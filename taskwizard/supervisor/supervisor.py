@@ -1,17 +1,25 @@
 """Naval Fate.
 
 Usage:
-  taskrun [--maxproc=<maxproc>]
+  taskrun <task-folder> <submission> [--maxproc=<maxproc>]
   taskrun (-h | --help)
-  taskrun --version
 
 Options:
   -h --help            Show this screen.
-  --version            Show version.
-  --maxproc=<maxproc>  Speed in knots [default: 20].
+  --maxproc=<maxproc>  Max num of processes [default: 20].
 """
+
+import logging
+import os
 
 from docopt import docopt
 
+
+logger = logging.getLogger("taskrun")
+
+
 def main():
-    print(docopt(__doc__))
+    args = docopt(__doc__)
+
+    if not os.path.isdir(args["<task-folder>"]):
+        logger.critical("%s should be a folder", args["<task-folder>"])

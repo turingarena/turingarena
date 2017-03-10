@@ -11,11 +11,11 @@ algorithm =
 
 declaration =
   | function_declaration
-  | variable_declaration
+  | global_variable_declaration
   ;
 
-variable_declaration =
-  inout:(inout|`inout`) type:type name:identifier ';'
+global_variable_declaration =
+  inout:(inout|`inout`) variable:variable ';'
   ;
 
 function_declaration =
@@ -23,7 +23,16 @@ function_declaration =
   ;
 
 parameter =
-  type:type name:identifier
+  variable:variable
+  ;
+
+variable =
+  type:type name:identifier {'[' array_dimensions+:array_dimension ']'}*
+  ;
+
+array_dimension =
+  | constant:/[1-9][0-9]*/
+  | variable_reference:identifier
   ;
 
 type =
