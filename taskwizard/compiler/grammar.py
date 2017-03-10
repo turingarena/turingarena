@@ -108,11 +108,11 @@ class GrammarParser(Parser):
             with self._option():
                 self._function_declaration_()
             with self._option():
-                self._variable_declaration_()
+                self._global_variable_declaration_()
             self._error('no available options')
 
     @graken()
-    def _variable_declaration_(self):
+    def _global_variable_declaration_(self):
         with self._group():
             with self._choice():
                 with self._option():
@@ -121,13 +121,11 @@ class GrammarParser(Parser):
                     self._constant('inout')
                 self._error('no available options')
         self.name_last_node('inout')
-        self._type_()
-        self.name_last_node('type')
-        self._identifier_()
-        self.name_last_node('name')
+        self._variable_()
+        self.name_last_node('variable')
         self._token(';')
         self.ast._define(
-            ['inout', 'name', 'type'],
+            ['inout', 'variable'],
             []
         )
 
@@ -158,12 +156,43 @@ class GrammarParser(Parser):
 
     @graken()
     def _parameter_(self):
+        self._variable_()
+        self.name_last_node('variable')
+        self.ast._define(
+            ['variable'],
+            []
+        )
+
+    @graken()
+    def _variable_(self):
         self._type_()
         self.name_last_node('type')
         self._identifier_()
         self.name_last_node('name')
+
+        def block2():
+            self._token('[')
+            self._array_dimension_()
+            self.add_last_node_to_name('array_dimensions')
+            self._token(']')
+        self._closure(block2)
         self.ast._define(
             ['name', 'type'],
+            ['array_dimensions']
+        )
+
+    @graken()
+    def _array_dimension_(self):
+        with self._choice():
+            with self._option():
+                self._pattern(r'[1-9][0-9]*')
+                self.name_last_node('constant')
+            with self._option():
+                self._identifier_()
+                self.name_last_node('variable_reference')
+            self._error('expecting one of: [1-9][0-9]*')
+        self.ast._define(
+            ['constant', 'variable_reference'],
             []
         )
 
@@ -196,13 +225,19 @@ class GrammarSemantics(object):
     def declaration(self, ast):
         return ast
 
-    def variable_declaration(self, ast):
+    def global_variable_declaration(self, ast):
         return ast
 
     def function_declaration(self, ast):
         return ast
 
     def parameter(self, ast):
+        return ast
+
+    def variable(self, ast):
+        return ast
+
+    def array_dimension(self, ast):
         return ast
 
     def type(self, ast):

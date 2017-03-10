@@ -1,6 +1,9 @@
 // Global input/output
 {% for variable in algorithm.variables.values() -%}
-extern {{variable.type}} {{variable.name}};
+{%- if variable.array_dimensions %}
+// {{variable.type}} {{variable.name}}{% for array_dimension in variable.array_dimensions -%}[{{array_dimension}}]{% endfor %}
+{%- endif %}
+extern {{variable.type}} {% for array_dimension in variable.array_dimensions %}*{% endfor %}{{variable.name}};
 {% endfor %}
 
 // Callback functions

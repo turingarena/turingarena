@@ -1,13 +1,18 @@
 #include <bits/stdc++.h>
 
 {% for variable in algorithm.variables.values() -%}
-{{variable.type}} {{variable.name}};
+{{variable.type}} {% for array_dimension in variable.array_dimensions %}*{% endfor %}{{variable.name}};
+
 {% endfor %}
 
 {% for function in algorithm.functions.values() -%}
 void receive_call_{{function.name}}() {
     {% for parameter in function.parameters.values() %}
-    {{parameter.type}} {{parameter.name}};
+    {{parameter.type}} 
+    {% for array_dimension in parameter.array_dimensions %}
+    *
+    {% endfor %}
+    {{parameter.name}};
     scanf(" %d", &{{parameter.name}});
     {%- endfor %}
   
@@ -23,7 +28,7 @@ void receive_call_{{function.name}}() {
 {% endfor %}
 
 {% for function in algorithm.callback_functions.values() -%}
-void callback_{{function.name}}(
+{{function.return_type}} {{function.name}}(
     {%- for parameter in function.parameters.values() -%}
     {%- if not loop.first -%}{{' '}}{%- endif -%}
     {{parameter.type}} {{parameter.name}}

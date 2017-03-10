@@ -1,59 +1,58 @@
 from collections import namedtuple, OrderedDict
 from jinja2 import Template
+
 from taskwizard.compiler.grammar import GrammarParser
 
 
-class Variable(namedtuple("Variable", [
-        "name", "type", "is_input", "is_output"
-])):
-    pass
-
-
-class Parameter(namedtuple("Parameter", ["name", "type"])):
-    pass
-
-
-class Function(namedtuple("Function", ["name", "return_type", "parameters"])):
-    pass
+Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
+GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
+Parameter = namedtuple("Parameter", [*Variable._fields])
+Function = namedtuple("Function", ["name", "return_type", "parameters"])
+Main = namedtuple("Main", ["commands"])
+Command = namedtuple("Command", [])
+Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "callback_functions", "main"])
 
 
 class CallbackFunction(Function):
     is_callback = True
 
-    pass
 
+class Semantics:
 
-class Algorithm(namedtuple("Algorithm", [
-        "name", "variables", "functions", "callback_functions"
-])):
-
-    @classmethod
-    def create(cls, name, declarations):
+    def algorithm(self, ast):
         variables = OrderedDict()
         functions = OrderedDict()
         callback_functions = OrderedDict()
+        main = None
 
-        for declaration in declarations:
+        for declaration in ast.declarations:
+            container = None
             if isinstance(declaration, Variable):
                 container = variables
             elif isinstance(declaration, CallbackFunction):
                 container = callback_functions
             elif isinstance(declaration, Function):
                 container = functions
-            container[declaration.name] = declaration
+            elif isinstance(declaration, Main):
+                main = declaration
 
-        return cls(name, variables, functions, callback_functions)
+            if container is not None:
+                container[declaration.name] = declaration
 
+        return Algorithm(ast.name, variables, functions, callback_functions, main)
 
-class Semantics:
+    def variable(self, ast):
+        return Variable(ast.name, ast.type, ast.array_dimensions)
 
-    def algorithm(self, ast):
-        return Algorithm.create(ast.name, ast.declarations)
+    def array_dimension(self, ast):
+        if ast.constant is not None:
+            return ast.constant
+        else:
+            return ast.variable_reference
 
-    def variable_declaration(self, ast):
-        return Variable(
-            ast.name,
-            ast.type,
+    def global_variable_declaration(self, ast):
+        return GlobalVariable(
+            *ast.variable,
             is_input=(ast.inout in ["in", "inout"]),
             is_output=(ast.inout in ["out", "inout"])
         )
@@ -69,7 +68,7 @@ class Semantics:
         )
 
     def parameter(self, ast):
-        return Parameter(ast.name, ast.type)
+        return Parameter(*ast.variable)
 
     def _default(self, ast):
         return ast
