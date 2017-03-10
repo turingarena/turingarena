@@ -20,7 +20,7 @@ if [ $(python3 -c "import sys; print(hasattr(sys, 'real_prefix'))") = "False" ];
 fi
 
 pip install --requirement dev-requirements.txt
-grako --name Grammar task-wizard/compiler/grammar.ebnf --output task-wizard/compiler/grammar.py
+grako --name Grammar taskwizard/compiler/grammar.ebnf --output taskwizard/compiler/grammar.py
 
 echo
 echo "OK! You can now install this software with either one of these commands:"
