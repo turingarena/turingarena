@@ -43,6 +43,7 @@ struct AlgorithmFunction {
 
 struct Algorithm {
 	unordered_map<string, AlgorithmFunction> functions;
+	DataBlock global_input;
 
 	void generate_support(std::ostream& out);
 	void generate_stub(std::ostream& out);

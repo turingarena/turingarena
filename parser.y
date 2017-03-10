@@ -55,6 +55,7 @@
 
 %token
   DATA "data"
+  GLOBAL_INPUT "global_input"
   ALGORITHM "algorithm"
   <std::string> IDENTIFIER
   <BaseType> INT "int"
@@ -92,12 +93,14 @@ data_block_body:
 
 %type <std::pair<std::string, Algorithm>> algorithm_declaration;
 algorithm_declaration:
-    "algorithm" IDENTIFIER algorithm_body { $$ = make_pair($IDENTIFIER, $algorithm_body); }
+    "algorithm" IDENTIFIER '{' algorithm_body '}' { $$ = make_pair($IDENTIFIER, $algorithm_body); }
   ;
 
 %type <Algorithm> algorithm_body;
 algorithm_body:
-    '{' function_declaration_list '}' { $$.functions = $2; }
+    %empty {}
+  | function_declaration[f] algorithm_body[rest] { auto name = $f.name; $$.functions.insert(make_pair(name, std::move($f))); }
+  | "global_input" data_block_body { $$.global_input = std::move($data_block_body); }
   ;
 
 %type <std::unordered_map<std::string, AlgorithmFunction>> function_declaration_list;

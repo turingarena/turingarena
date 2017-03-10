@@ -23,6 +23,7 @@
 
 algorithm { return Parser::make_ALGORITHM(location()); }
 data { return Parser::make_DATA(location()); }
+global_input { return Parser::make_GLOBAL_INPUT(location()); }
 int { return Parser::make_INT(BaseType::INT, location()); }
 
 [a-zA-Z][a-zA-Z0-9]* {
