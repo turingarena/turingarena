@@ -1,9 +1,20 @@
-#include <bits/stdc++.h>
-
+// Global input/output
 {% for variable in algorithm.variables.values() -%}
 extern {{variable.type}} {{variable.name}};
 {% endfor %}
 
+// Callback functions
+{% for function in algorithm.callback_functions.values() -%}
+{{function.return_type}} {{function.name}} (
+  {%- for parameter in function.parameters.values() -%}
+    {%- if not loop.first -%}{{' '}}{%- endif -%}
+    {{parameter.type}} {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
+);
+{% endfor %}
+
+// Functions to implement
 {% for function in algorithm.functions.values() -%}
 {{function.return_type}} {{function.name}} (
   {%- for parameter in function.parameters.values() -%}
@@ -11,30 +22,7 @@ extern {{variable.type}} {{variable.name}};
     {{parameter.type}} {{parameter.name}}
     {%- if not loop.last -%} , {%- endif -%}
   {%- endfor -%}
-)
-{%- if function.is_callback -%}
-;
-
-{% else %}
-{
+) {
   // TODO: implement
 }
-
-{% endif -%}
 {% endfor %}
-
-int main() {
-  {% for variable in algorithm.variables.values() -%}
-  {% if variable.is_input -%}
-  scanf(" %d", &{{variable.name}});
-  {% endif -%}
-  {% endfor %}
-
-  {% for variable in algorithm.variables.values() -%}
-  {% if variable.is_output -%}
-  printf("%d\n", {{variable.name}});
-  {% endif -%}
-  {% endfor %}
-}
-
-

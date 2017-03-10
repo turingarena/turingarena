@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+{% for variable in algorithm.variables.values() -%}
+{{variable.type}} {{variable.name}};
+{% endfor %}
+
+{% for function in algorithm.functions.values() -%}
+void receive_call_{{function.name}}() {
+  {% for parameter in function.parameters.values() %}
+    {{parameter.type}} {{parameter.name}};
+    scanf(" %d", &{{parameter.name}});
+  {%- endfor %}
+  
+  {{function.return_type}} result = {{function.name}}(
+    {%- for parameter in function.parameters.values() -%}
+      {{parameter.name}}
+      {%- if not loop.last -%} , {%- endif -%}
+    {%- endfor -%}
+  );
+  
+  printf("%d\n", result);
+}
+{% endfor %}
+
+{% for function in algorithm.callback_functions.values() -%}
+void callback_{{function.name}}(
+  {%- for parameter in function.parameters.values() -%}
+    {%- if not loop.first -%}{{' '}}{%- endif -%}
+    {{parameter.type}} {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
+) {
+  {% for parameter in function.parameters.values() %}
+    {{parameter.type}} {{parameter.name}};
+    printf("%d\n", {{parameter.name}});
+  {%- endfor %}
+  
+  {{function.return_type}} result;
+  scanf(" %d", &result);
+
+  return result;  
+}
+{% endfor %}
+
+int main() {
+  {% for variable in algorithm.variables.values() -%}
+  {% if variable.is_input -%}
+  scanf(" %d", &{{variable.name}});
+  {% endif -%}
+  {% endfor %}
+
+  {% for variable in algorithm.variables.values() -%}
+  {% if variable.is_output -%}
+  printf("%d\n", {{variable.name}});
+  {% endif -%}
+  {% endfor %}
+}
+
+

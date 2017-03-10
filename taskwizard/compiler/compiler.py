@@ -3,7 +3,9 @@ from jinja2 import Template
 from taskwizard.compiler.grammar import GrammarParser
 
 
-class Variable(namedtuple("Variable", ["name", "type", "is_input", "is_output"])):
+class Variable(namedtuple("Variable", [
+        "name", "type", "is_input", "is_output"
+])):
     pass
 
 
@@ -21,21 +23,26 @@ class CallbackFunction(Function):
     pass
 
 
-class Algorithm(namedtuple("Algorithm", ["name", "variables", "functions"])):
+class Algorithm(namedtuple("Algorithm", [
+        "name", "variables", "functions", "callback_functions"
+])):
 
     @classmethod
     def create(cls, name, declarations):
         variables = OrderedDict()
         functions = OrderedDict()
+        callback_functions = OrderedDict()
 
         for declaration in declarations:
             if isinstance(declaration, Variable):
                 container = variables
+            elif isinstance(declaration, CallbackFunction):
+                container = callback_functions
             elif isinstance(declaration, Function):
                 container = functions
             container[declaration.name] = declaration
 
-        return cls(name, variables, functions)
+        return cls(name, variables, functions, callback_functions)
 
 
 class Semantics:
@@ -73,7 +80,12 @@ def main():
     text = open("tests/test.task").read()
     algorithm = parse.parse(text)
 
-    template_text = open("taskwizard/compiler/stub_template.cpp.jinja2").read()
-    template = Template(template_text)
+    stub_template_text = open("taskwizard/compiler/stub_template.cpp.jinja2").read()
+    stub_template = Template(stub_template_text)
 
-    print(template.render(algorithm=algorithm))
+    print(stub_template.render(algorithm=algorithm))
+
+    support_template_text = open("taskwizard/compiler/support_template.cpp.jinja2").read()
+    support_template = Template(support_template_text)
+
+    print(support_template.render(algorithm=algorithm))
