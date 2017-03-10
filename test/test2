@@ -1,0 +1,36 @@
+target solution {
+  function solve {
+    context {
+      data {
+        int T;
+      }
+    }
+    input {
+      data {
+        int N;
+        int M;
+      }
+      constraints {
+        1 <= N <= 50_000;
+        1 <= M <= N*N;
+        1 <= M <= 100_000;
+      }
+      format {
+        N M;
+      }
+    }
+    output {
+      data {
+        int S;
+        int A[N];
+        int B[N];
+      }
+      
+      format {
+        S;
+        A[i] B[i];
+      }
+    }
+    prototype solve(N, M, A, B) returns S;
+  }
+}

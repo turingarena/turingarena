@@ -48,3 +48,11 @@ void Arena::AlgorithmFunction::generate_code(std::ostream& out) {
 		}
 	}
 }
+
+void Arena::Algorithm::generate_support(std::ostream& out) {
+	out << "support code..." << std::endl;
+}
+
+void Arena::Algorithm::generate_stub(std::ostream& out) {
+	out << "stub code..." << std::endl;
+}

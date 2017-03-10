@@ -18,7 +18,9 @@
     namespace Arena {
         using namespace std;
         class Scanner;
+        extern Interface interface;
     }
+
 }
 
 %code top
@@ -28,6 +30,10 @@
     #include "parser.hpp"
     #include "location.hh"
     #include "model.h"
+    
+    namespace Arena {
+        Interface interface;
+    }
     
     using namespace Arena;
 
@@ -59,13 +65,10 @@
 
 %%
 
+%type <Interface> main;
 main:
     interface {
-      for(auto algorithm : $interface.algorithms) {
-        for(auto fun : algorithm.second.functions) {
-          fun.second.generate_code(std::cout);
-        }
-      }
+      interface = std::move($interface);
     }
   ;
 

@@ -45,6 +45,9 @@ struct AlgorithmFunction {
 
 struct Algorithm {
 	unordered_map<string, AlgorithmFunction> functions;
+
+	void generate_support(std::ostream& out);
+	void generate_stub(std::ostream& out);
 };
 
 std::ostream& operator<< (std::ostream& out, const Algorithm& algorithm);
