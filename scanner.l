@@ -21,8 +21,8 @@
 
 [ \t\n] ;
 
-target {
-  return Parser::make_TARGET(location());
+algorithm {
+  return Parser::make_ALGORITHM(location());
 }
 
 int {

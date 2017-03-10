@@ -32,25 +32,25 @@ struct Variable {
 	vector<ArraySpecification> array_specifications;
 };
 
-struct VariableSet {
+struct DataBlock {
 	unordered_map<string, Variable> variables;
 };
 
-struct TargetFunction {
+struct AlgorithmFunction {
 	string name;
 	vector<Variable> parameters;
 
-	void generate_target_code(std::ostream& out);
+	void generate_code(std::ostream& out);
 };
 
-struct Target {
-	unordered_map<string, TargetFunction> functions;
+struct Algorithm {
+	unordered_map<string, AlgorithmFunction> functions;
 };
 
-std::ostream& operator<< (std::ostream& out, const Target& interface);
+std::ostream& operator<< (std::ostream& out, const Algorithm& algorithm);
 
 struct Interface {
-	unordered_map<string, Target> targets;
+	unordered_map<string, Algorithm> algorithms;
 };
 
 std::ostream& operator<< (std::ostream& out, const Interface& interface);

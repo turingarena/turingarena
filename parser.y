@@ -48,7 +48,7 @@
 %define api.token.prefix {TOKEN_}
 
 %token
-  TARGET "target"
+  ALGORITHM "algorithm"
   <std::string> IDENTIFIER
   <BaseType> INT "int"
 ;
@@ -61,9 +61,9 @@
 
 main:
     interface {
-      for(auto target : $interface.targets) {
-        for(auto fun : target.second.functions) {
-          fun.second.generate_target_code(std::cout);
+      for(auto algorithm : $interface.algorithms) {
+        for(auto fun : algorithm.second.functions) {
+          fun.second.generate_code(std::cout);
         }
       }
     }
@@ -72,34 +72,34 @@ main:
 %type <Interface> interface;
 interface:
     %empty { $$ = Interface {}; }
-  | declaration interface { $$ = std::move($2); $$.targets.insert($1); }
+  | declaration interface { $$ = std::move($2); $$.algorithms.insert($1); }
   ;
   
-%type <std::pair<std::string, Target>> declaration;
+%type <std::pair<std::string, Algorithm>> declaration;
 declaration:
-    target_declaration { $$ = std::move($1); }
+    algorithm_declaration { $$ = std::move($1); }
   ;
 
-%type <std::pair<std::string, Target>> target_declaration;
-target_declaration:
-    "target" IDENTIFIER target_body { $$ = make_pair($2, $3); }
+%type <std::pair<std::string, Algorithm>> algorithm_declaration;
+algorithm_declaration:
+    "algorithm" IDENTIFIER algorithm_body { $$ = make_pair($2, $3); }
   ;
 
-%type <Target> target_body;
-target_body:
+%type <Algorithm> algorithm_body;
+algorithm_body:
     '{' function_declaration_list '}' { $$.functions = $2; }
   ;
 
-%type <std::unordered_map<std::string, TargetFunction>> function_declaration_list;
+%type <std::unordered_map<std::string, AlgorithmFunction>> function_declaration_list;
 function_declaration_list:
     %empty { }
   | function_declaration[f] function_declaration_list { auto name = $f.name; $$.insert(make_pair(name, std::move($f))); }
 
-%type <TargetFunction> function_declaration;
+%type <AlgorithmFunction> function_declaration;
 function_declaration:
     base_type IDENTIFIER '(' variable_declaration_list ')' function_body
 {
-  $$ = TargetFunction { std::move($IDENTIFIER), std::move($variable_declaration_list) };
+  $$ = AlgorithmFunction { std::move($IDENTIFIER), std::move($variable_declaration_list) };
 }
 
 %type <std::vector<Variable>> variable_declaration_list;

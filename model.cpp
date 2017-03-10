@@ -6,7 +6,7 @@ using std::string;
 
 std::ostream& Arena::operator<<(std::ostream& out, const Arena::Interface& interface) {
 	int level = 0;
-	for(auto& target : interface.targets) {
+	for(auto& target : interface.algorithms) {
 		out << string(level, ' ') << "target " << target.first << " {" << std::endl;
 		out << target.second;
 		out << string(level, ' ') << "}" << std::endl;
@@ -14,9 +14,9 @@ std::ostream& Arena::operator<<(std::ostream& out, const Arena::Interface& inter
 	return out;
 }
 
-std::ostream& Arena::operator<<(std::ostream& out, const Arena::Target& target) {
+std::ostream& Arena::operator<<(std::ostream& out, const Arena::Algorithm& algorithm) {
 	int level = 4;
-	for(auto& function : target.functions) {
+	for(auto& function : algorithm.functions) {
 		out << string(level, ' ') << "function " << function.first << " {" << std::endl;
 		//out << function.second;
 		out << string(level, ' ') << "}" << std::endl;
@@ -24,7 +24,7 @@ std::ostream& Arena::operator<<(std::ostream& out, const Arena::Target& target) 
 	return out;
 }
 
-void Arena::TargetFunction::generate_target_code(std::ostream& out) {
+void Arena::AlgorithmFunction::generate_code(std::ostream& out) {
 	for(auto& parameter : parameters) {
 		int dims = parameter.array_specifications.size();
 		for(int i = 0; i < dims; i++) {
