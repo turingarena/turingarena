@@ -23,6 +23,5 @@ pip install --requirement dev-requirements.txt
 grako --name Grammar task-wizard/compiler/grammar.ebnf --output task-wizard/compiler/grammar.py
 
 echo
-echo "OK! You can now install this software with either one of these commands:"
-echo "  $ python setup.py install"
+echo "OK! Now (if you didn't already) you can install this software with:"
 echo "  $ python setup.py develop"

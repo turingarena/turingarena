@@ -20,8 +20,13 @@ setup(
     url="",
     download_url="",
     description="",
+    entry_points={
+        "console_scripts": [
+            "taskcc=taskwizard.compiler.compiler:main",
+        ],
+    },
     packages=find_packages(),
     keywords="",
     license="",
-    classifiers=[]
+    classifiers=[],
 )
