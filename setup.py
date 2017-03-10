@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name="task-wizard",
+    name="taskwizard",
     version="0.2",
     author="",
     author_email="",
@@ -23,10 +23,16 @@ setup(
     entry_points={
         "console_scripts": [
             "taskcc=taskwizard.compiler.compiler:main",
+            "taskrun=taskwizard.supervisor.supervisor:main",
         ],
     },
     packages=find_packages(),
     keywords="",
     license="",
     classifiers=[],
+    install_requires=[
+        "docopt",
+        "grako",
+        "jinja2",
+    ],
 )
