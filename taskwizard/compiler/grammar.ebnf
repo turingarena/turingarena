@@ -19,7 +19,7 @@ variable_declaration =
   ;
 
 function_declaration =
-  callback:['callback'] type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
+  callback:['callback'] return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
   ;
 
 parameter =
