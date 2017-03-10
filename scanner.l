@@ -21,13 +21,9 @@
 
 [ \t\n] ;
 
-algorithm {
-  return Parser::make_ALGORITHM(location());
-}
-
-int {
-  return Parser::make_INT(BaseType::INT, location());
-}
+algorithm { return Parser::make_ALGORITHM(location()); }
+data { return Parser::make_DATA(location()); }
+int { return Parser::make_INT(BaseType::INT, location()); }
 
 [a-zA-Z][a-zA-Z0-9]* {
   return Parser::make_IDENTIFIER(std::string(yytext), location());

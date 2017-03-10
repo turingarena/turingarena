@@ -1,3 +1,7 @@
+data graph {
+  int N;
+  int M;
+}
+
 algorithm solution {
-  int solve(int N, int M, int U[M], int V[M], int A[N][N]);
 }

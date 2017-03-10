@@ -27,7 +27,6 @@ struct ArraySpecification {
 };
 
 struct Variable {
-	string name;
 	BaseType base_type;
 	vector<ArraySpecification> array_specifications;
 };
@@ -38,7 +37,6 @@ struct DataBlock {
 
 struct AlgorithmFunction {
 	string name;
-	vector<Variable> parameters;
 
 	void generate_code(std::ostream& out);
 };
@@ -54,6 +52,7 @@ std::ostream& operator<< (std::ostream& out, const Algorithm& algorithm);
 
 struct Interface {
 	unordered_map<string, Algorithm> algorithms;
+	unordered_map<string, DataBlock> data_blocks;
 };
 
 std::ostream& operator<< (std::ostream& out, const Interface& interface);

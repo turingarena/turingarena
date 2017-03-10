@@ -54,6 +54,7 @@
 %define api.token.prefix {TOKEN_}
 
 %token
+  DATA "data"
   ALGORITHM "algorithm"
   <std::string> IDENTIFIER
   <BaseType> INT "int"
@@ -75,17 +76,23 @@ main:
 %type <Interface> interface;
 interface:
     %empty { $$ = Interface {}; }
-  | declaration interface { $$ = std::move($2); $$.algorithms.insert($1); }
+  | data_block_declaration interface { $$ = std::move($2); $$.data_blocks.insert($1); }
+  | algorithm_declaration interface { $$ = std::move($2); $$.algorithms.insert($1); }
   ;
-  
-%type <std::pair<std::string, Algorithm>> declaration;
-declaration:
-    algorithm_declaration { $$ = std::move($1); }
+
+%type <std::pair<std::string, DataBlock>> data_block_declaration;
+data_block_declaration:
+    "data" IDENTIFIER data_block_body { $$ = make_pair($IDENTIFIER, $data_block_body); }
+  ;
+
+%type <DataBlock> data_block_body;
+data_block_body:
+    '{' variable_declaration_list[list] '}' { $$.variables = std::move($list); }
   ;
 
 %type <std::pair<std::string, Algorithm>> algorithm_declaration;
 algorithm_declaration:
-    "algorithm" IDENTIFIER algorithm_body { $$ = make_pair($2, $3); }
+    "algorithm" IDENTIFIER algorithm_body { $$ = make_pair($IDENTIFIER, $algorithm_body); }
   ;
 
 %type <Algorithm> algorithm_body;
@@ -102,25 +109,22 @@ function_declaration_list:
 function_declaration:
     base_type IDENTIFIER '(' variable_declaration_list ')' function_body
 {
-  $$ = AlgorithmFunction { std::move($IDENTIFIER), std::move($variable_declaration_list) };
+  $$ = AlgorithmFunction { std::move($IDENTIFIER) };
 }
 
-%type <std::vector<Variable>> variable_declaration_list;
+%type <std::unordered_map<std::string, Variable>> variable_declaration_list;
 variable_declaration_list:
     %empty { }
-  | variable_declaration_nonempty_list { $$ = std::move($1); }
+  | variable_declaration[decl] variable_declaration_list[rest] { $$ = std::move($rest); $$.insert($decl); }
   ;
 
-%type <std::vector<Variable>> variable_declaration_nonempty_list;
-variable_declaration_nonempty_list:
-    variable_declaration { $$.push_back($1); }
-  | variable_declaration ',' variable_declaration_nonempty_list { $$ = std::move($3); $$.push_back($1); }
-  ;
-
-%type <Variable> variable_declaration;
+%type <std::pair<std::string, Variable>> variable_declaration;
 variable_declaration:
-    base_type IDENTIFIER array_specification_list {
-      $$ = Variable { std::move($IDENTIFIER), std::move($base_type), std::move($array_specification_list) };
+    base_type IDENTIFIER ';' {
+      $$ = make_pair(
+          std::string { $IDENTIFIER }, 
+          Variable { std::move($base_type) }
+      );
     }
   ;
 
