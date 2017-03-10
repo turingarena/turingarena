@@ -2,7 +2,29 @@ start = algorithm $ ;
 
 identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
-algorithm
-    =
-    'algorithm' name:identifier '{' '}'
-    ;
+algorithm =
+  'algorithm' name:identifier '{' declarations:{declaration}* '}'
+  ;
+
+declaration =
+  | function_declaration
+  | variable_declaration
+  ;
+
+variable_declaration =
+  inout:(inout|`inout`) type:type name:identifier ';'
+  ;
+
+function_declaration =
+  callback:['callback'] type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
+  ;
+
+parameter =
+  type:type name:identifier
+  ;
+
+type =
+  'int'
+  ;
+
+inout = 'in' | 'out' | 'inout' ;

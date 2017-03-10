@@ -1,0 +1,10 @@
+algorithm algo {
+  int N;
+  int M;
+
+  out int sol;
+
+  int solve(int N, int K);
+  int solve2();
+  callback int pesa(int a, int b);
+}
