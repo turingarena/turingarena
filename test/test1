@@ -3,8 +3,12 @@ data graph {
   int M;
 }
 
-algorithm solution {
+algorithm algo1 {
   global_input {
+    int N;
     int M;
   }
+}
+
+algorithm algo2 {
 }

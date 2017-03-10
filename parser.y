@@ -126,7 +126,7 @@ variable_declaration:
     base_type IDENTIFIER ';' {
       $$ = make_pair(
           std::string { $IDENTIFIER }, 
-          Variable { std::move($base_type) }
+          Variable { $IDENTIFIER, std::move($base_type) }
       );
     }
   ;

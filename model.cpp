@@ -24,29 +24,8 @@ std::ostream& Arena::operator<<(std::ostream& out, const Arena::Algorithm& algor
 	return out;
 }
 
-void Arena::AlgorithmFunction::generate_code(std::ostream& out) {
-	for(auto& parameter : parameters) {
-		int dims = parameter.array_specifications.size();
-		for(int i = 0; i < dims; i++) {
-			out << "for(";
-			out << "int " << "index" << i << "; ";
-			out << "index" << i << " < 10; ";
-			out << "index" << i << "++";
-			out << ") {" << std::endl;
-		}
-
-		switch (parameter.base_type) {
-			case INT:
-				out << "scanf(\"%d\", " << "&" << parameter.name << ");" << std::endl;
-				break;
-			default:
-				throw std::runtime_error("Unsupported base type.");
-		}
-
-		for(int i = 0; i < dims; i++) {
-			out << "}" << std::endl;
-		}
-	}
+void Arena::Variable::generate_stub_global(std::ostream& out) {
+	out << "extern int " << name << ";" << std::endl;
 }
 
 void Arena::Algorithm::generate_support(std::ostream& out) {
@@ -54,5 +33,7 @@ void Arena::Algorithm::generate_support(std::ostream& out) {
 }
 
 void Arena::Algorithm::generate_stub(std::ostream& out) {
-	out << "stub code..." << std::endl;
+	for(auto& var : global_input.variables) {
+		var.second.generate_stub_global(out);
+	}
 }

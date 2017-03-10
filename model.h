@@ -27,8 +27,11 @@ struct ArraySpecification {
 };
 
 struct Variable {
+	string name;
 	BaseType base_type;
 	vector<ArraySpecification> array_specifications;
+
+	void generate_stub_global(std::ostream& out);
 };
 
 struct DataBlock {
@@ -37,8 +40,6 @@ struct DataBlock {
 
 struct AlgorithmFunction {
 	string name;
-
-	void generate_code(std::ostream& out);
 };
 
 struct Algorithm {
