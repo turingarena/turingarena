@@ -10,7 +10,7 @@ Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Main = namedtuple("Main", ["commands"])
 Command = namedtuple("Command", [])
-Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "callback_functions", "main"])
+Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "main"])
 
 
 class CallbackFunction(Function):
@@ -22,15 +22,12 @@ class Semantics:
     def algorithm(self, ast):
         variables = OrderedDict()
         functions = OrderedDict()
-        callback_functions = OrderedDict()
         main = None
 
         for declaration in ast.declarations:
             container = None
             if isinstance(declaration, Variable):
                 container = variables
-            elif isinstance(declaration, CallbackFunction):
-                container = callback_functions
             elif isinstance(declaration, Function):
                 container = functions
             elif isinstance(declaration, Main):
@@ -39,7 +36,7 @@ class Semantics:
             if container is not None:
                 container[declaration.name] = declaration
 
-        return Algorithm(ast.name, variables, functions, callback_functions, main)
+        return Algorithm(ast.name, variables, functions, main)
 
     def variable(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)
@@ -82,9 +79,14 @@ def main():
     stub_template_text = open("taskwizard/compiler/stub_template.cpp.jinja2").read()
     stub_template = Template(stub_template_text)
 
-    print(stub_template.render(algorithm=algorithm))
+    open("tests/test_stub.cpp", "w").write(stub_template.render(algorithm=algorithm))
 
     support_template_text = open("taskwizard/compiler/support_template.cpp.jinja2").read()
     support_template = Template(support_template_text)
 
-    print(support_template.render(algorithm=algorithm))
+    open("tests/test_support.cpp", "w").write(support_template.render(algorithm=algorithm))
+
+    proto_template_text = open("taskwizard/compiler/proto_template.cpp.jinja2").read()
+    proto_template = Template(proto_template_text)
+
+    open("tests/test_proto.cpp", "w").write(proto_template.render(algorithm=algorithm))
