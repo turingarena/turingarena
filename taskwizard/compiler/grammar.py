@@ -137,7 +137,7 @@ class GrammarParser(Parser):
             self._token('callback')
         self.name_last_node('callback')
         self._type_()
-        self.name_last_node('type')
+        self.name_last_node('return_type')
         self._identifier_()
         self.name_last_node('name')
         self._token('(')
@@ -152,7 +152,7 @@ class GrammarParser(Parser):
         self._token(')')
         self._token(';')
         self.ast._define(
-            ['callback', 'name', 'parameters', 'type'],
+            ['callback', 'name', 'parameters', 'return_type'],
             []
         )
 

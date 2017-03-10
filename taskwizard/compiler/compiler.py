@@ -1,5 +1,5 @@
 from collections import namedtuple, OrderedDict
-
+from jinja2 import Template
 from taskwizard.compiler.grammar import GrammarParser
 
 
@@ -16,6 +16,8 @@ class Function(namedtuple("Function", ["name", "return_type", "parameters"])):
 
 
 class CallbackFunction(Function):
+    is_callback = True
+
     pass
 
 
@@ -69,6 +71,9 @@ class Semantics:
 def main():
     parse = GrammarParser(semantics=Semantics())
     text = open("tests/test.task").read()
-    result = parse.parse(text)
+    algorithm = parse.parse(text)
 
-    print(result)
+    template_text = open("taskwizard/compiler/stub_template.cpp.jinja2").read()
+    template = Template(template_text)
+
+    print(template.render(algorithm=algorithm))

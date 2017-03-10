@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+{% for variable in algorithm.variables.values() -%}
+extern {{variable.type}} {{variable.name}};
+{% endfor %}
+
+{% for function in algorithm.functions.values() -%}
+{{function.return_type}} {{function.name}} (
+  {%- for parameter in function.parameters.values() -%}
+    {%- if not loop.first -%}{{' '}}{%- endif -%}
+    {{parameter.type}} {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
+)
+{%- if function.is_callback -%}
+;
+
+{% else %}
+{
+  // TODO: implement
+}
+
+{% endif -%}
+{% endfor %}
+
+int main() {
+  {% for variable in algorithm.variables.values() -%}
+  {% if variable.is_input -%}
+  scanf(" %d", &{{variable.name}});
+  {% endif -%}
+  {% endfor %}
+
+  {% for variable in algorithm.variables.values() -%}
+  {% if variable.is_output -%}
+  printf("%d\n", {{variable.name}});
+  {% endif -%}
+  {% endfor %}
+}
+
+
