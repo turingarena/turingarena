@@ -2,6 +2,12 @@ algorithm algo {
   int N;
   int M;
 
+  // comment test !
+  
+  /*
+    comment test
+  */
+  
   out int sol;
 
   int solve(int N, int K);

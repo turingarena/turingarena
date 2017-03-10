@@ -27,8 +27,8 @@ class GrammarBuffer(Buffer):
         text,
         whitespace=None,
         nameguard=None,
-        comments_re=None,
-        eol_comments_re=None,
+        comments_re='\\/\\*(.|\\n|\\r)*\\*\\/',
+        eol_comments_re='\\/\\/.*$',
         ignorecase=None,
         namechars='',
         **kwargs
@@ -50,8 +50,8 @@ class GrammarParser(Parser):
         self,
         whitespace=None,
         nameguard=None,
-        comments_re=None,
-        eol_comments_re=None,
+        comments_re='\\/\\*(.|\\n|\\r)*\\*\\/',
+        eol_comments_re='\\/\\/.*$',
         ignorecase=None,
         left_recursion=False,
         parseinfo=True,
@@ -118,7 +118,7 @@ class GrammarParser(Parser):
                 with self._option():
                     self._inout_()
                 with self._option():
-                    self._constant('in')
+                    self._constant('inout')
                 self._error('no available options')
         self.name_last_node('inout')
         self._type_()

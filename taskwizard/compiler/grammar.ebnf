@@ -1,3 +1,6 @@
+@@comments :: /\/\*(.|\n|\r)*\*\//
+@@eol_comments :: /\/\/.*$/
+
 start = algorithm $ ;
 
 identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
