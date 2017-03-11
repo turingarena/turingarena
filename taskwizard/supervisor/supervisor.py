@@ -38,35 +38,36 @@ def main():
 
     task = yaml.safe_load(open(os.path.join(task_folder, "task.yaml")))
 
-    out_dir = tempfile.mkdtemp()
-    print("Dir: ", out_dir)
+    with tempfile.TemporaryDirectory() as out_dir:
+        os.mkdir(os.path.join(out_dir, "algorithms"))
 
-    os.mkdir(os.path.join(out_dir, "algorithms"))
-
-    driver_path = os.path.join(out_dir, "driver")
-    shutil.copytree(
-        os.path.join(task_folder, "driver"),
-        driver_path
-    )
-    os.system("g++ -o " + os.path.join(driver_path, "driver") +
-              " " + os.path.join(driver_path, "*.cpp"))
-
-    for slot_name, slot in task["slots"].items():
-        algorithm_path = os.path.join(out_dir, "algorithms", slot_name)
+        driver_path = os.path.join(out_dir, "driver")
         shutil.copytree(
-            os.path.join(task_folder, "interfaces", slot["interface"]),
-            algorithm_path
+            os.path.join(task_folder, "driver"),
+            driver_path
         )
-        shutil.copy(
-            slot_files[slot_name],
-            os.path.join(algorithm_path, "algorithm.cpp")
-        )
-        os.system("g++ -o " + os.path.join(algorithm_path, "algorithm") +
-                  " " + os.path.join(algorithm_path, "*.cpp"))
+        os.system("g++ -g -o " + os.path.join(driver_path, "driver") +
+                  " " + os.path.join(driver_path, "*.cpp"))
 
-    os.mkdir(os.path.join(out_dir, "read_files"))
-    os.mkdir(os.path.join(out_dir, "read_files", "evaluate"))
-    shutil.copy(
-        os.path.join(task_folder, "testcases", args['<testcase-id>'], "evaluate.txt"),
-        os.path.join(out_dir, "read_files", "evaluate", "data.txt")
-    )
+        for slot_name, slot in task["slots"].items():
+            algorithm_path = os.path.join(out_dir, "algorithms", slot_name)
+            shutil.copytree(
+                os.path.join(task_folder, "interfaces", slot["interface"]),
+                algorithm_path
+            )
+            shutil.copy(
+                slot_files[slot_name],
+                os.path.join(algorithm_path, "algorithm.cpp")
+            )
+            os.system("g++ -g -o " + os.path.join(algorithm_path, "algorithm") +
+                      " " + os.path.join(algorithm_path, "*.cpp"))
+
+        os.mkdir(os.path.join(out_dir, "read_files"))
+        os.mkdir(os.path.join(out_dir, "read_files", "evaluate"))
+        shutil.copy(
+            os.path.join(task_folder, "testcases", args['<testcase-id>'], "evaluate.txt"),
+            os.path.join(out_dir, "read_files", "evaluate", "data.txt")
+        )
+
+        print(out_dir)
+        input()
