@@ -2,8 +2,21 @@
 
 {% include "supervisor_proto.cpp" %}
 
-#define INPUT_PIPE (get_input_pipe())
-#define OUTPUT_PIPE (get_output_pipe())
+FILE* input_pipe;
+FILE* output_pipe;
+
+#define INPUT_PIPE (input_pipe)
+#define OUTPUT_PIPE (output_pipe)
+
+void set_active_algorithm(int id) {
+  input_pipe = algorithm_output_pipe(id);
+  output_pipe = algorithm_input_pipe(id);
+}
+
+void set_active_read_file(int id) {
+  input_pipe = read_file_pipe(id);
+  output_pipe = NULL;
+}
 
 {% for interface in task.interfaces.values() %}
   {% for function in interface.callback_functions.values() -%}
@@ -32,7 +45,8 @@
 {% endfor %}
 
 int main() {
-    // FIXME
-    // set_active_algorithm(open_file("evaluate"));
+    int evaluate_file = read_file_open("evaluate");
+    set_active_read_file(evaluate_file);
     {{ macro.process_command('int', task.functions.values(), task.variables.values()) }}
+    read_file_close(evaluate_file);
 }

@@ -6,9 +6,8 @@
 """
 
 import io
-import re
 import os
-
+import re
 from setuptools import setup, find_packages
 
 
@@ -23,7 +22,7 @@ setup(
     entry_points={
         "console_scripts": [
             "taskcc=taskwizard.compiler.compiler:main",
-            "taskrun=taskwizard.supervisor.supervisor:main",
+            "taskrun=taskwizard.runner.runner:main",
         ],
     },
     packages=find_packages(),

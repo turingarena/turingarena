@@ -7,3 +7,6 @@
 {% for function in task.functions.values() -%}
 {{ macro.function_prototype(function) }}
 {% endfor %}
+
+void set_active_algorithm(int id);
+void set_active_read_file(int id);

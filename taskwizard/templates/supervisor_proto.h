@@ -14,4 +14,4 @@ int read_file_close(int id);
 
 int write_file_open(const char *file_name);
 FILE *write_file_pipe(int id);
-int write_flie_close(int id);
+int write_file_close(int id);
