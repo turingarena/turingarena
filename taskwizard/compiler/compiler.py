@@ -1,6 +1,7 @@
 """Task Compiler.
 
 Usage:
+  taskcc makefile [-i <ifile>] [-o <ofile>]
   taskcc (stub|support) (algorithm <name>|driver) [-i <ifile>] [-o <ofile>]
   taskcc -h | --help
 
@@ -29,9 +30,12 @@ def main():
 
     env = Environment(loader=PackageLoader("taskwizard", "templates"))
 
-    stub_or_support = next(x for x in ["stub", "support"] if args[x])
-    algorithm_or_driver = next(x for x in ["algorithm", "driver"] if args[x])
-    template = env.get_template(stub_or_support + "_" + algorithm_or_driver + ".cpp.jinja2")
+    if args["makefile"]:
+        template = env.get_template("Makefile.jinja2")
+    else:
+        stub_or_support = next(x for x in ["stub", "support"] if args[x])
+        algorithm_or_driver = next(x for x in ["algorithm", "driver"] if args[x])
+        template = env.get_template(stub_or_support + "_" + algorithm_or_driver + ".cpp.jinja2")
 
     output = sys.stdout
     if args["--output"] is not None:
@@ -39,7 +43,7 @@ def main():
 
     if args["algorithm"]:
         template.stream(algorithm=interface.algorithms[args["<name>"]]).dump(output)
-    if args["driver"]:
+    else:
         template.stream(interface=interface).dump(output)
 
     if args["--output"] is not None:
