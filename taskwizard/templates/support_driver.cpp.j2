@@ -3,80 +3,73 @@
 #include <bits/stdc++.h>
 #include "driver.h"
 
-static FILE *inpipes[2000];
-static FILE *outpipes[2000];
+FILE *inpipes[2000];
+FILE *outpipes[2000];
 
-static int current_task;
+static int current_process;
 
-static void open_pipe(int descriptor) {
+FILE *get_input_pipe() {
+    return inpipes[current_process];
+}
+
+FILE *get_output_pipe() {
+    return outpipes[current_process];
+}
+
+
+int start_algorithm(const char *algo_name) {
+    
+    // Start new algorithm
+    
+    printf("start_algorithm %s\n", algo_name);
+    int descriptor;
+    scanf("%d", &descriptor);
+    fflush(stderr);
+
+    // Generate file descriptor names
+
     char read_pipe_name[200];
     sprintf(read_pipe_name, "wfdesc%d", descriptor);
 
     char write_pipe_name[200];
     sprintf(write_pipe_name, "rfdesc%d", descriptor);
 
+
+    // Open descriptors
     inpipes[descriptor] = fopen(read_pipe_name, "r");
     outpipes[descriptor] = fopen(write_pipe_name, "w");
-}
 
-int task_open_file(int file_name) {
-    printf("task_open_file %d\n", file_name);
-    int descriptor;
-    scanf(" %d", &descriptor);
-    fprintf(stderr, "Desc %d\n", descriptor);
+    // Set auto flush
+    setvbuf(outpipes[descriptor], NULL, _IONBF, 0);
     
     return descriptor;
 }
 
-int task_start(int task_name) {
-    printf("task_start %d\n", task_name);
-    int descriptor;
-    scanf(" %d", &descriptor);
-    fprintf(stderr, "Desc %d\n", descriptor);
-    
-    return descriptor;
-}
-
-void print_success() {
-    char buff[50] = {0};
-    fprintf(stderr, "pipe: %p\n", inpipes[1]);
-    fscanf(inpipes[1], "%s", buff);
-    //printf("Thedriverreceivedthisstringfromsubmission:%s\n", buff);
-    fprintf(stderr, "Thedriverreceivedthisstringfromsubmission:%s\n", buff);
-}
-
-int task_status() {
-    printf("task_status %d\n", current_task);
+int algorithm_status() {
+    printf("algorithm_status %d\n", current_process);
     int status;
     scanf(" %d", &status);
     return status;
 }
 
-void task_kill() {
-    printf("task_kill %d\n", current_task);
+int algorithm_kill() {
+    printf("algorithm_kill %d\n", current_process);
     int status;
     scanf(" %d", &status);
 }
 
-void task_set_current(int id) {
-    current_task = id;
+void get_active_algorithm(int id) {
+    current_process = id;
 }
 
-int task_get_current() {
-    return current_task;
+int set_active_algorithm() {
+    return current_process;
 }
 
 void init_communication() {
     printf("init_communication\n");
     int status;
     scanf(" %d", &status);
-}
-
-FILE* get_input_pipe() {
-  return inpipes[current_task];
-}
-FILE* get_output_pipe() {
-  return outpipes[current_task];
 }
 
 #define INPUT_PIPE (get_input_pipe())
