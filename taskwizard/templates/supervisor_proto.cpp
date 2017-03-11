@@ -1,71 +1,118 @@
 #include <bits/stdc++.h>
 #include "driver.h"
 
-FILE *inpipes[2000];
-FILE *outpipes[2000];
+/*
 
-static int current_process;
 
-FILE *get_input_pipe() {
-    return inpipes[current_process];
+
+;
+
+int write_file_open(const char *file_name);
+FILE *write_file_pipe(int id);
+int write_flie_close(int id);
+
+*/
+
+
+FILE *algorithm_input_pipes[2000];
+FILE *algorithm_output_pipes[2000];
+
+FILE *read_file_pipes[2000];
+FILE *write_file_pipes[2000];
+
+FILE *algorithm_input_pipe(int id) {
+    return algorithm_input_pipes[id];
 }
 
-FILE *get_output_pipe() {
-    return outpipes[current_process];
+FILE *algorithm_output_pipe(int id) {
+    return algorithm_output_pipes[id];
 }
 
 
-int start_algorithm(const char *algo_name) {
+int algorithm_start(const char *algo_name) {
     
     // Start new algorithm
     
-    printf("start_algorithm %s\n", algo_name);
+    printf("algorithm_start %s\n", algo_name);
     int descriptor;
     scanf("%d", &descriptor);
-    fflush(stderr);
 
     // Generate file descriptor names
 
-    char read_pipe_name[200];
-    sprintf(read_pipe_name, "wfdesc%d", descriptor);
+    char algorithm_output_pipe_name[200];
+    sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", descriptor);
 
-    char write_pipe_name[200];
-    sprintf(write_pipe_name, "rfdesc%d", descriptor);
+    char algorithm_input_pipe_name[200];
+    sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", descriptor);
 
 
     // Open descriptors
-    inpipes[descriptor] = fopen(read_pipe_name, "r");
-    outpipes[descriptor] = fopen(write_pipe_name, "w");
+    algorithm_input_pipes[descriptor] = fopen(algorithm_output_pipe_name, "r");
+    algorithm_output_pipes[descriptor] = fopen(algorithm_input_pipe_name, "w");
 
     // Set auto flush
-    setvbuf(outpipes[descriptor], NULL, _IONBF, 0);
+    setvbuf(algorithm_output_pipes[descriptor], NULL, _IONBF, 0);
     
     return descriptor;
 }
 
-int algorithm_status() {
-    printf("algorithm_status %d\n", current_process);
+int algorithm_status(int id) {
+    printf("algorithm_status %d\n", id);
     int status;
     scanf(" %d", &status);
     return status;
 }
 
-int algorithm_kill() {
-    printf("algorithm_kill %d\n", current_process);
+int algorithm_kill(int id) {
+    printf("algorithm_kill %d\n", id);
     int status;
     scanf(" %d", &status);
+    return status;
 }
 
-void get_active_algorithm(int id) {
-    current_process = id;
+int read_file_open(const char *file_name) {
+    
+    // Open file for reading
+    
+    printf("read_file_open %s\n", file_name);
+    int descriptor;
+    scanf(" %d", &descriptor);
+    
+
+    // Generate file names
+    char read_file_name[200];
+    sprintf(read_file_name, "read_file.%d.txt", descriptor);
+
+    // Open descriptors
+    read_file_pipes[descriptor] = fopen(read_file_name, "r");    
+    return descriptor;  
 }
 
-int set_active_algorithm() {
-    return current_process;
+FILE *read_file_pipe(int id) {
+    return read_file_pipes[id];
 }
 
-void init_communication() {
-    printf("init_communication\n");
+int read_file_close(int id) {
+    
+    fclose(read_file_pipes[id]);
+    read_file_pipes[id] = NULL;
+
+    printf("read_file_close %d\n", id);
     int status;
     scanf(" %d", &status);
+
+    return status;
 }
+
+int write_file_open(const char *file_name) {
+    return -1; // TODO
+}
+
+FILE *write_file_pipe(int id) {
+    return NULL; // TODO
+}
+
+int write_file_close(int id) {
+    return -1; // TODO
+}
+

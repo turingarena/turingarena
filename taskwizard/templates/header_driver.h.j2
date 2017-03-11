@@ -2,17 +2,7 @@
 
 #include <bits/stdc++.h>
 
-int start_algorithm(const char *algo_name);
-
-void set_active_algorithm(int id);
-int get_active_algorithm();
-
-
-int algorithm_status();
-int algorithm_kill();
-
-int file_open(const char *file_name); // FIXME: NOT IMPLEMENTED!
-
+{% include "supervisor_proto.h" %}
 
 {% for function in task.functions.values() -%}
 {{ macro.function_prototype(function) }}
