@@ -31,15 +31,15 @@ def main():
     env = Environment(loader=PackageLoader("taskwizard", "templates"))
 
     if args["makefile"]:
-        template = env.get_template("Makefile.jinja2")
+        template = env.get_template("Makefile.j2")
     else:
         algorithm_or_driver = next(x for x in ["algorithm", "driver"] if args[x])
         if args["stub"]:
-            template = env.get_template("stub_" + algorithm_or_driver + ".cpp.jinja2")
+            template = env.get_template("stub_" + algorithm_or_driver + ".cpp.j2")
         elif args["header"]:
-            template = env.get_template("header_" + algorithm_or_driver + ".h.jinja2")
+            template = env.get_template("header_" + algorithm_or_driver + ".h.j2")
         elif args["support"]:
-            template = env.get_template("support_" + algorithm_or_driver + ".cpp.jinja2")
+            template = env.get_template("support_" + algorithm_or_driver + ".cpp.j2")
         else:
             raise ValueError
 

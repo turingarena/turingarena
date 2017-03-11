@@ -1,0 +1,19 @@
+{% import "macro.cpp.j2" as macro %}
+
+#include <bits/stdc++.h>
+
+int start_algorithm(const char *algo_name);
+
+void set_active_algorithm(int id);
+int get_active_algorithm();
+
+
+int algorithm_status();
+void algorithm_kill();
+
+int file_open(const char *file_name); // FIXME: NOT IMPLEMENTED!
+
+
+{% for function in interface.functions.values() -%}
+{{ macro.function_prototype(function) }}
+{% endfor %}
