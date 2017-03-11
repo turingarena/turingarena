@@ -8,13 +8,13 @@ Options:
   -h --help          Show this screen.
   --version          Show version.
   name               The name of the algorithm/driver to use.
-  -i --input=ifile   Path to interface file.
+  -i --input=ifile   Path to interface file [default: task.txt].
   -o --output=ofile  Path to output file.
 """
 
-import pkg_resources
-
 from docopt import docopt
+from jinja2 import Environment, PackageLoader
+import sys
 
 from taskwizard.compiler.grammar import GrammarParser
 from taskwizard.compiler.semantics import Semantics
@@ -22,27 +22,19 @@ from taskwizard.compiler.semantics import Semantics
 
 def main():
     args = docopt(__doc__)
-    print(args)
 
     parse = GrammarParser(semantics=Semantics())
-    text = open(args["<name>"]).read()
+    text = open(args["--input"]).read()
     algorithm = parse.parse(text)
 
-    template = pkg_resources.resource_filename("taskwizard", "templates/stub_template.cpp.jinja2")
-    stub_template_text = open(template).read()
-    stub_template = Template(stub_template_text)
+    env = Environment(loader=PackageLoader("taskwizard", "templates"))
 
-    open("tests/test_stub.cpp", "w").write(stub_template.render(algorithm=algorithm))
+    stub_or_support = next(x for x in ["stub", "support"] if args[x])
+    algorithm_or_driver = next(x for x in ["algorithm", "driver"] if args[x])
+    template = env.get_template(stub_or_support + "_" + algorithm_or_driver + ".cpp.jinja2")
 
-    template = pkg_resources.resource_filename("taskwizard", "templates/support_template.cpp.jinja2")
-    support_template_text = open(template).read()
-    support_template = Template(support_template_text)
+    output = sys.stdout
+    if args["--output"] is not None:
+        output = open(args["--output"], "w")
 
-    open("tests/test_support.cpp", "w").write(support_template.render(algorithm=algorithm))
-
-    template = pkg_resources.resource_filename("taskwizard", "templates/support_template.cpp.jinja2")
-    proto_template_text = open(template).read()
-    proto_template = Template(proto_template_text)
-
-    open("tests/test_proto.cpp", "w").write(proto_template.render(algorithm=algorithm))
-
+    template.stream(algorithm=algorithm).dump(output)

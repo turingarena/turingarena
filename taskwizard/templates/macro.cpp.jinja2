@@ -1,0 +1,97 @@
+{% macro parameters_prototype(function) -%}
+  {%- for parameter in function.parameters.values() -%}
+    {%- if not loop.first -%}{{' '}}{%- endif -%}
+      {{parameter.type}} {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
+{%- endmacro %}
+
+{% macro receive_call(function) %}
+void receive_call_{{function.name}}() {
+    {% for parameter in function.parameters.values() %}
+    {{parameter.type}} {{parameter.name}};
+    scanf(" %d", &{{parameter.name}});
+    {%- endfor %}
+  
+    {{function.return_type}} result = {{function.name}}(
+    {%- for parameter in function.parameters.values() -%}
+    {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+    {%- endfor -%}
+    );
+  
+    printf("%s\n", "return");
+    printf("%d\n", result);
+}
+{% endmacro %}
+
+{% macro receive_set_global(variable) %}
+void receive_set_global_{{variable.name}}() {
+    scanf(" %d", &{{variable.name}});
+}
+{% endmacro %}
+
+{% macro process_callback(callbacks) %}
+    {
+        char callback_name[51];
+        scanf("%50s", callback_name);
+        {% for callback in callbacks -%}
+        if(!strcmp(callback_name, "{{callback.name}}")) {
+            receive_call_{{callback.name}}();
+        }
+        {% endfor %}
+    }
+{% endmacro %}
+
+{% macro process_set_global(variables) %}
+    {
+        char variable_name[51];
+        scanf("%50s", variable_name);
+        {% for variable in variables -%}
+        if(!strcmp(variable_name, "{{variable.name}}")) {
+            receive_set_global_{{variable.name}}();
+        }
+        {% endfor %}
+    }
+{% endmacro %}
+
+{% macro process_command(return_type, callbacks, variables) %}
+    while(1) {
+        char command[51];
+        scanf("%50s", command);
+        if(!strcmp(command, "return")) {
+            {{return_type}} result;
+            scanf(" %d", &result);
+            return result;
+        }
+        
+        if(!strcmp(command, "call")) {
+            {{process_callback(callbacks)}}
+        }
+        
+        if(!strcmp(command, "set")) {
+            {{process_set_global(callbacks)}}
+        }
+    }
+{% endmacro %}
+
+{% macro callback(function, callbacks, variables) %}
+{{function.return_type}} {{function.name}}({{parameters_prototype(function)}}) {
+    printf("%s\n", "call");
+    printf("%s\n", "{{function.name}}");
+
+    {% for parameter in function.parameters.values() %}
+    printf("%d\n", {{parameter.name}});
+    {%- endfor %}
+    
+    {{ process_command(function.return_type, callbacks, variables) }}
+}
+{% endmacro %}
+
+{% macro set_global(variable) %}
+void set_global_{{variable.name}}({{variable.type}} value) {
+    printf("%s\n", "set");
+    printf("%s\n", "{{variable.name}}");
+    printf("%d\n", value);
+}
+{% endmacro %}

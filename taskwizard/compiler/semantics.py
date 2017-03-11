@@ -10,7 +10,7 @@ Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Main = namedtuple("Main", ["commands"])
 Command = namedtuple("Command", [])
-Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "main"])
+Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "callback_functions", "main"])
 
 
 class CallbackFunction(Function):
@@ -22,12 +22,15 @@ class Semantics:
     def algorithm(self, ast):
         variables = OrderedDict()
         functions = OrderedDict()
+        callback_functions = OrderedDict()
         main = None
 
         for declaration in ast.declarations:
             container = None
             if isinstance(declaration, Variable):
                 container = variables
+            elif isinstance(declaration, CallbackFunction):
+                container = callback_functions
             elif isinstance(declaration, Function):
                 container = functions
             elif isinstance(declaration, Main):
@@ -36,7 +39,7 @@ class Semantics:
             if container is not None:
                 container[declaration.name] = declaration
 
-        return Algorithm(ast.name, variables, functions, main)
+        return Algorithm(ast.name, variables, functions, callback_functions, main)
 
     def variable(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)
