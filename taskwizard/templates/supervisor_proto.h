@@ -1,3 +1,5 @@
+#include <cstdio>
+
 int algorithm_start(const char *algo_name);
 
 int algorithm_status(int id);

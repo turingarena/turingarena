@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include "driver.h"
 
 FILE *algorithm_input_pipes[2000];
 FILE *algorithm_output_pipes[2000];
