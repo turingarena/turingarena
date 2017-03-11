@@ -1,19 +1,6 @@
 #include <bits/stdc++.h>
 #include "driver.h"
 
-/*
-
-
-
-;
-
-int write_file_open(const char *file_name);
-FILE *write_file_pipe(int id);
-int write_flie_close(int id);
-
-*/
-
-
 FILE *algorithm_input_pipes[2000];
 FILE *algorithm_output_pipes[2000];
 
