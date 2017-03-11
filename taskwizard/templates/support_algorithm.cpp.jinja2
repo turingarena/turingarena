@@ -1,16 +1,13 @@
 {% import "macro.cpp.jinja2" as macro %}
 
 #include <bits/stdc++.h>
+#include "driver.h"
 
 #define INPUT_PIPE stdin
 #define OUTPUT_PIPE stdout
 
 {% for variable in algorithm.variables.values() -%}
 {{variable.type}} {% for array_dimension in variable.array_dimensions %}*{% endfor %}{{variable.name}};
-{% endfor %}
-
-{% for function in algorithm.functions.values() -%}
-{{ macro.function_prototype(function) }}
 {% endfor %}
 
 {% for function in algorithm.functions.values() -%}

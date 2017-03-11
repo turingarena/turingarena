@@ -1,0 +1,18 @@
+{% import "macro.cpp.jinja2" as macro %}
+
+#include <bits/stdc++.h>
+
+int task_start(int algo_name);
+void task_kill();
+
+int task_open_file(int file_name);
+int task_close_file(int file_name);
+
+int task_status();
+
+void task_set_current(int id);
+int task_get_current();
+
+{% for function in interface.functions.values() -%}
+{{ macro.function_prototype(function) }}
+{% endfor %}

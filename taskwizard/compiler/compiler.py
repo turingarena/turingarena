@@ -2,7 +2,7 @@
 
 Usage:
   taskcc makefile [-i <ifile>] [-o <ofile>]
-  taskcc (stub|support) (algorithm <name>|driver) [-i <ifile>] [-o <ofile>]
+  taskcc (stub|support|header) (algorithm <name>|driver) [-i <ifile>] [-o <ofile>]
   taskcc -h | --help
 
 Options:
@@ -33,9 +33,15 @@ def main():
     if args["makefile"]:
         template = env.get_template("Makefile.jinja2")
     else:
-        stub_or_support = next(x for x in ["stub", "support"] if args[x])
         algorithm_or_driver = next(x for x in ["algorithm", "driver"] if args[x])
-        template = env.get_template(stub_or_support + "_" + algorithm_or_driver + ".cpp.jinja2")
+        if args["stub"]:
+            template = env.get_template("stub_" + algorithm_or_driver + ".cpp.jinja2")
+        elif args["header"]:
+            template = env.get_template("header_" + algorithm_or_driver + ".h.jinja2")
+        elif args["support"]:
+            template = env.get_template("support_" + algorithm_or_driver + ".cpp.jinja2")
+        else:
+            raise ValueError
 
     output = sys.stdout
     if args["--output"] is not None:

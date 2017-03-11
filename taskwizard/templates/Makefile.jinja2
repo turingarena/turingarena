@@ -1,31 +1,40 @@
-all: {% for algorithm in interface.algorithms.values() %}{{algorithm.name}}{% endfor %} driver
+all: {% for algorithm in interface.algorithms.values() %} \
+	build/stubs/{{algorithm.name}}/stub.cpp \
+	build/evaluator/algorithms/{{algorithm.name}}/support.cpp \
+	build/evaluator/algorithms/{{algorithm.name}}/{{algorithm.name}}.h \
+{% endfor %} \
+	build/evaluator/driver/support.cpp \
+	build/evaluator/driver/driver.cpp build/evaluator/driver/driver.h
+
+%/:
+	mkdir -p $@
+
+build/evaluator/driver/support.cpp: task.txt | build/evaluator/driver/
+	taskcc support driver -o $@
+
+build/evaluator/driver/driver.h: task.txt | build/evaluator/driver/
+	taskcc header driver -o $@
+
+build/evaluator/driver/driver.cpp: driver.cpp | build/evaluator/driver/
+	cp $^ $@
 
 {% for algorithm in interface.algorithms.values() %}
 
-{{algorithm.name}}_stub.cpp: task.txt
+build/stubs/{{algorithm.name}}/stub.cpp: task.txt | build/stubs/{{algorithm.name}}/
 	taskcc stub algorithm {{algorithm.name}} -o $@
 
-{{algorithm.name}}_support.cpp: task.txt
+build/evaluator/algorithms/{{algorithm.name}}/support.cpp: task.txt | build/evaluator/algorithms/{{algorithm.name}}/
 	taskcc support algorithm {{algorithm.name}} -o $@
 
-{{algorithm.name}}: {{algorithm.name}}_support.o
+build/evaluator/algorithms/{{algorithm.name}}/{{algorithm.name}}.h: task.txt | build/evaluator/algorithms/{{algorithm.name}}/
+	taskcc support algorithm {{algorithm.name}} -o $@
 
 {% endfor %}
 
-driver_support.cpp: task.txt
-	taskcc support driver -o $@
-
-driver: driver_support.o
-
 clean:
-	rm -f \
-{% for algorithm in interface.algorithms.values() -%}
-	{{algorithm.name}}_stub.cpp \
-	{{algorithm.name}}_support.cpp \
-	{{algorithm.name}}_support.o \
-	{{algorithm.name}} \
-{% endfor -%}
-	driver_support.cpp \
-	driver_support.o \
-	driver
+	rm -rf build/
+
+.PHONY: Makefile
+Makefile:
+	taskcc makefile -o $@
 
