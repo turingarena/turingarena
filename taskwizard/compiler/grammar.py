@@ -78,8 +78,16 @@ class GrammarParser(Parser):
 
     @graken()
     def _start_(self):
-        self._algorithm_()
+
+        def block1():
+            self._algorithm_()
+        self._closure(block1)
+        self.name_last_node('algorithms')
         self._check_eof()
+        self.ast._define(
+            ['algorithms'],
+            []
+        )
 
     @graken()
     def _identifier_(self):

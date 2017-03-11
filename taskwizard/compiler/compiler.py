@@ -1,7 +1,7 @@
 """Task Compiler.
 
 Usage:
-  taskcc (stub|support) (algorithm|driver) <name> [-i <ifile>] [-o <ofile>]
+  taskcc (stub|support) (algorithm <name>|driver) [-i <ifile>] [-o <ofile>]
   taskcc -h | --help
 
 Options:
@@ -25,7 +25,7 @@ def main():
 
     parse = GrammarParser(semantics=Semantics())
     text = open(args["--input"]).read()
-    algorithm = parse.parse(text)
+    interface = parse.parse(text)
 
     env = Environment(loader=PackageLoader("taskwizard", "templates"))
 
@@ -37,7 +37,10 @@ def main():
     if args["--output"] is not None:
         output = open(args["--output"], "w")
 
-    template.stream(algorithm=algorithm).dump(output)
+    if args["algorithm"]:
+        template.stream(algorithm=interface.algorithms[args["<name>"]]).dump(output)
+    if args["driver"]:
+        template.stream(interface=interface).dump(output)
 
     if args["--output"] is not None:
         output.close()

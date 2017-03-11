@@ -1,0 +1,21 @@
+{% import "macro.cpp.jinja2" as macro %}
+
+#include <bits/stdc++.h>
+
+{% for algorithm in interface.algorithms.values() %}
+  {% for function in algorithm.callback_functions.values() -%}
+  {{ macro.function_prototype(function) }}
+  {% endfor %}
+  
+  {% for function in algorithm.callback_functions.values() -%}
+  {{ macro.receive_call(function) }}
+  {% endfor %}
+  
+  {% for variable in algorithm.variables.values() -%}
+  {{ macro.set_global(variable) }}
+  {% endfor %}
+  
+  {% for function in algorithm.functions.values() -%}
+  {{ macro.callback(function, algorithm.callback_functions.values(), []) }}
+  {% endfor %}
+{% endfor %}

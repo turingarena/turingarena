@@ -11,6 +11,7 @@ Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Main = namedtuple("Main", ["commands"])
 Command = namedtuple("Command", [])
 Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "callback_functions", "main"])
+Interface = namedtuple("Interface", ["algorithms"])
 
 
 class CallbackFunction(Function):
@@ -18,6 +19,13 @@ class CallbackFunction(Function):
 
 
 class Semantics:
+
+    def start(self, ast):
+        algorithms = OrderedDict()
+        for algorithm in ast.algorithms:
+            algorithms[algorithm.name] = algorithm
+
+        return Interface(algorithms)
 
     def algorithm(self, ast):
         variables = OrderedDict()
