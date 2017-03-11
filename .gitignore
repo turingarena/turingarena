@@ -1,5 +1,11 @@
-#### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
+# The following three rules are equivalent to "ignore files without a dot in the name".
+# They're useful in order to avoid putting binaries in the repository.
+*
+!*/
+!*.*
 
+
+#### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
