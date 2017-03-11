@@ -11,9 +11,6 @@
 #include <string>
 using namespace std;
 
-char* make_env(const char *taskfolder, const char *submission);
-
-
 void read_from_pipe (int file)
  {
    FILE *stream;
@@ -28,10 +25,10 @@ void make_algorithm_pipes(int index) {
 
     // Generate file descriptor names
     char algorithm_output_pipe_name[200];
-    sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", index);
+    sprintf(algorithm_output_pipe_name, "driver_sandbox/algorithm_output.%d.pipe", index);
 
     char algorithm_input_pipe_name[200];
-    sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", index);
+    sprintf(algorithm_input_pipe_name, "driver_sandbox/algorithm_input.%d.pipe", index);
 
     mkfifo(algorithm_output_pipe_name, 0666);
     mkfifo(algorithm_input_pipe_name, 0666);
@@ -229,7 +226,6 @@ int main(int argc, char** argv) {
         printf("Only a task directory and an executable file should be specified\n");
         return 1;
     }
-    make_env(argv[1], argv[2]);
 
 
     fork_driver();

@@ -15,6 +15,7 @@ Options:
 from docopt import docopt
 import logging
 import os
+import pkg_resources
 import shutil
 import tempfile
 import yaml
@@ -39,6 +40,14 @@ def main():
     task = yaml.safe_load(open(os.path.join(task_folder, "task.yaml")))
 
     with tempfile.TemporaryDirectory() as out_dir:
+        supervisor_dir = os.path.join(out_dir, "supervisor")
+        shutil.copytree(
+            pkg_resources.resource_filename("taskwizard", "supervisor"),
+            supervisor_dir
+        )
+        os.system("g++ -g -o " + os.path.join(supervisor_dir, "supervisor") +
+                      " " + os.path.join(supervisor_dir, "supervisor.cpp"))
+
         os.mkdir(os.path.join(out_dir, "algorithms"))
 
         driver_path = os.path.join(out_dir, "driver")
@@ -68,6 +77,9 @@ def main():
             os.path.join(task_folder, "testcases", args['<testcase-id>'], "evaluate.txt"),
             os.path.join(out_dir, "read_files", "evaluate", "data.txt")
         )
+
+        os.mkdir(os.path.join(out_dir, "driver_sandbox"))
+        os.system("supervisor/supervisor a b")
 
         print(out_dir)
         input()
