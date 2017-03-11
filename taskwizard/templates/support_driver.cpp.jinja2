@@ -1,9 +1,83 @@
 {% import "macro.cpp.jinja2" as macro %}
 
 #include <bits/stdc++.h>
+#include "driver.h"
 
-FILE* get_input_pipe();
-FILE* get_output_pipe();
+static FILE *inpipes[2000];
+static FILE *outpipes[2000];
+
+static int current_task;
+
+static void open_pipe(int descriptor) {
+    char read_pipe_name[200];
+    sprintf(read_pipe_name, "wfdesc%d", descriptor);
+
+    char write_pipe_name[200];
+    sprintf(write_pipe_name, "rfdesc%d", descriptor);
+
+    inpipes[descriptor] = fopen(read_pipe_name, "r");
+    outpipes[descriptor] = fopen(write_pipe_name, "w");
+}
+
+int task_open_file(int file_name) {
+    printf("task_open_file %d\n", file_name);
+    int descriptor;
+    scanf(" %d", &descriptor);
+    fprintf(stderr, "Desc %d\n", descriptor);
+    
+    return descriptor;
+}
+
+int task_start(int task_name) {
+    printf("task_start %d\n", task_name);
+    int descriptor;
+    scanf(" %d", &descriptor);
+    fprintf(stderr, "Desc %d\n", descriptor);
+    
+    return descriptor;
+}
+
+void print_success() {
+    char buff[50] = {0};
+    fprintf(stderr, "pipe: %p\n", inpipes[1]);
+    fscanf(inpipes[1], "%s", buff);
+    //printf("Thedriverreceivedthisstringfromsubmission:%s\n", buff);
+    fprintf(stderr, "Thedriverreceivedthisstringfromsubmission:%s\n", buff);
+}
+
+int task_status() {
+    printf("task_status %d\n", current_task);
+    int status;
+    scanf(" %d", &status);
+    return status;
+}
+
+void task_kill() {
+    printf("task_kill %d\n", current_task);
+    int status;
+    scanf(" %d", &status);
+}
+
+void task_set_current(int id) {
+    current_task = id;
+}
+
+int task_get_current() {
+    return current_task;
+}
+
+void init_communication() {
+    printf("init_communication\n");
+    int status;
+    scanf(" %d", &status);
+}
+
+FILE* get_input_pipe() {
+  return inpipes[current_task];
+}
+FILE* get_output_pipe() {
+  return outpipes[current_task];
+}
 
 #define INPUT_PIPE (get_input_pipe())
 #define OUTPUT_PIPE (get_output_pipe())
@@ -25,3 +99,16 @@ FILE* get_output_pipe();
   {{ macro.callback(function, algorithm.callback_functions.values(), []) }}
   {% endfor %}
 {% endfor %}
+
+{% for function in interface.functions.values() -%}
+{{ macro.receive_call(function) }}
+{% endfor %}
+
+{% for variable in interface.variables.values() -%}
+{{ macro.receive_set_global(variable) }}
+{% endfor %}
+
+int main() {
+    task_set_current(task_open_file(0));
+    {{ macro.process_command('int', interface.functions.values(), interface.variables.values()) }}
+}

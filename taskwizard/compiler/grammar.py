@@ -79,14 +79,23 @@ class GrammarParser(Parser):
     @graken()
     def _start_(self):
 
-        def block1():
-            self._algorithm_()
-        self._closure(block1)
-        self.name_last_node('algorithms')
+        def block0():
+            with self._choice():
+                with self._option():
+                    self._algorithm_()
+                    self.add_last_node_to_name('algorithms')
+                with self._option():
+                    self._global_variable_declaration_()
+                    self.add_last_node_to_name('variables')
+                with self._option():
+                    self._function_declaration_()
+                    self.add_last_node_to_name('functions')
+                self._error('no available options')
+        self._closure(block0)
         self._check_eof()
         self.ast._define(
-            ['algorithms'],
-            []
+            [],
+            ['algorithms', 'functions', 'variables']
         )
 
     @graken()
