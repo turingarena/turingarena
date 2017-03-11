@@ -63,3 +63,10 @@ def main():
         )
         os.system("g++ -o " + os.path.join(algorithm_path, "algorithm") +
                   " " + os.path.join(algorithm_path, "*.cpp"))
+
+    os.mkdir(os.path.join(out_dir, "read_files"))
+    os.mkdir(os.path.join(out_dir, "read_files", "evaluate"))
+    shutil.copy(
+        os.path.join(task_folder, "testcases", args['<testcase-id>'], "evaluate.txt"),
+        os.path.join(out_dir, "read_files", "evaluate", "data.txt")
+    )
