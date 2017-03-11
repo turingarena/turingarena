@@ -36,5 +36,6 @@ setup(
         "docopt",
         "grako",
         "jinja2",
+        "pyyaml",
     ],
 )
