@@ -1,4 +1,4 @@
-algorithm algo {
+interface algo {
   int N;
   int M;
   

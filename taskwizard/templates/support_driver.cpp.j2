@@ -75,33 +75,33 @@ void init_communication() {
 #define INPUT_PIPE (get_input_pipe())
 #define OUTPUT_PIPE (get_output_pipe())
 
-{% for algorithm in interface.algorithms.values() %}
-  {% for function in algorithm.callback_functions.values() -%}
+{% for interface in task.interfaces.values() %}
+  {% for function in interface.callback_functions.values() -%}
   {{ macro.function_prototype(function) }}
   {% endfor %}
   
-  {% for function in algorithm.callback_functions.values() -%}
+  {% for function in interface.callback_functions.values() -%}
   {{ macro.receive_call(function) }}
   {% endfor %}
   
-  {% for variable in algorithm.variables.values() -%}
+  {% for variable in interface.variables.values() -%}
   {{ macro.set_global(variable) }}
   {% endfor %}
   
-  {% for function in algorithm.functions.values() -%}
-  {{ macro.callback(function, algorithm.callback_functions.values(), []) }}
+  {% for function in interface.functions.values() -%}
+  {{ macro.callback(function, interface.callback_functions.values(), []) }}
   {% endfor %}
 {% endfor %}
 
-{% for function in interface.functions.values() -%}
+{% for function in task.functions.values() -%}
 {{ macro.receive_call(function) }}
 {% endfor %}
 
-{% for variable in interface.variables.values() -%}
+{% for variable in task.variables.values() -%}
 {{ macro.receive_set_global(variable) }}
 {% endfor %}
 
 int main() {
     task_set_current(task_open_file(0));
-    {{ macro.process_command('int', interface.functions.values(), interface.variables.values()) }}
+    {{ macro.process_command('int', task.functions.values(), task.variables.values()) }}
 }

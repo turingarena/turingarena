@@ -1,0 +1,27 @@
+{% import "macro.cpp.j2" as macro %}
+
+#include <bits/stdc++.h>
+#include "{{interface.name}}.h"
+
+#define INPUT_PIPE stdin
+#define OUTPUT_PIPE stdout
+
+{% for variable in interface.variables.values() -%}
+{{variable.type}} {% for array_dimension in variable.array_dimensions %}*{% endfor %}{{variable.name}};
+{% endfor %}
+
+{% for function in interface.functions.values() -%}
+{{ macro.receive_call(function) }}
+{% endfor %}
+
+{% for variable in interface.variables.values() -%}
+{{ macro.receive_set_global(variable) }}
+{% endfor %}
+
+{% for function in interface.callback_functions.values() -%}
+{{ macro.callback(function, interface.functions.values(), interface.variables.values()) }}
+{% endfor %}
+
+int main() {
+    {{ macro.process_command('int', interface.functions.values(), interface.variables.values()) }}
+}

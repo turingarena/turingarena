@@ -3,15 +3,15 @@
 
 start = 
   {
-    | algorithms+:algorithm
+    | interfaces+:interface
     | variables+:global_variable_declaration
     | functions+:function_declaration
   }* $ ;
 
 identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
-algorithm =
-  'algorithm' name:identifier '{' declarations:{declaration}* '}'
+interface =
+  'interface' name:identifier '{' declarations:{declaration}* '}'
   ;
 
 declaration =

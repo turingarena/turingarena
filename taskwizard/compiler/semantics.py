@@ -10,8 +10,8 @@ Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Main = namedtuple("Main", ["commands"])
 Command = namedtuple("Command", [])
-Algorithm = namedtuple("Algorithm", ["name", "variables", "functions", "callback_functions", "main"])
-Interface = namedtuple("Interface", ["algorithms", "variables", "functions"])
+Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions", "main"])
+Task = namedtuple("Task", ["interfaces", "variables", "functions"])
 
 
 class CallbackFunction(Function):
@@ -23,18 +23,18 @@ class Semantics:
     def start(self, ast):
         variables = OrderedDict()
         functions = OrderedDict()
-        algorithms = OrderedDict()
+        interfaces = OrderedDict()
 
         for variable in ast.variables:
             variables[variable.name] = variable
         for function in ast.functions:
             functions[function.name] = function
-        for algorithm in ast.algorithms:
-            algorithms[algorithm.name] = algorithm
+        for interface in ast.interfaces:
+            interfaces[interface.name] = interface
 
-        return Interface(algorithms, variables, functions)
+        return Task(interfaces, variables, functions)
 
-    def algorithm(self, ast):
+    def interface(self, ast):
         variables = OrderedDict()
         functions = OrderedDict()
         callback_functions = OrderedDict()
@@ -54,7 +54,7 @@ class Semantics:
             if container is not None:
                 container[declaration.name] = declaration
 
-        return Algorithm(ast.name, variables, functions, callback_functions, main)
+        return Interface(ast.name, variables, functions, callback_functions, main)
 
     def variable(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)
