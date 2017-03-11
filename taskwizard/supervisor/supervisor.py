@@ -38,18 +38,20 @@ def main():
 
     task = yaml.safe_load(open(os.path.join(task_folder, "task.yaml")))
 
-    with tempfile.TemporaryDirectory() as out_dir:
-        os.mkdir(os.path.join(out_dir, "algorithms"))
+    out_dir = tempfile.mkdtemp()
+    print("Dir: ", out_dir)
 
-        for slot_name, slot in task["slots"].items():
-            algorithm_path = os.path.join(out_dir, "algorithms", slot_name)
-            shutil.copytree(
-                os.path.join(task_folder, "interfaces", slot["interface"]),
-                algorithm_path
-            )
-            shutil.copy(
-                slot_files[slot_name],
-                os.path.join(algorithm_path, "algorithm.cpp")
-            )
-            os.system("g++ -o " + os.path.join(algorithm_path, "algorithm") +
-                      " " + os.path.join(algorithm_path, "*.cpp"))
+    os.mkdir(os.path.join(out_dir, "algorithms"))
+
+    for slot_name, slot in task["slots"].items():
+        algorithm_path = os.path.join(out_dir, "algorithms", slot_name)
+        shutil.copytree(
+            os.path.join(task_folder, "interfaces", slot["interface"]),
+            algorithm_path
+        )
+        shutil.copy(
+            slot_files[slot_name],
+            os.path.join(algorithm_path, "algorithm.cpp")
+        )
+        os.system("g++ -o " + os.path.join(algorithm_path, "algorithm") +
+                  " " + os.path.join(algorithm_path, "*.cpp"))
