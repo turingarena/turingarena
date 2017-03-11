@@ -79,7 +79,7 @@ def main():
         )
 
         os.mkdir(os.path.join(out_dir, "driver_sandbox"))
-        os.system("supervisor/supervisor a b")
+        os.system("cd " + out_dir + " ; supervisor/supervisor a b")
 
         print(out_dir)
         input()
