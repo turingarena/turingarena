@@ -27,6 +27,9 @@ setup(
         ],
     },
     packages=find_packages(),
+    package_data={
+        'taskwizard.templates': ['*.jinja2'],
+    },
     keywords="",
     license="",
     classifiers=[],
