@@ -11,45 +11,8 @@
 #include <string>
 using namespace std;
 
-void copy_totmp(const char *temp, const char *driver, const char *exec)
-{
-    int childExitStatus;
-    pid_t pid;
-    int status;
-    pid = fork();
+char* make_env(const char *taskfolder, const char *submission);
 
-    if (pid == 0) { /* child */
-        int r = execl("./make_tmp.sh", "make_tmp.sh", "", temp, driver, exec, (char *)0);
-        if (r == -1)printf("r = %d   errno = %d\n",r,errno);
-        exit(0);
-    }
-    else if (pid < 0) {
-        /* error - couldn't start process - you decide how to handle */
-    }
-    else {
-
-        /* parent - wait for child - this has all error handling, you
-         * could just call wait() as long as you are only expecting to
-         * have one child process at a time.
-         */
-        pid_t ws = waitpid( pid, &childExitStatus, 0);
-        if (ws == -1)
-        { /* error - handle as you wish */
-        }
-
-        if( WIFEXITED(childExitStatus)) /* exit code in childExitStatus */
-        {
-            status = WEXITSTATUS(childExitStatus); /* zero is normal exit */
-            /* handle non-zero as you wish */
-        }
-        else if (WIFSIGNALED(childExitStatus)) /* killed */
-        {
-        }
-        else if (WIFSTOPPED(childExitStatus)) /* stopped */
-        {
-        }
-    }
-}
 
 void read_from_pipe (int file)
  {
@@ -61,115 +24,203 @@ void read_from_pipe (int file)
    fclose (stream);
  }
 
-void make_fd(int index) {
-    char read_fd[50]; 
-    char write_fd[50]; 
+void make_algorithm_pipes(int index) {
 
-    sprintf(read_fd, "rfdesc%d", index);
-    sprintf(write_fd, "wfdesc%d", index);
+    // Generate file descriptor names
+    char algorithm_output_pipe_name[200];
+    sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", index);
 
-    mkfifo(read_fd, 0666);
-    mkfifo(write_fd, 0666);
+    char algorithm_input_pipe_name[200];
+    sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", index);
 
-    printf("Created.\n");
+    mkfifo(algorithm_output_pipe_name, 0666);
+    mkfifo(algorithm_input_pipe_name, 0666);
 }
 
-FILE* open_fd_writetochild(int index) {
-    char read_fd[50]; 
-    sprintf(read_fd, "rfdesc%d", index);
-    return fopen(read_fd, "w");
+FILE* open_supervisor_writeto(int index) {
+    char algorithm_input_pipe_name[200];
+    sprintf(algorithm_input_pipe_name, "driver_sandbox/algorithm_input.%d.pipe", index);
+    return fopen(algorithm_input_pipe_name, "w");
 }
 
-FILE* open_fd_readfromchild(int index) {
-    char write_fd[50]; 
-    sprintf(write_fd, "wfdesc%d", index);
-    return fopen(write_fd, "r");
+FILE* open_supervisor_readfrom(int index) {
+    char algorithm_output_pipe_name[200];
+    sprintf(algorithm_output_pipe_name, "driver_sandbox/algorithm_output.%d.pipe", index);
+    return fopen(algorithm_output_pipe_name, "r");
 }
 
 
-FILE* open_fd_childwrites(int index) {
-    char write_fd[50]; 
-    sprintf(write_fd, "wfdesc%d", index);
-    return fopen(write_fd, "w");
+FILE* open_algorithm_writeto(int index) {
+    char algorithm_output_pipe_name[200];
+    sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", index);
+    return fopen(algorithm_output_pipe_name, "w");
 }
 
-FILE* open_fd_childreads(int index) {
-    char read_fd[50]; 
-    sprintf(read_fd, "rfdesc%d", index);
-    return fopen(read_fd, "r");
+FILE* open_algorithm_readfrom(int index) {
+    char algorithm_input_pipe_name[200];
+    sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", index);
+    return fopen(algorithm_input_pipe_name, "r");
 }
 
-static FILE *inpipes[2000];
-static FILE *outpipes[2000];
+static FILE *algorithm_input_pipes[2000];
+static FILE *algorithm_output_pipes[2000];
+static pid_t algorithm_pids[2000];
 
-void run_client(int index) { // index > 0!!!
-    make_fd(index); // Make control file descriptors
+static int next_algorithm_index = 1;
+static int next_file_index = 1;
+
+void fork_algorithm(const char *algorithm_name, int index) { // index > 0!!!
+    make_algorithm_pipes(index); // Make data/control file descriptors
 
     pid_t pid = fork();
     
     if (pid == 0) { /* child */
         
-        dup2(fileno(open_fd_childwrites(index)), STDOUT_FILENO);
-        dup2(fileno(open_fd_childreads(index)), STDIN_FILENO);
+        dup2(fileno(open_algorithm_writeto(index)), STDOUT_FILENO);
+        dup2(fileno(open_algorithm_readfrom(index)), STDIN_FILENO);
 
+        char executable_path[300];
+        sprintf(executable_path, "./algorithms/%s/algorithm", algorithm_name);
 
-        int r = execl("./solution", "solution", (char *)0);
-        if (r == -1) printf("r = %d   errno = %d\n",r,errno);
+        int r = execl(executable_path, "algorithm", (char *)0);
+        if (r == -1) {
+            fprintf(stderr, "Error while executing algorithm:\n\tr = %d   errno = %d\n",r,errno);
+        }
         exit(0);
     }
 
-    inpipes[index] = open_fd_readfromchild(index);
-    outpipes[index] = open_fd_writetochild(index);
-    setvbuf(outpipes[index], NULL, _IONBF, 0);
+    if (pid > 0) {
+        algorithm_pids[index] = pid;
+    }
+
+    algorithm_input_pipes[index] = open_supervisor_readfrom(index);
+    algorithm_output_pipes[index] = open_supervisor_writeto(index);
+    setvbuf(algorithm_output_pipes[index], NULL, _IONBF, 0);
 }
 
-FILE *ctrlout;
-FILE *ctrlin;
+FILE *driver_control_output;
+FILE *driver_control_input;
 
-void run_driver() {
-    make_fd(0); // Make control file descriptors
+void fork_driver() {
+    make_algorithm_pipes(0); // Make control file descriptors
 
     pid_t pid = fork();
     
     if (pid == 0) { /* child */
         
-        dup2(fileno(open_fd_childwrites(0)), STDOUT_FILENO);
-        dup2(fileno(open_fd_childreads(0)), STDIN_FILENO);
+        dup2(fileno(open_algorithm_writeto(0)), STDOUT_FILENO);
+        dup2(fileno(open_algorithm_readfrom(0)), STDIN_FILENO);
 
+        chdir("driver_sandbox");
 
-        int r = execl("./driver", "driver", (char *)0);
-        if (r == -1) printf("r = %d   errno = %d\n",r,errno);
+        int r = execl("../driver/driver", "driver", (char *)0);
+        if (r == -1) {
+            fprintf(stderr, "Error while executing algorithm:\n\tr = %d   errno = %d\n",r,errno);
+        }
         exit(0);
     }
 
-    ctrlin = open_fd_readfromchild(0);
-    ctrlout = open_fd_writetochild(0);
-    setvbuf(ctrlout, NULL, _IONBF, 0);
+    driver_control_input = open_supervisor_readfrom(0);
+    driver_control_output = open_supervisor_writeto(0);
+    setvbuf(driver_control_output, NULL, _IONBF, 0);
 }
 
 
 
 
-char tempdir[5000];
-char* make_env(const char *taskfolder, const char *submission) {
-    char temp[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp (temp);
-    strcpy(tempdir, tmp_dirname);
-    tmp_dirname = tempdir;
+int on_algorithm_start(const char *algo_name) {
+    int current_algorithm_index = next_algorithm_index++;
+    fork_algorithm(algo_name, current_algorithm_index);
+    return current_algorithm_index;
+}
+int on_algorithm_status(int id) {
+    return 0;
+}
 
-    if (tmp_dirname == NULL) {
-        exit(1);
+
+int on_algorithm_kill(int id) {
+    if (algorithm_pids[id] != 0) {
+        kill(algorithm_pids[id], SIGKILL);
+        fprintf(stderr, "Killed process with pid %d\n", algorithm_pids[id]);
+        algorithm_pids[id] = 0;
+        return 0;
     }
-
-    char driver[300];
-    sprintf(driver, "%s/%s", taskfolder, "driver");
-
-    printf("Folder: %s\n", tmp_dirname);
-
-    copy_totmp(tmp_dirname, driver, submission);
-    chdir(tmp_dirname);
-    return tmp_dirname;
+    return -1;
 }
+
+int on_read_file_open(const char *file_name) {
+
+    int id = next_file_index++;
+
+    char read_file_name_source[200];
+    sprintf(read_file_name_source, "read_files/%s/data.txt", file_name);
+
+    char read_file_name_dest[200];
+    sprintf(read_file_name_dest, "driver_sandbox/algorithm_output.%d.pipe", id);
+
+
+    symlink(read_file_name_source, read_file_name_dest);
+
+
+}
+
+int on_read_file_close(int id) {
+    char read_file_name_dest[200];
+    sprintf(read_file_name_dest, "driver_sandbox/algorithm_output.%d.pipe", id);
+    return unlink(read_file_name_dest);
+}
+
+
+
+void ctrl_loop() {
+
+#define CASE(s) if (!strcmp(command, s))
+
+    while (1) {
+        //for (int i = 0; i < 2; i++) {
+        //fprintf(stderr, "Waiting...\n");
+
+        char command[500];
+        char name[500];
+        int proc_id;
+
+        fprintf(stderr, "SUPERVISOR: waiting for commands...\n");
+
+        fscanf(driver_control_input, "%s", command);
+        fprintf(stderr, "SUPERVISOR: received command \"%s\"\n", command);
+
+
+        CASE("algorithm_start") {
+            fscanf(driver_control_input, "%s", name);
+            int id = on_algorithm_start(name);
+            fprintf(driver_control_output, "%d\n", id);
+            fprintf(stderr, "SUPERVISOR: Started process\n");
+        }
+        CASE("algorithm_status") {
+            fscanf(driver_control_input, "%d", &proc_id);
+            fprintf(driver_control_output, "%d\n", on_algorithm_status(proc_id));
+            fprintf(stderr, "SUPERVISOR: Requested status\n");            
+        }
+        CASE("algorithm_kill") {
+            fscanf(driver_control_input, "%d", &proc_id);
+            fprintf(driver_control_output, "%d\n", on_algorithm_kill(proc_id));
+            fprintf(stderr, "SUPERVISOR: Killed process with id %d\n", proc_id);
+        }
+        CASE("read_file_open") {
+            fscanf(driver_control_input, "%s", name);
+            int id = on_read_file_open(name);
+            fprintf(driver_control_output, "%d\n", id);
+            fprintf(stderr, "SUPERVISOR: Opened file\n");
+        }
+        CASE("read_file_close") {
+            int file_id;
+            fscanf(driver_control_input, "%d", &file_id);
+            fprintf(driver_control_output, "%d\n", on_read_file_close(file_id));
+            fprintf(stderr, "SUPERVISOR: Closed file %d\n", file_id);
+        }
+    }
+}
+
 
 
 int main(int argc, char** argv) {
@@ -181,26 +232,7 @@ int main(int argc, char** argv) {
     make_env(argv[1], argv[2]);
 
 
-    run_driver();
-    run_client(1);
+    fork_driver();
 
-    
-    char ex[500];
-
-    //for (int i = 0; i < 2; i++) {
-    fprintf(stderr, "Waiting...\n");
-    fscanf(ctrlin, "%s", ex);
-    fprintf(stderr, "String: %s\n", ex);
-    fprintf(ctrlout, "1\n"); // write id
-
-    fscanf(ctrlin, "%s", ex); // read response
-    for (int i = 0; i < 10; i++)
-    fprintf(stderr, "%s\n", ex);
-
-
-    //}
-
-    //fscanf(inpipes[1], "%s", ex);
-    //printf ("Solution response: %s\n", ex);
-
+    ctrl_loop();
 }

@@ -1,19 +1,6 @@
 #include <bits/stdc++.h>
 #include "driver.h"
 
-/*
-
-
-
-;
-
-int write_file_open(const char *file_name);
-FILE *write_file_pipe(int id);
-int write_flie_close(int id);
-
-*/
-
-
 FILE *algorithm_input_pipes[2000];
 FILE *algorithm_output_pipes[2000];
 
@@ -31,14 +18,12 @@ FILE *algorithm_output_pipe(int id) {
 
 int algorithm_start(const char *algo_name) {
     
-    // Start new algorithm
-    
+    // Start new algorithm    
     printf("algorithm_start %s\n", algo_name);
     int descriptor;
     scanf("%d", &descriptor);
 
     // Generate file descriptor names
-
     char algorithm_output_pipe_name[200];
     sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", descriptor);
 
