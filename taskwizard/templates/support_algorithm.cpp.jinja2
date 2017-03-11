@@ -7,6 +7,10 @@
 {% endfor %}
 
 {% for function in algorithm.functions.values() -%}
+{{ macro.function_prototype(function) }}
+{% endfor %}
+
+{% for function in algorithm.functions.values() -%}
 {{ macro.receive_call(function) }}
 {% endfor %}
 

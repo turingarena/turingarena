@@ -38,3 +38,6 @@ def main():
         output = open(args["--output"], "w")
 
     template.stream(algorithm=algorithm).dump(output)
+
+    if args["--output"] is not None:
+        output.close()

@@ -6,6 +6,10 @@
   {%- endfor -%}
 {%- endmacro %}
 
+{% macro function_prototype(function) -%}
+  {{function.return_type}} {{function.name}}({{parameters_prototype(function)}});
+{%- endmacro %}
+
 {% macro receive_call(function) %}
 void receive_call_{{function.name}}() {
     {% for parameter in function.parameters.values() %}
@@ -70,7 +74,7 @@ void receive_set_global_{{variable.name}}() {
         }
         
         if(!strcmp(command, "set")) {
-            {{process_set_global(callbacks)}}
+            {{process_set_global(variables)}}
         }
     }
 {% endmacro %}

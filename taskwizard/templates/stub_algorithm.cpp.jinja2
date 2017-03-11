@@ -9,7 +9,7 @@ extern {{variable.type}} {% for array_dimension in variable.array_dimensions %}*
 {% endfor %}
 
 // Callback functions
-{% for function in algorithm.functions.values() -%}
+{% for function in algorithm.callback_functions.values() -%}
 {{function.return_type}} {{function.name}}({{macro.parameters_prototype(function)}});
 {%- endfor %}
 
@@ -23,5 +23,6 @@ extern {{variable.type}} {% for array_dimension in variable.array_dimensions %}*
   {%- endfor -%}
 ) {
     // TODO: implement
+    return 42;
 }
 {% endfor %}
