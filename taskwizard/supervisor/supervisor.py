@@ -43,6 +43,14 @@ def main():
 
     os.mkdir(os.path.join(out_dir, "algorithms"))
 
+    driver_path = os.path.join(out_dir, "driver")
+    shutil.copytree(
+        os.path.join(task_folder, "driver"),
+        driver_path
+    )
+    os.system("g++ -o " + os.path.join(driver_path, "driver") +
+              " " + os.path.join(driver_path, "*.cpp"))
+
     for slot_name, slot in task["slots"].items():
         algorithm_path = os.path.join(out_dir, "algorithms", slot_name)
         shutil.copytree(
