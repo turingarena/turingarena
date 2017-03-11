@@ -14,7 +14,7 @@
 void receive_call_{{function.name}}() {
     {% for parameter in function.parameters.values() %}
     {{parameter.type}} {{parameter.name}};
-    scanf(" %d", &{{parameter.name}});
+    fscanf(INPUT_PIPE, " %d", &{{parameter.name}});
     {%- endfor %}
   
     {{function.return_type}} result = {{function.name}}(
@@ -24,21 +24,21 @@ void receive_call_{{function.name}}() {
     {%- endfor -%}
     );
   
-    printf("%s\n", "return");
-    printf("%d\n", result);
+    fprintf(OUTPUT_PIPE, "%s\n", "return");
+    fprintf(OUTPUT_PIPE, "%d\n", result);
 }
 {% endmacro %}
 
 {% macro receive_set_global(variable) %}
 void receive_set_global_{{variable.name}}() {
-    scanf(" %d", &{{variable.name}});
+    fscanf(INPUT_PIPE, " %d", &{{variable.name}});
 }
 {% endmacro %}
 
 {% macro process_callback(callbacks) %}
     {
         char callback_name[51];
-        scanf("%50s", callback_name);
+        fscanf(INPUT_PIPE, "%50s", callback_name);
         {% for callback in callbacks -%}
         if(!strcmp(callback_name, "{{callback.name}}")) {
             receive_call_{{callback.name}}();
@@ -50,7 +50,7 @@ void receive_set_global_{{variable.name}}() {
 {% macro process_set_global(variables) %}
     {
         char variable_name[51];
-        scanf("%50s", variable_name);
+        fscanf(INPUT_PIPE, "%50s", variable_name);
         {% for variable in variables -%}
         if(!strcmp(variable_name, "{{variable.name}}")) {
             receive_set_global_{{variable.name}}();
@@ -62,10 +62,10 @@ void receive_set_global_{{variable.name}}() {
 {% macro process_command(return_type, callbacks, variables) %}
     while(1) {
         char command[51];
-        scanf("%50s", command);
+        fscanf(INPUT_PIPE, "%50s", command);
         if(!strcmp(command, "return")) {
             {{return_type}} result;
-            scanf(" %d", &result);
+            fscanf(INPUT_PIPE, " %d", &result);
             return result;
         }
         
@@ -81,11 +81,11 @@ void receive_set_global_{{variable.name}}() {
 
 {% macro callback(function, callbacks, variables) %}
 {{function.return_type}} {{function.name}}({{parameters_prototype(function)}}) {
-    printf("%s\n", "call");
-    printf("%s\n", "{{function.name}}");
+    fprintf(OUTPUT_PIPE, "%s\n", "call");
+    fprintf(OUTPUT_PIPE, "%s\n", "{{function.name}}");
 
     {% for parameter in function.parameters.values() %}
-    printf("%d\n", {{parameter.name}});
+    fprintf(OUTPUT_PIPE, "%d\n", {{parameter.name}});
     {%- endfor %}
     
     {{ process_command(function.return_type, callbacks, variables) }}
@@ -94,9 +94,9 @@ void receive_set_global_{{variable.name}}() {
 
 {% macro set_global(variable) %}
 void set_global_{{variable.name}}({{variable.type}} value) {
-    printf("%s\n", "set");
-    printf("%s\n", "{{variable.name}}");
-    printf("%d\n", value);
+    fprintf(OUTPUT_PIPE, "%s\n", "set");
+    fprintf(OUTPUT_PIPE, "%s\n", "{{variable.name}}");
+    fprintf(OUTPUT_PIPE, "%d\n", value);
 }
 
 {% endmacro %}

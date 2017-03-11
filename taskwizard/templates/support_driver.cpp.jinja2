@@ -2,6 +2,12 @@
 
 #include <bits/stdc++.h>
 
+FILE* get_input_pipe();
+FILE* get_output_pipe();
+
+#define INPUT_PIPE (get_input_pipe())
+#define OUTPUT_PIPE (get_output_pipe())
+
 {% for algorithm in interface.algorithms.values() %}
   {% for function in algorithm.callback_functions.values() -%}
   {{ macro.function_prototype(function) }}
