@@ -1,4 +1,4 @@
-algorithm aplusb {
+interface aplusb {
   int sum(int A, int B);
 }
 

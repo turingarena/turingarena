@@ -1,0 +1,21 @@
+{% import "macro.cpp.jinja2" as macro %}
+
+#include <bits/stdc++.h>
+
+// Global input/output
+{% for variable in interface.variables.values() -%}
+{%- if variable.array_dimensions %}
+// {{variable.type}} {{variable.name}}{% for array_dimension in variable.array_dimensions -%}[{{array_dimension}}]{% endfor %}
+{%- endif %}
+extern {{variable.type}} {% for array_dimension in variable.array_dimensions %}*{% endfor %}{{variable.name}};
+{% endfor %}
+
+// Callback functions
+{% for function in interface.callback_functions.values() -%}
+{{macro.function_prototype(function)}}
+{%- endfor %}
+
+// Functions to implement
+{% for function in interface.functions.values() -%}
+{{macro.function_prototype(function)}}
+{%- endfor %}

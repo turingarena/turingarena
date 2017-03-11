@@ -82,8 +82,8 @@ class GrammarParser(Parser):
         def block0():
             with self._choice():
                 with self._option():
-                    self._algorithm_()
-                    self.add_last_node_to_name('algorithms')
+                    self._interface_()
+                    self.add_last_node_to_name('interfaces')
                 with self._option():
                     self._global_variable_declaration_()
                     self.add_last_node_to_name('variables')
@@ -95,7 +95,7 @@ class GrammarParser(Parser):
         self._check_eof()
         self.ast._define(
             [],
-            ['algorithms', 'functions', 'variables']
+            ['functions', 'interfaces', 'variables']
         )
 
     @graken()
@@ -103,8 +103,8 @@ class GrammarParser(Parser):
         self._pattern(r'[a-zA-Z_][0-9a-zA-Z_]*')
 
     @graken()
-    def _algorithm_(self):
-        self._token('algorithm')
+    def _interface_(self):
+        self._token('interface')
         self._identifier_()
         self.name_last_node('name')
         self._token('{')
@@ -236,7 +236,7 @@ class GrammarSemantics(object):
     def identifier(self, ast):
         return ast
 
-    def algorithm(self, ast):
+    def interface(self, ast):
         return ast
 
     def declaration(self, ast):

@@ -1,7 +1,7 @@
-all: {% for algorithm in interface.algorithms.values() %} \
-	build/stubs/{{algorithm.name}}/stub.cpp \
-	build/evaluator/algorithms/{{algorithm.name}}/support.cpp \
-	build/evaluator/algorithms/{{algorithm.name}}/{{algorithm.name}}.h \
+all: {% for interface in task.interfaces.values() %} \
+	build/stubs/{{interface.name}}/stub.cpp \
+	build/evaluator/interfaces/{{interface.name}}/support.cpp \
+	build/evaluator/interfaces/{{interface.name}}/{{interface.name}}.h \
 {% endfor %} \
 	build/evaluator/driver/support.cpp \
 	build/evaluator/driver/driver.cpp build/evaluator/driver/driver.h
@@ -18,16 +18,16 @@ build/evaluator/driver/driver.h: task.txt | build/evaluator/driver/
 build/evaluator/driver/driver.cpp: driver.cpp | build/evaluator/driver/
 	cp $^ $@
 
-{% for algorithm in interface.algorithms.values() %}
+{% for interface in task.interfaces.values() %}
 
-build/stubs/{{algorithm.name}}/stub.cpp: task.txt | build/stubs/{{algorithm.name}}/
-	taskcc stub algorithm {{algorithm.name}} -o $@
+build/stubs/{{interface.name}}/stub.cpp: task.txt | build/stubs/{{interface.name}}/
+	taskcc stub interface {{interface.name}} -o $@
 
-build/evaluator/algorithms/{{algorithm.name}}/support.cpp: task.txt | build/evaluator/algorithms/{{algorithm.name}}/
-	taskcc support algorithm {{algorithm.name}} -o $@
+build/evaluator/interfaces/{{interface.name}}/support.cpp: task.txt | build/evaluator/interfaces/{{interface.name}}/
+	taskcc support interface {{interface.name}} -o $@
 
-build/evaluator/algorithms/{{algorithm.name}}/{{algorithm.name}}.h: task.txt | build/evaluator/algorithms/{{algorithm.name}}/
-	taskcc support algorithm {{algorithm.name}} -o $@
+build/evaluator/interfaces/{{interface.name}}/{{interface.name}}.h: task.txt | build/evaluator/interfaces/{{interface.name}}/
+	taskcc header interface {{interface.name}} -o $@
 
 {% endfor %}
 

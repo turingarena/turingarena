@@ -1,0 +1,15 @@
+{% import "macro.cpp.jinja2" as macro %}
+
+// Functions to implement
+{% for function in interface.functions.values() -%}
+{{function.return_type}} {{function.name}} (
+  {%- for parameter in function.parameters.values() -%}
+  {%- if not loop.first -%}{{' '}}{%- endif -%}
+  {{parameter.type}} {{parameter.name}}
+  {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
+) {
+    // TODO: implement
+    return 42;
+}
+{% endfor %}

@@ -13,6 +13,6 @@ int task_status();
 void task_set_current(int id);
 int task_get_current();
 
-{% for function in interface.functions.values() -%}
+{% for function in task.functions.values() -%}
 {{ macro.function_prototype(function) }}
 {% endfor %}
