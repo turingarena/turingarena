@@ -1,5 +1,0 @@
-slots:
-  player1:
-    interface: player
-  player2:
-    interface: player
