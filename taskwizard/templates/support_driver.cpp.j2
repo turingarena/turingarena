@@ -45,8 +45,11 @@ void set_active_read_file(int id) {
 {% endfor %}
 
 int main() {
+    setvbuf(stdout, NULL, _IONBF, 0);
+    fprintf(stderr, "Start driver.\n");
     int evaluate_file = read_file_open("evaluate");
     set_active_read_file(evaluate_file);
+    fprintf(stderr, "Start main loop.\n");
     {{ macro.process_command('int', task.functions.values(), task.variables.values()) }}
     read_file_close(evaluate_file);
 }

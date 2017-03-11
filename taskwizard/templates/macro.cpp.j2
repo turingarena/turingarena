@@ -62,7 +62,9 @@ void receive_set_global_{{variable.name}}() {
 {% macro process_command(return_type, callbacks, variables) %}
     while(1) {
         char command[51];
-        fscanf(INPUT_PIPE, "%50s", command);
+        fprintf(stderr, "Reading from %p\n", INPUT_PIPE);
+        assert(fscanf(INPUT_PIPE, "%50s", command));
+        fprintf(stderr, "%s\n", command);
         if(!strcmp(command, "return")) {
             {{return_type}} result;
             fscanf(INPUT_PIPE, " %d", &result);
@@ -84,8 +86,12 @@ void receive_set_global_{{variable.name}}() {
     fprintf(OUTPUT_PIPE, "%s\n", "call");
     fprintf(OUTPUT_PIPE, "%s\n", "{{function.name}}");
 
+    fprintf(stderr, "%s\n", "call");
+    fprintf(stderr, "%s\n", "{{function.name}}");
+
     {% for parameter in function.parameters.values() %}
     fprintf(OUTPUT_PIPE, "%d\n", {{parameter.name}});
+    fprintf(stderr, "%d\n", {{parameter.name}});
     {%- endfor %}
     
     {{ process_command(function.return_type, callbacks, variables) }}

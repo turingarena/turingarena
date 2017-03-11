@@ -8,8 +8,13 @@
 #include <errno.h>
 #include <string.h>
 
+#include <cassert>
+
 #include <string>
 using namespace std;
+
+
+#define DEBUG(...) fprintf(stderr, __VA_ARGS__)
 
 void read_from_pipe (int file)
  {
@@ -50,13 +55,19 @@ FILE* open_supervisor_readfrom(int index) {
 FILE* open_algorithm_writeto(int index) {
     char algorithm_output_pipe_name[200];
     sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", index);
-    return fopen(algorithm_output_pipe_name, "w");
+    DEBUG("Opening algorithm write pipe\n");
+    FILE *f = fopen(algorithm_output_pipe_name, "w");
+    assert(f);
+    return f;
 }
 
 FILE* open_algorithm_readfrom(int index) {
     char algorithm_input_pipe_name[200];
     sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", index);
-    return fopen(algorithm_input_pipe_name, "r");
+    DEBUG("Opening algorithm read pipe\n");    
+    FILE *f = fopen(algorithm_input_pipe_name, "r");
+    assert(f);
+    return f;
 }
 
 static FILE *algorithm_input_pipes[2000];
@@ -72,12 +83,13 @@ void fork_algorithm(const char *algorithm_name, int index) { // index > 0!!!
     pid_t pid = fork();
     
     if (pid == 0) { /* child */
+        chdir("driver_sandbox");    
         
         dup2(fileno(open_algorithm_writeto(index)), STDOUT_FILENO);
         dup2(fileno(open_algorithm_readfrom(index)), STDIN_FILENO);
 
         char executable_path[300];
-        sprintf(executable_path, "./algorithms/%s/algorithm", algorithm_name);
+        sprintf(executable_path, "../algorithms/%s/algorithm", algorithm_name);
 
         int r = execl(executable_path, "algorithm", (char *)0);
         if (r == -1) {
@@ -99,16 +111,20 @@ FILE *driver_control_output;
 FILE *driver_control_input;
 
 void fork_driver() {
+
+    DEBUG("Creating driver pipes...\n");    
     make_algorithm_pipes(0); // Make control file descriptors
 
     pid_t pid = fork();
     
     if (pid == 0) { /* child */
-        
+        chdir("driver_sandbox");
         dup2(fileno(open_algorithm_writeto(0)), STDOUT_FILENO);
         dup2(fileno(open_algorithm_readfrom(0)), STDIN_FILENO);
 
-        chdir("driver_sandbox");
+        DEBUG("Finished redirect stdin/out\n");   
+
+        DEBUG("Driver changed directory to driver_sandbox\n");     
 
         int r = execl("../driver/driver", "driver", (char *)0);
         if (r == -1) {
@@ -120,6 +136,8 @@ void fork_driver() {
     driver_control_input = open_supervisor_readfrom(0);
     driver_control_output = open_supervisor_writeto(0);
     setvbuf(driver_control_output, NULL, _IONBF, 0);
+
+    DEBUG("Driver started.\n");    
 }
 
 
@@ -150,20 +168,20 @@ int on_read_file_open(const char *file_name) {
     int id = next_file_index++;
 
     char read_file_name_source[200];
-    sprintf(read_file_name_source, "read_files/%s/data.txt", file_name);
+    sprintf(read_file_name_source, "../read_files/%s/data.txt", file_name);
 
     char read_file_name_dest[200];
-    sprintf(read_file_name_dest, "driver_sandbox/algorithm_output.%d.pipe", id);
+    sprintf(read_file_name_dest, "driver_sandbox/read_file.%d.txt", id);
 
 
     symlink(read_file_name_source, read_file_name_dest);
 
-
+    return id;
 }
 
 int on_read_file_close(int id) {
     char read_file_name_dest[200];
-    sprintf(read_file_name_dest, "driver_sandbox/algorithm_output.%d.pipe", id);
+    sprintf(read_file_name_dest, "driver_sandbox/read_file.%d.pipe", id);
     return unlink(read_file_name_dest);
 }
 
@@ -177,15 +195,17 @@ void ctrl_loop() {
         //for (int i = 0; i < 2; i++) {
         //fprintf(stderr, "Waiting...\n");
 
-        char command[500];
-        char name[500];
+        char command[500] = { 0 };
+        char name[500] = { 0 };
         int proc_id;
 
         fprintf(stderr, "SUPERVISOR: waiting for commands...\n");
 
-        fscanf(driver_control_input, "%s", command);
-        fprintf(stderr, "SUPERVISOR: received command \"%s\"\n", command);
+        fscanf(driver_control_input, " %500s", command);
 
+        if (feof(driver_control_input)) break;
+
+        fprintf(stderr, "SUPERVISOR: received command \"%s\"\n", command);
 
         CASE("algorithm_start") {
             fscanf(driver_control_input, "%s", name);
@@ -222,13 +242,11 @@ void ctrl_loop() {
 
 int main(int argc, char** argv) {
 
-    if (argc != 3) {
-        printf("Only a task directory and an executable file should be specified\n");
-        return 1;
-    }
-
+    DEBUG("Supervisor started\n");
 
     fork_driver();
+
+    DEBUG("Starting control loop...\n");
 
     ctrl_loop();
 }

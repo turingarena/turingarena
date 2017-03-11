@@ -74,6 +74,7 @@ int read_file_open(const char *file_name) {
 }
 
 FILE *read_file_pipe(int id) {
+    fprintf(stderr, "Requested id %d with pointer: %p\n",id, read_file_pipes[id]);
     return read_file_pipes[id];
 }
 
