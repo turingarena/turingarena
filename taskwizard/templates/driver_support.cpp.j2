@@ -10,9 +10,11 @@
         interface.functions.values(),
         interface.callback_functions.values(),
         driver=True,
-        suffix="_" + interface.name) }}
+        interface_name=interface.name) }}
 {% endfor %}
 
-int main() {
+{{ macro.generate_protocol([], task.functions.values()) }}
 
+int main() {
+    accept_callbacks();
 }

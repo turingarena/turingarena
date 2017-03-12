@@ -83,23 +83,47 @@ printf("return %d\n", retval);
 {% endmacro %}
 
 
-{% macro generate_protocol(functions, callbacks, driver=False, suffix="") %}
+{% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}
 
 {% for callback in callbacks %}
-void accept_callback{{suffix}}_{{callback.name}}(int algorithm_id) {
+
+{% if driver %}
+void accept_callback_{{interface_name}}_{{callback.name}}(int algorithm_id) {
+{% else %}
+void accept_callback_{{callback.name}}() {
+{% endif %}
     {{ generate_read_data(callback.parameters.values(), driver=driver) }}
+    {% if driver %}
     int retval = on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
+    {% else %}
+    {% set comma = joiner(", ") %}
+    int retval = {{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %});
+    {% endif %}
     {{ generate_write_retval(driver=driver) }}
 }
 {% endfor %}
 
-void accept_any_callback{{suffix}}(int algorithm_id) {
+{% if driver %}
+void accept_any_callback_{{interface_name}}(int algorithm_id) {
+{% else %}
+void accept_any_callback() {
+{% endif %}
     char callback_name[51] = { 0 };
+
+    {% if driver %}
     fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
+    {% else %}
+    scanf("%50s", callback_name);
+    {% endif %}
 
     {% for callback in callbacks %}
     if(!strcmp(callback_name, "{{callback.name}}")) {
-        accept_callback{{suffix}}_{{callback.name}}(algorithm_id);
+        {% if driver %}
+        accept_callback_{{interface_name}}_{{callback.name}}(algorithm_id);
+        {% else %}
+        accept_callback_{{callback.name}}();
+        {% endif %}
+
         return;
     }
     {% endfor %}
@@ -108,14 +132,28 @@ void accept_any_callback{{suffix}}(int algorithm_id) {
     assert(0 && "Unrecognized callback");
 }
 
-void accept_callbacks{{suffix}}(int algorithm_id) {
+{% if driver %}
+void accept_callbacks_{{interface_name}}(int algorithm_id) {
+{% else %}
+void accept_callbacks() {
+{% endif %}
     while(1) {
         char command[51] = { 0 };
+
+        {% if driver %}
         fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
+        {% else %}
+        scanf("%50s", command);
+        {% endif %}
+
         if(!strcmp(command, "return")) {
             break;
         } else if(!strcmp(command, "call")) {
-            accept_any_callback{{suffix}}(algorithm_id);
+            {% if driver %}
+            accept_any_callback_{{interface_name}}(algorithm_id);
+            {% else %}
+            accept_any_callback();
+            {% endif %}
         } else {
             fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
             assert(0 && "Unrecognized command");
@@ -124,13 +162,22 @@ void accept_callbacks{{suffix}}(int algorithm_id) {
 }
 
 {% for function in functions %}
-    {{ algorithm_function_signature(function, "call_") }} {
+    {{ algorithm_function_signature(function, "call_" if driver else "") }} {
+        {% if driver %}
         fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
         fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
+        {% else %}
+        printf("%s\n", "call");
+        printf("%s\n", "{{function.name}}");
+        {% endif %}
 
         {{ generate_write_data(function.parameters.values(), driver=driver) }}
 
-        accept_callbacks{{suffix}}(algorithm_id);
+        {% if driver %}
+        accept_callbacks_{{interface_name}}(algorithm_id);
+        {% else %}
+        accept_callbacks();
+        {% endif %}
 
         {{ generate_read_retval(driver=driver) }}
     }
