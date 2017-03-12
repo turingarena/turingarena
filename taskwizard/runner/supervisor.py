@@ -3,15 +3,6 @@ import subprocess
 import sys
 
 
-def logged(fun):
-    def logged_fun(self, *args):
-        print("SUPERVISOR: Called function", fun.__name__, *args, file=sys.stderr)
-        ret = fun(self, *args)
-        print("SUPERVISOR: Function", fun.__name__, *args, "returned", ret, file=sys.stderr)
-        return ret
-    return logged_fun
-
-
 class AlgorithmProcess:
 
     def __init__(self, supervisor, process_id, algorithm_name):
@@ -26,16 +17,15 @@ class AlgorithmProcess:
         os.mkfifo(self.downward_pipe_name)
         os.mkfifo(self.upward_pipe_name)
 
-        print("SUPERVISOR: Pipes created", file=sys.stderr)
+        print("SUPERVISOR: algorithm process %s(%d): pipes created" % (self.algorithm_name, self.process_id), file=sys.stderr)
 
     def run(self):
         self.downward_pipe = open(self.downward_pipe_name, "r")
-        print("SUPERVISOR: Downward pipe opened", file=sys.stderr)
+        print("SUPERVISOR: algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id), file=sys.stderr)
         self.upward_pipe = open(self.upward_pipe_name, "w")
-        print("SUPERVISOR: Upward pipe opened", file=sys.stderr)
+        print("SUPERVISOR: algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id), file=sys.stderr)
 
-        print("SUPERVISOR: Pipes opened", file=sys.stderr)
-
+        print("SUPERVISOR: algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id), file=sys.stderr)
         self.process = subprocess.Popen(
             [self.executable_path],
             universal_newlines=True,
@@ -43,8 +33,7 @@ class AlgorithmProcess:
             stdout=self.upward_pipe,
             bufsize=1
         )
-
-        print("SUPERVISOR: Algorithm process started", file=sys.stderr)
+        print("SUPERVISOR: algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id), file=sys.stderr)
 
 
 class ReadFile:
@@ -72,11 +61,13 @@ class Supervisor:
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
         self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
 
+        self.control_request_pipe_name = os.path.join(self.driver_sandbox_dir, "control_request.pipe")
+        self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
+
     def next_id(self):
         self._next_id += 1
         return self._next_id
 
-    @logged
     def algorithm_start(self, algorithm_name):
         process_id = self.next_id()
         process = AlgorithmProcess(self, process_id, algorithm_name)
@@ -89,15 +80,12 @@ class Supervisor:
     def after_algorithm_start(self, algorithm_name, process_id):
         self.algorithm_processes[process_id].run()
 
-    @logged
     def algorithm_status(self, process_id):
         pass
 
-    @logged
     def algorithm_kill(self, process_id):
         pass
 
-    @logged
     def read_file_open(self, file_name):
         process_id = self.next_id()
         read_file = ReadFile(self, process_id, file_name)
@@ -107,7 +95,6 @@ class Supervisor:
 
         return process_id
 
-    @logged
     def read_file_close(self, file_id):
         pass
 
@@ -124,39 +111,67 @@ class Supervisor:
             raise ValueError("Unrecognized command: " + command)
 
         arg_type = commands[command]
-        return getattr(self, command)(arg_type(arg))
+        arg_value = arg_type(arg)
+
+        print("SUPERVISOR: received command %s(%s)" % (command, arg_value), file=sys.stderr)
+        response = getattr(self, command)(arg_value)
+        print("SUPERVISOR: command %s(%s) returned %s" % (command, arg_value, response), file=sys.stderr)
+
+        return response
 
     def after_command(self, command, arg, result):
         method_name = "after_" + command
+        print("SUPERVISOR: after command %s(%s,%s)" % (command, arg, result), file=sys.stderr)
         if hasattr(self, method_name):
             getattr(self, method_name)(arg, result)
 
     def main_loop(self):
         while True:
-            line = self.driver.stdout.readline()
+            print("SUPERVISOR: waiting for commands on control request pipe...", file=sys.stderr)
+            line = self.control_request_pipe.readline()
             if not line:
-                print("SUPERVISOR: control pipe closed, terminating.")
+                print("SUPERVISOR: control request pipe closed, terminating.", file=sys.stderr)
                 break
-            print("SUPERVISOR: received line:", line)
+            print("SUPERVISOR: received line on control request pipe:", line, file=sys.stderr)
 
             command, arg = line.rstrip().split(" ", 2)
             result = self.on_command(command, arg)
-            print(result, file=self.driver.stdin)
+
+            print("SUPERVISOR: sending on control response pipe %s" % (result,), file=sys.stderr)
+            print(result, file=self.control_response_pipe)
+            self.control_response_pipe.flush()
+            print("SUPERVISOR: sent on control response pipe %s" % (result,), file=sys.stderr)
 
             self.after_command(command, arg, result)
 
     def run(self):
-        print("Starting supervisor in folder: ", self.task_run_dir, file=sys.stderr)
+        print("SUPERVISOR: starting in folder:", self.task_run_dir, file=sys.stderr)
 
         os.mkdir(self.driver_sandbox_dir)
+
+        print("SUPERVISOR: creating control pipes...", file=sys.stderr)
+        os.mkfifo(self.control_request_pipe_name)
+        os.mkfifo(self.control_response_pipe_name)
+        print("SUPERVISOR: control pipes created", file=sys.stderr)
+        print("SUPERVISOR: control request pipe: %s" % (self.control_request_pipe_name,), file=sys.stderr)
+        print("SUPERVISOR: control response pipe: %s" % (self.control_response_pipe_name,), file=sys.stderr)
+
+        print("SUPERVISOR: starting driver process: %s" % (self.driver_path,), file=sys.stderr)
+        print("SUPERVISOR: driver sandbox dir: %s" % (self.driver_sandbox_dir,), file=sys.stderr)
 
         self.driver = subprocess.Popen(
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
             bufsize=1  # line buffered
         )
+
+        print("SUPERVISOR: driver process started", file=sys.stderr)
+
+        print("SUPERVISOR: opening control pipes...", file=sys.stderr)
+        self.control_request_pipe = open(self.control_request_pipe_name, "r")
+        print("SUPERVISOR: control request pipe opened", file=sys.stderr)
+        self.control_response_pipe = open(self.control_response_pipe_name, "w")
+        print("SUPERVISOR: control response pipe opened", file=sys.stderr)
 
         self.main_loop()

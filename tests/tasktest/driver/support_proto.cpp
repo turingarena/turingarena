@@ -26,7 +26,7 @@ int algorithm_start(const char *algo_name) {
     // Start new algorithm    
     fprintf(stderr, "DRIVER SUPPORT: Starting new instance of algorithm \"%s\"\n", algo_name);    
     fprintf(control_request_pipe, "algorithm_start %s\n", algo_name);
-    fflush(control_request_pipe);
+    fflush(stdout);
     int descriptor;
     fscanf(control_response_pipe, "%d", &descriptor);
 
@@ -62,14 +62,14 @@ static int read_status() {
 int algorithm_status(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPPORT: Requesting status of algo with id: %d...\n", algorithm_id);
     fprintf(control_request_pipe, "algorithm_status %d\n", algorithm_id);
-    fflush(control_request_pipe);
+    fflush(stdout);
     return read_status();
 }
 
 int algorithm_kill(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPPORT: Killing algorithm with id: %d...\n", algorithm_id);
     fprintf(control_request_pipe, "algorithm_kill %d\n", algorithm_id);
-    fflush(control_request_pipe);
+    fflush(stdout);
     return read_status();
 }
 
@@ -78,7 +78,7 @@ int read_file_open(const char *file_name) {
     // Open file for reading
     fprintf(stderr, "DRIVER SUPPORT: Opening file with name: \"%s\"...\n", file_name);    
     fprintf(control_request_pipe, "read_file_open %s\n", file_name);
-    fflush(control_request_pipe);
+    fflush(stdout);
     int descriptor;
     fscanf(control_response_pipe, " %d", &descriptor);
     
@@ -105,7 +105,7 @@ int read_file_close(int id) {
 
         fprintf(stderr, "DRIVER SUPPORT: Closing pipe with id %d\n", id);
         fprintf(control_request_pipe, "read_file_close %d\n", id);
-        fflush(control_request_pipe);
+        fflush(stdout);
         return read_status();
     }
 

@@ -1,5 +1,7 @@
 #include <cstdio>
 
+void driver_init();
+
 int algorithm_start(const char *algo_name);
 
 int algorithm_status(int algorithm_id);
