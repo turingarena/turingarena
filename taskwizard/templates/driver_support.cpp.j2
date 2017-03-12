@@ -2,10 +2,16 @@
 
 #include "driver.h"
 
-{% macro generate_read_data_algorithm(variables) %}
+{% macro generate_read_data_interface(variables) %}
     {% for v in variables %}
     {{v.type}} {{v.name}};
     fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
+    {% endfor %}
+{% endmacro %}
+
+{% macro generate_write_data_interface(variables) %}
+    {% for v in variables %}
+    fprintf(algorithm_downward_pipe(algorithm_id), "%d\n", {{v.name}});
     {% endfor %}
 {% endmacro %}
 
@@ -13,7 +19,7 @@
 
 {% for callback in interface.callback_functions.values() %}
 void accept_callback_{{interface.name}}_{{callback.name}}(int algorithm_id) {
-    {{ generate_read_data_algorithm(callback.parameters.values()) }}
+    {{ generate_read_data_interface(callback.parameters.values()) }}
     on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor -%}
 }
 {% endfor %}
@@ -47,8 +53,23 @@ void accept_callbacks_{{interface.name}}(int algorithm_id) {
     }
 }
 
-
+{% for function in interface.functions.values() %}
+    {{ macro.algorithm_function_signature(function, "call_") }} {
+        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
+        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
+        
+        {{ generate_write_data_interface(function.parameters.values()) }}
+        
+        accept_callbacks_{{interface.name}}(algorithm_id);
+        
+        int result;
+        fscanf(algorithm_upward_pipe(algorithm_id), " %d", &result);
+        
+        return result;
+    }
 {% endfor %}
+
+{% endfor %}{# interface #}
 
 int main() {
 }

@@ -1,0 +1,10 @@
+{% import "macro.cpp.j2" as macro %}
+
+// Functions to implement
+
+{% for function in interface.functions.values() -%}
+{{ macro.function_signature(function) }} {
+    // TODO: implement
+    return 42;
+}
+{% endfor %}

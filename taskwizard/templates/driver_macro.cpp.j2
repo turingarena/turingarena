@@ -7,15 +7,15 @@
   {%- for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
-{% macro function_signature(function, prefix='') -%}
-  {{function.return_type}} {{prefix}}{{function.name}}({{parameters_signature(function)}})
+{% macro function_signature(function) -%}
+  {{function.return_type}} {{function.name}}({{parameters_signature(function)}})
 {%- endmacro %}
 
-{% macro algorithm_parameters_signature(function) -%}
+{% macro interface_parameters_signature(function) -%}
   int algorithm_id
   {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
-{% macro algorithm_function_signature(function, prefix='') -%}
-  {{function.return_type}} {{prefix}}{{function.name}}({{algorithm_parameters_signature(function)}})
+{% macro interface_function_signature(function) -%}
+  {{function.return_type}} {{function.name}}({{interface_parameters_signature(function)}})
 {%- endmacro %}

@@ -1,11 +1,9 @@
 {% import "macro.cpp.j2" as macro %}
 
-#include <bits/stdc++.h>
-
 // Driver entry points
 
 {% for function in task.functions.values() %}
-  {{ macro.function_prototype(function) }}
+  {{ macro.function_signature(function) }});
 {% endfor %}
 
 // Interface RPCs
@@ -16,12 +14,13 @@
   // Downward calls
   
   {% for function in interface.functions.values() -%}
-    {{ macro.call_interface_function_prototype(function) }}
+    {{ macro.algorithm_function_signature(function, "call_") }};
   {% endfor %}
 
   // Upward call
   
   {% for function in interface.callback_functions.values() -%}
-    {{ macro.receive_interface_callback_prototype(function) }}
+    {{ macro.algorithm_function_signature(function, "on_") }});
   {% endfor %}
+  
 {% endfor %}

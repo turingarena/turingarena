@@ -35,11 +35,11 @@ def main():
     else:
         interface_or_driver = next(x for x in ["interface", "driver"] if args[x])
         if args["stub"]:
-            template = env.get_template("stub_" + interface_or_driver + ".cpp.j2")
+            template = env.get_template(interface_or_driver + "_stub.cpp.j2")
         elif args["header"]:
-            template = env.get_template("header_" + interface_or_driver + ".h.j2")
+            template = env.get_template(interface_or_driver + "_header.h.j2")
         elif args["support"]:
-            template = env.get_template("support_" + interface_or_driver + ".cpp.j2")
+            template = env.get_template(interface_or_driver + "_support.cpp.j2")
         else:
             raise ValueError
 

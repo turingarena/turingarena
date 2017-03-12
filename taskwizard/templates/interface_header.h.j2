@@ -1,0 +1,11 @@
+{% import "macro.cpp.j2" as macro %}
+
+// Callbacks functions
+{% for function in interface.callback_functions.values() -%}
+  {{ macro.function_signature(function) }};
+{%- endfor %}
+
+// Functions
+{% for function in interface.functions.values() -%}
+  {{ macro.function_signature(function) }};
+{%- endfor %}
