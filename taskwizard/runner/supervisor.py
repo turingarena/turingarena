@@ -26,7 +26,7 @@ class AlgorithmProcess:
         print("SUPERVISOR: algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id), file=sys.stderr)
 
         print("SUPERVISOR: algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id), file=sys.stderr)
-        self.process = subprocess.Popen(
+        self.os_process = subprocess.Popen(
             [self.executable_path],
             universal_newlines=True,
             stdin=self.downward_pipe,
@@ -34,6 +34,14 @@ class AlgorithmProcess:
             bufsize=1
         )
         print("SUPERVISOR: algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id), file=sys.stderr)
+
+    def status(self):
+        # TODO: return something meaningful
+        return 0
+
+    def kill(self):
+        # TODO: define meaning of return value
+        return self.os_process.kill()
 
 
 class ReadFile:
@@ -81,10 +89,12 @@ class Supervisor:
         self.algorithm_processes[process_id].run()
 
     def algorithm_status(self, process_id):
-        pass
+        process = self.algorithm_processes[process_id]
+        return process.status()
 
     def algorithm_kill(self, process_id):
-        pass
+        process = self.algorithm_processes[process_id]
+        return process.kill()
 
     def read_file_open(self, file_name):
         process_id = self.next_id()
