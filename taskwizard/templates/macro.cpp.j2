@@ -1,27 +1,13 @@
-{% macro parameter(p) -%}
-{{p.type}} {{p.name}}
-{%- endmacro %}
-
 {% macro parameters_prototype(function) -%}
-  {%- set comma = joiner(", ") -%}
-  {%- for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor -%}
-{%- endmacro %}
-
-{% macro interface_parameters_prototype(function) -%}
-  int algorithm_id
-  {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
+  {%- for parameter in function.parameters.values() -%}
+    {%- if not loop.first -%}{{' '}}{%- endif -%}
+      {{parameter.type}} {{parameter.name}}
+    {%- if not loop.last -%} , {%- endif -%}
+  {%- endfor -%}
 {%- endmacro %}
 
 {% macro function_prototype(function) -%}
   {{function.return_type}} {{function.name}}({{parameters_prototype(function)}});
-{%- endmacro %}
-
-{% macro call_interface_function_prototype(function) -%}
-  {{function.return_type}} call_{{function.name}}({{interface_parameters_prototype(function)}});
-{%- endmacro %}
-
-{% macro receive_interface_callback_prototype(function) -%}
-  {{function.return_type}} on_{{function.name}}({{interface_parameters_prototype(function)}});
 {%- endmacro %}
 
 {% macro receive_call(function) %}
