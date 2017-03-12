@@ -2,11 +2,26 @@
 
 #include <bits/stdc++.h>
 
-{% include "support_driver_proto.h" %}
+// Driver entry points
 
-{% for function in task.functions.values() -%}
-{{ macro.function_prototype(function) }}
+{% for function in task.functions.values() %}
+  {{ macro.function_prototype(function) }}
 {% endfor %}
 
-void set_active_algorithm(int id);
-void set_active_read_file(int id);
+// Interface RPCs
+
+{% for interface in task.interfaces.values() %}
+  // RPC with interface {{interface.name}} 
+
+  // Downward calls
+  
+  {% for function in interface.functions.values() -%}
+    {{ macro.call_interface_function_prototype(function) }}
+  {% endfor %}
+
+  // Upward call
+  
+  {% for function in interface.callback_functions.values() -%}
+    {{ macro.receive_interface_callback_prototype(function) }}
+  {% endfor %}
+{% endfor %}
