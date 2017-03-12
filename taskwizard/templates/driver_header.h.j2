@@ -1,5 +1,7 @@
 {% import "macro.cpp.j2" as macro %}
 
+{% include "driver_support_proto.h" %}
+
 // Driver entry points
 
 {% for function in task.functions.values() %}
