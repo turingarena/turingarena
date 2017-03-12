@@ -19,6 +19,7 @@ import pkg_resources
 import shutil
 import tempfile
 import yaml
+from taskwizard.runner import supervisor
 
 
 logger = logging.getLogger("taskrun")
@@ -78,8 +79,4 @@ def main():
             os.path.join(out_dir, "read_files", "evaluate", "data.txt")
         )
 
-        os.mkdir(os.path.join(out_dir, "driver_sandbox"))
-        os.system("cd " + out_dir + " ; supervisor/supervisor a b")
-
-        print(out_dir)
-        input()
+        supervisor.Supervisor(out_dir).run()

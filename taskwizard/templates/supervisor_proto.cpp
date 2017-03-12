@@ -14,11 +14,10 @@ FILE *algorithm_output_pipe(int id) {
     return algorithm_output_pipes[id];
 }
 
-
 int algorithm_start(const char *algo_name) {
-    
     // Start new algorithm    
     printf("algorithm_start %s\n", algo_name);
+    fflush(stdout);
     int descriptor;
     scanf("%d", &descriptor);
 
@@ -40,18 +39,22 @@ int algorithm_start(const char *algo_name) {
     return descriptor;
 }
 
-int algorithm_status(int id) {
-    printf("algorithm_status %d\n", id);
+static int read_status() {
     int status;
     scanf(" %d", &status);
     return status;
 }
 
+int algorithm_status(int id) {
+    printf("algorithm_status %d\n", id);
+    fflush(stdout);
+    return read_status();
+}
+
 int algorithm_kill(int id) {
     printf("algorithm_kill %d\n", id);
-    int status;
-    scanf(" %d", &status);
-    return status;
+    fflush(stdout);
+    return read_status();
 }
 
 int read_file_open(const char *file_name) {
@@ -59,6 +62,7 @@ int read_file_open(const char *file_name) {
     // Open file for reading
     
     printf("read_file_open %s\n", file_name);
+    fflush(stdout);
     int descriptor;
     scanf(" %d", &descriptor);
     
@@ -78,11 +82,11 @@ FILE *read_file_pipe(int id) {
 }
 
 int read_file_close(int id) {
-    
     fclose(read_file_pipes[id]);
     read_file_pipes[id] = NULL;
 
     printf("read_file_close %d\n", id);
+    fflush(stdout);
     int status;
     scanf(" %d", &status);
 
