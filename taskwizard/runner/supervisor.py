@@ -162,7 +162,7 @@ class Supervisor:
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
-            bufsize=1  # line buffered
+            bufsize=1
         )
 
         print("SUPERVISOR: driver process started", file=sys.stderr)

@@ -6,7 +6,12 @@
 {% include "driver/support_proto.cpp" %}
 
 #define support_trace(...) do { \
-    fprintf(stderr, "DRIVER: "); \
+    fprintf(stderr, "DRIVER: communication with stdin/out: "); \
+    fprintf(stderr, __VA_ARGS__); \
+} while(0) 
+
+#define support_trace_driver(process_id,...) do { \
+    fprintf(stderr, "DRIVER: communication with process(%d): ", process_id); \
     fprintf(stderr, __VA_ARGS__); \
 } while(0) 
 

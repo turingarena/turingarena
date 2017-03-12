@@ -15,7 +15,7 @@
 
 
 {% macro algorithm_parameters_signature(function) -%}
-  int algorithm_id
+  int process_id
   {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
@@ -36,10 +36,10 @@
     {{v.type}} {{v.name}};
 
     {% if driver %}
-        support_trace("reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
-        fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
+        support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
+        fscanf(algorithm_upward_pipe(process_id), " %d", &{{v.name}});
     {% else %}
-        support_trace("reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
+        support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
         scanf(" %d", &{{v.name}});
     {% endif %}
 
@@ -56,83 +56,88 @@
 
     {% for v in variables %}
 
-    {% if driver %}
-        support_trace("writing variable %s: %d\n", "{{v.name}}", {{v.name}});
-        fprintf(algorithm_downward_pipe(algorithm_id), "%d\n", {{v.name}});
-    {% else %}
-        support_trace("writing variable %s: %d\n", "{{v.name}}", {{v.name}});
-        printf("%d\n", {{v.name}});
-    {% endif %}
+    support_trace("writing variable '%s %s': %d\n", "{{v.type}}", "{{v.name}}", {{v.name}});
+    printf("%d\n", {{v.name}});
 
     {% endfor %}
 {% endmacro %}
 
+
 {% macro generate_read_retval(driver=False) %}
-int retval;
-
-{% if driver %}
-fscanf(algorithm_upward_pipe(algorithm_id), " %d", &retval);
-{% else %}
-scanf(" %d", &retval);
-{% endif %}
-
-return retval;
+    int retval;
+    scanf(" %d", &retval);
+    return retval;
 {% endmacro %}
 
 
 {% macro generate_write_retval(driver=False) %}
-
-{% if driver %}
-fprintf(algorithm_downward_pipe(algorithm_id), "return %d\n", retval);
-{% else %}
-printf("return %d\n", retval);
-{% endif %}
-
+    printf("return %d\n", retval);
 {% endmacro %}
 
 
 {% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}
+{{
+  do_generate_protocol(functions, callbacks, driver, interface_name)
+  |
+  replace(
+    "printf(",
+    "fprintf(algorithm_downward_pipe(process_id), " if driver else "printf("
+  )
+  | 
+  replace(
+    "scanf(",
+    "fscanf(algorithm_upward_pipe(process_id), " if driver else "scanf(" 
+  )
+  | 
+  replace(
+    "support_trace(",
+    "support_trace_driver(process_id, " if driver else "support_trace(" 
+  )
+}}
+{% endmacro %}
+
+{% macro do_generate_protocol(functions, callbacks, driver=False, interface_name="") %}
 
 {% for callback in callbacks %}
 
 {% if driver %}
-void accept_callback_{{interface_name}}_{{callback.name}}(int algorithm_id) {
+void accept_callback_{{interface_name}}_{{callback.name}}(int process_id) {
 {% else %}
 void accept_callback_{{callback.name}}() {
 {% endif %}
-    support_trace("received callback %s\n", "{{callback.name}}");
+    support_trace("received callback '%s'\n", "{{callback.name}}");
 
     {{ generate_read_data(callback.parameters.values(), driver=driver) }}
     {% if driver %}
-    support_trace("calling function in this process %s\n", "on_{{callback.name}}");
-    int retval = on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
+    support_trace("calling local function '%s'\n", "on_{{callback.name}}");
+    int retval = on_{{callback.name}}(process_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
+    support_trace("local function '%s' returned\n", "on_{{callback.name}}");
     {% else %}
+    support_trace("calling local function '%s'\n", "{{callback.name}}");
     {% set comma = joiner(", ") %}
-    support_trace("calling function in this process %s\n", "{{callback.name}}");
     int retval = {{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %});
+    support_trace("local function '%s' returned\n", "{{callback.name}}");
     {% endif %}
+    
+    support_trace("writing return value\n");
     {{ generate_write_retval(driver=driver) }}
 }
 {% endfor %}
 
 {% if driver %}
-void accept_any_callback_{{interface_name}}(int algorithm_id) {
+void accept_any_callback_{{interface_name}}(int process_id) {
 {% else %}
 void accept_any_callback() {
 {% endif %}
     char callback_name[51] = { 0 };
     support_trace("reading callback name\n");
 
-    {% if driver %}
-    fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
-    {% else %}
     scanf("%50s", callback_name);
-    {% endif %}
 
     {% for callback in callbacks %}
     if(!strcmp(callback_name, "{{callback.name}}")) {
         {% if driver %}
-        accept_callback_{{interface_name}}_{{callback.name}}(algorithm_id);
+        accept_callback_{{interface_name}}_{{callback.name}}(process_id);
         {% else %}
         accept_callback_{{callback.name}}();
         {% endif %}
@@ -146,7 +151,7 @@ void accept_any_callback() {
 }
 
 {% if driver %}
-void accept_callbacks_{{interface_name}}(int algorithm_id) {
+void accept_callbacks_{{interface_name}}(int process_id) {
 {% else %}
 void accept_callbacks() {
 {% endif %}
@@ -154,17 +159,15 @@ void accept_callbacks() {
         char command[51] = { 0 };
         support_trace("waiting for call/return\n");
 
-        {% if driver %}
-        fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
-        {% else %}
         scanf("%50s", command);
-        {% endif %}
 
         if(!strcmp(command, "return")) {
+            support_trace("received 'return', breaking loop\n");
             break;
         } else if(!strcmp(command, "call")) {
+            support_trace("received 'call', expecting a call\n");
             {% if driver %}
-            accept_any_callback_{{interface_name}}(algorithm_id);
+            accept_any_callback_{{interface_name}}(process_id);
             {% else %}
             accept_any_callback();
             {% endif %}
@@ -177,22 +180,20 @@ void accept_callbacks() {
 
 {% for function in functions %}
     {{ algorithm_function_signature(function, "call_" if driver else "") }} {
-        {% if driver %}
-        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
-        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
-        {% else %}
+        support_trace("calling function '%s'\n", "{{function.name}}");
         printf("%s\n", "call");
         printf("%s\n", "{{function.name}}");
-        {% endif %}
 
         {{ generate_write_data(function.parameters.values(), driver=driver) }}
 
+        support_trace("function called, waiting for return or callbacks...\n");
         {% if driver %}
-        accept_callbacks_{{interface_name}}(algorithm_id);
+        accept_callbacks_{{interface_name}}(process_id);
         {% else %}
         accept_callbacks();
         {% endif %}
 
+        support_trace("reading return value for function '%s'\n", "{{function.name}}");
         {{ generate_read_retval(driver=driver) }}
     }
 {% endfor %}
