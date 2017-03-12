@@ -5,6 +5,11 @@
 
 {% include "driver/support_proto.cpp" %}
 
+#define support_trace(...) do { \
+    fprintf(stderr, "DRIVER: "); \
+    fprintf(stderr, __VA_ARGS__); \
+} while(0) 
+
 {% for interface in task.interfaces.values() %}
     {{ macro.generate_protocol(
         interface.functions.values(),

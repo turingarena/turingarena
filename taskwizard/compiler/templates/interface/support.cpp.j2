@@ -3,6 +3,11 @@
 #include <bits/stdc++.h>
 #include "{{interface.name}}.h"
 
+#define support_trace(...) do { \
+    fprintf(stderr, "ALGORITHM({{interface.name}}): "); \
+    fprintf(stderr, __VA_ARGS__); \
+} while(0)
+
 {{ macro.generate_protocol(interface.callback_functions.values(), interface.functions.values()) }}
 
 int main() {

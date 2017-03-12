@@ -121,7 +121,6 @@ class Supervisor:
 
     def after_command(self, command, arg, result):
         method_name = "after_" + command
-        print("SUPERVISOR: after command %s(%s,%s)" % (command, arg, result), file=sys.stderr)
         if hasattr(self, method_name):
             getattr(self, method_name)(arg, result)
 

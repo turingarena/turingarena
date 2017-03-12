@@ -27,19 +27,19 @@
 
 {% macro generate_read_data(variables, driver=False) %}
     {% if driver %}
-    fprintf(stderr, "DRIVER: reading arguments\n");
+    support_trace("reading arguments\n");
     {% else %}
-    fprintf(stderr, "ALGORITHM: reading arguments\n");
+    support_trace("reading arguments\n");
     {% endif %}
 
     {% for v in variables %}
     {{v.type}} {{v.name}};
 
     {% if driver %}
-        fprintf(stderr, "DRIVER: reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
+        support_trace("reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
         fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
     {% else %}
-        fprintf(stderr, "ALGORITHM: reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
+        support_trace("reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
         scanf(" %d", &{{v.name}});
     {% endif %}
 
@@ -48,11 +48,19 @@
 
 
 {% macro generate_write_data(variables, driver=False) %}
+    {% if driver %}
+    support_trace("writing arguments\n");
+    {% else %}
+    support_trace("writing arguments\n");
+    {% endif %}
+
     {% for v in variables %}
 
     {% if driver %}
+        support_trace("writing variable %s: %d\n", "{{v.name}}", {{v.name}});
         fprintf(algorithm_downward_pipe(algorithm_id), "%d\n", {{v.name}});
     {% else %}
+        support_trace("writing variable %s: %d\n", "{{v.name}}", {{v.name}});
         printf("%d\n", {{v.name}});
     {% endif %}
 
@@ -92,11 +100,15 @@ void accept_callback_{{interface_name}}_{{callback.name}}(int algorithm_id) {
 {% else %}
 void accept_callback_{{callback.name}}() {
 {% endif %}
+    support_trace("received callback %s\n", "{{callback.name}}");
+
     {{ generate_read_data(callback.parameters.values(), driver=driver) }}
     {% if driver %}
+    support_trace("calling function in this process %s\n", "on_{{callback.name}}");
     int retval = on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
     {% else %}
     {% set comma = joiner(", ") %}
+    support_trace("calling function in this process %s\n", "{{callback.name}}");
     int retval = {{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %});
     {% endif %}
     {{ generate_write_retval(driver=driver) }}
@@ -109,6 +121,7 @@ void accept_any_callback_{{interface_name}}(int algorithm_id) {
 void accept_any_callback() {
 {% endif %}
     char callback_name[51] = { 0 };
+    support_trace("reading callback name\n");
 
     {% if driver %}
     fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
@@ -128,7 +141,7 @@ void accept_any_callback() {
     }
     {% endfor %}
 
-    fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
+    support_trace("unrecognized callback: %s\n", callback_name);
     assert(0 && "Unrecognized callback");
 }
 
@@ -139,6 +152,7 @@ void accept_callbacks() {
 {% endif %}
     while(1) {
         char command[51] = { 0 };
+        support_trace("waiting for call/return\n");
 
         {% if driver %}
         fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
@@ -155,7 +169,7 @@ void accept_callbacks() {
             accept_any_callback();
             {% endif %}
         } else {
-            fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
+            support_trace("unrecognized command: %s\n", command);
             assert(0 && "Unrecognized command");
         }
     }
