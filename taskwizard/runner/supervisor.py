@@ -19,20 +19,32 @@ class AlgorithmProcess:
         self.id = id
         self.algorithm_name = algorithm_name
         self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
+        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_downward.%d.pipe" % (id,))
+        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_upward.%d.pipe" % (id,))
 
-    def start(self):
-        self.downward_pipe = os.mkfifo(
-            os.path.join(self.supervisor.task_run_dir, "algorithm_downward.%d.pipe" % (self.id,)))
-        self.upward_pipe = os.mkfifo(
-            os.path.join(self.supervisor.task_run_dir, "algorithm_upward.%d.pipe" % (self.id,)))
+    def prepare(self):
+        os.mkfifo(self.downward_pipe_name)
+        os.mkfifo(self.upward_pipe_name)
+
+        print("SUPERVISOR: Pipes created", file=sys.stderr)
+
+    def run(self):
+        self.downward_pipe = open(self.downward_pipe_name, "r")
+        print("SUPERVISOR: Downward pipe opened", file=sys.stderr)
+        self.upward_pipe = open(self.upward_pipe_name, "w")
+        print("SUPERVISOR: Upward pipe opened", file=sys.stderr)
+
+        print("SUPERVISOR: Pipes opened", file=sys.stderr)
 
         self.process = subprocess.Popen(
             [self.executable_path],
             universal_newlines=True,
-            stdin=open(self.downward_pipe, "r"),
-            stdout=open(self.upward_pipe, "w"),
+            stdin=self.downward_pipe,
+            stdout=self.upward_pipe,
             bufsize=1
         )
+
+        print("SUPERVISOR: Algorithm process started", file=sys.stderr)
 
 
 class ReadFile:
@@ -60,6 +72,8 @@ class Supervisor:
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
         self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
 
+        self.algorithm_to_run = None
+
     def next_id(self):
         self._next_id += 1
         return self._next_id
@@ -70,7 +84,9 @@ class Supervisor:
         process = AlgorithmProcess(self, id, algorithm_name)
         self.algorithm_processes[id] = process
 
-        process.start()
+        process.prepare()
+
+        self.algorithm_to_run = process
 
         return id
 
@@ -112,6 +128,8 @@ class Supervisor:
         return getattr(self, command)(arg_type(arg))
 
     def run(self):
+        print("Starting supervisor in folder: ", self.task_run_dir, file=sys.stderr)
+
         os.mkdir(self.driver_sandbox_dir)
 
         driver = subprocess.Popen(
@@ -132,3 +150,7 @@ class Supervisor:
             command, arg = line.rstrip().split(" ", 2)
             result = self.on_command(command, arg)
             print(result, file=driver.stdin)
+
+            if self.algorithm_to_run is not None:
+                self.algorithm_to_run.run()
+                self.algorithm_to_run = None

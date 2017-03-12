@@ -1,17 +1,17 @@
 #include <bits/stdc++.h>
 
-FILE *algorithm_input_pipes[2000];
-FILE *algorithm_output_pipes[2000];
+FILE *algorithm_upward_pipes[2000];
+FILE *algorithm_downward_pipes[2000];
 
 FILE *read_file_pipes[2000];
 FILE *write_file_pipes[2000];
 
-FILE *algorithm_input_pipe(int id) {
-    return algorithm_input_pipes[id];
+FILE *algorithm_upward_pipe(int id) {
+    return algorithm_upward_pipes[id];
 }
 
-FILE *algorithm_output_pipe(int id) {
-    return algorithm_output_pipes[id];
+FILE *algorithm_downward_pipe(int id) {
+    return algorithm_downward_pipes[id];
 }
 
 int algorithm_start(const char *algo_name) {
@@ -22,19 +22,18 @@ int algorithm_start(const char *algo_name) {
     scanf("%d", &descriptor);
 
     // Generate file descriptor names
-    char algorithm_output_pipe_name[200];
-    sprintf(algorithm_output_pipe_name, "algorithm_output.%d.pipe", descriptor);
+    char algorithm_downward_pipe_name[200];
+    sprintf(algorithm_downward_pipe_name, "algorithm_downward.%d.pipe", descriptor);
 
-    char algorithm_input_pipe_name[200];
-    sprintf(algorithm_input_pipe_name, "algorithm_input.%d.pipe", descriptor);
-
+    char algorithm_upward_pipe_name[200];
+    sprintf(algorithm_upward_pipe_name, "algorithm_upward.%d.pipe", descriptor);
 
     // Open descriptors
-    algorithm_input_pipes[descriptor] = fopen(algorithm_output_pipe_name, "r");
-    algorithm_output_pipes[descriptor] = fopen(algorithm_input_pipe_name, "w");
+    algorithm_downward_pipes[descriptor] = fopen(algorithm_downward_pipe_name, "w");
+    algorithm_upward_pipes[descriptor] = fopen(algorithm_upward_pipe_name, "r");
 
     // Set auto flush
-    setvbuf(algorithm_output_pipes[descriptor], NULL, _IONBF, 0);
+    setvbuf(algorithm_downward_pipes[descriptor], NULL, _IONBF, 0);
     
     return descriptor;
 }

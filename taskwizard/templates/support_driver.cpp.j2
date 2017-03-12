@@ -2,6 +2,8 @@
 
 {% include "supervisor_proto.cpp" %}
 
+#include "driver.h"
+
 FILE* input_pipe;
 FILE* output_pipe;
 
@@ -9,8 +11,8 @@ FILE* output_pipe;
 #define OUTPUT_PIPE (output_pipe)
 
 void set_active_algorithm(int id) {
-  input_pipe = algorithm_output_pipe(id);
-  output_pipe = algorithm_input_pipe(id);
+  input_pipe = algorithm_upward_pipe(id);
+  output_pipe = algorithm_downward_pipe(id);
 }
 
 void set_active_read_file(int id) {
