@@ -16,8 +16,10 @@ import logging
 import os
 import pkg_resources
 import shutil
+import sys
 import tempfile
 import yaml
+
 from taskwizard.runner import supervisor
 
 

@@ -1,7 +1,8 @@
 {% import "macro.cpp.j2" as macro %}
 
-// Functions to implement
+#include "header.h"
 
+// Functions to implement
 {% for function in interface.functions.values() -%}
 {{ macro.function_signature(function) }} {
     // TODO: implement

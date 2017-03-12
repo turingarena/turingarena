@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "support_proto.h"
 
 FILE *algorithm_upward_pipes[2000];
 FILE *algorithm_downward_pipes[2000];

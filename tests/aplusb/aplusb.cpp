@@ -1,10 +1,4 @@
-
-
-// Global input/output
-
-
-// Callback functions
-
+#include "header.h"
 
 // Functions to implement
 int sum (int A, int B) {
