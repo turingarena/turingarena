@@ -16,10 +16,14 @@ FILE *algorithm_downward_pipe(int id) {
 
 int algorithm_start(const char *algo_name) {
     // Start new algorithm    
+    fprintf(stderr, "DRIVER SUPPORT: Starting new instance of algorithm \"%s\"\n", algo_name);    
     printf("algorithm_start %s\n", algo_name);
     fflush(stdout);
     int descriptor;
     scanf("%d", &descriptor);
+
+    fprintf(stderr, "DRIVER SUPPORT: received id, opening pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
+
 
     // Generate file descriptor names
     char algorithm_downward_pipe_name[200];
@@ -32,6 +36,8 @@ int algorithm_start(const char *algo_name) {
     algorithm_downward_pipes[descriptor] = fopen(algorithm_downward_pipe_name, "w");
     algorithm_upward_pipes[descriptor] = fopen(algorithm_upward_pipe_name, "r");
 
+    fprintf(stderr, "DRIVER SUPPORT: successfully opened pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
+
     // Set auto flush
     setvbuf(algorithm_downward_pipes[descriptor], NULL, _IONBF, 0);
     
@@ -41,17 +47,20 @@ int algorithm_start(const char *algo_name) {
 static int read_status() {
     int status;
     scanf(" %d", &status);
+    fprintf(stderr, "DRIVER SUPPORT: Status of request: %d\n", status);    
     return status;
 }
 
-int algorithm_status(int id) {
-    printf("algorithm_status %d\n", id);
+int algorithm_status(int algorithm_id) {
+    fprintf(stderr, "DRIVER SUPPORT: Requesting status of algo with id: %d...\n", algorithm_id);
+    printf("algorithm_status %d\n", algorithm_id);
     fflush(stdout);
     return read_status();
 }
 
-int algorithm_kill(int id) {
-    printf("algorithm_kill %d\n", id);
+int algorithm_kill(int algorithm_id) {
+    fprintf(stderr, "DRIVER SUPPORT: Killing algorithm with id: %d...\n", algorithm_id);
+    printf("algorithm_kill %d\n", algorithm_id);
     fflush(stdout);
     return read_status();
 }
@@ -59,7 +68,7 @@ int algorithm_kill(int id) {
 int read_file_open(const char *file_name) {
     
     // Open file for reading
-    
+    fprintf(stderr, "DRIVER SUPPORT: Opening file with name: \"%s\"...\n", file_name);    
     printf("read_file_open %s\n", file_name);
     fflush(stdout);
     int descriptor;
@@ -76,20 +85,23 @@ int read_file_open(const char *file_name) {
 }
 
 FILE *read_file_pipe(int id) {
-    fprintf(stderr, "Requested id %d with pointer: %p\n",id, read_file_pipes[id]);
+    fprintf(stderr, "DRIVER SUPPORT: Requested id %d with pointer: %p\n", id, read_file_pipes[id]);
     return read_file_pipes[id];
 }
 
 int read_file_close(int id) {
-    fclose(read_file_pipes[id]);
-    read_file_pipes[id] = NULL;
 
-    printf("read_file_close %d\n", id);
-    fflush(stdout);
-    int status;
-    scanf(" %d", &status);
+    if (read_file_pipes[id]) {
+        fclose(read_file_pipes[id]);
+        read_file_pipes[id] = NULL;
 
-    return status;
+        fprintf(stderr, "DRIVER SUPPORT: Closing pipe with id %d\n", id);
+        printf("read_file_close %d\n", id);
+        fflush(stdout);
+        return read_status();
+    }
+
+    fprintf(stderr, "DRIVER SUPPORT: Driver requested to close an invalid file with id: %d\n", id);    
 }
 
 int write_file_open(const char *file_name) {
