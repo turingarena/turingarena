@@ -12,7 +12,7 @@
 {% for interface in task.interfaces.values() %}
 
 {% for callback in interface.callback_functions.values() %}
-void accept_callback_{{interface.name}}_{{callback.name}}() {
+void accept_callback_{{interface.name}}_{{callback.name}}(int algorithm_id) {
     {{ generate_read_data_algorithm(callback.parameters.values()) }}
     on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor -%}
 }
@@ -51,11 +51,4 @@ void accept_callbacks_{{interface.name}}(int algorithm_id) {
 {% endfor %}
 
 int main() {
-    setvbuf(stdout, NULL, _IONBF, 0);
-    fprintf(stderr, "Start driver.\n");
-    int evaluate_file = read_file_open("evaluate");
-    set_active_read_file(evaluate_file);
-    fprintf(stderr, "Start main loop.\n");
-    {{ macro.process_command('int', task.functions.values(), task.variables.values()) }}
-    read_file_close(evaluate_file);
 }
