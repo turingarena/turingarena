@@ -2,36 +2,50 @@
 {{p.type}} {{p.name}}
 {%- endmacro %}
 
+
 {% macro parameters_signature(function) -%}
   {%- set comma = joiner(", ") -%}
   {%- for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
+
 {% macro function_signature(function, prefix='') -%}
   {{function.return_type}} {{prefix}}{{function.name}}({{parameters_signature(function)}})
 {%- endmacro %}
+
 
 {% macro algorithm_parameters_signature(function) -%}
   int algorithm_id
   {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
+
 {% macro algorithm_function_signature(function, prefix='') -%}
   {{function.return_type}} {{prefix}}{{function.name}}({{algorithm_parameters_signature(function)}})
 {%- endmacro %}
 
+
 {% macro generate_read_data(variables, driver=False) %}
+    {% if driver %}
+    fprintf(stderr, "DRIVER: reading arguments\n");
+    {% else %}
+    fprintf(stderr, "ALGORITHM: reading arguments\n");
+    {% endif %}
+
     {% for v in variables %}
     {{v.type}} {{v.name}};
 
     {% if driver %}
+        fprintf(stderr, "DRIVER: reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
         fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
     {% else %}
+        fprintf(stderr, "ALGORITHM: reading variable %s %s\n", "{{v.type}}", "{{v.name}}");
         scanf(" %d", &{{v.name}});
     {% endif %}
 
     {% endfor %}
 {% endmacro %}
+
 
 {% macro generate_write_data(variables, driver=False) %}
     {% for v in variables %}
@@ -57,6 +71,7 @@ scanf(" %d", &retval);
 return retval;
 {% endmacro %}
 
+
 {% macro generate_write_retval(driver=False) %}
 
 {% if driver %}
@@ -68,52 +83,57 @@ printf("return %d\n", retval);
 {% endmacro %}
 
 
-{#
-{% macro generate_protocol(interface, suffix='') %}
-    void accept_any_callback{{suffix}}(int algorithm_id) {
-        char callback_name[51] = { 0 };
-        fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
+{% macro generate_protocol(functions, callbacks, driver=False, suffix="") %}
 
-        {% for callback in interface.callback_functions.values() %}
-        if(!strcmp(callback_name, "{{callback.name}}")) {
-            accept_callback_{{interface.name}}_{{callback.name}}();
-        }
-        {% endfor %}
+{% for callback in callbacks %}
+void accept_callback{{suffix}}_{{callback.name}}(int algorithm_id) {
+    {{ generate_read_data(callback.parameters.values(), driver=driver) }}
+    int retval = on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
+    {{ generate_write_retval(driver=driver) }}
+}
+{% endfor %}
 
-        fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
-        assert(0 && "Unrecognized callback");
+void accept_any_callback{{suffix}}(int algorithm_id) {
+    char callback_name[51] = { 0 };
+    fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
+
+    {% for callback in callbacks %}
+    if(!strcmp(callback_name, "{{callback.name}}")) {
+        accept_callback{{suffix}}_{{callback.name}}(algorithm_id);
+        return;
     }
-
-    void accept_callbacks{{suffix}}(int algorithm_id) {
-        while(1) {
-            char command[51] = { 0 };
-            fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
-            if(!strcmp(command, "return") {
-                break;
-            } else if(!strcmp(command, "call") {
-                accept_any_callback_{{interface.name}}(algorithm_id);
-            } else {
-                fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
-                assert(0 && "Unrecognized command");
-            }
-        }
-    }
-
-    {% for function in interface.functions.values() %}
-        {{ macro.algorithm_function_signature(function, "call_") }} {
-            fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
-            fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
-
-            {{ generate_write_data_interface(function.parameters.values()) }}
-
-            accept_callbacks_{{interface.name}}(algorithm_id);
-
-            int result;
-            fscanf(algorithm_upward_pipe(algorithm_id), " %d", &result);
-
-            return result;
-        }
     {% endfor %}
 
+    fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
+    assert(0 && "Unrecognized callback");
+}
+
+void accept_callbacks{{suffix}}(int algorithm_id) {
+    while(1) {
+        char command[51] = { 0 };
+        fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
+        if(!strcmp(command, "return")) {
+            break;
+        } else if(!strcmp(command, "call")) {
+            accept_any_callback{{suffix}}(algorithm_id);
+        } else {
+            fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
+            assert(0 && "Unrecognized command");
+        }
+    }
+}
+
+{% for function in functions %}
+    {{ algorithm_function_signature(function, "call_") }} {
+        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
+        fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
+
+        {{ generate_write_data(function.parameters.values(), driver=driver) }}
+
+        accept_callbacks{{suffix}}(algorithm_id);
+
+        {{ generate_read_retval(driver=driver) }}
+    }
+{% endfor %}
+
 {% endmacro %}
-#}
