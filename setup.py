@@ -27,7 +27,7 @@ setup(
     },
     packages=find_packages(),
     package_data={
-        'taskwizard.templates': ['*.j2'],
+        'taskwizard.compiler': ['templates/*'],
     },
     keywords="",
     license="",

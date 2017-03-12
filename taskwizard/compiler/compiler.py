@@ -15,6 +15,7 @@ Options:
 
 from docopt import docopt
 from jinja2 import Environment, PackageLoader
+import os
 import sys
 
 from taskwizard.compiler.grammar import GrammarParser
@@ -28,18 +29,18 @@ def main():
     text = open(args["--input"]).read()
     task = parse.parse(text)
 
-    env = Environment(loader=PackageLoader("taskwizard", "templates"))
+    env = Environment(loader=PackageLoader("taskwizard.compiler", "templates"))
 
     if args["makefile"]:
         template = env.get_template("Makefile.j2")
     else:
         interface_or_driver = next(x for x in ["interface", "driver"] if args[x])
         if args["stub"]:
-            template = env.get_template(interface_or_driver + "_stub.cpp.j2")
+            template = env.get_template(os.path.join(interface_or_driver, "stub.cpp.j2"))
         elif args["header"]:
-            template = env.get_template(interface_or_driver + "_header.h.j2")
+            template = env.get_template(os.path.join(interface_or_driver, "header.h.j2"))
         elif args["support"]:
-            template = env.get_template(interface_or_driver + "_support.cpp.j2")
+            template = env.get_template(os.path.join(interface_or_driver, "support.cpp.j2"))
         else:
             raise ValueError
 
