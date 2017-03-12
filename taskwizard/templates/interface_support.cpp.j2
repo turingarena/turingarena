@@ -3,6 +3,8 @@
 #include <bits/stdc++.h>
 #include "{{interface.name}}.h"
 
+{{ macro.generate_protocol(interface.callback_functions.values(), interface.functions.values()) }}
 
 int main() {
+    accept_callbacks();
 }
