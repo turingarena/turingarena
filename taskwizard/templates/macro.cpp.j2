@@ -43,12 +43,6 @@ void receive_call_{{function.name}}() {
 }
 {% endmacro %}
 
-{% macro receive_set_global(variable) %}
-void receive_set_global_{{variable.name}}() {
-    fscanf(INPUT_PIPE, " %d", &{{variable.name}});
-}
-{% endmacro %}
-
 {% macro process_callback(callbacks) %}
     {
         char callback_name[51];
@@ -56,18 +50,6 @@ void receive_set_global_{{variable.name}}() {
         {% for callback in callbacks -%}
         if(!strcmp(callback_name, "{{callback.name}}")) {
             receive_call_{{callback.name}}();
-        }
-        {% endfor %}
-    }
-{% endmacro %}
-
-{% macro process_set_global(variables) %}
-    {
-        char variable_name[51];
-        fscanf(INPUT_PIPE, "%50s", variable_name);
-        {% for variable in variables -%}
-        if(!strcmp(variable_name, "{{variable.name}}")) {
-            receive_set_global_{{variable.name}}();
         }
         {% endfor %}
     }
@@ -88,10 +70,6 @@ void receive_set_global_{{variable.name}}() {
         if(!strcmp(command, "call")) {
             {{process_callback(callbacks)}}
         }
-        
-        if(!strcmp(command, "set")) {
-            {{process_set_global(variables)}}
-        }
     }
 {% endmacro %}
 
@@ -110,13 +88,4 @@ void receive_set_global_{{variable.name}}() {
     
     {{ process_command(function.return_type, callbacks, variables) }}
 }
-{% endmacro %}
-
-{% macro set_global(variable) %}
-void set_global_{{variable.name}}({{variable.type}} value) {
-    fprintf(OUTPUT_PIPE, "%s\n", "set");
-    fprintf(OUTPUT_PIPE, "%s\n", "{{variable.name}}");
-    fprintf(OUTPUT_PIPE, "%d\n", value);
-}
-
 {% endmacro %}

@@ -1,49 +1,53 @@
 {% import "macro.cpp.j2" as macro %}
 
-{% include "supervisor_proto.cpp" %}
-
 #include "driver.h"
 
-FILE* input_pipe;
-FILE* output_pipe;
-
-#define INPUT_PIPE (input_pipe)
-#define OUTPUT_PIPE (output_pipe)
-
-void set_active_algorithm(int id) {
-  input_pipe = algorithm_upward_pipe(id);
-  output_pipe = algorithm_downward_pipe(id);
-}
-
-void set_active_read_file(int id) {
-  input_pipe = read_file_pipe(id);
-  output_pipe = NULL;
-}
+{% macro generate_read_data_algorithm(variables) %}
+    {% for v in variables %}
+    {{v.type}} {{v.name}};
+    fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
+    {% endfor %}
+{% endmacro %}
 
 {% for interface in task.interfaces.values() %}
-  {% for function in interface.callback_functions.values() -%}
-  {{ macro.function_prototype(function) }}
-  {% endfor %}
-  
-  {% for function in interface.callback_functions.values() -%}
-  {{ macro.receive_call(function) }}
-  {% endfor %}
-  
-  {% for variable in interface.variables.values() -%}
-  {{ macro.set_global(variable) }}
-  {% endfor %}
-  
-  {% for function in interface.functions.values() -%}
-  {{ macro.callback(function, interface.callback_functions.values(), []) }}
-  {% endfor %}
+
+{% for callback in interface.callback_functions.values() %}
+void accept_callback_{{interface.name}}_{{callback.name}}() {
+    {{ generate_read_data_algorithm(callback.parameters.values()) }}
+    on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor -%}
+}
 {% endfor %}
 
-{% for function in task.functions.values() -%}
-{{ macro.receive_call(function) }}
-{% endfor %}
+void accept_any_callback_{{interface.name}}(int algorithm_id) {
+    char callback_name[51] = { 0 };
+    fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
+    
+    {% for callback in interface.callback_functions.values() %}
+    if(!strcmp(callback_name, "{{callback.name}}")) {
+        accept_callback_{{interface.name}}_{{callback.name}}();
+    }
+    {% endfor %}
+    
+    fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
+    assert(0 && "Unrecognized callback");
+}
 
-{% for variable in task.variables.values() -%}
-{{ macro.receive_set_global(variable) }}
+void accept_callbacks_{{interface.name}}(int algorithm_id) {
+    while(1) {
+        char command[51] = { 0 };
+        fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
+        if(!strcmp(command, "return") {
+            break;
+        } else if(!strcmp(command, "call") {
+            accept_any_callback_{{interface.name}}(algorithm_id);
+        } else {
+            fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
+            assert(0 && "Unrecognized command");
+        }
+    }
+}
+
+
 {% endfor %}
 
 int main() {
