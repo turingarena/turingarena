@@ -3,15 +3,8 @@
 #include "{{interface.name}}.h"
 
 {% for function in interface.functions.values() -%}
-{{ macro.receive_call(function) }}
-{% endfor %}
-
-{% for variable in interface.variables.values() -%}
-{{ macro.receive_set_global(variable) }}
-{% endfor %}
-
-{% for function in interface.callback_functions.values() -%}
-{{ macro.callback(function, interface.functions.values(), interface.variables.values()) }}
+    {{ macro.function_signature(function, "on_") }} {
+    }
 {% endfor %}
 
 int main() {

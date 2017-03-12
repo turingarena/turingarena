@@ -19,3 +19,76 @@
 {% macro algorithm_function_signature(function, prefix='') -%}
   {{function.return_type}} {{prefix}}{{function.name}}({{algorithm_parameters_signature(function)}})
 {%- endmacro %}
+
+{% macro generate_read_data(variables, driver=False) %}
+    {% for v in variables %}
+    {{v.type}} {{v.name}};
+
+    {% if driver %}
+        fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
+    {% else %}
+        scanf(" %d", &{{v.name}});
+    {% endif %}
+    
+    {% endfor %}
+{% endmacro %}
+
+{% macro generate_write_data(variables, driver=False) %}
+    {% for v in variables %}
+
+    {% if driver %}
+        fprintf(algorithm_downward_pipe(algorithm_id), "%d\n", {{v.name}});
+    {% else %}
+        printf("%d\n", {{v.name}});
+    {% endif %}
+
+    {% endfor %}
+{% endmacro %}
+
+{% macro generate_protocol(interface, suffix='') %}
+    void accept_any_callback{{suffix}}(int algorithm_id) {
+        char callback_name[51] = { 0 };
+        fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
+        
+        {% for callback in interface.callback_functions.values() %}
+        if(!strcmp(callback_name, "{{callback.name}}")) {
+            accept_callback_{{interface.name}}_{{callback.name}}();
+        }
+        {% endfor %}
+        
+        fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
+        assert(0 && "Unrecognized callback");
+    }
+    
+    void accept_callbacks{{suffix}}(int algorithm_id) {
+        while(1) {
+            char command[51] = { 0 };
+            fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
+            if(!strcmp(command, "return") {
+                break;
+            } else if(!strcmp(command, "call") {
+                accept_any_callback_{{interface.name}}(algorithm_id);
+            } else {
+                fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
+                assert(0 && "Unrecognized command");
+            }
+        }
+    }
+    
+    {% for function in interface.functions.values() %}
+        {{ macro.algorithm_function_signature(function, "call_") }} {
+            fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
+            fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
+            
+            {{ generate_write_data_interface(function.parameters.values()) }}
+            
+            accept_callbacks_{{interface.name}}(algorithm_id);
+            
+            int result;
+            fscanf(algorithm_upward_pipe(algorithm_id), " %d", &result);
+            
+            return result;
+        }
+    {% endfor %}
+
+{% endmacro %}

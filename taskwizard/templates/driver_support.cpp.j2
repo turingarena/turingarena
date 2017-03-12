@@ -2,19 +2,6 @@
 
 #include "driver.h"
 
-{% macro generate_read_data_interface(variables) %}
-    {% for v in variables %}
-    {{v.type}} {{v.name}};
-    fscanf(algorithm_upward_pipe(algorithm_id), " %d", &{{v.name}});
-    {% endfor %}
-{% endmacro %}
-
-{% macro generate_write_data_interface(variables) %}
-    {% for v in variables %}
-    fprintf(algorithm_downward_pipe(algorithm_id), "%d\n", {{v.name}});
-    {% endfor %}
-{% endmacro %}
-
 {% for interface in task.interfaces.values() %}
 
 {% for callback in interface.callback_functions.values() %}
