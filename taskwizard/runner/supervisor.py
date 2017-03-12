@@ -14,13 +14,13 @@ def logged(fun):
 
 class AlgorithmProcess:
 
-    def __init__(self, supervisor, id, algorithm_name):
+    def __init__(self, supervisor, process_id, algorithm_name):
         self.supervisor = supervisor
-        self.id = id
+        self.process_id = process_id
         self.algorithm_name = algorithm_name
         self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
-        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_downward.%d.pipe" % (id,))
-        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_upward.%d.pipe" % (id,))
+        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_downward.%d.pipe" % (process_id,))
+        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_upward.%d.pipe" % (process_id,))
 
     def prepare(self):
         os.mkfifo(self.downward_pipe_name)
@@ -49,16 +49,16 @@ class AlgorithmProcess:
 
 class ReadFile:
 
-    def __init__(self, supervisor, id, file_name):
+    def __init__(self, supervisor, file_id, file_name):
         self.supervisor = supervisor
-        self.id = id
+        self.file_id = file_id
         self.file_name = file_name
         self.file_path = os.path.join(self.supervisor.task_run_dir, "read_files", file_name, "data.txt")
 
     def open(self):
         os.symlink(
             os.path.join("..", self.file_path),
-            os.path.join(self.supervisor.driver_sandbox_dir, "read_file.%d.txt" % (self.id,)))
+            os.path.join(self.supervisor.driver_sandbox_dir, "read_file.%d.txt" % (self.file_id,)))
 
 
 class Supervisor:
@@ -72,41 +72,40 @@ class Supervisor:
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
         self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
 
-        self.algorithm_to_run = None
-
     def next_id(self):
         self._next_id += 1
         return self._next_id
 
     @logged
     def algorithm_start(self, algorithm_name):
-        id = self.next_id()
-        process = AlgorithmProcess(self, id, algorithm_name)
-        self.algorithm_processes[id] = process
+        process_id = self.next_id()
+        process = AlgorithmProcess(self, process_id, algorithm_name)
+        self.algorithm_processes[process_id] = process
 
         process.prepare()
 
-        self.algorithm_to_run = process
+        return process_id
 
-        return id
+    def after_algorithm_start(self, algorithm_name, process_id):
+        self.algorithm_processes[process_id].run()
 
     @logged
-    def algorithm_status(self, algorithm_id):
+    def algorithm_status(self, process_id):
         pass
 
     @logged
-    def algorithm_kill(self, algorithm_id):
+    def algorithm_kill(self, process_id):
         pass
 
     @logged
     def read_file_open(self, file_name):
-        id = self.next_id()
-        read_file = ReadFile(self, id, file_name)
-        self.read_files[id] = read_file
+        process_id = self.next_id()
+        read_file = ReadFile(self, process_id, file_name)
+        self.read_files[process_id] = read_file
 
         read_file.open()
 
-        return id
+        return process_id
 
     @logged
     def read_file_close(self, file_id):
@@ -127,12 +126,31 @@ class Supervisor:
         arg_type = commands[command]
         return getattr(self, command)(arg_type(arg))
 
+    def after_command(self, command, arg, result):
+        method_name = "after_" + command
+        if hasattr(self, method_name):
+            getattr(self, method_name)(arg, result)
+
+    def main_loop(self):
+        while True:
+            line = self.driver.stdout.readline()
+            if not line:
+                print("SUPERVISOR: control pipe closed, terminating.")
+                break
+            print("SUPERVISOR: received line:", line)
+
+            command, arg = line.rstrip().split(" ", 2)
+            result = self.on_command(command, arg)
+            print(result, file=self.driver.stdin)
+
+            self.after_command(command, arg, result)
+
     def run(self):
         print("Starting supervisor in folder: ", self.task_run_dir, file=sys.stderr)
 
         os.mkdir(self.driver_sandbox_dir)
 
-        driver = subprocess.Popen(
+        self.driver = subprocess.Popen(
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
@@ -141,16 +159,4 @@ class Supervisor:
             bufsize=1  # line buffered
         )
 
-        while True:
-            line = driver.stdout.readline()
-            if not line:
-                print("SUPERVISOR: control pipe closed, terminating.")
-                break
-            print("SUPERVISOR: received line", list(line))
-            command, arg = line.rstrip().split(" ", 2)
-            result = self.on_command(command, arg)
-            print(result, file=driver.stdin)
-
-            if self.algorithm_to_run is not None:
-                self.algorithm_to_run.run()
-                self.algorithm_to_run = None
+        self.main_loop()
