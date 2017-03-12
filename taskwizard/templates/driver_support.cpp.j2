@@ -1,26 +1,32 @@
 {% import "macro.cpp.j2" as macro %}
 
+#include <bits/stdc++.h>
 #include "driver.h"
+
+{% include "driver_support_proto.h" %}
+{% include "driver_support_proto.cpp" %}
 
 {% for interface in task.interfaces.values() %}
 
 {% for callback in interface.callback_functions.values() %}
 void accept_callback_{{interface.name}}_{{callback.name}}(int algorithm_id) {
-    {{ generate_read_data_interface(callback.parameters.values()) }}
-    on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor -%}
+    {{ macro.generate_read_data(callback.parameters.values(), driver=True) }}
+    int retval = on_{{callback.name}}(algorithm_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
+    {{ macro.generate_write_retval(driver=True) }}
 }
 {% endfor %}
 
 void accept_any_callback_{{interface.name}}(int algorithm_id) {
     char callback_name[51] = { 0 };
     fscanf(algorithm_upward_pipe(algorithm_id), "%50s", callback_name);
-    
+
     {% for callback in interface.callback_functions.values() %}
     if(!strcmp(callback_name, "{{callback.name}}")) {
-        accept_callback_{{interface.name}}_{{callback.name}}();
+        accept_callback_{{interface.name}}_{{callback.name}}(algorithm_id);
+        return;
     }
     {% endfor %}
-    
+
     fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized callback: %s\n", __FUNCTION__, callback_name);
     assert(0 && "Unrecognized callback");
 }
@@ -29,9 +35,9 @@ void accept_callbacks_{{interface.name}}(int algorithm_id) {
     while(1) {
         char command[51] = { 0 };
         fscanf(algorithm_upward_pipe(algorithm_id), "%50s", command);
-        if(!strcmp(command, "return") {
+        if(!strcmp(command, "return")) {
             break;
-        } else if(!strcmp(command, "call") {
+        } else if(!strcmp(command, "call")) {
             accept_any_callback_{{interface.name}}(algorithm_id);
         } else {
             fprintf(stderr, "DRIVER SUPPORT: %s: unrecognized command: %s\n", __FUNCTION__, command);
@@ -44,15 +50,12 @@ void accept_callbacks_{{interface.name}}(int algorithm_id) {
     {{ macro.algorithm_function_signature(function, "call_") }} {
         fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "call");
         fprintf(algorithm_downward_pipe(algorithm_id), "%s\n", "{{function.name}}");
-        
-        {{ generate_write_data_interface(function.parameters.values()) }}
-        
+
+        {{ macro.generate_write_data(function.parameters.values(), driver=True) }}
+
         accept_callbacks_{{interface.name}}(algorithm_id);
-        
-        int result;
-        fscanf(algorithm_upward_pipe(algorithm_id), " %d", &result);
-        
-        return result;
+
+        {{ macro.generate_read_retval(driver=True) }}
     }
 {% endfor %}
 

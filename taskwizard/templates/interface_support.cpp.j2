@@ -1,12 +1,8 @@
 {% import "macro.cpp.j2" as macro %}
 
+#include <bits/stdc++.h>
 #include "{{interface.name}}.h"
 
-{% for function in interface.functions.values() -%}
-    {{ macro.function_signature(function, "on_") }} {
-    }
-{% endfor %}
 
 int main() {
-    {{ macro.process_command('int', interface.functions.values(), interface.variables.values()) }}
 }
