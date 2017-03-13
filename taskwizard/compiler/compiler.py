@@ -24,7 +24,7 @@ import shutil
 import sys
 import yaml
 
-from taskwizard.compiler.grammar import GrammarParser
+from taskwizard.compiler.parser import TaskParser
 from taskwizard.compiler.semantics import Semantics
 
 
@@ -116,7 +116,7 @@ def main():
 
     task_source_dir = args["--input"]
 
-    parse = GrammarParser(semantics=Semantics())
+    parse = TaskParser(semantics=Semantics())
     text = open(os.path.join(task_source_dir, "task.txt")).read()
     task = parse.parse(text)
 

@@ -1,8 +1,4 @@
 from collections import namedtuple, OrderedDict
-from jinja2 import Template
-
-from taskwizard.compiler.grammar import GrammarParser
-
 
 Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
 GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
