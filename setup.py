@@ -21,7 +21,7 @@ setup(
     description="",
     entry_points={
         "console_scripts": [
-            "taskcc=taskwizard.compiler:main",
+            "taskcc=taskwizard.preparer:main",
             "taskmake=taskwizard.builder:main",
             "taskrun=taskwizard.runner:main",
         ],
