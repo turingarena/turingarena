@@ -40,8 +40,9 @@ class Process:
         return 0
 
     def kill(self):
-        # TODO: define meaning of return value
-        return self.os_process.kill()
+        self.os_process.kill()
+        # TODO: return something meaningful
+        return 0
 
 
 class ReadFile:
