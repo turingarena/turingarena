@@ -68,10 +68,13 @@ class Supervisor:
 
         self.task_run_dir = task_run_dir
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
-        self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
+        self.driver_path = os.path.join(task_run_dir, "driver", "driver")
 
         self.control_request_pipe_name = os.path.join(self.driver_sandbox_dir, "control_request.pipe")
         self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
+
+        self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
+        self.summary_path = os.path.join(task_run_dir, "summary.txt")
 
     def next_id(self):
         self._next_id += 1
@@ -173,6 +176,8 @@ class Supervisor:
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
+            stdin=open(self.parameter_path),
+            stdout=open(self.summary_path, "w"),
             bufsize=1
         )
 
