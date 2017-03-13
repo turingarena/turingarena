@@ -1,5 +1,3 @@
-from collections import OrderedDict
-from docopt import docopt
 from jinja2 import Environment, PackageLoader
 import os
 import pkg_resources

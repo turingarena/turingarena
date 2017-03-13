@@ -14,14 +14,10 @@ Options:
   --maxproc=<maxproc>           Max num of processes [default: 20].
 """
 
-from cmath import phase
 from datetime import datetime
 from docopt import docopt
-import logging
 import os
-import pkg_resources
 import shutil
-import sys
 import tempfile
 import yaml
 
