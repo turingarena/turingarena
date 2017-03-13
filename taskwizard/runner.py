@@ -90,8 +90,6 @@ class Phase:
 def main():
     args = docopt(__doc__)
 
-    print(args)
-
     slots = {}
     for slot in args["<slot:submission>"]:
         name, filename = slot.split(":", 2)
