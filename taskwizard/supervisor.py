@@ -70,9 +70,6 @@ class Supervisor:
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
         self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
 
-        self.control_request_pipe_name = os.path.join(self.driver_sandbox_dir, "control_request.pipe")
-        self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
-
     def next_id(self):
         self._next_id += 1
         return self._next_id
@@ -157,31 +154,29 @@ class Supervisor:
     def run(self):
         print("SUPERVISOR: starting in folder:", self.task_run_dir, file=sys.stderr)
 
+        print("SUPERVISOR: driver sandbox dir: %s" % (self.driver_sandbox_dir,), file=sys.stderr)
         os.mkdir(self.driver_sandbox_dir)
 
+
         print("SUPERVISOR: creating control pipes...", file=sys.stderr)
-        os.mkfifo(self.control_request_pipe_name)
-        os.mkfifo(self.control_response_pipe_name)
-        print("SUPERVISOR: control pipes created", file=sys.stderr)
-        print("SUPERVISOR: control request pipe: %s" % (self.control_request_pipe_name,), file=sys.stderr)
-        print("SUPERVISOR: control response pipe: %s" % (self.control_response_pipe_name,), file=sys.stderr)
+        control_request_pipe_fd, control_request_pipe_driver_fd = os.pipe()
+        control_response_pipe_driver_fd, control_response_pipe_fd = os.pipe()
+
 
         print("SUPERVISOR: starting driver process: %s" % (self.driver_path,), file=sys.stderr)
-        print("SUPERVISOR: driver sandbox dir: %s" % (self.driver_sandbox_dir,), file=sys.stderr)
-
         self.driver = subprocess.Popen(
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
-            bufsize=1
+            bufsize=1,
+            stdin=os.fdopen(control_response_pipe_driver_fd),
+            stdout=os.fdopen(control_request_pipe_driver_fd)
         )
 
         print("SUPERVISOR: driver process started", file=sys.stderr)
 
-        print("SUPERVISOR: opening control pipes...", file=sys.stderr)
-        self.control_request_pipe = open(self.control_request_pipe_name, "r")
-        print("SUPERVISOR: control request pipe opened", file=sys.stderr)
-        self.control_response_pipe = open(self.control_response_pipe_name, "w")
-        print("SUPERVISOR: control response pipe opened", file=sys.stderr)
-
+        print("SUPERVISOR: setting control pipes...", file=sys.stderr)
+        self.control_request_pipe = os.fdopen(control_request_pipe_fd, "r")
+        self.control_response_pipe = os.fdopen(control_response_pipe_fd, "w")
+        print("SUPERVISOR: control pipes set", file=sys.stderr)
         self.main_loop()

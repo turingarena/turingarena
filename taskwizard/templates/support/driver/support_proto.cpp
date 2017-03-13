@@ -18,18 +18,13 @@ FILE *process_downward_pipe(int id) {
     return process_downward_pipes[id];
 }
 
-void driver_init() {
-    control_request_pipe = fopen("control_request.pipe", "w");
-    control_response_pipe = fopen("control_response.pipe", "r");
-}
-
 int algorithm_start(const char *algo_name) {
     // Start new algorithm    
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Starting new instance of algorithm \"%s\"\n", algo_name);    
-    fprintf(control_request_pipe, "algorithm_start %s\n", algo_name);
+    printf("algorithm_start %s\n", algo_name);
     fflush(control_request_pipe);
     int descriptor;
-    fscanf(control_response_pipe, "%d", &descriptor);
+    printf("%d", &descriptor);
 
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: received id, opening pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
 
@@ -55,21 +50,21 @@ int algorithm_start(const char *algo_name) {
 
 static int read_status() {
     int status;
-    fscanf(control_response_pipe, " %d", &status);
+    printf(" %d", &status);
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Status of request: %d\n", status);    
     return status;
 }
 
 int process_status(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Requesting status of algo with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "process_status %d\n", algorithm_id);
+    printf("process_status %d\n", algorithm_id);
     fflush(control_request_pipe);
     return read_status();
 }
 
 int process_kill(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Killing algorithm with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "process_kill %d\n", algorithm_id);
+    printf("process_kill %d\n", algorithm_id);
     fflush(control_request_pipe);
     return read_status();
 }
@@ -78,10 +73,10 @@ int read_file_open(const char *file_name) {
     
     // Open file for reading
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Opening file with name: \"%s\"...\n", file_name);    
-    fprintf(control_request_pipe, "read_file_open %s\n", file_name);
+    printf("read_file_open %s\n", file_name);
     fflush(control_request_pipe);
     int descriptor;
-    fscanf(control_response_pipe, " %d", &descriptor);
+    printf(" %d", &descriptor);
     
 
     // Generate file names
@@ -105,7 +100,7 @@ int read_file_close(int id) {
         read_file_pipes[id] = NULL;
 
         fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Closing pipe with id %d\n", id);
-        fprintf(control_request_pipe, "read_file_close %d\n", id);
+        printf("read_file_close %d\n", id);
         fflush(control_request_pipe);
         return read_status();
     }
