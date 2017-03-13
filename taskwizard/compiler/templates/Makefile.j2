@@ -1,40 +1,8 @@
-all: {% for interface in task.interfaces.values() %} \
-	build/stubs/{{interface.name}}/stub.cpp \
-	build/evaluator/interfaces/{{interface.name}}/support.cpp \
-	build/evaluator/interfaces/{{interface.name}}/{{interface.name}}.h \
-{% endfor %} \
-	build/evaluator/driver/support.cpp \
-	build/evaluator/driver/driver.cpp build/evaluator/driver/driver.h
+.PHONY: all
+all: build/runner/
 
 %/:
 	mkdir -p $@
 
-build/evaluator/driver/support.cpp: task.txt | build/evaluator/driver/
-	taskcc support driver -o $@
-
-build/evaluator/driver/driver.h: task.txt | build/evaluator/driver/
-	taskcc header driver -o $@
-
-build/evaluator/driver/driver.cpp: driver.cpp | build/evaluator/driver/
-	cp $^ $@
-
-{% for interface in task.interfaces.values() %}
-
-build/stubs/{{interface.name}}/stub.cpp: task.txt | build/stubs/{{interface.name}}/
-	taskcc stub interface {{interface.name}} -o $@
-
-build/evaluator/interfaces/{{interface.name}}/support.cpp: task.txt | build/evaluator/interfaces/{{interface.name}}/
-	taskcc support interface {{interface.name}} -o $@
-
-build/evaluator/interfaces/{{interface.name}}/{{interface.name}}.h: task.txt | build/evaluator/interfaces/{{interface.name}}/
-	taskcc header interface {{interface.name}} -o $@
-
-{% endfor %}
-
-clean:
-	rm -rf build/
-
-.PHONY: Makefile
-Makefile:
-	taskcc makefile -o $@
-
+build/runner/: | build/
+	taskcc runner -o $@
