@@ -21,14 +21,14 @@ setup(
     description="",
     entry_points={
         "console_scripts": [
-            "taskcc=taskwizard.compiler.compiler:main",
-            "taskmake=taskwizard.compiler.builder:main",
-            "taskrun=taskwizard.runner.runner:main",
+            "taskcc=taskwizard.compiler:main",
+            "taskmake=taskwizard.builder:main",
+            "taskrun=taskwizard.runner:main",
         ],
     },
     packages=find_packages(),
     package_data={
-        'taskwizard.compiler': ['templates/*'],
+        'taskwizard': ['templates/*', 'grammar.ebnf'],
     },
     keywords="",
     license="",

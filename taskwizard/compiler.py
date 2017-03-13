@@ -24,8 +24,8 @@ import shutil
 import sys
 import yaml
 
-from taskwizard.compiler.parser import TaskParser
-from taskwizard.compiler.semantics import Semantics
+from taskwizard.parser import TaskParser
+from taskwizard.semantics import Semantics
 
 
 class TaskObject:
@@ -37,7 +37,7 @@ class TaskObject:
         env = Environment(loader=PackageLoader("taskwizard.compiler", "templates"))
 
         template_relative_dir = "support/" + self.get_type()
-        template_dir = pkg_resources.resource_filename("taskwizard.compiler", "templates/" + template_relative_dir)
+        template_dir = pkg_resources.resource_filename("taskwizard", "templates/" + template_relative_dir)
 
         os.mkdir(output_dir)
 

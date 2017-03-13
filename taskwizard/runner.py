@@ -20,7 +20,7 @@ import sys
 import tempfile
 import yaml
 
-from taskwizard.runner import supervisor
+from taskwizard import supervisor
 
 
 logger = logging.getLogger("taskrun")
