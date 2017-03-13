@@ -7,7 +7,10 @@ Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Command = namedtuple("Command", [])
 Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions"])
 Driver = namedtuple("Interface", ["name", "variables", "functions"])
-Task = namedtuple("Task", ["drivers", "interfaces"])
+TestCase = namedtuple("TestCase", ["name", "phases"])
+Phase = namedtuple("Phase", ["name", "driver_name", "driver_command", "slots"])
+Task = namedtuple("Task", ["drivers", "interfaces", "testcases"])
+Slot = namedtuple("Slot", ["name", "interface_name"])
 
 
 class CallbackFunction(Function):
@@ -23,7 +26,19 @@ class Semantics:
         return result
 
     def start(self, ast):
-        return Task(self.named_definitions(ast.drivers), self.named_definitions(ast.interfaces))
+        return Task(
+            self.named_definitions(ast.drivers),
+            self.named_definitions(ast.interfaces),
+            self.named_definitions(ast.testcases))
+
+    def testcase_definition(self, ast):
+        return TestCase(ast.name, self.named_definitions(ast.phases))
+
+    def phase_definition(self, ast):
+        return Phase(ast.name, ast.driver_name, ast.driver_command, self.named_definitions(ast.slots))
+
+    def slot_definition(self, ast):
+        return Slot(ast.name, ast.interface_name)
 
     def driver_definition(self, ast):
         return Driver(

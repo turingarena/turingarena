@@ -1,0 +1,15 @@
+interface pingpong {
+  int ping();
+  callback int pong();
+}
+
+driver main {
+  int evaluate();
+}
+
+testcase test1 {
+  phase evaluate {
+    slot solution interface pingpong;
+    driver main evaluate();
+  }
+}

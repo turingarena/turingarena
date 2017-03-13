@@ -68,7 +68,10 @@ class Supervisor:
 
         self.task_run_dir = task_run_dir
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
-        self.driver_path = os.path.join(self.task_run_dir, "driver", "driver")
+        self.driver_path = os.path.join(task_run_dir, "driver", "driver")
+
+        self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
+        self.summary_path = os.path.join(task_run_dir, "summary.txt")
 
     def next_id(self):
         self._next_id += 1

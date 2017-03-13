@@ -5,7 +5,31 @@ start =
   {
     | interfaces+:interface_definition
     | drivers+:driver_definition
+    | testcases+:testcase_definition
   }* $ ;
+
+testcase_definition =
+  'testcase' name:identifier '{'
+    { phases+:phase_definition }*
+  '}'
+  ;
+
+phase_definition =
+  'phase' name:identifier '{'
+    {
+      | 'driver' driver_name:identifier driver_command:command ';'
+      | slots+:slot_definition ';'
+    }*
+  '}'
+  ;
+
+slot_definition = 'slot' name:identifier 'interface' interface_name:identifier ;
+
+command =
+  function_name:identifier '(' parameters:','.{ value }* ')'
+  ;
+
+value = /[0-9]*/ ;
 
 driver_definition =
   'driver' name:identifier '{'
@@ -32,7 +56,7 @@ global_variable_declaration =
   inout:(inout|`inout`) variable:variable ';'
   ;
 
-callback_function_declaration = 'callback' function_declaration ;
+callback_function_declaration = 'callback' @:function_declaration ;
 
 function_declaration =
   return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
