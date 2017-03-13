@@ -19,8 +19,6 @@ if [ $(python3 -c "import sys; print(hasattr(sys, 'real_prefix'))") = "False" ];
     exit 1
 fi
 
-pip install --requirement dev-requirements.txt
-
 echo
 echo "OK! Now (if you didn't already) you can install this software with:"
 echo "  $ python setup.py develop"
