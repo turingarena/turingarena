@@ -3,28 +3,39 @@
 
 start = 
   {
-    | interfaces+:interface
+    | interfaces+:interface_definition
+    | drivers+:driver_definition
+  }* $ ;
+
+driver_definition =
+  'driver' name:identifier '{'
+  {
     | variables+:global_variable_declaration
     | functions+:function_declaration
-  }* $ ;
+  }*
+  '}'
+  ;
 
 identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
-interface =
-  'interface' name:identifier '{' declarations:{declaration}* '}'
-  ;
-
-declaration =
-  | function_declaration
-  | global_variable_declaration
+interface_definition =
+  'interface' name:identifier '{'
+  {
+    | variables+:global_variable_declaration
+    | functions+:function_declaration
+    | callback_functions+:callback_function_declaration
+  }*
+  '}' 
   ;
 
 global_variable_declaration =
   inout:(inout|`inout`) variable:variable ';'
   ;
 
+callback_function_declaration = 'callback' function_declaration ;
+
 function_declaration =
-  callback:['callback'] return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
+  return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
   ;
 
 parameter =

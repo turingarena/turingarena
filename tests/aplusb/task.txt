@@ -2,4 +2,6 @@ interface aplusb {
   int sum(int A, int B);
 }
 
-int evaluate(int A, int B);
+driver main {
+  int evaluate(int A, int B);
+}

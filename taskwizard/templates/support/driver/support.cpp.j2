@@ -21,7 +21,7 @@
         interface_name=interface.name) }}
 {% endfor %}
 
-{{ macro.generate_protocol([], task.functions.values()) }}
+{{ macro.generate_protocol([], driver.functions.values()) }}
 
 int main() {
     driver_init();

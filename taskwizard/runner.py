@@ -72,12 +72,13 @@ class Phase:
 
     def load_evaluation_conf(self):
         self.evaluation_conf = yaml.safe_load(open(self.evaluation_conf_path))
-        print(self.evaluation_conf)
 
         self.phase_conf = self.evaluation_conf["phases"][self.phase_name]
-        self.algorithm_slots = self.phase_conf["slots"]
 
-        self.driver_dir = os.path.join(self.prepared_dir, "driver")
+        self.algorithm_slots = self.phase_conf["slots"]
+        self.driver_name = self.phase_conf["driver"]
+
+        self.driver_dir = os.path.join(self.prepared_dir, "drivers", self.driver_name)
 
     def run(self, slots):
         self.load_evaluation_conf()

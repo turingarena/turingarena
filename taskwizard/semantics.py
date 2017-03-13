@@ -4,10 +4,10 @@ Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
 GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
 Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
-Main = namedtuple("Main", ["commands"])
 Command = namedtuple("Command", [])
-Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions", "main"])
-Task = namedtuple("Task", ["interfaces", "variables", "functions"])
+Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions"])
+Driver = namedtuple("Interface", ["name", "variables", "functions"])
+Task = namedtuple("Task", ["drivers", "interfaces"])
 
 
 class CallbackFunction(Function):
@@ -16,41 +16,27 @@ class CallbackFunction(Function):
 
 class Semantics:
 
+    def named_definitions(self, definitions):
+        result = OrderedDict()
+        for d in definitions:
+            result[d.name] = d
+        return result
+
     def start(self, ast):
-        variables = OrderedDict()
-        functions = OrderedDict()
-        interfaces = OrderedDict()
+        return Task(self.named_definitions(ast.drivers), self.named_definitions(ast.interfaces))
 
-        for variable in ast.variables:
-            variables[variable.name] = variable
-        for function in ast.functions:
-            functions[function.name] = function
-        for interface in ast.interfaces:
-            interfaces[interface.name] = interface
+    def driver_definition(self, ast):
+        return Driver(
+            ast.name,
+            self.named_definitions(ast.variables),
+            self.named_definitions(ast.functions))
 
-        return Task(interfaces, variables, functions)
-
-    def interface(self, ast):
-        variables = OrderedDict()
-        functions = OrderedDict()
-        callback_functions = OrderedDict()
-        main = None
-
-        for declaration in ast.declarations:
-            container = None
-            if isinstance(declaration, Variable):
-                container = variables
-            elif isinstance(declaration, CallbackFunction):
-                container = callback_functions
-            elif isinstance(declaration, Function):
-                container = functions
-            elif isinstance(declaration, Main):
-                main = declaration
-
-            if container is not None:
-                container[declaration.name] = declaration
-
-        return Interface(ast.name, variables, functions, callback_functions, main)
+    def interface_definition(self, ast):
+        return Interface(
+            ast.name,
+            self.named_definitions(ast.variables),
+            self.named_definitions(ast.functions),
+            self.named_definitions(ast.callback_functions))
 
     def variable(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)

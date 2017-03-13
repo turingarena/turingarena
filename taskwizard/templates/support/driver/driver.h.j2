@@ -4,7 +4,7 @@
 
 // Driver entry points
 
-{% for function in task.functions.values() %}
+{% for function in driver.functions.values() %}
   {{ macro.function_signature(function) }};
 {% endfor %}
 

@@ -36,14 +36,15 @@ class SupportPreparer:
 
 class DriverPreparer(SupportPreparer):
 
-    def __init__(self, problem):
-        super().__init__(problem, os.path.join(problem.prepared_dir, "driver"))
+    def __init__(self, problem, driver):
+        super().__init__(problem, os.path.join(problem.prepared_dir, "drivers", driver.name))
+        self.driver = driver
 
     def get_type(self):
         return "driver"
 
     def get_template_args(self):
-        return {"task": self.problem.task}
+        return {"task": self.problem.task, "driver": self.driver}
 
     def prepare(self):
         self.prepare_support()
@@ -96,7 +97,9 @@ class ProblemPreparer:
 
         os.mkdir(self.prepared_dir)
 
-        DriverPreparer(self).prepare()
+        os.mkdir(os.path.join(self.prepared_dir, "drivers"))
+        for driver in self.task.drivers.values():
+            DriverPreparer(self, driver).prepare()
 
         os.mkdir(os.path.join(self.prepared_dir, "interfaces"))
         for interface in self.task.interfaces.values():
@@ -105,4 +108,4 @@ class ProblemPreparer:
         evaluation_dir = os.path.join(self.prepared_dir, "evaluations", "main")
         os.makedirs(evaluation_dir)
         evaluation_yaml = open(os.path.join(evaluation_dir, "evaluation.yaml"), "w")
-        yaml.safe_dump({"phases": {"evaluate": {"slots": {"solution": {"interface": "aplusb"}}}}}, evaluation_yaml)
+        yaml.safe_dump({"phases": {"evaluate": {"driver": "main", "slots": {"solution": {"interface": "aplusb"}}}}}, evaluation_yaml)
