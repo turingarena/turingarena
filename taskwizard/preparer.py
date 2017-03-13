@@ -102,12 +102,7 @@ class ProblemPreparer:
         for interface in self.task.interfaces.values():
             InterfacePreparer(self, interface).prepare()
 
-        task_yaml = open(os.path.join(self.prepared_dir, "task.yaml"), "w")
-        yaml.safe_dump(
-            {
-                "slots": {
-                    "solution": {
-                        "interface": "aplusb"
-                    }
-                }
-            }, task_yaml)
+        evaluation_dir = os.path.join(self.prepared_dir, "evaluations", "main")
+        os.makedirs(evaluation_dir)
+        evaluation_yaml = open(os.path.join(evaluation_dir, "evaluation.yaml"), "w")
+        yaml.safe_dump({"phases": {"evaluate": {"slots": {"solution": {"interface": "aplusb"}}}}}, evaluation_yaml)
