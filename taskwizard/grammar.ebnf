@@ -56,7 +56,7 @@ global_variable_declaration =
   inout:(inout|`inout`) variable:variable ';'
   ;
 
-callback_function_declaration = 'callback' function_declaration ;
+callback_function_declaration = 'callback' @:function_declaration ;
 
 function_declaration =
   return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'

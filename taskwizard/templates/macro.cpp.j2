@@ -179,7 +179,11 @@ void accept_callbacks() {
 }
 
 {% for function in functions %}
-    {{ algorithm_function_signature(function, "call_" if driver else "") }} {
+    {% if driver %}
+    {{ algorithm_function_signature(function, "call_") }} {
+    {% else %}
+    {{ function_signature(function) }} {
+    {% endif %}
         support_trace("calling function '%s'\n", "{{function.name}}");
         printf("%s\n", "call");
         printf("%s\n", "{{function.name}}");
