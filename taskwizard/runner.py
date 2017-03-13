@@ -15,6 +15,7 @@ Options:
 """
 
 from cmath import phase
+from datetime import datetime
 from docopt import docopt
 import logging
 import os
@@ -69,7 +70,7 @@ class PhaseExecution:
             os.path.join(output_dir, "summary.txt"))
 
 
-class Phase:
+class PhaseEvaluation:
 
     def __init__(self, testcase, conf):
         self.testcase = testcase
@@ -79,20 +80,25 @@ class Phase:
         self.driver_name = conf["driver"]
         self.driver_dir = os.path.join(testcase.prepared_dir, "drivers", self.driver_name)
         self.phase_dir = os.path.join(testcase.testcase_dir, "phases", self.name)
+        self.output_dir = os.path.join(testcase.output_dir, "phases", self.name)
 
-    def run(self, slots, output_dir):
+    def run(self, slots):
+        os.makedirs(self.output_dir, exist_ok=True)
+
         with tempfile.TemporaryDirectory() as execution_dir:
-            PhaseExecution(self, execution_dir).execute(slots, output_dir)
+            PhaseExecution(self, execution_dir).execute(slots, self.output_dir)
 
 
-class Testcase:
+class TestcaseEvaluation:
 
-    def __init__(self, prepared_dir, name):
+    def __init__(self, prepared_dir, name, evaluation_dir):
         self.prepared_dir = prepared_dir
 
         self.name = name
 
         self.testcase_dir = os.path.join(prepared_dir, "testcases", name)
+        self.output_dir = os.path.join(evaluation_dir, "testcases", name)
+
         self.phases_conf_path = os.path.join(self.testcase_dir, "phases.yaml")
 
         self.load_phases()
@@ -102,7 +108,7 @@ class Testcase:
 
     def get_phase(self, phase_name):
         phase_conf = next(p for p in self.phases_conf if p["name"] == phase_name)
-        return Phase(self, phase_conf)
+        return PhaseEvaluation(self, phase_conf)
 
 
 def main():
@@ -113,5 +119,10 @@ def main():
         name, filename = slot.split(":", 2)
         slots[name] = filename
 
-    Testcase(args["--input"], args["<testcase>"]).get_phase(args["--phase"]).run(slots, args["--output"])
+    output_dir = args["--output"]
+    if output_dir is None:
+        output_dir = "evaluation_" + datetime.now().strftime("%Y%m%d%H%M%S")
+        os.mkdir(output_dir)
+
+    TestcaseEvaluation(args["--input"], args["<testcase>"], output_dir).get_phase(args["--phase"]).run(slots)
 
