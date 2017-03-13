@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 
-class AlgorithmProcess:
+class Process:
 
     def __init__(self, supervisor, process_id, algorithm_name):
         self.supervisor = supervisor
@@ -61,7 +61,7 @@ class ReadFile:
 class Supervisor:
 
     def __init__(self, task_run_dir):
-        self.algorithm_processes = {}
+        self.processes = {}
         self.read_files = {}
         self._next_id = 0
 
@@ -78,22 +78,22 @@ class Supervisor:
 
     def algorithm_start(self, algorithm_name):
         process_id = self.next_id()
-        process = AlgorithmProcess(self, process_id, algorithm_name)
-        self.algorithm_processes[process_id] = process
+        process = Process(self, process_id, algorithm_name)
+        self.processes[process_id] = process
 
         process.prepare()
 
         return process_id
 
     def after_algorithm_start(self, algorithm_name, process_id):
-        self.algorithm_processes[process_id].run()
+        self.processes[process_id].run()
 
     def process_status(self, process_id):
-        process = self.algorithm_processes[process_id]
+        process = self.processes[process_id]
         return process.status()
 
     def process_kill(self, process_id):
-        process = self.algorithm_processes[process_id]
+        process = self.processes[process_id]
         return process.kill()
 
     def read_file_open(self, file_name):
