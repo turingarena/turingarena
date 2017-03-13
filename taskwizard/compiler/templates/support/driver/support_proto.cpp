@@ -60,16 +60,16 @@ static int read_status() {
     return status;
 }
 
-int algorithm_status(int algorithm_id) {
+int process_status(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Requesting status of algo with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "algorithm_status %d\n", algorithm_id);
+    fprintf(control_request_pipe, "process_status %d\n", algorithm_id);
     fflush(control_request_pipe);
     return read_status();
 }
 
-int algorithm_kill(int algorithm_id) {
+int process_kill(int algorithm_id) {
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Killing algorithm with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "algorithm_kill %d\n", algorithm_id);
+    fprintf(control_request_pipe, "process_kill %d\n", algorithm_id);
     fflush(control_request_pipe);
     return read_status();
 }

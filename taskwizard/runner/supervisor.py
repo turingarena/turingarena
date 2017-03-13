@@ -88,11 +88,11 @@ class Supervisor:
     def after_algorithm_start(self, algorithm_name, process_id):
         self.algorithm_processes[process_id].run()
 
-    def algorithm_status(self, process_id):
+    def process_status(self, process_id):
         process = self.algorithm_processes[process_id]
         return process.status()
 
-    def algorithm_kill(self, process_id):
+    def process_kill(self, process_id):
         process = self.algorithm_processes[process_id]
         return process.kill()
 
@@ -111,8 +111,8 @@ class Supervisor:
     def on_command(self, command, arg):
         commands = {
             "algorithm_start": str,
-            "algorithm_status": int,
-            "algorithm_kill": int,
+            "process_status": int,
+            "process_kill": int,
             "read_file_open": str,
             "read_file_close": str
         }
