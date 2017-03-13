@@ -4,6 +4,7 @@ import pkg_resources
 import shutil
 import sys
 import yaml
+import subprocess
 
 from taskwizard.parser import TaskParser
 from taskwizard.semantics import Semantics
@@ -27,8 +28,30 @@ class SupportPreparer:
             ext = ".j2"
             if f.endswith(ext):
                 template = env.get_template(os.path.join(template_relative_dir, f))
-                output = open(os.path.join(self.output_dir, f[:-len(ext)]), "w")
-                template.stream(**self.get_template_args()).dump(output)
+                
+                ######## PRETTIFY CODE ########
+                read_pipe, write_pipe = os.pipe() # Make pipes to stream generated code to the prettifier
+                
+                base_prettifier_dir = pkg_resources.resource_filename("taskwizard", "../astyle/build/gcc/")
+                prettifier_executable = os.path.join(base_prettifier_dir, "bin/astyle")
+
+                output_file = open(os.path.join(self.output_dir, f[:-len(ext)]), "w")
+
+                if not os.path.isfile(prettifier_executable):
+                    print("Compiling prettifier...")
+                    make_process = subprocess.Popen("make -B -C \"" + base_prettifier_dir + "\" all", shell=True)
+                    make_process.wait()
+
+                subprocess.Popen(
+                    [prettifier_executable],
+                    universal_newlines=True,
+                    bufsize=1,
+                    stdin=os.fdopen(read_pipe, "r"),
+                    stdout=output_file
+                )
+                ######## END PRETTIFY CODE ########
+
+                template.stream(**self.get_template_args()).dump(os.fdopen(write_pipe, "w")) # Write directly to prettifier input pipe
             else:
                 shutil.copyfile(os.path.join(template_dir, f), os.path.join(self.output_dir, f))
 
