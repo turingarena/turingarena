@@ -1,19 +1,20 @@
 """Task Builder.
 
 Usage:
-  taskmake init [<name>] [ -C <dir> ]
+  taskmake (prepare|clean) [ -C <dir> ]
   taskmake -h | --help
 
 Options:
-  init               Initializes new task in the current directory
-  <name>             Task name [default: unnamed_task]
+  prepare            Prepares the task
   -C --chdir=<dir>   Change the current directory to <dir>
   -h --help          Show this screen.
 """
 
 from docopt import docopt
-from jinja2 import Environment, PackageLoader
 import os
+import shutil
+
+from taskwizard.preparer import ProblemPreparer
 
 
 def main():
@@ -23,5 +24,12 @@ def main():
     if chdir:
         os.chdir(chdir)
 
-    if args["init"]:
-        raise NotImplementedError
+    os.makedirs("build", exist_ok=True)
+
+    if args["clean"]:
+        shutil.rmtree("build")
+
+    if args["prepare"]:
+        prepared_dir = os.path.join("build", "prepared")
+        shutil.rmtree(prepared_dir, ignore_errors=True)
+        ProblemPreparer(".", prepared_dir).prepare()

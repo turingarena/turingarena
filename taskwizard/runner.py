@@ -28,7 +28,6 @@ logger = logging.getLogger("taskrun")
 
 def main():
     args = docopt(__doc__)
-    print(args)
 
     if not os.path.isdir(args["<task-folder>"]):
         logger.critical("%s should be a folder", args["<task-folder>"])

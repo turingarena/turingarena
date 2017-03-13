@@ -1,21 +1,3 @@
-"""Task Compiler.
-
-Usage:
-  taskcc prepare [-i <input-output_dir>] -o <output-output_dir>
-  taskcc stubs [-i <input-output_dir>] -o <output-file>
-  taskcc stub (driver|interface <name>) [-i <input-output_dir>] [-o <output-file>]
-  taskcc -h | --help
-
-Options:
-  -h --help          Show this screen.
-  --version          Show version.
-  prepare            Create the problem prepared folder
-  stub               Create the stub of driver/interfaces
-  name               The name of the interface to use.
-  -i --input=<output_dir>   Path to task source directory [default: .].
-  -o --output=<out>  Path to output file/directory
-"""
-
 from docopt import docopt
 from jinja2 import Environment, PackageLoader
 import os
@@ -129,13 +111,3 @@ class ProblemPreparer:
                     }
                 }
             }, task_yaml)
-
-
-def main():
-    args = docopt(__doc__)
-
-    if args["prepare"]:
-        ProblemPreparer(args["--input"], args["--output"]).prepare()
-
-    if args["stub"] or args["stubs"]:
-        raise NotImplementedError("not yet supported")
