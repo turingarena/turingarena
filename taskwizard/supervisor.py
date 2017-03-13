@@ -142,7 +142,7 @@ class Supervisor:
             if not line:
                 print("SUPERVISOR: control request pipe closed, terminating.", file=sys.stderr)
                 break
-            print("SUPERVISOR: received line on control request pipe:", line, file=sys.stderr)
+            print("SUPERVISOR: received line on control request pipe:", line.rstrip(), file=sys.stderr)
 
             command, arg = line.rstrip().split(" ", 2)
             result = self.on_command(command, arg)
