@@ -37,7 +37,7 @@
 
     {% if driver %}
         support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
-        fscanf(algorithm_upward_pipe(process_id), " %d", &{{v.name}});
+        fscanf(process_upward_pipe(process_id), " %d", &{{v.name}});
     {% else %}
         support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
         scanf(" %d", &{{v.name}});
@@ -81,12 +81,12 @@
   |
   replace(
     "printf(",
-    "fprintf(algorithm_downward_pipe(process_id), " if driver else "printf("
+    "fprintf(process_downward_pipe(process_id), " if driver else "printf("
   )
   | 
   replace(
     "scanf(",
-    "fscanf(algorithm_upward_pipe(process_id), " if driver else "scanf(" 
+    "fscanf(process_upward_pipe(process_id), " if driver else "scanf(" 
   )
   | 
   replace(

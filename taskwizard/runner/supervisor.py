@@ -10,8 +10,8 @@ class AlgorithmProcess:
         self.process_id = process_id
         self.algorithm_name = algorithm_name
         self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
-        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_downward.%d.pipe" % (process_id,))
-        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "algorithm_upward.%d.pipe" % (process_id,))
+        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "process_downward.%d.pipe" % (process_id,))
+        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "process_upward.%d.pipe" % (process_id,))
 
     def prepare(self):
         os.mkfifo(self.downward_pipe_name)

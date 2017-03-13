@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 #include "support_proto.h"
 
-FILE *algorithm_upward_pipes[2000];
-FILE *algorithm_downward_pipes[2000];
+FILE *process_upward_pipes[2000];
+FILE *process_downward_pipes[2000];
 
 FILE *read_file_pipes[2000];
 FILE *write_file_pipes[2000];
@@ -10,12 +10,12 @@ FILE *write_file_pipes[2000];
 FILE *control_request_pipe;
 FILE *control_response_pipe;
 
-FILE *algorithm_upward_pipe(int id) {
-    return algorithm_upward_pipes[id];
+FILE *process_upward_pipe(int id) {
+    return process_upward_pipes[id];
 }
 
-FILE *algorithm_downward_pipe(int id) {
-    return algorithm_downward_pipes[id];
+FILE *process_downward_pipe(int id) {
+    return process_downward_pipes[id];
 }
 
 void driver_init() {
@@ -35,20 +35,20 @@ int algorithm_start(const char *algo_name) {
 
 
     // Generate file descriptor names
-    char algorithm_downward_pipe_name[200];
-    sprintf(algorithm_downward_pipe_name, "algorithm_downward.%d.pipe", descriptor);
+    char process_downward_pipe_name[200];
+    sprintf(process_downward_pipe_name, "process_downward.%d.pipe", descriptor);
 
-    char algorithm_upward_pipe_name[200];
-    sprintf(algorithm_upward_pipe_name, "algorithm_upward.%d.pipe", descriptor);
+    char process_upward_pipe_name[200];
+    sprintf(process_upward_pipe_name, "process_upward.%d.pipe", descriptor);
 
     // Open descriptors
-    algorithm_downward_pipes[descriptor] = fopen(algorithm_downward_pipe_name, "w");
-    algorithm_upward_pipes[descriptor] = fopen(algorithm_upward_pipe_name, "r");
+    process_downward_pipes[descriptor] = fopen(process_downward_pipe_name, "w");
+    process_upward_pipes[descriptor] = fopen(process_upward_pipe_name, "r");
 
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: successfully opened pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
 
     // Set auto flush
-    setvbuf(algorithm_downward_pipes[descriptor], NULL, _IONBF, 0);
+    setvbuf(process_downward_pipes[descriptor], NULL, _IONBF, 0);
     
     return descriptor;
 }
