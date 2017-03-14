@@ -55,6 +55,19 @@ class PhaseExecution:
 
         os.mkdir(os.path.join(self.execution_dir, "read_files"))
 
+        #FIXME: *************************** testing *******************************************
+        os.mkdir(os.path.join(self.execution_dir, "read_files","evaluate"))
+        
+        test = open(os.path.join(self.execution_dir, "read_files", "evaluate", "data.txt"), "w")
+        print("call", file=test)
+        print("evaluate", file=test)
+        print("return", file=test)
+        test.close()
+        test = open(os.path.join(self.execution_dir, "summary.txt"), "w")
+        print("TEST", file=test)
+        test.close()       
+        #******************************** END TESTING ****************************************** 
+
         shutil.copyfile(
             os.path.join(self.phase.phase_dir, "parameter.txt"),
             os.path.join(self.execution_dir, "parameter.txt"))

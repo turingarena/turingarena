@@ -40,6 +40,8 @@ int algorithm_start(const char *algo_name) {
     process_downward_pipes[descriptor] = fopen(process_downward_pipe_name, "w");
     process_upward_pipes[descriptor] = fopen(process_upward_pipe_name, "r");
 
+    assert(process_downward_pipes[descriptor]);
+    assert(process_upward_pipes[descriptor]);
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: successfully opened pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
 
     // Set auto flush

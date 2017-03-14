@@ -23,6 +23,10 @@
 
 {{ macro.generate_protocol([], driver.functions.values()) }}
 
+{{ macro.generate_protocol([], driver.functions.values(), [], from_file=True) }}
+
 int main() {
-    accept_callbacks();
+    int file_id = read_file_open("evaluate");
+    accept_file_callbacks(file_id);
+    support_trace("terminating");
 }

@@ -33,7 +33,7 @@
 {%- endmacro %}
 
 {# Generate code to read variables from custom pipe #}
-{% macro generate_read_data(variables, driver=False) %}
+{% macro generate_read_data(variables) %}
 
     support_trace("reading arguments\n");
 
@@ -47,7 +47,7 @@
 
 
 {# Generate code to write variables to custom pipe #}
-{% macro generate_write_data(variables, driver=False) %}
+{% macro generate_write_data(variables) %}
 
     support_trace("writing arguments\n");
 
@@ -76,12 +76,12 @@
   |
   replace(
     "INPUT_STREAM",
-    "process_downward_pipe(process_id)" if driver else "stdin"
+    "process_upward_pipe(process_id)" if driver else  "read_file_pipe(file_id)" if from_file else "stdin"
   )
   | 
   replace(
     "OUTPUT_STREAM",
-    "process_upward_pipe(process_id)" if driver else "stdout" 
+    "process_downward_pipe(process_id)" if driver else  "write_file_pipe(file_id)" if from_file else "stdout" 
   )
   | 
   replace(
@@ -94,23 +94,25 @@
 {# Generate code able to receive and execute calls to all 'callbacks' exposed by this executable,
      and call all 'functions' of the executable on the other side of the pipe #}
 {% macro do_generate_protocol(functions, callbacks, driver=False, from_file=False, interface_name="") %}
-    {{ generate_callbacks(callbacks, driver, interface_name) }}
+    {{ generate_callbacks(callbacks, driver, from_file, interface_name) }}
     {{ generate_functions(functions, driver, interface_name) }}
 {% endmacro %}
 
 {# Generate code to accept callbacks #}
-{% macro generate_callbacks(callbacks, driver, interface_name) %}
+{% macro generate_callbacks(callbacks, driver, from_file, interface_name) %}
  {% for callback in callbacks %}
 
   {% if driver %}
     void accept_callback_{{interface_name}}_{{callback.name}}(int process_id) {
+  {% elif from_file %}
+    void accept_file_callback_{{callback.name}}(int file_id) {  
   {% else %}
     void accept_callback_{{callback.name}}() {
   {% endif %}
         support_trace("received callback '%s'\n", "{{callback.name}}");
 
     {# Generate and receive all variables needed to execute this function #}
-    {{ generate_read_data(callback.parameters.values(), driver=driver) }}
+    {{ generate_read_data(callback.parameters.values()) }}
 
     {% set comma = joiner(", ") %}  {# Call the callback #}
     {% if driver %}
@@ -147,6 +149,8 @@ void accept_any_callback() {
     if(!strcmp(callback_name, "{{callback.name}}")) {
         {% if driver %}
         accept_callback_{{interface_name}}_{{callback.name}}(process_id);
+        {% elif from_file %}
+        accept_file_callback_{{callback.name}}(file_id);        
         {% else %}
         accept_callback_{{callback.name}}();
         {% endif %}
@@ -181,7 +185,7 @@ void accept_callbacks() {
             {% if driver %}
             accept_any_callback_{{interface_name}}(process_id);
             {% elif from_file %}
-            accept_any_file_callback(file_id)
+            accept_any_file_callback(file_id);
             {% else %}
             accept_any_callback();
             {% endif %}
@@ -206,7 +210,7 @@ void accept_callbacks() {
             fprintf(OUTPUT_STREAM, "%s\n", "{{function.name}}");
 
             {# Write all function variables to pipe #}
-            {{ generate_write_data(function.parameters.values(), driver=driver) }}
+            {{ generate_write_data(function.parameters.values()) }}
 
             support_trace("function called, waiting for return or callbacks...\n");
             {% if driver %}
