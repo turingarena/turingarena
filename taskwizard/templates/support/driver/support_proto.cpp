@@ -24,7 +24,7 @@ int algorithm_start(const char *algo_name) {
     printf("algorithm_start %s\n", algo_name);
     fflush(control_request_pipe);
     int descriptor;
-    printf("%d", &descriptor);
+    scanf("%d", &descriptor);
 
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: received id, opening pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
 
@@ -50,7 +50,7 @@ int algorithm_start(const char *algo_name) {
 
 static int read_status() {
     int status;
-    printf(" %d", &status);
+    scanf(" %d", &status);
     fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Status of request: %d\n", status);    
     return status;
 }
@@ -76,7 +76,7 @@ int read_file_open(const char *file_name) {
     printf("read_file_open %s\n", file_name);
     fflush(control_request_pipe);
     int descriptor;
-    printf(" %d", &descriptor);
+    scanf(" %d", &descriptor);
     
 
     // Generate file names
