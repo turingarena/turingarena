@@ -16,7 +16,12 @@ class SupportPreparer:
         self.output_dir = output_dir
 
     def prepare_support(self):
-        env = Environment(loader=PackageLoader("taskwizard", "templates"))
+        env = Environment(
+            loader=PackageLoader("taskwizard", "templates"),
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True,
+        )
 
         template_relative_dir = "support/" + self.get_type()
         template_dir = pkg_resources.resource_filename("taskwizard", "templates/" + template_relative_dir)

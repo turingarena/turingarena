@@ -1,126 +1,170 @@
-{% macro parameter(p) -%}
+{% macro parameter(p) %}
 {{p.type}} {{p.name}}
 {%- endmacro %}
 
 
-{% macro parameters_signature(function) -%}
-  {%- set comma = joiner(", ") -%}
-  {%- for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor -%}
+{% macro parameters_signature(function, comma=joiner(", ")) %}
+{% for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor %}
 {%- endmacro %}
 
 
-{% macro function_signature(function, prefix='') -%}
-  {{function.return_type}} {{prefix}}{{function.name}}({{parameters_signature(function)}})
+{% macro function_signature(function) %}
+{{function.return_type}} CALL_{{function.name}}({{parameters_signature(function)}})
 {%- endmacro %}
 
 
-{% macro process_parameters_signature(function) -%}
-  int process_id
-  {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
+{% macro callback_function_signature(function) %}
+{{function.return_type}} ON_{{function.name}}({{parameters_signature(function)}})
 {%- endmacro %}
 
 
-{% macro call_process_function_signature(function) -%}
-  {{function.return_type}} call_{{function.name}}({{process_parameters_signature(function)}})
+{% macro data_block_type(name) %}
+data_block_{{name}}
 {%- endmacro %}
 
 
-{% macro callback_function_signature(function) -%}
-  {{function.return_type}} on_{{function.name}}({{process_parameters_signature(function)}})
+{% macro generate_data_block_struct(name, variables) %}
+struct {{ data_block_type(name) }} {
+    {% for v in variables %}
+    {{v.type}} {{v.name}};
+    {% endfor %}
+};
 {%- endmacro %}
 
 
-{% macro generate_read_data(variables, driver=False) %}
-    support_trace("reading arguments\n");
-
+{% macro generate_data_block_read(name, variables) %}
+void data_block_read_{{name}}({{ data_block_type(name) }} *p) {
     {% for v in variables %}
     {{v.type}} {{v.name}};
 
     support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
-    scanf(" %d", &{{v.name}});
+    scanf(" %d", &p->{{v.name}});
 
     {% endfor %}
-{% endmacro %}
+}
+{%- endmacro %}
 
 
-{% macro generate_write_data(variables, driver=False) %}
-    support_trace("writing arguments\n");
-
+{% macro generate_data_block_write(name, variables) %}
+void data_block_write_{{name}}({{ data_block_type(name) }} *p) {
     {% for v in variables %}
 
-    support_trace("writing variable '%s %s': %d\n", "{{v.type}}", "{{v.name}}", {{v.name}});
-    printf("%d\n", {{v.name}});
+    support_trace("writing variable '%s %s': %d\n", "{{v.type}}", "{{v.name}}", p->{{v.name}});
+    printf("%d\n", p->{{v.name}});
 
     {% endfor %}
-{% endmacro %}
+  }
+{%- endmacro %}
 
 
 {% macro generate_read_retval(driver=False) %}
     int retval;
     scanf(" %d", &retval);
     return retval;
-{% endmacro %}
+{%- endmacro %}
 
 
 {% macro generate_write_retval(driver=False) %}
     printf("return %d\n", retval);
-{% endmacro %}
+{%- endmacro %}
 
 
-{% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}
+{% macro wrap_for_interface(driver=False, interface_name="") %}
 {{
-  do_generate_protocol(functions, callbacks, driver, interface_name)
+  caller()
   |
   replace(
     "printf(",
-    "fprintf(process_downward_pipe(process_id), " if driver else "printf("
+    "fprintf(process_downward_pipe(current_process_id), " if driver else "printf("
   )
   | 
   replace(
     "scanf(",
-    "fscanf(process_upward_pipe(process_id), " if driver else "scanf(" 
+    "fscanf(process_upward_pipe(current_process_id), " if driver else "scanf(" 
   )
   | 
   replace(
     "support_trace(",
-    "support_trace_driver(process_id, " if driver else "support_trace(" 
+    "support_trace_driver(current_process_id, " if driver else "support_trace(" 
+  )
+  | 
+  replace(
+    "_INTERFACE",
+    "_" + interface_name if driver else "" 
+  )
+  | 
+  replace(
+    "ON_",
+    "on_" + interface_name + "_" if driver else "" 
+  )
+  | 
+  replace(
+    "CALL_",
+    "call_" + interface_name + "_" if driver else "" 
   )
 }}
 {% endmacro %}
+
+
+{% macro do_generate_protocol_header(functions, callbacks) %}
+    // Downward calls
+  
+    {% for function in functions -%}
+        {{ function_signature(function) }};
+    {% endfor %}
+  
+    // Upward call
+  
+    {% for callback in callbacks -%}
+        {{ callback_function_signature(callback) }};
+    {% endfor %}
+{% endmacro %}
+
+
+{% macro generate_protocol_header(functions, callbacks, driver=False, interface_name="") %}
+{% call wrap_for_interface(driver, interface_name) %}
+{{do_generate_protocol_header(functions, callbacks)}}
+{% endcall %}
+{% endmacro %}
+
+
+{% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}
+{% call wrap_for_interface(driver, interface_name) %}
+{{do_generate_protocol(functions, callbacks, driver)}}
+{% endcall %}
+{%- endmacro %}
+
+
+{% macro parameters_of(function) %}
+parameters_of_{{function.name}}
+{%- endmacro %}
+
 
 {% macro do_generate_protocol(functions, callbacks, driver=False, interface_name="") %}
 
 {% for callback in callbacks %}
 
-{% if driver %}
-void accept_callback_{{interface_name}}_{{callback.name}}(int process_id) {
-{% else %}
-void accept_callback_{{callback.name}}() {
-{% endif %}
+{{ generate_data_block_struct(parameters_of(callback), callback.parameters.values()) }}
+{{ generate_data_block_read(parameters_of(callback), callback.parameters.values()) }}
+
+void accept_callback_INTERFACE_{{callback.name}}() {
     support_trace("received callback '%s'\n", "{{callback.name}}");
 
-    {{ generate_read_data(callback.parameters.values(), driver=driver) }}
-    {% if driver %}
-    support_trace("calling local function '%s'\n", "on_{{callback.name}}");
-    int retval = on_{{callback.name}}(process_id{% for p in callback.parameters.values() %}, {{p.name}}{% endfor %});
-    support_trace("local function '%s' returned\n", "on_{{callback.name}}");
-    {% else %}
-    support_trace("calling local function '%s'\n", "{{callback.name}}");
+    support_trace("reading arguments\n");
+    {{ data_block_type(parameters_of(callback)) }} parameters;
+    data_block_read_{{parameters_of(callback)}}(&parameters);
+
+    support_trace("calling local function '%s'\n", "ON_{{callback.name}}");
     {% set comma = joiner(", ") %}
-    int retval = {{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %});
-    support_trace("local function '%s' returned\n", "{{callback.name}}");
-    {% endif %}
+    int retval = ON_{{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}parameters.{{p.name}}{% endfor %});
+    support_trace("local function '%s' returned\n", "on_{{callback.name}}");
     
     support_trace("writing return value\n");
     {{ generate_write_retval(driver=driver) }}
 }
 {% endfor %}
 
-{% if driver %}
-void accept_any_callback_{{interface_name}}(int process_id) {
-{% else %}
-void accept_any_callback() {
-{% endif %}
+void accept_any_callback_INTERFACE() {
     char callback_name[51] = { 0 };
     support_trace("reading callback name\n");
 
@@ -128,11 +172,7 @@ void accept_any_callback() {
 
     {% for callback in callbacks %}
     if(!strcmp(callback_name, "{{callback.name}}")) {
-        {% if driver %}
-        accept_callback_{{interface_name}}_{{callback.name}}(process_id);
-        {% else %}
-        accept_callback_{{callback.name}}();
-        {% endif %}
+        accept_callback_INTERFACE_{{callback.name}}();
 
         return;
     }
@@ -142,11 +182,7 @@ void accept_any_callback() {
     assert(0 && "Unrecognized callback");
 }
 
-{% if driver %}
-void accept_callbacks_{{interface_name}}(int process_id) {
-{% else %}
-void accept_callbacks() {
-{% endif %}
+void accept_callbacks_INTERFACE() {
     while(1) {
         char command[51] = { 0 };
         support_trace("waiting for call/return\n");
@@ -158,11 +194,7 @@ void accept_callbacks() {
             break;
         } else if(!strcmp(command, "call")) {
             support_trace("received 'call', expecting a call\n");
-            {% if driver %}
-            accept_any_callback_{{interface_name}}(process_id);
-            {% else %}
-            accept_any_callback();
-            {% endif %}
+            accept_any_callback_INTERFACE();
         } else {
             support_trace("unrecognized command: %s\n", command);
             assert(0 && "Unrecognized command");
@@ -171,27 +203,36 @@ void accept_callbacks() {
 }
 
 {% for function in functions %}
-    {% if driver %}
-    {{ call_process_function_signature(function) }} {
-    {% else %}
-    {{ function_signature(function) }} {
-    {% endif %}
-        support_trace("calling function '%s'\n", "{{function.name}}");
-        printf("%s\n", "call");
-        printf("%s\n", "{{function.name}}");
 
-        {{ generate_write_data(function.parameters.values(), driver=driver) }}
+{{ generate_data_block_struct(parameters_of(function), function.parameters.values()) }}
+{{ generate_data_block_write(parameters_of(function), function.parameters.values()) }}
 
-        support_trace("function called, waiting for return or callbacks...\n");
-        {% if driver %}
-        accept_callbacks_{{interface_name}}(process_id);
-        {% else %}
-        accept_callbacks();
-        {% endif %}
+{% if driver %}
+{{ function_signature(function) }} {
+    current_process_id = process_id;
+    {% set comma = joiner(", ") %}
+    CALL_{{function.name}}({% for p in function.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %}));
+}
+{% endif %}
 
-        support_trace("reading return value for function '%s'\n", "{{function.name}}");
-        {{ generate_read_retval(driver=driver) }}
-    }
+{{ function_signature(function) }} {
+    support_trace("calling function '%s'\n", "{{function.name}}");
+    printf("%s\n", "call");
+    printf("%s\n", "{{function.name}}");
+
+    support_trace("writing arguments\n");
+    {{ data_block_type(parameters_of(function)) }} parameters;
+    {% for p in function.parameters.values() %}
+    parameters.{{p.name}} = {{p.name}};
+    {% endfor %}
+    data_block_write_{{parameters_of(function)}}(&parameters);
+
+    support_trace("function called, waiting for return or callbacks...\n");
+    accept_callbacks_INTERFACE();
+
+    support_trace("reading return value for function '%s'\n", "{{function.name}}");
+    {{ generate_read_retval(driver=driver) }}
+}
 {% endfor %}
 
-{% endmacro %}
+{%- endmacro %}

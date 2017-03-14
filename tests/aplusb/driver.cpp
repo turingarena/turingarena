@@ -2,7 +2,7 @@
 
 int evaluate(int A, int B) {
   int solution = algorithm_start("solution");
-  int result = call_sum(solution, A, B);
+  int result = call_aplusb_sum(solution, A, B);
   process_kill(solution);
 
   if(result == A+B) {

@@ -2,27 +2,13 @@
 
 #include "support_proto.h"
 
-// Driver entry points
-
-{% for function in driver.functions.values() %}
-  {{ macro.function_signature(function) }};
-{% endfor %}
-
-// Interface RPCs
-
 {% for interface in task.interfaces.values() %}
-  // RPC with interface {{interface.name}}
-
-  // Downward calls
-
-  {% for function in interface.functions.values() -%}
-    {{ macro.call_process_function_signature(function) }};
-  {% endfor %}
-
-  // Upward call
-
-  {% for function in interface.callback_functions.values() -%}
-    {{ macro.callback_function_signature(function) }};
-  {% endfor %}
-
+    {{ macro.generate_protocol_header(
+        interface.functions.values(),
+        interface.callback_functions.values(),
+        driver=True,
+        interface_name=interface.name) }}
 {% endfor %}
+
+{{ macro.generate_protocol_header([], driver.functions.values()) }}
+
