@@ -14,45 +14,37 @@
 {%- endmacro %}
 
 
-{% macro algorithm_parameters_signature(function) -%}
+{% macro process_parameters_signature(function) -%}
   int process_id
   {%- for p in function.parameters.values() %}, {{parameter(p)}}{% endfor -%}
 {%- endmacro %}
 
 
-{% macro algorithm_function_signature(function, prefix='') -%}
-  {{function.return_type}} {{prefix}}{{function.name}}({{algorithm_parameters_signature(function)}})
+{% macro call_process_function_signature(function) -%}
+  {{function.return_type}} call_{{function.name}}({{process_parameters_signature(function)}})
+{%- endmacro %}
+
+
+{% macro callback_function_signature(function) -%}
+  {{function.return_type}} on_{{function.name}}({{process_parameters_signature(function)}})
 {%- endmacro %}
 
 
 {% macro generate_read_data(variables, driver=False) %}
-    {% if driver %}
     support_trace("reading arguments\n");
-    {% else %}
-    support_trace("reading arguments\n");
-    {% endif %}
 
     {% for v in variables %}
     {{v.type}} {{v.name}};
 
-    {% if driver %}
-        support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
-        fscanf(process_upward_pipe(process_id), " %d", &{{v.name}});
-    {% else %}
-        support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
-        scanf(" %d", &{{v.name}});
-    {% endif %}
+    support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
+    scanf(" %d", &{{v.name}});
 
     {% endfor %}
 {% endmacro %}
 
 
 {% macro generate_write_data(variables, driver=False) %}
-    {% if driver %}
     support_trace("writing arguments\n");
-    {% else %}
-    support_trace("writing arguments\n");
-    {% endif %}
 
     {% for v in variables %}
 
@@ -180,7 +172,7 @@ void accept_callbacks() {
 
 {% for function in functions %}
     {% if driver %}
-    {{ algorithm_function_signature(function, "call_") }} {
+    {{ call_process_function_signature(function) }} {
     {% else %}
     {{ function_signature(function) }} {
     {% endif %}

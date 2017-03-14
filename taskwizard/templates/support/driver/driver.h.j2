@@ -16,13 +16,13 @@
   // Downward calls
 
   {% for function in interface.functions.values() -%}
-    {{ macro.algorithm_function_signature(function, "call_") }};
+    {{ macro.call_process_function_signature(function) }};
   {% endfor %}
 
   // Upward call
 
   {% for function in interface.callback_functions.values() -%}
-    {{ macro.algorithm_function_signature(function, "on_") }};
+    {{ macro.callback_function_signature(function) }};
   {% endfor %}
 
 {% endfor %}
