@@ -4,7 +4,7 @@ int pong = 0;
 
 int evaluate() {
   int solution = algorithm_start("solution");
-  int result = call_ping(solution);
+  int result = call_pingpong_ping(solution);
   process_kill(solution);
 
   if(pong) {
@@ -14,6 +14,7 @@ int evaluate() {
   }
 }
 
-int on_pong(int process_id) {
+int on_pingpong_pong(int process_id) {
   pong = 1;
 }
+
