@@ -54,6 +54,7 @@ Command evaluate options:
 
 import docopt
 
+from taskwizard.evaluator import ProblemEvaluator
 from taskwizard.preparer import ProblemPreparer
 
 
@@ -66,6 +67,19 @@ def main():
 
     if args["prepare"]:
         ProblemPreparer(definition_dir, output_dir).prepare()
+        return
+
+    if args["evaluate"]:
+        scenario = args["--test-scenario"]
+        seed = args["--test-seed"]
+        phase = args["--test-phase"]
+
+        slots = {}
+        for f in args["<file>"]:
+            slot, path = f.split(":", 2)
+            slots[slot] = path
+
+        ProblemEvaluator(input_dir, output_dir, "evaluation1").evaluate(slots=slots)
         return
 
     raise NotImplementedError
