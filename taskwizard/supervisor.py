@@ -74,7 +74,8 @@ class Supervisor:
         self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
 
         self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
-        self.summary_path = os.path.join(task_run_dir, "summary.txt")
+        self.seed_path = os.path.join(task_run_dir, "seed.txt")
+        self.result_path = os.path.join(task_run_dir, "result.txt")
 
     def next_id(self):
         self._next_id += 1
@@ -177,7 +178,7 @@ class Supervisor:
             cwd=self.driver_sandbox_dir,
             universal_newlines=True,
             stdin=open(self.parameter_path),
-            stdout=open(self.summary_path, "w"),
+            stdout=open(self.result_path, "w"),
             bufsize=1
         )
 

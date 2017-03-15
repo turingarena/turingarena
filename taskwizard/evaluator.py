@@ -59,8 +59,8 @@ class PhaseExecution:
         supervisor.Supervisor(self.execution_dir).run()
 
         shutil.copyfile(
-            os.path.join(self.execution_dir, "summary.txt"),
-            os.path.join(output_dir, "summary.txt"))
+            os.path.join(self.execution_dir, "result.txt"),
+            os.path.join(output_dir, "result.txt"))
 
 
 class CasePhaseEvaluator:
