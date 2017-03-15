@@ -1,19 +1,3 @@
-"""Task run.
-
-Usage:
-  taskrun <testcase> [<slot:submission>...] [-i <prepared-dir>] [-o <output_dir>] [-p <phase>] [--maxproc=<maxproc>]
-  taskrun (-h | --help)
-
-Options:
-  <testcase>                    Which testcase to run [default: main]
-  -i --input=<prepared-dir>     Path to the problem prepared folder [default: ./build/prepared/].
-  -o --output=<output-dir>      Path to the folder where to put evaluation results
-  -p --phase=<phase>            Which phase to run [default: evaluate]
-  slot:submission               Slot/submission pair (example: player1:sol/play.cpp)
-  -h --help                     Show this screen.
-  --maxproc=<maxproc>           Max num of processes [default: 20].
-"""
-
 from datetime import datetime
 from docopt import docopt
 import os
@@ -85,7 +69,7 @@ class PhaseEvaluation:
             PhaseExecution(self, execution_dir).execute(slots, self.output_dir)
 
 
-class TestcaseEvaluation:
+class CaseEvaluation:
 
     def __init__(self, prepared_dir, name, evaluation_dir):
         self.prepared_dir = prepared_dir
@@ -107,6 +91,12 @@ class TestcaseEvaluation:
         return PhaseEvaluation(self, phase_conf)
 
 
+class ScenarioEvaluation:
+
+    def __init__(self):
+        pass
+
+
 def main():
     args = docopt(__doc__)
 
@@ -120,5 +110,5 @@ def main():
         output_dir = "evaluation_" + datetime.now().strftime("%Y%m%d%H%M%S")
         os.mkdir(output_dir)
 
-    TestcaseEvaluation(args["--input"], args["<testcase>"], output_dir).get_phase(args["--phase"]).run(slots)
+    CaseEvaluation(args["--input"], args["<testcase>"], output_dir).get_phase(args["--phase"]).run(slots)
 

@@ -54,9 +54,18 @@ Command evaluate options:
 """
 
 import docopt
+from taskwizard.preparer import ProblemPreparer
 
 
 def main():
     args = docopt.docopt(__doc__)
+
+    definition_dir = args["--definition-dir"]
+    input_dir = args["--input-dir"]
+    output_dir = args["--output-dir"]
+
+    if args["prepare"]:
+        ProblemPreparer(definition_dir, output_dir).prepare()
+        return
 
     raise NotImplementedError

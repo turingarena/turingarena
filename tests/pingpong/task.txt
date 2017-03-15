@@ -7,7 +7,7 @@ driver main {
   int evaluate();
 }
 
-testcase test1 {
+scenario test1 {
   phase evaluate {
     slot solution interface pingpong;
     driver main evaluate();
