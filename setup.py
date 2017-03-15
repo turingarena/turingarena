@@ -23,6 +23,7 @@ setup(
         "console_scripts": [
             "taskmake=taskwizard.builder:main",
             "taskrun=taskwizard.runner:main",
+            "taskwizard=taskwizard.main:main",
         ],
     },
     packages=find_packages(),
