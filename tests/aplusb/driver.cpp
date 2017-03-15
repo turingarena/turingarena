@@ -5,14 +5,14 @@
 const int N_MAX = 1000;
 
 int evaluate() {
-  int solution = algorithm_start("solution");
-
   srand(get_seed());
   int A = rand() % N_MAX;
   int B = rand() % N_MAX;
 
+  int solution = algorithm_create_process("solution");
+  process_start(solution);
   int result = call_aplusb_sum(solution, A, B);
-  process_kill(solution);
+  process_stop(solution);
 
   if(result == A+B) {
     return 1;

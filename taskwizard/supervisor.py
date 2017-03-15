@@ -20,6 +20,9 @@ class Process:
 
         print("SUPERVISOR: algorithm process %s(%d): pipes created" % (self.algorithm_name, self.process_id), file=sys.stderr)
 
+    def start(self):
+        return 0
+
     def run(self):
         self.downward_pipe = open(self.downward_pipe_name, "r")
         print("SUPERVISOR: algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id), file=sys.stderr)
@@ -82,7 +85,7 @@ class Supervisor:
         self._next_id += 1
         return self._next_id
 
-    def algorithm_start(self, algorithm_name):
+    def algorithm_create_process(self, algorithm_name):
         process_id = self.next_id()
         process = Process(self, process_id, algorithm_name)
         self.processes[process_id] = process
@@ -91,14 +94,17 @@ class Supervisor:
 
         return process_id
 
-    def after_algorithm_start(self, algorithm_name, process_id):
+    def process_start(self, process_id):
+        return self.processes[process_id].start()
+
+    def after_process_start(self, process_id, status):
         self.processes[process_id].run()
 
     def process_status(self, process_id):
         process = self.processes[process_id]
         return process.status()
 
-    def process_kill(self, process_id):
+    def process_stop(self, process_id):
         process = self.processes[process_id]
         return process.kill()
 
@@ -114,11 +120,12 @@ class Supervisor:
     def read_file_close(self, file_id):
         pass
 
-    def on_command(self, command, arg):
+    def parse_command(self, command, arg_str):
         commands = {
-            "algorithm_start": str,
+            "algorithm_create_process": str,
+            "process_start": int,
             "process_status": int,
-            "process_kill": int,
+            "process_stop": int,
             "read_file_open": str,
             "read_file_close": str
         }
@@ -127,11 +134,14 @@ class Supervisor:
             raise ValueError("Unrecognized command: " + command)
 
         arg_type = commands[command]
-        arg_value = arg_type(arg)
+        arg = arg_type(arg_str)
 
-        print("SUPERVISOR: received command %s(%s)" % (command, arg_value), file=sys.stderr)
-        response = getattr(self, command)(arg_value)
-        print("SUPERVISOR: command %s(%s) returned %s" % (command, arg_value, response), file=sys.stderr)
+        return (command, arg)
+
+    def on_command(self, command, arg):
+        print("SUPERVISOR: received command %s(%s)" % (command, arg), file=sys.stderr)
+        response = getattr(self, command)(arg)
+        print("SUPERVISOR: command %s(%s) returned %s" % (command, arg, response), file=sys.stderr)
 
         return response
 
@@ -149,7 +159,9 @@ class Supervisor:
                 break
             print("SUPERVISOR: received line on control request pipe:", line.rstrip(), file=sys.stderr)
 
-            command, arg = line.rstrip().split(" ", 2)
+            command, arg_str = line.rstrip().split(" ", 2)
+            command, arg = self.parse_command(command, arg_str)
+
             result = self.on_command(command, arg)
 
             print("SUPERVISOR: sending on control response pipe %s" % (result,), file=sys.stderr)

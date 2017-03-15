@@ -42,34 +42,15 @@ FILE* get_parameter_file() {
     return parameter_file;
 }
 
-int algorithm_start(const char *algo_name) {
-    // Start new algorithm    
-    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Starting new instance of algorithm \"%s\"\n", algo_name);    
-    fprintf(control_request_pipe, "algorithm_start %s\n", algo_name);
+int algorithm_create_process(const char *algo_name) {
+    // Start new process    
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Creating new process for algorithm \"%s\"\n", algo_name);    
+    fprintf(control_request_pipe, "algorithm_create_process %s\n", algo_name);
     fflush(control_request_pipe);
-    int descriptor;
-    fscanf(control_response_pipe, "%d", &descriptor);
+    int process_id;
+    fscanf(control_response_pipe, "%d", &process_id);
 
-    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: received id, opening pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
-
-
-    // Generate file descriptor names
-    char process_downward_pipe_name[200];
-    sprintf(process_downward_pipe_name, "process_downward.%d.pipe", descriptor);
-
-    char process_upward_pipe_name[200];
-    sprintf(process_upward_pipe_name, "process_upward.%d.pipe", descriptor);
-
-    // Open descriptors
-    process_downward_pipes[descriptor] = fopen(process_downward_pipe_name, "w");
-    process_upward_pipes[descriptor] = fopen(process_upward_pipe_name, "r");
-
-    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: successfully opened pipes of algo \"%s\" with id %d \n", algo_name, descriptor);
-
-    // Set auto flush
-    setvbuf(process_downward_pipes[descriptor], NULL, _IONBF, 0);
-    
-    return descriptor;
+    return process_id;
 }
 
 static int read_status() {
@@ -79,16 +60,40 @@ static int read_status() {
     return status;
 }
 
-int process_status(int algorithm_id) {
-    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Requesting status of algo with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "process_status %d\n", algorithm_id);
+int process_start(int process_id) {
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Starting process with id: %d...\n", process_id);
+    fprintf(control_request_pipe, "process_start %d\n", process_id);
+    fflush(control_request_pipe);
+    
+    int status = read_status();
+    
+    char process_downward_pipe_name[200];
+    sprintf(process_downward_pipe_name, "process_downward.%d.pipe", process_id);
+
+    char process_upward_pipe_name[200];
+    sprintf(process_upward_pipe_name, "process_upward.%d.pipe", process_id);
+
+    process_downward_pipes[process_id] = fopen(process_downward_pipe_name, "w");
+    process_upward_pipes[process_id] = fopen(process_upward_pipe_name, "r");
+
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: successfully opened pipes of process %d\n", process_id);
+
+    // Set auto flush
+    setvbuf(process_downward_pipes[process_id], NULL, _IONBF, 0);
+    
+    return status;
+}
+
+int process_status(int process_id) {
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Requesting status of process with id: %d...\n", process_id);
+    fprintf(control_request_pipe, "process_status %d\n", process_id);
     fflush(control_request_pipe);
     return read_status();
 }
 
-int process_kill(int algorithm_id) {
-    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Killing algorithm with id: %d...\n", algorithm_id);
-    fprintf(control_request_pipe, "process_kill %d\n", algorithm_id);
+int process_stop(int process_id) {
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Killing process with id: %d...\n", process_id);
+    fprintf(control_request_pipe, "process_stop %d\n", process_id);
     fflush(control_request_pipe);
     return read_status();
 }
