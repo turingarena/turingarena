@@ -4,6 +4,8 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard stubs [options]
   taskwizard prepare [options]
+  taskwizard compile [options]
+  taskwizard verify [options]
   taskwizard evaluate [options] [-t <test scenario>] [-s <test seed>] [-p <phase>] [-l <language>]... [<file>...]
   taskwizard summary [options] [-t <test scenario>] [-s <test seed>] [-p <phase>]
   taskwizard (-h | --help)
@@ -12,7 +14,11 @@ Commands:
 
   create  Creates a new task definition folder
   stubs  Creates the stubs of files that should be written for this problem
-  prepare  Prepares this problem for evaluation
+
+  prepare  Prepares this problem
+  compile  Compiles this problem
+  verify  Verify this problem
+
   evaluate  Evaluate this problem on some submissions
   summary  Summarize the result of an evaluation
 
