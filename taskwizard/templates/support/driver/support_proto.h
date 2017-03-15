@@ -2,6 +2,10 @@
 
 void driver_init();
 
+int get_seed();
+
+FILE* get_parameter_file();
+
 int algorithm_start(const char *algo_name);
 
 int process_status(int process_id);

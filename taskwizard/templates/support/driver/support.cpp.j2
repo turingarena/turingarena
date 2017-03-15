@@ -26,6 +26,9 @@ int current_process_id;
 {{ macro.generate_protocol([], driver.functions.values()) }}
 
 int main() {
+    fprintf(stderr, "DRIVER({{driver.name}}): started.\n");
     driver_init();
+    fprintf(stderr, "DRIVER({{driver.name}}): driver_init() successful.\n");
     accept_callbacks();
+    fprintf(stderr, "DRIVER({{driver.name}}): about to exit.\n");
 }

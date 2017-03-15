@@ -10,6 +10,9 @@ FILE *write_file_pipes[2000];
 FILE *control_request_pipe;
 FILE *control_response_pipe;
 
+FILE *parameter_file;
+int seed;
+
 FILE *process_upward_pipe(int id) {
     return process_upward_pipes[id];
 }
@@ -21,6 +24,22 @@ FILE *process_downward_pipe(int id) {
 void driver_init() {
     control_request_pipe = fopen("control_request.pipe", "w");
     control_response_pipe = fopen("control_response.pipe", "r");
+
+    parameter_file = fopen("parameter.txt", "r");
+    
+    FILE *seed_file = fopen("seed.txt", "r");
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Reading seed...\n");    
+    fscanf(seed_file, "%d", &seed);
+    fprintf(stderr, "DRIVER SUPERVISOR CLIENT: Seed: %d.\n", seed);    
+    fclose(seed_file);
+}
+
+int get_seed() {
+    return seed;
+}
+
+FILE* get_parameter_file() {
+    return parameter_file;
 }
 
 int algorithm_start(const char *algo_name) {

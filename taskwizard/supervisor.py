@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 
@@ -172,6 +173,14 @@ class Supervisor:
 
         print("SUPERVISOR: starting driver process: %s" % (self.driver_path,), file=sys.stderr)
         print("SUPERVISOR: driver sandbox dir: %s" % (self.driver_sandbox_dir,), file=sys.stderr)
+
+        shutil.copyfile(
+            os.path.join(self.task_run_dir, "parameter.txt"),
+            os.path.join(self.driver_sandbox_dir, "parameter.txt"))
+
+        shutil.copyfile(
+            os.path.join(self.task_run_dir, "seed.txt"),
+            os.path.join(self.driver_sandbox_dir, "seed.txt"))
 
         self.driver = subprocess.Popen(
             [self.driver_path],
