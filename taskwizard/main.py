@@ -54,6 +54,8 @@ Command evaluate options:
 """
 
 import docopt
+
+from taskwizard.compiler import ProblemCompiler
 from taskwizard.preparer import ProblemPreparer
 
 
@@ -66,6 +68,10 @@ def main():
 
     if args["prepare"]:
         ProblemPreparer(definition_dir, output_dir).prepare()
+        return
+
+    if args["compile"]:
+        ProblemCompiler(input_dir, output_dir).compile()
         return
 
     raise NotImplementedError

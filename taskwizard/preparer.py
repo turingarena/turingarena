@@ -135,6 +135,7 @@ class ProblemPreparer:
     def __init__(self, task_dir, output_dir):
         self.task_dir = task_dir
         self.prepared_dir = os.path.join(output_dir, "build", "prepared")
+        self.yaml_file = os.path.join(self.prepared_dir, "problem.yaml")
 
     def parse_task(self):
         parse = TaskParser(semantics=Semantics())
@@ -158,3 +159,10 @@ class ProblemPreparer:
         os.mkdir(os.path.join(self.prepared_dir, "scenarios"))
         for scenario in self.task.scenarios.values():
             ScenarioPreparer(self, scenario).prepare()
+
+        data = {
+            "drivers": list(self.task.drivers.keys()),
+            "interfaces": list(self.task.interfaces.keys()),
+            "scenarios": list(self.task.scenarios.keys()),
+            }
+        yaml.safe_dump(data, open(self.yaml_file, "w"));
