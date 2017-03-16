@@ -26,7 +26,7 @@ class PhaseExecution:
             self.phase.driver_dir,
             self.driver_dir
         )
-        command = "g++ -g %s -o %s" % (
+        command = "g++ -std=c++11 -g %s -o %s" % (
             os.path.join(self.driver_dir, "*.cpp"),
             os.path.join(self.driver_dir, "driver"))
         print(command)
@@ -42,7 +42,7 @@ class PhaseExecution:
                 slots[slot_name],
                 os.path.join(algorithm_path, "algorithm.cpp")
             )
-            command = "g++ -g %s -o %s" % (
+            command = "g++ -std=c++11 -g %s -o %s" % (
                 os.path.join(algorithm_path, "*.cpp"),
                 os.path.join(algorithm_path, "algorithm"))
             print(command)
