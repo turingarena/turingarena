@@ -29,13 +29,9 @@ class SupportPreparer:
         os.mkdir(self.output_dir)
 
         for f in os.listdir(template_dir):
-            ext = ".j2"
-            if f.endswith(ext):
-                template = env.get_template(os.path.join(template_relative_dir, f))
-                output = open(os.path.join(self.output_dir, f[:-len(ext)]), "w")
-                template.stream(**self.get_template_args()).dump(output)
-            else:
-                shutil.copyfile(os.path.join(template_dir, f), os.path.join(self.output_dir, f))
+            template = env.get_template(os.path.join(template_relative_dir, f))
+            output = open(os.path.join(self.output_dir, f), "w")
+            template.stream(**self.get_template_args()).dump(output)
 
 
 class DriverPreparer(SupportPreparer):
