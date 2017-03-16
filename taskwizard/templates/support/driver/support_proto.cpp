@@ -22,7 +22,7 @@ FILE *process_downward_pipe(int id) {
 }
 
 #define trace(...) do { \
-    fprintf(stderr, "DRIVER: supervisor client: "); \
+    fprintf(stderr, "DRIVER({{driver.name}}): supervisor client: "); \
     fprintf(stderr, __VA_ARGS__); \
   } while(0);
 
