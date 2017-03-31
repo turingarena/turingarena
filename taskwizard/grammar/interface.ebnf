@@ -1,0 +1,40 @@
+identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
+
+interface_definition =
+  'interface' name:identifier '{'
+  {
+    | variables+:global_variable_declaration
+    | functions+:function_declaration
+    | callback_functions+:callback_function_declaration
+  }*
+  '}' 
+  ;
+
+global_variable_declaration =
+  inout:(inout|`inout`) variable:variable ';'
+  ;
+
+callback_function_declaration = 'callback' @:function_declaration ;
+
+function_declaration =
+  return_type:type name:identifier '(' parameters:','.{parameter}* ')' ';'
+  ;
+
+parameter =
+  variable:variable
+  ;
+
+variable =
+  type:type name:identifier {'[' array_dimensions+:array_dimension ']'}*
+  ;
+
+array_dimension =
+  | constant:/[1-9][0-9]*/
+  | variable_reference:identifier
+  ;
+
+type =
+  'int'
+  ;
+
+inout = 'in' | 'out' | 'inout' ;
