@@ -5,11 +5,11 @@ start =
   {
     | interfaces+:interface_definition
     | drivers+:driver_definition
-    | testcases+:testcase_definition
+    | scenarios+:scenario_definition
   }* $ ;
 
-testcase_definition =
-  'testcase' name:identifier '{'
+scenario_definition =
+  'scenario' name:identifier '{'
     { phases+:phase_definition }*
   '}'
   ;

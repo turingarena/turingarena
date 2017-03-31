@@ -2,10 +2,15 @@
 
 void driver_init();
 
-int algorithm_start(const char *algo_name);
+int get_seed();
 
+FILE* get_parameter_file();
+
+int algorithm_create_process(const char *algo_name);
+
+int process_start(int process_id);
 int process_status(int process_id);
-int process_kill(int process_id);
+int process_stop(int process_id);
 
 FILE *process_upward_pipe(int process_id);
 FILE *process_downward_pipe(int process_id);

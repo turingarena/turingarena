@@ -3,13 +3,15 @@
 #include <bits/stdc++.h>
 #include "driver.h"
 
+int current_process_id;
+
 #define support_trace(...) do { \
     fprintf(stderr, "DRIVER({{driver.name}}): communication with stdin/out: "); \
     fprintf(stderr, __VA_ARGS__); \
 } while(0) 
 
 #define support_trace_driver(process_id,...) do { \
-    fprintf(stderr, "DRIVER({{driver.name}}): communication with process(%d): ", process_id); \
+    fprintf(stderr, "DRIVER({{driver.name}}): communication with process(%d): ", current_process_id); \
     fprintf(stderr, __VA_ARGS__); \
 } while(0) 
 
@@ -26,7 +28,15 @@
 {{ macro.generate_protocol([], driver.functions.values(), [], from_file=True) }}
 
 int main() {
+<<<<<<< HEAD:taskwizard/templates/support/driver/support.cpp.j2
     int file_id = read_file_open("evaluate");
     accept_file_callbacks(file_id);
     support_trace("terminating");
+=======
+    fprintf(stderr, "DRIVER({{driver.name}}): started.\n");
+    driver_init();
+    fprintf(stderr, "DRIVER({{driver.name}}): driver_init() successful.\n");
+    accept_callbacks();
+    fprintf(stderr, "DRIVER({{driver.name}}): about to exit.\n");
+>>>>>>> 4b54911449a8d29736c62151628488d705380a86:taskwizard/templates/support/driver/support.cpp
 }

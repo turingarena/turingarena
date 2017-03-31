@@ -4,6 +4,8 @@
 !*/
 !*.*
 
+# TaskWizard-specific ignores
+.task/
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 

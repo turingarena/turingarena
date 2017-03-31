@@ -17,7 +17,12 @@ class SupportPreparer:
         self.output_dir = output_dir
 
     def prepare_support(self):
-        env = Environment(loader=PackageLoader("taskwizard", "templates"))
+        env = Environment(
+            loader=PackageLoader("taskwizard", "templates"),
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True,
+        )
 
         template_relative_dir = "support/" + self.get_type()
         template_dir = pkg_resources.resource_filename("taskwizard", "templates/" + template_relative_dir)
@@ -25,35 +30,9 @@ class SupportPreparer:
         os.mkdir(self.output_dir)
 
         for f in os.listdir(template_dir):
-            ext = ".j2"
-            if f.endswith(ext):
-                template = env.get_template(os.path.join(template_relative_dir, f))
-                
-                ######## PRETTIFY CODE ########
-                read_pipe, write_pipe = os.pipe() # Make pipes to stream generated code to the prettifier
-                
-                base_prettifier_dir = pkg_resources.resource_filename("taskwizard", "../astyle/build/gcc/")
-                prettifier_executable = os.path.join(base_prettifier_dir, "bin/astyle")
-
-                output_file = open(os.path.join(self.output_dir, f[:-len(ext)]), "w")
-
-                if not os.path.isfile(prettifier_executable):
-                    print("Compiling prettifier...")
-                    make_process = subprocess.Popen("make -B -C \"" + base_prettifier_dir + "\" all", shell=True)
-                    make_process.wait()
-
-                subprocess.Popen(
-                    [prettifier_executable],
-                    universal_newlines=True,
-                    bufsize=1,
-                    stdin=os.fdopen(read_pipe, "r"),
-                    stdout=output_file
-                )
-                ######## END PRETTIFY CODE ########
-
-                template.stream(**self.get_template_args()).dump(os.fdopen(write_pipe, "w")) # Write directly to prettifier input pipe
-            else:
-                shutil.copyfile(os.path.join(template_dir, f), os.path.join(self.output_dir, f))
+            template = env.get_template(os.path.join(template_relative_dir, f))
+            output = open(os.path.join(self.output_dir, f), "w")
+            template.stream(**self.get_template_args()).dump(output)
 
 
 class DriverPreparer(SupportPreparer):
@@ -105,53 +84,55 @@ class InterfacePreparer(SupportPreparer):
 
 class PhasePreparer:
 
-    def __init__(self, testcase, phase):
-        self.testcase = testcase
+    def __init__(self, scenario, phase):
+        self.scenario = scenario
         self.phase = phase
-        self.output_dir = os.path.join(testcase.output_dir, "phases", phase.name)
+        self.output_dir = os.path.join(scenario.output_dir, "phases", phase.name)
 
     def prepare(self):
         os.mkdir(self.output_dir)
+
+        phase_yaml_file = open(os.path.join(self.output_dir, "phase.yaml"), "w")
+        yaml.safe_dump({
+            "driver": self.phase.driver_name,
+            "slots": {
+                slot.name: slot.interface_name
+                for slot in self.phase.slots.values()}}, phase_yaml_file)
+
         env = Environment(loader=PackageLoader("taskwizard", "templates"))
         template = env.get_template(os.path.join("parameter", "parameter.txt.j2"))
         output = open(os.path.join(self.output_dir, "parameter.txt"), "w")
         template.stream(command=self.phase.driver_command).dump(output)
 
-    def get_yaml(self):
-        return {
-            "name": self.phase.name,
-            "driver": self.phase.driver_name,
-            "slots": {
-                slot.name: slot.interface_name
-                for slot in self.phase.slots.values()}}
 
+class ScenarioPreparer:
 
-class TestcasePreparer:
-
-    def __init__(self, problem, testcase):
+    def __init__(self, problem, scenario):
         self.problem = problem
-        self.testcase = testcase
-        self.output_dir = os.path.join(problem.prepared_dir, "testcases", testcase.name)
+        self.scenario = scenario
+        self.output_dir = os.path.join(problem.prepared_dir, "scenarios", scenario.name)
 
     def prepare(self):
         os.mkdir(self.output_dir)
 
         os.mkdir(os.path.join(self.output_dir, "phases"))
-        phases = []
-        for phase in self.testcase.phases.values():
+
+        for phase in self.scenario.phases.values():
             p = PhasePreparer(self, phase)
             p.prepare()
-            phases += [p.get_yaml()]
 
-        phases_yaml_file = open(os.path.join(self.output_dir, "phases.yaml"), "w")
-        yaml.safe_dump(phases, phases_yaml_file)
+        scenario_yaml_file = open(os.path.join(self.output_dir, "scenario.yaml"), "w")
+        yaml.safe_dump({
+            "cases": 10,
+            "phases": list(self.scenario.phases.keys())}, scenario_yaml_file)
 
 
 class ProblemPreparer:
 
-    def __init__(self, task_dir, prepared_dir):
+    def __init__(self, task_dir, output_dir):
         self.task_dir = task_dir
-        self.prepared_dir = prepared_dir
+        self.prepared_dir = os.path.join(output_dir, "build", "prepared")
+        self.yaml_file = os.path.join(self.prepared_dir, "problem.yaml")
 
     def parse_task(self):
         parse = TaskParser(semantics=Semantics())
@@ -161,7 +142,8 @@ class ProblemPreparer:
     def prepare(self):
         self.task = self.parse_task()
 
-        os.mkdir(self.prepared_dir)
+        shutil.rmtree(self.prepared_dir, ignore_errors=True)
+        os.makedirs(self.prepared_dir)
 
         os.mkdir(os.path.join(self.prepared_dir, "drivers"))
         for driver in self.task.drivers.values():
@@ -171,6 +153,13 @@ class ProblemPreparer:
         for interface in self.task.interfaces.values():
             InterfacePreparer(self, interface).prepare()
 
-        os.mkdir(os.path.join(self.prepared_dir, "testcases"))
-        for testcase in self.task.testcases.values():
-            TestcasePreparer(self, testcase).prepare()
+        os.mkdir(os.path.join(self.prepared_dir, "scenarios"))
+        for scenario in self.task.scenarios.values():
+            ScenarioPreparer(self, scenario).prepare()
+
+        data = {
+            "drivers": list(self.task.drivers.keys()),
+            "interfaces": list(self.task.interfaces.keys()),
+            "scenarios": list(self.task.scenarios.keys()),
+            }
+        yaml.safe_dump(data, open(self.yaml_file, "w"));

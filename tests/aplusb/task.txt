@@ -3,12 +3,12 @@ interface aplusb {
 }
 
 driver main {
-  int evaluate(int A, int B);
+  int evaluate();
 }
 
-testcase test1 {
+scenario test1 {
   phase evaluate {
     slot solution interface aplusb;
-    driver main evaluate(3, 5);
+    driver main evaluate();
   }
 }
