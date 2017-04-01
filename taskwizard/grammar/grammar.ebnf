@@ -1,8 +1,13 @@
 @@comments :: /\/\*(.|\n|\r)*\*\//
 @@eol_comments :: /\/\/.*$/
 
+#include :: identifier.ebnf
+#include :: types.ebnf
+#include :: expr.ebnf
+#include :: declarations.ebnf
 #include :: driver.ebnf
 #include :: interface.ebnf
+#include :: protocol.ebnf
 #include :: scenario.ebnf
 
 start = 

@@ -53,7 +53,7 @@ class Semantics:
             self.named_definitions(ast.functions),
             self.named_definitions(ast.callback_functions))
 
-    def variable(self, ast):
+    def variable_declaration(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)
 
     def array_dimension(self, ast):

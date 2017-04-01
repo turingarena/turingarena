@@ -1,0 +1,14 @@
+lvalue =
+  variable_reference:identifier { '[' indexes+:expr ']' }
+  ;
+
+expr =
+  | int_literal_expr
+  | lvalue
+  ;
+
+int_literal_expr = /[1-9][0-9]*/ ;
+
+range =
+  [ start:expr '..' ] end:expr
+  ;
