@@ -28,3 +28,4 @@ class TestProtocol(unittest.TestCase):
         step = parser.parse("call f(B, C);", rule_name="protocol_step")
         self.assertIsInstance(step, CallStep)
         self.assertEqual(step.function_name, "f")
+        self.assertIsNone(step.return_value)

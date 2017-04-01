@@ -1,5 +1,7 @@
 from collections import namedtuple, OrderedDict
 
+from grako.semantics import ModelBuilderSemantics
+
 from taskwizard.expr import IntLiteralExpression
 from taskwizard.protocol import InputStep, OutputStep, CallStep
 
@@ -19,7 +21,12 @@ class CallbackFunction(Function):
     is_callback = True
 
 
-class Semantics:
+class Semantics(ModelBuilderSemantics):
+
+    def __init__(self):
+        super().__init__(types=[
+            InputStep, OutputStep, CallStep
+        ])
 
     def named_definitions(self, definitions):
         result = OrderedDict()
@@ -88,15 +95,3 @@ class Semantics:
 
     def int_literal_expr(self, ast):
         return IntLiteralExpression(ast)
-
-    def input_step(self, ast):
-        return InputStep(ast)
-
-    def output_step(self, ast):
-        return OutputStep(ast)
-
-    def call_step(self, ast):
-        return CallStep(ast)
-
-    def _default(self, ast):
-        return ast

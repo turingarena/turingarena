@@ -16,15 +16,15 @@ protocol_step =
   | switch_node
   ;
 
-input_step =
+input_step::InputStep =
   'input' ','.{ items+:lvalue }* ';'
   ;
 
-output_step =
+output_step::OutputStep =
   'output' ','.{ items+:lvalue }* ';'
   ;
 
-call_step =
+call_step::CallStep =
   'call' [ return_value:lvalue '='  ] function_name:identifier '(' ','.{ parameters+:lvalue }* ')' ';'
   ;
 
