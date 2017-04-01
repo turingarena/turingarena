@@ -1,6 +1,7 @@
 from collections import namedtuple, OrderedDict
 
 from taskwizard.expr import IntLiteralExpression
+from taskwizard.protocol import InputStep, OutputStep, CallStep
 
 Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
 GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
@@ -87,6 +88,15 @@ class Semantics:
 
     def int_literal_expr(self, ast):
         return IntLiteralExpression(ast)
+
+    def input_step(self, ast):
+        return InputStep(ast)
+
+    def output_step(self, ast):
+        return OutputStep(ast)
+
+    def call_step(self, ast):
+        return CallStep(ast)
 
     def _default(self, ast):
         return ast
