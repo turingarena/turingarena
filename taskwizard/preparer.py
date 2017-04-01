@@ -134,9 +134,9 @@ class ProblemPreparer:
         self.yaml_file = os.path.join(self.prepared_dir, "problem.yaml")
 
     def parse_task(self):
-        parse = TaskParser(semantics=Semantics())
+        parser = TaskParser(semantics=Semantics())
         text = open(os.path.join(self.task_dir, "task.txt")).read()
-        return parse.parse(text)
+        return parser.parse(text)
 
     def prepare(self):
         self.task = self.parse_task()

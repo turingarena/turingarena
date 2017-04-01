@@ -1,4 +1,4 @@
-interface example_interface {
+interface protocol_example {
   int N;
   int M;
 

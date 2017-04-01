@@ -1,11 +1,12 @@
 from collections import namedtuple, OrderedDict
 
+from taskwizard.expr import IntLiteralExpression
+
 Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
 GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
 Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
-Command = namedtuple("Command", [])
-Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions"])
+Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions", "protocols"])
 Driver = namedtuple("Interface", ["name", "variables", "functions"])
 Scenario = namedtuple("Scenario", ["name", "phases"])
 Phase = namedtuple("Phase", ["name", "driver_name", "driver_command", "slots"])
@@ -51,7 +52,9 @@ class Semantics:
             ast.name,
             self.named_definitions(ast.variables),
             self.named_definitions(ast.functions),
-            self.named_definitions(ast.callback_functions))
+            self.named_definitions(ast.callback_functions),
+            self.named_definitions(ast.protocols)
+        )
 
     def variable_declaration(self, ast):
         return Variable(ast.name, ast.type, ast.array_dimensions)
@@ -81,6 +84,9 @@ class Semantics:
 
     def parameter(self, ast):
         return Parameter(*ast.variable)
+
+    def int_literal_expr(self, ast):
+        return IntLiteralExpression(ast)
 
     def _default(self, ast):
         return ast
