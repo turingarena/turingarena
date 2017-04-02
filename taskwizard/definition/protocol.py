@@ -44,6 +44,7 @@ class ForNode(ProtocolNode):
         super().__init__(ast)
         self.index = ast.index
         self.range = ast.range
+        self.steps = ast.steps
 
 
 class SwitchNode(ProtocolNode):

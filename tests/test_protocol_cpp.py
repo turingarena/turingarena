@@ -7,23 +7,26 @@ from taskwizard.parser import TaskParser
 
 parser = TaskParser(semantics=Semantics())
 
+protocol_definition = """\
+protocol p {
+    input N, M;
+    for(i : 1..N) {
+        input A[i];
+    }
+}
+"""
+
+expected_code = """\
+scanf("%d%d", &N, &M);
+for(i=1; i<=N; i++) {
+    scanf("%d", &A[i]);
+}
+"""
 
 class TestProtocolCpp(unittest.TestCase):
 
     def test(self):
-        interface_definition = """
-            interface a {
-                protocol p {
-                    input N, M;
-                }
-            }
-        """
+        protocol = parser.parse(protocol_definition, rule_name="protocol_declaration")
 
-        expected_code = 'scanf("%d%d", &N, &M);'
-
-        interface = parser.parse(interface_definition, rule_name="interface_definition")
-
-        protocol = interface.protocols["p"]
-
-        code = '\n'.join(CodeGenerator().generate_protocol(protocol))
-        self.assertEqual(code, expected_code)
+        code = '\n'.join(CodeGenerator().generate_protocol(protocol)) + '\n'
+        self.assertEqual(expected_code, code)
