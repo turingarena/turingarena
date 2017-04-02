@@ -35,13 +35,13 @@ for_node::ForNode =
   ;
 
 switch_node::SwitchNode =
-  'switch' '(' index:lvalue ')' '{'
+  'switch' '(' expression:expr ')' '{'
     cases:{ switch_case }*
   '}'
   ;
 
 switch_case::SwitchCase =
-  'case' '(' expression:expr ')' '{'
+  'case' '(' value:identifier ')' '{'
     steps:protocol_nodes
   '}'
   ;

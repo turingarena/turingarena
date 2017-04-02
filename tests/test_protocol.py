@@ -41,3 +41,4 @@ class TestProtocol(unittest.TestCase):
         cases = step.cases
         self.assertEqual(len(cases), 2)
         self.assertIsInstance(cases[0], SwitchCase)
+        self.assertEqual(cases[0].value, "A")
