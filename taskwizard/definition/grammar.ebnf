@@ -4,7 +4,7 @@
 #include :: literals.ebnf
 #include :: identifier.ebnf
 #include :: types.ebnf
-#include :: expr.ebnf
+#include :: expression.ebnf
 #include :: variable.ebnf
 #include :: function.ebnf
 #include :: driver.ebnf

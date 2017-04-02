@@ -2,7 +2,7 @@ import unittest
 
 from taskwizard.definition.semantics import Semantics
 
-from taskwizard.language.cpp.protocol import ProtocolSupportGenerator
+from taskwizard.language.cpp.codegen import CodeGenerator
 from taskwizard.parser import TaskParser
 
 parser = TaskParser(semantics=Semantics())
@@ -25,5 +25,5 @@ class TestProtocolCpp(unittest.TestCase):
 
         protocol = interface.protocols["p"]
 
-        code = '\n'.join(ProtocolSupportGenerator().generate(protocol))
+        code = '\n'.join(CodeGenerator().generate_protocol(protocol))
         self.assertEqual(code, expected_code)

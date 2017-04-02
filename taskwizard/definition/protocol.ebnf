@@ -17,15 +17,15 @@ protocol_node =
   ;
 
 input_step::InputStep =
-  'input' ','.{ variables+:lvalue }* ';'
+  'input' ','.{ variables+:expression }* ';'
   ;
 
 output_step::OutputStep =
-  'output' ','.{ variables+:lvalue }* ';'
+  'output' ','.{ variables+:expression }* ';'
   ;
 
 call_step::CallStep =
-  'call' [ return_value:lvalue '='  ] function_name:identifier '(' ','.{ parameters+:lvalue }* ')' ';'
+  'call' [ return_value:expression '='  ] function_name:identifier '(' ','.{ parameters+:expression }* ')' ';'
   ;
 
 for_node::ForNode =
@@ -35,7 +35,7 @@ for_node::ForNode =
   ;
 
 switch_node::SwitchNode =
-  'switch' '(' expression:expr ')' '{'
+  'switch' '(' expression:expression ')' '{'
     cases:{ switch_case }*
   '}'
   ;

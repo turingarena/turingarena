@@ -6,7 +6,7 @@ from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForN
 
 from taskwizard.definition.declarations import named_definitions
 from taskwizard.definition.driver import Driver
-from taskwizard.definition.expr import IntLiteralExpression
+from taskwizard.definition.expression import IntLiteralExpression
 from taskwizard.definition.variable import Variable
 
 Function = namedtuple("Function", ["name", "return_type", "parameters"])

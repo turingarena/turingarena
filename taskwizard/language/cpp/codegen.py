@@ -1,9 +1,9 @@
-class ProtocolSupportGenerator:
+class CodeGenerator:
 
-    def generate(self, protocol):
-        return self.generate_steps(protocol.steps)
+    def generate_protocol(self, protocol):
+        return self.generate_protocol_steps(protocol.steps)
 
-    def generate_steps(self, steps):
+    def generate_protocol_steps(self, steps):
         for step in steps:
             yield from self.generate_step(step)
 
@@ -22,4 +22,4 @@ class ProtocolSupportGenerator:
         return "%d"
 
     def get_reference(self, variable):
-        return variable.variable_reference
+        return variable.variable_name
