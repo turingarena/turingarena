@@ -10,11 +10,11 @@
 #include :: driver.ebnf
 #include :: interface.ebnf
 #include :: protocol.ebnf
-#include :: scenario.ebnf
+#include :: test_case.ebnf
 
 start = 
   {
     | interfaces+:interface_definition
     | drivers+:driver_definition
-    | scenarios+:scenario_definition
+    | test_cases+:test_case_definition
   }* $ ;

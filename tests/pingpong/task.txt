@@ -5,6 +5,7 @@ interface pingpong {
 
 driver main {
   source "driver.cpp";
+  language "cpp";
   int evaluate();
 }
 

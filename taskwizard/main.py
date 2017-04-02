@@ -5,8 +5,8 @@ Usage:
   taskwizard stubs [options]
   taskwizard prepare [options]
   taskwizard verify [options]
-  taskwizard evaluate [options] [-t <test scenario>] [-s <test seed>] [-p <phase>] [-l <language>]... [<file>...]
-  taskwizard summary [options] [-t <test scenario>] [-s <test seed>] [-p <phase>]
+  taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>...]
+  taskwizard summary [options] [-t <test case>] [-p <phase>]
   taskwizard (-h | --help)
 
 Commands:
@@ -31,19 +31,17 @@ Global options:
 
 Test options:
 
-  -t --test-scenario=<scenario>  The test scenario to consider.
-  -s --test-seed=<seed>  The test seed to consider. Use dash to specify a range (example '-s 1-5').
+  -t --test-case=<test case>  The test case to consider.
   -p --test-phase=<phase>  The test phase to consider.
 
-  If any option is omitted, then all the possibilities are considered
-  for that option.
-  Moreover, if a phase is specified but it is not defined in a scenario,
-  then nothing is evaluated for that scenario.
+  If the test case is omitted, then all test cases are considered.
+  If a phase is specified but it is not defined in a given test case,
+  then the test case is not considered.
+
   Example:
       taskwizard evaluate -p generate_input
-  evaluates the phase 'generate_input' for every test scenario
+  evaluates the phase 'generate_input' for every test case
   which defines a phase called 'generate_input',
-  and for every test seed allowed for that scenario.
 
 Command evaluate options:
 
@@ -70,8 +68,7 @@ def main():
         return
 
     if args["evaluate"]:
-        scenario = args["--test-scenario"]
-        seed = args["--test-seed"]
+        case = args["--test-case"]
         phase = args["--test-phase"]
 
         slots = {}

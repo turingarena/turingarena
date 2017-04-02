@@ -10,9 +10,9 @@ from taskwizard.definition.expr import IntLiteralExpression
 from taskwizard.definition.variable import Variable
 
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
-Scenario = namedtuple("Scenario", ["name", "phases"])
-Phase = namedtuple("Phase", ["name", "driver_name", "driver_command", "slots"])
-Task = namedtuple("Task", ["drivers", "interfaces", "scenarios"])
+TestCase = namedtuple("TestCase", ["name", "phases"])
+TestPhase = namedtuple("TestPhase", ["name", "driver_name", "driver_command", "slots"])
+Task = namedtuple("Task", ["drivers", "interfaces", "test_cases"])
 Slot = namedtuple("Slot", ["name", "interface_name"])
 
 
@@ -36,13 +36,13 @@ class Semantics(ModelBuilderSemantics):
         return Task(
             named_definitions(ast.drivers),
             named_definitions(ast.interfaces),
-            named_definitions(ast.scenarios))
+            named_definitions(ast.test_cases))
 
-    def scenario_definition(self, ast):
-        return Scenario(ast.name, named_definitions(ast.phases))
+    def test_case_definition(self, ast):
+        return TestCase(ast.name, named_definitions(ast.phases))
 
-    def phase_definition(self, ast):
-        return Phase(ast.name, ast.driver_name, ast.driver_command, named_definitions(ast.slots))
+    def test_phase_definition(self, ast):
+        return TestPhase(ast.name, ast.driver_name, ast.driver_command, named_definitions(ast.slots))
 
     def slot_definition(self, ast):
         return Slot(ast.name, ast.interface_name)
@@ -52,13 +52,6 @@ class Semantics(ModelBuilderSemantics):
             return ast.constant
         else:
             return ast.variable_reference
-
-    def global_variable_declaration(self, ast):
-        return GlobalVariable(
-            *ast.variable,
-            is_input=(ast.inout in ["in", "inout"]),
-            is_output=(ast.inout in ["out", "inout"])
-        )
 
     def function_declaration(self, ast):
         parameters = OrderedDict()
