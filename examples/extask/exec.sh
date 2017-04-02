@@ -3,7 +3,7 @@
 g++ solution_support.cpp alien.cpp -o solution
 g++ driver_stages_support.cpp driver.cpp --std=c++11 -o driver
 
-
+mkfifo foo
 cat foo |
 
 while read line; do
