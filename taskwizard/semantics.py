@@ -3,7 +3,7 @@ from collections import namedtuple, OrderedDict
 from grako.semantics import ModelBuilderSemantics
 
 from taskwizard.expr import IntLiteralExpression
-from taskwizard.protocol import InputStep, OutputStep, CallStep
+from taskwizard.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
 
 Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
 GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
@@ -25,7 +25,8 @@ class Semantics(ModelBuilderSemantics):
 
     def __init__(self):
         super().__init__(types=[
-            InputStep, OutputStep, CallStep
+            InputStep, OutputStep, CallStep,
+            ForNode, SwitchNode, SwitchCase
         ])
 
     def named_definitions(self, definitions):

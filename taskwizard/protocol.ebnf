@@ -1,14 +1,14 @@
 protocol_declaration =
   'protocol' [name:identifier] '{'
-    steps:protocol_steps
+    steps:protocol_nodes
   '}'
   ;
 
-protocol_steps =
-  {protocol_step}*
+protocol_nodes =
+  {protocol_node}*
   ;
 
-protocol_step =
+protocol_node =
   | input_step
   | output_step
   | call_step
@@ -28,21 +28,21 @@ call_step::CallStep =
   'call' [ return_value:lvalue '='  ] function_name:identifier '(' ','.{ parameters+:lvalue }* ')' ';'
   ;
 
-for_node =
+for_node::ForNode =
   'for' '(' index:identifier ':' range:range ')' '{'
-    steps:protocol_steps
+    steps:protocol_nodes
   '}'
   ;
 
-switch_node =
+switch_node::SwitchNode =
   'switch' '(' index:lvalue ')' '{'
     cases:{ switch_case }*
   '}'
   ;
 
-switch_case =
-  'case' '(' value:identifier ')' '{'
-    steps:protocol_steps
+switch_case::SwitchCase =
+  'case' '(' expression:expr ')' '{'
+    steps:protocol_nodes
   '}'
   ;
 
