@@ -78,6 +78,9 @@ class Supervisor:
         self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
         self.driver_path = os.path.join(task_run_dir, "driver", "driver")
 
+        self.control_request_pipe_name = os.path.join(self.driver_sandbox_dir, "control_request.pipe")
+        self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
+
         self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
         self.seed_path = os.path.join(task_run_dir, "seed.txt")
         self.result_path = os.path.join(task_run_dir, "result.txt")
@@ -175,7 +178,6 @@ class Supervisor:
     def run(self):
         trace("starting in folder:", self.task_run_dir)
 
-        print("SUPERVISOR: driver sandbox dir: %s" % (self.driver_sandbox_dir,), file=sys.stderr)
         os.mkdir(self.driver_sandbox_dir)
 
         trace("creating control pipes...")
@@ -196,7 +198,6 @@ class Supervisor:
             os.path.join(self.task_run_dir, "seed.txt"),
             os.path.join(self.driver_sandbox_dir, "seed.txt"))
 
-        print("SUPERVISOR: starting driver process: %s" % (self.driver_path,), file=sys.stderr)
         self.driver = subprocess.Popen(
             [self.driver_path],
             cwd=self.driver_sandbox_dir,
