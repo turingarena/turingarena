@@ -1,7 +1,8 @@
-driver_definition =
+driver_definition::Driver =
   'driver' name:identifier '{'
   {
-    | variables+:global_variable_declaration
+    | 'source' source:STRING ';'
+    | global_variables+:global_variable_declaration
     | functions+:function_declaration
   }*
   '}'

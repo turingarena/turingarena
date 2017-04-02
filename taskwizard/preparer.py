@@ -49,7 +49,7 @@ class DriverPreparer(SupportPreparer):
     def prepare(self):
         self.prepare_support()
         shutil.copyfile(
-            os.path.join(self.problem.task_dir, "driver.cpp"),
+            os.path.join(self.problem.task_dir, self.driver.source),
             os.path.join(self.output_dir, "driver.cpp")
         )
 

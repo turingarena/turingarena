@@ -36,5 +36,7 @@ interface protocol_example {
 }
 
 driver main {
+  source "driver.cpp";
+
   int evaluate();
 }

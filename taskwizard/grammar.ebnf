@@ -1,6 +1,7 @@
 @@comments :: /\/\*(.|\n|\r)*\*\//
 @@eol_comments :: /\/\/.*$/
 
+#include :: literals.ebnf
 #include :: identifier.ebnf
 #include :: types.ebnf
 #include :: expr.ebnf

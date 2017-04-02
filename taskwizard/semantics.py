@@ -2,6 +2,8 @@ from collections import namedtuple, OrderedDict
 
 from grako.semantics import ModelBuilderSemantics
 
+from taskwizard.declarations import named_definitions
+from taskwizard.driver import Driver
 from taskwizard.expr import IntLiteralExpression
 from taskwizard.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
 
@@ -10,7 +12,6 @@ GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "i
 Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions", "protocols"])
-Driver = namedtuple("Interface", ["name", "variables", "functions"])
 Scenario = namedtuple("Scenario", ["name", "phases"])
 Phase = namedtuple("Phase", ["name", "driver_name", "driver_command", "slots"])
 Task = namedtuple("Task", ["drivers", "interfaces", "scenarios"])
@@ -25,44 +26,33 @@ class Semantics(ModelBuilderSemantics):
 
     def __init__(self):
         super().__init__(types=[
+            Driver,
             InputStep, OutputStep, CallStep,
             ForNode, SwitchNode, SwitchCase
         ])
 
-    def named_definitions(self, definitions):
-        result = OrderedDict()
-        for d in definitions:
-            result[d.name] = d
-        return result
-
     def start(self, ast):
         return Task(
-            self.named_definitions(ast.drivers),
-            self.named_definitions(ast.interfaces),
-            self.named_definitions(ast.scenarios))
+            named_definitions(ast.drivers),
+            named_definitions(ast.interfaces),
+            named_definitions(ast.scenarios))
 
     def scenario_definition(self, ast):
-        return Scenario(ast.name, self.named_definitions(ast.phases))
+        return Scenario(ast.name, named_definitions(ast.phases))
 
     def phase_definition(self, ast):
-        return Phase(ast.name, ast.driver_name, ast.driver_command, self.named_definitions(ast.slots))
+        return Phase(ast.name, ast.driver_name, ast.driver_command, named_definitions(ast.slots))
 
     def slot_definition(self, ast):
         return Slot(ast.name, ast.interface_name)
 
-    def driver_definition(self, ast):
-        return Driver(
-            ast.name,
-            self.named_definitions(ast.variables),
-            self.named_definitions(ast.functions))
-
     def interface_definition(self, ast):
         return Interface(
             ast.name,
-            self.named_definitions(ast.variables),
-            self.named_definitions(ast.functions),
-            self.named_definitions(ast.callback_functions),
-            self.named_definitions(ast.protocols)
+            named_definitions(ast.variables),
+            named_definitions(ast.functions),
+            named_definitions(ast.callback_functions),
+            named_definitions(ast.protocols)
         )
 
     def variable_declaration(self, ast):

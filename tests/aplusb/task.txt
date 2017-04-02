@@ -3,6 +3,7 @@ interface aplusb {
 }
 
 driver main {
+  source "driver.cpp";
   int evaluate();
 }
 
