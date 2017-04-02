@@ -1,13 +1,13 @@
 from collections import namedtuple, OrderedDict
 
 from grako.semantics import ModelBuilderSemantics
+from taskwizard.definition.interface import Interface
+from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
 
-from taskwizard.declarations import named_definitions
-from taskwizard.driver import Driver
-from taskwizard.expr import IntLiteralExpression
-from taskwizard.interface import Interface
-from taskwizard.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
-from taskwizard.variable import Variable
+from taskwizard.definition.declarations import named_definitions
+from taskwizard.definition.driver import Driver
+from taskwizard.definition.expr import IntLiteralExpression
+from taskwizard.definition.variable import Variable
 
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
 Scenario = namedtuple("Scenario", ["name", "phases"])

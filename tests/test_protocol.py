@@ -1,8 +1,9 @@
 import unittest
 
-from taskwizard.parser import TaskParser
-from taskwizard.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
 from taskwizard.semantics import Semantics
+
+from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
+from taskwizard.parser import TaskParser
 
 parser = TaskParser(semantics=Semantics())
 

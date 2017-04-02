@@ -1,12 +1,13 @@
-from jinja2 import Environment, PackageLoader
 import os
-import pkg_resources
 import shutil
 import sys
-import yaml
 
+import pkg_resources
+import yaml
+from jinja2 import Environment, PackageLoader
+
+from taskwizard.definition.semantics import Semantics
 from taskwizard.parser import TaskParser
-from taskwizard.semantics import Semantics
 
 
 class SupportPreparer:

@@ -1,6 +1,4 @@
-from grako.exceptions import FailedSemantics
-
-from taskwizard.declarations import named_definitions
+from taskwizard.definition.declarations import named_definitions
 
 
 class Driver:
