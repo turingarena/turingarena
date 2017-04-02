@@ -2,6 +2,7 @@ driver_definition::Driver =
   'driver' name:identifier '{'
   {
     | 'source' source:STRING ';'
+    | 'language' language:STRING ';'
     | variables+:variable_declaration
     | functions+:function_declaration
   }*

@@ -1,4 +1,4 @@
-{% import "macro.cpp.j2" as macro %}
+{% import "macro.j2" as macro %}
 
 #include <bits/stdc++.h>
 #include "driver.h"

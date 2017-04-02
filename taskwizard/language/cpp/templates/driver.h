@@ -1,4 +1,4 @@
-{% import "macro.cpp.j2" as macro %}
+{% import "macro.j2" as macro %}
 
 #include "support_proto.h"
 
