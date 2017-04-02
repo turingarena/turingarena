@@ -1,0 +1,48 @@
+protocol_declaration =
+  'protocol' [name:identifier] '{'
+    steps:protocol_nodes
+  '}'
+  ;
+
+protocol_nodes =
+  {protocol_node}*
+  ;
+
+protocol_node =
+  | input_step
+  | output_step
+  | call_step
+  | for_node
+  | switch_node
+  ;
+
+input_step::InputStep =
+  'input' ','.{ variables+:expression }* ';'
+  ;
+
+output_step::OutputStep =
+  'output' ','.{ variables+:expression }* ';'
+  ;
+
+call_step::CallStep =
+  'call' [ return_value:expression '='  ] function_name:identifier '(' ','.{ parameters+:expression }* ')' ';'
+  ;
+
+for_node::ForNode =
+  'for' '(' index:identifier ':' range:range ')' '{'
+    steps:protocol_nodes
+  '}'
+  ;
+
+switch_node::SwitchNode =
+  'switch' '(' expression:expression ')' '{'
+    cases:{ switch_case }*
+  '}'
+  ;
+
+switch_case::SwitchCase =
+  'case' '(' value:identifier ')' '{'
+    steps:protocol_nodes
+  '}'
+  ;
+

@@ -1,8 +1,0 @@
-.PHONY: all
-all: build/runner/
-
-%/:
-	mkdir -p $@
-
-build/runner/: | build/
-	taskcc runner -o $@

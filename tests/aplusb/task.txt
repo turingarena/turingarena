@@ -3,10 +3,12 @@ interface aplusb {
 }
 
 driver main {
+  source "driver.cpp";
+  language "cpp";
   int evaluate();
 }
 
-scenario test1 {
+testcase test1 {
   phase evaluate {
     slot solution interface aplusb;
     driver main evaluate();

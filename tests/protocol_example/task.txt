@@ -1,0 +1,43 @@
+interface protocol_example {
+  int N;
+  int M;
+
+  void add_edge(int u, int v, int w);
+  bool are_connected(int u, int v);
+
+  protocol {
+
+    input N, M;
+
+    for(u : 1..N) {
+      input A[u];
+    }
+
+    for(i : 1..M) {
+
+      input C[i];
+      switch(C[i]) {
+
+        case(Q) {
+          input U[i], V[i];
+          call R[i] = are_connected(U[i], V[i]);
+          output R[i];
+        }
+
+        case(U) {
+          input U[i], V[i], W[i];
+          call add_edge(U[i], V[i], W[i]);
+        }
+
+      }
+
+    }
+  }
+}
+
+driver main {
+  source "driver.cpp";
+  language "cpp";
+
+  int evaluate();
+}

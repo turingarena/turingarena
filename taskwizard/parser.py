@@ -11,7 +11,7 @@ from grako.parser import GrammarGenerator
 import pkg_resources
 
 
-grammar_filename = pkg_resources.resource_filename("taskwizard", os.path.join("grammar", "grammar.ebnf"))
+grammar_filename = pkg_resources.resource_filename("taskwizard.definition", "grammar.ebnf")
 
 grammar = open(grammar_filename).read()
 model = GrammarGenerator(grammar_name="Task", buffer_class=EBNFBuffer).parse(grammar, filename=grammar_filename)

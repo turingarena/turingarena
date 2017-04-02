@@ -1,0 +1,20 @@
+@@comments :: /\/\*(.|\n|\r)*\*\//
+@@eol_comments :: /\/\/.*$/
+
+#include :: literals.ebnf
+#include :: identifier.ebnf
+#include :: types.ebnf
+#include :: expression.ebnf
+#include :: variable.ebnf
+#include :: function.ebnf
+#include :: driver.ebnf
+#include :: interface.ebnf
+#include :: protocol.ebnf
+#include :: test_case.ebnf
+
+start = 
+  {
+    | interfaces+:interface_definition
+    | drivers+:driver_definition
+    | test_cases+:test_case_definition
+  }* $ ;

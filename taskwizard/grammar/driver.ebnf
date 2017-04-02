@@ -1,8 +1,0 @@
-driver_definition =
-  'driver' name:identifier '{'
-  {
-    | variables+:global_variable_declaration
-    | functions+:function_declaration
-  }*
-  '}'
-  ;

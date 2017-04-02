@@ -1,10 +1,10 @@
-scenario_definition =
-  'scenario' name:identifier '{'
-    { phases+:phase_definition }*
+test_case_definition =
+  'testcase' name:identifier '{'
+    { phases+:test_phase_definition }*
   '}'
   ;
 
-phase_definition =
+test_phase_definition =
   'phase' name:identifier '{'
     {
       | 'driver' driver_name:identifier driver_command:command ';'
