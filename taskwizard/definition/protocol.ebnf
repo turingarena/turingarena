@@ -17,11 +17,11 @@ protocol_node =
   ;
 
 input_step::InputStep =
-  'input' ','.{ items+:lvalue }* ';'
+  'input' ','.{ variables+:lvalue }* ';'
   ;
 
 output_step::OutputStep =
-  'output' ','.{ items+:lvalue }* ';'
+  'output' ','.{ variables+:lvalue }* ';'
   ;
 
 call_step::CallStep =

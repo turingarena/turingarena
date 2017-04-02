@@ -29,6 +29,10 @@ class DriverPreparer:
             trim_blocks=True,
             lstrip_blocks=True,
             keep_trailing_newline=True,
+            block_start_string="/*{%",
+            block_end_string="%}*/",
+            variable_start_string="/*{{",
+            variable_end_string="}}*/",
         )
 
         env.get_template("driver.h").stream(task=self.problem_preparer.task, driver=self.driver).dump(

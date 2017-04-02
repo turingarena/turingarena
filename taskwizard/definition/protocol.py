@@ -3,23 +3,31 @@ class ProtocolNode:
     def __init__(self, ast):
         pass
 
+    @classmethod
+    def get_node_type(cls):
+        return cls.node_type
+
 
 class InputOutputStep(ProtocolNode):
 
     def __init__(self, ast):
         super().__init__(ast)
-        self.items = ast
+        self.variables = ast.variables
 
 
 class InputStep(InputOutputStep):
-    pass
+
+    node_type = "input"
 
 
 class OutputStep(InputOutputStep):
-    pass
+
+    node_type = "output"
 
 
 class CallStep(ProtocolNode):
+
+    node_type = "call"
 
     def __init__(self, ast):
         super().__init__(ast)
@@ -30,6 +38,8 @@ class CallStep(ProtocolNode):
 
 class ForNode(ProtocolNode):
 
+    node_type = "for"
+
     def __init__(self, ast):
         super().__init__(ast)
         self.index = ast.index
@@ -37,6 +47,8 @@ class ForNode(ProtocolNode):
 
 
 class SwitchNode(ProtocolNode):
+
+    node_type = "switch"
 
     def __init__(self, ast):
         super().__init__(ast)
