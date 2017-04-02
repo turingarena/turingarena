@@ -153,4 +153,3 @@ FILE *write_file_pipe(int id) {
 int write_file_close(int id) {
     return -1; // TODO
 }
-
