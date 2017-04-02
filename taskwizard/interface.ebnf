@@ -1,7 +1,7 @@
-interface_definition =
+interface_definition::Interface =
   'interface' name:identifier '{'
   {
-    | variables+:global_variable_declaration
+    | variables+:variable_declaration
     | functions+:function_declaration
     | callback_functions+:callback_function_declaration
     | protocols+:protocol_declaration

@@ -5,7 +5,8 @@
 #include :: identifier.ebnf
 #include :: types.ebnf
 #include :: expr.ebnf
-#include :: declarations.ebnf
+#include :: variable.ebnf
+#include :: function.ebnf
 #include :: driver.ebnf
 #include :: interface.ebnf
 #include :: protocol.ebnf

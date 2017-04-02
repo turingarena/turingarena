@@ -7,7 +7,7 @@ expr =
   | lvalue
   ;
 
-int_literal_expr = /[1-9][0-9]*/ ;
+int_literal_expr::IntLiteralExpression = /[1-9][0-9]*/ ;
 
 range =
   [ start:expr '..' ] end:expr

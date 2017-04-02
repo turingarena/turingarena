@@ -5,13 +5,11 @@ from grako.semantics import ModelBuilderSemantics
 from taskwizard.declarations import named_definitions
 from taskwizard.driver import Driver
 from taskwizard.expr import IntLiteralExpression
+from taskwizard.interface import Interface
 from taskwizard.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
+from taskwizard.variable import Variable
 
-Variable = namedtuple("Variable", ["name", "type", "array_dimensions"])
-GlobalVariable = namedtuple("GlobalVariable", [*Variable._fields, "is_input", "is_output"])
-Parameter = namedtuple("Parameter", [*Variable._fields])
 Function = namedtuple("Function", ["name", "return_type", "parameters"])
-Interface = namedtuple("Interface", ["name", "variables", "functions", "callback_functions", "protocols"])
 Scenario = namedtuple("Scenario", ["name", "phases"])
 Phase = namedtuple("Phase", ["name", "driver_name", "driver_command", "slots"])
 Task = namedtuple("Task", ["drivers", "interfaces", "scenarios"])
@@ -26,9 +24,12 @@ class Semantics(ModelBuilderSemantics):
 
     def __init__(self):
         super().__init__(types=[
+            Variable,
             Driver,
+            Interface,
             InputStep, OutputStep, CallStep,
-            ForNode, SwitchNode, SwitchCase
+            ForNode, SwitchNode, SwitchCase,
+            IntLiteralExpression
         ])
 
     def start(self, ast):
@@ -45,18 +46,6 @@ class Semantics(ModelBuilderSemantics):
 
     def slot_definition(self, ast):
         return Slot(ast.name, ast.interface_name)
-
-    def interface_definition(self, ast):
-        return Interface(
-            ast.name,
-            named_definitions(ast.variables),
-            named_definitions(ast.functions),
-            named_definitions(ast.callback_functions),
-            named_definitions(ast.protocols)
-        )
-
-    def variable_declaration(self, ast):
-        return Variable(ast.name, ast.type, ast.array_dimensions)
 
     def array_dimension(self, ast):
         if ast.constant is not None:
@@ -80,9 +69,3 @@ class Semantics(ModelBuilderSemantics):
         return (CallbackFunction if ast.callback is not None else Function)(
             ast.name, ast.return_type, OrderedDict(parameters)
         )
-
-    def parameter(self, ast):
-        return Parameter(*ast.variable)
-
-    def int_literal_expr(self, ast):
-        return IntLiteralExpression(ast)
