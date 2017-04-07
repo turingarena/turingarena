@@ -43,6 +43,11 @@ class DriverPreparer:
                 open(os.path.join(self.output_dir, "support.cpp"), "w")
         )
 
+        for interface in self.problem_preparer.task.interfaces.values():
+            env.get_template("driver_interface_support.cpp").stream(task=self.problem_preparer.task, driver=self.driver, interface=interface).dump(
+                    open(os.path.join(self.output_dir, "%s_support.cpp" % interface.name), "w")
+            )
+
 
 class InterfacePreparer:
 
