@@ -1,0 +1,17 @@
+interface exampleinterface {
+    int N;
+    int M;
+    int A[1..N];
+    int S;
+
+    int solve(int N, int M);
+
+    protocol {
+        input N, M;
+        for(i : 1..N) {
+            input A[i];
+        }
+        call S = solve(N, M);
+        output S;
+    }
+}
