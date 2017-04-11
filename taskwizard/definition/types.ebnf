@@ -1,9 +1,0 @@
-type =
-  | 'int'
-  | 'bool'
-  ;
-
-return_type =
-  | @:type
-  | 'void'
-  ;

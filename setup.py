@@ -26,14 +26,14 @@ setup(
     },
     packages=find_packages(),
     package_data={
-        'taskwizard': ['templates/*', 'grammar.ebnf'],
+        'taskwizard': ['**/templates/**', '**/*static/**'],
     },
     keywords="",
     license="",
     classifiers=[],
     install_requires=[
         "docopt",
-        "grako",
+        "grako>=3.20",
         "jinja2",
         "pyyaml",
     ],

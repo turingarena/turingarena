@@ -1,45 +1,41 @@
 import unittest
 
-from taskwizard.semantics import Semantics
-
-from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
-from taskwizard.parser import TaskParser
-
-parser = TaskParser(semantics=Semantics())
+from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase, \
+    ProtocolNode
 
 
 class TestProtocol(unittest.TestCase):
 
     def test_input(self):
-        step = parser.parse("input N, M;", rule_name="protocol_node")
-        self.assertIsInstance(step, InputStep)
-        self.assertEqual(len(step.items), 2)
+        step = ProtocolNode.Definition.parse("input N, M;")
+        self.assertIsInstance(step, InputStep.Definition)
+        self.assertEqual(len(step.variables), 2)
 
     def test_output(self):
-        step = parser.parse("output N, M;", rule_name="protocol_node")
-        self.assertIsInstance(step, OutputStep)
-        self.assertEqual(len(step.items), 2)
+        step = ProtocolNode.Definition.parse("output N, M;")
+        self.assertIsInstance(step, OutputStep.Definition)
+        self.assertEqual(len(step.variables), 2)
 
     def test_call_returns(self):
-        step = parser.parse("call A = f(B, C);", rule_name="protocol_node")
-        self.assertIsInstance(step, CallStep)
+        step = ProtocolNode.Definition.parse("call A = f(B, C);")
+        self.assertIsInstance(step, CallStep.Definition)
         self.assertEqual(step.function_name, "f")
 
     def test_call_no_return(self):
-        step = parser.parse("call f(B, C);", rule_name="protocol_node")
-        self.assertIsInstance(step, CallStep)
+        step = ProtocolNode.Definition.parse("call f(B, C);")
+        self.assertIsInstance(step, CallStep.Definition)
         self.assertEqual(step.function_name, "f")
-        self.assertIsNone(step.return_value)
+        self.assertFalse(hasattr(step, "return_value"))
 
     def test_for(self):
-        step = parser.parse("for (i : 1..10) {}", rule_name="protocol_node")
-        self.assertIsInstance(step, ForNode)
+        step = ProtocolNode.Definition.parse("for (i : 1..10) {}")
+        self.assertIsInstance(step, ForNode.Definition)
         self.assertEqual(step.index, "i")
 
     def test_switch(self):
-        step = parser.parse("switch (X[i]) { case(A) {} case(B) {} }", rule_name="protocol_node")
-        self.assertIsInstance(step, SwitchNode)
+        step = ProtocolNode.Definition.parse("switch (X[i]) { case(A) {} case(B) {} }")
+        self.assertIsInstance(step, SwitchNode.Definition)
         cases = step.cases
         self.assertEqual(len(cases), 2)
-        self.assertIsInstance(cases[0], SwitchCase)
+        self.assertIsInstance(cases[0], SwitchCase.Definition)
         self.assertEqual(cases[0].value, "A")

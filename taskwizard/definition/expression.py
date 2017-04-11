@@ -1,4 +1,21 @@
-class Expression:
+from taskwizard.definition.common import Identifier, Literals
+from taskwizard.definition.syntax import AbstractSyntaxNode
+
+
+class Expression(AbstractSyntaxNode):
+
+    grammar = """
+        expression =
+            | variable_expression
+            | int_literal_expression
+            ;
+
+        range =
+            [ start:expression '..' ] end:expression
+            ;
+    """
+
+    grammar_deps = lambda: [ VariableExpression, IntLiteralExpression ]
 
     @classmethod
     def get_expression_type(cls):
@@ -7,9 +24,28 @@ class Expression:
     def as_simple_lvalue(self, scope, indexes):
         raise ValueError("not a simple lvalue")
 
+
+class RangeExpression(AbstractSyntaxNode):
+
+    grammar = """
+        range_expression =
+            [ start:expression '..' ] end:expression
+            ;
+    """
+    grammar_deps = lambda: [ Expression ]
+
+
 class VariableExpression(Expression):
 
     expression_type = "variable"
+
+    grammar = """
+        variable_expression =
+        variable_name:identifier
+        { '[' indexes+:expression ']' }*
+        ;
+    """
+    grammar_deps = lambda: [Identifier]
 
     def __init__(self, ast):
         self.variable_name = ast.variable_name
@@ -39,8 +75,11 @@ class IntLiteralExpression(Expression):
 
     expression_type = "int_literal"
 
+    grammar = "int_literal_expression = value:INT;"
+    grammar_deps = lambda: [Literals]
+
     def __init__(self, ast):
-        self.value = int(ast)
+        self.value = int(ast.value)
 
     def __eq__(self, other):
         return (

@@ -1,4 +1,31 @@
 from taskwizard.definition.declarations import named_definitions
+from taskwizard.definition.syntax import AbstractSyntaxNode
+
+
+class TestCaseDefinition(AbstractSyntaxNode):
+
+    grammar = """
+        test_case_definition::TestCase =
+        'testcase' name:identifier '{'
+        { phases+:test_phase_definition }*
+        '}'
+        ;
+
+        test_phase_definition::TestPhase =
+        'phase' name:identifier '{'
+        {
+        | 'driver' driver_name:identifier driver_command:command ';'
+        | slots+:slot_definition ';'
+        }*
+        '}'
+        ;
+
+        slot_definition::TestPhaseSlot = 'slot' name:identifier 'interface' interface_name:identifier ;
+
+        command =
+        function_name:identifier '(' parameters:','.{ expression }* ')'
+        ;
+    """
 
 
 class TestCase:

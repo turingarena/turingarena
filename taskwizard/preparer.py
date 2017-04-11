@@ -6,9 +6,8 @@ import pkg_resources
 import yaml
 from jinja2 import Environment, PackageLoader
 
-from taskwizard.definition.semantics import Semantics
+from taskwizard.definition.task import Semantics
 from taskwizard.language.cpp import preparer as cpp_preparer
-from taskwizard.parser import TaskParser
 
 
 languages = {
