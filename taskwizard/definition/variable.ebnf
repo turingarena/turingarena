@@ -1,5 +1,5 @@
 parameter =
-  variable:variable
+  @:variable
   ;
 
 variable::Variable =

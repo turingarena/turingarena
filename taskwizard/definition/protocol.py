@@ -1,3 +1,18 @@
+class Protocol:
+
+    def __init__(self, ast):
+        self.steps = ast.steps
+        self.name = ast.name
+
+    def get_arrays_to_allocate(self, scope):
+        for step in self.steps:
+            yield from step.get_arrays_to_allocate(scope, [])
+
+    def get_free_variables(self, scope):
+        for step in self.steps:
+            yield from step.get_free_variables(scope, [])
+
+
 class ProtocolNode:
 
     def __init__(self, ast):
@@ -7,12 +22,22 @@ class ProtocolNode:
     def get_node_type(cls):
         return cls.node_type
 
+    def get_free_variables(self, scope, indexes):
+        return []
+
+    def get_arrays_to_allocate(self, scope, indexes):
+        return []
+
 
 class InputOutputStep(ProtocolNode):
 
     def __init__(self, ast):
         super().__init__(ast)
         self.variables = ast.variables
+
+    def get_free_variables(self, scope, indexes):
+        for variable in self.variables:
+            yield variable.as_simple_lvalue(scope, indexes)
 
 
 class InputStep(InputOutputStep):
@@ -36,16 +61,31 @@ class CallStep(ProtocolNode):
         self.parameters = ast.parameters
 
 
+class ForIndex:
+
+    def __init__(self, name, range):
+        self.name = name
+        self.range = range
+
+
 class ForNode(ProtocolNode):
 
     node_type = "for"
 
     def __init__(self, ast):
         super().__init__(ast)
-        self.index = ast.index
-        self.range = ast.range
+        self.index = ForIndex(ast.index, ast.range)
         self.steps = ast.steps
 
+    def get_free_variables(self, scope, indexes):
+        for step in self.steps:
+            yield from step.get_free_variables(scope, indexes + [self.index])
+
+    def get_arrays_to_allocate(self, scope, indexes):
+        for var in self.get_free_variables(scope, indexes):
+            yield (self, var, indexes)
+        for step in self.steps:
+            yield from step.get_arrays_to_allocate(scope, indexes + [self.index])
 
 class SwitchNode(ProtocolNode):
 

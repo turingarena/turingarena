@@ -14,5 +14,5 @@ void evaluate() {
         solution.set_A(i, 3);
     }
 
-    int S = solution.solve(N, M);
+    int S = solution.call_solve(N, M);
 }

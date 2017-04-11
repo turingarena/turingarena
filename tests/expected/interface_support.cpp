@@ -1,9 +1,9 @@
 #include <cstdio>
 
-extern int N;
-extern int M;
-extern int *A;
-extern int S;
+int N;
+int M;
+int *A;
+int S;
 
 int solve(int N, int M);
 

@@ -9,3 +9,6 @@ class Interface:
         self.functions = named_definitions(ast.functions)
         self.callback_functions = named_definitions(ast.callback_functions)
         self.protocols = named_definitions(ast.protocols)
+
+    def get_arrays_to_allocate(self, protocol):
+        return protocol.get_arrays_to_allocate(self.variables)

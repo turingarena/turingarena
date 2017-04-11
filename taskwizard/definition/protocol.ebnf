@@ -1,4 +1,4 @@
-protocol_declaration =
+protocol_declaration::Protocol =
   'protocol' [name:identifier] '{'
     steps:protocol_nodes
   '}'

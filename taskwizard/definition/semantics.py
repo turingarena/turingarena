@@ -4,7 +4,7 @@ from grako.semantics import ModelBuilderSemantics
 
 from taskwizard.definition.function import Function
 from taskwizard.definition.interface import Interface
-from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase
+from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase, Protocol
 
 from taskwizard.definition.declarations import named_definitions
 from taskwizard.definition.driver import Driver
@@ -22,6 +22,7 @@ class Semantics(ModelBuilderSemantics):
             Function,
             Driver,
             Interface,
+            Protocol,
             InputStep, OutputStep, CallStep,
             ForNode, SwitchNode, SwitchCase,
             VariableExpression, IntLiteralExpression,

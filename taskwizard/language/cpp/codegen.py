@@ -14,6 +14,12 @@ class ExpressionGenerator:
 
 class ProtocolGenerator:
 
+    def __init__(self, interface, protocol):
+        self.interface = interface
+        self.protocol = protocol
+
+        self.arrays_to_allocate = list(interface.get_arrays_to_allocate(protocol))
+
     def generate_steps(self, steps):
         for step in steps:
             yield from self.generate_step(step)
@@ -24,10 +30,18 @@ class ProtocolGenerator:
         yield from method(step)
 
     def for_node(self, node):
-        yield 'for({index}={start}; {index}<={end}; {index}++)'.format(
-                index=node.index,
-                start=generate_expression(node.range.start),
-                end=generate_expression(node.range.end)
+        for n, var, indexes in self.arrays_to_allocate:
+            if not n == node: continue
+            yield "{name} = new {type}[{size}+1];".format(
+                name=var.name,
+                type=var.type,
+                size=generate_expression(var.array_dimensions[0].end)
+            )
+
+        yield 'for(int {index} = {start}; {index} <= {end}; {index}++)'.format(
+                index=node.index.name,
+                start=generate_expression(node.index.range.start),
+                end=generate_expression(node.index.range.end)
         ) + " {"
         yield from indent(self.generate_steps(node.steps))
         yield "}"
@@ -82,14 +96,27 @@ class InterfaceDriverProtocolGenerator(ProtocolGenerator):
 
 class CodeGenerator:
 
+
     def generate_interface_support(self, interface):
+        yield "#include <cstdio>"
+
+        yield ""
+
         for variable in interface.variables.values():
             yield from self.generate_variable_declaration(variable);
 
         yield ""
 
+        for function in interface.functions.values():
+            yield from self.generate_function_declaration(function);
+
+        yield ""
+
         for protocol in interface.protocols.values():
-            yield from self.generate_interface_protocol(protocol)
+            if protocol.name is None:
+                yield from self.generate_main_interface_protocol(interface, protocol)
+            else:
+                yield from self.generate_interface_protocol(interface, protocol)
 
     def generate_interface_driver_support(self, interface):
         for variable in interface.variables.values():
@@ -101,24 +128,29 @@ class CodeGenerator:
             yield from self.generate_interface_driver_protocol(interface, protocol)
 
     def generate_variable_declaration(self, variable):
-        yield "{type} {name}{dimensions};".format(
+        yield self.format_variable(variable) + ";"
+
+    def format_variable(self, variable):
+        return "{type} {stars}{name}".format(
             type=variable.type,
             name=variable.name,
-            dimensions=''.join('[1+' + generate_expression(d.end) + ']' for d in variable.array_dimensions)
+            stars='*' * len(variable.array_dimensions)
         )
 
-    def generate_interface_protocol(self, protocol):
-        yield "void accept_{name}()".format(name=protocol.name) + " {"
-        yield from indent(InterfaceProtocolGenerator().generate_steps(protocol.steps))
+    def generate_function_declaration(self, function):
+        yield "{return_type} {name}({arguments});".format(
+            return_type=function.return_type,
+            name=function.name,
+            arguments=', '.join(self.format_variable(p) for p in function.parameters.values())
+        )
+
+    def generate_main_interface_protocol(self, interface, protocol):
+        yield "int main() {"
+        yield from indent(InterfaceProtocolGenerator(interface, protocol).generate_steps(protocol.steps))
         yield "}"
 
     def generate_interface_driver_protocol(self, interface, protocol):
-        yield "void send_{interface_name}_{name}(int process_id)".format(interface_name=interface.name,name=protocol.name) + " {"
-        yield "    FILE* dpipe = get_downward_pipe(process_id);"
-        yield "    FILE* upipe = get_upward_pipe(process_id);"
         yield ""
-        yield from indent(InterfaceDriverProtocolGenerator().generate_steps(protocol.steps))
-        yield "}"
 
 
 def generate_expression(expression):
