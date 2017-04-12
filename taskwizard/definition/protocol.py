@@ -20,9 +20,8 @@ class Protocol:
         """
         grammar_deps = lambda: [ProtocolNode.Definition, Identifier]
 
-    def __init__(self, ast):
-        self.steps = ast.steps
-        self.name = ast.name
+    def __init__(self, definition):
+        self.definition = definition
 
     def get_arrays_to_allocate(self, scope):
         for step in self.steps:

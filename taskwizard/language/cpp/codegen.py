@@ -94,8 +94,8 @@ class InterfaceDriverProtocolGenerator(ProtocolGenerator):
     def call_node(self, node):
         return []
 
-class CodeGenerator:
 
+class CodeGenerator:
 
     def generate_interface_support(self, interface):
         yield "#include <cstdio>"

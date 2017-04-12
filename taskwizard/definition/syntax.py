@@ -69,6 +69,7 @@ class AbstractSyntaxNode(AbstractSyntaxFragment):
     def get_grammar_rule(cls):
         rule = cls.get_explicit_grammar_rule()
         if rule is None:
+            # try to extract first rule defined in grammar (convention over configuration)
             rule = cls.get_grammar_fragment().lstrip().split(maxsplit=2)[0]
         return rule
 
