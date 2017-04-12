@@ -8,7 +8,7 @@
     fprintf(stderr, __VA_ARGS__); \
 } while(0)
 
-/*{{ macro.generate_protocol(interface.callback_functions.values(), interface.functions.values()) }}*/
+/*{{ macro.generate_protocol(interface.callback_functions, interface.functions) }}*/
 
 int main() {
     setvbuf(stdin, NULL, _IONBF, 0);

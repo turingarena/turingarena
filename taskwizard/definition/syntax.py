@@ -34,14 +34,17 @@ class AbstractSyntaxFragment:
 
     @classmethod
     def get_all_deps(cls):
-        queue = [cls]
-        deps = set()
-        while queue:
-            cls2 = queue.pop()
+        stack = [cls]
+        deps = []
+        deps_set = set()
+        while stack:
+            cls2 = stack.pop()
             assert issubclass(cls2, AbstractSyntaxFragment)
-            if not cls2 in deps:
-                deps.add(cls2)
-                queue.extend(cls2.get_direct_deps())
+            if not cls2 in deps_set:
+                deps_set.add(cls2)
+                deps.append(cls2)
+                stack.extend(reversed(cls2.get_direct_deps()))
+        deps.reverse() # post-order
         return deps
 
     @classmethod

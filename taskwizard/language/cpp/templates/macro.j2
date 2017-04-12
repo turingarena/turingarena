@@ -1,91 +1,91 @@
-{% macro parameter(p) %}
-{{p.type}} {{p.name}}
-{%- endmacro %}
+/*{% macro parameter(p) %}*/
+/*{{p.type}}*/ /*{{p.name}}*/
+/*{%- endmacro %}*/
 
 
-{% macro parameters_signature(function) %}
-{% set comma=joiner(", ") %}
-{% for p in function.parameters.values() %}{{comma()}}{{parameter(p)}}{% endfor %}
-{%- endmacro %}
+/*{% macro parameters_signature(function) %}*/
+/*{% set comma=joiner(", ") %}*/
+/*{% for p in function.parameters %}*//*{{comma()}}*//*{{parameter(p)}}*//*{% endfor %}*/
+/*{%- endmacro %}*/
 
-{% macro process_parameters_signature(function, comma=joiner(", ")) %}
-int process_id{% for p in function.parameters.values() %}, {{parameter(p)}}{% endfor %}
-{%- endmacro %}
-
-
-{% macro function_signature(function) %}
-{{function.return_type}} CALL_{{function.name}}({{parameters_signature(function)}})
-{%- endmacro %}
+/*{% macro process_parameters_signature(function, comma=joiner(", ")) %}*/
+int process_id/*{% for p in function.parameters %}*/, /*{{parameter(p)}}*//*{% endfor %}*/
+/*{%- endmacro %}*/
 
 
-{% macro process_function_signature(function) %}
-{{function.return_type}} CALL_{{function.name}}({{process_parameters_signature(function)}})
-{%- endmacro %}
+/*{% macro function_signature(function) %}*/
+/*{{function.return_type}}*/ CALL_/*{{function.name}}*/(/*{{parameters_signature(function)}}*/)
+/*{%- endmacro %}*/
 
 
-{% macro callback_function_signature(function) %}
-{{function.return_type}} ON_{{function.name}}({{parameters_signature(function)}})
-{%- endmacro %}
+/*{% macro process_function_signature(function) %}*/
+/*{{function.return_type}}*/ CALL_/*{{function.name}}*/(/*{{process_parameters_signature(function)}}*/)
+/*{%- endmacro %}*/
 
 
-{% macro process_callback_function_signature(function) %}
-{{function.return_type}} ON_{{function.name}}({{process_parameters_signature(function)}})
-{%- endmacro %}
+/*{% macro callback_function_signature(function) %}*/
+/*{{function.return_type}}*/ ON_/*{{function.name}}*/(/*{{parameters_signature(function)}}*/)
+/*{%- endmacro %}*/
 
 
-{% macro data_block_type(name) %}
-data_block_{{name}}
-{%- endmacro %}
+/*{% macro process_callback_function_signature(function) %}*/
+/*{{function.return_type}}*/ ON_/*{{function.name}}*/(/*{{process_parameters_signature(function)}}*/)
+/*{%- endmacro %}*/
 
 
-{% macro generate_data_block_struct(name, variables) %}
-struct {{ data_block_type(name) }} {
-    {% for v in variables %}
-    {{v.type}} {{v.name}};
-    {% endfor %}
+/*{% macro data_block_type(name) %}*/
+data_block_/*{{name}}*/
+/*{%- endmacro %}*/
+
+
+/*{% macro generate_data_block_struct(name, variables) %}*/
+struct /*{{ data_block_type(name) }}*/ {
+    /*{% for v in variables %}*/
+    /*{{v.type}}*/ /*{{v.name}}*/;
+    /*{% endfor %}*/
 };
-{%- endmacro %}
+/*{%- endmacro %}*/
 
 
-{% macro generate_data_block_read(name, variables) %}
-void data_block_read_{{name}}({{ data_block_type(name) }} *p) {
-    {% for v in variables %}
-    {{v.type}} {{v.name}};
+/*{% macro generate_data_block_read(name, variables) %}*/
+void data_block_read_/*{{name}}*/(/*{{ data_block_type(name) }}*/ *p) {
+    /*{% for v in variables %}*/
+    /*{{v.type}}*/ /*{{v.name}}*/;
 
-    support_trace("reading variable '%s %s'\n", "{{v.type}}", "{{v.name}}");
-    scanf(" %d", &p->{{v.name}});
+    support_trace("reading variable '%s %s'\n", "/*{{v.type}}*/", "/*{{v.name}}*/");
+    scanf(" %d", &p->/*{{v.name}}*/);
 
-    {% endfor %}
+    /*{% endfor %}*/
 }
-{%- endmacro %}
+/*{%- endmacro %}*/
 
 
-{% macro generate_data_block_write(name, variables) %}
-void data_block_write_{{name}}({{ data_block_type(name) }} *p) {
-    {% for v in variables %}
+/*{% macro generate_data_block_write(name, variables) %}*/
+void data_block_write_/*{{name}}*/(/*{{ data_block_type(name) }}*/ *p) {
+    /*{% for v in variables %}*/
 
-    support_trace("writing variable '%s %s': %d\n", "{{v.type}}", "{{v.name}}", p->{{v.name}});
-    printf("%d\n", p->{{v.name}});
+    support_trace("writing variable '%s %s': %d\n", "/*{{v.type}}*/", "/*{{v.name}}*/", p->/*{{v.name}}*/);
+    printf("%d\n", p->/*{{v.name}}*/);
 
-    {% endfor %}
+    /*{% endfor %}*/
   }
-{%- endmacro %}
+/*{%- endmacro %}*/
 
 
-{% macro generate_read_retval(driver=False) %}
+/*{% macro generate_read_retval(driver=False) %}*/
     int retval;
     scanf(" %d", &retval);
     return retval;
-{%- endmacro %}
+/*{%- endmacro %}*/
 
 
-{% macro generate_write_retval(driver=False) %}
+/*{% macro generate_write_retval(driver=False) %}*/
     printf("return %d\n", retval);
-{%- endmacro %}
+/*{%- endmacro %}*/
 
 
-{% macro wrap_for_interface(driver=False, interface_name="") %}
-{{
+/*{% macro wrap_for_interface(driver=False, interface_name="") %}*/
+/*{{
   caller()
   |
   replace(
@@ -117,81 +117,81 @@ void data_block_write_{{name}}({{ data_block_type(name) }} *p) {
     "CALL_",
     "call_" + interface_name + "_" if driver else "" 
   )
-}}
-{% endmacro %}
+}}*/
+/*{% endmacro %}*/
 
 
-{% macro do_generate_protocol_header(functions, callbacks, driver=False) %}
+/*{% macro do_generate_protocol_header(functions, callbacks, driver=False) %}*/
     // Downward calls
   
-    {% for function in functions -%}
-        {% if driver %}
-        {{ process_function_signature(function) }};
-        {% else %}
-        {{ function_signature(function) }};
-        {% endif %}
-    {% endfor %}
+    /*{% for function in functions -%}*/
+        /*{% if driver %}*/
+        /*{{ process_function_signature(function) }}*/;
+        /*{% else %}*/
+        /*{{ function_signature(function) }}*/;
+        /*{% endif %}*/
+    /*{% endfor %}*/
   
     // Upward call
   
-    {% for callback in callbacks -%}
-        {% if driver %}
-        {{ process_callback_function_signature(callback) }};
-        {% else %}
-        {{ callback_function_signature(callback) }};
-        {% endif %}
-    {% endfor %}
-{% endmacro %}
+    /*{% for callback in callbacks -%}*/
+        /*{% if driver %}*/
+        /*{{ process_callback_function_signature(callback) }}*/;
+        /*{% else %}*/
+        /*{{ callback_function_signature(callback) }}*/;
+        /*{% endif %}*/
+    /*{% endfor %}*/
+/*{% endmacro %}*/
 
 
-{% macro generate_protocol_header(functions, callbacks, driver=False, interface_name="") %}
-{% call wrap_for_interface(driver, interface_name) %}
-{{do_generate_protocol_header(functions, callbacks, driver)}}
-{% endcall %}
-{% endmacro %}
+/*{% macro generate_protocol_header(functions, callbacks, driver=False, interface_name="") %}*/
+/*{% call wrap_for_interface(driver, interface_name) %}*/
+/*{{do_generate_protocol_header(functions, callbacks, driver)}}*/
+/*{% endcall %}*/
+/*{% endmacro %}*/
 
 
-{% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}
-{% call wrap_for_interface(driver, interface_name) %}
-{{do_generate_protocol(functions, callbacks, driver)}}
-{% endcall %}
-{%- endmacro %}
+/*{% macro generate_protocol(functions, callbacks, driver=False, interface_name="") %}*/
+/*{% call wrap_for_interface(driver, interface_name) %}*/
+/*{{do_generate_protocol(functions, callbacks, driver)}}*/
+/*{% endcall %}*/
+/*{%- endmacro %}*/
 
 
-{% macro parameters_of(function) %}
-parameters_of_{{function.name}}
-{%- endmacro %}
+/*{% macro parameters_of(function) %}*/
+parameters_of_/*{{function.name}}*/
+/*{%- endmacro %}*/
 
 
-{% macro do_generate_protocol(functions, callbacks, driver=False, interface_name="") %}
+/*{% macro do_generate_protocol(functions, callbacks, driver=False, interface_name="") %}*/
 
-{% for callback in callbacks %}
+/*{% for callback in callbacks %}*/
 
-{{ generate_data_block_struct(parameters_of(callback), callback.parameters.values()) }}
-{{ generate_data_block_read(parameters_of(callback), callback.parameters.values()) }}
+/*{{ generate_data_block_struct(parameters_of(callback), callback.parameters.values()) }}*/
+/*{{ generate_data_block_read(parameters_of(callback), callback.parameters.values()) }}*/
 
-{% if driver %}
-    {{ callback_function_signature(callback) }} {
-        ON_{{callback.name}}(current_process_id{% for p in callback.parameters.values() %}, parameters.{{p.name}}{% endfor %});
+/*{% if driver %}*/
+    /*{{ callback_function_signature(callback) }}*/ {
+        ON_/*{{callback.name}}*/(current_process_id/*{% for p in callback.parameters %}*/, parameters./*{{p.name}}*//*{% endfor %}*/);
     }
-{% endif %}
+/*{% endif %}*/
 
-void accept_callback_INTERFACE_{{callback.name}}() {
-    support_trace("received callback '%s'\n", "{{callback.name}}");
+void accept_callback_INTERFACE_/*{{callback.name}}*/() {
+    support_trace("received callback '%s'\n", "/*{{callback.name}}*/");
 
     support_trace("reading arguments\n");
-    {{ data_block_type(parameters_of(callback)) }} parameters;
-    data_block_read_{{parameters_of(callback)}}(&parameters);
+    /*{{ data_block_type(parameters_of(callback)) }}*/ parameters;
+    data_block_read_/*{{parameters_of(callback)}}*/(&parameters);
 
-    support_trace("calling local function '%s'\n", "ON_{{callback.name}}");
-    {% set comma = joiner(", ") %}
-    int retval = ON_{{callback.name}}({% for p in callback.parameters.values() %}{{ comma() }}parameters.{{p.name}}{% endfor %});
-    support_trace("local function '%s' returned\n", "ON_{{callback.name}}");
+    support_trace("calling local function '%s'\n", "ON_/*{{callback.name}}*/");
+    /*{% set comma = joiner(", ") %}*/
+    int retval = ON_/*{{callback.name}}*/(/*{% for p in callback.parameters %}*//*{{ comma() }}*/parameters./*{{p.name}}*//*{% endfor %}*/);
+    support_trace("local function '%s' returned\n", "ON_/*{{callback.name}}*/");
     
     support_trace("writing return value\n");
-    {{ generate_write_retval(driver=driver) }}
+    /*{{ generate_write_retval(driver=driver) }}*/
 }
-{% endfor %}
+/*{% endfor %}*/
 
 void accept_any_callback_INTERFACE() {
     char callback_name[51] = { 0 };
@@ -199,13 +199,13 @@ void accept_any_callback_INTERFACE() {
 
     scanf("%50s", callback_name);
 
-    {% for callback in callbacks %}
-    if(!strcmp(callback_name, "{{callback.name}}")) {
-        accept_callback_INTERFACE_{{callback.name}}();
+    /*{% for callback in callbacks %}*/
+    if(!strcmp(callback_name, "/*{{callback.name}}*/")) {
+        accept_callback_INTERFACE_/*{{callback.name}}*/();
 
         return;
     }
-    {% endfor %}
+    /*{% endfor %}*/
 
     support_trace("unrecognized callback: %s\n", callback_name);
     assert(0 && "Unrecognized callback");
@@ -231,38 +231,38 @@ void accept_callbacks_INTERFACE() {
     }
 }
 
-{% for function in functions %}
+/*{% for function in functions %}*/
 
-{{ generate_data_block_struct(parameters_of(function), function.parameters.values()) }}
-{{ generate_data_block_write(parameters_of(function), function.parameters.values()) }}
+/*{{ generate_data_block_struct(parameters_of(function), function.parameters.values()) }}*/
+/*{{ generate_data_block_write(parameters_of(function), function.parameters.values()) }}*/
 
-{{ function_signature(function) }} {
-    support_trace("calling function '%s'\n", "{{function.name}}");
+/*{{ function_signature(function) }}*/ {
+    support_trace("calling function '%s'\n", "/*{{function.name}}*/");
     printf("%s\n", "call");
-    printf("%s\n", "{{function.name}}");
+    printf("%s\n", "/*{{function.name}}*/");
 
     support_trace("writing arguments\n");
-    {{ data_block_type(parameters_of(function)) }} parameters;
-    {% for p in function.parameters.values() %}
-    parameters.{{p.name}} = {{p.name}};
-    {% endfor %}
-    data_block_write_{{parameters_of(function)}}(&parameters);
+    /*{{ data_block_type(parameters_of(function)) }}*/ parameters;
+    /*{% for p in function.parameters %}*/
+    parameters./*{{p.name}}*/ = /*{{p.name}}*/;
+    /*{% endfor %}*/
+    data_block_write_/*{{parameters_of(function)}}*/(&parameters);
 
     support_trace("function called, waiting for return or callbacks...\n");
     accept_callbacks_INTERFACE();
 
-    support_trace("reading return value for function '%s'\n", "{{function.name}}");
-    {{ generate_read_retval(driver=driver) }}
+    support_trace("reading return value for function '%s'\n", "/*{{function.name}}*/");
+    /*{{ generate_read_retval(driver=driver) }}*/
 }
 
-{% if driver %}
-{{ process_function_signature(function) }} {
+/*{% if driver %}*/
+/*{{ process_function_signature(function) }}*/ {
     current_process_id = process_id;
-    {% set comma = joiner(", ") %}
-    CALL_{{function.name}}({% for p in function.parameters.values() %}{{ comma() }}{{p.name}}{% endfor %});
+    /*{% set comma = joiner(", ") %}*/
+    CALL_/*{{function.name}}*/(/*{% for p in function.parameters %}*//*{{ comma() }}*//*{{p.name}}*//*{% endfor %}*/);
 }
-{% endif %}
+/*{% endif %}*/
 
-{% endfor %}
+/*{% endfor %}*/
 
-{%- endmacro %}
+/*{%- endmacro %}*/

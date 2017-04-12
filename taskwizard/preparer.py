@@ -6,7 +6,7 @@ import pkg_resources
 import yaml
 from jinja2 import Environment, PackageLoader
 
-from taskwizard.definition.task import Semantics
+from taskwizard.definition.task import TaskDefinition
 from taskwizard.language.cpp import preparer as cpp_preparer
 
 
@@ -92,9 +92,8 @@ class ProblemPreparer:
         self.yaml_file = os.path.join(self.prepared_dir, "problem.yaml")
 
     def parse_task(self):
-        parser = TaskParser(semantics=Semantics())
         text = open(os.path.join(self.definition_dir, "task.txt")).read()
-        return parser.parse(text)
+        return TaskDefinition.parse(text)
 
     def prepare(self):
         self.task = self.parse_task()
@@ -103,15 +102,15 @@ class ProblemPreparer:
         os.makedirs(self.prepared_dir)
 
         os.mkdir(os.path.join(self.prepared_dir, "drivers"))
-        for driver in self.task.drivers.values():
+        for driver in self.task.drivers:
             DriverPreparer(self, driver).prepare()
 
         os.mkdir(os.path.join(self.prepared_dir, "interfaces"))
-        for interface in self.task.interfaces.values():
+        for interface in self.task.interfaces:
             InterfacePreparer(self, interface).prepare()
 
         os.mkdir(os.path.join(self.prepared_dir, "testcases"))
-        for test_case in self.task.test_cases.values():
+        for test_case in self.task.test_cases:
             TestCasePreparer(self, test_case).prepare()
 
         data = {

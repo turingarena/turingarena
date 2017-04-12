@@ -6,9 +6,12 @@ class FunctionDefinition(AbstractSyntaxNode):
 
     grammar = """
         function_declaration =
-        return_type:return_type name:identifier '(' parameters:','.{parameter}* ')' ';'
+        [callback:'callback'] return_type:return_type name:identifier '(' parameters:','.{parameter}* ')' ';'
         ;
     """
+
+    def is_callback(self):
+        return hasattr(self, "callback")
 
 
 class Function:

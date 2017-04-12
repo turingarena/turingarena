@@ -1,3 +1,5 @@
+from taskwizard.definition.common import Types, Identifier
+from taskwizard.definition.expression import RangeExpression
 from taskwizard.definition.syntax import AbstractSyntaxNode
 
 
@@ -6,7 +8,7 @@ class VariableDefinition(AbstractSyntaxNode):
     grammar_rule = "variable"
     grammar = """
         variable =
-        type:type name:identifier {'[' array_dimensions+:range ']'}*
+        type:type name:identifier {'[' array_dimensions+:range_expression ']'}*
         ;
 
         parameter =
@@ -15,6 +17,7 @@ class VariableDefinition(AbstractSyntaxNode):
 
         variable_declaration = @:variable ';' ;
     """
+    grammar_deps = lambda: [Types, Identifier, RangeExpression]
 
 
 class Variable:

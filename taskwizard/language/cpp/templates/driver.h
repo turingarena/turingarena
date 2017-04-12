@@ -4,13 +4,13 @@
 
 /*{{ 55 }}*/
 
-/*{% for interface in task.interfaces.values() %}*/
+/*{% for interface in task.interfaces %}*/
     /*{{ macro.generate_protocol_header(
-        interface.functions.values(),
-        interface.callback_functions.values(),
+        interface.functions,
+        interface.callback_functions,
         driver=True,
         interface_name=interface.name) }}*/
 /*{% endfor %}*/
 
-/*{{ macro.generate_protocol_header([], driver.functions.values()) }}*/
+/*{{ macro.generate_protocol_header([], driver.functions) }}*/
 
