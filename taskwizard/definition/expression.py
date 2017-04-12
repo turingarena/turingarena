@@ -34,6 +34,10 @@ class RangeExpression(AbstractSyntaxNode):
     """
     grammar_deps = lambda: [ Expression ]
 
+    def __init__(self, ast):
+        self.start = ast.start
+        self.end = ast.end
+
 
 class VariableExpression(Expression):
 
@@ -49,7 +53,7 @@ class VariableExpression(Expression):
 
     def __init__(self, ast):
         self.variable_name = ast.variable_name
-        self.indexes = ast.indexes
+        self.indexes = ast.get("indexes", [])
 
     def as_simple_lvalue(self, scope, indexes):
         variable = scope[self.variable_name]

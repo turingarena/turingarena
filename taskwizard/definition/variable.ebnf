@@ -1,9 +1,0 @@
-parameter =
-  @:variable
-  ;
-
-variable::Variable =
-  type:type name:identifier {'[' array_dimensions+:range ']'}*
-  ;
-
-variable_declaration = @:variable ';' ;

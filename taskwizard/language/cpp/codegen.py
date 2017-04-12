@@ -112,11 +112,10 @@ class CodeGenerator:
 
         yield ""
 
-        for protocol in interface.protocols.values():
-            if protocol.name is None:
-                yield from self.generate_main_interface_protocol(interface, protocol)
-            else:
-                yield from self.generate_interface_protocol(interface, protocol)
+        yield from self.generate_main_interface_protocol(interface)
+
+        for protocol in interface.named_protocols.values():
+            yield from self.generate_interface_protocol(interface, protocol)
 
     def generate_interface_driver_support(self, interface):
         for variable in interface.variables.values():
@@ -124,8 +123,7 @@ class CodeGenerator:
 
         yield ""
 
-        for protocol in interface.protocols.values():
-            yield from self.generate_interface_driver_protocol(interface, protocol)
+        yield from self.generate_interface_driver_protocol(interface, interface.main_protocol)
 
     def generate_variable_declaration(self, variable):
         yield self.format_variable(variable) + ";"
@@ -144,7 +142,9 @@ class CodeGenerator:
             arguments=', '.join(self.format_variable(p) for p in function.parameters.values())
         )
 
-    def generate_main_interface_protocol(self, interface, protocol):
+    def generate_main_interface_protocol(self, interface):
+        protocol = interface.main_protocol
+
         yield "int main() {"
         yield from indent(InterfaceProtocolGenerator(interface, protocol).generate_steps(protocol.steps))
         yield "}"

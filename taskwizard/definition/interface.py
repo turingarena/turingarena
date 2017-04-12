@@ -2,10 +2,10 @@ from collections import OrderedDict
 
 from taskwizard.definition.common import Identifier
 from taskwizard.definition.declarations import named_definitions
-from taskwizard.definition.function import FunctionDefinition
+from taskwizard.definition.function import FunctionDefinition, Function
 from taskwizard.definition.protocol import Protocol
 from taskwizard.definition.syntax import AbstractSyntaxNode
-from taskwizard.definition.variable import VariableDefinition
+from taskwizard.definition.variable import VariableDefinition, Variable
 
 
 class InterfaceDefinition(AbstractSyntaxNode):
@@ -14,10 +14,11 @@ class InterfaceDefinition(AbstractSyntaxNode):
         interface_definition =
             'interface' name:identifier '{'
 
-            declarations:{
-            | variable_declaration
-            | function_declaration
-            | protocol_declaration
+            {
+            | variables+:variable_declaration
+            | functions+:function_declaration
+            | protocols+:protocol_declaration
+            | 'callback' ~ callback_functions+:function_declaration
             }*
 
             '}'
@@ -25,17 +26,12 @@ class InterfaceDefinition(AbstractSyntaxNode):
     """
     grammar_deps = lambda: [Identifier, VariableDefinition, FunctionDefinition, Protocol.Definition]
 
-    def get_variable_definitions(self):
-        return [d for d in self.declarations if isinstance(d, VariableDefinition)]
-
-    def get_function_definitions(self):
-        return [d for d in self.declarations if isinstance(d, FunctionDefinition) and not d.is_callback()]
-
-    def get_callback_function_definitions(self):
-        return [d for d in self.declarations if isinstance(d, FunctionDefinition) and d.is_callback()]
-
-    def get_protocol_definitions(self):
-        return [d for d in self.declarations if isinstance(d, Protocol.Definition)]
+    def __init__(self, ast):
+        self.name = ast.name
+        self.variable_definitions = ast.get("variables", [])
+        self.function_definitions = ast.get("functions", [])
+        self.callback_function_definitions = ast.get("callback_functions", [])
+        self.protocol_definitions = ast.get("protocols", [])
 
 
 class Interface:
@@ -44,16 +40,20 @@ class Interface:
         self.definition = definition
         self.name = definition.name
         self.variables = OrderedDict(
-                (d.name, d) for d in definition.get_variable_definitions()
+                (d.name, Variable(d)) for d in definition.variable_definitions
         )
-        self.functions = named_definitions(definition.get_function_definitions())
-        self.callback_functions = named_definitions(definition.get_callback_function_definitions())
+        self.functions = OrderedDict(
+                (d.name, Function(d)) for d in definition.function_definitions
+        )
+        self.callback_functions = OrderedDict(
+                (d.name, Function(d)) for d in definition.callback_function_definitions
+        )
         self.named_protocols = OrderedDict(
-                (d.name, Protocol(d)) for d in definition.get_protocol_definitions()
-            if hasattr(d, "name")
+                (d.name, Protocol(d)) for d in definition.protocol_definitions
+                if d.name is not None
         )
         self.main_protocol = (
-            [Protocol(d) for d in definition.get_protocol_definitions() if not hasattr(d, "name")] + [None]
+            [Protocol(d) for d in definition.protocol_definitions if d.name is None]
         )[0]
 
     def get_arrays_to_allocate(self, protocol):

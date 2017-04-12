@@ -58,8 +58,7 @@ class AbstractSyntaxFragment:
 class AbstractSyntaxNode(AbstractSyntaxFragment):
 
     def __init__(self, ast):
-        for attr, value in ast.items():
-            setattr(self, attr, value)
+        pass
 
     @classmethod
     def get_explicit_grammar_rule(cls):

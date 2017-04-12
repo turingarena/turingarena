@@ -20,8 +20,16 @@ class Protocol:
         """
         grammar_deps = lambda: [ProtocolNode.Definition, Identifier]
 
+        def __init__(self, ast):
+            self.name = ast.name
+            self.steps = ast.steps
+
+
     def __init__(self, definition):
         self.definition = definition
+        self.steps = [
+            ProtocolNode.create(s) for s in definition.steps
+        ]
 
     def get_arrays_to_allocate(self, scope):
         for step in self.steps:
@@ -56,6 +64,12 @@ class ProtocolNode:
     def __init__(self, definition):
         pass
 
+    @staticmethod
+    def create(definition):
+        for name, cls in Protocol.cls_map.items():
+            if isinstance(definition, cls.Definition):
+                return cls(definition)
+
     @classmethod
     def get_node_type(cls):
         return cls.node_type
@@ -69,9 +83,13 @@ class ProtocolNode:
 
 class InputOutputStep(ProtocolNode):
 
-    def __init__(self, ast):
-        super().__init__(ast)
-        self.variables = ast.variables
+    class Definition(AbstractSyntaxNode):
+
+        def __init__(self, ast):
+            self.variables = ast.variables
+
+    def __init__(self, definition):
+        self.variables = definition.variables
 
     def get_free_variables(self, scope, indexes):
         for variable in self.variables:
@@ -82,11 +100,11 @@ class InputStep(InputOutputStep):
 
     node_type = "input"
 
-    class Definition(AbstractSyntaxNode):
+    class Definition(InputOutputStep.Definition):
 
         grammar = """
             input_step =
-            'input' ~ ','.{ variables+:expression }* ';'
+            'input' ~ variables:','.{ expression }* ';'
             ;
         """
         grammar_deps = lambda: [Expression]
@@ -96,11 +114,11 @@ class OutputStep(InputOutputStep):
 
     node_type = "output"
 
-    class Definition(AbstractSyntaxNode):
+    class Definition(InputOutputStep.Definition):
 
         grammar = """
             output_step =
-            'output' ~ ','.{ variables+:expression }* ';'
+            'output' ~ variables:','.{ expression }* ';'
             ;
         """
         grammar_deps = lambda: [Expression]
@@ -114,16 +132,20 @@ class CallStep(ProtocolNode):
 
         grammar = """
             call_step =
-            'call' ~ [ return_value:expression '='  ] function_name:identifier '(' ','.{ parameters+:expression }* ')' ';'
+            'call' ~ [ return_value:expression '='  ] function_name:identifier '(' parameters:','.{ expression }* ')' ';'
             ;
         """
         grammar_deps = lambda: [Expression, Identifier]
 
-    def __init__(self, ast):
-        super().__init__(ast)
-        self.return_value = ast.return_value
-        self.function_name = ast.function_name
-        self.parameters = ast.parameters
+        def __init__(self, ast):
+            self.return_value = ast.return_value
+            self.function_name = ast.function_name
+            self.parameters = ast.parameters
+
+    def __init__(self, definition):
+        self.return_value = definition.return_value
+        self.function_name = definition.function_name
+        self.parameters = definition.parameters
 
 
 class ForIndex:
@@ -148,10 +170,15 @@ class ForNode(ProtocolNode):
         """
         grammar_deps = lambda: [RangeExpression, Protocol.Definition]
 
-    def __init__(self, ast):
-        super().__init__(ast)
-        self.index = ForIndex(ast.index, ast.range)
-        self.steps = ast.steps
+        def __init__(self, ast):
+            self.index = ForIndex(ast.index, ast.range)
+            self.steps = ast.steps
+
+    def __init__(self, definition):
+        self.index = definition.index
+        self.steps = [
+            ProtocolNode.create(s) for s in definition.steps
+        ]
 
     def get_free_variables(self, scope, indexes):
         for step in self.steps:
@@ -201,3 +228,12 @@ class SwitchCase:
 
     def __init__(self, definition):
         self.definition = definition
+
+Protocol.cls_map = {
+    "input": InputStep,
+    "output": OutputStep,
+    "call": CallStep,
+    "for": ForNode,
+    "switch": SwitchNode,
+}
+

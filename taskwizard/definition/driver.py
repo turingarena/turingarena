@@ -11,7 +11,6 @@ class DriverDefinition(AbstractSyntaxNode):
             | 'source' source:STRING ';'
             | 'language' language:STRING ';'
             | variables+:variable_declaration
-            | functions+:function_declaration
             }*
             '}'
             ;

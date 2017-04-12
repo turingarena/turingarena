@@ -19,6 +19,11 @@ class VariableDefinition(AbstractSyntaxNode):
     """
     grammar_deps = lambda: [Types, Identifier, RangeExpression]
 
+    def __init__(self, ast):
+        self.name = ast.name
+        self.type = ast.type
+        self.array_dimensions = ast.get("array_dimensions", [])
+
 
 class Variable:
 
