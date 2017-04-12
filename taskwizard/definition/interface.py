@@ -3,7 +3,7 @@ from collections import OrderedDict
 from taskwizard.definition.common import Identifier
 from taskwizard.definition.declarations import named_definitions
 from taskwizard.definition.function import FunctionDefinition, Function
-from taskwizard.definition.protocol import Protocol
+from taskwizard.definition.protocol import Protocol, ProtocolDefinition
 from taskwizard.definition.syntax import AbstractSyntaxNode
 from taskwizard.definition.variable import VariableDefinition, Variable
 
@@ -24,7 +24,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             '}'
         ;
     """
-    grammar_deps = lambda: [Identifier, VariableDefinition, FunctionDefinition, Protocol.Definition]
+    grammar_deps = lambda: [Identifier, VariableDefinition, FunctionDefinition, ProtocolDefinition]
 
     def __init__(self, ast):
         self.name = ast.name

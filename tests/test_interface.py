@@ -12,10 +12,10 @@ class TestInterface(unittest.TestCase):
             interface exampleinterface {}
         """)
 
-        self.assertEqual([], interface.get_function_definitions())
-        self.assertEqual([], interface.get_variable_definitions())
-        self.assertEqual([], interface.get_callback_function_definitions())
-        self.assertEqual([], interface.get_protocol_definitions())
+        self.assertEqual([], interface.function_definitions)
+        self.assertEqual([], interface.variable_definitions)
+        self.assertEqual([], interface.callback_function_definitions)
+        self.assertEqual([], interface.protocol_definitions)
 
     def test_full(self):
         interface = InterfaceDefinition.parse("""
@@ -27,7 +27,7 @@ class TestInterface(unittest.TestCase):
             }
         """)
 
-        self.assertEqual(1, len(interface.get_function_definitions()))
-        self.assertEqual(1, len(interface.get_variable_definitions()))
-        self.assertEqual(1, len(interface.get_callback_function_definitions()))
-        self.assertEqual(1, len(interface.get_protocol_definitions()))
+        self.assertEqual(1, len(interface.function_definitions))
+        self.assertEqual(1, len(interface.variable_definitions))
+        self.assertEqual(1, len(interface.callback_function_definitions))
+        self.assertEqual(1, len(interface.protocol_definitions))

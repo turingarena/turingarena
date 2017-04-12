@@ -1,41 +1,40 @@
 import unittest
 
-from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase, \
-    ProtocolNode
+from taskwizard.definition.protocol import *
 
 
 class TestProtocol(unittest.TestCase):
 
     def test_input(self):
-        step = ProtocolNode.Definition.parse("input N, M;")
-        self.assertIsInstance(step, InputStep.Definition)
+        step = ProtocolNodeDefinition.parse("input N, M;")
+        self.assertIsInstance(step, InputStepDefinition)
         self.assertEqual(len(step.variables), 2)
 
     def test_output(self):
-        step = ProtocolNode.Definition.parse("output N, M;")
-        self.assertIsInstance(step, OutputStep.Definition)
+        step = ProtocolNodeDefinition.parse("output N, M;")
+        self.assertIsInstance(step, OutputStepDefinition)
         self.assertEqual(len(step.variables), 2)
 
     def test_call_returns(self):
-        step = ProtocolNode.Definition.parse("call A = f(B, C);")
-        self.assertIsInstance(step, CallStep.Definition)
+        step = ProtocolNodeDefinition.parse("call A = f(B, C);")
+        self.assertIsInstance(step, CallStepDefinition)
         self.assertEqual(step.function_name, "f")
 
     def test_call_no_return(self):
-        step = ProtocolNode.Definition.parse("call f(B, C);")
-        self.assertIsInstance(step, CallStep.Definition)
+        step = ProtocolNodeDefinition.parse("call f(B, C);")
+        self.assertIsInstance(step, CallStepDefinition)
         self.assertEqual(step.function_name, "f")
-        self.assertFalse(hasattr(step, "return_value"))
+        self.assertIsNone(step.return_value)
 
     def test_for(self):
-        step = ProtocolNode.Definition.parse("for (i : 1..10) {}")
-        self.assertIsInstance(step, ForNode.Definition)
-        self.assertEqual(step.index, "i")
+        step = ProtocolNodeDefinition.parse("for (i : 1..10) {}")
+        self.assertIsInstance(step, ForNodeDefinition)
+        self.assertEqual(step.index.name, "i")
 
     def test_switch(self):
-        step = ProtocolNode.Definition.parse("switch (X[i]) { case(A) {} case(B) {} }")
-        self.assertIsInstance(step, SwitchNode.Definition)
+        step = ProtocolNodeDefinition.parse("switch (X[i]) { case(A) {} case(B) {} }")
+        self.assertIsInstance(step, SwitchNodeDefinition)
         cases = step.cases
         self.assertEqual(len(cases), 2)
-        self.assertIsInstance(cases[0], SwitchCase.Definition)
+        self.assertIsInstance(cases[0], SwitchCaseDefinition)
         self.assertEqual(cases[0].value, "A")
