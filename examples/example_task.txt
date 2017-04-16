@@ -1,0 +1,57 @@
+interface exampleinterface {
+    const int N_MAX = 1000;
+
+    global int N, M;
+    global int U[], V[];
+    global int A[][];
+
+    // assumptions about global variables
+    assumptions {
+        assert 1 <= N <= N_MAX;
+        assert 1 <= M <= N*N;
+        for(i : 1..M) {
+            assert U[i] <= V[i];
+        }
+    }
+
+    function int preprocess(int a, int b) {
+        // assertions involving parameters (and globals)
+        assumptions {
+            assert 1 <= a <= b <= N;
+        }
+    }
+    function int solve(int a, int b);
+
+    callback int choose(int a, int b) {
+        output a, b;
+        input r;
+        return r;
+    }
+
+    main {
+        input N, M;
+        sizeof U = [1..M];
+        sizeof A = [1..N][1..N];
+        for(i : 1..M) {
+            input U[i], V[i];
+        }
+        do {
+            local enum {U, R} C;
+            input C;
+            switch(C) {
+                case(U) {
+                    continue;
+                }
+                case(R) {
+                    break;
+                }
+            }
+        }
+        local int u, v;
+        input u, v;
+        call preprocess(u, v);
+        call S = solve2(u, v);
+        output S;
+    }
+
+}
