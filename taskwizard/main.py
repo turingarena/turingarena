@@ -4,6 +4,7 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard stubs [options]
   taskwizard prepare [options]
+  taskwizard run [options] <module> <entry point> [<args>...]
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
@@ -16,6 +17,9 @@ Commands:
 
   prepare  Prepares this problem
   compile  Compiles this problem
+
+  run  Runs a module
+
   verify  Verify this problem
 
   evaluate  Evaluate this problem on some submissions
@@ -65,6 +69,10 @@ def main():
 
     if args["prepare"]:
         ProblemPreparer(definition_dir, output_dir).prepare()
+        return
+
+    if args["run"]:
+        # TODO
         return
 
     if args["evaluate"]:
