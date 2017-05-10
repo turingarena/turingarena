@@ -1,0 +1,10 @@
+interface aplusb {
+  raw;
+}
+
+module main {
+  source "module.cpp";
+  language "cpp";
+
+  raw;
+}

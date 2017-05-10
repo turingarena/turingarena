@@ -7,6 +7,7 @@ class ModuleDefinition(AbstractSyntaxNode):
         module_definition =
             'module' name:identifier '{'
             {
+            | 'raw' ~ raw:`true` ';'
             | 'source' source:STRING ';'
             | 'language' language:STRING ';'
             | variables+:variable_declaration
@@ -16,6 +17,7 @@ class ModuleDefinition(AbstractSyntaxNode):
     """
 
     def __init__(self, ast):
+        self.raw = ast.raw is not None
         self.name = ast.name
         self.source = ast.source
         self.language = ast.language

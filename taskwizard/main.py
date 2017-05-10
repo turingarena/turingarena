@@ -4,7 +4,7 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard stubs [options]
   taskwizard prepare [options]
-  taskwizard run [options] <module> <entry point> [<args>...]
+  taskwizard run [options] <module> <entry_point> [<args>...]
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
