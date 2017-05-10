@@ -15,8 +15,8 @@ class Process:
         self.process_id = process_id
         self.algorithm_name = algorithm_name
         self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
-        self.downward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "process_downward.%d.pipe" % (process_id,))
-        self.upward_pipe_name = os.path.join(self.supervisor.driver_sandbox_dir, "process_upward.%d.pipe" % (process_id,))
+        self.downward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_downward.%d.pipe" % (process_id,))
+        self.upward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_upward.%d.pipe" % (process_id,))
 
     def prepare(self):
         os.mkfifo(self.downward_pipe_name)
@@ -64,7 +64,7 @@ class ReadFile:
     def open(self):
         os.symlink(
             os.path.join("..", self.file_path),
-            os.path.join(self.supervisor.driver_sandbox_dir, "read_file.%d.txt" % (self.file_id,)))
+            os.path.join(self.supervisor.module_sandbox_dir, "read_file.%d.txt" % (self.file_id,)))
 
 
 class Supervisor:
@@ -75,11 +75,11 @@ class Supervisor:
         self._next_id = 0
 
         self.task_run_dir = task_run_dir
-        self.driver_sandbox_dir = os.path.join(task_run_dir, "driver_sandbox")
-        self.driver_path = os.path.join(task_run_dir, "driver", "driver")
+        self.module_sandbox_dir = os.path.join(task_run_dir, "module_sandbox")
+        self.module_path = os.path.join(task_run_dir, "module", "module")
 
-        self.control_request_pipe_name = os.path.join(self.driver_sandbox_dir, "control_request.pipe")
-        self.control_response_pipe_name = os.path.join(self.driver_sandbox_dir, "control_response.pipe")
+        self.control_request_pipe_name = os.path.join(self.module_sandbox_dir, "control_request.pipe")
+        self.control_response_pipe_name = os.path.join(self.module_sandbox_dir, "control_response.pipe")
 
         self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
         self.seed_path = os.path.join(task_run_dir, "seed.txt")
@@ -178,7 +178,7 @@ class Supervisor:
     def run(self):
         trace("starting in folder:", self.task_run_dir)
 
-        os.mkdir(self.driver_sandbox_dir)
+        os.mkdir(self.module_sandbox_dir)
 
         trace("creating control pipes...")
         os.mkfifo(self.control_request_pipe_name)
@@ -187,27 +187,27 @@ class Supervisor:
         trace("control request pipe: %s" % (self.control_request_pipe_name,))
         trace("control response pipe: %s" % (self.control_response_pipe_name,))
 
-        trace("starting driver process: %s" % (self.driver_path,))
-        trace("driver sandbox dir: %s" % (self.driver_sandbox_dir,))
+        trace("starting module process: %s" % (self.module_path,))
+        trace("module sandbox dir: %s" % (self.module_sandbox_dir,))
 
         shutil.copyfile(
             os.path.join(self.task_run_dir, "parameter.txt"),
-            os.path.join(self.driver_sandbox_dir, "parameter.txt"))
+            os.path.join(self.module_sandbox_dir, "parameter.txt"))
 
         shutil.copyfile(
             os.path.join(self.task_run_dir, "seed.txt"),
-            os.path.join(self.driver_sandbox_dir, "seed.txt"))
+            os.path.join(self.module_sandbox_dir, "seed.txt"))
 
-        self.driver = subprocess.Popen(
-            [self.driver_path],
-            cwd=self.driver_sandbox_dir,
+        self.module = subprocess.Popen(
+            [self.module_path],
+            cwd=self.module_sandbox_dir,
             universal_newlines=True,
             stdin=open(self.parameter_path),
             stdout=open(self.result_path, "w"),
             bufsize=1
         )
 
-        trace("driver process started")
+        trace("module process started")
 
         trace("opening control pipes...")
         self.control_request_pipe = open(self.control_request_pipe_name, "r")

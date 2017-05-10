@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from taskwizard.definition.declarations import named_definitions
-from taskwizard.definition.driver import DriverDefinition
+from taskwizard.definition.module import DriverDefinition
 from taskwizard.definition.interface import Interface, InterfaceDefinition
 from taskwizard.definition.syntax import AbstractSyntaxNode
 from taskwizard.definition.test_case import TestCaseDefinition

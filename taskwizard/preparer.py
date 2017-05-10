@@ -15,15 +15,15 @@ languages = {
 }
 
 
-class DriverPreparer:
+class ModulePreparer:
 
-    def __init__(self, problem_preparer, driver):
+    def __init__(self, problem_preparer, module):
         self.problem_preparer = problem_preparer
-        self.driver = driver
-        self.output_dir = os.path.join(problem_preparer.prepared_dir, "drivers", driver.name)
+        self.module = module
+        self.output_dir = os.path.join(problem_preparer.prepared_dir, "modules", module.name)
 
     def prepare(self):
-        delegate = languages[self.driver.language].DriverPreparer(self.problem_preparer, self.driver, self.output_dir)
+        delegate = languages[self.module.language].ModulePreparer(self.problem_preparer, self.module, self.output_dir)
         delegate.prepare()
 
 
@@ -39,49 +39,6 @@ class InterfacePreparer:
         for language, preparer in languages.items():
             delegate = preparer.InterfacePreparer(self.problem_preparer, self.interface, os.path.join(self.output_dir, language))
             delegate.prepare()
-
-
-class TestPhasePreparer:
-
-    def __init__(self, scenario, phase):
-        self.scenario = scenario
-        self.phase = phase
-        self.output_dir = os.path.join(scenario.output_dir, "phases", phase.name)
-
-    def prepare(self):
-        os.mkdir(self.output_dir)
-
-        phase_yaml_file = open(os.path.join(self.output_dir, "phase.yaml"), "w")
-        yaml.safe_dump({
-            "driver": self.phase.driver_name,
-            "slots": {
-                slot.name: slot.interface_name
-                for slot in self.phase.slots.values()}}, phase_yaml_file)
-
-        env = Environment(loader=PackageLoader("taskwizard", "templates"))
-        output = open(os.path.join(self.output_dir, "parameter.txt"), "w")
-        # TODO: fill parameter.txt
-
-
-class TestCasePreparer:
-
-    def __init__(self, problem_preparer, test_case):
-        self.problem_preparer = problem_preparer
-        self.test_case = test_case
-        self.output_dir = os.path.join(problem_preparer.prepared_dir, "testcases", test_case.name)
-
-    def prepare(self):
-        os.mkdir(self.output_dir)
-
-        os.mkdir(os.path.join(self.output_dir, "phases"))
-
-        for phase in self.test_case.phases.values():
-            p = TestPhasePreparer(self, phase)
-            p.prepare()
-
-        test_case_yaml_file = open(os.path.join(self.output_dir, "testcase.yaml"), "w")
-        yaml.safe_dump({
-            "phases": list(self.test_case.phases.keys())}, test_case_yaml_file)
 
 
 class ProblemPreparer:
@@ -101,21 +58,16 @@ class ProblemPreparer:
         shutil.rmtree(self.prepared_dir, ignore_errors=True)
         os.makedirs(self.prepared_dir)
 
-        os.mkdir(os.path.join(self.prepared_dir, "drivers"))
-        for driver in self.task.drivers:
-            DriverPreparer(self, driver).prepare()
+        os.mkdir(os.path.join(self.prepared_dir, "modules"))
+        for module in self.task.modules:
+            ModulePreparer(self, module).prepare()
 
         os.mkdir(os.path.join(self.prepared_dir, "interfaces"))
         for interface in self.task.interfaces:
             InterfacePreparer(self, interface).prepare()
 
-        os.mkdir(os.path.join(self.prepared_dir, "testcases"))
-        for test_case in self.task.test_cases:
-            TestCasePreparer(self, test_case).prepare()
-
         data = {
-            "drivers": list(self.task.drivers.keys()),
-            "interfaces": list(self.task.interfaces.keys()),
-            "testcases": list(self.task.test_cases.keys()),
+            "modules": list(self.task.modules.keys()),
+            "interfaces": list(self.task.interfaces.keys())
             }
         yaml.safe_dump(data, open(self.yaml_file, "w"))

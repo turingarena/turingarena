@@ -6,22 +6,22 @@ from jinja2.environment import Environment
 from jinja2.loaders import PackageLoader
 
 
-class DriverPreparer:
+class ModulePreparer:
 
-    def __init__(self, problem_preparer, driver, output_dir):
+    def __init__(self, problem_preparer, module, output_dir):
         self.problem_preparer = problem_preparer
-        self.driver = driver
+        self.module = module
         self.output_dir = output_dir
 
     def prepare(self):
         shutil.copytree(
-            pkg_resources.resource_filename("taskwizard.language.cpp", "driver_static"),
+            pkg_resources.resource_filename("taskwizard.language.cpp", "module_static"),
             self.output_dir
         )
 
         shutil.copyfile(
-            os.path.join(self.problem_preparer.definition_dir, self.driver.source),
-            os.path.join(self.output_dir, "driver.cpp"),
+            os.path.join(self.problem_preparer.definition_dir, self.module.source),
+            os.path.join(self.output_dir, "module.cpp"),
         )
 
         env = Environment(
@@ -35,16 +35,16 @@ class DriverPreparer:
             variable_end_string="}}*/",
         )
 
-        env.get_template("driver.h").stream(task=self.problem_preparer.task, driver=self.driver).dump(
-                open(os.path.join(self.output_dir, "driver.h"), "w")
+        env.get_template("module.h").stream(task=self.problem_preparer.task, module=self.module).dump(
+                open(os.path.join(self.output_dir, "module.h"), "w")
         )
 
-        env.get_template("driver_support.cpp").stream(task=self.problem_preparer.task, driver=self.driver).dump(
+        env.get_template("module_support.cpp").stream(task=self.problem_preparer.task, module=self.module).dump(
                 open(os.path.join(self.output_dir, "support.cpp"), "w")
         )
 
         for interface in self.problem_preparer.task.interfaces:
-            env.get_template("driver_interface_support.cpp").stream(task=self.problem_preparer.task, driver=self.driver, interface=interface).dump(
+            env.get_template("module_interface_support.cpp").stream(task=self.problem_preparer.task, module=self.module, interface=interface).dump(
                     open(os.path.join(self.output_dir, "%s_support.cpp" % interface.name), "w")
             )
 
