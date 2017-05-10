@@ -24,30 +24,6 @@ class ModulePreparer:
             os.path.join(self.output_dir, "module.cpp"),
         )
 
-        env = Environment(
-            loader=PackageLoader("taskwizard.language.cpp"),
-            trim_blocks=True,
-            lstrip_blocks=True,
-            keep_trailing_newline=True,
-            block_start_string="/*{%",
-            block_end_string="%}*/",
-            variable_start_string="/*{{",
-            variable_end_string="}}*/",
-        )
-
-        env.get_template("module.h").stream(task=self.problem_preparer.task, module=self.module).dump(
-                open(os.path.join(self.output_dir, "module.h"), "w")
-        )
-
-        env.get_template("module_support.cpp").stream(task=self.problem_preparer.task, module=self.module).dump(
-                open(os.path.join(self.output_dir, "support.cpp"), "w")
-        )
-
-        for interface in self.problem_preparer.task.interfaces:
-            env.get_template("module_interface_support.cpp").stream(task=self.problem_preparer.task, module=self.module, interface=interface).dump(
-                    open(os.path.join(self.output_dir, "%s_support.cpp" % interface.name), "w")
-            )
-
 
 class InterfacePreparer:
 
@@ -58,18 +34,3 @@ class InterfacePreparer:
 
     def prepare(self):
         os.mkdir(self.output_dir)
-
-        env = Environment(
-            loader=PackageLoader("taskwizard.language.cpp"),
-            trim_blocks=True,
-            lstrip_blocks=True,
-            keep_trailing_newline=True,
-        )
-
-        env.get_template("interface.h").stream(task=self.problem_preparer.task, interface=self.interface).dump(
-                open(os.path.join(self.output_dir, "%s.h" % self.interface.name), "w")
-        )
-
-        env.get_template("interface_support.cpp").stream(task=self.problem_preparer.task, interface=self.interface).dump(
-                open(os.path.join(self.output_dir, "support.cpp"), "w")
-        )

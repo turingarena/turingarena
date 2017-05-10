@@ -8,7 +8,7 @@ class VariableDefinition(AbstractSyntaxNode):
     grammar_rule = "variable"
     grammar = """
         variable =
-        type:type name:identifier {'[' array_dimensions+:range_expression ']'}*
+        type:type name:identifier {'[' [ array_dimensions+:range_expression ] ']'}*
         ;
 
         parameter =
@@ -23,12 +23,3 @@ class VariableDefinition(AbstractSyntaxNode):
         self.name = ast.name
         self.type = ast.type
         self.array_dimensions = ast.get("array_dimensions", [])
-
-
-class Variable:
-
-    def __init__(self, definition):
-        self.definition = definition
-        self.name = definition.name
-        self.type = definition.type
-        self.array_dimensions = definition.array_dimensions

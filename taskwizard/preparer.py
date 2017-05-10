@@ -67,7 +67,7 @@ class ProblemPreparer:
             InterfacePreparer(self, interface).prepare()
 
         data = {
-            "modules": list(self.task.modules.keys()),
-            "interfaces": list(self.task.interfaces.keys())
-            }
+            "modules": [m.name for m in self.task.modules],
+            "interfaces": [i.name for i in self.task.interfaces]
+        }
         yaml.safe_dump(data, open(self.yaml_file, "w"))

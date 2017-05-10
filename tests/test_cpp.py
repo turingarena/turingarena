@@ -25,5 +25,5 @@ class TestCodeGeneratorCpp(unittest.TestCase):
         interface = task.interfaces["exampleinterface"]
 
         code = '\n'.join(CodeGenerator().generate_interface_driver_support(interface)) + '\n'
-        expected_code = open("tests/expected/driver.h").read()
+        expected_code = open("tests/expected/module.h").read()
         self.assertEqual(expected_code, code)

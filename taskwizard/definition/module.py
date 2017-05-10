@@ -1,4 +1,3 @@
-from taskwizard.definition.declarations import named_definitions
 from taskwizard.definition.syntax import AbstractSyntaxNode
 
 
@@ -16,15 +15,7 @@ class ModuleDefinition(AbstractSyntaxNode):
             ;
     """
 
-
-class Module:
-
-    def __init__(self, definition):
-        self.name = definition.name
-        self.source = definition.source
-        self.language = definition.language
-        self.variables = named_definitions(definition.variables)
-        self.functions = named_definitions(definition.functions)
-
-        if self.source is None:
-            raise ValueError("No source specified for module '%s'" % self.name)
+    def __init__(self, ast):
+        self.name = ast.name
+        self.source = ast.source
+        self.language = ast.language
