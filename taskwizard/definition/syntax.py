@@ -5,7 +5,7 @@ from grako.ast import AST
 class Semantics:
 
     def __init__(self, cls):
-        self.deps = cls.get_all_deps();
+        self.deps = cls.get_all_deps()
         self.rule_map = {
             cls2.get_grammar_rule(): cls2
             for cls2 in self.deps

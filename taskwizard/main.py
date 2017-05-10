@@ -5,7 +5,7 @@ Usage:
   taskwizard stubs [options]
   taskwizard prepare [options]
   taskwizard verify [options]
-  taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>...]
+  taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
   taskwizard (-h | --help)
 

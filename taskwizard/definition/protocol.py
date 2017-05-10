@@ -3,64 +3,27 @@ from taskwizard.definition.expression import Expression, RangeExpression
 from taskwizard.definition.syntax import AbstractSyntaxNode
 
 
-class ProtocolDefinition(AbstractSyntaxNode):
+class ProtocolStatementDefinition(AbstractSyntaxNode):
 
     grammar = """
-        protocol_declaration =
-        'protocol' [name:identifier] '{'
-        steps:protocol_nodes
-        '}'
-        ;
-
-        protocol_nodes =
-        {protocol_node}*
-        ;
-    """
-    grammar_deps = lambda: [ProtocolNodeDefinition, Identifier]
-
-    def __init__(self, ast):
-        self.name = ast.name
-        self.steps = ast.steps
-
-
-class Protocol:
-
-    def __init__(self, definition):
-        self.definition = definition
-        self.steps = [
-            ProtocolNode.create(s) for s in definition.steps
-        ]
-
-    def get_arrays_to_allocate(self, scope):
-        for step in self.steps:
-            yield from step.get_arrays_to_allocate(scope, [])
-
-    def get_free_variables(self, scope):
-        for step in self.steps:
-            yield from step.get_free_variables(scope, [])
-
-
-class ProtocolNodeDefinition(AbstractSyntaxNode):
-
-    grammar = """
-        protocol_node =
-        | input_step
-        | output_step
-        | call_step
-        | for_node
-        | switch_node
+        protocol_statement =
+        | input_statement
+        | output_statement
+        | call_statement
+        | for_statement
+        | switch_statement
         ;
     """
     grammar_deps = lambda: [
-        InputStepDefinition,
-        OutputStepDefinition,
-        CallStepDefinition,
-        ForNodeDefinition,
-        SwitchNodeDefinition,
+        InputStatementDefinition,
+        OutputStatementDefinition,
+        CallStatementDefinition,
+        ForStatementDefinition,
+        SwitchStatementDefinition,
     ]
 
 
-class ProtocolNode:
+class ProtocolStatement:
 
     def __init__(self, definition):
         pass
@@ -72,8 +35,8 @@ class ProtocolNode:
                 return cls(definition)
 
     @classmethod
-    def get_node_type(cls):
-        return cls.node_type
+    def get_statement_type(cls):
+        return cls.statement_type
 
     def get_free_variables(self, scope, indexes):
         return []
@@ -82,13 +45,13 @@ class ProtocolNode:
         return []
 
 
-class InputOutputStepDefinition(AbstractSyntaxNode):
+class InputOutputStatementDefinition(AbstractSyntaxNode):
 
     def __init__(self, ast):
         self.variables = ast.variables
 
 
-class InputOutputStep(ProtocolNode):
+class InputOutputStatement(ProtocolStatement):
 
     def __init__(self, definition):
         self.variables = definition.variables
@@ -98,42 +61,42 @@ class InputOutputStep(ProtocolNode):
             yield variable.as_simple_lvalue(scope, indexes)
 
 
-class InputStepDefinition(InputOutputStepDefinition):
+class InputStatementDefinition(InputOutputStatementDefinition):
 
     grammar = """
-        input_step =
+        input_statement =
         'input' ~ variables:','.{ expression }* ';'
         ;
     """
     grammar_deps = lambda: [Expression]
 
 
-class InputStep(InputOutputStep):
+class InputStatement(InputOutputStatement):
 
-    node_type = "input"
-    definition_cls = InputStepDefinition
+    statement_type = "input"
+    definition_cls = InputStatementDefinition
 
 
-class OutputStepDefinition(InputOutputStepDefinition):
+class OutputStatementDefinition(InputOutputStatementDefinition):
 
     grammar = """
-        output_step =
+        output_statement =
         'output' ~ variables:','.{ expression }* ';'
         ;
     """
     grammar_deps = lambda: [Expression]
 
 
-class OutputStep(InputOutputStep):
+class OutputStatement(InputOutputStatement):
 
-    node_type = "output"
-    definition_cls = OutputStepDefinition
+    statement_type = "output"
+    definition_cls = OutputStatementDefinition
 
 
-class CallStepDefinition(AbstractSyntaxNode):
+class CallStatementDefinition(AbstractSyntaxNode):
 
     grammar = """
-        call_step =
+        call_statement =
         'call' ~ [ return_value:expression '='  ] function_name:identifier '(' parameters:','.{ expression }* ')' ';'
         ;
     """
@@ -145,10 +108,10 @@ class CallStepDefinition(AbstractSyntaxNode):
         self.parameters = ast.parameters
 
 
-class CallStep(ProtocolNode):
+class CallStatement(ProtocolStatement):
 
-    node_type = "call"
-    definition_cls = CallStepDefinition
+    statement_type = "call"
+    definition_cls = CallStatementDefinition
 
     def __init__(self, definition):
         self.return_value = definition.return_value
@@ -163,48 +126,48 @@ class ForIndex:
         self.range = range
 
 
-class ForNodeDefinition(AbstractSyntaxNode):
+class ForStatementDefinition(AbstractSyntaxNode):
 
     grammar = """
-        for_node =
+        for_statement =
         'for' ~ '(' index:identifier ':' range:range_expression ')' '{'
-        steps:protocol_nodes
+        statements:{protocol_statement}*
         '}'
         ;
     """
-    grammar_deps = lambda: [RangeExpression, ProtocolDefinition]
+    grammar_deps = lambda: [ProtocolStatementDefinition, RangeExpression]
 
     def __init__(self, ast):
         self.index = ForIndex(ast.index, ast.range)
-        self.steps = ast.steps
+        self.statements = ast.statements
 
 
-class ForNode(ProtocolNode):
+class ForStatement(ProtocolStatement):
 
-    node_type = "for"
-    definition_cls = ForNodeDefinition
+    statement_type = "for"
+    definition_cls = ForStatementDefinition
 
     def __init__(self, definition):
         self.index = definition.index
-        self.steps = [
-            ProtocolNode.create(s) for s in definition.steps
+        self.statements = [
+            ProtocolStatement.create(s) for s in definition.statements
         ]
 
     def get_free_variables(self, scope, indexes):
-        for step in self.steps:
-            yield from step.get_free_variables(scope, indexes + [self.index])
+        for statement in self.statements:
+            yield from statement.get_free_variables(scope, indexes + [self.index])
 
     def get_arrays_to_allocate(self, scope, indexes):
         for var in self.get_free_variables(scope, indexes):
             yield (self, var, indexes)
-        for step in self.steps:
-            yield from step.get_arrays_to_allocate(scope, indexes + [self.index])
+        for statement in self.statements:
+            yield from statement.get_arrays_to_allocate(scope, indexes + [self.index])
 
 
-class SwitchNodeDefinition(AbstractSyntaxNode):
+class SwitchStatementDefinition(AbstractSyntaxNode):
 
     grammar = """
-        switch_node =
+        switch_statement =
         'switch' ~ '(' expression:expression ')' '{'
         cases:{ switch_case }*
         '}'
@@ -217,10 +180,10 @@ class SwitchNodeDefinition(AbstractSyntaxNode):
         self.cases = ast.cases
 
 
-class SwitchNode(ProtocolNode):
+class SwitchStatement(ProtocolStatement):
 
-    node_type = "switch"
-    definition_cls = SwitchNodeDefinition
+    statement_type = "switch"
+    definition_cls = SwitchStatementDefinition
 
     def __init__(self, definition):
         self.expression = definition.expression
@@ -234,11 +197,11 @@ class SwitchCaseDefinition(AbstractSyntaxNode):
     grammar = """
         switch_case =
         'case' '(' value:identifier ')' '{'
-        steps:protocol_nodes
+        statements:{protocol_statement}*
         '}'
         ;
     """
-    grammar_deps = lambda: [ProtocolDefinition, Identifier]
+    grammar_deps = lambda: [ProtocolStatementDefinition, Identifier]
 
     def __init__(self, ast):
         self.value = ast.value
@@ -248,13 +211,3 @@ class SwitchCase:
 
     def __init__(self, definition):
         self.definition = definition
-
-
-Protocol.cls_map = {
-    "input": InputStep,
-    "output": OutputStep,
-    "call": CallStep,
-    "for": ForNode,
-    "switch": SwitchNode,
-}
-

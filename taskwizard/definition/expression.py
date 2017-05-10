@@ -9,10 +9,6 @@ class Expression(AbstractSyntaxNode):
             | variable_expression
             | int_literal_expression
             ;
-
-        range =
-            [ start:expression '..' ] end:expression
-            ;
     """
 
     grammar_deps = lambda: [ VariableExpression, IntLiteralExpression ]
@@ -29,7 +25,7 @@ class RangeExpression(AbstractSyntaxNode):
 
     grammar = """
         range_expression =
-            [ start:expression '..' ] end:expression
+            start:expression '..' end:expression
             ;
     """
     grammar_deps = lambda: [ Expression ]
@@ -46,14 +42,16 @@ class VariableExpression(Expression):
     grammar = """
         variable_expression =
         variable_name:identifier
-        { '[' indexes+:expression ']' }*
+        indexes:{ variable_expression_index }*
         ;
+
+        variable_expression_index = '[' @:expression ']' ;
     """
     grammar_deps = lambda: [Identifier]
 
     def __init__(self, ast):
         self.variable_name = ast.variable_name
-        self.indexes = ast.get("indexes", [])
+        self.indexes = ast.indexes
 
     def as_simple_lvalue(self, scope, indexes):
         variable = scope[self.variable_name]

@@ -6,7 +6,7 @@ class FunctionDefinition(AbstractSyntaxNode):
 
     grammar = """
         function_declaration =
-        return_type:return_type name:identifier '(' parameters:','.{parameter}* ')' ';'
+        'function' return_type:return_type name:identifier '(' parameters:','.{parameter}* ')' ';'
         ;
     """
 

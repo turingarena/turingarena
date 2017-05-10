@@ -30,7 +30,7 @@ class exampleinterface : support::interface {
 
         fprintf(downward_pipe(), "%d %d\n", get_N(), get_M());
         int& idx_i = downward_index_i;
-        for(idx_i = 1; idx_i <= N; idx_i++) {
+        for(idx_i = 1; idx_i <= get_N(); idx_i++) {
             fprintf(downward_pipe(), "%d\n", get_A(idx_i));
         }
 
@@ -47,7 +47,7 @@ class exampleinterface : support::interface {
         }
 
         int& idx_i = upward_index_i;
-        for(idx_i = 1; idx_i <= N; idx_i++) {
+        for(idx_i = 1; idx_i <= get_N(); idx_i++) {
         }
 
         upward_state = state_call_solve;

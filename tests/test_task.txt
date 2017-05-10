@@ -1,17 +1,18 @@
 interface exampleinterface {
-    int N;
-    int M;
-    int A[1..N];
-    int S;
+    global int N, M;
+    global int A[];
+    global int S;
 
-    int solve(int N, int M);
+    function int solve(int u);
 
-    protocol {
+    main {
         input N, M;
         for(i : 1..N) {
             input A[i];
         }
-        call S = solve(N, M);
+        local int u;
+        input u;
+        call S = solve(u);
         output S;
     }
 }

@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 from taskwizard.definition.common import Identifier
-from taskwizard.definition.declarations import named_definitions
 from taskwizard.definition.function import FunctionDefinition, Function
 from taskwizard.definition.protocol import Protocol, ProtocolDefinition
 from taskwizard.definition.syntax import AbstractSyntaxNode
@@ -18,7 +17,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             | variables+:variable_declaration
             | functions+:function_declaration
             | protocols+:protocol_declaration
-            | 'callback' ~ callback_functions+:function_declaration
+            | callback_functions+:function_declaration
             }*
 
             '}'

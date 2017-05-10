@@ -1,8 +1,6 @@
 import unittest
 
 from taskwizard.definition.interface import InterfaceDefinition
-from taskwizard.definition.protocol import InputStep, OutputStep, CallStep, ForNode, SwitchNode, SwitchCase, \
-    ProtocolNode
 
 
 class TestInterface(unittest.TestCase):
