@@ -21,15 +21,14 @@ grammar_ebnf = r"""
     type =
         | enum_type
         | array_type
-        | base_type
     ;
     
     array_type =
-        type '[' ']'
+        base_type:base_type dimensions:{ '[' ']' }*
     ;
     
     enum_type =
-        'enum' '{'
+        'enum' ~ '{'
             items:','.{ identifier }*
         '}'
     ;
@@ -187,4 +186,4 @@ grammar = grako.compile(grammar_ebnf)
 
 
 def parse(*args, **kwargs):
-    return grammar.parse(*args, **kwargs, left_recursion=True)
+    return grammar.parse(*args, **kwargs)
