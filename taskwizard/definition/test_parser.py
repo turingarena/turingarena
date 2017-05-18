@@ -1,6 +1,6 @@
 from unittest.case import TestCase
 
-from taskwizard.definition.grammar import grammar
+from taskwizard.definition.grammar import parse
 
 
 text = r"""
@@ -23,8 +23,12 @@ interface i {
 
     main {
         input N, M;
-        alloc (U, V) = int[1..M];
-        alloc A = int[1..N][1,,N];
+        alloc U, V : 1..M;
+        alloc A : 1..N;
+        const int N2 = N; 
+        for(i : 1..N) {
+            alloc A[i] : 1..N;
+        }
         for(i : 1..M) {
             input U[i], V[i];
         }
@@ -53,4 +57,4 @@ interface i {
 class TestParser(TestCase):
 
     def test_parse(self):
-        grammar.parse(text, "interface_definition", parseinfo=True)
+        parse(text, "interface_definition")

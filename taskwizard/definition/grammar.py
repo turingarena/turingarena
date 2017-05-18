@@ -13,9 +13,25 @@ grammar_ebnf = r"""
         { interface_definition }*
     ;
     
-    type =
+    base_type =
         | 'int'
         | 'bool'
+    ;
+    
+    type =
+        | enum_type
+        | array_type
+        | base_type
+    ;
+    
+    array_type =
+        type '[' ']'
+    ;
+    
+    enum_type =
+        'enum' '{'
+            items:','.{ identifier }*
+        '}'
     ;
 
     return_type =
@@ -24,7 +40,7 @@ grammar_ebnf = r"""
     ;
 
     interface_definition(InterfaceDefinition) =
-        'interface' name:identifier '{' {
+        'interface' ~ name:identifier '{' {
             | variables+:global_declaration
             | consts+:const_declaration
             | functions+:function_definition
@@ -34,17 +50,17 @@ grammar_ebnf = r"""
     ;
     
     function_definition(FunctionDefinition) =
-        'function' return_type:return_type name:identifier '('
+        'function' ~ return_type:return_type name:identifier '('
             parameters:parameter_declaration_list
         ')'
         ';'
     ;
 
     callback_definition(CallbackDefinition) =
-        'callback' return_type:return_type name:identifier '('
+        'callback' ~ return_type:return_type name:identifier '('
             parameters:parameter_declaration_list
         ')'
-        ';'
+        block:block
     ;
 
     main_definition(ProtocolDefinition) =
@@ -86,6 +102,7 @@ grammar_ebnf = r"""
     statement =
         | input_statement
         | output_statement
+        | alloc_statement
         | call_statement
         | for_statement
         | do_statement
@@ -95,14 +112,18 @@ grammar_ebnf = r"""
         | return_statement
     ;
 
-    io_statement_arguments = variables:','.{ expression }* ';' ;
+    expression_list = variables:','.{ expression }* ;
 
     input_statement(InputStatement) =
-        'input' ~ arguments:io_statement_arguments ';'
+        'input' ~ arguments:expression_list ';'
     ;
 
     output_statement(OutputStatement) =
-        'output' ~ arguments:io_statement_arguments ';'
+        'output' ~ arguments:expression_list ';'
+    ;
+
+    alloc_statement(AllocStatement) =
+        'alloc' ~ arguments:expression_list ':' range:range ';'
     ;
 
     call_statement(CallStatement) =
@@ -163,3 +184,7 @@ grammar_ebnf = r"""
 """
 
 grammar = grako.compile(grammar_ebnf)
+
+
+def parse(*args, **kwargs):
+    return grammar.parse(*args, **kwargs, left_recursion=True)
