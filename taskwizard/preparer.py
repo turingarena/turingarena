@@ -39,35 +39,3 @@ class InterfacePreparer:
         for language, preparer in languages.items():
             delegate = preparer.InterfacePreparer(self.problem_preparer, self.interface, os.path.join(self.output_dir, language))
             delegate.prepare()
-
-
-class ProblemPreparer:
-
-    def __init__(self, definition_dir, output_dir):
-        self.definition_dir = definition_dir
-        self.prepared_dir = os.path.join(output_dir, "build", "prepared")
-        self.yaml_file = os.path.join(self.prepared_dir, "problem.yaml")
-
-    def parse_task(self):
-        text = open(os.path.join(self.definition_dir, "task.txt")).read()
-        return TaskDefinition.parse(text)
-
-    def prepare(self):
-        self.task = self.parse_task()
-
-        shutil.rmtree(self.prepared_dir, ignore_errors=True)
-        os.makedirs(self.prepared_dir)
-
-        os.mkdir(os.path.join(self.prepared_dir, "modules"))
-        for module in self.task.modules:
-            ModulePreparer(self, module).prepare()
-
-        os.mkdir(os.path.join(self.prepared_dir, "interfaces"))
-        for interface in self.task.interfaces:
-            InterfacePreparer(self, interface).prepare()
-
-        data = {
-            "modules": [m.name for m in self.task.modules],
-            "interfaces": [i.name for i in self.task.interfaces]
-        }
-        yaml.safe_dump(data, open(self.yaml_file, "w"))

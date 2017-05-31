@@ -1,39 +1,42 @@
 import os
-import shutil
 import subprocess
-import sys
-
-
-def trace(*args):
-    print("SUPERVISOR:", *args, file=sys.stderr)
+import logging
 
 
 class Process:
 
     def __init__(self, supervisor, process_id, algorithm_name):
+        self.logger = logging.getLogger(__name__)
+
         self.supervisor = supervisor
         self.process_id = process_id
         self.algorithm_name = algorithm_name
+
         self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
+        self.os_process = None
+
         self.downward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_downward.%d.pipe" % (process_id,))
+        self.downward_pipe = None
+
         self.upward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_upward.%d.pipe" % (process_id,))
+        self.upward_pipe = None
 
     def prepare(self):
         os.mkfifo(self.downward_pipe_name)
         os.mkfifo(self.upward_pipe_name)
 
-        trace("algorithm process %s(%d): pipes created" % (self.algorithm_name, self.process_id))
+        self.logger.info("algorithm process %s(%d): pipes created" % (self.algorithm_name, self.process_id))
 
     def start(self):
         return 0
 
     def run(self):
         self.downward_pipe = open(self.downward_pipe_name, "r")
-        trace("algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id))
+        self.logger.debug("algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id))
         self.upward_pipe = open(self.upward_pipe_name, "w")
-        trace("algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id))
+        self.logger.debug("algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id))
 
-        trace("algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id))
+        self.logger.debug("algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id))
         self.os_process = subprocess.Popen(
             [self.executable_path],
             universal_newlines=True,
@@ -41,7 +44,7 @@ class Process:
             stdout=self.upward_pipe,
             bufsize=1
         )
-        trace("algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id))
+        self.logger.debug("algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id))
 
     def status(self):
         # TODO: return something meaningful
@@ -51,20 +54,6 @@ class Process:
         self.os_process.kill()
         # TODO: return something meaningful
         return 0
-
-
-class ReadFile:
-
-    def __init__(self, supervisor, file_id, file_name):
-        self.supervisor = supervisor
-        self.file_id = file_id
-        self.file_name = file_name
-        self.file_path = os.path.join(self.supervisor.task_run_dir, "read_files", file_name, "data.txt")
-
-    def open(self):
-        os.symlink(
-            os.path.join("..", self.file_path),
-            os.path.join(self.supervisor.module_sandbox_dir, "read_file.%d.txt" % (self.file_id,)))
 
 
 class Supervisor:
@@ -78,7 +67,11 @@ class Supervisor:
         self.sandbox_dir = sandbox_dir
 
         self.control_request_pipe_name = os.path.join(self.sandbox_dir, "control_request.pipe")
+        self.control_request_pipe = None
         self.control_response_pipe_name = os.path.join(self.sandbox_dir, "control_response.pipe")
+        self.control_response_pipe = None
+
+        self.logger = logging.getLogger(__name__)
 
     def next_id(self):
         self._next_id += 1
@@ -107,18 +100,6 @@ class Supervisor:
         process = self.processes[process_id]
         return process.kill()
 
-    def read_file_open(self, file_name):
-        process_id = self.next_id()
-        read_file = ReadFile(self, process_id, file_name)
-        self.read_files[process_id] = read_file
-
-        read_file.open()
-
-        return process_id
-
-    def read_file_close(self, file_id):
-        pass
-
     def parse_command(self, command, arg_str):
         commands = {
             "algorithm_create_process": str,
@@ -138,9 +119,9 @@ class Supervisor:
         return (command, arg)
 
     def on_command(self, command, arg):
-        trace("received command %s(%s)" % (command, arg))
+        self.logger.debug("received command %s(%s)" % (command, arg))
         response = getattr(self, command)(arg)
-        trace("command %s(%s) returned %s" % (command, arg, response))
+        self.logger.debug("command %s(%s) returned %s" % (command, arg, response))
 
         return response
 
@@ -150,22 +131,22 @@ class Supervisor:
             getattr(self, method_name)(arg, result)
 
     def accept_command(self):
-        trace("waiting for commands on control request pipe...")
+        self.logger.debug("waiting for commands on control request pipe...")
         line = self.control_request_pipe.readline()
         if not line:
-            trace("control request pipe closed, terminating.")
+            self.logger.debug("control request pipe closed, terminating.")
             raise StopIteration
-        trace("received line on control request pipe:", line.rstrip())
+        self.logger.debug("received line on control request pipe:", line.rstrip())
 
         command, arg_str = line.rstrip().split(" ", 2)
         command, arg = self.parse_command(command, arg_str)
 
         result = self.on_command(command, arg)
 
-        trace("sending on control response pipe %s" % (result,))
+        self.logger.debug("sending on control response pipe %s" % (result,))
         print(result, file=self.control_response_pipe)
         self.control_response_pipe.flush()
-        trace("sent on control response pipe %s" % (result,))
+        self.logger.debug("sent on control response pipe %s" % (result,))
 
         self.after_command(command, arg, result)
 
@@ -174,28 +155,28 @@ class Supervisor:
             self.accept_command()
 
     def run(self):
-        trace("sandbox folder:", self.sandbox_dir)
+        self.logger.debug("sandbox folder:", self.sandbox_dir)
 
-        trace("creating control pipes...")
+        self.logger.debug("creating control pipes...")
         os.mkfifo(self.control_request_pipe_name)
         os.mkfifo(self.control_response_pipe_name)
-        trace("control pipes created")
-        trace("control request pipe: %s" % (self.control_request_pipe_name,))
-        trace("control response pipe: %s" % (self.control_response_pipe_name,))
+        self.logger.debug("control pipes created")
+        self.logger.debug("control request pipe: %s" % (self.control_request_pipe_name,))
+        self.logger.debug("control response pipe: %s" % (self.control_response_pipe_name,))
 
-        trace("starting module process: %s" % (self.executable_path,))
+        self.logger.debug("starting module process: %s" % (self.executable_path,))
 
         self.module = subprocess.Popen(
             [self.executable_path],
             env={"TURINGARENA_SANDBOX_DIR": self.sandbox_dir}
         )
 
-        trace("module process started")
+        self.logger.debug("module process started")
 
-        trace("opening control pipes...")
+        self.logger.debug("opening control pipes...")
         self.control_request_pipe = open(self.control_request_pipe_name, "r")
-        trace("control request pipe opened")
+        self.logger.debug("control request pipe opened")
         self.control_response_pipe = open(self.control_response_pipe_name, "w")
-        trace("control response pipe opened")
+        self.logger.debug("control response pipe opened")
 
         self.main_loop()

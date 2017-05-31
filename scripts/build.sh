@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ $(python3 -c "import sys; print(hasattr(sys, 'real_prefix'))") = "False" ]; then
     echo "We recommend using a python virtualenv to use this software from source."
     echo
