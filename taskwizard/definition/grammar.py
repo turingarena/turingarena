@@ -66,7 +66,7 @@ grammar_ebnf = r"""
         
     declarator_list = ','.{ declarator }+;
 
-    declarator = identifier:identifier ;
+    declarator = name:identifier ;
     
     block = '{' block_items:{ block_item }* '}' ;
 
@@ -155,6 +155,7 @@ grammar_ebnf = r"""
 
     base_type =
         | 'int'
+        | 'int64'
         | 'bool'
     ;
     

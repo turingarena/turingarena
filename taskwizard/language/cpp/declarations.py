@@ -1,35 +1,37 @@
 from taskwizard.language.cpp.types import generate_base_type
+from taskwizard.generation.types import TypeVisitor
 
 
-class DeclaratorGenerator:
+class DeclaratorGenerator(TypeVisitor):
 
-    def generate(self, type, declarator):
-        method = getattr(self, "generate_%s" % type.parseinfo.rule)
-        return method(type, declarator)
+    def __init__(self, declarator):
+        self.declarator = declarator
 
-    def generate_array_type(self, type, declarator):
-        return '*' * len(type.dimensions) + declarator.identifier
-
-
-generator = DeclaratorGenerator()
+    def visit_array_type(self, type):
+        return '*' * len(type.dimensions) + self.declarator.name
 
 
-def generate_declarator(type, declarator):
-    return generator.generate(type, declarator)
+def generate_declarator(declaration, declarator):
+    return DeclaratorGenerator(declarator).visit(declaration.type)
 
 
-def generate_declaration(declaration):
+def generate_declarators(declaration, scope):
+    for declarator in declaration.declarators:
+        yield generate_declarator(declaration, declarator)
+        if declarator.name in scope:
+            raise ValueError("already defined: %s" % declarator.name)
+        scope[declarator.name] = declaration
+
+
+def generate_declaration(declaration, scope):
     yield '{base_type} {declarators};'.format(
         base_type=generate_base_type(declaration.type),
-        declarators=', '.join(
-            generate_declarator(declaration.type, d)
-            for d in declaration.declarators
-        ),
+        declarators=', '.join(generate_declarators(declaration, scope)),
     )
 
 
 def generate_parameter(parameter):
     return '{base_type} {declarator}'.format(
         base_type=generate_base_type(parameter.type),
-        declarator=generate_declarator(parameter.type, parameter.declarator),
+        declarator=generate_declarator(parameter, parameter.declarator),
     )

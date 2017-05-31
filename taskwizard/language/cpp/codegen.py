@@ -1,6 +1,6 @@
 import os
 
-from taskwizard.language.cpp.blocks import generate_support_block
+from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import generate_declaration, generate_parameter
 from taskwizard.language.cpp.types import generate_base_type
 from taskwizard.language.cpp.utils import indent
@@ -32,17 +32,19 @@ class SupportGenerator:
             print(line, file=main_file)
 
     def generate_main_file(self):
+        global_scope = {}
+
         yield "#include <cstdio>"
         yield ""
-        yield from self.generate_global_declarations()
+        yield from self.generate_global_declarations(global_scope)
         yield ""
         yield from self.generate_prototypes()
         yield ""
-        yield from self.generate_main_function()
+        yield from self.generate_main_function(global_scope)
 
-    def generate_global_declarations(self):
+    def generate_global_declarations(self, global_scope):
         for d in self.interface.variables:
-            yield from generate_declaration(d)
+            yield from generate_declaration(d, global_scope)
 
     def generate_prototypes(self):
         for f in self.interface.functions:
@@ -55,12 +57,12 @@ class SupportGenerator:
             arguments=', '.join(generate_parameter(p) for p in function.parameters)
         )
 
-    def generate_main_function(self):
+    def generate_main_function(self, global_scope):
         yield "int main() {"
-        yield from indent(self.generate_main_block())
+        yield from indent(self.generate_main_block(global_scope))
         yield "}"
 
-    def generate_main_block(self):
-        yield from generate_support_block(self.interface.main_definition.block)
+    def generate_main_block(self, global_scope):
+        yield from generate_block(self.interface.main_definition.block, global_scope)
 
 

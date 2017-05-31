@@ -1,18 +1,14 @@
-class BaseTypeGenerator:
-
-    def generate(self, type):
-        method = getattr(self, "generate_%s" % type.parseinfo.rule)
-        return method(type)
-
-    def generate_array_type(self, e):
-        return e.base_type
-
-    def generate_variable_expression(self, e):
-        return e.variable_name + ''.join('[' + self.generate(i) + ']' for i in e.indexes)
+from taskwizard.generation.types import TypeVisitor
 
 
-generator = BaseTypeGenerator()
+class BaseTypeGenerator(TypeVisitor):
+
+    def visit_array_type(self, e):
+        return {
+            "int": "int",
+            "int64": "long long int",
+        }[e.base_type]
 
 
 def generate_base_type(type):
-    return generator.generate(type)
+    return BaseTypeGenerator().visit(type)

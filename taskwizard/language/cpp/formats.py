@@ -1,17 +1,16 @@
-class FormatGenerator:
-
-    def generate(self, type):
-        return "%d" # TODO: avoids variable definition lookup
-
-        method = getattr(self, "generate_%s" % type.parseinfo.rule)
-        return method(type)
-
-    def generate_array_type(self, type):
-        return "%d"
+from taskwizard.generation.expressions import VariableExpressionVisitor
+from taskwizard.generation.types import TypeVisitor
 
 
-generator = FormatGenerator()
+class FormatGenerator(TypeVisitor):
+
+    def visit_array_type(self, type):
+        return {
+            "int": "%d",
+            "int64": "%lld",
+        }[type.base_type]
 
 
-def generate_format(type):
-    return generator.generate(type)
+def generate_format(expression, scope):
+    declaration = VariableExpressionVisitor(scope).visit(expression)
+    return FormatGenerator().visit(declaration.type)
