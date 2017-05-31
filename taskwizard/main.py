@@ -4,7 +4,7 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard stubs [options]
   taskwizard prepare [options]
-  taskwizard run [options] <module> <entry_point> [<args>...]
+  taskwizard run [options] <executable> [<args>...]
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
@@ -56,8 +56,7 @@ Command evaluate options:
 
 import docopt
 
-from taskwizard.evaluator import ProblemEvaluator
-from taskwizard.preparer import ProblemPreparer
+from taskwizard.runner import ModuleRunner
 
 
 def main():
@@ -72,7 +71,7 @@ def main():
         return
 
     if args["run"]:
-        # TODO
+        ModuleRunner(args["<executable>"]).run()
         return
 
     if args["evaluate"]:

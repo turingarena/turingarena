@@ -69,21 +69,16 @@ class ReadFile:
 
 class Supervisor:
 
-    def __init__(self, task_run_dir):
+    def __init__(self, executable_path, sandbox_dir):
         self.processes = {}
         self.read_files = {}
         self._next_id = 0
 
-        self.task_run_dir = task_run_dir
-        self.module_sandbox_dir = os.path.join(task_run_dir, "module_sandbox")
-        self.module_path = os.path.join(task_run_dir, "module", "module")
+        self.executable_path = executable_path
+        self.sandbox_dir = sandbox_dir
 
-        self.control_request_pipe_name = os.path.join(self.module_sandbox_dir, "control_request.pipe")
-        self.control_response_pipe_name = os.path.join(self.module_sandbox_dir, "control_response.pipe")
-
-        self.parameter_path = os.path.join(task_run_dir, "parameter.txt")
-        self.seed_path = os.path.join(task_run_dir, "seed.txt")
-        self.result_path = os.path.join(task_run_dir, "result.txt")
+        self.control_request_pipe_name = os.path.join(self.sandbox_dir, "control_request.pipe")
+        self.control_response_pipe_name = os.path.join(self.sandbox_dir, "control_response.pipe")
 
     def next_id(self):
         self._next_id += 1
@@ -154,31 +149,32 @@ class Supervisor:
         if hasattr(self, method_name):
             getattr(self, method_name)(arg, result)
 
+    def accept_command(self):
+        trace("waiting for commands on control request pipe...")
+        line = self.control_request_pipe.readline()
+        if not line:
+            trace("control request pipe closed, terminating.")
+            raise StopIteration
+        trace("received line on control request pipe:", line.rstrip())
+
+        command, arg_str = line.rstrip().split(" ", 2)
+        command, arg = self.parse_command(command, arg_str)
+
+        result = self.on_command(command, arg)
+
+        trace("sending on control response pipe %s" % (result,))
+        print(result, file=self.control_response_pipe)
+        self.control_response_pipe.flush()
+        trace("sent on control response pipe %s" % (result,))
+
+        self.after_command(command, arg, result)
+
     def main_loop(self):
         while True:
-            trace("waiting for commands on control request pipe...")
-            line = self.control_request_pipe.readline()
-            if not line:
-                trace("control request pipe closed, terminating.")
-                break
-            trace("received line on control request pipe:", line.rstrip())
-
-            command, arg_str = line.rstrip().split(" ", 2)
-            command, arg = self.parse_command(command, arg_str)
-
-            result = self.on_command(command, arg)
-
-            trace("sending on control response pipe %s" % (result,))
-            print(result, file=self.control_response_pipe)
-            self.control_response_pipe.flush()
-            trace("sent on control response pipe %s" % (result,))
-
-            self.after_command(command, arg, result)
+            self.accept_command()
 
     def run(self):
-        trace("starting in folder:", self.task_run_dir)
-
-        os.mkdir(self.module_sandbox_dir)
+        trace("sandbox folder:", self.sandbox_dir)
 
         trace("creating control pipes...")
         os.mkfifo(self.control_request_pipe_name)
@@ -187,24 +183,11 @@ class Supervisor:
         trace("control request pipe: %s" % (self.control_request_pipe_name,))
         trace("control response pipe: %s" % (self.control_response_pipe_name,))
 
-        trace("starting module process: %s" % (self.module_path,))
-        trace("module sandbox dir: %s" % (self.module_sandbox_dir,))
-
-        shutil.copyfile(
-            os.path.join(self.task_run_dir, "parameter.txt"),
-            os.path.join(self.module_sandbox_dir, "parameter.txt"))
-
-        shutil.copyfile(
-            os.path.join(self.task_run_dir, "seed.txt"),
-            os.path.join(self.module_sandbox_dir, "seed.txt"))
+        trace("starting module process: %s" % (self.executable_path,))
 
         self.module = subprocess.Popen(
-            [self.module_path],
-            cwd=self.module_sandbox_dir,
-            universal_newlines=True,
-            stdin=open(self.parameter_path),
-            stdout=open(self.result_path, "w"),
-            bufsize=1
+            [self.executable_path],
+            env={"TURINGARENA_SANDBOX_DIR": self.sandbox_dir}
         )
 
         trace("module process started")
