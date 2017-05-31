@@ -111,8 +111,16 @@ grammar_ebnf = r"""
         ';'
     ;
 
+    index_declarator =
+        name:identifier
+    ;
+
+    index_declaration =
+        type:`int` declarator:index_declarator ':' range:range
+    ;
+
     for_statement(ForStatement) =
-        'for' ~ '(' index:identifier ':' range:range ')' block:block
+        'for' ~ '(' index:index_declaration ')' block:block
     ;
 
     do_statement(DoStatement) =

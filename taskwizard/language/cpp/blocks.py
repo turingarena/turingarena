@@ -1,5 +1,5 @@
 from taskwizard.generation.blocks import BlockItemVisitor
-from taskwizard.language.cpp.declarations import generate_declaration
+from taskwizard.language.cpp.declarations import build_declaration
 from taskwizard.language.cpp.statements import generate_statement
 
 
@@ -9,7 +9,7 @@ class BlockItemGenerator(BlockItemVisitor):
         self.scope = dict(external_scope)
 
     def visit_declaration(self, declaration):
-        yield from generate_declaration(declaration, self.scope)
+        yield from build_declaration(declaration, self.scope)
 
     def visit_statement(self, statement):
         yield from generate_statement(statement, self.scope)

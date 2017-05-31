@@ -1,8 +1,9 @@
+from taskwizard.generation.declarations import add_to_scope
 from taskwizard.generation.statements import StatementVisitor
 from taskwizard.language.cpp import blocks
 from taskwizard.language.cpp.expressions import generate_expression
 from taskwizard.language.cpp.formats import generate_format
-from taskwizard.language.cpp.utils import indent
+from taskwizard.language.cpp.utils import indent_all
 
 
 class StatementGenerator(StatementVisitor):
@@ -10,13 +11,16 @@ class StatementGenerator(StatementVisitor):
     def __init__(self, scope):
         self.scope = scope
 
+    # TODO: add index to scope
     def visit_for_statement(self, statement):
         yield 'for(int {index} = {start}; {index} <= {end}; {index}++)'.format(
-                index=statement.index,
-                start=generate_expression(statement.range.start),
-                end=generate_expression(statement.range.end)
+                index=statement.index.declarator.name,
+                start=generate_expression(statement.index.range.start),
+                end=generate_expression(statement.index.range.end)
         ) + " {"
-        yield from indent(blocks.generate_block(statement.block, self.scope))
+        new_scope = dict(self.scope)
+        add_to_scope(new_scope, statement.index.declarator, statement.index)
+        yield from indent_all(blocks.generate_block(statement.block, new_scope))
         yield "}"
 
     def visit_input_statement(self, statement):

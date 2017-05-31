@@ -1,9 +1,9 @@
 import os
 
 from taskwizard.language.cpp.blocks import generate_block
-from taskwizard.language.cpp.declarations import generate_declaration, generate_parameter
+from taskwizard.language.cpp.declarations import build_declaration, build_parameter
 from taskwizard.language.cpp.types import generate_base_type
-from taskwizard.language.cpp.utils import indent
+from taskwizard.language.cpp.utils import indent_all, write_to_file
 
 
 class DriverGenerator:
@@ -28,8 +28,7 @@ class SupportGenerator:
 
     def generate(self):
         main_file = open(self.main_file_path, "w")
-        for line in self.generate_main_file():
-            print(line, file=main_file)
+        write_to_file(self.generate_main_file(), main_file)
 
     def generate_main_file(self):
         global_scope = {}
@@ -44,7 +43,7 @@ class SupportGenerator:
 
     def generate_global_declarations(self, global_scope):
         for d in self.interface.variables:
-            yield from generate_declaration(d, global_scope)
+            yield from build_declaration(d, global_scope)
 
     def generate_prototypes(self):
         for f in self.interface.functions:
@@ -54,12 +53,12 @@ class SupportGenerator:
         yield "{return_type} {name}({arguments});".format(
             return_type=generate_base_type(function.return_type),
             name=function.name,
-            arguments=', '.join(generate_parameter(p) for p in function.parameters)
+            arguments=', '.join(build_parameter(p) for p in function.parameters)
         )
 
     def generate_main_function(self, global_scope):
         yield "int main() {"
-        yield from indent(self.generate_main_block(global_scope))
+        yield from indent_all(self.generate_main_block(global_scope))
         yield "}"
 
     def generate_main_block(self, global_scope):
