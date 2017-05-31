@@ -103,7 +103,7 @@ def main():
 
     if args["cpp"] and args["module"] and args["flags"]:
         dir = pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib")
-        print("-I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
+        print("-std=c++14 -I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
         return
 
     raise NotImplementedError
