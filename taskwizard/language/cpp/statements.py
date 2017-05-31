@@ -1,9 +1,9 @@
 from taskwizard.generation.declarations import add_to_scope
 from taskwizard.generation.statements import StatementVisitor
+from taskwizard.generation.utils import indent_all
 from taskwizard.language.cpp import blocks
 from taskwizard.language.cpp.expressions import generate_expression
 from taskwizard.language.cpp.formats import generate_format
-from taskwizard.language.cpp.utils import indent_all
 
 
 class StatementGenerator(StatementVisitor):

@@ -2,10 +2,12 @@ import os
 import shutil
 
 from taskwizard.language.cpp import codegen as cpp_codegen
+from taskwizard.language.python import codegen as python_codegen
 
 
 languages = {
     "cpp": cpp_codegen,
+    "python": python_codegen,
 }
 
 

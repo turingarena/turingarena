@@ -1,27 +1,22 @@
 import os
 
+from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
+from taskwizard.generation.utils import indent_all, write_to_file
 from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import build_declaration, build_parameter
 from taskwizard.language.cpp.types import generate_base_type
-from taskwizard.language.cpp.utils import indent_all, write_to_file
 
 
-class DriverGenerator:
-
-    def __init__(self, task, dest_dir):
-        self.task = task
-        self.dest_dir = dest_dir
+class DriverGenerator(AbstractDriverGenerator):
 
     def generate(self):
         pass
 
 
-class SupportGenerator:
+class SupportGenerator(AbstractSupportGenerator):
 
-    def __init__(self, task, interface, dest_dir):
-        self.task = task
-        self.interface = interface
-        self.dest_dir = dest_dir
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.include_file_path = os.path.join(self.dest_dir, "main.h")
         self.main_file_path = os.path.join(self.dest_dir, "main.cpp")
