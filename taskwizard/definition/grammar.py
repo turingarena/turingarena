@@ -24,7 +24,7 @@ grammar_ebnf = r"""
     ;
     
     array_type =
-        base_type:base_type dimensions:{ '[' ']' }*
+        base_type:base_type ~ dimensions:{ '[' ']' }*
     ;
     
     enum_type =
