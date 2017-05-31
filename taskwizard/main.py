@@ -36,6 +36,8 @@ Global options:
   -i --input-dir=<dir>  Input directory [default: .task/]
   -o --output-dir=<dir>  Output directory [default: .task/]
 
+  -v --verbose  Be verbose
+
 Run options:
 
   -a --algorithm=<algorithm>  Expose an executable as an algorithm to the module.
@@ -63,8 +65,10 @@ Command evaluate options:
 """
 import os
 
+import coloredlogs
 import docopt
 import pkg_resources
+import logging
 
 from taskwizard.runner import ModuleRunner
 
@@ -75,6 +79,11 @@ def main():
     definition_dir = args["--definition-dir"]
     input_dir = args["--input-dir"]
     output_dir = args["--output-dir"]
+
+    level = logging.WARNING
+    if args["--verbose"]:
+        level = logging.DEBUG
+    coloredlogs.install(level=level)
 
     if args["prepare"]:
         ProblemPreparer(definition_dir, output_dir).prepare()

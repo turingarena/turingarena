@@ -1,6 +1,7 @@
 import os
 import subprocess
 import logging
+import threading
 
 
 class Process:
@@ -25,9 +26,11 @@ class Process:
         os.mkfifo(self.downward_pipe_name)
         os.mkfifo(self.upward_pipe_name)
 
-        self.logger.info("algorithm process %s(%d): pipes created" % (self.algorithm_name, self.process_id))
+        self.logger.debug("algorithm process %s(%d): pipes created", self.algorithm_name, self.process_id)
 
     def start(self):
+        self.logger.info("starting process %d (algorithm: %s)", self.process_id, self.algorithm_name)
+
         return 0
 
     def run(self):
@@ -144,17 +147,17 @@ class Supervisor:
         if not line:
             self.logger.debug("control request pipe closed, terminating.")
             raise StopIteration
-        self.logger.debug("received line on control request pipe:", line.rstrip())
+        self.logger.debug("received line on control request pipe %s", line.rstrip())
 
         command, arg_str = line.rstrip().split(" ", 2)
         command, arg = self.parse_command(command, arg_str)
 
         result = self.on_command(command, arg)
 
-        self.logger.debug("sending on control response pipe %s" % (result,))
+        self.logger.debug("sending on control response pipe %s", result)
         print(result, file=self.control_response_pipe)
         self.control_response_pipe.flush()
-        self.logger.debug("sent on control response pipe %s" % (result,))
+        self.logger.debug("sent on control response pipe %s", result)
 
         self.after_command(command, arg, result)
 
@@ -179,8 +182,20 @@ class Supervisor:
 
         self.module = subprocess.Popen(
             [self.executable_path],
-            env={"TASKWIZARD_SANDBOX_DIR": self.sandbox_dir}
+            env={"TASKWIZARD_SANDBOX_DIR": self.sandbox_dir},
+            stderr=subprocess.PIPE,
+            universal_newlines=True
         )
+
+        def stderr_logger():
+            while True:
+                line = self.module.stderr.readline()
+                if not line: return
+
+                self.logger.debug("module stderr: %s" % line.strip())
+
+        logging_thread = threading.Thread(target=stderr_logger)
+        logging_thread.start()
 
         self.logger.debug("module process started")
 

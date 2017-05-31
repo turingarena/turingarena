@@ -36,5 +36,6 @@ setup(
         "grako>=3.20",
         "jinja2",
         "pyyaml",
+        "coloredlogs",
     ],
 )
