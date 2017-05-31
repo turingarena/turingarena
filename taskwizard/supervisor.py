@@ -5,20 +5,20 @@ import logging
 
 class Process:
 
-    def __init__(self, supervisor, process_id, algorithm_name):
+    def __init__(self, supervisor, process_id, algorithm_name, executable_path):
         self.logger = logging.getLogger(__name__)
 
         self.supervisor = supervisor
         self.process_id = process_id
-        self.algorithm_name = algorithm_name
 
-        self.executable_path = os.path.join(self.supervisor.task_run_dir, "algorithms", algorithm_name, "algorithm")
+        self.algorithm_name = algorithm_name
+        self.executable_path = executable_path
         self.os_process = None
 
-        self.downward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_downward.%d.pipe" % (process_id,))
+        self.downward_pipe_name = os.path.join(self.supervisor.sandbox_dir, "process_downward.%d.pipe" % (process_id,))
         self.downward_pipe = None
 
-        self.upward_pipe_name = os.path.join(self.supervisor.module_sandbox_dir, "process_upward.%d.pipe" % (process_id,))
+        self.upward_pipe_name = os.path.join(self.supervisor.sandbox_dir, "process_upward.%d.pipe" % (process_id,))
         self.upward_pipe = None
 
     def prepare(self):
@@ -58,7 +58,7 @@ class Process:
 
 class Supervisor:
 
-    def __init__(self, executable_path, sandbox_dir):
+    def __init__(self, executable_path, sandbox_dir, algorithms):
         self.processes = {}
         self.read_files = {}
         self._next_id = 0
@@ -71,6 +71,8 @@ class Supervisor:
         self.control_response_pipe_name = os.path.join(self.sandbox_dir, "control_response.pipe")
         self.control_response_pipe = None
 
+        self.algorithms = algorithms
+
         self.logger = logging.getLogger(__name__)
 
     def next_id(self):
@@ -79,7 +81,13 @@ class Supervisor:
 
     def algorithm_create_process(self, algorithm_name):
         process_id = self.next_id()
-        process = Process(self, process_id, algorithm_name)
+
+        try:
+            executable_path = self.algorithms[algorithm_name]
+        except KeyError:
+            raise ValueError("invalid algorithm name %s" % algorithm_name)
+
+        process = Process(self, process_id, algorithm_name, executable_path)
         self.processes[process_id] = process
 
         process.prepare()
@@ -152,7 +160,10 @@ class Supervisor:
 
     def main_loop(self):
         while True:
-            self.accept_command()
+            try:
+                self.accept_command()
+            except StopIteration:
+                return
 
     def run(self):
         self.logger.debug("sandbox folder:", self.sandbox_dir)
@@ -168,7 +179,7 @@ class Supervisor:
 
         self.module = subprocess.Popen(
             [self.executable_path],
-            env={"TURINGARENA_SANDBOX_DIR": self.sandbox_dir}
+            env={"TASKWIZARD_SANDBOX_DIR": self.sandbox_dir}
         )
 
         self.logger.debug("module process started")

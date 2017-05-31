@@ -1,6 +1,7 @@
 #include <cstdio>
 
-void driver_init();
+// Returns non-zero on success
+int driver_init();
 
 void* algorithm_create_process(const char *algo_name);
 

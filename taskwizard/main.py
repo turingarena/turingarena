@@ -4,7 +4,8 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard stubs [options]
   taskwizard prepare [options]
-  taskwizard run [options] <executable> [<args>...]
+  taskwizard run [options] [-a <algorithm>]... <executable> [<args>...]
+  taskwizard cpp module flags
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
@@ -20,6 +21,8 @@ Commands:
 
   run  Runs a module
 
+  cpp module flags  Gets the flags to compile a module with GCC
+
   verify  Verify this problem
 
   evaluate  Evaluate this problem on some submissions
@@ -32,6 +35,11 @@ Global options:
   -d --definition-dir=<dir>  Task definition directory [default: .]
   -i --input-dir=<dir>  Input directory [default: .task/]
   -o --output-dir=<dir>  Output directory [default: .task/]
+
+Run options:
+
+  -a --algorithm=<algorithm>  Expose an executable as an algorithm to the module.
+      Use syntax <slot>:<executable> for <algorithm>
 
 Test options:
 
@@ -53,8 +61,10 @@ Command evaluate options:
   -l --language=<language>  Programming language. Use the syntax -l <slot>=<language> to specify a slot.
 
 """
+import os
 
 import docopt
+import pkg_resources
 
 from taskwizard.runner import ModuleRunner
 
@@ -71,7 +81,12 @@ def main():
         return
 
     if args["run"]:
-        ModuleRunner(args["<executable>"]).run()
+        algorithms = {}
+        for f in args["--algorithm"]:
+            slot, path = f.split(":", 2)
+            algorithms[slot] = path
+
+        ModuleRunner(args["<executable>"], algorithms).run()
         return
 
     if args["evaluate"]:
@@ -84,6 +99,11 @@ def main():
             slots[slot] = path
 
         ProblemEvaluator(input_dir, output_dir, "evaluation1").evaluate(slots=slots)
+        return
+
+    if args["cpp"] and args["module"] and args["flags"]:
+        dir = pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib")
+        print("-I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
         return
 
     raise NotImplementedError

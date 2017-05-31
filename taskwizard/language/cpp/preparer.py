@@ -15,7 +15,7 @@ class ModulePreparer:
 
     def prepare(self):
         shutil.copytree(
-            pkg_resources.resource_filename("taskwizard.language.cpp", "module_static"),
+            pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib"),
             self.output_dir
         )
 
