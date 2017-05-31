@@ -9,6 +9,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
         self.variable_definitions = ast.get("variables", [])
         self.function_definitions = ast.get("functions", [])
         self.callback_function_definitions = ast.get("callback_functions", [])
+        self.main_definition = ast.main_definition
 
 
 syntax_nodes = (

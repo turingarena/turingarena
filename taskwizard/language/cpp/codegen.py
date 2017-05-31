@@ -1,165 +1,66 @@
-class ExpressionGenerator:
+import os
 
-    def generate(self, expression):
-        expression_type = expression.get_expression_type()
-        method = getattr(self, "%s_expression" % expression_type)
-        return method(expression)
-
-    def int_literal_expression(self, e):
-        return str(e.value)
-
-    def variable_expression(self, e):
-        return e.variable_name + ''.join('[' + self.generate(i) + ']' for i in e.indexes)
+from taskwizard.language.cpp.blocks import generate_support_block
+from taskwizard.language.cpp.declarations import generate_declaration, generate_parameter
+from taskwizard.language.cpp.types import generate_base_type
+from taskwizard.language.cpp.utils import indent
 
 
-class ProtocolGenerator:
+class DriverGenerator:
 
-    def __init__(self, interface, protocol):
+    def __init__(self, task, dest_dir):
+        self.task = task
+        self.dest_dir = dest_dir
+
+    def generate(self):
+        pass
+
+
+class SupportGenerator:
+
+    def __init__(self, task, interface, dest_dir):
+        self.task = task
         self.interface = interface
-        self.protocol = protocol
+        self.dest_dir = dest_dir
 
-        self.arrays_to_allocate = list(interface.get_arrays_to_allocate(protocol))
+        self.include_file_path = os.path.join(self.dest_dir, "main.h")
+        self.main_file_path = os.path.join(self.dest_dir, "main.cpp")
 
-    def generate_steps(self, steps):
-        for step in steps:
-            yield from self.generate_step(step)
+    def generate(self):
+        main_file = open(self.main_file_path, "w")
+        for line in self.generate_main_file():
+            print(line, file=main_file)
 
-    def generate_step(self, step):
-        node_type = step.get_node_type()
-        method = getattr(self, "%s_node" % node_type)
-        yield from method(step)
-
-    def for_node(self, node):
-        for n, var, indexes in self.arrays_to_allocate:
-            if not n == node: continue
-            yield "{name} = new {type}[{size}+1];".format(
-                name=var.name,
-                type=var.type,
-                size=generate_expression(var.array_dimensions[0].end)
-            )
-
-        yield 'for(int {index} = {start}; {index} <= {end}; {index}++)'.format(
-                index=node.index.name,
-                start=generate_expression(node.index.range.start),
-                end=generate_expression(node.index.range.end)
-        ) + " {"
-        yield from indent(self.generate_steps(node.steps))
-        yield "}"
-
-    def get_format(self, variable):
-        return "%d"
-
-
-class InterfaceProtocolGenerator(ProtocolGenerator):
-
-    def input_node(self, node):
-        format_string = ''.join(self.get_format(v) for v in node.variables)
-        args = ', '.join("&" + generate_expression(v) for v in node.variables)
-
-        yield 'scanf("{format}", {args});'.format(format=format_string, args=args)
-
-    def output_node(self, node):
-        format_string = ' '.join(self.get_format(v) for v in node.variables) + r'\n'
-        args = ', '.join(generate_expression(v) for v in node.variables)
-
-        yield 'printf("{format}", {args});'.format(format=format_string, args=args)
-
-    def call_node(self, node):
-        if node.return_value is not None:
-            return_value = generate_expression(node.return_value) + " = "
-        else:
-            return_value = ""
-
-        yield "{return_value}{function_name}({parameters});".format(
-            return_value=return_value,
-            function_name=node.function_name,
-            parameters=", ".join(generate_expression(p) for p in node.parameters)
-        )
-
-
-class InterfaceDriverProtocolGenerator(ProtocolGenerator):
-
-    def input_node(self, node):
-        format_string = ' '.join(self.get_format(v) for v in node.variables) + r'\n'
-        args = ', '.join(generate_expression(v) for v in node.variables)
-
-        yield 'fprintf(dpipe, "{format}", {args});'.format(format=format_string, args=args)
-
-    def output_node(self, node):
-        format_string = ''.join(self.get_format(v) for v in node.variables)
-        args = ', '.join("&" + generate_expression(v) for v in node.variables)
-
-        yield 'fscanf(upipe, "{format}", {args});'.format(format=format_string, args=args)
-
-    def call_node(self, node):
-        return []
-
-
-class CodeGenerator:
-
-    def generate_interface_support(self, interface):
+    def generate_main_file(self):
         yield "#include <cstdio>"
-
         yield ""
-
-        for variable in interface.variables.values():
-            yield from self.generate_variable_declaration(variable);
-
+        yield from self.generate_global_declarations()
         yield ""
-
-        for function in interface.functions.values():
-            yield from self.generate_function_declaration(function);
-
+        yield from self.generate_prototypes()
         yield ""
+        yield from self.generate_main_function()
 
-        yield from self.generate_main_interface_protocol(interface)
+    def generate_global_declarations(self):
+        for d in self.interface.variables:
+            yield from generate_declaration(d)
 
-        for protocol in interface.named_protocols.values():
-            yield from self.generate_interface_protocol(interface, protocol)
-
-    def generate_interface_driver_support(self, interface):
-        yield "class {name} : support::interface".format(
-            name = interface.name
-        ) + " {"
-        yield from indent(self.generate_protocol_data(interface.main_protocol))
-        yield from indent(self.generate_protocol_indexes(interface.main_protocol))
-        yield from indent(self.generate_protocol_states(interface.main_protocol))
-        yield from indent(self.generate_protocol_validate(interface.main_protocol))
-        yield from indent(self.generate_protocol_advance(interface.main_protocol))
-        yield "public:"
-        yield from indent(self.generate_protocol_accessors(interface.main_protocol))
-        yield from indent(self.generate_protocol_calls(interface.main_protocol))
-        yield "};"
-
-    def generate_variable_declaration(self, variable):
-        yield self.format_variable(variable) + ";"
-
-    def format_variable(self, variable):
-        return "{type} {stars}{name}".format(
-            type=variable.type,
-            name=variable.name,
-            stars='*' * len(variable.array_dimensions)
-        )
+    def generate_prototypes(self):
+        for f in self.interface.functions:
+            yield from self.generate_function_declaration(f)
 
     def generate_function_declaration(self, function):
         yield "{return_type} {name}({arguments});".format(
-            return_type=function.return_type,
+            return_type=generate_base_type(function.return_type),
             name=function.name,
-            arguments=', '.join(self.format_variable(p) for p in function.parameters.values())
+            arguments=', '.join(generate_parameter(p) for p in function.parameters)
         )
 
-    def generate_main_interface_protocol(self, interface):
-        protocol = interface.main_protocol
-
+    def generate_main_function(self):
         yield "int main() {"
-        yield from indent(InterfaceProtocolGenerator(interface, protocol).generate_steps(protocol.steps))
+        yield from indent(self.generate_main_block())
         yield "}"
 
+    def generate_main_block(self):
+        yield from generate_support_block(self.interface.main_definition.block)
 
-def generate_expression(expression):
-    return ExpressionGenerator().generate(expression)
 
-
-def indent(lines):
-    for line in lines:
-        yield "    " + line

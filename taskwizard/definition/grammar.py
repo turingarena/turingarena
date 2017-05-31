@@ -2,7 +2,10 @@ import grako
 
 
 class AbstractSyntaxNode:
-    pass
+
+    def __init__(self, ast):
+        self.ast = ast
+        self.parseinfo = ast.parseinfo
 
 
 grammar_ebnf = r"""
@@ -10,41 +13,16 @@ grammar_ebnf = r"""
     @@eol_comments :: /\/\/.*$/
 
     unit =
-        { interface_definition }*
+        interfaces:{ interface_definition }*
     ;
     
-    base_type =
-        | 'int'
-        | 'bool'
-    ;
-    
-    type =
-        | enum_type
-        | array_type
-    ;
-    
-    array_type =
-        base_type:base_type ~ dimensions:{ '[' ']' }*
-    ;
-    
-    enum_type =
-        'enum' ~ '{'
-            items:','.{ identifier }*
-        '}'
-    ;
-
-    return_type =
-        | @:type
-        | 'void'
-    ;
-
     interface_definition(InterfaceDefinition) =
         'interface' ~ name:identifier '{' {
             | variables+:global_declaration
             | consts+:const_declaration
             | functions+:function_definition
             | callbacks+:callback_definition
-            | main:main_definition
+            | main_definition:main_definition
         }* '}'
     ;
     
@@ -88,9 +66,9 @@ grammar_ebnf = r"""
         
     declarator_list = ','.{ declarator }+;
 
-    declarator = identifier:identifier array_dimensions:{ '[' ']' }* ;
+    declarator = identifier:identifier ;
     
-    block = '{' items:{ block_item }* '}' ;
+    block = '{' block_items:{ block_item }* '}' ;
 
     block_item =
         | local_declaration
@@ -111,7 +89,7 @@ grammar_ebnf = r"""
         | return_statement
     ;
 
-    expression_list = variables:','.{ expression }* ;
+    expression_list = ','.{ expression }* ;
 
     input_statement(InputStatement) =
         'input' ~ arguments:expression_list ';'
@@ -174,6 +152,31 @@ grammar_ebnf = r"""
     variable_expression_index = '[' @:expression ']' ;
     
     int_literal_expression = value:INT;
+
+    base_type =
+        | 'int'
+        | 'bool'
+    ;
+    
+    type =
+        | enum_type
+        | array_type
+    ;
+    
+    array_type =
+        base_type:base_type ~ dimensions:{ '[' ']' }*
+    ;
+    
+    enum_type =
+        'enum' ~ '{'
+            items:','.{ identifier }*
+        '}'
+    ;
+
+    return_type =
+        | @:type
+        | 'void'
+    ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 

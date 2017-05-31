@@ -2,8 +2,7 @@
 
 Usage:
   taskwizard create <name> [<folder>]
-  taskwizard stubs [options]
-  taskwizard prepare [options]
+  taskwizard generate [options]
   taskwizard run [options] [-a <algorithm>]... <executable> [<args>...]
   taskwizard cpp module flags
   taskwizard verify [options]
@@ -14,10 +13,7 @@ Usage:
 Commands:
 
   create  Creates a new task definition folder
-  stubs  Creates the stubs of files that should be written for this problem
-
-  prepare  Prepares this problem
-  compile  Compiles this problem
+  generate  Generate all the code
 
   run  Runs a module
 
@@ -70,6 +66,9 @@ import docopt
 import pkg_resources
 import logging
 
+from taskwizard.definition import grammar
+from taskwizard.generator import CodeGenerator
+from taskwizard.parser import TaskParser
 from taskwizard.runner import ModuleRunner
 
 
@@ -85,8 +84,9 @@ def main():
         level = logging.DEBUG
     coloredlogs.install(level=level)
 
-    if args["prepare"]:
-        ProblemPreparer(definition_dir, output_dir).prepare()
+    if args["generate"]:
+        task = TaskParser(definition_dir=definition_dir).parse()
+        CodeGenerator(task=task, output_dir=output_dir).generate()
         return
 
     if args["run"]:

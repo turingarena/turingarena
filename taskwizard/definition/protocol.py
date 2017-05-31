@@ -2,29 +2,28 @@ from taskwizard.definition.grammar import AbstractSyntaxNode
 
 
 class Statement(AbstractSyntaxNode):
-
     pass
 
 
-class InputOutputStatement(ProtocolStatement):
+class InputOutputStatement(Statement):
 
     def __init__(self, ast):
+        super().__init__(ast)
         self.variables = ast.variables
 
 
 class InputStatement(InputOutputStatement):
-
     pass
 
 
 class OutputStatement(InputOutputStatement):
-
     pass
 
 
 class CallStatement(AbstractSyntaxNode):
 
     def __init__(self, ast):
+        super().__init__(ast)
         self.return_value = ast.return_value
         self.function_name = ast.function_name
         self.parameters = ast.parameters
@@ -40,6 +39,7 @@ class ForIndex:
 class ForStatement(AbstractSyntaxNode):
 
     def __init__(self, ast):
+        super().__init__(ast)
         self.index = ForIndex(ast.index, ast.range)
         self.statements = ast.statements
 
@@ -47,6 +47,7 @@ class ForStatement(AbstractSyntaxNode):
 class SwitchStatement(AbstractSyntaxNode):
 
     def __init__(self, ast):
+        super().__init__(ast)
         self.expression = ast.expression
         self.cases = ast.cases
 
