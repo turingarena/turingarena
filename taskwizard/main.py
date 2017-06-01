@@ -59,14 +59,13 @@ Command evaluate options:
   -l --language=<language>  Programming language. Use the syntax -l <slot>=<language> to specify a slot.
 
 """
+import logging
 import os
 
 import coloredlogs
 import docopt
 import pkg_resources
-import logging
 
-from taskwizard.definition import grammar
 from taskwizard.generator import CodeGenerator
 from taskwizard.parser import TaskParser
 from taskwizard.runner import ModuleRunner

@@ -1,7 +1,6 @@
 from unittest.case import TestCase
 
-from taskwizard.definition.grammar import parse
-
+from taskwizard.grammar import parse
 
 text = r"""
 
@@ -27,7 +26,7 @@ interface i {
         alloc A : 1..N;
         const int N2 = N; 
         for(i : 1..N) {
-            alloc A[i] : 1..N;
+            alloc U, A[i] : 1..N;
         }
         for(i : 1..M) {
             input U[i], V[i];

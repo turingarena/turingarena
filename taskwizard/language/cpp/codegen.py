@@ -1,6 +1,7 @@
 import os
 
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
+from taskwizard.generation.interface import InterfaceItemVisitor
 from taskwizard.generation.utils import indent_all, write_to_file
 from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import build_declaration, build_parameter
@@ -11,6 +12,27 @@ class DriverGenerator(AbstractDriverGenerator):
 
     def generate(self):
         pass
+
+
+class InterfaceItemGenerator(InterfaceItemVisitor):
+
+    def __init__(self):
+        self.global_scope = {}
+
+    def visit_global_declaration(self, declaration):
+        yield from build_declaration(declaration, self.global_scope)
+
+    def visit_function_definition(self, definition):
+        yield "{return_type} {name}({arguments});".format(
+            return_type=generate_base_type(definition.return_type),
+            name=definition.name,
+            arguments=', '.join(build_parameter(p) for p in definition.parameters)
+        )
+
+    def visit_main_definition(self, definition):
+        yield "int main() {"
+        yield from indent_all(generate_block(definition.block, self.global_scope))
+        yield "}"
 
 
 class SupportGenerator(AbstractSupportGenerator):
@@ -26,37 +48,10 @@ class SupportGenerator(AbstractSupportGenerator):
         write_to_file(self.generate_main_file(), main_file)
 
     def generate_main_file(self):
-        global_scope = {}
-
         yield "#include <cstdio>"
-        yield ""
-        yield from self.generate_global_declarations(global_scope)
-        yield ""
-        yield from self.generate_prototypes()
-        yield ""
-        yield from self.generate_main_function(global_scope)
-
-    def generate_global_declarations(self, global_scope):
-        for d in self.interface.variables:
-            yield from build_declaration(d, global_scope)
-
-    def generate_prototypes(self):
-        for f in self.interface.functions:
-            yield from self.generate_function_declaration(f)
-
-    def generate_function_declaration(self, function):
-        yield "{return_type} {name}({arguments});".format(
-            return_type=generate_base_type(function.return_type),
-            name=function.name,
-            arguments=', '.join(build_parameter(p) for p in function.parameters)
-        )
-
-    def generate_main_function(self, global_scope):
-        yield "int main() {"
-        yield from indent_all(self.generate_main_block(global_scope))
-        yield "}"
-
-    def generate_main_block(self, global_scope):
-        yield from generate_block(self.interface.main_definition.block, global_scope)
+        generator = InterfaceItemGenerator()
+        for item in self.interface.interface_items:
+            yield
+            yield from generator.visit(item)
 
 

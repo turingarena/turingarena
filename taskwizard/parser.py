@@ -1,6 +1,6 @@
 import os
 
-from taskwizard.definition import grammar
+from taskwizard import grammar
 
 
 class TaskParser:

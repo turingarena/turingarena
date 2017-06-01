@@ -16,17 +16,21 @@ grammar_ebnf = r"""
         interfaces:{ interface_definition }*
     ;
     
-    interface_definition(InterfaceDefinition) =
-        'interface' ~ name:identifier '{' {
-            | variables+:global_declaration
-            | consts+:const_declaration
-            | functions+:function_definition
-            | callbacks+:callback_definition
-            | main_definition:main_definition
-        }* '}'
+    interface_definition =
+        'interface' ~ name:identifier '{'
+            interface_items:{ interface_item }*
+        '}'
     ;
     
-    function_definition(FunctionDefinition) =
+    interface_item =
+        | global_declaration
+        | const_declaration
+        | function_definition
+        | callback_definition
+        | main_definition
+    ;
+
+    function_definition =
         'function' ~ return_type:return_type name:identifier '('
             parameters:parameter_declaration_list
         ')'
@@ -56,6 +60,10 @@ grammar_ebnf = r"""
         'const' ~ type:type declarators:init_declarator_list ';'
     ;
     
+    index_declaration =
+        type:`int` declarator:index_declarator ':' range:range
+    ;
+
     parameter_declaration_list = ','.{ parameter_declaration }* ;
 
     parameter_declaration = type:type declarator:declarator ;
@@ -68,6 +76,8 @@ grammar_ebnf = r"""
 
     declarator = name:identifier ;
     
+    index_declarator = name:identifier ;
+
     block = '{' block_items:{ block_item }* '}' ;
 
     block_item =
@@ -109,14 +119,6 @@ grammar_ebnf = r"""
         ')'
         [ '->' return_value:expression ] 
         ';'
-    ;
-
-    index_declarator =
-        name:identifier
-    ;
-
-    index_declaration =
-        type:`int` declarator:index_declarator ':' range:range
     ;
 
     for_statement(ForStatement) =
