@@ -165,21 +165,19 @@ grammar_ebnf = r"""
 
     type =
         | array_type
+        | enum_type
         | scalar_type 
     ;
     
-    array_type = scalar_type:scalar_type dimensions:{ '[' ']' }* ;
+    array_type = item_type:type '[' ']' ;
     
-    scalar_type =
-        | enum_type
-        | base:base_type
-    ;
-
     enum_type =
         'enum' ~ '{'
             items:','.{ identifier }*
         '}'
     ;
+
+    scalar_type = base:base_type ;
 
     base_type =
         | 'int'

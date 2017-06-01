@@ -8,7 +8,7 @@ class TypeVisitor:
 class BaseTypeExtractor(TypeVisitor):
 
     def visit_array_type(self, t):
-        return self.visit(t.scalar_type)
+        return self.visit(t.item_type)
 
     def visit_scalar_type(self, t):
         return t.base

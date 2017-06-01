@@ -7,8 +7,11 @@ class DeclaratorBuildingTypeVisitor(TypeVisitor):
     def __init__(self, declarator):
         self.declarator = declarator
 
+    def visit_scalar_type(self, type):
+        return self.declarator.name
+
     def visit_array_type(self, type):
-        return '*' * len(type.dimensions) + self.declarator.name
+        return '*' + self.visit(type.item_type)
 
 
 def build_declarator(declaration, declarator):
