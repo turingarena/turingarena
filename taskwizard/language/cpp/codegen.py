@@ -1,9 +1,9 @@
 import os
 
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
-from taskwizard.generation.interface import InterfaceItemVisitor
 from taskwizard.generation.scope import Scope
 from taskwizard.generation.utils import indent_all, write_to_file
+from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import build_declaration, build_parameter
 from taskwizard.language.cpp.types import generate_base_type
@@ -15,7 +15,7 @@ class DriverGenerator(AbstractDriverGenerator):
         pass
 
 
-class InterfaceItemGenerator(InterfaceItemVisitor):
+class InterfaceItemGenerator(SyntaxVisitor):
 
     def __init__(self):
         self.global_scope = Scope()
