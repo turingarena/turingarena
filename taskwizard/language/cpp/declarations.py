@@ -1,8 +1,8 @@
-from taskwizard.generation.types import TypeVisitor
+from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.types import generate_base_type
 
 
-class DeclaratorBuildingTypeVisitor(TypeVisitor):
+class DeclaratorBuilder(SyntaxVisitor):
 
     def __init__(self, declarator):
         self.declarator = declarator
@@ -15,7 +15,7 @@ class DeclaratorBuildingTypeVisitor(TypeVisitor):
 
 
 def build_declarator(declaration, declarator):
-    return DeclaratorBuildingTypeVisitor(declarator).visit(declaration.type)
+    return DeclaratorBuilder(declarator).visit(declaration.type)
 
 
 def generate_declarators(declaration, scope):
@@ -24,7 +24,7 @@ def generate_declarators(declaration, scope):
 
 
 def build_declaration(declaration, scope):
-    yield '{base_type} {declarators};'.format(
+    return '{base_type} {declarators};'.format(
         base_type=generate_base_type(declaration.type),
         declarators=', '.join(generate_declarators(declaration, scope)),
     )

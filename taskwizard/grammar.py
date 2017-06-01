@@ -150,14 +150,16 @@ grammar_ebnf = r"""
     ;
 
     expression(Expression) =
+        | subscript_expression
         | variable_expression
         | int_literal_expression
     ;
     
-    variable_expression(VariableExpression) =
-        variable_name:identifier
-        indexes:{ variable_expression_index }*
+    subscript_expression =
+        array:expression '[' index:expression ']'
     ;
+    
+    variable_expression(VariableExpression) = variable_name:identifier ;
 
     variable_expression_index = '[' @:expression ']' ;
     
@@ -202,3 +204,10 @@ grammar = tatsu.compile(grammar_ebnf)
 
 def parse(*args, **kwargs):
     return grammar.parse(*args, **kwargs)
+
+
+class SyntaxVisitor:
+
+    def visit(self, statement):
+        method = getattr(self, "visit_%s" % statement.parseinfo.rule)
+        return method(statement)

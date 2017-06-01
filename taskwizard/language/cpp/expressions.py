@@ -6,4 +6,4 @@ class ExpressionGenerator(AbstractExpressionGenerator):
 
 
 def generate_expression(expression):
-    return ExpressionGenerator().visit(expression)
+    return ExpressionGenerator().generate(expression)

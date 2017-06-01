@@ -1,9 +1,17 @@
-from taskwizard.generation.types import BaseTypeExtractor
+from taskwizard.grammar import SyntaxVisitor
+
+
+class BaseTypeGenerator(SyntaxVisitor):
+
+    def visit_array_type(self, t):
+        return self.visit(t.item_type)
+
+    def visit_scalar_type(self, t):
+        return {
+            "int": "int",
+            "int64": "long long int",
+        }[t.base]
 
 
 def generate_base_type(type):
-    base_type = BaseTypeExtractor().visit(type)
-    return {
-        "int": "int",
-        "int64": "long long int",
-    }[base_type]
+    return BaseTypeGenerator().visit(type)

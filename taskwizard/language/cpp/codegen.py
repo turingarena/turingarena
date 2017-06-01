@@ -21,7 +21,7 @@ class InterfaceItemGenerator(InterfaceItemVisitor):
         self.global_scope = Scope()
 
     def visit_global_declaration(self, declaration):
-        yield from build_declaration(declaration, self.global_scope)
+        yield build_declaration(declaration, self.global_scope)
 
     def visit_function_definition(self, definition):
         yield "{return_type} {name}({arguments});".format(
