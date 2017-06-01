@@ -1,12 +1,14 @@
 class TypeVisitor:
 
-    def visit(self, type):
-        method = getattr(self, "visit_%s" % type.parseinfo.rule)
-        return method(type)
+    def visit(self, t):
+        method = getattr(self, "visit_%s" % t.parseinfo.rule)
+        return method(t)
 
 
-class BaseTypeVisitor:
+class BaseTypeExtractor(TypeVisitor):
 
-    def visit(self, base_type):
-        method = getattr(self, "visit_%s" % type.parseinfo.rule)
-        return method(base_type)
+    def visit_array_type(self, t):
+        return self.visit(t.scalar_type)
+
+    def visit_scalar_type(self, t):
+        return t.base

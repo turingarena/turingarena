@@ -163,27 +163,30 @@ grammar_ebnf = r"""
     
     int_literal_expression = value:INT;
 
-    base_type =
-        | 'int'
-        | 'int64'
-        | 'bool'
-    ;
-    
     type =
-        | enum_type
         | array_type
+        | scalar_type 
     ;
     
-    array_type =
-        base_type:base_type ~ dimensions:{ '[' ']' }*
-    ;
+    array_type = scalar_type:scalar_type dimensions:{ '[' ']' }* ;
     
+    scalar_type =
+        | enum_type
+        | base:base_type
+    ;
+
     enum_type =
         'enum' ~ '{'
             items:','.{ identifier }*
         '}'
     ;
 
+    base_type =
+        | 'int'
+        | 'int64'
+        | 'bool'
+    ;
+    
     return_type =
         | @:type
         | 'void'
