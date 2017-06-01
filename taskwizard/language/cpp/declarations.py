@@ -1,4 +1,3 @@
-from taskwizard.generation.declarations import process_declaration
 from taskwizard.generation.types import TypeVisitor
 from taskwizard.language.cpp.types import generate_base_type
 
@@ -17,7 +16,7 @@ def build_declarator(declaration, declarator):
 
 
 def generate_declarators(declaration, scope):
-    for declarator in process_declaration(declaration, scope):
+    for declarator in scope.process_declarators(declaration):
         yield build_declarator(declaration, declarator)
 
 

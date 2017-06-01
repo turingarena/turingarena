@@ -1,4 +1,4 @@
-from taskwizard.generation.declarations import add_to_scope
+from taskwizard.generation.scope import Scope
 from taskwizard.generation.statements import StatementVisitor
 from taskwizard.generation.utils import indent_all
 from taskwizard.language.cpp import blocks
@@ -18,8 +18,8 @@ class StatementGenerator(StatementVisitor):
                 start=generate_expression(statement.index.range.start),
                 end=generate_expression(statement.index.range.end)
         ) + " {"
-        new_scope = dict(self.scope)
-        add_to_scope(new_scope, statement.index.declarator, statement.index)
+        new_scope = Scope(self.scope)
+        new_scope.process_simple_declaration(statement.index)
         yield from indent_all(blocks.generate_block(statement.block, new_scope))
         yield "}"
 
