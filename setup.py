@@ -33,7 +33,7 @@ setup(
     classifiers=[],
     install_requires=[
         "docopt",
-        "grako>=3.20",
+        "tatsu",
         "jinja2",
         "pyyaml",
         "coloredlogs",

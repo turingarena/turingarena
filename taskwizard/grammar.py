@@ -1,4 +1,4 @@
-import grako
+import tatsu
 
 
 class AbstractSyntaxNode:
@@ -199,7 +199,7 @@ grammar_ebnf = r"""
 
 """
 
-grammar = grako.compile(grammar_ebnf)
+grammar = tatsu.compile(grammar_ebnf)
 
 
 def parse(*args, **kwargs):
