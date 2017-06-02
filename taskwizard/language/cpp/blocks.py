@@ -4,6 +4,7 @@ from taskwizard.generation.utils import indent_all
 from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.declarations import build_declaration, generate_declarators
 from taskwizard.language.cpp.expressions import generate_expression
+from taskwizard.language.cpp.types import generate_base_type
 
 
 def generate_format(expression, scope):
@@ -57,6 +58,14 @@ class BlockGenerator(SyntaxVisitor):
             function_name=node.function_name,
             parameters=", ".join(generate_expression(p) for p in node.parameters)
         )
+
+    def visit_alloc_statement(self, statement):
+        for argument in statement.arguments:
+            yield "{var} = new {type}[{size}];".format(
+                var=generate_expression(argument),
+                type=generate_base_type(extract_type(self.scope, argument)),
+                size="1 + " + generate_expression(statement.range.end),
+            )
 
     def visit_local_declaration(self, declaration):
         yield build_declaration(declaration, self.scope)
