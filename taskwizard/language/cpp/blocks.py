@@ -27,8 +27,8 @@ class BlockGenerator(SyntaxVisitor):
     def visit_for_statement(self, statement):
         yield 'for(int {index} = {start}; {index} <= {end}; {index}++)'.format(
                 index=statement.index.declarator.name,
-                start=generate_expression(statement.index.range.start),
-                end=generate_expression(statement.index.range.end)
+                start=generate_expression(self.scope, statement.index.range.start),
+                end=generate_expression(self.scope, statement.index.range.end)
         ) + " {"
         new_scope = Scope(self.scope)
         new_scope.process_simple_declaration(statement.index)
@@ -37,34 +37,34 @@ class BlockGenerator(SyntaxVisitor):
 
     def visit_input_statement(self, statement):
         format_string = ''.join(generate_format(v, self.scope) for v in statement.arguments)
-        args = ', '.join("&" + generate_expression(v) for v in statement.arguments)
+        args = ', '.join("&" + generate_expression(self.scope, v) for v in statement.arguments)
 
         yield 'scanf("{format}", {args});'.format(format=format_string, args=args)
 
     def visit_output_statement(self, node):
         format_string = ' '.join(generate_format(v, self.scope) for v in node.arguments) + r'\n'
-        args = ', '.join(generate_expression(v) for v in node.arguments)
+        args = ', '.join(generate_expression(self.scope, v) for v in node.arguments)
 
         yield 'printf("{format}", {args});'.format(format=format_string, args=args)
 
     def visit_call_statement(self, node):
         if node.return_value is not None:
-            return_value = generate_expression(node.return_value) + " = "
+            return_value = generate_expression(self.scope, node.return_value) + " = "
         else:
             return_value = ""
 
         yield "{return_value}{function_name}({parameters});".format(
             return_value=return_value,
             function_name=node.function_name,
-            parameters=", ".join(generate_expression(p) for p in node.parameters)
+            parameters=", ".join(generate_expression(self.scope, p) for p in node.parameters)
         )
 
     def visit_alloc_statement(self, statement):
         for argument in statement.arguments:
             yield "{var} = new {type}[{size}];".format(
-                var=generate_expression(argument),
+                var=generate_expression(self.scope, argument),
                 type=generate_base_type(extract_type(self.scope, argument)),
-                size="1 + " + generate_expression(statement.range.end),
+                size="1 + " + generate_expression(self.scope, statement.range.end),
             )
 
     def visit_local_declaration(self, declaration):

@@ -19,6 +19,9 @@ def extract_type(scope, expression):
 
 class AbstractExpressionGenerator(SyntaxVisitor):
 
+    def __init__(self, scope):
+        self.scope = scope
+
     def generate(self, expression):
         return self.visit(expression)
 
