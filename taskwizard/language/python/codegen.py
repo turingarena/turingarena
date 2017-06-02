@@ -1,7 +1,54 @@
 import os
 
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractInterfaceDriverGenerator, AbstractSupportGenerator
-from taskwizard.generation.utils import write_to_file, indent_all
+from taskwizard.generation.scope import Scope
+from taskwizard.generation.utils import write_to_file, indent_all, indent
+from taskwizard.grammar import SyntaxVisitor
+
+
+class SupportInterfaceDeclarationGenerator(SyntaxVisitor):
+
+    def __init__(self):
+        self.global_scope = Scope()
+
+    def visit_global_declaration(self, declaration):
+        for declarator in self.global_scope.process_declarators(declaration):
+            args = {
+                "name": declarator.name,
+            }
+
+            yield
+            yield "@property"
+            yield "def {name}(self, value):".format(**args)
+            yield from indent_all(self.generate_getter_body(declaration, declarator))
+            yield
+            yield "@{name}.setter".format(**args)
+            yield "def {name}(self, value):".format(**args)
+            yield from indent_all(self.generate_setter_body(declaration, declarator))
+
+    def generate_getter_body(self, declaration, declarator):
+        args = {
+            "name": declarator.name,
+        }
+
+        yield "if self.__{name} is None:".format(**args)
+        yield indent("raise ValueError('not set')")
+        yield "return self.__{name}".format(**args)
+
+    def generate_setter_body(self, declaration, declarator):
+        args = {
+            "name": declarator.name,
+        }
+
+        yield "if self.__{name} is not None:".format(**args)
+        yield indent("raise ValueError('already set')")
+        yield "self.__{name} = value".format(**args)
+
+    def visit_function_definition(self, definition):
+        return []
+
+    def visit_main_definition(self, definition):
+        return []
 
 
 class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
@@ -27,7 +74,9 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
         yield from indent_all(self.generate_class_body())
 
     def generate_class_body(self):
-        yield "pass"
+        generator = SupportInterfaceDeclarationGenerator()
+        for item in self.interface.interface_items:
+            yield from generator.visit(item)
 
 
 class DriverGenerator(AbstractDriverGenerator):
