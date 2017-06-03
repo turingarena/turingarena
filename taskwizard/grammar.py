@@ -199,10 +199,9 @@ grammar_ebnf = r"""
 
 """
 
-grammar = tatsu.compile(grammar_ebnf)
-
 
 def parse(*args, **kwargs):
+    grammar = tatsu.compile(grammar_ebnf)
     return grammar.parse(*args, **kwargs)
 
 
