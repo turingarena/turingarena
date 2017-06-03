@@ -21,6 +21,9 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
         write_to_file(self.generate_module(), module_file)
 
     def generate_module(self):
+        yield "from __future__ import print_function"
+        yield
+        yield
         yield "class {name}:".format(
             name=self.interface.name
         )

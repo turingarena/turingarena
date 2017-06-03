@@ -17,7 +17,7 @@ class BlockDriverGenerator(SyntaxVisitor):
             )
 
     def visit_input_statement(self, statement):
-        yield "self.downward_pipe.print({arguments})".format(
+        yield "print({arguments}, file=self.downward_pipe)".format(
             arguments=", ".join(
                 build_driver_expression(self.scope, e)
                 for e in statement.arguments

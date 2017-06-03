@@ -17,7 +17,7 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
 
             yield
             yield "@property"
-            yield "def {name}(self, value):".format(**args)
+            yield "def {name}(self):".format(**args)
             yield from indent_all(generate_getter_body(declaration, declarator))
             yield
             yield "@{name}.setter".format(**args)
@@ -34,7 +34,7 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
 
     def visit_main_definition(self, definition):
         yield
-        yield "def downward_protocol():"
+        yield "def downward_protocol(self):"
         yield from indent_all(generate_downward_protocol_body(self.global_scope, definition.block))
 
 
@@ -43,9 +43,9 @@ def generate_getter_body(declaration, declarator):
         "name": declarator.name,
     }
 
-    yield "if self.__{name} is None:".format(**args)
+    yield "if not hasattr(self, '_{name}'):".format(**args)
     yield indent("raise ValueError('not set')")
-    yield "return self.__{name}".format(**args)
+    yield "return self._{name}".format(**args)
 
 
 def generate_setter_body(declaration, declarator):
@@ -53,9 +53,9 @@ def generate_setter_body(declaration, declarator):
         "name": declarator.name,
     }
 
-    yield "if self.__{name} is not None:".format(**args)
+    yield "if hasattr(self, '_{name}'):".format(**args)
     yield indent("raise ValueError('already set')")
-    yield "self.__{name} = value".format(**args)
+    yield "self._{name} = value".format(**args)
 
 
 def generate_function_body(definition):
