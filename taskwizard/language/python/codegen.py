@@ -22,6 +22,7 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
 
     def generate_module(self):
         yield "from __future__ import print_function"
+        yield "from taskwizard.driver import Array"
         yield
         yield
         yield "class {name}:".format(

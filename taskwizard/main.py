@@ -4,7 +4,8 @@ Usage:
   taskwizard create <name> [<folder>]
   taskwizard generate [options]
   taskwizard run [options] [-a <algorithm>]... <executable> [<args>...]
-  taskwizard cpp module flags
+  taskwizard cpp driver flags
+  taskwizard python driver path
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
@@ -17,7 +18,8 @@ Commands:
 
   run  Runs a module
 
-  cpp module flags  Gets the flags to compile a module with GCC
+  cpp driver flags  Prints the flags to compile a driver with GCC
+  python driver path  Prints the path to add to PYTHONPATH to run a driver in python
 
   verify  Verify this problem
 
@@ -109,9 +111,14 @@ def main():
         ProblemEvaluator(input_dir, output_dir, "evaluation1").evaluate(slots=slots)
         return
 
-    if args["cpp"] and args["module"] and args["flags"]:
+    if args["cpp"] and args["driver"] and args["flags"]:
         dir = pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib")
         print("-std=c++14 -I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
+        return
+
+    if args["python"] and args["driver"] and args["path"]:
+        dir = pkg_resources.resource_filename("taskwizard.language.python", "module_lib")
+        print(dir)
         return
 
     raise NotImplementedError

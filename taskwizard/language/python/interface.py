@@ -4,6 +4,31 @@ from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.python.protocol import generate_driver_block
 
 
+class GlobalPropertyGenerator(SyntaxVisitor):
+
+    def __init__(self, declaration, declarator):
+        self.declaration = declaration
+        self.declarator = declarator
+
+    def visit_scalar_type(self, t):
+        args = {"name": self.declarator.name}
+        yield
+        yield "@property"
+        yield "def {name}(self):".format(**args)
+        yield from indent_all(generate_getter_body(self.declaration, self.declarator))
+        yield
+        yield "@{name}.setter".format(**args)
+        yield "def {name}(self, value):".format(**args)
+        yield from indent_all(generate_setter_body(self.declaration, self.declarator))
+
+    def visit_array_type(self, t):
+        args = {"name": self.declarator.name}
+        yield
+        yield "@property"
+        yield "def {name}(self):".format(**args)
+        yield from indent_all(generate_array_getter_body(self.declaration, self.declarator))
+
+
 class SupportInterfaceItemGenerator(SyntaxVisitor):
 
     def __init__(self):
@@ -11,18 +36,10 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
 
     def visit_global_declaration(self, declaration):
         for declarator in self.global_scope.process_declarators(declaration):
-            args = {
-                "name": declarator.name,
-            }
-
-            yield
-            yield "@property"
-            yield "def {name}(self):".format(**args)
-            yield from indent_all(generate_getter_body(declaration, declarator))
-            yield
-            yield "@{name}.setter".format(**args)
-            yield "def {name}(self, value):".format(**args)
-            yield from indent_all(generate_setter_body(declaration, declarator))
+            yield from GlobalPropertyGenerator(
+                declaration=declaration,
+                declarator=declarator,
+            ).visit(declaration.type)
 
     def visit_function_definition(self, definition):
         yield
@@ -56,6 +73,16 @@ def generate_setter_body(declaration, declarator):
     yield "if hasattr(self, '_{name}'):".format(**args)
     yield indent("raise ValueError('already set')")
     yield "self._{name} = value".format(**args)
+
+
+def generate_array_getter_body(declaration, declarator):
+    args = {
+        "name": declarator.name,
+    }
+
+    yield "if not hasattr(self, '_{name}'):".format(**args)
+    yield indent("self._{name} = Array()").format(**args)
+    yield "return self._{name}".format(**args)
 
 
 def generate_function_body(definition):
