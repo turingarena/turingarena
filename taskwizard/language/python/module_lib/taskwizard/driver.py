@@ -5,8 +5,11 @@ def get_value(value):
 
 def set_once(old_value, new_value):
     if old_value is not None: raise ValueError("already set")
-    if new_value is None: raise ValueError
     return new_value
+
+
+def is_set(value):
+    return value is not None
 
 
 class BaseInterface:
@@ -15,6 +18,8 @@ class BaseInterface:
         self.upward_pipe = upward_pipe
         self.downward_pipe = downward_pipe
         self.data = self.Data()
+        self.downward = self._downward_protocol()
+        self.downward.send(None)
 
 
 class BaseStruct:

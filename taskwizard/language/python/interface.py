@@ -33,51 +33,30 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
 
     def visit_function_definition(self, definition):
         yield
-        yield "def call_{name}({parameters}):".format(
+        yield "def {name}({parameters}):".format(
             name=definition.name,
-            parameters=", ".join(p.declarator.name for p in definition.parameters),
+            parameters=", ".join(
+                ["self"] +
+                [p.declarator.name for p in definition.parameters]
+            ),
         )
         yield from indent_all(generate_function_body(definition))
 
     def visit_main_definition(self, definition):
         yield
-        yield "def downward_protocol(self):"
+        yield "def _downward_protocol(self):"
         yield from indent_all(generate_downward_protocol_body(self.global_scope, definition.block))
 
 
-def generate_getter_body(declaration, declarator):
-    args = {
-        "name": declarator.name,
-    }
-
-    yield "if not hasattr(self, '_{name}'):".format(**args)
-    yield indent("raise ValueError('not set')")
-    yield "return self._{name}".format(**args)
-
-
-def generate_setter_body(declaration, declarator):
-    args = {
-        "name": declarator.name,
-    }
-
-    yield "if hasattr(self, '_{name}'):".format(**args)
-    yield indent("raise ValueError('already set')")
-    yield "self._{name} = value".format(**args)
-
-
-def generate_array_getter_body(declaration, declarator):
-    args = {
-        "name": declarator.name,
-    }
-
-    yield "if not hasattr(self, '_{name}'):".format(**args)
-    yield indent("self._{name} = Array()").format(**args)
-    yield "return self._{name}".format(**args)
-
-
 def generate_function_body(definition):
-    yield "pass"
+    yield "self.downward.send(({values}))".format(
+        values=", ".join(
+            ["self." + definition.name] +
+            [p.declarator.name for p in definition.parameters]
+        )
+    )
 
 
 def generate_downward_protocol_body(scope, block):
+    yield "next_call = yield"
     yield from generate_driver_block(block, scope)

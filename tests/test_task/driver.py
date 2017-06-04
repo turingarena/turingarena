@@ -10,6 +10,4 @@ iface.data.A.alloc(1, 100)
 for i in range(1, 1+100):
     iface.data.A[i] = i*i
 
-iface.call_solve()
-
-iface.downward_protocol()
+iface.solve(3)

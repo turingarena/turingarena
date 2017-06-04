@@ -26,11 +26,34 @@ class DriverVariableExpressionBuilder(SyntaxVisitor):
         return self.expr.variable_name
 
 
+class DriverAssignableVariableExpressionBuilder(SyntaxVisitor):
+
+    def __init__(self, expr):
+        self.expr = expr
+
+    def visit_global_declaration(self, declaration):
+        return "self.data.{name}".format(
+            name=self.expr.variable_name,
+        )
+
+    def visit_local_declaration(self, declaration):
+        return "{var}".format(
+            var=self.expr.variable_name,
+        )
+
+
 class DriverExpressionGenerator(AbstractExpressionGenerator):
 
     def visit_variable_expression(self, e):
         declaration = self.scope[e.variable_name]
         return DriverVariableExpressionBuilder(e).visit(declaration)
+
+
+class DriverAssignableExpressionGenerator(AbstractExpressionGenerator):
+
+    def visit_variable_expression(self, e):
+        declaration = self.scope[e.variable_name]
+        return DriverAssignableVariableExpressionBuilder(e).visit(declaration)
 
 
 def build_driver_expression(scope, expr):
