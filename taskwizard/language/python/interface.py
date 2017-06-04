@@ -4,29 +4,18 @@ from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.python.protocol import generate_driver_block
 
 
-class GlobalPropertyGenerator(SyntaxVisitor):
-
-    def __init__(self, declaration, declarator):
-        self.declaration = declaration
-        self.declarator = declarator
+class FieldTypeBuilder(SyntaxVisitor):
 
     def visit_scalar_type(self, t):
-        args = {"name": self.declarator.name}
-        yield
-        yield "@property"
-        yield "def {name}(self):".format(**args)
-        yield from indent_all(generate_getter_body(self.declaration, self.declarator))
-        yield
-        yield "@{name}.setter".format(**args)
-        yield "def {name}(self, value):".format(**args)
-        yield from indent_all(generate_setter_body(self.declaration, self.declarator))
+        return {
+            "int": "int",
+            "int64": "int",
+        }[t.base]
 
     def visit_array_type(self, t):
-        args = {"name": self.declarator.name}
-        yield
-        yield "@property"
-        yield "def {name}(self):".format(**args)
-        yield from indent_all(generate_array_getter_body(self.declaration, self.declarator))
+        return "make_array({item_type})".format(
+            item_type=self.visit(t.item_type),
+        )
 
 
 class SupportInterfaceItemGenerator(SyntaxVisitor):
@@ -35,11 +24,12 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
         self.global_scope = Scope()
 
     def visit_global_declaration(self, declaration):
+        yield
         for declarator in self.global_scope.process_declarators(declaration):
-            yield from GlobalPropertyGenerator(
-                declaration=declaration,
-                declarator=declarator,
-            ).visit(declaration.type)
+            yield "Data._fields['{name}'] = {type}".format(
+                name=declarator.name,
+                type=FieldTypeBuilder().visit(declaration.type),
+            )
 
     def visit_function_definition(self, definition):
         yield

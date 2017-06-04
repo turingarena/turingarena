@@ -2,7 +2,7 @@ import os
 
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractInterfaceDriverGenerator, \
     AbstractSupportGenerator
-from taskwizard.generation.utils import write_to_file, indent_all
+from taskwizard.generation.utils import write_to_file, indent_all, indent
 from taskwizard.language.python.interface import SupportInterfaceItemGenerator
 
 
@@ -22,26 +22,22 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
 
     def generate_module(self):
         yield "from __future__ import print_function"
-        yield "from taskwizard.driver import Array"
+        yield "from taskwizard.driver import *"
         yield
         yield
-        yield "class {name}:".format(
+        yield "class {name}(BaseInterface):".format(
             name=self.interface.name
         )
+        yield
         yield from indent_all(self.generate_class_body())
 
     def generate_class_body(self):
-        yield
-        yield "def __init__(self, upward_pipe, downward_pipe):"
-        yield from indent_all(self.generate_init_body())
+        yield "class Data(BaseStruct):"
+        yield indent("_fields = {}")
 
         generator = SupportInterfaceItemGenerator()
         for item in self.interface.interface_items:
             yield from generator.visit(item)
-
-    def generate_init_body(self):
-        yield "self.upward_pipe = upward_pipe"
-        yield "self.downward_pipe = downward_pipe"
 
 
 class DriverGenerator(AbstractDriverGenerator):

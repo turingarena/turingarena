@@ -3,11 +3,11 @@ from interfaces.exampleinterface import exampleinterface
 
 i = exampleinterface(sys.stdin, sys.stdout)
 
-i.N = 10
-i.M = 100
-i.A.alloc(1,100)
+i.data.N = 10
+i.data.M = 100
+i.data.A.alloc(1,100)
 
-i.A[3] = 5
+i.data.A[3] = 5
 
 i.call_solve()
 
