@@ -15,7 +15,9 @@ class DriverVariableExpressionBuilder(SyntaxVisitor):
         )
 
     def visit_local_declaration(self, declaration):
-        return self.expr.variable_name
+        return "get_value({var})".format(
+            var=self.expr.variable_name,
+        )
 
     def visit_parameter_declaration(self, declaration):
         return self.expr.variable_name

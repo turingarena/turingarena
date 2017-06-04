@@ -1,3 +1,14 @@
+def get_value(value):
+    if value is None: raise ValueError("not set")
+    return value
+
+
+def set_once(old_value, new_value):
+    if old_value is not None: raise ValueError("already set")
+    if new_value is None: raise ValueError
+    return new_value
+
+
 class BaseInterface:
 
     def __init__(self, upward_pipe, downward_pipe):
@@ -13,25 +24,27 @@ class BaseStruct:
 
         for k, t in self._fields.items():
             if issubclass(t, BaseArray):
-                setattr(self, k, t())
+                self._delegate[k] = t()
+            else:
+                self._delegate[k] = None
+
+    def _check_field(self, key):
+        # raise if not found
+        return self._fields[key]
 
     def __getattr__(self, key):
         if key.startswith("_"):
             return super().__getattr__(key)
 
-        field = self._fields[key]
-        if key not in self._delegate:
-            raise ValueError("not set yet")
-        return self._delegate[key]
+        self._check_field(key)
+        return get_value(self._delegate[key])
 
     def __setattr__(self, key, value):
         if key.startswith("_"):
             return super().__setattr__(key, value)
 
-        field = self._fields[key]
-        if key in self._delegate:
-            raise ValueError("already set")
-        self._delegate[key] = value
+        self._check_field(key)
+        self._delegate[key] = set_once(self._delegate[key], value)
 
 
 class BaseArray:
@@ -53,16 +66,13 @@ class BaseArray:
         if not self.is_alloc(): raise ValueError("not alloc'd")
         if not (self.start <= key <= self.end): raise KeyError("out of range")
 
-    def _check_value(self, value):
-        if value is None: raise ValueError
-
     def __getitem__(self, index):
         self._check_key(index)
-        return self.delegate[index]
+        return get_value(self.delegate[index])
 
     def __setitem__(self, index, value):
-        self._check_value(value)
-        self.delegate[index] = value
+        self._check_key(index)
+        self.delegate[index] = set_once(self.delegate[index], value)
 
 
 def make_array(item_type):
