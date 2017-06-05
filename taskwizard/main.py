@@ -68,6 +68,7 @@ import coloredlogs
 import docopt
 import pkg_resources
 
+from taskwizard.compile.compile import TaskCompiler
 from taskwizard.generator import CodeGenerator
 from taskwizard.parser import TaskParser
 from taskwizard.runner import ModuleRunner
@@ -87,6 +88,7 @@ def main():
 
     if args["generate"]:
         task = TaskParser(definition_dir=definition_dir).parse()
+        TaskCompiler().compile(task)
         CodeGenerator(task=task, output_dir=output_dir).generate()
         return
 

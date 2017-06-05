@@ -51,8 +51,7 @@ class DriverExpressionBuilder(AbstractExpressionGenerator):
         return expr.accept(self)
 
     def visit_variable_expression(self, e):
-        declaration = self.scope[e.variable_name]
-        return DriverVariableExpressionBuilder(e).build(declaration)
+        return DriverVariableExpressionBuilder(e).build(e.variable_declaration)
 
 
 class DriverAssignableExpressionBuilder(AbstractExpressionGenerator):
@@ -61,8 +60,7 @@ class DriverAssignableExpressionBuilder(AbstractExpressionGenerator):
         return expr.accept(self)
 
     def visit_variable_expression(self, e):
-        declaration = self.scope[e.variable_name]
-        return DriverAssignableVariableExpressionBuilder(e).build(declaration)
+        return DriverAssignableVariableExpressionBuilder(e).build(e.variable_declaration)
 
 
 def build_driver_expression(scope, expr):
