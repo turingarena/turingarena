@@ -1,27 +1,23 @@
 from taskwizard.generation.expressions import extract_type
 from taskwizard.generation.scope import Scope
 from taskwizard.generation.utils import indent_all
-from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.declarations import build_declaration, generate_declarators
 from taskwizard.language.cpp.expressions import generate_expression
 from taskwizard.language.cpp.types import generate_base_type
 
 
 def generate_format(expression, scope):
-    type = extract_type(scope, expression)
+    t = extract_type(scope, expression)
     return {
         "int": "%d",
         "int64": "%lld",
-    }[type.base]
+    }[t.base]
 
 
-class BlockGenerator(SyntaxVisitor):
+class BlockGenerator:
 
     def __init__(self, external_scope):
         self.scope = Scope(external_scope)
-
-    def __init__(self, scope):
-        self.scope = scope
 
     # TODO: add index to scope
     def visit_for_statement(self, statement):
@@ -74,5 +70,5 @@ class BlockGenerator(SyntaxVisitor):
 def generate_block(block, external_scope):
     generator = BlockGenerator(external_scope)
     for item in block.block_items:
-        yield from generator.visit(item)
+        yield from item.accept(generator)
 

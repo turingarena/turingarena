@@ -1,13 +1,13 @@
 from taskwizard.generation.expressions import AbstractExpressionGenerator
-from taskwizard.generation.scope import Scope
-from taskwizard.generation.utils import indent_all, indent
-from taskwizard.grammar import SyntaxVisitor
 
 
-class DriverVariableExpressionBuilder(SyntaxVisitor):
+class DriverVariableExpressionBuilder:
 
     def __init__(self, expr):
         self.expr = expr
+
+    def build(self, expr):
+        return expr.accept(self)
 
     def visit_global_declaration(self, declaration):
         return "self.data.{name}".format(
@@ -26,10 +26,13 @@ class DriverVariableExpressionBuilder(SyntaxVisitor):
         return self.expr.variable_name
 
 
-class DriverAssignableVariableExpressionBuilder(SyntaxVisitor):
+class DriverAssignableVariableExpressionBuilder:
 
     def __init__(self, expr):
         self.expr = expr
+
+    def build(self, expr):
+        return expr.accept(self)
 
     def visit_global_declaration(self, declaration):
         return "self.data.{name}".format(
@@ -42,22 +45,28 @@ class DriverAssignableVariableExpressionBuilder(SyntaxVisitor):
         )
 
 
-class DriverExpressionGenerator(AbstractExpressionGenerator):
+class DriverExpressionBuilder(AbstractExpressionGenerator):
+
+    def build(self, expr):
+        return expr.accept(self)
 
     def visit_variable_expression(self, e):
         declaration = self.scope[e.variable_name]
-        return DriverVariableExpressionBuilder(e).visit(declaration)
+        return DriverVariableExpressionBuilder(e).build(declaration)
 
 
-class DriverAssignableExpressionGenerator(AbstractExpressionGenerator):
+class DriverAssignableExpressionBuilder(AbstractExpressionGenerator):
+
+    def build(self, expr):
+        return expr.accept(self)
 
     def visit_variable_expression(self, e):
         declaration = self.scope[e.variable_name]
-        return DriverAssignableVariableExpressionBuilder(e).visit(declaration)
+        return DriverAssignableVariableExpressionBuilder(e).build(declaration)
 
 
 def build_driver_expression(scope, expr):
-    return DriverExpressionGenerator(scope).visit(expr)
+    return DriverExpressionBuilder(scope).build(expr)
 
 def build_assignable_driver_expression(scope, expr):
-    return DriverAssignableExpressionGenerator(scope).visit(expr)
+    return DriverAssignableExpressionBuilder(scope).build(expr)

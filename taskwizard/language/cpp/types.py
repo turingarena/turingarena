@@ -1,10 +1,7 @@
-from taskwizard.grammar import SyntaxVisitor
-
-
-class BaseTypeGenerator(SyntaxVisitor):
+class BaseTypeGenerator:
 
     def visit_array_type(self, t):
-        return self.visit(t.item_type)
+        return generate_base_type(t.item_type)
 
     def visit_scalar_type(self, t):
         return {
@@ -13,5 +10,5 @@ class BaseTypeGenerator(SyntaxVisitor):
         }[t.base]
 
 
-def generate_base_type(type):
-    return BaseTypeGenerator().visit(type)
+def generate_base_type(t):
+    return t.accept(BaseTypeGenerator())

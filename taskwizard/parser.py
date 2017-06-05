@@ -10,4 +10,4 @@ class TaskParser:
         self.task_file_path = os.path.join(definition_dir, "task.txt")
 
     def parse(self):
-        return grammar.parse(open(self.task_file_path).read(), rule="unit", parseinfo=True)
+        return grammar.parse(open(self.task_file_path).read(), rule="unit")

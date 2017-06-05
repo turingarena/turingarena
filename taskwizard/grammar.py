@@ -1,11 +1,6 @@
 import tatsu
-
-
-class AbstractSyntaxNode:
-
-    def __init__(self, ast):
-        self.ast = ast
-        self.parseinfo = ast.parseinfo
+from tatsu.ast import AST
+from tatsu.semantics import ModelBuilderSemantics
 
 
 grammar_ebnf = r"""
@@ -39,18 +34,18 @@ grammar_ebnf = r"""
     
     function_declarator = name:identifier ;
 
-    callback_definition(CallbackDefinition) =
+    callback_definition =
         'callback' ~ return_type:return_type name:identifier '('
             parameters:parameter_declaration_list
         ')'
         block:block
     ;
 
-    main_definition(ProtocolDefinition) =
+    main_definition =
         'main' ~ block:block
     ;
 
-    global_declaration(GlobalDefinition) =
+    global_declaration =
         'global' ~ type:type declarators:declarator_list ';'
     ;
     
@@ -103,19 +98,19 @@ grammar_ebnf = r"""
 
     expression_list = ','.{ expression }* ;
 
-    input_statement(InputStatement) =
+    input_statement =
         'input' ~ arguments:expression_list ';'
     ;
 
-    output_statement(OutputStatement) =
+    output_statement =
         'output' ~ arguments:expression_list ';'
     ;
 
-    alloc_statement(AllocStatement) =
+    alloc_statement =
         'alloc' ~ arguments:expression_list ':' range:range ';'
     ;
 
-    call_statement(CallStatement) =
+    call_statement =
         'call' ~ function_name:identifier '('
             parameters:','.{ expression }*
         ')'
@@ -123,35 +118,35 @@ grammar_ebnf = r"""
         ';'
     ;
 
-    for_statement(ForStatement) =
+    for_statement =
         'for' ~ '(' index:index_declaration ')' block:block
     ;
 
-    do_statement(DoStatement) =
+    do_statement =
         'do' ~ block:block
     ;
     
-    switch_statement(SwitchStatement) =
+    switch_statement =
         'switch' ~ '(' expression:expression ')' '{'
             cases:{ switch_case }*
         '}'
     ;
 
-    switch_case(SwitchCase) =
+    switch_case =
         'case' '(' value:identifier ')' block:block
     ;
 
-    break_statement(BreakStatement) = 'break' ';' ;
+    break_statement = 'break' ';' ;
 
-    continue_statement(ContinueStatement) = 'continue' ';' ;
+    continue_statement = 'continue' ';' ;
 
-    return_statement(ReturnStatement) = 'return' expression:expression ';' ;
+    return_statement = 'return' expression:expression ';' ;
 
-    range(Range) =
+    range =
         start:expression '..' end:expression
     ;
 
-    expression(Expression) =
+    expression =
         | subscript_expression
         | variable_expression
         | int_literal_expression
@@ -161,7 +156,7 @@ grammar_ebnf = r"""
         array:expression '[' index:expression ']'
     ;
     
-    variable_expression(VariableExpression) = variable_name:identifier ;
+    variable_expression = variable_name:identifier ;
 
     variable_expression_index = '[' @:expression ']' ;
     
@@ -197,18 +192,39 @@ grammar_ebnf = r"""
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
     STRING = '"' @:/([^"\n]|\\")*/ '"' ;
-    INT(int) = /[1-9][0-9]*/ ;
+    INT = /[1-9][0-9]*/ ;
 
 """
 
 
 def parse(*args, **kwargs):
     grammar = tatsu.compile(grammar_ebnf)
-    return grammar.parse(*args, **kwargs)
+    return grammar.parse(*args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
-class SyntaxVisitor:
+class Semantics:
 
-    def visit(self, statement):
-        method = getattr(self, "visit_%s" % statement.parseinfo.rule)
-        return method(statement)
+    def _default(self, ast, *args, **kwargs):
+        if isinstance(ast, AST):
+            return AbstractSyntaxNode(ast, *args, **kwargs)
+        else:
+            return ast
+
+
+class AbstractSyntaxNode:
+
+    def __init__(self, ast, *args, **kwargs):
+        self.parseinfo = None
+        for key, value in ast.items():
+            setattr(self, key, value)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        self._arguments = args
+
+    def accept(self, visitor):
+        method_name = "visit_%s" % self.parseinfo.rule
+        if hasattr(visitor, method_name):
+            method = getattr(visitor, method_name)
+        else:
+            method = visitor.visit_default
+        return method(self)

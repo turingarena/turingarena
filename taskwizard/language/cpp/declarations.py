@@ -1,8 +1,7 @@
-from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.types import generate_base_type
 
 
-class DeclaratorBuilder(SyntaxVisitor):
+class DeclaratorBuilder:
 
     def __init__(self, declarator):
         self.declarator = declarator
@@ -11,11 +10,11 @@ class DeclaratorBuilder(SyntaxVisitor):
         return self.declarator.name
 
     def visit_array_type(self, type):
-        return '*' + self.visit(type.item_type)
+        return '*' + type.item_type.accept(self)
 
 
 def build_declarator(declaration, declarator):
-    return DeclaratorBuilder(declarator).visit(declaration.type)
+    return declaration.type.accept(DeclaratorBuilder(declarator))
 
 
 def generate_declarators(declaration, scope):

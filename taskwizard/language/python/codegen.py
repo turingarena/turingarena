@@ -37,7 +37,7 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
 
         generator = SupportInterfaceItemGenerator()
         for item in self.interface.interface_items:
-            yield from generator.visit(item)
+            yield from item.accept(generator)
 
 
 class DriverGenerator(AbstractDriverGenerator):

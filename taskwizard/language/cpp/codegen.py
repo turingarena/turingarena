@@ -3,7 +3,6 @@ import os
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
 from taskwizard.generation.scope import Scope
 from taskwizard.generation.utils import indent_all, write_to_file
-from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import build_declaration, build_parameter
 from taskwizard.language.cpp.types import generate_base_type
@@ -15,7 +14,7 @@ class DriverGenerator(AbstractDriverGenerator):
         pass
 
 
-class InterfaceItemGenerator(SyntaxVisitor):
+class InterfaceItemGenerator:
 
     def __init__(self):
         self.global_scope = Scope()
@@ -26,7 +25,7 @@ class InterfaceItemGenerator(SyntaxVisitor):
     def visit_function_declaration(self, definition):
         yield "{return_type} {name}({arguments});".format(
             return_type=generate_base_type(definition.return_type),
-            name=definition.name,
+            name=definition.declarator.name,
             arguments=', '.join(build_parameter(p) for p in definition.parameters)
         )
 
@@ -53,6 +52,6 @@ class SupportGenerator(AbstractSupportGenerator):
         generator = InterfaceItemGenerator()
         for item in self.interface.interface_items:
             yield
-            yield from generator.visit(item)
+            yield from item.accept(generator)
 
 

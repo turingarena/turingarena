@@ -1,14 +1,15 @@
-from taskwizard.generation.expressions import AbstractExpressionGenerator
 from taskwizard.generation.scope import Scope
-from taskwizard.generation.utils import indent_all, indent
-from taskwizard.grammar import SyntaxVisitor
+from taskwizard.generation.utils import indent_all
 from taskwizard.language.python.expression import build_driver_expression, build_assignable_driver_expression
 
 
-class BlockDriverGenerator(SyntaxVisitor):
+class BlockDriverGenerator:
 
     def __init__(self, scope):
         self.scope = scope
+
+    def generate(self, item):
+        return item.accept(self)
 
     def visit_local_declaration(self, declaration):
         yield
@@ -69,5 +70,5 @@ class BlockDriverGenerator(SyntaxVisitor):
 def generate_driver_block(block, external_scope):
     generator = BlockDriverGenerator(external_scope)
     for item in block.block_items:
-        yield from generator.visit(item)
+        yield from item.accept(generator)
 

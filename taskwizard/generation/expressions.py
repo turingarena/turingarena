@@ -1,7 +1,4 @@
-from taskwizard.grammar import SyntaxVisitor
-
-
-class ExpressionTypeExtractor(SyntaxVisitor):
+class ExpressionTypeExtractor:
 
     def __init__(self, scope):
         self.scope = scope
@@ -14,16 +11,16 @@ class ExpressionTypeExtractor(SyntaxVisitor):
 
 
 def extract_type(scope, expression):
-    return ExpressionTypeExtractor(scope).visit(expression)
+    return expression.accept(ExpressionTypeExtractor(scope))
 
 
-class AbstractExpressionGenerator(SyntaxVisitor):
+class AbstractExpressionGenerator:
 
     def __init__(self, scope):
         self.scope = scope
 
     def generate(self, expression):
-        return self.visit(expression)
+        return expression.accept(self)
 
     def visit_int_literal_expression(self, e):
         return str(e.value)

@@ -1,10 +1,12 @@
 from taskwizard.generation.scope import Scope
 from taskwizard.generation.utils import indent_all, indent
-from taskwizard.grammar import SyntaxVisitor
 from taskwizard.language.python.protocol import generate_driver_block
 
 
-class FieldTypeBuilder(SyntaxVisitor):
+class FieldTypeBuilder:
+
+    def build(self, t):
+        return t.accept(self)
 
     def visit_scalar_type(self, t):
         return {
@@ -14,11 +16,11 @@ class FieldTypeBuilder(SyntaxVisitor):
 
     def visit_array_type(self, t):
         return "make_array({item_type})".format(
-            item_type=self.visit(t.item_type),
+            item_type=self.build(t.item_type),
         )
 
 
-class SupportInterfaceItemGenerator(SyntaxVisitor):
+class SupportInterfaceItemGenerator:
 
     def __init__(self):
         self.global_scope = Scope()
@@ -28,7 +30,7 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
         for declarator in self.global_scope.process_declarators(declaration):
             yield "Data._fields['{name}'] = {type}".format(
                 name=declarator.name,
-                type=FieldTypeBuilder().visit(declaration.type),
+                type=FieldTypeBuilder().build(declaration.type),
             )
 
     def visit_function_declaration(self, declaration):
