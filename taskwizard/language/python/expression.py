@@ -15,7 +15,7 @@ class DriverVariableExpressionBuilder:
         )
 
     def visit_local_declaration(self, declaration):
-        return "get_value({var})".format(
+        return "{var}.value".format(
             var=self.expr.variable_name,
         )
 
@@ -40,7 +40,7 @@ class DriverAssignableVariableExpressionBuilder:
         )
 
     def visit_local_declaration(self, declaration):
-        return "{var}".format(
+        return "{var}.value".format(
             var=self.expr.variable_name,
         )
 

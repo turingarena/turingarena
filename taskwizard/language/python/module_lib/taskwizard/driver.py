@@ -86,3 +86,24 @@ def make_array(item_type):
         _item = item_type
 
     return Array
+
+
+class Local:
+
+    def __init__(self):
+        self._value = None
+
+    def is_set(self):
+        return self._value is not None
+
+    @property
+    def value(self):
+        return get_value(self._value)
+
+    @value.setter
+    def value(self, value):
+        self._value = set_once(self._value, value)
+
+
+def make_local():
+    return Local()
