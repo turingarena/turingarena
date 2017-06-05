@@ -1,3 +1,4 @@
+from taskwizard.compile.types import ScalarType
 class ExpressionCompiler:
 
     def __init__(self, scope):
@@ -7,14 +8,21 @@ class ExpressionCompiler:
         expr.accept(self)
 
     def visit_int_literal_expression(self, expr):
-        expr.value = int(expr.value)
+        expr.int_value = int(expr.value)
+        expr.type = ScalarType("int")
 
     def visit_subscript_expression(self, expr):
         self.compile(expr.array)
         self.compile(expr.index)
 
+        if expr.index.type.base != "int":
+            raise ValueError("invalid index expression")
+
+        expr.type = expr.array.type.item_type
+
     def visit_variable_expression(self, expr):
         expr.variable_declaration = self.scope[expr.variable_name]
+        expr.type = expr.variable_declaration.type
 
 
 def compile_expression(e, scope):

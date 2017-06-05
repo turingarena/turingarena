@@ -58,7 +58,7 @@ grammar_ebnf = r"""
     ;
     
     index_declaration =
-        type:`int` declarator:index_declarator ':' range:range
+        declarator:index_declarator ':' range:range
     ;
 
     parameter_declaration_list = ','.{ parameter_declaration }* ;

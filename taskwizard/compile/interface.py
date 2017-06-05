@@ -1,5 +1,6 @@
 from taskwizard.compile.block import compile_block
-from taskwizard.generation.scope import Scope
+from taskwizard.compile.declaration import compile_declaration
+from taskwizard.compile.scope import Scope
 
 
 class InterfaceCompiler:
@@ -17,11 +18,10 @@ class InterfaceItemCompiler:
         self.global_scope = Scope()
 
     def visit_global_declaration(self, declaration):
-        for declarator in self.global_scope.process_declarators(declaration):
-            pass
+        compile_declaration(declaration, scope=self.global_scope)
 
     def visit_function_declaration(self, declaration):
-        self.global_scope.process_simple_declaration(declaration)
+        compile_declaration(declaration, scope=self.global_scope)
 
     def visit_main_definition(self, definition):
         compile_block(definition.block, scope=self.global_scope)

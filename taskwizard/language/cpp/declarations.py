@@ -17,19 +17,18 @@ def build_declarator(declaration, declarator):
     return declaration.type.accept(DeclaratorBuilder(declarator))
 
 
-def generate_declarators(declaration, scope):
-    for declarator in scope.process_declarators(declaration):
+def generate_declarators(declaration):
+    for declarator in declaration.declarators:
         yield build_declarator(declaration, declarator)
 
 
-def build_declaration(declaration, scope):
+def build_declaration(declaration):
     return '{base_type} {declarators};'.format(
         base_type=generate_base_type(declaration.type),
-        declarators=', '.join(generate_declarators(declaration, scope)),
+        declarators=', '.join(generate_declarators(declaration)),
     )
 
 
-# TODO: use a scope for parameters, at least to ensure no name clash
 def build_parameter(parameter):
     return '{base_type} {declarator}'.format(
         base_type=generate_base_type(parameter.type),

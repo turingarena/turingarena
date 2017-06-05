@@ -1,5 +1,6 @@
+from taskwizard.compile.declaration import compile_declaration
 from taskwizard.compile.expression import compile_expression, compile_range
-from taskwizard.generation.scope import Scope
+from taskwizard.compile.scope import Scope
 
 
 def compile_block(block, scope):
@@ -17,8 +18,7 @@ class BlockItemCompiler:
         item.accept(self)
 
     def visit_local_declaration(self, declaration):
-        for declarator in self.scope.process_declarators(declaration):
-            pass
+        compile_declaration(declaration, scope=self.scope)
 
     def compile_arguments(self, statement):
         for e in statement.arguments:
@@ -39,12 +39,13 @@ class BlockItemCompiler:
             compile_expression(p, scope=self.scope)
         if statement.return_value is not None:
             compile_expression(statement.return_value, scope=self.scope)
+        statement.function_declaration = self.scope[statement.function_name]
 
     def visit_for_statement(self, statement):
         compile_range(statement.index.range, scope=self.scope)
 
         new_scope = Scope(self.scope)
-        new_scope.process_simple_declaration(statement.index)
+        compile_declaration(statement.index, scope=new_scope)
         compile_block(statement.block, scope=new_scope)
 
 

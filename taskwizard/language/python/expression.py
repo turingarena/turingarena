@@ -63,8 +63,8 @@ class DriverAssignableExpressionBuilder(AbstractExpressionGenerator):
         return DriverAssignableVariableExpressionBuilder(e).build(e.variable_declaration)
 
 
-def build_driver_expression(scope, expr):
-    return DriverExpressionBuilder(scope).build(expr)
+def build_driver_expression(expr):
+    return DriverExpressionBuilder().build(expr)
 
-def build_assignable_driver_expression(scope, expr):
-    return DriverAssignableExpressionBuilder(scope).build(expr)
+def build_assignable_driver_expression(expr):
+    return DriverAssignableExpressionBuilder().build(expr)

@@ -1,7 +1,6 @@
 import os
 
 from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
-from taskwizard.generation.scope import Scope
 from taskwizard.generation.utils import indent_all, write_to_file
 from taskwizard.language.cpp.blocks import generate_block
 from taskwizard.language.cpp.declarations import build_declaration, build_parameter
@@ -16,11 +15,8 @@ class DriverGenerator(AbstractDriverGenerator):
 
 class InterfaceItemGenerator:
 
-    def __init__(self):
-        self.global_scope = Scope()
-
     def visit_global_declaration(self, declaration):
-        yield build_declaration(declaration, self.global_scope)
+        yield build_declaration(declaration)
 
     def visit_function_declaration(self, definition):
         yield "{return_type} {name}({arguments});".format(
@@ -31,7 +27,7 @@ class InterfaceItemGenerator:
 
     def visit_main_definition(self, definition):
         yield "int main() {"
-        yield from indent_all(generate_block(definition.block, self.global_scope))
+        yield from indent_all(generate_block(definition.block))
         yield "}"
 
 

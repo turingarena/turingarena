@@ -5,5 +5,5 @@ class ExpressionGenerator(AbstractExpressionGenerator):
     pass
 
 
-def generate_expression(scope, expression):
-    return ExpressionGenerator(scope).generate(expression)
+def generate_expression(expression):
+    return ExpressionGenerator().generate(expression)

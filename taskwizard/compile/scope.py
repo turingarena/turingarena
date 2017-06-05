@@ -17,11 +17,3 @@ class Scope:
         if key in self.delegate:
             raise KeyError("already defined")
         self.delegate[key] = value
-
-    def process_simple_declaration(self, declaration):
-        self[declaration.declarator.name] = declaration
-
-    def process_declarators(self, declaration):
-        for declarator in declaration.declarators:
-            yield declarator
-            self[declarator.name] = declaration
