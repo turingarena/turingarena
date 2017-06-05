@@ -23,7 +23,7 @@ class InterfaceItemGenerator(SyntaxVisitor):
     def visit_global_declaration(self, declaration):
         yield build_declaration(declaration, self.global_scope)
 
-    def visit_function_definition(self, definition):
+    def visit_function_declaration(self, definition):
         yield "{return_type} {name}({arguments});".format(
             return_type=generate_base_type(definition.return_type),
             name=definition.name,

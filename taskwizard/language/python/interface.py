@@ -31,16 +31,17 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
                 type=FieldTypeBuilder().visit(declaration.type),
             )
 
-    def visit_function_definition(self, definition):
+    def visit_function_declaration(self, declaration):
+        self.global_scope.process_simple_declaration(declaration)
         yield
         yield "def {name}({parameters}):".format(
-            name=definition.name,
+            name=declaration.declarator.name,
             parameters=", ".join(
                 ["self"] +
-                [p.declarator.name for p in definition.parameters]
+                [p.declarator.name for p in declaration.parameters]
             ),
         )
-        yield from indent_all(generate_function_body(definition))
+        yield from indent_all(generate_function_body(declaration))
 
     def visit_main_definition(self, definition):
         yield
@@ -48,11 +49,11 @@ class SupportInterfaceItemGenerator(SyntaxVisitor):
         yield from indent_all(generate_downward_protocol_body(self.global_scope, definition.block))
 
 
-def generate_function_body(definition):
+def generate_function_body(declaration):
     yield "self.downward.send(({values}))".format(
         values=", ".join(
-            ["self." + definition.name] +
-            [p.declarator.name for p in definition.parameters]
+            ['"{name}"'.format(name=declaration.declarator.name)] +
+            [p.declarator.name for p in declaration.parameters]
         )
     )
 

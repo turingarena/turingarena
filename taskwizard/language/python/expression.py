@@ -58,3 +58,6 @@ class DriverAssignableExpressionGenerator(AbstractExpressionGenerator):
 
 def build_driver_expression(scope, expr):
     return DriverExpressionGenerator(scope).visit(expr)
+
+def build_assignable_driver_expression(scope, expr):
+    return DriverAssignableExpressionGenerator(scope).visit(expr)

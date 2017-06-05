@@ -25,17 +25,19 @@ grammar_ebnf = r"""
     interface_item =
         | global_declaration
         | const_declaration
-        | function_definition
+        | function_declaration
         | callback_definition
         | main_definition
     ;
 
-    function_definition =
-        'function' ~ return_type:return_type name:identifier '('
+    function_declaration =
+        'function' ~ return_type:return_type declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
         ';'
     ;
+    
+    function_declarator = name:identifier ;
 
     callback_definition(CallbackDefinition) =
         'callback' ~ return_type:return_type name:identifier '('
