@@ -7,6 +7,7 @@ def compile_block(block, scope):
     compiler = BlockItemCompiler(Scope(scope))
     for item in block.block_items:
         compiler.compile(item)
+    block.expected_calls = find_expected_calls(block)
 
 
 class BlockItemCompiler:
@@ -49,3 +50,21 @@ class BlockItemCompiler:
         compile_block(statement.block, scope=new_scope)
 
 
+def find_expected_calls(block):
+    for item in block.block_items:
+        calls = item.accept(ExpectedCallFinder())
+        if calls is not None:
+            return calls
+    return None
+
+
+class ExpectedCallFinder:
+
+    def visit_default(self, stmt):
+        return None
+
+    def visit_call_statement(self, stmt):
+        return set(stmt.function_name)
+
+    def visit_for_statement(self, stmt):
+        return find_expected_calls(stmt.block)

@@ -30,9 +30,9 @@ interface exampleinterface {
 
     main {
         input N, M;
-        sizeof U = [1..M];
-        sizeof A = [1..N][1..N];
+        alloc U, A = 1..M;
         for(i : 1..M) {
+            alloc A[i] = 1..N;
             input U[i], V[i];
         }
         do {
