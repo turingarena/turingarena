@@ -1,3 +1,6 @@
+from collections import deque
+
+
 def get_value(value):
     if value is None: raise ValueError("not set")
     return value
@@ -18,8 +21,19 @@ class BaseInterface:
         self.upward_pipe = upward_pipe
         self.downward_pipe = downward_pipe
         self.data = self.Data()
+        self.preflight = self._preflight_protocol()
+        self.preflight.send(None)
         self.downward = self._downward_protocol()
         self.downward.send(None)
+        self.locals = deque()
+
+    def make_local(self):
+        local = Local(self)
+        self.locals.append(local)
+        return local
+
+    def pop_local(self):
+        return self.locals.popleft()
 
 
 class BaseStruct:
@@ -90,8 +104,9 @@ def make_array(item_type):
 
 class Local:
 
-    def __init__(self):
+    def __init__(self, interface):
         self._value = None
+        self.interface = interface
 
     def is_set(self):
         return self._value is not None
@@ -104,6 +119,3 @@ class Local:
     def value(self, value):
         self._value = set_once(self._value, value)
 
-
-def make_local():
-    return Local()

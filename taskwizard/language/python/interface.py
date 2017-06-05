@@ -1,9 +1,8 @@
 from taskwizard.generation.utils import indent_all
-from taskwizard.language.python.protocol import generate_driver_block
+from taskwizard.language.python.protocol import BlockDriverGenerator, PreflightDriverGenerator
 
 
 class FieldTypeBuilder:
-
     def build(self, t):
         return t.accept(self)
 
@@ -20,7 +19,6 @@ class FieldTypeBuilder:
 
 
 class SupportInterfaceItemGenerator:
-
     def visit_global_declaration(self, declaration):
         yield
         for declarator in declaration.declarators:
@@ -42,19 +40,30 @@ class SupportInterfaceItemGenerator:
 
     def visit_main_definition(self, definition):
         yield
+        yield "def _preflight_protocol(self):"
+        yield from indent_all(generate_preflight_protocol_body(definition.block))
+        yield
         yield "def _downward_protocol(self):"
         yield from indent_all(generate_downward_protocol_body(definition.block))
 
 
 def generate_function_body(declaration):
-    yield "self.downward.send(({values}))".format(
-        values=", ".join(
+    args = {
+        "values": ", ".join(
             ['"{name}"'.format(name=declaration.declarator.name)] +
             [p.declarator.name for p in declaration.parameters]
         )
-    )
+    }
+
+    yield "self.preflight.send(({values}))".format(**args)
+    yield "self.downward.send(({values}))".format(**args)
 
 
 def generate_downward_protocol_body(block):
     yield "next_call = yield"
-    yield from generate_driver_block(block)
+    yield from BlockDriverGenerator().generate(block)
+
+
+def generate_preflight_protocol_body(block):
+    yield "next_call = yield"
+    yield from PreflightDriverGenerator().generate(block)
