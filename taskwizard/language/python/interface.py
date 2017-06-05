@@ -48,22 +48,20 @@ class SupportInterfaceItemGenerator:
 
 
 def generate_function_body(declaration):
-    args = {
-        "values": ", ".join(
+    yield "self.preflight.send(({values}))".format(
+        values=", ".join(
             ['"{name}"'.format(name=declaration.declarator.name)] +
             [p.declarator.name for p in declaration.parameters]
         )
-    }
-
-    yield "self.preflight.send(({values}))".format(**args)
-    yield "self.downward.send(({values}))".format(**args)
-
-
-def generate_downward_protocol_body(block):
-    yield "next_call = yield"
-    yield from BlockDriverGenerator().generate(block)
+    )
+    yield "self.downward.send(None)"
 
 
 def generate_preflight_protocol_body(block):
     yield "next_call = yield"
     yield from PreflightDriverGenerator().generate(block)
+
+
+def generate_downward_protocol_body(block):
+    yield "yield"
+    yield from BlockDriverGenerator().generate(block)

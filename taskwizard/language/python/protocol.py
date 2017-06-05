@@ -74,8 +74,5 @@ class BlockDriverGenerator(AbstractDriverGenerator):
                 i=i,
             )
 
-    def visit_alloc_statement(self, statement):
-        return []
-
     def visit_call_statement(self, statement):
-        yield "next_call = yield"
+        yield "yield"
