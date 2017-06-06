@@ -66,7 +66,7 @@ int driver_init() {
         trace("Unable to open response pipe: %s\n", strerror(errno));
         goto err;
     }
-    trace("Request response opened.");
+    trace("Response pipe opened.");
 
     inited = 1;
     return 1;

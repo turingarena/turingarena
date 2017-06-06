@@ -3,6 +3,8 @@ import subprocess
 import logging
 import threading
 
+import sys
+
 
 class Process:
 
@@ -61,12 +63,12 @@ class Process:
 
 class Supervisor:
 
-    def __init__(self, executable_path, sandbox_dir, algorithms):
+    def __init__(self, args, sandbox_dir, algorithms):
         self.processes = {}
         self.read_files = {}
         self._next_id = 0
 
-        self.executable_path = executable_path
+        self.args = args
         self.sandbox_dir = sandbox_dir
 
         self.control_request_pipe_name = os.path.join(self.sandbox_dir, "control_request.pipe")
@@ -169,7 +171,7 @@ class Supervisor:
                 return
 
     def run(self):
-        self.logger.debug("sandbox folder:", self.sandbox_dir)
+        self.logger.debug("sandbox folder: %s", self.sandbox_dir)
 
         self.logger.debug("creating control pipes...")
         os.mkfifo(self.control_request_pipe_name)
@@ -178,13 +180,17 @@ class Supervisor:
         self.logger.debug("control request pipe: %s" % (self.control_request_pipe_name,))
         self.logger.debug("control response pipe: %s" % (self.control_response_pipe_name,))
 
-        self.logger.debug("starting module process: %s" % (self.executable_path,))
+        self.logger.debug("starting module process: %s" % " ".join(self.args))
 
+        env = os.environ.copy()
+        env.update({
+            "TASKWIZARD_SANDBOX_DIR": self.sandbox_dir,
+        })
         self.module = subprocess.Popen(
-            [self.executable_path],
-            env={"TASKWIZARD_SANDBOX_DIR": self.sandbox_dir},
+            self.args,
+            env=env,
             stderr=subprocess.PIPE,
-            universal_newlines=True
+            universal_newlines=True,
         )
 
         def stderr_logger():

@@ -3,9 +3,11 @@
 Usage:
   taskwizard create <name> [<folder>]
   taskwizard generate [options]
-  taskwizard run [options] [-a <algorithm>]... <executable> [<args>...]
+  taskwizard supervise [options] [-a <algorithm>]... [--] <args>...
   taskwizard cpp driver flags
+  taskwizard cpp interface flags <interface>
   taskwizard python driver path
+  taskwizard python module run <args>...
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]
@@ -16,7 +18,7 @@ Commands:
   create  Creates a new task definition folder
   generate  Generate all the code
 
-  run  Runs a module
+  supervise  Runs a command providing a supervisor
 
   cpp driver flags  Prints the flags to compile a driver with GCC
   python driver path  Prints the path to add to PYTHONPATH to run a driver in python
@@ -63,6 +65,7 @@ Command evaluate options:
 """
 import logging
 import os
+import subprocess
 
 import coloredlogs
 import docopt
@@ -92,13 +95,13 @@ def main():
         CodeGenerator(task=task, output_dir=output_dir).generate()
         return
 
-    if args["run"]:
+    if args["supervise"]:
         algorithms = {}
         for f in args["--algorithm"]:
             slot, path = f.split(":", 2)
             algorithms[slot] = path
 
-        ModuleRunner(args["<executable>"], algorithms).run()
+        ModuleRunner(args["<args>"], algorithms).run()
         return
 
     if args["evaluate"]:
@@ -113,17 +116,49 @@ def main():
         ProblemEvaluator(input_dir, output_dir, "evaluation1").evaluate(slots=slots)
         return
 
-    if args["cpp"] and args["driver"] and args["flags"]:
-        dir = pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib")
-        print("-std=c++14 -I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
-        return
+    if args["cpp"]:
+        if args["driver"] and args["flags"]:
+            dir = pkg_resources.resource_filename("taskwizard.language.cpp", "module_lib")
+            print("-std=c++14 -I %s %s" % (dir, os.path.join(dir, "taskwizard", "support_proto.cpp")))
+            return
+        if args["interface"] and args["flags"]:
+            main_file = os.path.join(
+                input_dir,
+                "generated", "interfaces", args["<interface>"],
+                "cpp", "main.cpp"
+            )
+            print("-std=c++14 %s" % main_file)
+            return
 
-    if args["python"] and args["driver"] and args["path"]:
-        dir = pkg_resources.resource_filename("taskwizard.language.python", "module_lib")
-        print(dir)
-        return
+    if args["python"]:
+        if args["module"] and args["path"]:
+            dir = get_python_module_path()
+            print(dir)
+            return
+        if args["driver"] and args["path"]:
+            dir = get_python_driver_path(input_dir)
+            print(dir)
+            return
+        if args["module"] and args["run"]:
+            env = os.environ.copy()
+            env["PYTHONPATH"] = get_python_module_path() + os.path.pathsep + get_python_driver_path(input_dir)
+            subprocess.run(
+                ["python3"] + args["<args>"],
+                env=env,
+            )
+            return
+
 
     raise NotImplementedError
+
+
+def get_python_module_path():
+    return pkg_resources.resource_filename("taskwizard.language.python", "module_lib")
+
+
+def get_python_driver_path(input_dir):
+    return os.path.join(input_dir, "generated", "driver", "python")
+
 
 if __name__ == "__main__":
     main()
