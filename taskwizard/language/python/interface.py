@@ -41,33 +41,29 @@ class SupportInterfaceItemGenerator:
 
     def visit_main_definition(self, definition):
         yield
-        yield "def _preflight_protocol(self):"
+        yield "def preflight_protocol(self):"
         yield from indent_all(generate_preflight_protocol_body(definition.block))
         yield
-        yield "def _downward_protocol(self):"
+        yield "def downward_protocol(self):"
         yield from indent_all(generate_downward_protocol_body(definition.block))
         yield
-        yield "def _upward_protocol(self):"
+        yield "def upward_protocol(self):"
         yield from indent_all(generate_upward_protocol_body(definition.block))
         yield
-        yield "def _postflight_protocol(self):"
+        yield "def postflight_protocol(self):"
         yield from indent_all(generate_postflight_protocol_body(definition.block))
 
 
 def generate_function_body(declaration):
-    yield "self.preflight.send(({values}))".format(
-        values=", ".join(
+    yield "return self.call({args})".format(
+        args=", ".join(
             ['"{name}"'.format(name=declaration.declarator.name)] +
             [p.declarator.name for p in declaration.parameters]
         )
     )
-    yield "self.downward.send(None)"
-    yield "self.upward.send(None)"
-    yield "return self.postflight.send(None)"
 
 
 def generate_preflight_protocol_body(block):
-    yield "next_call = yield"
     yield from PreflightDriverBlockGenerator().generate(block)
 
 
@@ -76,9 +72,7 @@ def generate_downward_protocol_body(block):
 
 
 def generate_upward_protocol_body(block):
-    yield "called = True"
     yield from UpwardDriverBlockGenerator().generate(block)
-    yield "if called: yield"
 
 def generate_postflight_protocol_body(block):
     yield from PostflightDriverBlockGenerator().generate(block)

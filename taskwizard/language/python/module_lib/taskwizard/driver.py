@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from collections import deque
 
 
@@ -23,10 +24,10 @@ class BaseInterface:
 
         self.data = self.Data()
 
-        self.preflight = self._preflight_protocol()
-        self.downward = self._downward_protocol()
-        self.upward = self._upward_protocol()
-        self.postflight = self._postflight_protocol()
+        self.preflight = self.make_preflight()
+        self.downward = self.make_downward()
+        self.upward = self.make_upward()
+        self.postflight = self.make_postflight()
 
         self.downward_locals = deque()
         self.upward_locals = deque()
@@ -50,6 +51,66 @@ class BaseInterface:
 
     def get_postflight_local(self):
         return self.postflight_locals.popleft()
+
+    def call(self, name, *args):
+        self.preflight.send((name, *args))
+
+        next(self.downward)
+        next(self.upward)
+
+        return next(self.postflight)
+
+    def read_upward(self, *types):
+        raw_values = self.upward_pipe.readline().strip().split()
+        return [t(value) for value, t in zip(raw_values, types)]
+
+    def make_preflight(self):
+        self.next_call = yield
+        yield from self.preflight_protocol()
+
+    def on_preflight_call(self):
+        self.next_call = yield
+
+    def get_next_call(self):
+        return self.next_call
+
+    @abstractmethod
+    def preflight_protocol(self):
+        pass
+
+    def make_downward(self):
+        yield from self.downward_protocol()
+
+    @abstractmethod
+    def downward_protocol(self):
+        pass
+
+    def on_downward_call(self):
+        yield
+
+    def make_upward(self):
+        self.upward_called = True
+        yield from self.upward_protocol()
+        yield
+
+    def on_upward_call(self):
+        self.upward_called = True
+
+    def on_upward_input(self):
+        if self.upward_called:
+            self.upward_called = False
+            yield
+
+    @abstractmethod
+    def upward_protocol(self):
+        pass
+
+    def make_postflight(self):
+        yield from self.postflight_protocol()
+
+    @abstractmethod
+    def postflight_protocol(self):
+        pass
 
 
 class BaseStruct:

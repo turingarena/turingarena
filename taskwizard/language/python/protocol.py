@@ -12,13 +12,16 @@ class AbstractDriverGenerator:
             yield from item.accept(self)
 
     def visit_for_statement(self, statement):
+        yield "for {index} in range({start}, {end}):".format(
+            index=statement.index.declarator.name,
+            start=build_driver_expression(statement.index.range.start),
+            end="1 + " + build_driver_expression(statement.index.range.end),
+        )
         statements = list(statement.block.accept(self))
-        if len(statements) > 0:
-            yield "for {index} in range({start}, {end}):".format(
-                index=statement.index.declarator.name,
-                start=build_driver_expression(statement.index.range.start),
-                end="1 + " + build_driver_expression(statement.index.range.end),
-            )
+        if not statements:
+            yield indent("pass")
+        else:
+            assert any(s is not None for s in statements)
             yield from indent_all(statements)
 
     def visit_default(self, stmt):
@@ -34,7 +37,7 @@ class PreflightDriverBlockGenerator(AbstractDriverGenerator):
             )
 
     def visit_call_statement(self, statement):
-        yield "{unpack} = next_call".format(
+        yield "{unpack}, = self.get_next_call()".format(
             unpack=", ".join(
                 ["function"] +
                 ["parameter_" + p.declarator.name for p in statement.function_declaration.parameters]
@@ -46,7 +49,7 @@ class PreflightDriverBlockGenerator(AbstractDriverGenerator):
                 val=build_assignable_driver_expression(expr),
                 name=p.declarator.name,
             )
-        yield "next_call = yield"
+        yield "yield from self.on_preflight_call()"
 
 
 class DownwardDriverBlockGenerator(AbstractDriverGenerator):
@@ -78,20 +81,16 @@ class UpwardDriverBlockGenerator(AbstractDriverGenerator):
             )
 
     def visit_output_statement(self, statement):
-        yield "_values = self.upward_pipe.readline().split()"
-        for i, argument in enumerate(statement.arguments):
-            yield "{arg} = int(_values[{i}])".format(
-                arg=build_driver_expression(argument),
-                i=i,
-            )
+        yield "{args}, = self.read_upward({types})".format(
+            args=", ".join(build_driver_expression(a) for a in statement.arguments),
+            types=", ".join("int" for a in statement.arguments) # TODO: correct typing
+        )
 
     def visit_input_statement(self, stmt):
-        yield "if called:"
-        yield indent("yield")
-        yield indent("called = False")
+        yield "yield from self.on_upward_input()"
 
     def visit_call_statement(self, statement):
-        yield "called = True"
+        yield "self.on_upward_call()"
 
 
 class PostflightDriverBlockGenerator(AbstractDriverGenerator):
