@@ -16,13 +16,13 @@ def is_set(value):
     return value is not None
 
 
-class BaseInterface:
+class BaseInterfaceEngine:
 
-    def __init__(self, upward_pipe, downward_pipe):
+    def __init__(self, interface, upward_pipe, downward_pipe):
         self.upward_pipe = upward_pipe
         self.downward_pipe = downward_pipe
 
-        self.data = self.Data()
+        self.interface = interface
 
         self.preflight = self.make_preflight()
         self.downward = self.make_downward()
@@ -141,6 +141,14 @@ class BaseStruct:
 
         self._check_field(key)
         self._delegate[key] = set_once(self._delegate[key], value)
+
+
+class BaseInterface(BaseStruct):
+
+    def __init__(self, upward_pipe, downward_pipe):
+        super().__init__()
+
+        self._engine = self.Engine(self, upward_pipe, downward_pipe)
 
 
 class BaseArray:

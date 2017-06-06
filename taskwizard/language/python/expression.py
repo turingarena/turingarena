@@ -10,7 +10,7 @@ class DriverVariableExpressionBuilder:
         return expr.accept(self)
 
     def visit_global_declaration(self, declaration):
-        return "self.data.{name}".format(
+        return "self.interface.{name}".format(
             name=self.expr.variable_name,
         )
 

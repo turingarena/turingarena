@@ -1,5 +1,6 @@
 from taskwizard.generation.utils import indent_all, indent
 from taskwizard.language.python.expression import build_driver_expression, build_assignable_driver_expression
+from taskwizard.language.python.types import TypeBuilder
 
 
 class AbstractDriverGenerator:
@@ -83,7 +84,7 @@ class UpwardDriverBlockGenerator(AbstractDriverGenerator):
     def visit_output_statement(self, statement):
         yield "{args}, = self.read_upward({types})".format(
             args=", ".join(build_driver_expression(a) for a in statement.arguments),
-            types=", ".join("int" for a in statement.arguments) # TODO: correct typing
+            types=", ".join(TypeBuilder().build(a.type) for a in statement.arguments)
         )
 
     def visit_input_statement(self, stmt):
