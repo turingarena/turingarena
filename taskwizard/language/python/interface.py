@@ -1,5 +1,6 @@
 from taskwizard.generation.utils import indent_all
-from taskwizard.language.python.protocol import BlockDriverGenerator, PreflightDriverGenerator
+from taskwizard.language.python.protocol import DownwardDriverBlockGenerator, PreflightDriverBlockGenerator, \
+    UpwardDriverBlockGenerator, PostflightDriverBlockGenerator
 
 
 class FieldTypeBuilder:
@@ -45,6 +46,12 @@ class SupportInterfaceItemGenerator:
         yield
         yield "def _downward_protocol(self):"
         yield from indent_all(generate_downward_protocol_body(definition.block))
+        yield
+        yield "def _upward_protocol(self):"
+        yield from indent_all(generate_upward_protocol_body(definition.block))
+        yield
+        yield "def _postflight_protocol(self):"
+        yield from indent_all(generate_postflight_protocol_body(definition.block))
 
 
 def generate_function_body(declaration):
@@ -55,13 +62,23 @@ def generate_function_body(declaration):
         )
     )
     yield "self.downward.send(None)"
+    yield "self.upward.send(None)"
+    yield "return self.postflight.send(None)"
 
 
 def generate_preflight_protocol_body(block):
     yield "next_call = yield"
-    yield from PreflightDriverGenerator().generate(block)
+    yield from PreflightDriverBlockGenerator().generate(block)
 
 
 def generate_downward_protocol_body(block):
-    yield "yield"
-    yield from BlockDriverGenerator().generate(block)
+    yield from DownwardDriverBlockGenerator().generate(block)
+
+
+def generate_upward_protocol_body(block):
+    yield "called = True"
+    yield from UpwardDriverBlockGenerator().generate(block)
+    yield "if called: yield"
+
+def generate_postflight_protocol_body(block):
+    yield from PostflightDriverBlockGenerator().generate(block)

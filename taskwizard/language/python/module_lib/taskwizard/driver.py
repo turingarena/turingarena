@@ -20,20 +20,36 @@ class BaseInterface:
     def __init__(self, upward_pipe, downward_pipe):
         self.upward_pipe = upward_pipe
         self.downward_pipe = downward_pipe
+
         self.data = self.Data()
+
         self.preflight = self._preflight_protocol()
-        self.preflight.send(None)
         self.downward = self._downward_protocol()
-        self.downward.send(None)
-        self.locals = deque()
+        self.upward = self._upward_protocol()
+        self.postflight = self._postflight_protocol()
+
+        self.downward_locals = deque()
+        self.upward_locals = deque()
+        self.postflight_locals = deque()
+
+        next(self.preflight)
+        next(self.upward)
 
     def make_local(self):
         local = Local(self)
-        self.locals.append(local)
+        self.downward_locals.append(local)
+        self.upward_locals.append(local)
+        self.postflight_locals.append(local)
         return local
 
-    def pop_local(self):
-        return self.locals.popleft()
+    def get_downward_local(self):
+        return self.downward_locals.popleft()
+
+    def get_upward_local(self):
+        return self.upward_locals.popleft()
+
+    def get_postflight_local(self):
+        return self.postflight_locals.popleft()
 
 
 class BaseStruct:

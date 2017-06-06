@@ -1,4 +1,4 @@
-from taskwizard.generation.utils import indent_all
+from taskwizard.generation.utils import indent_all, indent
 from taskwizard.language.python.expression import build_driver_expression, build_assignable_driver_expression
 
 
@@ -9,24 +9,23 @@ class AbstractDriverGenerator:
 
     def visit_block(self, block):
         for item in block.block_items:
-            yield
             yield from item.accept(self)
-        yield
-        yield "pass"
 
     def visit_for_statement(self, statement):
-        yield "for {index} in range({start}, {end}):".format(
-            index=statement.index.declarator.name,
-            start=build_driver_expression(statement.index.range.start),
-            end="1 + " + build_driver_expression(statement.index.range.end),
-        )
-        yield from indent_all(statement.block.accept(self))
+        statements = list(statement.block.accept(self))
+        if len(statements) > 0:
+            yield "for {index} in range({start}, {end}):".format(
+                index=statement.index.declarator.name,
+                start=build_driver_expression(statement.index.range.start),
+                end="1 + " + build_driver_expression(statement.index.range.end),
+            )
+            yield from indent_all(statements)
 
     def visit_default(self, stmt):
         yield from []
 
 
-class PreflightDriverGenerator(AbstractDriverGenerator):
+class PreflightDriverBlockGenerator(AbstractDriverGenerator):
 
     def visit_local_declaration(self, declaration):
         for declarator in declaration.declarators:
@@ -50,11 +49,11 @@ class PreflightDriverGenerator(AbstractDriverGenerator):
         yield "next_call = yield"
 
 
-class BlockDriverGenerator(AbstractDriverGenerator):
+class DownwardDriverBlockGenerator(AbstractDriverGenerator):
 
     def visit_local_declaration(self, declaration):
         for declarator in declaration.declarators:
-            yield "{name} = self.pop_local()".format(
+            yield "{name} = self.get_downward_local()".format(
                 name=declarator.name,
             )
 
@@ -66,6 +65,18 @@ class BlockDriverGenerator(AbstractDriverGenerator):
             )
         )
 
+    def visit_call_statement(self, statement):
+        yield "yield"
+
+
+class UpwardDriverBlockGenerator(AbstractDriverGenerator):
+
+    def visit_local_declaration(self, declaration):
+        for declarator in declaration.declarators:
+            yield "{name} = self.get_upward_local()".format(
+                name=declarator.name,
+            )
+
     def visit_output_statement(self, statement):
         yield "_values = self.upward_pipe.readline().split()"
         for i, argument in enumerate(statement.arguments):
@@ -74,5 +85,24 @@ class BlockDriverGenerator(AbstractDriverGenerator):
                 i=i,
             )
 
+    def visit_input_statement(self, stmt):
+        yield "if called:"
+        yield indent("yield")
+        yield indent("called = False")
+
     def visit_call_statement(self, statement):
-        yield "yield"
+        yield "called = True"
+
+
+class PostflightDriverBlockGenerator(AbstractDriverGenerator):
+
+    def visit_local_declaration(self, declaration):
+        for declarator in declaration.declarators:
+            yield "{name} = self.get_postflight_local()".format(
+                name=declarator.name,
+            )
+
+    def visit_call_statement(self, statement):
+        yield "yield {ret}".format(
+            ret="None" if statement.return_value is None else build_driver_expression(statement.return_value),
+        )
