@@ -54,6 +54,12 @@ class BlockItemGenerator:
                 size="1 + " + generate_expression(statement.range.end),
             )
 
+    def visit_return_statement(self, stmt):
+        if stmt.expression is not None:
+            yield "return {expr};".format(expr=generate_expression(stmt.expression))
+        else:
+            yield "return;"
+
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
 

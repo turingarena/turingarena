@@ -22,6 +22,9 @@ class InterfaceGenerator:
         for g in interface.function_declarations:
             yield from g.accept(self)
 
+        for g in interface.callback_declarations:
+            yield from g.accept(self)
+
         yield from interface.accept(InterfaceEngineGenerator())
 
     def visit_variable_declaration(self, declaration):
@@ -42,6 +45,9 @@ class InterfaceGenerator:
             ),
         )
         yield from indent_all(self.generate_function_body(declaration))
+
+    def visit_callback_declaration(self, declaration):
+        yield from []
 
     def generate_function_body(self, declaration):
         yield "return self._engine.call({args})".format(
@@ -66,6 +72,9 @@ class InterfaceEngineGenerator:
         yield from []
 
     def visit_function_declaration(self, declaration):
+        yield from []
+
+    def visit_callback_declaration(self, declaration):
         yield from []
 
     def visit_main_definition(self, definition):

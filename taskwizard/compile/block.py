@@ -50,6 +50,10 @@ class BlockItemCompiler:
         compile_declaration(statement.index, scope=new_scope)
         compile_block(statement.block, scope=new_scope)
 
+    def visit_return_statement(self, stmt):
+        if stmt.expression is not None:
+            compile_expression(stmt.expression, scope=self.scope)
+
 
 def find_expected_calls(block):
     for item in block.block_items:

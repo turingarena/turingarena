@@ -18,12 +18,21 @@ class InterfaceItemGenerator:
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
 
-    def visit_function_declaration(self, definition):
+    def visit_function_declaration(self, decl):
         yield "{return_type} {name}({arguments});".format(
-            return_type=generate_base_type(definition.return_type),
-            name=definition.declarator.name,
-            arguments=', '.join(build_parameter(p) for p in definition.parameters)
+            return_type=generate_base_type(decl.return_type),
+            name=decl.declarator.name,
+            arguments=', '.join(build_parameter(p) for p in decl.parameters)
         )
+
+    def visit_callback_declaration(self, decl):
+        yield "{return_type} {name}({arguments})".format(
+            return_type=generate_base_type(decl.return_type),
+            name=decl.declarator.name,
+            arguments=', '.join(build_parameter(p) for p in decl.parameters)
+        ) + " {"
+        yield from indent_all(generate_block(decl.block))
+        yield "}"
 
     def visit_main_definition(self, definition):
         yield "int main() {"

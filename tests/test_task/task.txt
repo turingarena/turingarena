@@ -5,6 +5,13 @@ interface exampleinterface {
 
     function solve(int u) -> int;
 
+    callback test(int a, int b) -> int {
+        output a, b;
+        var int c;
+        input c;
+        return c;
+    }
+
     main {
         input N, M;
         alloc A : 1..N;

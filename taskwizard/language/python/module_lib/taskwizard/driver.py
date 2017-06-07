@@ -54,11 +54,14 @@ class BaseInterfaceEngine:
 
     def call(self, name, *args):
         self.preflight.send((name, *args))
-
         next(self.downward)
+        self.accept_callbacks()
         next(self.upward)
-
         return next(self.postflight)
+
+    @abstractmethod
+    def accept_callbacks(self):
+        pass
 
     def read_upward(self, *types):
         raw_values = self.upward_pipe.readline().strip().split()

@@ -44,6 +44,8 @@ class AbstractSyntaxNode:
         method_name = "visit_%s" % self.parseinfo.rule
         if hasattr(visitor, method_name):
             method = getattr(visitor, method_name)
-        else:
+        elif hasattr(visitor, "visit_default"):
             method = visitor.visit_default
+        else:
+            raise NotImplementedError("unable to visit %s" % self.parseinfo.rule)
         return method(self)
