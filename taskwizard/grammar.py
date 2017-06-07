@@ -1,8 +1,3 @@
-import tatsu
-from tatsu.ast import AST
-from tatsu.semantics import ModelBuilderSemantics
-
-
 grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
@@ -197,34 +192,3 @@ grammar_ebnf = r"""
 """
 
 
-def parse(*args, **kwargs):
-    grammar = tatsu.compile(grammar_ebnf)
-    return grammar.parse(*args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
-
-
-class Semantics:
-
-    def _default(self, ast, *args, **kwargs):
-        if isinstance(ast, AST):
-            return AbstractSyntaxNode(ast, *args, **kwargs)
-        else:
-            return ast
-
-
-class AbstractSyntaxNode:
-
-    def __init__(self, ast, *args, **kwargs):
-        self.parseinfo = None
-        for key, value in ast.items():
-            setattr(self, key, value)
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self._arguments = args
-
-    def accept(self, visitor):
-        method_name = "visit_%s" % self.parseinfo.rule
-        if hasattr(visitor, method_name):
-            method = getattr(visitor, method_name)
-        else:
-            method = visitor.visit_default
-        return method(self)

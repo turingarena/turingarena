@@ -1,6 +1,6 @@
 from unittest.case import TestCase
 
-from taskwizard.grammar import parse
+from taskwizard.parser import parse
 
 text = r"""
 
