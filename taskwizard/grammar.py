@@ -15,25 +15,27 @@ grammar_ebnf = r"""
     interface_item =
         | variable_declaration
         | function_declaration
-        | callback_definition
+        | callback_declaration
         | main_definition
     ;
 
     function_declaration =
-        'function' ~ return_type:return_type declarator:function_declarator '('
+        'function' ~ declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
+        [ '->' return_type:type ]
         ';'
     ;
     
-    function_declarator = name:identifier ;
-
-    callback_definition =
-        'callback' ~ return_type:return_type name:identifier '('
+    callback_declaration =
+        'callback' ~ declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
+        [ '->' return_type:type ]
         block:block
     ;
+
+    function_declarator = name:identifier ;
 
     main_definition =
         'main' ~ block:block
@@ -169,11 +171,6 @@ grammar_ebnf = r"""
         | 'int'
         | 'int64'
         | 'bool'
-    ;
-    
-    return_type =
-        | @:type
-        | 'void'
     ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;

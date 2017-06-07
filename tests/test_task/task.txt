@@ -3,7 +3,7 @@ interface exampleinterface {
     var int64[] A;
     var int64 S;
 
-    function int solve(int u);
+    function solve(int u) -> int;
 
     main {
         input N, M;
