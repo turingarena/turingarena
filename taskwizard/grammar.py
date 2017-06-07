@@ -13,8 +13,7 @@ grammar_ebnf = r"""
     ;
     
     interface_item =
-        | global_declaration
-        | const_declaration
+        | variable_declaration
         | function_declaration
         | callback_definition
         | main_definition
@@ -40,16 +39,8 @@ grammar_ebnf = r"""
         'main' ~ block:block
     ;
 
-    global_declaration =
-        'global' ~ type:type declarators:declarator_list ';'
-    ;
-    
-    local_declaration =
-        'local' ~ type:type declarators:declarator_list ';'
-    ;
-    
-    const_declaration =
-        'const' ~ type:type declarators:init_declarator_list ';'
+    variable_declaration =
+        'var' ~ type:type declarators:declarator_list ';'
     ;
     
     index_declaration =
@@ -60,21 +51,16 @@ grammar_ebnf = r"""
 
     parameter_declaration = type:type declarator:declarator ;
 
-    init_declarator_list = ','.{ init_declarator }+;
+    declarator_list = ','.{ declarator }+ ;
 
-    init_declarator = declarator:declarator '=' expression:expression ;
-        
-    declarator_list = ','.{ declarator }+;
-
-    declarator = name:identifier ;
+    declarator = name:identifier [ '=' initializer:expression ] ;
     
     index_declarator = name:identifier ;
 
     block = '{' block_items:{ block_item }* '}' ;
 
     block_item =
-        | local_declaration
-        | const_declaration
+        | variable_declaration
         | statement
     ;
     

@@ -18,8 +18,9 @@ class BlockItemCompiler:
     def compile(self, item):
         item.accept(self)
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         compile_declaration(declaration, scope=self.scope)
+        declaration.is_global = False
 
     def compile_arguments(self, statement):
         for e in statement.arguments:

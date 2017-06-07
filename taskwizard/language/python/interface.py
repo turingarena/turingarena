@@ -16,7 +16,7 @@ class InterfaceGenerator:
         yield
         yield "_fields = {}"
 
-        for g in interface.global_declarations:
+        for g in interface.variable_declarations:
             yield from g.accept(self)
 
         for g in interface.function_declarations:
@@ -24,7 +24,7 @@ class InterfaceGenerator:
 
         yield from interface.accept(InterfaceEngineGenerator())
 
-    def visit_global_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         yield
         for declarator in declaration.declarators:
             yield "_fields['{name}'] = {type}".format(
@@ -62,7 +62,7 @@ class InterfaceEngineGenerator:
         for item in interface.interface_items:
             yield from item.accept(self)
 
-    def visit_global_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         yield from []
 
     def visit_function_declaration(self, declaration):

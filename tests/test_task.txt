@@ -1,7 +1,7 @@
 interface exampleinterface {
-    global int N, M;
-    global int A[];
-    global int S;
+    var int N, M;
+    var int A[];
+    var int S;
 
     function int solve(int u);
 
@@ -10,7 +10,7 @@ interface exampleinterface {
         for(i : 1..N) {
             input A[i];
         }
-        local int u;
+        var int u;
         input u;
         call S = solve(u);
         output S;

@@ -1,5 +1,5 @@
 from taskwizard.generation.utils import indent_all, indent
-from taskwizard.language.python.expression import build_driver_expression, build_assignable_driver_expression
+from taskwizard.language.python.expression import build_driver_expression
 from taskwizard.language.python.types import TypeBuilder
 
 
@@ -31,7 +31,7 @@ class AbstractDriverGenerator:
 
 class PreflightDriverBlockGenerator(AbstractDriverGenerator):
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         for declarator in declaration.declarators:
             yield "{name} = self.make_local()".format(
                 name=declarator.name,
@@ -47,7 +47,7 @@ class PreflightDriverBlockGenerator(AbstractDriverGenerator):
         yield "if function != '{name}': raise ValueError".format(name=statement.function_declaration.declarator.name)
         for p, expr in zip(statement.function_declaration.parameters, statement.parameters):
             yield "{val} = parameter_{name}".format(
-                val=build_assignable_driver_expression(expr),
+                val=build_driver_expression(expr),
                 name=p.declarator.name,
             )
         yield "yield from self.on_preflight_call()"
@@ -55,7 +55,7 @@ class PreflightDriverBlockGenerator(AbstractDriverGenerator):
 
 class DownwardDriverBlockGenerator(AbstractDriverGenerator):
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         for declarator in declaration.declarators:
             yield "{name} = self.get_downward_local()".format(
                 name=declarator.name,
@@ -75,7 +75,7 @@ class DownwardDriverBlockGenerator(AbstractDriverGenerator):
 
 class UpwardDriverBlockGenerator(AbstractDriverGenerator):
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         for declarator in declaration.declarators:
             yield "{name} = self.get_upward_local()".format(
                 name=declarator.name,
@@ -96,7 +96,7 @@ class UpwardDriverBlockGenerator(AbstractDriverGenerator):
 
 class PostflightDriverBlockGenerator(AbstractDriverGenerator):
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         for declarator in declaration.declarators:
             yield "{name} = self.get_postflight_local()".format(
                 name=declarator.name,

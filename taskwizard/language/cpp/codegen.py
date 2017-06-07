@@ -15,7 +15,7 @@ class DriverGenerator(AbstractDriverGenerator):
 
 class InterfaceItemGenerator:
 
-    def visit_global_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
 
     def visit_function_declaration(self, definition):

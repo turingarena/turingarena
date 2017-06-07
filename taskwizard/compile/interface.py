@@ -6,7 +6,7 @@ from taskwizard.compile.scope import Scope
 class InterfaceCompiler:
 
     def compile(self, interface):
-        interface.global_declarations = []
+        interface.variable_declarations = []
         interface.function_declarations = []
         compiler = InterfaceItemCompiler(interface)
         for item in interface.interface_items:
@@ -19,9 +19,10 @@ class InterfaceItemCompiler:
         self.interface = interface
         self.global_scope = Scope()
 
-    def visit_global_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         compile_declaration(declaration, scope=self.global_scope)
-        self.interface.global_declarations.append(declaration)
+        declaration.is_global = True
+        self.interface.variable_declarations.append(declaration)
 
     def visit_function_declaration(self, declaration):
         compile_declaration(declaration, scope=self.global_scope)

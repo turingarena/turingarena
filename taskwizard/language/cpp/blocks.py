@@ -54,7 +54,7 @@ class BlockItemGenerator:
                 size="1 + " + generate_expression(statement.range.end),
             )
 
-    def visit_local_declaration(self, declaration):
+    def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
 
 

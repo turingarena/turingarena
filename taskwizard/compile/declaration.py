@@ -17,10 +17,7 @@ class DeclarationCompiler:
         for declarator in decl.declarators:
             self.scope[declarator.name] = decl
 
-    def visit_local_declaration(self, decl):
-        self.process_declarators(decl)
-
-    def visit_global_declaration(self, decl):
+    def visit_variable_declaration(self, decl):
         self.process_declarators(decl)
 
     def visit_index_declaration(self, decl):

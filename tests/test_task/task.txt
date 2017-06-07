@@ -1,7 +1,7 @@
 interface exampleinterface {
-    global int N, M;
-    global int64[] A;
-    global int64 S;
+    var int N, M;
+    var int64[] A;
+    var int64 S;
 
     function int solve(int u);
 
@@ -11,7 +11,7 @@ interface exampleinterface {
         for(i : 1..N) {
             input A[i];
         }
-        local int u;
+        var int u;
         input u;
         call solve(u) -> S;
         output S;
