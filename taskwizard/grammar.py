@@ -83,9 +83,10 @@ grammar_ebnf = r"""
         | output_statement
         | alloc_statement
         | call_statement
+        | if_statement
+        | switch_statement
         | for_statement
         | do_statement
-        | switch_statement
         | break_statement
         | continue_statement
         | return_statement
@@ -112,15 +113,12 @@ grammar_ebnf = r"""
         [ '->' return_value:expression ] 
         ';'
     ;
-
-    for_statement =
-        'for' ~ '(' index:index_declaration ')' block:block
-    ;
-
-    do_statement =
-        'do' ~ block:block
-    ;
     
+    if_statement =
+        'if' ~ '(' condition:expression ')' then_block:block
+        [ 'else' ~ else_block:block ]
+    ;
+
     switch_statement =
         'switch' ~ '(' expression:expression ')' '{'
             cases:{ switch_case }*
@@ -131,11 +129,19 @@ grammar_ebnf = r"""
         'case' '(' value:identifier ')' block:block
     ;
 
-    break_statement = 'break' ';' ;
+    for_statement =
+        'for' ~ '(' index:index_declaration ')' block:block
+    ;
 
-    continue_statement = 'continue' ';' ;
+    do_statement =
+        'do' ~ block:block
+    ;
+    
+    break_statement = 'break' ~ ';' ;
 
-    return_statement = 'return' expression:expression ';' ;
+    continue_statement = 'continue' ~ ';' ;
+
+    return_statement = 'return' ~ expression:expression ';' ;
 
     range =
         start:expression '..' end:expression
