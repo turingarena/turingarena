@@ -1,6 +1,5 @@
 from taskwizard.generation.utils import indent_all
-from taskwizard.language.python.protocol import DownwardDriverBlockGenerator, PreflightDriverBlockGenerator, \
-    UpwardDriverBlockGenerator, PostflightDriverBlockGenerator
+from taskwizard.language.python.protocol import DriverBlockGenerator
 from taskwizard.language.python.types import TypeBuilder
 
 
@@ -78,28 +77,10 @@ class InterfaceEngineGenerator:
     def visit_callback_declaration(self, declaration):
         name = declaration.declarator.name
         yield
-        yield "def callback_{name}_preflight_protocol(self):".format(name=name)
-        yield from indent_all(PreflightDriverBlockGenerator().generate(declaration.block))
-        yield
-        yield "def callback_{name}_downward_protocol(self):".format(name=name)
-        yield from indent_all(DownwardDriverBlockGenerator().generate(declaration.block))
-        yield
-        yield "def callback_{name}_upward_protocol(self):".format(name=name)
-        yield from indent_all(UpwardDriverBlockGenerator().generate(declaration.block))
-        yield
-        yield "def callback_{name}_postflight_protocol(self):".format(name=name)
-        yield from indent_all(PostflightDriverBlockGenerator().generate(declaration.block))
+        yield "def callback_{name}(self):".format(name=name)
+        yield from indent_all(DriverBlockGenerator().generate(declaration.block))
 
     def visit_main_definition(self, definition):
         yield
-        yield "def main_preflight_protocol(self):"
-        yield from indent_all(PreflightDriverBlockGenerator().generate(definition.block))
-        yield
-        yield "def main_downward_protocol(self):"
-        yield from indent_all(DownwardDriverBlockGenerator().generate(definition.block))
-        yield
-        yield "def main_upward_protocol(self):"
-        yield from indent_all(UpwardDriverBlockGenerator().generate(definition.block))
-        yield
-        yield "def main_postflight_protocol(self):"
-        yield from indent_all(PostflightDriverBlockGenerator().generate(definition.block))
+        yield "def main(self, phase):"
+        yield from indent_all(DriverBlockGenerator().generate(definition.block))

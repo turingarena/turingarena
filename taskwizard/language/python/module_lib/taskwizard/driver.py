@@ -29,28 +29,22 @@ class BaseInterfaceEngine:
         self.upward = self.make_upward()
         self.postflight = self.make_postflight()
 
-        self.downward_locals = deque()
-        self.upward_locals = deque()
-        self.postflight_locals = deque()
+        self.locals = {
+            "preflight": deque(),
+            "downward": deque(),
+            "upward": deque(),
+            "postflight": deque(),
+        }
 
         next(self.preflight)
         next(self.upward)
 
-    def make_local(self):
-        local = Local(self)
-        self.downward_locals.append(local)
-        self.upward_locals.append(local)
-        self.postflight_locals.append(local)
-        return local
-
-    def get_downward_local(self):
-        return self.downward_locals.popleft()
-
-    def get_upward_local(self):
-        return self.upward_locals.popleft()
-
-    def get_postflight_local(self):
-        return self.postflight_locals.popleft()
+    def get_local(self, phase):
+        if phase == 'preflight':
+            local = Local(self)
+            for p in self.locals.keys():
+                self.locals[p].append(local)
+        return self.locals[phase].popleft()
 
     def call(self, name, *args):
         self.preflight.send((name, *args))
@@ -69,7 +63,7 @@ class BaseInterfaceEngine:
 
     def make_preflight(self):
         self.next_call = yield
-        yield from self.preflight_protocol()
+        yield from self.main("preflight")
 
     def on_preflight_call(self):
         self.next_call = yield
@@ -77,23 +71,15 @@ class BaseInterfaceEngine:
     def get_next_call(self):
         return self.next_call
 
-    @abstractmethod
-    def main_preflight_protocol(self):
-        pass
-
     def make_downward(self):
-        yield from self.downward_protocol()
-
-    @abstractmethod
-    def main_downward_protocol(self):
-        pass
+        yield from self.main("downward")
 
     def on_downward_call(self):
         yield
 
     def make_upward(self):
         self.upward_called = True
-        yield from self.upward_protocol()
+        yield from self.main("upward")
         yield
 
     def on_upward_call(self):
@@ -104,15 +90,11 @@ class BaseInterfaceEngine:
             self.upward_called = False
             yield
 
-    @abstractmethod
-    def main_upward_protocol(self):
-        pass
-
     def make_postflight(self):
-        yield from self.postflight_protocol()
+        yield from self.main("postflight")
 
     @abstractmethod
-    def main_postflight_protocol(self):
+    def main(self):
         pass
 
 
