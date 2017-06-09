@@ -14,9 +14,9 @@ else:
 
 iface.N = 10
 iface.M = 100
-iface.A.alloc(1, 100)
+iface.A.alloc(1, iface.N)
 
-for i in range(1, 1+100):
+for i in range(1, 1+iface.N):
     iface.A[i] = i*i
 
 S = iface.solve(3)

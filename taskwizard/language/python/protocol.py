@@ -79,4 +79,12 @@ class DriverBlockGenerator:
         )
 
     def visit_alloc_statement(self, stmt):
-        yield from []
+        yield "if phase == 'downward':"
+        def body():
+            for a in stmt.arguments:
+                yield "assert ({val}.start, {val}.end) == ({start}, {end})".format(
+                    val=build_driver_expression(a),
+                    start=build_driver_expression(stmt.range.start),
+                    end=build_driver_expression(stmt.range.end),
+                )
+        yield from indent_all(body())
