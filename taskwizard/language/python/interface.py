@@ -77,7 +77,7 @@ class InterfaceEngineGenerator:
     def visit_callback_declaration(self, declaration):
         name = declaration.declarator.name
         yield
-        yield "def callback_{name}(self):".format(name=name)
+        yield "def callback_{name}(self, phase):".format(name=name)
         yield from indent_all(DriverBlockGenerator().generate(declaration.block))
 
     def visit_main_definition(self, definition):

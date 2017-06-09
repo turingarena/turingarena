@@ -9,6 +9,9 @@ class DriverBlockGenerator:
 
     def visit_block(self, block):
         for item in block.block_items:
+            yield
+            line = item.parseinfo.text_lines()[0]
+            yield "# " + line.strip()
             yield from item.accept(self)
 
     def visit_for_statement(self, statement):
