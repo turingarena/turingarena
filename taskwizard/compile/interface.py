@@ -11,6 +11,7 @@ class InterfaceCompiler:
         interface.callback_declarations = []
         compiler = InterfaceItemCompiler(interface)
         for item in interface.interface_items:
+            item.interface = interface
             item.accept(compiler)
 
 

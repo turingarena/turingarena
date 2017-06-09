@@ -13,6 +13,9 @@ class SupervisorClient:
 
         self.logger = logging.getLogger(__name__)
 
+    def has_supervisor(self):
+        return "TASKWIZARD_SANDBOX_DIR" in os.environ
+
     def init(self):
         self.sandbox_dir = os.environ["TASKWIZARD_SANDBOX_DIR"]
 
