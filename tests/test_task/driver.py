@@ -19,6 +19,8 @@ iface.A.alloc(1, 100)
 for i in range(1, 1+100):
     iface.A[i] = i*i
 
+iface.test = lambda a, b: a + b
+
 S = iface.solve(3)
 
 print("Answer:", S, file=sys.stderr)

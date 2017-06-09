@@ -57,6 +57,7 @@ class InterfaceGenerator:
             )
         )
 
+
 class InterfaceEngineGenerator:
 
     def visit_interface_definition(self, interface):
@@ -75,19 +76,30 @@ class InterfaceEngineGenerator:
         yield from []
 
     def visit_callback_declaration(self, declaration):
-        yield from []
+        name = declaration.declarator.name
+        yield
+        yield "def callback_{name}_preflight_protocol(self):".format(name=name)
+        yield from indent_all(PreflightDriverBlockGenerator().generate(declaration.block))
+        yield
+        yield "def callback_{name}_downward_protocol(self):".format(name=name)
+        yield from indent_all(DownwardDriverBlockGenerator().generate(declaration.block))
+        yield
+        yield "def callback_{name}_upward_protocol(self):".format(name=name)
+        yield from indent_all(UpwardDriverBlockGenerator().generate(declaration.block))
+        yield
+        yield "def callback_{name}_postflight_protocol(self):".format(name=name)
+        yield from indent_all(PostflightDriverBlockGenerator().generate(declaration.block))
 
     def visit_main_definition(self, definition):
         yield
-        yield "def preflight_protocol(self):"
+        yield "def main_preflight_protocol(self):"
         yield from indent_all(PreflightDriverBlockGenerator().generate(definition.block))
         yield
-        yield "def downward_protocol(self):"
+        yield "def main_downward_protocol(self):"
         yield from indent_all(DownwardDriverBlockGenerator().generate(definition.block))
         yield
-        yield "def upward_protocol(self):"
+        yield "def main_upward_protocol(self):"
         yield from indent_all(UpwardDriverBlockGenerator().generate(definition.block))
         yield
-        yield "def postflight_protocol(self):"
+        yield "def main_postflight_protocol(self):"
         yield from indent_all(PostflightDriverBlockGenerator().generate(definition.block))
-

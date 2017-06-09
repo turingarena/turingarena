@@ -78,14 +78,14 @@ class BaseInterfaceEngine:
         return self.next_call
 
     @abstractmethod
-    def preflight_protocol(self):
+    def main_preflight_protocol(self):
         pass
 
     def make_downward(self):
         yield from self.downward_protocol()
 
     @abstractmethod
-    def downward_protocol(self):
+    def main_downward_protocol(self):
         pass
 
     def on_downward_call(self):
@@ -105,14 +105,14 @@ class BaseInterfaceEngine:
             yield
 
     @abstractmethod
-    def upward_protocol(self):
+    def main_upward_protocol(self):
         pass
 
     def make_postflight(self):
         yield from self.postflight_protocol()
 
     @abstractmethod
-    def postflight_protocol(self):
+    def main_postflight_protocol(self):
         pass
 
 
