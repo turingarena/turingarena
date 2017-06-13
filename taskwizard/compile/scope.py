@@ -6,8 +6,8 @@ class Scope:
         else:
             self.delegate = parent.as_dict()
 
-    """Returns a _copy of_ this scope as a dict."""
     def as_dict(self):
+        """Returns a _copy of_ this scope as a dict."""
         return dict(self.delegate)
 
     def __getitem__(self, item):
