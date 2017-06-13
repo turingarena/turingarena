@@ -6,8 +6,9 @@ Usage:
   taskwizard supervise [options] [-a <algorithm>]... [--] <args>...
   taskwizard cpp driver flags
   taskwizard cpp interface flags <interface>
-  taskwizard python driver path
   taskwizard python module run <args>...
+  taskwizard python module path
+  taskwizard python driver path
   taskwizard verify [options]
   taskwizard evaluate [options] [-t <test case>] [-p <phase>] [-l <language>]... [<file>]...
   taskwizard summary [options] [-t <test case>] [-p <phase>]

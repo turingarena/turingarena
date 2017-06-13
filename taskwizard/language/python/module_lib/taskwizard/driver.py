@@ -18,80 +18,93 @@ def is_set(value):
 
 class BaseInterfaceEngine:
 
+    phases = ["preflight", "downward", "upward", "postflight"]
+
     def __init__(self, interface, upward_pipe, downward_pipe):
         self.upward_pipe = upward_pipe
         self.downward_pipe = downward_pipe
 
         self.interface = interface
 
-        self.preflight = self.make_preflight()
-        self.downward = self.make_downward()
-        self.upward = self.make_upward()
-        self.postflight = self.make_postflight()
-
+        self.protocols = {
+            phase: self.main(phase)
+            for phase in self.phases
+        }
         self.locals = {
-            "preflight": deque(),
-            "downward": deque(),
-            "upward": deque(),
-            "postflight": deque(),
+            phase: deque()
+            for phase in self.phases
         }
 
-        next(self.preflight)
-        next(self.upward)
+        self.upward_should_stop_on_input = None
+
+        self.start()
 
     def get_local(self, phase):
-        if phase == 'preflight':
+        queue = self.locals[phase]
+        if len(queue) == 0:
             local = Local(self)
             for p in self.locals.keys():
                 self.locals[p].append(local)
-        return self.locals[phase].popleft()
+        return queue.popleft()
 
-    def call(self, name, *args):
-        self.preflight.send((name, *args))
-        next(self.downward)
-        self.accept_callbacks()
-        next(self.upward)
-        return next(self.postflight)
+    def start(self):
+        next(self.protocols["preflight"])
+        self.upward_should_stop_on_input = True
+        next(self.protocols["upward"])
 
-    @abstractmethod
-    def accept_callbacks(self):
-        pass
+    def call(self, name, *call_args):
+        self.protocols["preflight"].send(("call", name, call_args))
+        while True:
+            next(self.protocols["downward"])
+            next(self.protocols["upward"])
+
+            command, *command_args = next(self.protocols["postflight"])
+
+            if command == "callback":
+                next(self.protocols["preflight"])
+                return_value = self.invoke_callback(*command_args)
+                self.protocols["preflight"].send(("callback_return", return_value))
+            elif command == "call_return":
+                return_value, = command_args
+                return return_value
+            else: raise ValueError
+
+    def invoke_callback(self, name, args):
+        return self.interface._callbacks[name](*args)
+
+    def upward_lazy_yield(self):
+        yield from self.upward_maybe_yield()
+        self.upward_should_stop_on_input = True
+
+    def upward_maybe_yield(self):
+        if self.upward_should_stop_on_input: yield
+        self.upward_should_stop_on_input = False
+
+    def expect_call(self, command, expected_name):
+        command, *command_args = command
+        if command != "call": "unexpected call, expecting {cmd}".format(cmd=command)
+        name, call_args = command_args
+        if name != expected_name:
+            raise ValueError("unexpected call to {actual}, expecting {expected}".format(
+                actual=name,
+                expected=expected_name,
+            ))
+        return call_args
+
+    def expect_callback_return(self, command):
+        command, *command_args = command
+        if command != "callback_return": "unexpected callback return, expecting {cmd}".format(cmd=command)
+        return_value, = command_args
+        return return_value
+
+    def set_callback(self, name, *args):
+        if self.callback is not None: raise ValueError
+        self.callback = name
+        self.callback_args = args
 
     def read_upward(self, *types):
         raw_values = self.upward_pipe.readline().strip().split()
         return [t(value) for value, t in zip(raw_values, types)]
-
-    def make_preflight(self):
-        self.next_call = yield
-        yield from self.main("preflight")
-
-    def on_preflight_call(self):
-        self.next_call = yield
-
-    def get_next_call(self):
-        return self.next_call
-
-    def make_downward(self):
-        yield from self.main("downward")
-
-    def on_downward_call(self):
-        yield
-
-    def make_upward(self):
-        self.upward_called = True
-        yield from self.main("upward")
-        yield
-
-    def on_upward_call(self):
-        self.upward_called = True
-
-    def on_upward_input(self):
-        if self.upward_called:
-            self.upward_called = False
-            yield
-
-    def make_postflight(self):
-        yield from self.main("postflight")
 
     @abstractmethod
     def main(self):
@@ -114,9 +127,6 @@ class BaseStruct:
         return self._fields[key]
 
     def __getattr__(self, key):
-        if key.startswith("_"):
-            return super().__getattr__(key)
-
         self._check_field(key)
         return get_value(self._delegate[key])
 
@@ -134,6 +144,7 @@ class BaseInterface(BaseStruct):
         super().__init__()
 
         self._engine = self.Engine(self, upward_pipe, downward_pipe)
+        self._callbacks = {}
 
 
 class BaseArray:

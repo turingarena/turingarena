@@ -40,7 +40,7 @@ class DriverBlockGenerator:
                 for e in statement.arguments
             )
         )
-        yield "if phase == 'upward': yield from self.on_upward_input()"
+        yield from generate_upward_maybe_yield()
 
     def visit_output_statement(self, statement):
         yield "if phase == 'upward': {args}, = self.read_upward({types})".format(
@@ -52,31 +52,39 @@ class DriverBlockGenerator:
         yield "if phase == 'preflight':"
 
         def preflight_body():
-            yield "{unpack}, = self.get_next_call()".format(
+            yield "{unpack}, = self.expect_call(preflight_command, '{name}')".format(
                 unpack=", ".join(
-                    ["function"] +
-                    ["parameter_" + p.declarator.name for p in statement.function_declaration.parameters]
-                )
+                    "parameter_" + p.declarator.name for p in statement.function_declaration.parameters
+                ),
+                name = statement.function_name,
             )
-            yield "if function != '{name}': raise ValueError".format(name=statement.function_declaration.declarator.name)
             for p, expr in zip(statement.function_declaration.parameters, statement.parameters):
                 yield "{val} = parameter_{name}".format(
                     val=build_driver_expression(expr),
                     name=p.declarator.name,
                 )
-            yield "yield from self.on_preflight_call()"
+            yield "preflight_command = yield"
 
         yield from indent_all(preflight_body())
         yield "if phase == 'downward': yield"
-        yield "if phase == 'upward': self.on_upward_call()"
-        yield "if phase == 'postflight': yield {ret}".format(
+        yield "if phase == 'upward': yield from self.upward_lazy_yield()"
+        yield "yield from self.accept_callbacks(phase)"
+        yield "if phase == 'postflight': yield 'call_return', {ret}".format(
             ret="None" if statement.return_value is None else build_driver_expression(statement.return_value),
         )
 
     def visit_return_statement(self, stmt):
-        yield "if phase == 'preflight': {ret} = self.get_last_callback_return()".format(
-            ret = build_driver_expression(stmt.expression),
-        )
+        yield "if phase == 'preflight':"
+        def body():
+            yield "{ret} = self.expect_callback_return(preflight_command)".format(
+                ret = build_driver_expression(stmt.expression),
+            )
+            yield "preflight_command = yield"
+        yield from indent_all(body())
+
+        yield "if phase == 'downward': yield"
+        yield "if phase == 'upward': yield from self.upward_lazy_yield()"
+
 
     def visit_alloc_statement(self, stmt):
         yield "if phase == 'downward':"
@@ -88,3 +96,29 @@ class DriverBlockGenerator:
                     end=build_driver_expression(stmt.range.end),
                 )
         yield from indent_all(body())
+
+
+def generate_upward_maybe_yield():
+    yield "if phase == 'upward': yield from self.upward_maybe_yield()"
+
+
+def generate_main_block(declaration):
+    yield "if phase == 'preflight': preflight_command = yield"
+    yield from DriverBlockGenerator().generate(declaration.block)
+    yield from generate_upward_maybe_yield()
+
+
+def generate_callback_block(decl):
+    yield "if phase == 'preflight': preflight_command = yield"
+    yield "{parameters} = {locals}".format(
+        parameters=", ".join(p.declarator.name for p in decl.parameters),
+        locals=", ".join("self.get_local(phase)" for p in decl.parameters),
+    )
+    yield "if phase == 'postflight': yield 'callback', '{name}', ({args})".format(
+        name=decl.declarator.name,
+        args="".join(
+            "{}.value, ".format(p.declarator.name)
+            for p in decl.parameters
+        ),
+    )
+    yield from DriverBlockGenerator().generate(decl.block)

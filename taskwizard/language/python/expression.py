@@ -15,12 +15,15 @@ class DriverVariableExpressionBuilder:
                 name=self.expr.variable_name,
             )
         else:
-            return "{name}.value".format(
-                name=self.expr.variable_name,
-            )
+            return self.build_local_dereference()
 
     def visit_parameter_declaration(self, declaration):
-        return self.expr.variable_name
+        return self.build_local_dereference()
+
+    def build_local_dereference(self):
+        return "{name}.value".format(
+            name=self.expr.variable_name,
+        )
 
     def visit_index_declaration(self, declaration):
         return self.expr.variable_name

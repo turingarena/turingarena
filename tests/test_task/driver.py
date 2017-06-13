@@ -12,6 +12,8 @@ if supervisor.has_supervisor():
 else:
     iface = exampleinterface(sys.stdin, sys.stdout)
 
+iface._callbacks["test"] = lambda a, b: a+b
+
 iface.N = 10
 iface.M = 100
 iface.A.alloc(1, iface.N)
