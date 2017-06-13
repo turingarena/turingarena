@@ -1,16 +1,12 @@
 import os
 
-from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractSupportGenerator
-from taskwizard.generation.utils import indent_all, write_to_file
-from taskwizard.language.cpp.blocks import generate_block
-from taskwizard.language.cpp.declarations import build_declaration, build_parameter
-from taskwizard.language.cpp.types import generate_base_type
+from taskwizard.language.cpp.supportgen.declarations import build_declaration, build_parameter
+from taskwizard.language.cpp.supportgen.types import generate_base_type
 
-
-class DriverGenerator(AbstractDriverGenerator):
-
-    def generate(self):
-        pass
+from taskwizard.codegen.drivergen import AbstractDriverGenerator
+from taskwizard.codegen.supportgen import AbstractSupportGenerator
+from taskwizard.codegen.utils import indent_all, write_to_file
+from taskwizard.language.cpp.supportgen.blocks import generate_block
 
 
 class InterfaceItemGenerator:

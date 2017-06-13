@@ -1,13 +1,17 @@
 import os
 import shutil
 
-from taskwizard.language.cpp import codegen as cpp_codegen
-from taskwizard.language.python import codegen as python_codegen
+from taskwizard.language.cpp.supportgen import supportgen as cpp_supportgen
+from taskwizard.language.python.drivergen import drivergen as python_drivergen
 
 
-languages = {
-    "cpp": cpp_codegen,
-    "python": python_codegen,
+lang_supportgen = {
+    "cpp": cpp_supportgen.SupportGenerator
+}
+
+
+lang_drivergen = {
+    "python": python_drivergen.DriverGenerator,
 }
 
 
@@ -37,14 +41,14 @@ class CodeGenerator:
         for interface in self.task.interfaces:
             interface_dir = os.path.join(self.interfaces_dir, interface.name)
             os.mkdir(interface_dir)
-            for language, generator in languages.items():
+            for language, generator in lang_supportgen.items():
                 language_dir = os.path.join(interface_dir, language)
                 os.mkdir(language_dir)
-                generator.SupportGenerator(self.task, interface, language_dir).generate()
+                generator(self.task, interface, language_dir).generate()
 
     def generate_driver(self):
         os.mkdir(self.driver_dir)
-        for language, generator in languages.items():
+        for language, generator in lang_drivergen.items():
             language_dir = os.path.join(self.driver_dir, language)
             os.mkdir(language_dir)
-            generator.DriverGenerator(self.task, language_dir).generate()
+            generator(self.task, language_dir).generate()

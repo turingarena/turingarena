@@ -1,9 +1,9 @@
 import os
 
-from taskwizard.generation.codegen import AbstractDriverGenerator, AbstractInterfaceDriverGenerator, \
-    AbstractSupportGenerator
-from taskwizard.generation.utils import write_to_file, indent_all, indent
-from taskwizard.language.python.interface import InterfaceEngineGenerator, InterfaceGenerator
+from taskwizard.codegen.drivergen import AbstractDriverGenerator, AbstractInterfaceDriverGenerator
+from taskwizard.codegen.supportgen import AbstractSupportGenerator
+from taskwizard.codegen.utils import write_to_file
+from taskwizard.language.python.drivergen.interface import InterfaceGenerator
 
 
 class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
@@ -42,7 +42,3 @@ class DriverGenerator(AbstractDriverGenerator):
 
     def generate_interface(self, interface):
         InterfaceDriverGenerator(self, interface).generate()
-
-
-class SupportGenerator(AbstractSupportGenerator):
-    pass

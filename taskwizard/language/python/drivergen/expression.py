@@ -1,4 +1,4 @@
-from taskwizard.generation.expressions import AbstractExpressionGenerator
+from taskwizard.codegen.expressions import AbstractExpressionGenerator
 
 
 class DriverVariableExpressionBuilder:

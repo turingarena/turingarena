@@ -1,4 +1,4 @@
-from taskwizard.language.cpp.types import generate_base_type
+from taskwizard.language.cpp.supportgen.types import generate_base_type
 
 
 class DeclaratorBuilder:

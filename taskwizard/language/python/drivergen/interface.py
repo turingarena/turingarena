@@ -1,7 +1,7 @@
-from taskwizard.generation.utils import indent_all
-from taskwizard.language.python.expression import build_driver_expression
-from taskwizard.language.python.protocol import generate_main_block, generate_callback_block
-from taskwizard.language.python.types import TypeBuilder
+from taskwizard.language.python.drivergen.protocol import generate_main_block, generate_callback_block
+
+from taskwizard.codegen.utils import indent_all
+from taskwizard.language.python.drivergen.types import TypeBuilder
 
 
 class InterfaceGenerator:
