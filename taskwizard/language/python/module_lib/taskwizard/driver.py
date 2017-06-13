@@ -35,7 +35,7 @@ class BaseInterfaceEngine:
             for phase in self.phases
         }
 
-        self.upward_should_stop_on_input = None
+        self.upward_should_yield = None
 
         self.start()
 
@@ -48,9 +48,14 @@ class BaseInterfaceEngine:
         return queue.popleft()
 
     def start(self):
-        next(self.protocols["preflight"])
-        self.upward_should_stop_on_input = True
+        self.start_preflight_generator()
+        self.upward_should_yield = True
         next(self.protocols["upward"])
+
+    def start_preflight_generator(self):
+        magic = next(self.protocols["preflight"])
+        # make sure the generator is in the correct state
+        if magic != 'initial_command': raise ValueError
 
     def call(self, name, *call_args):
         self.protocols["preflight"].send(("call", name, call_args))
@@ -61,7 +66,7 @@ class BaseInterfaceEngine:
             command, *command_args = next(self.protocols["postflight"])
 
             if command == "callback":
-                next(self.protocols["preflight"])
+                self.start_preflight_generator()
                 return_value = self.invoke_callback(*command_args)
                 self.protocols["preflight"].send(("callback_return", return_value))
             elif command == "call_return":
@@ -73,12 +78,13 @@ class BaseInterfaceEngine:
         return self.interface._callbacks[name](*args)
 
     def upward_lazy_yield(self):
+        """Yields once on the next call to either upward_maybe_yield or upward_lazy_yield"""
         yield from self.upward_maybe_yield()
-        self.upward_should_stop_on_input = True
+        self.upward_should_yield = True
 
     def upward_maybe_yield(self):
-        if self.upward_should_stop_on_input: yield
-        self.upward_should_stop_on_input = False
+        if self.upward_should_yield: yield
+        self.upward_should_yield = False
 
     def expect_call(self, command, expected_name):
         command, *command_args = command

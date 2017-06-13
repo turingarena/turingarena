@@ -103,13 +103,15 @@ def generate_upward_maybe_yield():
 
 
 def generate_main_block(declaration):
-    yield "if phase == 'preflight': preflight_command = yield"
+    yield "if phase == 'preflight': preflight_command = yield 'initial_command'"
     yield from DriverBlockGenerator().generate(declaration.block)
+    yield
+    yield "# ensure last upward lazy yield is done"
     yield from generate_upward_maybe_yield()
 
 
 def generate_callback_block(decl):
-    yield "if phase == 'preflight': preflight_command = yield"
+    yield "if phase == 'preflight': preflight_command = yield 'initial_command'"
     yield "{parameters} = {locals}".format(
         parameters=", ".join(p.declarator.name for p in decl.parameters),
         locals=", ".join("self.get_local(phase)" for p in decl.parameters),
