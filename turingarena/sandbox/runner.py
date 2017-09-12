@@ -1,6 +1,6 @@
 import tempfile
 
-from turingarena.sandbox.sandboxmanager import SandboxManager
+from turingarena.sandbox.server import SandboxManagerServer
 
 
 class ModuleRunner:
@@ -11,4 +11,4 @@ class ModuleRunner:
 
     def run(self):
         with tempfile.TemporaryDirectory() as sandbox_dir:
-            SandboxManager(self.args, sandbox_dir, self.algorithms).run()
+            SandboxManagerServer(self.args, sandbox_dir, self.algorithms).run()

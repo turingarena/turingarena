@@ -8,20 +8,20 @@ import sys
 
 class Process:
 
-    def __init__(self, supervisor, process_id, algorithm_name, executable_path):
+    def __init__(self, server, process_id, algorithm_name, executable_path):
         self.logger = logging.getLogger(__name__)
 
-        self.supervisor = supervisor
+        self.server = server
         self.process_id = process_id
 
         self.algorithm_name = algorithm_name
         self.executable_path = executable_path
         self.os_process = None
 
-        self.downward_pipe_name = os.path.join(self.supervisor.sandbox_dir, "process_downward.%d.pipe" % (process_id,))
+        self.downward_pipe_name = os.path.join(self.server.pipes_dir, "process_downward.%d.pipe" % (process_id,))
         self.downward_pipe = None
 
-        self.upward_pipe_name = os.path.join(self.supervisor.sandbox_dir, "process_upward.%d.pipe" % (process_id,))
+        self.upward_pipe_name = os.path.join(self.server.pipes_dir, "process_upward.%d.pipe" % (process_id,))
         self.upward_pipe = None
 
     def prepare(self):
@@ -61,22 +61,15 @@ class Process:
         return 0
 
 
-class SandboxManager:
+class SandboxManagerServer:
 
-    def __init__(self, args, sandbox_dir, algorithms):
+    def __init__(self, pipes_dir, executables_dir):
         self.processes = {}
         self.read_files = {}
         self._next_id = 0
 
-        self.args = args
-        self.sandbox_dir = sandbox_dir
-
-        self.control_request_pipe_name = os.path.join(self.sandbox_dir, "control_request.pipe")
-        self.control_request_pipe = None
-        self.control_response_pipe_name = os.path.join(self.sandbox_dir, "control_response.pipe")
-        self.control_response_pipe = None
-
-        self.algorithms = algorithms
+        self.pipes_dir = pipes_dir
+        self.executables_dir = executables_dir
 
         self.logger = logging.getLogger(__name__)
 
@@ -86,11 +79,7 @@ class SandboxManager:
 
     def algorithm_create_process(self, algorithm_name):
         process_id = self.next_id()
-
-        try:
-            executable_path = self.algorithms[algorithm_name]
-        except KeyError:
-            raise ValueError("invalid algorithm name %s" % algorithm_name)
+        executable_path = os.path.join(self.executables_dir, algorithm_name)
 
         process = Process(self, process_id, algorithm_name, executable_path)
         self.processes[process_id] = process
@@ -144,71 +133,29 @@ class SandboxManager:
             getattr(self, method_name)(arg, result)
 
     def accept_command(self):
-        self.logger.debug("waiting for commands on control request pipe...")
-        line = self.control_request_pipe.readline()
+        self.logger.debug("waiting for commands on stdin...")
+        line = sys.stdin.readline()
         if not line:
-            self.logger.debug("control request pipe closed, terminating.")
+            self.logger.debug("stdin closed, terminating.")
             raise StopIteration
-        self.logger.debug("received line on control request pipe %s", line.rstrip())
+        self.logger.debug("received line on stdin %s", line.rstrip())
 
         command, arg_str = line.rstrip().split(" ", 2)
         command, arg = self.parse_command(command, arg_str)
 
         result = self.on_command(command, arg)
 
-        self.logger.debug("sending on control response pipe %s", result)
-        print(result, file=self.control_response_pipe)
-        self.control_response_pipe.flush()
-        self.logger.debug("sent on control response pipe %s", result)
+        self.logger.debug("sending control response %s", result)
+        print(result)
+        sys.stdout.flush()
+        self.logger.debug("sent control response %s", result)
 
         self.after_command(command, arg, result)
 
-    def main_loop(self):
+    def run(self):
+        self.logger.debug("sandbox folder: %s", self.pipes_dir)
         while True:
             try:
                 self.accept_command()
             except StopIteration:
                 return
-
-    def run(self):
-        self.logger.debug("sandbox folder: %s", self.sandbox_dir)
-
-        self.logger.debug("creating control pipes...")
-        os.mkfifo(self.control_request_pipe_name)
-        os.mkfifo(self.control_response_pipe_name)
-        self.logger.debug("control pipes created")
-        self.logger.debug("control request pipe: %s" % (self.control_request_pipe_name,))
-        self.logger.debug("control response pipe: %s" % (self.control_response_pipe_name,))
-
-        self.logger.debug("starting module process: %s" % " ".join(self.args))
-
-        env = os.environ.copy()
-        env.update({
-            "TURINGARENA_SANDBOX_DIR": self.sandbox_dir,
-        })
-        self.module = subprocess.Popen(
-            self.args,
-            env=env,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        )
-
-        def stderr_logger():
-            while True:
-                line = self.module.stderr.readline()
-                if not line: return
-
-                self.logger.debug("module stderr: %s" % line.strip())
-
-        logging_thread = threading.Thread(target=stderr_logger)
-        logging_thread.start()
-
-        self.logger.debug("module process started")
-
-        self.logger.debug("opening control pipes...")
-        self.control_request_pipe = open(self.control_request_pipe_name, "r")
-        self.logger.debug("control request pipe opened")
-        self.control_response_pipe = open(self.control_response_pipe_name, "w")
-        self.logger.debug("control response pipe opened")
-
-        self.main_loop()

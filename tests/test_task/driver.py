@@ -1,7 +1,7 @@
 import sys
 
-import subprocess
 from interfaces.exampleinterface import exampleinterface
+from turingarena.runtime import sandbox
 
 
 def main():
@@ -21,16 +21,14 @@ def main():
 def test(a, b):
     return a + b
 
-solution = subprocess.Popen(
-    "./solution",
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE,
-    universal_newlines=True,
-)
+client = sandbox.SandboxClient(executables_dir=".")
+
+solution = client.algorithm_create_process("solution")
+solution.start()
 
 iface = exampleinterface(
-    downward_pipe=solution.stdin,
-    upward_pipe=solution.stdout,
+    downward_pipe=solution.downward_pipe,
+    upward_pipe=solution.upward_pipe,
     main=main,
     callback_test=test
 )
