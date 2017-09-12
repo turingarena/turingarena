@@ -1,0 +1,1714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="087d1bcd-7dec-49f2-b4a7-a4214a9e0bc6" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/.name" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/task-wizard.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/test_task/runtest.sh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/turingarena/compiler/main.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/turingarena/runtime/data.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.project" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.pydevproject" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/alien/alien.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/alien/driver.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/alien/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/alien/testo.pdf" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb/aplusb.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb/driver.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb_raw/module.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb_raw/solution.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/aplusb_raw/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/alien.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/driver.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/driver_stages_support.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/exec.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/foo.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/solution_support.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/test.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/extask/testo.pdf" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/protocol_example/driver.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/protocol_example/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/simple_task/module.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/examples/simple_task/task.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/build.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/codegen/drivergen.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/codegen/expressions.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/codegen/supportgen.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/codegen/utils.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/block.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/compile.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/declaration.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/expression.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/interface.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/scope.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/compile/types.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/evaluator.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/blocks.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/declarations.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/expressions.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/supportgen.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/types.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/drivergen.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/expression.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/interface.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/protocol.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/types.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/module_lib/taskwizard/driver.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/language/python/module_lib/taskwizard/module.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/taskwizard/main.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/expected/driver.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/expected/interface_support.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/print_sandbox_dir_env.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_expression.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_interface.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_protocol.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_sandbox_dir_env.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_supervisor/test_algorithm.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_supervisor/test_module.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/test_task.txt" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/examples/pingpong/driver.cpp" afterPath="$PROJECT_DIR$/tests/pingpong/driver.cpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/examples/pingpong/pingpong.cpp" afterPath="$PROJECT_DIR$/tests/pingpong/pingpong.cpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/examples/pingpong/pingpong_wrong.cpp" afterPath="$PROJECT_DIR$/tests/pingpong/pingpong_wrong.cpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/examples/pingpong/task.txt" afterPath="$PROJECT_DIR$/tests/pingpong/task.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/__init__.py" afterPath="$PROJECT_DIR$/turingarena/sandbox/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/codegen/__init__.py" afterPath="$PROJECT_DIR$/turingarena/runtime/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/compile/__init__.py" afterPath="$PROJECT_DIR$/turingarena/language/python/compiler/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/generator.py" afterPath="$PROJECT_DIR$/turingarena/compiler/generator.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/grammar.py" afterPath="$PROJECT_DIR$/turingarena/compiler/grammar.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/__init__.py" afterPath="$PROJECT_DIR$/turingarena/language/python/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/__init__.py" afterPath="$PROJECT_DIR$/turingarena/language/cpp/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/module_lib/taskwizard/interfaces_support_proto.cpp" afterPath="$PROJECT_DIR$/turingarena/language/cpp/runtime/interfaces_support_proto.cpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/module_lib/taskwizard/module_support_common.h" afterPath="$PROJECT_DIR$/turingarena/language/cpp/runtime/module_support_common.h" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/module_lib/taskwizard/support_proto.cpp" afterPath="$PROJECT_DIR$/turingarena/language/cpp/runtime/support_proto.cpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/module_lib/taskwizard/support_proto.h" afterPath="$PROJECT_DIR$/turingarena/language/cpp/runtime/support_proto.h" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/module_lib/taskwizard/support_proto.hpp" afterPath="$PROJECT_DIR$/turingarena/language/cpp/runtime/support_proto.hpp" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/__init__.py" afterPath="$PROJECT_DIR$/turingarena/language/cpp/compiler/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/python/__init__.py" afterPath="$PROJECT_DIR$/turingarena/language/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/python/drivergen/__init__.py" afterPath="$PROJECT_DIR$/turingarena/compiler/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/language/python/module_lib/taskwizard/__init__.py" afterPath="$PROJECT_DIR$/turingarena/__init__.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/parser.py" afterPath="$PROJECT_DIR$/turingarena/compiler/parser.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/runner.py" afterPath="$PROJECT_DIR$/turingarena/sandbox/runner.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/supervisor.py" afterPath="$PROJECT_DIR$/turingarena/sandbox/sandboxmanager.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/taskwizard/test_parser.py" afterPath="$PROJECT_DIR$/turingarena/compiler/test_parser.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/tests/test_task/task.txt" afterPath="$PROJECT_DIR$/tests/test_task/interfaces.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.asc" afterPath="$PROJECT_DIR$/README.asc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/setup.py" afterPath="$PROJECT_DIR$/setup.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test_task/driver.py" afterPath="$PROJECT_DIR$/tests/test_task/driver.py" />
+    </list>
+    <ignored path="task-wizard.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="task-wizard" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="exampleinterface.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="6" column="22" lean-forward="false" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="22" />
+              <folding>
+                <element signature="e#0#37#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="data.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/runtime/data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="293">
+              <caret line="40" column="33" lean-forward="true" selection-start-line="40" selection-start-column="33" selection-end-line="40" selection-end-column="33" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="runtimegen.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/runtimegen.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="360">
+              <caret line="25" column="18" lean-forward="true" selection-start-line="25" selection-start-column="18" selection-end-line="25" selection-end-column="18" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="module.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/runtime/module.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="expression.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/expression.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-20">
+              <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#77#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="expressions.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/compiler/codegen/expressions.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="driver.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/runtime/driver.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="311">
+              <caret line="95" column="36" lean-forward="true" selection-start-line="95" selection-start-column="36" selection-end-line="95" selection-end-column="36" />
+              <folding>
+                <element signature="e#0#30#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="protocol.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/protocol.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="182" column="28" lean-forward="false" selection-start-line="182" selection-start-column="28" selection-end-line="182" selection-end-column="28" />
+              <folding>
+                <element signature="e#0#30#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="driver.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tests/test_task/driver.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="414">
+              <caret line="23" column="14" lean-forward="true" selection-start-line="23" selection-start-column="14" selection-end-line="23" selection-end-column="14" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/interface.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="396">
+              <caret line="33" column="26" lean-forward="false" selection-start-line="33" selection-start-column="26" selection-end-line="33" selection-end-column="26" />
+              <folding>
+                <marker date="1505201407329" expanded="false" signature="0:178" ph="import ..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>phase</find>
+      <find>pro</find>
+      <find>main_definition</find>
+      <find>Protocol</find>
+      <find>ProtocolG</find>
+      <find>ProtocolGene</find>
+      <find>ProtocolGenera</find>
+      <find>ProtocolGenerat</find>
+      <find>ProtocolGenerato</find>
+      <find>Black</find>
+      <find>ProtocolGenerator</find>
+      <find>text_lines</find>
+      <find>preflight_command</find>
+      <find>ret</find>
+      <find>get_local</find>
+      <find>self.acce</find>
+      <find>self.accept_callbacks</find>
+      <find>self.upw</find>
+      <find>self.dow</find>
+      <find>self.up</find>
+      <find>accep</find>
+      <find>accept_callback</find>
+      <find>accept_callback()</find>
+      <find>.vaue</find>
+      <find>.value</find>
+      <find>def mn</find>
+      <find>yield from</find>
+      <find>BEGIN</find>
+      <find>yield from []</find>
+      <find>yield 'ma</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>process</replace>
+      <replace>snprintf(filename, MAX_LEN</replace>
+      <replace>TASKWIZARD_SANDBOX_DIR</replace>
+      <replace>self.executable_path</replace>
+      <replace>std::string</replace>
+      <replace>generate_format</replace>
+      <replace>visit_</replace>
+      <replace>raise</replace>
+      <replace>generate_expression(self.scope,</replace>
+      <replace>function_declaration</replace>
+      <replace>expr</replace>
+      <replace>statement.function_declaration</replace>
+      <replace>get_</replace>
+      <replace>visit_variable_declaration</replace>
+      <replace>callback_declaration</replace>
+      <replace>proto.befo</replace>
+      <replace>callback_{name}</replace>
+      <replace>self.next_call</replace>
+      <replace>self.upward_stop_on_input</replace>
+      <replace>turingarena</replace>
+      <replace>main_declaration</replace>
+      <replace>BlackGenerator</replace>
+      <replace>Block</replace>
+      <replace>BlockGenerator</replace>
+      <replace>command</replace>
+      <replace>var</replace>
+      <replace>accept_callback</replace>
+      <replace>yield &quot;pass&quot;</replace>
+      <replace>accept_callbacks()</replace>
+      <replace>&lt;initialization&gt;</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$/taskwizard/language</dir>
+      <dir>$PROJECT_DIR$</dir>
+      <dir>$PROJECT_DIR$/turingarena/language/python</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/codegen.py" />
+        <option value="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/supportgen.py" />
+        <option value="$PROJECT_DIR$/taskwizard/language/cpp/supportgen/blocks.py" />
+        <option value="$PROJECT_DIR$/taskwizard/language/python/drivergen/interface.py" />
+        <option value="$PROJECT_DIR$/taskwizard/language/python/drivergen/protocol.py" />
+        <option value="$PROJECT_DIR$/taskwizard/generation/codegen.py" />
+        <option value="$PROJECT_DIR$/taskwizard/compile/scope.py" />
+        <option value="$PROJECT_DIR$/taskwizard/language/cpp/runner/compiler.py" />
+        <option value="$PROJECT_DIR$/taskwizard/preparer.py" />
+        <option value="$PROJECT_DIR$/dock/Dockerfile" />
+        <option value="$PROJECT_DIR$/taskwizard/compile/expression.py" />
+        <option value="$PROJECT_DIR$/tests/test_task/.task/generated/driver/python/interfaces/exampleinterface.py" />
+        <option value="$PROJECT_DIR$/taskwizard/main.py" />
+        <option value="$PROJECT_DIR$/taskwizard/generator.py" />
+        <option value="$PROJECT_DIR$/taskwizard/compiler.py" />
+        <option value="$PROJECT_DIR$/taskwizard/grammar.py" />
+        <option value="$PROJECT_DIR$/README.asc" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/module_lib/taskwizard/module.py" />
+        <option value="$PROJECT_DIR$/tests/pingpong/task.txt" />
+        <option value="$PROJECT_DIR$/turingarena/sandboxmanager.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/compile.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/analysis.py" />
+        <option value="$PROJECT_DIR$/setup.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/cpp/compiler/supportgen/supportgen.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/cpp/compiler/supportgen/blocks.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/drivergen/drivergen.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/drivergen/interface.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/drivergen/protocol.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/main.py" />
+        <option value="$PROJECT_DIR$/turingarena/runtime/module.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/generator.py" />
+        <option value="$PROJECT_DIR$/tests/test_task/runtest.sh" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/declaration.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/interface.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/parser.py" />
+        <option value="$PROJECT_DIR$/tests/test_task/interfaces.txt" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/grammar.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/block.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/engine.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/runtimegen.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/analysis/types.py" />
+        <option value="$PROJECT_DIR$/turingarena/compiler/codegen/expressions.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/types.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/expression.py" />
+        <option value="$PROJECT_DIR$/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/interface.py" />
+        <option value="$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/protocol.py" />
+        <option value="$PROJECT_DIR$/turingarena/runtime/data.py" />
+        <option value="$PROJECT_DIR$/turingarena/runtime/driver.py" />
+        <option value="$PROJECT_DIR$/tests/test_task/driver.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="y" value="27" />
+    <option name="width" value="1920" />
+    <option name="height" value="1053" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyCompatibilityInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="task-wizard">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="runtime" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="language" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="language" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="language" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="compiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="turingarena" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="language" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="compiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="runtimegen" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test_task" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task-wizard" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+        <option name="show-excluded-files" value="false" />
+      </pane>
+      <pane id="Scratches" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tests/test_task/driver.py" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;exa&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;PEn&#9;null&#9;null&#10;data&#9;FILE&#9;file:///home/max/task-wizard/turingarena/runtime/data.py&#10;prot&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/protocol.py&#10;PEng&#9;null&#9;null&#10;inte&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/interface.py&#10;inter&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/interface.py&#10;BaseI&#9;null&#9;null&#10;Inte&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/interface.py&#10;dri&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/driver.py&#10;drive&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/driver.py&#10;eng&#9;null&#9;null&#10;e&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;p&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/interface.py&#10;pro&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/protocol.py&#10;proto&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/protocol.py&#10;ex&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;Interface&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;Base&#9;null&#9;null&#10;BaseInterface&#9;null&#9;null&#10;interfa&#9;FILE&#9;file:///home/max/task-wizard/turingarena/language/python/compiler/runtimegen/interface.py&#10;exam&#9;FILE&#9;file:///home/max/task-wizard/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py&#10;TypeBui&#9;null&#9;null&#10;BaI&#9;null&#9;null&#10;Engin&#9;null&#9;null&#10;ProPha&#9;null&#9;null&#10;get_last_callback_return&#9;null&#9;null&#10;generate_call&#9;null&#9;null&#10;BaseIn&#9;null&#9;null&#10;ParseIn&#9;null&#9;null&#10;AST&#9;null&#9;null&#10;Protocol&#9;null&#9;null&#10;commi&#9;ACTION&#9;ChangesView.Commit&#10;load_en&#9;null&#9;null&#10;push&#9;ACTION&#9;Vcs.Push&#10;Node&#9;null&#9;null&#10;tatsu.objectmodel.Node&#9;null&#9;null&#10;AbsSyn&#9;null&#9;null&#10;DeclaratorBuildingTypeVisitor&#9;null&#9;null&#10;gene&#9;FILE&#9;file:///home/max/task-wizard/taskwizard/generator.py&#10;DriverGenerator&#9;null&#9;null&#10;wal&#9;null&#9;null&#10;Model&#9;null&#9;null&#10;Parser&#9;FILE&#9;file:///home/max/.virtualenvs/task-wizard/lib/python3.5/site-packages/grako-3.19.1-py3.5.egg/grako/parser.py" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="258" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="279" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="285" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="1068" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="266" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="277" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="282" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="1065" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
+    <property name="full.screen.before.presentation.mode" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/turingarena/runtime" />
+      <recent name="$PROJECT_DIR$/tests/pingpong" />
+      <recent name="$PROJECT_DIR$/taskwizard" />
+      <recent name="$PROJECT_DIR$/taskwizard/language/python/module_lib/taskwizard" />
+      <recent name="$PROJECT_DIR$/taskwizard/compile" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/turingarena/language/cpp/compiler" />
+      <recent name="$PROJECT_DIR$/turingarena/compiler" />
+      <recent name="$PROJECT_DIR$/turingarena/sandbox" />
+      <recent name="$PROJECT_DIR$/turingarena/language/cpp/runtime" />
+      <recent name="$PROJECT_DIR$/turingarena/language/python/compiler" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.test_task driver">
+    <configuration default="false" name="test_task driver" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONPATH" value="./generated/runtime/python" />
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_task" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_task/driver.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="BashConfigurationType" factoryName="Bash">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="CompoundRunConfigurationType" factoryName="Compound Run Configuration">
+      <method />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/task-wizard/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/taskwizard/main.py" />
+      <option name="PARAMETERS" value="prepare" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+    <configuration default="false" name="compile" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_task" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/turingarena/compiler/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Python.compile" />
+      <item index="1" class="java.lang.String" itemvalue="Python.test_task driver" />
+    </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Python.test_task driver" />
+      </list>
+    </recent_temporary>
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="task-wizard" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="087d1bcd-7dec-49f2-b4a7-a4214a9e0bc6" name="Default" comment="" />
+      <created>1491060812260</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1491060812260</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Implement scopes in protocol blocks.">
+      <created>1496251083627</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1496251083627</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Add for indexes to scope. Reorganize code a little.">
+      <created>1496253322002</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1496253322002</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Add stub of python code generation.">
+      <created>1496264503087</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1496264503087</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Add missing file to git.">
+      <created>1496264530676</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1496264530676</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Remove unused file.">
+      <created>1496338780874</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1496338780874</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Cleanup grammar and remove &quot;semantic&quot; classes.">
+      <created>1496340264634</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1496340264635</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Introduce the Scope class to encapsulate scopes.">
+      <created>1496340868261</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1496340868261</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Introduce distinction array_type/scalar_type.">
+      <created>1496341704231</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1496341704231</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Switch from grako to tatsu.">
+      <created>1496341759381</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1496341759381</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Use left-recursion for defining types.">
+      <created>1496342002142</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1496342002142</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Use left-recursion for expressions and clean-up.">
+      <created>1496343312814</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1496343312815</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Remove useless file.">
+      <created>1496343367411</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1496343367411</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Add generation of alloc statements.">
+      <created>1496397804987</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1496397804987</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Implement generation of python properties for globals.">
+      <created>1496398832058</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1496398832058</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Generate partially protocol driver in python.">
+      <created>1496403075102</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1496403075102</updated>
+    </task>
+    <task id="LOCAL-00060" summary="Fix and try protocol driver in python.">
+      <created>1496480324389</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1496480324389</updated>
+    </task>
+    <task id="LOCAL-00061" summary="Draft implementation of Array's in python drivers.">
+      <created>1496485444560</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1496485444561</updated>
+    </task>
+    <task id="LOCAL-00062" summary="Compile grammar on-demand.">
+      <created>1496500717440</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1496500717440</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Use more meta-programming in python driver code.">
+      <created>1496567163730</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1496567163730</updated>
+    </task>
+    <task id="LOCAL-00064" summary="Check values are set in protocol.">
+      <created>1496568903451</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1496568903452</updated>
+    </task>
+    <task id="LOCAL-00065" summary="Use python generator for downward protocol.">
+      <created>1496569583072</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1496569583072</updated>
+    </task>
+    <task id="LOCAL-00066" summary="Generate draft of python driver code for call statements.">
+      <created>1496674049680</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1496674049680</updated>
+    </task>
+    <task id="LOCAL-00067" summary="Use a custom class to represent AST nodes.">
+      <created>1496677469296</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1496677469296</updated>
+    </task>
+    <task id="LOCAL-00068" summary="Run a common compilation phase before codegen.">
+      <created>1496679865572</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1496679865572</updated>
+    </task>
+    <task id="LOCAL-00069" summary="Drop scope handling from code generation.">
+      <created>1496681053921</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1496681053921</updated>
+    </task>
+    <task id="LOCAL-00070" summary="Determine expected first call in a block.&#10;&#10;To be used for if/switch expression inference.">
+      <created>1496687583175</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1496687583175</updated>
+    </task>
+    <task id="LOCAL-00071" summary="Use a class for locals in python driver.">
+      <created>1496695461622</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1496695461622</updated>
+    </task>
+    <task id="LOCAL-00072" summary="Split downward protocol into preflight/downward.">
+      <created>1496697078547</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1496697078547</updated>
+    </task>
+    <task id="LOCAL-00073" summary="Do not send call info in actual downward protocol.">
+      <created>1496697390969</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1496697390969</updated>
+    </task>
+    <task id="LOCAL-00074" summary="Complete protocol implementation in python driver.">
+      <created>1496734907761</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1496734907761</updated>
+    </task>
+    <task id="LOCAL-00075" summary="Extract some python driver code in common superclass.">
+      <created>1496737199667</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1496737199667</updated>
+    </task>
+    <task id="LOCAL-00076" summary="Wrap interface driver internals into an Engine class.">
+      <created>1496738476072</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1496738476072</updated>
+    </task>
+    <task id="LOCAL-00077" summary="Add code to run a module written in python.">
+      <created>1496760969011</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1496760969011</updated>
+    </task>
+    <task id="LOCAL-00078" summary="Add code to run a module written in python.">
+      <created>1496760999410</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1496760999410</updated>
+    </task>
+    <task id="LOCAL-00079" summary="Keep only EBNF in grammar.py, move rest to parser.py.">
+      <created>1496822232474</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1496822232474</updated>
+    </task>
+    <task id="LOCAL-00080" summary="Add if statement to grammar.">
+      <created>1496822532575</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1496822532575</updated>
+    </task>
+    <task id="LOCAL-00081" summary="Unify global/local/const into variable_declaration.">
+      <created>1496823009942</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1496823009942</updated>
+    </task>
+    <task id="LOCAL-00082" summary="Use postfix notation for function return type.">
+      <created>1496823766266</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1496823766266</updated>
+    </task>
+    <task id="LOCAL-00083" summary="Start implementation of callbacks.">
+      <created>1496825780190</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1496825780190</updated>
+    </task>
+    <task id="LOCAL-00084" summary="Use stdin/out in test_task when no supervisor is available.">
+      <created>1497016763957</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1497016763957</updated>
+    </task>
+    <task id="LOCAL-00085" summary="Generate protocol for callbacks.">
+      <created>1497021032095</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1497021032095</updated>
+    </task>
+    <task id="LOCAL-00086" summary="Unify generated code for different phases.">
+      <created>1497022426412</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1497022426412</updated>
+    </task>
+    <task id="LOCAL-00087" summary="Add comments to generated protocol driver.">
+      <created>1497022960984</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1497022960984</updated>
+    </task>
+    <task id="LOCAL-00088" summary="Remove useless __init__.py in python module_lib.">
+      <created>1497023263502</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1497023263502</updated>
+    </task>
+    <task id="LOCAL-00089" summary="Check size of allocated arrays in protocol.">
+      <created>1497024162096</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1497024162096</updated>
+    </task>
+    <task id="LOCAL-00090" summary="Working draft implementation of callbacks.">
+      <created>1497363846660</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1497363846661</updated>
+    </task>
+    <task id="LOCAL-00091" summary="Small clean-ups for protocol driver code.">
+      <created>1497370470600</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1497370470600</updated>
+    </task>
+    <task id="LOCAL-00092" summary="Reorganize code generation modules into packages.">
+      <created>1497370932358</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1497370932358</updated>
+    </task>
+    <task id="LOCAL-00093" summary="Fix misplaced docstring.">
+      <created>1497371010447</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1497371010447</updated>
+    </task>
+    <option name="localTasksCounter" value="94" />
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.05.18 at 21h 46m 39s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.05.18 at 21h 51m 14s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.05.18 at 21h 51m 24s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 44m 17s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 46m 33s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 48m 20s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 51m 02s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 51m 20s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_test_parser_TestParser - 2017.06.01 at 19h 51m 52s.xml">
+      <configuration name="Unittests for test_parser.TestParser" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_taskwizard - 2017.09.11 at 15h 55m 08s.xml">
+      <configuration name="Unittests in taskwizard" configurationId="tests" />
+    </history-entry>
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33085898" sideWeight="0.50208336" order="11" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32873806" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3478261" sideWeight="0.49791667" order="2" side_tool="false" content_ui="tabs" x="0" y="372" width="1920" height="342" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32980973" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39766702" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33085898" sideWeight="0.50208336" order="11" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.34814814" sideWeight="0.49791667" order="2" side_tool="false" content_ui="tabs" x="0" y="372" width="1920" height="342" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32980973" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39872748" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Run a common compilation phase before codegen." />
+    <MESSAGE value="Drop scope handling from code generation." />
+    <MESSAGE value="Determine expected first call in a block.&#10;&#10;To be used for if/switch expression inference." />
+    <MESSAGE value="Use a class for locals in python driver." />
+    <MESSAGE value="Split downward protocol into preflight/downward." />
+    <MESSAGE value="Do not send call info in actual downward protocol." />
+    <MESSAGE value="Complete protocol implementation in python driver." />
+    <MESSAGE value="Extract some python driver code in common superclass." />
+    <MESSAGE value="Wrap interface driver internals into an Engine class." />
+    <MESSAGE value="Add code to run a module written in python." />
+    <MESSAGE value="Keep only EBNF in grammar.py, move rest to parser.py." />
+    <MESSAGE value="Add if statement to grammar." />
+    <MESSAGE value="Unify global/local/const into variable_declaration." />
+    <MESSAGE value="Use postfix notation for function return type." />
+    <MESSAGE value="Start implementation of callbacks." />
+    <MESSAGE value="Use stdin/out in test_task when no supervisor is available." />
+    <MESSAGE value="Generate protocol for callbacks." />
+    <MESSAGE value="Unify generated code for different phases." />
+    <MESSAGE value="Add comments to generated protocol driver." />
+    <MESSAGE value="Remove useless __init__.py in python module_lib." />
+    <MESSAGE value="Check size of allocated arrays in protocol." />
+    <MESSAGE value="Working draft implementation of callbacks." />
+    <MESSAGE value="Small clean-ups for protocol driver code." />
+    <MESSAGE value="Reorganize code generation modules into packages." />
+    <MESSAGE value="Fix misplaced docstring." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix misplaced docstring." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_task/.task/generated/driver/python/interfaces/exampleinterface.py</url>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+      </breakpoints>
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+      <option name="time" value="76" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/tests/test_sandbox_dir_env.sh" />
+    <entry file="file://$PROJECT_DIR$/tests/test_task.txt" />
+    <entry file="file://$PROJECT_DIR$/tests/pingpong/task.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/sandbox/sandboxmanager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="416">
+          <caret line="194" column="0" lean-forward="false" selection-start-line="194" selection-start-column="0" selection-end-line="194" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.project" />
+    <entry file="file://$PROJECT_DIR$/.pydevproject" />
+    <entry file="file://$PROJECT_DIR$/turingarena/evaluator.py" />
+    <entry file="file://$PROJECT_DIR$/turingarena/sandbox/runner.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/test_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="24" column="10" lean-forward="false" selection-start-line="24" selection-start-column="10" selection-end-line="24" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/scope.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/cpp/compiler/supportgen/blocks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="12" column="29" lean-forward="false" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/generated/interfaces/exampleinterface/cpp/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/generator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="429">
+          <caret line="30" column="33" lean-forward="false" selection-start-line="30" selection-start-column="33" selection-end-line="30" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/solutionoutput.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/runtest.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/pingpong/driver.py" />
+    <entry file="file://$PROJECT_DIR$/turingarena/language/cpp/compiler/supportgen/supportgen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="410">
+          <caret line="28" column="51" lean-forward="false" selection-start-line="28" selection-start-column="51" selection-end-line="28" selection-end-column="51" />
+          <folding>
+            <element signature="e#0#9#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/declaration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="41" column="33" lean-forward="false" selection-start-line="41" selection-start-column="33" selection-end-line="41" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#47#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/pingpong/driver.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/interface.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="457">
+          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#61#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.virtualenvs/task-wizard/lib/python3.5/site-packages/pip/_vendor/ordereddict.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.virtualenvs/task-wizard/lib/python3.5/_collections_abc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="32">
+          <caret line="657" column="6" lean-forward="false" selection-start-line="657" selection-start-column="6" selection-end-line="657" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.virtualenvs/task-wizard/lib/python3.5/collections/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="55" column="32" lean-forward="false" selection-start-line="55" selection-start-column="32" selection-end-line="55" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Dropbox/Workspaces/task-wizard/turingarena/language/python/compiler/runtimegen/engine.py" />
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/engine.py" />
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/codegen/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="439">
+          <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/grammar.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="132" column="0" lean-forward="true" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="13" column="24" lean-forward="true" selection-start-line="13" selection-start-column="24" selection-end-line="13" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/types.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="46" lean-forward="true" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/interfaces.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" column="20" lean-forward="true" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/types.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/runtime/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2017.1/system/python_stubs/1945704160/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2030">
+          <caret line="3657" column="8" lean-forward="false" selection-start-line="3657" selection-start-column="8" selection-end-line="3657" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/analysis/block.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="295">
+          <caret line="65" column="6" lean-forward="false" selection-start-line="65" selection-start-column="6" selection-end-line="65" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/runtimegen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="25" column="18" lean-forward="true" selection-start-line="25" selection-start-column="18" selection-end-line="25" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-20">
+          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/runtime/module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/compiler/codegen/expressions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/interface.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="33" column="26" lean-forward="false" selection-start-line="33" selection-start-column="26" selection-end-line="33" selection-end-column="26" />
+          <folding>
+            <marker date="1505201407329" expanded="false" signature="0:178" ph="import ..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/language/python/compiler/runtimegen/protocol.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="182" column="28" lean-forward="false" selection-start-line="182" selection-start-column="28" selection-end-line="182" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#30#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/runtime/data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="293">
+          <caret line="40" column="33" lean-forward="true" selection-start-line="40" selection-start-column="33" selection-end-line="40" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/generated/runtime/python/interfaces/exampleinterface.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="22" lean-forward="false" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/turingarena/runtime/driver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="311">
+          <caret line="95" column="36" lean-forward="true" selection-start-line="95" selection-start-column="36" selection-end-line="95" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#30#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_task/driver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="14" lean-forward="true" selection-start-line="23" selection-start-column="14" selection-end-line="23" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

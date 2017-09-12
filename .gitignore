@@ -5,7 +5,7 @@
 !*.*
 
 # TaskWizard-specific ignores
-.task/
+generated/
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 

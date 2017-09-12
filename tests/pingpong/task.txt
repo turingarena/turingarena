@@ -1,0 +1,12 @@
+interface pingpong {
+
+  function int ping();
+
+  callback void pong() {
+  }
+
+  main() {
+    call ping();
+  }
+
+}

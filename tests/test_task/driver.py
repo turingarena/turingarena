@@ -1,29 +1,27 @@
 import sys
+
 from interfaces.exampleinterface import exampleinterface
-from taskwizard.module import supervisor
 
-if supervisor.has_supervisor():
-    supervisor.init()
 
-    solution_process = supervisor.algorithm_create_process("solution")
-    solution_process.start()
+def main():
+    iface.N = 10
+    iface.M = 100
+    iface.A.alloc(1, iface.N)
 
-    iface = exampleinterface(solution_process.upward_pipe, solution_process.downward_pipe)
-else:
-    iface = exampleinterface(sys.stdin, sys.stdout)
+    for i in range(1, 1 + iface.N):
+        iface.A[i] = i * i
 
-iface._callbacks["test"] = lambda a, b: a+b
+    S = iface.solve(3)
 
-iface.N = 10
-iface.M = 100
-iface.A.alloc(1, iface.N)
+    print("Answer:", S, file=sys.stderr)
 
-for i in range(1, 1+iface.N):
-    iface.A[i] = i*i
+def test(a, b):
+    return a + b
 
-S = iface.solve(3)
-
-print("Answer:", S, file=sys.stderr)
-
-if supervisor.has_supervisor():
-    solution_process.stop()
+iface = exampleinterface(
+    downward_pipe=sys.stdout,
+    upward_pipe=sys.stdin,
+    main=main,
+    callback_test=test
+)
+iface.main()

@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name="taskwizard",
+    name="turingarena",
     version="0.2",
     author="",
     author_email="",
@@ -21,12 +21,12 @@ setup(
     description="",
     entry_points={
         "console_scripts": [
-            "taskwizard=taskwizard.main:main",
+            "turingarenac=turingarena.compiler.main:main",
         ],
     },
     packages=find_packages(),
     package_data={
-        'taskwizard': ['**/templates/**', '**/*static/**'],
+        'turingarena': ['**/templates/**', '**/*static/**'],
     },
     keywords="",
     license="",
