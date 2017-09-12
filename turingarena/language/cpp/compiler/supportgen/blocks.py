@@ -33,6 +33,7 @@ class BlockItemGenerator:
         args = ', '.join(generate_expression(v) for v in node.arguments)
 
         yield 'printf("{format}", {args});'.format(format=format_string, args=args)
+        yield 'fflush(stdout);'
 
     def visit_call_statement(self, node):
         if node.return_value is not None:
@@ -45,6 +46,8 @@ class BlockItemGenerator:
             function_name=node.function_name,
             parameters=", ".join(generate_expression(p) for p in node.parameters)
         )
+        yield r'printf("return\n");'
+        yield 'fflush(stdout);'
 
     def visit_alloc_statement(self, statement):
         for argument in statement.arguments:

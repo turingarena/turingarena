@@ -1,7 +1,7 @@
 import os
 
 from turingarena.compiler.codegen.supportgen import AbstractSupportGenerator
-from turingarena.compiler.codegen.utils import indent_all, write_to_file
+from turingarena.compiler.codegen.utils import indent_all, write_to_file, indent
 
 from turingarena.language.cpp.compiler.supportgen.declarations import build_declaration, build_parameter
 from turingarena.language.cpp.compiler.supportgen.types import generate_base_type
@@ -26,6 +26,8 @@ class InterfaceItemGenerator:
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"
+        yield indent(r'printf("{name}\n");').format(name=decl.declarator.name)
+        yield indent('fflush(stdout);')
         yield from indent_all(generate_block(decl.block))
         yield "}"
 

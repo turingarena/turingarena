@@ -61,8 +61,10 @@ def array(item_type):
 
 
 class BaseScalar:
-    def __init__(self):
+    def __init__(self, value=None):
         self._value = None
+        if value is not None:
+            self.value = value
 
     def is_set(self):
         return self._value is not None

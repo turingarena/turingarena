@@ -213,7 +213,7 @@ class DownwardControlGenerator(ProtocolGenerator):
         yield "{ret}expect_return(command)".format(
             ret=(
                 "" if stmt.expression is None else
-                build_driver_expression(stmt.expression) + " = "
+                build_assignable_expression(stmt.expression) + " = "
             )
         )
         yield "yield"
@@ -237,7 +237,7 @@ class DownwardControlGenerator(ProtocolGenerator):
 class DownwardDataGenerator(ProtocolGenerator):
 
     def visit_input_statement(self, statement):
-        yield "print({arguments}, file=pipe)".format(
+        yield "print({arguments}, file=pipe, flush=True)".format(
             arguments=", ".join(
                 build_driver_expression(e)
                 for e in statement.arguments

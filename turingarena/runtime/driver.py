@@ -75,12 +75,12 @@ class ProtocolEngine:
         next(self.upward_data)
         command, *command_args = next(self.upward_control)
         assert command == "main" and len(command_args) == 0
-        self.invoke_main()
-        self.downward_control.send(("return", None))
+        return_value = self.invoke_main()
+        self.downward_control.send(("return", return_value))
         next(self.downward_data)
 
     def invoke_main(self):
-        self.main()
+        return self.main()
 
     def invoke_callback(self, name, args):
         return self.callbacks["callback_" + name](*args)

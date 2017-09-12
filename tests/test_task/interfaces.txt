@@ -22,6 +22,6 @@ interface exampleinterface {
         input u;
         call solve(u) -> S;
         output S;
-        return;
+        return 0;
     }
 }

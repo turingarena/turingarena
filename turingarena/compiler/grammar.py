@@ -136,9 +136,9 @@ grammar_ebnf = r"""
     ;
 
     expression =
+        | int_literal_expression
         | subscript_expression
         | variable_expression
-        | int_literal_expression
     ;
     
     subscript_expression =
@@ -174,7 +174,7 @@ grammar_ebnf = r"""
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
     STRING = '"' @:/([^"\n]|\\")*/ '"' ;
-    INT = /[1-9][0-9]*/ ;
+    INT = /0|[1-9][0-9]*/ ;
 
 """
 

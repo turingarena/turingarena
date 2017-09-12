@@ -1,5 +1,6 @@
 import sys
 
+import subprocess
 from interfaces.exampleinterface import exampleinterface
 
 
@@ -15,13 +16,23 @@ def main():
 
     print("Answer:", S, file=sys.stderr)
 
+    return 0
+
 def test(a, b):
     return a + b
 
+solution = subprocess.Popen(
+    "./solution",
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    universal_newlines=True,
+)
+
 iface = exampleinterface(
-    downward_pipe=sys.stdout,
-    upward_pipe=sys.stdin,
+    downward_pipe=solution.stdin,
+    upward_pipe=solution.stdout,
     main=main,
     callback_test=test
 )
+
 iface.main()
