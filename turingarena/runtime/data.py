@@ -69,7 +69,8 @@ class BaseScalar:
 
     @property
     def value(self):
-        if not self.is_set(): raise ValueError("not set")
+        if not self.is_set():
+            raise ValueError("not set")
         return self._value
 
     @value.setter
