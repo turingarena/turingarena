@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from collections import deque
 from functools import partial
 
@@ -6,7 +5,6 @@ from turingarena.runtime.data import Variable
 
 
 class ProtocolEngine:
-
     phases = [
         "global_data",
         "upward_data",

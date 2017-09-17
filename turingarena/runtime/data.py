@@ -1,8 +1,3 @@
-from abc import abstractmethod
-from collections import deque
-from functools import partial
-
-
 class BaseStruct:
     def __init__(self):
         self._delegate = {}
@@ -15,7 +10,6 @@ class BaseStruct:
 
 
 class BaseArray:
-
     _type = None
 
     def __init__(self):
@@ -93,11 +87,11 @@ class BaseScalar:
 def scalar(base):
     class Scalar(BaseScalar):
         _base = base
+
     return Scalar
 
 
 class Variable:
-
     def __init__(self, t, value=None):
         self._delegate = t()
         if value is not None:

@@ -1,7 +1,7 @@
 import sys
 
 from interfaces.exampleinterface import exampleinterface
-from turingarena.runtime import sandbox
+from turingarena.runtime.sandbox import SandboxClient
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
 def test(a, b):
     return a + b
 
-client = sandbox.SandboxClient(executables_dir=".")
+client = SandboxClient()
 
 solution = client.algorithm_create_process("solution")
 solution.start()

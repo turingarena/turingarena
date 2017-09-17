@@ -21,8 +21,9 @@ setup(
     description="",
     entry_points={
         "console_scripts": [
-            "turingarenac=turingarena.compiler.main:main",
-            "turingarenasandbox=turingarena.sandbox.main:main",
+            "turingarenagen=turingarena.interfaces.main:main",
+            "turingarenac=turingarena.runner.compile:main",
+            "turingarenasandbox=turingarena.runner.main:main",
         ],
     },
     packages=find_packages(),
