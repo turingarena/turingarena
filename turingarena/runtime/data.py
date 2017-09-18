@@ -21,6 +21,8 @@ class BaseAssignable:
 
 def get_value(assignable):
     if isinstance(assignable, list):
+        if None in assignable:
+            raise ValueError("trying to read an area of an array that does not exist")
         return [get_value(v) for v in assignable]
     else:
         assert isinstance(assignable, BaseAssignable)
@@ -30,7 +32,7 @@ def get_value(assignable):
 def set_value(assignable, value):
     if isinstance(assignable, list):
         for a, v in zip(assignable, value):
-            if value is not None:
+            if v is not None:
                 set_value(a, v)
     else:
         assert isinstance(assignable, BaseAssignable)

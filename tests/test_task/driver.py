@@ -11,14 +11,13 @@ solution.start()
 
 
 with exampleinterface(solution) as driver:
-    def test(a, b):
-        return a + b
-
-    driver.test = test
+    driver.test = lambda a, b: a + b
 
     driver.N = 10
     driver.M = 100
-    driver.A = rebased(1, [i*i for i in range(1, 1 + driver.N)])
+    driver.A = rebased(1, [None] * driver.N)
+
+    driver.A[1:] = [i*i for i in range(1,1+driver.N)]
 
     S = driver.solve(3)
 
