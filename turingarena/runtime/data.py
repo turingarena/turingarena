@@ -11,22 +11,35 @@ class BaseAssignable:
     """
 
     @abstractmethod
-    def on_get_value(self):
-        pass
+    def on_get(self):
+        """
+        Returns the assigned value, or None if not yet defined.
+        """
 
     @abstractmethod
-    def on_set_value(self, value):
-        pass
+    def on_set(self, value):
+        """
+        Sets the value.
+
+        The parameter value cannot be None.
+        """
 
 
-def get_value(assignable):
+def get_value_or_none(assignable):
     if isinstance(assignable, list):
         if None in assignable:
             raise ValueError("trying to read an area of an array that does not exist")
-        return [get_value(v) for v in assignable]
+        return [get_value_or_none(v) for v in assignable]
     else:
         assert isinstance(assignable, BaseAssignable)
-        return assignable.on_get_value()
+        return assignable.on_get()
+
+
+def get_value(assignable):
+    value = get_value_or_none(assignable)
+    if value is None:
+        raise ValueError("not set")
+    return value
 
 
 def set_value(assignable, value):
@@ -36,7 +49,7 @@ def set_value(assignable, value):
                 set_value(a, v)
     else:
         assert isinstance(assignable, BaseAssignable)
-        assignable.on_set_value(value)
+        assignable.on_set(value)
 
 
 class RebasedList:
@@ -94,10 +107,10 @@ class BaseArray(BaseAssignable):
             [self._item_type() for _ in range(end - start + 1)]
         )
 
-    def on_get_value(self):
+    def on_get(self):
         return self
 
-    def on_set_value(self, value):
+    def on_set(self, value):
         if not isinstance(value, RebasedList):
             # by default lists are zero-based
             value = rebased(0, value)
@@ -118,7 +131,8 @@ class BaseArray(BaseAssignable):
         return iter(self.delegate[self.start:])
 
     def check_alloc(self):
-        if not self.is_alloc(): raise ValueError("not alloc'd")
+        if not self.is_alloc():
+            raise ValueError("not alloc'd")
 
 
 def array(item_type):
@@ -134,33 +148,26 @@ class BaseScalar(BaseAssignable):
     def __init__(self, value=None):
         self.value = None
         if value is not None:
-            self.on_set_value(value)
+            self.on_set(value)
 
-    def is_set(self):
-        return self.value is not None
-
-    def on_get_value(self):
-        if not self.is_set():
-            raise ValueError("not set")
+    def on_get(self):
         return self.value
 
-    def on_set_value(self, value):
+    def on_set(self, value):
         if not isinstance(value, self._base):
             raise TypeError("value {} has wrong type, expecting {}".format(value, self._base))
 
-        if not self.is_set():
+        if self.value is None:
             self.value = value
             return
 
-        if self.value == value:
-            return
-
-        raise ImmutabilityViolation(
-            "cannot set to a different value ({previous} -> {new})".format(
-                previous=self.value,
-                new=value,
+        if self.value != value:
+            raise ImmutabilityViolation(
+                "cannot set to a different value ({previous} -> {new})".format(
+                    previous=self.value,
+                    new=value,
+                )
             )
-        )
 
 
 def scalar(base):
