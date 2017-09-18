@@ -21,7 +21,6 @@ class BaseDriverEngine:
             self,
             upward_pipe,
             downward_pipe,
-            callbacks,
     ):
 
         self.locals = {
@@ -50,7 +49,7 @@ class BaseDriverEngine:
             pipe=downward_pipe,
         )
 
-        self.callbacks = callbacks
+        self.callbacks = {}
 
         # prepare downward_control to receive data
         next(self.downward_control)
@@ -73,7 +72,7 @@ class BaseDriverEngine:
         next(self.downward_data)
 
     def invoke_callback(self, name, args):
-        return getattr(self.driver, name)(*args)
+        return self.callbacks[name](*args)
 
     def call(self, name, *call_args):
         self.downward_control.send(("call", name, call_args))
@@ -101,11 +100,10 @@ class BaseDriverEngine:
 
 
 class BaseDriver:
-    def __init__(self, process, **callbacks):
+    def __init__(self, process):
         self._engine = self._engine_class(
             downward_pipe=process.downward_pipe,
             upward_pipe=process.upward_pipe,
-            callbacks=callbacks,
         )
 
     def __enter__(self):
@@ -119,7 +117,7 @@ class BaseDriver:
 def expect_call(command, expected_name):
     command_type, *command_args = command
     if command_type != "call":
-        raise "unexpected call, expecting {cmd}".format(cmd=command)
+        raise ValueError("unexpected call, expecting {cmd}".format(cmd=command))
     name, call_args = command_args
     if name != expected_name:
         raise ValueError("unexpected call to {actual}, expecting {expected}".format(
@@ -132,7 +130,7 @@ def expect_call(command, expected_name):
 def expect_return(command):
     command_type, *command_args = command
     if command_type != "return":
-        raise "expecting return, received {cmd}".format(cmd=command)
+        raise ValueError("expecting return, received {cmd}".format(cmd=command))
     return_value, = command_args
     return return_value
 
@@ -140,7 +138,7 @@ def expect_return(command):
 def expect_stop(command):
     command_type, *command_args = command
     if command_type != "stop":
-        raise "expecting stop, received {cmd}".format(cmd=command)
+        raise ValueError("expecting stop, received {cmd}".format(cmd=command))
 
 
 def read(types, *, file):

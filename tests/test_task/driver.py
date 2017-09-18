@@ -10,11 +10,12 @@ solution = sandbox.create_process("solution")
 solution.start()
 
 
-def test(self, a, b):
-    return a + b
+with exampleinterface(solution) as driver:
+    def test(a, b):
+        return a + b
 
+    driver.test = test
 
-with exampleinterface(solution, test=test) as driver:
     driver.N = 10
     driver.M = 100
     driver.A = rebased(1, [i*i for i in range(1, 1 + driver.N)])
