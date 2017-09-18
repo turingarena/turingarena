@@ -45,14 +45,10 @@ class InterfaceGenerator:
         yield from indent_all(self.generate_function_body(declaration))
 
     def visit_callback_declaration(self, declaration):
-        yield "@abstractmethod"
-        yield from self.generate_function_def(declaration)
-        yield indent("pass")
+        yield "pass"
 
     def visit_main_declaration(self, declaration):
-        yield "@abstractmethod"
-        yield "def main(self):"
-        yield indent("pass")
+        yield "pass"
 
     def generate_function_def(self, declaration):
         yield "def {name}({parameters}):".format(

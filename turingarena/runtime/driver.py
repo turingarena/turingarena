@@ -21,7 +21,7 @@ class BaseDriverEngine:
             self,
             upward_pipe,
             downward_pipe,
-            driver
+            callbacks,
     ):
 
         self.locals = {
@@ -50,7 +50,7 @@ class BaseDriverEngine:
             pipe=downward_pipe,
         )
 
-        self.driver = driver
+        self.callbacks = callbacks
 
         # prepare downward_control to receive data
         next(self.downward_control)
@@ -66,13 +66,11 @@ class BaseDriverEngine:
     def start(self):
         next(self.upward_data)
         command, *command_args = next(self.upward_control)
-        assert command == "main" and len(command_args) == 0
-        return_value = self.invoke_main()
-        self.downward_control.send(("return", return_value))
-        next(self.downward_data)
+        assert command == "start" and len(command_args) == 0
 
-    def invoke_main(self):
-        return self.driver.main()
+    def stop(self):
+        self.downward_control.send(("stop",))
+        next(self.downward_data)
 
     def invoke_callback(self, name, args):
         return getattr(self.driver, name)(*args)
@@ -103,13 +101,19 @@ class BaseDriverEngine:
 
 
 class BaseDriver:
-    def __init__(self, process):
+    def __init__(self, process, **callbacks):
         self._engine = self._engine_class(
             downward_pipe=process.downward_pipe,
             upward_pipe=process.upward_pipe,
-            driver=self,
+            callbacks=callbacks,
         )
+
+    def __enter__(self):
         self._engine.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._engine.stop()
 
 
 def expect_call(command, expected_name):
@@ -128,9 +132,15 @@ def expect_call(command, expected_name):
 def expect_return(command):
     command_type, *command_args = command
     if command_type != "return":
-        raise "unexpected return, expecting {cmd}".format(cmd=command)
+        raise "expecting return, received {cmd}".format(cmd=command)
     return_value, = command_args
     return return_value
+
+
+def expect_stop(command):
+    command_type, *command_args = command
+    if command_type != "stop":
+        raise "expecting stop, received {cmd}".format(cmd=command)
 
 
 def read(types, *, file):

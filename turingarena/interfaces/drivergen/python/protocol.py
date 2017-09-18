@@ -106,6 +106,8 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield "# <initialization>"
         yield from self.generate_main_begin(declaration)
         yield from self.generate(declaration.block)
+        yield "# <finalization>"
+        yield from self.generate_main_end(declaration)
 
     def generate_callback_body(self, declaration):
         yield "# <arguments>"
@@ -117,6 +119,9 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield from self.generate(declaration.block)
 
     def generate_main_begin(self, declaration):
+        yield "pass"
+
+    def generate_main_end(self, declaration):
         yield "pass"
 
     def generate_callback_begin(self, declaration):
@@ -149,6 +154,9 @@ class UpwardDataGenerator(ProtocolGenerator):
     def generate_main_begin(self, declaration):
         yield from self.lazy_yield()
 
+    def generate_main_end(self, declaration):
+        yield from self.maybe_yield()
+
     def generate_callback_begin(self, declaration):
         yield from self.lazy_yield()
 
@@ -178,7 +186,7 @@ class UpwardDataGenerator(ProtocolGenerator):
 
 class UpwardControlGenerator(ProtocolGenerator):
     def generate_main_begin(self, declaration):
-        yield "yield 'main',"
+        yield "yield 'start',"
 
     def generate_callback_begin(self, declaration):
         yield "yield 'callback', '{name}', ({args})".format(
@@ -205,6 +213,10 @@ class DownwardControlGenerator(ProtocolGenerator):
 
     def generate_callback_begin(self, declaration):
         yield "command = yield"
+
+    def generate_main_end(self, declaration):
+        yield "expect_stop(command)"
+        yield "yield"
 
     def visit_return_statement(self, stmt):
         yield "{ret}expect_return(command)".format(
@@ -251,6 +263,9 @@ class DownwardDataGenerator(ProtocolGenerator):
                 start=build_driver_expression(stmt.range.start),
                 end=build_driver_expression(stmt.range.end),
             )
+
+    def generate_main_end(self, declaration):
+        yield "yield"
 
     def visit_return_statement(self, statement):
         yield "yield"
