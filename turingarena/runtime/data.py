@@ -45,7 +45,7 @@ class RebasedList:
 
     def __init__(self, start, items):
         self.start = start
-        self.items = items
+        self.items = list(items)
 
 
 def rebased(start, items):

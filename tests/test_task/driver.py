@@ -23,7 +23,7 @@ class Driver(exampleinterface):
 
 client = SandboxClient()
 
-solution = client.algorithm_create_process("solution")
+solution = client.create_process("solution")
 solution.start()
 
 Driver(solution)

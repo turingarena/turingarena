@@ -3,14 +3,17 @@ import os
 import subprocess
 import threading
 
+import coloredlogs
+
 from turingarena.runner.cpp import run_cpp
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
 class Process:
 
     def __init__(self, supervisor, process_id, algorithm_name):
-        self.logger = logging.getLogger(__name__)
-
         self.supervisor = supervisor
         self.process_id = process_id
 
@@ -27,18 +30,18 @@ class Process:
         os.mkfifo(self.downward_pipe_name)
         os.mkfifo(self.upward_pipe_name)
 
-        self.logger.debug("algorithm process %s(%d): pipes created", self.algorithm_name, self.process_id)
+        logger.debug("algorithm process %s(%d): pipes created", self.algorithm_name, self.process_id)
 
     def start(self):
-        self.logger.info("starting process %d (algorithm: %s)", self.process_id, self.algorithm_name)
+        logger.info("starting process %d (algorithm: %s)", self.process_id, self.algorithm_name)
 
         return 0
 
     def run(self):
         self.downward_pipe = open(self.downward_pipe_name, "r")
-        self.logger.debug("algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id))
+        logger.debug("algorithm process %s(%d): downward pipe opened" % (self.algorithm_name, self.process_id))
         self.upward_pipe = open(self.upward_pipe_name, "w")
-        self.logger.debug("algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id))
+        logger.debug("algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id))
 
         algorithm_dir = "algorithms/{}/".format(self.algorithm_name)
 
@@ -50,13 +53,13 @@ class Process:
         }
         runner = runners[language]
 
-        self.logger.debug("algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id))
+        logger.debug("algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id))
         self.os_process = runner(
             algorithm_dir=algorithm_dir,
             downward_pipe=self.downward_pipe,
             upward_pipe=self.upward_pipe,
         )
-        self.logger.debug("algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id))
+        logger.debug("algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id))
 
     def wait(self):
         if self.os_process is not None:
@@ -78,8 +81,6 @@ class SandboxManager:
         self.control_request_pipe = None
         self.control_response_pipe_name = os.path.join(self.sandbox_dir, "control_response.pipe")
         self.control_response_pipe = None
-
-        self.logger = logging.getLogger(__name__)
 
     def next_id(self):
         self._next_id += 1
@@ -128,9 +129,9 @@ class SandboxManager:
         return (command, arg)
 
     def on_command(self, command, arg):
-        self.logger.debug("received command %s(%s)" % (command, arg))
+        logger.debug("received command %s(%s)" % (command, arg))
         response = getattr(self, command)(arg)
-        self.logger.debug("command %s(%s) returned %s" % (command, arg, response))
+        logger.debug("command %s(%s) returned %s" % (command, arg, response))
 
         return response
 
@@ -140,22 +141,25 @@ class SandboxManager:
             getattr(self, method_name)(arg, result)
 
     def accept_command(self):
-        self.logger.debug("waiting for commands on control request pipe...")
-        line = self.control_request_pipe.readline()
-        if not line:
-            self.logger.debug("control request pipe closed, terminating.")
-            raise StopIteration
-        self.logger.debug("received line on control request pipe %s", line.rstrip())
+        logger.debug("waiting for commands on control request pipe...")
 
-        command, arg_str = line.rstrip().split(" ", 2)
+        with open(self.control_request_pipe_name, "r") as p:
+            line = p.readline().strip()
+
+        if line == "stop":
+            logger.debug("received stop command, terminating.")
+            raise StopIteration
+        logger.debug("received line on control request pipe %s", line.rstrip())
+
+        command, arg_str = line.split(" ", 2)
         command, arg = self.parse_command(command, arg_str)
 
         result = self.on_command(command, arg)
 
-        self.logger.debug("sending on control response pipe %s", result)
-        print(result, file=self.control_response_pipe)
-        self.control_response_pipe.flush()
-        self.logger.debug("sent on control response pipe %s", result)
+        logger.debug("sending on control response pipe %s", result)
+        with open(self.control_response_pipe_name, "w") as p:
+            print(result, file=p)
+        logger.debug("sent on control response pipe %s", result)
 
         self.after_command(command, arg, result)
 
@@ -167,14 +171,15 @@ class SandboxManager:
                 return
 
     def run(self):
-        self.logger.debug("sandbox folder: %s", self.sandbox_dir)
+        logger.debug("sandbox folder: %s", self.sandbox_dir)
 
-        self.logger.debug("creating control pipes...")
+        logger.debug("creating control pipes...")
         os.mkfifo(self.control_request_pipe_name)
         os.mkfifo(self.control_response_pipe_name)
-        self.logger.debug("control pipes created")
-        self.logger.debug("control request pipe: %s" % (self.control_request_pipe_name,))
-        self.logger.debug("control response pipe: %s" % (self.control_response_pipe_name,))
+        logger.debug("control pipes created")
+
+        logger.debug("control request pipe: %s" % (self.control_request_pipe_name,))
+        logger.debug("control response pipe: %s" % (self.control_response_pipe_name,))
 
         env = os.environ.copy()
         env.update({
@@ -182,23 +187,21 @@ class SandboxManager:
         })
 
         with subprocess.Popen(
-                self.args,
-                env=env,
-                universal_newlines=True,
+            self.args,
+            env=env,
+            universal_newlines=True,
         ) as delegate:
 
             def main_loop_thread():
-                self.logger.debug("opening control pipes...")
-                self.control_request_pipe = open(self.control_request_pipe_name, "r")
-                self.logger.debug("control request pipe opened")
-                self.control_response_pipe = open(self.control_response_pipe_name, "w")
-                self.logger.debug("control response pipe opened")
-
                 try:
                     self.main_loop()
                 except:
                     delegate.terminate()
                     raise
 
-            self.logger.debug("module process started")
+            logger.debug("module process started")
             threading.Thread(target=main_loop_thread).start()
+
+        # kill the other thread by injecting the "stop" command
+        with open(self.control_request_pipe_name, "w") as p:
+            print("stop", file=p)
