@@ -15,7 +15,7 @@ class AssignableExpressionBuilder:
         return self.wrap_in_scalar(expr)
 
     def wrap_in_scalar(self, expr):
-        return "{type}({expr}).value".format(
+        return "constant({type}, {expr})[:]".format(
             type=TypeBuilder().build(expr.type),
             expr=self.visit_default(expr),
         )

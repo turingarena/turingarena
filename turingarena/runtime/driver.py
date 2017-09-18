@@ -31,22 +31,22 @@ class BaseDriverEngine:
 
         self.globals = Globals()
         self.global_data(
-            var=partial(self.next_local, "global_data"),
+            var=partial(self.next_variable, "global_data"),
             globals=self.globals,
         )
 
         self.upward_data = self.upward_data(
-            var=partial(self.next_local, "upward_data"),
+            var=partial(self.next_variable, "upward_data"),
             pipe=upward_pipe,
         )
         self.upward_control = self.upward_control(
-            var=partial(self.next_local, "upward_control"),
+            var=partial(self.next_variable, "upward_control"),
         )
         self.downward_control = self.downward_control(
-            var=partial(self.next_local, "downward_control"),
+            var=partial(self.next_variable, "downward_control"),
         )
         self.downward_data = self.downward_data(
-            var=partial(self.next_local, "downward_data"),
+            var=partial(self.next_variable, "downward_data"),
             pipe=downward_pipe,
         )
 
@@ -55,10 +55,10 @@ class BaseDriverEngine:
         # prepare downward_control to receive data
         next(self.downward_control)
 
-    def next_local(self, phase, t, value=None):
+    def next_variable(self, phase, t):
         queue = self.locals[phase]
         if len(queue) == 0:
-            local = Variable(t, value)
+            local = Variable(t)
             for p in self.locals.keys():
                 self.locals[p].append(local)
         return queue.popleft()

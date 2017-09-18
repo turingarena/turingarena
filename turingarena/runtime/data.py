@@ -38,11 +38,13 @@ def set_value(assignable, value):
 
 
 class RebasedList:
+    """Wrapper to a list that specifies an initial index.
+
+    Used to initialize non-zero-based arrays.
+    """
 
     def __init__(self, start, items):
         self.start = start
-        if not isinstance(items, list):
-            raise TypeError
         self.items = items
 
 
@@ -175,11 +177,9 @@ class Variable:
     without cluttering the code too much.
     """
 
-    def __init__(self, t, value=None):
+    def __init__(self, t):
         assert issubclass(t, BaseAssignable)
         self.delegate = t()
-        if value is not None:
-            self[:] = value
 
     def __getitem__(self, key):
         self.check_trivial_slice(key)
@@ -192,3 +192,9 @@ class Variable:
     def check_trivial_slice(self, key):
         if key != slice(None, None, None):
             raise KeyError
+
+
+def constant(t, value):
+    v = Variable(t)
+    v[:] = value
+    return v

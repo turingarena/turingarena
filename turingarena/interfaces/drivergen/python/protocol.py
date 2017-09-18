@@ -134,7 +134,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
             start=build_driver_expression(statement.index.range.start),
             end="1 + " + build_driver_expression(statement.index.range.end),
         )
-        yield indent("{index}_ = var(scalar(int), index_{index})".format(index=index_name))
+        yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
         yield from indent_all(self.generate(statement.block))
 
     def visit_default(self, stmt):
