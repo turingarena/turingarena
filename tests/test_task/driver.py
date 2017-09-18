@@ -1,7 +1,10 @@
 import sys
 
 from interfaces.exampleinterface import exampleinterface
+
+from turingarena.runtime.driver import run_driver
 from turingarena.runtime.sandbox import SandboxClient
+
 
 class Driver(exampleinterface):
     def main(self):
@@ -26,9 +29,4 @@ client = SandboxClient()
 solution = client.algorithm_create_process("solution")
 solution.start()
 
-driver = Driver(
-    downward_pipe=solution.downward_pipe,
-    upward_pipe=solution.upward_pipe,
-)
-
-driver.start()
+driver = run_driver(Driver(), solution)

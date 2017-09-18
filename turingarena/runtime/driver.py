@@ -1,11 +1,14 @@
-from abc import abstractmethod
 from collections import deque
 from functools import partial
 
 from turingarena.runtime.data import Variable
 
 
-class ProtocolEngine:
+class Globals:
+    pass
+
+
+class BaseDriverEngine:
     phases = [
         "global_data",
         "upward_data",
@@ -18,11 +21,6 @@ class ProtocolEngine:
             self,
             upward_pipe,
             downward_pipe,
-            upward_data,
-            upward_control,
-            downward_control,
-            downward_data,
-            global_data,
             driver
     ):
 
@@ -31,26 +29,23 @@ class ProtocolEngine:
             for phase in self.phases
         }
 
-        class Globals:
-            pass
-
         self.globals = Globals()
-        global_data(
+        self.global_data(
             var=partial(self.next_local, "global_data"),
             globals=self.globals,
         )
 
-        self.upward_data = upward_data(
+        self.upward_data = self.upward_data(
             var=partial(self.next_local, "upward_data"),
             pipe=upward_pipe,
         )
-        self.upward_control = upward_control(
+        self.upward_control = self.upward_control(
             var=partial(self.next_local, "upward_control"),
         )
-        self.downward_control = downward_control(
+        self.downward_control = self.downward_control(
             var=partial(self.next_local, "downward_control"),
         )
-        self.downward_data = downward_data(
+        self.downward_data = self.downward_data(
             var=partial(self.next_local, "downward_data"),
             pipe=downward_pipe,
         )
@@ -108,21 +103,8 @@ class ProtocolEngine:
 
 
 class BaseDriver:
-
-    def __init__(self, **kwargs):
-        super().__init__()
-        self._engine = ProtocolEngine(
-            **kwargs,
-            global_data=self.global_data,
-            upward_control=self.upward_control,
-            upward_data=self.upward_data,
-            downward_data=self.downward_data,
-            downward_control=self.downward_control,
-            driver=self,
-        )
-
-    def start(self):
-        self._engine.start()
+    def __init__(self):
+        pass
 
 
 def expect_call(command, expected_name):
@@ -151,13 +133,20 @@ def read(types, *, file):
     return [t(value) for value, t in zip(raw_values, types)]
 
 
-"""
-Returns a generator that yields exactly once.
-
-Used in combination with the 'yield from' construct
-to implement the lazy yield mechanism used in upward data protocol.
-"""
-
-
 def lazy_yield():
-    return (_ for _ in (None,))
+    """
+    Returns a generator that yields exactly once.
+
+    Used in combination with the 'yield from' construct
+    to implement the lazy yield mechanism used in upward data protocol.
+    """
+    return iter([None])
+
+
+def run_driver(driver, process):
+    driver._engine = driver._engine_class(
+        downward_pipe=process.downward_pipe,
+        upward_pipe=process.upward_pipe,
+        driver=driver,
+    )
+    driver._engine.start()

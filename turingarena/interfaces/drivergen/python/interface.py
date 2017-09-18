@@ -6,32 +6,27 @@ class InterfaceGenerator:
     def visit_interface_definition(self, interface):
         yield
         yield
+        yield "class Engine(BaseDriverEngine):"
+        yield from indent_all(self.generate_engine_body(interface))
+        yield
+        yield
         yield "class Driver(BaseDriver):"
-        yield from indent_all(self.generate_class_body(interface))
+        yield from indent_all(self.generate_driver_body(interface))
         yield
         yield
         yield "{name} = Driver".format(name=interface.name)
 
-    def generate_factory_args(self):
-        for p in [
-            "upward_data",
-            "upward_control",
-            "downward_control",
-            "downward_data",
-            "global_data",
-        ]:
-            yield "{p}={p},".format(p=p)
-        yield "**kwargs"
-
-    def generate_class_body(self, interface):
-        for item in interface.interface_items:
-            yield
-            yield "# " + item.info()
-            yield from item.accept(self)
+    def generate_engine_body(self, interface):
         yield from global_data_generator.generate(interface)
         for phase, generator in protocol_generators.items():
             yield from generator.generate(interface)
 
+    def generate_driver_body(self, interface):
+        yield "_engine_class = Engine"
+        for item in interface.interface_items:
+            yield
+            yield "# " + item.info()
+            yield from item.accept(self)
 
     def visit_variable_declaration(self, declaration):
         for i, declarator in enumerate(declaration.declarators):

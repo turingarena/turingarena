@@ -17,7 +17,6 @@ class AbstractInterfaceGenerator:
 
     def visit_interface_definition(self, interface):
         yield
-        yield
         yield "@staticmethod"
         yield "def {name}({args}):".format(
             name=self.name,
@@ -259,7 +258,6 @@ class DownwardDataGenerator(ProtocolGenerator):
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):
     def visit_interface_definition(self, interface):
-        yield
         yield
         yield "@staticmethod"
         yield "def global_data(var, globals):"
