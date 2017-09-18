@@ -2,7 +2,7 @@ import sys
 
 from interfaces.exampleinterface import exampleinterface
 
-from turingarena.runtime.driver import run_driver
+from turingarena.runtime.data import rebased
 from turingarena.runtime.sandbox import SandboxClient
 
 
@@ -10,10 +10,7 @@ class Driver(exampleinterface):
     def main(self):
         self.N = 10
         self.M = 100
-        self.A.alloc(1, self.N)
-
-        for i in range(1, 1 + self.N):
-            self.A[i] = i * i
+        self.A = rebased(1, [i*i for i in range(1, 1 + self.N)])
 
         S = self.solve(3)
 
@@ -29,4 +26,4 @@ client = SandboxClient()
 solution = client.algorithm_create_process("solution")
 solution.start()
 
-driver = run_driver(Driver(), solution)
+Driver(solution)

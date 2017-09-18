@@ -103,8 +103,13 @@ class BaseDriverEngine:
 
 
 class BaseDriver:
-    def __init__(self):
-        pass
+    def __init__(self, process):
+        self._engine = self._engine_class(
+            downward_pipe=process.downward_pipe,
+            upward_pipe=process.upward_pipe,
+            driver=self,
+        )
+        self._engine.start()
 
 
 def expect_call(command, expected_name):
@@ -141,12 +146,3 @@ def lazy_yield():
     to implement the lazy yield mechanism used in upward data protocol.
     """
     return iter([None])
-
-
-def run_driver(driver, process):
-    driver._engine = driver._engine_class(
-        downward_pipe=process.downward_pipe,
-        upward_pipe=process.upward_pipe,
-        driver=driver,
-    )
-    driver._engine.start()

@@ -246,7 +246,7 @@ class DownwardDataGenerator(ProtocolGenerator):
 
     def visit_alloc_statement(self, stmt):
         for a in stmt.arguments:
-            yield "assert ({val}.start, {val}.end) == ({start}, {end})".format(
+            yield "assert {val}.range == ({start}, {end})".format(
                 val=build_driver_expression(a),
                 start=build_driver_expression(stmt.range.start),
                 end=build_driver_expression(stmt.range.end),

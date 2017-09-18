@@ -1,50 +1,120 @@
-class BaseStruct:
+from abc import abstractmethod
+
+
+class ImmutabilityViolation(Exception):
+    pass
+
+
+class BaseAssignable:
+    """
+    Base class for data types to be used in assignable expressions.
+    """
+
+    @abstractmethod
+    def on_get_value(self):
+        pass
+
+    @abstractmethod
+    def on_set_value(self, value):
+        pass
+
+
+def get_value(assignable):
+    if isinstance(assignable, list):
+        return [get_value(v) for v in assignable]
+    else:
+        assert isinstance(assignable, BaseAssignable)
+        return assignable.on_get_value()
+
+
+def set_value(assignable, value):
+    if isinstance(assignable, list):
+        for a, v in zip(assignable, value):
+            if value is not None:
+                set_value(a, v)
+    else:
+        assert isinstance(assignable, BaseAssignable)
+        assignable.on_set_value(value)
+
+
+class RebasedList:
+
+    def __init__(self, start, items):
+        self.start = start
+        if not isinstance(items, list):
+            raise TypeError
+        self.items = items
+
+
+def rebased(start, items):
+    return RebasedList(start, items)
+
+
+class BaseArray(BaseAssignable):
+    _item_type = None
+
     def __init__(self):
-        self._delegate = {}
-
-        for k, t in self._fields.items():
-            self._delegate[k] = t()
-
-    def __getattr__(self, key):
-        return self._delegate[key]
-
-
-class BaseArray:
-    _type = None
-
-    def __init__(self):
+        assert issubclass(self._item_type, BaseAssignable)
         self.start = None
-        self.end = None
         self.delegate = None
+
+    @property
+    def range(self):
+        """A pair (a, b) representing the interval (inclusive) of valid indexes.
+
+        For empty intervals, the value is (a,a-1) for some chosen a
+        """
+        self.check_alloc()
+        return self.start, len(self.delegate) - 1
+
+    @property
+    def __len__(self):
+        start, end = self.range
+        return end - start + 1
 
     def is_alloc(self):
         return self.delegate is not None
 
-    def alloc(self, start, end):
-        if self.is_alloc(): raise ValueError("already alloc'd")
+    @range.setter
+    def range(self, value):
+        if self.is_alloc():
+            if value != self.range:
+                raise ImmutabilityViolation(
+                    "cannot change the range of an already alloc'd array")
+        start, end = value
+        if start > end:
+            raise ValueError("invalid range")
         self.start = start
-        self.end = end
-        self.delegate = [self._item_type() for _ in range(end - start + 1)]
+        self.delegate = (
+            [None for _ in range(start)] +
+            [self._item_type() for _ in range(end - start + 1)]
+        )
 
-    @property
-    def value(self):
+    def on_get_value(self):
         return self
 
-    @value.setter
-    def value(self, value):
-        raise NotImplementedError
+    def on_set_value(self, value):
+        if not isinstance(value, RebasedList):
+            # by default lists are zero-based
+            value = rebased(0, value)
+        start = value.start
+        self.range = (start, start + len(value.items) - 1)
+        self[start:] = value.items
 
     def __getitem__(self, index):
-        return self.delegate[self.resolve_index(index)].value
+        self.check_alloc()
+        return get_value(self.delegate[index])
 
     def __setitem__(self, index, value):
-        self.delegate[self.resolve_index(index)].value = value
+        self.check_alloc()
+        set_value(self.delegate[index], value)
 
-    def resolve_index(self, index):
+    def __iter__(self):
+        self.check_alloc()
+        return iter(self.delegate[self.start:])
+
+    def check_alloc(self):
         if not self.is_alloc(): raise ValueError("not alloc'd")
-        if not (self.start <= index <= self.end): raise IndexError("out of range")
-        delegate_index = index - self.start
-        return delegate_index
 
 
 def array(item_type):
@@ -54,31 +124,36 @@ def array(item_type):
     return Array
 
 
-class BaseScalar:
+class BaseScalar(BaseAssignable):
+    _base = None
+
     def __init__(self, value=None):
-        self._value = None
+        self.value = None
         if value is not None:
-            self.value = value
+            self.on_set_value(value)
 
     def is_set(self):
-        return self._value is not None
+        return self.value is not None
 
-    @property
-    def value(self):
+    def on_get_value(self):
         if not self.is_set():
             raise ValueError("not set")
-        return self._value
+        return self.value
 
-    @value.setter
-    def value(self, value):
+    def on_set_value(self, value):
+        if not isinstance(value, self._base):
+            raise TypeError("value {} has wrong type, expecting {}".format(value, self._base))
+
         if not self.is_set():
-            self._value = value
+            self.value = value
             return
 
-        if self._value == value: return
-        raise ValueError(
+        if self.value == value:
+            return
+
+        raise ImmutabilityViolation(
             "cannot set to a different value ({previous} -> {new})".format(
-                previous=self._value,
+                previous=self.value,
                 new=value,
             )
         )
@@ -92,17 +167,28 @@ def scalar(base):
 
 
 class Variable:
+    """
+    Holds an assignable value, which is accessible through the self[:] notation.
+
+    Used by generated protocol code to implement the assignable logic
+    when writing/reading local variables,
+    without cluttering the code too much.
+    """
+
     def __init__(self, t, value=None):
-        self._delegate = t()
+        assert issubclass(t, BaseAssignable)
+        self.delegate = t()
         if value is not None:
-            self._delegate.value = value
+            self[:] = value
 
     def __getitem__(self, key):
-        if key != slice(None, None, None):
-            raise KeyError
-        return self._delegate.value
+        self.check_trivial_slice(key)
+        return get_value(self.delegate)
 
     def __setitem__(self, key, value):
+        self.check_trivial_slice(key)
+        set_value(self.delegate, value)
+
+    def check_trivial_slice(self, key):
         if key != slice(None, None, None):
             raise KeyError
-        self._delegate.value = value
