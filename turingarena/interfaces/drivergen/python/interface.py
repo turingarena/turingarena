@@ -6,25 +6,14 @@ class InterfaceGenerator:
     def visit_interface_definition(self, interface):
         yield
         yield
-        yield "class Interface(BaseInterface):"
+        yield "class Driver(BaseDriver):"
         yield from indent_all(self.generate_class_body(interface))
-        yield from global_data_generator.generate(interface)
-        for phase, generator in protocol_generators.items():
-            yield from generator.generate(interface)
         yield
         yield
-        yield "def {name}(downward_pipe, upward_pipe, **kwargs):".format(name=interface.name)
-        yield from indent_all(self.generate_factory_body(interface))
-
-    def generate_factory_body(self, interface):
-        yield "return Interface("
-        yield from indent_all(self.generate_factory_args())
-        yield ")"
+        yield "{name} = Driver".format(name=interface.name)
 
     def generate_factory_args(self):
         for p in [
-            "downward_pipe",
-            "upward_pipe",
             "upward_data",
             "upward_control",
             "downward_control",
@@ -35,20 +24,19 @@ class InterfaceGenerator:
         yield "**kwargs"
 
     def generate_class_body(self, interface):
-        for g in interface.variable_declarations:
-            yield from g.accept(self)
+        for item in interface.interface_items:
+            yield
+            yield "# " + item.info()
+            yield from item.accept(self)
+        yield from global_data_generator.generate(interface)
+        for phase, generator in protocol_generators.items():
+            yield from generator.generate(interface)
 
-        for g in interface.function_declarations:
-            yield from g.accept(self)
-
-        for g in interface.callback_declarations:
-            yield from g.accept(self)
 
     def visit_variable_declaration(self, declaration):
-        yield
-        yield "# " + declaration.info()
-        for declarator in declaration.declarators:
-            yield
+        for i, declarator in enumerate(declaration.declarators):
+            if i > 0:
+                yield
             yield "@property"
             yield "def {name}(self):".format(name=declarator.name)
             yield indent("return self._engine.globals.{name}[:]".format(name=declarator.name))
@@ -58,7 +46,20 @@ class InterfaceGenerator:
             yield indent("self._engine.globals.{name}[:] = value".format(name=declarator.name))
 
     def visit_function_declaration(self, declaration):
-        yield
+        yield from self.generate_function_def(declaration)
+        yield from indent_all(self.generate_function_body(declaration))
+
+    def visit_callback_declaration(self, declaration):
+        yield "@abstractmethod"
+        yield from self.generate_function_def(declaration)
+        yield indent("pass")
+
+    def visit_main_declaration(self, declaration):
+        yield "@abstractmethod"
+        yield "def main(self):"
+        yield indent("pass")
+
+    def generate_function_def(self, declaration):
         yield "def {name}({parameters}):".format(
             name=declaration.declarator.name,
             parameters=", ".join(
@@ -66,10 +67,6 @@ class InterfaceGenerator:
                 [p.declarator.name for p in declaration.parameters]
             ),
         )
-        yield from indent_all(self.generate_function_body(declaration))
-
-    def visit_callback_declaration(self, declaration):
-        yield from []
 
     def generate_function_body(self, declaration):
         yield "return self._engine.call({args})".format(

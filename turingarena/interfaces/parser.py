@@ -7,8 +7,7 @@ from turingarena.interfaces.grammar import grammar_ebnf
 
 
 def parse(*args, **kwargs):
-    grammar = tatsu.compile(grammar_ebnf)
-    return grammar.parse(*args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
+    return tatsu.parse(grammar_ebnf, *args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
 class TaskParser:

@@ -2,12 +2,12 @@ grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
 
-    task = task_items:{ task_item }* ;
+    unit = unit_items:{ unit_item }* $ ;
     
-    task_item = interface_definition ;
+    unit_item = interface_definition ;
     
     interface_definition =
-        'interfaces' ~ name:identifier '{'
+        'interface' ~ name:identifier '{'
             interface_items:{ interface_item }*
         '}'
     ;

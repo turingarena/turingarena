@@ -25,8 +25,11 @@ from turingarena.interfaces.generator import CodeGenerator
 def main():
     args = docopt.docopt(__doc__)
 
-    interface_file = args["<interfaces-file>"]
-    task = parser.parse(open(interface_file).read(), rule="unit")
+    interface_filename = args["<interfaces-file>"]
+    if interface_filename is None:
+        interface_filename = "interfaces.txt"
+    interface_text = open(interface_filename).read()
+    task = parser.parse(interface_text, rule="unit")
 
     TaskAnalyzer().analyze(task)
     CodeGenerator(task=task, output_dir=args["--output-dir"]).generate()

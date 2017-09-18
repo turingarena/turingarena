@@ -20,8 +20,9 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
 
     def generate_module(self):
         yield "from __future__ import print_function"
-        yield "from turingarena.cpp.driver import *"
-        yield "from turingarena.cpp.data import *"
+        yield "from abc import abstractmethod"
+        yield "from turingarena.runtime.driver import *"
+        yield "from turingarena.runtime.data import *"
         yield
         yield from self.interface.accept(InterfaceGenerator())
 

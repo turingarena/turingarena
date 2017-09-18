@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from collections import deque
 from functools import partial
 
@@ -22,8 +23,7 @@ class ProtocolEngine:
             downward_control,
             downward_data,
             global_data,
-            main,
-            **callbacks
+            driver
     ):
 
         self.locals = {
@@ -55,8 +55,7 @@ class ProtocolEngine:
             pipe=downward_pipe,
         )
 
-        self.main = main
-        self.callbacks = callbacks
+        self.driver = driver
 
         # prepare downward_control to receive data
         next(self.downward_control)
@@ -78,10 +77,10 @@ class ProtocolEngine:
         next(self.downward_data)
 
     def invoke_main(self):
-        return self.main()
+        return self.driver.main()
 
     def invoke_callback(self, name, args):
-        return self.callbacks["callback_" + name](*args)
+        return getattr(self.driver, name)(*args)
 
     def call(self, name, *call_args):
         self.downward_control.send(("call", name, call_args))
@@ -108,12 +107,21 @@ class ProtocolEngine:
                 raise ValueError
 
 
-class BaseInterface:
+class BaseDriver:
+
     def __init__(self, **kwargs):
         super().__init__()
-        self._engine = ProtocolEngine(**kwargs)
+        self._engine = ProtocolEngine(
+            **kwargs,
+            global_data=self.global_data,
+            upward_control=self.upward_control,
+            upward_data=self.upward_data,
+            downward_data=self.downward_data,
+            downward_control=self.downward_control,
+            driver=self,
+        )
 
-    def main(self):
+    def start(self):
         self._engine.start()
 
 

@@ -1,21 +1,20 @@
+import logging
 import os
 import subprocess
-import logging
 import threading
 
-import sys
+from turingarena.runner.cpp import run_cpp
 
 
 class Process:
 
-    def __init__(self, supervisor, process_id, algorithm_name, executable_path):
+    def __init__(self, supervisor, process_id, algorithm_name):
         self.logger = logging.getLogger(__name__)
 
         self.supervisor = supervisor
         self.process_id = process_id
 
         self.algorithm_name = algorithm_name
-        self.executable_path = executable_path
         self.os_process = None
 
         self.downward_pipe_name = os.path.join(self.supervisor.sandbox_dir, "process_downward.%d.pipe" % (process_id,))
@@ -41,28 +40,32 @@ class Process:
         self.upward_pipe = open(self.upward_pipe_name, "w")
         self.logger.debug("algorithm process %s(%d): upward pipe opened" % (self.algorithm_name, self.process_id))
 
+        algorithm_dir = "algorithms/{}/".format(self.algorithm_name)
+
+        with open(algorithm_dir + "language.txt") as language_file:
+            language = language_file.read().strip()
+
+        runners = {
+            "cpp": run_cpp
+        }
+        runner = runners[language]
+
         self.logger.debug("algorithm process %s(%d): starting process..." % (self.algorithm_name, self.process_id))
-        self.os_process = subprocess.Popen(
-            [self.executable_path],
-            universal_newlines=True,
-            stdin=self.downward_pipe,
-            stdout=self.upward_pipe,
-            bufsize=1
+        self.os_process = runner(
+            algorithm_dir=algorithm_dir,
+            downward_pipe=self.downward_pipe,
+            upward_pipe=self.upward_pipe,
         )
         self.logger.debug("algorithm process %s(%d): process started" % (self.algorithm_name, self.process_id))
 
-    def status(self):
-        # TODO: return something meaningful
-        return 0
-
-    def kill(self):
-        self.os_process.kill()
+    def wait(self):
+        if self.os_process is not None:
+            self.os_process.wait()
         # TODO: return something meaningful
         return 0
 
 
 class SandboxManager:
-
     def __init__(self, args, sandbox_dir):
         self.processes = {}
         self.read_files = {}
@@ -85,12 +88,7 @@ class SandboxManager:
     def algorithm_create_process(self, algorithm_name):
         process_id = self.next_id()
 
-        try:
-            executable_path = "algorithms/{}/algorithm".format(algorithm_name)
-        except KeyError:
-            raise ValueError("invalid algorithm name %s" % algorithm_name)
-
-        process = Process(self, process_id, algorithm_name, executable_path)
+        process = Process(self, process_id, algorithm_name)
         self.processes[process_id] = process
 
         process.prepare()
@@ -183,26 +181,24 @@ class SandboxManager:
             "TURINGARENA_SANDBOX_DIR": self.sandbox_dir,
         })
 
-        self.module = subprocess.Popen(
-            self.args,
-            env=env,
-            universal_newlines=True,
-        )
-        self.logger.debug("module process started")
+        with subprocess.Popen(
+                self.args,
+                env=env,
+                universal_newlines=True,
+        ) as delegate:
 
-        def main_loop_thread():
-            self.logger.debug("opening control pipes...")
-            self.control_request_pipe = open(self.control_request_pipe_name, "r")
-            self.logger.debug("control request pipe opened")
-            self.control_response_pipe = open(self.control_response_pipe_name, "w")
-            self.logger.debug("control response pipe opened")
+            def main_loop_thread():
+                self.logger.debug("opening control pipes...")
+                self.control_request_pipe = open(self.control_request_pipe_name, "r")
+                self.logger.debug("control request pipe opened")
+                self.control_response_pipe = open(self.control_response_pipe_name, "w")
+                self.logger.debug("control response pipe opened")
 
-            try:
-                self.main_loop()
-            except:
-                self.module.terminate()
-                raise
+                try:
+                    self.main_loop()
+                except:
+                    delegate.terminate()
+                    raise
 
-        threading.Thread(target=main_loop_thread).start()
-
-        exit(self.module.wait())
+            self.logger.debug("module process started")
+            threading.Thread(target=main_loop_thread).start()

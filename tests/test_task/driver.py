@@ -3,34 +3,32 @@ import sys
 from interfaces.exampleinterface import exampleinterface
 from turingarena.runtime.sandbox import SandboxClient
 
+class Driver(exampleinterface):
+    def main(self):
+        self.N = 10
+        self.M = 100
+        self.A.alloc(1, self.N)
 
-def main():
-    iface.N = 10
-    iface.M = 100
-    iface.A.alloc(1, iface.N)
+        for i in range(1, 1 + self.N):
+            self.A[i] = i * i
 
-    for i in range(1, 1 + iface.N):
-        iface.A[i] = i * i
+        S = self.solve(3)
 
-    S = iface.solve(3)
+        print("Answer:", S, file=sys.stderr)
 
-    print("Answer:", S, file=sys.stderr)
+        return 0
 
-    return 0
-
-def test(a, b):
-    return a + b
+    def test(self, a, b):
+        return a + b
 
 client = SandboxClient()
 
 solution = client.algorithm_create_process("solution")
 solution.start()
 
-iface = exampleinterface(
+driver = Driver(
     downward_pipe=solution.downward_pipe,
     upward_pipe=solution.upward_pipe,
-    main=main,
-    callback_test=test
 )
 
-iface.main()
+driver.start()

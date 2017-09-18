@@ -18,6 +18,7 @@ class AbstractInterfaceGenerator:
     def visit_interface_definition(self, interface):
         yield
         yield
+        yield "@staticmethod"
         yield "def {name}({args}):".format(
             name=self.name,
             args=", ".join(self.args),
@@ -260,6 +261,7 @@ class GlobalDataGenerator(AbstractInterfaceGenerator):
     def visit_interface_definition(self, interface):
         yield
         yield
+        yield "@staticmethod"
         yield "def global_data(var, globals):"
         yield from indent_all(self.generate_body(interface))
 

@@ -19,7 +19,7 @@ class CodeGenerator:
         self.output_dir = output_dir
 
         self.interfaces_dir = os.path.join(self.output_dir, "interfaces")
-        self.runtime_dir = os.path.join(self.output_dir, "cpp")
+        self.runtime_dir = os.path.join(self.output_dir, "runtime")
 
     def generate(self):
         os.makedirs(self.output_dir, exist_ok=True)
