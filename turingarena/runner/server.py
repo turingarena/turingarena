@@ -86,7 +86,7 @@ class SandboxManager:
         self._next_id += 1
         return self._next_id
 
-    def algorithm_create_process(self, algorithm_name):
+    def create_process(self, algorithm_name):
         process_id = self.next_id()
 
         process = Process(self, process_id, algorithm_name)
@@ -112,7 +112,7 @@ class SandboxManager:
 
     def parse_command(self, command, arg_str):
         commands = {
-            "algorithm_create_process": str,
+            "create_process": str,
             "process_start": int,
             "process_status": int,
             "process_stop": int,

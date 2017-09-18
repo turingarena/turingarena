@@ -20,7 +20,7 @@ class SandboxClient:
 
         logger.debug("Creating new process for algorithm %s" % algorithm_name)
 
-        response = self.request("algorithm_create_process", algorithm_name)
+        response = self.request("create_process", algorithm_name)
 
         return Process(self, process_id=int(response))
 
