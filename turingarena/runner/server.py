@@ -102,22 +102,15 @@ class SandboxManager:
     def after_process_start(self, process_id, status):
         self.processes[process_id].run()
 
-    def process_status(self, process_id):
+    def process_wait(self, process_id):
         process = self.processes[process_id]
-        return process.status()
-
-    def process_stop(self, process_id):
-        process = self.processes[process_id]
-        return process.kill()
+        return process.wait()
 
     def parse_command(self, command, arg_str):
         commands = {
             "create_process": str,
             "process_start": int,
-            "process_status": int,
-            "process_stop": int,
-            "read_file_open": str,
-            "read_file_close": str
+            "process_wait": int,
         }
 
         if command not in commands:

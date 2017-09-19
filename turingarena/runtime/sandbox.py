@@ -67,4 +67,11 @@ class Process:
         response = self.client.request("process_wait", self.process_id)
         return int(response)
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.wait()
+
 sandbox = SandboxClient()
