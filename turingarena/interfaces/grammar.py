@@ -74,7 +74,7 @@ grammar_ebnf = r"""
         | if_statement
         | switch_statement
         | for_statement
-        | do_statement
+        | loop_statement
         | break_statement
         | continue_statement
         | return_statement
@@ -121,8 +121,8 @@ grammar_ebnf = r"""
         'for' ~ '(' index:index_declaration ')' block:block
     ;
 
-    do_statement =
-        'do' ~ block:block
+    loop_statement =
+        'loop' ~ block:block
     ;
     
     break_statement = 'break' ~ ';' ;
