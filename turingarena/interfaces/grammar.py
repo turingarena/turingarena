@@ -69,6 +69,7 @@ grammar_ebnf = r"""
     statement =
         | input_statement
         | output_statement
+        | flush_statement
         | alloc_statement
         | call_statement
         | if_statement
@@ -88,6 +89,10 @@ grammar_ebnf = r"""
 
     output_statement =
         'output' ~ arguments:expression_list ';'
+    ;
+    
+    flush_statement =
+        'flush' ~ arguments:() ';'
     ;
 
     alloc_statement =

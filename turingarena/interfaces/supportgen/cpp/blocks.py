@@ -32,6 +32,8 @@ class BlockItemGenerator:
         args = ', '.join(generate_expression(v) for v in node.arguments)
 
         yield 'printf("{format}", {args});'.format(format=format_string, args=args)
+
+    def visit_flush_statement(self, statement):
         yield 'fflush(stdout);'
 
     def visit_call_statement(self, node):

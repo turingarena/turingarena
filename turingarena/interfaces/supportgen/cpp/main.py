@@ -25,7 +25,6 @@ class InterfaceItemGenerator:
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"
         yield indent(r'printf("{name}\n");').format(name=decl.declarator.name)
-        yield indent('fflush(stdout);')
         yield from indent_all(generate_block(decl.block))
         yield "}"
 

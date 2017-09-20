@@ -31,6 +31,9 @@ class BlockItemCompiler:
     def visit_output_statement(self, statement):
         self.compile_arguments(statement)
 
+    def visit_flush_statement(self, statement):
+        pass
+
     def visit_alloc_statement(self, statement):
         self.compile_arguments(statement)
         compile_range(statement.range, scope=self.scope)
