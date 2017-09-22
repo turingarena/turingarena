@@ -1,9 +1,3 @@
-# The following three rules are equivalent to "ignore files without a dot in the name".
-# They're useful in order to avoid putting binaries in the repository.
-*
-!*/
-!*.*
-
 /.idea/
 
 # TaskWizard-specific ignores
