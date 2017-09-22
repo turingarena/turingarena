@@ -1,5 +1,6 @@
 from turingarena.interfaces.codegen.utils import indent_all, indent
-from turingarena.interfaces.drivergen.python.protocol import protocol_generators, global_data_generator
+from turingarena.interfaces.drivergen.python.protocol import global_data_generator, \
+    porcelain_generator, plumbing_generator
 
 
 class InterfaceGenerator:
@@ -18,8 +19,8 @@ class InterfaceGenerator:
 
     def generate_engine_body(self, interface):
         yield from global_data_generator.generate(interface)
-        for phase, generator in protocol_generators.items():
-            yield from generator.generate(interface)
+        yield from porcelain_generator.generate(interface)
+        yield from plumbing_generator.generate(interface)
 
     def generate_driver_body(self, interface):
         yield "_engine_class = Engine"

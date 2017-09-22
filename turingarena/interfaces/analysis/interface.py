@@ -1,4 +1,4 @@
-from turingarena.interfaces.analysis.block import compile_block
+from turingarena.interfaces.analysis.block import compile_block, BlockContext
 from turingarena.interfaces.analysis.declaration import compile_declaration
 from turingarena.interfaces.analysis.scope import Scope
 
@@ -21,7 +21,6 @@ class InterfaceItemCompiler:
 
     def visit_variable_declaration(self, declaration):
         compile_declaration(declaration, scope=self.global_scope)
-        declaration.is_global = True
         self.interface.variable_declarations.append(declaration)
 
     def visit_function_declaration(self, declaration):
@@ -33,4 +32,4 @@ class InterfaceItemCompiler:
         self.interface.callback_declarations.append(declaration)
 
     def visit_main_declaration(self, declaration):
-        compile_block(declaration.block, scope=self.global_scope)
+        compile_block(declaration.block, context=BlockContext(True), scope=self.global_scope)

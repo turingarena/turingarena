@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 
-class ImmutabilityViolation(Exception):
+class ProtocolError(Exception):
     pass
 
 
@@ -96,8 +96,10 @@ class BaseArray(BaseAssignable):
     def range(self, value):
         if self.is_alloc():
             if value != self.range:
-                raise ImmutabilityViolation(
+                raise ProtocolError(
                     "cannot change the range of an already alloc'd array")
+            return
+
         start, end = value
         if start > end:
             raise ValueError("invalid range")
@@ -162,7 +164,7 @@ class BaseScalar(BaseAssignable):
             return
 
         if self.value != value:
-            raise ImmutabilityViolation(
+            raise ProtocolError(
                 "cannot set to a different value ({previous} -> {new})".format(
                     previous=self.value,
                     new=value,

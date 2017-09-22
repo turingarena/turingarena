@@ -63,7 +63,7 @@ class Process:
         return int(response)
 
     def wait(self):
-        logger.debug("Killing process with id: %d", self.process_id)
+        logger.debug("Waiting process with id: %d", self.process_id)
         response = self.client.request("process_wait", self.process_id)
         return int(response)
 
@@ -72,6 +72,7 @@ class Process:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.wait()
+        if exc_val is None:
+            self.wait()
 
 sandbox = SandboxClient()

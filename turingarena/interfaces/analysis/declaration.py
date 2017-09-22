@@ -38,7 +38,7 @@ class DeclarationCompiler:
         new_scope = Scope(self.scope)
         for p in decl.parameters:
             compile_declaration(p, scope=new_scope)
-        block.compile_block(decl.block, scope=new_scope)
+        block.compile_block(decl.block, context=block.BlockContext(True), scope=new_scope)
 
 
 def compile_declaration(decl, scope):

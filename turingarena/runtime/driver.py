@@ -1,7 +1,13 @@
+import logging
 from collections import deque
 from functools import partial
 
-from turingarena.runtime.data import Variable
+from turingarena.runtime.data import Variable, ProtocolError
+
+import coloredlogs
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
 class Globals:
@@ -11,10 +17,8 @@ class Globals:
 class BaseDriverEngine:
     phases = [
         "global_data",
-        "upward_data",
-        "upward_control",
-        "downward_control",
-        "downward_data",
+        "porcelain",
+        "plumbing",
     ]
 
     def __init__(
@@ -34,69 +38,98 @@ class BaseDriverEngine:
             globals=self.globals,
         )
 
-        self.upward_data = self.upward_data(
-            var=partial(self.next_variable, "upward_data"),
-            pipe=upward_pipe,
+        self.plumbing = self.plumbing(
+            var=partial(self.next_variable, "plumbing"),
+            upward_pipe=upward_pipe,
+            downward_pipe=downward_pipe,
         )
-        self.upward_control = self.upward_control(
-            var=partial(self.next_variable, "upward_control"),
-        )
-        self.downward_control = self.downward_control(
-            var=partial(self.next_variable, "downward_control"),
-        )
-        self.downward_data = self.downward_data(
-            var=partial(self.next_variable, "downward_data"),
-            pipe=downward_pipe,
+        self.porcelain = self.porcelain(
+            var=partial(self.next_variable, "porcelain"),
+            flush=self.on_flush,
         )
 
         self.callbacks = {}
+        self.downward_pipe = downward_pipe
+        self.upward_pipe = upward_pipe
 
-        # prepare downward_control to receive data
-        next(self.downward_control)
+        self.output_sent = False
+
 
     def next_variable(self, phase, t):
+        logger.debug("phase %r requests a local variable", phase)
         queue = self.locals[phase]
         if len(queue) == 0:
+            logger.debug("generating new local variable")
             local = Variable(t)
             for p in self.locals.keys():
                 self.locals[p].append(local)
-        return queue.popleft()
+        local = queue.popleft()
+        try:
+            logger.debug("variable has value %r", local[:])
+        except ValueError:
+            logger.debug("variable has no value yet")
+        return local
+
+    def send_command(self, command):
+        logger.debug("sending command %s", command)
+        command, *command_args = self.porcelain.send(command)
+        logger.debug("received status %s %s", command, command_args)
+        return command, command_args
 
     def start(self):
-        next(self.upward_data)
-        command, *command_args = next(self.upward_control)
-        assert command == "start" and len(command_args) == 0
+        status, status_args = self.send_command(None)
+        if status != "main_started":
+            raise ProtocolError("unexpected status: " + status)
 
     def stop(self):
-        self.downward_control.send(("stop",))
-        next(self.downward_data)
+        status, status_args = self.send_command(None)
+        if status != "main_stopped":
+            raise ProtocolError("unexpected status: " + status)
+        self.on_flush()
 
     def invoke_callback(self, name, args):
-        return self.callbacks[name](*args)
+        return_value = self.callbacks[name](*args)
+        status, *status_args = self.send_command(("return", return_value))
+        if status != "callback_stopped":
+            raise ProtocolError("unexpected status: " + status)
+        self.maybe_advance_plumbing()
 
-    def call(self, name, *call_args):
-        self.downward_control.send(("call", name, call_args))
+    def process_callbacks(self):
         while True:
-            next(self.downward_data)
-
-            # extra trip for callback detection
-            next(self.upward_data)
-            next(self.upward_control)
-            next(self.downward_control)
-            next(self.downward_data)
-
-            next(self.upward_data)
-            command, *command_args = next(self.upward_control)
-
-            if command == "callback":
-                return_value = self.invoke_callback(*command_args)
-                self.downward_control.send(("return", return_value))
-            elif command == "call_return":
-                function_name, return_value = command_args
-                assert function_name == name
+            status, status_args = self.send_command(None)
+            if status == "callback_started":
+                self.invoke_callback(*status_args)
+            elif status == "call_returned":
+                function_name, return_value = status_args
                 return return_value
             else:
-                raise ValueError
+                raise ProtocolError("unexpected status: " + status)
+
+    def on_flush(self):
+        logger.debug("communication block ended (porcelain flush)")
+        if not self.output_sent:
+            raise ProtocolError(
+                "no output was sent on flush, "
+                "make sure you have a 'call' which generates output in each communication block")
+        self.output_sent = False
+
+    def call(self, name, *call_args):
+        status, status_args = self.send_command(("call", name, call_args))
+
+        if status != "call_accepted":
+            raise ProtocolError("unexpected status: " + status)
+
+        has_output = True
+        if has_output:
+            self.maybe_advance_plumbing()
+        return self.process_callbacks()
+
+    def maybe_advance_plumbing(self):
+        if not self.output_sent:
+            logger.debug("call needs output but input not sent yet, advancing data in pipes...")
+            next(self.plumbing)
+            logger.debug("data exchanged in pipes.")
+        self.output_sent = True
 
 
 class BaseDriver:
@@ -111,7 +144,8 @@ class BaseDriver:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._engine.stop()
+        if exc_val is None:
+            self._engine.stop()
 
 
 def expect_call(command, expected_name):
@@ -133,12 +167,6 @@ def expect_return(command):
         raise ValueError("expecting return, received {cmd}".format(cmd=command))
     return_value, = command_args
     return return_value
-
-
-def expect_stop(command):
-    command_type, *command_args = command
-    if command_type != "stop":
-        raise ValueError("expecting stop, received {cmd}".format(cmd=command))
 
 
 def read(types, *, file):

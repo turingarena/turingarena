@@ -3,23 +3,52 @@ from turingarena.interfaces.analysis.expression import compile_expression, compi
 from turingarena.interfaces.analysis.scope import Scope
 
 
-def compile_block(block, scope):
-    compiler = BlockItemCompiler(Scope(scope))
-    for item in block.block_items:
-        compiler.compile(item)
-    block.expected_calls = find_expected_calls(block)
+class BlockContext:
+    def __init__(self, root=False):
+        self.root = root
 
 
-class BlockItemCompiler:
-    def __init__(self, scope):
-        self.scope = scope
+def compile_block(block, context, scope):
+    block.context = context
+    compiler = BlockCompiler(block, scope)
+    compiler.compile()
 
-    def compile(self, item):
-        item.accept(self)
+
+class BlockCompiler:
+    def __init__(self, block, scope):
+        self.block = block
+        self.scope = Scope(scope)
+
+        self.block.locals = []
+        self.block.first_calls = None
+        """A set containing the names of the possible functions
+        that can be called first in this block,
+        and possibly None if this block could call no function"""
+
+        if not self.block.context.root:
+            self.block.first_calls = {None}  # at the beginning, no functions are possible
+
+    def compile(self):
+        for item in self.block.block_items:
+            item.accept(self)
+        if True \
+                and not self.block.context.root \
+                and len(self.block.locals) > 0 \
+                and None in self.block.first_calls:
+            raise ValueError(
+                "An internal block that declares local variables "
+                "must always do at least one function call")
+
+    def expect_calls(self, calls):
+        if self.block.context.root:
+            return
+        if None in self.block.first_calls:
+            self.block.first_calls.remove(None)
+            self.block.first_calls |= calls
 
     def visit_variable_declaration(self, declaration):
         compile_declaration(declaration, scope=self.scope)
-        declaration.is_global = False
+        self.block.locals.append(declaration)
 
     def compile_arguments(self, statement):
         for e in statement.arguments:
@@ -39,6 +68,8 @@ class BlockItemCompiler:
         compile_range(statement.range, scope=self.scope)
 
     def visit_call_statement(self, statement):
+        self.expect_calls({statement.function_name})
+
         for p in statement.parameters:
             compile_expression(p, scope=self.scope)
         if statement.return_value is not None:
@@ -50,27 +81,10 @@ class BlockItemCompiler:
 
         new_scope = Scope(self.scope)
         compile_declaration(statement.index, scope=new_scope)
-        compile_block(statement.block, scope=new_scope)
+        compile_block(statement.block, context=BlockContext(), scope=new_scope)
+
+        self.expect_calls(statement.block.first_calls)
 
     def visit_return_statement(self, stmt):
         if stmt.expression is not None:
             compile_expression(stmt.expression, scope=self.scope)
-
-
-def find_expected_calls(block):
-    for item in block.block_items:
-        calls = item.accept(ExpectedCallFinder())
-        if calls is not None:
-            return calls
-    return None
-
-
-class ExpectedCallFinder:
-    def visit_default(self, stmt):
-        return None
-
-    def visit_call_statement(self, stmt):
-        return set(stmt.function_name)
-
-    def visit_for_statement(self, stmt):
-        return find_expected_calls(stmt.block)

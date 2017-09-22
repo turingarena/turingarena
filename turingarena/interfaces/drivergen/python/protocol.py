@@ -89,7 +89,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield "else: raise ValueError('unexpected callback %s' % callback_[:])"
 
     def generate_on_callback(self):
-        yield "yield"
+        yield "pass"
 
     def visit_function_declaration(self, declaration):
         yield "pass"
@@ -103,20 +103,22 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield from indent_all(self.generate_callback_body(declaration))
 
     def generate_main_body(self, declaration):
-        yield "# <initialization>"
+        yield "# <main initialization>"
         yield from self.generate_main_begin(declaration)
         yield from self.generate(declaration.block)
-        yield "# <finalization>"
+        yield "# <main finalization>"
         yield from self.generate_main_end(declaration)
 
     def generate_callback_body(self, declaration):
-        yield "# <arguments>"
+        yield "# <callback arguments>"
         yield from self.generate_local_variables(
             (p.declarator.name, p.type) for p in declaration.parameters
         )
-        yield "# <initialization>"
+        yield "# <callback initialization>"
         yield from self.generate_callback_begin(declaration)
         yield from self.generate(declaration.block)
+        yield "# <callback finalization>"
+        yield from self.generate_callback_end(declaration)
 
     def generate_main_begin(self, declaration):
         yield "pass"
@@ -127,7 +129,11 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_callback_begin(self, declaration):
         yield "pass"
 
+    def generate_callback_end(self, declaration):
+        yield "pass"
+
     def visit_block(self, block):
+        yield "# expected calls: " + str(block.first_calls)
         for item in block.block_items:
             yield "# " + item.info()
             yield from item.accept(self)
@@ -146,50 +152,60 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield "pass"
 
 
-class UpwardDataGenerator(ProtocolGenerator):
-    def generate_on_callback(self):
-        yield "callback_[:], = read([str], file=pipe)"
-        yield "yield"
-
-    def generate_main_begin(self, declaration):
-        yield from self.lazy_yield()
+class PlumbingProtocolGenerator(ProtocolGenerator):
+    """
+    Generates the code of a co-routine
+    which performs input/output from process stdin/stdout.
+    """
 
     def generate_main_end(self, declaration):
-        yield from self.maybe_yield()
-
-    def generate_callback_begin(self, declaration):
-        yield from self.lazy_yield()
+        yield "yield"
 
     def visit_input_statement(self, statement):
-        yield from self.maybe_yield()
+        yield "print({arguments}, file=downward_pipe, flush=True)".format(
+            arguments=", ".join(
+                build_driver_expression(e)
+                for e in statement.arguments
+            )
+        )
 
-    def visit_call_statement(self, statement):
-        yield from self.maybe_yield()
-        yield from self.lazy_yield()
-        yield "yield from accept_callbacks()"
-
-    def maybe_yield(self):
-        yield "yield from to_yield"
-
-    def lazy_yield(self):
-        yield "to_yield = lazy_yield()"
-
-    def visit_return_statement(self, stmt):
-        yield from self.maybe_yield()
+    def generate_on_callback(self):
+        yield "callback_[:], = read([str], file=upward_pipe)"
 
     def visit_output_statement(self, statement):
-        yield "{args}, = read([{types}], file=pipe)".format(
+        yield "{args}, = read([{types}], file=upward_pipe)".format(
             args=", ".join(build_assignable_expression(a) for a in statement.arguments),
             types=", ".join(BaseTypeBuilder().build(a.type) for a in statement.arguments)
         )
 
+    def visit_flush_statement(self, statement):
+        yield "yield"
 
-class UpwardControlGenerator(ProtocolGenerator):
+    def visit_call_statement(self, statement):
+        yield "yield from accept_callbacks()"
+
+    def visit_alloc_statement(self, stmt):
+        for a in stmt.arguments:
+            yield "{val}.range = ({start}, {end})".format(
+                val=build_driver_expression(a),
+                start=build_driver_expression(stmt.range.start),
+                end=build_driver_expression(stmt.range.end),
+            )
+
+
+class PorcelainProtocolGenerator(ProtocolGenerator):
+    """
+    Generates the code of a co-routine
+    which processes call/callback/return events.
+    """
     def generate_main_begin(self, declaration):
-        yield "yield 'start',"
+        yield "command = yield 'main_started',"
+
+    def generate_main_end(self, declaration):
+        yield "yield 'main_stopped',"
 
     def generate_callback_begin(self, declaration):
-        yield "yield 'callback', '{name}', ({args})".format(
+        yield "command = yield 'callback_started', '{name}', ({args})".format(
             name=declaration.declarator.name,
             args="".join(
                 "{}_[:], ".format(p.declarator.name)
@@ -197,26 +213,38 @@ class UpwardControlGenerator(ProtocolGenerator):
             ),
         )
 
+    def generate_callback_end(self, declaration):
+        yield "yield 'callback_stopped',"
+
+    def visit_for_statement(self, statement):
+        if statement.block.first_calls == {None}:
+            yield "# suppressed, contains no commands"
+            yield "pass"
+        else:
+            yield from super().visit_for_statement(statement)
+
     def visit_call_statement(self, statement):
+        yield "{unpack}, = expect_call(command, '{name}')".format(
+            unpack=", ".join(
+                build_assignable_expression(expr)
+                for p, expr in zip(
+                    statement.function_declaration.parameters,
+                    statement.parameters
+                )
+            ),
+            name=statement.function_name,
+        )
+        yield "yield 'call_accepted',"
         yield "yield from accept_callbacks()"
-        yield "yield 'call_return', '{name}', {ret}".format(
+        yield "command = yield 'call_returned', '{name}', {ret}".format(
             name=statement.function_name,
             ret="None"
             if statement.return_value is None else
             build_driver_expression(statement.return_value),
         )
 
-
-class DownwardControlGenerator(ProtocolGenerator):
-    def generate_main_begin(self, declaration):
-        yield "command = yield"
-
-    def generate_callback_begin(self, declaration):
-        yield "command = yield"
-
-    def generate_main_end(self, declaration):
-        yield "expect_stop(command)"
-        yield "yield"
+    def visit_flush_statement(self, statement):
+        yield "flush()"
 
     def visit_return_statement(self, stmt):
         yield "{ret}expect_return(command)".format(
@@ -225,50 +253,6 @@ class DownwardControlGenerator(ProtocolGenerator):
                 build_assignable_expression(stmt.expression) + " = "
             )
         )
-        yield "yield"
-
-    def visit_call_statement(self, statement):
-        yield "{unpack}, = expect_call(command, '{name}')".format(
-            unpack=", ".join(
-                "parameter_" + p.declarator.name for p in statement.function_declaration.parameters
-            ),
-            name=statement.function_name,
-        )
-        for p, expr in zip(statement.function_declaration.parameters, statement.parameters):
-            yield "{val} = parameter_{name}".format(
-                val=build_assignable_expression(expr),
-                name=p.declarator.name,
-            )
-        yield "yield from accept_callbacks()"
-        yield "command = yield"
-
-
-class DownwardDataGenerator(ProtocolGenerator):
-    def visit_input_statement(self, statement):
-        yield "print({arguments}, file=pipe, flush=True)".format(
-            arguments=", ".join(
-                build_driver_expression(e)
-                for e in statement.arguments
-            )
-        )
-
-    def visit_call_statement(self, statement):
-        yield "yield"
-        yield "yield from accept_callbacks()"
-
-    def visit_alloc_statement(self, stmt):
-        for a in stmt.arguments:
-            yield "assert {val}.range == ({start}, {end})".format(
-                val=build_driver_expression(a),
-                start=build_driver_expression(stmt.range.start),
-                end=build_driver_expression(stmt.range.end),
-            )
-
-    def generate_main_end(self, declaration):
-        yield "yield"
-
-    def visit_return_statement(self, statement):
-        yield "yield"
 
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):
@@ -295,14 +279,10 @@ class GlobalDataGenerator(AbstractInterfaceGenerator):
         yield "pass"
 
 
-protocol_generators = OrderedDict(
-    (g.name, g)
-    for g in [
-        UpwardDataGenerator("upward_data", ["var", "pipe"]),
-        UpwardControlGenerator("upward_control", ["var"]),
-        DownwardControlGenerator("downward_control", ["var"]),
-        DownwardDataGenerator("downward_data", ["var", "pipe"]),
-    ]
-)
+plumbing_generator = PlumbingProtocolGenerator(
+    "plumbing", ["var", "upward_pipe", "downward_pipe"])
+
+porcelain_generator = PorcelainProtocolGenerator(
+    "porcelain", ["var", "flush"])
 
 global_data_generator = GlobalDataGenerator("global_data", ["var", "globals"])
