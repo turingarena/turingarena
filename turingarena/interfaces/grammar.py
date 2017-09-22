@@ -46,7 +46,7 @@ grammar_ebnf = r"""
     ;
     
     index_declaration =
-        declarator:index_declarator ':' range:range
+        declarator:declarator ':' range:range
     ;
 
     parameter_declaration_list = ','.{ parameter_declaration }* ;
@@ -55,9 +55,7 @@ grammar_ebnf = r"""
 
     declarator_list = ','.{ declarator }+ ;
 
-    declarator = name:identifier [ '=' initializer:expression ] ;
-    
-    index_declarator = name:identifier ;
+    declarator = name:identifier ;
 
     block = '{' block_items:{ block_item }* '}' ;
 
