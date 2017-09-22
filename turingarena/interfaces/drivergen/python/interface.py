@@ -46,14 +46,7 @@ class InterfaceGenerator:
         yield from indent_all(self.generate_function_body(declaration))
 
     def visit_callback_declaration(self, declaration):
-        name = declaration.declarator.name
-        yield "@property"
-        yield "def {name}(self):".format(name=name)
-        yield indent("return self._engine.callbacks['{name}']".format(name=name))
-        yield
-        yield "@{name}.setter".format(name=name)
-        yield "def {name}(self, value):".format(name=name)
-        yield indent("self._engine.callbacks['{name}'] = value".format(name=name))
+        yield "pass"
 
     def visit_main_declaration(self, declaration):
         yield "pass"
@@ -63,7 +56,8 @@ class InterfaceGenerator:
             name=declaration.declarator.name,
             parameters=", ".join(
                 ["self"] +
-                [p.declarator.name for p in declaration.parameters]
+                ["arg_{}".format(p.declarator.name) for p in declaration.parameters] +
+                ["**kwargs"]
             ),
         )
 
@@ -71,6 +65,8 @@ class InterfaceGenerator:
         yield "return self._engine.call({args})".format(
             args=", ".join(
                 ['"{name}"'.format(name=declaration.declarator.name)] +
-                [p.declarator.name for p in declaration.parameters]
+                ["arg_{}".format(p.declarator.name) for p in declaration.parameters] +
+                ["has_return={}".format(declaration.return_type is not None)] +
+                ["**kwargs"]
             )
         )

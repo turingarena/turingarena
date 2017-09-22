@@ -10,6 +10,10 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
+class UnexpectedCallback(Exception):
+    pass
+
+
 class Globals:
     pass
 
@@ -48,7 +52,6 @@ class BaseDriverEngine:
             flush=self.on_flush,
         )
 
-        self.callbacks = {}
         self.downward_pipe = downward_pipe
         self.upward_pipe = upward_pipe
 
@@ -87,18 +90,21 @@ class BaseDriverEngine:
             raise ProtocolError("unexpected status: " + status)
         self.on_flush()
 
-    def invoke_callback(self, name, args):
-        return_value = self.callbacks[name](*args)
+    def invoke_callback(self, callbacks, name, args):
+        key = "callback_{}".format(name)
+        if key not in callbacks:
+            raise UnexpectedCallback(name)
+        return_value = callbacks[key](*args)
         status, *status_args = self.send_command(("return", return_value))
         if status != "callback_stopped":
             raise ProtocolError("unexpected status: " + status)
         self.maybe_advance_plumbing()
 
-    def process_callbacks(self):
+    def process_callbacks(self, callbacks):
         while True:
             status, status_args = self.send_command(None)
             if status == "callback_started":
-                self.invoke_callback(*status_args)
+                self.invoke_callback(callbacks, *status_args)
             elif status == "call_returned":
                 function_name, return_value = status_args
                 return return_value
@@ -113,16 +119,18 @@ class BaseDriverEngine:
                 "make sure you have a 'call' which generates output in each communication block")
         self.output_sent = False
 
-    def call(self, name, *call_args):
+    def call(self, name, *call_args, has_return, **kwargs):
+        callbacks = {n: f for n, f in kwargs.items() if n.startswith("callback_")}
+
         status, status_args = self.send_command(("call", name, call_args))
 
         if status != "call_accepted":
             raise ProtocolError("unexpected status: " + status)
 
-        has_output = True
+        has_output = has_return or len(callbacks > 0)
         if has_output:
             self.maybe_advance_plumbing()
-        return self.process_callbacks()
+        return self.process_callbacks(callbacks)
 
     def maybe_advance_plumbing(self):
         if not self.output_sent:
