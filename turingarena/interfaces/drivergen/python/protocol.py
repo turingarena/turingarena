@@ -256,12 +256,6 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
 
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):
-    def visit_interface_definition(self, interface):
-        yield
-        yield "@staticmethod"
-        yield "def global_data(var, globals):"
-        yield from indent_all(self.generate_body(interface))
-
     def visit_variable_declaration(self, declaration):
         yield from super().visit_variable_declaration(declaration)
         yield "{globals} = {vars}".format(
