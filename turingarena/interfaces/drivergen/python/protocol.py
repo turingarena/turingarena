@@ -247,12 +247,10 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "flush()"
 
     def visit_return_statement(self, stmt):
-        yield "{ret}expect_return(command)".format(
-            ret=(
-                "" if stmt.expression is None else
-                build_assignable_expression(stmt.expression) + " = "
-            )
+        yield "{ret} = expect_return(command)".format(
+            ret=build_assignable_expression(stmt.expression)
         )
+        yield "yield 'return_accepted',"
 
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):

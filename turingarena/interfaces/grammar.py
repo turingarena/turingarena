@@ -134,7 +134,7 @@ grammar_ebnf = r"""
 
     continue_statement = 'continue' ~ ';' ;
 
-    return_statement = 'return' ~ expression:[ expression ] ';' ;
+    return_statement = 'return' ~ expression:expression ';' ;
 
     range =
         start:expression '..' end:expression

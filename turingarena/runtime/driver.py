@@ -94,11 +94,19 @@ class BaseDriverEngine:
         key = "callback_{}".format(name)
         if key not in callbacks:
             raise UnexpectedCallback(name)
+
         return_value = callbacks[key](*args)
-        status, *status_args = self.send_command(("return", return_value))
+
+        if return_value is not None:
+            status, *status_args = self.send_command(("return", return_value))
+            if status != "return_accepted":
+                raise ProtocolError("unexpected status: " + status)
+
+        self.maybe_advance_plumbing()
+
+        status, *status_args = self.send_command(None)
         if status != "callback_stopped":
             raise ProtocolError("unexpected status: " + status)
-        self.maybe_advance_plumbing()
 
     def process_callbacks(self, callbacks):
         while True:
