@@ -10,7 +10,7 @@ coloredlogs.install(level=logging.DEBUG, logger=logger)
 class SandboxClient:
 
     def __init__(self):
-        self.sandbox_dir = os.environ["TURINGARENA_SANDBOX_DIR"]
+        self.sandbox_dir = os.environ.get("TURINGARENA_SANDBOX_DIR")
 
     def is_supported(self):
         return self.sandbox_dir is not None
