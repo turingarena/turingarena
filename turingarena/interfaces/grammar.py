@@ -77,6 +77,7 @@ grammar_ebnf = r"""
         | break_statement
         | continue_statement
         | return_statement
+        | exit_statement
     ;
 
     expression_list = ','.{ expression }* ;
@@ -133,6 +134,8 @@ grammar_ebnf = r"""
     continue_statement = 'continue' ~ ';' ;
 
     return_statement = 'return' ~ expression:expression ';' ;
+    
+    exit_statement = 'exit' ~ arguments:() ';' ;
 
     range =
         start:expression '..' end:expression
