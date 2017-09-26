@@ -47,6 +47,9 @@ class AbstractInterfaceGenerator:
 
     def generate_local_variables(self, vars):
         vars = list(vars)
+        assert len(vars) >= 1
+
+        vars = list(vars)
         yield "{names}, = {creators},".format(
             names=", ".join(name + "_" for name, t in vars),
             creators=", ".join(
@@ -110,10 +113,11 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield from self.generate_main_end(declaration)
 
     def generate_callback_body(self, declaration):
-        yield "# <callback arguments>"
-        yield from self.generate_local_variables(
-            (p.declarator.name, p.type) for p in declaration.parameters
-        )
+        if len(declaration.parameters) >= 1:
+            yield "# <callback arguments>"
+            yield from self.generate_local_variables(
+                (p.declarator.name, p.type) for p in declaration.parameters
+            )
         yield "# <callback initialization>"
         yield from self.generate_callback_begin(declaration)
         yield from self.generate(declaration.block)
