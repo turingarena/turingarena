@@ -48,7 +48,6 @@ class BlockItemGenerator:
             parameters=", ".join(generate_expression(p) for p in node.parameters)
         )
         yield r'printf("return\n");'
-        yield 'fflush(stdout);'
 
     def visit_alloc_statement(self, statement):
         for argument in statement.arguments:
