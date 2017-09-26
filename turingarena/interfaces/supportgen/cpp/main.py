@@ -20,7 +20,10 @@ class InterfaceItemGenerator:
 
     def visit_callback_declaration(self, decl):
         yield "{return_type} {name}({arguments})".format(
-            return_type=generate_base_type(decl.return_type),
+            return_type=
+                generate_base_type(decl.return_type)
+                if decl.return_type is not None
+                else "void",
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"

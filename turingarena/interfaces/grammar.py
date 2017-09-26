@@ -31,7 +31,7 @@ grammar_ebnf = r"""
         'callback' ~ declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
-        [ '->' return_type:type ]
+        return_type:[ '->' @:type ]
         block:block
     ;
 
