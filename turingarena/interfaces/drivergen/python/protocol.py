@@ -73,7 +73,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
 
     def generate_accept_callbacks_body(self, interface):
         if len(interface.callback_declarations) == 0:
-            yield "pass"
+            yield "yield from []"
         else:
             yield from self.generate_accept_callbacks_nonempty_body(interface)
 

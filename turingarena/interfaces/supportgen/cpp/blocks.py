@@ -47,7 +47,6 @@ class BlockItemGenerator:
             function_name=node.function_name,
             parameters=", ".join(generate_expression(p) for p in node.parameters)
         )
-        yield r'printf("return\n");'
 
     def visit_alloc_statement(self, statement):
         for argument in statement.arguments:
@@ -58,10 +57,11 @@ class BlockItemGenerator:
             )
 
     def visit_return_statement(self, stmt):
-        if stmt.expression is not None:
-            yield "return {expr};".format(expr=generate_expression(stmt.expression))
-        else:
-            yield "return;"
+        assert stmt.expression is not None
+        yield "return {expr};".format(expr=generate_expression(stmt.expression))
+
+    def visit_select_statement(self, stmt):
+        yield r'printf("{}\n");'.format(stmt.name)
 
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
