@@ -31,14 +31,18 @@ grammar_ebnf = r"""
         'callback' ~ declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
-        return_type:[ '->' @:type ]
-        block:block
+        return_type:[ return_type_declarator ]
+        body:block
+    ;
+    
+    return_type_declarator =
+        '->' ~ @:type
     ;
 
     function_declarator = name:identifier ;
 
     main_declaration =
-        'main' ~ block:block
+        'main' ~ body:block
     ;
 
     variable_declaration =
@@ -78,7 +82,6 @@ grammar_ebnf = r"""
         | continue_statement
         | return_statement
         | exit_statement
-        | select_statement
     ;
 
     expression_list = ','.{ expression }* ;
@@ -108,37 +111,35 @@ grammar_ebnf = r"""
     ;
     
     if_statement =
-        'if' ~ '(' condition:expression ')' then_block:block
-        [ 'else' ~ else_block:block ]
+        'if' ~ '(' condition:expression ')' then_body:block
+        [ 'else' ~ else_body:block ]
     ;
 
     switch_statement =
-        'switch' ~ '(' expression:expression ')' '{'
+        'switch' ~ '(' value:expression ')' '{'
             cases:{ switch_case }*
         '}'
     ;
 
     switch_case =
-        'case' '(' value:identifier ')' block:block
+        'case' '(' value:identifier ')' body:block
     ;
 
     for_statement =
-        'for' ~ '(' index:index_declaration ')' block:block
+        'for' ~ '(' index:index_declaration ')' body:block
     ;
 
     loop_statement =
-        'loop' ~ block:block
+        'loop' ~ body:block
     ;
     
     break_statement = 'break' ~ ';' ;
 
     continue_statement = 'continue' ~ ';' ;
 
-    return_statement = 'return' ~ expression:expression ';' ;
+    return_statement = 'return' ~ value:expression ';' ;
     
     exit_statement = 'exit' ~ arguments:() ';' ;
-    
-    select_statement = 'select' ~ name:identifier ';' ;
 
     range =
         start:expression '..' end:expression
@@ -156,7 +157,7 @@ grammar_ebnf = r"""
     
     variable_expression = variable_name:identifier ;
 
-    int_literal_expression = value:INT;
+    int_literal_expression = int_literal:INT;
 
     type =
         | array_type

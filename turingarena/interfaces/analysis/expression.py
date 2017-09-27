@@ -9,7 +9,7 @@ class ExpressionCompiler:
         expr.accept(self)
 
     def visit_int_literal_expression(self, expr):
-        expr.int_value = int(expr.value)
+        expr.int_value = int(expr.int_literal)
         expr.type = ScalarType("int")
 
     def visit_subscript_expression(self, expr):

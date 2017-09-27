@@ -1,7 +1,6 @@
 interface exampleinterface {
     var int N, M;
     var int64[] A;
-    var int64 S;
 
     function solve(int u) -> int;
 
@@ -19,9 +18,9 @@ interface exampleinterface {
         for(i : 1..N) {
             input A[i];
         }
-        var int u;
+        var int u, s;
         input u;
-        call solve(u) -> S;
-        output S;
+        call solve(u) -> s;
+        output s;
     }
 }

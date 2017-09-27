@@ -36,6 +36,11 @@ class BaseDriverEngine:
             for phase in self.phases
         }
 
+        self.expected_callbacks = {
+            phase: deque()
+            for phase in self.phases
+        }
+
         self.globals = Globals()
         self.global_data(
             var=partial(self.next_variable, "global_data"),
@@ -59,19 +64,12 @@ class BaseDriverEngine:
 
 
     def next_variable(self, phase, t):
-        logger.debug("phase %r requests a local variable", phase)
         queue = self.locals[phase]
         if len(queue) == 0:
-            logger.debug("generating new local variable")
             local = Variable(t)
             for p in self.locals.keys():
                 self.locals[p].append(local)
-        local = queue.popleft()
-        try:
-            logger.debug("variable has value %r", local[:])
-        except ValueError:
-            logger.debug("variable has no value yet")
-        return local
+        return queue.popleft()
 
     def send_command(self, command):
         logger.debug("sending command %s", command)
@@ -135,7 +133,7 @@ class BaseDriverEngine:
         if status != "call_accepted":
             raise ProtocolError("unexpected status: " + status)
 
-        has_output = has_return or len(callbacks > 0)
+        has_output = has_return or len(callbacks) > 0
         if has_output:
             self.maybe_advance_plumbing()
         return self.process_callbacks(callbacks)

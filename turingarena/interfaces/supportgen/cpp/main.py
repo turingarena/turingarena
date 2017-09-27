@@ -19,20 +19,23 @@ class InterfaceItemGenerator:
         )
 
     def visit_callback_declaration(self, decl):
+        name = decl.declarator.name
         yield "{return_type} {name}({arguments})".format(
             return_type=
                 generate_base_type(decl.return_type)
                 if decl.return_type is not None
                 else "void",
-            name=decl.declarator.name,
+            name=name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"
-        yield from indent_all(generate_block(decl.block))
+        if len(decl.interface.callback_declarations) > 0:
+            yield indent(r"""printf("%s\n", "{name}");""".format(name=name))
+        yield from indent_all(generate_block(decl.body))
         yield "}"
 
-    def visit_main_declaration(self, definition):
+    def visit_main_declaration(self, declaration):
         yield "int main() {"
-        yield from indent_all(generate_block(definition.block))
+        yield from indent_all(generate_block(declaration.body))
         yield "}"
 
 

@@ -63,9 +63,15 @@ class AbstractInterfaceGenerator:
 
 class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_interface_begin(self, interface):
-        yield
-        yield "def accept_callbacks():"
-        yield from indent_all(self.generate_accept_callbacks_body(interface))
+        if len(interface.callback_declarations) > 0:
+            yield
+            yield "def accept_callbacks():"
+            yield from indent_all(self.generate_accept_callbacks_body(interface))
+
+    def maybe_accept_callbacks(self, statement):
+        interface = statement.outer_block.outer_declaration.interface
+        if len(interface.callback_declarations) > 0:
+            yield "yield from accept_callbacks()"
 
     def generate_interface_end(self, interface):
         yield
@@ -108,7 +114,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_main_body(self, declaration):
         yield "# <main initialization>"
         yield from self.generate_main_begin(declaration)
-        yield from self.generate(declaration.block)
+        yield from self.generate(declaration.body)
         yield "# <main finalization>"
         yield from self.generate_main_end(declaration)
 
@@ -120,7 +126,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
             )
         yield "# <callback initialization>"
         yield from self.generate_callback_begin(declaration)
-        yield from self.generate(declaration.block)
+        yield from self.generate(declaration.body)
         yield "# <callback finalization>"
         yield from self.generate_callback_end(declaration)
 
@@ -150,7 +156,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
             end="1 + " + build_driver_expression(statement.index.range.end),
         )
         yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
-        yield from indent_all(self.generate(statement.block))
+        yield from indent_all(self.generate(statement.body))
 
     def visit_default(self, stmt):
         yield "pass"
@@ -186,7 +192,7 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
         yield "yield"
 
     def visit_call_statement(self, statement):
-        yield "yield from accept_callbacks()"
+        yield from self.maybe_accept_callbacks(statement)
 
     def visit_alloc_statement(self, stmt):
         for a in stmt.arguments:
@@ -221,7 +227,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "yield 'callback_stopped',"
 
     def visit_for_statement(self, statement):
-        if statement.block.first_calls == {None}:
+        if statement.body.first_calls == {None}:
             yield "# suppressed, contains no commands"
             yield "pass"
         else:
@@ -239,7 +245,8 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
             name=statement.function_name,
         )
         yield "yield 'call_accepted',"
-        yield "yield from accept_callbacks()"
+
+        yield from self.maybe_accept_callbacks(statement)
         yield "command = yield 'call_returned', '{name}', {ret}".format(
             name=statement.function_name,
             ret="None"
@@ -252,7 +259,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
 
     def visit_return_statement(self, stmt):
         yield "{ret} = expect_return(command)".format(
-            ret=build_assignable_expression(stmt.expression)
+            ret=build_assignable_expression(stmt.value)
         )
         yield "yield 'return_accepted',"
 

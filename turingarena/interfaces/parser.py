@@ -46,5 +46,11 @@ class AbstractSyntaxNode:
         elif hasattr(visitor, "visit_default"):
             method = visitor.visit_default
         else:
-            raise NotImplementedError("unable to visit %s" % self.parseinfo.rule)
+            raise NotImplementedError("visit", self)
         return method(self)
+
+    def __repr__(self):
+        return "<{rule} '{info}'>".format(
+            rule=self.parseinfo.rule,
+            info=self.info(),
+        )

@@ -1,4 +1,4 @@
-from turingarena.interfaces.analysis.interface import InterfaceCompiler
+from turingarena.interfaces.analysis.interface import InterfaceCompiler, compile_interface
 
 
 class TaskAnalyzer:
@@ -14,5 +14,5 @@ class TaskItemAnalyzer:
         self.task = task
 
     def visit_interface_definition(self, interface):
-        InterfaceCompiler().compile(interface)
+        compile_interface(interface)
         self.task.interfaces.append(interface)

@@ -18,7 +18,7 @@ class BlockItemGenerator:
             start=generate_expression(statement.index.range.start),
             end=generate_expression(statement.index.range.end)
         ) + " {"
-        yield from indent_all(generate_block(statement.block))
+        yield from indent_all(generate_block(statement.body))
         yield "}"
 
     def visit_input_statement(self, statement):
@@ -36,17 +36,20 @@ class BlockItemGenerator:
     def visit_flush_statement(self, statement):
         yield 'fflush(stdout);'
 
-    def visit_call_statement(self, node):
-        if node.return_value is not None:
-            return_value = generate_expression(node.return_value) + " = "
+    def visit_call_statement(self, statement):
+        if statement.return_value is not None:
+            return_value = generate_expression(statement.return_value) + " = "
         else:
             return_value = ""
 
         yield "{return_value}{function_name}({parameters});".format(
             return_value=return_value,
-            function_name=node.function_name,
-            parameters=", ".join(generate_expression(p) for p in node.parameters)
+            function_name=statement.function_name,
+            parameters=", ".join(generate_expression(p) for p in statement.parameters)
         )
+        interface = statement.outer_block.outer_declaration.interface
+        if len(interface.callback_declarations) > 0:
+            yield r"""printf("return\n");""".format(statement.function_name)
 
     def visit_alloc_statement(self, statement):
         for argument in statement.arguments:
@@ -57,11 +60,7 @@ class BlockItemGenerator:
             )
 
     def visit_return_statement(self, stmt):
-        assert stmt.expression is not None
-        yield "return {expr};".format(expr=generate_expression(stmt.expression))
-
-    def visit_select_statement(self, stmt):
-        yield r'printf("{}\n");'.format(stmt.name)
+        yield "return {expr};".format(expr=generate_expression(stmt.value))
 
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
