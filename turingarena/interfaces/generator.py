@@ -1,8 +1,11 @@
+import logging
 import os
 import shutil
 
 import turingarena.interfaces.drivergen.python.main as python_drivergen
 import turingarena.interfaces.supportgen.cpp.main as cpp_supportgen
+
+logger = logging.getLogger(__name__)
 
 lang_supportgen = {
     "cpp": cpp_supportgen.SupportGenerator
@@ -34,16 +37,39 @@ class CodeGenerator:
     def generate_interfaces_support(self):
         os.mkdir(self.interfaces_dir)
         for interface in self.task.interfaces:
-            interface_dir = os.path.join(self.interfaces_dir, interface.name)
-            os.mkdir(interface_dir)
-            for language, generator in lang_supportgen.items():
-                language_dir = os.path.join(interface_dir, language)
-                os.mkdir(language_dir)
-                generator(self.task, interface, language_dir).generate()
+            self._generate_support_for(interface)
+
+    def _generate_support_for(self, interface):
+        interface_dir = os.path.join(self.interfaces_dir, interface.name)
+        os.mkdir(interface_dir)
+        for language, generator in lang_supportgen.items():
+            self._generate_support_language(generator, interface, interface_dir, language)
+
+    def _generate_support_language(self, generator, interface, interface_dir, language):
+        language_dir = os.path.join(interface_dir, language)
+        os.mkdir(language_dir)
+        logger.info(
+            "Generating support for interface '{interface}'"
+            " and language {language} in dir {dir}".format(
+                interface=interface.name,
+                language=language,
+                dir=language_dir,
+            )
+        )
+        generator(self.task, interface, language_dir).generate()
 
     def generate_driver(self):
         os.mkdir(self.runtime_dir)
         for language, generator in lang_drivergen.items():
-            language_dir = os.path.join(self.runtime_dir, language)
-            os.mkdir(language_dir)
-            generator(self.task, language_dir).generate()
+            self._generate_driver_language(generator, language)
+
+    def _generate_driver_language(self, generator, language):
+        language_dir = os.path.join(self.runtime_dir, language)
+        os.mkdir(language_dir)
+        logger.info(
+            "Generating driver for all interfaces for language {language} in dir {dir}".format(
+                language=language,
+                dir=language_dir,
+            )
+        )
+        generator(self.task, language_dir).generate()

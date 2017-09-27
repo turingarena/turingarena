@@ -5,24 +5,25 @@ from tatsu.ast import AST
 
 from turingarena.interfaces.grammar import grammar_ebnf
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def parse(*args, **kwargs):
     return tatsu.parse(grammar_ebnf, *args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
-class TaskParser:
-    def __init__(self, definition_dir):
-        self.definition_dir = definition_dir
-        self.task_file_path = os.path.join(definition_dir, "interfaces.txt")
-
-    def parse(self):
-        return parse(open(self.task_file_path).read(), rule="unit")
+def parse_interfaces_file(filename):
+    logger.info("Parsing interfaces file %s", filename)
+    return parse(open(filename).read(), rule="unit")
 
 
 class Semantics:
     def _default(self, ast, *args, **kwargs):
         if isinstance(ast, AST):
-            return AbstractSyntaxNode(ast, *args, **kwargs)
+            node = AbstractSyntaxNode(ast, *args, **kwargs)
+            logger.debug("Parsed '%s' as %s", node.info(), node.parseinfo.rule)
+            return node
         else:
             return ast
 
@@ -35,9 +36,19 @@ class AbstractSyntaxNode:
         for key, value in kwargs.items():
             setattr(self, key, value)
         self._arguments = args
+        self._ast = ast
 
     def info(self):
-        return self.parseinfo.text_lines()[0].strip()
+        parseinfo = self.parseinfo
+        buffer = parseinfo.buffer
+        line_info = buffer.line_info(parseinfo.pos)
+        lines = parseinfo.text_lines()
+        start = parseinfo.pos - line_info.start
+        if len(lines) == 1:
+            end = parseinfo.endpos - line_info.start
+            return lines[0][start:end].strip()
+        else:
+            return lines[0][start:].strip() + "..."
 
     def accept(self, visitor):
         method_name = "visit_%s" % self.parseinfo.rule

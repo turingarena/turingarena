@@ -21,19 +21,18 @@ import docopt
 from turingarena.interfaces import parser
 from turingarena.interfaces.analysis.analysis import TaskAnalyzer
 from turingarena.interfaces.generator import CodeGenerator
+from turingarena.interfaces.parser import parse_interfaces_file
 from turingarena.loggerinit import init_logger
 
 
 def main():
     args = docopt.docopt(__doc__)
+    init_logger(args)
 
     interface_filename = args["<interfaces-file>"]
     if interface_filename is None:
         interface_filename = "interfaces.txt"
-    interface_text = open(interface_filename).read()
-    task = parser.parse(interface_text, rule="unit")
-
-    init_logger(args)
+    task = parse_interfaces_file(interface_filename)
 
     TaskAnalyzer().analyze(task)
     CodeGenerator(task=task, output_dir=args["--output-dir"]).generate()
