@@ -19,4 +19,8 @@ def init_logger(args=None):
     if level_name is None:
         level_name = "warning"
     level = getattr(logging, level_name.upper())
-    coloredlogs.install(logger=logger, level=level)
+    coloredlogs.install(
+        logger=logger,
+        level=level,
+        fmt="%(levelname)8s [%(process)5d] %(name)s: %(message)s",
+    )
