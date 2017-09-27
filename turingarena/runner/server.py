@@ -1,14 +1,11 @@
-import logging
 import os
 import subprocess
 import threading
 
-import coloredlogs
-
 from turingarena.runner.cpp import run_cpp
 
+import logging
 logger = logging.getLogger(__name__)
-coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
 class Process:

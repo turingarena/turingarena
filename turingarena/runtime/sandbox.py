@@ -1,10 +1,7 @@
-import logging
 import os
 
-import coloredlogs
-
+import logging
 logger = logging.getLogger(__name__)
-coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
 class SandboxClient:

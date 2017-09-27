@@ -4,10 +4,7 @@ from turingarena.interfaces.analysis.scope import Scope
 
 
 import logging
-import coloredlogs
-
 logger = logging.getLogger(__name__)
-coloredlogs.install(logger=logger, level=logging.DEBUG)
 
 
 class InterfaceCompiler:

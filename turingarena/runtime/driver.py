@@ -1,13 +1,10 @@
-import logging
 from collections import deque
 from functools import partial
 
 from turingarena.runtime.data import Variable, ProtocolError
 
-import coloredlogs
-
+import logging
 logger = logging.getLogger(__name__)
-coloredlogs.install(level=logging.DEBUG, logger=logger)
 
 
 class UnexpectedCallback(Exception):

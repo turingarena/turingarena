@@ -6,11 +6,12 @@ Usage:
 
 Options:
 
+  <source>  Source file of the algorithm
   -I --interface=<interface>  Name of the interface this algorithm implements
   --no-interface  This algorithm handles stdin/stdout directly
   -x --language=<lang>  Language in which the algorithm is written
   -o --algorithm=<name>  Name of the algorithm to generate
-  <source>  Source file of the algorithm
+  --log=<level>  Logging level
 
 """
 import os
@@ -19,7 +20,12 @@ from tempfile import TemporaryDirectory
 
 import docopt
 
+from turingarena.loggerinit import init_logger
 from turingarena.runner.cpp import compile_cpp
+
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def compile(source_filename, language=None, interface=None, algorithm_name=None):
@@ -46,15 +52,24 @@ def compile(source_filename, language=None, interface=None, algorithm_name=None)
 
     algorithm_dir = "algorithms/{}/".format(algorithm_name)
 
+    logger.info("Compiling algorithm '{algo}' with language {lang} and source file '{source}'".format(
+        algo=algorithm_name,
+        lang=language,
+        source=source_filename,
+    ))
+
+    logger.debug("Creating empty algorithm directory '{}'".format(algorithm_dir))
     # cleanup
     os.makedirs(algorithm_dir, exist_ok=True)
     shutil.rmtree(algorithm_dir)
 
     os.mkdir(algorithm_dir)
 
+    logger.debug("Creating language.txt file")
     with open("{}/language.txt".format(algorithm_dir), "w") as language_file:
         print(language, file=language_file)
     with open(source_filename) as source_file:
+        logger.debug("Starting language-specific compilation")
         compiler(
             algorithm_dir=algorithm_dir,
             source_file=source_file,
@@ -64,6 +79,8 @@ def compile(source_filename, language=None, interface=None, algorithm_name=None)
 
 def main():
     args = docopt.docopt(__doc__)
+
+    init_logger(args)
 
     compile(
         source_filename=args["<source>"],
