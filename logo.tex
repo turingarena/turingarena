@@ -1,0 +1,26 @@
+\documentclass[border=2mm]{standalone}
+
+\usepackage[letterspace=-70]{microtype}
+\usepackage[default]{sourcecodepro}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+
+\begin{document}
+
+\fontsize{2cm}{1cm}
+
+\tikz{
+    \fill [fill=blue!50,xslant=0.5] ellipse (1.35ex and 1ex);
+    \fill [white,xslant=0.5] ellipse (1ex and 1.03ex);
+    \path
+        (-1.6ex,-0.6ex)
+        node [
+            color=black!80,
+            font=\lsstyle,
+            anchor=base east,
+            inner sep=0.1ex
+        ]
+        {TuringArena};
+}
+
+\end{document}
