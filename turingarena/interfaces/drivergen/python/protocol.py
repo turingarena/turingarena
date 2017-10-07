@@ -1,9 +1,8 @@
-from turingarena.interfaces.analysis.statement import accept_statement
-
 from turingarena.interfaces.codegen.utils import indent_all, indent
 from turingarena.interfaces.drivergen.python.expression import build_driver_expression, \
     build_assignable_expression
 from turingarena.interfaces.drivergen.python.types import TypeBuilder, BaseTypeBuilder
+from turingarena.interfaces.visitor import accept_statement
 from ...analysis.types import ScalarType
 
 

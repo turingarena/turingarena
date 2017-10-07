@@ -1,9 +1,8 @@
 import os
 
-from turingarena.interfaces.analysis.statement import accept_statement
-
 from turingarena.interfaces.codegen.supportgen import AbstractSupportGenerator
 from turingarena.interfaces.codegen.utils import indent_all, write_to_file, indent
+from turingarena.interfaces.visitor import accept_statement
 from turingarena.interfaces.supportgen.cpp.blocks import generate_block
 from turingarena.interfaces.supportgen.cpp.declarations import build_declaration, build_parameter
 from turingarena.interfaces.supportgen.cpp.types import generate_base_type
@@ -42,11 +41,8 @@ class SupportGenerator(AbstractSupportGenerator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.include_file_path = os.path.join(self.dest_dir, "main.h")
-        self.main_file_path = os.path.join(self.dest_dir, "main.cpp")
-
-    def generate(self):
-        main_file = open(self.main_file_path, "w")
+        main_file = open(os.path.join(self.dest_dir, "main.cpp"), "w")
+        include_file = open(os.path.join(self.dest_dir, "main.h"), "w")
         write_to_file(self.generate_main_file(), main_file)
 
     def generate_main_file(self):

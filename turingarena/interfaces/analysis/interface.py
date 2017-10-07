@@ -1,20 +1,16 @@
+import logging
+
 from turingarena.interfaces.analysis.block import compile_block
 from turingarena.interfaces.analysis.declaration import process_simple_declaration, \
     process_declarators
 from turingarena.interfaces.analysis.scope import Scope
-
-
-import logging
-
-from turingarena.interfaces.analysis.statement import accept_statement
+from turingarena.interfaces.visitor import accept_statement
 
 logger = logging.getLogger(__name__)
 
 
 class InterfaceCompiler:
     def __init__(self, interface):
-        logger.debug("compiling interface {}".format(interface))
-
         self.interface = interface
 
         interface.variable_declarations = []

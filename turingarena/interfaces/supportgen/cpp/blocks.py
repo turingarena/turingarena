@@ -1,6 +1,5 @@
-from turingarena.interfaces.analysis.statement import accept_statement
-
 from turingarena.interfaces.codegen.utils import indent_all
+from turingarena.interfaces.visitor import accept_statement
 from turingarena.interfaces.supportgen.cpp.declarations import build_declaration
 from turingarena.interfaces.supportgen.cpp.expressions import generate_expression
 from turingarena.interfaces.supportgen.cpp.types import generate_base_type

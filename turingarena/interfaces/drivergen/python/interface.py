@@ -1,8 +1,7 @@
-from turingarena.interfaces.analysis.statement import accept_statement
-
 from turingarena.interfaces.codegen.utils import indent_all, indent
 from turingarena.interfaces.drivergen.python.protocol import global_data_generator, \
     porcelain_generator, plumbing_generator
+from turingarena.interfaces.visitor import accept_statement
 
 
 class InterfaceGenerator:

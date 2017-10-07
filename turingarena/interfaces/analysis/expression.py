@@ -1,12 +1,11 @@
+from turingarena.interfaces.visitor import accept_expression
+
 from turingarena.interfaces.analysis.types import ScalarType
 
 
 class ExpressionCompiler:
     def __init__(self, scope):
         self.scope = scope
-
-    def compile(self, expr):
-        expr.accept(self)
 
     def visit_int_literal_expression(self, expr):
         expr.int_value = int(expr.int_literal)
@@ -22,8 +21,8 @@ class ExpressionCompiler:
         expr.type = ScalarType("bool")
 
     def visit_subscript_expression(self, expr):
-        self.compile(expr.array)
-        self.compile(expr.index)
+        accept_expression(expr.array, visitor=self)
+        accept_expression(expr.index, visitor=self)
 
         if expr.index.type.base != "int":
             raise ValueError("invalid index expression")
@@ -35,8 +34,8 @@ class ExpressionCompiler:
         expr.type = expr.variable_declaration.type
 
 
-def compile_expression(e, scope):
-    ExpressionCompiler(scope).compile(e)
+def compile_expression(expr, scope):
+    accept_expression(expr, visitor=ExpressionCompiler(scope))
 
 
 def compile_range(range, scope):

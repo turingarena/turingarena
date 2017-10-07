@@ -56,7 +56,7 @@ class CodeGenerator:
                 dir=language_dir,
             )
         )
-        generator(self.task, interface, language_dir).generate()
+        generator(self.task, interface, language_dir)
 
     def generate_driver(self):
         os.mkdir(self.runtime_dir)
@@ -72,4 +72,4 @@ class CodeGenerator:
                 dir=language_dir,
             )
         )
-        generator(self.task, language_dir).generate()
+        generator(self.task, language_dir)

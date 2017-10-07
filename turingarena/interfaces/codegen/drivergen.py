@@ -12,8 +12,8 @@ class AbstractDriverGenerator:
 
 
 class AbstractInterfaceDriverGenerator:
-    def __init__(self, driver_generator, interface):
-        self.driver_generator = driver_generator
+    def __init__(self, interface, *, package_dir):
+        self.package_dir = package_dir
         self.interface = interface
 
     @abstractmethod

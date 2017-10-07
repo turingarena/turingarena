@@ -4,8 +4,8 @@ from turingarena.interfaces.analysis.declaration import process_simple_declarati
     process_declarators
 from turingarena.interfaces.analysis.expression import compile_expression, compile_range
 from turingarena.interfaces.analysis.scope import Scope
-from turingarena.interfaces.analysis.statement import accept_statement
 from turingarena.interfaces.analysis.types import ScalarType
+from turingarena.interfaces.visitor import accept_statement
 
 logger = logging.getLogger(__name__)
 

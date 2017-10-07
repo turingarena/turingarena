@@ -81,13 +81,13 @@ grammar_ebnf = r"""
     ;
     
     subscript_expression =
+        expression_type:`subscript`
         array:expression '[' index:expression ']'
     ;
     
-    variable_expression = variable_name:identifier ;
-
-    int_literal_expression = int_literal:INT;
-    bool_literal_expression = bool_literal:BOOL;
+    variable_expression = expression_type:`variable` variable_name:identifier ;
+    int_literal_expression = expression_type:`int_literal` int_literal:INT;
+    bool_literal_expression = expression_type:`bool_literal` bool_literal:BOOL;
 
     type =
         | array_type

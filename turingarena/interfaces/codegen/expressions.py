@@ -1,3 +1,6 @@
+from turingarena.interfaces.visitor import accept_expression
+
+
 class AbstractExpressionGenerator:
     def generate(self, expr):
         return expr.accept(self)
@@ -17,4 +20,6 @@ class AbstractExpressionGenerator:
         return expr.variable_name
 
     def visit_subscript_expression(self, expr):
-        return self.generate(expr.array) + '[' + self.generate(expr.index) + ']'
+        array = accept_expression(expr.array, visitor=self)
+        subscript = accept_expression(expr.index, visitor=self)
+        return array + '[' + subscript + ']'

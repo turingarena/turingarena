@@ -10,11 +10,10 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
         super().__init__(*args, **kwargs)
 
         self.module_path = os.path.join(
-            self.driver_generator.package_dir,
+            self.package_dir,
             self.interface.name + ".py"
         )
 
-    def generate(self):
         module_file = open(self.module_path, "w")
         write_to_file(self.generate_module(), module_file)
 
@@ -32,12 +31,10 @@ class DriverGenerator(AbstractDriverGenerator):
         super().__init__(*args, **kwargs)
 
         self.package_dir = os.path.join(self.dest_dir, "interfaces")
-
-    def generate(self):
         os.mkdir(self.package_dir)
 
         for interface in self.task.interfaces:
             self.generate_interface(interface)
 
     def generate_interface(self, interface):
-        InterfaceDriverGenerator(self, interface).generate()
+        InterfaceDriverGenerator(interface, package_dir=self.package_dir).generate()
