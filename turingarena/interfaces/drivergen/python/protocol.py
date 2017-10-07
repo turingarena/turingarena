@@ -202,6 +202,9 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
                 end=build_driver_expression(stmt.range.end),
             )
 
+    def visit_assignment_statement(self, stmt):
+        yield "pass"
+
 
 class PorcelainProtocolGenerator(ProtocolGenerator):
     """
@@ -250,7 +253,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "command = yield 'call_returned', '{name}', {ret}".format(
             name=statement.function_name,
             ret="None"
-            if statement.return_value is None else
+            if not hasattr(statement,'return_value') or statement.return_value is None else
             build_driver_expression(statement.return_value),
         )
 
@@ -262,6 +265,9 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
             ret=build_assignable_expression(stmt.value)
         )
         yield "yield 'return_accepted',"
+
+    def visit_assignment_statement(self, stmt):
+        yield "pass"
 
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):

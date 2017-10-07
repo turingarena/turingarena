@@ -12,8 +12,12 @@ class InterfaceItemGenerator:
         yield build_declaration(declaration)
 
     def visit_function_declaration(self, decl):
+        if hasattr(decl,'return_type'):
+            ret_type = generate_base_type(decl.return_type)
+        else:
+            ret_type = "void"
         yield "{return_type} {name}({arguments});".format(
-            return_type=generate_base_type(decl.return_type),
+            return_type=ret_type,
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         )
@@ -52,6 +56,7 @@ class SupportGenerator(AbstractSupportGenerator):
 
     def generate_main_file(self):
         yield "#include <cstdio>"
+        yield "#include <cstdlib>"
         generator = InterfaceItemGenerator()
         for item in self.interface.interface_items:
             yield
