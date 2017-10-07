@@ -1,7 +1,6 @@
 grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
-    @@keyword :: True False and or not return for if else call function callback loop main var input output flush alloc switch case break continue exit
 
     unit = unit_items:{ unit_item }* $ ;
     
@@ -70,7 +69,6 @@ grammar_ebnf = r"""
     ;
     
     statement =
-        | assignment_statement
         | input_statement
         | output_statement
         | flush_statement
@@ -90,10 +88,6 @@ grammar_ebnf = r"""
 
     input_statement =
         'input' ~ arguments:expression_list ';'
-    ;
-
-    assignment_statement =
-        variable_name:terminal_expression '<-' ~  value:expression ';'
     ;
 
     output_statement =
@@ -152,66 +146,16 @@ grammar_ebnf = r"""
     ;
 
     expression =
-        | addition_expression
-        | subtraction_expression
-        | multiplication_expression
-        | division_expression
-        | and_expression
-        | or_expression
-        | not_expression
-        | lesser_expression
-        | equality_expression
-        | terminal_expression
-    ;
-
-    terminal_expression =
-        | int_literal_expression 
-        | bool_literal_expression 
-        | variable_expression
+        | int_literal_expression
         | subscript_expression
+        | variable_expression
+    ;
+    
+    subscript_expression =
+        array:expression '[' index:expression ']'
     ;
     
     variable_expression = variable_name:identifier ;
-
-    subscript_expression =
-        array:terminal_expression '[' ~ index:expression ']'
-    ;
-
-     and_expression =
-         left:terminal_expression 'and' ~ right:expression
-    ;
-
-     or_expression =
-         left:terminal_expression 'or' ~ right:expression
-    ;
-
-     not_expression =
-         'not' ~ right:expression
-    ;
-
-     lesser_expression =
-         left:terminal_expression '<' ~  right:expression
-    ;
-
-     equality_expression =
-         left:terminal_expression '=' ~  right:expression
-    ;
-
-    addition_expression =
-         left:terminal_expression '+' ~  right:expression
-    ;
-
-    subtraction_expression =
-         left:terminal_expression '-' ~  right:expression
-    ;
-
-    multiplication_expression =
-         left:terminal_expression '*' ~ right:expression
-    ;
-
-    division_expression =
-         left:terminal_expression '/' ~  right:expression
-    ;
 
     int_literal_expression = int_literal:INT;
     bool_literal_expression = bool_literal:BOOL;
@@ -238,7 +182,7 @@ grammar_ebnf = r"""
         | 'bool'
     ;
 
-    @name identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
+    identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
     BOOL = /(False|True)/ ;
     STRING = '"' @:/([^"\n]|\\")*/ '"' ;

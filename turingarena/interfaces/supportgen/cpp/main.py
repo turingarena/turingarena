@@ -12,12 +12,8 @@ class InterfaceItemGenerator:
         yield build_declaration(declaration)
 
     def visit_function_declaration(self, decl):
-        if hasattr(decl,'return_type'):
-            ret_type = generate_base_type(decl.return_type)
-        else:
-            ret_type = "void"
         yield "{return_type} {name}({arguments});".format(
-            return_type=ret_type,
+            return_type=generate_base_type(decl.return_type),
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         )
@@ -25,10 +21,7 @@ class InterfaceItemGenerator:
     def visit_callback_declaration(self, decl):
         name = decl.declarator.name
         yield "{return_type} {name}({arguments})".format(
-            return_type=
-                generate_base_type(decl.return_type)
-                if decl.return_type is not None
-                else "void",
+            return_type=generate_base_type(decl.return_type),
             name=name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"
@@ -56,7 +49,6 @@ class SupportGenerator(AbstractSupportGenerator):
 
     def generate_main_file(self):
         yield "#include <cstdio>"
-        yield "#include <cstdlib>"
         generator = InterfaceItemGenerator()
         for item in self.interface.interface_items:
             yield

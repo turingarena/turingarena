@@ -11,4 +11,6 @@ class BaseTypeGenerator:
 
 
 def generate_base_type(t):
+    if t is None:
+        return "void"
     return t.accept(BaseTypeGenerator())

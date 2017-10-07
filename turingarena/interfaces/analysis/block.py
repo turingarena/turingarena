@@ -84,7 +84,7 @@ class BlockCompiler:
 
         for p in statement.parameters:
             compile_expression(p, scope=self.scope)
-        if hasattr(statement, 'return_value') and statement.return_value is not None:
+        if statement.return_value is not None:
             compile_expression(statement.return_value, scope=self.scope)
         statement.function_declaration = self.scope[statement.function_name]
 
@@ -111,8 +111,5 @@ class BlockCompiler:
     def visit_return_statement(self, stmt):
         compile_expression(stmt.value, scope=self.scope)
 
-    def visit_assignment_statement(self, stmt):
-        compile_expression(stmt.variable_name, scope=self.scope)
-        compile_expression(stmt.value, scope=self.scope)
 
 compile_block = BlockCompiler

@@ -33,7 +33,6 @@ class DeclarationCompiler:
         for p in decl.parameters:
             compile_declaration(p, scope=new_scope)
 
-
     def visit_callback_declaration(self, decl):
         self.process_simple_declaration(decl)
         new_scope = Scope(self.scope)

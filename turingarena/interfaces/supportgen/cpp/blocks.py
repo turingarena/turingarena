@@ -50,7 +50,7 @@ class BlockItemGenerator:
         yield 'exit(1);'
 
     def visit_call_statement(self, statement):
-        if hasattr(statement,'return_value') and  statement.return_value is not None:
+        if statement.return_value is not None:
             return_value = generate_expression(statement.return_value) + " = "
         else:
             return_value = ""
@@ -77,11 +77,6 @@ class BlockItemGenerator:
 
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
-
-    def visit_assignment_statement(self, stmt):
-        yield "{var} = {val};".format(
-                var=generate_expression(stmt.variable_name),
-                val=generate_expression(stmt.value))
 
 
 def generate_block(block):
