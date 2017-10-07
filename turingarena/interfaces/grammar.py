@@ -54,44 +54,20 @@ grammar_ebnf = r"""
         | statement_type:('flush'|'break'|'continue'|'exit') ~ ';'
         | statement_type:'alloc' ~ arguments:expression_list ':' range:range ';'
         | statement_type:'return' ~ value:expression ';'
-        | call_statement
-        | if_statement
-        | switch_statement
-        | for_statement
-        | loop_statement
+        | statement_type:'call' ~ function_name:identifier
+            '(' parameters:expression_list ')'
+            [ '->' return_value:expression ] ';'
+        | statement_type:'if' ~ '(' condition:expression ')'
+            then_body:block [ 'else' ~ else_body:block ]
+        | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }* '}'
+        | statement_type:'for' ~ '(' index:index_declaration ')' body:block
+        | statement_type:'loop' ~ body:block
     ;
 
     expression_list = ','.{ expression }* ;
 
-    call_statement =
-        statement_type:'call' ~ function_name:identifier '('
-            parameters:','.{ expression }*
-        ')'
-        [ '->' return_value:expression ] 
-        ';'
-    ;
-    
-    if_statement =
-        statement_type:'if' ~ '(' condition:expression ')' then_body:block
-        [ 'else' ~ else_body:block ]
-    ;
-
-    switch_statement =
-        statement_type:'switch' ~ '(' value:expression ')' '{'
-            cases:{ switch_case }*
-        '}'
-    ;
-
     switch_case =
-        statement_type:'case' '(' value:identifier ')' body:block
-    ;
-
-    for_statement =
-        statement_type:'for' ~ '(' index:index_declaration ')' body:block
-    ;
-
-    loop_statement =
-        statement_type:'loop' ~ body:block
+        'case' '(' value:identifier ')' body:block
     ;
 
     range =
