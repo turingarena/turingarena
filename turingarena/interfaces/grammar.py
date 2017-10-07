@@ -23,7 +23,7 @@ grammar_ebnf = r"""
         'function' ~ declarator:function_declarator '('
             parameters:parameter_declaration_list
         ')'
-        [ '->' return_type:type ]
+        return_type:[ return_type_declarator ]
         ';'
     ;
     
