@@ -72,6 +72,9 @@ class BlockCompiler:
     def visit_flush_statement(self, statement):
         pass
 
+    def visit_exit_statement(self, statement):
+        pass
+
     def visit_alloc_statement(self, statement):
         self.compile_arguments(statement)
         compile_range(statement.range, scope=self.scope)
@@ -81,7 +84,7 @@ class BlockCompiler:
 
         for p in statement.parameters:
             compile_expression(p, scope=self.scope)
-        if statement.return_value is not None:
+        if hasattr(statement, 'return_value') and statement.return_value is not None:
             compile_expression(statement.return_value, scope=self.scope)
         statement.function_declaration = self.scope[statement.function_name]
 
@@ -94,8 +97,22 @@ class BlockCompiler:
 
         self.expect_calls(statement.body.first_calls)
 
+    def visit_if_statement(self, stmt):
+        compile_expression(stmt.condition, scope=self.scope)
+
+        new_scope_then = Scope(self.scope)
+        compile_block(stmt.then_body, scope=new_scope_then, parent=self.block)
+        self.expect_calls(stmt.then_body.first_calls)
+        if hasattr(stmt,'else_body'):
+            new_scope_else = Scope(self.scope)
+            compile_block(stmt.else_body, scope=new_scope_else, parent=self.block)
+            self.expect_calls(stmt.else_body.first_calls)
+
     def visit_return_statement(self, stmt):
         compile_expression(stmt.value, scope=self.scope)
 
+    def visit_assignment_statement(self, stmt):
+        compile_expression(stmt.variable_name, scope=self.scope)
+        compile_expression(stmt.value, scope=self.scope)
 
 compile_block = BlockCompiler

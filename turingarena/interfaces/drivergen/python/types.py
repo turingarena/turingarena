@@ -19,5 +19,6 @@ class BaseTypeBuilder:
         return {
             "int": "int",
             "int64": "int",
+            "bool": "bool",
             "string": "str",
         }[t.base]

@@ -21,6 +21,16 @@ class BlockItemGenerator:
         yield from indent_all(generate_block(statement.body))
         yield "}"
 
+    def visit_if_statement(self, statement):
+        yield 'if( {condition} )'.format( condition = generate_expression(statement.condition)
+        ) + " {"
+        yield from indent_all(generate_block(statement.then_body))
+        yield "}"
+        if  hasattr(statement,'else_body'):
+            yield "else  {"
+            yield from indent_all(generate_block(statement.else_body))
+            yield "}"
+
     def visit_input_statement(self, statement):
         format_string = ''.join(generate_format(v) for v in statement.arguments)
         args = ', '.join("&" + generate_expression(v) for v in statement.arguments)
@@ -36,8 +46,11 @@ class BlockItemGenerator:
     def visit_flush_statement(self, statement):
         yield 'fflush(stdout);'
 
+    def visit_exit_statement(self, statement):
+        yield 'exit(1);'
+
     def visit_call_statement(self, statement):
-        if statement.return_value is not None:
+        if hasattr(statement,'return_value') and  statement.return_value is not None:
             return_value = generate_expression(statement.return_value) + " = "
         else:
             return_value = ""
@@ -64,6 +77,11 @@ class BlockItemGenerator:
 
     def visit_variable_declaration(self, declaration):
         yield build_declaration(declaration)
+
+    def visit_assignment_statement(self, stmt):
+        yield "{var} = {val};".format(
+                var=generate_expression(stmt.variable_name),
+                val=generate_expression(stmt.value))
 
 
 def generate_block(block):

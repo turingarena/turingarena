@@ -66,7 +66,7 @@ class InterfaceGenerator:
             args=", ".join(
                 ['"{name}"'.format(name=declaration.declarator.name)] +
                 ["arg_{}".format(p.declarator.name) for p in declaration.parameters] +
-                ["has_return={}".format(declaration.return_type is not None)] +
+                ["has_return={}".format(hasattr(declaration,'return_type'))] +
                 ["**kwargs"]
             )
         )

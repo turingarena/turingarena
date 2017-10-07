@@ -6,6 +6,7 @@ class BaseTypeGenerator:
         return {
             "int": "int",
             "int64": "long long int",
+            "bool" : "bool"
         }[t.base]
 
 
