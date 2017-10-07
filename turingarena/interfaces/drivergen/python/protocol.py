@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from turingarena.interfaces.analysis.statement import accept_statement
 
 from turingarena.interfaces.codegen.utils import indent_all, indent
 from turingarena.interfaces.drivergen.python.expression import build_driver_expression, \
@@ -12,10 +12,7 @@ class AbstractInterfaceGenerator:
         self.name = name
         self.args = args
 
-    def generate(self, item):
-        yield from item.accept(self)
-
-    def visit_interface_definition(self, interface):
+    def generate_interface(self, interface):
         yield
         yield "@staticmethod"
         yield "def {name}({args}):".format(
@@ -27,10 +24,10 @@ class AbstractInterfaceGenerator:
     def generate_body(self, interface):
         yield from self.generate_interface_begin(interface)
 
-        for item in interface.interface_items:
+        for statement in interface.statements:
             yield
-            yield "# " + item.info()
-            yield from self.generate(item)
+            yield "# " + statement.info()
+            yield from accept_statement(statement, visitor=self)
 
         yield from self.generate_interface_end(interface)
 
@@ -40,7 +37,7 @@ class AbstractInterfaceGenerator:
     def generate_interface_end(self, interface):
         yield from []
 
-    def visit_variable_declaration(self, declaration):
+    def visit_var_statement(self, declaration):
         yield from self.generate_local_variables(
             (d.name, declaration.type) for d in declaration.declarators
         )
@@ -100,21 +97,21 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_on_callback(self):
         yield "pass"
 
-    def visit_function_declaration(self, declaration):
+    def visit_function_statement(self, declaration):
         yield "pass"
 
-    def visit_main_declaration(self, declaration):
+    def visit_main_statement(self, declaration):
         yield "def main():"
         yield from indent_all(self.generate_main_body(declaration))
 
-    def visit_callback_declaration(self, declaration):
+    def visit_callback_statement(self, declaration):
         yield "def callback_{name}():".format(name=declaration.declarator.name)
         yield from indent_all(self.generate_callback_body(declaration))
 
     def generate_main_body(self, declaration):
         yield "# <main initialization>"
         yield from self.generate_main_begin(declaration)
-        yield from self.generate(declaration.body)
+        yield from self.generate_block(declaration.body)
         yield "# <main finalization>"
         yield from self.generate_main_end(declaration)
 
@@ -126,7 +123,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
             )
         yield "# <callback initialization>"
         yield from self.generate_callback_begin(declaration)
-        yield from self.generate(declaration.body)
+        yield from self.generate_block(declaration.body)
         yield "# <callback finalization>"
         yield from self.generate_callback_end(declaration)
 
@@ -142,11 +139,11 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_callback_end(self, declaration):
         yield "pass"
 
-    def visit_block(self, block):
+    def generate_block(self, block):
         yield "# expected calls: " + str(block.first_calls)
-        for item in block.block_items:
-            yield "# " + item.info()
-            yield from item.accept(self)
+        for statement in block.statements:
+            yield "# " + statement.info()
+            yield from accept_statement(statement, visitor=self)
 
     def visit_for_statement(self, statement):
         index_name = statement.index.declarator.name
@@ -156,9 +153,9 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
             end="1 + " + build_driver_expression(statement.index.range.end),
         )
         yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
-        yield from indent_all(self.generate(statement.body))
+        yield from indent_all(self.generate_block(statement.body))
 
-    def visit_default(self, stmt):
+    def visit_any_statement(self, statement):
         yield "pass"
 
 
@@ -208,6 +205,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
     Generates the code of a co-routine
     which processes call/callback/return events.
     """
+
     def generate_main_begin(self, declaration):
         yield "command = yield 'main_started',"
 
@@ -268,20 +266,20 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
 
 
 class GlobalDataGenerator(AbstractInterfaceGenerator):
-    def visit_variable_declaration(self, declaration):
-        yield from super().visit_variable_declaration(declaration)
+    def visit_var_statement(self, declaration):
+        yield from super().visit_var_statement(declaration)
         yield "{globals} = {vars}".format(
             globals=", ".join("globals.{}".format(d.name) for d in declaration.declarators),
             vars=", ".join("{}_".format(d.name) for d in declaration.declarators),
         )
 
-    def visit_function_declaration(self, declaration):
+    def visit_function_statement(self, declaration):
         yield "pass"
 
-    def visit_callback_declaration(self, declaration):
+    def visit_callback_statement(self, declaration):
         yield "pass"
 
-    def visit_main_declaration(self, declaration):
+    def visit_main_statement(self, declaration):
         yield "pass"
 
 

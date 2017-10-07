@@ -57,7 +57,7 @@ class AbstractSyntaxNode:
         elif hasattr(visitor, "visit_default"):
             method = visitor.visit_default
         else:
-            raise NotImplementedError("visit", self)
+            raise NotImplementedError(self)
         return method(self)
 
     def __repr__(self):

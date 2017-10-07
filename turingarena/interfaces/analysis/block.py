@@ -1,9 +1,12 @@
-from turingarena.interfaces.analysis.declaration import compile_declaration
+import logging
+
+from turingarena.interfaces.analysis.declaration import process_simple_declaration, \
+    process_declarators
 from turingarena.interfaces.analysis.expression import compile_expression, compile_range
 from turingarena.interfaces.analysis.scope import Scope
+from turingarena.interfaces.analysis.statement import accept_statement
+from turingarena.interfaces.analysis.types import ScalarType
 
-
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -37,10 +40,10 @@ class BlockCompiler:
         if parent is not None:
             block.first_calls = {None}  # at the beginning, no functions are possible
 
-        for item in self.block.block_items:
-            logger.debug("compiling block item {}".format(item))
-            item.outer_block = block
-            item.accept(self)
+        for statement in self.block.statements:
+            logger.debug("compiling block item {}".format(statement))
+            statement.outer_block = block
+            accept_statement(statement, visitor=self)
 
         if block.parent is not None:
             if len(block.locals) > 0 and None in block.first_calls:
@@ -55,13 +58,16 @@ class BlockCompiler:
             self.block.first_calls.remove(None)
             self.block.first_calls |= calls
 
-    def visit_variable_declaration(self, declaration):
-        compile_declaration(declaration, scope=self.scope)
-        self.block.locals.append(declaration)
+    def visit_var_statement(self, statement):
+        process_declarators(statement, scope=self.scope)
+        self.block.locals.append(statement)
 
     def compile_arguments(self, statement):
         for e in statement.arguments:
             compile_expression(e, scope=self.scope)
+
+    def visit_statement(self, statement):
+        accept_statement(statement, visitor=self)
 
     def visit_input_statement(self, statement):
         self.compile_arguments(statement)
@@ -92,7 +98,10 @@ class BlockCompiler:
         compile_range(statement.index.range, scope=self.scope)
 
         new_scope = Scope(self.scope)
-        compile_declaration(statement.index, scope=new_scope)
+
+        process_simple_declaration(statement.index, scope=new_scope)
+        statement.index.type = ScalarType("int")
+
         compile_block(statement.body, scope=new_scope, parent=self.block)
 
         self.expect_calls(statement.body.first_calls)
@@ -103,7 +112,7 @@ class BlockCompiler:
         new_scope_then = Scope(self.scope)
         compile_block(stmt.then_body, scope=new_scope_then, parent=self.block)
         self.expect_calls(stmt.then_body.first_calls)
-        if hasattr(stmt,'else_body'):
+        if hasattr(stmt, 'else_body'):
             new_scope_else = Scope(self.scope)
             compile_block(stmt.else_body, scope=new_scope_else, parent=self.block)
             self.expect_calls(stmt.else_body.first_calls)

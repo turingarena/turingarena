@@ -1,9 +1,13 @@
 from turingarena.interfaces.analysis.block import compile_block
-from turingarena.interfaces.analysis.declaration import compile_declaration
+from turingarena.interfaces.analysis.declaration import process_simple_declaration, \
+    process_declarators
 from turingarena.interfaces.analysis.scope import Scope
 
 
 import logging
+
+from turingarena.interfaces.analysis.statement import accept_statement
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,25 +23,32 @@ class InterfaceCompiler:
 
         self.global_scope = Scope()
 
-        for item in interface.interface_items:
-            item.interface = interface
-            logger.debug("compiling interface item {}".format(item))
-            item.accept(self)
+        for statement in interface.statements:
+            statement.interface = interface
+            logger.debug("compiling interface item {}".format(statement))
+            accept_statement(statement, visitor=self)
 
-    def visit_variable_declaration(self, declaration):
-        compile_declaration(declaration, scope=self.global_scope)
-        self.interface.variable_declarations.append(declaration)
+    def visit_var_statement(self, statement):
+        process_declarators(statement, scope=self.global_scope)
+        self.interface.variable_declarations.append(statement)
 
-    def visit_function_declaration(self, declaration):
-        compile_declaration(declaration, scope=self.global_scope)
-        self.interface.function_declarations.append(declaration)
+    def visit_function_statement(self, statement):
+        process_simple_declaration(statement, scope=self.global_scope)
+        new_scope = Scope(self.global_scope)
+        for p in statement.parameters:
+            process_simple_declaration(p, scope=new_scope)
+        self.interface.function_declarations.append(statement)
 
-    def visit_callback_declaration(self, declaration):
-        compile_declaration(declaration, scope=self.global_scope)
-        self.interface.callback_declarations.append(declaration)
+    def visit_callback_statement(self, statement):
+        process_simple_declaration(statement, scope=self.global_scope)
+        new_scope = Scope(self.global_scope)
+        for p in statement.parameters:
+            process_simple_declaration(p, scope=new_scope)
+        compile_block(statement.body, scope=new_scope, outer_declaration=statement)
+        self.interface.callback_declarations.append(statement)
 
-    def visit_main_declaration(self, declaration):
-        compile_block(declaration.body, scope=self.global_scope, outer_declaration=declaration)
+    def visit_main_statement(self, statement):
+        compile_block(statement.body, scope=self.global_scope, outer_declaration=statement)
 
 
 compile_interface = InterfaceCompiler

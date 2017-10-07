@@ -1,10 +1,12 @@
+from turingarena.interfaces.analysis.statement import accept_statement
+
 from turingarena.interfaces.codegen.utils import indent_all, indent
 from turingarena.interfaces.drivergen.python.protocol import global_data_generator, \
     porcelain_generator, plumbing_generator
 
 
 class InterfaceGenerator:
-    def visit_interface_definition(self, interface):
+    def generate_interface(self, interface):
         yield
         yield
         yield "class Engine(BaseDriverEngine):"
@@ -18,18 +20,18 @@ class InterfaceGenerator:
         yield "{name} = Driver".format(name=interface.name)
 
     def generate_engine_body(self, interface):
-        yield from global_data_generator.generate(interface)
-        yield from porcelain_generator.generate(interface)
-        yield from plumbing_generator.generate(interface)
+        yield from global_data_generator.generate_interface(interface)
+        yield from porcelain_generator.generate_interface(interface)
+        yield from plumbing_generator.generate_interface(interface)
 
     def generate_driver_body(self, interface):
         yield "_engine_class = Engine"
-        for item in interface.interface_items:
+        for statement in interface.statements:
             yield
-            yield "# " + item.info()
-            yield from item.accept(self)
+            yield "# " + statement.info()
+            yield from accept_statement(statement, visitor=self)
 
-    def visit_variable_declaration(self, declaration):
+    def visit_var_statement(self, declaration):
         for i, declarator in enumerate(declaration.declarators):
             if i > 0:
                 yield
@@ -41,14 +43,14 @@ class InterfaceGenerator:
             yield "def {name}(self, value):".format(name=declarator.name)
             yield indent("self._engine.globals.{name}[:] = value".format(name=declarator.name))
 
-    def visit_function_declaration(self, declaration):
+    def visit_function_statement(self, declaration):
         yield from self.generate_function_def(declaration)
         yield from indent_all(self.generate_function_body(declaration))
 
-    def visit_callback_declaration(self, declaration):
+    def visit_callback_statement(self, declaration):
         yield "pass"
 
-    def visit_main_declaration(self, declaration):
+    def visit_main_statement(self, declaration):
         yield "pass"
 
     def generate_function_def(self, declaration):

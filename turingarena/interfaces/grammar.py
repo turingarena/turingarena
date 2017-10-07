@@ -2,51 +2,36 @@ grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
 
-    unit = unit_items:{ unit_item }* $ ;
+    unit = statements:{ unit_statement }* $ ;
     
-    unit_item = interface_definition ;
-    
-    interface_definition =
-        'interface' ~ name:identifier '{'
-            interface_items:{ interface_item }*
+    unit_statement =
+        statement_type:'interface' ~ name:identifier '{'
+            statements:{ interface_statement }*
         '}'
     ;
     
-    interface_item =
-        | variable_declaration
-        | function_declaration
-        | callback_declaration
-        | main_declaration
+    signature =
+        declarator:function_declarator '('
+            parameters:parameter_declaration_list
+        ')'
+        return_type:[ return_type_declarator ]
     ;
 
-    function_declaration =
-        'function' ~ declarator:function_declarator '('
-            parameters:parameter_declaration_list
-        ')'
-        return_type:[ return_type_declarator ]
-        ';'
-    ;
-    
-    callback_declaration =
-        'callback' ~ declarator:function_declarator '('
-            parameters:parameter_declaration_list
-        ')'
-        return_type:[ return_type_declarator ]
-        body:block
-    ;
-    
     return_type_declarator =
         '->' ~ @:type
     ;
-
+    
     function_declarator = name:identifier ;
 
-    main_declaration =
-        'main' ~ body:block
+    interface_statement =
+        | var_statement
+        | statement_type:'function' ~ >signature ';'
+        | statement_type:'callback' ~ >signature body:block
+        | statement_type:'main' ~ body:block
     ;
 
-    variable_declaration =
-        'var' ~ type:type declarators:declarator_list ';'
+    var_statement =
+        statement_type:'var' ~ type:type declarators:declarator_list ';'
     ;
     
     index_declaration =
@@ -61,49 +46,25 @@ grammar_ebnf = r"""
 
     declarator = name:identifier ;
 
-    block = '{' block_items:{ block_item }* '}' ;
+    block = '{' statements:{ block_statement }* '}' ;
 
-    block_item =
-        | variable_declaration
-        | statement
-    ;
-    
-    statement =
-        | input_statement
-        | output_statement
-        | flush_statement
-        | alloc_statement
+    block_statement =
+        | var_statement
+        | statement_type:('input'|'output') ~ arguments:expression_list ';'
+        | statement_type:('flush'|'break'|'continue'|'exit') ~ ';'
+        | statement_type:'alloc' ~ arguments:expression_list ':' range:range ';'
+        | statement_type:'return' ~ value:expression ';'
         | call_statement
         | if_statement
         | switch_statement
         | for_statement
         | loop_statement
-        | break_statement
-        | continue_statement
-        | return_statement
-        | exit_statement
     ;
 
     expression_list = ','.{ expression }* ;
 
-    input_statement =
-        'input' ~ arguments:expression_list ';'
-    ;
-
-    output_statement =
-        'output' ~ arguments:expression_list ';'
-    ;
-    
-    flush_statement =
-        'flush' ~ arguments:() ';'
-    ;
-
-    alloc_statement =
-        'alloc' ~ arguments:expression_list ':' range:range ';'
-    ;
-
     call_statement =
-        'call' ~ function_name:identifier '('
+        statement_type:'call' ~ function_name:identifier '('
             parameters:','.{ expression }*
         ')'
         [ '->' return_value:expression ] 
@@ -111,35 +72,27 @@ grammar_ebnf = r"""
     ;
     
     if_statement =
-        'if' ~ '(' condition:expression ')' then_body:block
+        statement_type:'if' ~ '(' condition:expression ')' then_body:block
         [ 'else' ~ else_body:block ]
     ;
 
     switch_statement =
-        'switch' ~ '(' value:expression ')' '{'
+        statement_type:'switch' ~ '(' value:expression ')' '{'
             cases:{ switch_case }*
         '}'
     ;
 
     switch_case =
-        'case' '(' value:identifier ')' body:block
+        statement_type:'case' '(' value:identifier ')' body:block
     ;
 
     for_statement =
-        'for' ~ '(' index:index_declaration ')' body:block
+        statement_type:'for' ~ '(' index:index_declaration ')' body:block
     ;
 
     loop_statement =
-        'loop' ~ body:block
+        statement_type:'loop' ~ body:block
     ;
-    
-    break_statement = 'break' ~ ';' ;
-
-    continue_statement = 'continue' ~ ';' ;
-
-    return_statement = 'return' ~ value:expression ';' ;
-    
-    exit_statement = 'exit' ~ arguments:() ';' ;
 
     range =
         start:expression '..' end:expression

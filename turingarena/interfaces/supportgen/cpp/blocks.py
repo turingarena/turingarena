@@ -1,3 +1,5 @@
+from turingarena.interfaces.analysis.statement import accept_statement
+
 from turingarena.interfaces.codegen.utils import indent_all
 from turingarena.interfaces.supportgen.cpp.declarations import build_declaration
 from turingarena.interfaces.supportgen.cpp.expressions import generate_expression
@@ -75,10 +77,10 @@ class BlockItemGenerator:
     def visit_return_statement(self, stmt):
         yield "return {expr};".format(expr=generate_expression(stmt.value))
 
-    def visit_variable_declaration(self, declaration):
+    def visit_var_statement(self, declaration):
         yield build_declaration(declaration)
 
 
 def generate_block(block):
-    for item in block.block_items:
-        yield from item.accept(BlockItemGenerator())
+    for statement in block.statements:
+        yield from accept_statement(statement, visitor=BlockItemGenerator())

@@ -1,5 +1,7 @@
 import os
 
+from turingarena.interfaces.analysis.statement import accept_statement
+
 from turingarena.interfaces.codegen.supportgen import AbstractSupportGenerator
 from turingarena.interfaces.codegen.utils import indent_all, write_to_file, indent
 from turingarena.interfaces.supportgen.cpp.blocks import generate_block
@@ -8,17 +10,17 @@ from turingarena.interfaces.supportgen.cpp.types import generate_base_type
 
 
 class InterfaceItemGenerator:
-    def visit_variable_declaration(self, declaration):
+    def visit_var_statement(self, declaration):
         yield build_declaration(declaration)
 
-    def visit_function_declaration(self, decl):
+    def visit_function_statement(self, decl):
         yield "{return_type} {name}({arguments});".format(
             return_type=generate_base_type(decl.return_type),
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         )
 
-    def visit_callback_declaration(self, decl):
+    def visit_callback_statement(self, decl):
         name = decl.declarator.name
         yield "{return_type} {name}({arguments})".format(
             return_type=generate_base_type(decl.return_type),
@@ -30,7 +32,7 @@ class InterfaceItemGenerator:
         yield from indent_all(generate_block(decl.body))
         yield "}"
 
-    def visit_main_declaration(self, declaration):
+    def visit_main_statement(self, declaration):
         yield "int main() {"
         yield from indent_all(generate_block(declaration.body))
         yield "}"
@@ -50,6 +52,6 @@ class SupportGenerator(AbstractSupportGenerator):
     def generate_main_file(self):
         yield "#include <cstdio>"
         generator = InterfaceItemGenerator()
-        for item in self.interface.interface_items:
+        for statement in self.interface.statements:
             yield
-            yield from item.accept(generator)
+            yield from accept_statement(statement, visitor=generator)

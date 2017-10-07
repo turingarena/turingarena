@@ -24,7 +24,7 @@ class InterfaceDriverGenerator(AbstractInterfaceDriverGenerator):
         yield "from turingarena.runtime.driver import *"
         yield "from turingarena.runtime.data import *"
         yield
-        yield from self.interface.accept(InterfaceGenerator())
+        yield from InterfaceGenerator().generate_interface(self.interface)
 
 
 class DriverGenerator(AbstractDriverGenerator):
