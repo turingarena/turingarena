@@ -85,8 +85,10 @@ grammar_ebnf = r"""
         | meta_type:`array` item_type:type_expression '[' ']'
         | meta_type:'enum' ~ underlying_type:[underlying_type_declaration]
             '{' items:','.{ identifier }* '}'
-        | meta_type:`scalar` base:('int'|'int64'|'bool') 
+        | meta_type:`scalar` base:base_type
     ;
+    
+    base_type = ('int'|'int64'|'bool') ;
     
     underlying_type_declaration = ':' @:base_type ;
 
