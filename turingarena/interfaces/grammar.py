@@ -75,19 +75,11 @@ grammar_ebnf = r"""
     ;
 
     expression =
-        | int_literal_expression
-        | subscript_expression
-        | variable_expression
+        | expression_type:`int_literal` int_literal:INT
+        | expression_type:`bool_literal` bool_literal:BOOL
+        | expression_type:`subscript` array:expression '[' index:expression ']'
+        | expression_type:`variable` variable_name:identifier
     ;
-    
-    subscript_expression =
-        expression_type:`subscript`
-        array:expression '[' index:expression ']'
-    ;
-    
-    variable_expression = expression_type:`variable` variable_name:identifier ;
-    int_literal_expression = expression_type:`int_literal` int_literal:INT;
-    bool_literal_expression = expression_type:`bool_literal` bool_literal:BOOL;
 
     type =
         | array_type
@@ -95,15 +87,15 @@ grammar_ebnf = r"""
         | scalar_type 
     ;
     
-    array_type = item_type:type '[' ']' ;
+    array_type = kind:`array` item_type:type '[' ']' ;
     
     enum_type =
-        'enum' ~ '{'
+        kind:'enum' ~ '{'
             items:','.{ identifier }*
         '}'
     ;
 
-    scalar_type = base:base_type ;
+    scalar_type = kind:`scalar` base:base_type ;
 
     base_type =
         | 'int'
