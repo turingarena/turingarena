@@ -1,3 +1,6 @@
+from turingarena.interfaces.visitor import accept_type_expression
+
+
 class BaseTypeGenerator:
     def visit_array_type(self, t):
         return generate_base_type(t.item_type)
@@ -10,7 +13,7 @@ class BaseTypeGenerator:
         }[t.base]
 
 
-def generate_base_type(t):
-    if t is None:
+def generate_base_type(type_expression):
+    if type_expression is None:
         return "void"
-    return t.accept(BaseTypeGenerator())
+    return accept_type_expression(type_expression, visitor=BaseTypeGenerator())

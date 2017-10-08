@@ -1,3 +1,5 @@
+from turingarena.interfaces.visitor import accept_type_expression
+
 from turingarena.interfaces.supportgen.cpp.types import generate_base_type
 
 
@@ -5,15 +7,15 @@ class DeclaratorBuilder:
     def __init__(self, declarator):
         self.declarator = declarator
 
-    def visit_scalar_type(self, type):
+    def visit_scalar_type(self, type_expression):
         return self.declarator.name
 
-    def visit_array_type(self, type):
-        return '*' + type.item_type.accept(self)
+    def visit_array_type(self, type_expression):
+        return '*' + accept_type_expression(type_expression.item_type, visitor=self)
 
 
 def build_declarator(declaration, declarator):
-    return declaration.type.accept(DeclaratorBuilder(declarator))
+    return accept_type_expression(declaration.type, visitor=DeclaratorBuilder(declarator))
 
 
 def generate_declarators(declaration):

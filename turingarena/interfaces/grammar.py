@@ -18,7 +18,7 @@ grammar_ebnf = r"""
     ;
 
     return_type_declarator =
-        '->' ~ @:type
+        '->' ~ @:type_expression
     ;
     
     function_declarator = name:identifier ;
@@ -31,7 +31,7 @@ grammar_ebnf = r"""
     ;
 
     var_statement =
-        statement_type:'var' ~ type:type declarators:declarator_list ';'
+        statement_type:'var' ~ type:type_expression declarators:declarator_list ';'
     ;
     
     index_declaration =
@@ -40,7 +40,7 @@ grammar_ebnf = r"""
 
     parameter_declaration_list = ','.{ parameter_declaration }* ;
 
-    parameter_declaration = type:type declarator:declarator ;
+    parameter_declaration = type:type_expression declarator:declarator ;
 
     declarator_list = ','.{ declarator }+ ;
 
@@ -81,26 +81,10 @@ grammar_ebnf = r"""
         | expression_type:`variable` variable_name:identifier
     ;
 
-    type =
-        | array_type
-        | enum_type
-        | scalar_type 
-    ;
-    
-    array_type = kind:`array` item_type:type '[' ']' ;
-    
-    enum_type =
-        kind:'enum' ~ '{'
-            items:','.{ identifier }*
-        '}'
-    ;
-
-    scalar_type = kind:`scalar` base:base_type ;
-
-    base_type =
-        | 'int'
-        | 'int64'
-        | 'bool'
+    type_expression =
+        | meta_type:`array` item_type:type_expression '[' ']'
+        | meta_type:'enum' ~ '{' items:','.{ identifier }* '}'
+        | meta_type:`scalar` base:('int'|'int64'|'bool') 
     ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;

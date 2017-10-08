@@ -1,7 +1,7 @@
 from turingarena.interfaces.codegen.utils import indent_all, indent
 from turingarena.interfaces.drivergen.python.expression import build_driver_expression, \
     build_assignable_expression
-from turingarena.interfaces.drivergen.python.types import TypeBuilder, BaseTypeBuilder
+from turingarena.interfaces.drivergen.python.types import TypeBuilder, BaseTypeBuilder, build_type, build_base_type
 from turingarena.interfaces.visitor import accept_statement
 from ...analysis.types import ScalarType
 
@@ -50,7 +50,7 @@ class AbstractInterfaceGenerator:
             names=", ".join(name + "_" for name, t in vars),
             creators=", ".join(
                 "var({type})".format(
-                    type=TypeBuilder().build(t),
+                    type=build_type(t),
                 )
                 for name, t in vars
             )
@@ -181,7 +181,7 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
     def visit_output_statement(self, statement):
         yield "{args}, = read([{types}], file=upward_pipe)".format(
             args=", ".join(build_assignable_expression(a) for a in statement.arguments),
-            types=", ".join(BaseTypeBuilder().build(a.type) for a in statement.arguments)
+            types=", ".join(build_base_type(a.type) for a in statement.arguments)
         )
 
     def visit_flush_statement(self, statement):

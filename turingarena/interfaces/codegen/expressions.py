@@ -2,9 +2,6 @@ from turingarena.interfaces.visitor import accept_expression
 
 
 class AbstractExpressionGenerator:
-    def generate(self, expr):
-        return expr.accept(self)
-
     def visit_int_literal_expression(self, expr):
         assert isinstance(expr.int_literal, str)
         return expr.int_literal

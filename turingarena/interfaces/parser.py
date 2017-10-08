@@ -50,16 +50,6 @@ class AbstractSyntaxNode:
         else:
             return lines[0][start:].strip() + "..."
 
-    def accept(self, visitor):
-        method_name = "visit_%s" % self.parseinfo.rule
-        if hasattr(visitor, method_name):
-            method = getattr(visitor, method_name)
-        elif hasattr(visitor, "visit_default"):
-            method = visitor.visit_default
-        else:
-            raise NotImplementedError(self)
-        return method(self)
-
     def __repr__(self):
         return "<{rule} '{info}'>".format(
             rule=self.parseinfo.rule,
