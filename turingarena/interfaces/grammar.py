@@ -83,9 +83,12 @@ grammar_ebnf = r"""
 
     type_expression =
         | meta_type:`array` item_type:type_expression '[' ']'
-        | meta_type:'enum' ~ '{' items:','.{ identifier }* '}'
+        | meta_type:'enum' ~ underlying_type:[underlying_type_declaration]
+            '{' items:','.{ identifier }* '}'
         | meta_type:`scalar` base:('int'|'int64'|'bool') 
     ;
+    
+    underlying_type_declaration = ':' @:base_type ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 

@@ -59,7 +59,6 @@ class BaseDriverEngine:
 
         self.output_sent = False
 
-
     def next_variable(self, phase, t):
         queue = self.locals[phase]
         if len(queue) == 0:
@@ -183,13 +182,3 @@ def expect_return(command):
 def read(types, *, file):
     raw_values = file.readline().strip().split()
     return [t(value) for value, t in zip(raw_values, types)]
-
-
-def lazy_yield():
-    """
-    Returns a generator that yields exactly once.
-
-    Used in combination with the 'yield from' construct
-    to implement the lazy yield mechanism used in upward data protocol.
-    """
-    return iter([None])
