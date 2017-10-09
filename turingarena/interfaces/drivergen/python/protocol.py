@@ -130,13 +130,15 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         yield "pass"
 
     def generate_main_end(self, declaration):
-        yield "pass"
+        # make sure it is a generator
+        yield "yield from []"
 
     def generate_callback_begin(self, declaration):
         yield "pass"
 
     def generate_callback_end(self, declaration):
-        yield "pass"
+        # make sure it is a generator
+        yield "yield from []"
 
     def generate_block(self, block):
         yield "# expected calls: " + str(block.first_calls)
@@ -231,14 +233,20 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
             yield from super().visit_for_statement(statement)
 
     def visit_call_statement(self, statement):
-        yield "{unpack}, = expect_call(command, '{name}')".format(
-            unpack=", ".join(
-                build_assignable_expression(expr)
+        parameters = statement.function_declaration.parameters
+        if len(parameters) == 0:
+            unpack = ""
+        else:
+            unpack = sum(
+                build_assignable_expression(expr) + ", "
                 for p, expr in zip(
-                    statement.function_declaration.parameters,
+                    parameters,
                     statement.parameters
                 )
-            ),
+            )
+
+        yield "{unpack}expect_call(command, '{name}')".format(
+            unpack=unpack,
             name=statement.function_name,
         )
         yield "yield 'call_accepted',"
