@@ -1,12 +1,16 @@
 import os
 
 import logging
+
+from turingarena.loggerinit import init_logger
+
 logger = logging.getLogger(__name__)
 
 
 class SandboxClient:
 
     def __init__(self):
+        init_logger()
         self.sandbox_dir = os.environ.get("TURINGARENA_SANDBOX_DIR")
 
     def is_supported(self):

@@ -179,7 +179,6 @@ class SandboxManager:
         with subprocess.Popen(
             self.args,
             env=env,
-            universal_newlines=True,
         ) as delegate:
 
             def main_loop_thread():
