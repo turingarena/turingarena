@@ -21,6 +21,7 @@ setup(
             "turingarenagen=turingarena.interfaces.main:main",
             "turingarenac=turingarena.runner.compile:main",
             "turingarenasandbox=turingarena.runner.main:main",
+            "turingarenacontainer=turingarena.container:main",
         ],
     },
     packages=find_packages(),
@@ -36,5 +37,6 @@ setup(
         "jinja2",
         "pyyaml",
         "coloredlogs",
+        "WerkZeug",
     ],
 )
