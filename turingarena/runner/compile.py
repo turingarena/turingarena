@@ -11,7 +11,7 @@ Options:
   --no-interface  This algorithm handles stdin/stdout directly
   -x --language=<lang>  Language in which the algorithm is written
   -o --algorithm=<name>  Name of the algorithm to generate
-  --log=<level>  Logging level
+  --log-level=<level>  Set logging level.
 
 """
 import os

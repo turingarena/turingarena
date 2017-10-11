@@ -10,7 +10,7 @@ Usage:
 Options:
 
   <interfaces-file>  File containing the interface definition [default: interfaces.txt].
-  --log=<level>  Set verbosity (critical, error, warning, info, debug)
+  --log-level=<level>  Set logging level.
   -o --output-dir=<output-dir>  Directory where to generate code [default: ./generated]
   -h --help  Show this screen
 

@@ -8,7 +8,7 @@ Usage:
 
 Options:
 
-  --log=<level>  Set logging level.
+  --log-level=<level>  Set logging level.
   <cmd>  Command to run
 
 """

@@ -21,7 +21,8 @@ setup(
             "turingarenagen=turingarena.interfaces.main:main",
             "turingarenac=turingarena.runner.compile:main",
             "turingarenasandbox=turingarena.runner.main:main",
-            "turingarenacontainer=turingarena.container:main",
+            "turingarena-container-server=turingarena.container.server:main",
+            "turingarena-container-client=turingarena.container.client:main",
         ],
     },
     packages=find_packages(),
@@ -38,5 +39,6 @@ setup(
         "pyyaml",
         "coloredlogs",
         "WerkZeug",
+        "requests",
     ],
 )

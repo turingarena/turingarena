@@ -13,7 +13,7 @@ def init_logger(args=None):
         logging.INFO,
         logging.DEBUG,
     ]
-    level_name = args.get("--log", None)
+    level_name = args.get("--log-level", None)
     if level_name is None:
         level_name = os.environ.get("TURINGARENA_LOG", None)
     if level_name is None:
