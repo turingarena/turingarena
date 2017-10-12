@@ -237,7 +237,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         if len(parameters) == 0:
             unpack = ""
         else:
-            unpack = sum(
+            unpack = "".join(
                 build_assignable_expression(expr) + ", "
                 for p, expr in zip(
                     parameters,
