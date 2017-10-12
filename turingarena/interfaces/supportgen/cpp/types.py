@@ -3,7 +3,7 @@ from turingarena.interfaces.visitor import accept_type_expression
 
 class BaseTypeGenerator:
     def visit_array_type(self, t):
-        return generate_base_type(t.item_type)
+        return generate_base_type(t.item_type)+'*'
 
     def visit_scalar_type(self, t):
         return {
