@@ -36,8 +36,3 @@ class ExpressionCompiler:
 
 def compile_expression(expr, scope):
     accept_expression(expr, visitor=ExpressionCompiler(scope))
-
-
-def compile_range(range, scope):
-    compile_expression(range.start, scope=scope)
-    compile_expression(range.end, scope=scope)

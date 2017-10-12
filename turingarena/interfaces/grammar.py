@@ -35,7 +35,7 @@ grammar_ebnf = r"""
     ;
     
     index_declaration =
-        declarator:declarator ':' range:range
+        declarator:declarator ':' range:expression
     ;
 
     parameter_declaration_list = ','.{ parameter_declaration }* ;
@@ -52,7 +52,7 @@ grammar_ebnf = r"""
         | var_statement
         | statement_type:('input'|'output') ~ arguments:expression_list ';'
         | statement_type:('flush'|'break'|'continue'|'exit') ~ ';'
-        | statement_type:'alloc' ~ arguments:expression_list ':' range:range ';'
+        | statement_type:'alloc' ~ arguments:expression_list ':' size:expression ';'
         | statement_type:'return' ~ value:expression ';'
         | statement_type:'call' ~ function_name:identifier
             '(' parameters:expression_list ')'
@@ -68,10 +68,6 @@ grammar_ebnf = r"""
 
     switch_case =
         'case' '(' value:identifier ')' body:block
-    ;
-
-    range =
-        start:expression '..' end:expression
     ;
 
     expression =

@@ -14,8 +14,8 @@ interface exampleinterface {
 
     main {
         input N, M;
-        alloc A : 1..N;
-        for(i : 1..N) {
+        alloc A : N;
+        for(i : N) {
             input A[i];
         }
         var int u, s;

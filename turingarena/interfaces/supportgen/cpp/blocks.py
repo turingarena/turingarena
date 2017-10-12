@@ -14,10 +14,9 @@ def generate_format(expr):
 
 class BlockItemGenerator:
     def visit_for_statement(self, statement):
-        yield 'for(int {index} = {start}; {index} <= {end}; {index}++)'.format(
+        yield 'for(int {index} = 0; {index} < {end}; {index}++)'.format(
             index=statement.index.declarator.name,
-            start=generate_expression(statement.index.range.start),
-            end=generate_expression(statement.index.range.end)
+            end=generate_expression(statement.index.range)
         ) + " {"
         yield from indent_all(generate_block(statement.body))
         yield "}"
@@ -70,7 +69,7 @@ class BlockItemGenerator:
             yield "{var} = new {type}[{size}];".format(
                 var=generate_expression(argument),
                 type=generate_type_expression(argument.type.item_type),
-                size="1 + " + generate_expression(statement.range.end),
+                size=generate_expression(statement.size),
             )
 
     def visit_return_statement(self, stmt):

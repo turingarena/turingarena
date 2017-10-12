@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interfaces.analysis.declaration import process_simple_declaration, \
     process_declarators
-from turingarena.interfaces.analysis.expression import compile_expression, compile_range
+from turingarena.interfaces.analysis.expression import compile_expression
 from turingarena.interfaces.analysis.scope import Scope
 from turingarena.interfaces.analysis.types import ScalarType
 from turingarena.interfaces.visitor import accept_statement
@@ -83,7 +83,7 @@ class BlockCompiler:
 
     def visit_alloc_statement(self, statement):
         self.compile_arguments(statement)
-        compile_range(statement.range, scope=self.scope)
+        compile_expression(statement.size, scope=self.scope)
 
     def visit_call_statement(self, statement):
         self.expect_calls({statement.function_name})
@@ -95,7 +95,7 @@ class BlockCompiler:
         statement.function_declaration = self.scope[statement.function_name]
 
     def visit_for_statement(self, statement):
-        compile_range(statement.index.range, scope=self.scope)
+        compile_expression(statement.index.range, scope=self.scope)
 
         new_scope = Scope(self.scope)
 

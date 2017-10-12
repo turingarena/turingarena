@@ -52,21 +52,6 @@ def set_value(assignable, value):
         assignable.on_set(value)
 
 
-class RebasedList:
-    """Wrapper to a list that specifies an initial index.
-
-    Used to initialize non-zero-based arrays.
-    """
-
-    def __init__(self, start, items):
-        self.start = start
-        self.items = list(items)
-
-
-def rebased(start, items):
-    return RebasedList(start, items)
-
-
 class BaseArray(BaseAssignable):
     _item_type = None
 
@@ -76,49 +61,38 @@ class BaseArray(BaseAssignable):
         self.delegate = None
 
     @property
-    def range(self):
+    def size(self):
         """A pair (a, b) representing the interval (inclusive) of valid indexes.
 
         For empty intervals, the value is (a,a-1) for some chosen a
         """
         self.check_alloc()
-        return self.start, len(self.delegate) - 1
+        return len(self.delegate)
 
-    @property
-    def __len__(self):
-        start, end = self.range
-        return end - start + 1
-
-    def is_alloc(self):
-        return self.delegate is not None
-
-    @range.setter
-    def range(self, value):
+    @size.setter
+    def size(self, value):
         if self.is_alloc():
-            if value != self.range:
+            if value != self.size:
                 raise ProtocolError(
                     "cannot change the range of an already alloc'd array")
             return
 
-        start, end = value
-        if start > end:
-            raise ValueError("invalid range")
-        self.start = start
-        self.delegate = (
-            [None for _ in range(start)] +
-            [self._item_type() for _ in range(end - start + 1)]
-        )
+        self.delegate = [self._item_type() for _ in range(value)]
+
+    @property
+    def __len__(self):
+        return self.size
+
+    def is_alloc(self):
+        return self.delegate is not None
 
     def on_get(self):
         return self
 
     def on_set(self, value):
-        if not isinstance(value, RebasedList):
-            # by default lists are zero-based
-            value = rebased(0, value)
-        start = value.start
-        self.range = (start, start + len(value.items) - 1)
-        self[start:] = value.items
+        value = list(value)
+        self.size = len(value)
+        self[:] = value
 
     def __getitem__(self, index):
         self.check_alloc()

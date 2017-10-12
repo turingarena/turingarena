@@ -148,10 +148,9 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
 
     def visit_for_statement(self, statement):
         index_name = statement.index.declarator.name
-        yield "for index_{index} in range({start}, {end}):".format(
+        yield "for index_{index} in range({range}):".format(
             index=index_name,
-            start=build_driver_expression(statement.index.range.start),
-            end="1 + " + build_driver_expression(statement.index.range.end),
+            range=build_driver_expression(statement.index.range),
         )
         yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
         yield from indent_all(self.generate_block(statement.body))
@@ -194,10 +193,9 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
 
     def visit_alloc_statement(self, stmt):
         for a in stmt.arguments:
-            yield "{val}.range = ({start}, {end})".format(
+            yield "{val}.size = {size}".format(
                 val=build_driver_expression(a),
-                start=build_driver_expression(stmt.range.start),
-                end=build_driver_expression(stmt.range.end),
+                size=build_driver_expression(stmt.size),
             )
 
 
@@ -243,7 +241,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
                     parameters,
                     statement.parameters
                 )
-            )
+            ) + " = "
 
         yield "{unpack}expect_call(command, '{name}')".format(
             unpack=unpack,
