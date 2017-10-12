@@ -1,6 +1,6 @@
 from turingarena.interfaces.visitor import accept_type_expression
 
-from turingarena.interfaces.supportgen.cpp.types import generate_base_type
+from turingarena.interfaces.supportgen.cpp.types import generate_type_expression
 
 
 class DeclaratorBuilder:
@@ -25,13 +25,13 @@ def generate_declarators(declaration):
 
 def build_declaration(declaration):
     return '{base_type} {declarators};'.format(
-        base_type=generate_base_type(declaration.type),
+        base_type=generate_type_expression(declaration.type),
         declarators=', '.join(generate_declarators(declaration)),
     )
 
 
 def build_parameter(parameter):
     return '{base_type} {declarator}'.format(
-        base_type=generate_base_type(parameter.type),
+        base_type=generate_type_expression(parameter.type),
         declarator=build_declarator(parameter, parameter.declarator),
     )
