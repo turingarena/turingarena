@@ -69,7 +69,7 @@ class BlockItemGenerator:
         for argument in statement.arguments:
             yield "{var} = new {type}[{size}];".format(
                 var=generate_expression(argument),
-                type=generate_base_type(argument.type),
+                type=generate_base_type(argument.type.item_type),
                 size="1 + " + generate_expression(statement.range.end),
             )
 
