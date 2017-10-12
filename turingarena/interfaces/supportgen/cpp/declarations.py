@@ -11,7 +11,7 @@ class DeclaratorBuilder:
         return self.declarator.name
 
     def visit_array_type(self, type_expression):
-        return '*' + accept_type_expression(type_expression.item_type, visitor=self)
+        return accept_type_expression(type_expression.item_type, visitor=self)
 
 
 def build_declarator(declaration, declarator):
