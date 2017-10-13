@@ -1,6 +1,6 @@
 from turingarena.interfaces.codegen.utils import indent_all, indent
-from turingarena.interfaces.drivergen.python.expression import build_right_value_expression, \
-    build_left_value_expression
+from turingarena.interfaces.drivergen.python.expression import build_value_expression, \
+    build_reference_expression
 from turingarena.interfaces.drivergen.python.types import build_type, build_base_type
 from turingarena.interfaces.visitor import accept_statement
 from ...analysis.types import ScalarType
@@ -150,7 +150,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         index_name = statement.index.declarator.name
         yield "for index_{index} in range({range}):".format(
             index=index_name,
-            range=build_right_value_expression(statement.index.range),
+            range=build_value_expression(statement.index.range),
         )
         yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
         yield from indent_all(self.generate_block(statement.body))
@@ -171,7 +171,7 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
     def visit_input_statement(self, statement):
         yield "print({args}, file=downward_pipe, flush=True)".format(
             args=", ".join(
-                build_right_value_expression(e)
+                build_value_expression(e)
                 for e in statement.arguments
             )
         )
@@ -184,7 +184,7 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
             args=", ".join(
                 "({type}, {expr})".format(
                     type=build_base_type(a.type),
-                    expr=build_left_value_expression(a),
+                    expr=build_reference_expression(a),
                 )
                 for a in statement.arguments
             )
@@ -199,8 +199,8 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
     def visit_alloc_statement(self, stmt):
         for a in stmt.arguments:
             yield "{val}.size = {size}".format(
-                val=build_left_value_expression(a),
-                size=build_right_value_expression(stmt.size),
+                val=build_reference_expression(a),
+                size=build_value_expression(stmt.size),
             )
 
 
@@ -240,7 +240,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "expect_call(command, '{name}', [{args}])".format(
             name=statement.function_name,
             args=", ".join(
-                build_left_value_expression(expr) + ", "
+                build_reference_expression(expr) + ", "
                 for p, expr in zip(
                     parameters,
                     statement.parameters
@@ -254,7 +254,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
             name=statement.function_name,
             ret="None"
             if statement.return_value is None else
-            build_right_value_expression(statement.return_value),
+            build_value_expression(statement.return_value),
         )
 
     def visit_flush_statement(self, statement):
@@ -262,7 +262,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
 
     def visit_return_statement(self, stmt):
         yield "expect_return(command, {ret})".format(
-            ret=build_left_value_expression(stmt.value)
+            ret=build_reference_expression(stmt.value)
         )
         yield "yield 'return_accepted',"
 

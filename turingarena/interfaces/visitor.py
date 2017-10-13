@@ -44,10 +44,11 @@ def accept(*args, method_names, visitor):
         ret = "EXC"
         raise
     finally:
-        logger.debug("visiting {visitor}({args}) -> {ret}".format(
+        logger.debug("visiting {visitor}({args}) -> {ret} (methods: {methods})".format(
             args=", ".join(repr(a) for a in args),
-            visitor=type(visitor).__name__,
+            visitor=repr(visitor),
             ret=repr(ret),
+            methods=", ".join(method_names),
         ))
 
 
