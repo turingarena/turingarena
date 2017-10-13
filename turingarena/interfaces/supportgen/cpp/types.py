@@ -1,9 +1,9 @@
 from turingarena.interfaces.visitor import accept_type_expression
 
 
-class TypeExpressionGenerator:
+class TypeExpressionBuilder:
     def visit_array_type(self, t):
-        return generate_type_expression(t.item_type) + '*'
+        return build_type_expression(t.item_type) + '*'
 
     def visit_scalar_type(self, t):
         return {
@@ -13,7 +13,7 @@ class TypeExpressionGenerator:
         }[t.base]
 
 
-def generate_type_expression(type_expression):
+def build_type_expression(type_expression):
     if type_expression is None:
         return "void"
-    return accept_type_expression(type_expression, visitor=TypeExpressionGenerator())
+    return accept_type_expression(type_expression, visitor=TypeExpressionBuilder())

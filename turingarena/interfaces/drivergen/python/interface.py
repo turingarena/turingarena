@@ -36,11 +36,11 @@ class InterfaceGenerator:
                 yield
             yield "@property"
             yield "def {name}(self):".format(name=declarator.name)
-            yield indent("return self._engine.globals.{name}[:]".format(name=declarator.name))
+            yield indent("return get_value(self._engine.globals.{name})".format(name=declarator.name))
             yield
             yield "@{name}.setter".format(name=declarator.name)
             yield "def {name}(self, value):".format(name=declarator.name)
-            yield indent("self._engine.globals.{name}[:] = value".format(name=declarator.name))
+            yield indent("set_value(self._engine.globals.{name}, value)".format(name=declarator.name))
 
     def visit_function_statement(self, declaration):
         yield from self.generate_function_def(declaration)

@@ -1,7 +1,7 @@
 from collections import deque
 from functools import partial
 
-from turingarena.runtime.data import Variable, ProtocolError
+from turingarena.runtime.data import ProtocolError, set_value, get_value
 
 import logging
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class BaseDriverEngine:
     def next_variable(self, phase, t):
         queue = self.locals[phase]
         if len(queue) == 0:
-            local = Variable(t)
+            local = t()
             for p in self.locals.keys():
                 self.locals[p].append(local)
         return queue.popleft()
@@ -89,7 +89,9 @@ class BaseDriverEngine:
         if key not in callbacks:
             raise UnexpectedCallback(name)
 
-        return_value = callbacks[key](*args)
+        return_value = callbacks[key](*[
+            get_value(a) for a in args
+        ])
 
         if return_value is not None:
             status, *status_args = self.send_command(("return", return_value))
@@ -158,7 +160,7 @@ class BaseDriver:
             self._engine.stop()
 
 
-def expect_call(command, expected_name):
+def expect_call(command, expected_name, left_value_args):
     command_type, *command_args = command
     if command_type != "call":
         raise ValueError("unexpected call, expecting {cmd}".format(cmd=command))
@@ -168,17 +170,20 @@ def expect_call(command, expected_name):
             actual=name,
             expected=expected_name,
         ))
+    for left_value, value in zip(left_value_args, call_args):
+        set_value(left_value, value)
     return call_args
 
 
-def expect_return(command):
+def expect_return(command, return_left_value):
     command_type, *command_args = command
     if command_type != "return":
         raise ValueError("expecting return, received {cmd}".format(cmd=command))
     return_value, = command_args
-    return return_value
+    set_value(return_left_value, return_value)
 
 
-def read(types, *, file):
+def read(args, *, file):
     raw_values = file.readline().strip().split()
-    return [t(value) for value, t in zip(raw_values, types)]
+    for (base_type, expr), value in zip(args, raw_values):
+        set_value(expr, base_type(value))

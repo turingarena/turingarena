@@ -2,7 +2,7 @@ from turingarena.interfaces.codegen.utils import indent_all
 from turingarena.interfaces.visitor import accept_statement
 from turingarena.interfaces.supportgen.cpp.declarations import build_declaration
 from turingarena.interfaces.supportgen.cpp.expressions import generate_expression
-from turingarena.interfaces.supportgen.cpp.types import generate_type_expression
+from turingarena.interfaces.supportgen.cpp.types import build_type_expression
 
 
 def generate_format(expr):
@@ -68,7 +68,7 @@ class BlockItemGenerator:
         for argument in statement.arguments:
             yield "{var} = new {type}[{size}];".format(
                 var=generate_expression(argument),
-                type=generate_type_expression(argument.type.item_type),
+                type=build_type_expression(argument.type.item_type),
                 size=generate_expression(statement.size),
             )
 

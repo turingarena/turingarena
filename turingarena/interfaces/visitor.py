@@ -1,3 +1,8 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def accept_statement(statement, *, visitor):
     return accept(
         statement,
@@ -32,6 +37,21 @@ def accept_type_expression(type_expression, *, visitor):
 
 
 def accept(*args, method_names, visitor):
+    try:
+        ret = do_accept(args, method_names, visitor)
+        return ret
+    except:
+        ret = "EXC"
+        raise
+    finally:
+        logger.debug("visiting {visitor}({args}) -> {ret}".format(
+            args=", ".join(repr(a) for a in args),
+            visitor=type(visitor).__name__,
+            ret=repr(ret),
+        ))
+
+
+def do_accept(args, method_names, visitor):
     for method_name in method_names:
         method = getattr(visitor, method_name, None)
         if method is not None:

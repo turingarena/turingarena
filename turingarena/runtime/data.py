@@ -71,6 +71,7 @@ class BaseArray(BaseAssignable):
 
     @size.setter
     def size(self, value):
+        assert type(value) == int
         if self.is_alloc():
             if value != self.size:
                 raise ProtocolError(
@@ -94,13 +95,16 @@ class BaseArray(BaseAssignable):
         self.size = len(value)
         self[:] = value
 
+    def item(self, index):
+        return self.delegate[index]
+
     def __getitem__(self, index):
         self.check_alloc()
-        return get_value(self.delegate[index])
+        return get_value(self.item(index))
 
     def __setitem__(self, index, value):
         self.check_alloc()
-        set_value(self.delegate[index], value)
+        set_value(self.item(index), value)
 
     def __iter__(self):
         self.check_alloc()
@@ -153,33 +157,7 @@ def scalar(base):
     return Scalar
 
 
-class Variable:
-    """
-    Holds an assignable value, which is accessible through the self[:] notation.
-
-    Used by generated protocol code to implement the assignable logic
-    when writing/reading local variables,
-    without cluttering the code too much.
-    """
-
-    def __init__(self, t):
-        assert issubclass(t, BaseAssignable)
-        self.delegate = t()
-
-    def __getitem__(self, key):
-        self.check_trivial_slice(key)
-        return get_value(self.delegate)
-
-    def __setitem__(self, key, value):
-        self.check_trivial_slice(key)
-        set_value(self.delegate, value)
-
-    def check_trivial_slice(self, key):
-        if key != slice(None, None, None):
-            raise KeyError
-
-
 def constant(t, value):
-    v = Variable(t)
-    v[:] = value
+    v = t()
+    set_value(v, value)
     return v

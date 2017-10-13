@@ -5,7 +5,7 @@ from turingarena.interfaces.codegen.utils import indent_all, write_to_file, inde
 from turingarena.interfaces.visitor import accept_statement
 from turingarena.interfaces.supportgen.cpp.blocks import generate_block
 from turingarena.interfaces.supportgen.cpp.declarations import build_declaration, build_parameter
-from turingarena.interfaces.supportgen.cpp.types import generate_type_expression
+from turingarena.interfaces.supportgen.cpp.types import build_type_expression
 
 
 class InterfaceItemGenerator:
@@ -14,7 +14,7 @@ class InterfaceItemGenerator:
 
     def visit_function_statement(self, decl):
         yield "{return_type} {name}({arguments});".format(
-            return_type=generate_type_expression(decl.return_type),
+            return_type=build_type_expression(decl.return_type),
             name=decl.declarator.name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         )
@@ -22,7 +22,7 @@ class InterfaceItemGenerator:
     def visit_callback_statement(self, decl):
         name = decl.declarator.name
         yield "{return_type} {name}({arguments})".format(
-            return_type=generate_type_expression(decl.return_type),
+            return_type=build_type_expression(decl.return_type),
             name=name,
             arguments=', '.join(build_parameter(p) for p in decl.parameters)
         ) + " {"

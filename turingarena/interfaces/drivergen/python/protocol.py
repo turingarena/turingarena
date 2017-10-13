@@ -1,7 +1,7 @@
 from turingarena.interfaces.codegen.utils import indent_all, indent
-from turingarena.interfaces.drivergen.python.expression import build_driver_expression, \
-    build_assignable_expression
-from turingarena.interfaces.drivergen.python.types import TypeBuilder, BaseTypeBuilder, build_type, build_base_type
+from turingarena.interfaces.drivergen.python.expression import build_right_value_expression, \
+    build_left_value_expression
+from turingarena.interfaces.drivergen.python.types import build_type, build_base_type
 from turingarena.interfaces.visitor import accept_statement
 from ...analysis.types import ScalarType
 
@@ -86,12 +86,12 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
     def generate_callbacks_loop(self, interface):
         yield from self.generate_local_variables([("callback", ScalarType("string"))])
         yield from self.generate_on_callback()
-        yield "if callback_[:] == 'return': break"
+        yield "if get_value(callback_) == 'return': break"
         for decl in interface.callback_declarations:
-            yield "elif callback_[:] == '{name}': yield from callback_{name}()".format(
+            yield "elif get_value(callback_) == '{name}': yield from callback_{name}()".format(
                 name=decl.declarator.name,
             )
-        yield "else: raise ValueError('unexpected callback %s' % callback_[:])"
+        yield "else: raise ValueError('unexpected callback %s' % get_value(callback_))"
 
     def generate_on_callback(self):
         yield "pass"
@@ -150,7 +150,7 @@ class ProtocolGenerator(AbstractInterfaceGenerator):
         index_name = statement.index.declarator.name
         yield "for index_{index} in range({range}):".format(
             index=index_name,
-            range=build_driver_expression(statement.index.range),
+            range=build_right_value_expression(statement.index.range),
         )
         yield indent("{index}_ = constant(scalar(int), index_{index})".format(index=index_name))
         yield from indent_all(self.generate_block(statement.body))
@@ -169,20 +169,25 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
         yield "yield"
 
     def visit_input_statement(self, statement):
-        yield "print({arguments}, file=downward_pipe, flush=True)".format(
-            arguments=", ".join(
-                build_driver_expression(e)
+        yield "print({args}, file=downward_pipe, flush=True)".format(
+            args=", ".join(
+                build_right_value_expression(e)
                 for e in statement.arguments
             )
         )
 
     def generate_on_callback(self):
-        yield "callback_[:], = read([str], file=upward_pipe)"
+        yield "read([(str, callback_)], file=upward_pipe)"
 
     def visit_output_statement(self, statement):
-        yield "{args}, = read([{types}], file=upward_pipe)".format(
-            args=", ".join(build_assignable_expression(a) for a in statement.arguments),
-            types=", ".join(build_base_type(a.type) for a in statement.arguments)
+        yield "read([{args}], file=upward_pipe)".format(
+            args=", ".join(
+                "({type}, {expr})".format(
+                    type=build_base_type(a.type),
+                    expr=build_left_value_expression(a),
+                )
+                for a in statement.arguments
+            )
         )
 
     def visit_flush_statement(self, statement):
@@ -194,8 +199,8 @@ class PlumbingProtocolGenerator(ProtocolGenerator):
     def visit_alloc_statement(self, stmt):
         for a in stmt.arguments:
             yield "{val}.size = {size}".format(
-                val=build_driver_expression(a),
-                size=build_driver_expression(stmt.size),
+                val=build_left_value_expression(a),
+                size=build_right_value_expression(stmt.size),
             )
 
 
@@ -215,7 +220,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "command = yield 'callback_started', '{name}', ({args})".format(
             name=declaration.declarator.name,
             args="".join(
-                "{}_[:], ".format(p.declarator.name)
+                "{}_, ".format(p.declarator.name)
                 for p in declaration.parameters
             ),
         )
@@ -232,20 +237,15 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
 
     def visit_call_statement(self, statement):
         parameters = statement.function_declaration.parameters
-        if len(parameters) == 0:
-            unpack = ""
-        else:
-            unpack = "".join(
-                build_assignable_expression(expr) + ", "
+        yield "expect_call(command, '{name}', [{args}])".format(
+            name=statement.function_name,
+            args=", ".join(
+                build_left_value_expression(expr) + ", "
                 for p, expr in zip(
                     parameters,
                     statement.parameters
                 )
-            ) + " = "
-
-        yield "{unpack}expect_call(command, '{name}')".format(
-            unpack=unpack,
-            name=statement.function_name,
+            )
         )
         yield "yield 'call_accepted',"
 
@@ -254,15 +254,15 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
             name=statement.function_name,
             ret="None"
             if statement.return_value is None else
-            build_driver_expression(statement.return_value),
+            build_right_value_expression(statement.return_value),
         )
 
     def visit_flush_statement(self, statement):
         yield "flush()"
 
     def visit_return_statement(self, stmt):
-        yield "{ret} = expect_return(command)".format(
-            ret=build_assignable_expression(stmt.value)
+        yield "expect_return(command, {ret})".format(
+            ret=build_left_value_expression(stmt.value)
         )
         yield "yield 'return_accepted',"
 
