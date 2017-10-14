@@ -240,7 +240,7 @@ class PorcelainProtocolGenerator(ProtocolGenerator):
         yield "expect_call(command, '{name}', [{args}])".format(
             name=statement.function_name,
             args=", ".join(
-                build_reference_expression(expr) + ", "
+                build_reference_expression(expr)
                 for p, expr in zip(
                     parameters,
                     statement.parameters
