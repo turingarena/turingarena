@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="10cm" height="10cm" viewBox="-1 -1 2 2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <clipPath transform="scale(.67, 1.03)" id="clip">
+        <!-- negative unit circle -->
+        <path d="
+            M -10,-10
+            H  10
+            V  10
+            H -10
+            Z
+
+            M 1,0
+            A 1,1 0 0,0 -1,0
+            A 1,1 0 0,0  1,0
+        " />
+    </clipPath>
+    <circle r="1" fill="#77c" clip-path="url(#clip)" transform="skewX(-30) scale(.8) translate(0 -.1)" />
+</svg>
