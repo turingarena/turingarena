@@ -1,25 +1,30 @@
 """TuringArena container client.
 
 Usage:
-  turingarena-container-client [options] exec <container> [-i <input>]... [-o <output>]... [--] <cmd>...
-  turingarena-container-client [options] import <container> <dir>
-  turingarena-container-client [options] export <container> <id>
+  container [options] exec [-i <input>]... [-o <output>]... [--] <cmd>...
+  container [options] import <dir>
+  container [options] export <id>
 
 Options:
 
-  --log-level=<level>  Set logging level.
+  -i --input=<input>  Declares an input directory. Format: <dir>:<data-id>
+  -o --output=<output>  Declares an output directory.
+  -n --name  Container name
   <cmd>  Command to run
 
 """
 
+import requests
+import requests_unixsocket
+
 from docopt import docopt
 
-from turingarena.loggerinit import init_logger
+requests_unixsocket.monkeypatch()
 
 
-def main():
-    args = docopt(__doc__)
-    init_logger(args)
+def container_client_cli(argv):
+    print(argv)
+    args = docopt(__doc__, argv=argv, options_first=True)
 
     if args["exec"]:
-        pass # TODO
+        requests.get('http+unix://%2Frun%2Fturingarena-container%2F.sock/path/to/page')

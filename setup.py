@@ -18,11 +18,7 @@ setup(
     description="",
     entry_points={
         "console_scripts": [
-            "turingarenagen=turingarena.interfaces.main:main",
-            "turingarenac=turingarena.runner.compile:main",
-            "turingarenasandbox=turingarena.runner.main:main",
-            "turingarena-container-server=turingarena.container.server:main",
-            "turingarena-container-client=turingarena.container.client:main",
+            "turingarena=turingarena.cli.main:main",
         ],
     },
     packages=find_packages(),
@@ -40,5 +36,6 @@ setup(
         "coloredlogs",
         "WerkZeug",
         "requests",
+        "requests-unixsocket",
     ],
 )

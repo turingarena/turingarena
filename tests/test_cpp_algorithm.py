@@ -1,11 +1,7 @@
-import io
-
-import sys
-from tempfile import TemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 from unittest.case import TestCase
 
-from turingarena.runner import compile
-from turingarena.runner.cpp import run_cpp
+import turingarena.sandbox.compile
 
 
 class Test(TestCase):
@@ -21,4 +17,4 @@ class Test(TestCase):
                         return 0;
                     }
                 """)
-            compile.compile(source_filename, algorithm_name="test")
+            turingarena.sandbox.compile.compile(source_filename, algorithm_name="test")

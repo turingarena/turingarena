@@ -1,13 +1,12 @@
 import json
 import logging
 import os
-
+import secrets
 import subprocess
 
 from werkzeug.wrappers import Request, Response
 
-from turingarena.loggerinit import init_logger
-import secrets
+from turingarena.cli.loggerinit import init_logger
 
 init_logger()
 logger = logging.getLogger(__name__)
