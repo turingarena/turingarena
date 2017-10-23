@@ -5,12 +5,16 @@ import tempfile
 import sys
 from contextlib import ExitStack
 
+from turingarena.protocol.plumber.porcelain import make_porcelain
+
 logger = logging.getLogger(__name__)
 
 
 class PlumberServer:
     def __init__(self, *, protocol, interface, downward_pipe_name, upward_pipe_name):
         prefix = "turingarena_plumber"
+
+        self.procelain = make_porcelain(interface)
 
         with ExitStack() as stack:
             self.plumber_dir = stack.enter_context(tempfile.TemporaryDirectory(prefix=prefix))
@@ -37,7 +41,8 @@ class PlumberServer:
         sys.stdout.close()
 
     def main_loop(self):
-        pass
+        for _ in self.procelain:
+            pass
 
 
 run_plumber = PlumberServer

@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 from turingarena.protocol.analysis.block import compile_block
 from turingarena.protocol.analysis.declaration import process_simple_declaration, \
@@ -14,8 +15,8 @@ class InterfaceCompiler:
         self.interface = interface
 
         interface.variable_declarations = []
-        interface.function_declarations = []
-        interface.callback_declarations = []
+        interface.function_declarations = OrderedDict()
+        interface.callback_declarations = OrderedDict()
 
         self.global_scope = Scope()
 
@@ -33,7 +34,7 @@ class InterfaceCompiler:
         new_scope = Scope(self.global_scope)
         for p in statement.parameters:
             process_simple_declaration(p, scope=new_scope)
-        self.interface.function_declarations.append(statement)
+        self.interface.function_declarations[statement.declarator.name] = statement
 
     def visit_callback_statement(self, statement):
         process_simple_declaration(statement, scope=self.global_scope)
@@ -41,10 +42,11 @@ class InterfaceCompiler:
         for p in statement.parameters:
             process_simple_declaration(p, scope=new_scope)
         compile_block(statement.body, scope=new_scope, outer_declaration=statement)
-        self.interface.callback_declarations.append(statement)
+        self.interface.callback_declarations[statement.declarator.name] = statement
 
     def visit_main_statement(self, statement):
         compile_block(statement.body, scope=self.global_scope, outer_declaration=statement)
+        self.interface.main = statement
 
 
 compile_interface = InterfaceCompiler
