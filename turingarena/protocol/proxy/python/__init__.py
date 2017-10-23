@@ -2,7 +2,6 @@ import os
 
 from turingarena.protocol.codegen.utils import write_to_file
 from turingarena.protocol.proxy.common import AbstractProxyGenerator, AbstractInterfaceProxyGenerator
-from turingarena.protocol.proxy.python.interface import InterfaceGenerator
 
 
 class InterfaceProxyGenerator(AbstractInterfaceProxyGenerator):

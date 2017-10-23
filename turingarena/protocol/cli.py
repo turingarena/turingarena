@@ -14,6 +14,8 @@ Options:
 """
 
 import docopt
+from turingarena.protocol.plumber.cli import protocol_plumber_cli
+
 from turingarena.protocol.proxy.cli import protocol_proxy_cli
 
 from turingarena.protocol.analysis import analyze_protocol
@@ -28,8 +30,9 @@ def protocol_cli(argv):
     analyze_protocol(protocol)
 
     dest_dir = args["--output-dir"]
+    # FIXME: not needed by all subcommands
 
     argv2 = args["<args>"]
     if args["skeleton"]: return protocol_skeleton_cli(protocol=protocol, dest_dir=dest_dir, argv=argv2)
     if args["proxy"]: return protocol_proxy_cli(protocol=protocol, dest_dir=dest_dir, argv=argv2)
-    if args["plumber"]: raise NotImplementedError
+    if args["plumber"]: return protocol_plumber_cli(protocol=protocol, argv=argv2)

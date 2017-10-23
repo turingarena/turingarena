@@ -2,7 +2,6 @@ import logging
 import os
 
 import subprocess
-from contextlib import AbstractContextManager
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +18,23 @@ class Algorithm:
         return Process(self.name)
 
 
-class Process(AbstractContextManager):
+class Process:
     def __init__(self, algorithm_name):
         self.algorithm_name = algorithm_name
 
-        sandbox = subprocess.Popen(
+        self.sandbox = subprocess.Popen(
             ["turingarena", "sandbox", "run", algorithm_name],
             stdout=subprocess.PIPE,
             universal_newlines=True,
         )
-        self.sandbox_dir = sandbox.stdout.readline().strip()
+        self.sandbox_dir = self.sandbox.stdout.readline().strip()
 
+        assert os.path.isdir(self.sandbox_dir)
+        logger.info("connected to sandbox at {}".format(self.sandbox_dir))
+
+        self.downward_pipe_name = self.sandbox_dir + "/downward.pipe"
         self.downward_pipe = None
+        self.upward_pipe_name = self.sandbox_dir + "/upward.pipe"
         self.upward_pipe = None
 
     def request(self, *args):
@@ -46,14 +50,22 @@ class Process(AbstractContextManager):
         logger.debug("Starting process")
         self.request("start")
 
-        self.downward_pipe = open(self.sandbox_dir + "/downward.pipe", "w", buffering=1)
-        self.upward_pipe = open(self.sandbox_dir + "/upward.pipe", "r")
+    def attach_downward(self):
+        self.downward_pipe = open(self.downward_pipe_name, "w", buffering=1)
+        logger.debug("successfully opened downward pipe")
 
-        logger.debug("successfully opened pipes")
+    def attach_upward(self):
+        self.upward_pipe = open(self.upward_pipe_name, "r")
+        logger.debug("successfully opened upward pipe")
 
     def wait(self):
         logger.debug("Waiting process")
         self.request("wait")
 
+    def __enter__(self):
+        self.start()
+        return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.wait()
+        self.sandbox.wait()

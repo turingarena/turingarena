@@ -1,6 +1,7 @@
+import logging
 import subprocess
 
-from turingarena.sandbox.compile.cpp import logger
+logger = logging.getLogger(__name__)
 
 
 def run_cpp(algorithm_dir, downward_pipe, upward_pipe):

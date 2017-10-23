@@ -3,6 +3,8 @@ import os
 import sys
 import tempfile
 
+from turingarena.sandbox.run.cpp import run_cpp
+
 from . import cpp
 
 OK = 0
@@ -15,7 +17,7 @@ class SandboxException(Exception):
     pass
 
 
-class Sandbox:
+class SandboxServer:
     def __init__(self, algorithm_name):
         self.algorithm_name = algorithm_name
 
@@ -58,12 +60,14 @@ class Sandbox:
             command = request.readline().strip()
             if command not in self.commands:
                 raise ValueError("invalid command", command)
+            logger.debug("received command '{}'".format(command))
             handler = getattr(self, "command_" + command)(request)
 
             try:
                 next(handler)
                 result = OK
             except SandboxException as e:
+                logger.exception(e)
                 result = EXC
 
         with open(self.control_response_pipe_name, "w") as response:
@@ -74,7 +78,7 @@ class Sandbox:
 
     commands = {
         "start",
-        "stop",
+        "wait",
     }
 
     def command_start(self, request):
@@ -83,22 +87,39 @@ class Sandbox:
 
         yield
 
+        logger.debug("opening pipes")
         self.downward_pipe = open(self.downward_pipe_name, "r")
         logger.debug("downward pipe opened")
         self.upward_pipe = open(self.upward_pipe_name, "w")
         logger.debug("upward pipe opened")
+
+        self.os_process = self.run()
+
+    def run(self):
+        algorithm_dir = "algorithms/{}/".format(self.algorithm_name)
+
+        with open(algorithm_dir + "language.txt") as language_file:
+            language = language_file.read().strip()
+
+        runners = {
+            "cpp": run_cpp
+        }
+        runner = runners[language]
+
         logger.debug("starting process...")
-        self.os_process = run(
-            algorithm_name=self.algorithm_name,
+        os_process = runner(
+            algorithm_dir=algorithm_dir,
             downward_pipe=self.downward_pipe,
             upward_pipe=self.upward_pipe,
         )
         logger.debug("process started")
+        return os_process
 
-    def command_stop(self, request, response):
+    def command_wait(self, request):
         if self.os_process is None:
             raise SandboxException("not started")
         yield
+        raise SystemExit
 
 
-sandbox_run = Sandbox
+sandbox_run = SandboxServer
