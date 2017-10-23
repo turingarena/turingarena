@@ -1,10 +1,11 @@
 import sys
 
-from interfaces.exampleinterface import exampleinterface
+from protocol import exampleinterface
+from turingarena.sandbox.client import Algorithm
 
-from turingarena.sandbox.client import sandbox
+solution = Algorithm("solution")
 
-with sandbox.create_process("solution") as s, exampleinterface(s) as proxy:
+with solution.create_process() as s, exampleinterface(s) as proxy:
     proxy.N = 10
     proxy.M = 100
     proxy.A = [i * i for i in range(proxy.N)]
