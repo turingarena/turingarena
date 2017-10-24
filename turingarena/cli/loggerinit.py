@@ -4,7 +4,11 @@ import os
 import coloredlogs
 
 
-def init_logger(args):
+def init_logger(args=None):
+    if args is None:
+        args = {
+            "--log-level": None,
+        }
     logger = logging.getLogger()
     levels = [
         logging.WARNING,

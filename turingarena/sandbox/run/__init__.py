@@ -2,9 +2,9 @@ import logging
 import os
 import sys
 import tempfile
+import threading
 
 from turingarena.sandbox.run.cpp import run_cpp
-
 from . import cpp
 
 OK = 0
@@ -30,25 +30,22 @@ class SandboxServer:
             self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
             self.upward_pipe_name = os.path.join(sandbox_dir, "upward.pipe")
 
+            self.spawner_thread = None
             self.os_process = None
-            self.downward_pipe = None
-            self.upward_pipe = None
 
             logger.debug("sandbox folder: %s", sandbox_dir)
 
-            self.prepare()
+            logger.debug("creating pipes...")
+            os.mkfifo(self.control_request_pipe_name)
+            os.mkfifo(self.control_response_pipe_name)
+            os.mkfifo(self.downward_pipe_name)
+            os.mkfifo(self.upward_pipe_name)
+            logger.debug("pipes created")
+
+            print(self.sandbox_dir)
+            sys.stdout.close()
+
             self.main_loop()
-
-    def prepare(self):
-        logger.debug("creating pipes...")
-        os.mkfifo(self.control_request_pipe_name)
-        os.mkfifo(self.control_response_pipe_name)
-        os.mkfifo(self.downward_pipe_name)
-        os.mkfifo(self.upward_pipe_name)
-        logger.debug("pipes created")
-
-        print(self.sandbox_dir)
-        sys.stdout.close()
 
     def main_loop(self):
         while True:
@@ -61,10 +58,11 @@ class SandboxServer:
             if command not in self.commands:
                 raise ValueError("invalid command", command)
             logger.debug("received command '{}'".format(command))
-            handler = getattr(self, "command_" + command)(request)
+            handler = getattr(self, "command_" + command)
 
             try:
-                next(handler)
+                handler(request)
+                logger.debug("handler OK")
                 result = OK
             except SandboxException as e:
                 logger.exception(e)
@@ -73,29 +71,18 @@ class SandboxServer:
         with open(self.control_response_pipe_name, "w") as response:
             print(result, file=response)
 
-        l = list(handler)
-        assert not l  # should yield once
+        logger.debug("response sent: {}".format(result))
 
     commands = {
         "start",
         "wait",
+        "exit",
     }
 
     def command_start(self, request):
         if self.os_process is not None:
             raise SandboxException("already started")
 
-        yield
-
-        logger.debug("opening pipes")
-        self.downward_pipe = open(self.downward_pipe_name, "r")
-        logger.debug("downward pipe opened")
-        self.upward_pipe = open(self.upward_pipe_name, "w")
-        logger.debug("upward pipe opened")
-
-        self.os_process = self.run()
-
-    def run(self):
         algorithm_dir = "algorithms/{}/".format(self.algorithm_name)
 
         with open(algorithm_dir + "language.txt") as language_file:
@@ -107,18 +94,40 @@ class SandboxServer:
         runner = runners[language]
 
         logger.debug("starting process...")
-        os_process = runner(
-            algorithm_dir=algorithm_dir,
-            downward_pipe=self.downward_pipe,
-            upward_pipe=self.upward_pipe,
-        )
+
+        def spawn():
+            logger.debug("opening downward pipe...")
+            downward_pipe = open(self.downward_pipe_name, "r")
+            logger.debug("opening upward pipe...")
+            upward_pipe = open(self.upward_pipe_name, "w")
+            logger.debug("pipes opened")
+
+            self.os_process = runner(
+                algorithm_dir=algorithm_dir,
+                downward_pipe=downward_pipe,
+                upward_pipe=upward_pipe,
+            )
+
+        # avoid blocking when opening pipes
+        self.spawner_thread = threading.Thread(target=spawn)
+        self.spawner_thread.start()
+
         logger.debug("process started")
-        return os_process
 
     def command_wait(self, request):
-        if self.os_process is None:
+        if self.spawner_thread is None:
             raise SandboxException("not started")
-        yield
+        logger.debug("joining spawner thread")
+        self.spawner_thread.join()
+        logger.debug("waiting for child process")
+        self.os_process.wait()
+        logger.debug("wait done")
+        self.os_process = None
+        self.spawner_thread = None
+
+    def command_exit(self, request):
+        if self.os_process is not None:
+            raise SandboxException("still running")
         raise SystemExit
 
 

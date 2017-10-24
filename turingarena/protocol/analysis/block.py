@@ -92,7 +92,7 @@ class BlockCompiler:
             compile_expression(p, scope=self.scope)
         if statement.return_value is not None:
             compile_expression(statement.return_value, scope=self.scope)
-        statement.function_declaration = self.scope[statement.function_name]
+        statement.function = self.scope[statement.function_name]
 
     def visit_for_statement(self, statement):
         compile_expression(statement.index.range, scope=self.scope)

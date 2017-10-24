@@ -15,11 +15,10 @@ class ProxyException(Exception):
 
 
 class ProxyEngine:
-    def __init__(self, *, interface, instance, request_pipe, response_pipe):
+    def __init__(self, *, interface, instance, connection):
         self.interface = interface
         self.instance = instance
-        self.request_pipe = request_pipe
-        self.response_pipe = response_pipe
+        self.connection = connection
 
         self.functions = {
             s.signature.name: s for s in interface if isinstance(s, interface_function)
@@ -32,10 +31,10 @@ class ProxyEngine:
 
     def send(self, value, *, indent=0):
         assert indent <= 10
-        print("  " * indent, value, sep="", file=self.request_pipe)
+        print("  " * indent, value, sep="", file=self.connection.request_pipe)
 
     def receive(self):
-        return self.response_pipe.readline().strip()
+        return self.connection.response_pipe.readline().strip()
 
     def serialize(self, value, *, type_expression, indent=0):
         if isinstance(type_expression, scalar):
@@ -58,7 +57,7 @@ class ProxyEngine:
         return type_expression.base_type(self.receive())
 
     def flush(self):
-        self.request_pipe.flush()
+        self.connection.request_pipe.flush()
 
     def call(self, name, args, callbacks_impl):
         if not self.globals_sent:

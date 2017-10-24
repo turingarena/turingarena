@@ -10,41 +10,35 @@ grammar_ebnf = r"""
         '}'
     ;
     
-    signature =
-        declarator:function_declarator '('
-            parameters:parameter_declaration_list
-        ')'
-        return_type:[ return_type_declarator ]
-    ;
-
     return_type_declarator =
         '->' ~ @:type_expression
     ;
     
-    function_declarator = name:identifier ;
+    signature_declarator =
+        name:identifier '('
+            parameters:','.{ parameter_declaration }*
+        ')'
+        return_type:[ return_type_declarator ]
+    ;
 
     interface_statement =
         | var_statement
-        | statement_type:'function' ~ >signature ';'
-        | statement_type:'callback' ~ >signature body:block
+        | statement_type:'function' ~ declarator:signature_declarator ';'
+        | statement_type:'callback' ~ declarator:signature_declarator body:block
         | statement_type:'main' ~ body:block
     ;
 
     var_statement =
-        statement_type:'var' ~ type:type_expression declarators:declarator_list ';'
+        statement_type:'var' ~ type:type_expression declarators:','.{ declarator }+ ';'
     ;
     
+    declarator = name:identifier ;
+
     index_declaration =
         declarator:declarator ':' range:expression
     ;
 
-    parameter_declaration_list = ','.{ parameter_declaration }* ;
-
     parameter_declaration = type:type_expression declarator:declarator ;
-
-    declarator_list = ','.{ declarator }+ ;
-
-    declarator = name:identifier ;
 
     block = '{' statements:{ block_statement }* '}' ;
 

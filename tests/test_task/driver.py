@@ -1,15 +1,24 @@
 import sys
 
-from protocol import exampleinterface
+from proxy import exampleinterface
+from turingarena.protocol.proxy.python.library import ProxyEngine
+
+from turingarena.protocol.plumber.client import Plumber
+
 from turingarena.sandbox.client import Algorithm
 
 solution = Algorithm("solution")
 
-with solution.create_process() as s, exampleinterface(s) as proxy:
-    proxy.N = 10
-    proxy.M = 100
-    proxy.A = [i * i for i in range(proxy.N)]
+with solution.create_sandbox().open() as process:
+    with Plumber("exampleinterface", process).connect() as connection:
+        class Data:
+            pass
+        data = Data()
+        data.N = 10
+        data.M = 100
+        data.A = [i * i for i in range(data.N)]
 
-    S = proxy.solve(3, callback_test=lambda a, b: a + b)
+        proxy = ProxyEngine(interface=exampleinterface, instance=data, connection=connection)
+        S = proxy.call("solve", [3], {"test": lambda a, b: a + b})
 
 print("Answer:", S, file=sys.stderr)

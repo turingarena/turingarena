@@ -1,9 +1,13 @@
 import logging
 import os
-
 import subprocess
+from contextlib import contextmanager, ExitStack
+
+from turingarena.cli.loggerinit import init_logger
 
 logger = logging.getLogger(__name__)
+
+init_logger()
 
 
 class SandboxException(Exception):
@@ -14,58 +18,74 @@ class Algorithm:
     def __init__(self, name):
         self.name = name
 
-    def create_process(self):
-        return Process(self.name)
+    def create_sandbox(self):
+        return SandboxClient(self.name)
+
+
+class SandboxClient:
+    def __init__(self, algorithm_name):
+        logger.debug("creating a sandbox client")
+        self.algorithm_name = algorithm_name
+
+    @contextmanager
+    def open(self):
+        logger.debug("starting sandbox process")
+        with subprocess.Popen(
+                ["turingarena", "sandbox", "run", self.algorithm_name],
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+        ) as sandbox_process:
+            sandbox_dir = sandbox_process.stdout.readline().strip()
+            logger.info("connected to sandbox at {}".format(sandbox_dir))
+
+            yield Process(sandbox_dir)
+
+            logger.debug("waiting sandbox process")
 
 
 class Process:
-    def __init__(self, algorithm_name):
-        self.algorithm_name = algorithm_name
-
-        self.sandbox = subprocess.Popen(
-            ["turingarena", "sandbox", "run", algorithm_name],
-            stdout=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        self.sandbox_dir = self.sandbox.stdout.readline().strip()
-
-        assert os.path.isdir(self.sandbox_dir)
-        logger.info("connected to sandbox at {}".format(self.sandbox_dir))
-
+    def __init__(self, sandbox_dir):
+        assert os.path.isdir(sandbox_dir)
+        self.sandbox_dir = sandbox_dir
         self.downward_pipe_name = self.sandbox_dir + "/downward.pipe"
-        self.downward_pipe = None
         self.upward_pipe_name = self.sandbox_dir + "/upward.pipe"
-        self.upward_pipe = None
 
     def request(self, *args):
+        logger.debug("sending request {}...".format(args))
         with open(self.sandbox_dir + "/control_request.pipe", "w") as p:
             for a in args:
                 print(a, file=p)
+        logger.debug("waiting response...")
         with open(self.sandbox_dir + "/control_response.pipe", "r") as p:
             result = int(p.readline().strip())
             if result:
                 raise SandboxException
+        logger.debug("response received: {}".format(result))
 
     def start(self):
-        logger.debug("Starting process")
+        logger.info("starting process")
         self.request("start")
 
-    def attach_downward(self):
-        self.downward_pipe = open(self.downward_pipe_name, "w", buffering=1)
-        logger.debug("successfully opened downward pipe")
-
-    def attach_upward(self):
-        self.upward_pipe = open(self.upward_pipe_name, "r")
-        logger.debug("successfully opened upward pipe")
-
     def wait(self):
-        logger.debug("Waiting process")
+        logger.info("waiting for process")
         self.request("wait")
 
-    def __enter__(self):
-        self.start()
-        return self
+    @contextmanager
+    def connect(self):
+        logger.debug("connecting to process...")
+        with ExitStack() as stack:
+            self.start()
+            try:
+                logger.debug("opening downward pipe...")
+                downward_pipe = stack.enter_context(open(self.downward_pipe_name, "w"))
+                logger.debug("opening upward pipe...")
+                upward_pipe = stack.enter_context(open(self.upward_pipe_name))
+                yield ProcessConnection(downward_pipe=downward_pipe, upward_pipe=upward_pipe)
+            finally:
+                self.wait()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.wait()
-        self.sandbox.wait()
+
+class ProcessConnection:
+    def __init__(self, *, downward_pipe, upward_pipe):
+        self.downward_pipe = downward_pipe
+        self.upward_pipe = upward_pipe

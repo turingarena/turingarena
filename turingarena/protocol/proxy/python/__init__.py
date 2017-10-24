@@ -17,25 +17,28 @@ class ProxyInterfaceGenerator:
         )
 
     def visit_function_statement(self, statement):
-        name = statement.declarator.name
-        yield "interface_function({name}, [{parameters}], {return_type}),".format(
-            fun=name,
-            name="'{}'".format(name),
-            parameters=", ".join(
-                "arg({type}, '{name}')".format(
-                    type=build_type_expression(p.type),
-                    name=p.declarator.name,
-                )
-                for p in statement.parameters
-            ),
-            return_type=build_optional_type_expression(statement.return_type),
-        )
+        yield "interface_function({}),".format(build_signature(statement.declarator))
 
-    def visit_callback_statement(self, declaration):
+    def visit_callback_statement(self, statement):
+        yield "interface_callback({}),".format(build_signature(statement.declarator))
+
+    def visit_main_statement(self, statement):
         yield from []
 
-    def visit_main_statement(self, declaration):
-        yield from []
+
+def build_signature(signature):
+    return "signature({name}, [{parameters}], {return_type})".format(
+        fun=signature.name,
+        name="'{}'".format(signature.name),
+        parameters=", ".join(
+            "arg({type}, '{name}')".format(
+                type=build_type_expression(p.type),
+                name=p.declarator.name,
+            )
+            for p in signature.parameters
+        ),
+        return_type=build_optional_type_expression(signature.return_type),
+    )
 
 
 def do_generate_proxy(protocol):

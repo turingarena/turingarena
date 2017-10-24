@@ -8,5 +8,5 @@ class TestPlumber(TestCase):
 
     def test(self):
         s = Algorithm("solution")
-        with s.create_process() as p, Plumber("exampleinterface", process=p):
+        with s.create_sandbox() as p, Plumber("exampleinterface", process=p):
             pass

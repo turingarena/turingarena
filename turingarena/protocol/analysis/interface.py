@@ -32,14 +32,14 @@ class InterfaceCompiler:
     def visit_function_statement(self, statement):
         process_simple_declaration(statement, scope=self.global_scope)
         new_scope = Scope(self.global_scope)
-        for p in statement.parameters:
+        for p in statement.declarator.parameters:
             process_simple_declaration(p, scope=new_scope)
         self.interface.functions.append(statement)
 
     def visit_callback_statement(self, statement):
         process_simple_declaration(statement, scope=self.global_scope)
         new_scope = Scope(self.global_scope)
-        for p in statement.parameters:
+        for p in statement.declarator.parameters:
             process_simple_declaration(p, scope=new_scope)
         compile_block(statement.body, scope=new_scope, outer_declaration=statement)
         self.interface.callbacks.append(statement)

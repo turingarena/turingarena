@@ -1,44 +1,62 @@
 import logging
 import os
-import tempfile
-
 import sys
+import tempfile
 from contextlib import ExitStack
 
 from turingarena.protocol.plumber.porcelain import make_porcelain
+from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
 
 
 class PlumberServer:
-    def __init__(self, *, protocol, interface, downward_pipe_name, upward_pipe_name):
+    def __init__(self, *, protocol, interface_name, sandbox_dir):
         prefix = "turingarena_plumber"
 
-        self.porcelain = make_porcelain(interface)
+        self.protocol = protocol
+        [self.interface] = [
+            s for s in protocol.statements
+            if s.statement_type == "interface"
+               and s.name == interface_name
+        ]
+
+        self.porcelain = make_porcelain(self)
 
         with ExitStack() as stack:
             self.plumber_dir = stack.enter_context(tempfile.TemporaryDirectory(prefix=prefix))
-            self.request_pipe_name = os.path.join(self.plumber_dir, "plumbing_request.pipe")
-            self.response_pipe_name = os.path.join(self.plumber_dir, "plumbing_response.pipe")
 
-            logger.debug("opening downward/upward pipes")
-            self.downward_pipe = stack.enter_context(open(downward_pipe_name, "w"))
-            logger.debug("downward pipe opened")
-            self.upward_pipe = stack.enter_context(open(upward_pipe_name, "r"))
-            logger.debug("upward pipe opened")
+            request_pipe_name = os.path.join(self.plumber_dir, "plumbing_request.pipe")
+            response_pipe_name = os.path.join(self.plumber_dir, "plumbing_response.pipe")
 
-            self.prepare()
+            logger.debug("creating request/response pipes...")
+            os.mkfifo(request_pipe_name)
+            os.mkfifo(response_pipe_name)
+
+            print(self.plumber_dir)
+            sys.stdout.close()
+
+            logger.debug("opening request pipe...")
+            self.request_pipe = stack.enter_context(open(request_pipe_name))
+            logger.debug("opening response pipe...")
+            self.response_pipe = stack.enter_context(open(response_pipe_name, "w"))
+            logger.debug("pipes opened")
+
+            logger.debug("connecting to process...")
+            self.connection = stack.enter_context(Process(sandbox_dir).connect())
+            logger.debug("connected")
+
             self.main_loop()
 
+    def receive(self):
+        logger.debug("receiving request")
+        line = self.request_pipe.readline().strip()
+        logger.debug("received request '{}'".format(line))
+        return line
 
-    def prepare(self):
-        logger.debug("creating pipes...")
-        os.mkfifo(self.request_pipe_name)
-        os.mkfifo(self.response_pipe_name)
-        logger.debug("pipes created")
-
-        print(self.plumber_dir)
-        sys.stdout.close()
+    def send(self, line):
+        logger.debug("sending response '{}'".format(line))
+        print(line, file=self.response_pipe)
 
     def main_loop(self):
         for _ in self.porcelain:
