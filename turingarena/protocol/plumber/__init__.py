@@ -14,7 +14,7 @@ class PlumberServer:
     def __init__(self, *, protocol, interface, downward_pipe_name, upward_pipe_name):
         prefix = "turingarena_plumber"
 
-        self.procelain = make_porcelain(interface)
+        self.porcelain = make_porcelain(interface)
 
         with ExitStack() as stack:
             self.plumber_dir = stack.enter_context(tempfile.TemporaryDirectory(prefix=prefix))
@@ -41,7 +41,7 @@ class PlumberServer:
         sys.stdout.close()
 
     def main_loop(self):
-        for _ in self.procelain:
+        for _ in self.porcelain:
             pass
 
 

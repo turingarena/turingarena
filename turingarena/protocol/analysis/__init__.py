@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def analyze_protocol(unit):
     logger.debug("compiling {}".format(unit))
-    unit.interfaces = {}
+    unit.interfaces = []
     compiler = ProtocolAnalyzer(unit)
     for statement in unit.statements:
         accept_statement(statement, visitor=compiler)
@@ -21,4 +21,4 @@ class ProtocolAnalyzer:
     def visit_interface_statement(self, statement):
         logger.debug("compiling interface {}".format(statement))
         compile_interface(statement)
-        self.unit.interfaces[statement.name] = statement
+        self.unit.interfaces.append(statement)

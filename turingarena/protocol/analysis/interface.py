@@ -14,9 +14,9 @@ class InterfaceCompiler:
     def __init__(self, interface):
         self.interface = interface
 
-        interface.variable_declarations = []
-        interface.function_declarations = OrderedDict()
-        interface.callback_declarations = OrderedDict()
+        interface.variables = []
+        interface.functions = []
+        interface.callbacks = []
 
         self.global_scope = Scope()
 
@@ -27,14 +27,14 @@ class InterfaceCompiler:
 
     def visit_var_statement(self, statement):
         process_declarators(statement, scope=self.global_scope)
-        self.interface.variable_declarations.append(statement)
+        self.interface.variables.append(statement)
 
     def visit_function_statement(self, statement):
         process_simple_declaration(statement, scope=self.global_scope)
         new_scope = Scope(self.global_scope)
         for p in statement.parameters:
             process_simple_declaration(p, scope=new_scope)
-        self.interface.function_declarations[statement.declarator.name] = statement
+        self.interface.functions.append(statement)
 
     def visit_callback_statement(self, statement):
         process_simple_declaration(statement, scope=self.global_scope)
@@ -42,7 +42,7 @@ class InterfaceCompiler:
         for p in statement.parameters:
             process_simple_declaration(p, scope=new_scope)
         compile_block(statement.body, scope=new_scope, outer_declaration=statement)
-        self.interface.callback_declarations[statement.declarator.name] = statement
+        self.interface.callbacks.append(statement)
 
     def visit_main_statement(self, statement):
         compile_block(statement.body, scope=self.global_scope, outer_declaration=statement)

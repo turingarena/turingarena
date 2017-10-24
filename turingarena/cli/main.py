@@ -26,3 +26,6 @@ def main():
     if args["container"]: return container_cli(argv2)
     if args["sandbox"]: return sandbox_cli(argv2)
     if args["protocol"]: return protocol_cli(argv2)
+
+if __name__ == '__main__':
+    main()

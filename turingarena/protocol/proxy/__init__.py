@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 from . import python
 
 languages = {
-    "python": python.ProxyGenerator,
+    "python": python.generate_proxy,
 }
 
 
@@ -37,7 +37,7 @@ class ProxyGenerator:
                 dir=language_dir,
             )
         )
-        languages[language](self.protocol, language_dir)
+        languages[language](self.protocol, proxy_dir=language_dir)
 
 
 generate_proxy = ProxyGenerator
