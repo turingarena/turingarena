@@ -36,6 +36,7 @@ class TestProxyEngine(TestCase):
             interface=[
                 interface_var(scalar(int), ["N"]),
                 interface_function(signature("solve", [arg(scalar(int), "x")], None)),
+                interface_function(signature("solve2", [arg(scalar(int), "x")], scalar(int))),
                 interface_callback(signature("cb", [arg(scalar(int), "y")], scalar(int))),
             ],
             instance=self.data,
@@ -46,8 +47,11 @@ class TestProxyEngine(TestCase):
     def test_unexpected_callbacks(self):
         self.data.N = 10
         self.check_communication(
-            ["globals", "10", "call", "solve", "0", "15"],
-            [],
+            [
+                "globals", "10",
+                "call", "solve", "0", "15",
+            ],
+            ["function_stop"],
             lambda: self.engine.call("solve", [15], {}),
         )
 
@@ -55,14 +59,30 @@ class TestProxyEngine(TestCase):
         self.data.N = 10
         self.check_communication(
             ["globals", "10", "call", "solve", "1", "15"],
-            ["no_callbacks"],
+            ["no_callbacks", "function_stop"],
             lambda: self.engine.call("solve", [15], {"cb": lambda y: y + 1}),
         )
 
     def test_callbacks(self):
         self.data.N = 10
         self.check_communication(
-            ["globals", "10", "call", "solve", "1", "15", "callback_stop", "callback_return", "8"],
-            ["callback", "cb", "7", "no_callbacks"],
+            [
+                "globals", "10",
+                "call", "solve", "1", "15",
+                "callback_stop", "callback_return", "8",
+            ],
+            ["callback", "cb", "7", "no_callbacks", "function_stop"],
             lambda: self.engine.call("solve", [15], {"cb": lambda y: y + 1}),
+        )
+
+    def test_return_value(self):
+        self.data.N = 10
+        self.check_communication(
+            [
+                "globals", "10",
+                "call", "solve2", "0", "15",
+            ],
+            ["function_stop", "function_return", "30"],
+            lambda: self.engine.call("solve2", [15], {}),
+            30,
         )

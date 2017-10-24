@@ -80,8 +80,12 @@ class ProxyEngine:
         if callbacks_impl:
             self.accept_callbacks(callbacks_impl)
 
+        status = self.receive()
+        assert status == "function_stop"
+
         if signature.return_type:
             return self.accept_return_value(signature.return_type)
+
 
     def accept_callbacks(self, callbacks_impl):
         while True:
@@ -114,10 +118,10 @@ class ProxyEngine:
 
     def accept_return_value(self, return_type):
         status = self.receive()
-        if status == "return":
+        if status == "function_return":
             return self.deserialize(return_type)
         else:
-            raise ProxyException()
+            raise ProxyException("unexpected status", status)
 
     def send_globals(self):
         self.send("globals")
