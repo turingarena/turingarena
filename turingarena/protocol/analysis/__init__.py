@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.protocol.analysis.interface import compile_interface
+from turingarena.protocol.analysis.statement import compile_interface
 from turingarena.protocol.visitor import accept_statement
 
 logger = logging.getLogger(__name__)

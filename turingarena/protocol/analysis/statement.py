@@ -2,7 +2,7 @@ import logging
 
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
-from turingarena.protocol.analysis.types import compile_type_expression
+from turingarena.protocol.analysis.type_expression import compile_type_expression
 from turingarena.protocol.types import scalar
 
 logger = logging.getLogger(__name__)
