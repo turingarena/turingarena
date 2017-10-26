@@ -1,7 +1,6 @@
 import os
 
 from turingarena.protocol.codegen.utils import write_to_file, indent_all
-from turingarena.protocol.proxy.python.types import build_type, build_optional_type
 from turingarena.protocol.visitor import accept_statement
 
 
@@ -96,3 +95,13 @@ def generate_proxy(protocol, *, dest_dir):
 
     with open(setup_py_path, "w") as setup_py_file:
         write_to_file(generate_setup_py(), setup_py_file)
+
+
+def build_type(type_expression):
+    return repr(type_expression)
+
+
+def build_optional_type(type_expression):
+    if type_expression is None:
+        return "None"
+    return build_type(type_expression)
