@@ -34,8 +34,5 @@ setup(
         "jinja2",
         "pyyaml",
         "coloredlogs",
-        "WerkZeug",
-        "requests",
-        "requests-unixsocket",
     ],
 )
