@@ -84,7 +84,7 @@ grammar_ebnf = r"""
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
-    BOOL = /(False|True)/ ;
+    BOOL = /(0|1)/ ;
     STRING = '"' @:/([^"\n]|\\")*/ '"' ;
     INT = /0|-?[1-9][0-9]*/ ;
 

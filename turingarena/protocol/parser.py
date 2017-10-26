@@ -21,9 +21,7 @@ def parse_protocol(filename):
 class Semantics:
     def _default(self, ast, *args, **kwargs):
         if isinstance(ast, AST):
-            node = AbstractSyntaxNode(ast, *args, **kwargs)
-            logger.debug("Parsed '%s' as %s", node.info(), node.parseinfo.rule)
-            return node
+            return AbstractSyntaxNode(ast, *args, **kwargs)
         else:
             return ast
 
@@ -38,20 +36,17 @@ class AbstractSyntaxNode:
         self._arguments = args
         self._ast = ast
 
-    def info(self):
-        parseinfo = self.parseinfo
-        buffer = parseinfo.buffer
-        line_info = buffer.line_info(parseinfo.pos)
-        lines = parseinfo.text_lines()
-        start = parseinfo.pos - line_info.start
-        if len(lines) == 1:
-            end = parseinfo.endpos - line_info.start
-            return lines[0][start:end].strip()
-        else:
-            return lines[0][start:].strip() + "..."
-
     def __repr__(self):
-        return "<{rule} '{info}'>".format(
-            rule=self.parseinfo.rule,
-            info=self.info(),
-        )
+        return "<{}>".format(self.parseinfo)
+
+
+def get_line(parseinfo):
+    buffer = parseinfo.buffer
+    line_info = buffer.line_info(parseinfo.pos)
+    lines = parseinfo.text_lines()
+    start = parseinfo.pos - line_info.start
+    if len(lines) == 1:
+        end = parseinfo.endpos - line_info.start
+        return lines[0][start:end].strip()
+    else:
+        return lines[0][start:].strip() + "..."

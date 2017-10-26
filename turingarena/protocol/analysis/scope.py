@@ -1,16 +1,20 @@
 class Scope:
     def __init__(self, parent=None):
-        if parent is None:
-            self.delegate = {}
-        else:
-            self.delegate = parent.as_dict()
+        self.parent = parent
+        self.delegate = {}
 
-    def as_dict(self):
+    def locals(self):
         """Returns a _copy of_ this scope as a dict."""
         return dict(self.delegate)
 
-    def __getitem__(self, item):
-        return self.delegate[item]
+    def __getitem__(self, key):
+        try:
+            return self.delegate[key]
+        except KeyError:
+            if self.parent:
+                return self.parent[key]
+            else:
+                raise
 
     def __setitem__(self, key, value):
         if key in self.delegate:
