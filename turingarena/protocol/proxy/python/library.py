@@ -1,7 +1,6 @@
 from collections import namedtuple
 
-scalar = namedtuple("scalar", ["base_type"])
-array = namedtuple("array", ["item_type"])
+from turingarena.protocol.types import scalar, array
 
 arg = namedtuple("arg", ["type", "name"])
 signature = namedtuple("signature", ["name", "arguments", "return_type"])

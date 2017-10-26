@@ -1,6 +1,6 @@
 interface exampleinterface {
     var int N, M;
-    var int64[] A;
+    var int[] A;
 
     function solve(int u) -> int;
 

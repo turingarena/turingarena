@@ -3,6 +3,7 @@ from io import StringIO
 from unittest.case import TestCase
 
 from turingarena.protocol.proxy.python.library import *
+from turingarena.protocol.types import scalar, array
 
 
 class D: pass

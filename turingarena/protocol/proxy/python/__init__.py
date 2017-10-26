@@ -1,7 +1,7 @@
 import os
 
 from turingarena.protocol.codegen.utils import write_to_file, indent_all
-from turingarena.protocol.proxy.python.types import build_type_expression, build_optional_type_expression
+from turingarena.protocol.proxy.python.types import build_type, build_optional_type
 from turingarena.protocol.visitor import accept_statement
 
 
@@ -12,7 +12,7 @@ class ProxyInterfaceGenerator:
     def visit_var_statement(self, declaration):
         yield "interface_var({type}, [{names}]),".format(
             vars=", ".join(d.name for d in declaration.declarators),
-            type=build_type_expression(declaration.type),
+            type=build_type(declaration.type),
             names=", ".join("'{}'".format(d.name) for d in declaration.declarators)
         )
 
@@ -32,12 +32,12 @@ def build_signature(signature):
         name="'{}'".format(signature.name),
         parameters=", ".join(
             "arg({type}, '{name}')".format(
-                type=build_type_expression(p.type),
+                type=build_type(p.type),
                 name=p.declarator.name,
             )
             for p in signature.parameters
         ),
-        return_type=build_optional_type_expression(signature.return_type),
+        return_type=build_optional_type(signature.return_type),
     )
 
 

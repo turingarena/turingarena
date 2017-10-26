@@ -2,12 +2,15 @@ import logging
 
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
-from turingarena.protocol.analysis.types import ScalarType
+from turingarena.protocol.analysis.types import compile_type_expression
+from turingarena.protocol.types import scalar
 
 logger = logging.getLogger(__name__)
 
 
 def compile_var(statement, *, scope):
+    compile_type_expression(statement.type_expression)
+    statement.type = statement.type_expression.descriptor
     for declarator in statement.declarators:
         scope["var", declarator.name] = statement
 
@@ -60,12 +63,13 @@ class BlockStatementCompiler:
         statement.function = self.block.scope["function", statement.function_name]
 
     def compile_for(self, statement):
-        compile_expression(statement.index.range, scope=self.block.scope)
+        index = statement.index
+        compile_expression(index.range, scope=self.block.scope)
 
         new_scope = Scope(self.block.scope)
+        new_scope["var", index.declarator.name] = index
 
-        new_scope["var", statement.index.declarator.name] = statement.index
-        statement.index.type = ScalarType("int")
+        index.type = scalar(int)
 
         compile_block(statement.body, scope=new_scope, parent=self.block)
 
@@ -136,6 +140,8 @@ class InterfaceStatementCompiler:
         new_scope = Scope(self.interface.scope)
         for p in statement.declarator.parameters:
             new_scope["var", p.declarator.name] = p
+            compile_type_expression(p.type_expression)
+            p.type = p.type_expression.descriptor
         return new_scope
 
     def compile_main(self, statement):

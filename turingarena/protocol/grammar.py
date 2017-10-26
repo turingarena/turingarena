@@ -29,7 +29,7 @@ grammar_ebnf = r"""
     ;
 
     var_statement =
-        statement_type:'var' ~ type:type_expression declarators:','.{ declarator }+ ';'
+        statement_type:'var' ~ type_expression:type_expression declarators:','.{ declarator }+ ';'
     ;
     
     declarator = name:identifier ;
@@ -38,7 +38,7 @@ grammar_ebnf = r"""
         declarator:declarator ':' range:expression
     ;
 
-    parameter_declaration = type:type_expression declarator:declarator ;
+    parameter_declaration = type_expression:type_expression declarator:declarator ;
 
     block = '{' statements:{ block_statement }* '}' ;
 
@@ -78,7 +78,7 @@ grammar_ebnf = r"""
         | meta_type:`scalar` base:base_type
     ;
     
-    base_type = ('int'|'int64'|'bool') ;
+    base_type = ('int'|'bool') ;
     
     underlying_type_declaration = ':' @:base_type ;
 
