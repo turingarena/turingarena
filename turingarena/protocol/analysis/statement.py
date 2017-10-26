@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
@@ -123,7 +124,7 @@ def compile_block(block):
 def compile_main(statement):
     statement.body.context = statement.context
     compile_block(statement.body)
-    statement.context.scope["main"] = statement
+    statement.context.scope["main", "main"] = statement
 
 
 class CallbackContext:

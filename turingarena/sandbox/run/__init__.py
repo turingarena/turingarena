@@ -45,12 +45,15 @@ class SandboxServer:
             print(self.sandbox_dir)
             sys.stdout.close()
 
+            self.terminated = False
             self.main_loop()
 
     def main_loop(self):
         while True:
             logger.debug("waiting for commands on control request pipe...")
             self.accept_command()
+            if self.terminated:
+                sys.exit()
 
     def accept_command(self):
         with open(self.control_request_pipe_name, "r") as request:
@@ -75,8 +78,8 @@ class SandboxServer:
 
     commands = {
         "start",
+        "kill",
         "wait",
-        "exit",
     }
 
     def command_start(self, request):
@@ -114,6 +117,14 @@ class SandboxServer:
 
         logger.debug("process started")
 
+    def command_kill(self, request):
+        if self.spawner_thread is None:
+            raise SandboxException("not started")
+        logger.debug("joining spawner thread")
+        self.spawner_thread.join()
+        logger.debug("killing child process")
+        self.os_process.kill()
+
     def command_wait(self, request):
         if self.spawner_thread is None:
             raise SandboxException("not started")
@@ -124,11 +135,7 @@ class SandboxServer:
         logger.debug("wait done")
         self.os_process = None
         self.spawner_thread = None
-
-    def command_exit(self, request):
-        if self.os_process is not None:
-            raise SandboxException("still running")
-        raise SystemExit
+        self.terminated = True
 
 
 sandbox_run = SandboxServer

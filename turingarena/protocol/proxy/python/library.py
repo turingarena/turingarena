@@ -1,6 +1,9 @@
+import logging
 from collections import namedtuple
 
 from turingarena.protocol.types import scalar, array
+
+logger = logging.getLogger(__name__)
 
 arg = namedtuple("arg", ["type", "name"])
 signature = namedtuple("signature", ["name", "arguments", "return_type"])
@@ -29,11 +32,14 @@ class ProxyEngine:
         self.globals_sent = False
 
     def send(self, value, *, indent=0):
+        logging.debug("sending '{}'".format(value))
         assert indent <= 10
         print("  " * indent, value, sep="", file=self.connection.request_pipe)
 
     def receive(self):
-        return self.connection.response_pipe.readline().strip()
+        line = self.connection.response_pipe.readline().strip()
+        logging.debug("received '{}'".format(line))
+        return line
 
     def serialize(self, value, *, type_expression, indent=0):
         if isinstance(type_expression, scalar):
@@ -56,6 +62,7 @@ class ProxyEngine:
         return type_expression.base_type(self.receive())
 
     def flush(self):
+        logging.debug("flushing")
         self.connection.request_pipe.flush()
 
     def call(self, name, args, callbacks_impl):
@@ -83,7 +90,6 @@ class ProxyEngine:
 
         if signature.return_type:
             return self.accept_return_value(signature.return_type)
-
 
     def accept_callbacks(self, callbacks_impl):
         while True:

@@ -38,7 +38,11 @@ class SandboxClient:
             sandbox_dir = sandbox_process.stdout.readline().strip()
             logger.info("connected to sandbox at {}".format(sandbox_dir))
 
-            yield Process(sandbox_dir)
+            try:
+                yield Process(sandbox_dir)
+            except Exception as e:
+                logger.exception(e)
+                raise
 
             logger.debug("waiting sandbox process")
 
@@ -66,6 +70,10 @@ class Process:
         logger.info("starting process")
         self.request("start")
 
+    def kill(self):
+        logger.info("killing process")
+        self.request("kill")
+
     def wait(self):
         logger.info("waiting for process")
         self.request("wait")
@@ -81,6 +89,10 @@ class Process:
                 logger.debug("opening upward pipe...")
                 upward_pipe = stack.enter_context(open(self.upward_pipe_name))
                 yield ProcessConnection(downward_pipe=downward_pipe, upward_pipe=upward_pipe)
+            except Exception as e:
+                logger.exception(e)
+                self.kill()
+                raise
             finally:
                 self.wait()
 

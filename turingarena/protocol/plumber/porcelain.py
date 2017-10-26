@@ -41,14 +41,14 @@ class PorcelainRunner:
         self.plumber = plumber
 
     def visit_call_statement(self, statement):
+        logger.debug("expecting call {}...".format(statement))
         command = self.plumber.receive()
         assert command == "call"
         function_name = self.plumber.receive()
         assert function_name == statement.function_name
         has_callbacks = bool(self.plumber.receive())
 
-        logger.debug("receive call command (function_name={name}, has_callbacks={has_callbacks})".format(
-            name=function_name,
+        logger.debug("received call command (has_callbacks={has_callbacks})".format(
             has_callbacks=has_callbacks,
         ))
 
@@ -64,7 +64,9 @@ def run_porcelain(plumber):
     logger.debug("reading global variables")
     command = plumber.receive()
     assert command == "globals"
-    for statement in plumber.interface.variables:
+    for ns, name in plumber.interface.scope:
+        if ns != "var": continue
+        statement = plumber.interface.scope[ns, name]
         logger.debug("reading global variables {}".format(statement))
         for d in statement.declarators:
             logger.debug("reading global variable {}".format(d.name))

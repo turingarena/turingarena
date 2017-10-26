@@ -1,11 +1,10 @@
-import os
+import logging
 
 import tatsu
 from tatsu.ast import AST
 
 from turingarena.protocol.grammar import grammar_ebnf
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +36,7 @@ class AbstractSyntaxNode:
         self._ast = ast
 
     def __repr__(self):
-        return "<{}>".format(self.parseinfo)
+        return "<{}>".format(get_line(self.parseinfo))
 
 
 def get_line(parseinfo):

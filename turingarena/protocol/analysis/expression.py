@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from turingarena.protocol.types import scalar
 
 

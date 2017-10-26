@@ -22,7 +22,7 @@ class Implementation:
     def run(self):
         sandbox = self.algorithm.sandbox()
         with sandbox.run() as process:
-            plumber = Plumber(interface=self.interface, process=process)
+            plumber = PlumberClient(interface=self.interface, process=process)
             with plumber.connect() as connection:
                 yield connection
 
@@ -31,7 +31,7 @@ class PlumberException(Exception):
     pass
 
 
-class Plumber:
+class PlumberClient:
     def __init__(self, *, interface, process):
         self.interface = interface
         self.process = process
@@ -55,10 +55,17 @@ class Plumber:
             plumber_dir = plumber_process.stdout.readline().strip()
 
             assert os.path.isdir(plumber_dir)
-            yield PlumberConnection(
-                request_pipe=stack.enter_context(open(plumber_dir + "/plumbing_request.pipe", "w")),
-                response_pipe=stack.enter_context(open(plumber_dir + "/plumbing_response.pipe")),
-            )
+
+            try:
+                yield PlumberConnection(
+                    request_pipe=stack.enter_context(open(plumber_dir + "/plumbing_request.pipe", "w")),
+                    response_pipe=stack.enter_context(open(plumber_dir + "/plumbing_response.pipe")),
+                )
+            except Exception as e:
+                logger.exception(e)
+                raise
+
+            logger.debug("waiting for plumber process")
 
 
 class PlumberConnection:
