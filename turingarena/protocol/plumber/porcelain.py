@@ -54,14 +54,13 @@ class PorcelainRunner:
 
         for arg in statement.function.declarator.parameters:
             deserialize(type_expression=arg.type, plumber=self.plumber)
-        yield
 
     def visit_any_statement(self, statement):
         logger.debug("ignoring statement {}".format(statement))
         yield from []
 
 
-def make_porcelain(plumber):
+def run_porcelain(plumber):
     logger.debug("reading global variables")
     command = plumber.receive()
     assert command == "globals"
@@ -72,7 +71,7 @@ def make_porcelain(plumber):
             deserialize(type_expression=statement.type, plumber=plumber)
 
     logger.debug("starting main procedure")
-    yield from run_body(plumber.interface.main.body, plumber=plumber)
+    run_body(plumber.interface.main.body, plumber=plumber)
 
 
 def run_body(body, *, plumber):
