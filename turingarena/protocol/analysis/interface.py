@@ -78,13 +78,16 @@ class BlockStatementCompiler:
     def compile_if(self, stmt):
         compile_expression(stmt.condition, scope=self.block.scope)
 
-        new_scope_then = Scope(self.block.scope)
-        compile_block(stmt.then_body, scope=new_scope_then, parent=self.block)
-        self.expect_calls(stmt.then_body.first_calls)
-        if hasattr(stmt, 'else_body'):
-            new_scope_else = Scope(self.block.scope)
-            compile_block(stmt.else_body, scope=new_scope_else, parent=self.block)
-            self.expect_calls(stmt.else_body.first_calls)
+        compile_block(stmt.then_body, scope=self.block.scope, parent=self.block)
+        then_calls = stmt.then_body.first_calls
+
+        if stmt.else_body:
+            compile_block(stmt.else_body, scope=self.block.scope, parent=self.block)
+            else_calls = stmt.else_body.first_calls
+        else:
+            else_calls = {None}
+
+        self.expect_calls(then_calls | else_calls)
 
 
 def compile_block(block, scope, parent=None, outer_declaration=None):
