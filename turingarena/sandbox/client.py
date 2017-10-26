@@ -18,7 +18,7 @@ class Algorithm:
     def __init__(self, name):
         self.name = name
 
-    def create_sandbox(self):
+    def sandbox(self):
         return SandboxClient(self.name)
 
 
@@ -28,7 +28,7 @@ class SandboxClient:
         self.algorithm_name = algorithm_name
 
     @contextmanager
-    def open(self):
+    def run(self):
         logger.debug("starting sandbox process")
         with subprocess.Popen(
                 ["turingarena", "sandbox", "run", self.algorithm_name],

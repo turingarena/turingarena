@@ -7,12 +7,26 @@ from contextlib import contextmanager, ExitStack
 logger = logging.getLogger(__name__)
 
 
+class Implementation:
+    def __init__(self, *, interface_name, algorithm):
+        self.interface_name = interface_name
+        self.algorithm = algorithm
+
+    @contextmanager
+    def run(self):
+        sandbox = self.algorithm.sandbox()
+        with sandbox.run() as process:
+            plumber = Plumber(interface_name=self.interface_name, process=process)
+            with plumber.connect() as connection:
+                yield connection
+
+
 class PlumberException(Exception):
     pass
 
 
 class Plumber:
-    def __init__(self, interface_name, process):
+    def __init__(self, *, interface_name, process):
         self.interface_name = interface_name
         self.process = process
 
