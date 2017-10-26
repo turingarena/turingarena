@@ -18,11 +18,13 @@ def compile_var(statement, *, scope):
 def compile_if(statement):
     compile_expression(statement.condition, scope=statement.context.scope)
 
-    compile_block(statement.then_body, scope=statement.context.scope, parent=statement.context)
+    statement.then_body.context = statement.context
+    compile_block(statement.then_body)
     then_calls = statement.then_body.first_calls
 
     if statement.else_body:
-        compile_block(statement.else_body, scope=statement.context.scope, parent=statement.context)
+        statement.else_body.context = statement.context
+        compile_block(statement.else_body)
         else_calls = statement.else_body.first_calls
     else:
         else_calls = {None}
@@ -30,16 +32,22 @@ def compile_if(statement):
     expect_calls(statement=statement, calls=(then_calls | else_calls))
 
 
+class ForContext:
+    pass
+
+
 def compile_for(statement):
     index = statement.index
     compile_expression(index.range, scope=statement.context.scope)
 
-    new_scope = Scope(statement.context.scope)
-    new_scope["var", index.declarator.name] = index
+    for_context = ForContext()
+    for_context.scope = Scope(statement.context.scope)
+    for_context.scope["var", index.declarator.name] = index
 
     index.type = scalar(int)
 
-    compile_block(statement.body, scope=new_scope, parent=statement.context)
+    statement.body.context = for_context
+    compile_block(statement.body)
 
     expect_calls(statement=statement, calls=statement.body.first_calls)
 
@@ -55,8 +63,6 @@ def compile_call(statement):
 
 
 def expect_calls(*, statement, calls):
-    if statement.context.parent is None:
-        return
     if None in statement.context.first_calls:
         statement.context.first_calls.remove(None)
         statement.context.first_calls |= calls
@@ -97,25 +103,16 @@ def compile_statement(statement):
     compilers[statement.statement_type](statement)
 
 
-def compile_block(block, scope, parent=None, outer_declaration=None):
+def compile_block(block):
     logger.debug("compiling block {}".format(block))
 
-    block.scope = Scope(scope)
-    block.parent = parent
-
-    if parent is None:
-        block.outer_declaration = outer_declaration
-    else:
-        assert outer_declaration is None
-        block.outer_declaration = parent.outer_declaration
-
+    block.scope = Scope(block.context.scope)
     block.first_calls = None
     """A set containing the names of the possible functions
     that can be called first in this block,
     and possibly None if this block could call no function"""
 
-    if parent is not None:
-        block.first_calls = {None}  # at the beginning, no functions are possible
+    block.first_calls = {None}  # at the beginning, no functions are possible
 
     for statement in block.statements:
         logger.debug("compiling block statement {}".format(statement))
@@ -124,14 +121,21 @@ def compile_block(block, scope, parent=None, outer_declaration=None):
 
 
 def compile_main(statement):
-    compile_block(statement.body, scope=statement.context.scope, outer_declaration=statement)
+    statement.body.context = statement.context
+    compile_block(statement.body)
     statement.context.scope["main"] = statement
+
+
+class CallbackContext:
+    pass
 
 
 def compile_callback(statement):
     statement.context.scope["callback", statement.declarator.name] = statement
-    new_scope = compile_signature(context=statement.context, declarator=statement.declarator)
-    compile_block(statement.body, scope=new_scope, outer_declaration=statement)
+    context = CallbackContext()
+    context.scope = compile_signature(context=statement.context, declarator=statement.declarator)
+    statement.body.context = context
+    compile_block(statement.body)
 
 
 def compile_function(statement):
