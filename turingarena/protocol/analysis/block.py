@@ -5,7 +5,6 @@ from turingarena.protocol.analysis.declaration import process_simple_declaration
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
 from turingarena.protocol.analysis.types import ScalarType
-from turingarena.protocol.visitor import accept_statement
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +42,36 @@ class BlockCompiler:
         for statement in self.block.statements:
             logger.debug("compiling block item {}".format(statement))
             statement.outer_block = block
-            accept_statement(statement, visitor=self)
+            self.compile_statement(statement)
 
         if block.parent is not None:
             if len(block.locals) > 0 and None in block.first_calls:
                 raise ValueError(
                     "An internal block that declares local variables "
                     "must always do at least one function call")
+
+    def compile_statement(self, statement):
+        compilers = {
+            "var": self.compile_var,
+            "input": self.compile_arguments,
+            "output": self.compile_arguments,
+            "alloc": self.compile_alloc,
+            "return": lambda s: compile_expression(s.value, scope=self.scope),
+            "call": self.compile_call,
+            "flush": lambda s: None,
+            "exit": lambda s: None,
+            "if": self.compile_if,
+            "for": self.compile_for,
+            "break": lambda s: None,
+            "continue": lambda s: None,
+            "loop": NotImplemented,
+            "switch": NotImplemented,
+        }
+        compilers[statement.statement_type](statement)
+
+    def compile_alloc(self, statement):
+        self.compile_arguments(statement)
+        compile_expression(statement.size, scope=self.scope)
 
     def expect_calls(self, calls):
         if self.block.parent is None:
@@ -58,7 +80,7 @@ class BlockCompiler:
             self.block.first_calls.remove(None)
             self.block.first_calls |= calls
 
-    def visit_var_statement(self, statement):
+    def compile_var(self, statement):
         process_declarators(statement, scope=self.scope)
         self.block.locals.append(statement)
 
@@ -66,26 +88,7 @@ class BlockCompiler:
         for e in statement.arguments:
             compile_expression(e, scope=self.scope)
 
-    def visit_statement(self, statement):
-        accept_statement(statement, visitor=self)
-
-    def visit_input_statement(self, statement):
-        self.compile_arguments(statement)
-
-    def visit_output_statement(self, statement):
-        self.compile_arguments(statement)
-
-    def visit_flush_statement(self, statement):
-        pass
-
-    def visit_exit_statement(self, statement):
-        pass
-
-    def visit_alloc_statement(self, statement):
-        self.compile_arguments(statement)
-        compile_expression(statement.size, scope=self.scope)
-
-    def visit_call_statement(self, statement):
+    def compile_call(self, statement):
         self.expect_calls({statement.function_name})
 
         for p in statement.parameters:
@@ -94,7 +97,7 @@ class BlockCompiler:
             compile_expression(statement.return_value, scope=self.scope)
         statement.function = self.scope[statement.function_name]
 
-    def visit_for_statement(self, statement):
+    def compile_for(self, statement):
         compile_expression(statement.index.range, scope=self.scope)
 
         new_scope = Scope(self.scope)
@@ -106,7 +109,7 @@ class BlockCompiler:
 
         self.expect_calls(statement.body.first_calls)
 
-    def visit_if_statement(self, stmt):
+    def compile_if(self, stmt):
         compile_expression(stmt.condition, scope=self.scope)
 
         new_scope_then = Scope(self.scope)
@@ -116,9 +119,6 @@ class BlockCompiler:
             new_scope_else = Scope(self.scope)
             compile_block(stmt.else_body, scope=new_scope_else, parent=self.block)
             self.expect_calls(stmt.else_body.first_calls)
-
-    def visit_return_statement(self, stmt):
-        compile_expression(stmt.value, scope=self.scope)
 
 
 compile_block = BlockCompiler
