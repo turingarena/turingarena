@@ -21,6 +21,7 @@ setup(
             "turingarena=turingarena.cli.main:main",
         ],
     },
+    namespace_packages=["turingarena_protocols"],
     packages=find_packages(),
     package_data={
         'turingarena': ['**/templates/**', '**/*static/**'],

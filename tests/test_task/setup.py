@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="test_challenge",
-    packages=find_packages(),
+    packages=["test_challenge"],
     package_data={
-        '': ['protocol.txt'],
+        'test_challenge': ['protocol.txt'],
     },
 )

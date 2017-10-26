@@ -1,13 +1,13 @@
 import sys
 
-from proxy import exampleinterface
+from turingarena_protocols.test_challenge import exampleinterface
 
-from turingarena.protocol.plumber.client import Implementation
+from turingarena.protocol.plumber.client import Implementation, Interface
 from turingarena.protocol.proxy.python.library import ProxyEngine
 from turingarena.sandbox.client import Algorithm
 
 solution = Implementation(
-    interface_name="exampleinterface",
+    interface=Interface("test_challenge", "exampleinterface"),
     algorithm=Algorithm("solution"),
 )
 
