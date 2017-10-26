@@ -22,16 +22,12 @@ setup(
         ],
     },
     packages=find_packages(),
-    package_data={
-        'turingarena': ['**/templates/**', '**/*static/**'],
-    },
     keywords="",
     license="",
     classifiers=[],
     install_requires=[
         "docopt",
         "tatsu",
-        "jinja2",
         "pyyaml",
         "coloredlogs",
     ],
