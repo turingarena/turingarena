@@ -1,7 +1,4 @@
 import os
-import shutil
-
-import pkg_resources
 
 from turingarena.protocol.codegen.utils import write_to_file, indent_all
 from turingarena.protocol.proxy.python.types import build_type_expression, build_optional_type_expression
@@ -64,17 +61,16 @@ def generate_proxy(protocol, *, dest_dir):
 
     qual_package_name = "turingarena_protocols." + package_name
 
-    shutil.copytree(
-        pkg_resources.resource_filename("turingarena_protocols", "."),
-        os.path.join(dest_dir, "turingarena_protocols"),
-    )
-
-    package_dir = os.path.join(
+    namespace_dir = os.path.join(
         dest_dir,
         "turingarena_protocols",
+    )
+    package_dir = os.path.join(
+        namespace_dir,
         package_name,
     )
-    os.mkdir(package_dir)
+
+    os.makedirs(package_dir, exist_ok=True)
 
     module_path = os.path.join(
         package_dir,
