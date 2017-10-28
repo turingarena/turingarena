@@ -48,6 +48,6 @@ class SkeletonGenerator(AbstractSupportGenerator):
     def generate_main_file(self):
         yield "#include <cstdio>"
         generator = InterfaceItemGenerator()
-        for statement in self.interface.statements:
+        for statement in self.interface.body.statements:
             yield
             yield from accept_statement(statement, visitor=generator)

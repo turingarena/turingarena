@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
@@ -7,13 +6,6 @@ from turingarena.protocol.analysis.type_expression import compile_type_expressio
 from turingarena.protocol.types import scalar
 
 logger = logging.getLogger(__name__)
-
-
-def compile_var(statement, *, scope):
-    compile_type_expression(statement.type_expression)
-    statement.type = statement.type_expression.descriptor
-    for declarator in statement.declarators:
-        scope["var", declarator.name] = statement
 
 
 def compile_if(statement):
@@ -151,12 +143,3 @@ def compile_signature(*, context, declarator):
         compile_type_expression(p.type_expression)
         p.type = p.type_expression.descriptor
     return new_scope
-
-
-def compile_interface(interface):
-    interface.scope = Scope()
-
-    for statement in interface.statements:
-        logger.debug("compiling interface statement {}".format(statement))
-        statement.context = interface
-        compile_statement(statement)

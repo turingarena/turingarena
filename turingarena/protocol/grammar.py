@@ -2,14 +2,25 @@ grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
 
-    unit = statements:{ unit_statement }* $ ;
+    protocol = body:protocol_body $ ;
     
-    unit_statement =
+    protocol_body = statements:{ protocol_statement }* ;
+    
+    protocol_statement =
         statement_type:'interface' ~ name:identifier '{'
-            statements:{ interface_statement }*
+            body:interface_body
         '}'
     ;
     
+    interface_body = statements:{ interface_statement }* ;
+    
+    interface_statement =
+        | var_statement
+        | statement_type:'function' ~ declarator:signature_declarator ';'
+        | statement_type:'callback' ~ declarator:signature_declarator body:block
+        | statement_type:'main' ~ body:block
+    ;
+
     return_type_declarator =
         '->' ~ @:type_expression
     ;
@@ -19,13 +30,6 @@ grammar_ebnf = r"""
             parameters:','.{ parameter_declaration }*
         ')'
         return_type:[ return_type_declarator ]
-    ;
-
-    interface_statement =
-        | var_statement
-        | statement_type:'function' ~ declarator:signature_declarator ';'
-        | statement_type:'callback' ~ declarator:signature_declarator body:block
-        | statement_type:'main' ~ body:block
     ;
 
     var_statement =

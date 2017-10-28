@@ -16,11 +16,11 @@ Options:
 import docopt
 import pkg_resources
 
+from turingarena.protocol.model.statements import Protocol
 from turingarena.protocol.plumber.cli import protocol_plumber_cli
 
 from turingarena.protocol.proxy.cli import protocol_proxy_cli
 
-from turingarena.protocol.analysis import analyze_protocol
 from turingarena.protocol.parser import parse_protocol
 from turingarena.protocol.skeleton.cli import protocol_skeleton_cli
 
@@ -35,7 +35,7 @@ def protocol_cli(argv):
     protocol.package_name = package_name
     protocol.file_name = protocol_file_name
 
-    analyze_protocol(protocol)
+    protocol = Protocol.compile(protocol)
 
     argv2 = args["<args>"]
     if args["skeleton"]: return protocol_skeleton_cli(protocol=protocol, argv=argv2)
