@@ -59,7 +59,7 @@ class ReferenceExpression(Expression):
 
     @staticmethod
     def compile(ast, scope):
-        variable = scope["var", ast.variable_name]
+        variable = scope.variables[ast.variable_name]
         return ReferenceExpression(
             variable=variable,
             value_type=variable.type,

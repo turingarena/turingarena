@@ -1,7 +1,9 @@
 from collections import OrderedDict
 
 
-class Scope:
+class ScopeNamespace:
+    __slots__ = ["parent", "delegate"]
+
     def __init__(self, parent=None):
         self.parent = parent
         self.delegate = OrderedDict()
@@ -15,8 +17,17 @@ class Scope:
             yield from self.parent
         yield from self.delegate
 
+    def items(self):
+        if self.parent:
+            yield from self.parent.items()
+        yield from self.delegate.items()
+
+    def values(self):
+        if self.parent:
+            yield from self.parent.values()
+        yield from self.delegate.values()
+
     def __getitem__(self, key):
-        self.check_key(key)
         try:
             return self.delegate[key]
         except KeyError:
@@ -26,10 +37,15 @@ class Scope:
                 raise
 
     def __setitem__(self, key, value):
-        self.check_key(key)
         if key in self.delegate:
             raise KeyError("already defined")
         self.delegate[key] = value
 
-    def check_key(self, key):
-        _, _ = key
+
+class Scope:
+    __slots__ = ["interfaces", "variables", "functions", "callbacks", "main"]
+
+    def __init__(self, parent=None):
+        for ns in Scope.__slots__:
+            ns_parent = getattr(parent, ns) if parent else None
+            setattr(self, ns, ScopeNamespace(ns_parent))

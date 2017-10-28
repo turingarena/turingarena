@@ -25,8 +25,8 @@ class SkeletonGenerator:
         shutil.rmtree(self.skeleton_dir)
 
         os.mkdir(self.skeleton_dir)
-        for statement in self.protocol.body.statements:
-            self.generate_skeleton_interface(statement.interface)
+        for interface in self.protocol.scope.interfaces.values():
+            self.generate_skeleton_interface(interface)
 
     def generate_skeleton_interface(self, interface):
         interface_dir = self.make_interface_dir(interface)

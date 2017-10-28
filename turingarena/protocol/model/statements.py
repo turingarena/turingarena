@@ -21,14 +21,15 @@ def statement_class(statement_type):
 
 
 class Protocol(AbstractSyntaxNode):
-    __slots__ = ["body"]
+    __slots__ = ["body", "scope"]
 
     @staticmethod
     def compile(ast):
         logger.debug("compiling {}".format(ast))
         scope = Scope()
         return Protocol(
-            body=Body.compile(ast.body, scope=scope)
+            body=Body.compile(ast.body, scope=scope),
+            scope=scope,
         )
 
 
@@ -65,7 +66,7 @@ class VarStatement(Statement):
             for d in ast.declarators
         ]
         for v in variables:
-            scope["var", v.name] = v
+            scope.variables[v.name] = v
         return VarStatement(
             type=value_type,
             variables=variables
@@ -107,7 +108,7 @@ class InterfaceStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         interface = Interface.compile(ast, scope)
-        scope["interface", interface.name] = interface
+        scope.interfaces[interface.name] = interface
         return InterfaceStatement(interface=interface)
 
 
@@ -125,7 +126,7 @@ class CallableDeclarator(AbstractSyntaxNode):
             for p in ast.parameters
         ]
         for p in parameters:
-            callable_scope["var", p.name] = p
+            callable_scope.variables[p.name] = p
 
         return CallableDeclarator(
             name=ast.name,
@@ -154,7 +155,7 @@ class FunctionStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         fun = Function.compile(ast, scope)
-        scope["function", fun.declarator.name] = fun
+        scope.functions[fun.declarator.name] = fun
         return FunctionStatement(
             function=fun
         )
@@ -179,7 +180,7 @@ class CallbackStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         callback = Callback.compile(ast, scope=scope)
-        scope["callback", callback.declarator.name] = callback
+        scope.callbacks[callback.declarator.name] = callback
         return CallbackStatement(callback=callback)
 
 
@@ -194,7 +195,7 @@ class MainStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         main = Main(body=Body.compile(ast.body, scope=scope))
-        scope["main", "main"] = main
+        scope.main["main"] = main
         return MainStatement(main=main)
 
 
@@ -255,7 +256,7 @@ class CallStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        fun = scope["function", ast.function_name]
+        fun = scope.functions[ast.function_name]
         assert len(ast.parameters) == len(fun.declarator.parameters)
         return CallStatement(
             function=fun,
@@ -294,7 +295,7 @@ class ForStatement(ImperativeStatement):
     def compile(ast, scope):
         for_scope = Scope(scope)
         index_var = Variable(type=ScalarType(base_type=int), name=ast.index.declarator.name)
-        for_scope["var", index_var.name] = index_var
+        for_scope.variables[index_var.name] = index_var
         return ForStatement(
             index=ForIndex(
                 variable=index_var,
