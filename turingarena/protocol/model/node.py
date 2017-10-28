@@ -3,14 +3,21 @@ class ImmutableObject:
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
-            setattr(self, k, v)
+            object.__setattr__(self, k, v)
+
+    def __setattr__(self, key, value):
+        raise NotImplementedError
+
+
+class TupleLikeObject(ImmutableObject):
+    __slots__ = []
 
     def _to_tuple(self):
         return tuple(getattr(self, s) for s in self.__slots__)
 
     def __eq__(self, other):
         return (
-            isinstance(other, ImmutableObject)
+            isinstance(other, TupleLikeObject)
             and self._to_tuple() == other._to_tuple()
         )
 

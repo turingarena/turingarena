@@ -21,7 +21,7 @@ def statement_class(statement_type):
 
 
 class Protocol(AbstractSyntaxNode):
-    __slots__ = ["body", "scope"]
+    __slots__ = ["body"]
 
     @staticmethod
     def compile(ast):
@@ -29,7 +29,6 @@ class Protocol(AbstractSyntaxNode):
         scope = Scope()
         return Protocol(
             body=Body.compile(ast.body, scope=scope),
-            scope=scope,
         )
 
 
@@ -97,7 +96,7 @@ class Interface(ImmutableObject):
         return Interface(
             name=ast.name,
             body=body,
-            has_callbacks=False, # FIXME
+            has_callbacks=any(True for _ in body.scope.callbacks),
         )
 
 

@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from turingarena.protocol.model.node import ImmutableObject
+from turingarena.protocol.model.node import ImmutableObject, TupleLikeObject
 
 type_expression_classes = bidict()
 
@@ -13,7 +13,7 @@ def type_expression_class(meta_type):
     return decorator
 
 
-class ValueType(ImmutableObject):
+class ValueType(TupleLikeObject):
     __slots__ = ["meta_type"]
 
     def __init__(self, **kwargs):
