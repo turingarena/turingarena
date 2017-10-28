@@ -1,26 +1,14 @@
-from turingarena.protocol.codegen.expressions import AbstractValueExpressionBuilder, \
-    AbstractReferenceExpressionBuilder
-from turingarena.protocol.visitor import accept_expression
+def build_subscript(expression):
+    array = build_expression(expression.array)
+    index = build_expression(expression.index)
+    return f"{array}[{index}]"
 
 
-class ReferenceExpressionBuilder(AbstractReferenceExpressionBuilder):
-
-    def build_value(self, expr):
-        return generate_expression(expr)
-
-
-class ValueExpressionBuilder(AbstractValueExpressionBuilder):
-
-    def build_reference(self, expr):
-        return generate_reference_expression(expr)
-
-    def visit_any_expression(self, expr):
-        return self.build_reference(expr)
-
-
-def generate_reference_expression(expression):
-    return accept_expression(expression, visitor=ReferenceExpressionBuilder())
-
-
-def generate_expression(expression):
-    return accept_expression(expression, visitor=ValueExpressionBuilder())
+def build_expression(expression):
+    builders = {
+        "int_literal": lambda: f"{expression.int_value}",
+        "bool_literal": lambda: f"{int(expression.bool_value)}",
+        "reference": lambda: f"{expression.variable.name}",
+        "subscript": lambda: build_subscript(expression),
+    }
+    return builders[expression.expression_type]()

@@ -7,7 +7,7 @@ from . import cpp
 logger = logging.getLogger(__name__)
 
 languages = {
-    "cpp": cpp.SkeletonGenerator
+    "cpp": cpp.generate_skeleton
 }
 
 
@@ -25,8 +25,8 @@ class SkeletonGenerator:
         shutil.rmtree(self.skeleton_dir)
 
         os.mkdir(self.skeleton_dir)
-        for interface in self.protocol.body.statements:
-            self.generate_skeleton_interface(interface)
+        for statement in self.protocol.body.statements:
+            self.generate_skeleton_interface(statement.interface)
 
     def generate_skeleton_interface(self, interface):
         interface_dir = self.make_interface_dir(interface)
@@ -45,7 +45,11 @@ class SkeletonGenerator:
                 dir=language_dir,
             )
         )
-        languages[language](self.protocol, interface, language_dir)
+        languages[language](
+            protocol=self.protocol,
+            interface=interface,
+            dest_dir=language_dir,
+        )
 
     def make_interface_dir(self, interface):
         return os.path.join(self.skeleton_dir, interface.name)

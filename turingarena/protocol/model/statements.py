@@ -87,16 +87,28 @@ class Body(AbstractSyntaxNode):
         )
 
 
-@statement_class("interface")
-class InterfaceStatement(Statement):
-    __slots__ = ["name", "body"]
+class Interface(ImmutableObject):
+    __slots__ = ["name", "body", "has_callbacks"]
 
     @staticmethod
     def compile(ast, scope):
-        return InterfaceStatement(
+        body = Body.compile(ast.body, scope=scope)
+        return Interface(
             name=ast.name,
-            body=Body.compile(ast.body, scope=scope)
+            body=body,
+            has_callbacks=False, # FIXME
         )
+
+
+@statement_class("interface")
+class InterfaceStatement(Statement):
+    __slots__ = ["interface"]
+
+    @staticmethod
+    def compile(ast, scope):
+        interface = Interface.compile(ast, scope)
+        scope["interface", interface.name] = interface
+        return InterfaceStatement(interface=interface)
 
 
 class CallableDeclarator(AbstractSyntaxNode):
