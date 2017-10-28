@@ -2,11 +2,10 @@ import logging
 
 from bidict import bidict
 
-from turingarena.protocol.analysis.expression import compile_expression
-from turingarena.protocol.analysis.scope import Scope
+from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
-from turingarena.protocol.model.type_expressions import ValueType
-from turingarena.protocol.types import scalar
+from turingarena.protocol.model.scope import Scope
+from turingarena.protocol.model.type_expressions import ValueType, ScalarType
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +55,7 @@ class Variable(ImmutableObject):
 
 @statement_class("var")
 class VarStatement(Statement):
-    __slots__ = ["type", "vars"]
+    __slots__ = ["type", "variables"]
 
     @staticmethod
     def compile(ast, scope):
@@ -69,7 +68,7 @@ class VarStatement(Statement):
             scope["var", v.name] = v
         return VarStatement(
             type=value_type,
-            vars=variables
+            variables=variables
         )
 
 
@@ -105,7 +104,7 @@ class CallableDeclarator(AbstractSyntaxNode):
 
     @staticmethod
     def compile(ast, scope):
-        scope = Scope(scope)
+        callable_scope = Scope(scope)
         parameters = [
             Variable(
                 type=ValueType.compile(p.type_expression, scope=scope),
@@ -114,13 +113,13 @@ class CallableDeclarator(AbstractSyntaxNode):
             for p in ast.parameters
         ]
         for p in parameters:
-            scope["var", p.name] = p
+            callable_scope["var", p.name] = p
 
         return CallableDeclarator(
             name=ast.name,
             parameters=parameters,
-            return_type=ast.return_type,
-            scope=scope
+            return_type=ValueType.compile(ast.return_type, scope=scope),
+            scope=callable_scope
         )
 
 
@@ -197,12 +196,12 @@ class AllocStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        for arg in ast.arguments:
-            compile_expression(arg, scope=scope)
-        compile_expression(ast.size, scope=scope)
         return AllocStatement(
-            arguments=ast.arguments,
-            size=ast.size,
+            arguments=[
+                Expression.compile(arg, scope=scope)
+                for arg in ast.arguments
+            ],
+            size=Expression.compile(ast.size, scope=scope),
         )
 
 
@@ -211,10 +210,11 @@ class InputOutputStatement(ImperativeStatement):
 
     @classmethod
     def compile(cls, ast, scope):
-        for arg in ast.arguments:
-            compile_expression(arg, scope=scope)
         return cls(
-            arguments=ast.arguments,
+            arguments=[
+                Expression.compile(arg, scope=scope)
+                for arg in ast.arguments
+            ],
         )
 
 
@@ -245,14 +245,17 @@ class CallStatement(ImperativeStatement):
     def compile(ast, scope):
         fun = scope["function", ast.function_name]
         assert len(ast.parameters) == len(fun.declarator.parameters)
-        for decl_arg, arg in zip(fun.declarator.parameters, ast.parameters):
-            compile_expression(arg, scope=scope)
-            assert arg.type == decl_arg.type
-        compile_expression(ast.return_value, scope=scope)
         return CallStatement(
             function=fun,
-            parameters=ast.parameters,
-            return_value=ast.return_value,
+            parameters=[
+                Expression.compile(arg, scope=scope, expected_type=decl_arg.type)
+                for decl_arg, arg in zip(fun.declarator.parameters, ast.parameters)
+            ],
+            return_value=Expression.compile(
+                ast.return_value,
+                scope=scope,
+                expected_type=fun.declarator.return_type,
+            ),
         )
 
 
@@ -262,9 +265,8 @@ class ReturnStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        compile_expression(ast.value, scope=scope)
         return ReturnStatement(
-            value=ast.value,
+            value=Expression.compile(ast.value, scope=scope),
         )
 
 
@@ -278,14 +280,16 @@ class ForStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        compile_expression(ast.index.range, scope=scope)
-        scope = Scope(scope)
-        index_var = Variable(type=scalar(int), name=ast.index.declarator.name)
-        scope["var", index_var.name] = index_var
+        for_scope = Scope(scope)
+        index_var = Variable(type=ScalarType(base_type=int), name=ast.index.declarator.name)
+        for_scope["var", index_var.name] = index_var
         return ForStatement(
-            index=ForIndex(variable=index_var, range=ast.index.range),
-            body=Body.compile(ast.body, scope=scope),
-            scope=scope,
+            index=ForIndex(
+                variable=index_var,
+                range=Expression.compile(ast.index.range, scope=scope),
+            ),
+            body=Body.compile(ast.body, scope=for_scope),
+            scope=for_scope,
         )
 
 

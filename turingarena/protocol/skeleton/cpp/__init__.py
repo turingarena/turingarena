@@ -12,23 +12,24 @@ class InterfaceItemGenerator:
     def visit_var_statement(self, declaration):
         yield build_declaration(declaration)
 
-    def visit_function_statement(self, decl):
+    def visit_function_statement(self, statement):
+        declarator = statement.function.declarator
         yield "{return_type} {name}({arguments});".format(
-            return_type=build_type_expression(decl.return_type),
-            name=decl.declarator.name,
-            arguments=', '.join(build_parameter(p) for p in decl.parameters)
+            return_type=build_type_expression(declarator.return_type),
+            name=declarator.name,
+            arguments=', '.join(build_parameter(p) for p in declarator.parameters)
         )
 
-    def visit_callback_statement(self, decl):
-        name = decl.declarator.name
+    def visit_callback_statement(self, statement):
+        declarator = statement.callback.declarator
         yield "{return_type} {name}({arguments})".format(
-            return_type=build_type_expression(decl.return_type),
-            name=name,
-            arguments=', '.join(build_parameter(p) for p in decl.parameters)
+            return_type=build_type_expression(declarator.return_type),
+            name=declarator.name,
+            arguments=', '.join(build_parameter(p) for p in declarator.parameters)
         ) + " {"
-        if len(decl.interface.callback_declarations) > 0:
-            yield indent(r"""printf("%s\n", "{name}");""".format(name=name))
-        yield from indent_all(generate_block(decl.body))
+        if len(statement.interface.callback_declarations) > 0:
+            yield indent(r"""printf("%s\n", "{name}");""".format(name=declarator.name))
+        yield from indent_all(generate_block(statement.body))
         yield "}"
 
     def visit_main_statement(self, declaration):

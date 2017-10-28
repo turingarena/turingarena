@@ -72,7 +72,7 @@ grammar_ebnf = r"""
         | expression_type:`int_literal` int_literal:INT
         | expression_type:`bool_literal` bool_literal:BOOL
         | expression_type:`subscript` array:expression '[' index:expression ']'
-        | expression_type:`variable` variable_name:identifier
+        | expression_type:`reference` variable_name:identifier
     ;
 
     type_expression =

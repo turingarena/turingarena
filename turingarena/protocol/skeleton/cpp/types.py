@@ -7,9 +7,8 @@ class TypeExpressionBuilder:
 
     def visit_scalar_type(self, t):
         return {
-            "int": "int",
-            "int64": "long long int",
-            "bool" : "bool"
+            int: "int",
+            bool : "bool",
         }[t.base_type]
 
 
