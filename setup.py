@@ -30,5 +30,6 @@ setup(
         "tatsu",
         "pyyaml",
         "coloredlogs",
+        "bidict",
     ],
 )

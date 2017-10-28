@@ -10,7 +10,7 @@ class TypeExpressionBuilder:
             "int": "int",
             "int64": "long long int",
             "bool" : "bool"
-        }[t.base]
+        }[t.base_type]
 
 
 def build_type_expression(type_expression):

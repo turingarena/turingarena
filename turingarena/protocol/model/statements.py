@@ -1,21 +1,21 @@
 import logging
 
+from bidict import bidict
+
 from turingarena.protocol.analysis.expression import compile_expression
 from turingarena.protocol.analysis.scope import Scope
-from turingarena.protocol.analysis.type_expression import compile_type_expression
 from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
+from turingarena.protocol.model.type_expressions import ValueType
 from turingarena.protocol.types import scalar
 
 logger = logging.getLogger(__name__)
 
-statement_classes = {}
-statement_types = {}
+statement_classes = bidict()
 
 
 def statement_class(statement_type):
     def decorator(cls):
         statement_classes[statement_type] = cls
-        statement_types[cls] = statement_type
         return cls
 
     return decorator
@@ -37,7 +37,7 @@ class Statement(AbstractSyntaxNode):
     __slots__ = ["statement_type"]
 
     def __init__(self, **kwargs):
-        super().__init__(statement_type=statement_types[self.__class__], **kwargs)
+        super().__init__(statement_type=statement_classes.inv[self.__class__], **kwargs)
 
 
 class VarDeclarator(AbstractSyntaxNode):
@@ -60,15 +60,15 @@ class VarStatement(Statement):
 
     @staticmethod
     def compile(ast, scope):
-        compile_type_expression(ast.type_expression)
+        value_type = ValueType.compile(ast.type_expression, scope=scope)
         variables = [
-            Variable(type=ast.type_expression.descriptor, name=d.name)
+            Variable(type=value_type, name=d.name)
             for d in ast.declarators
         ]
         for v in variables:
             scope["var", v.name] = v
         return VarStatement(
-            type=ast.type_expression.descriptor,
+            type=value_type,
             vars=variables
         )
 
@@ -106,10 +106,11 @@ class CallableDeclarator(AbstractSyntaxNode):
     @staticmethod
     def compile(ast, scope):
         scope = Scope(scope)
-        for parameter in ast.parameters:
-            compile_type_expression(parameter.type_expression)
         parameters = [
-            Variable(type=p.type_expression.descriptor, name=p.declarator.name)
+            Variable(
+                type=ValueType.compile(p.type_expression, scope=scope),
+                name=p.declarator.name,
+            )
             for p in ast.parameters
         ]
         for p in parameters:
