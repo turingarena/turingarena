@@ -1,4 +1,5 @@
 import logging
+from abc import abstractmethod
 
 from bidict import bidict
 
@@ -37,6 +38,11 @@ class Statement(AbstractSyntaxNode):
 
     def __init__(self, **kwargs):
         super().__init__(statement_type=statement_classes.inv[self.__class__], **kwargs)
+
+    @staticmethod
+    def compile(ast, scope):
+        logger.debug("compiling statement {}".format(ast))
+        return statement_classes[ast.statement_type].compile(ast, scope)
 
 
 class VarDeclarator(AbstractSyntaxNode):
@@ -81,7 +87,7 @@ class Body(AbstractSyntaxNode):
         return Body(
             scope=scope,
             statements=[
-                compile_statement(s, scope=scope)
+                Statement.compile(s, scope=scope)
                 for s in ast.statements
             ]
         )
@@ -186,6 +192,10 @@ class CallbackStatement(Statement):
 class Main(ImmutableObject):
     __slots__ = ["body"]
 
+    def run(self, context):
+        yield from run_body(self.body, context)
+        yield
+
 
 @statement_class("main")
 class MainStatement(Statement):
@@ -200,6 +210,10 @@ class MainStatement(Statement):
 
 class ImperativeStatement(Statement):
     __slots__ = ["first_call"]
+
+    @abstractmethod
+    def run(self, context):
+        pass
 
 
 @statement_class("alloc")
@@ -305,6 +319,7 @@ class ForStatement(ImperativeStatement):
         )
 
 
-def compile_statement(ast, *, scope):
-    logger.debug("compiling statement {}".format(ast))
-    return statement_classes[ast.statement_type].compile(ast, scope)
+def run_body(body, context):
+    for statement in body.statements:
+        if isinstance(statement, ImperativeStatement):
+            yield from statement.run(context)

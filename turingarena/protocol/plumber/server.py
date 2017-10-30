@@ -4,8 +4,6 @@ import sys
 import tempfile
 from contextlib import ExitStack
 
-from turingarena.protocol.plumber.data import Frame
-from turingarena.protocol.types import scalar, array
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
@@ -14,16 +12,9 @@ logger = logging.getLogger(__name__)
 class PlumberServer:
     def __init__(self, *, protocol, interface_name, sandbox_dir):
         self.protocol = protocol
-        [self.interface] = [
-            s for s in protocol.statements
-            if s.statement_type == "interface"
-               and s.name == interface_name
-        ]
+        self.interface = protocol.body.scope.interfaces[interface_name]
 
-        self.main = self.interface.scope["main", "main"]
-        self.frame_stack = [
-            Frame(parent=None, scope=self.interface.scope)
-        ]
+        self.main = self.interface.body.scope.main["main"]
 
         with ExitStack() as stack:
             prefix = "turingarena_plumber"
@@ -86,12 +77,9 @@ class PlumberServer:
         logger.debug("reading global variables")
         command = self.receive()
         assert command == "globals"
-        for statement in self.interface.statements:
-            if statement.statement_type != "var": continue
-            logger.debug("reading global variables {}".format(statement))
-            for d in statement.declarators:
-                logger.debug("reading global variable {}".format(d.name))
-                self.deserialize(type_descriptor=statement.type)
+        for variable in self.interface.body.scope.variables.values():
+            logger.debug("reading global variable {}".format(variable.name))
+            variable.type.deserialize(file=self.connection.request_pipe)
 
         logger.debug("starting main procedure")
 
@@ -120,17 +108,6 @@ class PlumberServer:
     def send(self, line):
         logger.debug("sending response '{}'".format(line))
         print(line, file=self.response_pipe)
-
-    def deserialize(self, type_descriptor):
-        logger.debug("deserializing type {}".format(type_descriptor))
-        if isinstance(type_descriptor, scalar):
-            return type_descriptor.base_type(self.receive())
-        if isinstance(type_descriptor, array):
-            size = int(self.receive())
-            return [
-                self.deserialize(type_descriptor.item_type)
-                for _ in range(size)
-            ]
 
     def run_call(self, statement):
         logger.debug("expecting call {}...".format(statement))

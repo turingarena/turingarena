@@ -1,6 +1,8 @@
+from abc import abstractmethod
+
 from bidict import bidict
 
-from turingarena.protocol.model.node import ImmutableObject, TupleLikeObject
+from turingarena.protocol.model.node import TupleLikeObject
 
 type_expression_classes = bidict()
 
@@ -23,6 +25,14 @@ class ValueType(TupleLikeObject):
     def compile(ast, *, scope):
         return type_expression_classes[ast.meta_type].compile(ast, scope)
 
+    @abstractmethod
+    def serialize(self, value, *, file):
+        pass
+
+    @abstractmethod
+    def deserialize(self, *, file):
+        pass
+
 
 @type_expression_class("scalar")
 class ScalarType(ValueType):
@@ -34,6 +44,17 @@ class ScalarType(ValueType):
             base_type={"int": int, "bool": bool, }[ast.base_type]
         )
 
+    def serialize(self, value, *, file):
+        assert isinstance(value, self.base_type)
+        formatters = {
+            int: lambda: value,
+            bool: lambda: int(value),
+        }
+        print(formatters[self.base_type](), file=file)
+
+    def deserialize(self, *, file):
+        return self.base_type(file.readline().strip())
+
 
 @type_expression_class("array")
 class ArrayType(ValueType):
@@ -44,3 +65,16 @@ class ArrayType(ValueType):
         return ArrayType(
             item_type=ValueType.compile(ast.item_type, scope=scope),
         )
+
+    def serialize(self, value, *, file):
+        value = list(value)
+        ScalarType(int).serialize(len(value), file=file)
+        for item in value:
+            self.item_type.deserialize(item, file=file)
+
+    def deserialize(self, *, file):
+        size = ScalarType(int).deserialize(file=file)
+        return [
+            self.item_type.deserialize(file=file)
+            for _ in range(size)
+        ]
