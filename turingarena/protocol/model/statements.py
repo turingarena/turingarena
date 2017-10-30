@@ -293,6 +293,9 @@ class CallStatement(ImperativeStatement):
             ),
         )
 
+    def run_porcelain(self, *, context, frame):
+        call = context.get_next_call()
+
 
 @statement_class("return")
 class ReturnStatement(ImperativeStatement):

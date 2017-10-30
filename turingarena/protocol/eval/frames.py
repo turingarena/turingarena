@@ -7,7 +7,25 @@ class Frame:
     def __init__(self, *, scope_variables, parent):
         self.scope_variables = scope_variables
         self.parent = parent
-        self.values = {}
+        self.values = {
+            l: None for l in self.scope_variables.locals().values()
+        }
+
+    def __getitem__(self, variable):
+        if variable in self.values:
+            return self.values[variable]
+        elif self.parent:
+            return self.parent[variable]
+        else:
+            raise KeyError
+
+    def __setitem__(self, variable, value):
+        if variable in self.values:
+            self.values[variable] = value
+        elif self.parent:
+            self.parent[variable] = value
+        else:
+            raise KeyError
 
 
 class RunContext:
