@@ -1,5 +1,8 @@
+from abc import abstractmethod
+
 from bidict import bidict
 
+from turingarena.protocol.eval.data import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.type_expressions import ScalarType
 
@@ -28,27 +31,41 @@ class Expression(AbstractSyntaxNode):
             raise ValueError("expected {}, got {}".format(expected_type, actual_type))
         return expression
 
+    @abstractmethod
+    def evaluate(self, *, frame):
+        pass
+
+
+class LiteralExpression(Expression):
+    __slots__ = ["value"]
+
+    def evaluate(self, *, frame):
+        return ConstantReference(
+            value_type=self.value_type,
+            value=self.value,
+        )
+
 
 @expression_class("int_literal")
-class IntLiteralExpression(Expression):
-    __slots__ = ["int_value"]
+class IntLiteralExpression(LiteralExpression):
+    __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
         return IntLiteralExpression(
-            int_value=int(ast.int_literal),
+            value=int(ast.int_literal),
             value_type=ScalarType(int),
         )
 
 
 @expression_class("bool_literal")
 class BoolLiteralExpression(Expression):
-    __slots__ = ["bool_value"]
+    __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
         return IntLiteralExpression(
-            bool_value=bool(int(ast.int_literal)),
+            value=bool(int(ast.int_literal)),
             value_type=ScalarType(bool),
         )
 
@@ -65,6 +82,12 @@ class ReferenceExpression(Expression):
             value_type=variable.type,
         )
 
+    def evaluate(self, *, frame):
+        return VariableReference(
+            frame=frame,
+            variable=self.variable,
+        )
+
 
 @expression_class("subscript")
 class SubscriptExpression(Expression):
@@ -78,4 +101,10 @@ class SubscriptExpression(Expression):
             array=array,
             index=index,
             value_type=array.value_type.item_type,
+        )
+
+    def evaluate(self, *, frame):
+        return ArrayItemReference(
+            array=self.array.evaluate(frame).get(),
+            index=self.index.evaluate(frame).get(),
         )

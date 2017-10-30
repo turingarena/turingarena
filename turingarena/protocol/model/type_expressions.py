@@ -25,8 +25,24 @@ class ValueType(TupleLikeObject):
     def compile(ast, *, scope):
         return type_expression_classes[ast.meta_type].compile(ast, scope)
 
+    def ensure(self, value):
+        value = self.intern(value)
+        assert self.check(value)
+        return value
+
     @abstractmethod
+    def intern(self, value):
+        pass
+
+    @abstractmethod
+    def check(self, value):
+        pass
+
     def serialize(self, value, *, file):
+        return self.on_serialize(self.ensure(value), file=file)
+
+    @abstractmethod
+    def on_serialize(self, value, *, file):
         pass
 
     @abstractmethod
@@ -37,7 +53,7 @@ class ValueType(TupleLikeObject):
 class PrimaryType(ValueType):
     __slots__ = []
 
-    def serialize(self, value, *, file):
+    def on_serialize(self, value, *, file):
         print(self.format(value), file=file)
 
     def deserialize(self, *, file):
@@ -67,8 +83,13 @@ class ScalarType(PrimaryType):
         }
         return ScalarType(bases[ast.base_type])
 
-    def format(self, value):
+    def intern(self, value):
+        return value
+
+    def check(self, value):
         assert isinstance(value, self.base_type)
+
+    def format(self, value):
         formatters = {
             int: lambda: value,
             bool: lambda: int(value),
@@ -89,9 +110,19 @@ class ArrayType(ValueType):
             item_type=ValueType.compile(ast.item_type, scope=scope),
         )
 
-    def serialize(self, value, *, file):
+    def intern(self, value):
+        return [
+            self.item_type.ensure(x)
+            for x in value
+        ]
+
+    def check(self, value):
+        assert type(value) == list
+        assert all(self.item_type.check(x) for x in value)
+
+    def on_serialize(self, value, *, file):
         value = list(value)
-        ScalarType(int).serialize(len(value), file=file)
+        ScalarType(int).on_serialize(len(value), file=file)
         for item in value:
             self.item_type.deserialize(item, file=file)
 

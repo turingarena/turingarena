@@ -6,7 +6,7 @@ from bidict import bidict
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
 from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.type_expressions import ValueType, ScalarType
+from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +212,11 @@ class ImperativeStatement(Statement):
     __slots__ = ["first_call"]
 
     @abstractmethod
-    def run(self, context):
+    def run_porcelain(self, *, context, frame):
+        pass
+
+    @abstractmethod
+    def run_plumbing(self, context):
         pass
 
 
@@ -222,13 +226,18 @@ class AllocStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
+        arguments = [Expression.compile(arg, scope=scope) for arg in ast.arguments]
+        assert all(isinstance(a.value_type, ArrayType) for a in arguments)
         return AllocStatement(
-            arguments=[
-                Expression.compile(arg, scope=scope)
-                for arg in ast.arguments
-            ],
-            size=Expression.compile(ast.size, scope=scope),
+            arguments=arguments,
+            size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
+
+    def run_porcelain(self, *, context, frame):
+        size = self.size.evaluate(frame=frame).get()
+        for a in self.arguments:
+            array_reference = a.evaluate(frame=frame)
+            array_reference.alloc(frame=frame, size=size)
 
 
 class InputOutputStatement(ImperativeStatement):
