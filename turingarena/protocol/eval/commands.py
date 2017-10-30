@@ -45,12 +45,7 @@ class FunctionCall(ProxyRequest):
 
 @request_type("callback_end")
 class CallbackEnd(ProxyRequest):
-    __slots__ = []
-
-
-@request_type("callback_return")
-class CallbackReturn(ProxyRequest):
-    __slots__ = ["value"]
+    __slots__ = ["return_value"]
 
 
 @request_type("main_end")
@@ -63,12 +58,8 @@ class ProxyResponse(ImmutableObject):
 
 
 class FunctionEnd(ProxyResponse):
-    __slots__ = []
-
-
-class FunctionReturn(ProxyResponse):
-    __slots__ = ["value"]
+    __slots__ = ["return_value"]
 
 
 class CallbackCall(ProxyResponse):
-    __slots__ = ["callback", "arguments"]
+    __slots__ = ["callback", "parameters"]
