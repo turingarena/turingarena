@@ -307,7 +307,7 @@ class ForStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         for_scope = Scope(scope)
-        index_var = Variable(type=ScalarType(base_type=int), name=ast.index.declarator.name)
+        index_var = Variable(type=ScalarType(int), name=ast.index.declarator.name)
         for_scope.variables[index_var.name] = index_var
         return ForStatement(
             index=ForIndex(

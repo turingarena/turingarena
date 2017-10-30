@@ -37,7 +37,10 @@ class ProxyEngine:
         print("  " * indent, value, sep="", file=self.connection.request_pipe)
 
     def receive(self):
-        line = self.connection.response_pipe.readline().strip()
+        line = self.connection.response_pipe.readline()
+        if not line:
+            raise ValueError()
+        line = line.strip()
         logging.debug("received '{}'".format(line))
         return line
 

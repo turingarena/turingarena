@@ -73,7 +73,7 @@ class SubscriptExpression(Expression):
     @staticmethod
     def compile(ast, scope):
         array = Expression.compile(ast.array, scope=scope)
-        index = Expression.compile(ast.index, scope=scope, expected_type=ScalarType(base_type=int))
+        index = Expression.compile(ast.index, scope=scope, expected_type=ScalarType(int))
         return SubscriptExpression(
             array=array,
             index=index,

@@ -79,11 +79,14 @@ class PlumberServer:
         assert command == "globals"
         for variable in self.interface.body.scope.variables.values():
             logger.debug("reading global variable {}".format(variable.name))
-            variable.type.deserialize(file=self.connection.request_pipe)
+            self.deserialize(variable.type)
 
         logger.debug("starting main procedure")
 
         self.run_body(self.main.body)
+
+    def deserialize(self, value_type):
+        value_type.deserialize(file=self.request_pipe)
 
     def run_body(self, body):
         for statement in body.statements:
@@ -101,7 +104,10 @@ class PlumberServer:
 
     def receive(self):
         logger.debug("receiving request")
-        line = self.request_pipe.readline().strip()
+        line = self.request_pipe.readline()
+        if not line:
+            raise ValueError()
+        line = line.strip()
         logger.debug("received request '{}'".format(line))
         return line
 
@@ -114,7 +120,7 @@ class PlumberServer:
         command = self.receive()
         assert command == "call"
         function_name = self.receive()
-        assert function_name == statement.function_name
+        assert function_name == statement.function.declarator.name
         has_callbacks = bool(self.receive())
 
         logger.debug("received call command (has_callbacks={has_callbacks})".format(

@@ -34,26 +34,49 @@ class ValueType(TupleLikeObject):
         pass
 
 
+class PrimaryType(ValueType):
+    __slots__ = []
+
+    def serialize(self, value, *, file):
+        print(self.format(value), file=file)
+
+    def deserialize(self, *, file):
+        return self.parse(file.readline().strip())
+
+    @abstractmethod
+    def format(self, value):
+        pass
+
+    @abstractmethod
+    def parse(self, string):
+        pass
+
+
 @type_expression_class("scalar")
-class ScalarType(ValueType):
+class ScalarType(PrimaryType):
     __slots__ = ["base_type"]
+
+    def __init__(self, base_type):
+        super().__init__(base_type=base_type)
 
     @staticmethod
     def compile(ast, scope):
-        return ScalarType(
-            base_type={"int": int, "bool": bool, }[ast.base_type]
-        )
+        bases = {
+            "int": int,
+            "bool": bool,
+        }
+        return ScalarType(bases[ast.base_type])
 
-    def serialize(self, value, *, file):
+    def format(self, value):
         assert isinstance(value, self.base_type)
         formatters = {
             int: lambda: value,
             bool: lambda: int(value),
         }
-        print(formatters[self.base_type](), file=file)
+        return formatters[self.base_type]()
 
-    def deserialize(self, *, file):
-        return self.base_type(file.readline().strip())
+    def parse(self, string):
+        return self.base_type(string)
 
 
 @type_expression_class("array")
