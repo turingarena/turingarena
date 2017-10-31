@@ -77,14 +77,14 @@ class MainBegin(ProxyRequest):
     def receive_arguments(*, interface_signature, file):
         return MainBegin(
             global_variables=[
-                (variable, variable.type.deserialize(file=file))
+                (variable, variable.value_type.deserialize(file=file))
                 for variable in interface_signature.variables
             ]
         )
 
     def send_arguments(self, *, file):
         for variable, value in self.global_variables:
-            variable.type.serialize(value, file=file)
+            variable.value_type.serialize(value, file=file)
 
 
 @request_type("function_call")
@@ -94,26 +94,51 @@ class FunctionCall(ProxyRequest):
     def send_arguments(self, *, file):
         print(self.function_name, file=file)
         for parameter, value in self.parameters:
-            parameter.type.serialize(value, file=file)
+            parameter.value_type.serialize(value, file=file)
         print(int(self.accept_callbacks), file=file)
 
     @staticmethod
     def receive_arguments(*, interface_signature, file):
         function_name = file.readline().strip()
         function_signature = interface_signature.functions[function_name]
+        parameters = [
+            (p, p.value_type.deserialize(file=file))
+            for p in function_signature.parameters
+        ]
+        accept_callbacks = bool(int(file.readline().strip()))
         return FunctionCall(
             function_name=function_name,
-            parameters=[
-                (p, p.type.deserialize(file=file))
-                for p in function_signature.parameters
-            ],
-            accept_callbacks=bool(int(file.readline().strip())),
+            parameters=parameters,
+            accept_callbacks=accept_callbacks,
         )
 
 
 @request_type("callback_return")
 class CallbackReturn(ProxyRequest):
-    __slots__ = ["return_value"]
+    __slots__ = ["callback_name", "return_value"]
+
+    @staticmethod
+    def receive_arguments(*, interface_signature, file):
+        callback_name = file.readline().strip()
+        callback_signature = interface_signature.callbacks[callback_name]
+        if callback_signature.return_type:
+            return_type_value = (
+                callback_signature.return_type,
+                callback_signature.return_type.deserialize(file=file),
+            )
+        else:
+            return_type_value = None
+        return CallbackReturn(
+            callback_name=callback_name,
+            return_value=return_type_value,
+        )
+
+    def send_arguments(self, *, file):
+        print(self.callback_name, file=file)
+        # FIXME: should type be deduced ?
+        if self.return_value:
+            return_type, return_value = self.return_value
+            return_type.serialize(return_value, file=file)
 
 
 @request_type("main_end")
@@ -126,11 +151,28 @@ class ProxyResponse(ProxyMessage):
     message_types = response_types
 
 
-@request_type("function_return")
+@response_type("function_return")
 class FunctionReturn(ProxyResponse):
     __slots__ = ["return_value"]
 
 
-@request_type("callback_call")
+@response_type("callback_call")
 class CallbackCall(ProxyResponse):
-    __slots__ = ["callback", "parameters"]
+    __slots__ = ["callback_name", "parameters"]
+
+    @staticmethod
+    def receive_arguments(*, interface_signature, file):
+        name = file.readline().strip()
+        signature = interface_signature.callbacks[name]
+        return CallbackCall(
+            callback_name=name,
+            parameters=[
+                (p, p.value_type.deserialize(file=file))
+                for p in signature.parameters
+            ],
+        )
+
+    def send_arguments(self, *, file):
+        print(self.callback_name, file=file)
+        for p, v in self.parameters:
+            p.value_type.serialize(v, file=file)

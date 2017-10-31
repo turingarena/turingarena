@@ -111,16 +111,16 @@ def generate_statement(statement, *, interface):
 
 def generate_declarators(declaration):
     for variable in declaration.variables:
-        yield build_declarator(declaration.type, variable.name)
+        yield build_declarator(declaration.value_type, variable.name)
 
 
 def build_declaration(statement):
-    type_specifier = build_type_specifier(statement.type)
+    type_specifier = build_type_specifier(statement.value_type)
     declarators = ', '.join(generate_declarators(statement))
     return f'{type_specifier} {declarators};'
 
 
 def build_parameter(parameter):
-    full_type = build_full_type(parameter.type)
-    declarator = build_declarator(parameter.type, parameter.name)
+    full_type = build_full_type(parameter.value_type)
+    declarator = build_declarator(parameter.value_type, parameter.name)
     return f'{full_type} {declarator}'

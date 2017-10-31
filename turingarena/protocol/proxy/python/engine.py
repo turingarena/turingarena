@@ -25,7 +25,7 @@ class ProxyEngine:
         request = FunctionCall(
             function_name=name,
             parameters=[
-                (p, p.type.ensure(a))
+                (p, p.value_type.ensure(a))
                 for p, a in zip(function_signature.parameters, args)
             ],
             accept_callbacks=bool(callbacks_impl),
@@ -33,14 +33,24 @@ class ProxyEngine:
         self.send(request)
 
         while True:
+            logger.debug("waiting for response...")
             response = ProxyResponse.accept(
                 interface_signature=self.interface_signature,
                 file=self.connection.response_pipe,
             )
             if response.message_type == "callback_call":
-                return_value = callbacks_impl[response.callback_name](response.parameters)
+                callback_name = response.callback_name
+                callback_signature = self.interface_signature.callbacks[callback_name]
+                return_value = callbacks_impl[callback_name](*[
+                    v for p, v in response.parameters
+                ])
+                if callback_signature.return_type:
+                    return_type_value = callback_signature.return_type, return_value
+                else:
+                    return_type_value = None
                 request = CallbackReturn(
-                    return_value=return_value,
+                    callback_name=callback_name,
+                    return_value=return_type_value,
                 )
                 self.send(request)
                 continue

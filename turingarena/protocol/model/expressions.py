@@ -85,13 +85,13 @@ class ReferenceExpression(Expression):
     def compile(ast, scope):
         variable = scope.variables[ast.variable_name]
         return ReferenceExpression(
-            value_type=variable.type,
+            value_type=variable.value_type,
             variable=variable,
         )
 
     def do_evaluate(self, *, frame):
         return VariableReference(
-            value_type=self.variable.type,
+            value_type=self.variable.value_type,
             frame=frame,
             variable=self.variable,
         )

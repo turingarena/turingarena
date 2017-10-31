@@ -34,32 +34,51 @@ class Frame:
             raise KeyError
 
 
-class PreflightContext:
+class InterfaceEnvironment:
     __slots__ = [
-        "proxy_connection",
         "interface",
-        "frame_cache",
-        "next_request",
-        "input_sent",
-        "on_advance",
         "root_frame",
+        "frame_cache",
         "callback_queue",
     ]
 
-    def __init__(self, *, proxy_connection, interface, on_advance):
-        self.proxy_connection = proxy_connection
+    def __init__(self, *, interface):
         self.interface = interface
         self.frame_cache = {}
+        self.callback_queue = deque()
+        self.root_frame = Frame(parent=None, scope_variables=interface.body.scope.variables)
+
+    @contextmanager
+    def new_frame(self, *, parent, scope):
+        if scope not in self.frame_cache:
+            logger.debug(f"creating new frame for scope {scope}")
+            self.frame_cache[scope] = Frame(parent=parent, scope_variables=scope.variables)
+        frame = self.frame_cache[scope]
+        logger.debug(f"entering frame {frame} for scope {scope}")
+        yield frame
+        logger.debug(f"exiting frame {frame} for scope {scope}")
+
+
+class PreflightContext:
+    __slots__ = [
+        "environment",
+        "proxy_connection",
+        "next_request",
+        "input_sent",
+        "on_advance",
+    ]
+
+    def __init__(self, *, environment, proxy_connection, on_advance):
+        self.environment = environment
+        self.proxy_connection = proxy_connection
         self.next_request = None
         self.input_sent = False
         self.on_advance = on_advance
-        self.callback_queue = deque()
-        self.root_frame = Frame(parent=None, scope_variables=interface.body.scope.variables)
 
     def peek_request(self):
         if self.next_request is None:
             self.next_request = ProxyRequest.accept(
-                interface_signature=self.interface.signature,
+                interface_signature=self.environment.interface.signature,
                 file=self.proxy_connection.request_pipe,
             )
         return self.next_request
@@ -68,14 +87,8 @@ class PreflightContext:
         assert self.next_request is not None
         self.next_request = None
 
-    @contextmanager
-    def new_frame(self, *, parent, scope):
-        logger.debug(f"entering preflight frame for scope {scope}")
-        assert scope not in self.frame_cache
-        frame = Frame(parent=parent, scope_variables=scope.variables)
-        self.frame_cache[scope] = frame
-        yield frame
-        logger.debug(f"exiting preflight frame {frame} for scope {scope} (frame cache: {self.frame_cache})")
+    def send_response(self, response):
+        response.send(file=self.proxy_connection.response_pipe)
 
     def advance(self):
         if not self.input_sent:
@@ -86,45 +99,25 @@ class PreflightContext:
         assert self.input_sent
         self.input_sent = False
 
+    def new_frame(self, *, parent, scope):
+        return self.environment.new_frame(parent=parent, scope=scope)
+
     def pop_callback(self):
-        return self.callback_queue.popleft()
+        return self.environment.callback_queue.popleft()
 
 
 class RunContext:
     __slots__ = [
         "process_connection",
-        "interface",
-        "frame_cache",
-        "active_frames",
-        "callback_queue",
-        "root_frame"
+        "environment",
     ]
 
-    def __init__(self, *, process_connection, interface, preflight_context, callback_queue, root_frame):
+    def __init__(self, *, environment, process_connection):
+        self.environment = environment
         self.process_connection = process_connection
-        self.interface = interface
-        self.frame_cache = preflight_context.frame_cache
-        self.active_frames = set()
-        self.callback_queue = callback_queue
-        self.root_frame = root_frame
 
-    @contextmanager
     def new_frame(self, *, parent, scope):
-        if parent:
-            assert scope not in self.active_frames
-            self.active_frames.add(scope)
-        if scope not in self.frame_cache:
-            self.frame_cache[scope] = Frame(
-                parent=parent,
-                scope_variables=scope.variables,
-            )
-        frame = self.frame_cache[scope]
-        logger.debug(f"entering run frame {frame} for scope {scope}")
-        yield frame
-        logger.debug(f"exiting run frame {frame} for scope {scope} (frame cache: {self.frame_cache})")
-        if parent:
-            self.active_frames.remove(scope)
-        del self.frame_cache[scope]
+        return self.environment.new_frame(parent=parent, scope=scope)
 
     def push_callback(self, callback):
-        self.callback_queue.append(callback)
+        self.environment.callback_queue.append(callback)
