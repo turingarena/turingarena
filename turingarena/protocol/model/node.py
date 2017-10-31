@@ -8,6 +8,10 @@ class ImmutableObject:
     def __setattr__(self, key, value):
         raise NotImplementedError
 
+    def __repr__(self):
+        args = ", ".join(f"{s}={repr(getattr(self, s))}" for s in self.__slots__)
+        return f"{self.__class__.__name__}({args})"
+
 
 class TupleLikeObject(ImmutableObject):
     __slots__ = []

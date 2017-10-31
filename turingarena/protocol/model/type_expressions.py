@@ -75,6 +75,9 @@ class ScalarType(PrimaryType):
     def __init__(self, base_type):
         super().__init__(base_type=base_type)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.base_type.__name__})"
+
     @staticmethod
     def compile(ast, scope):
         bases = {

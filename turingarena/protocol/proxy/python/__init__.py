@@ -1,58 +1,15 @@
 import os
 
-from turingarena.protocol.codegen.utils import write_to_file, indent_all
-from turingarena.protocol.visitor import accept_statement
-
-
-class ProxyInterfaceGenerator:
-    def __init__(self, interface):
-        self.interface = interface
-
-    def visit_var_statement(self, declaration):
-        yield "interface_var({type}, [{names}]),".format(
-            vars=", ".join(d.name for d in declaration.declarators),
-            type=build_type(declaration.type),
-            names=", ".join("'{}'".format(d.name) for d in declaration.declarators)
-        )
-
-    def visit_function_statement(self, statement):
-        yield "interface_function({}),".format(build_signature(statement.declarator))
-
-    def visit_callback_statement(self, statement):
-        yield "interface_callback({}),".format(build_signature(statement.declarator))
-
-    def visit_main_statement(self, statement):
-        yield from []
-
-
-def build_signature(signature):
-    return "signature({name}, [{parameters}], {return_type})".format(
-        fun=signature.name,
-        name="'{}'".format(signature.name),
-        parameters=", ".join(
-            "arg({type}, '{name}')".format(
-                type=build_type(p.type),
-                name=p.declarator.name,
-            )
-            for p in signature.parameters
-        ),
-        return_type=build_optional_type(signature.return_type),
-    )
+from turingarena.protocol.codegen.utils import write_to_file
 
 
 def do_generate_proxy(protocol):
-    yield "from __future__ import print_function"
-    yield "from turingarena.protocol.proxy.python.library import *"
+    yield "from collections import OrderedDict"
+    yield "from turingarena.protocol.model.statements import *"
+    yield "from turingarena.protocol.model.type_expressions import *"
     yield
-    for interface in protocol.interfaces:
-        yield "{} = ".format(interface.name) + "["
-        yield from indent_all(generate_interface_proxy(interface))
-        yield "]".format(interface.name)
-
-
-def generate_interface_proxy(interface):
-    for statement in interface.statements:
-        yield from accept_statement(statement, visitor=ProxyInterfaceGenerator(interface))
+    for interface in protocol.body.scope.interfaces.values():
+        yield f"{interface.name} = {repr(interface.signature)}"
 
 
 def generate_proxy(protocol, *, dest_dir):

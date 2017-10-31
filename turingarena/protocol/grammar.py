@@ -16,8 +16,8 @@ grammar_ebnf = r"""
     
     interface_statement =
         | var_statement
-        | statement_type:'function' ~ declarator:signature_declarator ';'
-        | statement_type:'callback' ~ declarator:signature_declarator body:block
+        | statement_type:'function' ~ signature:signature ';'
+        | statement_type:'callback' ~ signature:signature body:block
         | statement_type:'main' ~ body:block
     ;
 
@@ -25,7 +25,7 @@ grammar_ebnf = r"""
         '->' ~ @:type_expression
     ;
     
-    signature_declarator =
+    signature =
         name:identifier '('
             parameters:','.{ parameter_declaration }*
         ')'

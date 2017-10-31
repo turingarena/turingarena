@@ -1,10 +1,11 @@
 import logging
 from abc import abstractmethod
+from collections import OrderedDict
 
 from bidict import bidict
 
 from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
+from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject, TupleLikeObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
 
@@ -22,14 +23,15 @@ def statement_class(statement_type):
 
 
 class Protocol(AbstractSyntaxNode):
-    __slots__ = ["body"]
+    __slots__ = ["package_name", "file_name", "body"]
 
     @staticmethod
-    def compile(ast):
+    def compile(*, ast, **kwargs):
         logger.debug("compiling {}".format(ast))
         scope = Scope()
         return Protocol(
             body=Body.compile(ast.body, scope=scope),
+            **kwargs,
         )
 
 
@@ -93,16 +95,33 @@ class Body(AbstractSyntaxNode):
         )
 
 
+class InterfaceSignature(TupleLikeObject):
+    __slots__ = ["variables", "functions", "callbacks"]
+
+
 class Interface(ImmutableObject):
-    __slots__ = ["name", "body", "has_callbacks"]
+    __slots__ = ["name", "signature", "body"]
 
     @staticmethod
     def compile(ast, scope):
         body = Body.compile(ast.body, scope=scope)
+        signature = InterfaceSignature(
+            variables=OrderedDict(
+                body.scope.variables.items()
+            ),
+            functions=OrderedDict(
+                (c.signature.name, c.signature)
+                for c in body.scope.functions.values()
+            ),
+            callbacks=OrderedDict(
+                (c.signature.name, c.signature)
+                for c in body.scope.callbacks.values()
+            ),
+        )
         return Interface(
             name=ast.name,
+            signature=signature,
             body=body,
-            has_callbacks=any(True for _ in body.scope.callbacks),
         )
 
 
@@ -117,12 +136,11 @@ class InterfaceStatement(Statement):
         return InterfaceStatement(interface=interface)
 
 
-class CallableDeclarator(AbstractSyntaxNode):
-    __slots__ = ["name", "parameters", "return_type", "scope"]
+class CallableSignature(TupleLikeObject):
+    __slots__ = ["name", "parameters", "return_type"]
 
     @staticmethod
     def compile(ast, scope):
-        callable_scope = Scope(scope)
         parameters = [
             Variable(
                 type=ValueType.compile(p.type_expression, scope=scope),
@@ -130,19 +148,16 @@ class CallableDeclarator(AbstractSyntaxNode):
             )
             for p in ast.parameters
         ]
-        for p in parameters:
-            callable_scope.variables[p.name] = p
 
-        return CallableDeclarator(
+        return CallableSignature(
             name=ast.name,
             parameters=parameters,
             return_type=ValueType.compile(ast.return_type, scope=scope),
-            scope=callable_scope
         )
 
 
 class Callable(ImmutableObject):
-    __slots__ = ["declarator"]
+    __slots__ = ["signature"]
 
 
 class Function(Callable):
@@ -150,7 +165,7 @@ class Function(Callable):
 
     @staticmethod
     def compile(ast, scope):
-        return Function(declarator=CallableDeclarator.compile(ast.declarator, scope))
+        return Function(signature=CallableSignature.compile(ast.signature, scope))
 
 
 @statement_class("function")
@@ -160,7 +175,7 @@ class FunctionStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         fun = Function.compile(ast, scope)
-        scope.functions[fun.declarator.name] = fun
+        scope.functions[fun.signature.name] = fun
         return FunctionStatement(
             function=fun
         )
@@ -171,10 +186,13 @@ class Callback(Callable):
 
     @staticmethod
     def compile(ast, scope):
-        declarator = CallableDeclarator.compile(ast.declarator, scope)
+        signature = CallableSignature.compile(ast.signature, scope)
+        callback_scope = Scope(scope)
+        for p in signature.parameters:
+            callback_scope.variables[p.name] = p
         return Callback(
-            declarator=declarator,
-            body=Body.compile(ast.body, scope=declarator.scope)
+            signature=signature,
+            body=Body.compile(ast.body, scope=callback_scope)
         )
 
 
@@ -185,7 +203,7 @@ class CallbackStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         callback = Callback.compile(ast, scope=scope)
-        scope.callbacks[callback.declarator.name] = callback
+        scope.callbacks[callback.signature.name] = callback
         return CallbackStatement(callback=callback)
 
 
@@ -279,23 +297,22 @@ class CallStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         fun = scope.functions[ast.function_name]
-        assert len(ast.parameters) == len(fun.declarator.parameters)
+        assert len(ast.parameters) == len(fun.signature.parameters)
         return CallStatement(
             function=fun,
             parameters=[
                 Expression.compile(arg, scope=scope, expected_type=decl_arg.type)
-                for decl_arg, arg in zip(fun.declarator.parameters, ast.parameters)
+                for decl_arg, arg in zip(fun.signature.parameters, ast.parameters)
             ],
             return_value=Expression.compile(
                 ast.return_value,
                 scope=scope,
-                expected_type=fun.declarator.return_type,
+                expected_type=fun.signature.return_type,
             ),
         )
 
     def run_porcelain(self, *, context, frame):
         call = context.get_next_call()
-
 
 
 @statement_class("return")

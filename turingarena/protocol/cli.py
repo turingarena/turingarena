@@ -31,11 +31,11 @@ def protocol_cli(argv):
     package_name = args["--package"]
     protocol_file_name = pkg_resources.resource_filename(package_name, args["--file"])
 
-    protocol = parse_protocol(protocol_file_name)
-    protocol.package_name = package_name
-    protocol.file_name = protocol_file_name
-
-    protocol = Protocol.compile(protocol)
+    protocol = Protocol.compile(
+        ast=parse_protocol(protocol_file_name),
+        package_name=package_name,
+        file_name=protocol_file_name,
+    )
 
     argv2 = args["<args>"]
     if args["skeleton"]: return protocol_skeleton_cli(protocol=protocol, argv=argv2)
