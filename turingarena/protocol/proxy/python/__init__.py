@@ -28,12 +28,7 @@ def generate_proxy(protocol, *, dest_dir):
 
     os.makedirs(package_dir, exist_ok=True)
 
-    module_path = os.path.join(
-        package_dir,
-        "__init__.py",
-    )
-
-    with open(module_path, "w") as module_file:
+    with open(os.path.join(package_dir, "__init__.py"), "w") as module_file:
         write_to_file(do_generate_proxy(protocol), module_file)
 
     setup_py_path = os.path.join(
@@ -44,11 +39,10 @@ def generate_proxy(protocol, *, dest_dir):
     def generate_setup_py():
         yield "from setuptools import setup"
         yield
-        yield "setup("
-        yield "    name='{}',".format(qual_package_name)
-        yield "    namespace_packages=['turingarena_protocols'],"
-        yield "    packages=['turingarena_protocols', '{}'],".format(qual_package_name)
-        yield ")"
+        yield f"setup("
+        yield f"    name='{qual_package_name}',"
+        yield f"    packages=['turingarena_protocols', '{qual_package_name}'],"
+        yield f")"
 
     with open(setup_py_path, "w") as setup_py_file:
         write_to_file(generate_setup_py(), setup_py_file)
