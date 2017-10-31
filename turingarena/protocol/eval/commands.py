@@ -3,17 +3,30 @@ from bidict import bidict
 from turingarena.protocol.model.node import ImmutableObject
 
 request_types = bidict()
+response_types = bidict()
 
 
-def request_type(statement_type):
+def request_type(name):
     def decorator(cls):
-        request_types[statement_type] = cls
+        request_types[name] = cls
         return cls
 
     return decorator
 
 
-class ProxyRequest(ImmutableObject):
+def response_type(name):
+    def decorator(cls):
+        response_types[name] = cls
+        return cls
+
+    return decorator
+
+
+class ProxyMessage(ImmutableObject):
+    __slots__ = []
+
+
+class ProxyRequest(ProxyMessage):
     __slots__ = []
 
     @staticmethod
@@ -33,18 +46,18 @@ class ProxyRequest(ImmutableObject):
         return request
 
 
-@request_type("global_data_init")
-class GlobalDataInit(ProxyRequest):
+@request_type("main_begin")
+class MainBegin(ProxyRequest):
     __slots__ = ["values"]
 
 
 @request_type("function_call")
 class FunctionCall(ProxyRequest):
-    __slots__ = ["function", "parameters", "has_callbacks"]
+    __slots__ = ["function_signature", "parameters", "accept_callbacks"]
 
 
-@request_type("callback_end")
-class CallbackEnd(ProxyRequest):
+@request_type("callback_return")
+class CallbackReturn(ProxyRequest):
     __slots__ = ["return_value"]
 
 
@@ -53,13 +66,15 @@ class MainEnd(ProxyRequest):
     __slots__ = []
 
 
-class ProxyResponse(ImmutableObject):
+class ProxyResponse(ProxyMessage):
     __slots__ = []
 
 
-class FunctionEnd(ProxyResponse):
+@request_type("function_return")
+class FunctionReturn(ProxyResponse):
     __slots__ = ["return_value"]
 
 
+@request_type("callback_call")
 class CallbackCall(ProxyResponse):
     __slots__ = ["callback", "parameters"]
