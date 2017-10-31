@@ -31,11 +31,10 @@ def compile(source_filename, language=None, interface=None, algorithm_name=None)
 
     algorithm_dir = "algorithms/{}/".format(algorithm_name)
 
-    logger.info("Compiling algorithm '{algo}' with language {lang} and source file '{source}'".format(
-        algo=algorithm_name,
-        lang=language,
-        source=source_filename,
-    ))
+    logger.info(
+        f"Compiling algorithm '{algorithm_name}'"
+        f"with language {language} and source file '{source_filename}'"
+    )
 
     logger.debug("Creating empty algorithm directory '{}'".format(algorithm_dir))
     # cleanup

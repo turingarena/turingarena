@@ -49,3 +49,11 @@ class Scope:
         for ns in Scope.__slots__:
             ns_parent = getattr(parent, ns) if parent else None
             setattr(self, ns, ScopeNamespace(ns_parent))
+
+    def __repr__(self):
+        names = ", ".join(
+            k
+            for ns in self.__slots__
+            for k in getattr(self, ns).locals()
+        )
+        return f"Scope({names})"

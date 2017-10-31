@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 def compile_cpp(algorithm_dir, source_file, interface):
-    interface_file_name = "generated/skeleton/{}/cpp/main.cpp".format(interface)
+    interface_file_name = "generated_skeletons/skeleton/{}/cpp/main.cpp".format(interface)
 
     with open(algorithm_dir + "/compilation_output.txt", "w") as compilation_output:
         cli = "g++ -x c++ -o algorithm -"

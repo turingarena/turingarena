@@ -59,8 +59,12 @@ class PrimaryType(ValueType):
     def deserialize(self, *, file):
         return self.parse(file.readline().strip())
 
-    @abstractmethod
     def format(self, value):
+        self.check(value)
+        return self.do_format(value)
+
+    @abstractmethod
+    def do_format(self, value):
         pass
 
     @abstractmethod
@@ -92,7 +96,7 @@ class ScalarType(PrimaryType):
     def check(self, value):
         assert isinstance(value, self.base_type)
 
-    def format(self, value):
+    def do_format(self, value):
         formatters = {
             int: lambda: value,
             bool: lambda: int(value),

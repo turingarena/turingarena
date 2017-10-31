@@ -6,6 +6,7 @@ from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject, TupleLikeObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
+from turingarena.protocol.server.commands import FunctionReturn
 
 logger = logging.getLogger(__name__)
 
@@ -137,8 +138,7 @@ class Interface(ImmutableObject):
 
     def run(self, context):
         main = self.body.scope.main["main"]
-        with context.new_frame(parent=None, scope=self.body.scope) as frame:
-            yield from run_body(main.body, context=context, frame=frame)
+        yield from run_body(main.body, context=context, frame=context.root_frame)
         yield
 
 
@@ -216,6 +216,15 @@ class Callback(Callable):
             scope=callback_scope,
             body=Body.compile(ast.body, scope=callback_scope)
         )
+
+    def preflight(self, *, context):
+        with context.new_frame(scope=self.scope, parent=context.root_frame) as new_frame:
+            preflight_body(self.body, context=context, frame=new_frame)
+
+    def run(self, *, context):
+        logger.debug(f"running callback {self}")
+        with context.new_frame(scope=self.scope, parent=context.root_frame) as new_frame:
+            yield from run_body(self.body, context=context, frame=new_frame)
 
 
 @statement_class("callback")
@@ -301,10 +310,12 @@ class InputStatement(InputOutputStatement):
 
     def run(self, *, context, frame):
         raw_values = [
-            a.value_type.format(a.evaluate(frame=frame))
+            a.value_type.format(a.evaluate(frame=frame).get())
             for a in self.arguments
         ]
-        print(*raw_values, file=context.process_connection.downward_pipe)
+        logger.debug(f"printing {raw_values} to downward_pipe")
+        # FIXME: should flush only once per communication block
+        print(*raw_values, file=context.process_connection.downward_pipe, flush=True)
         yield from []
 
 
@@ -313,8 +324,10 @@ class OutputStatement(InputOutputStatement):
     __slots__ = []
 
     def run(self, *, context, frame):
+        logger.debug(f"reading from upward_pipe...")
         line = context.process_connection.upward_pipe.readline()
         raw_values = line.strip().split()
+        logger.debug(f"read {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
             a.evaluate(frame=frame).resolve(value)
@@ -362,6 +375,36 @@ class CallStatement(ImperativeStatement):
         if request.accept_callbacks or request.function_signature.return_type:
             context.advance()
         context.complete_request()
+        if context.interface.signature.callbacks:
+            while True:
+                callback = context.pop_callback()
+                if callback is None:
+                    break
+                logger.debug(f"preflight callback {callback}")
+                callback.preflight(context=context)
+
+        if self.function.signature.return_type:
+            return_value = self.return_value.evaluate(frame=frame).get()
+        else:
+            return_value = None
+        context.send_response(FunctionReturn(
+            return_value=return_value
+        ))
+
+    def run(self, *, context, frame):
+        if context.interface.signature.callbacks:
+            while True:
+                logger.debug("accepting callbacks...")
+                callback_name = context.process_connection.upward_pipe.readline().strip()
+                logger.debug(f"received line {callback_name}")
+                if callback_name == "return":
+                    context.push_callback(None)
+                    break
+                else:
+                    callback = context.interface.body.scope.callbacks[callback_name]
+                    context.push_callback(callback)
+                    yield from callback.run(context=context)
+        yield from []
 
 
 @statement_class("return")
@@ -396,6 +439,13 @@ class ForStatement(ImperativeStatement):
             body=Body.compile(ast.body, scope=for_scope),
             scope=for_scope,
         )
+
+    def run(self, *, context, frame):
+        size = self.index.range.evaluate(frame=frame).get()
+        for i in range(size):
+            with context.new_frame(scope=self.scope, parent=frame) as for_frame:
+                for_frame[self.index.variable] = i
+                yield from run_body(self.body, context=context, frame=for_frame)
 
 
 def preflight_body(body, *, context, frame):

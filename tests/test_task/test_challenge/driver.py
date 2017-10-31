@@ -28,4 +28,6 @@ with solution.run() as connection:
     )
     S = proxy.call("solve", [3], {"test": lambda a, b: a + b})
 
+    proxy.end_main()
+
 print("Answer:", S, file=sys.stderr)

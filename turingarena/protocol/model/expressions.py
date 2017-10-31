@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod
 
 from bidict import bidict
@@ -7,6 +8,8 @@ from turingarena.protocol.model.type_expressions import ScalarType
 from turingarena.protocol.server.data import ConstantReference, VariableReference, ArrayItemReference
 
 expression_classes = bidict()
+
+logger = logging.getLogger(__name__)
 
 
 def expression_class(meta_type):
@@ -31,15 +34,19 @@ class Expression(AbstractSyntaxNode):
             raise ValueError("expected {}, got {}".format(expected_type, actual_type))
         return expression
 
-    @abstractmethod
     def evaluate(self, *, frame):
+        logger.debug(f"evaluating expression {self} in {frame}")
+        return self.do_evaluate(frame=frame)
+
+    @abstractmethod
+    def do_evaluate(self, *, frame):
         pass
 
 
 class LiteralExpression(Expression):
     __slots__ = ["value"]
 
-    def evaluate(self, *, frame):
+    def do_evaluate(self, *, frame):
         return ConstantReference(
             value_type=self.value_type,
             value=self.value,
@@ -82,7 +89,7 @@ class ReferenceExpression(Expression):
             variable=variable,
         )
 
-    def evaluate(self, *, frame):
+    def do_evaluate(self, *, frame):
         return VariableReference(
             value_type=self.variable.type,
             frame=frame,
@@ -104,9 +111,9 @@ class SubscriptExpression(Expression):
             value_type=array.value_type.item_type,
         )
 
-    def evaluate(self, *, frame):
+    def do_evaluate(self, *, frame):
         return ArrayItemReference(
             value_type=self.array.value_type.item_type,
-            array=self.array.evaluate(frame).get(),
-            index=self.index.evaluate(frame).get(),
+            array=self.array.evaluate(frame=frame).get(),
+            index=self.index.evaluate(frame=frame).get(),
         )

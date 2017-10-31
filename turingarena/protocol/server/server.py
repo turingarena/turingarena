@@ -49,12 +49,15 @@ class PlumberServer:
 
             self.preflight_context = PreflightContext(
                 proxy_connection=self.proxy_connection,
-                interface_signature=self.interface.signature,
+                interface=self.interface,
                 on_advance=lambda: next(self.runner),
             )
             self.run_context = RunContext(
                 process_connection=self.process_connection,
+                interface=self.interface,
                 preflight_context=self.preflight_context,
+                callback_queue=self.preflight_context.callback_queue,
+                root_frame=self.preflight_context.root_frame,
             )
 
             self.runner = self.interface.run(context=self.run_context)
