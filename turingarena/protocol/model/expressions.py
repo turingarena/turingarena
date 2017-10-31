@@ -2,9 +2,9 @@ from abc import abstractmethod
 
 from bidict import bidict
 
-from turingarena.protocol.eval.data import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.type_expressions import ScalarType
+from turingarena.protocol.server.data import ConstantReference, VariableReference, ArrayItemReference
 
 expression_classes = bidict()
 
@@ -53,8 +53,8 @@ class IntLiteralExpression(LiteralExpression):
     @staticmethod
     def compile(ast, scope):
         return IntLiteralExpression(
-            value=int(ast.int_literal),
             value_type=ScalarType(int),
+            value=int(ast.int_literal),
         )
 
 
@@ -78,12 +78,13 @@ class ReferenceExpression(Expression):
     def compile(ast, scope):
         variable = scope.variables[ast.variable_name]
         return ReferenceExpression(
-            variable=variable,
             value_type=variable.type,
+            variable=variable,
         )
 
     def evaluate(self, *, frame):
         return VariableReference(
+            value_type=self.variable.type,
             frame=frame,
             variable=self.variable,
         )
@@ -105,6 +106,7 @@ class SubscriptExpression(Expression):
 
     def evaluate(self, *, frame):
         return ArrayItemReference(
+            value_type=self.array.value_type.item_type,
             array=self.array.evaluate(frame).get(),
             index=self.index.evaluate(frame).get(),
         )

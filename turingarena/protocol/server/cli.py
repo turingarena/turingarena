@@ -10,12 +10,12 @@ Options:
 
 import docopt
 
-from turingarena.protocol.plumber import run_plumber
+from turingarena.protocol.server import run_server
 
 
-def protocol_plumber_cli(*, argv, protocol):
+def protocol_server_cli(*, argv, protocol):
     args = docopt.docopt(__doc__, argv=argv)
-    run_plumber(
+    run_server(
         protocol=protocol,
         interface_name=args["<interface>"],
         sandbox_dir=args["<sandbox-dir>"],

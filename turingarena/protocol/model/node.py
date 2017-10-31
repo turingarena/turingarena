@@ -1,15 +1,25 @@
-class ImmutableObject:
+from abc import ABCMeta
+
+
+class ImmutableObject(metaclass=ABCMeta):
     __slots__ = []
 
     def __init__(self, **kwargs):
+        assert len(kwargs) == len(list(self.all_slots()))
         for k, v in kwargs.items():
             object.__setattr__(self, k, v)
+
+    @classmethod
+    def all_slots(cls):
+        for base in cls.mro():
+            if base == object: continue
+            yield from base.__slots__
 
     def __setattr__(self, key, value):
         raise NotImplementedError
 
     def __repr__(self):
-        args = ", ".join(f"{s}={repr(getattr(self, s))}" for s in self.__slots__)
+        args = ", ".join(f"{s}={repr(getattr(self, s, 'MISSING'))}" for s in self.all_slots())
         return f"{self.__class__.__name__}({args})"
 
 

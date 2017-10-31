@@ -1,6 +1,4 @@
 import logging
-from abc import abstractmethod
-from collections import OrderedDict
 
 from bidict import bidict
 
@@ -106,23 +104,42 @@ class Interface(ImmutableObject):
     def compile(ast, scope):
         body = Body.compile(ast.body, scope=scope)
         signature = InterfaceSignature(
-            variables=OrderedDict(
-                body.scope.variables.items()
-            ),
-            functions=OrderedDict(
-                (c.signature.name, c.signature)
+            variables=list(body.scope.variables.values()),
+            functions={
+                c.name: c.signature
                 for c in body.scope.functions.values()
-            ),
-            callbacks=OrderedDict(
-                (c.signature.name, c.signature)
+            },
+            callbacks={
+                c.name: c.signature
                 for c in body.scope.callbacks.values()
-            ),
+            },
         )
         return Interface(
             name=ast.name,
             signature=signature,
             body=body,
         )
+
+    def preflight(self, context):
+        with context.new_frame(parent=None, scope=self.body.scope) as frame:
+            request = context.peek_request()
+            assert request.message_type == "main_begin"
+            for variable, value in request.global_variables:
+                frame[variable] = value
+            context.complete_request()
+
+            main = self.body.scope.main["main"]
+            main.preflight(context=context, frame=frame)
+
+            request = context.peek_request()
+            assert request.message_type == "main_end"
+            context.complete_request()
+
+    def run(self, context):
+        main = self.body.scope.main["main"]
+        with context.new_frame(parent=None, scope=self.body.scope) as frame:
+            yield from run_body(main.body, context=context, frame=frame)
+        yield
 
 
 @statement_class("interface")
@@ -185,7 +202,7 @@ class FunctionStatement(Statement):
 
 
 class Callback(Callable):
-    __slots__ = ["body"]
+    __slots__ = ["scope", "body"]
 
     @staticmethod
     def compile(ast, scope):
@@ -196,6 +213,7 @@ class Callback(Callable):
         return Callback(
             name=ast.declarator.name,
             signature=signature,
+            scope=callback_scope,
             body=Body.compile(ast.body, scope=callback_scope)
         )
 
@@ -214,9 +232,11 @@ class CallbackStatement(Statement):
 class Main(ImmutableObject):
     __slots__ = ["body"]
 
-    def run(self, context):
-        yield from run_body(self.body, context)
-        yield
+    def preflight(self, *, context, frame):
+        preflight_body(self.body, context=context, frame=frame)
+
+    def run(self, *, context, frame):
+        yield from run_body(self.body, context=context, frame=frame)
 
 
 @statement_class("main")
@@ -231,15 +251,14 @@ class MainStatement(Statement):
 
 
 class ImperativeStatement(Statement):
-    __slots__ = ["first_call"]
+    # TODO: first_call
+    __slots__ = []
 
-    @abstractmethod
-    def run_porcelain(self, *, context, frame):
+    def preflight(self, *, context, frame):
         pass
 
-    @abstractmethod
-    def run_plumbing(self, context):
-        pass
+    def run(self, *, context, frame):
+        yield from []
 
 
 @statement_class("alloc")
@@ -255,11 +274,12 @@ class AllocStatement(ImperativeStatement):
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
 
-    def run_porcelain(self, *, context, frame):
+    def run(self, *, context, frame):
         size = self.size.evaluate(frame=frame).get()
         for a in self.arguments:
             array_reference = a.evaluate(frame=frame)
-            array_reference.alloc(frame=frame, size=size)
+            array_reference.alloc(size=size)
+        yield from []
 
 
 class InputOutputStatement(ImperativeStatement):
@@ -279,10 +299,26 @@ class InputOutputStatement(ImperativeStatement):
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
+    def run(self, *, context, frame):
+        raw_values = [
+            a.value_type.format(a.evaluate(frame=frame))
+            for a in self.arguments
+        ]
+        print(*raw_values, file=context.process_connection.downward_pipe)
+        yield from []
+
 
 @statement_class("output")
 class OutputStatement(InputOutputStatement):
     __slots__ = []
+
+    def run(self, *, context, frame):
+        line = context.process_connection.upward_pipe.readline()
+        raw_values = line.strip().split()
+        for a, v in zip(self.arguments, raw_values):
+            value = a.value_type.parse(v)
+            a.evaluate(frame=frame).resolve(value)
+        yield from []
 
 
 @statement_class("flush")
@@ -292,6 +328,9 @@ class FlushStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         return FlushStatement()
+
+    def run(self, *, context, frame):
+        yield
 
 
 @statement_class("call")
@@ -315,8 +354,14 @@ class CallStatement(ImperativeStatement):
             ),
         )
 
-    def run_porcelain(self, *, context, frame):
-        call = context.get_next_call()
+    def preflight(self, *, context, frame):
+        request = context.peek_request()
+        assert request.message_type == "function_call"
+        for value_expr, (parameter, value) in zip(self.parameters, request.parameters):
+            value_expr.evaluate(frame=frame).resolve(value)
+        if request.accept_callbacks or request.function_signature.return_type:
+            context.advance()
+        context.complete_request()
 
 
 @statement_class("return")
@@ -353,7 +398,17 @@ class ForStatement(ImperativeStatement):
         )
 
 
-def run_body(body, context):
-    for statement in body.statements:
-        if isinstance(statement, ImperativeStatement):
-            yield from statement.run(context)
+def preflight_body(body, *, context, frame):
+    with context.new_frame(parent=frame, scope=body.scope) as inner_frame:
+        for statement in body.statements:
+            if isinstance(statement, ImperativeStatement):
+                logger.debug(f"preflight {statement}")
+                statement.preflight(context=context, frame=inner_frame)
+
+
+def run_body(body, *, context, frame):
+    with context.new_frame(parent=frame, scope=body.scope) as inner_frame:
+        for statement in body.statements:
+            if isinstance(statement, ImperativeStatement):
+                logger.debug(f"run {statement}")
+                yield from statement.run(context=context, frame=inner_frame)

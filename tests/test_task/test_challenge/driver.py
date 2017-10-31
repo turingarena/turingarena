@@ -2,8 +2,8 @@ import sys
 
 from turingarena_protocols.test_challenge import exampleinterface
 
-from turingarena.protocol.plumber.client import Implementation, Interface
-from turingarena.protocol.proxy.python.library import ProxyEngine
+from turingarena.protocol.proxy.python.client import Implementation, Interface
+from turingarena.protocol.proxy.python.engine import ProxyEngine
 from turingarena.sandbox.client import Algorithm
 
 solution = Implementation(
@@ -21,7 +21,11 @@ with solution.run() as connection:
     data.M = 100
     data.A = [i * i for i in range(data.N)]
 
-    proxy = ProxyEngine(interface=exampleinterface, instance=data, connection=connection)
+    proxy = ProxyEngine(
+        interface_signature=exampleinterface,
+        instance=data,
+        connection=connection,
+    )
     S = proxy.call("solve", [3], {"test": lambda a, b: a + b})
 
 print("Answer:", S, file=sys.stderr)

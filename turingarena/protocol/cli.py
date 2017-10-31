@@ -4,7 +4,7 @@ Parse and compiles an interface definition file,
 and generates interface code for the supported languages.
 
 Usage:
-  protocol [options] -p <package> [-f <file>] (skeleton|proxy|plumber) [<args>...]
+  protocol [options] -p <package> [-f <file>] (skeleton|proxy|server) [<args>...]
 
 Options:
 
@@ -17,11 +17,9 @@ import docopt
 import pkg_resources
 
 from turingarena.protocol.model.statements import Protocol
-from turingarena.protocol.plumber.cli import protocol_plumber_cli
-
-from turingarena.protocol.proxy.cli import protocol_proxy_cli
-
 from turingarena.protocol.parser import parse_protocol
+from turingarena.protocol.proxy.cli import protocol_proxy_cli
+from turingarena.protocol.server.cli import protocol_server_cli
 from turingarena.protocol.skeleton.cli import protocol_skeleton_cli
 
 
@@ -40,4 +38,4 @@ def protocol_cli(argv):
     argv2 = args["<args>"]
     if args["skeleton"]: return protocol_skeleton_cli(protocol=protocol, argv=argv2)
     if args["proxy"]: return protocol_proxy_cli(protocol=protocol, argv=argv2)
-    if args["plumber"]: return protocol_plumber_cli(protocol=protocol, argv=argv2)
+    if args["server"]: return protocol_server_cli(protocol=protocol, argv=argv2)

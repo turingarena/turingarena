@@ -22,16 +22,12 @@ class Implementation:
     def run(self):
         sandbox = self.algorithm.sandbox()
         with sandbox.run() as process:
-            plumber = PlumberClient(interface=self.interface, process=process)
+            plumber = ProxyClient(interface=self.interface, process=process)
             with plumber.connect() as connection:
                 yield connection
 
 
-class PlumberException(Exception):
-    pass
-
-
-class PlumberClient:
+class ProxyClient:
     def __init__(self, *, interface, process):
         self.interface = interface
         self.process = process
@@ -44,7 +40,7 @@ class PlumberClient:
                     "turingarena",
                     "protocol",
                     "-p", self.interface.package_name,
-                    "plumber",
+                    "server",
                     self.interface.name,
                     self.process.sandbox_dir,
                 ],
@@ -56,10 +52,16 @@ class PlumberClient:
 
             assert os.path.isdir(plumber_dir)
 
+            logger.debug("opening request pipe...")
+            request_pipe = stack.enter_context(open(plumber_dir + "/plumbing_request.pipe", "w"))
+            logger.debug("opening response pipe...")
+            response_pipe = stack.enter_context(open(plumber_dir + "/plumbing_response.pipe"))
+            logger.debug("connected")
+
             try:
-                yield PlumberConnection(
-                    request_pipe=stack.enter_context(open(plumber_dir + "/plumbing_request.pipe", "w")),
-                    response_pipe=stack.enter_context(open(plumber_dir + "/plumbing_response.pipe")),
+                yield ProxyConnection(
+                    request_pipe=request_pipe,
+                    response_pipe=response_pipe,
                 )
             except Exception as e:
                 logger.exception(e)
@@ -68,7 +70,7 @@ class PlumberClient:
             logger.debug("waiting for plumber process")
 
 
-class PlumberConnection:
+class ProxyConnection:
     def __init__(self, *, request_pipe, response_pipe):
         self.request_pipe = request_pipe
         self.response_pipe = response_pipe

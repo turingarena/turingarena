@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from io import StringIO
 from unittest.case import TestCase
 
-from turingarena.protocol.proxy.python.library import *
+from turingarena.protocol.proxy.python.engine import *
 from turingarena.protocol.types import scalar, array
 
 
@@ -36,7 +36,7 @@ class TestProxyEngine(TestCase):
         self.data.N = 10
         self.data.A = []
         self.engine = ProxyEngine(
-            interface=[
+            interface_signature=[
                 interface_var(scalar(int), ["N"]),
                 interface_var(array(scalar(int)), ["A"]),
                 interface_function(signature("solve", [arg(scalar(int), "x")], None)),

@@ -27,7 +27,7 @@ class ValueType(TupleLikeObject):
 
     def ensure(self, value):
         value = self.intern(value)
-        assert self.check(value)
+        self.check(value)
         return value
 
     @abstractmethod
@@ -121,13 +121,14 @@ class ArrayType(ValueType):
 
     def check(self, value):
         assert type(value) == list
-        assert all(self.item_type.check(x) for x in value)
+        for x in value:
+            self.item_type.check(x)
 
     def on_serialize(self, value, *, file):
         value = list(value)
         ScalarType(int).on_serialize(len(value), file=file)
         for item in value:
-            self.item_type.deserialize(item, file=file)
+            self.item_type.serialize(item, file=file)
 
     def deserialize(self, *, file):
         size = ScalarType(int).deserialize(file=file)
