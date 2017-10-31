@@ -157,7 +157,7 @@ class CallableSignature(TupleLikeObject):
 
 
 class Callable(ImmutableObject):
-    __slots__ = ["signature"]
+    __slots__ = ["name", "signature"]
 
 
 class Function(Callable):
@@ -165,7 +165,10 @@ class Function(Callable):
 
     @staticmethod
     def compile(ast, scope):
-        return Function(signature=CallableSignature.compile(ast.signature, scope))
+        return Function(
+            name=ast.declarator.name,
+            signature=CallableSignature.compile(ast.declarator, scope),
+        )
 
 
 @statement_class("function")
@@ -175,7 +178,7 @@ class FunctionStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         fun = Function.compile(ast, scope)
-        scope.functions[fun.signature.name] = fun
+        scope.functions[fun.name] = fun
         return FunctionStatement(
             function=fun
         )
@@ -186,11 +189,12 @@ class Callback(Callable):
 
     @staticmethod
     def compile(ast, scope):
-        signature = CallableSignature.compile(ast.signature, scope)
+        signature = CallableSignature.compile(ast.declarator, scope)
         callback_scope = Scope(scope)
         for p in signature.parameters:
             callback_scope.variables[p.name] = p
         return Callback(
+            name=ast.declarator.name,
             signature=signature,
             body=Body.compile(ast.body, scope=callback_scope)
         )
@@ -203,7 +207,7 @@ class CallbackStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         callback = Callback.compile(ast, scope=scope)
-        scope.callbacks[callback.signature.name] = callback
+        scope.callbacks[callback.name] = callback
         return CallbackStatement(callback=callback)
 
 

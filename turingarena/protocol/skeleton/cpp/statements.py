@@ -19,14 +19,14 @@ def generate_alloc(statement):
 
 
 def generate_call(statement, *, interface):
-    function_name = statement.function.declarator.name
+    function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if interface.has_callbacks:
+    if interface.signature.callbacks:
         yield r"""printf("return\n");"""
 
 
@@ -68,23 +68,22 @@ def generate_main(statement, *, interface):
 
 
 def generate_callback(statement, *, interface):
-    declarator = statement.callback.declarator
-    yield f"{build_signature(declarator)}" " {"
-    if interface.has_callbacks:
-        yield indent(rf"""printf("%s\n", "{declarator.name}");""")
-    yield from indent_all(generate_block(statement.callback.body, interface=interface))
+    callback = statement.callback
+    yield f"{build_callable_declarator(callback)}" " {"
+    yield indent(rf"""printf("%s\n", "{callback.name}");""")
+    yield from indent_all(generate_block(callback.body, interface=interface))
     yield "}"
 
 
-def build_signature(declarator):
-    return_type = build_full_type(declarator.return_type)
-    arguments = ', '.join(build_parameter(p) for p in declarator.parameters)
-    return f"{return_type} {declarator.name}({arguments})"
+def build_callable_declarator(callable):
+    signature = callable.signature
+    return_type = build_full_type(signature.return_type)
+    arguments = ', '.join(build_parameter(p) for p in signature.parameters)
+    return f"{return_type} {callable.name}({arguments})"
 
 
 def generate_function(statement):
-    declarator = statement.function.declarator
-    yield f"{build_signature(declarator)};"
+    yield f"{build_callable_declarator(statement.function)};"
 
 
 def generate_block(block, *, interface):
