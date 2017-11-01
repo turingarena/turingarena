@@ -137,7 +137,6 @@ class CallbackReturn(ProxyRequest):
 
     def serialize_arguments(self):
         yield self.callback_name
-        # FIXME: should type be deduced ?
         return_type = self.interface_signature.callbacks[self.callback_name].return_type
         if self.return_value:
             yield from return_type.serialize(self.return_value)
