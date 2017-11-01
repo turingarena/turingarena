@@ -91,7 +91,6 @@ class ReferenceExpression(Expression):
 
     def do_evaluate(self, *, frame):
         return VariableReference(
-            value_type=self.variable.value_type,
             frame=frame,
             variable=self.variable,
         )

@@ -4,6 +4,8 @@ from turingarena.protocol.model.node import ImmutableObject, AbstractSyntaxNode,
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType
 from turingarena.protocol.server.commands import CallbackCall
+from turingarena.protocol.server.data import VariableReference
+from turingarena.protocol.server.frames import Phase
 
 logger = logging.getLogger(__name__)
 
@@ -129,11 +131,15 @@ class Callback(Callable):
 
     def preflight(self, *, context):
         logger.debug(f"preflight callback {self.name}")
-        with context.new_frame(scope=self.scope, parent=context.root_frame) as frame:
+        with context.new_frame(
+                scope=self.scope,
+                parent=context.root_frame,
+                phase=Phase.PREFLIGHT,
+        ) as frame:
             response = CallbackCall(
                 callback_name=self.name,
                 parameters=[
-                    (p, frame[p])
+                    (p, VariableReference(frame=frame, variable=p).get())
                     for p in self.signature.parameters
                 ],
             )
@@ -148,7 +154,11 @@ class Callback(Callable):
 
     def run(self, *, context):
         logger.debug(f"running callback {self.name}")
-        with context.new_frame(scope=self.scope, parent=context.root_frame) as new_frame:
+        with context.new_frame(
+                scope=self.scope,
+                parent=context.root_frame,
+                phase=Phase.RUN,
+        ) as new_frame:
             yield from run_body(self.body, context=context, frame=new_frame)
 
 

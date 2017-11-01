@@ -1,21 +1,32 @@
 import logging
 from collections import deque
 from contextlib import contextmanager
+from enum import Enum
 
 from turingarena.protocol.server.commands import ProxyRequest
 
 logger = logging.getLogger(__name__)
 
 
-class Frame:
-    __slots__ = ["scope_variables", "parent", "values"]
+class Phase(Enum):
+    PREFLIGHT = 1
+    RUN = 2
 
-    def __init__(self, *, scope_variables, parent):
-        self.scope_variables = scope_variables
+
+class FrameState(Enum):
+    PRISTINE = 1
+    OPEN = 2
+    CLOSED = 3
+
+
+class Frame:
+    def __init__(self, *, scope, parent):
+        self.scope = scope
         self.parent = parent
         self.values = {
-            l: None for l in self.scope_variables.locals().values()
+            l: None for l in self.scope.variables.locals().values()
         }
+        self.state = {phase: FrameState.PRISTINE for phase in Phase}
 
     def __getitem__(self, variable):
         if variable in self.values:
@@ -33,13 +44,26 @@ class Frame:
         else:
             raise KeyError
 
+    def __str__(self):
+        return str({
+            variable.name: value
+            for variable, value in self.values.items()
+        })
+
+    @contextmanager
+    def contextmanager(self, phase):
+        assert self.state[phase] is FrameState.PRISTINE
+        self.state[phase] = FrameState.OPEN
+        yield
+        self.state[phase] = FrameState.CLOSED
+
 
 class RunContext:
     def __init__(self, *, interface, proxy_connection, process_connection):
         self.interface = interface
         self.frame_cache = {}
         self.callback_queue = deque()
-        self.root_frame = Frame(parent=None, scope_variables=interface.body.scope.variables)
+        self.root_frame = Frame(parent=None, scope=interface.body.scope)
         self.proxy_connection = proxy_connection
         self.process_connection = process_connection
         self.next_request = None
@@ -51,14 +75,29 @@ class RunContext:
         self.interface.preflight(self)
 
     @contextmanager
-    def new_frame(self, *, parent, scope):
-        if scope not in self.frame_cache:
-            logger.debug(f"creating new frame for scope {scope}")
-            self.frame_cache[scope] = Frame(parent=parent, scope_variables=scope.variables)
-        frame = self.frame_cache[scope]
-        logger.debug(f"entering frame {frame} for scope {scope}")
-        yield frame
-        logger.debug(f"exiting frame {frame} for scope {scope}")
+    def new_frame(self, *, parent, scope, phase):
+        try:
+            frame = self.frame_cache[scope]
+        except KeyError:
+            frame = None
+
+        if frame:
+            if frame.state[phase] is FrameState.CLOSED:
+                logger.debug(f"not reusing frame {frame}")
+                del self.frame_cache[scope]
+                frame = None
+            else:
+                logger.debug(f"reusing frame {frame}")
+
+        if not frame:
+            frame = self.frame_cache[scope] = Frame(
+                parent=parent,
+                scope=scope,
+            )
+            logger.debug(f"created new frame {frame} for scope {scope} ({phase})")
+
+        with frame.contextmanager(phase=phase):
+            yield frame
 
     def peek_request(self):
         if self.next_request is None:

@@ -8,6 +8,7 @@ from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
 from turingarena.protocol.server.commands import FunctionReturn
+from turingarena.protocol.server.frames import Phase
 
 logger = logging.getLogger(__name__)
 
@@ -300,13 +301,13 @@ class ForStatement(ImperativeStatement):
     def run(self, *, context, frame):
         size = self.index.range.evaluate(frame=frame).get()
         for i in range(size):
-            with context.new_frame(scope=self.scope, parent=frame) as for_frame:
+            with context.new_frame(scope=self.scope, parent=frame, phase=Phase.RUN) as for_frame:
                 for_frame[self.index.variable] = i
                 yield from run_body(self.body, context=context, frame=for_frame)
 
 
 def preflight_body(body, *, context, frame):
-    with context.new_frame(parent=frame, scope=body.scope) as inner_frame:
+    with context.new_frame(parent=frame, scope=body.scope, phase=Phase.PREFLIGHT) as inner_frame:
         for statement in body.statements:
             if isinstance(statement, ImperativeStatement):
                 logger.debug(f"preflight {statement}")
@@ -314,7 +315,7 @@ def preflight_body(body, *, context, frame):
 
 
 def run_body(body, *, context, frame):
-    with context.new_frame(parent=frame, scope=body.scope) as inner_frame:
+    with context.new_frame(parent=frame, scope=body.scope, phase=Phase.RUN) as inner_frame:
         for statement in body.statements:
             if isinstance(statement, ImperativeStatement):
                 logger.debug(f"run {statement}")
