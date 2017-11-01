@@ -34,19 +34,21 @@ class Frame:
             raise KeyError
 
 
-class InterfaceEnvironment:
-    __slots__ = [
-        "interface",
-        "root_frame",
-        "frame_cache",
-        "callback_queue",
-    ]
-
-    def __init__(self, *, interface):
+class RunContext:
+    def __init__(self, *, interface, proxy_connection, process_connection):
         self.interface = interface
         self.frame_cache = {}
         self.callback_queue = deque()
         self.root_frame = Frame(parent=None, scope_variables=interface.body.scope.variables)
+        self.proxy_connection = proxy_connection
+        self.process_connection = process_connection
+        self.next_request = None
+        self.input_sent = False
+
+        self.run_generator = self.interface.run(self)
+
+    def run(self):
+        self.interface.preflight(self)
 
     @contextmanager
     def new_frame(self, *, parent, scope):
@@ -58,27 +60,10 @@ class InterfaceEnvironment:
         yield frame
         logger.debug(f"exiting frame {frame} for scope {scope}")
 
-
-class PreflightContext:
-    __slots__ = [
-        "environment",
-        "proxy_connection",
-        "next_request",
-        "input_sent",
-        "on_advance",
-    ]
-
-    def __init__(self, *, environment, proxy_connection, on_advance):
-        self.environment = environment
-        self.proxy_connection = proxy_connection
-        self.next_request = None
-        self.input_sent = False
-        self.on_advance = on_advance
-
     def peek_request(self):
         if self.next_request is None:
             self.next_request = ProxyRequest.accept(
-                interface_signature=self.environment.interface.signature,
+                interface_signature=self.interface.signature,
                 file=self.proxy_connection.request_pipe,
             )
         return self.next_request
@@ -90,34 +75,17 @@ class PreflightContext:
     def send_response(self, response):
         response.send(file=self.proxy_connection.response_pipe)
 
-    def advance(self):
+    def ensure_output(self):
         if not self.input_sent:
-            self.on_advance()
+            next(self.run_generator)
         self.input_sent = True
 
-    def on_flush(self):
+    def flush(self):
         assert self.input_sent
         self.input_sent = False
 
-    def new_frame(self, *, parent, scope):
-        return self.environment.new_frame(parent=parent, scope=scope)
+    def push_callback(self, callback):
+        self.callback_queue.append(callback)
 
     def pop_callback(self):
-        return self.environment.callback_queue.popleft()
-
-
-class RunContext:
-    __slots__ = [
-        "process_connection",
-        "environment",
-    ]
-
-    def __init__(self, *, environment, process_connection):
-        self.environment = environment
-        self.process_connection = process_connection
-
-    def new_frame(self, *, parent, scope):
-        return self.environment.new_frame(parent=parent, scope=scope)
-
-    def push_callback(self, callback):
-        self.environment.callback_queue.append(callback)
+        return self.callback_queue.popleft()

@@ -19,7 +19,8 @@ class ValueType(TupleLikeObject):
     __slots__ = ["meta_type"]
 
     def __init__(self, **kwargs):
-        super().__init__(meta_type=type_expression_classes.inv[self.__class__], **kwargs)
+        kwargs.setdefault("meta_type", type_expression_classes.inv[self.__class__])
+        super().__init__(**kwargs)
 
     @staticmethod
     def compile(ast, *, scope):

@@ -16,7 +16,7 @@ Options:
 import docopt
 import pkg_resources
 
-from turingarena.protocol.model.statements import Protocol
+from turingarena.protocol.model.model import Protocol
 from turingarena.protocol.parser import parse_protocol
 from turingarena.protocol.proxy.cli import protocol_proxy_cli
 from turingarena.protocol.server.cli import protocol_server_cli

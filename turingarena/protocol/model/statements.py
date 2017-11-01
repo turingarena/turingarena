@@ -3,10 +3,11 @@ import logging
 from bidict import bidict
 
 from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject, TupleLikeObject
+from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
+from turingarena.protocol.model.node import AbstractSyntaxNode, ImmutableObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
-from turingarena.protocol.server.commands import FunctionReturn, CallbackCall
+from turingarena.protocol.server.commands import FunctionReturn
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +22,6 @@ def statement_class(statement_type):
     return decorator
 
 
-class Protocol(AbstractSyntaxNode):
-    __slots__ = ["package_name", "file_name", "body"]
-
-    @staticmethod
-    def compile(*, ast, **kwargs):
-        logger.debug("compiling {}".format(ast))
-        scope = Scope()
-        return Protocol(
-            body=Body.compile(ast.body, scope=scope),
-            **kwargs,
-        )
-
-
 class Statement(AbstractSyntaxNode):
     __slots__ = ["statement_type"]
 
@@ -44,20 +32,6 @@ class Statement(AbstractSyntaxNode):
     def compile(ast, scope):
         logger.debug("compiling statement {}".format(ast))
         return statement_classes[ast.statement_type].compile(ast, scope)
-
-
-class VarDeclarator(AbstractSyntaxNode):
-    __slots__ = ["name"]
-
-    @staticmethod
-    def compile(ast, scope):
-        declarator = VarDeclarator(name=ast.name)
-        scope["var", ast.name] = declarator
-        return declarator
-
-
-class Variable(ImmutableObject):
-    __slots__ = ["value_type", "name"]
 
 
 @statement_class("var")
@@ -79,68 +53,6 @@ class VarStatement(Statement):
         )
 
 
-class Body(AbstractSyntaxNode):
-    __slots__ = ["statements", "scope"]
-
-    @staticmethod
-    def compile(ast, *, scope):
-        scope = Scope(scope)
-        return Body(
-            scope=scope,
-            statements=[
-                Statement.compile(s, scope=scope)
-                for s in ast.statements
-            ]
-        )
-
-
-class InterfaceSignature(TupleLikeObject):
-    __slots__ = ["variables", "functions", "callbacks"]
-
-
-class Interface(ImmutableObject):
-    __slots__ = ["name", "signature", "body"]
-
-    @staticmethod
-    def compile(ast, scope):
-        body = Body.compile(ast.body, scope=scope)
-        signature = InterfaceSignature(
-            variables=list(body.scope.variables.values()),
-            functions={
-                c.name: c.signature
-                for c in body.scope.functions.values()
-            },
-            callbacks={
-                c.name: c.signature
-                for c in body.scope.callbacks.values()
-            },
-        )
-        return Interface(
-            name=ast.name,
-            signature=signature,
-            body=body,
-        )
-
-    def preflight(self, context):
-        main = self.body.scope.main["main"]
-        request = context.peek_request()
-        assert request.message_type == "main_begin"
-        for variable, value in request.global_variables:
-            context.environment.root_frame[variable] = value
-        context.complete_request()
-
-        preflight_body(main.body, context=context, frame=context.environment.root_frame)
-
-        request = context.peek_request()
-        assert request.message_type == "main_end"
-        context.complete_request()
-
-    def run(self, context):
-        main = self.body.scope.main["main"]
-        yield from run_body(main.body, context=context, frame=context.environment.root_frame)
-        yield
-
-
 @statement_class("interface")
 class InterfaceStatement(Statement):
     __slots__ = ["interface"]
@@ -150,41 +62,6 @@ class InterfaceStatement(Statement):
         interface = Interface.compile(ast, scope)
         scope.interfaces[interface.name] = interface
         return InterfaceStatement(interface=interface)
-
-
-class CallableSignature(TupleLikeObject):
-    __slots__ = ["name", "parameters", "return_type"]
-
-    @staticmethod
-    def compile(ast, scope):
-        parameters = [
-            Variable(
-                value_type=ValueType.compile(p.type_expression, scope=scope),
-                name=p.declarator.name,
-            )
-            for p in ast.parameters
-        ]
-
-        return CallableSignature(
-            name=ast.name,
-            parameters=parameters,
-            return_type=ValueType.compile(ast.return_type, scope=scope),
-        )
-
-
-class Callable(ImmutableObject):
-    __slots__ = ["name", "signature"]
-
-
-class Function(Callable):
-    __slots__ = []
-
-    @staticmethod
-    def compile(ast, scope):
-        return Function(
-            name=ast.declarator.name,
-            signature=CallableSignature.compile(ast.declarator, scope),
-        )
 
 
 @statement_class("function")
@@ -200,47 +77,6 @@ class FunctionStatement(Statement):
         )
 
 
-class Callback(Callable):
-    __slots__ = ["scope", "body"]
-
-    @staticmethod
-    def compile(ast, scope):
-        signature = CallableSignature.compile(ast.declarator, scope)
-        callback_scope = Scope(scope)
-        for p in signature.parameters:
-            callback_scope.variables[p.name] = p
-        return Callback(
-            name=ast.declarator.name,
-            signature=signature,
-            scope=callback_scope,
-            body=Body.compile(ast.body, scope=callback_scope)
-        )
-
-    def preflight(self, *, context):
-        logger.debug(f"preflight callback {self.name}")
-        with context.new_frame(scope=self.scope, parent=context.environment.root_frame) as frame:
-            response = CallbackCall(
-                callback_name=self.name,
-                parameters=[
-                    (p, frame[p])
-                    for p in self.signature.parameters
-                ],
-            )
-            context.send_response(response)
-
-            preflight_body(self.body, context=context, frame=frame)
-
-            request = context.peek_request()
-            assert request.message_type == "callback_return"
-            # TODO: handle return value
-            context.complete_request()
-
-    def run(self, *, context):
-        logger.debug(f"running callback {self.name}")
-        with context.new_frame(scope=self.scope, parent=context.environment.root_frame) as new_frame:
-            yield from run_body(self.body, context=context, frame=new_frame)
-
-
 @statement_class("callback")
 class CallbackStatement(Statement):
     __slots__ = ["callback"]
@@ -250,10 +86,6 @@ class CallbackStatement(Statement):
         callback = Callback.compile(ast, scope=scope)
         scope.callbacks[callback.name] = callback
         return CallbackStatement(callback=callback)
-
-
-class Main(ImmutableObject):
-    __slots__ = ["body"]
 
 
 @statement_class("main")
@@ -350,6 +182,9 @@ class FlushStatement(ImperativeStatement):
     def compile(ast, scope):
         return FlushStatement()
 
+    def preflight(self, *, context, frame):
+        context.flush()
+
     def run(self, *, context, frame):
         yield
 
@@ -378,32 +213,37 @@ class CallStatement(ImperativeStatement):
     def preflight(self, *, context, frame):
         request = context.peek_request()
         assert request.message_type == "function_call"
+        assert request.function_name == self.function.name
+
         for value_expr, (parameter, value) in zip(self.parameters, request.parameters):
             value_expr.evaluate(frame=frame).resolve(value)
 
-        if request.accept_callbacks or request.function_signature.return_type:
-            context.advance()
+        return_type = self.function.signature.return_type
+        if return_type or request.accept_callbacks:
+            context.ensure_output()
 
         context.complete_request()
 
-        if context.environment.interface.signature.callbacks:
+        if context.interface.signature.callbacks:
             while True:
                 logger.debug(f"popping callbacks")
                 callback = context.pop_callback()
                 if callback is None:
                     break
                 callback.preflight(context=context)
+                context.ensure_output()
 
-        if self.function.signature.return_type:
-            return_value = self.return_value.evaluate(frame=frame).get()
+        if return_type:
+            return_value = return_type, self.return_value.evaluate(frame=frame).get()
         else:
             return_value = None
         context.send_response(FunctionReturn(
+            function_name=self.function.name,
             return_value=return_value
         ))
 
     def run(self, *, context, frame):
-        if context.environment.interface.signature.callbacks:
+        if context.interface.signature.callbacks:
             while True:
                 logger.debug("accepting callbacks...")
                 callback_name = context.process_connection.upward_pipe.readline().strip()
@@ -412,7 +252,7 @@ class CallStatement(ImperativeStatement):
                     context.push_callback(None)
                     break
                 else:
-                    callback = context.environment.interface.body.scope.callbacks[callback_name]
+                    callback = context.interface.body.scope.callbacks[callback_name]
                     context.push_callback(callback)
                     yield from callback.run(context=context)
         yield from []
@@ -427,6 +267,12 @@ class ReturnStatement(ImperativeStatement):
         return ReturnStatement(
             value=Expression.compile(ast.value, scope=scope),
         )
+
+    def preflight(self, *, context, frame):
+        request = context.peek_request()
+        return_type, return_value = request.return_value
+        assert request.message_type == "callback_return"
+        self.value.evaluate(frame=frame).resolve(return_value)
 
 
 class ForIndex(ImmutableObject):
@@ -473,3 +319,18 @@ def run_body(body, *, context, frame):
             if isinstance(statement, ImperativeStatement):
                 logger.debug(f"run {statement}")
                 yield from statement.run(context=context, frame=inner_frame)
+
+
+class Body(AbstractSyntaxNode):
+    __slots__ = ["statements", "scope"]
+
+    @staticmethod
+    def compile(ast, *, scope):
+        scope = Scope(scope)
+        return Body(
+            scope=scope,
+            statements=[
+                Statement.compile(s, scope=scope)
+                for s in ast.statements
+            ]
+        )

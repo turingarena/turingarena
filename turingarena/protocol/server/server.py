@@ -5,7 +5,7 @@ import tempfile
 from contextlib import ExitStack
 
 from turingarena.protocol.proxy.python.client import ProxyConnection
-from turingarena.protocol.server.frames import PreflightContext, RunContext, InterfaceEnvironment
+from turingarena.protocol.server.frames import RunContext
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
@@ -47,16 +47,10 @@ class PlumberServer:
             self.process_connection = stack.enter_context(Process(sandbox_dir).connect())
             logger.debug("connected")
 
-            environment = InterfaceEnvironment(interface=self.interface)
-            self.preflight_context = PreflightContext(
-                proxy_connection=self.proxy_connection,
-                environment=environment,
-                on_advance=lambda: next(self.runner),
-            )
             self.run_context = RunContext(
                 process_connection=self.process_connection,
-                environment=environment,
+                proxy_connection=self.proxy_connection,
+                interface=self.interface
             )
 
-            self.runner = self.interface.run(context=self.run_context)
-            self.interface.preflight(context=self.preflight_context)
+            self.run_context.run()

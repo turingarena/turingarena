@@ -145,6 +145,13 @@ class CallbackReturn(ProxyRequest):
 class MainEnd(ProxyRequest):
     __slots__ = []
 
+    @staticmethod
+    def receive_arguments(*, interface_signature, file):
+        return MainEnd()
+
+    def send_arguments(self, *, file):
+        pass
+
 
 class ProxyResponse(ProxyMessage):
     __slots__ = []
@@ -153,7 +160,26 @@ class ProxyResponse(ProxyMessage):
 
 @response_type("function_return")
 class FunctionReturn(ProxyResponse):
-    __slots__ = ["return_value"]
+    __slots__ = ["function_name", "return_value"]
+
+    @staticmethod
+    def receive_arguments(*, interface_signature, file):
+        name = file.readline().strip()
+        signature = interface_signature.functions[name]
+        if signature.return_type:
+            return_value = signature.return_type, signature.return_type.deserialize(file=file)
+        else:
+            return_value = None
+        return FunctionReturn(
+            function_name=name,
+            return_value=return_value,
+        )
+
+    def send_arguments(self, *, file):
+        print(self.function_name, file=file)
+        if self.return_value is not None:
+            return_type, return_value = self.return_value
+            return_type.serialize(return_value, file=file)
 
 
 @response_type("callback_call")
