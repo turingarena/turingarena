@@ -39,26 +39,26 @@ class ValueType(TupleLikeObject):
     def check(self, value):
         pass
 
-    def serialize(self, value, *, file):
-        return self.on_serialize(self.ensure(value), file=file)
+    def serialize(self, value):
+        yield from self.on_serialize(self.ensure(value))
 
     @abstractmethod
-    def on_serialize(self, value, *, file):
+    def on_serialize(self, value):
         pass
 
     @abstractmethod
-    def deserialize(self, *, file):
+    def deserialize(self, lines):
         pass
 
 
 class PrimaryType(ValueType):
     __slots__ = []
 
-    def on_serialize(self, value, *, file):
-        print(self.format(value), file=file)
+    def on_serialize(self, value):
+        yield self.format(value)
 
-    def deserialize(self, *, file):
-        return self.parse(file.readline().strip())
+    def deserialize(self, lines):
+        return self.parse(next(lines))
 
     def format(self, value):
         self.check(value)
@@ -95,7 +95,8 @@ class ScalarType(PrimaryType):
         return value
 
     def check(self, value):
-        assert isinstance(value, self.base_type)
+        if not isinstance(value, self.base_type):
+            raise TypeError(f"expected a {self.base_type}, got {value}")
 
     def do_format(self, value):
         formatters = {
@@ -129,15 +130,15 @@ class ArrayType(ValueType):
         for x in value:
             self.item_type.check(x)
 
-    def on_serialize(self, value, *, file):
+    def on_serialize(self, value):
         value = list(value)
-        ScalarType(int).on_serialize(len(value), file=file)
+        yield from ScalarType(int).serialize(len(value))
         for item in value:
-            self.item_type.serialize(item, file=file)
+            yield from self.item_type.serialize(item)
 
-    def deserialize(self, *, file):
-        size = ScalarType(int).deserialize(file=file)
+    def deserialize(self, lines):
+        size = ScalarType(int).deserialize(lines)
         return [
-            self.item_type.deserialize(file=file)
+            self.item_type.deserialize(lines)
             for _ in range(size)
         ]

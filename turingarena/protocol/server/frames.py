@@ -112,8 +112,8 @@ class InterfaceEngine:
     def peek_request(self):
         if self.next_request is None:
             self.next_request = ProxyRequest.accept(
+                map(str.strip, self.proxy_connection.request_pipe),
                 interface_signature=self.interface.signature,
-                file=self.proxy_connection.request_pipe,
             )
         return self.next_request
 
@@ -122,7 +122,10 @@ class InterfaceEngine:
         self.next_request = None
 
     def send_response(self, response):
-        response.send(file=self.proxy_connection.response_pipe)
+        file = self.proxy_connection.response_pipe
+        for line in response.serialize():
+            print(line, file=file)
+        file.flush()
 
     def ensure_output(self):
         if not self.input_sent:

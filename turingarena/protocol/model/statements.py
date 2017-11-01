@@ -221,7 +221,7 @@ class CallStatement(ImperativeStatement):
         assert request.message_type == "function_call"
         assert request.function_name == self.function.name
 
-        for value_expr, (parameter, value) in zip(self.parameters, request.parameters):
+        for value_expr, value in zip(self.parameters, request.parameters):
             context.evaluate(value_expr).resolve(value)
 
         return_type = self.function.signature.return_type
@@ -233,12 +233,13 @@ class CallStatement(ImperativeStatement):
         yield from invoke_callbacks(context)
 
         if return_type:
-            return_value = return_type, context.evaluate(self.return_value).get()
+            return_value = context.evaluate(self.return_value).get()
         else:
             return_value = None
         context.engine.send_response(FunctionReturn(
+            interface_signature=context.engine.interface.signature,
             function_name=self.function.name,
-            return_value=return_value
+            return_value=return_value,
         ))
 
     def run(self, context):
@@ -289,9 +290,8 @@ class ReturnStatement(ImperativeStatement):
     def run(self, context):
         if context.phase is Phase.PREFLIGHT:
             request = context.engine.peek_request()
-            return_type, return_value = request.return_value
             assert request.message_type == "callback_return"
-            context.evaluate(self.value).resolve(return_value)
+            context.evaluate(self.value).resolve(request.return_value)
         yield from []
 
 

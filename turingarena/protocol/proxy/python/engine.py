@@ -23,9 +23,10 @@ class ProxyEngine:
         function_signature = self.interface_signature.functions[name]
 
         request = FunctionCall(
+            interface_signature=self.interface_signature,
             function_name=name,
             parameters=[
-                (p, p.value_type.ensure(a))
+                p.value_type.ensure(a)
                 for p, a in zip(function_signature.parameters, args)
             ],
             accept_callbacks=bool(callbacks_impl),
@@ -34,41 +35,53 @@ class ProxyEngine:
 
         while True:
             logger.debug("waiting for response...")
-            response = ProxyResponse.accept(
-                interface_signature=self.interface_signature,
-                file=self.connection.response_pipe,
-            )
+            response = self.accept_response()
             if response.message_type == "callback_call":
                 callback_name = response.callback_name
                 callback_signature = self.interface_signature.callbacks[callback_name]
-                return_value = callbacks_impl[callback_name](*[
-                    v for p, v in response.parameters
-                ])
-                if callback_signature.return_type:
-                    return_type_value = callback_signature.return_type, return_value
+                raw_return_value = callbacks_impl[callback_name](*response.parameters)
+                return_type = callback_signature.return_type
+                if return_type:
+                    return_value = return_type.ensure(raw_return_value)
                 else:
-                    return_type_value = None
+                    assert raw_return_value is None
+                    return_value = None
                 request = CallbackReturn(
+                    interface_signature=self.interface_signature,
                     callback_name=callback_name,
-                    return_value=return_type_value,
+                    return_value=return_value,
                 )
                 self.send(request)
                 continue
             if response.message_type == "function_return":
                 return response.return_value
 
+    def accept_response(self):
+        return ProxyResponse.accept(
+            map(str.strip, self.connection.response_pipe),
+            interface_signature=self.interface_signature,
+        )
+
     def send(self, request):
-        request.send(file=self.connection.request_pipe)
+        file = self.connection.request_pipe
+        for line in request.serialize():
+            print(line, file=file)
+        file.flush()
 
     def begin_main(self):
-        request = MainBegin(global_variables=[
-            (variable, getattr(self.instance, variable.name))
-            for variable in self.interface_signature.variables
-        ])
+        request = MainBegin(
+            interface_signature=self.interface_signature,
+            global_variables=[
+                getattr(self.instance, variable.name)
+                for variable in self.interface_signature.variables
+            ]
+        )
         self.send(request)
         self.main_begun = True
 
     def end_main(self):
         assert self.main_begun
-        request = MainEnd()
+        request = MainEnd(
+            interface_signature=self.interface_signature,
+        )
         self.send(request)

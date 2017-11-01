@@ -63,7 +63,7 @@ class Interface(ImmutableObject):
         if context.phase is Phase.PREFLIGHT:
             request = context.engine.peek_request()
             assert request.message_type == "main_begin"
-            for variable, value in request.global_variables:
+            for variable, value in zip(self.signature.variables, request.global_variables):
                 context.engine.root_frame[variable] = value
             context.engine.complete_request()
 
@@ -134,9 +134,10 @@ class Callback(Callable):
         with context.enter(self.scope) as inner_context:
             if context.phase is Phase.PREFLIGHT:
                 response = CallbackCall(
+                    interface_signature=context.engine.interface.signature,
                     callback_name=self.name,
                     parameters=[
-                        (p, VariableReference(frame=inner_context.frame, variable=p).get())
+                        VariableReference(frame=inner_context.frame, variable=p).get()
                         for p in self.signature.parameters
                     ],
                 )
