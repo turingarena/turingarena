@@ -3,6 +3,7 @@ from collections import deque
 from contextlib import contextmanager
 from enum import Enum
 
+from turingarena.protocol.model.node import ImmutableObject
 from turingarena.protocol.server.commands import ProxyRequest
 
 logger = logging.getLogger(__name__)
@@ -58,21 +59,30 @@ class Frame:
         self.state[phase] = FrameState.CLOSED
 
 
-class RunContext:
+class InterfaceEngine:
     def __init__(self, *, interface, proxy_connection, process_connection):
         self.interface = interface
-        self.frame_cache = {}
-        self.callback_queue = deque()
-        self.root_frame = Frame(parent=None, scope=interface.body.scope)
         self.proxy_connection = proxy_connection
         self.process_connection = process_connection
+
+        self.root_frame = Frame(parent=None, scope=interface.body.scope)
+        self.frame_cache = {}
+        self.callback_queue = deque()
         self.next_request = None
         self.input_sent = False
 
-        self.run_generator = self.interface.run(self)
+        self.run_generator = self.interface.run(StatementContext(
+            engine=self,
+            frame=self.root_frame,
+            phase=Phase.RUN,
+        ))
 
     def run(self):
-        self.interface.preflight(self)
+        next(self.interface.run(StatementContext(
+            engine=self,
+            frame=self.root_frame,
+            phase=Phase.PREFLIGHT,
+        )))
 
     @contextmanager
     def new_frame(self, *, parent, scope, phase):
@@ -128,3 +138,23 @@ class RunContext:
 
     def pop_callback(self):
         return self.callback_queue.popleft()
+
+
+class StatementContext(ImmutableObject):
+    __slots__ = ["engine", "frame", "phase"]
+
+    def evaluate(self, expression):
+        return expression.evaluate(frame=self.frame)
+
+    @contextmanager
+    def enter(self, scope):
+        with self.engine.new_frame(
+                parent=self.frame,
+                scope=scope,
+                phase=self.phase,
+        ) as new_frame:
+            yield StatementContext(
+                engine=self.engine,
+                frame=new_frame,
+                phase=self.phase,
+            )

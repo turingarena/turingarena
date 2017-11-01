@@ -5,7 +5,7 @@ import tempfile
 from contextlib import ExitStack
 
 from turingarena.protocol.proxy.python.client import ProxyConnection
-from turingarena.protocol.server.frames import RunContext
+from turingarena.protocol.server.frames import InterfaceEngine
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
@@ -47,10 +47,10 @@ class PlumberServer:
             self.process_connection = stack.enter_context(Process(sandbox_dir).connect())
             logger.debug("connected")
 
-            self.run_context = RunContext(
+            self.engine = InterfaceEngine(
                 process_connection=self.process_connection,
                 proxy_connection=self.proxy_connection,
                 interface=self.interface
             )
 
-            self.run_context.run()
+            self.engine.run()

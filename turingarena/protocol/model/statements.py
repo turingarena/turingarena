@@ -1,4 +1,5 @@
 import logging
+from abc import abstractmethod
 
 from bidict import bidict
 
@@ -104,10 +105,7 @@ class ImperativeStatement(Statement):
     # TODO: first_call
     __slots__ = []
 
-    def preflight(self, *, context, frame):
-        pass
-
-    def run(self, *, context, frame):
+    def run(self, context):
         yield from []
 
 
@@ -124,11 +122,11 @@ class AllocStatement(ImperativeStatement):
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
 
-    def run(self, *, context, frame):
-        size = self.size.evaluate(frame=frame).get()
-        for a in self.arguments:
-            array_reference = a.evaluate(frame=frame)
-            array_reference.alloc(size=size)
+    def run(self, context):
+        if context.phase is Phase.RUN:
+            size = context.evaluate(self.size).get()
+            for a in self.arguments:
+                context.evaluate(a).alloc(size=size)
         yield from []
 
 
@@ -144,35 +142,42 @@ class InputOutputStatement(ImperativeStatement):
             ],
         )
 
+    def run(self, context):
+        if context.phase is Phase.RUN:
+            self.on_run(context)
+        yield from []
+
+    @abstractmethod
+    def on_run(self, context):
+        pass
+
 
 @statement_class("input")
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
-    def run(self, *, context, frame):
+    def on_run(self, context):
         raw_values = [
-            a.value_type.format(a.evaluate(frame=frame).get())
+            a.value_type.format(a.evaluate(frame=context.frame).get())
             for a in self.arguments
         ]
         logger.debug(f"printing {raw_values} to downward_pipe")
         # FIXME: should flush only once per communication block
-        print(*raw_values, file=context.process_connection.downward_pipe, flush=True)
-        yield from []
+        print(*raw_values, file=context.engine.process_connection.downward_pipe, flush=True)
 
 
 @statement_class("output")
 class OutputStatement(InputOutputStatement):
     __slots__ = []
 
-    def run(self, *, context, frame):
+    def on_run(self, context):
         logger.debug(f"reading from upward_pipe...")
-        line = context.process_connection.upward_pipe.readline()
+        line = context.engine.process_connection.upward_pipe.readline()
         raw_values = line.strip().split()
         logger.debug(f"read {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
-            a.evaluate(frame=frame).resolve(value)
-        yield from []
+            context.evaluate(a).resolve(value)
 
 
 @statement_class("flush")
@@ -183,11 +188,11 @@ class FlushStatement(ImperativeStatement):
     def compile(ast, scope):
         return FlushStatement()
 
-    def preflight(self, *, context, frame):
-        context.flush()
-
-    def run(self, *, context, frame):
-        yield
+    def run(self, context):
+        if context.phase is Phase.RUN:
+            yield
+        else:
+            context.engine.flush()
 
 
 @statement_class("call")
@@ -211,52 +216,64 @@ class CallStatement(ImperativeStatement):
             ),
         )
 
-    def preflight(self, *, context, frame):
-        request = context.peek_request()
+    def preflight(self, context):
+        request = context.engine.peek_request()
         assert request.message_type == "function_call"
         assert request.function_name == self.function.name
 
         for value_expr, (parameter, value) in zip(self.parameters, request.parameters):
-            value_expr.evaluate(frame=frame).resolve(value)
+            context.evaluate(value_expr).resolve(value)
 
         return_type = self.function.signature.return_type
-        if return_type or request.accept_callbacks:
-            context.ensure_output()
+        if return_type or accept_callbacks:
+            context.engine.ensure_output()
 
-        context.complete_request()
+        context.engine.complete_request()
 
-        if context.interface.signature.callbacks:
-            while True:
-                logger.debug(f"popping callbacks")
-                callback = context.pop_callback()
-                if callback is None:
-                    break
-                callback.preflight(context=context)
-                context.ensure_output()
+        yield from invoke_callbacks(context)
 
         if return_type:
-            return_value = return_type, self.return_value.evaluate(frame=frame).get()
+            return_value = return_type, context.evaluate(self.return_value).get()
         else:
             return_value = None
-        context.send_response(FunctionReturn(
+        context.engine.send_response(FunctionReturn(
             function_name=self.function.name,
             return_value=return_value
         ))
 
-    def run(self, *, context, frame):
-        if context.interface.signature.callbacks:
-            while True:
-                logger.debug("accepting callbacks...")
-                callback_name = context.process_connection.upward_pipe.readline().strip()
-                logger.debug(f"received line {callback_name}")
-                if callback_name == "return":
-                    context.push_callback(None)
-                    break
-                else:
-                    callback = context.interface.body.scope.callbacks[callback_name]
-                    context.push_callback(callback)
-                    yield from callback.run(context=context)
-        yield from []
+    def run(self, context):
+        if context.phase == Phase.RUN:
+            yield from accept_callbacks(context)
+        if context.phase == Phase.PREFLIGHT:
+            yield from self.preflight(context)
+
+
+def invoke_callbacks(context):
+    if not context.engine.interface.signature.callbacks:
+        return
+    while True:
+        logger.debug(f"popping callbacks")
+        callback = context.engine.pop_callback()
+        if callback is None:
+            break
+        yield from callback.run(context)
+        context.engine.ensure_output()
+
+
+def accept_callbacks(context):
+    if not context.engine.interface.signature.callbacks:
+        return
+    while True:
+        logger.debug("accepting callbacks...")
+        callback_name = context.engine.process_connection.upward_pipe.readline().strip()
+        logger.debug(f"received line {callback_name}")
+        if callback_name == "return":
+            context.engine.push_callback(None)
+            break
+        else:
+            callback = context.engine.interface.body.scope.callbacks[callback_name]
+            context.engine.push_callback(callback)
+            yield from callback.run(context=context)
 
 
 @statement_class("return")
@@ -269,11 +286,13 @@ class ReturnStatement(ImperativeStatement):
             value=Expression.compile(ast.value, scope=scope),
         )
 
-    def preflight(self, *, context, frame):
-        request = context.peek_request()
-        return_type, return_value = request.return_value
-        assert request.message_type == "callback_return"
-        self.value.evaluate(frame=frame).resolve(return_value)
+    def run(self, context):
+        if context.phase is Phase.PREFLIGHT:
+            request = context.engine.peek_request()
+            return_type, return_value = request.return_value
+            assert request.message_type == "callback_return"
+            context.evaluate(self.value).resolve(return_value)
+        yield from []
 
 
 class ForIndex(ImmutableObject):
@@ -298,28 +317,21 @@ class ForStatement(ImperativeStatement):
             scope=for_scope,
         )
 
-    def run(self, *, context, frame):
-        size = self.index.range.evaluate(frame=frame).get()
-        for i in range(size):
-            with context.new_frame(scope=self.scope, parent=frame, phase=Phase.RUN) as for_frame:
-                for_frame[self.index.variable] = i
-                yield from run_body(self.body, context=context, frame=for_frame)
+    def run(self, context):
+        if context.phase is Phase.RUN:
+            size = context.evaluate(self.index.range).get()
+            for i in range(size):
+                with context.enter(self.scope) as for_context:
+                    for_context.frame[self.index.variable] = i
+                    yield from run_body(self.body, context=for_context)
 
 
-def preflight_body(body, *, context, frame):
-    with context.new_frame(parent=frame, scope=body.scope, phase=Phase.PREFLIGHT) as inner_frame:
+def run_body(body, *, context):
+    with context.enter(body.scope) as inner_context:
         for statement in body.statements:
             if isinstance(statement, ImperativeStatement):
-                logger.debug(f"preflight {statement}")
-                statement.preflight(context=context, frame=inner_frame)
-
-
-def run_body(body, *, context, frame):
-    with context.new_frame(parent=frame, scope=body.scope, phase=Phase.RUN) as inner_frame:
-        for statement in body.statements:
-            if isinstance(statement, ImperativeStatement):
-                logger.debug(f"run {statement}")
-                yield from statement.run(context=context, frame=inner_frame)
+                logger.debug(f"run {statement} in {inner_context}")
+                yield from statement.run(inner_context)
 
 
 class Body(AbstractSyntaxNode):

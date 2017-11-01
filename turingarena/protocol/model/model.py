@@ -58,23 +58,22 @@ class Interface(ImmutableObject):
             body=body,
         )
 
-    def preflight(self, context):
-        main = self.body.scope.main["main"]
-        request = context.peek_request()
-        assert request.message_type == "main_begin"
-        for variable, value in request.global_variables:
-            context.root_frame[variable] = value
-        context.complete_request()
-
-        preflight_body(main.body, context=context, frame=context.root_frame)
-
-        request = context.peek_request()
-        assert request.message_type == "main_end"
-        context.complete_request()
-
     def run(self, context):
         main = self.body.scope.main["main"]
-        yield from run_body(main.body, context=context, frame=context.root_frame)
+        if context.phase is Phase.PREFLIGHT:
+            request = context.engine.peek_request()
+            assert request.message_type == "main_begin"
+            for variable, value in request.global_variables:
+                context.engine.root_frame[variable] = value
+            context.engine.complete_request()
+
+        yield from run_body(main.body, context=context)
+
+        if context.phase is Phase.PREFLIGHT:
+            request = context.engine.peek_request()
+            assert request.message_type == "main_end"
+            context.engine.complete_request()
+
         yield
 
 
@@ -129,38 +128,28 @@ class Callback(Callable):
             body=Body.compile(ast.body, scope=callback_scope)
         )
 
-    def preflight(self, *, context):
-        logger.debug(f"preflight callback {self.name}")
-        with context.new_frame(
-                scope=self.scope,
-                parent=context.root_frame,
-                phase=Phase.PREFLIGHT,
-        ) as frame:
-            response = CallbackCall(
-                callback_name=self.name,
-                parameters=[
-                    (p, VariableReference(frame=frame, variable=p).get())
-                    for p in self.signature.parameters
-                ],
-            )
-            context.send_response(response)
+    def run(self, context):
+        logger.debug(f"running callback {self.name} in {context}")
 
-            preflight_body(self.body, context=context, frame=frame)
+        with context.enter(self.scope) as inner_context:
+            if context.phase is Phase.PREFLIGHT:
+                response = CallbackCall(
+                    callback_name=self.name,
+                    parameters=[
+                        (p, VariableReference(frame=inner_context.frame, variable=p).get())
+                        for p in self.signature.parameters
+                    ],
+                )
+                context.engine.send_response(response)
 
-            request = context.peek_request()
-            assert request.message_type == "callback_return"
-            # TODO: handle return value
-            context.complete_request()
+            yield from run_body(self.body, context=inner_context)
 
-    def run(self, *, context):
-        logger.debug(f"running callback {self.name}")
-        with context.new_frame(
-                scope=self.scope,
-                parent=context.root_frame,
-                phase=Phase.RUN,
-        ) as new_frame:
-            yield from run_body(self.body, context=context, frame=new_frame)
+            if context.phase is Phase.PREFLIGHT:
+                request = context.engine.peek_request()
+                assert request.message_type == "callback_return"
+                # TODO: handle return value
+                context.engine.complete_request()
 
 
 # FIXME: here to avoid circular import, find better solution
-from turingarena.protocol.model.statements import run_body, preflight_body, Body
+from turingarena.protocol.model.statements import run_body, Body
