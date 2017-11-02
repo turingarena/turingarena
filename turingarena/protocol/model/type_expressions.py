@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 from bidict import bidict
 
-from turingarena.protocol.model.node import TupleLikeObject
+from turingarena.common import TupleLikeObject
 
 type_expression_classes = bidict()
 

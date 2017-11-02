@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 from bidict import bidict
 
-from turingarena.protocol.model.node import ImmutableObject
+from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)
 

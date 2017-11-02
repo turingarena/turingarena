@@ -3,7 +3,7 @@ from collections import deque
 from contextlib import contextmanager
 from enum import Enum
 
-from turingarena.protocol.model.node import ImmutableObject
+from turingarena.common import ImmutableObject
 from turingarena.protocol.server.commands import ProxyRequest
 
 logger = logging.getLogger(__name__)

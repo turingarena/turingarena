@@ -1,6 +1,7 @@
 import logging
 
-from turingarena.protocol.model.node import ImmutableObject, AbstractSyntaxNode, TupleLikeObject
+from turingarena.protocol.model.node import AbstractSyntaxNode
+from turingarena.common import ImmutableObject, TupleLikeObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType
 from turingarena.protocol.server.commands import CallbackCall
