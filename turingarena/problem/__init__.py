@@ -1,3 +1,4 @@
+import importlib
 from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
@@ -67,7 +68,9 @@ class ImplementationSubmissionItem(SubmissionItem):
 
     def resolve(self):
         # FIXME: install the protocol file
-        protocol_module = __import__(f"turingarena_protocols.{self.protocol_name}", self)
+        protocol_module = importlib.import_module(
+            f"turingarena_protocols.{self.protocol_name}"
+        )
         interface_signature = getattr(protocol_module, self.interface_name)
 
 
