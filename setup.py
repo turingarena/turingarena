@@ -31,5 +31,6 @@ setup(
         "pyyaml",
         "coloredlogs",
         "bidict",
+        "gitpython",
     ],
 )

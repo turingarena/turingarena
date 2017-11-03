@@ -4,7 +4,7 @@ Parse and compiles an interface definition file,
 and generates interface code for the supported languages.
 
 Usage:
-  protocol [options] -p <package> [-f <file>] (skeleton|proxy|server) [<args>...]
+  protocol [options] -p <package> [-f <file>] <cmd> [<args>...]
 
 Options:
 
@@ -35,7 +35,10 @@ def protocol_cli(argv):
         file_name=protocol_file_name,
     )
 
+    commands = {
+        "skeleton": protocol_skeleton_cli,
+        "proxy": protocol_proxy_cli,
+        "server": protocol_server_cli,
+    }
     argv2 = args["<args>"]
-    if args["skeleton"]: return protocol_skeleton_cli(protocol=protocol, argv=argv2)
-    if args["proxy"]: return protocol_proxy_cli(protocol=protocol, argv=argv2)
-    if args["server"]: return protocol_server_cli(protocol=protocol, argv=argv2)
+    return commands[args["<cmd>"]](protocol=protocol, argv=argv2)
