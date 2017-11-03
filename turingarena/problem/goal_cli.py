@@ -22,3 +22,4 @@ def problem_goal_cli(*, problem_id, argv):
     argv2 = args["<args>"]
 
     if args["task"]: return print(goal.to_task_description(problem_id).to_json())
+    if args["evaluate"]: return print(goal.evaluate())

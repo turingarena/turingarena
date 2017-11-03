@@ -4,4 +4,4 @@ problem = Problem()
 
 @problem.goal
 def goal():
-    pass
+    return "goal result"
