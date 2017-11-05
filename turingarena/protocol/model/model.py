@@ -1,7 +1,7 @@
 import logging
 
-from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.common import ImmutableObject, TupleLikeObject
+from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType
 from turingarena.protocol.server.commands import CallbackCall
@@ -16,7 +16,7 @@ class Main(ImmutableObject):
 
 
 class Protocol(AbstractSyntaxNode):
-    __slots__ = ["package_name", "file_name", "body"]
+    __slots__ = ["id", "file_name", "body"]
 
     @staticmethod
     def compile(*, ast, **kwargs):

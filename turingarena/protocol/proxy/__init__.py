@@ -10,12 +10,8 @@ languages = {
 }
 
 
-def generate_proxy(*, protocol, dest_dir, language):
-    os.makedirs(dest_dir, exist_ok=True)
+def generate_proxy(*, protocol_id, language):
     logger.info(
-        "Generating proxy for language {language} in dir {dir}".format(
-            language=language,
-            dir=dest_dir,
-        )
+        f"Installing proxy for protocol {protocol_id} language {language}"
     )
-    languages[language](protocol, dest_dir=dest_dir)
+    languages[language](protocol_id)
