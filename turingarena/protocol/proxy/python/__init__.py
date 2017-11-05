@@ -16,7 +16,7 @@ def do_generate_proxy(protocol):
 
 
 def generate_proxy(protocol_id):
-    package_name = protocol_id.python_package()
+    package_name = f"turingarena_proxies.{protocol_id.name()}"
 
     def generate_setup_py():
         yield "from setuptools import setup"
@@ -32,7 +32,7 @@ def generate_proxy(protocol_id):
     with TemporaryDirectory() as dest_dir:
         namespace_dir = os.path.join(
             dest_dir,
-            "turingarena_protocols",
+            "turingarena_proxies",
         )
         package_dir = os.path.join(
             namespace_dir,
