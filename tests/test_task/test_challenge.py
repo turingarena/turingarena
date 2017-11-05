@@ -1,13 +1,15 @@
-from turingarena_protocols.test_challenge import exampleinterface
+import sys
+from turingarena_proxies.test_challenge import exampleinterface
 
 from turingarena.problem import Problem
+from turingarena.protocol import ProtocolIdentifier
 from turingarena.protocol.proxy.python.engine import ProxyEngine
 
 problem = Problem()
 
 problem.implementation_submission_item(
     "solution",
-    protocol_name="test_challenge",
+    protocol_id=ProtocolIdentifier("test_challenge"),
     interface_name="exampleinterface",
 )
 
@@ -32,3 +34,5 @@ def goal(solution):
         proxy.end_main()
 
     print("Answer:", S, file=sys.stderr)
+
+goal.evaluate()

@@ -1,8 +1,10 @@
 import logging
-import os
-
 import subprocess
 from contextlib import contextmanager, ExitStack
+
+import os
+
+from turingarena.sandbox.client import Algorithm
 
 logger = logging.getLogger(__name__)
 
@@ -14,36 +16,42 @@ class Interface:
 
 
 class Implementation:
-    def __init__(self, *, interface, algorithm):
-        self.interface = interface
-        self.algorithm = algorithm
+    def __init__(self, *, protocol_id, interface_name, algorithm_name):
+        self.protocol_id = protocol_id
+        self.interface_name = interface_name
+        self.algorithm = Algorithm(algorithm_name)
 
     @contextmanager
     def run(self):
         sandbox = self.algorithm.sandbox()
         with sandbox.run() as process:
-            plumber = ProxyClient(interface=self.interface, process=process)
+            plumber = ProxyClient(
+                protocol_id=self.protocol_id,
+                interface_name=self.interface_name,
+                process=process,
+            )
             with plumber.connect() as connection:
                 yield connection
 
 
 class ProxyClient:
-    def __init__(self, *, interface, process):
-        self.interface = interface
+    def __init__(self, *, protocol_id, interface_name, process):
+        self.protocol_id = protocol_id
+        self.interface_name = interface_name
         self.process = process
 
     @contextmanager
     def connect(self):
+        cli = (
+            f"{self.protocol_id.to_command()}"
+            f" server"
+            f" --interface {self.interface_name}"
+            f" --sandbox {self.process.sandbox_dir}"
+        )
         with ExitStack() as stack:
             plumber_process = subprocess.Popen(
-                [
-                    "turingarena",
-                    "protocol",
-                    "-p", self.interface.package_name,
-                    "server",
-                    self.interface.name,
-                    self.process.sandbox_dir,
-                ],
+                cli,
+                shell=True,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
             )

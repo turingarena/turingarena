@@ -1,19 +1,20 @@
 """TuringArena algorithm compiler.
 
-    Usage:
-      compile_algorithm (-I <interface> | --no-interface) [-x <language>] [-o <name>] <source>
+Usage:
+  compile [options] <source>
 
-    Options:
+Options:
 
-      <source>  Source file of the algorithm
-      -I --interface=<interface>  Name of the interface this algorithm implements
-      --no-interface  This algorithm handles stdin/stdout directly
-      -x --language=<lang>  Language in which the algorithm is written
-      -o --algorithm=<name>  Name of the algorithm to generate
+  <source>  Source file of the algorithm
+  -I --interface=<interface>  Name of the interface this algorithm implements
+  -p --protocol=<interface>  Name of the protocol there the interface is defined
+  -x --language=<lang>  Language in which the algorithm is written
+  -o --algorithm=<name>  Name of the algorithm to generate
 
-    """
+"""
 import docopt
 
+from turingarena.protocol import ProtocolIdentifier
 from turingarena.sandbox.compile import compile
 
 
@@ -23,6 +24,7 @@ def sandbox_compile_cli(argv):
     compile(
         source_filename=args["<source>"],
         language=args["--language"],
-        interface=args["--interface"],
+        protocol_id=ProtocolIdentifier(args["--protocol"]),
+        interface_name=args["--interface"],
         algorithm_name=args["--algorithm"],
     )

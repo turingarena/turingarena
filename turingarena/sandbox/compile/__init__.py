@@ -7,7 +7,7 @@ from turingarena.sandbox.compile.cpp import compile_cpp
 logger = logging.getLogger(__name__)
 
 
-def compile(source_filename, language=None, interface=None, algorithm_name=None):
+def compile(*, language, source_filename, protocol_id, interface_name, algorithm_name):
     if language is None:
         lang_by_extensions = {
             "cpp": "cpp"
@@ -18,9 +18,9 @@ def compile(source_filename, language=None, interface=None, algorithm_name=None)
         language = lang_by_extensions[source_extension]
 
     if algorithm_name is None:
-        if interface is None:
+        if interface_name is None:
             raise ValueError("please provide an algorithm name when no interface is used")
-        algorithm_name = interface
+        algorithm_name = interface_name
 
     compilers = {
         "cpp": compile_cpp
@@ -46,10 +46,11 @@ def compile(source_filename, language=None, interface=None, algorithm_name=None)
     logger.debug("Creating language.txt file")
     with open("{}/language.txt".format(algorithm_dir), "w") as language_file:
         print(language, file=language_file)
-    with open(source_filename) as source_file:
-        logger.debug("Starting language-specific compilation")
-        compiler(
-            algorithm_dir=algorithm_dir,
-            source_file=source_file,
-            interface=interface,
-        )
+
+    logger.debug("Starting language-specific compilation")
+    compiler(
+        algorithm_dir=algorithm_dir,
+        source_filename=source_filename,
+        protocol_id=protocol_id,
+        interface_name=interface_name,
+    )

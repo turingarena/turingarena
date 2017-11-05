@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class PlumberServer:
-    def __init__(self, *, protocol, interface_name, sandbox_dir):
+    def __init__(self, *, protocol_id, interface_name, sandbox_dir):
+        protocol = protocol_id.load()
         self.protocol = protocol
         self.interface = protocol.body.scope.interfaces[interface_name]
 

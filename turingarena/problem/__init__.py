@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.evaluation import Task, TaskDescription
+from turingarena.protocol.proxy.python.client import Implementation
 
 
 class ProblemIdentifier(TupleLikeObject):
@@ -42,13 +43,13 @@ class Problem:
         assert name is not None
         assert name not in self.submission_items
 
-        item = ImplementationSubmissionItem(**kwargs)
+        item = ImplementationSubmissionItem(name=name, **kwargs)
         self.submission_items[name] = item
         return item
 
 
 class SubmissionItem(ImmutableObject):
-    __slots__ = []
+    __slots__ = ["name"]
 
     @abstractmethod
     def dependencies(self):
@@ -60,18 +61,21 @@ class SubmissionItem(ImmutableObject):
 
 
 class ImplementationSubmissionItem(SubmissionItem):
-    __slots__ = ["protocol_name", "interface_name"]
+    __slots__ = ["protocol_id", "interface_name"]
 
     def dependencies(self):
         # TODO: compile the submission
         return []
 
+    def algorithm_name(self):
+        return self.name
+
     def resolve(self):
-        # FIXME: install the protocol file
-        protocol_module = importlib.import_module(
-            f"turingarena_protocols.{self.protocol_name}"
+        return Implementation(
+            protocol_id=self.protocol_id,
+            interface_name=self.interface_name,
+            algorithm_name=self.algorithm_name(),
         )
-        interface_signature = getattr(protocol_module, self.interface_name)
 
 
 class Goal:

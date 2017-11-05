@@ -22,6 +22,11 @@ class ProtocolIdentifier(TupleLikeObject):
         )
         super().__init__(parts=parts)
 
+    def to_command(self):
+        return (
+            f"turingarena protocol --name {self.name()}"
+        )
+
     def source_dir(self):
         dirs = self.parts[:-2]
         if dirs:

@@ -1,11 +1,11 @@
 """TuringArena protocol plumber.
 
 Usage:
-  plumber [options] <interface> <sandbox-dir>
+  server [options]
 
 Options:
-  <interface>  Interface to drive.
-  <sandbox-dir>  Location of the sandbox.
+  -I --interface=<interface>  Interface to drive.
+  -s --sandbox=<sandbox>  Sandbox to connect to.
 """
 
 import docopt
@@ -13,10 +13,10 @@ import docopt
 from turingarena.protocol.server import run_server
 
 
-def protocol_server_cli(*, argv, protocol):
+def protocol_server_cli(*, argv, protocol_id):
     args = docopt.docopt(__doc__, argv=argv)
     run_server(
-        protocol=protocol,
-        interface_name=args["<interface>"],
-        sandbox_dir=args["<sandbox-dir>"],
+        protocol_id=protocol_id,
+        interface_name=args["--interface"],
+        sandbox_dir=args["--sandbox"],
     )

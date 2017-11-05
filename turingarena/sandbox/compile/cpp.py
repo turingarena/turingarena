@@ -1,38 +1,36 @@
 import logging
+import os
 import subprocess
+
+import pkg_resources
+import shutil
 
 logger = logging.getLogger(__name__)
 
 
-def compile_cpp(algorithm_dir, source_file, interface):
-    interface_file_name = "generated_skeletons/skeleton/{}/cpp/main.cpp".format(interface)
+def compile_cpp(algorithm_dir, source_filename, protocol_id, interface_name):
+    skeleton_path = pkg_resources.resource_filename(
+        f"turingarena_skeletons.{protocol_id.name()}",
+        f"skeleton/{interface_name}/cpp/main.cpp",
+    )
+
+    shutil.copy(source_filename, os.path.join(algorithm_dir, "source.cpp"))
+    shutil.copy(skeleton_path, os.path.join(algorithm_dir, "skeleton.cpp"))
+
+    cli = "g++ -o algorithm source.cpp skeleton.cpp"
+    logger.debug(f"Running {cli}")
 
     with open(algorithm_dir + "/compilation_output.txt", "w") as compilation_output:
-        cli = "g++ -x c++ -o algorithm -"
-        logger.debug("Running {}".format(cli))
-        compiler = subprocess.Popen(
+        compiler = subprocess.run(
             cli,
             shell=True,
             cwd=algorithm_dir,
-            stdin=subprocess.PIPE,
             stderr=compilation_output,
             universal_newlines=True,
         )
 
-        if interface is not None:
-            logger.debug("Streaming interface code")
-            print('#line 1 "<interface>"', file=compiler.stdin)
-            with open(interface_file_name) as interface_file:
-                compiler.stdin.write(interface_file.read())
-        logger.debug("Streaming algorithm code")
-        print('#line 1 "<algorithm>"', file=compiler.stdin)
-        compiler.stdin.write(source_file.read())
+    with open(algorithm_dir + "/compilation_return.txt", "w") as compilation_return:
+        print(compiler.returncode, file=compilation_return)
 
-        logger.debug("Compiling...")
-        compiler.communicate()
-        logger.debug("Compiling done.")
-
-        with open(algorithm_dir + "/compilation_return.txt", "w") as compilation_return:
-            print(compiler.returncode, file=compilation_return)
-
-
+    if compiler.returncode != 0:
+        logger.warning("Compilation failed")
