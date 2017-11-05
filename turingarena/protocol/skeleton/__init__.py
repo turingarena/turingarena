@@ -1,9 +1,10 @@
 import logging
+
 import os
 import shutil
 from tempfile import TemporaryDirectory
 
-from turingarena.protocol.codegen.utils import write_to_file
+from turingarena.tools.install import install_with_setuptools
 from . import cpp
 
 logger = logging.getLogger(__name__)
@@ -11,8 +12,6 @@ logger = logging.getLogger(__name__)
 languages = {
     "cpp": cpp.generate_skeleton
 }
-
-
 
 
 class SkeletonGenerator:
@@ -64,15 +63,6 @@ class SkeletonGenerator:
 
 def install_skeleton(protocol_id):
     package_name = f"turingarena_skeletons.{protocol_id.name()}"
-
-    def generate_setup_py():
-        yield "from setuptools import setup"
-        yield
-        yield f"setup("
-        yield f"    name='{package_name}',"
-        yield f"    packages=['turingarena_protocols', '{package_name}'],"
-        yield f")"
-
     protocol = protocol_id.load()
 
     with TemporaryDirectory() as dest_dir:
@@ -82,7 +72,19 @@ def install_skeleton(protocol_id):
             protocol_id.full_dir(),
         )
 
-        with open(os.path.join(dest_dir, "setup.py"), "w") as setup_py:
-            write_to_file(generate_setup_py(), setup_py)
-
         SkeletonGenerator(protocol, dest_dir=package_dir)
+
+        with open(os.path.join(package_dir, "__init__.py"), "w") as init_py:
+            pass
+
+        levels = 10
+        install_with_setuptools(
+            dest_dir,
+            name=package_name,
+            packages=[package_name],
+            package_data={
+                # copy recursively up to levels
+                package_name: ["/".join(["*"] * i) for i in range(1, levels)],
+            },
+            zip_safe=False,
+        )
