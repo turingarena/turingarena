@@ -12,9 +12,8 @@ def parse(*args, **kwargs):
     return tatsu.parse(grammar_ebnf, *args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
-def parse_protocol(filename):
-    logger.info("Parsing protocol file %s", filename)
-    return parse(open(filename).read(), rule="unit")
+def parse_protocol(data):
+    return parse(data, rule="unit")
 
 
 class Semantics:

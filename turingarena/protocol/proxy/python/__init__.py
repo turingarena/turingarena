@@ -1,7 +1,7 @@
+import subprocess
+
 import os
 from tempfile import TemporaryDirectory
-
-from gevent import subprocess
 
 from turingarena.protocol.codegen.utils import write_to_file
 
@@ -16,15 +16,18 @@ def do_generate_proxy(protocol):
 
 
 def generate_proxy(protocol_id):
-    qual_package_name = protocol_id.python_package()
+    package_name = protocol_id.python_package()
 
     def generate_setup_py():
         yield "from setuptools import setup"
         yield
         yield f"setup("
-        yield f"    name='{qual_package_name}',"
-        yield f"    packages=['turingarena_protocols', '{qual_package_name}'],"
+        yield f"    name='{package_name}',"
+        yield f"    packages={[package_name]},"
+        yield f"    zip_safe={False},"
         yield f")"
+
+    protocol = protocol_id.load()
 
     with TemporaryDirectory() as dest_dir:
         namespace_dir = os.path.join(
@@ -51,7 +54,7 @@ def generate_proxy(protocol_id):
 
         subprocess.run(
             ["python", "setup.py", "install"],
-            chdir=dest_dir,
+            cwd=dest_dir,
         )
 
 

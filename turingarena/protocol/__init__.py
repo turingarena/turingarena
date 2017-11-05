@@ -1,7 +1,11 @@
 import os
 import re
 
+import pkg_resources
+
 from turingarena.common import TupleLikeObject
+from turingarena.protocol.model.model import Protocol
+from turingarena.protocol.parser import parse_protocol
 
 part_regex = re.compile("^[a-z][a-z_]*$")
 
@@ -31,6 +35,9 @@ class ProtocolIdentifier(TupleLikeObject):
     def source_path(self):
         return os.path.join(self.source_dir(), self.source_filename())
 
+    def full_dir(self):
+        return os.path.join(*self.parts)
+
     def name(self):
         return ".".join(self.parts)
 
@@ -38,7 +45,12 @@ class ProtocolIdentifier(TupleLikeObject):
         return "turingarena_protocols." + self.name()
 
     def python_package_dir(self):
-        return os.path.join("turingarena_protocols", *self.parts)
+        return os.path.join("turingarena_protocols", self.full_dir())
+
+    def load(self):
+        protocol_def = pkg_resources.resource_string(self.python_package(), "__init__.tap")
+        ast = parse_protocol(protocol_def.decode())
+        return Protocol.compile(ast=ast, id=self)
 
     def __str__(self):
         return self.name()
