@@ -7,12 +7,9 @@ Usage:
 
 import docopt
 
-from turingarena.evaluation import EvaluationPlan, Task
+from turingarena.evaluation import EvaluationPlan, Task, evaluate_task
 
 
 def evaluation_cli(argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
-
-    plan = EvaluationPlan(Task(args["<task>"]))
-
-    print(plan)
+    evaluate_task(Task(args["<task>"]))

@@ -105,7 +105,7 @@ class Goal:
     def evaluate(self):
         submission = {
             name: item.resolve()
-            for name, item in self.problem.submission_items.items()
+            for name, item in self.problem.entries.items()
         }
         return self.checker(**submission)
 
