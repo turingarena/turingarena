@@ -8,14 +8,14 @@ Usage:
 
 import docopt
 
-from turingarena.evaluation import Task, evaluate_task, make_entry
+from turingarena.evaluation import evaluate_task, make_entry
 
 
 def evaluation_cli(argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
 
     if args["task"]:
-        return evaluate_task(Task(args["<task>"]))
+        return evaluate_task(args["<task>"])
 
     if args["entry"]:
         return make_entry(

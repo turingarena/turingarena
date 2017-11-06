@@ -12,21 +12,15 @@ from turingarena.common import ImmutableObject, TupleLikeObject
 logger = logging.getLogger(__name__)
 
 
-class Task(TupleLikeObject):
-    __slots__ = ["meta_command"]
-
-    def __init__(self, meta_command):
-        super().__init__(meta_command=meta_command)
-
-    def resolve(self):
-        with TemporaryDirectory() as dir:
-            result = subprocess.run(
-                self.meta_command,
-                cwd=dir,
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
-        return TaskDescription(**json.loads(result.stdout))
+def load_task_description(task):
+    with TemporaryDirectory() as dir:
+        result = subprocess.run(
+            task,
+            cwd=dir,
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
+    return TaskDescription(**json.loads(result.stdout))
 
 
 class TaskDescription(ImmutableObject):
@@ -43,7 +37,7 @@ class TaskDescription(ImmutableObject):
         return json.dumps({
             "command": self.command,
             "dependencies": [
-                d.meta_command
+                d
                 for d in self.dependencies
             ],
             "entries": self.entries,
@@ -73,15 +67,14 @@ class EvaluationPlan(ImmutableObject):
                 logger.debug(f"cache hit")
                 continue
 
-            description = top_task.resolve()
+            description = load_task_description(top_task)
             self.description_cache[top_task] = description
 
             for entry in description.entries:
                 logger.debug(f"adding entry {entry}")
                 self.entries.add(entry)
 
-            for dep_cmd in description.dependencies:
-                dep = Task(dep_cmd)
+            for dep in description.dependencies:
                 logger.debug(f"pushing dependency '{dep}'")
                 assert dep not in stack
                 stack.append(dep)
@@ -102,7 +95,7 @@ def evaluate_task(root_task):
             description = plan.description_cache[task]
 
             for d in description.dependencies:
-                dfs(Task(d))
+                dfs(d)
 
             subprocess.run(
                 description.command,

@@ -1,8 +1,7 @@
-import importlib
 from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.evaluation import Task, TaskDescription
+from turingarena.evaluation import TaskDescription
 from turingarena.protocol.proxy.python.client import Implementation
 
 
@@ -65,11 +64,10 @@ class ImplementationEntry(Entry):
 
     def dependencies(self, *, problem_id):
         return [
-            Task(
-                f"{problem_id.to_command()}"
-                f" entry --name {self.name}"
-                f" compile task"
-            )
+            f"{problem_id.to_command()}"
+            f" entry --name {self.name}"
+            f" compile task"
+            ,
         ]
 
     def compile_task_description(self):
@@ -117,7 +115,7 @@ class Goal:
         )
 
     def to_task(self, problem_id):
-        return Task(self.to_command(problem_id) + " task")
+        return self.to_command(problem_id) + " task"
 
     def to_task_description(self, problem_id):
         return TaskDescription(
