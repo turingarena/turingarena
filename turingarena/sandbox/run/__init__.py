@@ -92,7 +92,7 @@ class SandboxServer:
             language = language_file.read().strip()
 
         runners = {
-            "cpp": run_cpp
+            "c++": run_cpp
         }
         runner = runners[language]
 

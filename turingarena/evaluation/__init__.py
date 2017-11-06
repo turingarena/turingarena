@@ -30,6 +30,9 @@ class TaskDescription(ImmutableObject):
 
     def to_json(self):
         return json.dumps({
-            s: getattr(self, s)
-            for s in self.all_slots()
-        })
+            "command": self.command,
+            "dependencies": [
+                d.meta_command
+                for d in self.dependencies
+            ]
+        }, indent=4)

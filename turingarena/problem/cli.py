@@ -13,6 +13,7 @@ Options:
 import docopt
 
 from turingarena.problem import ProblemIdentifier
+from turingarena.problem.entry_cli import problem_entry_cli
 from turingarena.problem.goal_cli import problem_goal_cli
 
 
@@ -26,6 +27,7 @@ def problem_cli(argv):
 
     commands = {
         "goal": problem_goal_cli,
+        "entry": problem_entry_cli,
     }
     argv2 = args["<args>"]
     return commands[args["<cmd>"]](problem_id=problem_id, argv=argv2)

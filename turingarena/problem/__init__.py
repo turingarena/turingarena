@@ -22,11 +22,11 @@ class ProblemIdentifier(TupleLikeObject):
 
 
 class Problem:
-    __slots__ = ["goals", "submission_items"]
+    __slots__ = ["goals", "entries"]
 
     def __init__(self):
         self.goals = {}
-        self.submission_items = {}
+        self.entries = {}
 
     def goal(self, checker=None, *, name=None):
         if checker and not name:
@@ -39,20 +39,20 @@ class Problem:
         self.goals[name] = goal
         return goal
 
-    def implementation_submission_item(self, name, **kwargs):
+    def implementation_entry(self, name, **kwargs):
         assert name is not None
-        assert name not in self.submission_items
+        assert name not in self.entries
 
-        item = ImplementationSubmissionItem(name=name, **kwargs)
-        self.submission_items[name] = item
-        return item
+        entry = ImplementationEntry(problem=self, name=name, **kwargs)
+        self.entries[name] = entry
+        return entry
 
 
-class SubmissionItem(ImmutableObject):
-    __slots__ = ["name"]
+class Entry(ImmutableObject):
+    __slots__ = ["problem", "name"]
 
     @abstractmethod
-    def dependencies(self):
+    def dependencies(self, *, problem_id):
         pass
 
     @abstractmethod
@@ -60,12 +60,29 @@ class SubmissionItem(ImmutableObject):
         pass
 
 
-class ImplementationSubmissionItem(SubmissionItem):
+class ImplementationEntry(Entry):
     __slots__ = ["protocol_id", "interface_name"]
 
-    def dependencies(self):
-        # TODO: compile the submission
-        return []
+    def dependencies(self, *, problem_id):
+        return [
+            Task(
+                f"{problem_id.to_command()}"
+                f" entry --name {self.name}"
+                f" compile task"
+            )
+        ]
+
+    def compile_task_description(self):
+        return TaskDescription(
+            command=(
+                f"turingarena sandbox compile"
+                f" --protocol {self.protocol_id.name()}"
+                f" --interface {self.interface_name}"
+                f" -o {self.name}"
+                f" solution.cpp"
+            ),
+            dependencies=[],
+        )
 
     def algorithm_name(self):
         return self.name
@@ -105,5 +122,9 @@ class Goal:
     def to_task_description(self, problem_id):
         return TaskDescription(
             command=self.to_command(problem_id) + " evaluate",
-            dependencies=[],
+            dependencies=[
+                d
+                for entry in self.problem.entries.values()
+                for d in entry.dependencies(problem_id=problem_id)
+            ],
         )

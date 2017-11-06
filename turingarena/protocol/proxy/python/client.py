@@ -9,12 +9,6 @@ from turingarena.sandbox.client import Algorithm
 logger = logging.getLogger(__name__)
 
 
-class Interface:
-    def __init__(self, package_name, name):
-        self.package_name = package_name
-        self.name = name
-
-
 class Implementation:
     def __init__(self, *, protocol_id, interface_name, algorithm_name):
         self.protocol_id = protocol_id

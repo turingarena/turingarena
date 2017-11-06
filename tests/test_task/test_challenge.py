@@ -7,15 +7,15 @@ from turingarena.protocol.proxy.python.engine import ProxyEngine
 
 problem = Problem()
 
-problem.implementation_submission_item(
-    "solution",
+problem.implementation_entry(
+    "entry",
     protocol_id=ProtocolIdentifier("test_challenge"),
     interface_name="exampleinterface",
 )
 
 @problem.goal
-def goal(solution):
-    with solution.run() as connection:
+def goal(entry):
+    with entry.run() as connection:
         class Data:
             pass
 
@@ -34,5 +34,3 @@ def goal(solution):
         proxy.end_main()
 
     print("Answer:", S, file=sys.stderr)
-
-goal.evaluate()

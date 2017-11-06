@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def compile(*, language, source_filename, protocol_id, interface_name, algorithm_name):
     if language is None:
         lang_by_extensions = {
-            "cpp": "cpp"
+            "cpp": "c++",
         }
         source_extension = source_filename.split(".")[-1]
         if source_extension not in lang_by_extensions:
@@ -23,7 +23,7 @@ def compile(*, language, source_filename, protocol_id, interface_name, algorithm
         algorithm_name = interface_name
 
     compilers = {
-        "cpp": compile_cpp
+        "c++": compile_cpp
     }
     if language not in compilers:
         raise ValueError("unsupported language: {}".format(language))
@@ -33,10 +33,10 @@ def compile(*, language, source_filename, protocol_id, interface_name, algorithm
 
     logger.info(
         f"Compiling algorithm '{algorithm_name}'"
-        f"with language {language} and source file '{source_filename}'"
+        f" with language {language} and source file '{source_filename}'"
     )
 
-    logger.debug("Creating empty algorithm directory '{}'".format(algorithm_dir))
+    logger.debug(f"Creating empty algorithm directory '{algorithm_dir}'")
     # cleanup
     os.makedirs(algorithm_dir, exist_ok=True)
     shutil.rmtree(algorithm_dir)
@@ -44,7 +44,7 @@ def compile(*, language, source_filename, protocol_id, interface_name, algorithm
     os.mkdir(algorithm_dir)
 
     logger.debug("Creating language.txt file")
-    with open("{}/language.txt".format(algorithm_dir), "w") as language_file:
+    with open(f"{algorithm_dir}/language.txt", "w") as language_file:
         print(language, file=language_file)
 
     logger.debug("Starting language-specific compilation")
