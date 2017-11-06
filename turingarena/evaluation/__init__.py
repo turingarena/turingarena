@@ -2,6 +2,9 @@ import json
 import logging
 import subprocess
 
+import git
+import os
+import shutil
 from tempfile import TemporaryDirectory
 
 from turingarena.common import ImmutableObject, TupleLikeObject
@@ -108,3 +111,19 @@ def evaluate_task(root_task):
             )
             done[task] = True
         dfs(root_task)
+
+
+def make_entry(name, file_map):
+    with TemporaryDirectory() as temp_dir:
+        repo = git.Repo.init(path=temp_dir)
+
+        for source, dest in file_map.items():
+            os.makedirs(os.path.join(temp_dir, os.path.dirname(dest)), exist_ok=True)
+            shutil.copy(source, os.path.join(temp_dir, dest))
+
+        repo.active_branch.checkout(orphan=f"entry/{name}")
+        repo.index.add(".")
+
+        repo.create_head("HEAD")
+        commit = repo.commit()
+        print(commit.hexsha)
