@@ -79,9 +79,9 @@ class ImplementationEntry(Entry):
                 f" --protocol {self.protocol_id.name()}"
                 f" --interface {self.interface_name}"
                 f" -o {self.name}"
-                f" solution.cpp"
+                f" {self.name}.cpp"
             ),
-            dependencies=[],
+            entries=[f"{self.name}"],
         )
 
     def algorithm_name(self):
