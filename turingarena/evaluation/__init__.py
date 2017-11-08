@@ -35,12 +35,8 @@ class TaskDescription(ImmutableObject):
 
     def to_json(self):
         return json.dumps({
-            "command": self.command,
-            "dependencies": [
-                d
-                for d in self.dependencies
-            ],
-            "entries": self.entries,
+            slot: getattr(self, slot)
+            for slot in self.all_slots()
         }, indent=4)
 
 
@@ -106,17 +102,51 @@ def evaluate_task(root_task):
         dfs(root_task)
 
 
-def make_entry(name, file_map):
+def compute_task(task, *, repo_path, deps, entries):
+    description = load_task_description(task)
+    assert len(description.dependencies) == len(deps)
+    assert len(description.entries) == len(entries)
+
+    root_repo = git.Repo(path=repo_path)
+
     with TemporaryDirectory() as temp_dir:
-        repo = git.Repo.init(path=temp_dir)
+        repo = root_repo.clone(path=temp_dir)
+
+        for dep in entries + deps:
+            repo.remote("origin").fetch(f"sha-{dep}")
+            repo.index.merge_tree(repo.commit(dep))
+
+        repo.index.checkout()
+
+        subprocess.run(
+            description.command,
+            shell=True,
+            cwd=repo.working_dir,
+        )
+
+        repo.index.add("*")
+
+        commit = repo.index.commit(f"turingarena compute '{task}'")
+
+        repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
+        logger.debug(f"commit message: {commit.message}")
+        print(commit.hexsha)
+
+
+def make_entry(name, *, file_map, repo_path):
+    root_repo = git.Repo(path=repo_path)
+
+    with TemporaryDirectory() as temp_dir:
+        repo = root_repo.clone(path=temp_dir)
 
         for source, dest in file_map.items():
             os.makedirs(os.path.join(temp_dir, os.path.dirname(dest)), exist_ok=True)
             shutil.copy(source, os.path.join(temp_dir, dest))
 
-        repo.active_branch.checkout(orphan=f"entry/{name}")
-        repo.index.add(".")
+        repo.index.add("*")
+        commit = repo.index.commit(f"turingarena entry {name}")
+        repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
 
-        repo.create_head("HEAD")
-        commit = repo.commit()
+        logger.debug(f"commit message: {commit.message}")
+
         print(commit.hexsha)
