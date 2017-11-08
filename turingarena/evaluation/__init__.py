@@ -112,9 +112,10 @@ def compute_task(task, *, repo_path, deps, entries):
     with TemporaryDirectory() as temp_dir:
         repo = root_repo.clone(path=temp_dir)
 
-        for dep in entries + deps:
-            repo.remote("origin").fetch(f"sha-{dep}")
-            repo.index.merge_tree(repo.commit(dep))
+        bases = entries + deps
+        for base in bases:
+            repo.remote("origin").fetch(f"sha-{base}")
+            repo.index.merge_tree(repo.commit(base))
 
         repo.index.checkout()
 
@@ -126,7 +127,13 @@ def compute_task(task, *, repo_path, deps, entries):
 
         repo.index.add("*")
 
-        commit = repo.index.commit(f"turingarena compute '{task}'")
+        commit = repo.index.commit(
+            f"turingarena compute '{task}'",
+            parent_commits=[
+                repo.commit(base)
+                for base in bases
+            ],
+        )
 
         repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
         logger.debug(f"commit message: {commit.message}")
