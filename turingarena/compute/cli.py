@@ -1,7 +1,7 @@
 """TuringArena compute.
 
 Usage:
-  compute [options] [--dep <id>]... <cmd>
+  compute [options] [--dep <id>]... [--] <cmd>...
 
 Options:
   --db=<db>  Location of the database
@@ -19,7 +19,7 @@ def compute_cli(argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
 
     return compute(
-        command=args["<cmd>"],
+        command=" ".join(args["<cmd>"]),
         repo_path=args["--db"],
         deps=args["--dep"],
     )
