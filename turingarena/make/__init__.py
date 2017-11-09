@@ -107,7 +107,8 @@ class SequentialMaker:
             for task in self.plan.description_cache
         }
         try:
-            return self.dfs(self.target)
+            self.dfs(self.target)
+            return self.results[self.target]
         finally:
             self.results = None
 
