@@ -3,11 +3,9 @@ import logging
 import subprocess
 
 import git
-import os
-import shutil
 from tempfile import TemporaryDirectory
 
-from turingarena.common import ImmutableObject, TupleLikeObject
+from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)
 
@@ -99,28 +97,24 @@ def evaluate_task(root_task):
                 cwd=eval_dir,
             )
             done[task] = True
+
         dfs(root_task)
 
 
-def compute_task(task, *, repo_path, deps, entries):
-    description = load_task_description(task)
-    assert len(description.dependencies) == len(deps)
-    assert len(description.entries) == len(entries)
-
+def compute(command, *, deps, repo_path):
     root_repo = git.Repo(path=repo_path)
 
     with TemporaryDirectory() as temp_dir:
         repo = root_repo.clone(path=temp_dir)
 
-        bases = entries + deps
-        for base in bases:
-            repo.remote("origin").fetch(f"sha-{base}")
-            repo.index.merge_tree(repo.commit(base))
+        for dep in deps:
+            repo.remote("origin").fetch(dep)
+            repo.index.merge_tree(repo.commit(dep))
 
         repo.index.checkout()
 
         subprocess.run(
-            description.command,
+            command,
             shell=True,
             cwd=repo.working_dir,
         )
@@ -128,32 +122,13 @@ def compute_task(task, *, repo_path, deps, entries):
         repo.index.add("*")
 
         commit = repo.index.commit(
-            f"turingarena compute '{task}'",
+            f"turingarena compute '{command}'",
             parent_commits=[
-                repo.commit(base)
-                for base in bases
+                repo.commit(dep)
+                for dep in deps
             ],
         )
 
         repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
         logger.debug(f"commit message: {commit.message}")
-        print(commit.hexsha)
-
-
-def make_entry(name, *, file_map, repo_path):
-    root_repo = git.Repo(path=repo_path)
-
-    with TemporaryDirectory() as temp_dir:
-        repo = root_repo.clone(path=temp_dir)
-
-        for source, dest in file_map.items():
-            os.makedirs(os.path.join(temp_dir, os.path.dirname(dest)), exist_ok=True)
-            shutil.copy(source, os.path.join(temp_dir, dest))
-
-        repo.index.add("*")
-        commit = repo.index.commit(f"turingarena entry {name}")
-        repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
-
-        logger.debug(f"commit message: {commit.message}")
-
         print(commit.hexsha)

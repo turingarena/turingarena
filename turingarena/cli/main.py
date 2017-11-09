@@ -13,7 +13,7 @@ Available sub-commands:
 import docopt
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.evaluation.cli import evaluation_cli
+from turingarena.compute.cli import compute_cli
 from turingarena.problem.cli import problem_cli
 from turingarena.protocol.cli import protocol_cli
 from turingarena.sandbox.cli import sandbox_cli
@@ -26,7 +26,7 @@ def main():
     commands = {
         "sandbox": sandbox_cli,
         "protocol": protocol_cli,
-        "evaluation": evaluation_cli,
+        "compute": compute_cli,
         "problem": problem_cli,
     }
     argv2 = args["<args>"]
