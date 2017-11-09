@@ -25,11 +25,16 @@ def subprocess_compute(task_command, *, compute_command, parents):
         f"--parent {parent}"
         for parent in parents
     )
+
+    combined_command = f"{compute_command} {dep_options} {task_command}"
+
+    logger.debug(f"executing '{combined_command}'")
     process = subprocess.run(
-        f"{compute_command} {dep_options} {task_command}",
+        combined_command,
         shell=True,
         stdout=subprocess.PIPE,
         universal_newlines=True,
+        check=True,
     )
     return process.stdout.strip()
 
