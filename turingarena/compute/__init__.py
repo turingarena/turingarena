@@ -7,15 +7,15 @@ from tempfile import TemporaryDirectory
 logger = logging.getLogger(__name__)
 
 
-def compute(command, *, deps, repo_path):
+def compute(command, *, parents, repo_path):
     root_repo = git.Repo(path=repo_path)
 
     with TemporaryDirectory() as temp_dir:
         repo = root_repo.clone(path=temp_dir)
 
-        for dep in deps:
-            repo.remote("origin").fetch(dep)
-            repo.index.merge_tree(repo.commit(dep))
+        for parent in parents:
+            repo.remote("origin").fetch(parent)
+            repo.index.merge_tree(repo.commit(parent))
 
         repo.index.checkout()
 
@@ -30,8 +30,8 @@ def compute(command, *, deps, repo_path):
         commit = repo.index.commit(
             f"turingarena compute '{command}'",
             parent_commits=[
-                repo.commit(dep)
-                for dep in deps
+                repo.commit(parent)
+                for parent in parents
             ],
         )
 

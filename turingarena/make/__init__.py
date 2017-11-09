@@ -20,10 +20,10 @@ def load_task_description(task):
     return TaskDescription(**json.loads(result.stdout))
 
 
-def subprocess_compute(task_command, *, compute_command, deps):
+def subprocess_compute(task_command, *, compute_command, parents):
     dep_options = " ".join(
-        f"--dep {dep}"
-        for dep in deps
+        f"--parent {parent}"
+        for parent in parents
     )
     process = subprocess.run(
         f"{compute_command} {dep_options} {task_command}",
@@ -116,7 +116,7 @@ class SequentialMaker:
 
         self.results[task] = self.compute(
             description.command,
-            deps=[
+            parents=[
                 self.results[dep]
                 for dep in description.dependencies
             ] + [

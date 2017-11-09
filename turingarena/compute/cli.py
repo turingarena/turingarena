@@ -1,11 +1,11 @@
 """TuringArena compute.
 
 Usage:
-  compute [options] [--dep <id>]... [--] <cmd>...
+  compute [options] [--parent <id>]... [--] <cmd>...
 
 Options:
   --db=<db>  Location of the database
-  --dep=<id>  Add a dependency
+  --parent=<id>  Add a parent
   <cmd>  The command to execute
 
 """
@@ -21,5 +21,5 @@ def compute_cli(argv):
     return compute(
         command=" ".join(args["<cmd>"]),
         repo_path=args["--db"],
-        deps=args["--dep"],
+        parents=args["--parent"],
     )
