@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.compute import TaskDescription
+from turingarena.make import TaskDescription
 from turingarena.protocol.proxy.python.client import Implementation
 
 
