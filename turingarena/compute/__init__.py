@@ -21,11 +21,17 @@ def compute(command, *, parents, repo_path):
 
         repo.index.checkout()
 
-        subprocess.run(
+        process = subprocess.run(
             command,
             shell=True,
             cwd=repo.working_dir,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+            check=True,
         )
+
+        for line in process.stdout.splitlines():
+            logger.debug(f"process output: {line.strip()}")
 
         repo.index.add("*")
 

@@ -10,10 +10,14 @@ Options:
   <target>  The task to make
 
 """
+import logging
+
 import docopt
 from functools import partial
 
 from turingarena.make import SequentialMaker, subprocess_compute
+
+logger = logging.getLogger(__name__)
 
 
 def make_cli(argv):
@@ -31,4 +35,7 @@ def make_cli(argv):
         )
     )
 
-    print(maker.run())
+    result = maker.run()
+    logger.debug(f"result {result}")
+
+    print(result)
