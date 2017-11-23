@@ -1,6 +1,6 @@
 import os
 
-from turingarena.protocol.codegen.utils import write_to_file
+from turingarena.tools.utils import write_to_file
 from turingarena.protocol.skeleton.cpp.statements import generate_block, generate_statement, build_declaration, \
     build_parameter
 

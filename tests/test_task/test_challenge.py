@@ -1,9 +1,9 @@
 import sys
+
 from turingarena_proxies.test_challenge import exampleinterface
 
 from turingarena.problem import Problem
 from turingarena.protocol import ProtocolIdentifier
-from turingarena.protocol.proxy.python.engine import ProxyEngine
 
 problem = Problem()
 
@@ -13,24 +13,16 @@ problem.implementation_entry(
     interface_name="exampleinterface",
 )
 
+
 @problem.goal
 def goal(entry):
     with entry.run() as connection:
-        class Data:
-            pass
+        p = exampleinterface(connection)
 
-        data = Data()
-        data.N = 10
-        data.M = 100
-        data.A = [i * i for i in range(data.N)]
+        p.N = 10
+        p.M = 100
+        p.A = [i * i for i in range(p.N)]
 
-        proxy = ProxyEngine(
-            interface_signature=exampleinterface,
-            instance=data,
-            connection=connection,
-        )
-        S = proxy.call("solve", [3], {"test": lambda a, b: a + b})
-
-        proxy.end_main()
+        S = p.solve(3, callback_test=lambda a, b: a + b)
 
     print("Answer:", S, file=sys.stderr)

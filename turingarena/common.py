@@ -19,7 +19,7 @@ class ImmutableObject(metaclass=ABCMeta):
         raise NotImplementedError
 
     def __repr__(self):
-        args = ", ".join(f"{s}={repr(getattr(self, s, 'MISSING'))}" for s in self.all_slots())
+        args = ", ".join(f"{s}={repr(getattr(self, s, '<MISSING>'))}" for s in self.all_slots())
         return f"{self.__class__.__name__}({args})"
 
 

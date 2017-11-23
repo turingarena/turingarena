@@ -1,4 +1,4 @@
-from turingarena.protocol.codegen.utils import indent_all, indent
+from turingarena.tools.utils import indent_all, indent
 from turingarena.protocol.skeleton.cpp.expressions import build_expression
 from turingarena.protocol.skeleton.cpp.type_expressions import build_full_type, build_declarator, build_type_specifier
 

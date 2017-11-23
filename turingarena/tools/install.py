@@ -3,7 +3,7 @@ import subprocess
 
 import os
 
-from turingarena.protocol.codegen.utils import indent, write_to_file
+from turingarena.tools.utils import indent, write_to_file
 
 logger = logging.getLogger(__name__)
 

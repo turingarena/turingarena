@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 import subprocess
 
-from turingarena.protocol.codegen.utils import write_to_file
+from turingarena.tools.utils import write_to_file
 from turingarena.tools.install import install_with_setuptools
 
 logger = logging.getLogger(__name__)
