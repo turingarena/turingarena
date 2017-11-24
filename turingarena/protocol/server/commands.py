@@ -82,12 +82,12 @@ class MainBegin(ProxyRequest):
         return dict(
             global_variables=[
                 variable.value_type.deserialize(lines)
-                for variable in interface_signature.variables
+                for variable in interface_signature.variables.values()
             ]
         )
 
     def serialize_arguments(self):
-        for variable, value in zip(self.interface_signature.variables, self.global_variables):
+        for variable, value in zip(self.interface_signature.variables.values(), self.global_variables):
             yield from variable.value_type.serialize(value)
 
 

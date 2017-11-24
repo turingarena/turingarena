@@ -66,7 +66,7 @@ class Interface(ImmutableObject):
         if context.phase is Phase.PREFLIGHT:
             request = context.engine.peek_request()
             assert request.message_type == "main_begin"
-            for variable, value in zip(self.signature.variables, request.global_variables):
+            for variable, value in zip(self.signature.variables.values(), request.global_variables):
                 context.engine.root_frame[variable] = value
             context.engine.complete_request()
 

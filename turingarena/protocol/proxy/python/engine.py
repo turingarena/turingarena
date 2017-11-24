@@ -73,7 +73,7 @@ class ProxyEngine:
             interface_signature=self.interface_signature,
             global_variables=[
                 getattr(self.instance, variable.name)
-                for variable in self.interface_signature.variables
+                for variable in self.interface_signature.variables.values()
             ]
         )
         self.send(request)
