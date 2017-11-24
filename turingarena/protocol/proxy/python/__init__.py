@@ -6,7 +6,7 @@ from turingarena.tools.install import install_with_setuptools
 
 
 def generate_interface_proxy(signature):
-    slots = ", ".join(f"'{v.name}'" for v in signature.variables)
+    slots = ", ".join(f"'{v.name}'" for v in signature.variables.values())
 
     yield f"__slots__ = ['_engine', {slots}]"
 

@@ -31,10 +31,9 @@ class ScopeNamespace:
         try:
             return self.delegate[key]
         except KeyError:
-            if self.parent:
-                return self.parent[key]
-            else:
+            if not self.parent:
                 raise
+        return self.parent[key]
 
     def __setitem__(self, key, value):
         if key in self.delegate:

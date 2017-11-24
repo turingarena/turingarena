@@ -1,5 +1,7 @@
 import logging
 
+from collections import OrderedDict
+
 from turingarena.common import ImmutableObject, TupleLikeObject
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
@@ -43,7 +45,7 @@ class Interface(ImmutableObject):
     def compile(ast, scope):
         body = Body.compile(ast.body, scope=scope)
         signature = InterfaceSignature(
-            variables=list(body.scope.variables.values()),
+            variables=OrderedDict(body.scope.variables.items()),
             functions={
                 c.name: c.signature
                 for c in body.scope.functions.values()
