@@ -14,13 +14,13 @@ Options:
 """
 import docopt
 
-from turingarena.sandbox.compile import compile
+from turingarena.sandbox.compile import sandbox_compile
 
 
 def sandbox_compile_cli(argv):
     args = docopt.docopt(__doc__, argv=argv)
 
-    compile(
+    sandbox_compile(
         source_filename=args["<source>"],
         language=args["--language"],
         protocol_name=args["--protocol"],

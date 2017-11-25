@@ -1,7 +1,6 @@
 from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.make import TaskDescription
 from turingarena.protocol.proxy.python.engine import Implementation
 
 
@@ -69,18 +68,6 @@ class ImplementationEntry(Entry):
             f" compile task"
             ,
         ]
-
-    def compile_task_description(self):
-        return TaskDescription(
-            command=(
-                f"turingarena sandbox compile"
-                f" --protocol {self.protocol_name}"
-                f" --interface {self.interface_name}"
-                f" -o {self.name}"
-                f" {self.name}.cpp"
-            ),
-            entries=[f"{self.name}"],
-        )
 
     def algorithm_name(self):
         return self.name
