@@ -1,4 +1,6 @@
 import logging
+from contextlib import contextmanager
+from functools import partial
 
 from turingarena.protocol.server.commands import MainBegin, FunctionCall, ProxyResponse, CallbackReturn, MainEnd
 
@@ -10,16 +12,11 @@ class ProxyException(Exception):
 
 
 class ProxyEngine:
-    def __init__(self, *, interface_signature, instance, connection):
+    def __init__(self, *, interface_signature, connection):
         self.interface_signature = interface_signature
-        self.instance = instance
         self.connection = connection
-        self.main_begun = False
 
     def call(self, name, args, callbacks_impl):
-        if not self.main_begun:
-            self.begin_main()
-
         function_signature = self.interface_signature.functions[name]
 
         request = FunctionCall(
@@ -68,20 +65,35 @@ class ProxyEngine:
             print(line, file=file)
         file.flush()
 
-    def begin_main(self):
+    def begin_main(self, **global_variables):
         request = MainBegin(
             interface_signature=self.interface_signature,
             global_variables=[
-                getattr(self.instance, variable.name)
+                global_variables[variable.name]
                 for variable in self.interface_signature.variables.values()
             ]
         )
         self.send(request)
-        self.main_begun = True
 
     def end_main(self):
-        assert self.main_begun
         request = MainEnd(
             interface_signature=self.interface_signature,
         )
         self.send(request)
+
+
+class Proxy:
+    def __init__(self, engine, interface_signature):
+        self._engine = engine
+        self._interface_signature = interface_signature
+
+    def __getattr__(self, item):
+        try:
+            fun = self._interface_signature.functions[item]
+        except KeyError:
+            raise AttributeError
+
+        def method(*args, **kwargs):
+            return self._engine.call(item, args=args, callbacks_impl=kwargs)
+
+        return method

@@ -4,6 +4,7 @@ from contextlib import contextmanager, ExitStack
 
 import os
 
+from turingarena.protocol.proxy.python.engine import ProxyEngine, Proxy
 from turingarena.sandbox.client import Algorithm
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,8 @@ class Implementation:
         self.algorithm = Algorithm(algorithm_name)
 
     @contextmanager
-    def run(self):
+    def run(self, **global_variables):
+        interface_signature = self.protocol_id.load_signature(self.interface_name)
         sandbox = self.algorithm.sandbox()
         with sandbox.run() as process:
             plumber = ProxyClient(
@@ -25,7 +27,13 @@ class Implementation:
                 process=process,
             )
             with plumber.connect() as connection:
-                yield connection
+                engine = ProxyEngine(
+                    connection=connection,
+                    interface_signature=interface_signature,
+                )
+                engine.begin_main(**global_variables)
+                yield Proxy(engine=engine, interface_signature=interface_signature)
+                engine.end_main()
 
 
 class ProxyClient:

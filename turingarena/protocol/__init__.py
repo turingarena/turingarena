@@ -1,3 +1,4 @@
+import importlib
 import os
 import re
 
@@ -56,6 +57,10 @@ class ProtocolIdentifier(TupleLikeObject):
         protocol_def = pkg_resources.resource_string(self.python_package(), "__init__.tap")
         ast = parse_protocol(protocol_def.decode())
         return Protocol.compile(ast=ast, id=self)
+
+    def load_signature(self, interface_name):
+        proxy_module = importlib.import_module(f"turingarena_proxies.{self.name()}")
+        return getattr(proxy_module, interface_name)
 
     def __str__(self):
         return self.name()
