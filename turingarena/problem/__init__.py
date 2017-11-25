@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.make import TaskDescription
+from turingarena.protocol import ProtocolIdentifier
 from turingarena.protocol.proxy.python.client import Implementation
 
 
@@ -60,7 +61,7 @@ class Entry(ImmutableObject):
 
 
 class ImplementationEntry(Entry):
-    __slots__ = ["protocol_id", "interface_name"]
+    __slots__ = ["protocol_name", "interface_name"]
 
     def dependencies(self, *, problem_id):
         return [
@@ -74,7 +75,7 @@ class ImplementationEntry(Entry):
         return TaskDescription(
             command=(
                 f"turingarena sandbox compile"
-                f" --protocol {self.protocol_id.name()}"
+                f" --protocol {self.protocol_name}"
                 f" --interface {self.interface_name}"
                 f" -o {self.name}"
                 f" {self.name}.cpp"
@@ -87,7 +88,7 @@ class ImplementationEntry(Entry):
 
     def resolve(self):
         return Implementation(
-            protocol_id=self.protocol_id,
+            protocol_id=ProtocolIdentifier(self.protocol_name),
             interface_name=self.interface_name,
             algorithm_name=self.algorithm_name(),
         )

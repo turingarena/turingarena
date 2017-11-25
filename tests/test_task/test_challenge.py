@@ -1,13 +1,12 @@
 import sys
 
 from turingarena.problem import Problem
-from turingarena.protocol import ProtocolIdentifier
 
 problem = Problem()
 
 problem.implementation_entry(
     "entry",
-    protocol_id=ProtocolIdentifier("test_challenge"),
+    protocol_name="test_challenge",
     interface_name="exampleinterface",
 )
 
