@@ -1,8 +1,8 @@
 import sys
 
+from turingarena.make import task
 from turingarena.problem import Problem
 from turingarena.sandbox.compile import sandbox_compile
-from turingarena.task import task
 
 problem = Problem()
 

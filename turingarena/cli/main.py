@@ -13,10 +13,9 @@ Available sub-commands:
 import docopt
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.problem.cli import problem_cli
+from turingarena.make.cli import make_cli
 from turingarena.protocol.cli import protocol_cli
 from turingarena.sandbox.cli import sandbox_cli
-from turingarena.task.cli import task_cli
 
 
 def main():
@@ -26,8 +25,7 @@ def main():
     commands = {
         "sandbox": sandbox_cli,
         "protocol": protocol_cli,
-        "problem": problem_cli,
-        "task": task_cli,
+        "make": make_cli,
     }
     argv2 = args["<args>"]
     commands[args["<cmd>"]](argv2)

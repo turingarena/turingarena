@@ -1,22 +1,10 @@
 from abc import abstractmethod
+from functools import partial
 
-from turingarena.common import TupleLikeObject, ImmutableObject
+from turingarena.common import ImmutableObject
+from turingarena.make import Task
 from turingarena.protocol.proxy.python.engine import Implementation
-
-
-class ProblemIdentifier(TupleLikeObject):
-    __slots__ = ["module", "name"]
-
-    def load(self):
-        module = __import__(self.module)
-        return getattr(module, self.name)
-
-    def to_command(self):
-        return (
-            f"turingarena problem"
-            f" --module {self.module}"
-            f" --name {self.name}"
-        )
+from turingarena.sandbox.compile import sandbox_compile
 
 
 class Problem:
@@ -25,6 +13,10 @@ class Problem:
     def __init__(self):
         self.goals = {}
         self.entries = {}
+
+    def get_tasks(self):
+        for goal in self.goals.values():
+            yield goal.main_task()
 
     def goal(self, checker=None, *, name=None):
         if checker and not name:
@@ -50,7 +42,7 @@ class Entry(ImmutableObject):
     __slots__ = ["problem", "name"]
 
     @abstractmethod
-    def dependencies(self, *, problem_id):
+    def get_tasks(self):
         pass
 
     @abstractmethod
@@ -61,13 +53,18 @@ class Entry(ImmutableObject):
 class ImplementationEntry(Entry):
     __slots__ = ["protocol_name", "interface_name"]
 
-    def dependencies(self, *, problem_id):
-        return [
-            f"{problem_id.to_command()}"
-            f" entry --name {self.name}"
-            f" compile task"
-            ,
-        ]
+    def get_tasks(self):
+        yield Task(
+            name=f"compile_{self.name}",
+            target=partial(
+                sandbox_compile,
+                protocol_name=self.protocol_name,
+                interface_name=self.interface_name,
+                algorithm_name=self.name,
+                source_filename=f"{self.name}.cpp",
+            ),
+            dependencies=[],
+        )
 
     def algorithm_name(self):
         return self.name
@@ -94,22 +91,13 @@ class Goal:
         }
         return self.checker(**submission)
 
-    def to_command(self, problem_id):
-        return (
-            problem_id.to_command() +
-            f" goal"
-            f" --name {self.name}"
-        )
-
-    def to_task(self, problem_id):
-        return self.to_command(problem_id) + " task"
-
-    def to_task_description(self, problem_id):
-        return TaskDescription(
-            command=self.to_command(problem_id) + " evaluate",
+    def main_task(self):
+        return Task(
+            target=self.evaluate,
+            name=f"goal_{self.name}",
             dependencies=[
-                d
+                t
                 for entry in self.problem.entries.values()
-                for d in entry.dependencies(problem_id=problem_id)
+                for t in entry.get_tasks()
             ],
         )
