@@ -1,3 +1,4 @@
+import os
 from abc import abstractmethod
 from functools import partial
 
@@ -84,12 +85,19 @@ class Goal:
         self.dependencies = []
         self.name = name
 
+    def goal_dir(self):
+        return os.path.join("goals", self.name)
+
     def evaluate(self):
         submission = {
             name: item.resolve()
             for name, item in self.problem.entries.items()
         }
-        return self.checker(**submission)
+        result = self.checker(**submission)
+
+        os.makedirs(self.goal_dir(), exist_ok=True)
+        with open(os.path.join(self.goal_dir(), "result.txt"), "w") as result_file:
+            print(result, file=result_file)
 
     def main_task(self):
         return Task(
