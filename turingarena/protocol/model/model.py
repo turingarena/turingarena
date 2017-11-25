@@ -18,7 +18,7 @@ class Main(ImmutableObject):
 
 
 class Protocol(AbstractSyntaxNode):
-    __slots__ = ["id", "body"]
+    __slots__ = ["body"]
 
     @staticmethod
     def compile(*, ast, **kwargs):

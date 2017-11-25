@@ -1,6 +1,7 @@
 import os
 from tempfile import TemporaryDirectory
 
+from turingarena.protocol.packaging import load_protocol
 from turingarena.tools.utils import write_to_file, indent_all
 from turingarena.tools.install import install_with_setuptools
 
@@ -14,9 +15,9 @@ def do_generate_proxy(protocol):
         yield f"{interface.name} = {repr(interface.signature)}"
 
 
-def generate_proxy(protocol_id):
-    package_name = f"turingarena_proxies.{protocol_id.name()}"
-    protocol = protocol_id.load()
+def generate_proxy(protocol_name):
+    package_name = f"turingarena_proxies.{protocol_name}"
+    protocol = load_protocol(protocol_name)
 
     with TemporaryDirectory() as dest_dir:
         namespace_dir = os.path.join(
@@ -25,7 +26,7 @@ def generate_proxy(protocol_id):
         )
         package_dir = os.path.join(
             namespace_dir,
-            str(protocol_id),
+            protocol_name,
         )
 
         os.makedirs(package_dir)

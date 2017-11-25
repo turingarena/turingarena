@@ -7,7 +7,7 @@ from turingarena.sandbox.compile.cpp import compile_cpp
 logger = logging.getLogger(__name__)
 
 
-def compile(*, language, source_filename, protocol_id, interface_name, algorithm_name):
+def compile(*, language, source_filename, protocol_name, interface_name, algorithm_name):
     if language is None:
         lang_by_extensions = {
             "cpp": "c++",
@@ -51,6 +51,6 @@ def compile(*, language, source_filename, protocol_id, interface_name, algorithm
     compiler(
         algorithm_dir=algorithm_dir,
         source_filename=source_filename,
-        protocol_id=protocol_id,
+        protocol_name=protocol_name,
         interface_name=interface_name,
     )

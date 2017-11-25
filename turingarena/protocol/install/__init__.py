@@ -1,29 +1,31 @@
 import logging
+
 import os
 import shutil
 from tempfile import TemporaryDirectory
 
-import subprocess
-
-from turingarena.tools.utils import write_to_file
+from turingarena.protocol.packaging import parse_protocol_name
 from turingarena.tools.install import install_with_setuptools
 
 logger = logging.getLogger(__name__)
 
 
-def install_protocol(protocol_id):
-    package_name = protocol_id.python_package()
+def install_protocol(protocol_name):
+    parts = parse_protocol_name(protocol_name)
+
+    package_name = f"turingarena_protocols.{protocol_name}"
     filename = "__init__.tap"
 
     with TemporaryDirectory() as dest_dir:
         package_dir = os.path.join(
             dest_dir,
-            protocol_id.python_package_dir(),
+            "turingarena_protocols",
+            *parts,
         )
         os.makedirs(package_dir)
 
         shutil.copy(
-            protocol_id.source_path(),
+            os.path.join(*parts[:-2], f"{parts[-1]}.tap"),
             os.path.join(package_dir, filename),
         )
         with open(os.path.join(package_dir, "__init__.py"), "w") as init_py:

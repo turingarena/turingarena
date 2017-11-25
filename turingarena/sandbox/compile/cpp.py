@@ -8,9 +8,9 @@ import shutil
 logger = logging.getLogger(__name__)
 
 
-def compile_cpp(algorithm_dir, source_filename, protocol_id, interface_name):
+def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name):
     skeleton_path = pkg_resources.resource_filename(
-        f"turingarena_skeletons.{protocol_id.name()}",
+        f"turingarena_skeletons.{protocol_name}",
         f"skeleton/{interface_name}/cpp/main.cpp",
     )
 

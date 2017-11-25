@@ -13,10 +13,10 @@ import docopt
 from turingarena.protocol.server import run_server
 
 
-def protocol_server_cli(*, argv, protocol_id):
+def protocol_server_cli(*, argv, protocol_name):
     args = docopt.docopt(__doc__, argv=argv)
     run_server(
-        protocol_id=protocol_id,
+        protocol_name=protocol_name,
         interface_name=args["--interface"],
         sandbox_dir=args["--sandbox"],
     )

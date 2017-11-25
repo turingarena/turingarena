@@ -1,10 +1,38 @@
 import logging
 from contextlib import contextmanager
-from functools import partial
 
+from turingarena.protocol.packaging import load_interface_signature
+from turingarena.protocol.proxy.python.client import ProxyClient
 from turingarena.protocol.server.commands import MainBegin, FunctionCall, ProxyResponse, CallbackReturn, MainEnd
+from turingarena.sandbox.client import Algorithm
 
 logger = logging.getLogger(__name__)
+
+
+class Implementation:
+    def __init__(self, *, protocol_name, interface_name, algorithm_name):
+        self.protocol_name = protocol_name
+        self.interface_name = interface_name
+        self.algorithm = Algorithm(algorithm_name)
+
+    @contextmanager
+    def run(self, **global_variables):
+        interface_signature = load_interface_signature(self.protocol_name, self.interface_name)
+        sandbox = self.algorithm.sandbox()
+        with sandbox.run() as process:
+            plumber = ProxyClient(
+                protocol_name=self.protocol_name,
+                interface_name=self.interface_name,
+                process=process,
+            )
+            with plumber.connect() as connection:
+                engine = ProxyEngine(
+                    connection=connection,
+                    interface_signature=interface_signature,
+                )
+                engine.begin_main(**global_variables)
+                yield Proxy(engine=engine, interface_signature=interface_signature)
+                engine.end_main()
 
 
 class ProxyException(Exception):

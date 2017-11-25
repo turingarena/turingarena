@@ -12,6 +12,6 @@ from turingarena.protocol.install import install_protocol
 from turingarena.protocol.proxy import generate_proxy
 
 
-def protocol_install_cli(*, argv, protocol_id):
+def protocol_install_cli(*, argv, protocol_name):
     args = docopt.docopt(__doc__, argv=argv)
-    install_protocol(protocol_id=protocol_id)
+    install_protocol(protocol_name=protocol_name)

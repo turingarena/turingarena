@@ -4,6 +4,7 @@ import os
 import shutil
 from tempfile import TemporaryDirectory
 
+from turingarena.protocol.packaging import load_protocol, parse_protocol_name
 from turingarena.tools.install import install_with_setuptools
 from . import cpp
 
@@ -61,15 +62,16 @@ class SkeletonGenerator:
         return os.path.join(self.make_interface_dir(interface), language)
 
 
-def install_skeleton(protocol_id):
-    package_name = f"turingarena_skeletons.{protocol_id.name()}"
-    protocol = protocol_id.load()
+def install_skeleton(protocol_name):
+    parts = parse_protocol_name(protocol_name)
+    package_name = f"turingarena_skeletons.{protocol_name}"
+    protocol = load_protocol(protocol_name)
 
     with TemporaryDirectory() as dest_dir:
         package_dir = os.path.join(
             dest_dir,
             "turingarena_skeletons",
-            protocol_id.full_dir(),
+            *parts,
         )
 
         SkeletonGenerator(protocol, dest_dir=package_dir)

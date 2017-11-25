@@ -14,7 +14,6 @@ Options:
 """
 import docopt
 
-from turingarena.protocol import ProtocolIdentifier
 from turingarena.sandbox.compile import compile
 
 
@@ -24,7 +23,7 @@ def sandbox_compile_cli(argv):
     compile(
         source_filename=args["<source>"],
         language=args["--language"],
-        protocol_id=ProtocolIdentifier(args["--protocol"]),
+        protocol_name=args["--protocol"],
         interface_name=args["--interface"],
         algorithm_name=args["--algorithm"],
     )

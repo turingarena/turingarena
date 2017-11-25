@@ -2,8 +2,7 @@ from abc import abstractmethod
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.make import TaskDescription
-from turingarena.protocol import ProtocolIdentifier
-from turingarena.protocol.proxy.python.client import Implementation
+from turingarena.protocol.proxy.python.engine import Implementation
 
 
 class ProblemIdentifier(TupleLikeObject):
@@ -88,7 +87,7 @@ class ImplementationEntry(Entry):
 
     def resolve(self):
         return Implementation(
-            protocol_id=ProtocolIdentifier(self.protocol_name),
+            protocol_name=self.protocol_name,
             interface_name=self.interface_name,
             algorithm_name=self.algorithm_name(),
         )

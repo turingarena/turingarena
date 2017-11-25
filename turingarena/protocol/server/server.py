@@ -1,9 +1,11 @@
 import logging
-import os
 import sys
-import tempfile
 from contextlib import ExitStack
 
+import os
+import tempfile
+
+from turingarena.protocol.packaging import load_protocol
 from turingarena.protocol.proxy.python.client import ProxyConnection
 from turingarena.protocol.server.frames import InterfaceEngine
 from turingarena.sandbox.client import Process
@@ -12,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class PlumberServer:
-    def __init__(self, *, protocol_id, interface_name, sandbox_dir):
-        protocol = protocol_id.load()
+    def __init__(self, *, protocol_name, interface_name, sandbox_dir):
+        protocol = load_protocol(protocol_name)
         self.protocol = protocol
         self.interface = protocol.body.scope.interfaces[interface_name]
 

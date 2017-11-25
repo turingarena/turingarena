@@ -13,9 +13,9 @@ import docopt
 from turingarena.protocol.proxy import generate_proxy
 
 
-def protocol_proxy_cli(*, argv, protocol_id):
+def protocol_proxy_cli(*, argv, protocol_name):
     args = docopt.docopt(__doc__, argv=argv)
     generate_proxy(
-        protocol_id=protocol_id,
+        protocol_name=protocol_name,
         language=args["--language"],
     )

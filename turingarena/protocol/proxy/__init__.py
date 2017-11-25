@@ -10,8 +10,8 @@ languages = {
 }
 
 
-def generate_proxy(*, protocol_id, language):
+def generate_proxy(*, protocol_name, language):
     logger.info(
-        f"Installing proxy for protocol {protocol_id} language {language}"
+        f"Installing proxy for protocol {protocol_name} language {language}"
     )
-    languages[language](protocol_id)
+    languages[language](protocol_name)
