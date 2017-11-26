@@ -14,4 +14,4 @@ import docopt
 def make_run_cli(*, plan, argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
     phase_name = args["--phase"]
-    plan[phase_name].target()
+    plan[phase_name].run()
