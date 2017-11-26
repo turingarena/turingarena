@@ -4,8 +4,8 @@ import os
 import shutil
 from tempfile import TemporaryDirectory
 
-from turingarena.protocol.packaging import load_protocol, parse_protocol_name
 from turingarena.common import install_with_setuptools
+from turingarena.protocol.packaging import load_protocol, parse_protocol_name
 from . import cpp
 
 logger = logging.getLogger(__name__)

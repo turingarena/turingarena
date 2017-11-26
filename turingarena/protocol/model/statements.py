@@ -1,12 +1,12 @@
 import logging
-from abc import abstractmethod
 
+from abc import abstractmethod
 from bidict import bidict
 
+from turingarena.common import ImmutableObject
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
-from turingarena.common import ImmutableObject
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
 from turingarena.protocol.server.commands import FunctionReturn

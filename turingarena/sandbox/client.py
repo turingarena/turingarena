@@ -1,7 +1,8 @@
 import logging
-import os
 import subprocess
 from contextlib import contextmanager, ExitStack
+
+import os
 
 from turingarena.cli.loggerinit import init_logger
 

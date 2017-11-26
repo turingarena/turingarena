@@ -1,7 +1,7 @@
 """TuringArena sandbox manager.
 
 Usage:
-  sandbox [options] (compile|run) [<args>]...
+  sandbox [options] <cmd> [<args>]...
 
 Options:
   -h --help  Show this help.
@@ -15,6 +15,12 @@ from turingarena.sandbox.run.cli import sandbox_run_cli
 def sandbox_cli(argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
 
+    commands = {
+        "compile": sandbox_compile_cli,
+        "run": sandbox_run_cli,
+    }
+
     argv2 = args["<args>"]
-    if args["compile"]: return sandbox_compile_cli(argv2)
-    if args["run"]: return sandbox_run_cli(argv2)
+    command = args["<cmd>"]
+
+    commands[command](argv2)

@@ -1,7 +1,7 @@
 import logging
-import os
 
 import coloredlogs
+import os
 
 
 def init_logger(args=None):

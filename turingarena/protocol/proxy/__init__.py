@@ -1,9 +1,8 @@
 import logging
-import os
-
-logger = logging.getLogger(__name__)
 
 from . import python
+
+logger = logging.getLogger(__name__)
 
 languages = {
     "python": python.generate_proxy,

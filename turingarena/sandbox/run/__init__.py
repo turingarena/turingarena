@@ -1,8 +1,9 @@
 import logging
-import os
 import sys
-import tempfile
 import threading
+
+import os
+import tempfile
 
 from turingarena.sandbox.run.cpp import run_cpp
 from . import cpp

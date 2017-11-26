@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 from bidict import bidict
 
 from turingarena.common import TupleLikeObject

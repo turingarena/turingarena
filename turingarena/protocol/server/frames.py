@@ -1,6 +1,7 @@
 import logging
-from collections import deque
 from contextlib import contextmanager
+
+from collections import deque
 from enum import Enum
 
 from turingarena.common import ImmutableObject

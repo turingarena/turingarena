@@ -7,7 +7,6 @@
 
 from setuptools import setup, find_packages
 
-
 setup(
     name="turingarena",
     version="0.2",

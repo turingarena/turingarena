@@ -1,8 +1,8 @@
 import os
 from tempfile import TemporaryDirectory
 
+from turingarena.common import install_with_setuptools, write_to_file
 from turingarena.protocol.packaging import load_protocol
-from turingarena.common import install_with_setuptools, indent_all, write_to_file
 
 
 def do_generate_proxy(protocol):

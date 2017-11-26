@@ -1,6 +1,6 @@
 import logging
-from abc import abstractmethod
 
+from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.protocol.model.node import AbstractSyntaxNode

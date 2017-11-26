@@ -1,9 +1,7 @@
 import logging
-import subprocess
-
-import git
 import multiprocessing
 
+import git
 import os
 from collections import OrderedDict
 from functools import partial
@@ -92,4 +90,3 @@ def resolve_plan(tasks):
 
 def task(*deps, **kwargs):
     return partial(Task, **kwargs, dependencies=list(deps))
-

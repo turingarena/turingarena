@@ -1,7 +1,7 @@
 import logging
-import os
 import subprocess
 
+import os
 import pkg_resources
 import shutil
 
