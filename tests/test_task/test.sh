@@ -6,10 +6,5 @@ turingarena protocol --name test_challenge install
 turingarena protocol --name test_challenge proxy
 turingarena protocol --name test_challenge skeleton
 
-turingarena sandbox compile \
-    --protocol test_challenge \
-    --interface exampleinterface \
-    -x c++ -o entry entry.cpp
-
-turingarena problem --module test_challenge \
-    goal --name goal evaluate
+turingarena make --module test_challenge --name problem run --phase compile_entry
+turingarena make --module test_challenge --name problem run --phase goal_goal
