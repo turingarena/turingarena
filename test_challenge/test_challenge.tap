@@ -1,0 +1,26 @@
+interface exampleinterface {
+    var int N, M;
+    var int[] A;
+
+    function solve(int u) -> int;
+
+    callback test(int a, int b) -> int {
+        output a, b;
+        flush;
+        var int c;
+        input c;
+        return c;
+    }
+
+    main {
+        input N, M;
+        alloc A : N;
+        for(i : N) {
+            input A[i];
+        }
+        var int u, s;
+        input u;
+        call solve(u) -> s;
+        output s;
+    }
+}
