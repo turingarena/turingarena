@@ -93,10 +93,15 @@ class CallableSignature(TupleLikeObject):
             for p in ast.parameters
         ]
 
+        if ast.return_type is None:
+            return_type = None
+        else:
+            return_type = ValueType.compile(ast.return_type, scope=scope)
+
         return CallableSignature(
             name=ast.name,
             parameters=parameters,
-            return_type=ValueType.compile(ast.return_type, scope=scope),
+            return_type=return_type
         )
 
 
