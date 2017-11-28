@@ -8,7 +8,7 @@ from turingarena.sandbox.compile.cpp import compile_cpp
 logger = logging.getLogger(__name__)
 
 
-def sandbox_compile(*, language=None, check=False, source_filename, protocol_name, interface_name, algorithm_name):
+def sandbox_compile(*, dest_dir=".", language=None, check=False, source_filename, protocol_name, interface_name, algorithm_name):
     if language is None:
         lang_by_extensions = {
             "cpp": "c++",
@@ -30,7 +30,11 @@ def sandbox_compile(*, language=None, check=False, source_filename, protocol_nam
         raise ValueError("unsupported language: {}".format(language))
     compiler = compilers[language]
 
-    algorithm_dir = "algorithms/{}/".format(algorithm_name)
+    algorithm_dir = os.path.join(
+        dest_dir,
+        "algorithms",
+        algorithm_name
+    )
 
     logger.info(
         f"Compiling algorithm '{algorithm_name}'"
