@@ -25,7 +25,7 @@ def install_protocol(protocol_name):
         os.makedirs(package_dir)
 
         shutil.copy(
-            os.path.join(*parts[:-2], f"{parts[-1]}.tap"),
+            os.path.join(*parts[:-1], f"{parts[-1]}.tap"),
             os.path.join(package_dir, filename),
         )
         with open(os.path.join(package_dir, "__init__.py"), "w") as init_py:

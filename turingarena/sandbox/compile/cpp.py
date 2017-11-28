@@ -8,7 +8,7 @@ import shutil
 logger = logging.getLogger(__name__)
 
 
-def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name):
+def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name, check):
     skeleton_path = pkg_resources.resource_filename(
         f"turingarena_skeletons.{protocol_name}",
         f"skeleton/{interface_name}/cpp/main.cpp",
@@ -34,3 +34,5 @@ def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name):
 
     if compiler.returncode != 0:
         logger.warning("Compilation failed")
+        if check:
+            raise ValueError("Compilation failed")
