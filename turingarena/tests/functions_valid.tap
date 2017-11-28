@@ -1,19 +1,8 @@
-interface function_no_args {
+interface functions_valid {
     function no_args();
-    main {}
-}
-
-interface function_args {
     function args(int a, int b);
-    main {}
-}
-
-interface function_no_return_value {
     function no_return_value(int a);
-    main {}
-}
-
-interface function_return_value {
     function return_value(int a) -> int;
+
     main {}
 }
