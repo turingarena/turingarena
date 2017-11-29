@@ -19,14 +19,14 @@ RUN \
 COPY setup.py setup.py
 RUN python setup.py develop
 
-RUN \
-    sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config && \
-    echo "root:root" | chpasswd && \
-    true
+COPY turingarena/ turingarena/
 
 RUN ssh-keygen -A
 
-# do not detach (-D), log to stderr (-e)
-CMD ["/usr/sbin/sshd", "-D", "-e"]
+WORKDIR /root
+RUN mkdir db.git && git init --bare db.git
 
-COPY turingarena/ turingarena/
+# do not detach (-D), log to stderr (-e)
+CMD /usr/sbin/sshd -D -e \
+    -o PermitEmptyPasswords=yes \
+    -o PermitRootLogin=yes
