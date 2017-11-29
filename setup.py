@@ -32,5 +32,8 @@ setup(
         "bidict",
         "gitpython",
     ],
+    tests_require=[
+        "pytest",
+    ],
     zip_safe=False,
 )
