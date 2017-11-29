@@ -1,31 +1,10 @@
 import os
 import shutil
-from tempfile import TemporaryDirectory
 
-from turingarena.common import install_with_setuptools, write_to_file
-from turingarena.protocol.install.common import *
+from turingarena.common import write_to_file
 from turingarena.protocol.proxy.python import do_generate_proxy
 from turingarena.protocol.skeleton import generate_skeleton
-
-
-def turingarena_setup(*, source_dir=".", name, protocols):
-    python_packages = []
-    with TemporaryDirectory() as dest_dir:
-        for protocol_name in protocols:
-            python_packages.append(module_to_python_package(PROTOCOL_QUALIFIER, protocol_name))
-            _prepare_protocol(dest_dir, protocol_name, source_dir)
-        levels = 5
-        install_with_setuptools(
-            dest_dir,
-            name=f"{MODULES_PACKAGE}.{name}",
-            packages=python_packages,
-            package_data={
-                # copy recursively up to levels
-                package_name: ["/".join(["*"] * i) for i in range(1, levels)]
-                for package_name in python_packages
-            },
-            zip_safe=False,
-        )
+from turingarena.setup.common import *
 
 
 def _prepare_protocol(dest_dir, protocol_name, source_dir):

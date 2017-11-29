@@ -5,7 +5,7 @@ import os
 import pkg_resources
 import shutil
 
-from turingarena.protocol.install.common import module_to_python_package, PROTOCOL_QUALIFIER
+from turingarena.setup.common import module_to_python_package, PROTOCOL_QUALIFIER
 
 logger = logging.getLogger(__name__)
 

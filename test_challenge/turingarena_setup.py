@@ -1,4 +1,4 @@
-from turingarena.protocol.install.setup import turingarena_setup
+from turingarena.setup import turingarena_setup
 
 turingarena_setup(
     name="test_challenge",

@@ -10,8 +10,9 @@ Options:
 
 """
 
-import docopt
 import importlib
+
+import docopt
 
 from turingarena.make import resolve_plan
 from turingarena.make.compute_cli import make_compute_cli
@@ -23,6 +24,9 @@ def make_cli(argv):
     args = docopt.docopt(__doc__, argv=argv, options_first=True)
 
     plan_module = importlib.import_module(args["--module"])
+
+    print(plan_module)
+
     plan_descriptor = getattr(plan_module, args["--name"])
     plan = resolve_plan(plan_descriptor.get_tasks())
 

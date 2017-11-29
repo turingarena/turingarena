@@ -1,7 +1,7 @@
 import importlib
 import pkg_resources
 
-from turingarena.protocol.install.common import *
+from turingarena.setup.common import *
 
 
 def load_protocol(protocol_name):

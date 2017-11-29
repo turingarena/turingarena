@@ -1,7 +1,7 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena.protocol.install.load import load_interface_signature
+from turingarena.setup.load import load_interface_signature
 from turingarena.protocol.proxy.python.client import ProxyClient
 from turingarena.protocol.server.commands import MainBegin, FunctionCall, ProxyResponse, CallbackReturn, MainEnd
 from turingarena.sandbox.client import Algorithm
