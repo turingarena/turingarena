@@ -32,4 +32,5 @@ setup(
         "bidict",
         "gitpython",
     ],
+    zip_safe=False,
 )

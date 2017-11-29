@@ -10,10 +10,7 @@ Options:
 
 import docopt
 
-from turingarena.protocol.install.cli import protocol_install_cli
-from turingarena.protocol.proxy.cli import protocol_proxy_cli
 from turingarena.protocol.server.cli import protocol_server_cli
-from turingarena.protocol.skeleton.cli import protocol_skeleton_cli
 
 
 def protocol_cli(argv):
@@ -22,9 +19,6 @@ def protocol_cli(argv):
     protocol_name = args["--name"]
 
     commands = {
-        "install": protocol_install_cli,
-        "skeleton": protocol_skeleton_cli,
-        "proxy": protocol_proxy_cli,
         "server": protocol_server_cli,
     }
     argv2 = args["<args>"]

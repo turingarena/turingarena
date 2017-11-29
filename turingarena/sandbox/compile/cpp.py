@@ -5,13 +5,15 @@ import os
 import pkg_resources
 import shutil
 
+from turingarena.protocol.install.common import module_to_python_package, PROTOCOL_QUALIFIER
+
 logger = logging.getLogger(__name__)
 
 
 def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name, check):
     skeleton_path = pkg_resources.resource_filename(
-        f"turingarena_skeletons.{protocol_name}",
-        f"skeleton/{interface_name}/cpp/main.cpp",
+        module_to_python_package(PROTOCOL_QUALIFIER, protocol_name),
+        f"_skeletons/{interface_name}/cpp/main.cpp",
     )
 
     shutil.copy(source_filename, os.path.join(algorithm_dir, "source.cpp"))
