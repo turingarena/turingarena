@@ -9,6 +9,7 @@ RUN apk add --no-cache \
     make \
     openssh \
     python3 \
+    socat \
     && true
 
 RUN \
@@ -16,17 +17,14 @@ RUN \
     ln -sf python3 /usr/bin/python && \
     true
 
-COPY setup.py setup.py
+COPY setup.py /setup.py
 RUN python setup.py develop
-
-COPY turingarena/ turingarena/
 
 RUN ssh-keygen -A
 
 WORKDIR /root
 RUN mkdir db.git && git init --bare db.git
 
-# do not detach (-D), log to stderr (-e)
-CMD /usr/sbin/sshd -D -e \
-    -o PermitEmptyPasswords=yes \
-    -o PermitRootLogin=yes
+ENTRYPOINT ["turingarena"]
+
+COPY turingarena/ /turingarena/
