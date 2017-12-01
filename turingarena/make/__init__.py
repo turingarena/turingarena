@@ -1,11 +1,11 @@
 import logging
 import multiprocessing
-
-import git
 import os
 from collections import OrderedDict
 from functools import partial
 from tempfile import TemporaryDirectory
+
+import git
 
 from turingarena.common import ImmutableObject
 
@@ -35,6 +35,7 @@ class Task(EvaluationNode):
         logger.debug(f"running task '{self}' with parents: {parents} in repo '{repo_path}'")
 
         assert set(parents.keys()) == set(d.name for d in self.dependencies)
+        assert all(isinstance(p, str) for p in parents.values())
 
         root_repo = git.Repo(path=repo_path)
 
