@@ -3,7 +3,7 @@ from abc import abstractmethod
 from functools import partial
 
 from turingarena.common import ImmutableObject
-from turingarena.make import Task
+from turingarena.make import Task, EvaluationEntry
 from turingarena.protocol.proxy.python.engine import Implementation
 from turingarena.sandbox.compile import sandbox_compile
 
@@ -43,7 +43,7 @@ class Entry(ImmutableObject):
     __slots__ = ["problem", "name"]
 
     @abstractmethod
-    def get_tasks(self):
+    def get_nodes(self):
         pass
 
     @abstractmethod
@@ -54,7 +54,7 @@ class Entry(ImmutableObject):
 class ImplementationEntry(Entry):
     __slots__ = ["protocol_name", "interface_name"]
 
-    def get_tasks(self):
+    def get_nodes(self):
         yield Task(
             name=f"compile_{self.name}",
             target=partial(
@@ -64,7 +64,9 @@ class ImplementationEntry(Entry):
                 algorithm_name=self.name,
                 source_filename=f"{self.name}.cpp",
             ),
-            dependencies=[],
+            dependencies=[
+                EvaluationEntry(name=f"entry_{self.name}")
+            ],
         )
 
     def algorithm_name(self):
@@ -102,10 +104,10 @@ class Goal:
     def main_task(self):
         return Task(
             target=self.evaluate,
-            name=f"goal_{self.name}",
+            name=f"evaluate_{self.name}",
             dependencies=[
                 t
                 for entry in self.problem.entries.values()
-                for t in entry.get_tasks()
+                for t in entry.get_nodes()
             ],
         )

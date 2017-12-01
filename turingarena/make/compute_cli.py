@@ -18,6 +18,9 @@ def make_compute_cli(*, plan, argv):
     phase_name = args["--phase"]
     commit = plan[phase_name].compute(
         repo_path=args["--repo-path"],
-        parents=args["--parent"],
+        parents=dict([
+            p.split(":", 2)
+            for p in args["--parent"]
+        ]),
     )
     print(commit.hexsha)
