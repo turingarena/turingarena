@@ -1,29 +1,21 @@
-"""TuringArena entry CLI.
-
-Usage:
-  entry [options] [--file=<file>]...
-
-Options:
-
-  --repo-path=<path>  Path to the repository
-  --source-dir=<dir>  Source directory [default: .]
-  --file=<file>  Files to add (format: <source>:<dest>)
-"""
-
-import importlib
-
-import docopt
+from turingarena.cli import docopt_cli
 
 from turingarena.entry.files import add_files
-from turingarena.make import resolve_plan
-from turingarena.make.compute_cli import make_compute_cli
-from turingarena.make.describe_cli import make_describe_cli
-from turingarena.make.make_cli import make_make_cli
-from turingarena.make.run_cli import make_run_cli
 
 
-def entry_cli(argv):
-    args = docopt.docopt(__doc__, argv=argv, options_first=True)
+@docopt_cli
+def entry_cli(args):
+    """TuringArena entry CLI.
+
+    Usage:
+      entry [options] [--file=<file>]...
+
+    Options:
+
+      --repo-path=<path>  Path to the repository
+      --source-dir=<dir>  Source directory [default: .]
+      --file=<file>  Files to add (format: <source>:<dest>)
+    """
 
     commit = add_files(
         source_dir=args["--source-dir"],

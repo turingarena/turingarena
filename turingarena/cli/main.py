@@ -1,16 +1,4 @@
-"""TuringArena command line interface.
-
-Usage:
-  turingarena [options] <cmd> [<args>]...
-
-Options:
-  --log-level=<level>  Set logging level.
-
-Available sub-commands:
-  engine  commands that are supposed to run within a container
-"""
-
-import docopt
+from turingarena.cli import docopt_cli
 
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
@@ -20,8 +8,16 @@ from turingarena.protocol.cli import protocol_cli
 from turingarena.sandbox.cli import sandbox_cli
 
 
-def main():
-    args = docopt.docopt(__doc__, options_first=True)
+@docopt_cli
+def main(args):
+    """TuringArena command line interface.
+
+    Usage:
+      turingarena [options] <cmd> [<args>]...
+
+    Options:
+      --log-level=<level>  Set logging level.
+    """
     init_logger(args)
 
     commands = {
