@@ -1,11 +1,10 @@
 """TuringArena entry CLI.
 
 Usage:
-  entry [options] [--parent=<parent>]... --file=<file>...
+  entry [options] [--file=<file>]...
 
 Options:
 
-  --parent=<parent>  Add a parent commit
   --repo-path=<path>  Path to the repository
   --source-dir=<dir>  Source directory [default: .]
   --file=<file>  Files to add (format: <source>:<dest>)
@@ -29,7 +28,6 @@ def entry_cli(argv):
     commit = add_files(
         source_dir=args["--source-dir"],
         repo_path=args["--repo-path"],
-        parents=args["--parent"],
         files=[
             f.split(":", 2)
             for f in args["--file"]

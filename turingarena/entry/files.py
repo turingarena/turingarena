@@ -8,15 +8,11 @@ import git
 logger = logging.getLogger(__name__)
 
 
-def add_files(*, source_dir, parents, files, repo_path):
+def add_files(*, source_dir, files, repo_path):
     root_repo = git.Repo(path=repo_path)
 
     with TemporaryDirectory() as temp_dir:
         repo = root_repo.clone(path=temp_dir)
-
-        for parent in parents:
-            repo.remote("origin").fetch(parent)
-            repo.index.merge_tree(repo.commit(parent))
 
         repo.index.checkout()
 
@@ -30,11 +26,7 @@ def add_files(*, source_dir, parents, files, repo_path):
 
         files = ", ".join(f[1] for f in files)
         commit = repo.index.commit(
-            f"added files {files}",
-            parent_commits=[
-                repo.commit(parent)
-                for parent in parents
-            ],
+            f"entry with files {files}",
         )
 
         repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
