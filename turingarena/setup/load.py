@@ -5,12 +5,10 @@ from turingarena.setup.common import *
 
 
 def load_protocol(protocol_name):
-    protocol_def = pkg_resources.resource_string(
-        module_to_python_package(PROTOCOL_QUALIFIER, protocol_name),
-        "_source.tap",
-    ).decode()
+    resource = module_to_python_package(PROTOCOL_QUALIFIER, protocol_name), "_source.tap"
+    protocol_text = pkg_resources.resource_string(*resource).decode()
 
-    return compile_protocol(protocol_def)
+    return compile_protocol(protocol_text)
 
 
 def load_interface_signature(protocol_name, interface_name):

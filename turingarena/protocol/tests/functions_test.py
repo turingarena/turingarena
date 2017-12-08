@@ -47,7 +47,7 @@ def test_functions_valid():
 def test_function_return_type_not_scalar():
     protocol_name = "turingarena.protocol.tests.function_return_type_not_scalar"
 
-    with pytest.raises(ProtocolError) as excinfo:
+    with pytest.raises(SystemExit) as excinfo:
         turingarena_setup(
             name=protocol_name,
             protocols=[protocol_name],

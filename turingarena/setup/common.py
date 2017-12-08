@@ -27,8 +27,8 @@ MODULES_PACKAGE = "turingarena_modules"
 PROTOCOL_QUALIFIER = "protocol"
 
 
-def compile_protocol(protocol_def):
+def compile_protocol(text, **kwargs):
     from turingarena.protocol.model.model import Protocol
     from turingarena.protocol.parser import parse_protocol
-    ast = parse_protocol(protocol_def)
+    ast = parse_protocol(text, **kwargs)
     return Protocol.compile(ast=ast)

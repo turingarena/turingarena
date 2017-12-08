@@ -12,8 +12,8 @@ def parse(*args, **kwargs):
     return tatsu.parse(grammar_ebnf, *args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
-def parse_protocol(data):
-    return parse(data, rule="unit")
+def parse_protocol(text, **kwargs):
+    return parse(text, rule="unit", **kwargs)
 
 
 class Semantics:

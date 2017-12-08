@@ -99,7 +99,10 @@ class CallableSignature(TupleLikeObject):
         else:
             return_type = ValueType.compile(ast.return_type, scope=scope)
             if not isinstance(return_type, ScalarType):
-                raise ProtocolError("return type must be a scalar")
+                raise ProtocolError(
+                    "return type must be a scalar",
+                    parseinfo=ast.return_type.parseinfo,
+                )
 
         return CallableSignature(
             name=ast.name,
