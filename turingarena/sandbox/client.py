@@ -1,8 +1,7 @@
 import logging
+import os
 import subprocess
 from contextlib import contextmanager, ExitStack
-
-import os
 
 from turingarena.cli.loggerinit import init_logger
 
@@ -16,17 +15,19 @@ class SandboxException(Exception):
 
 
 class Algorithm:
-    def __init__(self, name):
+    def __init__(self, work_dir, name):
+        self.work_dir = work_dir
         self.name = name
 
     def sandbox(self):
-        return SandboxClient(self.name)
+        return SandboxClient(work_dir=self.work_dir, algorithm_name=self.name)
 
 
 class SandboxClient:
-    def __init__(self, algorithm_name):
+    def __init__(self, *, work_dir, algorithm_name):
         logger.debug("creating a sandbox client")
         self.algorithm_name = algorithm_name
+        self.work_dir = work_dir
 
     @contextmanager
     def run(self):
@@ -35,6 +36,7 @@ class SandboxClient:
                 ["turingarena", "sandbox", "run", self.algorithm_name],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
+                cwd=self.work_dir,
         ) as sandbox_process:
             sandbox_dir = sandbox_process.stdout.readline().strip()
             logger.info("connected to sandbox at {}".format(sandbox_dir))

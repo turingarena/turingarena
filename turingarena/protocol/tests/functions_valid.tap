@@ -4,5 +4,12 @@ interface functions_valid {
     function no_return_value(int a);
     function return_value(int a) -> int;
 
-    main {}
+    main {
+        call no_args();
+        call args(0, 0);
+        call no_return_value(0);
+        var int x;
+        call return_value(0) -> x;
+        output x;
+    }
 }

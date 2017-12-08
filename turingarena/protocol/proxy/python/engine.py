@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class Implementation:
-    def __init__(self, *, protocol_name, interface_name, algorithm_name):
+    def __init__(self, *, work_dir=".", protocol_name, interface_name, algorithm_name):
+        self.work_dir=work_dir
         self.protocol_name = protocol_name
         self.interface_name = interface_name
-        self.algorithm = Algorithm(algorithm_name)
+        self.algorithm = Algorithm(work_dir, algorithm_name)
 
     @contextmanager
     def run(self, **global_variables):

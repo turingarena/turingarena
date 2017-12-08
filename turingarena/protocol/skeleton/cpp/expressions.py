@@ -6,8 +6,8 @@ def build_subscript(expression):
 
 def build_expression(expression):
     builders = {
-        "int_literal": lambda: f"{expression.int_value}",
-        "bool_literal": lambda: f"{int(expression.bool_value)}",
+        "int_literal": lambda: f"{expression.value}",
+        "bool_literal": lambda: f"{int(expression.value)}",
         "reference": lambda: f"{expression.variable.name}",
         "subscript": lambda: build_subscript(expression),
     }

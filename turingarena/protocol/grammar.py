@@ -46,6 +46,8 @@ grammar_ebnf = r"""
 
     block = '{' statements:{ block_statement }* '}' ;
 
+    return_value_expression = '->' @:expression ;
+
     block_statement =
         | var_statement
         | statement_type:('input'|'output') ~ arguments:expression_list ';'
@@ -54,7 +56,7 @@ grammar_ebnf = r"""
         | statement_type:'return' ~ value:expression ';'
         | statement_type:'call' ~ function_name:identifier
             '(' parameters:expression_list ')'
-            [ '->' return_value:expression ] ';'
+            return_value:[ return_value_expression ] ';'
         | statement_type:'if' ~ '(' condition:expression ')'
             then_body:block [ 'else' ~ else_body:block ]
         | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }* '}'

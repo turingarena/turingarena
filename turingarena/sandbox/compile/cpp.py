@@ -19,13 +19,17 @@ def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name, c
     shutil.copy(source_filename, os.path.join(algorithm_dir, "source.cpp"))
     shutil.copy(skeleton_path, os.path.join(algorithm_dir, "skeleton.cpp"))
 
-    cli = "g++ -o algorithm source.cpp skeleton.cpp"
-    logger.debug(f"Running {cli}")
+    cli = [
+        "g++",
+        "-o", "algorithm",
+        "source.cpp",
+        "skeleton.cpp",
+    ]
+    logger.debug(f"Running {' '.join(cli)}")
 
     with open(algorithm_dir + "/compilation_output.txt", "w") as compilation_output:
         compiler = subprocess.run(
             cli,
-            shell=True,
             cwd=algorithm_dir,
             stderr=compilation_output,
             universal_newlines=True,

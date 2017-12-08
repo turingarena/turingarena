@@ -1,6 +1,6 @@
 import logging
-
 from abc import abstractmethod
+
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
@@ -204,17 +204,21 @@ class CallStatement(ImperativeStatement):
     def compile(ast, scope):
         fun = scope.functions[ast.function_name]
         assert len(ast.parameters) == len(fun.signature.parameters)
+        if ast.return_value is None:
+            return_value = None
+        else:
+            return_value = Expression.compile(
+                ast.return_value,
+                scope=scope,
+                expected_type=fun.signature.return_type,
+            )
         return CallStatement(
             function=fun,
             parameters=[
                 Expression.compile(arg, scope=scope, expected_type=decl_arg.value_type)
                 for decl_arg, arg in zip(fun.signature.parameters, ast.parameters)
             ],
-            return_value=Expression.compile(
-                ast.return_value,
-                scope=scope,
-                expected_type=fun.signature.return_type,
-            ),
+            return_value=return_value,
         )
 
     def preflight(self, context):

@@ -1,12 +1,12 @@
-void function_args(int a, int b) {
+void args(int a, int b) {
 }
 
-void function_no_args() {
+void no_args() {
 }
 
-void function_no_return_value(int a) {
+void no_return_value(int a) {
 }
 
-int function_return_value() {
+int return_value(int a) {
     return 0;
 }
