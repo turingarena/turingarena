@@ -3,9 +3,10 @@ import logging
 from collections import OrderedDict
 
 from turingarena.common import ImmutableObject, TupleLikeObject
+from turingarena.protocol.model.exceptions import ProtocolError
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.type_expressions import ValueType
+from turingarena.protocol.model.type_expressions import ValueType, PrimaryType, ScalarType
 from turingarena.protocol.server.commands import CallbackCall
 from turingarena.protocol.server.data import VariableReference
 from turingarena.protocol.server.frames import Phase
@@ -97,6 +98,8 @@ class CallableSignature(TupleLikeObject):
             return_type = None
         else:
             return_type = ValueType.compile(ast.return_type, scope=scope)
+            if not isinstance(return_type, ScalarType):
+                raise ProtocolError("return type must be a scalar")
 
         return CallableSignature(
             name=ast.name,
