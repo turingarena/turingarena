@@ -4,6 +4,24 @@ interface functions_valid {
     function no_return_value(int a);
     function return_value(int a) -> int;
 
+    callback cb_no_args() {}
+    callback cb_args(int a, int b) {
+        output a, b;
+    }
+    callback cb_no_return_value(int a) {
+        output a;
+    }
+
+    callback cb_return_value(int a) -> int {
+        output a;
+        flush;
+        var int ans;
+        input ans;
+        return ans;
+    }
+
+    function invoke_callbacks() -> int;
+
     main {
         call no_args();
         call args(0, 0);
@@ -11,5 +29,8 @@ interface functions_valid {
         var int x;
         call return_value(0) -> x;
         output x;
+        var int y;
+        call invoke_callbacks() -> y;
+        output y;
     }
 }

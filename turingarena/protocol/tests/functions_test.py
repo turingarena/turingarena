@@ -30,12 +30,48 @@ def test_functions_valid():
             interface_name=name,
             algorithm_name=name,
         )
+
         with impl.run() as p:
             p.no_args()
             p.args(0, 0)
             p.no_return_value(0)
             x = p.return_value(0)
-        assert x == 0
+            assert x == 0
+
+            phase = 0
+
+            def cb_no_args():
+                nonlocal phase
+                assert phase == 0
+                phase += 1
+
+            def cb_args(a, b):
+                nonlocal phase
+                assert a == 2 and b == 3
+                assert phase == 1
+                phase += 1
+
+            def cb_no_return_value(a):
+                nonlocal phase
+                assert a == 4
+                assert phase == 2
+                phase += 1
+
+            def cb_return_value(a):
+                nonlocal phase
+                assert a == 5
+                assert phase == 3
+                phase += 1
+                return 5
+
+            y = p.invoke_callbacks(
+                cb_no_args=cb_no_args,
+                cb_args=cb_args,
+                cb_no_return_value=cb_no_return_value,
+                cb_return_value=cb_return_value,
+            )
+            assert phase == 4
+            assert y == 5
 
 
 def test_function_return_type_not_scalar():
