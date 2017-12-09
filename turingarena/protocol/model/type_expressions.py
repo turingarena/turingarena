@@ -86,7 +86,6 @@ class ScalarType(PrimaryType):
     def compile(ast, scope):
         bases = {
             "int": int,
-            "bool": bool,
         }
         return ScalarType(bases[ast.base_type])
 
@@ -100,7 +99,6 @@ class ScalarType(PrimaryType):
     def do_format(self, value):
         formatters = {
             int: lambda: value,
-            bool: lambda: int(value),
         }
         return formatters[self.base_type]()
 

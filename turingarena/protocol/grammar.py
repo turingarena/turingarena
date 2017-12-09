@@ -72,25 +72,17 @@ grammar_ebnf = r"""
 
     expression =
         | expression_type:`int_literal` int_literal:INT
-        | expression_type:`bool_literal` bool_literal:BOOL
         | expression_type:`subscript` array:expression '[' index:expression ']'
         | expression_type:`reference` variable_name:identifier
     ;
 
     type_expression =
         | meta_type:`array` item_type:type_expression '[' ']'
-        | meta_type:'enum' ~ underlying_type:[underlying_type_declaration]
-            '{' items:','.{ identifier }* '}'
-        | meta_type:`scalar` base_type:base_type
+        | meta_type:`scalar` base_type:'int'
     ;
-    
-    base_type = ('int'|'bool') ;
-    
-    underlying_type_declaration = ':' @:base_type ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 
-    BOOL = /(0|1)/ ;
     STRING = '"' @:/([^"\n]|\\")*/ '"' ;
     INT = /0|-?[1-9][0-9]*/ ;
 

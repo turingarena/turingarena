@@ -27,13 +27,17 @@ def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name, c
     ]
     logger.debug(f"Running {' '.join(cli)}")
 
-    with open(algorithm_dir + "/compilation_output.txt", "w") as compilation_output:
+    compilation_output_filename = algorithm_dir + "/compilation_output.txt"
+    with open(compilation_output_filename, "w") as compilation_output:
         compiler = subprocess.run(
             cli,
             cwd=algorithm_dir,
             stderr=compilation_output,
             universal_newlines=True,
         )
+    with open(compilation_output_filename) as compilation_output:
+        for line in compilation_output:
+            logger.debug(f"g++: {line.rstrip()}")
 
     with open(algorithm_dir + "/compilation_return.txt", "w") as compilation_return:
         print(compiler.returncode, file=compilation_return)

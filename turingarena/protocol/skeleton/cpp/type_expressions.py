@@ -3,7 +3,7 @@ def build_declarator(value_type, name):
         return name
     builders = {
         "scalar": lambda: name,
-        "array": lambda: f"*{name}",
+        "array": lambda: "*" + build_declarator(value_type.item_type, name),
     }
     return builders[value_type.meta_type]()
 
@@ -14,7 +14,6 @@ def build_type_specifier(value_type):
     builders = {
         "scalar": lambda: {
             int: "int",
-            bool: "bool",
         }[value_type.base_type],
         "array": lambda: build_type_specifier(value_type.item_type)
     }

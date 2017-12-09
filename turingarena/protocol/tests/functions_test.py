@@ -3,7 +3,6 @@ from tempfile import TemporaryDirectory
 import pkg_resources
 import pytest
 
-from turingarena.protocol.model.exceptions import ProtocolError
 from turingarena.protocol.proxy.python.engine import Implementation
 from turingarena.sandbox.compile import sandbox_compile
 from turingarena.setup import turingarena_setup
@@ -13,11 +12,6 @@ def test_functions_valid():
     with TemporaryDirectory() as temp_dir:
         protocol_name = "turingarena.protocol.tests.functions_valid"
         name = "functions_valid"
-
-        turingarena_setup(
-            name=protocol_name,
-            protocols=[protocol_name],
-        )
 
         sandbox_compile(
             dest_dir=temp_dir,

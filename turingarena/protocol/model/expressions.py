@@ -1,6 +1,6 @@
 import logging
-
 from abc import abstractmethod
+
 from bidict import bidict
 
 from turingarena.protocol.model.node import AbstractSyntaxNode
@@ -62,18 +62,6 @@ class IntLiteralExpression(LiteralExpression):
         return IntLiteralExpression(
             value_type=ScalarType(int),
             value=int(ast.int_literal),
-        )
-
-
-@expression_class("bool_literal")
-class BoolLiteralExpression(Expression):
-    __slots__ = []
-
-    @staticmethod
-    def compile(ast, scope):
-        return IntLiteralExpression(
-            value=bool(int(ast.int_literal)),
-            value_type=ScalarType(bool),
         )
 
 

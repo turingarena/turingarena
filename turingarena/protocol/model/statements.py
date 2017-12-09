@@ -109,6 +109,9 @@ class ImperativeStatement(Statement):
     def run(self, context):
         yield from []
 
+    def first_calls(self):
+        return {None}
+
 
 @statement_class("alloc")
 class AllocStatement(ImperativeStatement):
@@ -174,8 +177,10 @@ class OutputStatement(InputOutputStatement):
     def on_run(self, context):
         logger.debug(f"reading from upward_pipe...")
         line = context.engine.process_connection.upward_pipe.readline()
+        logger.debug(f"read line {line.strip()} from upward_pipe")
+        assert line
         raw_values = line.strip().split()
-        logger.debug(f"read {raw_values} from upward_pipe")
+        logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
             context.evaluate(a).resolve(value)
@@ -253,6 +258,9 @@ class CallStatement(ImperativeStatement):
         if context.phase == Phase.PREFLIGHT:
             yield from self.preflight(context)
 
+    def first_calls(self):
+        return {self.function}
+
 
 def invoke_callbacks(context):
     if not context.engine.interface.signature.callbacks:
@@ -323,12 +331,18 @@ class ForStatement(ImperativeStatement):
         )
 
     def run(self, context):
-        if context.phase is Phase.RUN:
+        if context.phase is Phase.RUN or self.may_call():
             size = context.evaluate(self.index.range).get()
             for i in range(size):
                 with context.enter(self.scope) as for_context:
                     for_context.frame[self.index.variable] = i
                     yield from run_body(self.body, context=for_context)
+
+    def may_call(self):
+        return any(f is not None for f in self.body.first_calls())
+
+    def first_calls(self):
+        return self.body.first_calls() | {None}
 
 
 def run_body(body, *, context):
@@ -352,3 +366,12 @@ class Body(AbstractSyntaxNode):
                 for s in ast.statements
             ]
         )
+
+    def first_calls(self):
+        ans = {None}
+        for s in self.statements:
+            if None not in ans:
+                break
+            ans.remove(None)
+            ans.update(s.first_calls())
+        return ans

@@ -6,7 +6,6 @@ from turingarena.protocol.skeleton.cpp.type_expressions import build_full_type, 
 def generate_format(expr):
     return {
         int: "%d",
-        bool: "%d",
     }[expr.value_type.base_type]
 
 

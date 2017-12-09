@@ -129,7 +129,9 @@ class InterfaceEngine:
         file.flush()
 
     def ensure_output(self):
+        logger.debug("ensure_output")
         if not self.input_sent:
+            logger.debug("sending input on downward pipe")
             next(self.run_generator)
         self.input_sent = True
 
