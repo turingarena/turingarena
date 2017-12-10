@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 import pkg_resources
 import pytest
 
-from turingarena.protocol.proxy.python.engine import Implementation
+from turingarena.protocol.client import Implementation
 from turingarena.sandbox.compile import sandbox_compile
 from turingarena.setup import turingarena_setup
 

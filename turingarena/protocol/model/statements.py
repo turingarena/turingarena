@@ -103,7 +103,6 @@ class MainStatement(Statement):
 
 
 class ImperativeStatement(Statement):
-    # TODO: first_call
     __slots__ = []
 
     def run(self, context):

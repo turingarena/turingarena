@@ -1,4 +1,4 @@
-extern int i, *ia, **iaa;
+int i, *ia, **iaa;
 
 int get_i() {
     return i;

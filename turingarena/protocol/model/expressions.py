@@ -5,7 +5,7 @@ from bidict import bidict
 
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.type_expressions import ScalarType
-from turingarena.protocol.server.data import ConstantReference, VariableReference, ArrayItemReference
+from turingarena.protocol.server.references import ConstantReference, VariableReference, ArrayItemReference
 
 expression_classes = bidict()
 

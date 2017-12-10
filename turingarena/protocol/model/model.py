@@ -7,7 +7,7 @@ from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
 from turingarena.protocol.server.commands import CallbackCall
-from turingarena.protocol.server.data import VariableReference
+from turingarena.protocol.server.references import VariableReference
 from turingarena.protocol.server.frames import Phase
 
 logger = logging.getLogger(__name__)

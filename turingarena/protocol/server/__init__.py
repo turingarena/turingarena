@@ -1,3 +1,3 @@
-from turingarena.protocol.server.server import PlumberServer
+from turingarena.protocol.server.server import ProxyServer
 
-run_server = PlumberServer
+run_server = ProxyServer

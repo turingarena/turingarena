@@ -1,11 +1,9 @@
 import os
 import shutil
-
 import sys
 
-from turingarena.common import write_to_file
 from turingarena.protocol.model.exceptions import ProtocolError
-from turingarena.protocol.proxy.python import do_generate_proxy
+from turingarena.protocol.proxy.python import generate_proxy
 from turingarena.protocol.skeleton import generate_skeleton
 from turingarena.setup.common import *
 
@@ -27,8 +25,7 @@ def _prepare_protocol(dest_dir, protocol_name, source_dir):
         dest_source_filename,
     )
 
-    with open(os.path.join(module_dir, "_proxy.py"), "w") as proxy_module_file:
-        write_to_file(do_generate_proxy(protocol), proxy_module_file)
+    generate_proxy(module_dir, protocol)
     generate_skeleton(protocol, dest_dir=os.path.join(module_dir, "_skeletons"))
 
 

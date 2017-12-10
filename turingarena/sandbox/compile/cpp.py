@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def compile_cpp(algorithm_dir, source_filename, protocol_name, interface_name, check):
     skeleton_path = pkg_resources.resource_filename(
         module_to_python_package(PROTOCOL_QUALIFIER, protocol_name),
-        f"_skeletons/{interface_name}/cpp/main.cpp",
+        f"_skeletons/{interface_name}/cpp/skeleton.cpp",
     )
 
     shutil.copy(source_filename, os.path.join(algorithm_dir, "source.cpp"))

@@ -6,14 +6,14 @@ import os
 import tempfile
 
 from turingarena.setup.load import load_protocol
-from turingarena.protocol.proxy.python.client import ProxyConnection
-from turingarena.protocol.server.frames import InterfaceEngine
+from turingarena.protocol.connection import ProxyConnection
+from turingarena.protocol.server.engine import InterfaceEngine
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
 
 
-class PlumberServer:
+class ProxyServer:
     def __init__(self, *, protocol_name, interface_name, sandbox_dir):
         protocol = load_protocol(protocol_name)
         self.protocol = protocol

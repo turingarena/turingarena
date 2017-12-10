@@ -45,7 +45,6 @@ class SkeletonGenerator:
             )
         )
         languages[language](
-            protocol=self.protocol,
             interface=interface,
             dest_dir=language_dir,
         )
