@@ -1,10 +1,50 @@
 import pytest
 
+from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.module import ProtocolSource
 from turingarena.protocol.tests.util import cpp_implementation
-from turingarena.setup import turingarena_setup
 
 
 def test_functions_valid():
+    protocol_text = """
+        interface functions_valid {
+            function no_args();
+            function args(int a, int b);
+            function no_return_value(int a);
+            function return_value(int a) -> int;
+        
+            callback cb_no_args() {}
+            callback cb_args(int a, int b) {
+                output a, b;
+            }
+            callback cb_no_return_value(int a) {
+                output a;
+            }
+        
+            callback cb_return_value(int a) -> int {
+                output a;
+                flush;
+                var int ans;
+                input ans;
+                return ans;
+            }
+        
+            function invoke_callbacks() -> int;
+        
+            main {
+                call no_args();
+                call args(0, 0);
+                call no_return_value(0);
+                var int x;
+                call return_value(0) -> x;
+                output x;
+                var int y;
+                call invoke_callbacks() -> y;
+                output y;
+            }
+        }
+    """
+
     source_text = """
         void args(int a, int b) {
         }
@@ -33,6 +73,7 @@ def test_functions_valid():
     """
 
     with cpp_implementation(
+            protocol_text=protocol_text,
             source_text=source_text,
             protocol_name="turingarena.protocol.tests.functions_valid",
             interface_name="functions_valid",
@@ -81,14 +122,26 @@ def test_functions_valid():
 
 
 def test_interface_no_callbacks():
+    protocol_text = """
+        interface interface_no_callbacks {
+            function test() -> int;
+            main {
+                var int o;
+                call test() -> o;
+                output o;
+            }
+        }
+    """
+
     source_text = """
         int test() {
             return 1;
         }
     """
     with cpp_implementation(
+            protocol_text=protocol_text,
             source_text=source_text,
-            protocol_name="turingarena.protocol.tests.functions_valid",
+            protocol_name="turingarena.protocol.tests.interface_no_callbacks",
             interface_name="interface_no_callbacks",
     ) as impl:
         with impl.run() as p:
@@ -96,6 +149,18 @@ def test_interface_no_callbacks():
 
 
 def test_interface_one_callback():
+    protocol_text = """
+        interface interface_one_callback {
+            callback cb() {}
+            function test() -> int;
+            main {
+                var int o;
+                call test() -> o;
+                output o;
+            }
+        }
+    """
+
     source_text = """
         void cb();
         
@@ -106,8 +171,9 @@ def test_interface_one_callback():
         }
     """
     with cpp_implementation(
+            protocol_text=protocol_text,
             source_text=source_text,
-            protocol_name="turingarena.protocol.tests.functions_valid",
+            protocol_name="turingarena.protocol.tests.interface_one_callback",
             interface_name="interface_one_callback",
     ) as impl:
         with impl.run() as p:
@@ -121,6 +187,19 @@ def test_interface_one_callback():
 
 
 def test_interface_multiple_callbacks():
+    protocol_text = """
+        interface interface_multiple_callbacks {
+            callback cb1() {}
+            callback cb2() {}
+            function test() -> int;
+            main {
+                var int o;
+                call test() -> o;
+                output o;
+            }
+        }
+    """
+
     source_text = """
         void cb1();
         void cb2();
@@ -134,8 +213,9 @@ def test_interface_multiple_callbacks():
         }
     """
     with cpp_implementation(
+            protocol_text=protocol_text,
             source_text=source_text,
-            protocol_name="turingarena.protocol.tests.functions_valid",
+            protocol_name="turingarena.protocol.tests.interface_multiple_callbacks",
             interface_name="interface_multiple_callbacks",
     ) as impl:
         with impl.run() as p:
@@ -151,26 +231,53 @@ def test_interface_multiple_callbacks():
             assert calls == [cb1, cb2, cb2, cb1]
 
 
-def test_callable_return_type_not_scalar():
-    protocol_names = [
-        "turingarena.protocol.tests.function_return_type_not_scalar",
-        "turingarena.protocol.tests.callback_return_type_not_scalar",
-    ]
-    for protocol_name in protocol_names:
-        with pytest.raises(SystemExit) as excinfo:
-            turingarena_setup(
-                protocols=[protocol_name],
-            )
+def test_function_return_type_not_scalar():
+    protocol_text = """
+        interface function_return_type_not_scalar {
+            function function_return_type_not_scalar() -> int[];
+            main {}
+        }
+    """
+    source = ProtocolSource(
+        text=protocol_text,
+        filename="<none>",
+    )
 
-        assert 'return type must be a scalar' in str(excinfo.value)
+    with pytest.raises(ProtocolError) as excinfo:
+        source.compile()
+    assert 'return type must be a scalar' in str(excinfo.value.get_user_message())
+
+
+def test_callback_return_type_not_scalar():
+    protocol_text = """
+        interface callback_return_type_not_scalar {
+            callback callback_return_type_not_scalar() -> int[] {}
+            main {}
+        }
+    """
+    source = ProtocolSource(
+        text=protocol_text,
+        filename="<none>",
+    )
+
+    with pytest.raises(ProtocolError) as excinfo:
+        source.compile()
+    assert 'return type must be a scalar' in str(excinfo.value.get_user_message())
 
 
 def test_callback_argument_not_scalar():
-    protocol_name = "turingarena.protocol.tests.callback_argument_not_scalar"
+    protocol_text = """
+        interface callback_argument_not_scalar {
+            callback callback_argument_not_scalar(int ok, int[] wrong) {}
+            main {}
+        }
+    """
+    source = ProtocolSource(
+        text=protocol_text,
+        filename="<none>",
+    )
 
-    with pytest.raises(SystemExit) as excinfo:
-        turingarena_setup(
-            protocols=[protocol_name],
-        )
+    with pytest.raises(ProtocolError) as excinfo:
+        source.compile()
 
     assert 'callback arguments must be scalars' in str(excinfo.value)

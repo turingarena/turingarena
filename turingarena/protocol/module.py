@@ -29,9 +29,24 @@ class ProtocolSource(ImmutableObject):
 
     def install(self, name):
         with TemporaryDirectory() as dest_dir:
+            self.generate(dest_dir, name)
             self._do_install(dest_dir, name)
 
     def _do_install(self, dest_dir, name):
+        package_name = module_to_python_package(PROTOCOL_QUALIFIER, name)
+        levels = 5
+        install_with_setuptools(
+            dest_dir,
+            name=package_name,
+            packages=[package_name],
+            package_data={
+                # copy recursively up to levels
+                package_name: ["/".join(["*"] * i) for i in range(1, levels)]
+            },
+            zip_safe=False,
+        )
+
+    def generate(self, *, dest_dir, name):
         module_dir = prepare_module_dir(dest_dir, PROTOCOL_QUALIFIER, name)
         try:
             definition = self.compile(filename=self.filename)
@@ -49,18 +64,6 @@ class ProtocolSource(ImmutableObject):
         from turingarena.protocol.skeleton import generate_skeleton
         generate_proxy(module_dir, definition)
         generate_skeleton(definition, dest_dir=os.path.join(module_dir, "_skeletons"))
-        package_name = module_to_python_package(PROTOCOL_QUALIFIER, name)
-        levels = 5
-        install_with_setuptools(
-            dest_dir,
-            name=package_name,
-            packages=[package_name],
-            package_data={
-                # copy recursively up to levels
-                package_name: ["/".join(["*"] * i) for i in range(1, levels)]
-            },
-            zip_safe=False,
-        )
 
 
 def install_protocol_from_source(source_dir, name):

@@ -1,4 +1,0 @@
-interface function_return_type_not_scalar {
-    function function_return_type_not_scalar() -> int[];
-    main {}
-}
