@@ -1,12 +1,11 @@
 import logging
+import os
 import sys
+import tempfile
 import threading
 
-import os
-import tempfile
-
-from turingarena.sandbox.run.cpp import run_cpp
-from . import cpp
+from turingarena.sandbox.client import ProcessConnection
+from turingarena.sandbox.loader import load_algorithm_executable
 
 OK = 0
 EXC = 1
@@ -19,10 +18,10 @@ class SandboxException(Exception):
 
 
 class SandboxServer:
-    def __init__(self, algorithm_name):
-        self.algorithm_name = algorithm_name
+    def __init__(self, *, algorithm_dir):
+        prefix = "turingarena_sandbox"
 
-        prefix = "turingarena_sandbox_{}_".format(self.algorithm_name)
+        self.executable = load_algorithm_executable(algorithm_dir)
 
         with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
             self.sandbox_dir = sandbox_dir
@@ -87,16 +86,6 @@ class SandboxServer:
         if self.os_process is not None:
             raise SandboxException("already started")
 
-        algorithm_dir = "algorithms/{}/".format(self.algorithm_name)
-
-        with open(algorithm_dir + "language.txt") as language_file:
-            language = language_file.read().strip()
-
-        runners = {
-            "c++": run_cpp
-        }
-        runner = runners[language]
-
         logger.debug("starting process...")
 
         def spawn():
@@ -106,11 +95,11 @@ class SandboxServer:
             upward_pipe = open(self.upward_pipe_name, "w")
             logger.debug("pipes opened")
 
-            self.os_process = runner(
-                algorithm_dir=algorithm_dir,
+            connection = ProcessConnection(
                 downward_pipe=downward_pipe,
                 upward_pipe=upward_pipe,
             )
+            self.os_process = self.executable.start_os_process(connection)
 
         # avoid blocking when opening pipes
         self.spawner_thread = threading.Thread(target=spawn)

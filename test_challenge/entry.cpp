@@ -1,3 +1,7 @@
+int N, M;
+
+int *A;
+
 int test(int a, int b);
 
 int solve(int u) {

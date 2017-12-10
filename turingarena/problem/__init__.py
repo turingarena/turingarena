@@ -1,11 +1,11 @@
 import os
 from abc import abstractmethod
-from functools import partial
 
 from turingarena.common import ImmutableObject
 from turingarena.make import Task, EvaluationEntry
-from turingarena.protocol.client import Implementation
-from turingarena.sandbox.compile import sandbox_compile
+from turingarena.protocol.client import ProxiedAlgorithm
+from turingarena.sandbox.algorithm import Algorithm
+from turingarena.sandbox.loader import load_algorithm_source, load_algorithm_executable
 
 
 class Problem:
@@ -57,26 +57,40 @@ class ImplementationEntry(Entry):
     def get_nodes(self):
         yield Task(
             name=f"compile_{self.name}",
-            target=partial(
-                sandbox_compile,
-                protocol_name=self.protocol_name,
-                interface_name=self.interface_name,
-                algorithm_name=self.name,
-                source_filename=f"{self.name}.cpp",
-            ),
+            target=self.target,
             dependencies=[
                 EvaluationEntry(name=f"entry_{self.name}")
             ],
         )
 
+    def target(self):
+        source = self.load_source()
+        os.makedirs("algorithms", exist_ok=True)
+        source.compile(algorithm_dir=self.algorithm_dir)
+
+    @property
+    def algorithm_dir(self):
+        return os.path.join("algorithms", self.name)
+
+    def load_source(self):
+        return load_algorithm_source(
+            filename=f"{self.name}.cpp",
+            protocol_name=self.protocol_name,
+            interface_name=self.interface_name,
+        )
+
+    def load_executable(self):
+        return load_algorithm_executable(algorithm_dir=self.algorithm_dir)
+
     def algorithm_name(self):
         return self.name
 
     def resolve(self):
-        return Implementation(
-            protocol_name=self.protocol_name,
-            interface_name=self.interface_name,
-            algorithm_name=self.algorithm_name(),
+        return ProxiedAlgorithm(
+            algorithm=Algorithm(
+                source=self.load_source(),
+                executable=self.load_executable(),
+            ),
         )
 
 

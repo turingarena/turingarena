@@ -5,7 +5,6 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
 from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd
-from turingarena.sandbox.client import Algorithm
 from turingarena.setup.load import load_interface_signature
 
 logger = logging.getLogger(__name__)
@@ -58,17 +57,19 @@ class ProxyClient:
             logger.debug("waiting for proxy server process")
 
 
-class Implementation:
-    def __init__(self, *, work_dir=".", protocol_name, interface_name, algorithm_name):
-        self.work_dir = work_dir
-        self.protocol_name = protocol_name
-        self.interface_name = interface_name
-        self.algorithm = Algorithm(work_dir, algorithm_name)
+class ProxiedAlgorithm:
+    def __init__(self, algorithm):
+        self.algorithm = algorithm
+        self.protocol_name = self.algorithm.source.protocol_name
+        self.interface_name = self.algorithm.source.interface_name
 
     @contextmanager
     def run(self, **global_variables):
-        interface_signature = load_interface_signature(self.protocol_name, self.interface_name)
-        sandbox = self.algorithm.sandbox()
+        interface_signature = load_interface_signature(
+            protocol_name=self.protocol_name,
+            interface_name=self.interface_name,
+        )
+        sandbox = self.algorithm.executable.sandbox()
         with sandbox.run() as process:
             proxy = ProxyClient(
                 protocol_name=self.protocol_name,

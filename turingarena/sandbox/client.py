@@ -14,29 +14,18 @@ class SandboxException(Exception):
     pass
 
 
-class Algorithm:
-    def __init__(self, work_dir, name):
-        self.work_dir = work_dir
-        self.name = name
-
-    def sandbox(self):
-        return SandboxClient(work_dir=self.work_dir, algorithm_name=self.name)
-
-
 class SandboxClient:
-    def __init__(self, *, work_dir, algorithm_name):
+    def __init__(self, *, algorithm_dir):
         logger.debug("creating a sandbox client")
-        self.algorithm_name = algorithm_name
-        self.work_dir = work_dir
+        self.algorithm_dir = algorithm_dir
 
     @contextmanager
     def run(self):
         logger.debug("starting sandbox process")
         with subprocess.Popen(
-                ["turingarena", "sandbox", "run", self.algorithm_name],
+                ["turingarena", "sandbox", "run", self.algorithm_dir],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
-                cwd=self.work_dir,
         ) as sandbox_process:
             sandbox_dir = sandbox_process.stdout.readline().strip()
             logger.info("connected to sandbox at {}".format(sandbox_dir))

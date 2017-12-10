@@ -1,32 +1,44 @@
 from tempfile import TemporaryDirectory
 
-import pkg_resources
-
-from turingarena.protocol.client import Implementation
-from turingarena.sandbox.compile import sandbox_compile
+from turingarena.protocol.client import ProxiedAlgorithm
+from turingarena.sandbox.algorithm import Algorithm
+from turingarena.sandbox.cpp import CppAlgorithmSource
 
 
 def test_valid_types():
+    protocol_name = "turingarena.protocol.tests.types_valid"
+    name = "types_valid"
+
+    source_text = """
+        int i, *ia, **iaa;
+    
+        int get_i() {
+            return i;
+        }
+        
+        int get_ia(int j) {
+            return ia[j];
+        }
+        
+        int get_iaa(int j, int k) {
+            return iaa[j][k];
+        }
+    """
+
+    algorithm_source = CppAlgorithmSource(
+        filename=None,
+        language="c++",
+        text=source_text,
+        protocol_name=protocol_name,
+        interface_name=name,
+    )
+
     with TemporaryDirectory() as temp_dir:
-        protocol_name = "turingarena.protocol.tests.types_valid"
-        name = "types_valid"
+        algorithm_executable = algorithm_source.compile(name=name, dest_dir=temp_dir)
+        algorithm = Algorithm(source=algorithm_source, executable=algorithm_executable)
 
-        sandbox_compile(
-            dest_dir=temp_dir,
-            source_filename=pkg_resources.resource_filename(
-                __name__, f"types_valid.cpp"
-            ),
-            protocol_name=protocol_name,
-            interface_name=name,
-            algorithm_name=name,
-            check=True,
-        )
-
-        impl = Implementation(
-            work_dir=temp_dir,
-            protocol_name=protocol_name,
-            interface_name=name,
-            algorithm_name=name,
+        impl = ProxiedAlgorithm(
+            algorithm=algorithm,
         )
 
         iaa = [
