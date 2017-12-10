@@ -21,12 +21,12 @@ class Implementation:
         interface_signature = load_interface_signature(self.protocol_name, self.interface_name)
         sandbox = self.algorithm.sandbox()
         with sandbox.run() as process:
-            plumber = ProxyClient(
+            proxy = ProxyClient(
                 protocol_name=self.protocol_name,
                 interface_name=self.interface_name,
                 process=process,
             )
-            with plumber.connect() as connection:
+            with proxy.connect() as connection:
                 engine = ProxyEngine(
                     connection=connection,
                     interface_signature=interface_signature,

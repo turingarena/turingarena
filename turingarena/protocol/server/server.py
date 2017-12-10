@@ -22,17 +22,17 @@ class PlumberServer:
         self.main = self.interface.body.scope.main["main"]
 
         with ExitStack() as stack:
-            prefix = "turingarena_plumber"
-            plumber_dir = stack.enter_context(tempfile.TemporaryDirectory(prefix=prefix))
+            prefix = "turingarena_proxy"
+            proxy_dir = stack.enter_context(tempfile.TemporaryDirectory(prefix=prefix))
 
-            request_pipe_name = os.path.join(plumber_dir, "plumbing_request.pipe")
-            response_pipe_name = os.path.join(plumber_dir, "plumbing_response.pipe")
+            request_pipe_name = os.path.join(proxy_dir, "proxy_request.pipe")
+            response_pipe_name = os.path.join(proxy_dir, "proxy_response.pipe")
 
             logger.debug("creating request/response pipes...")
             os.mkfifo(request_pipe_name)
             os.mkfifo(response_pipe_name)
 
-            print(plumber_dir)
+            print(proxy_dir)
             sys.stdout.close()
 
             logger.debug("opening request pipe...")

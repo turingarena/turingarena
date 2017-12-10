@@ -1,8 +1,7 @@
 import logging
+import os
 import subprocess
 from contextlib import contextmanager, ExitStack
-
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,29 +14,32 @@ class ProxyClient:
 
     @contextmanager
     def connect(self):
-        cli = (
-            f"turingarena protocol --name {self.protocol_name}"
-            f" server"
-            f" --interface {self.interface_name}"
-            f" --sandbox {self.process.sandbox_dir}"
-        )
+        cli = [
+            f"turingarena",
+            f"protocol",
+            f"--name={self.protocol_name}",
+            f"server",
+            f"--interface={self.interface_name}",
+            f"--sandbox={self.process.sandbox_dir}",
+        ]
         with ExitStack() as stack:
-            plumber_process = subprocess.Popen(
+            logger.debug(f"running {cli}...")
+            proxy_process = subprocess.Popen(
                 cli,
-                shell=True,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
             )
-            stack.enter_context(plumber_process)
-            plumber_dir = plumber_process.stdout.readline().strip()
+            stack.enter_context(proxy_process)
+            proxy_dir = proxy_process.stdout.readline().strip()
+            logger.debug(f"proxy dir: {proxy_dir}...")
 
-            assert os.path.isdir(plumber_dir)
+            assert os.path.isdir(proxy_dir)
 
             logger.debug("opening request pipe...")
-            request_pipe = stack.enter_context(open(plumber_dir + "/plumbing_request.pipe", "w"))
+            request_pipe = stack.enter_context(open(proxy_dir + "/proxy_request.pipe", "w"))
             logger.debug("opening response pipe...")
-            response_pipe = stack.enter_context(open(plumber_dir + "/plumbing_response.pipe"))
-            logger.debug("connected")
+            response_pipe = stack.enter_context(open(proxy_dir + "/proxy_response.pipe"))
+            logger.debug("proxy connected")
 
             try:
                 yield ProxyConnection(
@@ -48,7 +50,7 @@ class ProxyClient:
                 logger.exception(e)
                 raise
 
-            logger.debug("waiting for plumber process")
+            logger.debug("waiting for proxy server process")
 
 
 class ProxyConnection:
