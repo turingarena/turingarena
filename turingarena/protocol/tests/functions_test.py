@@ -74,8 +74,23 @@ def test_functions_valid():
             assert y == 5
 
 
-def test_function_return_type_not_scalar():
-    protocol_name = "turingarena.protocol.tests.function_return_type_not_scalar"
+def test_callable_return_type_not_scalar():
+    protocol_names = [
+        "turingarena.protocol.tests.function_return_type_not_scalar",
+        "turingarena.protocol.tests.callback_return_type_not_scalar",
+    ]
+    for protocol_name in protocol_names:
+        with pytest.raises(SystemExit) as excinfo:
+            turingarena_setup(
+                name=protocol_name,
+                protocols=[protocol_name],
+            )
+
+        assert 'return type must be a scalar' in str(excinfo.value)
+
+
+def test_callback_argument_not_scalar():
+    protocol_name = "turingarena.protocol.tests.callback_argument_not_scalar"
 
     with pytest.raises(SystemExit) as excinfo:
         turingarena_setup(
@@ -83,4 +98,4 @@ def test_function_return_type_not_scalar():
             protocols=[protocol_name],
         )
 
-    assert 'return type must be a scalar' in str(excinfo.value)
+    assert 'callback arguments must be scalars' in str(excinfo.value)

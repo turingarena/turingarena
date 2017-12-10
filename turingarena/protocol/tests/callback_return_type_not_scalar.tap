@@ -1,0 +1,4 @@
+interface callback_return_type_not_scalar {
+    callback callback_return_type_not_scalar() -> int[] {}
+    main {}
+}

@@ -1,0 +1,4 @@
+interface callback_argument_not_scalar {
+    callback callback_argument_not_scalar(int ok, int[] wrong) {}
+    main {}
+}

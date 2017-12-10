@@ -1,12 +1,11 @@
 import logging
-
 from collections import OrderedDict
 
 from turingarena.common import ImmutableObject, TupleLikeObject
 from turingarena.protocol.model.exceptions import ProtocolError
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.type_expressions import ValueType, PrimaryType, ScalarType
+from turingarena.protocol.model.type_expressions import ValueType, ScalarType
 from turingarena.protocol.server.commands import CallbackCall
 from turingarena.protocol.server.data import VariableReference
 from turingarena.protocol.server.frames import Phase
@@ -132,6 +131,21 @@ class Callback(Callable):
     @staticmethod
     def compile(ast, scope):
         signature = CallableSignature.compile(ast.declarator, scope)
+
+        invalid_parameter = next(
+            (
+                a for p, a in zip(signature.parameters, ast.declarator.parameters)
+                if not isinstance(p.value_type, ScalarType)
+            ),
+            None
+        )
+
+        if invalid_parameter is not None:
+            raise ProtocolError(
+                "callback arguments must be scalars",
+                parseinfo=invalid_parameter.parseinfo,
+            )
+
         callback_scope = Scope(scope)
         for p in signature.parameters:
             callback_scope.variables[p.name] = p
