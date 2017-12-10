@@ -99,3 +99,91 @@ def test_callback_argument_not_scalar():
         )
 
     assert 'callback arguments must be scalars' in str(excinfo.value)
+
+
+def test_interface_no_callbacks():
+    protocol_name = "turingarena.protocol.tests.functions_valid"
+    name = "interface_no_callbacks"
+    with TemporaryDirectory() as temp_dir:
+        sandbox_compile(
+            dest_dir=temp_dir,
+            source_filename=pkg_resources.resource_filename(
+                __name__, f"{name}.cpp"
+            ),
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+            check=True,
+        )
+
+        impl = Implementation(
+            work_dir=temp_dir,
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+        )
+
+        with impl.run() as p:
+            assert p.test() == 1
+
+
+def test_interface_one_callback():
+    protocol_name = "turingarena.protocol.tests.functions_valid"
+    name = "interface_one_callback"
+    with TemporaryDirectory() as temp_dir:
+        sandbox_compile(
+            dest_dir=temp_dir,
+            source_filename=pkg_resources.resource_filename(
+                __name__, f"{name}.cpp"
+            ),
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+            check=True,
+        )
+
+        impl = Implementation(
+            work_dir=temp_dir,
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+        )
+
+        with impl.run() as p:
+            calls = []
+            def cb():
+                calls.append(cb)
+            assert p.test(cb=cb) == 1
+            assert calls == [cb, cb]
+
+
+def test_interface_multiple_callbacks():
+    protocol_name = "turingarena.protocol.tests.functions_valid"
+    name = "interface_multiple_callbacks"
+    with TemporaryDirectory() as temp_dir:
+        sandbox_compile(
+            dest_dir=temp_dir,
+            source_filename=pkg_resources.resource_filename(
+                __name__, f"{name}.cpp"
+            ),
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+            check=True,
+        )
+
+        impl = Implementation(
+            work_dir=temp_dir,
+            protocol_name=protocol_name,
+            interface_name=name,
+            algorithm_name=name,
+        )
+
+        with impl.run() as p:
+            calls = []
+            def cb1():
+                calls.append(cb1)
+            def cb2():
+                calls.append(cb2)
+            assert p.test(cb1=cb1, cb2=cb2) == 1
+            assert calls == [cb1, cb2, cb2, cb1]

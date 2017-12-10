@@ -34,3 +34,33 @@ interface functions_valid {
         output y;
     }
 }
+
+interface interface_no_callbacks {
+    function test() -> int;
+    main {
+        var int o;
+        call test() -> o;
+        output o;
+    }
+}
+
+interface interface_one_callback {
+    callback cb() {}
+    function test() -> int;
+    main {
+        var int o;
+        call test() -> o;
+        output o;
+    }
+}
+
+interface interface_multiple_callbacks {
+    callback cb1() {}
+    callback cb2() {}
+    function test() -> int;
+    main {
+        var int o;
+        call test() -> o;
+        output o;
+    }
+}
