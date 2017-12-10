@@ -4,8 +4,8 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
+from turingarena.protocol.module import ProtocolModule
 from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd
-from turingarena.protocol.module import load_interface_signature
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +65,9 @@ class ProxiedAlgorithm:
 
     @contextmanager
     def run(self, **global_variables):
-        interface_signature = load_interface_signature(
-            protocol_name=self.protocol_name,
-            interface_name=self.interface_name,
-        )
+        protocol_module = ProtocolModule(name=self.protocol_name)
+
+        interface_signature = protocol_module.load_interface_signature(self.interface_name)
         sandbox = self.algorithm.executable.sandbox()
         with sandbox.run() as process:
             proxy = ProxyClient(

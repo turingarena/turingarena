@@ -1,3 +1,4 @@
+import os
 import re
 
 MODULES_PACKAGE = "turingarena_modules"
@@ -23,3 +24,14 @@ def parse_module_name(protocol_name):
         for part in parts
     )
     return parts
+
+
+def prepare_module_dir(dest_dir, qualifier, name):
+    module_dir = os.path.join(
+        dest_dir,
+        *python_module_parts(qualifier, name),
+    )
+    os.makedirs(module_dir, exist_ok=True)
+    with open(os.path.join(module_dir, "__init__.py"), "x"):
+        pass
+    return module_dir

@@ -1,12 +1,11 @@
 import logging
+import os
 import sys
+import tempfile
 from contextlib import ExitStack
 
-import os
-import tempfile
-
-from turingarena.protocol.module import load_protocol
 from turingarena.protocol.connection import ProxyConnection
+from turingarena.protocol.module import ProtocolModule
 from turingarena.protocol.server.engine import InterfaceEngine
 from turingarena.sandbox.client import Process
 
@@ -15,9 +14,8 @@ logger = logging.getLogger(__name__)
 
 class ProxyServer:
     def __init__(self, *, protocol_name, interface_name, sandbox_dir):
-        protocol = load_protocol(protocol_name)
-        self.protocol = protocol
-        self.interface = protocol.body.scope.interfaces[interface_name]
+        self.protocol_definition = ProtocolModule(protocol_name).load_definition()
+        self.interface = self.protocol_definition.body.scope.interfaces[interface_name]
 
         self.main = self.interface.body.scope.main["main"]
 

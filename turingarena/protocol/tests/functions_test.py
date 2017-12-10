@@ -159,7 +159,6 @@ def test_callable_return_type_not_scalar():
     for protocol_name in protocol_names:
         with pytest.raises(SystemExit) as excinfo:
             turingarena_setup(
-                name=protocol_name,
                 protocols=[protocol_name],
             )
 
@@ -171,7 +170,6 @@ def test_callback_argument_not_scalar():
 
     with pytest.raises(SystemExit) as excinfo:
         turingarena_setup(
-            name=protocol_name,
             protocols=[protocol_name],
         )
 
