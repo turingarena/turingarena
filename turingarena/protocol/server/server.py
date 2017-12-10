@@ -5,7 +5,7 @@ from contextlib import ExitStack
 import os
 import tempfile
 
-from turingarena.setup.load import load_protocol
+from turingarena.protocol.module import load_protocol
 from turingarena.protocol.connection import ProxyConnection
 from turingarena.protocol.server.engine import InterfaceEngine
 from turingarena.sandbox.client import Process

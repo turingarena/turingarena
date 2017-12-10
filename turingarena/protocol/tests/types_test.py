@@ -1,14 +1,7 @@
-from tempfile import TemporaryDirectory
-
-from turingarena.protocol.client import ProxiedAlgorithm
-from turingarena.sandbox.algorithm import Algorithm
-from turingarena.sandbox.cpp import CppAlgorithmSource
+from turingarena.protocol.tests.util import cpp_implementation
 
 
 def test_valid_types():
-    protocol_name = "turingarena.protocol.tests.types_valid"
-    name = "types_valid"
-
     source_text = """
         int i, *ia, **iaa;
     
@@ -25,30 +18,19 @@ def test_valid_types():
         }
     """
 
-    algorithm_source = CppAlgorithmSource(
-        filename=None,
-        language="c++",
-        text=source_text,
-        protocol_name=protocol_name,
-        interface_name=name,
-    )
+    iaa = [
+        [1, 2, 3],
+        [],
+        [4, 5],
+    ]
+    ia = [len(x) for x in iaa]
+    i = len(ia)
 
-    with TemporaryDirectory() as temp_dir:
-        algorithm_executable = algorithm_source.compile(name=name, dest_dir=temp_dir)
-        algorithm = Algorithm(source=algorithm_source, executable=algorithm_executable)
-
-        impl = ProxiedAlgorithm(
-            algorithm=algorithm,
-        )
-
-        iaa = [
-            [1, 2, 3],
-            [],
-            [4, 5],
-        ]
-        ia = [len(x) for x in iaa]
-        i = len(ia)
-
+    with cpp_implementation(
+            source_text=source_text,
+            protocol_name="turingarena.protocol.tests.types_valid",
+            interface_name="types_valid",
+    ) as impl:
         with impl.run(i=i, ia=ia, iaa=iaa) as p:
             assert i == p.get_i()
             for j in range(i):

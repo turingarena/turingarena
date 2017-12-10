@@ -7,8 +7,8 @@ from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
 from turingarena.protocol.server.commands import CallbackCall
-from turingarena.protocol.server.references import VariableReference
 from turingarena.protocol.server.frames import Phase
+from turingarena.protocol.server.references import VariableReference
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +17,14 @@ class Main(ImmutableObject):
     __slots__ = ["body"]
 
 
-class Protocol(AbstractSyntaxNode):
+class ProtocolDefinition(AbstractSyntaxNode):
     __slots__ = ["body"]
 
     @staticmethod
     def compile(*, ast, **kwargs):
         logger.debug("compiling {}".format(ast))
         scope = Scope()
-        return Protocol(
+        return ProtocolDefinition(
             body=Body.compile(ast.body, scope=scope),
             **kwargs,
         )

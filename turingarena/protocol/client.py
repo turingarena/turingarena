@@ -5,7 +5,7 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
 from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd
-from turingarena.setup.load import load_interface_signature
+from turingarena.protocol.module import load_interface_signature
 
 logger = logging.getLogger(__name__)
 

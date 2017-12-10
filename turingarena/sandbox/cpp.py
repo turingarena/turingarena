@@ -7,7 +7,8 @@ import pkg_resources
 
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
-from turingarena.setup.common import PROTOCOL_QUALIFIER, module_to_python_package
+from turingarena.modules import module_to_python_package
+from turingarena.protocol.module import PROTOCOL_QUALIFIER
 
 logger = logging.getLogger(__name__)
 

@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
@@ -17,7 +18,8 @@ def cpp_implementation(source_text, protocol_name, interface_name):
     )
 
     with TemporaryDirectory() as temp_dir:
-        algorithm_executable = algorithm_source.compile(name=interface_name, dest_dir=temp_dir)
+        algorithm_dir = os.path.join(temp_dir, "algorithm")
+        algorithm_executable = algorithm_source.compile(algorithm_dir=algorithm_dir)
         algorithm = Algorithm(source=algorithm_source, executable=algorithm_executable)
 
         impl = ProxiedAlgorithm(

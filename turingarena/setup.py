@@ -1,11 +1,38 @@
 import os
 import shutil
 import sys
+from tempfile import TemporaryDirectory
 
+from turingarena.modules import parse_module_name, python_module_parts
 from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.module import PROTOCOL_QUALIFIER, compile_protocol
 from turingarena.protocol.proxy.python import generate_proxy
 from turingarena.protocol.skeleton import generate_skeleton
-from turingarena.setup.common import *
+
+
+def turingarena_setup(*, source_dir=".", name, protocols):
+    from turingarena.common import install_with_setuptools
+    from turingarena.modules import MODULES_PACKAGE
+    from turingarena.modules import module_to_python_package
+    from turingarena.protocol.module import PROTOCOL_QUALIFIER
+
+    python_packages = []
+    with TemporaryDirectory() as dest_dir:
+        for protocol_name in protocols:
+            python_packages.append(module_to_python_package(PROTOCOL_QUALIFIER, protocol_name))
+            _prepare_protocol(dest_dir, protocol_name, source_dir)
+        levels = 5
+        install_with_setuptools(
+            dest_dir,
+            name=f"{MODULES_PACKAGE}.{name}",
+            packages=python_packages,
+            package_data={
+                # copy recursively up to levels
+                package_name: ["/".join(["*"] * i) for i in range(1, levels)]
+                for package_name in python_packages
+            },
+            zip_safe=False,
+        )
 
 
 def _prepare_protocol(dest_dir, protocol_name, source_dir):

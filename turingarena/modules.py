@@ -1,5 +1,7 @@
 import re
 
+MODULES_PACKAGE = "turingarena_modules"
+
 
 def module_to_python_package(qualifier, name):
     return ".".join(python_module_parts(qualifier, name))
@@ -21,14 +23,3 @@ def parse_module_name(protocol_name):
         for part in parts
     )
     return parts
-
-
-MODULES_PACKAGE = "turingarena_modules"
-PROTOCOL_QUALIFIER = "protocol"
-
-
-def compile_protocol(text, **kwargs):
-    from turingarena.protocol.model.model import Protocol
-    from turingarena.protocol.parser import parse_protocol
-    ast = parse_protocol(text, **kwargs)
-    return Protocol.compile(ast=ast)
