@@ -57,21 +57,57 @@ class Frame:
         self.state[phase] = FrameState.CLOSED
 
 
+class RootBlockContext(ImmutableObject):
+    __slots__ = ["callback", "frame_cache"]
+
+    def __init__(self, callback=None):
+        super().__init__(
+            callback=callback,
+            frame_cache={},
+        )
+
+    @contextmanager
+    def new_frame(self, *, parent, scope, phase):
+        try:
+            frame = self.frame_cache[scope]
+        except KeyError:
+            frame = None
+
+        if frame:
+            if frame.state[phase] is FrameState.CLOSED:
+                logger.debug(f"not reusing frame {frame}")
+                del self.frame_cache[scope]
+                frame = None
+            else:
+                logger.debug(f"reusing frame {frame}")
+
+        if not frame:
+            frame = self.frame_cache[scope] = Frame(
+                parent=parent,
+                scope=scope,
+            )
+            logger.debug(f"created new frame {frame} for scope {scope} ({phase})")
+
+        with frame.contextmanager(phase=phase):
+            yield frame
+
+
 class StatementContext(ImmutableObject):
-    __slots__ = ["engine", "frame", "phase"]
+    __slots__ = ["engine", "root_block_context", "frame", "phase"]
 
     def evaluate(self, expression):
         return expression.evaluate(frame=self.frame)
 
     @contextmanager
     def enter(self, scope):
-        with self.engine.new_frame(
+        with self.root_block_context.new_frame(
                 parent=self.frame,
                 scope=scope,
                 phase=self.phase,
         ) as new_frame:
             yield StatementContext(
                 engine=self.engine,
+                root_block_context=self.root_block_context,
                 frame=new_frame,
                 phase=self.phase,
             )

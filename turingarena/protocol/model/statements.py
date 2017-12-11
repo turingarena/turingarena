@@ -10,7 +10,7 @@ from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
 from turingarena.protocol.server.commands import FunctionReturn
-from turingarena.protocol.server.frames import Phase
+from turingarena.protocol.server.frames import Phase, RootBlockContext
 
 logger = logging.getLogger(__name__)
 
@@ -266,10 +266,14 @@ def invoke_callbacks(context):
         return
     while True:
         logger.debug(f"popping callbacks")
-        callback = context.engine.pop_callback()
-        if callback is None:
+        callback_context = context.engine.pop_callback()
+        if callback_context is None:
             break
-        yield from callback.run(context)
+        logger.debug(f"popped {callback_context}")
+        yield from callback_context.callback.run(context.engine.new_context(
+            root_block_context=callback_context,
+            phase=context.phase,
+        ))
         context.engine.ensure_output()
 
 
@@ -285,8 +289,12 @@ def accept_callbacks(context):
             break
         else:
             callback = context.engine.interface.body.scope.callbacks[callback_name]
-            context.engine.push_callback(callback)
-            yield from callback.run(context=context)
+            callback_context = RootBlockContext(callback)
+            context.engine.push_callback(callback_context)
+            yield from callback.run(context=context.engine.new_context(
+                root_block_context=callback_context,
+                phase=context.phase,
+            ))
 
 
 @statement_class("return")

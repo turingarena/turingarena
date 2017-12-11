@@ -1,4 +1,5 @@
 import os
+from collections import deque
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
@@ -40,3 +41,16 @@ def cpp_implementation(protocol_text, source_text, protocol_name, interface_name
         )
 
         yield impl
+
+
+def callback_mock(calls, return_values=None):
+    if return_values is not None:
+        return_values = deque(return_values)
+
+    def mock(*args):
+        calls.append((mock, args))
+
+        if return_values is not None:
+            return return_values.popleft()
+
+    return mock

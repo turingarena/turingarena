@@ -1,8 +1,7 @@
 from collections import deque
-from contextlib import contextmanager
 
 from turingarena.protocol.server.commands import ProxyRequest
-from turingarena.protocol.server.frames import Frame, StatementContext, Phase, FrameState, logger
+from turingarena.protocol.server.frames import Frame, StatementContext, Phase, logger, RootBlockContext
 
 
 class InterfaceEngine:
@@ -12,48 +11,29 @@ class InterfaceEngine:
         self.process_connection = process_connection
 
         self.root_frame = Frame(parent=None, scope=interface.body.scope)
-        self.frame_cache = {}
         self.callback_queue = deque()
         self.next_request = None
         self.input_sent = False
 
-        self.run_generator = self.interface.run(StatementContext(
-            engine=self,
-            frame=self.root_frame,
+        self.main_block_context = RootBlockContext()
+        self.run_generator = self.interface.run(self.new_context(
+            root_block_context=self.main_block_context,
             phase=Phase.RUN,
         ))
 
     def run(self):
-        next(self.interface.run(StatementContext(
-            engine=self,
-            frame=self.root_frame,
+        next(self.interface.run(self.new_context(
+            root_block_context=self.main_block_context,
             phase=Phase.PREFLIGHT,
         )))
 
-    @contextmanager
-    def new_frame(self, *, parent, scope, phase):
-        try:
-            frame = self.frame_cache[scope]
-        except KeyError:
-            frame = None
-
-        if frame:
-            if frame.state[phase] is FrameState.CLOSED:
-                logger.debug(f"not reusing frame {frame}")
-                del self.frame_cache[scope]
-                frame = None
-            else:
-                logger.debug(f"reusing frame {frame}")
-
-        if not frame:
-            frame = self.frame_cache[scope] = Frame(
-                parent=parent,
-                scope=scope,
-            )
-            logger.debug(f"created new frame {frame} for scope {scope} ({phase})")
-
-        with frame.contextmanager(phase=phase):
-            yield frame
+    def new_context(self, *, root_block_context, phase):
+        return StatementContext(
+            engine=self,
+            root_block_context=root_block_context,
+            frame=self.root_frame,
+            phase=phase,
+        )
 
     def peek_request(self):
         if self.next_request is None:
