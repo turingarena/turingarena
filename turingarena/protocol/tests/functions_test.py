@@ -19,7 +19,6 @@ def test_function_no_arguments():
                 void function_no_arguments() {
                 }
             """,
-            protocol_name="turingarena.protocol.tests.function_no_arguments",
             interface_name="function_no_arguments",
     ) as impl:
         with impl.run() as p:
@@ -44,7 +43,6 @@ def test_function_with_arguments():
                     assert(a == 1 && b == 2);
                 }
             """,
-            protocol_name="turingarena.protocol.tests.function_with_arguments",
             interface_name="function_with_arguments",
     ) as impl:
         with impl.run() as p:
@@ -71,7 +69,6 @@ def test_function_return_value():
                     return 2;
                 }
             """,
-            protocol_name="turingarena.protocol.tests.function_return_value",
             interface_name="function_return_value",
     ) as impl:
         with impl.run() as p:

@@ -23,7 +23,6 @@ def test_callback_no_arguments():
                     callback_no_arguments();
                 }
             """,
-            protocol_name="turingarena.protocol.tests.callback_no_arguments",
             interface_name="callback_no_arguments",
     ) as impl:
         with impl.run() as p:
@@ -57,7 +56,6 @@ def test_callback_with_arguments():
                     callback_with_arguments(3, 4);
                 }
             """,
-            protocol_name="turingarena.protocol.tests.callback_with_arguments",
             interface_name="callback_with_arguments",
     ) as impl:
         with impl.run() as p:
@@ -96,7 +94,6 @@ def test_callback_return_value():
                     assert(callback_return_value(3) == 4);
                 }
             """,
-            protocol_name="turingarena.protocol.tests.callback_return_value",
             interface_name="callback_return_value",
     ) as impl:
         with impl.run() as p:

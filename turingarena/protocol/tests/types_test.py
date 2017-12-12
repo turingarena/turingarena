@@ -75,7 +75,6 @@ def test_valid_types():
     with cpp_implementation(
             protocol_text=protocol_text,
             source_text=source_text,
-            protocol_name="turingarena.protocol.tests.types_valid",
             interface_name="types_valid",
     ) as impl:
         with impl.run(i=i, ia=ia, iaa=iaa) as p:
