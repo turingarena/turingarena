@@ -122,6 +122,21 @@ class FunctionCall(ProxyRequest):
 class CallbackReturn(ProxyRequest):
     __slots__ = ["callback_name", "return_value"]
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.return_type is not None:
+            assert self.return_value is not None
+        else:
+            assert self.return_value is None
+
+    @property
+    def return_type(self):
+        return self.callback_signature.return_type
+
+    @property
+    def callback_signature(self):
+        return self.interface_signature.callbacks[self.callback_name]
+
     @staticmethod
     def deserialize_arguments(lines, *, interface_signature):
         callback_name = next(lines)
@@ -137,9 +152,8 @@ class CallbackReturn(ProxyRequest):
 
     def serialize_arguments(self):
         yield self.callback_name
-        return_type = self.interface_signature.callbacks[self.callback_name].return_type
-        if self.return_value:
-            yield from return_type.serialize(self.return_value)
+        if self.return_type is not None:
+            yield from self.return_type.serialize(self.return_value)
 
 
 @request_type("main_end")
