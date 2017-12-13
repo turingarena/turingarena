@@ -29,7 +29,7 @@ class ProtocolSource(ImmutableObject):
 
     def install(self, name):
         with TemporaryDirectory() as dest_dir:
-            self.generate(dest_dir, name)
+            self.generate(dest_dir=dest_dir, name=name)
             self._do_install(dest_dir, name)
 
     def _do_install(self, dest_dir, name):
