@@ -9,8 +9,8 @@ from . import python
 logger = logging.getLogger(__name__)
 
 languages = {
-    "cpp":    cpp.generate_skeleton
-    "python": python.generate_skeleton
+    "cpp":    cpp.generate_skeleton,
+    "python": python.generate_skeleton,
 }
 
 

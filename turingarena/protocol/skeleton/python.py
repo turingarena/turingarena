@@ -51,7 +51,7 @@ def generate_function(statement):
 def generate_function_template(statement):
     function = statement.function
     yield f"{build_callable_declarator(function)}:"
-    yield indent("// TODO")
+    yield indent("# TODO")
     yield indent("pass")
 
 
