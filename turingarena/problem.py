@@ -2,7 +2,7 @@ import os
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.make import Task, EvaluationEntry
+from turingarena.make.node import EvaluationEntry, Task
 from turingarena.protocol.client import ProxiedAlgorithm
 from turingarena.sandbox.algorithm import Algorithm
 from turingarena.sandbox.loader import load_algorithm_source, load_algorithm_executable

@@ -10,4 +10,4 @@ git init --bare $REPO_PATH
 
 ENTRY=$(turingarena entry --repo-path=$REPO_PATH --file=entry.cpp:entry.cpp)
 
-turingarena make --module=test_challenge --name=problem make --phase=evaluate_goal --repo-path=$REPO_PATH --entry=entry_entry:$ENTRY
+turingarena make make --plan=test_challenge:problem --repo-path=$REPO_PATH --entry=entry_entry:$ENTRY evaluate_goal

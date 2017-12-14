@@ -1,31 +1,19 @@
-import importlib
 import json
 
 from turingarena.cli import docopt_cli
-from turingarena.make import resolve_plan, make_plan_signature
 from turingarena.make.make import sequential_make
+from turingarena.make.node import make_plan_signature, load_plan
 
 
 @docopt_cli
 def make_cli(args):
-    """TuringArena task CLI.
+    """TuringArena make CLI.
 
     Usage:
-      task [options] -m <module> [-n <name>] <cmd> [<args>...]
-
-    Options:
-
-      -m --module=<package>  Python module containing the problem definition
-      -n --name=<name>  Qualified name of the problem variable [default: problem]
-
+      make [options] <cmd> [<args>...]
     """
 
-    plan_module = importlib.import_module(args["--module"])
-
-    print(plan_module)
-
-    plan_descriptor = getattr(plan_module, args["--name"])
-    plan = resolve_plan(plan_descriptor.get_tasks())
+    # FIXME: reuse common option '--plan'
 
     commands = {
         "describe": make_describe_cli,
@@ -34,36 +22,39 @@ def make_cli(args):
         "make": make_make_cli,
     }
     argv2 = args["<args>"]
-    return commands[args["<cmd>"]](plan=plan, argv=argv2)
+    return commands[args["<cmd>"]](argv=argv2)
 
 
 @docopt_cli
-def make_describe_cli(args, *, plan):
+def make_describe_cli(args):
     """TuringArena task describe CLI.
 
     Usage:
-      describe
+      describe <plan>
     """
 
+    plan = load_plan(args["<plan>"])
     print(json.dumps(make_plan_signature(plan), indent=2))
 
 
 @docopt_cli
-def make_compute_cli(args, *, plan):
+def make_compute_cli(args):
     """TuringArena task compute CLI.
 
     Usage:
-      compute [options] --phase=<name> [--index=<index>] [--parent=<id>]...
+      compute <task> [--parent=<id>]...
 
     Options:
-      --phase=<name>  Name of the phase to run
-      --index=<index>  Index of the specific parametrization of the phase to run
+      --plan=<plan>  Name of the plan containing the task
+      <task>  Name of the task to compute
       --parent=<id>  Add a dependency as a Git commit
       --repo-path=<path>  Path to the repository
     """
 
-    phase_name = args["--phase"]
-    commit = plan[phase_name].compute(
+    task_name = args["<task>"]
+    plan = load_plan(args["--plan"] or task_name)
+    task = plan[task_name]
+    commit = task.compute(
         repo_path=args["--repo-path"],
         parents=dict([
             p.split(":", 2)
@@ -74,22 +65,24 @@ def make_compute_cli(args, *, plan):
 
 
 @docopt_cli
-def make_make_cli(args, *, plan):
+def make_make_cli(args):
     """TuringArena task compute CLI.
 
     Usage:
-      make [options] --phase=<name> [--index=<index>] [--entry=<id>]...
+      make [options] <task> [--entry=<id>]...
 
     Options:
-      --phase=<name>  Name of the phase to run
-      --index=<index>  Index of the specific parametrization of the phase to run
+      --plan=<plan>  Name of the plan containing the task
+      <task>  Name of the task to make
       --entry=<entry>  Add an entry (format: <entry name>:<commit SHA>)
       --repo-path=<path>  Path to the repository
     """
 
+    task_name = args["<task>"]
+    plan = load_plan(args["--plan"] or task_name)
     commit_sha = sequential_make(
         plan=plan,
-        task_name=args["--phase"],
+        task_name=task_name,
         repo_path=args["--repo-path"],
         entries=dict([
             e.split(":", 2)
@@ -100,16 +93,18 @@ def make_make_cli(args, *, plan):
 
 
 @docopt_cli
-def make_run_cli(args, *, plan):
+def make_run_cli(args):
     """TuringArena task run CLI.
 
     Usage:
-      run --phase=<name> [--index=<index>]
+      run <task> [--index=<index>]
 
     Options:
-      --phase=<name>  Name of the phase to run
-      --index=<index>  Index of the specific parametrization of the phase to run
+      <task>  Name of the task to run
+      --plan=<plan>  Name of the plan containing the task
     """
 
-    phase_name = args["--phase"]
-    plan[phase_name].run()
+    task_name = args["<task>"]
+    plan = load_plan(args["--plan"] or task_name)
+    task = plan[task_name]
+    task.run()

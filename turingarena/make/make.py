@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.make import Task, EvaluationEntry
+from turingarena.make.node import EvaluationEntry, Task
 
 logger = logging.getLogger(__name__)
 
