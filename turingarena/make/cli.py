@@ -97,7 +97,7 @@ def make_run_cli(args):
     """TuringArena task run CLI.
 
     Usage:
-      run <task> [--index=<index>]
+      run [options] <task> [--index=<index>]
 
     Options:
       <task>  Name of the task to run
