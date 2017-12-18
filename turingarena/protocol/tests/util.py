@@ -1,7 +1,6 @@
 import os
 import random
 import string
-import subprocess
 import sys
 from collections import deque
 from contextlib import contextmanager

@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 
 from turingarena.common import ImmutableObject, TupleLikeObject
-from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
@@ -70,14 +70,15 @@ class Interface(ImmutableObject):
                 context.engine.root_frame[variable] = value
             context.engine.complete_request()
 
-        yield from run_body(main.body, context=context)
-
-        if context.phase is Phase.PREFLIGHT:
-            request = context.engine.peek_request()
-            assert request.message_type == "main_end"
-            context.engine.complete_request()
-
-        yield
+        try:
+            yield from run_body(main.body, context=context)
+        except ProtocolExit:
+            yield
+        else:
+            if context.phase is Phase.PREFLIGHT:
+                request = context.engine.peek_request()
+                assert request.message_type == "main_end"
+                context.engine.complete_request()
 
 
 class CallableSignature(TupleLikeObject):

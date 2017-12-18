@@ -7,6 +7,7 @@ from functools import partial
 from tempfile import TemporaryDirectory
 
 import git
+
 from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)

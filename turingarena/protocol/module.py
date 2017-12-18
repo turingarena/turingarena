@@ -7,7 +7,7 @@ import pkg_resources
 
 from turingarena.common import ImmutableObject, install_with_setuptools
 from turingarena.modules import module_to_python_package, prepare_module_dir, parse_module_name
-from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.exceptions import ProtocolError
 
 PROTOCOL_QUALIFIER = "protocol"
 ORIGINAL_SOURCE_FILENAME = "_original_source_filename.txt"

@@ -1,10 +1,8 @@
 import logging
-
 import os
 import shutil
 
-from . import cpp
-from . import python
+from . import cpp, python
 
 logger = logging.getLogger(__name__)
 

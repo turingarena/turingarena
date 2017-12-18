@@ -1,6 +1,5 @@
-import subprocess
-
 import os
+import subprocess
 from abc import ABCMeta
 
 

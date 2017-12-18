@@ -5,10 +5,10 @@ import subprocess
 
 import pkg_resources
 
-from turingarena.sandbox.executable import AlgorithmExecutable
-from turingarena.sandbox.source import AlgorithmSource
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 

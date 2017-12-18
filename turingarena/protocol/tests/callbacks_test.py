@@ -1,6 +1,6 @@
 import pytest
 
-from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.module import ProtocolSource
 from turingarena.protocol.tests.util import cpp_implementation, callback_mock
 

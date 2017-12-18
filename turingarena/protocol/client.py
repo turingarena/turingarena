@@ -4,9 +4,9 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
-from turingarena.protocol.model.exceptions import ProtocolError
+from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import ProtocolModule
-from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd
+from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 
 logger = logging.getLogger(__name__)
 
@@ -122,24 +122,32 @@ class ProxyEngine:
             logger.debug("waiting for response...")
             response = self.accept_response()
             if response.message_type == "callback_call":
-                callback_name = response.callback_name
-                callback_signature = self.interface_signature.callbacks[callback_name]
-                raw_return_value = callbacks_impl[callback_name](*response.parameters)
-                return_type = callback_signature.return_type
-                if return_type:
-                    return_value = return_type.ensure(raw_return_value)
-                else:
-                    assert raw_return_value is None
-                    return_value = None
-                request = CallbackReturn(
-                    interface_signature=self.interface_signature,
-                    callback_name=callback_name,
-                    return_value=return_value,
-                )
-                self.send(request)
+                self.accept_callback(callbacks_impl, response)
                 continue
             if response.message_type == "function_return":
                 return response.return_value
+
+    def accept_callback(self, callbacks_impl, response):
+        callback_name = response.callback_name
+        callback_signature = self.interface_signature.callbacks[callback_name]
+        try:
+            raw_return_value = callbacks_impl[callback_name](*response.parameters)
+        except ProtocolExit:
+            request = Exit(interface_signature=self.interface_signature)
+            self.send(request)
+            raise
+        return_type = callback_signature.return_type
+        if return_type:
+            return_value = return_type.ensure(raw_return_value)
+        else:
+            assert raw_return_value is None
+            return_value = None
+        request = CallbackReturn(
+            interface_signature=self.interface_signature,
+            callback_name=callback_name,
+            return_value=return_value,
+        )
+        self.send(request)
 
     def accept_response(self):
         return ProxyResponse.accept(

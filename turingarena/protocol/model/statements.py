@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.model.exceptions import ProtocolExit
+from turingarena.protocol.exceptions import ProtocolExit
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
@@ -328,6 +328,8 @@ class ExitStatement(ImperativeStatement):
 
     def run(self, context):
         yield from []
+        if context.phase == Phase.PREFLIGHT:
+            context.engine.ensure_output()
         raise ProtocolExit
 
     def first_calls(self):
@@ -396,9 +398,9 @@ class IfStatement(ImperativeStatement):
                 condition.resolve(0)
 
         if condition.get():
-            run_body(self.then_body, context=context)
+            yield from run_body(self.then_body, context=context)
         elif self.else_body is not None:
-            run_body(self.else_body, context=context)
+            yield from run_body(self.else_body, context=context)
 
     def first_calls(self):
         return self.then_body.first_calls() | (
