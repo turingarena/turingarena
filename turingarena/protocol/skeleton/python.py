@@ -86,6 +86,7 @@ def generate_block_statement(statement, *, interface):
         "flush": lambda: ["sys.stdout.flush()"],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
+        "if": lambda: generate_if(statement, interface=interface),
         "exit": lambda: ["sys.exit(0)"],
         "return": lambda: [f"return {build_expression(statement.value)}"],
     }
@@ -133,7 +134,7 @@ def generate_if(statement, *, interface):
     condition = build_expression(statement.condition)
     yield f"if {condition} :"
     yield from indent_all(generate_block(statement.then_body, interface=interface))
-    if hasattr(statement, 'else_body'):
+    if statement.else_body is not None:
         yield "else:"
         yield from indent_all(generate_block(statement.else_body, interface=interface))
 

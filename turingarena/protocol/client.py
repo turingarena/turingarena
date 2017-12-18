@@ -4,6 +4,7 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
+from turingarena.protocol.model.exceptions import ProtocolError
 from turingarena.protocol.module import ProtocolModule
 from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd
 
@@ -95,7 +96,16 @@ class ProxyEngine:
         self.connection = connection
 
     def call(self, name, args, callbacks_impl):
-        function_signature = self.interface_signature.functions[name]
+        try:
+            function_signature = self.interface_signature.functions[name]
+        except KeyError:
+            raise ProtocolError(f"undefined function {name}")
+
+        if len(args) != len(function_signature.parameters):
+            raise ProtocolError(
+                f"function '{name}'"
+                f" expects {len(function_signature.parameters)} parameters,"
+                f" got {len(args)}")
 
         request = FunctionCall(
             interface_signature=self.interface_signature,

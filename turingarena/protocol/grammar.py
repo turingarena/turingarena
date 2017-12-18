@@ -58,11 +58,13 @@ grammar_ebnf = r"""
             '(' parameters:expression_list ')'
             return_value:[ return_value_expression ] ';'
         | statement_type:'if' ~ '(' condition:expression ')'
-            then_body:block [ 'else' ~ else_body:block ]
+            then_body:block else_body:[ else_body ]
         | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }* '}'
         | statement_type:'for' ~ '(' index:index_declaration ')' body:block
         | statement_type:'loop' ~ body:block
     ;
+
+    else_body = 'else' ~ @:block ;
 
     expression_list = ','.{ expression }* ;
 
@@ -70,10 +72,19 @@ grammar_ebnf = r"""
         'case' '(' value:identifier ')' body:block
     ;
 
-    expression =
+    atomic_expression =
         | expression_type:`int_literal` int_literal:INT
         | expression_type:`subscript` array:expression '[' index:expression ']'
         | expression_type:`reference` variable_name:identifier
+        | '(' @:expression ')'
+    ;
+    
+    expression =
+        | expression_type:`binary`
+            left:atomic_expression
+            operator:('=='|'!='|'<'|'<='|'>'|'>=')
+            right:atomic_expression
+        | atomic_expression
     ;
 
     type_expression =

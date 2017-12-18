@@ -16,6 +16,9 @@ class Reference(ImmutableObject):
         assert value is not None
         return value
 
+    def is_resolved(self):
+        return self.do_get() is not None
+
     def resolve(self, value):
         logger.debug(f"resolving {self} <- {value}")
         value = self.value_type.ensure(value)

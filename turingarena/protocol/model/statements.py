@@ -4,6 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
+from turingarena.protocol.model.exceptions import ProtocolExit
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
@@ -15,6 +16,8 @@ from turingarena.protocol.server.frames import Phase, RootBlockContext
 logger = logging.getLogger(__name__)
 
 statement_classes = bidict()
+
+ExitCall = object()
 
 
 def statement_class(statement_type):
@@ -258,7 +261,7 @@ class CallStatement(ImperativeStatement):
             yield from self.preflight(context)
 
     def first_calls(self):
-        return {self.function}
+        return {self.function.name}
 
 
 def invoke_callbacks(context):
@@ -315,6 +318,22 @@ class ReturnStatement(ImperativeStatement):
         yield from []
 
 
+@statement_class("exit")
+class ExitStatement(ImperativeStatement):
+    __slots__ = []
+
+    @staticmethod
+    def compile(ast, scope):
+        return ExitStatement()
+
+    def run(self, context):
+        yield from []
+        raise ProtocolExit
+
+    def first_calls(self):
+        return {ExitCall}
+
+
 class ForIndex(ImmutableObject):
     __slots__ = ["variable", "range"]
 
@@ -352,6 +371,42 @@ class ForStatement(ImperativeStatement):
         return self.body.first_calls() | {None}
 
 
+@statement_class("if")
+class IfStatement(ImperativeStatement):
+    __slots__ = ["condition", "then_body", "else_body"]
+
+    @staticmethod
+    def compile(ast, scope):
+        return IfStatement(
+            condition=Expression.compile(ast.condition, scope=scope),
+            then_body=Body.compile(ast.then_body, scope=scope),
+            else_body=(
+                None if ast.else_body is None else
+                Body.compile(ast.then_body, scope=scope)
+            ),
+        )
+
+    def run(self, context):
+        condition = context.evaluate(self.condition)
+        if context.phase == Phase.PREFLIGHT and not condition.is_resolved():
+            # FIXME: use a stricter logic here
+            if self.then_body.is_possible_branch(context=context):
+                condition.resolve(1)
+            else:
+                condition.resolve(0)
+
+        if condition.get():
+            run_body(self.then_body, context=context)
+        elif self.else_body is not None:
+            run_body(self.else_body, context=context)
+
+    def first_calls(self):
+        return self.then_body.first_calls() | (
+            {None} if self.else_body is not None else
+            self.else_body.first_calls()
+        )
+
+
 def run_body(body, *, context):
     with context.enter(body.scope) as inner_context:
         for statement in body.statements:
@@ -373,6 +428,16 @@ class Body(AbstractSyntaxNode):
                 for s in ast.statements
             ]
         )
+
+    def is_possible_branch(self, *, context):
+        request = context.engine.peek_request()
+        if request.message_type == "function_call":
+            call = request.function_name
+        elif request.message_type == "exit":
+            call = ExitCall
+        else:
+            call = None
+        return call is not None and call in self.first_calls()
 
     def first_calls(self):
         ans = {None}

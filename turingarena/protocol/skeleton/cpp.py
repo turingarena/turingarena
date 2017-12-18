@@ -12,6 +12,7 @@ def generate_skeleton(*, interface, dest_dir):
 
 def generate_main_file(interface):
     yield "#include <cstdio>"
+    yield "#include <cstdlib>"
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
@@ -86,6 +87,7 @@ def generate_block_statement(statement, *, interface):
         "flush": lambda: ["fflush(stdout);"],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
+        "if": lambda: generate_if(statement, interface=interface),
         "exit": lambda: ["exit(0);"],
         "return": lambda: [f"return {build_expression(statement.value)};"],
     }
@@ -134,7 +136,7 @@ def generate_if(statement, *, interface):
     yield f"if( {condition} )" " {"
     yield from indent_all(generate_block(statement.then_body, interface=interface))
     yield "}"
-    if hasattr(statement, 'else_body'):
+    if statement.else_body is not None:
         yield "else {"
         yield from indent_all(generate_block(statement.else_body, interface=interface))
         yield "}"

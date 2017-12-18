@@ -95,10 +95,13 @@ class MainBegin(ProxyRequest):
 class FunctionCall(ProxyRequest):
     __slots__ = ["function_name", "parameters", "accept_callbacks"]
 
+    @property
+    def function_signature(self):
+        return self.interface_signature.functions[self.function_name]
+
     def serialize_arguments(self):
-        function_signature = self.interface_signature.functions[self.function_name]
         yield self.function_name
-        for parameter, value in zip(function_signature.parameters, self.parameters):
+        for parameter, value in zip(self.function_signature.parameters, self.parameters):
             yield from parameter.value_type.serialize(value)
         yield str(int(self.accept_callbacks))
 
@@ -158,6 +161,18 @@ class CallbackReturn(ProxyRequest):
 
 @request_type("main_end")
 class MainEnd(ProxyRequest):
+    __slots__ = []
+
+    @staticmethod
+    def deserialize_arguments(lines, *, interface_signature):
+        return dict()
+
+    def serialize_arguments(self):
+        yield from []
+
+
+@request_type("exit")
+class Exit(ProxyRequest):
     __slots__ = []
 
     @staticmethod
