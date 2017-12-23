@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.exceptions import ProtocolExit
+from turingarena.protocol.exceptions import ProtocolExit, ProtocolError
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
@@ -229,9 +229,11 @@ class CallStatement(ImperativeStatement):
         )
 
     def preflight(self, context):
-        request = context.engine.peek_request()
-        assert request.message_type == "function_call"
-        assert request.function_name == self.function.name
+        request = context.engine.peek_request(expected_type="function_call")
+        context.engine.complete_request()
+
+        if request.function_name != self.function.name:
+            raise ProtocolError(f"expected call to '{self.function.name}', got '{request.function_name}'")
 
         for value_expr, value in zip(self.parameters, request.parameters):
             context.evaluate(value_expr).resolve(value)
@@ -239,8 +241,6 @@ class CallStatement(ImperativeStatement):
         return_type = self.function.signature.return_type
         if return_type or accept_callbacks:
             context.engine.ensure_output()
-
-        context.engine.complete_request()
 
         yield from invoke_callbacks(context)
 
@@ -255,9 +255,9 @@ class CallStatement(ImperativeStatement):
         ))
 
     def run(self, context):
-        if context.phase == Phase.RUN:
+        if context.phase is Phase.RUN:
             yield from accept_callbacks(context)
-        if context.phase == Phase.PREFLIGHT:
+        if context.phase is Phase.PREFLIGHT:
             yield from self.preflight(context)
 
     def first_calls(self):
@@ -266,13 +266,14 @@ class CallStatement(ImperativeStatement):
 
 def invoke_callbacks(context):
     if not context.engine.interface.signature.callbacks:
+        logger.debug(f"no callback defined, nothing to do")
         return
     while True:
         logger.debug(f"popping callbacks")
         callback_context = context.engine.pop_callback()
+        logger.debug(f"popped {callback_context}")
         if callback_context is None:
             break
-        logger.debug(f"popped {callback_context}")
         yield from callback_context.callback.run(context.engine.new_context(
             root_block_context=callback_context,
             phase=context.phase,
@@ -288,12 +289,14 @@ def accept_callbacks(context):
         callback_name = context.engine.process_connection.upward_pipe.readline().strip()
         logger.debug(f"received line {callback_name}")
         if callback_name == "return":
+            logger.debug(f"no more callbacks, push None to callback queue")
             context.engine.push_callback(None)
             break
         else:
             callback = context.engine.interface.body.scope.callbacks[callback_name]
             callback_context = RootBlockContext(callback)
             context.engine.push_callback(callback_context)
+            logger.debug(f"got callback '{callback_name}', pushing {callback_context} to queue")
             yield from callback.run(context=context.engine.new_context(
                 root_block_context=callback_context,
                 phase=context.phase,
@@ -410,11 +413,13 @@ class IfStatement(ImperativeStatement):
 
 
 def run_body(body, *, context):
+    logger.debug(f"running body {body} in {context}")
     with context.enter(body.scope) as inner_context:
         for statement in body.statements:
             if isinstance(statement, ImperativeStatement):
                 logger.debug(f"run {statement} in {inner_context}")
                 yield from statement.run(inner_context)
+                logger.debug(f"completed {statement} in {inner_context}")
 
 
 @statement_class("loop")

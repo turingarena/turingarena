@@ -63,9 +63,11 @@ class Interface(ImmutableObject):
 
     def run(self, context):
         main = self.body.scope.main["main"]
+
+        logger.debug(f"running main {main} in {context}")
+
         if context.phase is Phase.PREFLIGHT:
-            request = context.engine.peek_request()
-            assert request.message_type == "main_begin"
+            request = context.engine.peek_request(expected_type="main_begin")
             for variable, value in zip(self.signature.variables.values(), request.global_variables):
                 context.engine.root_frame[variable] = value
             context.engine.complete_request()
@@ -73,12 +75,19 @@ class Interface(ImmutableObject):
         try:
             yield from run_body(main.body, context=context)
         except ProtocolExit:
-            yield
-        else:
+            logger.debug(f"exit was reached in {context}")
             if context.phase is Phase.PREFLIGHT:
-                request = context.engine.peek_request()
-                assert request.message_type == "main_end"
+                context.engine.peek_request(expected_type="exit")
                 context.engine.complete_request()
+        else:
+            logger.debug(f"main body reached end in {context}")
+            if context.phase is Phase.PREFLIGHT:
+                context.engine.peek_request(expected_type="main_end")
+                context.engine.complete_request()
+
+        if context.phase is Phase.RUN:
+            # end of last communication block
+            yield
 
 
 class CallableSignature(TupleLikeObject):
