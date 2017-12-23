@@ -13,7 +13,7 @@ class InterfaceEngine:
 
         self.root_frame = Frame(parent=None, scope=interface.body.scope)
         self.callback_queue = deque()
-        self.next_request = None
+        self._current_request = None
         self.input_sent = False
 
         self.main_block_context = RootBlockContext()
@@ -39,22 +39,35 @@ class InterfaceEngine:
             phase=phase,
         )
 
-    def peek_request(self, *, expected_type=None):
-        if self.next_request is None:
-            self.next_request = ProxyRequest.accept(
-                map(str.strip, self.proxy_connection.request_pipe),
-                interface_signature=self.interface.signature,
-            )
-        r = self.next_request
+    def peek_request(self, **kwargs):
+        self._ensure_current_request()
+        self._validate_current_request(**kwargs)
+        return self._current_request
+
+    def process_request(self, **kwargs):
+        self._ensure_current_request()
+        self._validate_current_request(**kwargs)
+        return self._pop_current_request()
+
+    def _ensure_current_request(self):
+        if self._current_request is not None:
+            return
+        self._current_request = ProxyRequest.accept(
+            map(str.strip, self.proxy_connection.request_pipe),
+            interface_signature=self.interface.signature,
+        )
+
+    def _validate_current_request(self, *, expected_type=None):
+        r = self._current_request
         if expected_type is not None:
             if r.message_type != expected_type:
                 raise ProtocolError(f"expecting '{expected_type}', got '{r.message_type}'")
-        return r
 
-    def complete_request(self):
-        assert self.next_request is not None
-        logger.debug(f"current request {self.next_request} completed")
-        self.next_request = None
+    def _pop_current_request(self):
+        try:
+            return self._current_request
+        finally:
+            self._current_request = None
 
     def send_response(self, response):
         file = self.proxy_connection.response_pipe

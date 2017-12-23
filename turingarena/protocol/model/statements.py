@@ -229,8 +229,7 @@ class CallStatement(ImperativeStatement):
         )
 
     def preflight(self, context):
-        request = context.engine.peek_request(expected_type="function_call")
-        context.engine.complete_request()
+        request = context.engine.process_request(expected_type="function_call")
 
         if request.function_name != self.function.name:
             raise ProtocolError(f"expected call to '{self.function.name}', got '{request.function_name}'")
@@ -315,8 +314,7 @@ class ReturnStatement(ImperativeStatement):
 
     def run(self, context):
         if context.phase is Phase.PREFLIGHT:
-            request = context.engine.peek_request()
-            assert request.message_type == "callback_return"
+            request = context.engine.peek_request(expected_type="callback_return")
             context.evaluate(self.value).resolve(request.return_value)
         yield from []
 

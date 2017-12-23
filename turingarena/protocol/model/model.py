@@ -67,23 +67,20 @@ class Interface(ImmutableObject):
         logger.debug(f"running main {main} in {context}")
 
         if context.phase is Phase.PREFLIGHT:
-            request = context.engine.peek_request(expected_type="main_begin")
+            request = context.engine.process_request(expected_type="main_begin")
             for variable, value in zip(self.signature.variables.values(), request.global_variables):
                 context.engine.root_frame[variable] = value
-            context.engine.complete_request()
 
         try:
             yield from run_body(main.body, context=context)
         except ProtocolExit:
             logger.debug(f"exit was reached in {context}")
             if context.phase is Phase.PREFLIGHT:
-                context.engine.peek_request(expected_type="exit")
-                context.engine.complete_request()
+                context.engine.process_request(expected_type="exit")
         else:
             logger.debug(f"main body reached end in {context}")
             if context.phase is Phase.PREFLIGHT:
-                context.engine.peek_request(expected_type="main_end")
-                context.engine.complete_request()
+                context.engine.process_request(expected_type="main_end")
 
         if context.phase is Phase.RUN:
             # end of last communication block
@@ -184,10 +181,7 @@ class Callback(Callable):
             yield from run_body(self.body, context=inner_context)
 
             if context.phase is Phase.PREFLIGHT:
-                request = context.engine.peek_request()
-                assert request.message_type == "callback_return"
-                # TODO: handle return value
-                context.engine.complete_request()
+                context.engine.process_request(expected_type="callback_return")
 
 
 # FIXME: here to avoid circular import, find better solution
