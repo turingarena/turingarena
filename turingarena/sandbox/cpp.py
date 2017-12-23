@@ -7,6 +7,7 @@ import pkg_resources
 
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.sandbox.exceptions import AlgorithmError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -36,7 +37,7 @@ class CppAlgorithmSource(AlgorithmSource):
         ]
         logger.debug(f"Running {' '.join(cli)}")
 
-        compilation_output_filename = algorithm_dir + "/compilation_output.txt"
+        compilation_output_filename = os.path.join(algorithm_dir, "compilation_output.txt")
         with open(compilation_output_filename, "w") as compilation_output:
             compiler = subprocess.run(
                 cli,
@@ -48,11 +49,12 @@ class CppAlgorithmSource(AlgorithmSource):
             for line in compilation_output:
                 logger.debug(f"g++: {line.rstrip()}")
 
-        with open(algorithm_dir + "/compilation_return.txt", "w") as compilation_return:
-            print(compiler.returncode, file=compilation_return)
-
-        if compiler.returncode != 0:
+        if compiler.returncode == 0:
+            logger.info("Compilation successful")
+        elif compiler.returncode == 1:
             logger.warning("Compilation failed")
+        else:
+            raise ValueError("Unable to invoke g++ properly")
 
         return ElfAlgorithmExecutable(algorithm_dir=algorithm_dir)
 
@@ -63,7 +65,7 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
     def start_os_process(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "algorithm")
         if not os.path.isfile(executable_filename):
-            return None
+            raise AlgorithmError("Compilation failed")
 
         logger.debug("Starting process")
         return subprocess.Popen(
