@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.make.node import EvaluationEntry, Task
+from turingarena.make.node import EvaluationEntry, EvaluationTask
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ def sequential_make(*, plan, task_name, repo_path, entries):
     def dfs(node):
         logger.debug(f"computing node {node} (cache: {cache})")
 
-        if isinstance(node, Task):
+        if isinstance(node, EvaluationTask):
             for d in node.dependencies:
                 cached = cache[d.name]
                 logger.debug(f"resolving dependency {d} (cached: {cached})")

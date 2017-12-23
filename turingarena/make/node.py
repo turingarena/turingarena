@@ -26,7 +26,7 @@ class EvaluationEntry(EvaluationNode):
     __slots__ = []
 
 
-class Task(EvaluationNode):
+class EvaluationTask(EvaluationNode):
     __slots__ = ["dependencies"]
 
     def run(self):
@@ -103,7 +103,7 @@ def resolve_plan(tasks):
             pass
 
         assert isinstance(node, EvaluationNode)
-        if isinstance(node, Task):
+        if isinstance(node, EvaluationTask):
             for d in node.dependencies:
                 dfs(d)
 
@@ -122,7 +122,7 @@ def make_plan_signature(plan):
                 "dependencies": [d.name for d in node.dependencies],
             }
             for node in plan.values()
-            if isinstance(node, Task)
+            if isinstance(node, EvaluationTask)
         ],
         "entries": [
             {
@@ -135,7 +135,7 @@ def make_plan_signature(plan):
 
 
 def task(*deps, **kwargs):
-    return partial(Task, **kwargs, dependencies=list(deps))
+    return partial(EvaluationTask, **kwargs, dependencies=list(deps))
 
 
 def entry(**kwargs):

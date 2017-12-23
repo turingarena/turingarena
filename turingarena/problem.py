@@ -2,7 +2,7 @@ import os
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.make.node import EvaluationEntry, Task
+from turingarena.make.node import EvaluationEntry, EvaluationTask
 from turingarena.protocol.client import ProxiedAlgorithm
 from turingarena.sandbox.algorithm import Algorithm
 from turingarena.sandbox.loader import load_algorithm_source, load_algorithm_executable
@@ -55,7 +55,7 @@ class ImplementationEntry(Entry):
     __slots__ = ["protocol_name", "interface_name"]
 
     def get_nodes(self):
-        yield Task(
+        yield EvaluationTask(
             name=f"compile_{self.name}",
             target=self.target,
             dependencies=[
@@ -116,7 +116,7 @@ class Goal:
             print(result, file=result_file)
 
     def main_task(self):
-        return Task(
+        return EvaluationTask(
             target=self.evaluate,
             name=f"evaluate_{self.name}",
             dependencies=[
