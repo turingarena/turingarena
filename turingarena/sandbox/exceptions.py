@@ -1,0 +1,2 @@
+class AlgorithmError(Exception):
+    pass
