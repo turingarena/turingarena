@@ -74,7 +74,7 @@ grammar_ebnf = r"""
 
     atomic_expression =
         | expression_type:`int_literal` int_literal:INT
-        | expression_type:`subscript` array:expression '[' index:expression ']'
+        | expression_type:`subscript` array:atomic_expression '[' index:expression ']'
         | expression_type:`reference` variable_name:identifier
         | '(' @:expression ')'
     ;
