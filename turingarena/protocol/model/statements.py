@@ -417,6 +417,28 @@ def run_body(body, *, context):
                 yield from statement.run(inner_context)
 
 
+@statement_class("loop")
+class LoopStatement(ImperativeStatement):
+    __slots__ = ["body"]
+
+    @staticmethod
+    def compile(ast, scope):
+        return LoopStatement(
+            body=Body.compile(ast.body, scope=scope),
+        )
+
+    def run(self, context):
+        if context.phase is Phase.RUN or self.may_call():
+            size = context.evaluate(self.index.range).get()
+            for i in range(size):
+                with context.enter(self.scope) as for_context:
+                    for_context.frame[self.index.variable] = i
+                    yield from run_body(self.body, context=for_context)
+
+    def first_calls(self):
+        return self.body.first_calls() | {None}
+
+
 class Body(AbstractSyntaxNode):
     __slots__ = ["statements", "scope"]
 
