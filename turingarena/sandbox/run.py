@@ -2,7 +2,8 @@ import logging
 import os
 import sys
 import tempfile
-import threading
+from contextlib import ExitStack
+from threading import Thread
 
 from turingarena.sandbox.client import ProcessConnection
 from turingarena.sandbox.loader import load_algorithm_executable
@@ -17,115 +18,74 @@ class SandboxException(Exception):
     pass
 
 
-class SandboxServer:
-    def __init__(self, *, algorithm_dir):
-        prefix = "turingarena_sandbox"
+class SandboxProcess:
+    def __init__(self, *, sandbox_dir, executable):
+        self.executable = executable
+        self.sandbox_dir = sandbox_dir
 
-        self.executable = load_algorithm_executable(algorithm_dir)
+        self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
+        self.upward_pipe_name = os.path.join(sandbox_dir, "upward.pipe")
+        self.error_pipe_name = os.path.join(sandbox_dir, "error.pipe")
+        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
 
-        with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
-            self.sandbox_dir = sandbox_dir
-            self.control_request_pipe_name = os.path.join(sandbox_dir, "control_request.pipe")
-            self.control_response_pipe_name = os.path.join(sandbox_dir, "control_response.pipe")
-            self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
-            self.upward_pipe_name = os.path.join(sandbox_dir, "upward.pipe")
+        self.os_process = None
 
-            self.spawner_thread = None
-            self.os_process = None
+        logger.debug("sandbox folder: %s", sandbox_dir)
 
-            logger.debug("sandbox folder: %s", sandbox_dir)
+        logger.debug("creating pipes...")
+        os.mkfifo(self.downward_pipe_name)
+        os.mkfifo(self.upward_pipe_name)
+        os.mkfifo(self.error_pipe_name)
+        os.mkfifo(self.wait_pipe_name)
+        logger.debug("pipes created")
 
-            logger.debug("creating pipes...")
-            os.mkfifo(self.control_request_pipe_name)
-            os.mkfifo(self.control_response_pipe_name)
-            os.mkfifo(self.downward_pipe_name)
-            os.mkfifo(self.upward_pipe_name)
-            logger.debug("pipes created")
+        self.spawn_thread = Thread(target=self.spawn)
+        self.wait_thread = Thread(target=self.wait)
 
-            print(self.sandbox_dir)
-            sys.stdout.close()
+        print(self.sandbox_dir)
+        sys.stdout.close()
 
-            self.terminated = False
-            self.main_loop()
+        self.run()
 
-    def main_loop(self):
-        while True:
-            logger.debug("waiting for commands on control request pipe...")
-            self.accept_command()
-            if self.terminated:
-                sys.exit()
+    def run(self):
+        self.wait_thread.start()
+        self.spawn_thread.start()
 
-    def accept_command(self):
-        with open(self.control_request_pipe_name, "r") as request:
-            command = request.readline().strip()
-            if command not in self.commands:
-                raise ValueError("invalid command", command)
-            logger.debug("received command '{}'".format(command))
-            handler = getattr(self, "command_" + command)
+        self.wait_thread.join()
+        self.spawn_thread.join()
 
-            try:
-                handler(request)
-                logger.debug("handler OK")
-                result = OK
-            except SandboxException as e:
-                logger.exception(e)
-                result = EXC
-
-        with open(self.control_response_pipe_name, "w") as response:
-            print(result, file=response)
-
-        logger.debug("response sent: {}".format(result))
-
-    commands = {
-        "start",
-        "kill",
-        "wait",
-    }
-
-    def command_start(self, request):
         if self.os_process is not None:
-            raise SandboxException("already started")
+            self.os_process.kill()
+            self.os_process.wait()
 
-        logger.debug("starting process...")
-
-        def spawn():
+    def spawn(self):
+        with ExitStack() as stack:
             logger.debug("opening downward pipe...")
-            downward_pipe = open(self.downward_pipe_name, "r")
+            downward_pipe = stack.enter_context(open(self.downward_pipe_name, "r"))
             logger.debug("opening upward pipe...")
-            upward_pipe = open(self.upward_pipe_name, "w")
+            upward_pipe = stack.enter_context(open(self.upward_pipe_name, "w"))
+            logger.debug("opening error pipe...")
+            error_pipe = stack.enter_context(open(self.error_pipe_name, "w"))
             logger.debug("pipes opened")
 
             connection = ProcessConnection(
                 downward_pipe=downward_pipe,
                 upward_pipe=upward_pipe,
+                error_pipe=error_pipe,
             )
+
             self.os_process = self.executable.start_os_process(connection)
 
-        # avoid blocking when opening pipes
-        self.spawner_thread = threading.Thread(target=spawn)
-        self.spawner_thread.start()
-
-        logger.debug("process started")
-
-    def command_kill(self, request):
-        if self.spawner_thread is None:
-            raise SandboxException("not started")
-        logger.debug("joining spawner thread")
-        self.spawner_thread.join()
-        logger.debug("killing child process")
-        self.os_process.kill()
-
-    def command_wait(self, request):
-        if self.spawner_thread is None:
-            raise SandboxException("not started")
-        logger.debug("joining spawner thread")
-        self.spawner_thread.join()
-        logger.debug("waiting for child process")
-        self.os_process.wait()
-        logger.debug("wait done")
-        self.os_process = None
-        self.spawner_thread = None
-        self.terminated = True
+    def wait(self):
+        logger.debug("opening wait pipe...")
+        with open(self.wait_pipe_name, "w"):
+            pass
+        logger.debug("wait pipe opened, terminating...")
 
 
-sandbox_run = SandboxServer
+def sandbox_run(algorithm_dir):
+    prefix = "turingarena_sandbox_"
+
+    executable = load_algorithm_executable(algorithm_dir)
+    with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
+        SandboxProcess(executable=executable, sandbox_dir=sandbox_dir)

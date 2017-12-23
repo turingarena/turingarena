@@ -4,9 +4,10 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.connection import ProxyConnection
-from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
+from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
 from turingarena.protocol.module import ProtocolModule
 from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
+from turingarena.sandbox.exceptions import AlgorithmError
 
 logger = logging.getLogger(__name__)
 
@@ -41,15 +42,18 @@ class ProxyClient:
             assert os.path.isdir(proxy_dir)
 
             logger.debug("opening request pipe...")
-            request_pipe = stack.enter_context(open(proxy_dir + "/proxy_request.pipe", "w"))
+            request_pipe = stack.enter_context(open(os.path.join(proxy_dir, "proxy_request.pipe"), "w"))
             logger.debug("opening response pipe...")
-            response_pipe = stack.enter_context(open(proxy_dir + "/proxy_response.pipe"))
+            response_pipe = stack.enter_context(open(os.path.join(proxy_dir, "proxy_response.pipe")))
+            logger.debug("opening error pipe...")
+            error_pipe = stack.enter_context(open(os.path.join(proxy_dir, "error.pipe")))
             logger.debug("proxy connected")
 
             try:
                 yield ProxyConnection(
                     request_pipe=request_pipe,
                     response_pipe=response_pipe,
+                    error_pipe=error_pipe,
                 )
             except Exception as e:
                 logger.exception(e)
@@ -84,10 +88,6 @@ class ProxiedAlgorithm:
                 engine.begin_main(**global_variables)
                 yield Proxy(engine=engine, interface_signature=interface_signature)
                 engine.end_main()
-
-
-class ProxyException(Exception):
-    pass
 
 
 class ProxyEngine:
@@ -150,16 +150,25 @@ class ProxyEngine:
         self.send(request)
 
     def accept_response(self):
-        return ProxyResponse.accept(
-            map(str.strip, self.connection.response_pipe),
-            interface_signature=self.interface_signature,
-        )
+        try:
+            return ProxyResponse.accept(
+                map(str.strip, self.connection.response_pipe),
+                interface_signature=self.interface_signature,
+            )
+        except CommunicationBroken:
+            self.handle_exceptions()
+            raise
 
     def send(self, request):
         file = self.connection.request_pipe
         for line in request.serialize():
             print(line, file=file)
         file.flush()
+
+    def handle_exceptions(self):
+        error = self.connection.error_pipe.read()
+        if error:
+            raise AlgorithmError(error)
 
     def begin_main(self, **global_variables):
         request = MainBegin(
@@ -185,7 +194,7 @@ class Proxy:
 
     def __getattr__(self, item):
         try:
-            fun = self._interface_signature.functions[item]
+            self._interface_signature.functions[item]
         except KeyError:
             raise AttributeError
 

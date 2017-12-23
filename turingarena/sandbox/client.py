@@ -4,6 +4,7 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.cli.loggerinit import init_logger
+from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)
 
@@ -43,53 +44,36 @@ class Process:
     def __init__(self, sandbox_dir):
         assert os.path.isdir(sandbox_dir)
         self.sandbox_dir = sandbox_dir
-        self.downward_pipe_name = self.sandbox_dir + "/downward.pipe"
-        self.upward_pipe_name = self.sandbox_dir + "/upward.pipe"
-
-    def request(self, *args):
-        logger.debug("sending request {}...".format(args))
-        with open(self.sandbox_dir + "/control_request.pipe", "w") as p:
-            for a in args:
-                print(a, file=p)
-        logger.debug("waiting response...")
-        with open(self.sandbox_dir + "/control_response.pipe", "r") as p:
-            result = int(p.readline().strip())
-            if result:
-                raise SandboxException
-        logger.debug("response received: {}".format(result))
-
-    def start(self):
-        logger.info("starting process")
-        self.request("start")
-
-    def kill(self):
-        logger.info("killing process")
-        self.request("kill")
-
-    def wait(self):
-        logger.info("waiting for process")
-        self.request("wait")
+        self.downward_pipe_name = os.path.join(self.sandbox_dir, "downward.pipe")
+        self.upward_pipe_name = os.path.join(self.sandbox_dir, "upward.pipe")
+        self.error_pipe_name = os.path.join(self.sandbox_dir, "error.pipe")
+        self.wait_pipe_name = os.path.join(self.sandbox_dir, "wait.pipe")
 
     @contextmanager
     def connect(self):
         logger.debug("connecting to process...")
-        with ExitStack() as stack:
-            self.start()
-            try:
+        try:
+            with ExitStack() as stack:
                 logger.debug("opening downward pipe...")
                 downward_pipe = stack.enter_context(open(self.downward_pipe_name, "w"))
                 logger.debug("opening upward pipe...")
                 upward_pipe = stack.enter_context(open(self.upward_pipe_name))
-                yield ProcessConnection(downward_pipe=downward_pipe, upward_pipe=upward_pipe)
-            except Exception as e:
-                logger.exception(e)
-                self.kill()
-                raise
-            finally:
-                self.wait()
+                logger.debug("opening error pipe...")
+                error_pipe = stack.enter_context(open(self.error_pipe_name))
+                connection = ProcessConnection(
+                    downward_pipe=downward_pipe,
+                    upward_pipe=upward_pipe,
+                    error_pipe=error_pipe,
+                )
+                logger.debug("connected to process")
+                yield connection
+        except Exception as e:
+            logger.exception(e)
+            raise
+        finally:
+            with open(self.wait_pipe_name):
+                pass
 
 
-class ProcessConnection:
-    def __init__(self, *, downward_pipe, upward_pipe):
-        self.downward_pipe = downward_pipe
-        self.upward_pipe = upward_pipe
+class ProcessConnection(ImmutableObject):
+    __slots__ = ["downward_pipe", "upward_pipe", "error_pipe"]

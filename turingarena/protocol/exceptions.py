@@ -11,3 +11,9 @@ class ProtocolError(Exception):
         lineinfo = self.parseinfo.buffer.line_info(self.parseinfo.endpos)
         # lines are zero-based-numbered
         return f"{lineinfo.filename}:{lineinfo.line+1}:{lineinfo.col+1}: {self.message}"
+
+
+class CommunicationBroken(Exception):
+    """
+    Raised when the communication with a process is interrupted.
+    """

@@ -7,7 +7,6 @@ import pkg_resources
 
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
-from turingarena.sandbox.exceptions import AlgorithmError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -64,10 +63,13 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
 
     def start_os_process(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "algorithm")
-        if not os.path.isfile(executable_filename):
-            raise AlgorithmError("Compilation failed")
 
-        logger.debug("Starting process")
+        if not os.path.isfile(executable_filename):
+            logger.warning(f"executing an algorithm that did not compile")
+            executable_filename = "true"
+            connection.error_pipe.write("compilation failed")
+
+        logger.debug("starting process")
         return subprocess.Popen(
             [executable_filename],
             universal_newlines=True,

@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.exceptions import ProtocolExit, ProtocolError
+from turingarena.protocol.exceptions import ProtocolExit, ProtocolError, CommunicationBroken
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
@@ -179,8 +179,9 @@ class OutputStatement(InputOutputStatement):
     def on_run(self, context):
         logger.debug(f"reading from upward_pipe...")
         line = context.engine.process_connection.upward_pipe.readline()
+        if not line:
+            raise CommunicationBroken
         logger.debug(f"read line {line.strip()} from upward_pipe")
-        assert line
         raw_values = line.strip().split()
         logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
