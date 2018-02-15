@@ -2,7 +2,7 @@ import json
 
 from turingarena.cli import docopt_cli
 from turingarena.make.make import sequential_make
-from turingarena.make.node import make_plan_signature, load_plan
+from turingarena.make.plan import load_plan, make_plan_signature
 
 
 @docopt_cli
@@ -20,6 +20,7 @@ def make_cli(args):
         "run": make_run_cli,
         "compute": make_compute_cli,
         "make": make_make_cli,
+        "entry": make_entry_cli,
     }
     argv2 = args["<args>"]
     return commands[args["<cmd>"]](argv=argv2)
@@ -94,7 +95,7 @@ def make_make_cli(args):
 
 @docopt_cli
 def make_run_cli(args):
-    """TuringArena task run CLI.
+    """TuringArena make run CLI.
 
     Usage:
       run [options] <task> [--index=<index>]
@@ -108,3 +109,31 @@ def make_run_cli(args):
     plan = load_plan(args["--plan"] or task_name)
     task = plan[task_name]
     task.run()
+
+
+@docopt_cli
+def make_entry_cli(args):
+    """TuringArena make entry CLI.
+
+    Usage:
+      entry [options] <entry> [--file <file>] ...
+
+    Options:
+      --repo-path=<path>  Path to the repository
+      --source-dir=<dir>  Source directory [default: .]
+      --file=<file>  Files to add (format: <source>:<dest>)
+      --plan=<plan>  Name of the plan containing the entry
+    """
+
+    entry_name = args["<entry>"]
+    plan = load_plan(args["--plan"] or entry_name)
+    entry = plan[entry_name]
+    commit = entry.create(
+        source_dir=args["--source-dir"],
+        repo_path=args["--repo-path"],
+        files=[
+            f.split(":", 2)
+            for f in args["--file"]
+        ]
+    )
+    print(commit.hexsha)

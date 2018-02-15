@@ -8,6 +8,6 @@ mkdir -p $REPO_PATH
 
 git init --bare $REPO_PATH
 
-ENTRY=$(turingarena entry --repo-path=$REPO_PATH --file=entry.cpp:entry.cpp)
+ENTRY=$(turingarena make entry --plan=test_challenge:problem --repo-path=$REPO_PATH entry_entry --file=entry.cpp:entry.cpp)
 
 turingarena make make --plan=test_challenge:problem --repo-path=$REPO_PATH --entry=entry_entry:$ENTRY evaluate_goal

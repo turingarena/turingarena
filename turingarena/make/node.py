@@ -1,9 +1,7 @@
-import importlib
 import logging
 import multiprocessing
 import os
-from collections import OrderedDict
-from functools import partial
+import shutil
 from tempfile import TemporaryDirectory
 
 import git
@@ -14,20 +12,41 @@ logger = logging.getLogger(__name__)
 
 
 class EvaluationNode(ImmutableObject):
-    __slots__ = ["name", "target"]
-
-    def __init__(self, target=None, **kwargs):
-        if "name" not in kwargs:
-            kwargs["name"] = f"{target.__module__}:{target.__qualname__}"
-        super().__init__(target=target, **kwargs)
+    __slots__ = ["name"]
 
 
 class EvaluationEntry(EvaluationNode):
     __slots__ = []
 
+    def create(*, source_dir, files, repo_path):
+        root_repo = git.Repo(path=repo_path)
+
+        with TemporaryDirectory() as temp_dir:
+            repo = root_repo.clone(path=temp_dir)
+
+            repo.index.checkout()
+
+            for src, dest in files:
+                shutil.copy(
+                    os.path.join(source_dir, src),
+                    os.path.join(temp_dir, dest),
+                )
+
+            repo.index.add("*")
+
+            files = ", ".join(dest for src, dest in files)
+            commit = repo.index.commit(
+                f"entry with files {files}",
+            )
+
+            repo.remote("origin").push(f"{commit}:refs/heads/sha-{commit}")
+            logger.debug(f"commit message: {commit.message}")
+
+            return commit
+
 
 class EvaluationTask(EvaluationNode):
-    __slots__ = ["dependencies"]
+    __slots__ = ["dependencies", "target"]
 
     def run(self):
         self.target()
@@ -75,68 +94,3 @@ class EvaluationTask(EvaluationNode):
             logger.debug(f"commit message: {commit.message}")
 
             return commit
-
-    def get_tasks(self):
-        return [self]
-
-
-def load_anchor(name):
-    module_name, qualname = name.split(":", 2)
-    anchor_module = importlib.import_module(module_name)
-    return getattr(anchor_module, qualname)
-
-
-def load_plan(name):
-    anchor = load_anchor(name)
-    return resolve_plan(anchor.get_tasks())
-
-
-def resolve_plan(tasks):
-    cache = OrderedDict()
-
-    def dfs(node):
-        try:
-            cached = cache[node.name]
-            assert cached == node
-            return
-        except KeyError:
-            pass
-
-        assert isinstance(node, EvaluationNode)
-        if isinstance(node, EvaluationTask):
-            for d in node.dependencies:
-                dfs(d)
-
-        cache[node.name] = node
-
-    for t in tasks:
-        dfs(t)
-    return cache
-
-
-def make_plan_signature(plan):
-    return {
-        "tasks": [
-            {
-                "name": node.name,
-                "dependencies": [d.name for d in node.dependencies],
-            }
-            for node in plan.values()
-            if isinstance(node, EvaluationTask)
-        ],
-        "entries": [
-            {
-                "name": node.name,
-            }
-            for node in plan.values()
-            if isinstance(node, EvaluationEntry)
-        ]
-    }
-
-
-def task(*deps, **kwargs):
-    return partial(EvaluationTask, **kwargs, dependencies=list(deps))
-
-
-def entry(**kwargs):
-    return partial(EvaluationEntry, **kwargs)
