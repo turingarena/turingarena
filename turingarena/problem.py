@@ -74,7 +74,8 @@ class ImplementationEntry(Entry):
 
     def load_source(self):
         return load_algorithm_source(
-            filename=f"{self.name}.cpp",
+            #FIXME: need different suffix for source file (cpp, py ecc...)
+            filename=f"{self.name}.py",
             protocol_name=self.protocol_name,
             interface_name=self.interface_name,
         )

@@ -2,6 +2,7 @@ import logging
 import os
 
 from turingarena.sandbox.cpp import CppAlgorithmSource, ElfAlgorithmExecutable
+from turingarena.sandbox.python import PythonAlgorithmSource, PythonAlgorithmExecutableScript
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,7 @@ def load_algorithm_source(filename, *, language=None, **kwargs):
     if language is None:
         lang_by_extensions = {
             "cpp": "c++",
+            "py": "python",
         }
         source_extension = filename.split(".")[-1]
         if source_extension not in lang_by_extensions:
@@ -17,7 +19,8 @@ def load_algorithm_source(filename, *, language=None, **kwargs):
         language = lang_by_extensions[source_extension]
 
     source_classes = {
-        "c++": CppAlgorithmSource
+        "c++":    CppAlgorithmSource,
+        "python": PythonAlgorithmSource
     }
 
     if language not in source_classes:
@@ -44,6 +47,7 @@ def load_algorithm_executable(algorithm_dir):
 
     executable_classes = {
         "c++": ElfAlgorithmExecutable,
+        "python": PythonAlgorithmExecutableScript,
     }
     cls = executable_classes[language]
 

@@ -2,7 +2,7 @@ import os
 
 from turingarena.common import write_to_file, indent_all, indent
 
-template_file_name = "template"
+template_file_name = "source"
 def generate_skeleton(*, interface, dest_dir):
     with open(os.path.join(dest_dir, "skeleton.py"), "w") as main_file:
         write_to_file(generate_main_file(interface), main_file)

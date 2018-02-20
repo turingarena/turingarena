@@ -97,7 +97,7 @@ def resolve_plan(tasks):
     def dfs(node):
         try:
             cached = cache[node.name]
-            assert cached == node
+            assert cached.name == node.name
             return
         except KeyError:
             pass
