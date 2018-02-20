@@ -1,5 +1,5 @@
-from turingarena.protocol.tests.util import cpp_implementation
-from turingarena.protocol.tests.util import python_implementation
+from turingarena.protocol.tests.util import cpp_implementation, python_implementation
+
 
 def test_valid_types_python():
     protocol_text = """
@@ -47,11 +47,9 @@ def test_valid_types_python():
             }
         }
     """
-# requires 0 identation
-    python_source_text = """ 
-i = 0
-ia = [None]
-iaa = [ [None] ]
+    # requires 0 identation
+    python_source_text = """
+from __main__ import i, ia, iaa
 
 def get_i():
     return i
@@ -82,6 +80,7 @@ def get_iaa(j, k):
                 assert ia[j] == p.get_ia(j)
                 for k in range(ia[j]):
                     assert iaa[j][k] == p.get_iaa(j, k)
+
 
 def test_valid_types_cpp():
     protocol_text = """
@@ -164,4 +163,3 @@ def test_valid_types_cpp():
                 assert ia[j] == p.get_ia(j)
                 for k in range(ia[j]):
                     assert iaa[j][k] == p.get_iaa(j, k)
-

@@ -63,7 +63,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
     __slots__ = []
 
     def start_os_process(self, connection):
-        executable_filename = os.path.join(self.algorithm_dir, "source.py")
+        executable_filename = os.path.join(self.algorithm_dir, "skeleton.py")
 
         if not os.path.isfile(executable_filename):
             logger.warning(f"executing an algorithm that did not compile")
@@ -72,7 +72,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
 
         logger.debug("starting process")
         return subprocess.Popen(
-            [executable_filename],
+            ["python", executable_filename],
             universal_newlines=True,
             stdin=connection.downward_pipe,
             stdout=connection.upward_pipe,

@@ -1,10 +1,6 @@
-import importlib
 import logging
 import multiprocessing
 import os
-from collections import OrderedDict
-from functools import partial
-import s
 from tempfile import TemporaryDirectory
 
 import git
