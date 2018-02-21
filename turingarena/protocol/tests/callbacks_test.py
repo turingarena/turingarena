@@ -47,16 +47,16 @@ def test_callback_no_arguments_python():
                 }
             """,
             # requires no indentation
-            source_text="""
-from skeleton import callback_no_arguments
-
-def test():
-    callback_no_arguments()
-    callback_no_arguments()
+            source_text="""if True:
+                from __main__ import callback_no_arguments
+                
+                def test():
+                    callback_no_arguments()
+                    callback_no_arguments()
             """,
             interface_name="callback_no_arguments",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             callback_no_arguments = callback_mock(calls)
             p.test(callback_no_arguments=callback_no_arguments)

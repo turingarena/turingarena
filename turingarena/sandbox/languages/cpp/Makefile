@@ -2,11 +2,19 @@
 
 CC=gcc
 CFLAGS=-O3 -Wall -Wextra -pedantic
+TESTDIR=test/
+SANDBOX_OBJECT=sandbox.o
 
-sandbox.o: sandbox.c
+$(SANDBOX_OBKECT): sandbox.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-clean:
-	rm -f sandbox.o 
+clean: clean_tests
+	rm -f $(SANDBOX_OBJECT) 
 
-.PHONY: clean
+clean_tests:
+	$(MAKE) -C $(TESTDIR) clean 
+
+tests: $(SANDBOX_OBJECT) 
+	$(MAKE) -C $(TESTDIR) all
+
+.PHONY: clean tests clean_tests
