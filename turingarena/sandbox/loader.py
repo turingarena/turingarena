@@ -1,6 +1,7 @@
 import logging
 import os
 
+from turingarena.sandbox.algorithm import Algorithm
 from turingarena.sandbox.cpp import CppAlgorithmSource, ElfAlgorithmExecutable
 from turingarena.sandbox.python import PythonAlgorithmSource, PythonAlgorithmExecutableScript
 
@@ -40,10 +41,12 @@ def load_algorithm_source(filename, *, language=None, **kwargs):
     )
 
 
-def load_algorithm_executable(algorithm_dir):
-    language_filename = os.path.join(algorithm_dir, "language.txt")
-    with open(language_filename) as language_file:
-        language = language_file.read().strip()
+def load_algorithm(algorithm_dir):
+    with open(os.path.join(algorithm_dir, "language.txt")) as f:
+        language = f.read().strip()
+
+    with open(os.path.join(algorithm_dir, "interface.txt")) as f:
+        protocol_name, interface_name = f.read().strip().split(":", 1)
 
     executable_classes = {
         "c++": ElfAlgorithmExecutable,
@@ -51,4 +54,9 @@ def load_algorithm_executable(algorithm_dir):
     }
     cls = executable_classes[language]
 
-    return cls(algorithm_dir=algorithm_dir)
+    return Algorithm(
+        protocol_name=protocol_name,
+        interface_name=interface_name,
+        source=None,
+        executable=cls(algorithm_dir=algorithm_dir),
+    )

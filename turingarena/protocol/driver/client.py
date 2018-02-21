@@ -6,7 +6,7 @@ from contextlib import contextmanager, ExitStack
 from turingarena.protocol.connection import DriverConnection
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
-from turingarena.sandbox.exceptions import AlgorithmError
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class DriverClientEngine:
     def handle_exceptions(self):
         error = self.connection.error_pipe.read()
         if error:
-            raise AlgorithmError(error)
+            raise AlgorithmRuntimeError(error)
 
     def begin_main(self, **global_variables):
         request = MainBegin(

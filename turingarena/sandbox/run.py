@@ -6,10 +6,7 @@ from contextlib import ExitStack
 from threading import Thread
 
 from turingarena.sandbox.client import ProcessConnection
-from turingarena.sandbox.loader import load_algorithm_executable
-
-OK = 0
-EXC = 1
+from turingarena.sandbox.loader import load_algorithm
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +16,8 @@ class SandboxException(Exception):
 
 
 class SandboxProcess:
-    def __init__(self, *, sandbox_dir, executable):
-        self.executable = executable
+    def __init__(self, *, sandbox_dir, algorithm):
+        self.algorithm = algorithm
         self.sandbox_dir = sandbox_dir
 
         self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
@@ -74,7 +71,7 @@ class SandboxProcess:
                 error_pipe=error_pipe,
             )
 
-            self.os_process = self.executable.start_os_process(connection)
+            self.os_process = self.algorithm.executable.start_os_process(connection)
 
     def wait(self):
         logger.debug("opening wait pipe...")
@@ -86,6 +83,6 @@ class SandboxProcess:
 def sandbox_run(algorithm_dir):
     prefix = "turingarena_sandbox_"
 
-    executable = load_algorithm_executable(algorithm_dir)
+    algorithm = load_algorithm(algorithm_dir)
     with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
-        SandboxProcess(executable=executable, sandbox_dir=sandbox_dir)
+        SandboxProcess(algorithm=algorithm, sandbox_dir=sandbox_dir)

@@ -7,6 +7,7 @@ import pkg_resources
 
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -16,10 +17,10 @@ logger = logging.getLogger(__name__)
 class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
-    def do_compile(self, algorithm_dir):
+    def do_compile(self, *, algorithm_dir, protocol_name, interface_name):
         skeleton_path = pkg_resources.resource_filename(
-            module_to_python_package(PROTOCOL_QUALIFIER, self.protocol_name),
-            f"_skeletons/{self.interface_name}/cpp/skeleton.cpp",
+            module_to_python_package(PROTOCOL_QUALIFIER, protocol_name),
+            f"_skeletons/{interface_name}/cpp/skeleton.cpp",
         )
 
         source_filename = os.path.join(algorithm_dir, "source.cpp")
@@ -51,7 +52,7 @@ class CppAlgorithmSource(AlgorithmSource):
         if compiler.returncode == 0:
             logger.info("Compilation successful")
         elif compiler.returncode == 1:
-            logger.warning("Compilation failed")
+            raise CompilationFailed
         else:
             raise ValueError("Unable to invoke g++ properly")
 
