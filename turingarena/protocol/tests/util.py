@@ -57,19 +57,6 @@ def algorithm(*, protocol_text, language, source_text, interface_name):
             os.environ["PYTHONPATH"] = old_path
 
 
-def cpp_implementation(**kwargs):
-    return algorithm(
-        language="c++",
-        **kwargs,
-    )
-
-
-def python_implementation(**kwargs):
-    return algorithm(
-        language="python",
-        **kwargs,
-    )
-
 def callback_mock(calls, return_values=None):
     if return_values is not None:
         return_values = deque(return_values)
