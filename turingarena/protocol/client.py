@@ -21,12 +21,10 @@ class ProxyClient:
     @contextmanager
     def connect(self):
         cli = [
-            f"turingarena",
-            f"protocol",
-            f"--name={self.protocol_name}",
-            f"server",
-            f"--interface={self.interface_name}",
-            f"--sandbox={self.process.sandbox_dir}",
+            "turingarena-driver",
+            self.protocol_name,
+            self.interface_name,
+            self.process.sandbox_dir,
         ]
         with ExitStack() as stack:
             logger.debug(f"running {cli}...")
