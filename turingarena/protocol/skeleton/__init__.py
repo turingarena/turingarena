@@ -37,12 +37,8 @@ class SkeletonGenerator:
         language_dir = self.make_language_dir(interface, language)
         os.mkdir(language_dir)
         logger.info(
-            "Generating support for interface '{interface}'"
-            " and language {language} in dir {dir}".format(
-                interface=interface.name,
-                language=language,
-                dir=language_dir,
-            )
+            f"Generating support for interface '{interface.name}'"
+            f" and language {language} in dir {language_dir}"
         )
         languages[language](
             interface=interface,
