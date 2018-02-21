@@ -18,6 +18,7 @@ setup(
     entry_points={
         "console_scripts": [
             "turingarena=turingarena.cli.main:main",
+            "turingarena-sandbox=turingarena.sandbox.main:main",
         ],
     },
     packages=find_packages(),
