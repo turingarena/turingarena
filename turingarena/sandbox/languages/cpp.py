@@ -7,63 +7,61 @@ import pkg_resources
 
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
 
-class PythonAlgorithmSource(AlgorithmSource):
+class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
         skeleton_path = pkg_resources.resource_filename(
             module_to_python_package(PROTOCOL_QUALIFIER, self.protocol_name),
-            f"_skeletons/{self.interface_name}/python/skeleton.py",
+            f"_skeletons/{self.interface_name}/cpp/skeleton.cpp",
         )
 
-        source_filename = os.path.join(algorithm_dir, "source.py")
+        source_filename = os.path.join(algorithm_dir, "source.cpp")
         with open(source_filename, "w") as f:
             f.write(self.text)
 
-        shutil.copy(skeleton_path, os.path.join(algorithm_dir, "skeleton.py"))
+        shutil.copy(skeleton_path, os.path.join(algorithm_dir, "skeleton.cpp"))
 
         cli = [
-            "python",
-            "-m", "py_compile",
-            "source.py",
+            "g++",
+            "-o", "algorithm",
+            "source.cpp",
+            "skeleton.cpp",
         ]
         logger.debug(f"Running {' '.join(cli)}")
 
-        execution_output_filename = os.path.join(algorithm_dir, "execution_output.txt")
-        with open(execution_output_filename, "w") as execution_output:
+        compilation_output_filename = os.path.join(algorithm_dir, "compilation_output.txt")
+        with open(compilation_output_filename, "w") as compilation_output:
             compiler = subprocess.run(
                 cli,
                 cwd=algorithm_dir,
-                stderr=execution_output,
+                stderr=compilation_output,
                 universal_newlines=True,
             )
-        with open(execution_output_filename) as execution_output:
-            for line in execution_output:
-                logger.debug(f"py_compile: {line.rstrip()}")
+        with open(compilation_output_filename) as compilation_output:
+            for line in compilation_output:
+                logger.debug(f"g++: {line.rstrip()}")
 
         if compiler.returncode == 0:
-            logger.info("execution successful")
+            logger.info("Compilation successful")
         elif compiler.returncode == 1:
-            logger.warning("execution failed")
+            raise CompilationFailed
         else:
-            raise ValueError("Unable to invoke py_compile properly")
-
-        #shutil.copy(algorithm_dir + "/source.py", "algorithm")
-
-        return PythonAlgorithmExecutableScript(algorithm_dir=algorithm_dir)
+            raise ValueError("Unable to invoke g++ properly")
 
 
-class PythonAlgorithmExecutableScript(AlgorithmExecutable):
+class ElfAlgorithmExecutable(AlgorithmExecutable):
     __slots__ = []
 
     def start_os_process(self, connection):
-        executable_filename = os.path.join(self.algorithm_dir, "skeleton.py")
+        executable_filename = os.path.join(self.algorithm_dir, "algorithm")
 
         if not os.path.isfile(executable_filename):
             logger.warning(f"executing an algorithm that did not compile")
@@ -72,7 +70,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
 
         logger.debug("starting process")
         return subprocess.Popen(
-            ["python", executable_filename],
+            [executable_filename],
             universal_newlines=True,
             stdin=connection.downward_pipe,
             stdout=connection.upward_pipe,

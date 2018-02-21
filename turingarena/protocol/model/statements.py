@@ -10,8 +10,8 @@ from turingarena.protocol.model.model import Main, Variable, Interface, Function
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
-from turingarena.protocol.server.commands import FunctionReturn
-from turingarena.protocol.server.frames import Phase, RootBlockContext
+from turingarena.protocol.driver.commands import FunctionReturn
+from turingarena.protocol.driver.frames import Phase, RootBlockContext
 
 logger = logging.getLogger(__name__)
 
@@ -239,10 +239,10 @@ class CallStatement(ImperativeStatement):
             context.evaluate(value_expr).resolve(value)
 
         return_type = self.function.signature.return_type
-        if return_type or accept_callbacks:
+        if return_type or request.accept_callbacks:
             context.engine.ensure_output()
 
-        yield from invoke_callbacks(context)
+        yield from self.invoke_callbacks(context)
 
         if return_type:
             return_value = context.evaluate(self.return_value).get()
@@ -254,53 +254,51 @@ class CallStatement(ImperativeStatement):
             return_value=return_value,
         ))
 
+    def accept_callbacks(self, context):
+        if not context.engine.interface.signature.callbacks:
+            return
+        while True:
+            logger.debug("accepting callbacks...")
+            callback_name = context.engine.process_connection.upward_pipe.readline().strip()
+            logger.debug(f"received line {callback_name}")
+            if callback_name == "return":
+                logger.debug(f"no more callbacks, push None to callback queue")
+                context.engine.push_callback(None)
+                break
+            else:
+                callback = context.engine.interface.body.scope.callbacks[callback_name]
+                callback_context = RootBlockContext(callback)
+                context.engine.push_callback(callback_context)
+                logger.debug(f"got callback '{callback_name}', pushing {callback_context} to queue")
+                yield from callback.run(context=context.engine.new_context(
+                    root_block_context=callback_context,
+                    phase=context.phase,
+                ))
+
+    def invoke_callbacks(self, context):
+        if not context.engine.interface.signature.callbacks:
+            logger.debug(f"no callback defined, nothing to do")
+            return
+        while True:
+            logger.debug(f"popping callbacks")
+            callback_context = context.engine.pop_callback()
+            logger.debug(f"popped {callback_context}")
+            if callback_context is None:
+                break
+            yield from callback_context.callback.run(context.engine.new_context(
+                root_block_context=callback_context,
+                phase=context.phase,
+            ))
+            context.engine.ensure_output()
+
     def run(self, context):
         if context.phase is Phase.RUN:
-            yield from accept_callbacks(context)
+            yield from self.accept_callbacks(context)
         if context.phase is Phase.PREFLIGHT:
             yield from self.preflight(context)
 
     def first_calls(self):
         return {self.function.name}
-
-
-def invoke_callbacks(context):
-    if not context.engine.interface.signature.callbacks:
-        logger.debug(f"no callback defined, nothing to do")
-        return
-    while True:
-        logger.debug(f"popping callbacks")
-        callback_context = context.engine.pop_callback()
-        logger.debug(f"popped {callback_context}")
-        if callback_context is None:
-            break
-        yield from callback_context.callback.run(context.engine.new_context(
-            root_block_context=callback_context,
-            phase=context.phase,
-        ))
-        context.engine.ensure_output()
-
-
-def accept_callbacks(context):
-    if not context.engine.interface.signature.callbacks:
-        return
-    while True:
-        logger.debug("accepting callbacks...")
-        callback_name = context.engine.process_connection.upward_pipe.readline().strip()
-        logger.debug(f"received line {callback_name}")
-        if callback_name == "return":
-            logger.debug(f"no more callbacks, push None to callback queue")
-            context.engine.push_callback(None)
-            break
-        else:
-            callback = context.engine.interface.body.scope.callbacks[callback_name]
-            callback_context = RootBlockContext(callback)
-            context.engine.push_callback(callback_context)
-            logger.debug(f"got callback '{callback_name}', pushing {callback_context} to queue")
-            yield from callback.run(context=context.engine.new_context(
-                root_block_context=callback_context,
-                phase=context.phase,
-            ))
 
 
 @statement_class("return")
@@ -364,9 +362,9 @@ class ForStatement(ImperativeStatement):
         if context.phase is Phase.RUN or self.may_call():
             size = context.evaluate(self.index.range).get()
             for i in range(size):
-                with context.enter(self.scope) as for_context:
-                    for_context.frame[self.index.variable] = i
-                    yield from run_body(self.body, context=for_context)
+                with context.enter(self.scope) as inner_context:
+                    inner_context.frame[self.index.variable] = i
+                    yield from self.body.run(inner_context)
 
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
@@ -400,25 +398,15 @@ class IfStatement(ImperativeStatement):
                 condition.resolve(0)
 
         if condition.get():
-            yield from run_body(self.then_body, context=context)
+            yield from self.then_body.run(context)
         elif self.else_body is not None:
-            yield from run_body(self.else_body, context=context)
+            yield from self.else_body.run(context)
 
     def first_calls(self):
         return self.then_body.first_calls() | (
             {None} if self.else_body is not None else
             self.else_body.first_calls()
         )
-
-
-def run_body(body, *, context):
-    logger.debug(f"running body {body} in {context}")
-    with context.enter(body.scope) as inner_context:
-        for statement in body.statements:
-            if isinstance(statement, ImperativeStatement):
-                logger.debug(f"run {statement} in {inner_context}")
-                yield from statement.run(inner_context)
-                logger.debug(f"completed {statement} in {inner_context}")
 
 
 @statement_class("loop")
@@ -435,9 +423,9 @@ class LoopStatement(ImperativeStatement):
         if context.phase is Phase.RUN or self.may_call():
             size = context.evaluate(self.index.range).get()
             for i in range(size):
-                with context.enter(self.scope) as for_context:
-                    for_context.frame[self.index.variable] = i
-                    yield from run_body(self.body, context=for_context)
+                with context.enter(self.scope) as inner_context:
+                    inner_context.frame[self.index.variable] = i
+                    yield from self.body.run(inner_context)
 
     def first_calls(self):
         return self.body.first_calls() | {None}
@@ -456,6 +444,15 @@ class Body(AbstractSyntaxNode):
                 for s in ast.statements
             ]
         )
+
+    def run(self, context):
+        logger.debug(f"running body {self} in {context}")
+        with context.enter(self.scope) as inner_context:
+            for statement in self.statements:
+                if isinstance(statement, ImperativeStatement):
+                    logger.debug(f"run {statement} in {inner_context}")
+                    yield from statement.run(inner_context)
+                    logger.debug(f"completed {statement} in {inner_context}")
 
     def is_possible_branch(self, *, context):
         request = context.engine.peek_request()

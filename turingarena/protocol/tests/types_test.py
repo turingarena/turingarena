@@ -74,7 +74,7 @@ def get_iaa(j, k):
             source_text=python_source_text,
             interface_name="types_valid",
     ) as py_impl:
-        with py_impl.run(i=i, ia=ia, iaa=iaa) as p:
+        with py_impl.run(i=i, ia=ia, iaa=iaa) as (process, p):
             assert i == p.get_i()
             for j in range(i):
                 assert ia[j] == p.get_ia(j)
@@ -157,7 +157,7 @@ def test_valid_types_cpp():
             source_text=cpp_source_text,
             interface_name="types_valid",
     ) as cpp_impl:
-        with cpp_impl.run(i=i, ia=ia, iaa=iaa) as p:
+        with cpp_impl.run(i=i, ia=ia, iaa=iaa) as (process, p):
             assert i == p.get_i()
             for j in range(i):
                 assert ia[j] == p.get_ia(j)

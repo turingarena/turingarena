@@ -1,31 +1,33 @@
+import logging
 import os
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.sandbox.algorithm import logger
+
+logger = logging.getLogger(__name__)
 
 
 class AlgorithmSource(ImmutableObject):
     __slots__ = [
+        "protocol_name",
+        "interface_name",
         "language",
         "filename",
         "text",
-        "protocol_name",
-        "interface_name",
     ]
 
-    def compile(self, *, algorithm_dir):
+    def compile(self, algorithm_dir):
         logger.info(f"Compiling algorithm source {self} into algorithm dir '{algorithm_dir}'")
 
-        logger.debug(f"Creating empty algorithm directory '{algorithm_dir}'")
         os.mkdir(algorithm_dir)
+        with open(f"{algorithm_dir}/language.txt", "w") as f:
+            print(self.language, file=f)
 
-        logger.debug("Creating language.txt file")
-        with open(f"{algorithm_dir}/language.txt", "w") as language_file:
-            print(self.language, file=language_file)
+        with open(f"{algorithm_dir}/interface.txt", "w") as f:
+            print(f"{self.protocol_name}:{self.interface_name}", file=f)
 
         logger.debug("Starting language-specific compilation")
-        return self.do_compile(algorithm_dir)
+        self.do_compile(algorithm_dir)
 
     @abstractmethod
     def do_compile(self, algorithm_dir):

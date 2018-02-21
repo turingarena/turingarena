@@ -24,7 +24,7 @@ class SandboxClient:
     def run(self):
         logger.debug("starting sandbox process")
         with subprocess.Popen(
-                ["turingarena", "sandbox", "run", self.algorithm_dir],
+                ["turingarena-sandbox", self.algorithm_dir],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
         ) as sandbox_process:

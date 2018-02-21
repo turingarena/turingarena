@@ -6,9 +6,9 @@ from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
-from turingarena.protocol.server.commands import CallbackCall
-from turingarena.protocol.server.frames import Phase
-from turingarena.protocol.server.references import VariableReference
+from turingarena.protocol.driver.commands import CallbackCall
+from turingarena.protocol.driver.frames import Phase
+from turingarena.protocol.driver.references import VariableReference
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class Interface(ImmutableObject):
                 context.engine.root_frame[variable] = value
 
         try:
-            yield from run_body(main.body, context=context)
+            yield from main.body.run(context)
         except ProtocolExit:
             logger.debug(f"exit was reached in {context}")
             if context.phase is Phase.PREFLIGHT:
@@ -178,11 +178,11 @@ class Callback(Callable):
                 )
                 context.engine.send_response(response)
 
-            yield from run_body(self.body, context=inner_context)
+            yield from self.body.run(inner_context)
 
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="callback_return")
 
 
 # FIXME: here to avoid circular import, find better solution
-from turingarena.protocol.model.statements import run_body, Body
+from turingarena.protocol.model.statements import Body

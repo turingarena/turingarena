@@ -6,10 +6,7 @@ from contextlib import ExitStack
 from threading import Thread
 
 from turingarena.sandbox.client import ProcessConnection
-from turingarena.sandbox.loader import load_algorithm_executable
-
-OK = 0
-EXC = 1
+from turingarena.sandbox.executables import load_executable
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +83,6 @@ class SandboxProcess:
 def sandbox_run(algorithm_dir):
     prefix = "turingarena_sandbox_"
 
-    executable = load_algorithm_executable(algorithm_dir)
+    executable = load_executable(algorithm_dir)
     with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
         SandboxProcess(executable=executable, sandbox_dir=sandbox_dir)

@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Build and installation routines for task-wizard.
-
-"""
-
 from setuptools import setup, find_packages
 
 setup(
@@ -18,6 +14,8 @@ setup(
     entry_points={
         "console_scripts": [
             "turingarena=turingarena.cli.main:main",
+            "turingarena-sandbox=turingarena.sandbox.main:main",
+            "turingarena-driver=turingarena.protocol.driver.main:main",
         ],
     },
     packages=find_packages(),
@@ -30,7 +28,6 @@ setup(
         "pyyaml",
         "coloredlogs",
         "bidict",
-        "gitpython",
     ],
     tests_require=[
         "pytest",

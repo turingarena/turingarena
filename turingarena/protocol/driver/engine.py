@@ -1,14 +1,14 @@
 from collections import deque
 
 from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.server.commands import ProxyRequest
-from turingarena.protocol.server.frames import Frame, StatementContext, Phase, logger, RootBlockContext
+from turingarena.protocol.driver.commands import ProxyRequest
+from turingarena.protocol.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
 
 
 class InterfaceEngine:
-    def __init__(self, *, interface, proxy_connection, process_connection):
+    def __init__(self, *, interface, driver_connection, process_connection):
         self.interface = interface
-        self.proxy_connection = proxy_connection
+        self.driver_connection = driver_connection
         self.process_connection = process_connection
 
         self.root_frame = Frame(parent=None, scope=interface.body.scope)
@@ -53,7 +53,7 @@ class InterfaceEngine:
         if self._current_request is not None:
             return
         self._current_request = ProxyRequest.accept(
-            map(str.strip, self.proxy_connection.request_pipe),
+            map(str.strip, self.driver_connection.request_pipe),
             interface_signature=self.interface.signature,
         )
 
@@ -70,7 +70,7 @@ class InterfaceEngine:
             self._current_request = None
 
     def send_response(self, response):
-        file = self.proxy_connection.response_pipe
+        file = self.driver_connection.response_pipe
         for line in response.serialize():
             print(line, file=file)
         file.flush()

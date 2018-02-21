@@ -3,8 +3,8 @@ from turingarena.cli import docopt_cli
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
 from turingarena.make.cli import make_cli
-from turingarena.protocol.cli import protocol_cli
-from turingarena.sandbox.cli import sandbox_cli
+from turingarena.protocol.driver import protocol_cli
+from turingarena.sandbox.main import main
 
 
 @docopt_cli
@@ -21,7 +21,7 @@ def main(args):
 
     commands = {
         "container": container_cli,
-        "sandbox": sandbox_cli,
+        "sandbox": main,
         "protocol": protocol_cli,
         "make": make_cli,
     }
