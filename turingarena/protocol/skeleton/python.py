@@ -2,6 +2,7 @@ import os
 
 from turingarena.common import write_to_file, indent_all, indent
 
+
 def generate_skeleton(*, interface, dest_dir):
     with open(os.path.join(dest_dir, "skeleton.py"), "w") as main_file:
         write_to_file(generate_main_file(interface), main_file)
@@ -106,12 +107,12 @@ def generate_alloc(statement):
 
 
 def generate_call(statement, *, interface):
-    yield f"import source"
     function_name = statement.function.name
+    yield f"from source import {function_name}"
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
-        yield f"{return_value} = source.{function_name}({parameters})"
+        yield f"{return_value} = {function_name}({parameters})"
     else:
         yield f"{function_name}({parameters})"
     if interface.signature.callbacks:

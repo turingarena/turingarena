@@ -2,10 +2,10 @@ import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.module import ProtocolSource
-from turingarena.protocol.tests.util import cpp_implementation, callback_mock
+from turingarena.protocol.tests.util import cpp_implementation, callback_mock, python_implementation
 
 
-def test_callback_no_arguments():
+def test_callback_no_arguments_cpp():
     with cpp_implementation(
             protocol_text="""
                 interface callback_no_arguments {
@@ -35,8 +35,38 @@ def test_callback_no_arguments():
                 (callback_no_arguments, ()),
             ]
 
+def test_callback_no_arguments_python():
+    with python_implementation(
+            protocol_text="""
+                interface callback_no_arguments {
+                    callback callback_no_arguments() {}
+                    function test();
+                    main {
+                        call test();
+                    }
+                }
+            """,
+            # requires no indentation
+            source_text="""if True:
+                from __main__ import callback_no_arguments
+                
+                def test():
+                    callback_no_arguments()
+                    callback_no_arguments()
+            """,
+            interface_name="callback_no_arguments",
+    ) as impl:
+        with impl.run() as (process, p):
+            calls = []
+            callback_no_arguments = callback_mock(calls)
+            p.test(callback_no_arguments=callback_no_arguments)
 
-def test_callback_with_arguments():
+            assert calls == [
+                (callback_no_arguments, ()),
+                (callback_no_arguments, ()),
+            ]
+
+def test_callback_with_arguments_cpp():
     with cpp_implementation(
             protocol_text="""
                 interface callback_with_arguments {
@@ -69,7 +99,7 @@ def test_callback_with_arguments():
             ]
 
 
-def test_callback_return_value():
+def test_callback_return_value_cpp():
     with cpp_implementation(
             protocol_text="""
                 interface callback_return_value {
