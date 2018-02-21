@@ -28,7 +28,6 @@ setup(
         "pyyaml",
         "coloredlogs",
         "bidict",
-        "gitpython",
     ],
     tests_require=[
         "pytest",
