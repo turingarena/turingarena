@@ -7,6 +7,9 @@ from turingarena.sandbox.client import SandboxClient
 class AlgorithmExecutable(ImmutableObject):
     __slots__ = [
         "algorithm_dir",
+        "language",
+        "protocol_name",
+        "interface_name",
     ]
 
     @abstractmethod

@@ -5,10 +5,10 @@ from turingarena.protocol.module import ProtocolModule
 
 
 class ProxiedAlgorithm:
-    def __init__(self, algorithm):
-        self.algorithm = algorithm
-        self.protocol_name = self.algorithm.protocol_name
-        self.interface_name = self.algorithm.interface_name
+    def __init__(self, *, executable, protocol_name, interface_name):
+        self.executable = executable
+        self.protocol_name = protocol_name
+        self.interface_name = interface_name
 
     @contextmanager
     def run(self, **global_variables):
@@ -16,7 +16,7 @@ class ProxiedAlgorithm:
 
         interface_signature = protocol_module.load_interface_signature(self.interface_name)
 
-        sandbox = self.algorithm.executable.sandbox()
+        sandbox = self.executable.sandbox()
         with sandbox.run() as process:
             driver = DriverClient(
                 protocol_name=self.protocol_name,

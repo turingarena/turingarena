@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
-    def do_compile(self, *, algorithm_dir, protocol_name, interface_name):
+    def do_compile(self, algorithm_dir):
         skeleton_path = pkg_resources.resource_filename(
-            module_to_python_package(PROTOCOL_QUALIFIER, protocol_name),
-            f"_skeletons/{interface_name}/cpp/skeleton.cpp",
+            module_to_python_package(PROTOCOL_QUALIFIER, self.protocol_name),
+            f"_skeletons/{self.interface_name}/cpp/skeleton.cpp",
         )
 
         source_filename = os.path.join(algorithm_dir, "source.cpp")
@@ -55,8 +55,6 @@ class CppAlgorithmSource(AlgorithmSource):
             raise CompilationFailed
         else:
             raise ValueError("Unable to invoke g++ properly")
-
-        return ElfAlgorithmExecutable(algorithm_dir=algorithm_dir)
 
 
 class ElfAlgorithmExecutable(AlgorithmExecutable):
