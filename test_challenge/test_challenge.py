@@ -1,15 +1,3 @@
-from turingarena.problem import Problem
-
-problem = Problem()
-
-problem.implementation_entry(
-    "entry",
-    protocol_name="test_challenge",
-    interface_name="exampleinterface",
-)
-
-
-@problem.goal
 def goal(entry):
     N = 10
     M = 100

@@ -1,5 +1,5 @@
 from turingarena.cli import docopt_cli
-from turingarena.protocol.server import run_server
+from turingarena.protocol.driver.server import DriverServer
 
 
 @docopt_cli
@@ -15,7 +15,7 @@ def main(args):
       <sandbox>  Sandbox to connect to.
     """
 
-    run_server(
+    DriverServer(
         protocol_name=args["<protocol>"],
         interface_name=args["<interface>"],
         sandbox_dir=args["<sandbox>"],

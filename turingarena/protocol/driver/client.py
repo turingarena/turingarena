@@ -3,16 +3,15 @@ import os
 import subprocess
 from contextlib import contextmanager, ExitStack
 
-from turingarena.protocol.connection import ProxyConnection
+from turingarena.protocol.connection import DriverConnection
+from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
-from turingarena.protocol.module import ProtocolModule
-from turingarena.protocol.server.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.sandbox.exceptions import AlgorithmError
 
 logger = logging.getLogger(__name__)
 
 
-class ProxyClient:
+class DriverClient:
     def __init__(self, *, protocol_name, interface_name, process):
         self.protocol_name = protocol_name
         self.interface_name = interface_name
@@ -28,27 +27,27 @@ class ProxyClient:
         ]
         with ExitStack() as stack:
             logger.debug(f"running {cli}...")
-            proxy_process = subprocess.Popen(
+            driver_process = subprocess.Popen(
                 cli,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
             )
-            stack.enter_context(proxy_process)
-            proxy_dir = proxy_process.stdout.readline().strip()
-            logger.debug(f"proxy dir: {proxy_dir}...")
+            stack.enter_context(driver_process)
+            driver_dir = driver_process.stdout.readline().strip()
+            logger.debug(f"driver dir: {driver_dir}...")
 
-            assert os.path.isdir(proxy_dir)
+            assert os.path.isdir(driver_dir)
 
             logger.debug("opening request pipe...")
-            request_pipe = stack.enter_context(open(os.path.join(proxy_dir, "proxy_request.pipe"), "w"))
+            request_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_request.pipe"), "w"))
             logger.debug("opening response pipe...")
-            response_pipe = stack.enter_context(open(os.path.join(proxy_dir, "proxy_response.pipe")))
+            response_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_response.pipe")))
             logger.debug("opening error pipe...")
-            error_pipe = stack.enter_context(open(os.path.join(proxy_dir, "error.pipe")))
-            logger.debug("proxy connected")
+            error_pipe = stack.enter_context(open(os.path.join(driver_dir, "error.pipe")))
+            logger.debug("driver connected")
 
             try:
-                yield ProxyConnection(
+                yield DriverConnection(
                     request_pipe=request_pipe,
                     response_pipe=response_pipe,
                     error_pipe=error_pipe,
@@ -57,38 +56,10 @@ class ProxyClient:
                 logger.exception(e)
                 raise
 
-            logger.debug("waiting for proxy server process")
+            logger.debug("waiting for driver server process")
 
 
-class ProxiedAlgorithm:
-    def __init__(self, algorithm):
-        self.algorithm = algorithm
-        self.protocol_name = self.algorithm.source.protocol_name
-        self.interface_name = self.algorithm.source.interface_name
-
-    @contextmanager
-    def run(self, **global_variables):
-        protocol_module = ProtocolModule(name=self.protocol_name)
-
-        interface_signature = protocol_module.load_interface_signature(self.interface_name)
-        sandbox = self.algorithm.executable.sandbox()
-        with sandbox.run() as process:
-            proxy = ProxyClient(
-                protocol_name=self.protocol_name,
-                interface_name=self.interface_name,
-                process=process,
-            )
-            with proxy.connect() as connection:
-                engine = ProxyEngine(
-                    connection=connection,
-                    interface_signature=interface_signature,
-                )
-                engine.begin_main(**global_variables)
-                yield Proxy(engine=engine, interface_signature=interface_signature)
-                engine.end_main()
-
-
-class ProxyEngine:
+class DriverClientEngine:
     def __init__(self, *, interface_signature, connection):
         self.interface_signature = interface_signature
         self.connection = connection
@@ -185,18 +156,3 @@ class ProxyEngine:
         self.send(request)
 
 
-class Proxy:
-    def __init__(self, engine, interface_signature):
-        self._engine = engine
-        self._interface_signature = interface_signature
-
-    def __getattr__(self, item):
-        try:
-            self._interface_signature.functions[item]
-        except KeyError:
-            raise AttributeError
-
-        def method(*args, **kwargs):
-            return self._engine.call(item, args=args, callbacks_impl=kwargs)
-
-        return method

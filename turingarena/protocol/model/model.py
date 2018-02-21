@@ -6,9 +6,9 @@ from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
-from turingarena.protocol.server.commands import CallbackCall
-from turingarena.protocol.server.frames import Phase
-from turingarena.protocol.server.references import VariableReference
+from turingarena.protocol.driver.commands import CallbackCall
+from turingarena.protocol.driver.frames import Phase
+from turingarena.protocol.driver.references import VariableReference
 
 logger = logging.getLogger(__name__)
 

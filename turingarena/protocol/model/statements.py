@@ -10,8 +10,8 @@ from turingarena.protocol.model.model import Main, Variable, Interface, Function
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
-from turingarena.protocol.server.commands import FunctionReturn
-from turingarena.protocol.server.frames import Phase, RootBlockContext
+from turingarena.protocol.driver.commands import FunctionReturn
+from turingarena.protocol.driver.frames import Phase, RootBlockContext
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from collections import deque
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena.protocol.client import ProxiedAlgorithm
+from turingarena.protocol.proxy.library import ProxiedAlgorithm
 from turingarena.protocol.module import ProtocolSource
 from turingarena.sandbox.algorithm import Algorithm
 from turingarena.sandbox.cpp import CppAlgorithmSource
