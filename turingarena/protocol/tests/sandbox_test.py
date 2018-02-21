@@ -22,6 +22,6 @@ def test_not_compiling():
             interface_name="not_compiling",
     ) as impl:
         with pytest.raises(AlgorithmError) as e:
-            with impl.run() as p:
+            with impl.run() as (process, p):
                 p.test()
         assert "compilation failed" in str(e)

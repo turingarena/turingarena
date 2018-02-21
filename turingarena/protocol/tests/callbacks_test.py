@@ -25,7 +25,7 @@ def test_callback_no_arguments():
             """,
             interface_name="callback_no_arguments",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             callback_no_arguments = callback_mock(calls)
             p.test(callback_no_arguments=callback_no_arguments)
@@ -58,7 +58,7 @@ def test_callback_with_arguments():
             """,
             interface_name="callback_with_arguments",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             callback_with_arguments = callback_mock(calls)
             p.test(callback_with_arguments=callback_with_arguments)
@@ -96,7 +96,7 @@ def test_callback_return_value():
             """,
             interface_name="callback_return_value",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             callback_return_value = callback_mock(calls, [2, 4])
             p.test(callback_return_value=callback_return_value)

@@ -28,7 +28,8 @@ class ProxiedAlgorithm:
                     interface_signature=interface_signature,
                 )
                 engine.begin_main(**global_variables)
-                yield Proxy(engine=engine, interface_signature=interface_signature)
+                proxy = Proxy(engine=engine, interface_signature=interface_signature)
+                yield process, proxy
                 engine.end_main()
 
 

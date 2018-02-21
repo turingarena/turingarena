@@ -20,7 +20,7 @@ def test_interface_no_callbacks():
             """,
             interface_name="interface_no_callbacks",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             assert p.test() == 1
 
 
@@ -48,7 +48,7 @@ def test_interface_one_callback():
             """,
             interface_name="interface_one_callback",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             cb = callback_mock(calls)
             assert p.test(cb=cb) == 1
@@ -86,7 +86,7 @@ def test_interface_multiple_callbacks():
             """,
             interface_name="interface_multiple_callbacks",
     ) as impl:
-        with impl.run() as p:
+        with impl.run() as (process, p):
             calls = []
             cb1 = callback_mock(calls)
             cb2 = callback_mock(calls)
