@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Build and installation routines for task-wizard.
-
-"""
-
 from setuptools import setup, find_packages
 
 setup(
