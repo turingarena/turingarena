@@ -72,7 +72,7 @@ class Interface(ImmutableObject):
                 context.engine.root_frame[variable] = value
 
         try:
-            yield from run_body(main.body, context=context)
+            yield from main.body.run(context)
         except ProtocolExit:
             logger.debug(f"exit was reached in {context}")
             if context.phase is Phase.PREFLIGHT:
@@ -178,11 +178,11 @@ class Callback(Callable):
                 )
                 context.engine.send_response(response)
 
-            yield from run_body(self.body, context=inner_context)
+            yield from self.body.run(inner_context)
 
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="callback_return")
 
 
 # FIXME: here to avoid circular import, find better solution
-from turingarena.protocol.model.statements import run_body, Body
+from turingarena.protocol.model.statements import Body
