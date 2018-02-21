@@ -24,6 +24,7 @@ def test_function_no_arguments_cpp():
         with impl.run() as p:
             p.function_no_arguments()
 
+
 def test_function_no_arguments_python():
     with python_implementation(
             protocol_text="""
@@ -34,10 +35,9 @@ def test_function_no_arguments_python():
                     }
                 }
             """,
-            # requires 0 indentation
-            source_text="""
-def function_no_arguments():
-    pass
+            source_text="""if True:
+                def function_no_arguments():
+                    pass
             """,
             interface_name="function_no_arguments",
     ) as impl:
@@ -68,6 +68,7 @@ def test_function_with_arguments_cpp():
         with impl.run() as p:
             p.function_with_arguments(1, 2)
 
+
 def test_function_with_arguments_python():
     with python_implementation(
             protocol_text="""
@@ -80,14 +81,15 @@ def test_function_with_arguments_python():
                     }
                 }
             """,
-            source_text="""
-def function_with_arguments(a,b):
-    assert a == 1 and b == 2
+            source_text="""if True:
+                def function_with_arguments(a,b):
+                    assert a == 1 and b == 2
             """,
             interface_name="function_with_arguments",
     ) as impl:
         with impl.run() as p:
             p.function_with_arguments(1, 2)
+
 
 def test_function_return_value_cpp():
     with cpp_implementation(
@@ -114,6 +116,7 @@ def test_function_return_value_cpp():
         with impl.run() as p:
             assert p.function_return_value(1) == 2
 
+
 def test_function_return_value_python():
     with python_implementation(
             protocol_text="""
@@ -127,15 +130,16 @@ def test_function_return_value_python():
                     }
                 }
             """,
-            source_text="""
-def function_return_value(a):
-    assert a == 1
-    return 2
+            source_text="""if True:
+                def function_return_value(a):
+                    assert a == 1
+                    return 2
             """,
             interface_name="function_return_value",
     ) as impl:
         with impl.run() as p:
             assert p.function_return_value(1) == 2
+
 
 def test_function_return_type_not_scalar():
     protocol_text = """
