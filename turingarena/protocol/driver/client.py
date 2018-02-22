@@ -12,17 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class DriverClient:
-    def __init__(self, *, protocol_name, interface_name, process):
-        self.protocol_name = protocol_name
-        self.interface_name = interface_name
+    def __init__(self, *, interface, process):
+        self.interface = interface
         self.process = process
 
     @contextmanager
     def connect(self):
         cli = [
             "turingarena-driver",
-            self.protocol_name,
-            self.interface_name,
+            self.interface,
             self.process.sandbox_dir,
         ]
         with ExitStack() as stack:

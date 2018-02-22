@@ -7,16 +7,14 @@ def main(args):
     """TuringArena protocol driver.
 
     Usage:
-      turingarena-driver <protocol> <interface> <sandbox>
+      turingarena-driver <interface> <sandbox>
 
     Options:
-      <protocol>  Protocol defining the desired interface.
       <interface>  Interface to drive.
       <sandbox>  Sandbox to connect to.
     """
 
     DriverServer(
-        protocol_name=args["<protocol>"],
-        interface_name=args["<interface>"],
+        interface=args["<interface>"],
         sandbox_dir=args["<sandbox>"],
     )

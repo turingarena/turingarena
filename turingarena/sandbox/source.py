@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 class AlgorithmSource(ImmutableObject):
     __slots__ = [
-        "protocol_name",
-        "interface_name",
+        "interface",
         "language",
         "filename",
         "text",
@@ -24,7 +23,7 @@ class AlgorithmSource(ImmutableObject):
             print(self.language, file=f)
 
         with open(f"{algorithm_dir}/interface.txt", "w") as f:
-            print(f"{self.protocol_name}:{self.interface_name}", file=f)
+            print(self.interface, file=f)
 
         logger.debug("Starting language-specific compilation")
         self.do_compile(algorithm_dir)

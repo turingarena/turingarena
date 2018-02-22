@@ -7,8 +7,7 @@ class AlgorithmExecutable(ImmutableObject):
     __slots__ = [
         "algorithm_dir",
         "language",
-        "protocol_name",
-        "interface_name",
+        "interface",
     ]
 
     @abstractmethod

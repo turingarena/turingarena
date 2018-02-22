@@ -14,7 +14,9 @@ from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
 @contextmanager
 def algorithm(*, protocol_text, language, source_text, interface_name):
-    protocol_name = "test_protocol_" + ''.join(random.choices(string.ascii_lowercase, k=8))
+    protocol = "test_protocol_" + ''.join(random.choices(string.ascii_lowercase, k=8))
+    interface = f"{protocol}:{interface_name}"
+
     protocol_source = ProtocolSource(
         text=protocol_text,
         filename="<none>",
@@ -26,15 +28,14 @@ def algorithm(*, protocol_text, language, source_text, interface_name):
     }
 
     algorithm_source = languages[language](
-        protocol_name=protocol_name,
-        interface_name=interface_name,
+        interface=interface,
         filename=None,
         language=language,
         text=source_text,
     )
 
     with TemporaryDirectory() as temp_dir:
-        protocol_source.generate(dest_dir=temp_dir, name=protocol_name)
+        protocol_source.generate(dest_dir=temp_dir, name=protocol)
 
         sys.path.append(temp_dir)
         old_path = os.environ["PYTHONPATH"]
@@ -46,8 +47,7 @@ def algorithm(*, protocol_text, language, source_text, interface_name):
 
             impl = ProxiedAlgorithm(
                 algorithm_dir=algorithm_dir,
-                protocol_name=protocol_name,
-                interface_name=interface_name,
+                interface=interface,
             )
 
             yield impl

@@ -6,22 +6,21 @@ from turingarena.sandbox.client import SandboxClient
 
 
 class ProxiedAlgorithm:
-    def __init__(self, *, algorithm_dir, protocol_name, interface_name):
+    def __init__(self, *, algorithm_dir, interface):
         self.algorithm_dir = algorithm_dir
-        self.protocol_name = protocol_name
-        self.interface_name = interface_name
+        self.interface = interface
 
     @contextmanager
     def run(self, **global_variables):
-        protocol_module = ProtocolModule(name=self.protocol_name)
+        protocol, interface_name = self.interface.split(":")
+        protocol_module = ProtocolModule(name=protocol)
 
-        interface_signature = protocol_module.load_interface_signature(self.interface_name)
+        interface_signature = protocol_module.load_interface_signature(interface_name)
 
         sandbox = SandboxClient(algorithm_dir=self.algorithm_dir)
         with sandbox.run() as process:
             driver = DriverClient(
-                protocol_name=self.protocol_name,
-                interface_name=self.interface_name,
+                interface=self.interface,
                 process=process,
             )
             with driver.connect() as connection:

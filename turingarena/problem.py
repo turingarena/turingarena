@@ -34,8 +34,7 @@ class FeedbackLogger:
 
 class AlgorithmicProblem(ImmutableObject):
     __slots__ = [
-        "protocol_name",
-        "interface_name",
+        "interface",
         "checker",
     ]
 
@@ -47,8 +46,7 @@ class AlgorithmicProblem(ImmutableObject):
             context = EvaluationContext(
                 algorithm=ProxiedAlgorithm(
                     algorithm_dir=algorithm_dir,
-                    protocol_name=self.protocol_name,
-                    interface_name=self.interface_name,
+                    interface=self.interface,
                 ),
                 logger=logging.getLogger("evaluation"),
                 feedback=FeedbackLogger(),
@@ -56,11 +54,10 @@ class AlgorithmicProblem(ImmutableObject):
             self.checker(context)
 
 
-def algorithmic_problem(protocol_name, interface_name):
+def algorithmic_problem(interface):
     def decorator(f):
         return AlgorithmicProblem(
-            protocol_name=protocol_name,
-            interface_name=interface_name,
+            interface=interface,
             checker=f,
         )
 
@@ -80,8 +77,7 @@ def problem_evaluate_cli(args):
     problem = getattr(problem_module, problem_attr_name)
 
     source = CppAlgorithmSource(
-        protocol_name=problem.protocol_name,
-        interface_name=problem.interface_name,
+        interface=problem.interface,
         language="c++",
         text=sys.stdin.read(),
         filename=None,

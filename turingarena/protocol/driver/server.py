@@ -5,20 +5,21 @@ import tempfile
 from contextlib import ExitStack
 
 from turingarena.protocol.connection import DriverConnection
+from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import ProtocolModule
-from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
 
 
 class DriverServer:
-    def __init__(self, *, protocol_name, interface_name, sandbox_dir):
-        self.protocol_definition = ProtocolModule(protocol_name).load_definition()
-        self.interface = self.protocol_definition.body.scope.interfaces[interface_name]
+    def __init__(self, *, interface, sandbox_dir):
+        protocol, interface_name = interface.split(":")
+        self.protocol_definition = ProtocolModule(protocol).load_definition()
+        self.interface_definition = self.protocol_definition.body.scope.interfaces[interface_name]
 
-        self.main = self.interface.body.scope.main["main"]
+        self.main = self.interface_definition.body.scope.main["main"]
 
         with ExitStack() as stack:
             prefix = "turingarena_driver_"
@@ -57,7 +58,7 @@ class DriverServer:
             self.engine = InterfaceEngine(
                 process_connection=self.process_connection,
                 driver_connection=self.driver_connection,
-                interface=self.interface
+                interface=self.interface_definition
             )
 
             try:

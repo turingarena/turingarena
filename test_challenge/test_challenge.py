@@ -1,7 +1,7 @@
 from turingarena.problem import algorithmic_problem
 
 
-@algorithmic_problem("test_challenge", "test_interface")
+@algorithmic_problem("test_challenge:test_interface")
 def test_problem(context):
     N = 10
     M = 100

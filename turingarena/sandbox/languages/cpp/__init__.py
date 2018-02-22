@@ -18,9 +18,10 @@ class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
+        protocol, interface_name = self.interface.split(":")
         skeleton_path = pkg_resources.resource_filename(
-            module_to_python_package(PROTOCOL_QUALIFIER, self.protocol_name),
-            f"_skeletons/{self.interface_name}/cpp/skeleton.cpp",
+            module_to_python_package(PROTOCOL_QUALIFIER, protocol),
+            f"_skeletons/{interface_name}/cpp/skeleton.cpp",
         )
 
         source_filename = os.path.join(algorithm_dir, "source.cpp")
