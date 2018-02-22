@@ -1,4 +1,4 @@
-interface exampleinterface {
+interface test_interface {
     var int N, M;
     var int[] A;
 

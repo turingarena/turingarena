@@ -35,7 +35,7 @@ def generate_skeleton_statement(statement, *, interface):
 
 def generate_template_statement(statement, *, interface):
     generators = {
-        "var": lambda: [generate_global_var_template(statement)],
+        "var": lambda: generate_global_var_template(statement),
         "function": lambda: generate_function_template(statement),
         "callback": lambda: generate_callback_template(statement, interface=interface),
         "main": lambda: [],

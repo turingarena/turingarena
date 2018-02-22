@@ -2,9 +2,7 @@ from turingarena.cli import docopt_cli
 
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
-from turingarena.make.cli import make_cli
-from turingarena.protocol.driver import protocol_cli
-from turingarena.sandbox.main import main
+from turingarena.problem import problem_evaluate_cli
 
 
 @docopt_cli
@@ -21,9 +19,7 @@ def main(args):
 
     commands = {
         "container": container_cli,
-        "sandbox": main,
-        "protocol": protocol_cli,
-        "make": make_cli,
+        "evaluate": problem_evaluate_cli,
     }
     argv2 = args["<args>"]
     commands[args["<cmd>"]](argv2)
