@@ -1,8 +1,10 @@
 from contextlib import contextmanager
 
 from turingarena.protocol.driver.client import DriverClient, DriverClientEngine
+from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import ProtocolModule
 from turingarena.sandbox.client import SandboxClient
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 
 class ProxiedAlgorithm:
@@ -28,10 +30,14 @@ class ProxiedAlgorithm:
                     connection=connection,
                     interface_signature=interface_signature,
                 )
-                engine.begin_main(**global_variables)
-                proxy = Proxy(engine=engine, interface_signature=interface_signature)
-                yield process, proxy
-                engine.end_main()
+                try:
+                    engine.begin_main(**global_variables)
+                    proxy = Proxy(engine=engine, interface_signature=interface_signature)
+                    yield process, proxy
+                    engine.end_main()
+                except CommunicationBroken:
+                    error = connection.error_pipe.read()
+                    raise AlgorithmRuntimeError(error)
 
 
 class Proxy:

@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 import subprocess
+from contextlib import contextmanager
 
 import pkg_resources
 
@@ -33,14 +34,16 @@ class PythonAlgorithmSource(AlgorithmSource):
 class PythonAlgorithmExecutableScript(AlgorithmExecutable):
     __slots__ = []
 
-    def start_os_process(self, connection):
+    @contextmanager
+    def run(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "skeleton.py")
 
         logger.debug("invoking python interpreter")
-        return subprocess.Popen(
-            ["python3.6", executable_filename],
-            universal_newlines=True,
-            stdin=connection.downward_pipe,
-            stdout=connection.upward_pipe,
-            bufsize=1,
-        )
+        with subprocess.Popen(
+                ["python3.6", executable_filename],
+                universal_newlines=True,
+                stdin=connection.downward_pipe,
+                stdout=connection.upward_pipe,
+                bufsize=1,
+        ) as p:
+            yield p

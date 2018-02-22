@@ -127,10 +127,13 @@ class DriverClientEngine:
             raise
 
     def send(self, request):
-        file = self.connection.request_pipe
-        for line in request.serialize():
-            print(line, file=file)
-        file.flush()
+        try:
+            file = self.connection.request_pipe
+            for line in request.serialize():
+                print(line, file=file)
+            file.flush()
+        except BrokenPipeError:
+            raise CommunicationBroken
 
     def handle_exceptions(self):
         error = self.connection.error_pipe.read()

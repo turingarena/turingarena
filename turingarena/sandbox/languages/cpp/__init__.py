@@ -1,13 +1,13 @@
 import logging
 import os
-import shutil
 import subprocess
+from contextlib import contextmanager
 
 import pkg_resources
 
 from turingarena.modules import module_to_python_package
 from turingarena.protocol.module import PROTOCOL_QUALIFIER
-from turingarena.sandbox.exceptions import CompilationFailed
+from turingarena.sandbox.exceptions import CompilationFailed, AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -19,22 +19,23 @@ class CppAlgorithmSource(AlgorithmSource):
 
     def do_compile(self, algorithm_dir):
         protocol, interface_name = self.interface.split(":")
+
         skeleton_path = pkg_resources.resource_filename(
             module_to_python_package(PROTOCOL_QUALIFIER, protocol),
             f"_skeletons/{interface_name}/cpp/skeleton.cpp",
         )
 
+        sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.c")
         source_filename = os.path.join(algorithm_dir, "source.cpp")
         with open(source_filename, "w") as f:
             f.write(self.text)
 
-        shutil.copy(skeleton_path, os.path.join(algorithm_dir, "skeleton.cpp"))
-
         cli = [
             "g++",
             "-o", "algorithm",
+            sandbox_path,
+            skeleton_path,
             "source.cpp",
-            "skeleton.cpp",
         ]
         logger.debug(f"Running {' '.join(cli)}")
 
@@ -61,7 +62,8 @@ class CppAlgorithmSource(AlgorithmSource):
 class ElfAlgorithmExecutable(AlgorithmExecutable):
     __slots__ = []
 
-    def start_os_process(self, connection):
+    @contextmanager
+    def run(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "algorithm")
 
         if not os.path.isfile(executable_filename):
@@ -70,10 +72,16 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
             connection.error_pipe.write("compilation failed")
 
         logger.debug("starting process")
-        return subprocess.Popen(
-            [executable_filename],
-            universal_newlines=True,
-            stdin=connection.downward_pipe,
-            stdout=connection.upward_pipe,
-            bufsize=1,
-        )
+
+        with subprocess.Popen(
+                [executable_filename],
+                universal_newlines=True,
+                stdin=connection.downward_pipe,
+                stdout=connection.upward_pipe,
+                bufsize=1,
+        ) as p:
+            yield p
+
+        if p.returncode != 0:
+            logger.warning(f"process terminated with returncode {p.returncode}")
+            raise AlgorithmRuntimeError("invalid return code {p.returncode}")

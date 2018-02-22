@@ -71,6 +71,7 @@ class Process:
             logger.exception(e)
             raise
         finally:
+            logger.debug("opening wait pipe")
             with open(self.wait_pipe_name):
                 pass
 

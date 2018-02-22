@@ -11,5 +11,5 @@ class AlgorithmExecutable(ImmutableObject):
     ]
 
     @abstractmethod
-    def start_os_process(self, connection):
+    def run(self, connection):
         pass

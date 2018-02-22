@@ -5,9 +5,11 @@ from turingarena.test_utils import algorithm
 
 protocol_text = """
     interface simple {
-        function run();
+        function test() -> int;
         main {
-            call run();
+            var int o;
+            call test() -> o;
+            output o;
         }
     }
 """
@@ -23,14 +25,15 @@ def cpp_algorithm(source):
 
 
 def test_open():
-    with cpp_algorithm("""
+    with cpp_algorithm(r"""
             #include <stdio.h>
             
-            void run() 
+            int test() 
             {
                 fopen("name", "r");
             }
     """) as algo:
-        with algo.run() as (process, proxy):
-            with pytest.raises(AlgorithmRuntimeError) as e:
-                proxy.run()
+        with pytest.raises(AlgorithmRuntimeError) as e:
+            with algo.run() as (process, proxy):
+                proxy.test()
+        assert "invalid return code" in str(e.value)
