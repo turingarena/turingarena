@@ -7,13 +7,11 @@ from turingarena.protocol.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 
-
-def parse(*args, **kwargs):
-    return tatsu.parse(grammar_ebnf, *args, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
+grammar = tatsu.compile(grammar_ebnf)
 
 
 def parse_protocol(text, **kwargs):
-    return parse(text, rule="unit", **kwargs)
+    return grammar.parse(text, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 
 class Semantics:
