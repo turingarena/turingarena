@@ -56,6 +56,7 @@ static struct sock_filter filter_instructions[] = {
 	/* Allow read/write */
 	ALLOW(read),
 	ALLOW(write),
+	ALLOW(lseek),
 	ALLOW(fstat),
 
 	/* Default deny rule: send SIGSYS signal */
