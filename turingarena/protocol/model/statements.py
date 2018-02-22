@@ -282,9 +282,10 @@ class CallStatement(ImperativeStatement):
         while True:
             logger.debug(f"popping callbacks")
             callback_context = context.engine.pop_callback()
-            logger.debug(f"popped {callback_context}")
             if callback_context is None:
+                logger.debug(f"popped None")
                 break
+            logger.debug(f"popped callback")
             yield from callback_context.callback.run(context.engine.new_context(
                 root_block_context=callback_context,
                 phase=context.phase,

@@ -7,6 +7,7 @@ from turingarena.protocol.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 
+logger.debug("compiling protocol grammar")
 grammar = tatsu.compile(grammar_ebnf)
 
 
