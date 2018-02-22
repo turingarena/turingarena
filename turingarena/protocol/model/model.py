@@ -74,11 +74,11 @@ class Interface(ImmutableObject):
         try:
             yield from main.body.run(context)
         except ProtocolExit:
-            logger.debug(f"exit was reached in {context}")
+            logger.debug(f"exit was reached")
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="exit")
         else:
-            logger.debug(f"main body reached end in {context}")
+            logger.debug(f"main body reached end")
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="main_end")
 
