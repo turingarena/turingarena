@@ -1,7 +1,9 @@
+from contextlib import contextmanager
+
 import pytest
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.test_utils import algorithm
+from turingarena.test_utils import define_many
 
 protocol_text = """
     interface simple {
@@ -15,12 +17,12 @@ protocol_text = """
 """
 
 
+@contextmanager
 def cpp_algorithm(source):
-    return algorithm(
+    return define_many(
         protocol_text=protocol_text,
-        language="c++",
-        source_text=source,
         interface_name="simple",
+        sources={"c++": source},
     )
 
 

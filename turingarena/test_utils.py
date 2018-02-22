@@ -13,14 +13,29 @@ from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
 
 @contextmanager
-def algorithm(*, protocol_text, language, source_text, interface_name):
+def define_protocol(text):
     protocol = "test_protocol_" + ''.join(random.choices(string.ascii_lowercase, k=8))
-    interface = f"{protocol}:{interface_name}"
-
     protocol_source = ProtocolSource(
-        text=protocol_text,
+        text=text,
         filename="<none>",
     )
+
+    with TemporaryDirectory() as temp_dir:
+        protocol_source.generate(dest_dir=temp_dir, name=protocol)
+
+        sys.path.append(temp_dir)
+        old_path = os.environ["PYTHONPATH"]
+        try:
+            os.environ["PYTHONPATH"] = temp_dir
+            yield protocol
+        finally:
+            sys.path.remove(temp_dir)
+            os.environ["PYTHONPATH"] = old_path
+
+
+@contextmanager
+def define_algorithm(*, protocol, language, source_text, interface_name):
+    interface = f"{protocol}:{interface_name}"
 
     languages = {
         "c++": CppAlgorithmSource,
@@ -35,25 +50,13 @@ def algorithm(*, protocol_text, language, source_text, interface_name):
     )
 
     with TemporaryDirectory() as temp_dir:
-        protocol_source.generate(dest_dir=temp_dir, name=protocol)
+        algorithm_dir = os.path.join(temp_dir, "algorithm")
+        algorithm_source.compile(algorithm_dir)
 
-        sys.path.append(temp_dir)
-        old_path = os.environ["PYTHONPATH"]
-        try:
-            os.environ["PYTHONPATH"] = temp_dir
-
-            algorithm_dir = os.path.join(temp_dir, "algorithm")
-            algorithm_source.compile(algorithm_dir)
-
-            impl = ProxiedAlgorithm(
-                algorithm_dir=algorithm_dir,
-                interface=interface,
-            )
-
-            yield impl
-        finally:
-            sys.path.remove(temp_dir)
-            os.environ["PYTHONPATH"] = old_path
+        yield ProxiedAlgorithm(
+            algorithm_dir=algorithm_dir,
+            interface=interface,
+        )
 
 
 def callback_mock(calls, return_values=None):
@@ -67,3 +70,15 @@ def callback_mock(calls, return_values=None):
             return return_values.popleft()
 
     return mock
+
+
+def define_many(protocol_text, interface_name, sources):
+    with define_protocol(protocol_text) as protocol:
+        for language, source in sources.items():
+            with define_algorithm(
+                    source_text=source,
+                    language=language,
+                    protocol=protocol,
+                    interface_name=interface_name,
+            ) as impl:
+                yield impl
