@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/mman.h>
 
 #define DEBUG(message) fprintf(stderr, "DEBUG: %s \n", message)
 
@@ -36,6 +37,14 @@
 #define ALLOW(syscall) \
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, CAT(__NR_,syscall), 0, 1), \
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
+#define ALLOW_ARG(syscall, arg_number, arg_value) \
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, CAT(__NR_,syscall), 0, 6), \
+	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, args[(arg_number)])), \
+	BPF_JUMP(BPF_JMP+BPF_JEQ+BPF_K, ((arg_value) & 0xFFFFFFFF), 0, 3), \
+	BPF_STMT(BPF_LD+BPF_W+BPF_ABS, offsetof(struct seccomp_data, args[(arg_number)]) + 4), \
+	BPF_JUMP(BPF_JMP+BPF_JEQ+BPF_K, ((long)(arg_value) >> 32) & 0xFFFFFFFF, 0, 1), \
+	BPF_STMT(BPF_RET+BPF_K, SECCOMP_RET_ALLOW), \
+	BPF_STMT(BPF_LD+BPF_W+BPF_ABS, offsetof(struct seccomp_data, nr))
 
 /* 
  * Instructions of the BPF syscall filter program  
@@ -55,15 +64,18 @@ static struct sock_filter filter_instructions[] = {
 
 	/* Allow memory allocation */
 	ALLOW(brk),
-	ALLOW(mmap),
+	ALLOW_ARG(mmap, 3, MAP_PRIVATE | MAP_ANONYMOUS),
 	ALLOW(mremap),
 	ALLOW(munmap),
 
 	/* Allow read/write */
-	ALLOW(read),
-	ALLOW(write),
-	ALLOW(lseek),
-	ALLOW(fstat),
+	ALLOW_ARG(read, 0, 0),
+	ALLOW_ARG(write, 0, 1),
+	ALLOW_ARG(write, 0, 2),
+	ALLOW_ARG(lseek, 0, 0),
+	ALLOW_ARG(fstat, 0, 0),
+	ALLOW_ARG(fstat, 0, 1),
+	ALLOW_ARG(fstat, 0, 2),
 
 	/* Default deny rule: send SIGSYS signal */
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRAP)
