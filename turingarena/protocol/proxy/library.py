@@ -2,11 +2,12 @@ from contextlib import contextmanager
 
 from turingarena.protocol.driver.client import DriverClient, DriverClientEngine
 from turingarena.protocol.module import ProtocolModule
+from turingarena.sandbox.client import SandboxClient
 
 
 class ProxiedAlgorithm:
-    def __init__(self, *, executable, protocol_name, interface_name):
-        self.executable = executable
+    def __init__(self, *, algorithm_dir, protocol_name, interface_name):
+        self.algorithm_dir = algorithm_dir
         self.protocol_name = protocol_name
         self.interface_name = interface_name
 
@@ -16,7 +17,7 @@ class ProxiedAlgorithm:
 
         interface_signature = protocol_module.load_interface_signature(self.interface_name)
 
-        sandbox = self.executable.sandbox()
+        sandbox = SandboxClient(algorithm_dir=self.algorithm_dir)
         with sandbox.run() as process:
             driver = DriverClient(
                 protocol_name=self.protocol_name,
