@@ -58,7 +58,6 @@ static struct sock_filter filter_instructions[] = {
 	ALLOW(mmap),
 	ALLOW(mremap),
 	ALLOW(munmap),
-	ALLOW(mremap),
 
 	/* Allow read/write */
 	ALLOW(read),
