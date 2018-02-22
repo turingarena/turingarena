@@ -59,7 +59,6 @@ class ProxyMessage(ImmutableObject):
             interface_signature=interface_signature,
             **arguments,
         )
-        logger.debug(f"received message {message}")
         return message
 
     @abstractmethod
@@ -67,7 +66,6 @@ class ProxyMessage(ImmutableObject):
         pass
 
     def serialize(self):
-        logger.debug(f"serializing message {self}")
         yield self.message_type
         yield from self.serialize_arguments()
 

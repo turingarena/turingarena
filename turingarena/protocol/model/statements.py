@@ -4,14 +4,14 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
+from turingarena.protocol.driver.commands import FunctionReturn
+from turingarena.protocol.driver.frames import Phase, RootBlockContext
 from turingarena.protocol.exceptions import ProtocolExit, ProtocolError, CommunicationBroken
 from turingarena.protocol.model.expressions import Expression
 from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
-from turingarena.protocol.driver.commands import FunctionReturn
-from turingarena.protocol.driver.frames import Phase, RootBlockContext
 
 logger = logging.getLogger(__name__)
 
@@ -269,7 +269,7 @@ class CallStatement(ImperativeStatement):
                 callback = context.engine.interface.body.scope.callbacks[callback_name]
                 callback_context = RootBlockContext(callback)
                 context.engine.push_callback(callback_context)
-                logger.debug(f"got callback '{callback_name}', pushing {callback_context} to queue")
+                logger.debug(f"got callback '{callback_name}', pushing to queue")
                 yield from callback.run(context=context.engine.new_context(
                     root_block_context=callback_context,
                     phase=context.phase,
@@ -446,13 +446,11 @@ class Body(AbstractSyntaxNode):
         )
 
     def run(self, context):
-        logger.debug(f"running body {self} in {context}")
+        logger.debug(f"running body")
         with context.enter(self.scope) as inner_context:
             for statement in self.statements:
                 if isinstance(statement, ImperativeStatement):
-                    logger.debug(f"run {statement} in {inner_context}")
                     yield from statement.run(inner_context)
-                    logger.debug(f"completed {statement} in {inner_context}")
 
     def is_possible_branch(self, *, context):
         request = context.engine.peek_request()

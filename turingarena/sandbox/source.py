@@ -16,7 +16,7 @@ class AlgorithmSource(ImmutableObject):
     ]
 
     def compile(self, algorithm_dir):
-        logger.info(f"Compiling algorithm source {self} into algorithm dir '{algorithm_dir}'")
+        logger.info(f"Compiling algorithm source into dir '{algorithm_dir}'")
 
         os.mkdir(algorithm_dir)
         with open(f"{algorithm_dir}/language.txt", "w") as f:

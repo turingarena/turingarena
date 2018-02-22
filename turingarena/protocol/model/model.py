@@ -2,13 +2,13 @@ import logging
 from collections import OrderedDict
 
 from turingarena.common import ImmutableObject, TupleLikeObject
+from turingarena.protocol.driver.commands import CallbackCall
+from turingarena.protocol.driver.frames import Phase
+from turingarena.protocol.driver.references import VariableReference
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
-from turingarena.protocol.driver.commands import CallbackCall
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.driver.references import VariableReference
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class Interface(ImmutableObject):
     def run(self, context):
         main = self.body.scope.main["main"]
 
-        logger.debug(f"running main {main} in {context}")
+        logger.debug(f"running main")
 
         if context.phase is Phase.PREFLIGHT:
             request = context.engine.process_request(expected_type="main_begin")
@@ -164,7 +164,7 @@ class Callback(Callable):
         )
 
     def run(self, context):
-        logger.debug(f"running callback {self.name} in {context}")
+        logger.debug(f"running callback {self.name}")
 
         with context.enter(self.scope) as inner_context:
             if context.phase is Phase.PREFLIGHT:

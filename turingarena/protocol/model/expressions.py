@@ -3,9 +3,9 @@ from abc import abstractmethod
 
 from bidict import bidict
 
+from turingarena.protocol.driver.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.type_expressions import ScalarType
-from turingarena.protocol.driver.references import ConstantReference, VariableReference, ArrayItemReference
 
 expression_classes = bidict()
 
@@ -35,7 +35,6 @@ class Expression(AbstractSyntaxNode):
         return expression
 
     def evaluate(self, *, frame):
-        logger.debug(f"evaluating expression {self} in {frame}")
         return self.do_evaluate(frame=frame)
 
     @abstractmethod
