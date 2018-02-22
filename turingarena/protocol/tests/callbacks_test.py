@@ -2,7 +2,7 @@ import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.module import ProtocolSource
-from turingarena.protocol.tests.util import callback_mock, algorithm 
+from turingarena.test_utils import callback_mock, algorithm
 
 
 def test_callback_no_arguments_cpp():

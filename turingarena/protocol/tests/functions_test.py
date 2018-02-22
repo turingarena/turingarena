@@ -2,7 +2,7 @@ import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.module import ProtocolSource
-from turingarena.protocol.tests.util import algorithm
+from turingarena.test_utils import algorithm
 
 
 def test_function_no_arguments():

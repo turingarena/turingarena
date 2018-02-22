@@ -1,4 +1,4 @@
-from turingarena.protocol.tests.util import algorithm
+from turingarena.test_utils import algorithm
 
 
 def test_valid_types():
