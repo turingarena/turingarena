@@ -1,5 +1,6 @@
 import importlib
 import os
+import pickle
 import sys
 from tempfile import TemporaryDirectory
 
@@ -62,6 +63,9 @@ class ProtocolSource(ImmutableObject):
         # FIXME: make top-level
         from turingarena.protocol.proxy.python import generate_proxy
         from turingarena.protocol.skeleton import generate_skeleton
+
+        with open(os.path.join(module_dir, "_definition.pickle"), "wb") as f:
+            pickle.dump(definition, f)
         generate_proxy(module_dir, definition)
         generate_skeleton(definition, dest_dir=os.path.join(module_dir, "_skeletons"))
 
@@ -83,7 +87,7 @@ class ProtocolModule:
     def __init__(self, name):
         self.name = name
 
-        module = module_to_python_package(PROTOCOL_QUALIFIER, self.name)
+        module = self.module_name()
         source_text = pkg_resources.resource_string(module, "_source.tap").decode()
         source_original_filename = pkg_resources.resource_string(module, ORIGINAL_SOURCE_FILENAME).decode()
 
@@ -92,8 +96,14 @@ class ProtocolModule:
             filename=source_original_filename,
         )
 
+    def module_name(self):
+        return module_to_python_package(PROTOCOL_QUALIFIER, self.name)
+
     def load_definition(self):
-        return self.source.compile()
+        module = self.module_name()
+        path = pkg_resources.resource_filename(module, "_definition.pickle")
+        with open(path, "rb") as f:
+            return pickle.load(f)
 
     def load_interface_signature(self, interface_name):
         proxy_module = importlib.import_module(

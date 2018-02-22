@@ -17,9 +17,6 @@ class ImmutableObject(metaclass=ABCMeta):
             if base == object: continue
             yield from base.__slots__
 
-    def __setattr__(self, key, value):
-        raise NotImplementedError
-
     def __repr__(self):
         args = ", ".join(f"{s}={repr(getattr(self, s, '<MISSING>'))}" for s in self.all_slots())
         return f"{self.__class__.__name__}({args})"
