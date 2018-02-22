@@ -1,14 +1,16 @@
 import logging
 import os
-import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.common import ImmutableObject
+from turingarena.sandbox.connection import ProcessConnection
+from turingarena.sandbox.server import SandboxServer
 
 logger = logging.getLogger(__name__)
 
 init_logger()
+
+server = SandboxServer()
 
 
 class SandboxException(Exception):
@@ -22,22 +24,22 @@ class SandboxClient:
 
     @contextmanager
     def run(self):
-        logger.debug("starting sandbox process")
-        with subprocess.Popen(
-                ["turingarena-sandbox", self.algorithm_dir],
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-        ) as sandbox_process:
-            sandbox_dir = sandbox_process.stdout.readline().strip()
-            logger.info("connected to sandbox at {}".format(sandbox_dir))
+        request_pipe_name = os.path.join(server.server_dir, "sandbox_server_request.pipe")
+        response_pipe_name = os.path.join(server.server_dir, "sandbox_server_response.pipe")
 
-            try:
-                yield Process(sandbox_dir)
-            except Exception as e:
-                logger.exception(e)
-                raise
+        with open(request_pipe_name, "w") as pipe:
+            pipe.write(self.algorithm_dir)
+        with open(response_pipe_name) as pipe:
+            sandbox_dir = pipe.read()
+        logger.info("connected to sandbox at {}".format(sandbox_dir))
 
-            logger.debug("waiting sandbox process")
+        try:
+            yield Process(sandbox_dir)
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+        logger.debug("waiting sandbox process")
 
 
 class Process:
@@ -74,7 +76,3 @@ class Process:
             logger.debug("opening wait pipe")
             with open(self.wait_pipe_name):
                 pass
-
-
-class ProcessConnection(ImmutableObject):
-    __slots__ = ["downward_pipe", "upward_pipe", "error_pipe"]
