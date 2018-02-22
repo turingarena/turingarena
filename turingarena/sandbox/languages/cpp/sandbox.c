@@ -1,9 +1,9 @@
 /* 
  * Simple Linux sandbox program that uses seccomp to deny all system calls to a program except:
- *     - read/write from already open file descriptors 
+ *     - read/write/lseek from already open file descriptors 
  *     - exit/exit_group 
  *     - mmap/munmap/mremap/brk, for dynamic memory allocation 
- *     - optionally time syscalls  
+ *     - for iostat/fstat return a EACCES error (but don't terminate program)
  * 
  * How to use: 
  *     - compile with `gcc -c sandbox.c`
@@ -29,6 +29,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #define DEBUG(message) fprintf(stderr, "DEBUG: %s \n", message)
 
@@ -36,6 +37,9 @@
 #define ALLOW(syscall) \
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, CAT(__NR_,syscall), 0, 1), \
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
+#define RETURN_ERROR(syscall, errno) \
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, CAT(__NR_,syscall), 0, 1), \
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO|(errno))
 
 /* 
  * Instructions of the BPF syscall filter program  
@@ -62,12 +66,13 @@ static struct sock_filter filter_instructions[] = {
 	/* Allow read/write */
 	ALLOW(read),
 	ALLOW(write),
+	ALLOW(lseek),
 
-	/* Allow ioctl and fstat (required by the stdlib) */
-	ALLOW(ioctl),
-	ALLOW(fstat),
+	/* Return an error for ioctl and fstat, but don't terminate the program */
+	RETURN_ERROR(ioctl, EACCES),
+	RETURN_ERROR(fstat, EACCES),
 
-	/* Default deny rule */
+	/* Default deny rule: send SIGSYS signal */
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRAP)
 };
 
