@@ -8,7 +8,6 @@ from tempfile import TemporaryDirectory
 
 from turingarena.protocol.module import ProtocolSource
 from turingarena.protocol.proxy.library import ProxiedAlgorithm
-from turingarena.sandbox.executables import load_executable
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
@@ -46,9 +45,9 @@ def algorithm(*, protocol_text, language, source_text, interface_name):
             algorithm_source.compile(algorithm_dir)
 
             impl = ProxiedAlgorithm(
+                algorithm_dir=algorithm_dir,
                 protocol_name=protocol_name,
                 interface_name=interface_name,
-                executable=load_executable(algorithm_dir),
             )
 
             yield impl
