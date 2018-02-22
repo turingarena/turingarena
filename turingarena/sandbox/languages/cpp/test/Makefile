@@ -4,7 +4,7 @@ CC=gcc
 CXX=g++
 CFLAGS=-O0
 CXXFLAGS=-O0
-TESTS=test_constructor test_c_valid test_c_invalid test_cpp_valid test_cpp_invalid 
+TESTS=test_read test_constructor test_c_valid test_c_invalid test_cpp_valid test_cpp_invalid 
 SANDBOX_OBJECT=../sandbox.o 
 
 all: $(TESTS)

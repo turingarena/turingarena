@@ -5,6 +5,8 @@ CFLAGS=-O3 -Wall -Wextra -pedantic
 TESTDIR=test/
 SANDBOX_OBJECT=sandbox.o
 
+all: $(SANDBOX_OBJECT)
+
 $(SANDBOX_OBKECT): sandbox.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -17,4 +19,4 @@ clean_tests:
 tests: $(SANDBOX_OBJECT) 
 	$(MAKE) -C $(TESTDIR) all
 
-.PHONY: clean tests clean_tests
+.PHONY: all clean tests clean_tests
