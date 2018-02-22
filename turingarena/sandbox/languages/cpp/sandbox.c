@@ -85,7 +85,7 @@ static struct sock_fprog seccomp_filter_program = {
  */
 static void SIGSYS_handler(int signum __attribute__((unused)), siginfo_t *info, void *ctx __attribute__((unused))) 
 {
-	fprintf(stderr, "SIGSYS recieved: unexpected system call (number %d)\n", info->si_syscall);
+	fprintf(stderr, "SIGSYS received: unexpected system call (number %d)\n", info->si_syscall);
 	_Exit(EXIT_FAILURE); 
 }
 
