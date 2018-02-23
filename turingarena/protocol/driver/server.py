@@ -7,7 +7,7 @@ from contextlib import ExitStack
 from turingarena.protocol.connection import DriverConnection
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
-from turingarena.protocol.module import ProtocolModule
+from turingarena.protocol.module import load_interface_definition
 from turingarena.sandbox.client import Process
 
 logger = logging.getLogger(__name__)
@@ -15,9 +15,7 @@ logger = logging.getLogger(__name__)
 
 class DriverServer:
     def __init__(self, *, interface, sandbox_dir):
-        protocol, interface_name = interface.split(":")
-        self.protocol_definition = ProtocolModule(protocol).load_definition()
-        self.interface_definition = self.protocol_definition.body.scope.interfaces[interface_name]
+        self.interface_definition = load_interface_definition(interface)
 
         self.main = self.interface_definition.body.scope.main["main"]
 

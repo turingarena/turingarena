@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 from turingarena.protocol.driver.client import DriverClient, DriverClientEngine
 from turingarena.protocol.exceptions import CommunicationBroken
-from turingarena.protocol.module import ProtocolModule
+from turingarena.protocol.module import load_interface_signature
 from turingarena.sandbox.client import SandboxClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
@@ -14,10 +14,7 @@ class ProxiedAlgorithm:
 
     @contextmanager
     def run(self, **global_variables):
-        protocol, interface_name = self.interface.split(":")
-        protocol_module = ProtocolModule(name=protocol)
-
-        interface_signature = protocol_module.load_interface_signature(interface_name)
+        interface_signature = load_interface_signature(self.interface)
 
         sandbox = SandboxClient(algorithm_dir=self.algorithm_dir)
         with sandbox.run() as process:

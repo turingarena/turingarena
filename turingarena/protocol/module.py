@@ -50,32 +50,18 @@ class ProtocolSource(ImmutableObject):
         generate_skeleton(definition, dest_dir=os.path.join(module_dir, "_skeletons"))
 
 
-class ProtocolModule:
-    __slots__ = ["name", "source"]
+def load_interface_definition(interface):
+    protocol, interface_name = interface.split(":")
+    module = module_to_python_package(PROTOCOL_QUALIFIER, protocol)
+    path = pkg_resources.resource_filename(module, "_definition.pickle")
+    with open(path, "rb") as f:
+        protocol_definition = pickle.load(f)
+    return protocol_definition.body.scope.interfaces[interface_name]
 
-    def __init__(self, name):
-        self.name = name
 
-        module = self.module_name()
-        source_text = pkg_resources.resource_string(module, "_source.tap").decode()
-        source_original_filename = pkg_resources.resource_string(module, ORIGINAL_SOURCE_FILENAME).decode()
-
-        self.source = ProtocolSource(
-            text=source_text,
-            filename=source_original_filename,
-        )
-
-    def module_name(self):
-        return module_to_python_package(PROTOCOL_QUALIFIER, self.name)
-
-    def load_definition(self):
-        module = self.module_name()
-        path = pkg_resources.resource_filename(module, "_definition.pickle")
-        with open(path, "rb") as f:
-            return pickle.load(f)
-
-    def load_interface_signature(self, interface_name):
-        proxy_module = importlib.import_module(
-            module_to_python_package(PROTOCOL_QUALIFIER, self.name) + "._proxy",
-        )
-        return getattr(proxy_module, interface_name)
+def load_interface_signature(interface):
+    protocol, interface_name = interface.split(":")
+    proxy_module = importlib.import_module(
+        module_to_python_package(PROTOCOL_QUALIFIER, protocol) + "._proxy",
+    )
+    return getattr(proxy_module, interface_name)
