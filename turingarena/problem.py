@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena.cli import docopt_cli
 from turingarena.common import ImmutableObject
-from turingarena.protocol.proxy.library import ProxiedAlgorithm
+from turingarena.protocol.proxy import ProxiedAlgorithm
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 
 

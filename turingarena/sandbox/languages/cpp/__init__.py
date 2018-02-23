@@ -5,8 +5,7 @@ from contextlib import contextmanager
 
 import pkg_resources
 
-from turingarena.modules import module_to_python_package
-from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.protocol.module import locate_protocol_dir
 from turingarena.sandbox.exceptions import CompilationFailed, AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
@@ -19,9 +18,10 @@ class CppAlgorithmSource(AlgorithmSource):
 
     def do_compile(self, algorithm_dir):
         protocol, interface_name = self.interface.split(":")
+        protocol_dir = locate_protocol_dir(protocol)
 
-        skeleton_path = pkg_resources.resource_filename(
-            module_to_python_package(PROTOCOL_QUALIFIER, protocol),
+        skeleton_path = os.path.join(
+            protocol_dir,
             f"_skeletons/{interface_name}/cpp/skeleton.cpp",
         )
 

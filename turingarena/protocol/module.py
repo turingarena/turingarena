@@ -1,10 +1,10 @@
-import importlib
+import logging
 import os
 import pickle
 
-import pkg_resources
+from turingarena.modules import parse_module_name
 
-from turingarena.modules import module_to_python_package, prepare_module_dir
+logger = logging.getLogger(__name__)
 
 PROTOCOL_QUALIFIER = "protocol"
 
@@ -20,7 +20,12 @@ class ProtocolSource:
         self.definition = ProtocolDefinition.compile(ast=ast)
 
     def generate(self, *, name, dest_dir):
-        module_dir = prepare_module_dir(dest_dir, PROTOCOL_QUALIFIER, name)
+        parts = parse_module_name(name)
+        module_dir = os.path.join(
+            dest_dir,
+            *parts[:],
+        )
+        os.makedirs(module_dir, exist_ok=True)
 
         dest_source_filename = os.path.join(module_dir, "_source.tap")
         with open(dest_source_filename, "w") as f:
@@ -29,25 +34,31 @@ class ProtocolSource:
         with open(os.path.join(module_dir, "_definition.pickle"), "wb") as f:
             pickle.dump(self.definition, f)
 
-        from turingarena.protocol.proxy.python import generate_proxy
         from turingarena.protocol.skeleton import generate_skeleton
-
-        generate_proxy(module_dir, self.definition)
         generate_skeleton(self.definition, dest_dir=os.path.join(module_dir, "_skeletons"))
+
+
+def locate_protocol_dir(protocol):
+    parts = parse_module_name(protocol)
+    for lookup_dir in os.environ.get("TURINGARENA_INTERFACE_PATH", "").split(":") + ["."]:
+        logger.debug(f"looking for {protocol} in {lookup_dir}")
+        path = os.path.join(
+            lookup_dir,
+            *parts[:]
+        )
+        if os.path.isdir(path):
+            return path
+    raise ValueError(f"unable to load protocol {protocol}")
 
 
 def load_interface_definition(interface):
     protocol, interface_name = interface.split(":")
-    module = module_to_python_package(PROTOCOL_QUALIFIER, protocol)
-    path = pkg_resources.resource_filename(module, "_definition.pickle")
-    with open(path, "rb") as f:
+    protocol_dir = locate_protocol_dir(protocol)
+
+    with open(os.path.join(protocol_dir, "_definition.pickle"), "rb") as f:
         protocol_definition = pickle.load(f)
     return protocol_definition.body.scope.interfaces[interface_name]
 
 
 def load_interface_signature(interface):
-    protocol, interface_name = interface.split(":")
-    proxy_module = importlib.import_module(
-        module_to_python_package(PROTOCOL_QUALIFIER, protocol) + "._proxy",
-    )
-    return getattr(proxy_module, interface_name)
+    return load_interface_definition(interface).signature

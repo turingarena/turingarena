@@ -4,10 +4,7 @@ import shutil
 import subprocess
 from contextlib import contextmanager
 
-import pkg_resources
-
-from turingarena.modules import module_to_python_package
-from turingarena.protocol.module import PROTOCOL_QUALIFIER
+from turingarena.protocol.module import locate_protocol_dir
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -19,8 +16,10 @@ class PythonAlgorithmSource(AlgorithmSource):
 
     def do_compile(self, algorithm_dir):
         protocol, interface_name = self.interface.split(":")
-        skeleton_path = pkg_resources.resource_filename(
-            module_to_python_package(PROTOCOL_QUALIFIER, protocol),
+        protocol_dir = locate_protocol_dir(protocol)
+
+        skeleton_path = os.path.join(
+            protocol_dir,
             f"_skeletons/{interface_name}/python/skeleton.py",
         )
 

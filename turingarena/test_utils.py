@@ -1,13 +1,12 @@
 import os
 import random
 import string
-import sys
 from collections import deque
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.protocol.module import ProtocolSource
-from turingarena.protocol.proxy.library import ProxiedAlgorithm
+from turingarena.protocol.proxy import ProxiedAlgorithm
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
@@ -22,14 +21,13 @@ def define_protocol(text):
             dest_dir=temp_dir,
         )
 
-        sys.path.append(temp_dir)
-        old_path = os.environ["PYTHONPATH"]
+        old_path = os.environ.get("TURINGARENA_INTERFACE_PATH")
         try:
-            os.environ["PYTHONPATH"] = temp_dir
+            os.environ["TURINGARENA_INTERFACE_PATH"] = temp_dir
             yield protocol
         finally:
-            sys.path.remove(temp_dir)
-            os.environ["PYTHONPATH"] = old_path
+            if old_path is not None:
+                os.environ["TURINGARENA_INTERFACE_PATH"] = old_path
 
 
 @contextmanager
