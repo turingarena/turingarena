@@ -46,7 +46,6 @@ class Process:
         self.sandbox_dir = sandbox_dir
         self.downward_pipe_name = os.path.join(self.sandbox_dir, "downward.pipe")
         self.upward_pipe_name = os.path.join(self.sandbox_dir, "upward.pipe")
-        self.error_pipe_name = os.path.join(self.sandbox_dir, "error.pipe")
         self.wait_pipe_name = os.path.join(self.sandbox_dir, "wait.pipe")
 
     @contextmanager
@@ -58,12 +57,9 @@ class Process:
                 downward_pipe = stack.enter_context(open(self.downward_pipe_name, "w"))
                 logger.debug("opening upward pipe...")
                 upward_pipe = stack.enter_context(open(self.upward_pipe_name))
-                logger.debug("opening error pipe...")
-                error_pipe = stack.enter_context(open(self.error_pipe_name))
                 connection = ProcessConnection(
                     downward_pipe=downward_pipe,
                     upward_pipe=upward_pipe,
-                    error_pipe=error_pipe,
                 )
                 logger.debug("connected to process")
                 yield connection
@@ -77,4 +73,4 @@ class Process:
 
 
 class ProcessConnection(ImmutableObject):
-    __slots__ = ["downward_pipe", "upward_pipe", "error_pipe"]
+    __slots__ = ["downward_pipe", "upward_pipe"]

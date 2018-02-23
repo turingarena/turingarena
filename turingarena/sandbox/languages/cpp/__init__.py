@@ -65,11 +65,6 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
     def run(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "algorithm")
 
-        if not os.path.isfile(executable_filename):
-            logger.warning(f"executing an algorithm that did not compile")
-            executable_filename = "true"
-            connection.error_pipe.write("compilation failed")
-
         logger.debug("starting process")
 
         with subprocess.Popen(

@@ -25,7 +25,6 @@ class SandboxProcess:
 
         self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
         self.upward_pipe_name = os.path.join(sandbox_dir, "upward.pipe")
-        self.error_pipe_name = os.path.join(sandbox_dir, "error.pipe")
         self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
 
         self.create_pipes()
@@ -48,7 +47,7 @@ class SandboxProcess:
                     wait_thread.start()
             except AlgorithmRuntimeError as e:
                 logger.exception(e)
-                connection.error_pipe.write(str(e))
+                # FIXME: connection.error_pipe.write(str(e))
         if wait_thread:
             wait_thread.join()
 
@@ -62,7 +61,6 @@ class SandboxProcess:
         logger.debug("creating pipes...")
         os.mkfifo(self.downward_pipe_name)
         os.mkfifo(self.upward_pipe_name)
-        os.mkfifo(self.error_pipe_name)
         os.mkfifo(self.wait_pipe_name)
         logger.debug("pipes created")
 
@@ -73,14 +71,11 @@ class SandboxProcess:
             downward_pipe = stack.enter_context(open(self.downward_pipe_name, "r"))
             logger.debug("opening upward pipe...")
             upward_pipe = stack.enter_context(open(self.upward_pipe_name, "w"))
-            logger.debug("opening error pipe...")
-            error_pipe = stack.enter_context(open(self.error_pipe_name, "w"))
             logger.debug("pipes opened")
 
             yield ProcessConnection(
                 downward_pipe=downward_pipe,
                 upward_pipe=upward_pipe,
-                error_pipe=error_pipe,
             )
 
 
