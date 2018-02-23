@@ -6,21 +6,20 @@ from contextlib import contextmanager, ExitStack
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DriverConnection
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
+from turingarena.protocol.module import load_interface_signature
 
 logger = logging.getLogger(__name__)
 
 
 class DriverClient:
-    def __init__(self, *, interface, process):
-        self.interface = interface
-        self.process = process
-
     @contextmanager
-    def connect(self):
+    def run(self, *, interface, process):
+        interface_signature = load_interface_signature(interface)
+
         cli = [
             "turingarena-driver",
-            self.interface,
-            self.process.sandbox_dir,
+            interface,
+            process.sandbox_dir,
         ]
         with ExitStack() as stack:
             logger.debug(f"running {cli}...")
@@ -41,10 +40,15 @@ class DriverClient:
             response_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_response.pipe")))
             logger.debug("driver connected")
 
+            connection = DriverConnection(
+                request_pipe=request_pipe,
+                response_pipe=response_pipe,
+            )
+
             try:
-                yield DriverConnection(
-                    request_pipe=request_pipe,
-                    response_pipe=response_pipe,
+                yield DriverProcessClient(
+                    interface_signature=interface_signature,
+                    connection=connection,
                 )
             except Exception as e:
                 logger.exception(e)
@@ -53,7 +57,7 @@ class DriverClient:
             logger.debug("waiting for driver server process")
 
 
-class DriverClientEngine:
+class DriverProcessClient:
     def __init__(self, *, interface_signature, connection):
         self.interface_signature = interface_signature
         self.connection = connection

@@ -8,7 +8,7 @@ from turingarena.protocol.driver.connection import DriverConnection
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import load_interface_definition
-from turingarena.sandbox.client import Process
+from turingarena.sandbox.client import SandboxProcessClient
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +45,11 @@ class DriverServer:
             )
 
             logger.debug("connecting to process...")
-            self.process_connection = stack.enter_context(Process(sandbox_dir).connect())
+            self.sandbox_connection = stack.enter_context(SandboxProcessClient(sandbox_dir).connect())
             logger.debug("connected")
 
             self.engine = InterfaceEngine(
-                process_connection=self.process_connection,
+                sandbox_connection=self.sandbox_connection,
                 driver_connection=self.driver_connection,
                 interface=self.interface_definition
             )

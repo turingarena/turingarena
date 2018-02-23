@@ -159,7 +159,7 @@ class InputStatement(InputOutputStatement):
         logger.debug(f"printing {raw_values} to downward_pipe")
         # FIXME: should flush only once per communication block
         try:
-            print(*raw_values, file=context.engine.process_connection.downward_pipe, flush=True)
+            print(*raw_values, file=context.engine.sandbox_connection.downward_pipe, flush=True)
         except BrokenPipeError:
             raise CommunicationBroken
 
@@ -170,7 +170,7 @@ class OutputStatement(InputOutputStatement):
 
     def on_run(self, context):
         logger.debug(f"reading from upward_pipe...")
-        line = context.engine.process_connection.upward_pipe.readline()
+        line = context.engine.sandbox_connection.upward_pipe.readline()
         if not line:
             raise CommunicationBroken
         logger.debug(f"read line {line.strip()} from upward_pipe")
@@ -251,7 +251,7 @@ class CallStatement(ImperativeStatement):
             return
         while True:
             logger.debug("accepting callbacks...")
-            callback_name = context.engine.process_connection.upward_pipe.readline().strip()
+            callback_name = context.engine.sandbox_connection.upward_pipe.readline().strip()
             logger.debug(f"received line {callback_name}")
             if callback_name == "return":
                 logger.debug(f"no more callbacks, push None to callback queue")

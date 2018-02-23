@@ -1,15 +1,15 @@
 from collections import deque
 
-from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.driver.commands import ProxyRequest
 from turingarena.protocol.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
+from turingarena.protocol.exceptions import ProtocolError
 
 
 class InterfaceEngine:
-    def __init__(self, *, interface, driver_connection, process_connection):
+    def __init__(self, *, interface, driver_connection, sandbox_connection):
         self.interface = interface
         self.driver_connection = driver_connection
-        self.process_connection = process_connection
+        self.sandbox_connection = sandbox_connection
 
         self.root_frame = Frame(parent=None, scope=interface.body.scope)
         self.callback_queue = deque()

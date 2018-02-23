@@ -5,7 +5,7 @@ import tempfile
 from contextlib import ExitStack, contextmanager
 from threading import Thread
 
-from turingarena.sandbox.client import ProcessConnection
+from turingarena.sandbox.client import SandboxConnection
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -16,7 +16,7 @@ class SandboxException(Exception):
     pass
 
 
-class SandboxProcess:
+class SandboxProcessServer:
     def __init__(self, *, sandbox_dir, executable):
         self.executable = executable
         self.sandbox_dir = sandbox_dir
@@ -73,7 +73,7 @@ class SandboxProcess:
             upward_pipe = stack.enter_context(open(self.upward_pipe_name, "w"))
             logger.debug("pipes opened")
 
-            yield ProcessConnection(
+            yield SandboxConnection(
                 downward_pipe=downward_pipe,
                 upward_pipe=upward_pipe,
             )
@@ -84,4 +84,4 @@ def sandbox_run(algorithm_dir):
 
     executable = load_executable(algorithm_dir)
     with tempfile.TemporaryDirectory(prefix=prefix) as sandbox_dir:
-        SandboxProcess(executable=executable, sandbox_dir=sandbox_dir)
+        SandboxProcessServer(executable=executable, sandbox_dir=sandbox_dir)
