@@ -2,15 +2,7 @@ grammar_ebnf = r"""
     @@comments :: /\/\*(.|\n|\r)*\*\//
     @@eol_comments :: /\/\/.*$/
 
-    protocol = body:protocol_body $ ;
-    
-    protocol_body = statements:{ protocol_statement }* ;
-    
-    protocol_statement =
-        statement_type:'interface' ~ name:identifier '{'
-            body:interface_body
-        '}'
-    ;
+    interface = body:interface_body $ ;
     
     interface_body = statements:{ interface_statement }* ;
     

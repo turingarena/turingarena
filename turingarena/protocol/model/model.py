@@ -6,7 +6,6 @@ from turingarena.protocol.driver.commands import CallbackCall
 from turingarena.protocol.driver.frames import Phase
 from turingarena.protocol.driver.references import VariableReference
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
-from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType
 
@@ -17,19 +16,6 @@ class Main(ImmutableObject):
     __slots__ = ["body"]
 
 
-class ProtocolDefinition(AbstractSyntaxNode):
-    __slots__ = ["body"]
-
-    @staticmethod
-    def compile(*, ast, **kwargs):
-        logger.debug("compiling {}".format(ast))
-        scope = Scope()
-        return ProtocolDefinition(
-            body=Body.compile(ast.body, scope=scope),
-            **kwargs,
-        )
-
-
 class Variable(ImmutableObject):
     __slots__ = ["value_type", "name"]
 
@@ -38,11 +24,13 @@ class InterfaceSignature(TupleLikeObject):
     __slots__ = ["variables", "functions", "callbacks"]
 
 
-class Interface(ImmutableObject):
-    __slots__ = ["name", "signature", "body"]
+class InterfaceDefinition(ImmutableObject):
+    __slots__ = ["signature", "body"]
 
     @staticmethod
-    def compile(ast, scope):
+    def compile(ast):
+        scope = Scope()
+        logger.debug("compiling {}".format(ast))
         body = Body.compile(ast.body, scope=scope)
         signature = InterfaceSignature(
             variables=OrderedDict(body.scope.variables.items()),
@@ -55,8 +43,7 @@ class Interface(ImmutableObject):
                 for c in body.scope.callbacks.values()
             },
         )
-        return Interface(
-            name=ast.name,
+        return InterfaceDefinition(
             signature=signature,
             body=body,
         )

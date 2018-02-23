@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from contextlib import contextmanager
 
-from turingarena.protocol.module import locate_protocol_dir
+from turingarena.protocol.module import locate_interface_dir
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -15,12 +15,11 @@ class PythonAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
-        protocol, interface_name = self.interface.split(":")
-        protocol_dir = locate_protocol_dir(protocol)
+        interface_dir = locate_interface_dir(self.interface)
 
         skeleton_path = os.path.join(
-            protocol_dir,
-            f"_skeletons/{interface_name}/python/skeleton.py",
+            interface_dir,
+            f"_skeletons/python/skeleton.py",
         )
 
         source_filename = os.path.join(algorithm_dir, "source.py")

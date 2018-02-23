@@ -5,35 +5,33 @@ from collections import deque
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena.protocol.module import ProtocolSource
+from turingarena.protocol.module import InterfaceSource
 from turingarena.protocol.proxy import ProxiedAlgorithm
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
 
 @contextmanager
-def define_protocol(text):
-    protocol = "test_protocol_" + ''.join(random.choices(string.ascii_lowercase, k=8))
-    source = ProtocolSource(text)
+def define_interface(text):
+    interface = "test_interface_" + ''.join(random.choices(string.ascii_lowercase, k=8))
+    source = InterfaceSource(text)
     with TemporaryDirectory() as temp_dir:
         source.generate(
-            name=protocol,
+            name=interface,
             dest_dir=temp_dir,
         )
 
         old_path = os.environ.get("TURINGARENA_INTERFACE_PATH")
         try:
             os.environ["TURINGARENA_INTERFACE_PATH"] = temp_dir
-            yield protocol
+            yield interface
         finally:
             if old_path is not None:
                 os.environ["TURINGARENA_INTERFACE_PATH"] = old_path
 
 
 @contextmanager
-def define_algorithm(*, protocol, language, source_text, interface_name):
-    interface = f"{protocol}:{interface_name}"
-
+def define_algorithm(*, interface, language, source_text):
     languages = {
         "c++": CppAlgorithmSource,
         "python": PythonAlgorithmSource,
@@ -69,13 +67,12 @@ def callback_mock(calls, return_values=None):
     return mock
 
 
-def define_many(protocol_text, interface_name, sources):
-    with define_protocol(protocol_text) as protocol:
+def define_many(interface_text, sources):
+    with define_interface(interface_text) as interface:
         for language, source in sources.items():
             with define_algorithm(
                     source_text=source,
                     language=language,
-                    protocol=protocol,
-                    interface_name=interface_name,
+                    interface=interface,
             ) as impl:
                 yield impl

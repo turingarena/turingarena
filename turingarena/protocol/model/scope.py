@@ -42,7 +42,7 @@ class ScopeNamespace:
 
 
 class Scope:
-    __slots__ = ["interfaces", "variables", "functions", "callbacks", "main"]
+    __slots__ = ["variables", "functions", "callbacks", "main"]
 
     def __init__(self, parent=None):
         for ns in Scope.__slots__:

@@ -3,11 +3,11 @@ import os
 from turingarena.common import write_to_file, indent_all, indent
 
 
-def generate_skeleton(*, interface, dest_dir):
+def generate_skeleton(*, interface_definition, dest_dir):
     with open(os.path.join(dest_dir, "skeleton.py"), "w") as main_file:
-        write_to_file(generate_main_file(interface), main_file)
+        write_to_file(generate_main_file(interface_definition), main_file)
     with open(os.path.join(dest_dir, "source.py"), "w") as template_file:
-        write_to_file(generate_template_file(interface), template_file)
+        write_to_file(generate_template_file(interface_definition), template_file)
 
 
 def generate_main_file(interface):

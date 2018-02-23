@@ -8,7 +8,7 @@ from turingarena.protocol.driver.commands import FunctionReturn
 from turingarena.protocol.driver.frames import Phase, RootBlockContext
 from turingarena.protocol.exceptions import ProtocolExit, ProtocolError, CommunicationBroken
 from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.model import Main, Variable, Interface, Function, Callback
+from turingarena.protocol.model.model import Main, Variable, Function, Callback
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.type_expressions import ValueType, ScalarType, ArrayType
@@ -57,17 +57,6 @@ class VarStatement(Statement):
             value_type=value_type,
             variables=variables
         )
-
-
-@statement_class("interface")
-class InterfaceStatement(Statement):
-    __slots__ = ["interface"]
-
-    @staticmethod
-    def compile(ast, scope):
-        interface = Interface.compile(ast, scope)
-        scope.interfaces[interface.name] = interface
-        return InterfaceStatement(interface=interface)
 
 
 @statement_class("function")

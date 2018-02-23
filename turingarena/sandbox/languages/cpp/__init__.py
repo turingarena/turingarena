@@ -5,7 +5,7 @@ from contextlib import contextmanager
 
 import pkg_resources
 
-from turingarena.protocol.module import locate_protocol_dir
+from turingarena.protocol.module import locate_interface_dir
 from turingarena.sandbox.exceptions import CompilationFailed, AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
@@ -17,12 +17,11 @@ class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
-        protocol, interface_name = self.interface.split(":")
-        protocol_dir = locate_protocol_dir(protocol)
+        protocol_dir = locate_interface_dir(self.interface)
 
         skeleton_path = os.path.join(
             protocol_dir,
-            f"_skeletons/{interface_name}/cpp/skeleton.cpp",
+            f"_skeletons/cpp/skeleton.cpp",
         )
 
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.c")

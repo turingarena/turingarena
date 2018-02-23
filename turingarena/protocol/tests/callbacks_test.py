@@ -1,22 +1,19 @@
 import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.module import ProtocolSource
+from turingarena.protocol.module import InterfaceSource
 from turingarena.test_utils import callback_mock, define_many
 
 
 def test_callback_no_arguments_cpp():
     for algo in define_many(
-            protocol_text="""
-                interface callback_no_arguments {
-                    callback callback_no_arguments() {}
-                    function test();
-                    main {
-                        call test();
-                    }
+            interface_text="""
+                callback callback_no_arguments() {}
+                function test();
+                main {
+                    call test();
                 }
             """,
-            interface_name="callback_no_arguments",
             sources={
                 'c++': """
                     void callback_no_arguments();
@@ -47,18 +44,15 @@ def test_callback_no_arguments_cpp():
 
 def test_callback_with_arguments():
     for algo in define_many(
-            protocol_text="""
-                interface callback_with_arguments {
-                    callback callback_with_arguments(int a, int b) {
-                        output a, b;
-                    }
-                    function test();
-                    main {
-                        call test();
-                    }
+            interface_text="""
+                callback callback_with_arguments(int a, int b) {
+                    output a, b;
+                }
+                function test();
+                main {
+                    call test();
                 }
             """,
-            interface_name="callback_with_arguments",
             sources={
                 'c++': """
                     void callback_with_arguments(int a, int b);
@@ -88,22 +82,19 @@ def test_callback_with_arguments():
 
 def test_callback_return_value():
     for algo in define_many(
-            protocol_text="""
-                interface callback_return_value {
-                    callback callback_return_value(int a) -> int {
-                        output a;
-                        flush;
-                        var int b;
-                        input b;
-                        return b;
-                    }
-                    function test();
-                    main {
-                        call test();
-                    }
+            interface_text="""
+                callback callback_return_value(int a) -> int {
+                    output a;
+                    flush;
+                    var int b;
+                    input b;
+                    return b;
+                }
+                function test();
+                main {
+                    call test();
                 }
             """,
-            interface_name="callback_return_value",
             sources={
                 'c++': """
                     #include <cassert>
@@ -134,23 +125,19 @@ def test_callback_return_value():
 
 def test_callback_return_type_not_scalar():
     protocol_text = """
-        interface callback_return_type_not_scalar {
-            callback callback_return_type_not_scalar() -> int[] {}
-            main {}
-        }
+        callback callback_return_type_not_scalar() -> int[] {}
+        main {}
     """
     with pytest.raises(ProtocolError) as excinfo:
-        ProtocolSource(protocol_text)
+        InterfaceSource(protocol_text)
     assert 'return type must be a scalar' in excinfo.value.get_user_message()
 
 
 def test_callback_argument_not_scalar():
     protocol_text = """
-        interface callback_argument_not_scalar {
-            callback callback_argument_not_scalar(int ok, int[] wrong) {}
-            main {}
-        }
+        callback callback_argument_not_scalar(int ok, int[] wrong) {}
+        main {}
     """
     with pytest.raises(ProtocolError) as excinfo:
-        ProtocolSource(protocol_text)
+        InterfaceSource(protocol_text)
     assert 'callback arguments must be scalars' in excinfo.value.get_user_message()

@@ -3,17 +3,14 @@ from turingarena.test_utils import callback_mock, define_many
 
 def test_interface_no_callbacks():
     for algo in define_many(
-            protocol_text="""
-                interface interface_no_callbacks {
-                    function test() -> int;
-                    main {
-                        var int o;
-                        call test() -> o;
-                        output o;
-                    }
+            interface_text="""
+                function test() -> int;
+                main {
+                    var int o;
+                    call test() -> o;
+                    output o;
                 }
             """,
-            interface_name="interface_no_callbacks",
             sources={
                 'c++': """
                     int test() {
@@ -32,18 +29,15 @@ def test_interface_no_callbacks():
 
 def test_interface_one_callback():
     for algo in define_many(
-            protocol_text="""
-                interface interface_one_callback {
-                    callback cb() {}
-                    function test() -> int;
-                    main {
-                        var int o;
-                        call test() -> o;
-                        output o;
-                    }
+            interface_text="""
+                callback cb() {}
+                function test() -> int;
+                main {
+                    var int o;
+                    call test() -> o;
+                    output o;
                 }
             """,
-            interface_name="interface_one_callback",
             sources={
                 'c++': """
                     void cb();
@@ -76,19 +70,16 @@ def test_interface_one_callback():
 
 def test_interface_multiple_callbacks():
     for algo in define_many(
-            protocol_text="""
-                interface interface_multiple_callbacks {
-                    callback cb1() {}
-                    callback cb2() {}
-                    function test() -> int;
-                    main {
-                        var int o;
-                        call test() -> o;
-                        output o;
-                    }
+            interface_text="""
+                callback cb1() {}
+                callback cb2() {}
+                function test() -> int;
+                main {
+                    var int o;
+                    call test() -> o;
+                    output o;
                 }
             """,
-            interface_name="interface_multiple_callbacks",
             sources={
                 'c++': """
                     void cb1();

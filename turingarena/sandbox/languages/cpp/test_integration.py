@@ -6,13 +6,11 @@ from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.test_utils import define_many
 
 protocol_text = """
-    interface simple {
-        function test() -> int;
-        main {
-            var int o;
-            call test() -> o;
-            output o;
-        }
+    function test() -> int;
+    main {
+        var int o;
+        call test() -> o;
+        output o;
     }
 """
 
@@ -20,8 +18,7 @@ protocol_text = """
 @contextmanager
 def cpp_algorithm(source):
     return define_many(
-        protocol_text=protocol_text,
-        interface_name="simple",
+        interface_text=protocol_text,
         sources={"c++": source},
     )
 
