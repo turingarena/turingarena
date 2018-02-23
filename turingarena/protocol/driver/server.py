@@ -4,7 +4,7 @@ import sys
 import tempfile
 from contextlib import ExitStack
 
-from turingarena.protocol.connection import DriverConnection
+from turingarena.protocol.driver.connection import DriverConnection
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import load_interface_definition

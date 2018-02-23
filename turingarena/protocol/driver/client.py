@@ -3,8 +3,8 @@ import os
 import subprocess
 from contextlib import contextmanager, ExitStack
 
-from turingarena.protocol.connection import DriverConnection
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
+from turingarena.protocol.driver.connection import DriverConnection
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
