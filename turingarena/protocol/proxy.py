@@ -33,8 +33,8 @@ class ProxiedAlgorithm:
                     yield process, proxy
                     engine.end_main()
                 except CommunicationBroken:
-                    error = connection.error_pipe.read()
-                    raise AlgorithmRuntimeError(error)
+                    # FIXME: error = connection.error_pipe.read()
+                    raise AlgorithmRuntimeError
 
 
 class Proxy:

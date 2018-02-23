@@ -6,7 +6,6 @@ from contextlib import contextmanager, ExitStack
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DriverConnection
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +39,12 @@ class DriverClient:
             request_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_request.pipe"), "w"))
             logger.debug("opening response pipe...")
             response_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_response.pipe")))
-            logger.debug("opening error pipe...")
-            error_pipe = stack.enter_context(open(os.path.join(driver_dir, "error.pipe")))
             logger.debug("driver connected")
 
             try:
                 yield DriverConnection(
                     request_pipe=request_pipe,
                     response_pipe=response_pipe,
-                    error_pipe=error_pipe,
                 )
             except Exception as e:
                 logger.exception(e)
@@ -117,14 +113,10 @@ class DriverClientEngine:
         self.send(request)
 
     def accept_response(self):
-        try:
-            return ProxyResponse.accept(
-                map(str.strip, self.connection.response_pipe),
-                interface_signature=self.interface_signature,
-            )
-        except CommunicationBroken:
-            self.handle_exceptions()
-            raise
+        return ProxyResponse.accept(
+            map(str.strip, self.connection.response_pipe),
+            interface_signature=self.interface_signature,
+        )
 
     def send(self, request):
         try:
@@ -134,11 +126,6 @@ class DriverClientEngine:
             file.flush()
         except BrokenPipeError:
             raise CommunicationBroken
-
-    def handle_exceptions(self):
-        error = self.connection.error_pipe.read()
-        if error:
-            raise AlgorithmRuntimeError(error)
 
     def begin_main(self, **global_variables):
         request = MainBegin(
