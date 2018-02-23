@@ -2,12 +2,11 @@ import importlib
 import os
 import pickle
 import sys
-from tempfile import TemporaryDirectory
 
 import pkg_resources
 
-from turingarena.common import ImmutableObject, install_with_setuptools
-from turingarena.modules import module_to_python_package, prepare_module_dir, parse_module_name
+from turingarena.common import ImmutableObject
+from turingarena.modules import module_to_python_package, prepare_module_dir
 from turingarena.protocol.exceptions import ProtocolError
 
 PROTOCOL_QUALIFIER = "protocol"
@@ -27,25 +26,6 @@ class ProtocolSource(ImmutableObject):
 
         ast = parse_protocol(self.text, **kwargs)
         return ProtocolDefinition.compile(ast=ast)
-
-    def install(self, name):
-        with TemporaryDirectory() as dest_dir:
-            self.generate(dest_dir=dest_dir, name=name)
-            self._do_install(dest_dir, name)
-
-    def _do_install(self, dest_dir, name):
-        package_name = module_to_python_package(PROTOCOL_QUALIFIER, name)
-        levels = 5
-        install_with_setuptools(
-            dest_dir,
-            name=package_name,
-            packages=[package_name],
-            package_data={
-                # copy recursively up to levels
-                package_name: ["/".join(["*"] * i) for i in range(1, levels)]
-            },
-            zip_safe=False,
-        )
 
     def generate(self, *, dest_dir, name):
         module_dir = prepare_module_dir(dest_dir, PROTOCOL_QUALIFIER, name)
@@ -68,17 +48,6 @@ class ProtocolSource(ImmutableObject):
             pickle.dump(definition, f)
         generate_proxy(module_dir, definition)
         generate_skeleton(definition, dest_dir=os.path.join(module_dir, "_skeletons"))
-
-
-def install_protocol_from_source(source_dir, name):
-    parts = parse_module_name(name)
-    source_filename = os.path.join(source_dir, *parts[:-1], f"{parts[-1]}.tap")
-
-    with open(source_filename) as f:
-        source_text = f.read()
-
-    source = ProtocolSource(filename=source_filename, text=source_text)
-    source.install(name)
 
 
 class ProtocolModule:
