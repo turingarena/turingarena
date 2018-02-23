@@ -1,12 +1,23 @@
 import logging
 import os
 import pickle
+import re
 
-from turingarena.modules import parse_module_name
+DEFINITION_PICKLE = "_definition.pickle"
 
 logger = logging.getLogger(__name__)
 
-PROTOCOL_QUALIFIER = "protocol"
+part_regex = re.compile("^[a-z][a-z_]*$")
+
+
+def parse_module_name(protocol_name):
+    parts = protocol_name.split(".")
+    assert len(parts) >= 1
+    assert all(
+        part_regex.fullmatch(part) is not None
+        for part in parts
+    )
+    return parts
 
 
 class InterfaceSource:
@@ -33,7 +44,7 @@ class InterfaceSource:
         with open(dest_source_filename, "w") as f:
             f.write(self.source_text)
 
-        with open(os.path.join(module_dir, "_definition.pickle"), "wb") as f:
+        with open(os.path.join(module_dir, DEFINITION_PICKLE), "wb") as f:
             pickle.dump(self.definition, f)
 
         from turingarena.protocol.skeleton import generate_skeleton
@@ -56,7 +67,7 @@ def locate_interface_dir(interface):
 def load_interface_definition(interface):
     interface_dir = locate_interface_dir(interface)
 
-    with open(os.path.join(interface_dir, "_definition.pickle"), "rb") as f:
+    with open(os.path.join(interface_dir, DEFINITION_PICKLE), "rb") as f:
         return pickle.load(f)
 
 
