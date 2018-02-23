@@ -4,7 +4,6 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.exceptions import CommunicationBroken
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +44,7 @@ class ProxyMessage(ImmutableObject):
     @classmethod
     def accept(cls, lines, *, interface_signature):
         logger.debug("accepting message...")
-        try:
-            message_type = next(lines)
-        except StopIteration:
-            raise CommunicationBroken
+        message_type = next(lines)
         logger.debug(f"received message type {message_type}, parsing arguments...")
         cls2 = cls.message_types[message_type]
         arguments = cls2.deserialize_arguments(

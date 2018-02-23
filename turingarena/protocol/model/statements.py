@@ -158,7 +158,10 @@ class InputStatement(InputOutputStatement):
         ]
         logger.debug(f"printing {raw_values} to downward_pipe")
         # FIXME: should flush only once per communication block
-        print(*raw_values, file=context.engine.process_connection.downward_pipe, flush=True)
+        try:
+            print(*raw_values, file=context.engine.process_connection.downward_pipe, flush=True)
+        except BrokenPipeError:
+            raise CommunicationBroken
 
 
 @statement_class("output")

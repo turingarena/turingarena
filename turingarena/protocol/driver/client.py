@@ -5,7 +5,7 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DriverConnection
-from turingarena.protocol.exceptions import ProtocolError, ProtocolExit, CommunicationBroken
+from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 
 logger = logging.getLogger(__name__)
 
@@ -119,13 +119,10 @@ class DriverClientEngine:
         )
 
     def send(self, request):
-        try:
-            file = self.connection.request_pipe
-            for line in request.serialize():
-                print(line, file=file)
-            file.flush()
-        except BrokenPipeError:
-            raise CommunicationBroken
+        file = self.connection.request_pipe
+        for line in request.serialize():
+            print(line, file=file)
+        file.flush()
 
     def begin_main(self, **global_variables):
         request = MainBegin(
@@ -142,5 +139,3 @@ class DriverClientEngine:
             interface_signature=self.interface_signature,
         )
         self.send(request)
-
-
