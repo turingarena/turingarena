@@ -101,11 +101,8 @@ def test_function_return_type_not_scalar():
             main {}
         }
     """
-    source = ProtocolSource(
-        text=protocol_text,
-        filename="<none>",
-    )
 
     with pytest.raises(ProtocolError) as excinfo:
-        source.compile()
+        ProtocolSource(protocol_text)
+
     assert 'return type must be a scalar' in excinfo.value.get_user_message()

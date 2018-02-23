@@ -1,53 +1,39 @@
 import importlib
 import os
 import pickle
-import sys
 
 import pkg_resources
 
-from turingarena.common import ImmutableObject
 from turingarena.modules import module_to_python_package, prepare_module_dir
-from turingarena.protocol.exceptions import ProtocolError
 
 PROTOCOL_QUALIFIER = "protocol"
-ORIGINAL_SOURCE_FILENAME = "_original_source_filename.txt"
 
 
-class ProtocolSource(ImmutableObject):
-    __slots__ = [
-        "filename",
-        "text",
-    ]
-
-    def compile(self, **kwargs):
-        # FIXME: make top-level
+class ProtocolSource:
+    def __init__(self, source_text, **kwargs):
         from turingarena.protocol.model.model import ProtocolDefinition
         from turingarena.protocol.parser import parse_protocol
 
-        ast = parse_protocol(self.text, **kwargs)
-        return ProtocolDefinition.compile(ast=ast)
+        ast = parse_protocol(source_text, **kwargs)
 
-    def generate(self, *, dest_dir, name):
+        self.source_text = source_text
+        self.definition = ProtocolDefinition.compile(ast=ast)
+
+    def generate(self, *, name, dest_dir):
         module_dir = prepare_module_dir(dest_dir, PROTOCOL_QUALIFIER, name)
-        try:
-            definition = self.compile(filename=self.filename)
-        except ProtocolError as e:
-            sys.exit(e.get_user_message())
+
         dest_source_filename = os.path.join(module_dir, "_source.tap")
         with open(dest_source_filename, "w") as f:
-            f.write(self.text)
-        dest_original_filename_filename = os.path.join(module_dir, ORIGINAL_SOURCE_FILENAME)
-        with open(dest_original_filename_filename, "w") as f:
-            f.write(self.filename)
+            f.write(self.source_text)
 
-        # FIXME: make top-level
+        with open(os.path.join(module_dir, "_definition.pickle"), "wb") as f:
+            pickle.dump(self.definition, f)
+
         from turingarena.protocol.proxy.python import generate_proxy
         from turingarena.protocol.skeleton import generate_skeleton
 
-        with open(os.path.join(module_dir, "_definition.pickle"), "wb") as f:
-            pickle.dump(definition, f)
-        generate_proxy(module_dir, definition)
-        generate_skeleton(definition, dest_dir=os.path.join(module_dir, "_skeletons"))
+        generate_proxy(module_dir, self.definition)
+        generate_skeleton(self.definition, dest_dir=os.path.join(module_dir, "_skeletons"))
 
 
 def load_interface_definition(interface):

@@ -139,13 +139,8 @@ def test_callback_return_type_not_scalar():
             main {}
         }
     """
-    source = ProtocolSource(
-        text=protocol_text,
-        filename="<none>",
-    )
-
     with pytest.raises(ProtocolError) as excinfo:
-        source.compile()
+        ProtocolSource(protocol_text)
     assert 'return type must be a scalar' in excinfo.value.get_user_message()
 
 
@@ -156,12 +151,6 @@ def test_callback_argument_not_scalar():
             main {}
         }
     """
-    source = ProtocolSource(
-        text=protocol_text,
-        filename="<none>",
-    )
-
     with pytest.raises(ProtocolError) as excinfo:
-        source.compile()
-
+        ProtocolSource(protocol_text)
     assert 'callback arguments must be scalars' in excinfo.value.get_user_message()

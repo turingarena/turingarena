@@ -15,13 +15,12 @@ from turingarena.sandbox.languages.python import PythonAlgorithmSource
 @contextmanager
 def define_protocol(text):
     protocol = "test_protocol_" + ''.join(random.choices(string.ascii_lowercase, k=8))
-    protocol_source = ProtocolSource(
-        text=text,
-        filename="<none>",
-    )
-
+    source = ProtocolSource(text)
     with TemporaryDirectory() as temp_dir:
-        protocol_source.generate(dest_dir=temp_dir, name=protocol)
+        source.generate(
+            name=protocol,
+            dest_dir=temp_dir,
+        )
 
         sys.path.append(temp_dir)
         old_path = os.environ["PYTHONPATH"]
