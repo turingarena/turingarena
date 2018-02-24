@@ -1,10 +1,10 @@
 import logging
-import os
 import subprocess
 from contextlib import contextmanager, ExitStack
 
+from turingarena.pipeboundary import PipeBoundary
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
-from turingarena.protocol.driver.connection import DriverProcessConnection
+from turingarena.protocol.driver.connection import DriverProcessBoundary
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import load_interface_signature
 
@@ -29,21 +29,11 @@ class DriverClient:
                 universal_newlines=True,
             )
             stack.enter_context(driver_process)
-            driver_dir = driver_process.stdout.readline().strip()
-            logger.debug(f"driver dir: {driver_dir}...")
+            driver_process_dir = driver_process.stdout.readline().strip()
+            logger.debug(f"driver dir: {driver_process_dir}...")
 
-            assert os.path.isdir(driver_dir)
-
-            logger.debug("opening request pipe...")
-            request_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_request.pipe"), "w"))
-            logger.debug("opening response pipe...")
-            response_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_response.pipe")))
-            logger.debug("driver connected")
-
-            connection = DriverProcessConnection(
-                request=request_pipe,
-                response=response_pipe,
-            )
+            boundary = DriverProcessBoundary(driver_process_dir)
+            connection = stack.enter_context(boundary.connect(side=PipeBoundary.CLIENT))
 
             try:
                 yield DriverProcessClient(
