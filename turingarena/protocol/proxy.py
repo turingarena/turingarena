@@ -2,10 +2,8 @@ import threading
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.protocol.driver.client import DriverClient
 from turingarena.sandbox.client import SandboxClient
-from turingarena.sandbox.connection import SandboxConnection, SANDBOX_CHANNEL
 from turingarena.sandbox.server import SandboxServer
 
 
@@ -17,26 +15,19 @@ class ProxiedAlgorithm:
     @contextmanager
     def run(self, **global_variables):
         with TemporaryDirectory("sandbox_server_") as server_dir:
-            boundary = PipeBoundary(server_dir)
-            boundary.create_channel(SANDBOX_CHANNEL)
+            server = SandboxServer(server_dir)
+            client = SandboxClient(server_dir)
 
-            def server_target():
-                with boundary.open_channel(SANDBOX_CHANNEL, PipeBoundarySide.SERVER) as pipes:
-                    server = SandboxServer(SandboxConnection(**pipes))
-                    server.run()
-
-            server_thread = threading.Thread(target=server_target)
+            server_thread = threading.Thread(target=server.run)
             server_thread.start()
 
-            with boundary.open_channel(SANDBOX_CHANNEL, PipeBoundarySide.CLIENT) as pipes:
-                client = SandboxClient(SandboxConnection(**pipes))
-
-                with client.run(self.algorithm_dir) as process:
-                    with DriverClient().run(interface=self.interface, process=process) as engine:
-                        engine.begin_main(**global_variables)
-                        proxy = Proxy(engine=engine)
-                        yield process, proxy
-                        engine.end_main()
+            with client.run(self.algorithm_dir) as process:
+                with DriverClient().run(interface=self.interface, process=process) as engine:
+                    engine.begin_main(**global_variables)
+                    proxy = Proxy(engine=engine)
+                    yield process, proxy
+                    engine.end_main()
+            server.stop()
             server_thread.join()
 
 

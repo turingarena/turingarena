@@ -1,7 +1,7 @@
 import logging
 
 from turingarena.common import ImmutableObject
-from turingarena.pipeboundary import PipeChannelDescriptor, PipeDescriptor
+from turingarena.pipeboundary import PipeChannelDescriptor, PipeDescriptor, PipeSynchronousQueueDescriptor
 
 logger = logging.getLogger(__name__)
 
@@ -10,10 +10,12 @@ class SandboxConnection(ImmutableObject):
     __slots__ = ["request", "response"]
 
 
-SANDBOX_CHANNEL = PipeChannelDescriptor(
-    pipes=dict(
-        request=PipeDescriptor("request.pipe", ("w", "r")),
-        response=PipeDescriptor("response.pipe", ("r", "w")),
+SANDBOX_QUEUE = PipeSynchronousQueueDescriptor(
+    request_pipes=dict(
+        algorithm_dir=PipeDescriptor("algorithm_dir.pipe", ("w", "r")),
+    ),
+    response_pipes=dict(
+        sandbox_process_dir=PipeDescriptor("sandbox_process_dir.pipe", ("r", "w")),
     ),
 )
 

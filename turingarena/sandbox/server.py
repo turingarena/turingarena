@@ -1,11 +1,10 @@
 import logging
 import tempfile
-import threading
 from threading import Thread
 
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
-    SANDBOX_WAIT_BARRIER
+    SANDBOX_WAIT_BARRIER, SANDBOX_QUEUE
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -17,27 +16,47 @@ class SandboxException(Exception):
 
 
 class SandboxServer:
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, directory):
+        self.boundary = PipeBoundary(directory)
+        self.boundary.create_queue(SANDBOX_QUEUE)
 
-    def serve_one(self, executable, response_sent):
-        with tempfile.TemporaryDirectory(
-                prefix="turingarena_sandbox_process_",
-        ) as sandbox_dir:
-            process_server = SandboxProcessServer(executable=executable, sandbox_dir=sandbox_dir)
-            print(sandbox_dir, file=self.connection.response, flush=True)
-            response_sent.set()
-            process_server.run()
+    def handle_request(self, algorithm_dir):
+        if not algorithm_dir:
+            raise Exception("stopping sandbox server")
+
+        logger.debug(f"handling sandbox request for {algorithm_dir}")
+        executable = load_executable(algorithm_dir)
+
+        sandbox_process_dir = None
+
+        def run():
+            nonlocal sandbox_process_dir
+            with tempfile.TemporaryDirectory(
+                    prefix="turingarena_sandbox_process_",
+            ) as sandbox_process_dir:
+                logger.debug(f"created sandbox process directory {sandbox_process_dir}")
+                # executed in main thread
+                process_server = SandboxProcessServer(executable=executable, sandbox_dir=sandbox_process_dir)
+                yield
+                # executed in child thread
+                logger.debug(f"running sandbox process server")
+                process_server.run()
+
+        handler = run()
+        next(handler)
+        assert sandbox_process_dir is not None
+        Thread(target=lambda: [x for x in handler]).start()
+        return dict(
+            sandbox_process_dir=sandbox_process_dir,
+        )
 
     def run(self):
-        response_sent = threading.Event()
         while True:
-            line = self.connection.request.readline()
-            if not line: break
-            algorithm_dir, = line.splitlines()
-            executable = load_executable(algorithm_dir)
-            threading.Thread(target=lambda: self.serve_one(executable, response_sent)).start()
-            response_sent.wait()
+            logger.debug("waiting for sandbox requests...")
+            self.boundary.handle_request(SANDBOX_QUEUE, self.handle_request)
+
+    def stop(self):
+        self.boundary.send_request(SANDBOX_QUEUE, algorithm_dir="")
 
 
 class SandboxProcessServer:

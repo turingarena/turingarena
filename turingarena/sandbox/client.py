@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, \
-    SANDBOX_PROCESS_CHANNEL, SANDBOX_WAIT_BARRIER
+    SANDBOX_PROCESS_CHANNEL, SANDBOX_WAIT_BARRIER, SANDBOX_QUEUE
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +13,17 @@ class SandboxException(Exception):
 
 
 class SandboxClient:
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, sandbox_dir):
+        self.boundary = PipeBoundary(sandbox_dir)
 
     @contextmanager
     def run(self, algorithm_dir):
-        print(algorithm_dir, file=self.connection.request, flush=True)
-        process_dir, = self.connection.response.readline().splitlines()
+        response = self.boundary.send_request(
+            SANDBOX_QUEUE,
+            algorithm_dir=algorithm_dir,
+        )
+
+        process_dir = response["sandbox_process_dir"]
 
         logger.info(f"connected to sandbox at {process_dir}")
 
@@ -28,8 +32,6 @@ class SandboxClient:
         except Exception as e:
             logger.exception(e)
             raise
-
-        logger.debug("waiting sandbox server process")
 
 
 class SandboxProcessClient:
