@@ -1,8 +1,7 @@
 import logging
-import tempfile
 from contextlib import ExitStack
-from threading import Thread
 
+from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.protocol.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL, DRIVER_QUEUE
 from turingarena.protocol.driver.engine import InterfaceEngine
@@ -13,59 +12,22 @@ from turingarena.sandbox.client import SandboxProcessClient
 logger = logging.getLogger(__name__)
 
 
-class StopServer(Exception):
-    pass
+class DriverServer(MetaServer):
+    def get_queue_descriptor(self):
+        return DRIVER_QUEUE
 
-
-class DriverServer:
-    def __init__(self, directory):
-        self.boundary = PipeBoundary(directory)
-        self.boundary.create_queue(DRIVER_QUEUE)
-
-    # FIXME: lot of code is shared with SandboxServer
-    def handle_request(self, sandbox_process_dir, interface):
-        if not sandbox_process_dir:
-            raise StopServer
-
-        logger.debug(f"handling sandbox request for {sandbox_process_dir}, {interface}")
-
-        driver_process_dir = None
-
-        def run():
-            nonlocal driver_process_dir
-            with tempfile.TemporaryDirectory(
-                    prefix="turingarena_driver_process_",
-            ) as driver_process_dir:
-                logger.debug(f"created driver process directory {driver_process_dir}")
-                # executed in main thread
-                process_server = DriverProcessServer(
-                    sandbox_process_dir=sandbox_process_dir,
-                    interface=interface,
-                    driver_process_dir=driver_process_dir
-                )
-                yield
-                # executed in child thread
-                logger.debug(f"running driver process server")
-                process_server.run()
-
-        handler = run()
-        next(handler)
-        assert driver_process_dir is not None
-        Thread(target=lambda: [x for x in handler]).start()
-        return dict(
-            driver_process_dir=driver_process_dir,
+    def create_child_server(self, child_server_dir, *, sandbox_process_dir, interface):
+        return DriverProcessServer(
+            sandbox_process_dir=sandbox_process_dir,
+            interface=interface,
+            driver_process_dir=child_server_dir,
         )
 
-    def run(self):
-        while True:
-            logger.debug("waiting for driver requests...")
-            try:
-                self.boundary.handle_request(DRIVER_QUEUE, self.handle_request)
-            except StopServer:
-                break
+    def run_child_server(self, child_server):
+        child_server.run()
 
-    def stop(self):
-        self.boundary.send_empty_request(DRIVER_QUEUE)
+    def create_response(self, child_server_dir):
+        return dict(driver_process_dir=child_server_dir)
 
 
 class DriverProcessServer:
