@@ -2,14 +2,16 @@ import logging
 import os
 import sys
 import tempfile
-from contextlib import ExitStack, contextmanager
 from threading import Thread
 
-from turingarena.sandbox.client import SandboxConnection
+from turingarena.cli.loggerinit import init_logger
+from turingarena.sandbox.connection import SandboxBoundary
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
 logger = logging.getLogger(__name__)
+
+init_logger()
 
 
 class SandboxException(Exception):
@@ -19,15 +21,15 @@ class SandboxException(Exception):
 class SandboxProcessServer:
     def __init__(self, *, sandbox_dir, executable):
         self.executable = executable
-        self.sandbox_dir = sandbox_dir
+        self.sandbox_dir = sandbox_dir  # FIXME: drop this field in favor of 'boundary'
 
         logger.debug("sandbox folder: %s", sandbox_dir)
 
-        self.downward_pipe_name = os.path.join(sandbox_dir, "downward.pipe")
-        self.upward_pipe_name = os.path.join(sandbox_dir, "upward.pipe")
-        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
+        self.boundary = SandboxBoundary(directory=sandbox_dir)
+        self.boundary.init()
 
-        self.create_pipes()
+        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
+        os.mkfifo(self.wait_pipe_name)
 
         print(self.sandbox_dir)
         sys.stdout.close()
@@ -36,7 +38,7 @@ class SandboxProcessServer:
 
     def run(self):
         wait_thread = None
-        with self.open_connection() as connection:
+        with self.boundary.connect(side=SandboxBoundary.SERVER) as connection:
             try:
                 with self.executable.run(connection) as p:
                     def wait():
@@ -56,27 +58,6 @@ class SandboxProcessServer:
         with open(self.wait_pipe_name, "w"):
             pass
         logger.debug("wait pipe opened, terminating...")
-
-    def create_pipes(self):
-        logger.debug("creating pipes...")
-        os.mkfifo(self.downward_pipe_name)
-        os.mkfifo(self.upward_pipe_name)
-        os.mkfifo(self.wait_pipe_name)
-        logger.debug("pipes created")
-
-    @contextmanager
-    def open_connection(self):
-        with ExitStack() as stack:
-            logger.debug("opening downward pipe...")
-            downward_pipe = stack.enter_context(open(self.downward_pipe_name, "r"))
-            logger.debug("opening upward pipe...")
-            upward_pipe = stack.enter_context(open(self.upward_pipe_name, "w"))
-            logger.debug("pipes opened")
-
-            yield SandboxConnection(
-                downward_pipe=downward_pipe,
-                upward_pipe=upward_pipe,
-            )
 
 
 def sandbox_run(algorithm_dir):

@@ -70,8 +70,8 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
         with subprocess.Popen(
                 [executable_filename],
                 universal_newlines=True,
-                stdin=connection.downward_pipe,
-                stdout=connection.upward_pipe,
+                stdin=connection.downward,
+                stdout=connection.upward,
                 bufsize=1,
         ) as p:
             yield p

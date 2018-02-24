@@ -4,7 +4,7 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.common import ImmutableObject
+from turingarena.sandbox.connection import SandboxConnection
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +18,10 @@ class SandboxException(Exception):
 class SandboxClient:
     @contextmanager
     def run(self, algorithm_dir):
-        logger.debug("starting sandbox process")
+        cli = ["turingarena-sandbox", algorithm_dir]
+        logger.debug(f"running {cli}")
         with subprocess.Popen(
-                ["turingarena-sandbox", algorithm_dir],
+                cli,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
         ) as server_process:
@@ -54,8 +55,8 @@ class SandboxProcessClient:
                 logger.debug("opening upward pipe...")
                 upward_pipe = stack.enter_context(open(self.upward_pipe_name))
                 connection = SandboxConnection(
-                    downward_pipe=downward_pipe,
-                    upward_pipe=upward_pipe,
+                    downward=downward_pipe,
+                    upward=upward_pipe,
                 )
                 logger.debug("connected to process")
                 yield connection
@@ -66,7 +67,3 @@ class SandboxProcessClient:
             logger.debug("opening wait pipe")
             with open(self.wait_pipe_name):
                 pass
-
-
-class SandboxConnection(ImmutableObject):
-    __slots__ = ["downward_pipe", "upward_pipe"]
