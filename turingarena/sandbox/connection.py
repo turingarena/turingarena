@@ -13,10 +13,11 @@ class SandboxConnection(ImmutableObject):
 class SandboxBoundary(PipeBoundary):
     __slots__ = []
 
-    pipe_info = {
-        "request": ("w", "r"),
-        "response": ("r", "w"),
-    }
+    def pipe_info(self):
+        return {
+            "request": ("w", "r"),
+            "response": ("r", "w"),
+        }
 
 
 class SandboxProcessConnection(ImmutableObject):
@@ -26,14 +27,17 @@ class SandboxProcessConnection(ImmutableObject):
 class SandboxProcessBoundary(PipeBoundary):
     __slots__ = []
 
-    pipe_info = {
-        "downward": ("w", "r"),
-        "upward": ("r", "w"),
-    }
+    def pipe_info(self):
+        return {
+            "downward": ("w", "r"),
+            "upward": ("r", "w"),
+        }
 
 
 class SandboxProcessWaitBarrier(PipeBoundary):
     __slots__ = []
-    pipe_info = {
-        "wait_barrier": ("w", "r"),
-    }
+
+    def pipe_info(self):
+        return {
+            "wait_barrier": ("w", "r"),
+        }

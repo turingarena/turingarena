@@ -9,7 +9,8 @@ class DriverProcessConnection(ImmutableObject):
 class DriverProcessBoundary(PipeBoundary):
     __slots__ = []
 
-    pipe_info = {
-        "request": ("w", "r"),
-        "response": ("r", "w"),
-    }
+    def pipe_info(self):
+        return {
+            "request": ("w", "r"),
+            "response": ("r", "w"),
+        }

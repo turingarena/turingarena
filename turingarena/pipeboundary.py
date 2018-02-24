@@ -1,5 +1,6 @@
 import logging
 import os
+from abc import abstractmethod
 from contextlib import ExitStack, contextmanager
 from enum import Enum
 
@@ -16,7 +17,9 @@ class PipeBoundarySide(Enum):
 class PipeBoundary(ImmutableObject):
     __slots__ = ["directory"]
 
-    pipe_info = NotImplemented
+    @abstractmethod
+    def pipe_info(self):
+        pass
 
     def __init__(self, directory):
         assert os.path.isdir(directory)
@@ -26,14 +29,14 @@ class PipeBoundary(ImmutableObject):
         return os.path.join(self.directory, f"{name}.pipe")
 
     def init(self):
-        for name in self.pipe_info:
+        for name in self.pipe_info():
             path = self.pipe_path(name)
             logger.debug(f"creating pipe {name} ({path})")
             os.mkfifo(path)
 
     def open_pipe(self, name, side):
         path = self.pipe_path(name)
-        flags = self.pipe_info[name][side.value]
+        flags = self.pipe_info()[name][side.value]
         logger.debug(f"opening pipe {name}, side {side} [open({repr(path)}, {repr(flags)})]")
         return open(path, flags)
 
@@ -43,5 +46,5 @@ class PipeBoundary(ImmutableObject):
         with ExitStack() as stack:
             yield {
                 name: stack.enter_context(self.open_pipe(name, side))
-                for name in self.pipe_info
+                for name in self.pipe_info()
             }
