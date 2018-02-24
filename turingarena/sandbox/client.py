@@ -4,7 +4,7 @@ import subprocess
 from contextlib import contextmanager
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.sandbox.connection import SandboxBoundary
+from turingarena.sandbox.connection import SandboxProcessBoundary
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +39,13 @@ class SandboxClient:
 
 class SandboxProcessClient:
     def __init__(self, sandbox_dir):
-        self.boundary = SandboxBoundary(directory=sandbox_dir)
+        self.boundary = SandboxProcessBoundary(directory=sandbox_dir)
         self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
 
     @contextmanager
     def connect(self):
         logger.debug("connecting to process...")
-        with self.boundary.connect(side=SandboxBoundary.CLIENT) as connection:
+        with self.boundary.connect(side=SandboxProcessBoundary.CLIENT) as connection:
             try:
                 yield connection
             except Exception as e:

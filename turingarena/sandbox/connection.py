@@ -6,15 +6,15 @@ from turingarena.pipeboundary import PipeBoundary
 logger = logging.getLogger(__name__)
 
 
-class SandboxConnection(ImmutableObject):
+class SandboxProcessConnection(ImmutableObject):
     __slots__ = ["downward", "upward"]
 
 
-class SandboxBoundary(PipeBoundary):
+class SandboxProcessBoundary(PipeBoundary):
     __slots__ = []
 
     pipe_info = {
         "downward": ("w", "r"),
         "upward": ("r", "w"),
     }
-    create_connection = SandboxConnection
+    create_connection = SandboxProcessConnection

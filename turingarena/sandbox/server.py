@@ -5,7 +5,7 @@ import tempfile
 from threading import Thread
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.sandbox.connection import SandboxBoundary
+from turingarena.sandbox.connection import SandboxProcessBoundary
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -25,7 +25,7 @@ class SandboxProcessServer:
 
         logger.debug("sandbox folder: %s", sandbox_dir)
 
-        self.boundary = SandboxBoundary(directory=sandbox_dir)
+        self.boundary = SandboxProcessBoundary(directory=sandbox_dir)
         self.boundary.init()
 
         self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
@@ -38,7 +38,7 @@ class SandboxProcessServer:
 
     def run(self):
         wait_thread = None
-        with self.boundary.connect(side=SandboxBoundary.SERVER) as connection:
+        with self.boundary.connect(side=SandboxProcessBoundary.SERVER) as connection:
             try:
                 with self.executable.run(connection) as p:
                     def wait():
