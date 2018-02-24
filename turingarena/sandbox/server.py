@@ -1,7 +1,7 @@
 import logging
-import tempfile
 from threading import Thread
 
+from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_WAIT_BARRIER, SANDBOX_QUEUE
@@ -15,54 +15,19 @@ class SandboxException(Exception):
     pass
 
 
-class StopServer(Exception):
-    pass
+class SandboxServer(MetaServer):
+    def get_queue_descriptor(self):
+        return SANDBOX_QUEUE
 
-class SandboxServer:
-    def __init__(self, directory):
-        self.boundary = PipeBoundary(directory)
-        self.boundary.create_queue(SANDBOX_QUEUE)
-
-    def handle_request(self, algorithm_dir):
-        if not algorithm_dir:
-            raise StopServer
-
-        logger.debug(f"handling sandbox request for {algorithm_dir}")
+    def create_child_server(self, child_server_dir, *, algorithm_dir):
         executable = load_executable(algorithm_dir)
+        return SandboxProcessServer(executable=executable, sandbox_dir=child_server_dir)
 
-        sandbox_process_dir = None
+    def run_child_server(self, child_server):
+        child_server.run()
 
-        def run():
-            nonlocal sandbox_process_dir
-            with tempfile.TemporaryDirectory(
-                    prefix="turingarena_sandbox_process_",
-            ) as sandbox_process_dir:
-                logger.debug(f"created sandbox process directory {sandbox_process_dir}")
-                # executed in main thread
-                process_server = SandboxProcessServer(executable=executable, sandbox_dir=sandbox_process_dir)
-                yield
-                # executed in child thread
-                logger.debug(f"running sandbox process server")
-                process_server.run()
-
-        handler = run()
-        next(handler)
-        assert sandbox_process_dir is not None
-        Thread(target=lambda: [x for x in handler]).start()
-        return dict(
-            sandbox_process_dir=sandbox_process_dir,
-        )
-
-    def run(self):
-        while True:
-            logger.debug("waiting for sandbox requests...")
-            try:
-                self.boundary.handle_request(SANDBOX_QUEUE, self.handle_request)
-            except StopServer:
-                break
-
-    def stop(self):
-        self.boundary.send_empty_request(SANDBOX_QUEUE)
+    def create_response(self, child_server_dir):
+        return dict(sandbox_process_dir=child_server_dir)
 
 
 class SandboxProcessServer:
