@@ -1,5 +1,4 @@
 import logging
-import subprocess
 from contextlib import contextmanager
 
 from turingarena.pipeboundary import PipeBoundarySide
@@ -7,30 +6,29 @@ from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProces
 
 logger = logging.getLogger(__name__)
 
+
 class SandboxException(Exception):
     pass
 
 
 class SandboxClient:
+    def __init__(self, connection):
+        self.connection = connection
+
     @contextmanager
     def run(self, algorithm_dir):
-        cli = ["turingarena-sandbox", algorithm_dir]
-        logger.debug(f"running {cli}")
-        with subprocess.Popen(
-                cli,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-        ) as server_process:
-            sandbox_dir = server_process.stdout.readline().strip()
-            logger.info("connected to sandbox at {}".format(sandbox_dir))
+        print(algorithm_dir, file=self.connection.request, flush=True)
+        process_dir, = self.connection.response.readline().splitlines()
 
-            try:
-                yield SandboxProcessClient(sandbox_dir)
-            except Exception as e:
-                logger.exception(e)
-                raise
+        logger.info(f"connected to sandbox at {process_dir}")
 
-            logger.debug("waiting sandbox server process")
+        try:
+            yield SandboxProcessClient(process_dir)
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+        logger.debug("waiting sandbox server process")
 
 
 class SandboxProcessClient:

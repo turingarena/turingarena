@@ -1,21 +1,29 @@
+import sys
+import tempfile
+
 from turingarena.cli import docopt_cli
 from turingarena.cli.loggerinit import init_logger
-from turingarena.sandbox.server import sandbox_run
+from turingarena.pipeboundary import PipeBoundarySide
+from turingarena.sandbox.connection import SandboxBoundary
+from turingarena.sandbox.server import SandboxServer
 
 
 @docopt_cli
 def main(args):
-    """TuringArena sandbox.
-
-    Runs the given algorithm in a sandbox.
+    """TuringArena sandbox server.
 
     Usage:
-      turingarena-sandbox <algorithm-dir>
-
-    Options:
-      <algorithm-dir>  Directory containing the algorithm to run
-
+      turingarena-sandbox
     """
 
     init_logger()
-    sandbox_run(algorithm_dir=args["<algorithm-dir>"])
+    with tempfile.TemporaryDirectory(
+            prefix="turingarena_sandbox_provider_",
+    ) as directory:
+        boundary = SandboxBoundary(directory)
+        boundary.init()
+        print(directory)
+        sys.stdout.close()
+        with boundary.connect(PipeBoundarySide.SERVER) as connection:
+            server = SandboxServer(connection)
+            server.run()
