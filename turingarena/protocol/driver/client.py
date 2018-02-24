@@ -4,7 +4,7 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
-from turingarena.protocol.driver.connection import DriverConnection
+from turingarena.protocol.driver.connection import DriverProcessConnection
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import load_interface_signature
 
@@ -40,9 +40,9 @@ class DriverClient:
             response_pipe = stack.enter_context(open(os.path.join(driver_dir, "driver_response.pipe")))
             logger.debug("driver connected")
 
-            connection = DriverConnection(
-                request_pipe=request_pipe,
-                response_pipe=response_pipe,
+            connection = DriverProcessConnection(
+                request=request_pipe,
+                response=response_pipe,
             )
 
             try:
@@ -118,12 +118,12 @@ class DriverProcessClient:
 
     def accept_response(self):
         return ProxyResponse.accept(
-            map(str.strip, self.connection.response_pipe),
+            map(str.strip, self.connection.response),
             interface_signature=self.interface_signature,
         )
 
     def send(self, request):
-        file = self.connection.request_pipe
+        file = self.connection.request
         for line in request.serialize():
             print(line, file=file)
         file.flush()

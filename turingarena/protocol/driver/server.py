@@ -4,7 +4,7 @@ import sys
 import tempfile
 from contextlib import ExitStack
 
-from turingarena.protocol.driver.connection import DriverConnection
+from turingarena.protocol.driver.connection import DriverProcessConnection
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import load_interface_definition
@@ -39,9 +39,9 @@ class DriverServer:
             response_pipe = stack.enter_context(open(response_pipe_name, "w"))
             logger.debug("pipes opened")
 
-            self.driver_connection = DriverConnection(
-                request_pipe=request_pipe,
-                response_pipe=response_pipe,
+            self.driver_connection = DriverProcessConnection(
+                request=request_pipe,
+                response=response_pipe,
             )
 
             logger.debug("connecting to process...")

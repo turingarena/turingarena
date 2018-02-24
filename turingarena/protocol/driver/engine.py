@@ -53,7 +53,7 @@ class InterfaceEngine:
         if self._current_request is not None:
             return
         self._current_request = ProxyRequest.accept(
-            map(str.strip, self.driver_connection.request_pipe),
+            map(str.strip, self.driver_connection.request),
             interface_signature=self.interface.signature,
         )
 
@@ -70,7 +70,7 @@ class InterfaceEngine:
             self._current_request = None
 
     def send_response(self, response):
-        file = self.driver_connection.response_pipe
+        file = self.driver_connection.response
         for line in response.serialize():
             print(line, file=file)
         file.flush()
