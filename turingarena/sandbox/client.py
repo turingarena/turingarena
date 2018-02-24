@@ -1,11 +1,10 @@
 import logging
-import os
 import subprocess
 from contextlib import contextmanager
 
 from turingarena.cli.loggerinit import init_logger
 from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.sandbox.connection import SandboxProcessBoundary
+from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +39,8 @@ class SandboxClient:
 
 class SandboxProcessClient:
     def __init__(self, sandbox_dir):
-        self.boundary = SandboxProcessBoundary(directory=sandbox_dir)
-        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
+        self.boundary = SandboxProcessBoundary(sandbox_dir)
+        self.wait_barrier = SandboxProcessWaitBarrier(sandbox_dir)
 
     @contextmanager
     def connect(self):
@@ -53,6 +52,6 @@ class SandboxProcessClient:
                 logger.exception(e)
                 raise
             finally:
-                logger.debug("opening wait pipe")
-                with open(self.wait_pipe_name):
+                logger.debug("reaching wait barrier")
+                with self.wait_barrier.connect(side=PipeBoundarySide.CLIENT):
                     pass

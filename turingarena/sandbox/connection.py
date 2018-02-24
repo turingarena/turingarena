@@ -18,3 +18,13 @@ class SandboxProcessBoundary(PipeBoundary):
         "upward": ("r", "w"),
     }
     create_connection = SandboxProcessConnection
+
+
+class SandboxProcessWaitBarrier(PipeBoundary):
+    __slots__ = []
+    pipe_info = {
+        "wait_barrier": ("w", "r"),
+    }
+
+    def create_connection(self):
+        return None

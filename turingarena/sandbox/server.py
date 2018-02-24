@@ -1,12 +1,11 @@
 import logging
-import os
 import sys
 import tempfile
 from threading import Thread
 
 from turingarena.cli.loggerinit import init_logger
 from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.sandbox.connection import SandboxProcessBoundary
+from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -22,17 +21,16 @@ class SandboxException(Exception):
 class SandboxProcessServer:
     def __init__(self, *, sandbox_dir, executable):
         self.executable = executable
-        self.sandbox_dir = sandbox_dir  # FIXME: drop this field in favor of 'boundary'
 
         logger.debug("sandbox folder: %s", sandbox_dir)
 
-        self.boundary = SandboxProcessBoundary(directory=sandbox_dir)
+        self.boundary = SandboxProcessBoundary(sandbox_dir)
         self.boundary.init()
 
-        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
-        os.mkfifo(self.wait_pipe_name)
+        self.wait_barrier = SandboxProcessWaitBarrier(sandbox_dir)
+        self.wait_barrier.init()
 
-        print(self.sandbox_dir)
+        print(sandbox_dir)
         sys.stdout.close()
 
         self.run()
@@ -41,12 +39,8 @@ class SandboxProcessServer:
         wait_thread = None
         with self.boundary.connect(side=PipeBoundarySide.SERVER) as connection:
             try:
-                with self.executable.run(connection) as p:
-                    def wait():
-                        self.wait_for_wait_pipe()
-                        p.kill()
-
-                    wait_thread = Thread(target=wait)
+                with self.executable.run(connection):
+                    wait_thread = Thread(target=self.wait_for_wait_pipe)
                     wait_thread.start()
             except AlgorithmRuntimeError as e:
                 logger.exception(e)
@@ -55,10 +49,9 @@ class SandboxProcessServer:
             wait_thread.join()
 
     def wait_for_wait_pipe(self):
-        logger.debug("opening wait pipe...")
-        with open(self.wait_pipe_name, "w"):
+        with self.wait_barrier.connect(side=PipeBoundarySide.SERVER):
             pass
-        logger.debug("wait pipe opened, terminating...")
+        logger.debug("wait barrier reached, terminating...")
 
 
 def sandbox_run(algorithm_dir):
