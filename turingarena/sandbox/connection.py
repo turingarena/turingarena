@@ -26,5 +26,5 @@ class SandboxProcessWaitBarrier(PipeBoundary):
         "wait_barrier": ("w", "r"),
     }
 
-    def create_connection(self):
+    def create_connection(self, wait_barrier):
         return None

@@ -1,4 +1,5 @@
 from turingarena.cli import docopt_cli
+from turingarena.cli.loggerinit import init_logger
 from turingarena.sandbox.server import sandbox_run
 
 
@@ -16,4 +17,5 @@ def main(args):
 
     """
 
+    init_logger()
     sandbox_run(algorithm_dir=args["<algorithm-dir>"])

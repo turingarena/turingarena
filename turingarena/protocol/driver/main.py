@@ -1,4 +1,5 @@
 from turingarena.cli import docopt_cli
+from turingarena.cli.loggerinit import init_logger
 from turingarena.protocol.driver.server import driver_server
 
 
@@ -14,6 +15,7 @@ def main(args):
       <sandbox>  Sandbox to connect to.
     """
 
+    init_logger()
     driver_server(
         interface=args["<interface>"],
         sandbox_dir=args["<sandbox>"],

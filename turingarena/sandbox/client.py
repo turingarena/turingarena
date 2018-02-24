@@ -2,14 +2,10 @@ import logging
 import subprocess
 from contextlib import contextmanager
 
-from turingarena.cli.loggerinit import init_logger
 from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier
 
 logger = logging.getLogger(__name__)
-
-init_logger()
-
 
 class SandboxException(Exception):
     pass
