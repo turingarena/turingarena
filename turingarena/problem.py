@@ -39,7 +39,7 @@ class AlgorithmicProblem(ImmutableObject):
     ]
 
     def evaluate(self, source):
-        with TemporaryDirectory() as temp_dir:
+        with TemporaryDirectory(dir="/dev/shm") as temp_dir:
             algorithm_dir = os.path.join(temp_dir, "algorithm")
             source.compile(algorithm_dir)
 

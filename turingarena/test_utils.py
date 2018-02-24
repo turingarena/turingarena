@@ -18,7 +18,7 @@ init_logger()
 def define_interface(text):
     interface = "test_interface_" + ''.join(random.choices(string.ascii_lowercase, k=8))
     source = InterfaceSource(text)
-    with TemporaryDirectory() as temp_dir:
+    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
         source.generate(
             name=interface,
             dest_dir=temp_dir,
@@ -47,7 +47,7 @@ def define_algorithm(*, interface, language, source_text):
         text=source_text,
     )
 
-    with TemporaryDirectory() as temp_dir:
+    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
         algorithm_dir = os.path.join(temp_dir, "algorithm")
         algorithm_source.compile(algorithm_dir)
 

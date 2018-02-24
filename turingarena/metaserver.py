@@ -63,7 +63,7 @@ class MetaServer:
 
         def run():
             nonlocal child_server_dir
-            with TemporaryDirectory() as child_server_dir:
+            with TemporaryDirectory(dir="/dev/shm") as child_server_dir:
                 # executed in main thread
                 child_server = self.create_child_server(
                     child_server_dir, **request_payloads

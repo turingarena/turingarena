@@ -15,7 +15,7 @@ class ProxiedAlgorithm:
 
     @contextmanager
     def run(self, **global_variables):
-        with TemporaryDirectory(prefix="sandbox_server_") as sandbox_dir:
+        with TemporaryDirectory(dir="/dev/shm", prefix="sandbox_server_") as sandbox_dir:
             sandbox_server = SandboxServer(sandbox_dir)
             sandbox_client = SandboxClient(sandbox_dir)
 
@@ -23,7 +23,7 @@ class ProxiedAlgorithm:
             sandbox_server_thread.start()
 
             with sandbox_client.run(self.algorithm_dir) as sandbox_process_dir:
-                with TemporaryDirectory(prefix="driver_server_") as driver_dir:
+                with TemporaryDirectory(dir="/dev/shm", prefix="driver_server_") as driver_dir:
                     driver_server = DriverServer(driver_dir)
                     driver_client = DriverClient(driver_dir)
 
