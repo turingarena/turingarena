@@ -1,11 +1,9 @@
 import logging
-import subprocess
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager
 
-from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
-from turingarena.protocol.driver.connection import DriverProcessConnection, \
-    DRIVER_PROCESS_CHANNEL
+from turingarena.protocol.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import load_interface_signature
 
@@ -13,47 +11,48 @@ logger = logging.getLogger(__name__)
 
 
 class DriverClient:
+    def __init__(self, driver_dir):
+        self.boundary = PipeBoundary(driver_dir)
+
     @contextmanager
-    def run(self, *, interface, process):
-        interface_signature = load_interface_signature(interface)
+    def run(self, *, interface, sandbox_process_dir):
+        response = self.boundary.send_request(
+            DRIVER_QUEUE,
+            interface=interface,
+            sandbox_process_dir=sandbox_process_dir,
+        )
 
-        cli = [
-            "turingarena-driver",
-            interface,
-            process.boundary.directory,
-        ]
-        with ExitStack() as stack:
-            logger.debug(f"running {cli}...")
-            driver_process = subprocess.Popen(
-                cli,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-            )
-            stack.enter_context(driver_process)
-            driver_process_dir = driver_process.stdout.readline().strip()
-            logger.debug(f"driver dir: {driver_process_dir}...")
+        driver_process_dir = response["driver_process_dir"]
 
-            boundary = PipeBoundary(driver_process_dir)
-            connection = DriverProcessConnection(
-                **stack.enter_context(boundary.open_channel(
-                    DRIVER_PROCESS_CHANNEL,
-                    PipeBoundarySide.CLIENT,
-                ))
-            )
+        logger.info(f"connected to driver at {driver_process_dir}")
 
-            try:
-                yield DriverProcessClient(
-                    interface_signature=interface_signature,
-                    connection=connection,
-                )
-            except Exception as e:
-                logger.exception(e)
-                raise
-
-            logger.debug("waiting for driver server process")
+        try:
+            yield driver_process_dir
+        except Exception as e:
+            logger.exception(e)
+            raise
 
 
 class DriverProcessClient:
+    def __init__(self, *, interface, driver_process_dir):
+        self.boundary = PipeBoundary(driver_process_dir)
+        self.interface = interface
+
+    @contextmanager
+    def run(self):
+        interface_signature = load_interface_signature(self.interface)
+        with self.boundary.open_channel(
+                DRIVER_PROCESS_CHANNEL,
+                PipeBoundarySide.CLIENT,
+        ) as pipes:
+            connection = DriverProcessConnection(**pipes)
+            yield DriverProcessEngine(
+                interface_signature=interface_signature,
+                connection=connection,
+            )
+
+
+class DriverProcessEngine:
     def __init__(self, *, interface_signature, connection):
         self.interface_signature = interface_signature
         self.connection = connection

@@ -15,6 +15,9 @@ class SandboxException(Exception):
     pass
 
 
+class StopServer(Exception):
+    pass
+
 class SandboxServer:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
@@ -22,7 +25,7 @@ class SandboxServer:
 
     def handle_request(self, algorithm_dir):
         if not algorithm_dir:
-            raise Exception("stopping sandbox server")
+            raise StopServer
 
         logger.debug(f"handling sandbox request for {algorithm_dir}")
         executable = load_executable(algorithm_dir)
@@ -53,10 +56,13 @@ class SandboxServer:
     def run(self):
         while True:
             logger.debug("waiting for sandbox requests...")
-            self.boundary.handle_request(SANDBOX_QUEUE, self.handle_request)
+            try:
+                self.boundary.handle_request(SANDBOX_QUEUE, self.handle_request)
+            except StopServer:
+                break
 
     def stop(self):
-        self.boundary.send_request(SANDBOX_QUEUE, algorithm_dir="")
+        self.boundary.send_empty_request(SANDBOX_QUEUE)
 
 
 class SandboxProcessServer:

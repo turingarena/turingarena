@@ -23,20 +23,20 @@ class SandboxClient:
             algorithm_dir=algorithm_dir,
         )
 
-        process_dir = response["sandbox_process_dir"]
+        sandbox_process_dir = response["sandbox_process_dir"]
 
-        logger.info(f"connected to sandbox at {process_dir}")
+        logger.info(f"connected to sandbox at {sandbox_process_dir}")
 
         try:
-            yield SandboxProcessClient(process_dir)
+            yield sandbox_process_dir
         except Exception as e:
             logger.exception(e)
             raise
 
 
 class SandboxProcessClient:
-    def __init__(self, sandbox_dir):
-        self.boundary = PipeBoundary(sandbox_dir)
+    def __init__(self, directory):
+        self.boundary = PipeBoundary(directory)
 
     @contextmanager
     def connect(self):

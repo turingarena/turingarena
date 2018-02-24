@@ -88,6 +88,14 @@ class PipeBoundary(ImmutableObject):
         ):
             os.mkfifo(self.pipe_path(pipe))
 
+    def send_empty_request(self, descriptor):
+        for name, pipe in descriptor.request_pipes.items():
+            self.sync_empty(pipe, PipeBoundarySide.CLIENT)
+        return {
+            name: self.sync_read(pipe, PipeBoundarySide.CLIENT)
+            for name, pipe in descriptor.response_pipes.items()
+        }
+
     def send_request(self, descriptor, **request_payloads):
         logger.debug(f"sending request on {descriptor} ({request_payloads})")
         assert len(descriptor.request_pipes) == len(request_payloads)
@@ -112,7 +120,7 @@ class PipeBoundary(ImmutableObject):
         try:
             response_payloads = handler(**request_payloads)
         except Exception as e:
-            logger.debug(f"request handler raise an exception, sending empty response")
+            logger.debug(f"request handler raised an exception, sending empty response")
             for name, pipe in descriptor.response_pipes.items():
                 self.sync_empty(pipe, PipeBoundarySide.SERVER)
             raise
