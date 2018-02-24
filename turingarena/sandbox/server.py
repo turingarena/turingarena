@@ -4,7 +4,7 @@ import threading
 from threading import Thread
 
 from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier
+from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier, SandboxProcessConnection
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -53,7 +53,8 @@ class SandboxProcessServer:
 
     def run(self):
         wait_thread = None
-        with self.boundary.connect(side=PipeBoundarySide.SERVER) as connection:
+        with self.boundary.connect(side=PipeBoundarySide.SERVER) as pipes:
+            connection = SandboxProcessConnection(**pipes)
             try:
                 with self.executable.run(connection):
                     wait_thread = Thread(target=self.wait_for_wait_pipe)

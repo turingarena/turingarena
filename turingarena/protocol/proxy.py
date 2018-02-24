@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.protocol.driver.client import DriverClient
 from turingarena.sandbox.client import SandboxClient
-from turingarena.sandbox.connection import SandboxBoundary
+from turingarena.sandbox.connection import SandboxBoundary, SandboxConnection
 from turingarena.sandbox.server import SandboxServer
 
 
@@ -21,15 +21,15 @@ class ProxiedAlgorithm:
             boundary.init()
 
             def server_target():
-                with boundary.connect(PipeBoundarySide.SERVER) as server_connection:
-                    server = SandboxServer(server_connection)
+                with boundary.connect(PipeBoundarySide.SERVER) as pipes:
+                    server = SandboxServer(SandboxConnection(**pipes))
                     server.run()
 
             server_thread = threading.Thread(target=server_target)
             server_thread.start()
 
-            with boundary.connect(PipeBoundarySide.CLIENT) as client_connection:
-                client = SandboxClient(client_connection)
+            with boundary.connect(PipeBoundarySide.CLIENT) as pipes:
+                client = SandboxClient(SandboxConnection(**pipes))
 
                 with client.run(self.algorithm_dir) as process:
                     with DriverClient().run(interface=self.interface, process=process) as engine:

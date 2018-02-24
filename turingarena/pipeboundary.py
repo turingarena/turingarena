@@ -17,7 +17,6 @@ class PipeBoundary(ImmutableObject):
     __slots__ = ["directory"]
 
     pipe_info = NotImplemented
-    create_connection = NotImplemented
 
     def __init__(self, directory):
         assert os.path.isdir(directory)
@@ -42,7 +41,7 @@ class PipeBoundary(ImmutableObject):
     def connect(self, side):
         logger.debug(f"connecting to boundary, side {side}")
         with ExitStack() as stack:
-            yield self.create_connection(**{
+            yield {
                 name: stack.enter_context(self.open_pipe(name, side))
                 for name in self.pipe_info
-            })
+            }

@@ -13,4 +13,3 @@ class DriverProcessBoundary(PipeBoundary):
         "request": ("w", "r"),
         "response": ("r", "w"),
     }
-    create_connection = DriverProcessConnection

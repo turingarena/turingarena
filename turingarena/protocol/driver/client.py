@@ -4,7 +4,7 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
-from turingarena.protocol.driver.connection import DriverProcessBoundary
+from turingarena.protocol.driver.connection import DriverProcessBoundary, DriverProcessConnection
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import load_interface_signature
 
@@ -33,7 +33,9 @@ class DriverClient:
             logger.debug(f"driver dir: {driver_process_dir}...")
 
             boundary = DriverProcessBoundary(driver_process_dir)
-            connection = stack.enter_context(boundary.connect(side=PipeBoundarySide.CLIENT))
+            connection = DriverProcessConnection(
+                **stack.enter_context(boundary.connect(side=PipeBoundarySide.CLIENT))
+            )
 
             try:
                 yield DriverProcessClient(

@@ -17,7 +17,6 @@ class SandboxBoundary(PipeBoundary):
         "request": ("w", "r"),
         "response": ("r", "w"),
     }
-    create_connection = SandboxConnection
 
 
 class SandboxProcessConnection(ImmutableObject):
@@ -31,7 +30,6 @@ class SandboxProcessBoundary(PipeBoundary):
         "downward": ("w", "r"),
         "upward": ("r", "w"),
     }
-    create_connection = SandboxProcessConnection
 
 
 class SandboxProcessWaitBarrier(PipeBoundary):
@@ -39,6 +37,3 @@ class SandboxProcessWaitBarrier(PipeBoundary):
     pipe_info = {
         "wait_barrier": ("w", "r"),
     }
-
-    def create_connection(self, wait_barrier):
-        return None
