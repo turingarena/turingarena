@@ -2,10 +2,10 @@ import threading
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena.pipeboundary import PipeBoundarySide
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.protocol.driver.client import DriverClient
 from turingarena.sandbox.client import SandboxClient
-from turingarena.sandbox.connection import SandboxBoundary, SandboxConnection
+from turingarena.sandbox.connection import SandboxConnection, SANDBOX_CHANNEL
 from turingarena.sandbox.server import SandboxServer
 
 
@@ -17,18 +17,18 @@ class ProxiedAlgorithm:
     @contextmanager
     def run(self, **global_variables):
         with TemporaryDirectory("sandbox_server_") as server_dir:
-            boundary = SandboxBoundary(server_dir)
-            boundary.init()
+            boundary = PipeBoundary(server_dir)
+            boundary.create_channel(SANDBOX_CHANNEL)
 
             def server_target():
-                with boundary.connect(PipeBoundarySide.SERVER) as pipes:
+                with boundary.open_channel(SANDBOX_CHANNEL, PipeBoundarySide.SERVER) as pipes:
                     server = SandboxServer(SandboxConnection(**pipes))
                     server.run()
 
             server_thread = threading.Thread(target=server_target)
             server_thread.start()
 
-            with boundary.connect(PipeBoundarySide.CLIENT) as pipes:
+            with boundary.open_channel(SANDBOX_CHANNEL, PipeBoundarySide.CLIENT) as pipes:
                 client = SandboxClient(SandboxConnection(**pipes))
 
                 with client.run(self.algorithm_dir) as process:

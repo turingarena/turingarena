@@ -1,16 +1,14 @@
 from turingarena.common import ImmutableObject
-from turingarena.pipeboundary import PipeBoundary
+from turingarena.pipeboundary import PipeDescriptor, PipeChannelDescriptor
 
 
 class DriverProcessConnection(ImmutableObject):
     __slots__ = ["request", "response"]
 
 
-class DriverProcessBoundary(PipeBoundary):
-    __slots__ = []
-
-    def pipe_info(self):
-        return {
-            "request": ("w", "r"),
-            "response": ("r", "w"),
-        }
+DRIVER_PROCESS_CHANNEL = PipeChannelDescriptor(
+    pipes=dict(
+        request=PipeDescriptor("request.pipe", ("w", "r")),
+        response=PipeDescriptor("response.pipe", ("r", "w")),
+    ),
+)

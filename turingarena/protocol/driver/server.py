@@ -3,8 +3,8 @@ import sys
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.protocol.driver.connection import DriverProcessBoundary, DriverProcessConnection
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.protocol.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
 from turingarena.protocol.module import load_interface_definition
@@ -16,18 +16,20 @@ logger = logging.getLogger(__name__)
 class DriverProcessServer:
     def __init__(self, *, interface, sandbox_dir, process_dir):
         self.sandbox_dir = sandbox_dir
-        self.boundary = DriverProcessBoundary(process_dir)
+        self.boundary = PipeBoundary(process_dir)
         self.interface_definition = load_interface_definition(interface)
         self.main = self.interface_definition.body.scope.main["main"]
 
-        self.boundary.init()
+        self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
 
     def run(self):
         with ExitStack() as stack:
             sys.stdout.close()
 
             driver_connection = DriverProcessConnection(
-                **stack.enter_context(self.boundary.connect(side=PipeBoundarySide.SERVER))
+                **stack.enter_context(
+                    self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER)
+                )
             )
 
             logger.debug("connecting to process...")

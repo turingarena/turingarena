@@ -2,9 +2,10 @@ import logging
 import subprocess
 from contextlib import contextmanager, ExitStack
 
-from turingarena.pipeboundary import PipeBoundarySide
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
-from turingarena.protocol.driver.connection import DriverProcessBoundary, DriverProcessConnection
+from turingarena.protocol.driver.connection import DriverProcessConnection, \
+    DRIVER_PROCESS_CHANNEL
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
 from turingarena.protocol.module import load_interface_signature
 
@@ -32,9 +33,12 @@ class DriverClient:
             driver_process_dir = driver_process.stdout.readline().strip()
             logger.debug(f"driver dir: {driver_process_dir}...")
 
-            boundary = DriverProcessBoundary(driver_process_dir)
+            boundary = PipeBoundary(driver_process_dir)
             connection = DriverProcessConnection(
-                **stack.enter_context(boundary.connect(side=PipeBoundarySide.CLIENT))
+                **stack.enter_context(boundary.open_channel(
+                    DRIVER_PROCESS_CHANNEL,
+                    PipeBoundarySide.CLIENT,
+                ))
             )
 
             try:

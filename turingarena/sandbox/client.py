@@ -1,8 +1,9 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier, SandboxProcessConnection
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.sandbox.connection import SandboxProcessConnection, \
+    SANDBOX_PROCESS_CHANNEL, SANDBOX_WAIT_BARRIER
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +34,12 @@ class SandboxClient:
 
 class SandboxProcessClient:
     def __init__(self, sandbox_dir):
-        self.boundary = SandboxProcessBoundary(sandbox_dir)
-        self.wait_barrier = SandboxProcessWaitBarrier(sandbox_dir)
+        self.boundary = PipeBoundary(sandbox_dir)
 
     @contextmanager
     def connect(self):
         logger.debug("connecting to process...")
-        with self.boundary.connect(side=PipeBoundarySide.CLIENT) as pipes:
+        with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.CLIENT) as pipes:
             try:
                 yield SandboxProcessConnection(**pipes)
             except Exception as e:
@@ -47,5 +47,5 @@ class SandboxProcessClient:
                 raise
             finally:
                 logger.debug("reaching wait barrier")
-                with self.wait_barrier.connect(side=PipeBoundarySide.CLIENT):
+                with self.boundary.open_channel(SANDBOX_WAIT_BARRIER, PipeBoundarySide.CLIENT):
                     pass

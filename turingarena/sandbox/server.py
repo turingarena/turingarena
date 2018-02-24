@@ -3,8 +3,9 @@ import tempfile
 import threading
 from threading import Thread
 
-from turingarena.pipeboundary import PipeBoundarySide
-from turingarena.sandbox.connection import SandboxProcessBoundary, SandboxProcessWaitBarrier, SandboxProcessConnection
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
+    SANDBOX_WAIT_BARRIER
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -45,15 +46,13 @@ class SandboxProcessServer:
 
         logger.debug("sandbox folder: %s", sandbox_dir)
 
-        self.boundary = SandboxProcessBoundary(sandbox_dir)
-        self.boundary.init()
-
-        self.wait_barrier = SandboxProcessWaitBarrier(sandbox_dir)
-        self.wait_barrier.init()
+        self.boundary = PipeBoundary(sandbox_dir)
+        self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
+        self.boundary.create_channel(SANDBOX_WAIT_BARRIER)
 
     def run(self):
         wait_thread = None
-        with self.boundary.connect(side=PipeBoundarySide.SERVER) as pipes:
+        with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
             try:
                 with self.executable.run(connection):
@@ -66,6 +65,6 @@ class SandboxProcessServer:
             wait_thread.join()
 
     def wait_for_wait_pipe(self):
-        with self.wait_barrier.connect(side=PipeBoundarySide.SERVER):
+        with self.boundary.open_channel(SANDBOX_WAIT_BARRIER, PipeBoundarySide.SERVER):
             pass
         logger.debug("wait barrier reached, terminating...")
