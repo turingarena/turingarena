@@ -1,10 +1,10 @@
 import logging
 import os
 import subprocess
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager
 
 from turingarena.cli.loggerinit import init_logger
-from turingarena.sandbox.connection import SandboxConnection
+from turingarena.sandbox.connection import SandboxBoundary
 
 logger = logging.getLogger(__name__)
 
@@ -39,31 +39,19 @@ class SandboxClient:
 
 class SandboxProcessClient:
     def __init__(self, sandbox_dir):
-        assert os.path.isdir(sandbox_dir)
-        self.sandbox_dir = sandbox_dir
-        self.downward_pipe_name = os.path.join(self.sandbox_dir, "downward.pipe")
-        self.upward_pipe_name = os.path.join(self.sandbox_dir, "upward.pipe")
-        self.wait_pipe_name = os.path.join(self.sandbox_dir, "wait.pipe")
+        self.boundary = SandboxBoundary(directory=sandbox_dir)
+        self.wait_pipe_name = os.path.join(sandbox_dir, "wait.pipe")
 
     @contextmanager
     def connect(self):
         logger.debug("connecting to process...")
-        try:
-            with ExitStack() as stack:
-                logger.debug("opening downward pipe...")
-                downward_pipe = stack.enter_context(open(self.downward_pipe_name, "w"))
-                logger.debug("opening upward pipe...")
-                upward_pipe = stack.enter_context(open(self.upward_pipe_name))
-                connection = SandboxConnection(
-                    downward=downward_pipe,
-                    upward=upward_pipe,
-                )
-                logger.debug("connected to process")
+        with self.boundary.connect(side=SandboxBoundary.CLIENT) as connection:
+            try:
                 yield connection
-        except Exception as e:
-            logger.exception(e)
-            raise
-        finally:
-            logger.debug("opening wait pipe")
-            with open(self.wait_pipe_name):
-                pass
+            except Exception as e:
+                logger.exception(e)
+                raise
+            finally:
+                logger.debug("opening wait pipe")
+                with open(self.wait_pipe_name):
+                    pass

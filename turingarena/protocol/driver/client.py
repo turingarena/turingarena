@@ -19,7 +19,7 @@ class DriverClient:
         cli = [
             "turingarena-driver",
             interface,
-            process.sandbox_dir,
+            process.boundary.directory,
         ]
         with ExitStack() as stack:
             logger.debug(f"running {cli}...")
