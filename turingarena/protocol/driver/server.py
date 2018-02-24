@@ -3,7 +3,7 @@ import sys
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.pipeboundary import PipeBoundary
+from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.protocol.driver.connection import DriverProcessBoundary
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
@@ -27,7 +27,7 @@ class DriverProcessServer:
             sys.stdout.close()
 
             driver_connection = stack.enter_context(
-                self.boundary.connect(side=PipeBoundary.SERVER)
+                self.boundary.connect(side=PipeBoundarySide.SERVER)
             )
 
             logger.debug("connecting to process...")

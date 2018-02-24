@@ -8,16 +8,13 @@ from turingarena.common import ImmutableObject
 logger = logging.getLogger(__name__)
 
 
-class BoundarySide(Enum):
+class PipeBoundarySide(Enum):
     CLIENT = 0
     SERVER = 1
 
 
 class PipeBoundary(ImmutableObject):
     __slots__ = ["directory"]
-
-    SERVER = BoundarySide.SERVER
-    CLIENT = BoundarySide.CLIENT
 
     pipe_info = NotImplemented
     create_connection = NotImplemented

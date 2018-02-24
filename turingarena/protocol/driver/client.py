@@ -2,7 +2,7 @@ import logging
 import subprocess
 from contextlib import contextmanager, ExitStack
 
-from turingarena.pipeboundary import PipeBoundary
+from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DriverProcessBoundary
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
@@ -33,7 +33,7 @@ class DriverClient:
             logger.debug(f"driver dir: {driver_process_dir}...")
 
             boundary = DriverProcessBoundary(driver_process_dir)
-            connection = stack.enter_context(boundary.connect(side=PipeBoundary.CLIENT))
+            connection = stack.enter_context(boundary.connect(side=PipeBoundarySide.CLIENT))
 
             try:
                 yield DriverProcessClient(

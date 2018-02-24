@@ -5,6 +5,7 @@ import tempfile
 from threading import Thread
 
 from turingarena.cli.loggerinit import init_logger
+from turingarena.pipeboundary import PipeBoundarySide
 from turingarena.sandbox.connection import SandboxProcessBoundary
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
@@ -38,7 +39,7 @@ class SandboxProcessServer:
 
     def run(self):
         wait_thread = None
-        with self.boundary.connect(side=SandboxProcessBoundary.SERVER) as connection:
+        with self.boundary.connect(side=PipeBoundarySide.SERVER) as connection:
             try:
                 with self.executable.run(connection) as p:
                     def wait():
