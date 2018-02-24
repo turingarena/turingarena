@@ -34,8 +34,6 @@ class SandboxProcessServer:
     def __init__(self, *, sandbox_dir, executable):
         self.executable = executable
 
-        logger.debug("sandbox folder: %s", sandbox_dir)
-
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
         self.boundary.create_channel(SANDBOX_WAIT_BARRIER)

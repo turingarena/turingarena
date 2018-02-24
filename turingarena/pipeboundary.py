@@ -43,26 +43,22 @@ class PipeBoundary(ImmutableObject):
 
     def create_pipe(self, descriptor):
         path = self.pipe_path(descriptor)
-        logger.debug(f"creating pipe {descriptor} ({path})")
         os.mkfifo(path)
 
     @contextmanager
     def open_pipe(self, descriptor, side):
         path = self.pipe_path(descriptor)
         flags = descriptor.flags[side.value]
-        logger.debug(f"opening pipe {descriptor}, side {side}")
         logger.debug(f"open({repr(path)}, {repr(flags)})")
         with open(path, flags) as pipe:
             yield pipe
 
     def create_channel(self, descriptor):
-        logger.debug(f"creating channel {descriptor}")
         for pipe in descriptor.pipes.values():
             self.create_pipe(pipe)
 
     @contextmanager
     def open_channel(self, descriptor, side):
-        logger.debug(f"open channel {descriptor}, side {side}")
         with ExitStack() as stack:
             yield {
                 name: stack.enter_context(self.open_pipe(pipe, side))
@@ -97,34 +93,27 @@ class PipeBoundary(ImmutableObject):
         }
 
     def send_request(self, descriptor, **request_payloads):
-        logger.debug(f"sending request on {descriptor} ({request_payloads})")
         assert len(descriptor.request_pipes) == len(request_payloads)
 
         for name, pipe in descriptor.request_pipes.items():
             self.sync_write(pipe, PipeBoundarySide.CLIENT, request_payloads[name])
-        logger.debug(f"receiving response on {descriptor}")
         response_payloads = {
             name: self.sync_read(pipe, PipeBoundarySide.CLIENT)
             for name, pipe in descriptor.response_pipes.items()
         }
-        logger.debug(f"received response on {descriptor} ({response_payloads})")
         return response_payloads
 
     def handle_request(self, descriptor, handler):
-        logger.debug(f"receiving request on {descriptor}")
         request_payloads = {
             name: self.sync_read(pipe, PipeBoundarySide.SERVER)
             for name, pipe in descriptor.request_pipes.items()
         }
-        logger.debug(f"handling request on {descriptor} ({request_payloads})")
         try:
             response_payloads = handler(**request_payloads)
         except Exception as e:
-            logger.debug(f"request handler raised an exception, sending empty response")
             for name, pipe in descriptor.response_pipes.items():
                 self.sync_empty(pipe, PipeBoundarySide.SERVER)
             raise
         else:
-            logger.debug(f"sending response on {descriptor} ({response_payloads})")
             for name, pipe in descriptor.response_pipes.items():
                 self.sync_write(pipe, PipeBoundarySide.SERVER, response_payloads[name])

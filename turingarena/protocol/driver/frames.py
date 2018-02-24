@@ -73,20 +73,15 @@ class RootBlockContext(ImmutableObject):
         except KeyError:
             frame = None
 
-        if frame:
-            if frame.state[phase] is FrameState.CLOSED:
-                logger.debug(f"not reusing frame {frame}")
-                del self.frame_cache[scope]
-                frame = None
-            else:
-                logger.debug(f"reusing frame {frame}")
+        if frame and frame.state[phase] is FrameState.CLOSED:
+            del self.frame_cache[scope]
+            frame = None
 
         if not frame:
             frame = self.frame_cache[scope] = Frame(
                 parent=parent,
                 scope=scope,
             )
-            logger.debug(f"created new frame {frame} for scope {scope} ({phase})")
 
         with frame.contextmanager(phase=phase):
             yield frame

@@ -25,8 +25,6 @@ class SandboxClient:
 
         sandbox_process_dir = response["sandbox_process_dir"]
 
-        logger.info(f"connected to sandbox at {sandbox_process_dir}")
-
         try:
             yield sandbox_process_dir
         except Exception as e:

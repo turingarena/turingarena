@@ -36,7 +36,6 @@ class Statement(AbstractSyntaxNode):
 
     @staticmethod
     def compile(ast, scope):
-        logger.debug("compiling statement {}".format(ast))
         return statement_classes[ast.statement_type].compile(ast, scope)
 
 
@@ -173,7 +172,6 @@ class OutputStatement(InputOutputStatement):
         line = context.engine.sandbox_connection.upward.readline()
         if not line:
             raise CommunicationBroken
-        logger.debug(f"read line {line.strip()} from upward_pipe")
         raw_values = line.strip().split()
         logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
@@ -252,7 +250,6 @@ class CallStatement(ImperativeStatement):
         while True:
             logger.debug("accepting callbacks...")
             callback_name = context.engine.sandbox_connection.upward.readline().strip()
-            logger.debug(f"received line {callback_name}")
             if callback_name == "return":
                 logger.debug(f"no more callbacks, push None to callback queue")
                 context.engine.push_callback(None)
@@ -439,7 +436,6 @@ class Body(AbstractSyntaxNode):
         )
 
     def run(self, context):
-        logger.debug(f"running body")
         with context.enter(self.scope) as inner_context:
             for statement in self.statements:
                 if isinstance(statement, ImperativeStatement):

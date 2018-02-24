@@ -19,14 +19,11 @@ class Reference(ImmutableObject):
         return self.do_get() is not None
 
     def resolve(self, value):
-        logger.debug(f"resolving {self} <- {value}")
         value = self.value_type.ensure(value)
         previous_value = self.do_get()
         if previous_value is None:
-            logger.debug(f"resolving: setting {self} <- {value}")
             self.do_set(value)
         else:
-            logger.debug(f"resolving: checking {self} == {value}")
             assert value == previous_value
 
     def alloc(self, size):

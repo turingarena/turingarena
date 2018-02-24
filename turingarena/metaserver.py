@@ -45,7 +45,6 @@ class MetaServer:
 
     def run(self):
         while True:
-            logger.debug("waiting for requests for child servers...")
             try:
                 self.boundary.handle_request(
                     self.get_queue_descriptor(),
@@ -60,21 +59,17 @@ class MetaServer:
             assert not any(request_payloads.values())
             raise StopMetaServer
 
-        logger.debug("handling requests for a child server...")
-
         child_server_dir = None
 
         def run():
             nonlocal child_server_dir
             with TemporaryDirectory() as child_server_dir:
-                logger.debug(f"created child server directory {child_server_dir}")
                 # executed in main thread
                 child_server = self.create_child_server(
                     child_server_dir, **request_payloads
                 )
                 yield
                 # executed in child thread
-                logger.debug(f"running child server")
                 self.run_child_server(child_server)
 
         handler = run()

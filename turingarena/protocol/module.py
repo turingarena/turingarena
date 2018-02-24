@@ -54,7 +54,6 @@ class InterfaceSource:
 def locate_interface_dir(interface):
     parts = parse_module_name(interface)
     for lookup_dir in os.environ.get("TURINGARENA_INTERFACE_PATH", "").split(":") + ["."]:
-        logger.debug(f"looking for {interface} in {lookup_dir}")
         path = os.path.join(
             lookup_dir,
             *parts[:]

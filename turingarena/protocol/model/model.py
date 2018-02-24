@@ -30,7 +30,6 @@ class InterfaceDefinition(ImmutableObject):
     @staticmethod
     def compile(ast):
         scope = Scope()
-        logger.debug("compiling {}".format(ast))
         body = Body.compile(ast.body, scope=scope)
         signature = InterfaceSignature(
             variables=OrderedDict(body.scope.variables.items()),
