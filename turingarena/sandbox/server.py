@@ -18,25 +18,25 @@ class SandboxException(Exception):
 class SandboxServer:
     def __init__(self, connection):
         self.connection = connection
-        self.response_barrier = threading.Barrier(2)
 
-    def serve_one(self, executable):
+    def serve_one(self, executable, response_sent):
         with tempfile.TemporaryDirectory(
                 prefix="turingarena_sandbox_process_",
         ) as sandbox_dir:
             process_server = SandboxProcessServer(executable=executable, sandbox_dir=sandbox_dir)
             print(sandbox_dir, file=self.connection.response, flush=True)
-            self.response_barrier.wait()
+            response_sent.set()
             process_server.run()
 
     def run(self):
+        response_sent = threading.Event()
         while True:
             line = self.connection.request.readline()
             if not line: break
             algorithm_dir, = line.splitlines()
             executable = load_executable(algorithm_dir)
-            threading.Thread(target=lambda: self.serve_one(executable)).start()
-            self.response_barrier.wait()
+            threading.Thread(target=lambda: self.serve_one(executable, response_sent)).start()
+            response_sent.wait()
 
 
 class SandboxProcessServer:
