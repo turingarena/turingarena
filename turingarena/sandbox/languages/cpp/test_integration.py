@@ -23,16 +23,71 @@ def cpp_algorithm(source):
     )
 
 
-def test_open():
-    with cpp_algorithm(r"""
-            #include <stdio.h>
-            
-            int test() 
-            {
-                fopen("name", "r");
-            }
-    """) as algo:
-        with pytest.raises(AlgorithmRuntimeError) as e:
-            with algo.run() as (process, proxy):
+def should_raise(cpp_source):
+    with cpp_algorithm(cpp_source) as algo:
+        with algo.run() as (process, proxy):
+            with pytest.raises(AlgorithmRuntimeError) as e:
                 proxy.test()
-        assert "invalid return code" in str(e.value)
+    return e
+
+
+def should_succeed(cpp_source):
+    with cpp_algorithm(cpp_source) as algo:
+        with algo.run() as (process, proxy):
+            proxy.test()
+
+
+def test_open():
+    should_raise(r"""
+        #include <cstdio>
+        int test() { fopen("name", "r"); }
+    """)
+
+
+def test_constructor():
+    should_raise(r"""
+        #include <stdio.h>
+        __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
+        int test() {}
+    """)
+
+
+def test_istream():
+    should_raise(r"""
+        #include <fstream>
+        int test() { std::ifstream in("name"); }
+    """)
+
+
+def test_malloc_succeeds():
+    should_succeed(r"""
+        #include <cstdlib>
+        #include <cstring>
+        int test() {
+            /* 10b (should use brk) */
+            void *small = malloc(10);
+            memset(small, 42, 10);
+
+            /* 1Gb (should use mmap) */
+            void *big = malloc(1000 * 1000);
+            memset(big, 42, 1000 * 1000);
+
+            free(small);
+            free(big);
+        }
+    """)
+
+
+def test_vector_succeeds():
+    should_succeed(r"""
+        #include <vector>
+        int test() {
+            /* 10b (should use brk) */
+            std::vector<char> v(10);
+            for (int i = 0; i < v.size(); i++) v[i] = '0';
+        
+            /* 1Gb (should use mmap) */
+            std::vector<char> v2(1000 * 1000);
+            for (int i = 0; i < v2.size(); i++) v2[i] = '0';
+        }
+    """)
