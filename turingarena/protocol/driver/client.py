@@ -21,16 +21,7 @@ class DriverClient:
             interface=interface,
             sandbox_process_dir=sandbox_process_dir,
         )
-
-        driver_process_dir = response["driver_process_dir"]
-
-        logger.info(f"connected to driver at {driver_process_dir}")
-
-        try:
-            yield driver_process_dir
-        except Exception as e:
-            logger.exception(e)
-            raise
+        yield response["driver_process_dir"]
 
 
 class DriverProcessClient:

@@ -25,10 +25,11 @@ def cpp_algorithm(source):
 
 def should_raise(cpp_source):
     with cpp_algorithm(cpp_source) as algo:
-        with pytest.raises(AlgorithmRuntimeError) as e:
+        with pytest.raises(AlgorithmRuntimeError) as excinfo:
             with algo.run() as (process, proxy):
                 proxy.test()
-    return e
+    # FIXME: should be something like 'invalid system call xyz'
+    assert "invalid return code" in str(excinfo.value)
 
 
 def should_succeed(cpp_source):

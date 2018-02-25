@@ -22,14 +22,7 @@ class SandboxClient:
             SANDBOX_QUEUE,
             algorithm_dir=algorithm_dir,
         )
-
-        sandbox_process_dir = response["sandbox_process_dir"]
-
-        try:
-            yield sandbox_process_dir
-        except Exception as e:
-            logger.exception(e)
-            raise
+        yield response["sandbox_process_dir"]
 
 
 class SandboxProcessClient:
@@ -46,11 +39,7 @@ class SandboxProcessClient:
     def connect(self):
         logger.debug("connecting to process...")
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.CLIENT) as pipes:
-            try:
-                yield SandboxProcessConnection(**pipes)
-            except Exception as e:
-                logger.exception(e)
-                raise
+            yield SandboxProcessConnection(**pipes)
 
     def wait(self):
         return self.get_info(wait=True)
