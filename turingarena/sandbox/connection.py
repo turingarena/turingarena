@@ -26,9 +26,14 @@ SANDBOX_PROCESS_CHANNEL = PipeChannelDescriptor(
     ),
 )
 
-SANDBOX_WAIT_BARRIER = PipeChannelDescriptor(
-    pipes=dict(
-        wait_barrier=PipeDescriptor("wait_barrier.pipe", ("w", "r")),
+SANDBOX_WAIT_QUEUE = PipeSynchronousQueueDescriptor(
+    request_pipes=dict(
+        wait=PipeDescriptor("wait.pipe", ("w", "r")),
+    ),
+    response_pipes=dict(
+        error=PipeDescriptor("error.pipe", ("r", "w")),
+        time_usage=PipeDescriptor("time_usage.pipe", ("r", "w")),
+        memory_usage=PipeDescriptor("memory_usage.pipe", ("r", "w")),
     ),
 )
 

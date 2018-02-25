@@ -4,7 +4,7 @@ from threading import Thread
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
-    SANDBOX_WAIT_BARRIER, SANDBOX_QUEUE
+    SANDBOX_QUEUE, SANDBOX_WAIT_QUEUE
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -36,7 +36,10 @@ class SandboxProcessServer:
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
-        self.boundary.create_channel(SANDBOX_WAIT_BARRIER)
+        self.boundary.create_queue(SANDBOX_WAIT_QUEUE)
+
+        self.waiting = False
+        self.error = ""
 
     def run(self):
         wait_thread = None
@@ -52,7 +55,18 @@ class SandboxProcessServer:
         if wait_thread:
             wait_thread.join()
 
+    def handle_wait_request(self, *, wait):
+        assert not self.waiting
+        assert wait in ("0", "1")
+        self.waiting = bool(int(wait))
+
+        return {
+            "error": self.error,
+            "time_usage": str(0),  # TODO
+            "memory_usage": str(0),  # TODO
+        }
+
     def wait_for_wait_pipe(self):
-        with self.boundary.open_channel(SANDBOX_WAIT_BARRIER, PipeBoundarySide.SERVER):
-            pass
+        while not self.waiting:
+            self.boundary.handle_request(SANDBOX_WAIT_QUEUE, self.handle_wait_request)
         logger.debug("wait barrier reached, terminating...")

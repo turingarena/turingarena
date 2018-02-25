@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, \
-    SANDBOX_PROCESS_CHANNEL, SANDBOX_WAIT_BARRIER, SANDBOX_QUEUE
+    SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_WAIT_QUEUE
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +36,12 @@ class SandboxProcessClient:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
 
+    def get_info(self, *, wait=False):
+        return self.boundary.send_request(
+            SANDBOX_WAIT_QUEUE,
+            wait=str(int(bool(wait))),
+        )
+
     @contextmanager
     def connect(self):
         logger.debug("connecting to process...")
@@ -47,5 +53,4 @@ class SandboxProcessClient:
                 raise
             finally:
                 logger.debug("reaching wait barrier")
-                with self.boundary.open_channel(SANDBOX_WAIT_BARRIER, PipeBoundarySide.CLIENT):
-                    pass
+                self.get_info(wait=True)
