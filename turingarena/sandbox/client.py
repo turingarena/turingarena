@@ -51,6 +51,6 @@ class SandboxProcessClient:
             except Exception as e:
                 logger.exception(e)
                 raise
-            finally:
-                logger.debug("reaching wait barrier")
-                self.get_info(wait=True)
+
+    def wait(self):
+        return self.get_info(wait=True)

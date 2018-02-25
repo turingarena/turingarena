@@ -88,7 +88,9 @@ class InterfaceEngine:
         self.input_sent = True
 
     def flush(self):
-        assert self.input_sent
+        if not self.input_sent:
+            logger.warning("communication block has no output")
+            self.ensure_output()
         self.input_sent = False
 
     def push_callback(self, callback):

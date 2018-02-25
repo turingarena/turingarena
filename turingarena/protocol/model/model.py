@@ -68,8 +68,10 @@ class InterfaceDefinition(ImmutableObject):
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="main_end")
 
+        # end of last communication block
+        if context.phase is Phase.PREFLIGHT:
+            context.engine.flush()
         if context.phase is Phase.RUN:
-            # end of last communication block
             yield
 
 

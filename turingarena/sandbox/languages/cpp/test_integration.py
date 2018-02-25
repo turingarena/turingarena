@@ -25,8 +25,8 @@ def cpp_algorithm(source):
 
 def should_raise(cpp_source):
     with cpp_algorithm(cpp_source) as algo:
-        with algo.run() as (process, proxy):
-            with pytest.raises(AlgorithmRuntimeError) as e:
+        with pytest.raises(AlgorithmRuntimeError) as e:
+            with algo.run() as (process, proxy):
                 proxy.test()
     return e
 

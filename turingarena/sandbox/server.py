@@ -50,8 +50,7 @@ class SandboxProcessServer:
                     wait_thread = Thread(target=self.wait_for_wait_pipe)
                     wait_thread.start()
             except AlgorithmRuntimeError as e:
-                logger.exception(e)
-                # FIXME: connection.error_pipe.write(str(e))
+                self.error = str(e)
         if wait_thread:
             wait_thread.join()
 

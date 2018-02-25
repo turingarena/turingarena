@@ -78,4 +78,4 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
 
         if p.returncode != 0:
             logger.warning(f"process terminated with returncode {p.returncode}")
-            raise AlgorithmRuntimeError("invalid return code {p.returncode}")
+            raise AlgorithmRuntimeError(f"invalid return code {p.returncode}")

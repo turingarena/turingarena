@@ -4,7 +4,8 @@ from tempfile import TemporaryDirectory
 
 from turingarena.protocol.driver.client import DriverClient, DriverProcessClient
 from turingarena.protocol.driver.server import DriverServer
-from turingarena.sandbox.client import SandboxClient
+from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
 
 
@@ -32,6 +33,7 @@ class ProxiedAlgorithm:
             driver_dir = stack.enter_context(
                 TemporaryDirectory(dir="/dev/shm", prefix="driver_server_")
             )
+            sandbox_process_client = SandboxProcessClient(sandbox_process_dir)
 
             driver_server = DriverServer(driver_dir)
             driver_client = DriverClient(driver_dir)
@@ -55,10 +57,16 @@ class ProxiedAlgorithm:
                 ).run()
             )
 
-            engine.begin_main(**global_variables)
-            proxy = Proxy(engine=engine)
-            yield engine, proxy
-            engine.end_main()
+            try:
+                engine.begin_main(**global_variables)
+                proxy = Proxy(engine=engine)
+                yield engine, proxy
+                engine.end_main()
+            finally:
+                info = sandbox_process_client.wait()
+                error = info["error"]
+                if error:
+                    raise AlgorithmRuntimeError(error)
 
 
 class Proxy:
