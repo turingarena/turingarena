@@ -28,7 +28,7 @@ def should_raise(cpp_source):
         with pytest.raises(AlgorithmRuntimeError) as excinfo:
             with algo.run() as (process, proxy):
                 proxy.test()
-    assert "Bad system call" in excinfo.value.stacktrace
+    print(excinfo.value.stacktrace)
     return excinfo
 
 
@@ -43,6 +43,7 @@ def test_open():
         #include <cstdio>
         int test() { fopen("name", "r"); }
     """)
+    assert "Bad system call" in excinfo.value.stacktrace
     assert "test ()" in excinfo.value.stacktrace
 
 
@@ -52,7 +53,17 @@ def test_constructor():
         __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
         int test() {}
     """)
+    assert "Bad system call" in excinfo.value.stacktrace
     assert "init ()" in excinfo.value.stacktrace
+
+
+def test_preinit():
+    should_raise(r"""
+        #include <stdio.h>
+        static void init() { fopen("name", "r"); }
+        __attribute__((section(".preinit_array"), used)) static void (*preinit_fun)(void) = init;
+        int test() {}
+    """)
 
 
 def test_istream():
@@ -60,6 +71,7 @@ def test_istream():
         #include <fstream>
         int test() { std::ifstream in("name"); }
     """)
+    assert "Bad system call" in excinfo.value.stacktrace
     assert "test ()" in excinfo.value.stacktrace
 
 
@@ -72,7 +84,7 @@ def test_malloc_succeeds():
             void *small = malloc(10);
             memset(small, 42, 10);
 
-            /* 1Gb (should use mmap) */
+            /* 1Mb (should use mmap) */
             void *big = malloc(1000 * 1000);
             memset(big, 42, 1000 * 1000);
 
@@ -90,8 +102,49 @@ def test_vector_succeeds():
             std::vector<char> v(10);
             for (int i = 0; i < v.size(); i++) v[i] = '0';
         
-            /* 1Gb (should use mmap) */
+            /* 1Mb (should use mmap) */
             std::vector<char> v2(1000 * 1000);
             for (int i = 0; i < v2.size(); i++) v2[i] = '0';
         }
     """)
+
+
+def test_time_limit():
+    excinfo = should_raise("""
+        int test() { for(;;) {} }
+    """)
+    assert "CPU time limit exceeded" in excinfo.value.stacktrace
+
+
+def test_memory_limit_static():
+    should_raise("""
+        const int size = 1 * 1024 * 1024 * 1024;
+        char big[size];
+        int test() {}
+    """)
+
+
+def test_memory_limit_malloc():
+    should_succeed(r"""
+        #include <cstdlib>
+        #include <cstring>
+        #include <cassert>
+        int test() {
+            int size = 1 * 1024 * 1024 * 1024;
+            char* a = (char*) malloc(size);
+            assert(a == NULL);
+        }
+    """)
+
+
+def test_memory_limit_new():
+    should_raise("""
+        int test() { new int[1 * 1024 * 1024 * 1024]; }
+    """)
+
+
+def test_segmentation_fault():
+    excinfo = should_raise("""
+        int test() { *((int*) 0) = 1; }
+    """)
+    assert "Segmentation fault" in excinfo.value.stacktrace

@@ -33,8 +33,7 @@ class CppAlgorithmSource(AlgorithmSource):
 
         cli = [
             "g++",
-            "-g",
-            "-O2",
+            "-g", "-O2", "-static",
             "-o", "algorithm",
             sandbox_path,
             skeleton_path,
@@ -71,10 +70,29 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
 
         logger.debug("starting process")
 
+        memory_limit = 16 * 1024 * 1024
+        time_limit = 1
+
+        core_limit = 32 * 1024 * 1024
+
         def preexec_fn():
             resource.setrlimit(
                 resource.RLIMIT_CORE,
+                (core_limit, resource.RLIM_INFINITY),
+            )
+            resource.setrlimit(
+                resource.RLIMIT_STACK,
                 (resource.RLIM_INFINITY, resource.RLIM_INFINITY),
+            )
+            resource.setrlimit(
+                resource.RLIMIT_CPU,
+                (time_limit, resource.RLIM_INFINITY),
+                # use soft < hard to ensure SIGXCPU is raised instead of SIGKILL
+                # see setrlimit(2)
+            )
+            resource.setrlimit(
+                resource.RLIMIT_AS,
+                (memory_limit, resource.RLIM_INFINITY),
             )
 
         with TemporaryDirectory(dir="/dev/shm", prefix="elf_cwd_") as cwd:

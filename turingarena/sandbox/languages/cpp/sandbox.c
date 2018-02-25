@@ -58,7 +58,7 @@ static struct sock_filter filter_instructions[] = {
 	ALLOW(lseek),
 	ALLOW(fstat),
 
-	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL)
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRAP)
 };
 
 /* 
