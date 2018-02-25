@@ -1,8 +1,6 @@
 /* 
- * Simple Linux sandbox program that uses seccomp to deny all system calls to a program except:
- *     - read/write/lseek from already open file descriptors 
- *     - exit/exit_group 
- *     - mmap/munmap/mremap/brk, for dynamic memory allocation 
+ * Simple Linux sandbox program that uses seccomp to deny all system calls to a program,
+ * except those listed in filter_instructions.
  * 
  * How to use: 
  *     - compile with `gcc -c sandbox.c`
@@ -24,6 +22,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/resource.h>
 
 #define DEBUG(message) fprintf(stderr, "DEBUG: %s \n", message)
 #define CAT(a, b) a ## b 
@@ -59,8 +58,7 @@ static struct sock_filter filter_instructions[] = {
 	ALLOW(lseek),
 	ALLOW(fstat),
 
-	/* Default deny rule: send SIGSYS signal */
-	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRAP)
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL)
 };
 
 /* 
@@ -72,30 +70,10 @@ static struct sock_fprog seccomp_filter_program = {
 };
 
 /*
- * Handler for SIGSYS signal 
- */
-static void SIGSYS_handler(int signum __attribute__((unused)), siginfo_t *info, void *ctx __attribute__((unused))) 
-{
-	fprintf(stderr, "SIGSYS received: unexpected system call (number %d)\n", info->si_syscall);
-	_Exit(EXIT_FAILURE); 
-}
-
-/*
  * Initialization function that is called to initialize the sandbox by the libc
  */
 static void sandbox_init(void) 
 {
-	DEBUG("Initializing signal handler");
-
-	struct sigaction action = {0};
-	action.sa_flags = SA_SIGINFO;
-	action.sa_sigaction = SIGSYS_handler;
-
-	if (sigaction(SIGSYS, &action, NULL) == -1) {
-		perror("Error sigaction()");
-		_Exit(EXIT_FAILURE);
-	}
-
 	DEBUG("Initializing sandbox");
 
 	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {

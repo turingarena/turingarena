@@ -1,7 +1,9 @@
 import logging
 import os
+import resource
 import subprocess
 from contextlib import contextmanager
+from tempfile import TemporaryDirectory
 
 import pkg_resources
 
@@ -31,6 +33,8 @@ class CppAlgorithmSource(AlgorithmSource):
 
         cli = [
             "g++",
+            "-g",
+            "-O2",
             "-o", "algorithm",
             sandbox_path,
             skeleton_path,
@@ -67,15 +71,43 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
 
         logger.debug("starting process")
 
-        with subprocess.Popen(
-                [executable_filename],
-                universal_newlines=True,
-                stdin=connection.downward,
-                stdout=connection.upward,
-                bufsize=1,
-        ) as p:
-            yield p
+        def preexec_fn():
+            resource.setrlimit(
+                resource.RLIMIT_CORE,
+                (resource.RLIM_INFINITY, resource.RLIM_INFINITY),
+            )
 
-        if p.returncode != 0:
-            logger.warning(f"process terminated with returncode {p.returncode}")
-            raise AlgorithmRuntimeError(f"invalid return code {p.returncode}")
+        with TemporaryDirectory(dir="/dev/shm", prefix="elf_cwd_") as cwd:
+            with subprocess.Popen(
+                    [executable_filename],
+                    universal_newlines=True,
+                    preexec_fn=preexec_fn,
+                    cwd=cwd,
+                    stdin=connection.downward,
+                    stdout=connection.upward,
+                    bufsize=1,
+            ) as p:
+                yield p
+
+            if p.returncode != 0:
+                bt = self.get_back_trace(executable_filename, cwd)
+                logger.warning(f"process terminated with returncode {p.returncode}")
+                raise AlgorithmRuntimeError(
+                    "invalid return code {p.returncode}",
+                    bt,
+                )
+
+    def get_back_trace(self, executable_filename, cwd):
+        gdb_run = subprocess.run(
+            [
+                "gdb",
+                "-se", executable_filename,
+                "-c", os.path.join(cwd, "core"),
+                "-q",
+                "-batch",
+                "-ex", "backtrace",
+            ],
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        return gdb_run.stdout

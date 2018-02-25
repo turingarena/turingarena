@@ -28,8 +28,8 @@ def should_raise(cpp_source):
         with pytest.raises(AlgorithmRuntimeError) as excinfo:
             with algo.run() as (process, proxy):
                 proxy.test()
-    # FIXME: should be something like 'invalid system call xyz'
-    assert "invalid return code" in str(excinfo.value)
+    assert "Bad system call" in excinfo.value.stacktrace
+    return excinfo
 
 
 def should_succeed(cpp_source):
@@ -39,25 +39,28 @@ def should_succeed(cpp_source):
 
 
 def test_open():
-    should_raise(r"""
+    excinfo = should_raise(r"""
         #include <cstdio>
         int test() { fopen("name", "r"); }
     """)
+    assert "test ()" in excinfo.value.stacktrace
 
 
 def test_constructor():
-    should_raise(r"""
+    excinfo = should_raise(r"""
         #include <stdio.h>
         __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
         int test() {}
     """)
+    assert "init ()" in excinfo.value.stacktrace
 
 
 def test_istream():
-    should_raise(r"""
+    excinfo = should_raise(r"""
         #include <fstream>
         int test() { std::ifstream in("name"); }
     """)
+    assert "test ()" in excinfo.value.stacktrace
 
 
 def test_malloc_succeeds():

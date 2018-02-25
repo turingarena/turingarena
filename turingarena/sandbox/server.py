@@ -39,7 +39,8 @@ class SandboxProcessServer:
         self.boundary.create_queue(SANDBOX_WAIT_QUEUE)
 
         self.waiting = False
-        self.error = ""
+
+        self.runtime_error = None
 
     def run(self):
         wait_thread = None
@@ -49,8 +50,8 @@ class SandboxProcessServer:
                 with self.executable.run(connection):
                     wait_thread = Thread(target=self.wait_for_wait_pipe)
                     wait_thread.start()
-            except AlgorithmRuntimeError as e:
-                self.error = str(e)
+            except AlgorithmRuntimeError as runtime_error:
+                self.runtime_error = runtime_error
         if wait_thread:
             wait_thread.join()
 
@@ -59,8 +60,15 @@ class SandboxProcessServer:
         assert wait in ("0", "1")
         self.waiting = bool(int(wait))
 
+        if self.runtime_error is not None:
+            message = self.runtime_error.message
+            stacktrace = self.runtime_error.stacktrace
+        else:
+            message = stacktrace = ""
+
         return {
-            "error": self.error,
+            "error": message,
+            "stacktrace": stacktrace,
             "time_usage": str(0),  # TODO
             "memory_usage": str(0),  # TODO
         }

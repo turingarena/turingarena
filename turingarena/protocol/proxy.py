@@ -64,9 +64,11 @@ class ProxiedAlgorithm:
                 engine.end_main()
             finally:
                 info = sandbox_process_client.wait()
-                error = info["error"]
-                if error:
-                    raise AlgorithmRuntimeError(error)
+                if info["error"]:
+                    raise AlgorithmRuntimeError(
+                        info["error"],
+                        info["stacktrace"],
+                    )
 
 
 class Proxy:

@@ -1,5 +1,7 @@
 class AlgorithmRuntimeError(Exception):
-    pass
+    def __init__(self, message, stacktrace=None):
+        self.message = message
+        self.stacktrace = stacktrace
 
 
 class CompilationFailed(Exception):
