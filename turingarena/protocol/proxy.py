@@ -1,5 +1,5 @@
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena.protocol.driver.client import DriverClient, DriverProcessClient
@@ -15,39 +15,50 @@ class ProxiedAlgorithm:
 
     @contextmanager
     def run(self, **global_variables):
-        with TemporaryDirectory(dir="/dev/shm", prefix="sandbox_server_") as sandbox_dir:
+        with ExitStack() as stack:
+            sandbox_dir = stack.enter_context(
+                TemporaryDirectory(dir="/dev/shm", prefix="sandbox_server_")
+            )
+
             sandbox_server = SandboxServer(sandbox_dir)
             sandbox_client = SandboxClient(sandbox_dir)
 
             sandbox_server_thread = threading.Thread(target=sandbox_server.run)
             sandbox_server_thread.start()
+            stack.callback(sandbox_server_thread.join)
+            stack.callback(sandbox_server.stop)
 
-            with sandbox_client.run(self.algorithm_dir) as sandbox_process_dir:
-                with TemporaryDirectory(dir="/dev/shm", prefix="driver_server_") as driver_dir:
-                    driver_server = DriverServer(driver_dir)
-                    driver_client = DriverClient(driver_dir)
+            sandbox_process_dir = stack.enter_context(sandbox_client.run(self.algorithm_dir))
+            driver_dir = stack.enter_context(
+                TemporaryDirectory(dir="/dev/shm", prefix="driver_server_")
+            )
 
-                    driver_server_thread = threading.Thread(target=driver_server.run)
-                    driver_server_thread.start()
+            driver_server = DriverServer(driver_dir)
+            driver_client = DriverClient(driver_dir)
 
-                    with driver_client.run(
-                            interface=self.interface,
-                            sandbox_process_dir=sandbox_process_dir,
-                    ) as driver_process_dir:
-                        with DriverProcessClient(
-                                interface=self.interface,
-                                driver_process_dir=driver_process_dir,
-                        ).run() as engine:
-                            engine.begin_main(**global_variables)
-                            proxy = Proxy(engine=engine)
-                            yield engine, proxy
-                            engine.end_main()
+            driver_server_thread = threading.Thread(target=driver_server.run)
+            driver_server_thread.start()
+            stack.callback(driver_server_thread.join)
+            stack.callback(driver_server.stop)
 
-                    driver_server.stop()
-                    driver_server_thread.join()
+            driver_process_dir = stack.enter_context(
+                driver_client.run(
+                    interface=self.interface,
+                    sandbox_process_dir=sandbox_process_dir,
+                )
+            )
 
-            sandbox_server.stop()
-            sandbox_server_thread.join()
+            engine = stack.enter_context(
+                DriverProcessClient(
+                    interface=self.interface,
+                    driver_process_dir=driver_process_dir,
+                ).run()
+            )
+
+            engine.begin_main(**global_variables)
+            proxy = Proxy(engine=engine)
+            yield engine, proxy
+            engine.end_main()
 
 
 class Proxy:
