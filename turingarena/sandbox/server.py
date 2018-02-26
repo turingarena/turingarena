@@ -1,9 +1,10 @@
 import logging
+from contextlib import ExitStack
 
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
-    SANDBOX_QUEUE, SANDBOX_WAIT_QUEUE
+    SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executables import load_executable
 
@@ -35,32 +36,41 @@ class SandboxProcessServer:
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
-        self.boundary.create_queue(SANDBOX_WAIT_QUEUE)
+        self.boundary.create_queue(SANDBOX_REQUEST_QUEUE)
 
-        self.waiting = False
+        self.done = False
+        self.process = None
 
-        self.runtime_error = None
+        self.process_exit_stack = ExitStack()
 
     def run(self):
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
-            try:
-                with self.executable.run(connection):
-                    pass
-            except AlgorithmRuntimeError as runtime_error:
-                self.runtime_error = runtime_error
-        self.respond_to_info_requests()
+            self.process = self.process_exit_stack.enter_context(
+                self.executable.run(connection)
+            )
 
-    def handle_wait_request(self, *, wait):
-        assert not self.waiting
+        logger.debug("process started")
+
+        while not self.done:
+            logger.debug("handling requests...")
+            self.boundary.handle_request(
+                SANDBOX_REQUEST_QUEUE,
+                self.handle_request,
+            )
+
+    def handle_request(self, *, wait):
+        assert not self.done
         assert wait in ("0", "1")
-        self.waiting = bool(int(wait))
 
-        if self.runtime_error is not None:
-            message = self.runtime_error.message
-            stacktrace = self.runtime_error.stacktrace
-        else:
-            message = stacktrace = ""
+        message = stacktrace = ""
+        if wait == "1":
+            self.done = True
+            self.process = None
+            try:
+                self.process_exit_stack.close()
+            except AlgorithmRuntimeError as e:
+                message, stacktrace = e.args
 
         return {
             "error": message,
@@ -68,8 +78,3 @@ class SandboxProcessServer:
             "time_usage": str(0),  # TODO
             "memory_usage": str(0),  # TODO
         }
-
-    def respond_to_info_requests(self):
-        while not self.waiting:
-            self.boundary.handle_request(SANDBOX_WAIT_QUEUE, self.handle_wait_request)
-        logger.debug("client asks to wait for process, terminating")

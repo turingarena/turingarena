@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, \
-    SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_WAIT_QUEUE
+    SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class SandboxProcessClient:
 
     def get_info(self, *, wait=False):
         return self.boundary.send_request(
-            SANDBOX_WAIT_QUEUE,
+            SANDBOX_REQUEST_QUEUE,
             wait=str(int(bool(wait))),
         )
 
