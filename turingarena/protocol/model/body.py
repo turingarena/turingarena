@@ -1,6 +1,7 @@
 from turingarena.protocol.model.node import AbstractSyntaxNode
 from turingarena.protocol.model.scope import Scope
 from turingarena.protocol.model.statement import ImperativeStatement
+from turingarena.protocol.model.statements import compile_statement
 
 
 class Body(AbstractSyntaxNode):
@@ -44,6 +45,3 @@ class Body(AbstractSyntaxNode):
 
 
 ExitCall = object()
-
-# FIXME
-from turingarena.protocol.model.statements import compile_statement
