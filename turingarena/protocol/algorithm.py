@@ -81,7 +81,31 @@ class Algorithm:
                     )
 
 
+class AlgorithmSectionInfo:
+    def __init__(self):
+        self.info_before = None
+        self.info_after = None
+
+    def finished(self, info_before, info_after):
+        self.info_before = info_before
+        self.info_after = info_after
+
+    @property
+    def time_usage(self):
+        return self.info_after.time_usage - self.info_before.time_usage
+
+
 class AlgorithmProcess:
     def __init__(self, *, sandbox, driver):
         self.sandbox = sandbox
         self.driver = driver
+
+    @contextmanager
+    def section(self):
+        section_info = AlgorithmSectionInfo()
+        info_before = self.sandbox.get_info()
+        try:
+            yield section_info
+        finally:
+            info_after = self.sandbox.get_info()
+            section_info.finished(info_before, info_after)

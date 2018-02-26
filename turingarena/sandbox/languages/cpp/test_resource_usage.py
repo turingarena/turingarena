@@ -1,3 +1,5 @@
+from pytest import approx
+
 from turingarena.test_utils import define_interface, define_algorithm
 
 
@@ -29,8 +31,17 @@ def test_get_time_memory_usage():
                 """
         ) as algo:
             with algo.run() as (process, proxy):
-                proxy.test(0)
-                info = process.sandbox.get_info()
-                proxy.test(1)
-    assert 0 < info.time_usage < 0.5
-    assert 1024 * 1024 < info.memory_usage < 2 * 1024 * 1024
+                with process.section() as section1:
+                    proxy.test(1)
+                info1 = process.sandbox.get_info()
+                with process.section() as section2:
+                    proxy.test(2)
+                info2 = process.sandbox.get_info()
+
+    assert 0 < section1.time_usage == info1.time_usage < 0.5
+    assert 0 < section2.time_usage < 0.5
+
+    assert section1.time_usage + section2.time_usage == approx(info2.time_usage)
+
+    assert 1024 * 1024 < info1.memory_usage < 2 * 1024 * 1024
+    assert info2.memory_usage == 0
