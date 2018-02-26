@@ -1,5 +1,4 @@
 import logging
-from threading import Thread
 
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
@@ -43,17 +42,14 @@ class SandboxProcessServer:
         self.runtime_error = None
 
     def run(self):
-        wait_thread = None
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
             try:
                 with self.executable.run(connection):
-                    wait_thread = Thread(target=self.wait_for_wait_pipe)
-                    wait_thread.start()
+                    pass
             except AlgorithmRuntimeError as runtime_error:
                 self.runtime_error = runtime_error
-        if wait_thread:
-            wait_thread.join()
+        self.respond_to_info_requests()
 
     def handle_wait_request(self, *, wait):
         assert not self.waiting
@@ -73,7 +69,7 @@ class SandboxProcessServer:
             "memory_usage": str(0),  # TODO
         }
 
-    def wait_for_wait_pipe(self):
+    def respond_to_info_requests(self):
         while not self.waiting:
             self.boundary.handle_request(SANDBOX_WAIT_QUEUE, self.handle_wait_request)
-        logger.debug("wait barrier reached, terminating...")
+        logger.debug("client asks to wait for process, terminating")

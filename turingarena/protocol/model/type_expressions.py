@@ -4,16 +4,6 @@ from bidict import bidict
 
 from turingarena.common import TupleLikeObject
 
-type_expression_classes = bidict()
-
-
-def type_expression_class(meta_type):
-    def decorator(cls):
-        type_expression_classes[meta_type] = cls
-        return cls
-
-    return decorator
-
 
 class ValueType(TupleLikeObject):
     __slots__ = ["meta_type"]
@@ -73,7 +63,6 @@ class PrimaryType(ValueType):
         pass
 
 
-@type_expression_class("scalar")
 class ScalarType(PrimaryType):
     __slots__ = ["base_type"]
 
@@ -107,7 +96,6 @@ class ScalarType(PrimaryType):
         return self.base_type(string)
 
 
-@type_expression_class("array")
 class ArrayType(ValueType):
     __slots__ = ["item_type"]
 
@@ -140,3 +128,9 @@ class ArrayType(ValueType):
             self.item_type.deserialize(lines)
             for _ in range(size)
         ]
+
+
+type_expression_classes = bidict({
+    "scalar": ScalarType,
+    "array": ArrayType,
+})
