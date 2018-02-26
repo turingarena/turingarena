@@ -19,7 +19,10 @@ class Algorithm:
         self.interface = interface
 
     @contextmanager
-    def run(self, **global_variables):
+    def run(self, global_variables=None):
+        if global_variables is None:
+            global_variables = {}
+
         with ExitStack() as stack:
             sandbox_dir = stack.enter_context(
                 TemporaryDirectory(dir="/dev/shm", prefix="sandbox_server_")
