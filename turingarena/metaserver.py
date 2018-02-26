@@ -53,30 +53,26 @@ class MetaServer:
             except StopMetaServer:
                 break
 
+    def _run_child_server(self, child_server, child_server_dir):
+        try:
+            self.run_child_server(child_server)
+        finally:
+            child_server_dir.cleanup()
+
     def handle_request(self, **request_payloads):
-        if not all(request_payloads.values()):
-            # either all parameters are present, or none is
-            assert not any(request_payloads.values())
-            raise StopMetaServer
+        self.handle_stop_request(request_payloads)
 
-        child_server_dir = None
+        child_server_dir = TemporaryDirectory(dir="/dev/shm")
+        child_server = self.create_child_server(
+            child_server_dir.name, **request_payloads
+        )
 
-        def run():
-            nonlocal child_server_dir
-            with TemporaryDirectory(dir="/dev/shm") as child_server_dir:
-                # executed in main thread
-                child_server = self.create_child_server(
-                    child_server_dir, **request_payloads
-                )
-                yield
-                # executed in child thread
-                self.run_child_server(child_server)
+        Thread(target=lambda: self._run_child_server(child_server, child_server_dir)).start()
+        return self.create_response(child_server_dir.name)
 
-        handler = run()
-        next(handler)
-        assert child_server_dir is not None
-        Thread(target=lambda: [x for x in handler]).start()
-        return self.create_response(child_server_dir)
+    def handle_stop_request(self, request_payloads):
+        if any(request_payloads.values()): return
+        raise StopMetaServer
 
     def stop(self):
         self.boundary.send_empty_request(self.get_queue_descriptor())
