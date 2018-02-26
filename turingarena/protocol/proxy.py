@@ -1,3 +1,4 @@
+import logging
 import threading
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
@@ -7,6 +8,8 @@ from turingarena.protocol.driver.server import DriverServer
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
+
+logger = logging.getLogger(__name__)
 
 
 class ProxiedAlgorithm:
@@ -60,14 +63,14 @@ class ProxiedAlgorithm:
             try:
                 engine.begin_main(**global_variables)
                 proxy = Proxy(engine=engine)
-                yield engine, proxy
+                yield sandbox_process_client, proxy
                 engine.end_main()
             finally:
                 info = sandbox_process_client.wait()
-                if info["error"]:
+                if info.error:
                     raise AlgorithmRuntimeError(
-                        info["error"],
-                        info["stacktrace"],
+                        info.error,
+                        info.stacktrace,
                     )
 
 

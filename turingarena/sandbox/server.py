@@ -63,6 +63,9 @@ class SandboxProcessServer:
         assert not self.done
         assert wait in ("0", "1")
 
+        time_usage = self.executable.get_time_usage(self.process)
+        memory_usage = self.executable.get_memory_usage(self.process)
+
         message = stacktrace = ""
         if wait == "1":
             self.done = True
@@ -75,6 +78,6 @@ class SandboxProcessServer:
         return {
             "error": message,
             "stacktrace": stacktrace,
-            "time_usage": str(0),  # TODO
-            "memory_usage": str(0),  # TODO
+            "time_usage": str(time_usage),
+            "memory_usage": str(memory_usage),
         }

@@ -28,6 +28,7 @@ setup(
         "pyyaml",
         "coloredlogs",
         "bidict",
+        "psutil",
     ],
     tests_require=[
         "pytest",
