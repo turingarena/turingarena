@@ -43,7 +43,7 @@ grammar_ebnf = r"""
     block_statement =
         | var_statement
         | statement_type:('input'|'output') ~ arguments:expression_list ';'
-        | statement_type:('flush'|'break'|'continue'|'exit') ~ ';'
+        | statement_type:('checkpoint'|'flush'|'break'|'continue'|'exit') ~ ';'
         | statement_type:'alloc' ~ arguments:expression_list ':' size:expression ';'
         | statement_type:'return' ~ value:expression ';'
         | statement_type:'call' ~ function_name:identifier

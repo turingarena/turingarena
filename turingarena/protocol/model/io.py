@@ -9,6 +9,25 @@ from turingarena.protocol.model.statement import ImperativeStatement
 logger = logging.getLogger(__name__)
 
 
+def read_line(context):
+    line = context.engine.sandbox_connection.upward.readline()
+    if not line:
+        raise CommunicationBroken
+    return line
+
+
+class CheckpointStatement(ImperativeStatement):
+    __slots__ = []
+
+    @staticmethod
+    def compile(ast, scope):
+        return CheckpointStatement()
+
+    def run(self, context):
+        if context.phase is Phase.RUN:
+            read_line(context)
+
+
 class InputOutputStatement(ImperativeStatement):
     __slots__ = ["arguments"]
 
@@ -52,9 +71,7 @@ class OutputStatement(InputOutputStatement):
 
     def on_run(self, context):
         logger.debug(f"reading from upward_pipe...")
-        line = context.engine.sandbox_connection.upward.readline()
-        if not line:
-            raise CommunicationBroken
+        line = read_line(context)
         raw_values = line.strip().split()
         logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):

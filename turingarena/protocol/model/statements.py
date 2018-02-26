@@ -11,7 +11,7 @@ def get_statement_classes():
     from turingarena.protocol.model.control import ForStatement, IfStatement, LoopStatement, ExitStatement
     from turingarena.protocol.model.callables import FunctionStatement, CallbackStatement, MainStatement
     from turingarena.protocol.model.variables import VarStatement
-    from turingarena.protocol.model.io import InputStatement, OutputStatement, FlushStatement
+    from turingarena.protocol.model.io import CheckpointStatement, InputStatement, OutputStatement, FlushStatement
 
     return bidict({
         "var": VarStatement,
@@ -19,6 +19,7 @@ def get_statement_classes():
         "callback": CallbackStatement,
         "main": MainStatement,
         "alloc": AllocStatement,
+        "checkpoint": CheckpointStatement,
         "input": InputStatement,
         "output": OutputStatement,
         "flush": FlushStatement,
