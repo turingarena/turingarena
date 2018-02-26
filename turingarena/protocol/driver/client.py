@@ -5,7 +5,7 @@ from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
 from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
-from turingarena.protocol.module import load_interface_signature
+from turingarena.protocol.proxy import InterfaceProxy
 
 logger = logging.getLogger(__name__)
 
@@ -25,30 +25,25 @@ class DriverClient:
 
 
 class DriverProcessClient:
-    def __init__(self, *, interface, driver_process_dir):
+    def __init__(self, driver_process_dir):
         self.boundary = PipeBoundary(driver_process_dir)
-        self.interface = interface
 
     @contextmanager
-    def run(self):
-        interface_signature = load_interface_signature(self.interface)
+    def connect(self):
         with self.boundary.open_channel(
                 DRIVER_PROCESS_CHANNEL,
                 PipeBoundarySide.CLIENT,
         ) as pipes:
-            connection = DriverProcessConnection(**pipes)
-            yield DriverProcessEngine(
-                interface_signature=interface_signature,
-                connection=connection,
-            )
+            yield DriverProcessConnection(**pipes)
 
 
-class DriverProcessEngine:
+class DriverRunningProcess:
     def __init__(self, *, interface_signature, connection):
         self.interface_signature = interface_signature
         self.connection = connection
+        self.proxy = InterfaceProxy(self)
 
-    def call(self, name, args, callbacks_impl):
+    def call(self, name, args, callbacks):
         try:
             function_signature = self.interface_signature.functions[name]
         except KeyError:
@@ -67,54 +62,55 @@ class DriverProcessEngine:
                 p.value_type.ensure(a)
                 for p, a in zip(function_signature.parameters, args)
             ],
-            accept_callbacks=bool(callbacks_impl),
+            accept_callbacks=bool(callbacks),
         )
-        self.send(request)
+        self._send_request(request)
 
         while True:
             logger.debug("waiting for response...")
-            response = self.accept_response()
+            response = self._receive_response()
             if response.message_type == "callback_call":
-                self.accept_callback(callbacks_impl, response)
+                self._accept_callback(callbacks, response)
                 continue
             if response.message_type == "function_return":
                 return response.return_value
 
-    def accept_callback(self, callbacks_impl, response):
+    def _accept_callback(self, callbacks_impl, response):
         callback_name = response.callback_name
         callback_signature = self.interface_signature.callbacks[callback_name]
+
         try:
             raw_return_value = callbacks_impl[callback_name](*response.parameters)
         except ProtocolExit:
-            request = Exit(interface_signature=self.interface_signature)
-            self.send(request)
+            self._send_request(Exit(interface_signature=self.interface_signature))
             raise
+
         return_type = callback_signature.return_type
         if return_type:
             return_value = return_type.ensure(raw_return_value)
         else:
             assert raw_return_value is None
             return_value = None
-        request = CallbackReturn(
+
+        self._send_request(CallbackReturn(
             interface_signature=self.interface_signature,
             callback_name=callback_name,
             return_value=return_value,
-        )
-        self.send(request)
+        ))
 
-    def accept_response(self):
-        return ProxyResponse.accept(
+    def _receive_response(self):
+        return ProxyResponse.deserialize(
             map(str.strip, self.connection.response),
             interface_signature=self.interface_signature,
         )
 
-    def send(self, request):
+    def _send_request(self, request):
         file = self.connection.request
         for line in request.serialize():
             print(line, file=file)
         file.flush()
 
-    def begin_main(self, **global_variables):
+    def begin_main(self, global_variables):
         request = MainBegin(
             interface_signature=self.interface_signature,
             global_variables=[
@@ -122,10 +118,10 @@ class DriverProcessEngine:
                 for variable in self.interface_signature.variables.values()
             ]
         )
-        self.send(request)
+        self._send_request(request)
 
     def end_main(self):
         request = MainEnd(
             interface_signature=self.interface_signature,
         )
-        self.send(request)
+        self._send_request(request)

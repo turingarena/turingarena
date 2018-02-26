@@ -52,7 +52,7 @@ class InterfaceEngine:
     def _ensure_current_request(self):
         if self._current_request is not None:
             return
-        self._current_request = ProxyRequest.accept(
+        self._current_request = ProxyRequest.deserialize(
             map(str.strip, self.driver_connection.request),
             interface_signature=self.interface.signature,
         )

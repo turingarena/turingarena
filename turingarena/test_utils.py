@@ -6,8 +6,8 @@ from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.cli.loggerinit import init_logger
+from turingarena.protocol.algorithm import Algorithm
 from turingarena.protocol.module import InterfaceSource
-from turingarena.protocol.proxy import ProxiedAlgorithm
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
@@ -51,7 +51,7 @@ def define_algorithm(*, interface, language, source_text):
         algorithm_dir = os.path.join(temp_dir, "algorithm")
         algorithm_source.compile(algorithm_dir)
 
-        yield ProxiedAlgorithm(
+        yield Algorithm(
             algorithm_dir=algorithm_dir,
             interface=interface,
         )

@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena.cli import docopt_cli
 from turingarena.common import ImmutableObject
-from turingarena.protocol.proxy import ProxiedAlgorithm
+from turingarena.protocol.algorithm import Algorithm
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 
 
@@ -44,7 +44,7 @@ class AlgorithmicProblem(ImmutableObject):
             source.compile(algorithm_dir)
 
             context = EvaluationContext(
-                algorithm=ProxiedAlgorithm(
+                algorithm=Algorithm(
                     algorithm_dir=algorithm_dir,
                     interface=self.interface,
                 ),

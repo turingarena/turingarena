@@ -42,7 +42,7 @@ class ProxyMessage(ImmutableObject):
         pass
 
     @classmethod
-    def accept(cls, lines, *, interface_signature):
+    def deserialize(cls, lines, *, interface_signature):
         logger.debug("accepting message...")
         message_type = next(lines)
         logger.debug(f"received message type {message_type}, parsing arguments...")

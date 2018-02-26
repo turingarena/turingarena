@@ -30,7 +30,7 @@ def test_get_time_memory_usage():
         ) as algo:
             with algo.run() as (process, proxy):
                 proxy.test(0)
-                info = process.get_info()
+                info = process.sandbox.get_info()
                 proxy.test(1)
     assert 0 < info.time_usage < 0.5
     assert 1024 * 1024 < info.memory_usage < 2 * 1024 * 1024
