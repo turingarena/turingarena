@@ -1,7 +1,7 @@
 from turingarena.test_utils import define_interface, define_algorithm
 
 
-def test_get_time_usage():
+def test_get_time_memory_usage():
     with define_interface("""
         function test(int i) -> int;
         main {
@@ -20,7 +20,7 @@ def test_get_time_usage():
                 language="c++",
                 source_text="""
                     int test(int i) {
-                        char x[2 * 1024 * 1024];
+                        char x[1024 * 1024];
                         for(int j = 0; j < 100 * 1000 * 1000; j++) {
                             i = x[j%1024] = j^i^x[j%1024];
                         }
@@ -33,4 +33,4 @@ def test_get_time_usage():
                 info = process.get_info()
                 proxy.test(1)
     assert 0 < info.time_usage < 0.5
-    assert 2 * 1024 * 1024 < info.memory_usage < 3 * 1024 * 1024
+    assert 1024 * 1024 < info.memory_usage < 2 * 1024 * 1024
