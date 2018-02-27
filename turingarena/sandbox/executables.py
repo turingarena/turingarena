@@ -2,7 +2,7 @@ import logging
 import os
 
 from turingarena.protocol.model.model import InterfaceDefinition
-from turingarena.sandbox.languages.cpp import ElfAlgorithmExecutable
+from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
 from turingarena.sandbox.languages.python import PythonAlgorithmExecutableScript
 
 logger = logging.getLogger(__name__)
