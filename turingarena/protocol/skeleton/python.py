@@ -1,26 +1,18 @@
-import os
-
-from turingarena.common import write_to_file, indent_all, indent
+from turingarena.common import indent_all, indent
 
 
-def generate_skeleton(*, interface_definition, dest_dir):
-    with open(os.path.join(dest_dir, "skeleton.py"), "w") as main_file:
-        write_to_file(generate_main_file(interface_definition), main_file)
-    with open(os.path.join(dest_dir, "source.py"), "w") as template_file:
-        write_to_file(generate_template_file(interface_definition), template_file)
-
-
-def generate_main_file(interface):
+def generate_skeleton(interface):
     yield "import sys"
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
 
 
-def generate_template_file(interface):
+def generate_template(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_template_statement(statement, interface=interface)
+
 
 def generate_skeleton_statement(statement, *, interface):
     generators = {

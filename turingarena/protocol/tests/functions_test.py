@@ -1,7 +1,7 @@
 import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.module import InterfaceSource
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.test_utils import define_many
 
 
@@ -92,6 +92,6 @@ def test_function_return_type_not_scalar():
     """
 
     with pytest.raises(ProtocolError) as excinfo:
-        InterfaceSource(protocol_text)
+        InterfaceDefinition.compile(protocol_text)
 
     assert 'return type must be a scalar' in excinfo.value.get_user_message()

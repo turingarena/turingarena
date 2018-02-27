@@ -15,10 +15,10 @@ class DriverClient:
         self.boundary = PipeBoundary(driver_dir)
 
     @contextmanager
-    def run(self, *, interface, sandbox_process_dir):
+    def run(self, *, interface_text, sandbox_process_dir):
         response = self.boundary.send_request(
             DRIVER_QUEUE,
-            interface=interface,
+            interface_text=interface_text,
             sandbox_process_dir=sandbox_process_dir,
         )
         yield response["driver_process_dir"]

@@ -1,6 +1,7 @@
 import logging
 import os
 
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.languages.cpp import ElfAlgorithmExecutable
 from turingarena.sandbox.languages.python import PythonAlgorithmExecutableScript
 
@@ -12,7 +13,8 @@ def load_executable(algorithm_dir):
         language = f.read().strip()
 
     with open(os.path.join(algorithm_dir, "interface.txt")) as f:
-        interface = f.read().strip().split(":", 1)
+        interface_text = f.read()
+    interface = InterfaceDefinition.compile(interface_text)
 
     executable_classes = {
         "c++": ElfAlgorithmExecutable,

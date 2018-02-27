@@ -1,13 +1,11 @@
 import os
-import random
-import string
 from collections import deque
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.cli.loggerinit import init_logger
 from turingarena.protocol.algorithm import Algorithm
-from turingarena.protocol.module import InterfaceSource
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.languages.cpp import CppAlgorithmSource
 from turingarena.sandbox.languages.python import PythonAlgorithmSource
 
@@ -16,21 +14,8 @@ init_logger()
 
 @contextmanager
 def define_interface(text):
-    interface = "test_interface_" + ''.join(random.choices(string.ascii_lowercase, k=8))
-    source = InterfaceSource(text)
-    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
-        source.generate(
-            name=interface,
-            dest_dir=temp_dir,
-        )
-
-        old_path = os.environ.get("TURINGARENA_INTERFACE_PATH")
-        try:
-            os.environ["TURINGARENA_INTERFACE_PATH"] = temp_dir
-            yield interface
-        finally:
-            if old_path is not None:
-                os.environ["TURINGARENA_INTERFACE_PATH"] = old_path
+    interface = InterfaceDefinition.compile(text)
+    yield interface
 
 
 @contextmanager

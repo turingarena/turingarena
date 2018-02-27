@@ -1,7 +1,7 @@
 import pytest
 
 from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.module import InterfaceSource
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.test_utils import callback_mock, define_many
 
 
@@ -129,7 +129,7 @@ def test_callback_return_type_not_scalar():
         main {}
     """
     with pytest.raises(ProtocolError) as excinfo:
-        InterfaceSource(protocol_text)
+        InterfaceDefinition.compile(protocol_text)
     assert 'return type must be a scalar' in excinfo.value.get_user_message()
 
 
@@ -139,5 +139,5 @@ def test_callback_argument_not_scalar():
         main {}
     """
     with pytest.raises(ProtocolError) as excinfo:
-        InterfaceSource(protocol_text)
+        InterfaceDefinition.compile(protocol_text)
     assert 'callback arguments must be scalars' in excinfo.value.get_user_message()

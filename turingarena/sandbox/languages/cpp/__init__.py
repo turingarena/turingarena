@@ -7,7 +7,8 @@ from tempfile import TemporaryDirectory
 
 import pkg_resources
 
-from turingarena.protocol.module import locate_interface_dir
+from turingarena.common import write_to_file
+from turingarena.protocol.skeleton.cpp import generate_skeleton
 from turingarena.sandbox.exceptions import CompilationFailed, AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
@@ -19,14 +20,12 @@ class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
-        protocol_dir = locate_interface_dir(self.interface)
-
-        skeleton_path = os.path.join(
-            protocol_dir,
-            f"_skeletons/cpp/skeleton.cpp",
-        )
-
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.c")
+
+        skeleton_filename = os.path.join(algorithm_dir, "skeleton.cpp")
+        with open(skeleton_filename, "w") as f:
+            write_to_file(generate_skeleton(self.interface), f)
+
         source_filename = os.path.join(algorithm_dir, "source.cpp")
         with open(source_filename, "w") as f:
             f.write(self.text)
@@ -36,7 +35,7 @@ class CppAlgorithmSource(AlgorithmSource):
             "-g", "-O2", "-static",
             "-o", "algorithm",
             sandbox_path,
-            skeleton_path,
+            "skeleton.cpp",
             "source.cpp",
         ]
         logger.debug(f"Running {' '.join(cli)}")

@@ -6,7 +6,7 @@ from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.protocol.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL, DRIVER_QUEUE
 from turingarena.protocol.driver.engine import InterfaceEngine
 from turingarena.protocol.exceptions import CommunicationBroken
-from turingarena.protocol.module import load_interface_definition
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.client import SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -16,10 +16,10 @@ class DriverServer(MetaServer):
     def get_queue_descriptor(self):
         return DRIVER_QUEUE
 
-    def create_child_server(self, child_server_dir, *, sandbox_process_dir, interface):
+    def create_child_server(self, child_server_dir, *, sandbox_process_dir, interface_text):
         return DriverProcessServer(
             sandbox_process_dir=sandbox_process_dir,
-            interface=interface,
+            interface_text=interface_text,
             driver_process_dir=child_server_dir,
         )
 
@@ -31,11 +31,11 @@ class DriverServer(MetaServer):
 
 
 class DriverProcessServer:
-    def __init__(self, *, interface, sandbox_process_dir, driver_process_dir):
+    def __init__(self, *, interface_text, sandbox_process_dir, driver_process_dir):
         self.sandbox_dir = sandbox_process_dir
         self.boundary = PipeBoundary(driver_process_dir)
-        self.interface_definition = load_interface_definition(interface)
-        self.main = self.interface_definition.body.scope.main["main"]
+        self.interface = InterfaceDefinition.compile(interface_text)
+        self.main = self.interface.body.scope.main["main"]
 
         self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
 
@@ -56,7 +56,7 @@ class DriverProcessServer:
             engine = InterfaceEngine(
                 sandbox_connection=sandbox_connection,
                 driver_connection=driver_connection,
-                interface=self.interface_definition
+                interface=self.interface
             )
 
             try:

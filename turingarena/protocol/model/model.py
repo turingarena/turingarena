@@ -6,6 +6,7 @@ from turingarena.protocol.driver.frames import Phase
 from turingarena.protocol.exceptions import ProtocolExit
 from turingarena.protocol.model.body import Body
 from turingarena.protocol.model.scope import Scope
+from turingarena.protocol.parser import parse_protocol
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,12 @@ class InterfaceSignature(TupleLikeObject):
 
 
 class InterfaceDefinition(ImmutableObject):
-    __slots__ = ["signature", "body"]
+    __slots__ = ["signature", "body", "source_text", "ast"]
 
     @staticmethod
-    def compile(ast):
+    def compile(source_text, **kwargs):
+        ast = parse_protocol(source_text, **kwargs)
+
         scope = Scope()
         body = Body.compile(ast.body, scope=scope)
         signature = InterfaceSignature(
@@ -33,6 +36,8 @@ class InterfaceDefinition(ImmutableObject):
             },
         )
         return InterfaceDefinition(
+            source_text=source_text,
+            ast=ast,
             signature=signature,
             body=body,
         )

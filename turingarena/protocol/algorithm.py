@@ -5,7 +5,6 @@ from tempfile import TemporaryDirectory
 
 from turingarena.protocol.driver.client import DriverClient, DriverProcessClient, DriverRunningProcess
 from turingarena.protocol.driver.server import DriverServer
-from turingarena.protocol.module import load_interface_signature
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
@@ -52,7 +51,7 @@ class Algorithm:
 
             driver_process_dir = stack.enter_context(
                 driver_client.run(
-                    interface=self.interface,
+                    interface_text=self.interface.source_text,
                     sandbox_process_dir=sandbox_process_dir,
                 )
             )
@@ -61,9 +60,8 @@ class Algorithm:
                 DriverProcessClient(driver_process_dir).connect()
             )
 
-            interface_signature = load_interface_signature(self.interface)
             running_process = DriverRunningProcess(
-                interface_signature=interface_signature,
+                interface_signature=self.interface.signature,
                 connection=driver_connection,
             )
 

@@ -23,7 +23,7 @@ class AlgorithmSource(ImmutableObject):
             print(self.language, file=f)
 
         with open(f"{algorithm_dir}/interface.txt", "w") as f:
-            print(self.interface, file=f)
+            print(self.interface.source_text, file=f)
 
         logger.debug("Starting language-specific compilation")
         self.do_compile(algorithm_dir)
