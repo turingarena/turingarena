@@ -11,7 +11,6 @@ class AlgorithmSource(ImmutableObject):
     __slots__ = [
         "interface",
         "language",
-        "filename",
         "text",
     ]
 

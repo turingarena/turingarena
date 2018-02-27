@@ -82,7 +82,7 @@ class Algorithm:
                     )
 
 
-class AlgorithmSectionInfo:
+class AlgorithmSection:
     def __init__(self):
         self.info_before = None
         self.info_after = None
@@ -103,7 +103,7 @@ class AlgorithmProcess:
 
     @contextmanager
     def section(self):
-        section_info = AlgorithmSectionInfo()
+        section_info = AlgorithmSection()
         info_before = self.sandbox.get_info()
         try:
             yield section_info

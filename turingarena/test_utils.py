@@ -6,8 +6,7 @@ from tempfile import TemporaryDirectory
 from turingarena.cli.loggerinit import init_logger
 from turingarena.protocol.algorithm import Algorithm
 from turingarena.protocol.model.model import InterfaceDefinition
-from turingarena.sandbox.languages.cpp import CppAlgorithmSource
-from turingarena.sandbox.languages.python import PythonAlgorithmSource
+from turingarena.sandbox.sources import load_source
 
 init_logger()
 
@@ -20,17 +19,7 @@ def define_interface(text):
 
 @contextmanager
 def define_algorithm(*, interface, language, source_text):
-    languages = {
-        "c++": CppAlgorithmSource,
-        "python": PythonAlgorithmSource,
-    }
-
-    algorithm_source = languages[language](
-        interface=interface,
-        filename=None,
-        language=language,
-        text=source_text,
-    )
+    algorithm_source = load_source(source_text, interface=interface, language=language)
 
     with TemporaryDirectory(dir="/dev/shm") as temp_dir:
         algorithm_dir = os.path.join(temp_dir, "algorithm")
