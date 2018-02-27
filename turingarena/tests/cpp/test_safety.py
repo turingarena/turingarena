@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import pytest
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.test_utils import define_many
+from turingarena.tests.utils import define_algorithms
 
 protocol_text = """
     function test() -> int;
@@ -17,7 +17,7 @@ protocol_text = """
 
 @contextmanager
 def cpp_algorithm(source):
-    return define_many(
+    return define_algorithms(
         interface_text=protocol_text,
         sources={"c++": source},
     )

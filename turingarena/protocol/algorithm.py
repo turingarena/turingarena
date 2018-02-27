@@ -1,13 +1,16 @@
 import logging
+import os
 import threading
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena.protocol.driver.client import DriverClient, DriverProcessClient, DriverRunningProcess
 from turingarena.protocol.driver.server import DriverServer
+from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
+from turingarena.sandbox.sources import load_source
 
 logger = logging.getLogger(__name__)
 
@@ -110,3 +113,22 @@ class AlgorithmProcess:
         finally:
             info_after = self.sandbox.get_info()
             section_info.finished(info_before, info_after)
+
+
+@contextmanager
+def load_algorithm(*, interface_text, language, source_text):
+    interface = InterfaceDefinition.compile(interface_text)
+    algorithm_source = load_source(
+        source_text,
+        interface=interface,
+        language=language,
+    )
+
+    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
+        algorithm_dir = os.path.join(temp_dir, "algorithm")
+        algorithm_source.compile(algorithm_dir)
+
+        yield Algorithm(
+            algorithm_dir=algorithm_dir,
+            interface=interface,
+        )

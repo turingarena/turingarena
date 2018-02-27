@@ -1,12 +1,8 @@
-import pytest
-
-from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.model.model import InterfaceDefinition
-from turingarena.test_utils import define_many
+from turingarena.tests.utils import define_algorithms
 
 
 def test_function_no_arguments():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 function function_no_arguments();
                 main {
@@ -29,7 +25,7 @@ def test_function_no_arguments():
 
 
 def test_function_with_arguments():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 function function_with_arguments(int a, int b);
                 main {
@@ -56,7 +52,7 @@ def test_function_with_arguments():
 
 
 def test_function_return_value():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 function function_return_value(int a) -> int;
                 main {
@@ -83,15 +79,3 @@ def test_function_return_value():
     ):
         with algo.run() as (process, p):
             assert p.function_return_value(1) == 2
-
-
-def test_function_return_type_not_scalar():
-    protocol_text = """
-        function function_return_type_not_scalar() -> int[];
-        main {}
-    """
-
-    with pytest.raises(ProtocolError) as excinfo:
-        InterfaceDefinition.compile(protocol_text)
-
-    assert 'return type must be a scalar' in excinfo.value.get_user_message()

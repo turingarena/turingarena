@@ -1,8 +1,8 @@
-from turingarena.test_utils import callback_mock, define_many
+from turingarena.tests.utils import callback_mock, define_algorithms
 
 
 def test_interface_no_callbacks():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 function test() -> int;
                 main {
@@ -28,7 +28,7 @@ def test_interface_no_callbacks():
 
 
 def test_interface_one_callback():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 callback cb() {}
                 function test() -> int;
@@ -69,7 +69,7 @@ def test_interface_one_callback():
 
 
 def test_interface_multiple_callbacks():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 callback cb1() {}
                 callback cb2() {}

@@ -1,12 +1,8 @@
-import pytest
-
-from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.model.model import InterfaceDefinition
-from turingarena.test_utils import callback_mock, define_many
+from turingarena.tests.utils import callback_mock, define_algorithms
 
 
 def test_callback_no_arguments_cpp():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 callback callback_no_arguments() {}
                 function test();
@@ -43,7 +39,7 @@ def test_callback_no_arguments_cpp():
 
 
 def test_callback_with_arguments():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 callback callback_with_arguments(int a, int b) {
                     output a, b;
@@ -81,7 +77,7 @@ def test_callback_with_arguments():
 
 
 def test_callback_return_value():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 callback callback_return_value(int a) -> int {
                     output a;
@@ -121,23 +117,3 @@ def test_callback_return_value():
                 (callback_return_value, (1,)),
                 (callback_return_value, (3,)),
             ]
-
-
-def test_callback_return_type_not_scalar():
-    protocol_text = """
-        callback callback_return_type_not_scalar() -> int[] {}
-        main {}
-    """
-    with pytest.raises(ProtocolError) as excinfo:
-        InterfaceDefinition.compile(protocol_text)
-    assert 'return type must be a scalar' in excinfo.value.get_user_message()
-
-
-def test_callback_argument_not_scalar():
-    protocol_text = """
-        callback callback_argument_not_scalar(int ok, int[] wrong) {}
-        main {}
-    """
-    with pytest.raises(ProtocolError) as excinfo:
-        InterfaceDefinition.compile(protocol_text)
-    assert 'callback arguments must be scalars' in excinfo.value.get_user_message()

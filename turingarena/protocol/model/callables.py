@@ -35,7 +35,7 @@ class CallableSignature(TupleLikeObject):
     def compile(ast, scope):
         parameters = [
             Variable(
-                value_type=ValueType.compile(p.type_expression, scope=scope),
+                value_type=ValueType.compile(p.type.expression, scope=scope),
                 name=p.declarator.name,
             )
             for p in ast.parameters
@@ -44,7 +44,7 @@ class CallableSignature(TupleLikeObject):
         if ast.return_type is None:
             return_type = None
         else:
-            return_type = ValueType.compile(ast.return_type, scope=scope)
+            return_type = ValueType.compile(ast.return_type.expression, scope=scope)
             if not isinstance(return_type, ScalarType):
                 raise ProtocolError(
                     "return type must be a scalar",

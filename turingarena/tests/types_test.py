@@ -1,8 +1,8 @@
-from turingarena.test_utils import define_many
+from turingarena.tests.utils import define_algorithms
 
 
 def test_valid_types():
-    for algo in define_many(
+    for algo in define_algorithms(
             interface_text="""
                 var int i;
                 var int[] ia;
