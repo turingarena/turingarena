@@ -4,7 +4,7 @@ import subprocess
 from contextlib import contextmanager
 
 from turingarena.common import write_to_file
-from turingarena.protocol.skeleton.python import generate_skeleton
+from turingarena.protocol.skeleton.python import generate_skeleton_python
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -21,7 +21,7 @@ class PythonAlgorithmSource(AlgorithmSource):
 
         skeleton_filename = os.path.join(algorithm_dir, "skeleton.py")
         with open(skeleton_filename, "w") as f:
-            write_to_file(generate_skeleton(self.interface), f)
+            write_to_file(generate_skeleton_python(self.interface), f)
 
 
 class PythonAlgorithmExecutableScript(AlgorithmExecutable):

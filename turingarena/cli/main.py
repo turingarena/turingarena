@@ -3,6 +3,7 @@ from turingarena.cli import docopt_cli
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
 from turingarena.problem import problem_evaluate_cli
+from turingarena.protocol.template import generate_template_cli, generate_skeleton_cli
 
 
 @docopt_cli
@@ -20,6 +21,8 @@ def main(args):
     commands = {
         "container": container_cli,
         "evaluate": problem_evaluate_cli,
+        "template": generate_template_cli,
+        "skeleton": generate_skeleton_cli,
     }
     argv2 = args["<args>"]
     commands[args["<cmd>"]](argv2)

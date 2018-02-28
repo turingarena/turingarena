@@ -1,14 +1,14 @@
 from turingarena.common import indent_all, indent
 
 
-def generate_skeleton(interface):
+def generate_skeleton_python(interface):
     yield "import sys"
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
 
 
-def generate_template(interface):
+def generate_template_python(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_template_statement(statement, interface=interface)

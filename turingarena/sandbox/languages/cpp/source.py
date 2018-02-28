@@ -6,7 +6,7 @@ from subprocess import CalledProcessError
 import pkg_resources
 
 from turingarena.common import write_to_file
-from turingarena.protocol.skeleton.cpp import generate_skeleton
+from turingarena.protocol.skeleton.cpp import generate_skeleton_cpp
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -21,7 +21,7 @@ class CppAlgorithmSource(AlgorithmSource):
 
         skeleton_filename = os.path.join(algorithm_dir, "skeleton.cpp")
         with open(skeleton_filename, "w") as f:
-            write_to_file(generate_skeleton(self.interface), f)
+            write_to_file(generate_skeleton_cpp(self.interface), f)
 
         source_filename = os.path.join(algorithm_dir, "source.cpp")
         with open(source_filename, "w") as f:

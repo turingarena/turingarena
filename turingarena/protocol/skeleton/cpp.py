@@ -1,7 +1,7 @@
 from turingarena.common import indent_all, indent
 
 
-def generate_skeleton(interface):
+def generate_skeleton_cpp(interface):
     yield "#include <cstdio>"
     yield "#include <cstdlib>"
     for statement in interface.body.statements:
@@ -9,7 +9,7 @@ def generate_skeleton(interface):
         yield from generate_skeleton_statement(statement, interface=interface)
 
 
-def generate_template(interface):
+def generate_template_cpp(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_template_statement(statement, interface=interface)
