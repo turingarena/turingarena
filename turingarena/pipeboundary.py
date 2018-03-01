@@ -1,10 +1,8 @@
 import itertools
 import logging
 import os
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from enum import Enum
-
-from decorator import contextmanager
 
 from turingarena.common import ImmutableObject
 

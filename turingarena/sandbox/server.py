@@ -44,6 +44,8 @@ class SandboxProcessServer:
         self.process_exit_stack = ExitStack()
 
     def run(self):
+        logger.debug("starting process...")
+
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
             self.process = self.process_exit_stack.enter_context(

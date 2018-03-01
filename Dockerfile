@@ -1,15 +1,11 @@
-FROM alpine:3.6
+FROM python:3.6-stretch
 
-RUN apk add --no-cache \
+RUN apt update && apt install -y \
     ca-certificates \
-    cmake \
     g++ \
     gcc \
-    git \
-    make \
-    openssh \
-    python3 \
-    socat \
+    gdb \
+    linux-headers-amd64 \
     && true
 
 RUN \
@@ -18,13 +14,10 @@ RUN \
     true
 
 COPY setup.py /setup.py
+
 RUN python setup.py develop
-
-RUN ssh-keygen -A
-
-WORKDIR /root
-RUN mkdir db.git && git init --bare db.git
 
 ENTRYPOINT ["turingarena"]
 
 COPY turingarena/ /turingarena/
+COPY test_challenge/ /test_challenge/
