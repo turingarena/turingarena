@@ -37,8 +37,8 @@ def generate_template_statement(statement, *, interface):
 
 def generate_var(statement):
     names = ", ".join(d.name for d in statement.variables)
-    nones = ", ".join("None" for _ in statement.variables)
-    yield f"[{names}] = [{nones}]"
+    formats = ", ".join(build_type(d.value_type) for d in statement.variables)
+    yield f"# {names} : {formats}"
 
 
 def generate_global_var_template(statement):
@@ -53,10 +53,18 @@ def generate_function_template(statement):
     yield indent("pass")
 
 
+def generate_globals(interface):
+    variables = interface.body.scope.variables
+    if variables:
+        variables = ", ".join(variables)
+        yield f"global {variables}"
+
+
 def generate_callback(statement, *, interface):
     callback = statement.callback
     yield f"def {build_callable_declarator(callback)}:"
-    yield indent(f"print ('{callback.name}')")
+    yield from indent_all(generate_globals(interface))
+    yield indent(f"print('{callback.name}')")
     yield from indent_all(generate_block(callback.body, interface=interface))
 
 
@@ -66,8 +74,12 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(statement, *, interface):
-    yield 'if __name__ == "__main__":'
+    yield 'def main():'
+    yield from indent_all(generate_globals(interface))
     yield from indent_all(generate_block(statement.main.body, interface=interface))
+    yield
+    yield 'if __name__ == "__main__":'
+    yield indent("main()")
 
 
 def generate_block(block, *, interface):
@@ -81,7 +93,7 @@ def generate_block_statement(statement, *, interface):
         "alloc": lambda: generate_alloc(statement),
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
-        "flush": lambda: ["sys.stdout.flush()"],
+        "flush": lambda: ["""sys.stdout.flush()"""],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),
@@ -112,25 +124,32 @@ def generate_call(statement, *, interface):
 
 
 def generate_output(statement):
-    format_string = ' '.join('{}' for v in statement.arguments)
     args = ', '.join(build_expression(v) for v in statement.arguments)
-    yield f'print("{format_string}".format({args}))'
+    yield f'print({args})'
 
 
 def generate_input(statement):
-    for v in statement.arguments:
-        arg = build_expression(v)
-        format_string = build_format(v)
-        yield f'{arg} = {format_string}(input())'
+    arguments = ", ".join(
+        build_expression(v)
+        for v in statement.arguments
+    )
+
+    formats = ", ".join(
+        build_format(v.value_type.base_type)
+        for v in statement.arguments
+    )
+
+    yield f"[{arguments}] = (fmt(v) for fmt, v in zip([{formats}], sys.stdin.readline().split()))"
 
 
 def generate_if(statement, *, interface):
     condition = build_expression(statement.condition)
-    yield f"if {condition} :"
+    yield f"if {condition}:"
     yield from indent_all(generate_block(statement.then_body, interface=interface))
-    if statement.else_body is not None:
-        yield "else:"
-        yield from indent_all(generate_block(statement.else_body, interface=interface))
+    if statement.else_body is None:
+        return
+    yield "else:"
+    yield from indent_all(generate_block(statement.else_body, interface=interface))
 
 
 def generate_for(statement, *, interface):
@@ -165,7 +184,15 @@ def build_expression(expression):
     return builders[expression.expression_type]()
 
 
-def build_format(expr):
+def build_format(t):
     return {
         int: "int",
-    }[expr.value_type.base_type]
+    }[t]
+
+
+def build_type(t):
+    builders = {
+        "scalar": lambda: f"{build_format(t.base_type)}",
+        "array": lambda: f"List[{build_type(t.item_type)}]",
+    }
+    return builders[t.meta_type]()
