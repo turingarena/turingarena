@@ -39,8 +39,7 @@ class DriverProcessClient:
 
 
 class DriverRunningProcess:
-    def __init__(self, *, interface_signature, connection):
-        self.interface_signature = interface_signature
+    def __init__(self, connection):
         self.connection = connection
         self.proxy = InterfaceProxy(self)
 

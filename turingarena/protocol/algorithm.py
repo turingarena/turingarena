@@ -63,10 +63,7 @@ class Algorithm:
                 DriverProcessClient(driver_process_dir).connect()
             )
 
-            running_process = DriverRunningProcess(
-                interface_signature=self.interface.signature,
-                connection=driver_connection,
-            )
+            running_process = DriverRunningProcess(driver_connection)
 
             try:
                 running_process.begin_main(global_variables)
