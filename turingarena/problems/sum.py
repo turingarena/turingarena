@@ -13,11 +13,6 @@ interface_text = """
 """
 
 
-def compute(algorithm, a, b):
-    with algorithm.run() as process:
-        return process.call.sum(a, b)
-
-
 def evaluate(algorithm):
     cases = [
         (random.randrange(0, 1000), random.randrange(0, 1000))
@@ -32,10 +27,9 @@ def evaluate(algorithm):
             print("WRONG!")
 
 
-problem = AlgorithmicProblem(
-    interface_text=interface_text,
-    evaluator=evaluate,
-)
+def compute(algorithm, a, b):
+    with algorithm.run() as process:
+        return process.call.sum(a, b)
 
 
 def test_correct():
@@ -43,3 +37,16 @@ def test_correct():
         "int sum(int a, int b) { return a+b; }",
         language="c++",
     )
+
+
+def test_wrong():
+    problem.evaluate(
+        "int sum(int a, int b) { return a+b+b%2; }",
+        language="c++",
+    )
+
+
+problem = AlgorithmicProblem(
+    interface_text=interface_text,
+    evaluator=evaluate,
+)
