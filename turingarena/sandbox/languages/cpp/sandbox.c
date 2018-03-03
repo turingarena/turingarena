@@ -24,8 +24,7 @@
 #include <stdlib.h>
 #include <sys/resource.h>
 
-#define DEBUG(message) fprintf(stderr, "DEBUG: %s \n", message)
-#define CAT(a, b) a ## b 
+#define CAT(a, b) a ## b
 #define ALLOW(syscall) \
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, CAT(__NR_,syscall), 0, 1), \
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
@@ -74,8 +73,6 @@ static struct sock_fprog seccomp_filter_program = {
  */
 static void sandbox_init(void) 
 {
-	DEBUG("Initializing sandbox");
-
 	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
 		perror("Error calling prctl(PR_SET_O_NEW_PRIVS, 1)");
 		_Exit(EXIT_FAILURE);
@@ -85,8 +82,6 @@ static void sandbox_init(void)
 		perror("Error calling prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &seccomp_filter_program)");
 		_Exit(EXIT_FAILURE);
 	}
-
-	DEBUG("Sandbox initialized");
 }
 
 /* 
