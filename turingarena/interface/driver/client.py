@@ -2,8 +2,8 @@ import logging
 from contextlib import contextmanager
 from functools import partial
 
+from turingarena.interface.driver.commands import MetaType, get_meta_type
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
-from turingarena.interface.driver.serialize import MetaType, get_meta_type
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.proxy import InterfaceProxy
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide

@@ -4,7 +4,7 @@ from functools import partial
 from decorator import contextmanager
 
 from turingarena.interface.driver.commands import ProxyRequest
-from turingarena.interface.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
+from turingarena.interface.driver.frames import Frame, StatementContext, Phase, logger, ActivationRecord
 from turingarena.interface.exceptions import InterfaceError
 
 
@@ -14,31 +14,32 @@ class InterfaceEngine:
         self.driver_connection = driver_connection
         self.sandbox_connection = sandbox_connection
 
-        self.root_frame = Frame(parent=None, scope=interface.body.scope)
+        self.global_frame = Frame(parent=None, scope=interface.body.scope)
+        self.main_activation_record = ActivationRecord()
+
         self.callback_queue = deque()
         self._current_request = None
         self.input_sent = False
 
-        self.main_block_context = RootBlockContext()
         self.run_generator = self.interface.run(self.new_context(
-            root_block_context=self.main_block_context,
+            activation_record=self.main_activation_record,
             phase=Phase.RUN,
         ))
 
     def run(self):
         generator = self.interface.run(self.new_context(
-            root_block_context=self.main_block_context,
+            activation_record=self.main_activation_record,
             phase=Phase.PREFLIGHT,
         ))
         l = list(generator)
         # in the preflight phase, the protocol should never yield
         assert l == []
 
-    def new_context(self, *, root_block_context, phase):
+    def new_context(self, *, activation_record, phase):
         return StatementContext(
             engine=self,
-            root_block_context=root_block_context,
-            frame=self.root_frame,
+            activation_record=activation_record,
+            frame=self.global_frame,
             phase=phase,
         )
 

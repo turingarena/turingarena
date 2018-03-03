@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.interface.driver.frames import RootBlockContext, Phase
+from turingarena.interface.driver.frames import ActivationRecord, Phase
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.model.expressions import Expression
 from turingarena.interface.model.statement import ImperativeStatement
@@ -70,7 +70,7 @@ class CallStatement(ImperativeStatement):
                 p(request.accepted_callbacks.index(callback_context.callback.name))
             # TODO: callback arguments should be part of the same response
             yield from callback_context.callback.run(context.engine.new_context(
-                root_block_context=callback_context,
+                activation_record=callback_context,
                 phase=context.phase,
             ))
             context.engine.ensure_output()
@@ -92,11 +92,11 @@ class CallStatement(ImperativeStatement):
                 break
 
             callback = context.engine.interface.body.scope.callbacks[callback_name]
-            callback_context = RootBlockContext(callback)
-            context.engine.push_callback(callback_context)
+            callback_activation_record = ActivationRecord(callback)
+            context.engine.push_callback(callback_activation_record)
             logger.debug(f"got callback '{callback_name}', pushing to queue")
             yield from callback.run(context=context.engine.new_context(
-                root_block_context=callback_context,
+                activation_record=callback_activation_record,
                 phase=context.phase,
             ))
 

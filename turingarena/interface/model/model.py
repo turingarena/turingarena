@@ -50,7 +50,7 @@ class InterfaceDefinition(ImmutableObject):
         if context.phase is Phase.PREFLIGHT:
             request = context.engine.process_request(expected_type="main_begin")
             for variable, value in zip(self.signature.variables.values(), request.global_variables):
-                context.engine.root_frame[variable] = value
+                context.engine.global_frame[variable] = value
 
         try:
             yield from main.body.run(context)

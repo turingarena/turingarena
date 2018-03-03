@@ -50,14 +50,14 @@ class Frame:
         })
 
     @contextmanager
-    def contextmanager(self, phase):
+    def open(self, phase):
         assert self.state[phase] is FrameState.PRISTINE
         self.state[phase] = FrameState.OPEN
         yield
         self.state[phase] = FrameState.CLOSED
 
 
-class RootBlockContext(ImmutableObject):
+class ActivationRecord(ImmutableObject):
     __slots__ = ["callback", "frame_cache"]
 
     def __init__(self, callback=None):
@@ -68,14 +68,7 @@ class RootBlockContext(ImmutableObject):
 
     @contextmanager
     def new_frame(self, *, parent, scope, phase):
-        try:
-            frame = self.frame_cache[scope]
-        except KeyError:
-            frame = None
-
-        if frame and frame.state[phase] is FrameState.CLOSED:
-            del self.frame_cache[scope]
-            frame = None
+        frame = self._lookup_frame_cache(phase, scope)
 
         if not frame:
             frame = self.frame_cache[scope] = Frame(
@@ -83,26 +76,38 @@ class RootBlockContext(ImmutableObject):
                 scope=scope,
             )
 
-        with frame.contextmanager(phase=phase):
+        with frame.open(phase=phase):
             yield frame
+
+    def _lookup_frame_cache(self, phase, scope):
+        try:
+            frame = self.frame_cache[scope]
+        except KeyError:
+            return None
+
+        if frame.state[phase] is FrameState.CLOSED:
+            del self.frame_cache[scope]
+            return None
+
+        return frame
 
 
 class StatementContext(ImmutableObject):
-    __slots__ = ["engine", "root_block_context", "frame", "phase"]
+    __slots__ = ["engine", "activation_record", "frame", "phase"]
 
     def evaluate(self, expression):
         return expression.evaluate(frame=self.frame)
 
     @contextmanager
     def enter(self, scope):
-        with self.root_block_context.new_frame(
+        with self.activation_record.new_frame(
                 parent=self.frame,
                 scope=scope,
                 phase=self.phase,
         ) as new_frame:
             yield StatementContext(
                 engine=self.engine,
-                root_block_context=self.root_block_context,
+                activation_record=self.activation_record,
                 frame=new_frame,
                 phase=self.phase,
             )
