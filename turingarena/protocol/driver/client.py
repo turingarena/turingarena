@@ -1,10 +1,11 @@
 import logging
 from contextlib import contextmanager
+from functools import partial
 
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
-from turingarena.protocol.driver.commands import FunctionCall, CallbackReturn, ProxyResponse, MainBegin, MainEnd, Exit
 from turingarena.protocol.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
-from turingarena.protocol.exceptions import ProtocolError, ProtocolExit
+from turingarena.protocol.driver.serialize import MetaType, get_meta_type
+from turingarena.protocol.exceptions import ProtocolExit
 from turingarena.protocol.proxy import InterfaceProxy
 
 logger = logging.getLogger(__name__)
@@ -44,84 +45,83 @@ class DriverRunningProcess:
         self.proxy = InterfaceProxy(self)
 
     def call(self, name, args, callbacks):
-        try:
-            function_signature = self.interface_signature.functions[name]
-        except KeyError:
-            raise ProtocolError(f"undefined function {name}")
+        logger.debug(f"call {name!r}, {args!r}, {callbacks.keys()!r}")
+        callback_list = list(callbacks.items())
 
-        if len(args) != len(function_signature.parameters):
-            raise ProtocolError(
-                f"function '{name}'"
-                f" expects {len(function_signature.parameters)} parameters,"
-                f" got {len(args)}")
+        with self.request() as p:
+            p("function_call")
 
-        request = FunctionCall(
-            interface_signature=self.interface_signature,
-            function_name=name,
-            parameters=[
-                p.value_type.ensure(a)
-                for p, a in zip(function_signature.parameters, args)
-            ],
-            accept_callbacks=bool(callbacks),
-        )
-        self._send_request(request)
+            p(name)
 
-        while True:
-            logger.debug("waiting for response...")
-            response = self._receive_response()
-            if response.message_type == "callback_call":
-                self._accept_callback(callbacks, response)
-                continue
-            if response.message_type == "function_return":
-                return response.return_value
+            p(len(args))
+            for v in args:
+                self.serialize(v, p)
 
-    def _accept_callback(self, callbacks_impl, response):
-        callback_name = response.callback_name
-        callback_signature = self.interface_signature.callbacks[callback_name]
+            p(len(callback_list))
+            for name, f in callback_list:
+                p(name)
+                p(f.__code__.co_argcount)
 
-        try:
-            raw_return_value = callbacks_impl[callback_name](*response.parameters)
-        except ProtocolExit:
-            self._send_request(Exit(interface_signature=self.interface_signature))
-            raise
+        logger.debug(f"call: request sent, waiting response")
+        while self.read_response():  # has callback
+            logger.debug(f"has callback, accepting")
+            self.accept_callback(callback_list)
 
-        return_type = callback_signature.return_type
-        if return_type:
-            return_value = return_type.ensure(raw_return_value)
+        if self.read_response():  # has return value
+            return self.read_response()
         else:
-            assert raw_return_value is None
-            return_value = None
+            return None
 
-        self._send_request(CallbackReturn(
-            interface_signature=self.interface_signature,
-            callback_name=callback_name,
-            return_value=return_value,
-        ))
+    def accept_callback(self, callback_list):
+        callback_index = self.read_response()
+        name, f = callback_list[callback_index]
+        logger.debug(f"received callback {name!r}, reading args...")
+        args = [self.read_response() for _ in range(f.__code__.co_argcount)]
+        logger.debug(f"received callback {name!r} with args {args!r}")
+        try:
+            return_value = f(*args)
+        except ProtocolExit:
+            with self.request() as p:
+                p("exit")
+            raise
+        with self.request() as p:
+            p("callback_return")
+            p(name)
+            has_return_value = (return_value is not None)
+            p(int(has_return_value))
+            if has_return_value:
+                p(int(return_value))
 
-    def _receive_response(self):
-        return ProxyResponse.deserialize(
-            map(str.strip, self.connection.response),
-            interface_signature=self.interface_signature,
-        )
+    def read_response(self):
+        line = self.connection.response.readline()
+        assert line
+        return int(line.strip())
 
-    def _send_request(self, request):
-        file = self.connection.request
-        for line in request.serialize():
-            print(line, file=file)
-        file.flush()
+    def serialize(self, value, p):
+        meta_type = get_meta_type(value)
+        logger.debug(f"meta_type: {meta_type!r}")
+        p(meta_type.value)
+        if meta_type is MetaType.ARRAY:
+            items = list(value)
+            p(len(items))
+            for item in items:
+                self.serialize(item, p)
+        elif meta_type == MetaType.SCALAR:
+            p(int(value))
+
+    @contextmanager
+    def request(self):
+        yield partial(print, file=self.connection.request)
+        self.connection.request.flush()
 
     def begin_main(self, global_variables):
-        request = MainBegin(
-            interface_signature=self.interface_signature,
-            global_variables=[
-                global_variables[variable.name]
-                for variable in self.interface_signature.variables.values()
-            ]
-        )
-        self._send_request(request)
+        with self.request() as p:
+            p("main_begin")
+            p(len(global_variables))
+            for name, value in global_variables.items():
+                p(name)
+                self.serialize(value, p)
 
     def end_main(self):
-        request = MainEnd(
-            interface_signature=self.interface_signature,
-        )
-        self._send_request(request)
+        with self.request() as p:
+            p("main_end")

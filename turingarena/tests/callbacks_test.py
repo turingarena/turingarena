@@ -68,7 +68,7 @@ def test_callback_with_arguments():
         with algo.run() as p:
             calls = []
             callback_with_arguments = callback_mock(calls)
-            p.call.test(callback_with_arguments=callback_with_arguments)
+            p.call.test(callback_with_arguments=lambda a, b: callback_with_arguments(a, b))
 
             assert calls == [
                 (callback_with_arguments, (1, 2)),
@@ -111,7 +111,7 @@ def test_callback_return_value():
         with algo.run() as p:
             calls = []
             callback_return_value = callback_mock(calls, [2, 4])
-            p.call.test(callback_return_value=callback_return_value)
+            p.call.test(callback_return_value=lambda a: callback_return_value(a))
 
             assert calls == [
                 (callback_return_value, (1,)),

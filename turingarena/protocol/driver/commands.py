@@ -4,6 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
+from turingarena.protocol.driver.serialize import deserialize
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,6 @@ class ProxyMessage(ImmutableObject):
         )
         return message
 
-    @abstractmethod
     def serialize_arguments(self):
         pass
 
@@ -77,45 +77,56 @@ class MainBegin(ProxyRequest):
 
     @staticmethod
     def deserialize_arguments(lines, *, interface_signature):
+        size = int(next(lines))
+        global_variables = dict([
+            (next(lines), deserialize(lines))
+            for _ in range(size)
+        ])
+        assert len(global_variables) == len(interface_signature.variables)
         return dict(
             global_variables=[
-                variable.value_type.deserialize(lines)
-                for variable in interface_signature.variables.values()
+                variable.value_type.ensure(global_variables[name])
+                for name, variable in interface_signature.variables.items()
             ]
         )
-
-    def serialize_arguments(self):
-        for variable, value in zip(self.interface_signature.variables.values(), self.global_variables):
-            yield from variable.value_type.serialize(value)
 
 
 @request_type("function_call")
 class FunctionCall(ProxyRequest):
-    __slots__ = ["function_name", "parameters", "accept_callbacks"]
+    __slots__ = ["function_name", "parameters", "accepted_callbacks"]
 
     @property
     def function_signature(self):
         return self.interface_signature.functions[self.function_name]
 
-    def serialize_arguments(self):
-        yield self.function_name
-        for parameter, value in zip(self.function_signature.parameters, self.parameters):
-            yield from parameter.value_type.serialize(value)
-        yield str(int(self.accept_callbacks))
-
     @staticmethod
     def deserialize_arguments(lines, *, interface_signature):
         function_name = next(lines)
         function_signature = interface_signature.functions[function_name]
+
+        parameters_count = int(next(lines))
+        assert parameters_count == len(function_signature.parameters)
+
         parameters = [
-            p.value_type.deserialize(lines)
+            p.value_type.ensure(deserialize(lines))
             for p in function_signature.parameters
         ]
-        accept_callbacks = bool(int(next(lines)))
+
+        accepted_callbacks = list()
+        callbacks_count = int(next(lines))
+        for _ in range(callbacks_count):
+            callback_name = next(lines)
+            callback_parameters_count = int(next(lines))
+
+            callback_signature = interface_signature.callbacks[callback_name]
+            assert callback_parameters_count == len(callback_signature.parameters)
+
+            accepted_callbacks.append(callback_name)
+
         return dict(
             function_name=function_name,
             parameters=parameters,
-            accept_callbacks=accept_callbacks,
+            accepted_callbacks=accepted_callbacks,
         )
 
 
@@ -142,19 +153,16 @@ class CallbackReturn(ProxyRequest):
     def deserialize_arguments(lines, *, interface_signature):
         callback_name = next(lines)
         callback_signature = interface_signature.callbacks[callback_name]
-        if callback_signature.return_type:
-            return_value = callback_signature.return_type.deserialize(lines)
+        has_return_value = int(next(lines))
+        assert has_return_value == bool(callback_signature.return_type)
+        if has_return_value:
+            return_value = callback_signature.return_type.ensure(int(next(lines)))
         else:
             return_value = None
         return dict(
             callback_name=callback_name,
             return_value=return_value,
         )
-
-    def serialize_arguments(self):
-        yield self.callback_name
-        if self.return_type is not None:
-            yield from self.return_type.serialize(self.return_value)
 
 
 @request_type("main_end")

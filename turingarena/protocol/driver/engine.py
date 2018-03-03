@@ -1,4 +1,7 @@
 from collections import deque
+from functools import partial
+
+from decorator import contextmanager
 
 from turingarena.protocol.driver.commands import ProxyRequest
 from turingarena.protocol.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
@@ -69,11 +72,10 @@ class InterfaceEngine:
         finally:
             self._current_request = None
 
-    def send_response(self, response):
-        file = self.driver_connection.response
-        for line in response.serialize():
-            print(line, file=file)
-        file.flush()
+    @contextmanager
+    def response(self):
+        yield partial(print, file=self.driver_connection.response)
+        self.driver_connection.response.flush()
 
     def ensure_output(self):
         logger.debug("ensure_output")

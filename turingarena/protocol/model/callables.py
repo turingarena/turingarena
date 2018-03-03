@@ -1,7 +1,6 @@
 import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.protocol.driver.commands import CallbackCall
 from turingarena.protocol.driver.frames import Phase
 from turingarena.protocol.driver.references import VariableReference
 from turingarena.protocol.exceptions import ProtocolError
@@ -121,15 +120,15 @@ class Callback(Callable):
 
         with context.enter(self.scope) as inner_context:
             if context.phase is Phase.PREFLIGHT:
-                response = CallbackCall(
-                    interface_signature=context.engine.interface.signature,
-                    callback_name=self.name,
-                    parameters=[
-                        VariableReference(frame=inner_context.frame, variable=p).get()
-                        for p in self.signature.parameters
-                    ],
-                )
-                context.engine.send_response(response)
+                parameters = [
+                    VariableReference(frame=inner_context.frame, variable=p).get()
+                    for p in self.signature.parameters
+                ]
+
+                with context.engine.response() as p:
+                    for v in parameters:
+                        assert isinstance(v, int)
+                        p(v)
 
             yield from self.body.run(inner_context)
 

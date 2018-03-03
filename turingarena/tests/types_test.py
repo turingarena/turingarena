@@ -84,7 +84,7 @@ def test_valid_types():
         ia = [len(x) for x in iaa]
         i = len(ia)
 
-        with algo.run(global_variables=locals()) as p:
+        with algo.run(global_variables=dict(iaa=iaa, ia=ia, i=i)) as p:
             assert i == p.call.get_i()
             for j in range(i):
                 assert ia[j] == p.call.get_ia(j)

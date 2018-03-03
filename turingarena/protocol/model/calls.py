@@ -1,6 +1,5 @@
 import logging
 
-from turingarena.protocol.driver.commands import FunctionReturn
 from turingarena.protocol.driver.frames import RootBlockContext, Phase
 from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.model.expressions import Expression
@@ -43,20 +42,39 @@ class CallStatement(ImperativeStatement):
             context.evaluate(value_expr).resolve(value)
 
         return_type = self.function.signature.return_type
-        if return_type or request.accept_callbacks:
+        if return_type or request.accepted_callbacks:
             context.engine.ensure_output()
 
-        yield from self.invoke_callbacks(context)
+        while True:
+            if not context.engine.interface.signature.callbacks:
+                logger.debug(f"no callback defined, nothing to do")
+                break
 
-        if return_type:
-            return_value = context.evaluate(self.return_value).get()
-        else:
-            return_value = None
-        context.engine.send_response(FunctionReturn(
-            interface_signature=context.engine.interface.signature,
-            function_name=self.function.name,
-            return_value=return_value,
-        ))
+            logger.debug(f"popping callbacks")
+            callback_context = context.engine.pop_callback()
+            if callback_context is None:
+                logger.debug(f"popped None")
+                break
+            logger.debug(f"popped callback")
+            with context.engine.response() as p:
+                p(1)  # has callbacks
+                p(request.accepted_callbacks.index(callback_context.callback.name))
+            yield from callback_context.callback.run(context.engine.new_context(
+                root_block_context=callback_context,
+                phase=context.phase,
+            ))
+            context.engine.ensure_output()
+
+        with context.engine.response() as p:
+            p(0)  # no more callbacks
+
+        with context.engine.response() as p:
+            if return_type:
+                return_value = context.evaluate(self.return_value).get()
+                p(1)  # has return value
+                p(return_value)
+            else:
+                p(0)  # no return value
 
     def accept_callbacks(self, context):
         if not context.engine.interface.signature.callbacks:
@@ -77,23 +95,6 @@ class CallStatement(ImperativeStatement):
                     root_block_context=callback_context,
                     phase=context.phase,
                 ))
-
-    def invoke_callbacks(self, context):
-        if not context.engine.interface.signature.callbacks:
-            logger.debug(f"no callback defined, nothing to do")
-            return
-        while True:
-            logger.debug(f"popping callbacks")
-            callback_context = context.engine.pop_callback()
-            if callback_context is None:
-                logger.debug(f"popped None")
-                break
-            logger.debug(f"popped callback")
-            yield from callback_context.callback.run(context.engine.new_context(
-                root_block_context=callback_context,
-                phase=context.phase,
-            ))
-            context.engine.ensure_output()
 
     def run(self, context):
         if context.phase is Phase.RUN:

@@ -3,12 +3,9 @@ from collections import deque
 import pytest
 import tatsu
 
-from turingarena.cli.loggerinit import init_logger
 from turingarena.protocol.algorithm import load_algorithm
 from turingarena.protocol.exceptions import ProtocolError
 from turingarena.protocol.model.model import InterfaceDefinition
-
-init_logger()
 
 
 def callback_mock(calls, return_values=None):
