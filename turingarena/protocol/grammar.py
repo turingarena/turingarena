@@ -1,5 +1,5 @@
 grammar_ebnf = r"""
-    @@comments :: /\/\*(.|\n|\r)*\*\//
+    @@comments :: /\/\*((?!\*\/).)*\*\//
     @@eol_comments :: /\/\/.*$/
 
     interface = body:interface_body $ ;

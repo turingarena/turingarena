@@ -1,4 +1,4 @@
-from turingarena.tests.utils import callback_mock, define_algorithms
+from turingarena.tests.test_utils import callback_mock, define_algorithms
 
 
 def test_interface_no_callbacks():

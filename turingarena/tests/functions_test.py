@@ -1,4 +1,4 @@
-from turingarena.tests.utils import define_algorithms
+from turingarena.tests.test_utils import define_algorithms
 
 
 def test_function_no_arguments():

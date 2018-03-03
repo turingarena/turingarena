@@ -12,6 +12,15 @@ class ScopeNamespace:
         """Returns a _copy of_ this scope as a dict."""
         return OrderedDict(self.delegate)
 
+    def __bool__(self):
+        return bool(len(self))
+
+    def __len__(self):
+        ans = len(self.delegate)
+        if self.parent:
+            ans += len(self.parent)
+        return ans
+
     def __iter__(self):
         if self.parent:
             yield from self.parent
