@@ -4,7 +4,7 @@ import subprocess
 from contextlib import contextmanager
 
 from turingarena.common import write_to_file
-from turingarena.protocol.skeleton.python import generate_skeleton_python
+from turingarena.interface.skeleton.python import generate_skeleton_python
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.source import AlgorithmSource
 

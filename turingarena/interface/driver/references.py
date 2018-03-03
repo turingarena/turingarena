@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.model.type_expressions import PrimaryType, ArrayType
+from turingarena.interface.model.type_expressions import PrimaryType, ArrayType
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,8 @@
 from turingarena.cli import docopt_cli
-
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
+from turingarena.interface.template import generate_template_cli, generate_skeleton_cli
 from turingarena.problem import problem_evaluate_cli
-from turingarena.protocol.template import generate_template_cli, generate_skeleton_cli
 
 
 @docopt_cli

@@ -1,12 +1,12 @@
 from turingarena.common import ImmutableObject
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.exceptions import ProtocolExit
-from turingarena.protocol.model.body import Body, ExitCall
-from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.statement import ImperativeStatement
-from turingarena.protocol.model.type_expressions import ScalarType
-from turingarena.protocol.model.variables import Variable
+from turingarena.interface.driver.frames import Phase
+from turingarena.interface.exceptions import InterfaceExit
+from turingarena.interface.model.body import Body, ExitCall
+from turingarena.interface.model.expressions import Expression
+from turingarena.interface.model.scope import Scope
+from turingarena.interface.model.statement import ImperativeStatement
+from turingarena.interface.model.type_expressions import ScalarType
+from turingarena.interface.model.variables import Variable
 
 
 class ExitStatement(ImperativeStatement):
@@ -20,7 +20,7 @@ class ExitStatement(ImperativeStatement):
         yield from []
         if context.phase == Phase.PREFLIGHT:
             context.engine.ensure_output()
-        raise ProtocolExit
+        raise InterfaceExit
 
     def first_calls(self):
         return {ExitCall}

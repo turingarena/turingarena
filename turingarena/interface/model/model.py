@@ -2,11 +2,11 @@ import logging
 from collections import OrderedDict
 
 from turingarena.common import ImmutableObject, TupleLikeObject
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.exceptions import ProtocolExit
-from turingarena.protocol.model.body import Body
-from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.parser import parse_protocol
+from turingarena.interface.driver.frames import Phase
+from turingarena.interface.exceptions import InterfaceExit
+from turingarena.interface.model.body import Body
+from turingarena.interface.model.scope import Scope
+from turingarena.interface.parser import parse_interface
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class InterfaceDefinition(ImmutableObject):
 
     @staticmethod
     def compile(source_text, **kwargs):
-        ast = parse_protocol(source_text, **kwargs)
+        ast = parse_interface(source_text, **kwargs)
 
         scope = Scope()
         body = Body.compile(ast.body, scope=scope)
@@ -54,7 +54,7 @@ class InterfaceDefinition(ImmutableObject):
 
         try:
             yield from main.body.run(context)
-        except ProtocolExit:
+        except InterfaceExit:
             logger.debug(f"exit was reached")
             if context.phase is Phase.PREFLIGHT:
                 context.engine.process_request(expected_type="exit")

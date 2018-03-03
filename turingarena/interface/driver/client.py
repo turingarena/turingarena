@@ -2,11 +2,11 @@ import logging
 from contextlib import contextmanager
 from functools import partial
 
+from turingarena.interface.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
+from turingarena.interface.driver.serialize import MetaType, get_meta_type
+from turingarena.interface.exceptions import InterfaceExit
+from turingarena.interface.proxy import InterfaceProxy
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
-from turingarena.protocol.driver.connection import DRIVER_QUEUE, DriverProcessConnection, DRIVER_PROCESS_CHANNEL
-from turingarena.protocol.driver.serialize import MetaType, get_meta_type
-from turingarena.protocol.exceptions import ProtocolExit
-from turingarena.protocol.proxy import InterfaceProxy
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ class DriverRunningProcess:
         logger.debug(f"received callback {name!r} with args {args!r}")
         try:
             return_value = f(*args)
-        except ProtocolExit:
+        except InterfaceExit:
             with self.request() as p:
                 p("exit")
             raise

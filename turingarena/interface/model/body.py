@@ -1,7 +1,7 @@
-from turingarena.protocol.model.node import AbstractSyntaxNode
-from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.statement import ImperativeStatement
-from turingarena.protocol.model.statements import compile_statement
+from turingarena.interface.model.node import AbstractSyntaxNode
+from turingarena.interface.model.scope import Scope
+from turingarena.interface.model.statement import ImperativeStatement
+from turingarena.interface.model.statements import compile_statement
 
 
 class Body(AbstractSyntaxNode):

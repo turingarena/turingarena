@@ -1,9 +1,9 @@
 import logging
 
-from turingarena.protocol.driver.frames import RootBlockContext, Phase
-from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.statement import ImperativeStatement
+from turingarena.interface.driver.frames import RootBlockContext, Phase
+from turingarena.interface.exceptions import InterfaceError
+from turingarena.interface.model.expressions import Expression
+from turingarena.interface.model.statement import ImperativeStatement
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class CallStatement(ImperativeStatement):
         request = context.engine.process_request(expected_type="function_call")
 
         if request.function_name != self.function.name:
-            raise ProtocolError(f"expected call to '{self.function.name}', got '{request.function_name}'")
+            raise InterfaceError(f"expected call to '{self.function.name}', got '{request.function_name}'")
 
         for value_expr, value in zip(self.parameters, request.parameters):
             context.evaluate(value_expr).resolve(value)

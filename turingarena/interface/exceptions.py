@@ -1,8 +1,8 @@
-class ProtocolExit(Exception):
+class InterfaceExit(Exception):
     pass
 
 
-class ProtocolError(Exception):
+class InterfaceError(Exception):
     def __init__(self, message, *, parseinfo=None):
         self.message = message
         self.parseinfo = parseinfo

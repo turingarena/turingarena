@@ -1,5 +1,5 @@
-from turingarena.protocol.model.node import AbstractSyntaxNode
-from turingarena.protocol.model.statements import get_statement_classes
+from turingarena.interface.model.node import AbstractSyntaxNode
+from turingarena.interface.model.statements import get_statement_classes
 
 
 class Statement(AbstractSyntaxNode):

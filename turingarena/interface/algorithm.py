@@ -4,9 +4,9 @@ import threading
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.protocol.driver.client import DriverClient, DriverProcessClient, DriverRunningProcess
-from turingarena.protocol.driver.server import DriverServer
-from turingarena.protocol.model.model import InterfaceDefinition
+from turingarena.interface.driver.client import DriverClient, DriverProcessClient, DriverRunningProcess
+from turingarena.interface.driver.server import DriverServer
+from turingarena.interface.model.model import InterfaceDefinition
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer

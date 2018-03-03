@@ -1,7 +1,7 @@
 import logging
 import os
 
-from turingarena.protocol.model.model import InterfaceDefinition
+from turingarena.interface.model.model import InterfaceDefinition
 from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
 from turingarena.sandbox.languages.python import PythonAlgorithmExecutableScript
 

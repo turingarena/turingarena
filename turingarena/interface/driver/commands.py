@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import ImmutableObject
-from turingarena.protocol.driver.serialize import deserialize
+from turingarena.interface.driver.serialize import deserialize
 
 logger = logging.getLogger(__name__)
 

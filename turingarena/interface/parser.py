@@ -3,7 +3,7 @@ import logging
 import tatsu
 from tatsu.ast import AST
 
-from turingarena.protocol.grammar import grammar_ebnf
+from turingarena.interface.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ logger.debug("compiling interface grammar")
 grammar = tatsu.compile(grammar_ebnf)
 
 
-def parse_protocol(text, **kwargs):
+def parse_interface(text, **kwargs):
     return grammar.parse(text, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
 
 

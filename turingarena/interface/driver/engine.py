@@ -3,9 +3,9 @@ from functools import partial
 
 from decorator import contextmanager
 
-from turingarena.protocol.driver.commands import ProxyRequest
-from turingarena.protocol.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
-from turingarena.protocol.exceptions import ProtocolError
+from turingarena.interface.driver.commands import ProxyRequest
+from turingarena.interface.driver.frames import Frame, StatementContext, Phase, logger, RootBlockContext
+from turingarena.interface.exceptions import InterfaceError
 
 
 class InterfaceEngine:
@@ -64,7 +64,7 @@ class InterfaceEngine:
         r = self._current_request
         if expected_type is not None:
             if r.message_type != expected_type:
-                raise ProtocolError(f"expecting '{expected_type}', got '{r.message_type}'")
+                raise InterfaceError(f"expecting '{expected_type}', got '{r.message_type}'")
 
     def _pop_current_request(self):
         try:

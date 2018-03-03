@@ -1,10 +1,10 @@
 import logging
 from abc import abstractmethod
 
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.exceptions import CommunicationBroken
-from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.statement import ImperativeStatement
+from turingarena.interface.driver.frames import Phase
+from turingarena.interface.exceptions import CommunicationBroken
+from turingarena.interface.model.expressions import Expression
+from turingarena.interface.model.statement import ImperativeStatement
 
 logger = logging.getLogger(__name__)
 

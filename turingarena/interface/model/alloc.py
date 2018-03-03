@@ -1,7 +1,7 @@
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.model.expressions import Expression
-from turingarena.protocol.model.statement import ImperativeStatement
-from turingarena.protocol.model.type_expressions import ArrayType, ScalarType
+from turingarena.interface.driver.frames import Phase
+from turingarena.interface.model.expressions import Expression
+from turingarena.interface.model.statement import ImperativeStatement
+from turingarena.interface.model.type_expressions import ArrayType, ScalarType
 
 
 class AllocStatement(ImperativeStatement):

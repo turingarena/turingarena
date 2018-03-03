@@ -1,6 +1,6 @@
 from pytest import approx
 
-from turingarena.protocol.algorithm import load_algorithm
+from turingarena.interface.algorithm import load_algorithm
 
 
 def test_get_time_memory_usage():

@@ -1,12 +1,12 @@
 import logging
 from contextlib import ExitStack
 
+from turingarena.interface.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL, DRIVER_QUEUE
+from turingarena.interface.driver.engine import InterfaceEngine
+from turingarena.interface.exceptions import CommunicationBroken
+from turingarena.interface.model.model import InterfaceDefinition
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena.protocol.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL, DRIVER_QUEUE
-from turingarena.protocol.driver.engine import InterfaceEngine
-from turingarena.protocol.exceptions import CommunicationBroken
-from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.client import SandboxProcessClient
 
 logger = logging.getLogger(__name__)

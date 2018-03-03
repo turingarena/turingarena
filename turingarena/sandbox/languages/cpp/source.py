@@ -6,7 +6,7 @@ from subprocess import CalledProcessError
 import pkg_resources
 
 from turingarena.common import write_to_file
-from turingarena.protocol.skeleton.cpp import generate_skeleton_cpp
+from turingarena.interface.skeleton.cpp import generate_skeleton_cpp
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
 

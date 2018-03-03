@@ -3,9 +3,9 @@ from abc import abstractmethod
 
 from bidict import bidict
 
-from turingarena.protocol.driver.references import ConstantReference, VariableReference, ArrayItemReference
-from turingarena.protocol.model.node import AbstractSyntaxNode
-from turingarena.protocol.model.type_expressions import ScalarType
+from turingarena.interface.driver.references import ConstantReference, VariableReference, ArrayItemReference
+from turingarena.interface.model.node import AbstractSyntaxNode
+from turingarena.interface.model.type_expressions import ScalarType
 
 expression_classes = bidict()
 

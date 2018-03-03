@@ -3,9 +3,9 @@ from collections import deque
 import pytest
 import tatsu
 
-from turingarena.protocol.algorithm import load_algorithm
-from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.model.model import InterfaceDefinition
+from turingarena.interface.algorithm import load_algorithm
+from turingarena.interface.exceptions import InterfaceError
+from turingarena.interface.model.model import InterfaceDefinition
 
 
 def callback_mock(calls, return_values=None):
@@ -44,7 +44,7 @@ def parse_markers(interface_text):
 
 def compilation_fails(interface_text, message):
     markers = parse_markers(interface_text)
-    with pytest.raises(ProtocolError) as excinfo:
+    with pytest.raises(InterfaceError) as excinfo:
         InterfaceDefinition.compile(interface_text)
     assert excinfo.value.message == message
     assert_at_markers(excinfo.value, markers)

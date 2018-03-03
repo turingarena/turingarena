@@ -1,14 +1,14 @@
 import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.protocol.driver.frames import Phase
-from turingarena.protocol.driver.references import VariableReference
-from turingarena.protocol.exceptions import ProtocolError
-from turingarena.protocol.model.body import Body
-from turingarena.protocol.model.scope import Scope
-from turingarena.protocol.model.statement import Statement
-from turingarena.protocol.model.type_expressions import ValueType, ScalarType
-from turingarena.protocol.model.variables import Variable
+from turingarena.interface.driver.frames import Phase
+from turingarena.interface.driver.references import VariableReference
+from turingarena.interface.exceptions import InterfaceError
+from turingarena.interface.model.body import Body
+from turingarena.interface.model.scope import Scope
+from turingarena.interface.model.statement import Statement
+from turingarena.interface.model.type_expressions import ValueType, ScalarType
+from turingarena.interface.model.variables import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class CallableSignature(TupleLikeObject):
         else:
             return_type = ValueType.compile(ast.return_type.expression, scope=scope)
             if not isinstance(return_type, ScalarType):
-                raise ProtocolError(
+                raise InterfaceError(
                     "return type must be a scalar",
                     parseinfo=ast.return_type.parseinfo,
                 )
@@ -100,7 +100,7 @@ class Callback(Callable):
         )
 
         if invalid_parameter is not None:
-            raise ProtocolError(
+            raise InterfaceError(
                 "callback arguments must be scalars",
                 parseinfo=invalid_parameter.parseinfo,
             )
