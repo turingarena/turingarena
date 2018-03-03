@@ -45,30 +45,10 @@ class CallStatement(ImperativeStatement):
         if return_type or request.accepted_callbacks:
             context.engine.ensure_output()
 
-        while True:
-            if not context.engine.interface.signature.callbacks:
-                logger.debug(f"no callback defined, nothing to do")
-                break
-
-            logger.debug(f"popping callbacks")
-            callback_context = context.engine.pop_callback()
-            if callback_context is None:
-                logger.debug(f"popped None")
-                break
-            logger.debug(f"popped callback")
-            with context.engine.response() as p:
-                p(1)  # has callbacks
-                p(request.accepted_callbacks.index(callback_context.callback.name))
-            yield from callback_context.callback.run(context.engine.new_context(
-                root_block_context=callback_context,
-                phase=context.phase,
-            ))
-            context.engine.ensure_output()
+        yield from self.invoke_callbacks(context, request)
 
         with context.engine.response() as p:
             p(0)  # no more callbacks
-
-        with context.engine.response() as p:
             if return_type:
                 return_value = context.evaluate(self.return_value).get()
                 p(1)  # has return value
@@ -76,25 +56,48 @@ class CallStatement(ImperativeStatement):
             else:
                 p(0)  # no return value
 
+    def invoke_callbacks(self, context, request):
+        while True:
+            logger.debug(f"popping callbacks")
+            callback_context = context.engine.pop_callback()
+            if callback_context is None:
+                logger.debug(f"popped None: no more callbacks")
+                break
+            logger.debug(f"popped callback")
+            with context.engine.response() as p:
+                p(1)  # has callbacks
+                p(request.accepted_callbacks.index(callback_context.callback.name))
+            # TODO: callback arguments should be part of the same response
+            yield from callback_context.callback.run(context.engine.new_context(
+                root_block_context=callback_context,
+                phase=context.phase,
+            ))
+            context.engine.ensure_output()
+
     def accept_callbacks(self, context):
         if not context.engine.interface.signature.callbacks:
-            return
+            context.engine.push_callback(None)
+        else:
+            yield from self.do_accept_callbacks(context)
+
+    def do_accept_callbacks(self, context):
         while True:
             logger.debug("accepting callbacks...")
             callback_name = context.engine.sandbox_connection.upward.readline().strip()
+
             if callback_name == "return":
                 logger.debug(f"no more callbacks, push None to callback queue")
                 context.engine.push_callback(None)
                 break
-            else:
-                callback = context.engine.interface.body.scope.callbacks[callback_name]
-                callback_context = RootBlockContext(callback)
-                context.engine.push_callback(callback_context)
-                logger.debug(f"got callback '{callback_name}', pushing to queue")
-                yield from callback.run(context=context.engine.new_context(
-                    root_block_context=callback_context,
-                    phase=context.phase,
-                ))
+
+            callback = context.engine.interface.body.scope.callbacks[callback_name]
+            callback_context = RootBlockContext(callback)
+            context.engine.push_callback(callback_context)
+            logger.debug(f"got callback '{callback_name}', pushing to queue")
+            yield from callback.run(context=context.engine.new_context(
+                root_block_context=callback_context,
+                phase=context.phase,
+            ))
 
     def run(self, context):
         if context.phase is Phase.RUN:

@@ -63,16 +63,16 @@ class Algorithm:
                 DriverProcessClient(driver_process_dir).connect()
             )
 
-            running_process = DriverRunningProcess(driver_connection)
+            driver_running_process = DriverRunningProcess(driver_connection)
 
             try:
-                running_process.begin_main(global_variables)
+                driver_running_process.begin_main(global_variables)
                 algorithm_process = AlgorithmProcess(
                     sandbox=sandbox_process_client,
-                    driver=running_process,
+                    driver=driver_running_process,
                 )
                 yield algorithm_process
-                running_process.end_main()
+                driver_running_process.end_main()
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:
