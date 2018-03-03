@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class Algorithm:
-    def __init__(self, *, algorithm_dir, interface):
+    def __init__(self, *, algorithm_dir, interface_text):
         self.algorithm_dir = algorithm_dir
-        self.interface = interface
+        self.interface_text = interface_text
 
     @contextmanager
     def run(self, global_variables=None):
@@ -54,7 +54,7 @@ class Algorithm:
 
             driver_process_dir = stack.enter_context(
                 driver_client.run(
-                    interface_text=self.interface.source_text,
+                    interface_text=self.interface_text,
                     sandbox_process_dir=sandbox_process_dir,
                 )
             )
@@ -128,5 +128,5 @@ def load_algorithm(*, interface_text, language, source_text):
 
         yield Algorithm(
             algorithm_dir=algorithm_dir,
-            interface=interface,
+            interface_text=interface_text,
         )

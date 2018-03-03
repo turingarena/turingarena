@@ -45,7 +45,8 @@ class CallStatement(ImperativeStatement):
         if return_type or request.accepted_callbacks:
             context.engine.ensure_output()
 
-        yield from self.invoke_callbacks(context, request)
+            # FIXME: this is not in sync with accept_callbacks
+            yield from self.invoke_callbacks(context, request)
 
         with context.engine.response() as p:
             p(0)  # no more callbacks
