@@ -38,41 +38,41 @@ def should_succeed(cpp_source):
             p.call.test()
 
 
+def expect_bad_syscall(code, where):
+    excinfo = should_raise(code)
+    assert "Bad system call" in excinfo.value.stacktrace
+    assert where in excinfo.value.stacktrace
+
+
 def test_open():
-    excinfo = should_raise(r"""
+    expect_bad_syscall(r"""
         #include <cstdio>
         int test() { fopen("name", "r"); }
-    """)
-    assert "Bad system call" in excinfo.value.stacktrace
-    assert "test ()" in excinfo.value.stacktrace
+    """, "test ()")
 
 
 def test_constructor():
-    excinfo = should_raise(r"""
+    expect_bad_syscall(r"""
         #include <stdio.h>
         __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
         int test() {}
-    """)
-    assert "Bad system call" in excinfo.value.stacktrace
-    assert "init ()" in excinfo.value.stacktrace
+    """, "init ()")
 
 
 def test_preinit():
-    should_raise(r"""
+    expect_bad_syscall(r"""
         #include <stdio.h>
         static void init() { fopen("name", "r"); }
         __attribute__((section(".preinit_array"), used)) static void (*preinit_fun)(void) = init;
         int test() {}
-    """)
+    """, "init ()")
 
 
 def test_istream():
-    excinfo = should_raise(r"""
+    expect_bad_syscall(r"""
         #include <fstream>
         int test() { std::ifstream in("name"); }
-    """)
-    assert "Bad system call" in excinfo.value.stacktrace
-    assert "test ()" in excinfo.value.stacktrace
+    """, "test ()")
 
 
 def test_malloc_succeeds():
