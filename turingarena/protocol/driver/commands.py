@@ -8,33 +8,12 @@ from turingarena.protocol.driver.serialize import deserialize
 
 logger = logging.getLogger(__name__)
 
-request_types = bidict()
-response_types = bidict()
 
-
-def request_type(name):
-    def decorator(cls):
-        request_types[name] = cls
-        return cls
-
-    return decorator
-
-
-def response_type(name):
-    def decorator(cls):
-        response_types[name] = cls
-        return cls
-
-    return decorator
-
-
-class ProxyMessage(ImmutableObject):
+class ProxyRequest(ImmutableObject):
     __slots__ = ["interface_signature", "message_type"]
 
-    message_types = None
-
     def __init__(self, **kwargs):
-        kwargs.setdefault("message_type", self.message_types.inv[self.__class__])
+        kwargs.setdefault("message_type", request_types.inv[self.__class__])
         super().__init__(**kwargs)
 
     @staticmethod
@@ -47,7 +26,7 @@ class ProxyMessage(ImmutableObject):
         logger.debug("accepting message...")
         message_type = next(lines)
         logger.debug(f"received message type {message_type}, parsing arguments...")
-        cls2 = cls.message_types[message_type]
+        cls2 = request_types[message_type]
         arguments = cls2.deserialize_arguments(
             interface_signature=interface_signature,
             lines=lines,
@@ -58,20 +37,7 @@ class ProxyMessage(ImmutableObject):
         )
         return message
 
-    def serialize_arguments(self):
-        pass
 
-    def serialize(self):
-        yield self.message_type
-        yield from self.serialize_arguments()
-
-
-class ProxyRequest(ProxyMessage):
-    __slots__ = []
-    message_types = request_types
-
-
-@request_type("main_begin")
 class MainBegin(ProxyRequest):
     __slots__ = ["global_variables"]
 
@@ -91,7 +57,6 @@ class MainBegin(ProxyRequest):
         )
 
 
-@request_type("function_call")
 class FunctionCall(ProxyRequest):
     __slots__ = ["function_name", "parameters", "accepted_callbacks"]
 
@@ -130,7 +95,6 @@ class FunctionCall(ProxyRequest):
         )
 
 
-@request_type("callback_return")
 class CallbackReturn(ProxyRequest):
     __slots__ = ["callback_name", "return_value"]
 
@@ -165,7 +129,6 @@ class CallbackReturn(ProxyRequest):
         )
 
 
-@request_type("main_end")
 class MainEnd(ProxyRequest):
     __slots__ = []
 
@@ -173,11 +136,7 @@ class MainEnd(ProxyRequest):
     def deserialize_arguments(lines, *, interface_signature):
         return dict()
 
-    def serialize_arguments(self):
-        yield from []
 
-
-@request_type("exit")
 class Exit(ProxyRequest):
     __slots__ = []
 
@@ -185,57 +144,11 @@ class Exit(ProxyRequest):
     def deserialize_arguments(lines, *, interface_signature):
         return dict()
 
-    def serialize_arguments(self):
-        yield from []
 
-
-class ProxyResponse(ProxyMessage):
-    __slots__ = []
-    message_types = response_types
-
-
-@response_type("function_return")
-class FunctionReturn(ProxyResponse):
-    __slots__ = ["function_name", "return_value"]
-
-    @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        function_name = next(lines)
-        signature = interface_signature.functions[function_name]
-        if signature.return_type:
-            return_value = signature.return_type.deserialize(lines)
-        else:
-            return_value = None
-        return dict(
-            function_name=function_name,
-            return_value=return_value,
-        )
-
-    def serialize_arguments(self):
-        yield self.function_name
-        return_type = self.interface_signature.functions[self.function_name].return_type
-        if self.return_value is not None:
-            yield from return_type.serialize(self.return_value)
-
-
-@response_type("callback_call")
-class CallbackCall(ProxyResponse):
-    __slots__ = ["callback_name", "parameters"]
-
-    @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        callback_name = next(lines)
-        callback_signature = interface_signature.callbacks[callback_name]
-        return dict(
-            callback_name=callback_name,
-            parameters=[
-                p.value_type.deserialize(lines)
-                for p in callback_signature.parameters
-            ],
-        )
-
-    def serialize_arguments(self):
-        yield self.callback_name
-        callback_signature = self.interface_signature.callbacks[self.callback_name]
-        for p, v in zip(callback_signature.parameters, self.parameters):
-            yield from p.value_type.serialize(v)
+request_types = bidict({
+    "main_begin": MainBegin,
+    "main_end": MainEnd,
+    "function_call": FunctionCall,
+    "callback_return": CallbackReturn,
+    "exit": Exit,
+})
