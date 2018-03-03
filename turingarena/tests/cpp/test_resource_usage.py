@@ -29,13 +29,13 @@ def test_get_time_memory_usage():
                 }
             """
     ) as algo:
-        with algo.run() as (process, proxy):
-            with process.section() as section1:
-                proxy.test(1)
-            info1 = process.sandbox.get_info()
-            with process.section() as section2:
-                proxy.test(2)
-            info2 = process.sandbox.get_info()
+        with algo.run() as p:
+            with p.section() as section1:
+                p.call.test(1)
+            info1 = p.sandbox.get_info()
+            with p.section() as section2:
+                p.call.test(2)
+            info2 = p.sandbox.get_info()
 
     assert 0 < section1.time_usage == info1.time_usage < 0.5
     assert 0 < section2.time_usage < 0.5

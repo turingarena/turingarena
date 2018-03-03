@@ -20,8 +20,8 @@ def test_function_no_arguments():
                 """
             },
     ):
-        with algo.run() as (process, p):
-            p.function_no_arguments()
+        with algo.run() as p:
+            p.call.function_no_arguments()
 
 
 def test_function_with_arguments():
@@ -47,8 +47,8 @@ def test_function_with_arguments():
                 """,
             }
     ):
-        with algo.run() as (process, p):
-            p.function_with_arguments(1, 2)
+        with algo.run() as p:
+            p.call.function_with_arguments(1, 2)
 
 
 def test_function_return_value():
@@ -77,5 +77,5 @@ def test_function_return_value():
                 """,
             },
     ):
-        with algo.run() as (process, p):
-            assert p.function_return_value(1) == 2
+        with algo.run() as p:
+            assert p.call.function_return_value(1) == 2

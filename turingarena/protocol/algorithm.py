@@ -74,7 +74,7 @@ class Algorithm:
                     sandbox=sandbox_process_client,
                     driver=running_process,
                 )
-                yield algorithm_process, running_process.proxy
+                yield algorithm_process
                 running_process.end_main()
             finally:
                 info = sandbox_process_client.wait()
@@ -103,6 +103,7 @@ class AlgorithmProcess:
     def __init__(self, *, sandbox, driver):
         self.sandbox = sandbox
         self.driver = driver
+        self.call = driver.proxy
 
     @contextmanager
     def section(self):

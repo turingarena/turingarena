@@ -4,9 +4,31 @@ import sys
 from tempfile import TemporaryDirectory
 
 from turingarena.cli import docopt_cli
+from turingarena.common import ImmutableObject
 from turingarena.protocol.algorithm import Algorithm
 from turingarena.protocol.model.model import InterfaceDefinition
 from turingarena.sandbox.sources import load_source
+
+
+class AlgorithmicProblem(ImmutableObject):
+    __slots__ = [
+        "interface_text",
+        "evaluator",
+    ]
+
+    def evaluate(self, source_text, *, language):
+        interface = InterfaceDefinition.compile(self.interface_text)
+        with TemporaryDirectory(dir="/dev/shm") as temp_dir:
+            algorithm_dir = os.path.join(temp_dir, "algorithm")
+            source = load_source(
+                source_text,
+                language=language,
+                interface=interface,
+            )
+            source.compile(algorithm_dir=algorithm_dir)
+            algorithm = Algorithm(algorithm_dir=algorithm_dir, interface=interface)
+
+            self.evaluator(algorithm)
 
 
 @docopt_cli
@@ -29,15 +51,12 @@ def problem_evaluate_cli(args):
     with open(args["--interface"]) as f:
         interface_text = f.read()
 
-    interface = InterfaceDefinition.compile(interface_text)
-    source = load_source(
-        sys.stdin.read(),
-        language=args["--language"],
-        interface=interface,
+    problem = AlgorithmicProblem(
+        interface_text=interface_text,
+        evaluator=checker,
     )
 
-    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
-        algorithm_dir = os.path.join(temp_dir, "algorithm")
-        source.compile(algorithm_dir=algorithm_dir)
-
-        checker(Algorithm(algorithm_dir=algorithm_dir, interface=interface))
+    problem.evaluate(
+        sys.stdin.read(),
+        language=args["--language"],
+    )

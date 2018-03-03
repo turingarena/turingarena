@@ -27,10 +27,10 @@ def test_callback_no_arguments_cpp():
                 """,
             }
     ):
-        with algo.run() as (process, p):
+        with algo.run() as p:
             calls = []
             callback_no_arguments = callback_mock(calls)
-            p.test(callback_no_arguments=callback_no_arguments)
+            p.call.test(callback_no_arguments=callback_no_arguments)
 
             assert calls == [
                 (callback_no_arguments, ()),
@@ -65,10 +65,10 @@ def test_callback_with_arguments():
                 """,
             },
     ):
-        with algo.run() as (process, p):
+        with algo.run() as p:
             calls = []
             callback_with_arguments = callback_mock(calls)
-            p.test(callback_with_arguments=callback_with_arguments)
+            p.call.test(callback_with_arguments=callback_with_arguments)
 
             assert calls == [
                 (callback_with_arguments, (1, 2)),
@@ -108,10 +108,10 @@ def test_callback_return_value():
                 """
             }
     ):
-        with algo.run() as (process, p):
+        with algo.run() as p:
             calls = []
             callback_return_value = callback_mock(calls, [2, 4])
-            p.test(callback_return_value=callback_return_value)
+            p.call.test(callback_return_value=callback_return_value)
 
             assert calls == [
                 (callback_return_value, (1,)),

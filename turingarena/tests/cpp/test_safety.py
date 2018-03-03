@@ -34,8 +34,8 @@ def should_raise(cpp_source):
 
 def should_succeed(cpp_source):
     with cpp_algorithm(cpp_source) as algo:
-        with algo.run() as (process, proxy):
-            proxy.test()
+        with algo.run() as p:
+            p.call.test()
 
 
 def test_open():
