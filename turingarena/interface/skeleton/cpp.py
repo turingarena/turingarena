@@ -157,8 +157,7 @@ def build_declaration(statement):
 
 def build_parameter(parameter):
     full_type = build_full_type(parameter.value_type)
-    declarator = build_declarator(parameter.value_type, parameter.name)
-    return f'{full_type} {declarator}'
+    return f'{full_type} {parameter.name}'
 
 
 def build_subscript(expression):
