@@ -30,14 +30,16 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
             shutil.copy(solution_path, cwd)
             shutil.copy(security_policy_path, cwd)
 
+            cli = [
+                "java",
+                "-Djava.security.manager",
+                "-Djava.security.policy==security.policy",
+                "Skeleton",
+            ]
+
             # run java process 
             with subprocess.Popen(
-                    [
-                        "java",
-                        "-Djava.security.manager",
-                        "-Djava.security.policy==security.policy",
-                        "Skeleton",
-                    ],
+                    cli,
                     universal_newlines=True,
                     # preexec_fn=set_memory_and_time_limits,
                     cwd=cwd,
