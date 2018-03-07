@@ -1,16 +1,11 @@
 import random
 
+import pkg_resources
+import pytest
+
 from turingarena.problem import AlgorithmicProblem
 
-interface_text = """
-    function sum(int a, int b) -> int;
-    main {
-        var int a, b, c;
-        input a, b;
-        call sum(a, b) -> c;
-        output c;
-    }
-"""
+interface_text = pkg_resources.resource_string(__name__, "interface.txt").decode()
 
 
 def evaluate(algorithm):
@@ -38,15 +33,15 @@ problem = AlgorithmicProblem(
 )
 
 
-def test_correct():
+@pytest.mark.parametrize(
+    "solution,language",
+    [
+        ("correct.cpp", "c++"),
+        ("wrong.cpp", "c++"),
+    ]
+)
+def test_solution(solution, language):
     problem.evaluate(
-        "int sum(int a, int b) { return a+b; }",
-        language="c++",
-    )
-
-
-def test_wrong():
-    problem.evaluate(
-        "int sum(int a, int b) { return a+b+b%2; }",
-        language="c++",
+        pkg_resources.resource_string(__name__, f"solutions/{solution}").decode(),
+        language=language,
     )

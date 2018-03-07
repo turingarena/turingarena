@@ -1,0 +1,19 @@
+var int N;
+var int[][] V;
+
+function find_best_sum() -> int;
+
+main {
+    input N;
+    alloc V : N;
+    for(i : N) {
+        alloc V[i] : i;
+        for(j : i) {
+            input V[i][j];
+        }
+    }
+
+    var int S;
+    call find_best_sum() -> S;
+    output S;
+}
