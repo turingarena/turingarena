@@ -5,4 +5,5 @@ class AlgorithmRuntimeError(Exception):
 
 
 class CompilationFailed(Exception):
-    pass
+    def __init__(self, output=None):
+        self.compilation_output=output

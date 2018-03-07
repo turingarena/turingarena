@@ -36,12 +36,10 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                         "java",
                         "-Djava.security.manager",
                         "-Djava.security.policy==security.policy",
-                        "-Xmx64m",  # FIXME: is this sufficient to limit memory?
-                        "-Xss64m",
                         "Skeleton",
                     ],
                     universal_newlines=True,
-                    preexec_fn=set_memory_and_time_limits,
+                    # preexec_fn=set_memory_and_time_limits,
                     cwd=cwd,
                     stdin=connection.downward,
                     stdout=connection.upward,
