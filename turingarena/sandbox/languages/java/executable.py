@@ -1,11 +1,12 @@
 import logging
 import os
 import resource
+import shutil
 import subprocess
-import pkg_resources
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
-import shutil
+
+import pkg_resources
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
@@ -18,15 +19,13 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
 
     @contextmanager
     def run(self, connection):
-        
-        # get class files 
+        # get class files
         skeleton_path = os.path.join(self.algorithm_dir, "Skeleton.class")
         solution_path = os.path.join(self.algorithm_dir, "Solution.class")
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
         with TemporaryDirectory(dir="/dev/shm", prefix="java_cwd_") as cwd:
-
-            # copy class files to current directory 
+            # copy class files to current directory
             shutil.copy(skeleton_path, cwd)
             shutil.copy(solution_path, cwd)
             shutil.copy(security_policy_path, cwd)
@@ -35,9 +34,11 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
             with subprocess.Popen(
                     [
                         "java",
-                        "-Djava.security.manager"
-                        "-Djava.security.policy==security.policy" 
-                        "Skeleton"
+                        "-Djava.security.manager",
+                        "-Djava.security.policy==security.policy",
+                        "-Xmx64m",  # FIXME: is this sufficient to limit memory?
+                        "-Xss64m",
+                        "Skeleton",
                     ],
                     universal_newlines=True,
                     preexec_fn=set_memory_and_time_limits,
@@ -52,11 +53,11 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
 
             if p.returncode != 0:
                 logger.warning(f"process terminated with returncode {p.returncode}")
-                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}")
+                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
+
 
 def set_memory_and_time_limits():
-    memory_limit = 16 * 1024 * 1024
-    time_limit = 1
+    time_limit = 2
     core_limit = 32 * 1024 * 1024
 
     resource.setrlimit(
@@ -73,7 +74,9 @@ def set_memory_and_time_limits():
         # use soft < hard to ensure SIGXCPU is raised instead of SIGKILL
         # see setrlimit(2)
     )
-    resource.setrlimit(
-        resource.RLIMIT_AS,
-        (memory_limit, resource.RLIM_INFINITY),
-    )
+    if False:  # FIXME: seems to kill the JVM
+        memory_limit = 256 * 1024 * 1024
+        resource.setrlimit(
+            resource.RLIMIT_AS,
+            (memory_limit, resource.RLIM_INFINITY),
+        )

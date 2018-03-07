@@ -37,6 +37,8 @@ problem = AlgorithmicProblem(
     "solution,language",
     [
         ("correct.cpp", "c++"),
+        ("correct.py", "python"),
+        ("Correct.java", "java"),
         ("wrong.cpp", "c++"),
     ]
 )

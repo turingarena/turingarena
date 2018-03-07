@@ -3,10 +3,11 @@ from turingarena.common import indent_all, indent
 
 def generate_skeleton_java(interface):
     yield "import java.util.Scanner;"
+    yield
     yield "abstract class Skeleton {"
     yield indent("private Scanner in = new Scanner(System.in);")
     for statement in interface.body.statements:
-        yield 
+        yield
         yield from indent_all(generate_skeleton_statement(statement, interface=interface))
     yield
     yield indent("public static void main(String args[]) {")
@@ -16,10 +17,11 @@ def generate_skeleton_java(interface):
 
 
 def generate_template_java(interface):
-    yield "class Solution extends Skeleton {" 
+    yield "class Solution extends Skeleton {"
     for statement in interface.body.statements:
         yield from indent_all(generate_template_statement(statement, interface=interface))
     yield "}"
+
 
 def generate_skeleton_statement(statement, *, interface):
     generators = {
@@ -93,15 +95,10 @@ def generate_block_statement(statement, *, interface):
     return generators[statement.statement_type]()
 
 
-def generate_declarators(declaration):
-    for variable in declaration.variables:
-        yield build_declarator(declaration.value_type, variable.name)
-
-
 def generate_alloc(statement):
     for argument in statement.arguments:
         arg = build_expression(argument)
-        value_type = build_full_type(argument.value_type.item_type)
+        value_type = build_type(argument.value_type.item_type)
         size = build_expression(statement.size)
         yield f"{arg} = new {value_type}[{size}];"
 
@@ -125,11 +122,12 @@ def generate_output(statement):
 
 
 def generate_input(statement):
-    #format_string = ''.join(build_format(v) for v in statement.arguments)
-    #args = ', '.join("&" + build_expression(v) for v in statement.arguments)
-    #yield f'scanf("{format_string}", {args});'
+    # format_string = ''.join(build_format(v) for v in statement.arguments)
+    # args = ', '.join("&" + build_expression(v) for v in statement.arguments)
+    # yield f'scanf("{format_string}", {args});'
     for arg in statement.arguments:
         yield f"{build_expression(arg)} = in.nextInt();"
+
 
 def generate_if(statement, *, interface):
     condition = build_expression(statement.condition)
@@ -152,21 +150,20 @@ def generate_for(statement, *, interface):
 
 def build_callable_declarator(callable):
     signature = callable.signature
-    return_type = build_full_type(signature.return_type)
+    return_type = build_type(signature.return_type)
     arguments = ', '.join(build_parameter(p) for p in signature.parameters)
     return f"{return_type} {callable.name}({arguments})"
 
 
 def build_declaration(statement):
-    type_specifier = build_type_specifier(statement.value_type)
-    declarators = ', '.join(generate_declarators(statement))
-    return f'{type_specifier} {declarators};'
+    type = build_type(statement.value_type)
+    declarators = ', '.join(v.name for v in statement.variables)
+    return f'{type} {declarators};'
 
 
 def build_parameter(parameter):
-    full_type = build_full_type(parameter.value_type)
-    declarator = build_declarator(parameter.value_type, parameter.name)
-    return f'{full_type} {declarator}'
+    value_type = build_type(parameter.value_type)
+    return f'{value_type} {parameter.name}'
 
 
 def build_subscript(expression):
@@ -184,30 +181,16 @@ def build_expression(expression):
     return builders[expression.expression_type]()
 
 
-def build_declarator(value_type, name):
-    if value_type is None:
-        return name
-    builders = {
-        "scalar": lambda: name,
-        "array": lambda: "*" + build_declarator(value_type.item_type, name),
-    }
-    return builders[value_type.meta_type]()
-
-
-def build_type_specifier(value_type):
+def build_type(value_type):
     if value_type is None:
         return "void"
     builders = {
         "scalar": lambda: {
             int: "int",
         }[value_type.base_type],
-        "array": lambda: build_type_specifier(value_type.item_type)
+        "array": lambda: f"{build_type(value_type.item_type)}[]"
     }
     return builders[value_type.meta_type]()
-
-
-def build_full_type(value_type):
-    return build_type_specifier(value_type) + build_declarator(value_type, "")
 
 
 def build_format(expr):
