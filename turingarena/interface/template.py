@@ -5,7 +5,7 @@ from turingarena.common import write_to_file
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_skeleton_cpp
 from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
-from turingarena.protocol.skeleton.java import generate_skeleton_java, generate_template_java
+from turingarena.interface.skeleton.java import generate_skeleton_java, generate_template_java
 
 
 @docopt_cli
