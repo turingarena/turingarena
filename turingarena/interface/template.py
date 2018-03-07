@@ -5,6 +5,7 @@ from turingarena.common import write_to_file
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_skeleton_cpp
 from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
+from turingarena.protocol.skeleton.java import generate_skeleton_java, generate_template_java
 
 
 @docopt_cli
@@ -22,6 +23,7 @@ def generate_template_cli(args):
     generate(args, {
         "c++": generate_template_cpp,
         "python": generate_template_python,
+        "java": generate_template_java,
     })
 
 
@@ -40,6 +42,7 @@ def generate_skeleton_cli(args):
     generate(args, {
         "c++": generate_skeleton_cpp,
         "python": generate_skeleton_python,
+        "java": generate_skeleton_java,
     })
 
 

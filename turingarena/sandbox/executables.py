@@ -3,7 +3,7 @@ import os
 
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
-from turingarena.sandbox.languages.python import PythonAlgorithmExecutableScript
+from turingarena.sandbox.languages.python.executable import PythonAlgorithmExecutableScript
 
 logger = logging.getLogger(__name__)
 
