@@ -1,7 +1,7 @@
 import logging
 
 from turingarena.sandbox.languages.cpp.source import CppAlgorithmSource
-from turingarena.sandbox.languages.python import PythonAlgorithmSource
+from turingarena.sandbox.languages.python.source import PythonAlgorithmSource
 
 logger = logging.getLogger(__name__)
 
