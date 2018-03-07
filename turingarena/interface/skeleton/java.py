@@ -10,9 +10,7 @@ def generate_skeleton_java(interface):
         yield
         yield from indent_all(generate_skeleton_statement(statement, interface=interface))
     yield
-    yield indent("public static void main(String args[]) {")
-    yield indent(indent("new Solution();"))
-    yield indent("}")
+    yield from indent_all(generate_main_method())
     yield "}"
 
 
@@ -20,6 +18,12 @@ def generate_template_java(interface):
     yield "class Solution extends Skeleton {"
     for statement in interface.body.statements:
         yield from indent_all(generate_template_statement(statement, interface=interface))
+    yield "}"
+
+
+def generate_main_method():
+    yield "public static void main(String args[]) {"
+    yield indent("new Solution();")
     yield "}"
 
 
@@ -44,11 +48,11 @@ def generate_template_statement(statement, *, interface):
 
 
 def generate_function(statement):
-    yield f"abstract public {build_callable_declarator(statement.function)};"
+    yield f"abstract {build_callable_declarator(statement.function)};"
 
 
 def generate_function_template(statement):
-    yield f"public {build_callable_declarator(statement.function)}" " {"
+    yield f"{build_callable_declarator(statement.function)}" " {"
     yield indent("// TODO")
     yield indent("return 0;")
     yield "}"
@@ -85,22 +89,30 @@ def generate_block_statement(statement, *, interface):
         "alloc": lambda: generate_alloc(statement),
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
-        "flush": lambda: ["fflush(stdout);"],
+        "flush": lambda: ["System.out.flush();"],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),
-        "exit": lambda: ["exit(0);"],
+        "exit": lambda: ["System.exit(0);"],
         "return": lambda: [f"return {build_expression(statement.value)};"],
     }
     return generators[statement.statement_type]()
 
 
 def generate_alloc(statement):
+    size = build_expression(statement.size)
     for argument in statement.arguments:
         arg = build_expression(argument)
-        value_type = build_type(argument.value_type.item_type)
-        size = build_expression(statement.size)
-        yield f"{arg} = new {value_type}[{size}];"
+        yield f"{arg} = new {build_alloc_type(argument.value_type.item_type, size)};"
+
+
+def build_alloc_type(var_type, size):
+    if var_type.meta_type == "array":
+        return build_alloc_type(var_type.item_type, size) + "[]"
+    else:
+        return {
+            int: "int",
+        }[var_type.base_type] + f"[{size}]"
 
 
 def generate_call(statement, *, interface):
@@ -112,7 +124,7 @@ def generate_call(statement, *, interface):
     else:
         yield f"{function_name}({parameters});"
     if interface.signature.callbacks:
-        yield r"""System.out.println("return");"""
+        yield 'System.out.println("return");'
 
 
 def generate_output(statement):
@@ -122,11 +134,10 @@ def generate_output(statement):
 
 
 def generate_input(statement):
-    # format_string = ''.join(build_format(v) for v in statement.arguments)
-    # args = ', '.join("&" + build_expression(v) for v in statement.arguments)
-    # yield f'scanf("{format_string}", {args});'
     for arg in statement.arguments:
-        yield f"{build_expression(arg)} = in.nextInt();"
+        yield f"{build_expression(arg)} = " + {
+            int: "in.nextInt()",
+        }[arg.value_type.base_type]
 
 
 def generate_if(statement, *, interface):
