@@ -3,7 +3,7 @@ from turingarena.common import indent_all, indent
 
 def generate_skeleton_java(interface):
     yield "import java.util.Scanner;"
-    yield "abstract class Skeleton {"
+    yield "public abstract class Skeleton {"
     yield indent("private Scanner in = new Scanner(System.in);")
     for statement in interface.body.statements:
         yield 

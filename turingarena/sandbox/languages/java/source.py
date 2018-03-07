@@ -4,7 +4,7 @@ import subprocess
 from subprocess import CalledProcessError
 
 from turingarena.common import write_to_file
-from turingarena.protocol.skeleton.java import generate_skeleton_java
+from turingarena.interface.skeleton.java import generate_skeleton_java
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
 

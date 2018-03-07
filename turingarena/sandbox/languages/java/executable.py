@@ -35,12 +35,12 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
             with subprocess.Popen(
                     [
                         "java",
-                        "-Djava.security.manager"
-                        "-Djava.security.policy==security.policy" 
+                        "-Djava.security.manager",
+                        "-Djava.security.policy==security.policy",
                         "Skeleton"
                     ],
                     universal_newlines=True,
-                    preexec_fn=set_memory_and_time_limits,
+                    #preexec_fn=set_memory_and_time_limits,
                     cwd=cwd,
                     stdin=connection.downward,
                     stdout=connection.upward,
