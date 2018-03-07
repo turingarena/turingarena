@@ -1,7 +1,7 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body, ExitCall
 from turingarena.interface.exceptions import InterfaceExit
-from turingarena.interface.executable import ImperativeStatement, StatementInstruction
+from turingarena.interface.executable import ImperativeStatement, StatementInstruction, Instruction
 from turingarena.interface.expressions import Expression
 from turingarena.interface.scope import Scope
 from turingarena.interface.type_expressions import ScalarType
@@ -86,6 +86,12 @@ class ForStatement(ImperativeStatement):
         )
 
     def unroll(self, frame):
+        if not self.may_call():
+            yield SimpleForInstruction(statement=self, frame=frame)
+        else:
+            yield from self.do_unroll(frame)
+
+    def do_unroll(self, frame):
         size = self.index.range.evaluate_in(frame=frame).get()
         for i in range(size):
             with frame.child(self.scope) as inner_frame:
@@ -97,6 +103,20 @@ class ForStatement(ImperativeStatement):
 
     def first_calls(self):
         return self.body.first_calls() | {None}
+
+
+class SimpleForInstruction(Instruction):
+    """
+    Corresponds to a for-loop which does not perform any function call.
+    This is seen as a single instruction so that it can be fully skipped
+    in the preflight phase, when the number of iterations is not yet known.
+    """
+
+    __slots__ = ["statement", "frame"]
+
+    def run_sandbox(self, connection):
+        for instruction in self.statement.do_unroll(self.frame):
+            instruction.run_sandbox(connection)
 
 
 class LoopStatement(ImperativeStatement):

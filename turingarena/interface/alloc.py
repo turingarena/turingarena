@@ -15,7 +15,13 @@ class AllocStatement(SimpleStatement):
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
 
+    def run_sandbox(self, connection, *, frame):
+        self.do_alloc(frame)
+
     def run_driver_pre(self, request, *, frame):
+        self.do_alloc(frame)
+
+    def do_alloc(self, frame):
         size = self.size.evaluate_in(frame).get()
         for a in self.arguments:
             a.evaluate_in(frame).alloc(size)

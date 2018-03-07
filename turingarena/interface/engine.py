@@ -101,7 +101,7 @@ def send_response(driver_connection, response):
 
 def run_sandbox(instructions, *, sandbox_connection):
     for instruction in instructions:
-        logger.debug(f"executing with SANDBOX {instruction!r:.50}")
+        logger.debug(f"executing with SANDBOX {instruction!r:.200}")
         instruction.run_sandbox(sandbox_connection)
         if instruction.is_flush():
             yield
