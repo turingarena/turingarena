@@ -25,7 +25,6 @@ class JavaAlgorithmSource(AlgorithmSource):
         with open(solution_filename, "w") as f:
             f.write(self.text)
 
-        # TODO: specify security policy for the jvm 
         cli = [
             "javac",
             "Skeleton.java", 
