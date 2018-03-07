@@ -30,7 +30,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
 
             # run java process 
             with subprocess.Popen(
-                    ["java", "Solution"],
+                    ["java", "Skeleton"],
                     universal_newlines=True,
                     preexec_fn=set_memory_and_time_limits,
                     cwd=cwd,
