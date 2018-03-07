@@ -5,7 +5,7 @@ import tatsu
 
 from turingarena.interface.algorithm import load_algorithm
 from turingarena.interface.exceptions import InterfaceError
-from turingarena.interface.model.model import InterfaceDefinition
+from turingarena.interface.interface import InterfaceDefinition
 
 
 def callback_mock(calls, return_values=None):

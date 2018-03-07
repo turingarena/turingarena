@@ -1,6 +1,6 @@
 from turingarena.common import ImmutableObject
-from turingarena.interface.model.statement import Statement
-from turingarena.interface.model.type_expressions import ValueType
+from turingarena.interface.statement import Statement
+from turingarena.interface.type_expressions import ValueType
 
 
 class Variable(ImmutableObject):

@@ -4,8 +4,16 @@ from abc import ABCMeta
 class ImmutableObject(metaclass=ABCMeta):
     __slots__ = []
 
-    def __init__(self, **kwargs):
-        assert len(kwargs) == len(list(self.all_slots()))
+    def __init__(self, *args, **kwargs):
+        n_slots = len(list(self.all_slots()))
+
+        if n_slots == 1 and len(args) == 1:
+            assert len(kwargs) == 0
+            object.__setattr__(self, next(self.all_slots()), args[0])
+            return
+
+        assert len(args) == 0
+        assert len(kwargs) == n_slots
         for k, v in kwargs.items():
             object.__setattr__(self, k, v)
 

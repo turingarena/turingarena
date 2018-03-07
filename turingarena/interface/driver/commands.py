@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyRequest(ImmutableObject):
-    __slots__ = ["interface_signature", "message_type"]
+    __slots__ = ["interface_signature", "request_type"]
 
     def __init__(self, **kwargs):
-        kwargs.setdefault("message_type", request_types.inv[self.__class__])
+        kwargs.setdefault("request_type", request_types.inv[self.__class__])
         super().__init__(**kwargs)
 
     @staticmethod
@@ -25,10 +25,10 @@ class ProxyRequest(ImmutableObject):
 
     @classmethod
     def deserialize(cls, lines, *, interface_signature):
-        logger.debug("accepting message...")
-        message_type = next(lines)
-        logger.debug(f"received message type {message_type}, parsing arguments...")
-        cls2 = request_types[message_type]
+        logger.debug("accepting request...")
+        request_type = next(lines)
+        logger.debug(f"received request type {request_type}, parsing arguments...")
+        cls2 = request_types[request_type]
         arguments = cls2.deserialize_arguments(
             interface_signature=interface_signature,
             lines=lines,
@@ -68,9 +68,11 @@ class FunctionCall(ProxyRequest):
 
     @staticmethod
     def deserialize_arguments(lines, *, interface_signature):
+        logger.debug(f"deserializing FunctionCall...")
         function_name = next(lines)
         function_signature = interface_signature.functions[function_name]
 
+        logger.debug(f"read name {function_name!r}")
         parameters_count = int(next(lines))
         assert parameters_count == len(function_signature.parameters)
 
@@ -78,6 +80,7 @@ class FunctionCall(ProxyRequest):
             p.value_type.ensure(deserialize(lines))
             for p in function_signature.parameters
         ]
+        logger.debug(f"read parameters: {parameters!r:.50s}")
 
         accepted_callbacks = list()
         callbacks_count = int(next(lines))
@@ -90,6 +93,7 @@ class FunctionCall(ProxyRequest):
 
             accepted_callbacks.append(callback_name)
 
+        logger.debug(f"read accepted_callbacks: {accepted_callbacks!r:.50s}")
         return dict(
             function_name=function_name,
             parameters=parameters,
@@ -119,12 +123,13 @@ class CallbackReturn(ProxyRequest):
     def deserialize_arguments(lines, *, interface_signature):
         callback_name = next(lines)
         callback_signature = interface_signature.callbacks[callback_name]
-        has_return_value = int(next(lines))
+        has_return_value = bool(int(next(lines)))
         assert has_return_value == bool(callback_signature.return_type)
         if has_return_value:
             return_value = callback_signature.return_type.ensure(int(next(lines)))
         else:
             return_value = None
+        logger.debug(f"callback return: {callback_name!r:.10} -> {return_value!r:.10}")
         return dict(
             callback_name=callback_name,
             return_value=return_value,

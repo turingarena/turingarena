@@ -1,7 +1,11 @@
-from turingarena.interface.model.node import AbstractSyntaxNode
-from turingarena.interface.model.scope import Scope
-from turingarena.interface.model.statement import ImperativeStatement
-from turingarena.interface.model.statements import compile_statement
+import logging
+
+from turingarena.interface.executable import ImperativeStatement
+from turingarena.interface.node import AbstractSyntaxNode
+from turingarena.interface.scope import Scope
+from turingarena.interface.statements import compile_statement
+
+logger = logging.getLogger(__name__)
 
 
 class Body(AbstractSyntaxNode):
@@ -10,19 +14,22 @@ class Body(AbstractSyntaxNode):
     @staticmethod
     def compile(ast, *, scope):
         scope = Scope(scope)
+        statements = [
+            compile_statement(s, scope=scope)
+            for s in ast.statements
+        ]
         return Body(
             scope=scope,
-            statements=[
-                compile_statement(s, scope=scope)
-                for s in ast.statements
-            ]
+            statements=statements
         )
 
-    def run(self, context):
-        with context.enter(self.scope) as inner_context:
+    def unroll(self, frame):
+        logger.debug(f"unrolling body {self!s:.50}")
+        with frame.child(self.scope) as inner_frame:
             for statement in self.statements:
-                if isinstance(statement, ImperativeStatement):
-                    yield from statement.run(inner_context)
+                if not isinstance(statement, ImperativeStatement):
+                    continue
+                yield from statement.unroll(inner_frame)
 
     def is_possible_branch(self, *, context):
         request = context.engine.peek_request()

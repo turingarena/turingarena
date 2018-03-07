@@ -1,12 +1,11 @@
 from turingarena.common import ImmutableObject
-from turingarena.interface.driver.frames import Phase
+from turingarena.interface.body import Body, ExitCall
 from turingarena.interface.exceptions import InterfaceExit
-from turingarena.interface.model.body import Body, ExitCall
-from turingarena.interface.model.expressions import Expression
-from turingarena.interface.model.scope import Scope
-from turingarena.interface.model.statement import ImperativeStatement
-from turingarena.interface.model.type_expressions import ScalarType
-from turingarena.interface.model.variables import Variable
+from turingarena.interface.executable import ImperativeStatement, StatementInstruction
+from turingarena.interface.expressions import Expression
+from turingarena.interface.scope import Scope
+from turingarena.interface.type_expressions import ScalarType
+from turingarena.interface.variables import Variable
 
 
 class ExitStatement(ImperativeStatement):
@@ -16,11 +15,15 @@ class ExitStatement(ImperativeStatement):
     def compile(ast, scope):
         return ExitStatement()
 
-    def run(self, context):
-        yield from []
-        if context.phase == Phase.PREFLIGHT:
-            context.engine.ensure_output()
+    def unroll(self, frame):
+        yield StatementInstruction(statement=self, frame=frame)
         raise InterfaceExit
+
+    def run_driver_pre(self, request, *, frame):
+        assert request.request_type == "exit"
+
+    def run_driver_post(self, *, frame):
+        return []
 
     def first_calls(self):
         return {ExitCall}
@@ -40,19 +43,19 @@ class IfStatement(ImperativeStatement):
             ),
         )
 
-    def run(self, context):
-        condition = context.evaluate(self.condition)
-        if context.phase == Phase.PREFLIGHT and not condition.is_resolved():
+    def unroll(self, frame):
+        condition = self.condition.evaluate_in(frame)
+        if not condition.is_resolved():
             # FIXME: use a stricter logic here
-            if self.then_body.is_possible_branch(context=context):
+            if self.then_body.is_possible_branch(frame):
                 condition.resolve(1)
             else:
                 condition.resolve(0)
 
         if condition.get():
-            yield from self.then_body.run(context)
+            yield from self.then_body.unroll(frame)
         elif self.else_body is not None:
-            yield from self.else_body.run(context)
+            yield from self.else_body.unroll(frame)
 
     def first_calls(self):
         return self.then_body.first_calls() | (
@@ -82,13 +85,12 @@ class ForStatement(ImperativeStatement):
             scope=for_scope,
         )
 
-    def run(self, context):
-        if context.phase is Phase.RUN or self.may_call():
-            size = context.evaluate(self.index.range).get()
-            for i in range(size):
-                with context.enter(self.scope) as inner_context:
-                    inner_context.frame[self.index.variable] = i
-                    yield from self.body.run(inner_context)
+    def unroll(self, frame):
+        size = self.index.range.evaluate_in(frame=frame).get()
+        for i in range(size):
+            with frame.child(self.scope) as inner_frame:
+                inner_frame[self.index.variable] = i
+                yield from self.body.unroll(inner_frame)
 
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
@@ -105,14 +107,6 @@ class LoopStatement(ImperativeStatement):
         return LoopStatement(
             body=Body.compile(ast.body, scope=scope),
         )
-
-    def run(self, context):
-        if context.phase is Phase.RUN or self.may_call():
-            size = context.evaluate(self.index.range).get()
-            for i in range(size):
-                with context.enter(self.scope) as inner_context:
-                    inner_context.frame[self.index.variable] = i
-                    yield from self.body.run(inner_context)
 
     def first_calls(self):
         return self.body.first_calls() | {None}

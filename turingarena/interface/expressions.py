@@ -3,9 +3,9 @@ from abc import abstractmethod
 
 from bidict import bidict
 
-from turingarena.interface.driver.references import ConstantReference, VariableReference, ArrayItemReference
-from turingarena.interface.model.node import AbstractSyntaxNode
-from turingarena.interface.model.type_expressions import ScalarType
+from turingarena.interface.node import AbstractSyntaxNode
+from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
+from turingarena.interface.type_expressions import ScalarType
 
 expression_classes = bidict()
 
@@ -34,11 +34,11 @@ class Expression(AbstractSyntaxNode):
             raise ValueError("expected {}, got {}".format(expected_type, actual_type))
         return expression
 
-    def evaluate(self, *, frame):
-        return self.do_evaluate(frame=frame)
+    def evaluate_in(self, frame):
+        return self.do_evaluate(frame)
 
     @abstractmethod
-    def do_evaluate(self, *, frame):
+    def do_evaluate(self, frame):
         pass
 
 
@@ -76,7 +76,7 @@ class ReferenceExpression(Expression):
             variable=variable,
         )
 
-    def do_evaluate(self, *, frame):
+    def do_evaluate(self, frame):
         return VariableReference(
             frame=frame,
             variable=self.variable,
@@ -97,9 +97,9 @@ class SubscriptExpression(Expression):
             value_type=array.value_type.item_type,
         )
 
-    def do_evaluate(self, *, frame):
+    def do_evaluate(self, frame):
         return ArrayItemReference(
             value_type=self.array.value_type.item_type,
-            array=self.array.evaluate(frame=frame).get(),
-            index=self.index.evaluate(frame=frame).get(),
+            array=self.array.evaluate_in(frame).get(),
+            index=self.index.evaluate_in(frame).get(),
         )

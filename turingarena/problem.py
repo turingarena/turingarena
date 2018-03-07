@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 from turingarena.cli import docopt_cli
 from turingarena.common import ImmutableObject
 from turingarena.interface.algorithm import Algorithm
-from turingarena.interface.model.model import InterfaceDefinition
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.sources import load_source
 
 

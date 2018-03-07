@@ -2,7 +2,7 @@ import sys
 
 from turingarena.cli import docopt_cli
 from turingarena.common import write_to_file
-from turingarena.interface.model.model import InterfaceDefinition
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_skeleton_cpp
 from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
 

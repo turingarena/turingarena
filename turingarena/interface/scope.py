@@ -51,17 +51,19 @@ class ScopeNamespace:
 
 
 class Scope:
-    __slots__ = ["variables", "functions", "callbacks", "main"]
+    namespaces = ["variables", "functions", "callbacks", "main"]
+    __slots__ = namespaces + ["parent"]
 
     def __init__(self, parent=None):
-        for ns in Scope.__slots__:
+        self.parent = parent
+        for ns in Scope.namespaces:
             ns_parent = getattr(parent, ns) if parent else None
             setattr(self, ns, ScopeNamespace(ns_parent))
 
     def __repr__(self):
         names = ", ".join(
             k
-            for ns in self.__slots__
+            for ns in self.namespaces
             for k in getattr(self, ns).locals()
         )
         return f"Scope({names})"

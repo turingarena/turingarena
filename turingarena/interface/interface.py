@@ -1,12 +1,12 @@
 import logging
 from collections import OrderedDict
 
-from turingarena.common import ImmutableObject, TupleLikeObject
-from turingarena.interface.driver.frames import Phase
+from turingarena.common import TupleLikeObject
+from turingarena.interface.body import Body
 from turingarena.interface.exceptions import InterfaceExit
-from turingarena.interface.model.body import Body
-from turingarena.interface.model.scope import Scope
+from turingarena.interface.executable import ExecutableStructure, Instruction
 from turingarena.interface.parser import parse_interface
+from turingarena.interface.scope import Scope
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class InterfaceSignature(TupleLikeObject):
     __slots__ = ["variables", "functions", "callbacks"]
 
 
-class InterfaceDefinition(ImmutableObject):
+class InterfaceDefinition(ExecutableStructure):
     __slots__ = ["signature", "body", "source_text", "ast"]
 
     @staticmethod
@@ -42,29 +42,33 @@ class InterfaceDefinition(ImmutableObject):
             body=body,
         )
 
-    def run(self, context):
+    def unroll(self, frame):
         main = self.body.scope.main["main"]
 
-        logger.debug(f"running main")
-
-        if context.phase is Phase.PREFLIGHT:
-            request = context.engine.process_request(expected_type="main_begin")
-            for variable, value in zip(self.signature.variables.values(), request.global_variables):
-                context.engine.global_frame[variable] = value
-
+        yield MainBeginInstruction(interface=self, global_frame=frame)
         try:
-            yield from main.body.run(context)
+            yield from main.body.unroll(frame)
         except InterfaceExit:
-            logger.debug(f"exit was reached")
-            if context.phase is Phase.PREFLIGHT:
-                context.engine.process_request(expected_type="exit")
+            pass
         else:
-            logger.debug(f"main body reached end")
-            if context.phase is Phase.PREFLIGHT:
-                context.engine.process_request(expected_type="main_end")
+            yield MainEndInstruction()
 
-        # end of last communication block
-        if context.phase is Phase.PREFLIGHT:
-            context.engine.flush()
-        if context.phase is Phase.RUN:
-            yield
+
+class MainBeginInstruction(Instruction):
+    __slots__ = ["interface", "global_frame"]
+
+    def run_driver_pre(self, request):
+        assert request.request_type == "main_begin"
+        for variable, value in zip(
+                self.interface.signature.variables.values(),
+                request.global_variables,
+        ):
+            self.global_frame[variable] = value
+
+    def run_driver_post(self):
+        return []
+
+
+class MainEndInstruction(Instruction):
+    def run_driver_post(self):
+        return []

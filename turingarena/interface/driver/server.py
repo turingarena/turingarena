@@ -1,12 +1,12 @@
 import logging
 from contextlib import ExitStack
 
-from turingarena.interface.driver.connection import DriverProcessConnection, DRIVER_PROCESS_CHANNEL, DRIVER_QUEUE
-from turingarena.interface.driver.engine import InterfaceEngine
+from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
+from turingarena.interface.engine import drive_interface
 from turingarena.interface.exceptions import CommunicationBroken
-from turingarena.interface.model.model import InterfaceDefinition
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.metaserver import MetaServer
-from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.pipeboundary import PipeBoundary
 from turingarena.sandbox.client import SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -37,30 +37,22 @@ class DriverProcessServer:
         self.interface = InterfaceDefinition.compile(interface_text)
         self.main = self.interface.body.scope.main["main"]
 
-        self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
+        self.boundary.create_queue(DRIVER_PROCESS_QUEUE)
 
     def run(self):
         with ExitStack() as stack:
-            driver_connection = DriverProcessConnection(
-                **stack.enter_context(
-                    self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER)
-                )
-            )
-
             logger.debug("connecting to process...")
             sandbox_connection = stack.enter_context(
                 SandboxProcessClient(self.sandbox_dir).connect()
             )
             logger.debug("connected")
 
-            engine = InterfaceEngine(
-                sandbox_connection=sandbox_connection,
-                driver_connection=driver_connection,
-                interface=self.interface
-            )
-
             try:
-                engine.run()
+                drive_interface(
+                    sandbox_connection=sandbox_connection,
+                    driver_boundary=self.boundary,
+                    interface=self.interface
+                )
             except CommunicationBroken as e:
                 logger.warning(f"communication with process broken")
                 logger.exception(e)

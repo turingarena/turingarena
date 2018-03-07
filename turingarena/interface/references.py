@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.interface.model.type_expressions import PrimaryType, ArrayType
+from turingarena.interface.type_expressions import PrimaryType, ArrayType
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +11,8 @@ class Reference(ImmutableObject):
     __slots__ = ["value_type"]
 
     def get(self):
-        value = self.do_get()
-        assert value is not None
-        return value
+        assert self.is_resolved()
+        return self.do_get()
 
     def is_resolved(self):
         return self.do_get() is not None

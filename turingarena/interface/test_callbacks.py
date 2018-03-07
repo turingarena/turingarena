@@ -4,7 +4,7 @@ from turingarena.tests.test_utils import callback_mock, define_algorithms, compi
 def test_callback_no_arguments_cpp():
     for algo in define_algorithms(
             interface_text="""
-                callback callback_no_arguments() {}
+                callback c() {}
                 function test();
                 main {
                     call test();
@@ -12,36 +12,36 @@ def test_callback_no_arguments_cpp():
             """,
             sources={
                 'c++': """
-                    void callback_no_arguments();
+                    void c();
                     void test() {
-                        callback_no_arguments();
-                        callback_no_arguments();
+                        c();
+                        c();
                     }
                 """,
                 'python': """if True:
-                    from __main__ import callback_no_arguments
+                    from __main__ import c
                     
                     def test():
-                        callback_no_arguments()
-                        callback_no_arguments()
+                        c()
+                        c()
                 """,
             }
     ):
         with algo.run() as p:
             calls = []
-            callback_no_arguments = callback_mock(calls)
-            p.call.test(callback_no_arguments=callback_no_arguments)
+            c = callback_mock(calls)
+            p.call.test(c=lambda: c())
 
             assert calls == [
-                (callback_no_arguments, ()),
-                (callback_no_arguments, ()),
+                (c, ()),
+                (c, ()),
             ]
 
 
 def test_callback_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                callback callback_with_arguments(int a, int b) {
+                callback c(int a, int b) {
                     output a, b;
                 }
                 function test();
@@ -51,35 +51,35 @@ def test_callback_with_arguments():
             """,
             sources={
                 'c++': """
-                    void callback_with_arguments(int a, int b);
+                    void c(int a, int b);
                     void test() {
-                        callback_with_arguments(1, 2);
-                        callback_with_arguments(3, 4);
+                        c(1, 2);
+                        c(3, 4);
                     }
                 """,
                 'python': """if True:
-                    from __main__ import callback_with_arguments
+                    from __main__ import c
                     def test():
-                        callback_with_arguments(1, 2)
-                        callback_with_arguments(3, 4)
+                        c(1, 2)
+                        c(3, 4)
                 """,
             },
     ):
         with algo.run() as p:
             calls = []
-            callback_with_arguments = callback_mock(calls)
-            p.call.test(callback_with_arguments=lambda a, b: callback_with_arguments(a, b))
+            c = callback_mock(calls)
+            p.call.test(c=lambda a, b: c(a, b))
 
             assert calls == [
-                (callback_with_arguments, (1, 2)),
-                (callback_with_arguments, (3, 4)),
+                (c, (1, 2)),
+                (c, (3, 4)),
             ]
 
 
 def test_callback_return_value():
     for algo in define_algorithms(
             interface_text="""
-                callback callback_return_value(int a) -> int {
+                callback c(int a) -> int {
                     output a;
                     flush;
                     var int b;
@@ -89,33 +89,34 @@ def test_callback_return_value():
                 function test();
                 main {
                     call test();
+                    checkpoint;
                 }
             """,
             sources={
                 'c++': """
                     #include <cassert>
-                    int callback_return_value(int a);
+                    int c(int a);
                     void test() {
-                        assert(callback_return_value(1) == 2);
-                        assert(callback_return_value(3) == 4);
+                        assert(c(1) == 2);
+                        assert(c(3) == 4);
                     }
                 """,
                 'python': """if True:
-                    from __main__ import callback_return_value
+                    from __main__ import c
                     def test():
-                        assert callback_return_value(1) == 2
-                        assert callback_return_value(3) == 4
+                        assert c(1) == 2
+                        assert c(3) == 4
                 """
             }
     ):
         with algo.run() as p:
             calls = []
-            callback_return_value = callback_mock(calls, [2, 4])
-            p.call.test(callback_return_value=lambda a: callback_return_value(a))
+            c = callback_mock(calls, [2, 4])
+            p.call.test(c=lambda a: c(a))
 
             assert calls == [
-                (callback_return_value, (1,)),
-                (callback_return_value, (3,)),
+                (c, (1,)),
+                (c, (3,)),
             ]
 
 

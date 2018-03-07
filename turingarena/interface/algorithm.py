@@ -4,9 +4,9 @@ import threading
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.interface.driver.client import DriverClient, DriverProcessClient, DriverRunningProcess
+from turingarena.interface.driver.client import DriverClient, DriverProcessClient
 from turingarena.interface.driver.server import DriverServer
-from turingarena.interface.model.model import InterfaceDefinition
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
@@ -59,20 +59,19 @@ class Algorithm:
                 )
             )
 
-            driver_connection = stack.enter_context(
-                DriverProcessClient(driver_process_dir).connect()
-            )
-
-            driver_running_process = DriverRunningProcess(driver_connection)
+            driver_process_client = DriverProcessClient(driver_process_dir)
 
             try:
-                driver_running_process.begin_main(global_variables)
+                driver_process_client.send_begin_main(global_variables)
                 algorithm_process = AlgorithmProcess(
                     sandbox=sandbox_process_client,
-                    driver=driver_running_process,
+                    driver=driver_process_client,
                 )
                 yield algorithm_process
-                driver_running_process.end_main()
+                driver_process_client.send_end_main()
+            except Exception as e:
+                logger.exception(e)
+                raise
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:

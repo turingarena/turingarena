@@ -3,6 +3,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena.common import TupleLikeObject
+from turingarena.interface.driver.client import serialize
 
 
 class ValueType(TupleLikeObject):
@@ -120,7 +121,7 @@ class ArrayType(ValueType):
         value = list(value)
         yield from ScalarType(int).serialize(len(value))
         for item in value:
-            yield from self.item_type.serialize(item)
+            yield from serialize(item)
 
     def deserialize(self, lines):
         size = ScalarType(int).deserialize(lines)

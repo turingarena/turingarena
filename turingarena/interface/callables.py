@@ -1,14 +1,14 @@
 import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.interface.driver.frames import Phase
-from turingarena.interface.driver.references import VariableReference
+from turingarena.interface.body import Body
 from turingarena.interface.exceptions import InterfaceError
-from turingarena.interface.model.body import Body
-from turingarena.interface.model.scope import Scope
-from turingarena.interface.model.statement import Statement
-from turingarena.interface.model.type_expressions import ValueType, ScalarType
-from turingarena.interface.model.variables import Variable
+from turingarena.interface.executable import Instruction
+from turingarena.interface.references import VariableReference
+from turingarena.interface.scope import Scope
+from turingarena.interface.statement import Statement
+from turingarena.interface.type_expressions import ValueType, ScalarType
+from turingarena.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -115,25 +115,36 @@ class Callback(Callable):
             body=Body.compile(ast.body, scope=callback_scope)
         )
 
-    def run(self, context):
-        logger.debug(f"running callback {self.name}")
+    def unroll(self, context):
+        logger.debug(f"unrolling callback {self.name}")
 
-        with context.enter(self.scope) as inner_context:
-            if context.phase is Phase.PREFLIGHT:
-                parameters = [
-                    VariableReference(frame=inner_context.frame, variable=p).get()
-                    for p in self.signature.parameters
-                ]
+        global_frame = context.call.frame.global_frame
 
-                with context.engine.response() as p:
-                    for v in parameters:
-                        assert isinstance(v, int)
-                        p(v)
+        with global_frame.child(self.scope) as parameters_frame:
+            yield CallbackCallInstruction(
+                callback=self,
+                context=context,
+                parameters_frame=parameters_frame,
+            )
+            yield from self.body.unroll(parameters_frame)
 
-            yield from self.body.run(inner_context)
 
-            if context.phase is Phase.PREFLIGHT:
-                context.engine.process_request(expected_type="callback_return")
+class CallbackCallInstruction(Instruction):
+    __slots__ = ["callback", "context", "parameters_frame"]
+
+    def run_driver_post(self):
+        parameters = [
+            VariableReference(frame=self.parameters_frame, variable=p).get()
+            for p in self.callback.signature.parameters
+        ]
+
+        assert all(isinstance(v, int) for v in parameters)
+
+        return (
+            [1] +  # has callback
+            [self.context.call.accepted_callbacks.index(self.callback.name)] +
+            parameters
+        )
 
 
 class CallbackStatement(Statement):

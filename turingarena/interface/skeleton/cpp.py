@@ -75,6 +75,7 @@ def generate_block_statement(statement, *, interface):
         "alloc": lambda: generate_alloc(statement),
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
+        "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
         "flush": lambda: ["fflush(stdout);"],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
