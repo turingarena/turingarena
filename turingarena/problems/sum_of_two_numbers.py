@@ -32,6 +32,12 @@ def compute(algorithm, a, b):
         return process.call.sum(a, b)
 
 
+problem = AlgorithmicProblem(
+    interface_text=interface_text,
+    evaluator=evaluate,
+)
+
+
 def test_correct():
     problem.evaluate(
         "int sum(int a, int b) { return a+b; }",
@@ -44,9 +50,3 @@ def test_wrong():
         "int sum(int a, int b) { return a+b+b%2; }",
         language="c++",
     )
-
-
-problem = AlgorithmicProblem(
-    interface_text=interface_text,
-    evaluator=evaluate,
-)

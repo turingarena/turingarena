@@ -26,7 +26,7 @@ class AlgorithmicProblem(ImmutableObject):
                 interface=interface,
             )
             source.compile(algorithm_dir=algorithm_dir)
-            algorithm = Algorithm(algorithm_dir=algorithm_dir, interface=interface)
+            algorithm = Algorithm(algorithm_dir=algorithm_dir, interface_text=self.interface_text)
 
             self.evaluator(algorithm)
 
