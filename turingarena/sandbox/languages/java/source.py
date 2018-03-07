@@ -10,6 +10,7 @@ from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
+
 class JavaAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
@@ -32,16 +33,16 @@ class JavaAlgorithmSource(AlgorithmSource):
         ]
         logger.debug(f"Running {' '.join(cli)}")
 
-        try:
-            subprocess.run(
+        with subprocess.Popen(
                 cli,
                 cwd=algorithm_dir,
                 universal_newlines=True,
-                check=True,
-            )
-        except CalledProcessError as e:
-            if e.returncode == 1:
-                raise CompilationFailed
-            raise
+                stderr=subprocess.PIPE,
+                bufsize=1
+        ) as p:
+            p.wait()
+            if p.returncode != 0:
+                out = p.communicate()[1]
+                raise CompilationFailed(out)
         
         logger.info("Java file compilation succeded")

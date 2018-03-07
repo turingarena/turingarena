@@ -52,7 +52,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
 
             if p.returncode != 0:
                 logger.warning(f"process terminated with returncode {p.returncode}")
-                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}")
+                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
 
 def set_memory_and_time_limits():
     memory_limit = 16 * 1024 * 1024
