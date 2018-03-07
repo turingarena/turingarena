@@ -19,7 +19,7 @@ def test_callback_no_arguments_cpp():
                     }
                 """,
                 'python': """if True:
-                    from __main__ import c
+                    from skeleton import c
                     
                     def test():
                         c()
@@ -58,7 +58,7 @@ def test_callback_with_arguments():
                     }
                 """,
                 'python': """if True:
-                    from __main__ import c
+                    from skeleton import c
                     def test():
                         c(1, 2)
                         c(3, 4)
@@ -102,7 +102,7 @@ def test_callback_return_value():
                     }
                 """,
                 'python': """if True:
-                    from __main__ import c
+                    from skeleton import c
                     def test():
                         assert c(1) == 2
                         assert c(3) == 4
@@ -175,7 +175,7 @@ def test_interface_one_callback():
                     }
                 """,
                 'python': """if True:
-                    from __main__ import cb
+                    from skeleton import cb
                     
                     def test():
                         cb()
@@ -220,7 +220,7 @@ def test_interface_multiple_callbacks():
                     }
                 """,
                 'python': """if True:
-                    from __main__ import cb1, cb2
+                    from skeleton import cb1, cb2
                     def test():
                         cb1()
                         cb2()

@@ -48,7 +48,7 @@ def test_valid_types():
             """,
             sources={
                 'python': """if True:
-                    from __main__ import i, ia, iaa
+                    from skeleton import i, ia, iaa
     
                     def get_i():
                         return i

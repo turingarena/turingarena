@@ -43,7 +43,7 @@ def generate_var(statement):
 
 def generate_global_var_template(statement):
     names = ", ".join(v.name for v in statement.variables)
-    yield f"from __main__ import {names}"
+    yield f"from skeleton import {names}"
 
 
 def generate_function_template(statement):
@@ -70,16 +70,13 @@ def generate_callback(statement, *, interface):
 
 def generate_callback_template(statement, *, interface):
     callback = statement.callback
-    yield f"from __name__ import {callback.name}"
+    yield f"from skeleton import {callback.name}"
 
 
 def generate_main(statement, *, interface):
     yield 'def main():'
     yield from indent_all(generate_globals(interface))
     yield from indent_all(generate_block(statement.main.body, interface=interface))
-    yield
-    yield 'if __name__ == "__main__":'
-    yield indent("main()")
 
 
 def generate_block(block, *, interface):
@@ -113,6 +110,7 @@ def generate_alloc(statement):
 
 def generate_call(statement, *, interface):
     function_name = statement.function.name
+    yield f"__load_source__()"
     yield f"from source import {function_name}"
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:

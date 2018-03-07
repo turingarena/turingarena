@@ -1,7 +1,9 @@
-from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ
-import sys 
-import errno 
+import errno
+import sys
 import types
+
+from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ
+
 
 def init_sandbox():
     filter = Filter(ERRNO(errno.EACCES))
@@ -19,12 +21,13 @@ def init_sandbox():
     filter.add_rule(ALLOW, "ioctl")
     filter.load()
 
-# read source and skeleton files to string 
+
+# read source and skeleton files to string
 with open("source.py", "r") as source_file:
     source_string = source_file.read()
 
 with open("skeleton.py", "r") as skeleton_file:
-    skeleton_string = skeleton_file.read() 
+    skeleton_string = skeleton_file.read()
 
 # enter sandbox enviroment. From here every system call that is not allowed will result in an Exception 
 init_sandbox()
@@ -34,15 +37,21 @@ sys.modules["source"] = types.ModuleType("source")
 sys.modules["skeleton"] = types.ModuleType("skeleton")
 
 # import modules (because they are in sys.modules it will not try to access the filesystem)
-import source 
-import skeleton 
+import source
+import skeleton
 
-# execute the modules source file 
+
+def load_source():
+    exec(source_string, source.__dict__)
+
+
+skeleton.__dict__["__load_source__"] = load_source
+
+# execute the modules source file
 exec(skeleton_string, skeleton.__dict__)
-exec(source_string, source.__dict__)
 
-# execute skeleton main 
-skeleton.main() 
+# execute skeleton main
+skeleton.main()
 
 # terminate sandbox 
 exit(0)

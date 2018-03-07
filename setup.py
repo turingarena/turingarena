@@ -29,6 +29,7 @@ setup(
         "coloredlogs",
         "bidict",
         "psutil",
+        "seccomplite",
     ],
     tests_require=[
         "pytest",
