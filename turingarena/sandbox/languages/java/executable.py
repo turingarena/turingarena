@@ -7,7 +7,6 @@ from tempfile import TemporaryDirectory
 
 import pkg_resources
 
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.rlimits import set_memory_and_time_limits
 
@@ -37,20 +36,15 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                 "Skeleton",
             ]
 
-            # run java process 
-            with subprocess.Popen(
-                    cli,
-                    universal_newlines=True,
-                    preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
-                    cwd=cwd,
-                    stdin=connection.downward,
-                    stdout=connection.upward,
-                    bufsize=1,
-            ) as p:
-                logger.debug(f"starting process")
-                yield p
-                logger.debug(f"waiting for process")
+            popen = subprocess.Popen(
+                cli,
+                universal_newlines=True,
+                preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
+                cwd=cwd,
+                stdin=connection.downward,
+                stdout=connection.upward,
+                bufsize=1,
+            )
 
-            if p.returncode != 0:
-                logger.warning(f"process terminated with returncode {p.returncode}")
-                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
+            with self.manage_process(popen) as p:
+                yield p

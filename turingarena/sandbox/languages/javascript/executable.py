@@ -7,7 +7,6 @@ from tempfile import TemporaryDirectory
 
 import pkg_resources
 
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 
 logger = logging.getLogger(__name__)
@@ -30,21 +29,15 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
             shutil.copy(source_path, cwd)
             shutil.copy(skeleton_path, cwd)
 
+            popen = subprocess.Popen(
+                ["node", "sandbox.js"],
+                universal_newlines=True,
+                # preexec_fn=set_memory_and_time_limits,
+                cwd=cwd,
+                stdin=connection.downward,
+                stdout=connection.upward,
+                bufsize=1,
+            )
             # run process
-            with subprocess.Popen(
-                    ["node", "sandbox.js"],
-                    universal_newlines=True,
-                    # preexec_fn=set_memory_and_time_limits,
-                    cwd=cwd,
-                    stdin=connection.downward,
-                    stdout=connection.upward,
-                    bufsize=1,
-            ) as p:
-                logger.debug(f"starting process")
+            with self.manage_process(popen) as p:
                 yield p
-                logger.debug(f"waiting for process")
-
-            # check return code
-            if p.returncode != 0:
-                logger.warning(f"process terminated with returncode {p.returncode}")
-                raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
