@@ -5,6 +5,7 @@ from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
 from turingarena.sandbox.languages.java.executable import JavaAlgorithmExecutable
 from turingarena.sandbox.languages.python.executable import PythonAlgorithmExecutableScript
+from turingarena.sandbox.languages.javascript.executable import JavaScriptAlgorithmExecutableScript
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ def load_executable(algorithm_dir):
         "c++": ElfAlgorithmExecutable,
         "python": PythonAlgorithmExecutableScript,
         "java": JavaAlgorithmExecutable,
+        "javascript": JavaScriptAlgorithmExecutableScript,
     }
     cls = executable_classes[language]
 
