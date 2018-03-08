@@ -44,6 +44,8 @@ class Body(AbstractSyntaxNode):
     def first_calls(self):
         ans = {None}
         for s in self.statements:
+            if not isinstance(s, ImperativeStatement):
+                continue
             if None not in ans:
                 break
             ans.remove(None)

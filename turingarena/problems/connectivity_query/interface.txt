@@ -1,0 +1,37 @@
+// number of nodes
+var int N;
+var int Q;
+
+function preprocess(int[] D, int[][] adj);
+function is_there_a_path(int u, int v) -> int;
+
+main {
+    input N;
+
+    /* block { */
+        // D[u] = degree of u
+        var int[] D;
+
+        // adj[u][i] = destination of i-th edge out of u (zero-based)
+        var int[][] adj;
+
+        for(u : N) {
+            input D[u];
+            alloc adj[u] : D[u];
+            for(i : D[u]) {
+                input adj[u][i];
+            }
+        }
+
+        call preprocess(D, adj);
+    /* } */
+
+    input Q;
+    for(q : Q) {
+        var int u, v, ans;
+        input u, v;
+        call is_there_a_path(u, v) -> ans;
+        output ans;
+        flush;
+    }
+}
