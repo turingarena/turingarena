@@ -99,7 +99,7 @@ def generate_alloc(statement):
     for argument in statement.arguments:
         arg = build_expression(argument)
         size = build_expression(statement.size)
-        yield f"var {arg} = Array({size});"
+        yield f"{arg} = Array({size});"
 
 
 def generate_call(statement, *, interface):
