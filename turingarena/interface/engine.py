@@ -1,8 +1,6 @@
 import itertools
 import logging
 
-from turingarena.interface.driver.commands import ProxyRequest
-from turingarena.interface.driver.connection import DRIVER_PROCESS_QUEUE
 from turingarena.interface.frames import Frame
 from turingarena.pipeboundary import PipeBoundary
 
@@ -33,32 +31,7 @@ def drive_interface(*, interface, driver_boundary: PipeBoundary, sandbox_connect
 
     # a generator that receives driver requests
     # and yields responses
-    run_driver_iterator = run_driver(driver_iterator, run_sandbox_iterator=run_sandbox_iterator)
-
-    def handler(request):
-        logger.debug(f"handling driver request {request!s:.50}")
-        current_request = ProxyRequest.deserialize(
-            iter(request.splitlines()),
-            interface_signature=interface.signature,
-        )
-
-        response = run_driver_iterator.send(current_request)
-
-        logger.debug(f"handling driver request {request!s:.10} with response {response!s:.50}")
-
-        assert all(isinstance(x, int) for x in response)
-        return {
-            "response": "\n".join(str(x) for x in response)
-        }
-
-    assert next(run_driver_iterator) is None
-    while True:
-        logger.debug(f"waiting for driver request...")
-        driver_boundary.handle_request(DRIVER_PROCESS_QUEUE, handler)
-        try:
-            assert next(run_driver_iterator) is None
-        except StopIteration:
-            break
+    return run_driver(driver_iterator, run_sandbox_iterator=run_sandbox_iterator)
 
 
 def run_driver(driver_iterator, *, run_sandbox_iterator):

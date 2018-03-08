@@ -16,6 +16,8 @@ DRIVER_PROCESS_QUEUE = PipeSynchronousQueueDescriptor(
         request=PipeDescriptor("request.pipe", ("w", "r")),
     ),
     response_pipes=dict(
+        driver_error=PipeDescriptor("driver_error.pipe", ("r", "w")),
+        sandbox_error=PipeDescriptor("sandbox_error.pipe", ("r", "w")),
         response=PipeDescriptor("response.pipe", ("r", "w")),
     ),
 )

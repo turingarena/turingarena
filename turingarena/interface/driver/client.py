@@ -3,10 +3,15 @@ from contextlib import contextmanager
 
 from turingarena.interface.driver.commands import MetaType, get_meta_type
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
+from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.proxy import InterfaceProxy
 from turingarena.pipeboundary import PipeBoundary
 
 logger = logging.getLogger(__name__)
+
+
+class SandboxError(Exception):
+    pass
 
 
 class DriverClient:
@@ -73,10 +78,16 @@ class DriverProcessClient:
     def send_request(self, request_lines):
         request = "\n".join(str(l) for l in request_lines)
         logger.debug(f"sending request:\n{request!s:.50}")
-        response = self.boundary.send_request(
-            DRIVER_PROCESS_QUEUE,
-            request=request,
-        )["response"]
+        payloads = self.boundary.send_request(DRIVER_PROCESS_QUEUE, request=request, )
+
+        driver_error = payloads["driver_error"]
+        if driver_error:
+            raise InterfaceError(driver_error)
+        sandbox_error = payloads["sandbox_error"]
+        if sandbox_error:
+            raise SandboxError(sandbox_error)
+
+        response = payloads["response"]
         logger.debug(f"request:\n{request!s:.50}\ngot response:\n{response!s:.50}")
         return response
 

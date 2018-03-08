@@ -1,6 +1,7 @@
 import logging
 from contextlib import ExitStack
 
+from turingarena.interface.driver.commands import ProxyRequest
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.interface.engine import drive_interface
 from turingarena.interface.exceptions import CommunicationBroken
@@ -38,6 +39,7 @@ class DriverProcessServer:
         self.main = self.interface.body.scope.main["main"]
 
         self.boundary.create_queue(DRIVER_PROCESS_QUEUE)
+        self.run_driver_iterator = None
 
     def run(self):
         with ExitStack() as stack:
@@ -47,12 +49,41 @@ class DriverProcessServer:
             )
             logger.debug("connected")
 
+            self.run_driver_iterator = drive_interface(
+                sandbox_connection=sandbox_connection,
+                driver_boundary=self.boundary,
+                interface=self.interface
+            )
+            self.process_requests()
+
+    def handle_request(self, request):
+        logger.debug(f"handling driver request {request!s:.50}")
+        current_request = ProxyRequest.deserialize(
+            iter(request.splitlines()),
+            interface_signature=self.interface.signature,
+        )
+
+        try:
+            response = self.run_driver_iterator.send(current_request)
+        except CommunicationBroken as e:
+            logger.warning(f"communication with process broken")
+            return {
+                "sandbox_error": "communication broken",
+            }
+
+        assert all(isinstance(x, int) for x in response)
+        logger.debug(f"handling driver request {request!s:.10} with response {response!s:.50}")
+
+        return {
+            "response": "\n".join(str(x) for x in response)
+        }
+
+    def process_requests(self):
+        assert next(self.run_driver_iterator) is None
+        while True:
+            logger.debug(f"waiting for driver request...")
+            self.boundary.handle_request(DRIVER_PROCESS_QUEUE, self.handle_request)
             try:
-                drive_interface(
-                    sandbox_connection=sandbox_connection,
-                    driver_boundary=self.boundary,
-                    interface=self.interface
-                )
-            except CommunicationBroken as e:
-                logger.warning(f"communication with process broken")
-                logger.exception(e)
+                assert next(self.run_driver_iterator) is None
+            except StopIteration:
+                break

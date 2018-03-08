@@ -106,12 +106,16 @@ class PipeBoundary(ImmutableObject):
             name: self.sync_read(pipe, PipeBoundarySide.SERVER)
             for name, pipe in descriptor.request_pipes.items()
         }
+        response_payloads = {}
         try:
             response_payloads = handler(**request_payloads)
-        except Exception as e:
-            for name, pipe in descriptor.response_pipes.items():
+        finally:
+            self._send_payloads(descriptor, response_payloads)
+
+    def _send_payloads(self, descriptor, response_payloads):
+        for name, pipe in descriptor.response_pipes.items():
+            payload = response_payloads.get(name)
+            if payload is not None:
+                self.sync_write(pipe, PipeBoundarySide.SERVER, payload)
+            else:
                 self.sync_empty(pipe, PipeBoundarySide.SERVER)
-            raise
-        else:
-            for name, pipe in descriptor.response_pipes.items():
-                self.sync_write(pipe, PipeBoundarySide.SERVER, response_payloads[name])
