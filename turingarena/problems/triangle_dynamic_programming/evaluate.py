@@ -54,7 +54,8 @@ problem = AlgorithmicProblem(
     "solution,language",
     [
         ("correct.cpp", "c++"),
-        ("Correct.java", "java")
+        ("Correct.java", "java"),
+        ("correct.py", "python")
     ]
 )
 def test_solution(solution, language):
