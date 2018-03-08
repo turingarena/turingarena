@@ -137,7 +137,7 @@ def generate_input(statement):
     for arg in statement.arguments:
         yield f"{build_expression(arg)} = " + {
             int: "in.nextInt()",
-        }[arg.value_type.base_type]
+        }[arg.value_type.base_type] + ";"
 
 
 def generate_if(statement, *, interface):
