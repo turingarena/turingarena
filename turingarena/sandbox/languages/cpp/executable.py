@@ -1,12 +1,12 @@
 import logging
 import os
-import resource
 import subprocess
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.rlimits import set_memory_and_time_limits
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
             with subprocess.Popen(
                     [executable_filename],
                     universal_newlines=True,
-                    preexec_fn=preexec_fn,
+                    preexec_fn=lambda: set_memory_and_time_limits(),
                     cwd=cwd,
                     stdin=connection.downward,
                     stdout=connection.upward,
@@ -53,28 +53,3 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
             universal_newlines=True,
         )
         return gdb_run.stdout
-
-
-def preexec_fn():
-    memory_limit = 16 * 1024 * 1024
-    time_limit = 1
-    core_limit = 32 * 1024 * 1024
-
-    resource.setrlimit(
-        resource.RLIMIT_CORE,
-        (core_limit, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_STACK,
-        (resource.RLIM_INFINITY, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_CPU,
-        (time_limit, resource.RLIM_INFINITY),
-        # use soft < hard to ensure SIGXCPU is raised instead of SIGKILL
-        # see setrlimit(2)
-    )
-    resource.setrlimit(
-        resource.RLIMIT_AS,
-        (memory_limit, resource.RLIM_INFINITY),
-    )

@@ -1,6 +1,5 @@
 import logging
 import os
-import resource
 import shutil
 import subprocess
 from contextlib import contextmanager
@@ -35,7 +34,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
             with subprocess.Popen(
                     ["python", "sandbox.py"],
                     universal_newlines=True,
-                    # preexec_fn=set_memory_and_time_limits,
+                    # preexec_fn=lambda: set_memory_and_time_limits(),
                     cwd=cwd,
                     stdin=connection.downward,
                     stdout=connection.upward,
@@ -49,28 +48,3 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
             if p.returncode != 0:
                 logger.warning(f"process terminated with returncode {p.returncode}")
                 raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
-
-
-def set_memory_and_time_limits():
-    memory_limit = 16 * 1024 * 1024
-    time_limit = 1
-    core_limit = 32 * 1024 * 1024
-
-    resource.setrlimit(
-        resource.RLIMIT_CORE,
-        (core_limit, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_STACK,
-        (resource.RLIM_INFINITY, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_CPU,
-        (time_limit, resource.RLIM_INFINITY),
-        # use soft < hard to ensure SIGXCPU is raised instead of SIGKILL
-        # see setrlimit(2)
-    )
-    resource.setrlimit(
-        resource.RLIMIT_AS,
-        (memory_limit, resource.RLIM_INFINITY),
-    )

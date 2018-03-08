@@ -1,6 +1,5 @@
 import logging
 import os
-import resource
 import shutil
 import subprocess
 from contextlib import contextmanager
@@ -10,6 +9,7 @@ import pkg_resources
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.rlimits import set_memory_and_time_limits
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
             with subprocess.Popen(
                     cli,
                     universal_newlines=True,
-                    # preexec_fn=set_memory_and_time_limits,
+                    preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
                     cwd=cwd,
                     stdin=connection.downward,
                     stdout=connection.upward,
@@ -54,29 +54,3 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
             if p.returncode != 0:
                 logger.warning(f"process terminated with returncode {p.returncode}")
                 raise AlgorithmRuntimeError(f"invalid return code {p.returncode}", "")
-
-
-def set_memory_and_time_limits():
-    time_limit = 2
-    core_limit = 32 * 1024 * 1024
-
-    resource.setrlimit(
-        resource.RLIMIT_CORE,
-        (core_limit, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_STACK,
-        (resource.RLIM_INFINITY, resource.RLIM_INFINITY),
-    )
-    resource.setrlimit(
-        resource.RLIMIT_CPU,
-        (time_limit, resource.RLIM_INFINITY),
-        # use soft < hard to ensure SIGXCPU is raised instead of SIGKILL
-        # see setrlimit(2)
-    )
-    if False:  # FIXME: seems to kill the JVM
-        memory_limit = 256 * 1024 * 1024
-        resource.setrlimit(
-            resource.RLIMIT_AS,
-            (memory_limit, resource.RLIM_INFINITY),
-        )
