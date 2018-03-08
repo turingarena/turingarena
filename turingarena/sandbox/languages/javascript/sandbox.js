@@ -15,7 +15,7 @@ function load_source() {
     }
 }
 
-// get integers on a line
+// get integer
 function readInteger() {
     return scanf("%d");
 }

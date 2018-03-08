@@ -38,3 +38,15 @@ def test_java():
     """) as algo:
         with algo.run() as p:
             assert p.call.test() == 3
+
+
+def test_security():
+    should_raise("""
+        var fs = require('fs');
+    """)
+
+
+def test_loop():
+    should_raise("""
+        while (true) {}
+    """)
