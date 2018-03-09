@@ -5,6 +5,9 @@ def generate_skeleton_javascript(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
+        yield
+    yield "main();"
+    yield
 
 
 def generate_template_javascript(interface):
@@ -82,7 +85,7 @@ def generate_block_statement(statement, *, interface):
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
         "checkpoint": lambda: ["print(0);"],
-        "flush": lambda: ["// flush"],
+        "flush": lambda: ["flush();"],
         "call": lambda: generate_call(statement, interface=interface),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),
@@ -96,7 +99,7 @@ def generate_alloc(statement):
     for argument in statement.arguments:
         arg = build_expression(argument)
         size = build_expression(statement.size)
-        yield f"var {arg} = Array({size});"
+        yield f"{arg} = Array({size});"
 
 
 def generate_call(statement, *, interface):
@@ -109,7 +112,7 @@ def generate_call(statement, *, interface):
     else:
         yield f"{function_name}({parameters});"
     if interface.signature.callbacks:
-        yield r"""print("return");"""
+        yield 'print("return");'
 
 
 def generate_output(statement):
@@ -118,9 +121,8 @@ def generate_output(statement):
 
 
 def generate_input(statement):
-    format_string = ''.join(build_format_string(v) for v in statement.arguments)
-    args = ', '.join(build_expression(v) for v in statement.arguments)
-    yield f'[{args}] = scanf("{format_string}");'
+    for arg in statement.arguments:
+        yield f'{build_expression(arg)} = readInteger();'
 
 
 def generate_if(statement, *, interface):
@@ -178,9 +180,3 @@ def build_format(t):
     return {
         int: "int",
     }[t]
-
-
-def build_format_string(expr):
-    return {
-        int: "%d",
-    }[expr.value_type.base_type]

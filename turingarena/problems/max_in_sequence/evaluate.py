@@ -37,11 +37,11 @@ problem = AlgorithmicProblem(
 @pytest.mark.parametrize(
     "solution,language",
     [
-        #("correct.cpp", "c++"),
-        #("correct.py", "python"),
-        #("Correct.java", "java"),
+        ("correct.cpp", "c++"),
+        ("correct.py", "python"),
+        ("Correct.java", "java"),
         ("correct.js", "javascript"),
-        #("wrong.cpp", "c++"),
+        ("wrong.cpp", "c++"),
     ]
 )
 def test_solution(solution, language):

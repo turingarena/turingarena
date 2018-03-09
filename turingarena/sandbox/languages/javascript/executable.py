@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 import pkg_resources
 
 from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.rlimits import set_memory_and_time_limits
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
             popen = subprocess.Popen(
                 ["node", "sandbox.js"],
                 universal_newlines=True,
-                # preexec_fn=set_memory_and_time_limits,
+                preexec_fn=lambda : set_memory_and_time_limits(memory_limit=None, time_limit=5),
                 cwd=cwd,
                 stdin=connection.downward,
                 stdout=connection.upward,
