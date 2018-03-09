@@ -1,9 +1,9 @@
-from turingarena.interface.executable import SimpleStatement
+from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
 from turingarena.interface.type_expressions import ArrayType, ScalarType
 
 
-class AllocStatement(SimpleStatement):
+class AllocStatement(ImperativeStatement):
     __slots__ = ["arguments", "size"]
 
     @staticmethod
@@ -15,10 +15,14 @@ class AllocStatement(SimpleStatement):
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
 
-    def run_sandbox(self, connection, *, frame):
-        self.do_alloc(frame)
+    def unroll(self, frame):
+        yield AllocInstruction(arguments=self.arguments, size=self.size, frame=frame)
 
-    def do_alloc(self, frame):
-        size = self.size.evaluate_in(frame).get()
+
+class AllocInstruction(Instruction):
+    __slots__ = ["arguments", "size", "frame"]
+
+    def run_sandbox(self, connection):
+        size = self.size.evaluate_in(self.frame).get()
         for a in self.arguments:
-            a.evaluate_in(frame).alloc(size)
+            a.evaluate_in(self.frame).alloc(size)

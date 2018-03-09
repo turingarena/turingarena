@@ -1,7 +1,7 @@
 import logging
 
 from turingarena.interface.exceptions import CommunicationBroken
-from turingarena.interface.executable import SimpleStatement
+from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import Expression
 
 logger = logging.getLogger(__name__)
@@ -14,17 +14,24 @@ def read_line(pipe):
     return line
 
 
-class CheckpointStatement(SimpleStatement):
+class CheckpointStatement(ImperativeStatement):
     __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
         return CheckpointStatement()
 
-    def should_send_input(self, *, frame):
+    def unroll(self, frame):
+        yield CheckpointInstruction()
+
+
+class CheckpointInstruction(Instruction):
+    __slots__ = []
+
+    def should_send_input(self):
         return True
 
-    def run_sandbox(self, connection, *, frame):
+    def run_sandbox(self, connection):
         # make sure all input was sent before receiving output
         connection.downward.flush()
 
@@ -33,7 +40,7 @@ class CheckpointStatement(SimpleStatement):
         assert line == str(0)
 
 
-class InputOutputStatement(SimpleStatement):
+class InputOutputStatement(ImperativeStatement):
     __slots__ = ["arguments"]
 
     @classmethod
@@ -49,9 +56,16 @@ class InputOutputStatement(SimpleStatement):
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
-    def run_sandbox(self, connection, *, frame):
+    def unroll(self, frame):
+        yield InputInstruction(arguments=self.arguments, frame=frame)
+
+
+class InputInstruction(Instruction):
+    __slots__ = ["arguments", "frame"]
+
+    def run_sandbox(self, connection):
         raw_values = [
-            a.value_type.format(a.evaluate_in(frame).get())
+            a.value_type.format(a.evaluate_in(self.frame).get())
             for a in self.arguments
         ]
         logger.debug(f"printing {raw_values} to downward pipe")
@@ -64,7 +78,14 @@ class InputStatement(InputOutputStatement):
 class OutputStatement(InputOutputStatement):
     __slots__ = []
 
-    def run_sandbox(self, connection, *, frame):
+    def unroll(self, frame):
+        yield OutputInstruction(arguments=self.arguments, frame=frame)
+
+
+class OutputInstruction(Instruction):
+    __slots__ = ["arguments", "frame"]
+
+    def run_sandbox(self, connection):
         # make sure all input was sent before receiving output
         connection.downward.flush()
 
@@ -72,15 +93,22 @@ class OutputStatement(InputOutputStatement):
         logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
-            a.evaluate_in(frame).resolve(value)
+            a.evaluate_in(self.frame).resolve(value)
 
 
-class FlushStatement(SimpleStatement):
+class FlushStatement(ImperativeStatement):
     __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
         return FlushStatement()
 
-    def is_flush(self, *, frame):
+    def unroll(self, frame):
+        yield FlushInstruction()
+
+
+class FlushInstruction(Instruction):
+    __slots__ = []
+
+    def is_flush(self):
         return True

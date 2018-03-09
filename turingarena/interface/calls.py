@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
 from turingarena.interface.exceptions import InterfaceError
-from turingarena.interface.executable import SimpleStatement, ImperativeStatement, Instruction
+from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
 from turingarena.interface.io import read_line
 
@@ -188,7 +188,7 @@ class AcceptCallbackInstruction(Instruction):
             self.context.callback = interface.body.scope.callbacks[callback_name]
 
 
-class ReturnStatement(SimpleStatement):
+class ReturnStatement(ImperativeStatement):
     __slots__ = ["value"]
 
     @staticmethod
@@ -197,8 +197,15 @@ class ReturnStatement(SimpleStatement):
             value=Expression.compile(ast.value, scope=scope),
         )
 
-    def run_driver_pre(self, request, *, frame):
+    def unroll(self, frame):
+        yield ReturnInstruction(value=self.value, frame=frame)
+
+
+class ReturnInstruction(Instruction):
+    __slots__ = ["value", "frame"]
+
+    def run_driver_pre(self, request):
         assert isinstance(request, CallbackReturn)
-        self.value.evaluate_in(frame).resolve(
+        self.value.evaluate_in(self.frame).resolve(
             self.value.value_type.ensure(request.return_value)
         )

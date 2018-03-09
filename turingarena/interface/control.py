@@ -2,7 +2,7 @@ from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body, ExitCall
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
-from turingarena.interface.executable import ImperativeStatement, StatementInstruction, Instruction
+from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
 from turingarena.interface.scope import Scope
 from turingarena.interface.type_expressions import ScalarType
@@ -17,17 +17,21 @@ class ExitStatement(ImperativeStatement):
         return ExitStatement()
 
     def unroll(self, frame):
-        yield StatementInstruction(statement=self, frame=frame)
+        yield ExitInstruction()
         raise InterfaceExit
-
-    def run_driver_pre(self, request, *, frame):
-        assert isinstance(request, Exit)
-
-    def run_driver_post(self, *, frame):
-        return []
 
     def first_calls(self):
         return {ExitCall}
+
+
+class ExitInstruction(Instruction):
+    __slots__ = []
+
+    def run_driver_pre(self, request):
+        assert isinstance(request, Exit)
+
+    def run_driver_post(self):
+        return []
 
 
 class IfStatement(ImperativeStatement):
