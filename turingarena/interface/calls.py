@@ -32,25 +32,78 @@ class CallStatement(ImperativeStatement):
     __slots__ = ["function", "parameters", "return_value"]
 
     @staticmethod
+    def compile_parameter(ast, *, fun, decl, scope):
+        expr = Expression.compile(ast, scope=scope)
+        if expr.value_type != decl.value_type:
+            raise InterfaceError(
+                f"argument {decl.name} "
+                f"of function {fun.name}: "
+                f"expected {decl.value_type}, "
+                f"got {expr.value_type}",
+                parseinfo=ast.parseinfo,
+            )
+        return expr
+
+    @staticmethod
     def compile(ast, scope):
-        fun = scope.functions[ast.function_name]
-        assert len(ast.parameters) == len(fun.signature.parameters)
-        if ast.return_value is None:
+        try:
+            fun = scope.functions[ast.function_name]
+        except KeyError:
+            raise InterfaceError("function does not exist", parseinfo=ast.parseinfo)
+
+        if len(ast.parameters) != len(fun.signature.parameters):
+            raise InterfaceError(
+                f"function {fun.name} "
+                f"expects {len(fun.signature.parameters)} argument(s), "
+                f"got {len(ast.parameters)}",
+                parseinfo=ast.parseinfo,
+            )
+
+        parameters = [
+            CallStatement.compile_parameter(param_ast, fun=fun, decl=decl, scope=scope)
+            for decl, param_ast in
+            zip(fun.signature.parameters, ast.parameters)
+        ]
+
+        return_value = CallStatement.compile_return_value(ast.return_value, fun=fun, scope=scope)
+
+        return_type = fun.signature.return_type
+        if return_type is not None and return_value is None:
+            raise InterfaceError(
+                f"function {fun.name} returns {return_type}, but no return expression given",
+                parseinfo=ast.parseinfo,
+            )
+
+        if return_type is None and return_value is not None:
+            raise InterfaceError(
+                f"function {fun.name} does not return a value",
+                parseinfo=ast.return_value.parseinfo,
+            )
+
+        if return_value is not None and return_value.value_type != return_type:
+            raise InterfaceError(
+                f"function {fun.name} returns {return_type}, "
+                f"but return expression is {return_value.value_type}",
+                parseinfo=ast.return_value.parseinfo,
+            )
+
+        return CallStatement(
+            function=fun,
+            parameters=parameters,
+            return_value=return_value,
+        )
+
+    @staticmethod
+    def compile_return_value(ast, *, fun, scope):
+        if ast is None:
             return_value = None
         else:
             return_value = Expression.compile(
-                ast.return_value,
+                ast,
                 scope=scope,
                 expected_type=fun.signature.return_type,
             )
-        return CallStatement(
-            function=fun,
-            parameters=[
-                Expression.compile(arg, scope=scope, expected_type=decl_arg.value_type)
-                for decl_arg, arg in zip(fun.signature.parameters, ast.parameters)
-            ],
-            return_value=return_value,
-        )
+        return return_value
 
     def first_calls(self):
         return {self.function.name}

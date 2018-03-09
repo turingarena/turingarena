@@ -28,11 +28,7 @@ class Expression(AbstractSyntaxNode):
 
     @staticmethod
     def compile(ast, *, scope, expected_type=None):
-        expression = expression_classes[ast.expression_type].compile(ast, scope)
-        actual_type = expression.value_type
-        if expected_type and actual_type != expected_type:
-            raise ValueError("expected {}, got {}".format(expected_type, actual_type))
-        return expression
+        return expression_classes[ast.expression_type].compile(ast, scope)
 
     def evaluate_in(self, frame):
         return self.do_evaluate(frame)

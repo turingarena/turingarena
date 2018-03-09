@@ -72,6 +72,9 @@ class ScalarType(PrimaryType):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.base_type.__name__})"
 
+    def __str__(self):
+        return self.base_type.__name__
+
     @staticmethod
     def compile(ast, scope):
         bases = {
@@ -104,6 +107,9 @@ class ArrayType(ValueType):
         return ArrayType(
             item_type=ValueType.compile(ast.item_type, scope=scope),
         )
+
+    def __str__(self):
+        return f"{self.item_type}[]"
 
     def intern(self, value):
         return [
