@@ -1,7 +1,7 @@
 import logging
 from contextlib import ExitStack
 
-from turingarena.interface.driver.commands import ProxyRequest
+from turingarena.interface.driver.commands import deserialize_request
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.interface.engine import drive_interface
 from turingarena.interface.exceptions import CommunicationBroken
@@ -51,17 +51,14 @@ class DriverProcessServer:
 
             self.run_driver_iterator = drive_interface(
                 sandbox_connection=sandbox_connection,
-                driver_boundary=self.boundary,
                 interface=self.interface
             )
             self.process_requests()
 
     def handle_request(self, request):
         logger.debug(f"handling driver request {request!s:.50}")
-        current_request = ProxyRequest.deserialize(
-            iter(request.splitlines()),
-            interface_signature=self.interface.signature,
-        )
+
+        current_request = self.deserialize(request)
 
         try:
             response = self.run_driver_iterator.send(current_request)
@@ -77,6 +74,28 @@ class DriverProcessServer:
         return {
             "response": "\n".join(str(x) for x in response)
         }
+
+    def deserialize(self, request):
+        deserializer = deserialize_request()
+
+        assert next(deserializer) is None
+
+        lines = request.splitlines()
+        lines_it = iter(lines)
+        try:
+            for line in lines_it:
+                deserializer.send(line)
+        except StopIteration as e:
+            extra_lines = list(lines_it)
+            if extra_lines:
+                raise ValueError(f"extra lines '{extra_lines!s:.50}'") from None
+            result = e.value
+        else:
+            raise ValueError(f"too few lines")
+
+        logger.debug(f"deserialized: {result!s:.200}")
+
+        return result
 
     def process_requests(self):
         assert next(self.run_driver_iterator) is None

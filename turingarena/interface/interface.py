@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
+from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ExecutableStructure, Instruction
 from turingarena.interface.parser import parse_interface
@@ -58,12 +59,12 @@ class MainBeginInstruction(Instruction):
     __slots__ = ["interface", "global_frame"]
 
     def run_driver_pre(self, request):
-        assert request.request_type == "main_begin"
-        for variable, value in zip(
-                self.interface.signature.variables.values(),
-                request.global_variables,
-        ):
-            self.global_frame[variable] = value
+        assert isinstance(request, MainBegin)
+        variables = self.interface.signature.variables
+        assert len(request.global_variables) == len(variables)
+        for name, variable in variables.items():
+            value = request.global_variables[name]
+            self.global_frame[variable] = variable.value_type.ensure(value)
 
     def run_driver_post(self):
         return []

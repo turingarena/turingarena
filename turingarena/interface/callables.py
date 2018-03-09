@@ -139,10 +139,10 @@ class CallbackCallInstruction(Instruction):
         ]
 
         assert all(isinstance(v, int) for v in parameters)
-
+        accepted_callbacks = list(self.context.call.accepted_callbacks.keys())
         return (
             [1] +  # has callback
-            [self.context.call.accepted_callbacks.index(self.callback.name)] +
+            [accepted_callbacks.index(self.callback.name)] +
             parameters
         )
 

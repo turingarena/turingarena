@@ -1,7 +1,6 @@
 import collections
 import logging
 import numbers
-from abc import abstractmethod
 from enum import IntEnum
 
 from bidict import bidict
@@ -12,144 +11,137 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyRequest(ImmutableObject):
-    __slots__ = ["interface_signature", "request_type"]
+    __slots__ = []
 
-    def __init__(self, **kwargs):
-        kwargs.setdefault("request_type", request_types.inv[self.__class__])
-        super().__init__(**kwargs)
+    def serialize_arguments(self):
+        yield from []
 
     @staticmethod
-    @abstractmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        pass
+    def deserialize_arguments():
+        yield from []
 
-    @classmethod
-    def deserialize(cls, lines, *, interface_signature):
-        logger.debug("accepting request...")
-        request_type = next(lines)
-        logger.debug(f"received request type {request_type}, parsing arguments...")
-        cls2 = request_types[request_type]
-        arguments = cls2.deserialize_arguments(
-            interface_signature=interface_signature,
-            lines=lines,
-        )
-        message = cls2(
-            interface_signature=interface_signature,
-            **arguments,
-        )
-        return message
+
+def deserialize_request():
+    cls = request_types[(yield)]
+    return (yield from cls.deserialize_arguments())
+
+
+def serialize_request(request):
+    yield request_types.inv[type(request)]
+    yield from request.serialize_arguments()
 
 
 class MainBegin(ProxyRequest):
     __slots__ = ["global_variables"]
 
     @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        size = int(next(lines))
-        global_variables = dict([
-            (next(lines), deserialize(lines))
-            for _ in range(size)
-        ])
-        assert len(global_variables) == len(interface_signature.variables)
-        return dict(
-            global_variables=[
-                variable.value_type.ensure(global_variables[name])
-                for name, variable in interface_signature.variables.items()
-            ]
+    def deserialize_arguments():
+        return MainBegin(
+            global_variables=(yield from MainBegin.deserialize_global_variables())
         )
+
+    @staticmethod
+    def deserialize_global_variables():
+        size = int((yield))
+        result = {}
+        for _ in range(size):
+            name = yield
+            value = yield from deserialize_data()
+            result[name] = value
+        return result
+
+    def serialize_arguments(self):
+        yield len(self.global_variables)
+        for name, value in self.global_variables.items():
+            yield name
+            yield from serialize_data(value)
+
+    def validate(self, *, interface_signature):
+        assert len(self.global_variables) == len(interface_signature.variables)
 
 
 class FunctionCall(ProxyRequest):
     __slots__ = ["function_name", "parameters", "accepted_callbacks"]
 
-    @property
-    def function_signature(self):
-        return self.interface_signature.functions[self.function_name]
-
     @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        logger.debug(f"deserializing FunctionCall...")
-        function_name = next(lines)
-        function_signature = interface_signature.functions[function_name]
-
-        logger.debug(f"read name {function_name!r}")
-        parameters_count = int(next(lines))
-        assert parameters_count == len(function_signature.parameters)
-
-        parameters = [
-            p.value_type.ensure(deserialize(lines))
-            for p in function_signature.parameters
-        ]
-        logger.debug(f"read parameters: {parameters!r:.50s}")
-
-        accepted_callbacks = list()
-        callbacks_count = int(next(lines))
+    def deserialize_arguments():
+        function_name = yield
+        parameters_count = int((yield))
+        parameters = [None] * parameters_count
+        for i in range(parameters_count):
+            parameters[i] = yield from deserialize_data()
+        callbacks_count = int((yield))
+        accepted_callbacks = {}
         for _ in range(callbacks_count):
-            callback_name = next(lines)
-            callback_parameters_count = int(next(lines))
+            callback_name = yield
+            callback_parameters_count = int((yield))
+            accepted_callbacks[callback_name] = callback_parameters_count
 
-            callback_signature = interface_signature.callbacks[callback_name]
-            assert callback_parameters_count == len(callback_signature.parameters)
-
-            accepted_callbacks.append(callback_name)
-
-        logger.debug(f"read accepted_callbacks: {accepted_callbacks!r:.50s}")
-        return dict(
+        return FunctionCall(
             function_name=function_name,
             parameters=parameters,
             accepted_callbacks=accepted_callbacks,
         )
 
+    def serialize_arguments(self):
+        yield self.function_name
+        yield len(self.parameters)
+        for value in self.parameters:
+            yield from serialize_data(value)
+        yield len(self.accepted_callbacks)
+        for name, parameters_count in self.accepted_callbacks.items():
+            yield name
+            yield parameters_count
+
+    def validate(self, *, interface_signature):
+        function_signature = interface_signature.functions[self.function_name]
+
+        assert len(self.parameters) == len(function_signature.parameters)
+        self.validate_accepted_callbacks(interface_signature)
+
+    def validate_accepted_callbacks(self, interface_signature):
+        for name, parameters_count in self.accepted_callbacks:
+            signature = interface_signature.callbacks[name]
+            assert parameters_count == len(signature.parameters)
+
 
 class CallbackReturn(ProxyRequest):
-    __slots__ = ["callback_name", "return_value"]
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if self.return_type is not None:
-            assert self.return_value is not None
-        else:
-            assert self.return_value is None
-
-    @property
-    def return_type(self):
-        return self.callback_signature.return_type
-
-    @property
-    def callback_signature(self):
-        return self.interface_signature.callbacks[self.callback_name]
+    __slots__ = ["return_value"]
 
     @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        callback_name = next(lines)
-        callback_signature = interface_signature.callbacks[callback_name]
-        has_return_value = bool(int(next(lines)))
-        assert has_return_value == bool(callback_signature.return_type)
+    def deserialize_arguments():
+        has_return_value = bool(int((yield)))
         if has_return_value:
-            return_value = callback_signature.return_type.ensure(int(next(lines)))
+            return_value = int((yield))
         else:
             return_value = None
-        logger.debug(f"callback return: {callback_name!r:.10} -> {return_value!r:.10}")
-        return dict(
-            callback_name=callback_name,
+        return CallbackReturn(
             return_value=return_value,
         )
+
+    def serialize_arguments(self):
+        has_return_value = (self.return_value is not None)
+        yield int(has_return_value)
+        if has_return_value:
+            yield int(self.return_value)
 
 
 class MainEnd(ProxyRequest):
     __slots__ = []
 
     @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        return dict()
+    def deserialize_arguments():
+        yield from []
+        return MainEnd()
 
 
 class Exit(ProxyRequest):
     __slots__ = []
 
     @staticmethod
-    def deserialize_arguments(lines, *, interface_signature):
-        return dict()
+    def deserialize_arguments():
+        yield from []
+        return Exit()
 
 
 request_types = bidict({
@@ -174,10 +166,29 @@ def get_meta_type(value):
     raise AssertionError(f"unsupported type for value: {value}")
 
 
-def deserialize(lines):
-    meta_type = MetaType(int(next(lines)))
+def serialize_data(value):
+    meta_type = get_meta_type(value)
+    yield meta_type.value
     if meta_type is MetaType.ARRAY:
-        size = int(next(lines))
-        return [deserialize(lines) for _ in range(size)]
+        items = list(value)
+        yield len(items)
+        for item in items:
+            yield from serialize_data(item)
     elif meta_type == MetaType.SCALAR:
-        return int(next(lines))
+        yield int(value)
+    else:
+        raise AssertionError
+
+
+def deserialize_data():
+    meta_type = MetaType(int((yield)))
+    if meta_type is MetaType.ARRAY:
+        size = int((yield))
+        value = [None] * size
+        for i in range(size):
+            value[i] = yield from deserialize_data()
+    elif meta_type == MetaType.SCALAR:
+        value = int((yield))
+    else:
+        raise AssertionError
+    return value

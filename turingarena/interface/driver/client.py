@@ -1,7 +1,8 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena.interface.driver.commands import MetaType, get_meta_type
+from turingarena.interface.driver.commands import MainBegin, serialize_request, MainEnd, Exit, FunctionCall, \
+    CallbackReturn
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.proxy import InterfaceProxy
@@ -44,7 +45,7 @@ class DriverProcessClient:
                 name, f = callback_list[index]
                 logger.debug(f"got callback {name!r:.20} with args {args!r:.20}")
                 return_value = f(*args)
-                response = self.send_callback_return(name, return_value)
+                response = self.send_callback_return(return_value)
             else:  # no callbacks
                 break
 
@@ -56,29 +57,26 @@ class DriverProcessClient:
             return None
 
     def send_call(self, args, name, callback_list):
-        logger.debug(f"call {name!r}, {args!r}, {callback_list!r}")
-        logger.debug(f"sending function call request")
-        request_lines = call_request_lines(name, args, callback_list)
-        return self.send_request(request_lines)
+        return self.send_request(FunctionCall(function_name=name, parameters=args, accepted_callbacks={
+            name: f.__code__.co_argcount
+            for name, f in callback_list
+        }))
 
-    def send_callback_return(self, name, return_value):
-        logger.debug(f"sending callback return request")
-        logger.debug(f"(callback {name!r:.20} returned {return_value!r:.10})")
-        return self.send_request(callback_return_request_lines(name, return_value))
+    def send_callback_return(self, return_value):
+        return self.send_request(CallbackReturn(return_value=return_value))
 
     def send_begin_main(self, global_variables):
-        return self.send_request(begin_main_request_lines(global_variables))
+        return self.send_request(MainBegin(global_variables=global_variables))
 
     def send_end_main(self):
-        return self.send_request(["main_end"])
+        return self.send_request(MainEnd())
 
     def send_exit(self):
-        return self.send_request(["exit"])
+        return self.send_request(Exit())
 
-    def send_request(self, request_lines):
-        request = "\n".join(str(l) for l in request_lines)
-        logger.debug(f"sending request:\n{request!s:.50}")
-        payloads = self.boundary.send_request(DRIVER_PROCESS_QUEUE, request=request, )
+    def send_request(self, request):
+        request_payload = "\n".join(str(l) for l in serialize_request(request))
+        payloads = self.boundary.send_request(DRIVER_PROCESS_QUEUE, request=request_payload)
 
         driver_error = payloads["driver_error"]
         if driver_error:
@@ -87,53 +85,8 @@ class DriverProcessClient:
         if sandbox_error:
             raise SandboxError(sandbox_error)
 
-        response = payloads["response"]
-        logger.debug(f"request:\n{request!s:.50}\ngot response:\n{response!s:.50}")
-        return response
+        return payloads["response"]
 
     def response_iterator(self, response):
         items = [int(line.strip()) for line in response.splitlines()]
         return iter(items)
-
-
-def begin_main_request_lines(global_variables):
-    yield "main_begin"
-    yield len(global_variables)
-
-    for name, value in global_variables.items():
-        yield name
-        yield from serialize(value)
-
-
-def call_request_lines(name, args, callback_list):
-    yield "function_call"
-    yield name
-    yield len(args)
-    for value in args:
-        yield from serialize(value)
-    yield len(callback_list)
-    for name, f in callback_list:
-        yield name
-        yield f.__code__.co_argcount
-
-
-def callback_return_request_lines(callback_name, return_value):
-    yield "callback_return"
-    yield callback_name
-    has_return_value = (return_value is not None)
-    yield int(has_return_value)
-    if has_return_value:
-        yield int(return_value)
-
-
-def serialize(value):
-    meta_type = get_meta_type(value)
-    logger.debug(f"meta_type: {meta_type!r}")
-    yield meta_type.value
-    if meta_type is MetaType.ARRAY:
-        items = list(value)
-        yield len(items)
-        for item in items:
-            yield from serialize(item)
-    elif meta_type == MetaType.SCALAR:
-        yield int(value)

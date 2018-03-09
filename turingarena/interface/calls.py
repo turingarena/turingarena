@@ -1,5 +1,6 @@
 import logging
 
+from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import SimpleStatement, ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
@@ -81,14 +82,16 @@ class FunctionCallInstruction(Instruction):
         fun = self.statement.function
         parameters = self.statement.parameters
 
-        if request.request_type != "function_call":
-            raise InterfaceError(f"expected call to '{fun.name}', got {request.request_type}")
+        if not isinstance(request, FunctionCall):
+            raise InterfaceError(f"expected call to '{fun.name}', got {request}")
 
         if request.function_name != fun.name:
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
-            value_expr.evaluate_in(self.context.frame).resolve(value)
+            value_expr.evaluate_in(self.context.frame).resolve(
+                value_expr.value_type.ensure(value)
+            )
 
         self.context.accepted_callbacks = request.accepted_callbacks
 
@@ -139,5 +142,7 @@ class ReturnStatement(SimpleStatement):
         )
 
     def run_driver_pre(self, request, *, frame):
-        assert request.request_type == "callback_return"
-        self.value.evaluate_in(frame).resolve(request.return_value)
+        assert isinstance(request, CallbackReturn)
+        self.value.evaluate_in(frame).resolve(
+            self.value.value_type.ensure(request.return_value)
+        )

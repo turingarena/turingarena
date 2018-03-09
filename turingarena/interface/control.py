@@ -1,5 +1,6 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body, ExitCall
+from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, StatementInstruction, Instruction
 from turingarena.interface.expressions import Expression
@@ -20,7 +21,7 @@ class ExitStatement(ImperativeStatement):
         raise InterfaceExit
 
     def run_driver_pre(self, request, *, frame):
-        assert request.request_type == "exit"
+        assert isinstance(request, Exit)
 
     def run_driver_post(self, *, frame):
         return []

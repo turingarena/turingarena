@@ -2,12 +2,11 @@ import itertools
 import logging
 
 from turingarena.interface.frames import Frame
-from turingarena.pipeboundary import PipeBoundary
 
 logger = logging.getLogger(__name__)
 
 
-def drive_interface(*, interface, driver_boundary: PipeBoundary, sandbox_connection):
+def drive_interface(*, interface, sandbox_connection):
     global_frame = Frame(
         global_frame=None,  # FIXME: use a different class for global frame ?
         scope=interface.body.scope,
