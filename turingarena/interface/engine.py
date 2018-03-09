@@ -11,7 +11,6 @@ def drive_interface(*, interface, sandbox_connection):
         global_frame=None,  # FIXME: use a different class for global frame ?
         scope=interface.body.scope,
         parent=None,
-        record=None,
         interface=interface,
     )
 

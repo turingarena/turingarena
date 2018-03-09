@@ -52,7 +52,7 @@ class CallStatement(ImperativeStatement):
             raise InterfaceError(
                 f"function {ast.function_name} is not defined",
                 parseinfo=ast.parseinfo,
-            )
+            ) from None
 
         if len(ast.parameters) != len(fun.signature.parameters):
             raise InterfaceError(

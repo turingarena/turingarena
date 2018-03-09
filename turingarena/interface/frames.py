@@ -1,36 +1,14 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena.common import ImmutableObject
-
 logger = logging.getLogger(__name__)
 
 
-class MainActivationRecord:
-    __slots__ = ["interface", "global_variables"]
-
-    def __init__(self, *, interface, global_variables):
-        self.interface = interface
-        self.global_variables = global_variables
-
-
-class CallbackActivationRecord:
-    __slots__ = ["parent", "callback", "parameters", "return_value"]
-
-    def __init__(self, *, callback):
-        self.callback = callback
-
-
-class FunctionInvocation(ImmutableObject):
-    __slots__ = ["statement", "frame"]
-
-
 class Frame:
-    def __init__(self, *, global_frame, scope, parent, record, interface):
+    def __init__(self, *, global_frame, scope, parent, interface):
         self.global_frame = global_frame
         self.scope = scope
         self.parent = parent
-        self.record = record
         self.interface = interface
 
         self.values = {
@@ -65,7 +43,6 @@ class Frame:
         yield Frame(
             global_frame=self.global_frame if self.global_frame is not None else self,
             parent=self,
-            record=self.record,
             scope=scope,
             interface=self.interface,
         )
