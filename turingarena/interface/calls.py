@@ -49,7 +49,10 @@ class CallStatement(ImperativeStatement):
         try:
             fun = scope.functions[ast.function_name]
         except KeyError:
-            raise InterfaceError("function does not exist", parseinfo=ast.parseinfo)
+            raise InterfaceError(
+                f"function {ast.function_name} is not defined",
+                parseinfo=ast.parseinfo,
+            )
 
         if len(ast.parameters) != len(fun.signature.parameters):
             raise InterfaceError(

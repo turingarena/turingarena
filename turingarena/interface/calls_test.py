@@ -1,13 +1,13 @@
 from turingarena.tests.test_utils import compilation_fails
 
 
-def test_call_non_existing():
+def test_call_not_defined():
     compilation_fails("""
         function f();
         main {
             /*!*/ call g(); /*!*/
         }
-    """, "function does not exist")
+    """, "function g is not defined")
 
 
 def test_call_extra_arguments():
