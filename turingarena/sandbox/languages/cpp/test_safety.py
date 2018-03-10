@@ -28,7 +28,6 @@ def should_raise(cpp_source):
         with pytest.raises(AlgorithmRuntimeError) as excinfo:
             with algo.run() as p:
                 p.call.test()
-    print(excinfo.value.stacktrace)
     return excinfo
 
 

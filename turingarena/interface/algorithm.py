@@ -69,9 +69,6 @@ class Algorithm:
                 )
                 yield algorithm_process
                 driver_process_client.send_end_main()
-            except Exception as e:
-                logger.exception(e)
-                raise
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:
