@@ -117,8 +117,6 @@ class Callback(Callable):
         )
 
     def generate_instructions(self, context):
-        logger.debug(f"unrolling callback {self.name}")
-
         global_context = context.call_context.local_context.procedure.global_context
         callback_context = CallbackContext(accept_context=context, global_context=global_context)
 

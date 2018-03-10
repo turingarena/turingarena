@@ -35,7 +35,6 @@ class CheckpointInstruction(Instruction):
         # make sure all input was sent before receiving output
         connection.downward.flush()
 
-        logger.debug(f"reading from upward pipe...")
         line = read_line(connection.upward).strip()
         assert line == str(0)
 
@@ -68,7 +67,6 @@ class InputInstruction(Instruction):
             a.value_type.format(a.evaluate_in(self.context).get())
             for a in self.arguments
         ]
-        logger.debug(f"printing {raw_values} to downward pipe")
         try:
             print(*raw_values, file=connection.downward)
         except BrokenPipeError:
@@ -90,7 +88,6 @@ class OutputInstruction(Instruction):
         connection.downward.flush()
 
         raw_values = read_line(connection.upward).strip().split()
-        logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
             a.evaluate_in(self.context).resolve(value)

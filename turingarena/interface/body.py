@@ -24,7 +24,6 @@ class Body(AbstractSyntaxNode):
         )
 
     def generate_instructions(self, context):
-        logger.debug(f"unrolling body {self!s:.50}")
         inner_context = context.child(self.scope)
         for statement in self.statements:
             if not isinstance(statement, ImperativeStatement):

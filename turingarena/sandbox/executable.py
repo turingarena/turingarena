@@ -24,7 +24,7 @@ class AlgorithmExecutable(ImmutableObject):
         try:
             process.wait(timeout=1.0)
         except TimeoutExpired:
-            logger.debug(f"timeout expired! sending signal {which_signal}")
+            logger.warning(f"timeout expired! sending signal {which_signal}")
             process.send_signal(which_signal)
 
     @contextmanager
@@ -58,9 +58,6 @@ class AlgorithmExecutable(ImmutableObject):
         memory_usage = psutil.Process(process.pid).memory_full_info().vms
         logger.debug(f"memory usage of PID {process.pid} == {memory_usage}")
         return memory_usage
-
-    def get_stack_trace(self, process):
-        bt = self.get_back_trace(executable_filename, cwd)
 
     @abstractmethod
     def run(self, connection):

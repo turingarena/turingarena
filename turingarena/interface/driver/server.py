@@ -47,7 +47,6 @@ class DriverProcessServer:
             sandbox_connection = stack.enter_context(
                 SandboxProcessClient(self.sandbox_dir).connect()
             )
-            logger.debug("connected")
 
             self.run_driver_iterator = drive_interface(
                 sandbox_connection=sandbox_connection,
@@ -56,21 +55,16 @@ class DriverProcessServer:
             self.process_requests()
 
     def handle_request(self, request):
-        logger.debug(f"handling driver request {request!s:.50}")
-
         current_request = self.deserialize(request)
-
         try:
             response = self.run_driver_iterator.send(current_request)
-        except CommunicationBroken as e:
+        except CommunicationBroken:
             logger.warning(f"communication with process broken")
             return {
                 "sandbox_error": "communication broken",
             }
 
         assert all(isinstance(x, int) for x in response)
-        logger.debug(f"handling driver request {request!s:.10} with response {response!s:.50}")
-
         return {
             "response": "\n".join(str(x) for x in response)
         }
@@ -93,14 +87,11 @@ class DriverProcessServer:
         else:
             raise ValueError(f"too few lines")
 
-        logger.debug(f"deserialized: {result!s:.200}")
-
         return result
 
     def process_requests(self):
         assert next(self.run_driver_iterator) is None
         while True:
-            logger.debug(f"waiting for driver request...")
             self.boundary.handle_request(DRIVER_PROCESS_QUEUE, self.handle_request)
             try:
                 assert next(self.run_driver_iterator) is None

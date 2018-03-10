@@ -28,13 +28,9 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
     input_sent = False
 
     for instruction in driver_iterator:
-        logger.debug(f"about to execute with driver {instruction!r:.50}")
-
         if current_request is None:
             current_request = yield
             assert current_request is not None
-
-        logger.debug(f"executing with driver {instruction!r:.50}")
 
         instruction.on_request_lookahead(current_request)
         if instruction.should_send_input() and not input_sent:
@@ -63,7 +59,6 @@ def send_response(driver_connection, response):
 
 def run_sandbox(instructions, *, sandbox_connection):
     for instruction in instructions:
-        logger.debug(f"executing with SANDBOX {instruction!r:.200}")
         instruction.on_communicate_with_process(sandbox_connection)
         if instruction.is_flush():
             yield

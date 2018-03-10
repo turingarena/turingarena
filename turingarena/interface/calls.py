@@ -160,7 +160,6 @@ class AcceptCallbackInstruction(Instruction):
         return True
 
     def on_communicate_with_process(self, connection):
-        logger.debug("accepting callbacks...")
         connection.downward.flush()
         callback_name = read_line(connection.upward).strip()
         if callback_name == "return":

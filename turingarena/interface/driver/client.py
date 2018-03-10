@@ -43,17 +43,14 @@ class DriverProcessClient:
                 index = next(response_it)
                 args = list(response_it)
                 name, f = callback_list[index]
-                logger.debug(f"got callback {name!r:.20} with args {args!r:.20}")
                 return_value = f(*args)
                 response = self.send_callback_return(return_value)
             else:  # no callbacks
                 break
 
         if next(response_it):  # has return value
-            logger.debug(f"has return value, receiving...")
             return next(response_it)
         else:
-            logger.debug(f"no return value, done")
             return None
 
     def send_call(self, args, name, callback_list):
