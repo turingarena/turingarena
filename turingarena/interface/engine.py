@@ -1,25 +1,16 @@
 import itertools
 import logging
 
-from turingarena.interface.frames import Frame
-
 logger = logging.getLogger(__name__)
 
 
 def drive_interface(*, interface, sandbox_connection):
-    global_frame = Frame(
-        global_frame=None,  # FIXME: use a different class for global frame ?
-        scope=interface.body.scope,
-        parent=None,
-        interface=interface,
-    )
-
     # maintain two "instruction pointers" in the form of paraller iterators
     # over the same sequence of instructions (see itertools.tee).
     # driver_iterator is for handling driver requests (main begin/end, function call, callback return and exit)
     # sandbox_iterator is for communicating with sandbox (input/output)
     driver_iterator, sandbox_iterator = itertools.tee(
-        interface.generate_instructions(frame=global_frame)
+        interface.generate_instructions()
     )
 
     # a generator that executes the instructions in sandbox_iterator

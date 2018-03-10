@@ -1,5 +1,6 @@
 import logging
 
+from turingarena.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import ImperativeStatement, Instruction
@@ -7,25 +8,6 @@ from turingarena.interface.expressions import Expression
 from turingarena.interface.io import read_line
 
 logger = logging.getLogger(__name__)
-
-
-class FunctionCallContext:
-    __slots__ = ["frame", "accepted_callbacks"]
-
-    def __init__(self, frame):
-        self.frame = frame
-
-
-class AcceptCallbackContext:
-    __slots__ = ["call", "callback"]
-
-    def __init__(self, call):
-        self.call = call
-        self.callback = None
-
-
-class CallbackContext:
-    __slots__ = ["accept", "parameters"]
 
 
 class CallStatement(ImperativeStatement):
@@ -111,19 +93,19 @@ class CallStatement(ImperativeStatement):
     def first_calls(self):
         return {self.function.name}
 
-    def generate_instructions(self, frame):
-        context = FunctionCallContext(frame=frame)
+    def generate_instructions(self, context):
+        call_context = FunctionCallContext(local_context=context)
 
-        yield FunctionCallInstruction(statement=self, context=context)
+        yield FunctionCallInstruction(statement=self, context=call_context)
 
-        if frame.interface.signature.callbacks:
-            yield from self.unroll_callbacks(frame, context)
+        if context.procedure.global_context.interface.signature.callbacks:
+            yield from self.unroll_callbacks(call_context)
 
-        yield FunctionReturnInstruction(statement=self, context=context)
+        yield FunctionReturnInstruction(statement=self, context=call_context)
 
-    def unroll_callbacks(self, frame, call_context):
+    def unroll_callbacks(self, call_context):
         while True:
-            context = AcceptCallbackContext(call=call_context)
+            context = AcceptCallbackContext(call_context)
             yield AcceptCallbackInstruction(context=context)
             if context.callback is None:
                 break
@@ -145,7 +127,7 @@ class FunctionCallInstruction(Instruction):
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
-            value_expr.evaluate_in(self.context.frame).resolve(
+            value_expr.evaluate_in(self.context.local_context).resolve(
                 value_expr.value_type.ensure(value)
             )
 
@@ -161,7 +143,7 @@ class FunctionReturnInstruction(Instruction):
 
     def on_generate_response(self):
         if self.statement.function.signature.return_type:
-            return_value = self.statement.return_value.evaluate_in(self.context.frame).get()
+            return_value = self.statement.return_value.evaluate_in(self.context.local_context).get()
             return_response = [1, return_value]
         else:
             return_response = [0]
@@ -184,7 +166,7 @@ class AcceptCallbackInstruction(Instruction):
         if callback_name == "return":
             self.context.callback = None
         else:
-            interface = self.context.call.frame.interface
+            interface = self.context.call_context.local_context.procedure.global_context.interface
             self.context.callback = interface.body.scope.callbacks[callback_name]
 
 
@@ -197,15 +179,15 @@ class ReturnStatement(ImperativeStatement):
             value=Expression.compile(ast.value, scope=scope),
         )
 
-    def generate_instructions(self, frame):
-        yield ReturnInstruction(value=self.value, frame=frame)
+    def generate_instructions(self, context):
+        yield ReturnInstruction(value=self.value, context=context)
 
 
 class ReturnInstruction(Instruction):
-    __slots__ = ["value", "frame"]
+    __slots__ = ["value", "context"]
 
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
-        self.value.evaluate_in(self.frame).resolve(
+        self.value.evaluate_in(self.context).resolve(
             self.value.value_type.ensure(request.return_value)
         )

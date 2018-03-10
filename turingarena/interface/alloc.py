@@ -15,14 +15,14 @@ class AllocStatement(ImperativeStatement):
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )
 
-    def generate_instructions(self, frame):
-        yield AllocInstruction(arguments=self.arguments, size=self.size, frame=frame)
+    def generate_instructions(self, context):
+        yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)
 
 
 class AllocInstruction(Instruction):
-    __slots__ = ["arguments", "size", "frame"]
+    __slots__ = ["arguments", "size", "context"]
 
     def on_communicate_with_process(self, connection):
-        size = self.size.evaluate_in(self.frame).get()
+        size = self.size.evaluate_in(self.context).get()
         for a in self.arguments:
-            a.evaluate_in(self.frame).alloc(size)
+            a.evaluate_in(self.context).alloc(size)

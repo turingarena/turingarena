@@ -2,6 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.interface.body import Body
+from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
 from turingarena.interface.references import VariableReference
@@ -118,28 +119,32 @@ class Callback(Callable):
     def generate_instructions(self, context):
         logger.debug(f"unrolling callback {self.name}")
 
-        global_frame = context.call.frame.global_frame
+        global_context = context.call_context.local_context.procedure.global_context
+        callback_context = CallbackContext(accept_context=context, global_context=global_context)
 
-        with global_frame.child(self.scope) as parameters_frame:
-            yield CallbackCallInstruction(
-                callback=self,
-                context=context,
-                parameters_frame=parameters_frame,
-            )
-            yield from self.body.generate_instructions(parameters_frame)
+        local_context = callback_context.child(self.scope)
+        yield CallbackCallInstruction(
+            callback_context=callback_context,
+            local_context=local_context,
+        )
+        yield from self.body.generate_instructions(local_context)
 
 
 class CallbackCallInstruction(Instruction):
-    __slots__ = ["callback", "context", "parameters_frame"]
+    __slots__ = ["callback_context", "local_context"]
+
+    @property
+    def callback(self):
+        return self.callback_context.accept_context.callback
 
     def on_generate_response(self):
         parameters = [
-            VariableReference(frame=self.parameters_frame, variable=p).get()
+            VariableReference(context=self.local_context, variable=p).get()
             for p in self.callback.signature.parameters
         ]
 
         assert all(isinstance(v, int) for v in parameters)
-        accepted_callbacks = list(self.context.call.accepted_callbacks.keys())
+        accepted_callbacks = list(self.callback_context.accept_context.call_context.accepted_callbacks.keys())
         return (
             [1] +  # has callback
             [accepted_callbacks.index(self.callback.name)] +

@@ -16,7 +16,7 @@ class ExitStatement(ImperativeStatement):
     def compile(ast, scope):
         return ExitStatement()
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         yield ExitInstruction()
         raise InterfaceExit
 
@@ -48,19 +48,19 @@ class IfStatement(ImperativeStatement):
             ),
         )
 
-    def generate_instructions(self, frame):
-        condition = self.condition.evaluate_in(frame)
+    def generate_instructions(self, context):
+        condition = self.condition.evaluate_in(context)
         if not condition.is_resolved():
             # FIXME: use a stricter logic here
-            if self.then_body.is_possible_branch(frame):
+            if self.then_body.is_possible_branch(context):
                 condition.resolve(1)
             else:
                 condition.resolve(0)
 
         if condition.get():
-            yield from self.then_body.generate_instructions(frame)
+            yield from self.then_body.generate_instructions(context)
         elif self.else_body is not None:
-            yield from self.else_body.generate_instructions(frame)
+            yield from self.else_body.generate_instructions(context)
 
     def first_calls(self):
         return self.then_body.first_calls() | (
@@ -90,18 +90,18 @@ class ForStatement(ImperativeStatement):
             scope=for_scope,
         )
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         if not self.may_call():
-            yield SimpleForInstruction(statement=self, frame=frame)
+            yield SimpleForInstruction(statement=self, context=context)
         else:
-            yield from self.do_unroll(frame)
+            yield from self.do_generate_instruction(context)
 
-    def do_unroll(self, frame):
-        size = self.index.range.evaluate_in(frame=frame).get()
+    def do_generate_instruction(self, context):
+        size = self.index.range.evaluate_in(context=context).get()
         for i in range(size):
-            with frame.child(self.scope) as inner_frame:
-                inner_frame[self.index.variable] = i
-                yield from self.body.generate_instructions(inner_frame)
+            inner_context = context.child(self.scope)
+            inner_context.bindings[self.index.variable] = i
+            yield from self.body.generate_instructions(inner_context)
 
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
@@ -117,10 +117,10 @@ class SimpleForInstruction(Instruction):
     in the preflight phase, when the number of iterations is not yet known.
     """
 
-    __slots__ = ["statement", "frame"]
+    __slots__ = ["statement", "context"]
 
     def on_communicate_with_process(self, connection):
-        for instruction in self.statement.do_unroll(self.frame):
+        for instruction in self.statement.do_generate_instruction(self.context):
             instruction.on_communicate_with_process(connection)
 
 

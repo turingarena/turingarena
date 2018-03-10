@@ -30,18 +30,18 @@ class Expression(AbstractSyntaxNode):
     def compile(ast, *, scope, expected_type=None):
         return expression_classes[ast.expression_type].compile(ast, scope)
 
-    def evaluate_in(self, frame):
-        return self.do_evaluate(frame)
+    def evaluate_in(self, context):
+        return self.do_evaluate(context)
 
     @abstractmethod
-    def do_evaluate(self, frame):
+    def do_evaluate(self, context):
         pass
 
 
 class LiteralExpression(Expression):
     __slots__ = ["value"]
 
-    def do_evaluate(self, *, frame):
+    def do_evaluate(self, context):
         return ConstantReference(
             value_type=self.value_type,
             value=self.value,
@@ -72,9 +72,9 @@ class ReferenceExpression(Expression):
             variable=variable,
         )
 
-    def do_evaluate(self, frame):
+    def do_evaluate(self, context):
         return VariableReference(
-            frame=frame,
+            context=context,
             variable=self.variable,
         )
 
@@ -93,9 +93,9 @@ class SubscriptExpression(Expression):
             value_type=array.value_type.item_type,
         )
 
-    def do_evaluate(self, frame):
+    def do_evaluate(self, context):
         return ArrayItemReference(
             value_type=self.array.value_type.item_type,
-            array=self.array.evaluate_in(frame).get(),
-            index=self.index.evaluate_in(frame).get(),
+            array=self.array.evaluate_in(context).get(),
+            index=self.index.evaluate_in(context).get(),
         )

@@ -23,13 +23,13 @@ class Body(AbstractSyntaxNode):
             statements=statements
         )
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         logger.debug(f"unrolling body {self!s:.50}")
-        with frame.child(self.scope) as inner_frame:
-            for statement in self.statements:
-                if not isinstance(statement, ImperativeStatement):
-                    continue
-                yield from statement.generate_instructions(inner_frame)
+        inner_context = context.child(self.scope)
+        for statement in self.statements:
+            if not isinstance(statement, ImperativeStatement):
+                continue
+            yield from statement.generate_instructions(inner_context)
 
     def is_possible_branch(self, *, context):
         request = context.engine.peek_request()

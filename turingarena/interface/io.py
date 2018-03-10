@@ -21,7 +21,7 @@ class CheckpointStatement(ImperativeStatement):
     def compile(ast, scope):
         return CheckpointStatement()
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         yield CheckpointInstruction()
 
 
@@ -56,16 +56,16 @@ class InputOutputStatement(ImperativeStatement):
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
-    def generate_instructions(self, frame):
-        yield InputInstruction(arguments=self.arguments, frame=frame)
+    def generate_instructions(self, context):
+        yield InputInstruction(arguments=self.arguments, context=context)
 
 
 class InputInstruction(Instruction):
-    __slots__ = ["arguments", "frame"]
+    __slots__ = ["arguments", "context"]
 
     def on_communicate_with_process(self, connection):
         raw_values = [
-            a.value_type.format(a.evaluate_in(self.frame).get())
+            a.value_type.format(a.evaluate_in(self.context).get())
             for a in self.arguments
         ]
         logger.debug(f"printing {raw_values} to downward pipe")
@@ -78,12 +78,12 @@ class InputInstruction(Instruction):
 class OutputStatement(InputOutputStatement):
     __slots__ = []
 
-    def generate_instructions(self, frame):
-        yield OutputInstruction(arguments=self.arguments, frame=frame)
+    def generate_instructions(self, context):
+        yield OutputInstruction(arguments=self.arguments, context=context)
 
 
 class OutputInstruction(Instruction):
-    __slots__ = ["arguments", "frame"]
+    __slots__ = ["arguments", "context"]
 
     def on_communicate_with_process(self, connection):
         # make sure all input was sent before receiving output
@@ -93,7 +93,7 @@ class OutputInstruction(Instruction):
         logger.debug(f"read values {raw_values} from upward_pipe")
         for a, v in zip(self.arguments, raw_values):
             value = a.value_type.parse(v)
-            a.evaluate_in(self.frame).resolve(value)
+            a.evaluate_in(self.context).resolve(value)
 
 
 class FlushStatement(ImperativeStatement):
@@ -103,7 +103,7 @@ class FlushStatement(ImperativeStatement):
     def compile(ast, scope):
         return FlushStatement()
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         yield FlushInstruction()
 
 

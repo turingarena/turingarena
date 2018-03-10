@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
+from turingarena.interface.context import GlobalContext, MainContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -44,12 +45,15 @@ class InterfaceDefinition(AbstractSyntaxNode):
             body=body,
         )
 
-    def generate_instructions(self, frame):
+    def generate_instructions(self):
+        global_context = GlobalContext(self)
+        main_context = MainContext(global_context=global_context)
+
         main = self.body.scope.main["main"]
 
-        yield MainBeginInstruction(interface=self, global_frame=frame)
+        yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
-            yield from main.body.generate_instructions(frame)
+            yield from main.body.generate_instructions(main_context)
         except InterfaceExit:
             pass
         else:
@@ -57,7 +61,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
 
 class MainBeginInstruction(Instruction):
-    __slots__ = ["interface", "global_frame"]
+    __slots__ = ["interface", "global_context"]
 
     def on_request_lookahead(self, request):
         assert isinstance(request, MainBegin)
@@ -65,7 +69,7 @@ class MainBeginInstruction(Instruction):
         assert len(request.global_variables) == len(variables)
         for name, variable in variables.items():
             value = request.global_variables[name]
-            self.global_frame[variable] = variable.value_type.ensure(value)
+            self.global_context.bindings[variable] = variable.value_type.ensure(value)
 
     def on_generate_response(self):
         return []

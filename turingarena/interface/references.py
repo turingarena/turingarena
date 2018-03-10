@@ -58,17 +58,17 @@ class ConstantReference(Reference):
 
 
 class VariableReference(Reference):
-    __slots__ = ["frame", "variable"]
+    __slots__ = ["context", "variable"]
 
     def __init__(self, **kwargs):
         kwargs.setdefault("value_type", kwargs["variable"].value_type)
         super().__init__(**kwargs)
 
     def do_get(self):
-        return self.frame[self.variable]
+        return self.context.bindings[self.variable]
 
     def do_set(self, value):
-        self.frame[self.variable] = value
+        self.context.bindings[self.variable] = value
 
     def __str__(self):
         return f"var({self.variable.name})"

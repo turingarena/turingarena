@@ -27,7 +27,7 @@ class ImperativeStatement(Statement):
     __slots__ = []
 
     @abstractmethod
-    def generate_instructions(self, frame):
+    def generate_instructions(self, context):
         pass
 
     def first_calls(self):
