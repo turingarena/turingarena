@@ -1,0 +1,20 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "neutrino build",
+    "start": "neutrino start",
+    "lint": "neutrino lint"
+  },
+  "dependencies": {
+    "preact": "^8.2.7",
+    "preact-compat": "^3.18.0"
+  },
+  "devDependencies": {
+    "@neutrinojs/airbnb": "^8.1.2",
+    "@neutrinojs/preact": "^8.1.2",
+    "neutrino": "^8.1.2"
+  }
+}

@@ -1,7 +1,5 @@
 /.idea/
-
-# TaskWizard-specific ignores
-generated/
+node_modules/
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 
