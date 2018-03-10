@@ -21,7 +21,7 @@ class CheckpointStatement(ImperativeStatement):
     def compile(ast, scope):
         return CheckpointStatement()
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield CheckpointInstruction()
 
 
@@ -31,7 +31,7 @@ class CheckpointInstruction(Instruction):
     def should_send_input(self):
         return True
 
-    def run_sandbox(self, connection):
+    def on_communicate_with_process(self, connection):
         # make sure all input was sent before receiving output
         connection.downward.flush()
 
@@ -56,14 +56,14 @@ class InputOutputStatement(ImperativeStatement):
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield InputInstruction(arguments=self.arguments, frame=frame)
 
 
 class InputInstruction(Instruction):
     __slots__ = ["arguments", "frame"]
 
-    def run_sandbox(self, connection):
+    def on_communicate_with_process(self, connection):
         raw_values = [
             a.value_type.format(a.evaluate_in(self.frame).get())
             for a in self.arguments
@@ -78,14 +78,14 @@ class InputInstruction(Instruction):
 class OutputStatement(InputOutputStatement):
     __slots__ = []
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield OutputInstruction(arguments=self.arguments, frame=frame)
 
 
 class OutputInstruction(Instruction):
     __slots__ = ["arguments", "frame"]
 
-    def run_sandbox(self, connection):
+    def on_communicate_with_process(self, connection):
         # make sure all input was sent before receiving output
         connection.downward.flush()
 
@@ -103,7 +103,7 @@ class FlushStatement(ImperativeStatement):
     def compile(ast, scope):
         return FlushStatement()
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield FlushInstruction()
 
 

@@ -1,21 +1,19 @@
 from abc import abstractmethod
-from typing import Iterator
 
 from turingarena.common import ImmutableObject
-from turingarena.interface.frames import Frame
 from turingarena.interface.statement import Statement
 
 
 class Instruction(ImmutableObject):
     __slots__ = []
 
-    def run_driver_pre(self, request):
+    def on_request_lookahead(self, request):
         pass
 
-    def run_sandbox(self, connection):
+    def on_generate_response(self):
         pass
 
-    def run_driver_post(self):
+    def on_communicate_with_process(self, connection):
         pass
 
     def should_send_input(self):
@@ -25,16 +23,12 @@ class Instruction(ImmutableObject):
         return False
 
 
-class ExecutableStructure(ImmutableObject):
+class ImperativeStatement(Statement):
     __slots__ = []
 
     @abstractmethod
-    def unroll(self, frame: Frame) -> Iterator[Instruction]:
+    def generate_instructions(self, frame):
         pass
 
     def first_calls(self):
         return {None}
-
-
-class ImperativeStatement(Statement, ExecutableStructure):
-    __slots__ = []

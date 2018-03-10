@@ -115,7 +115,7 @@ class Callback(Callable):
             body=Body.compile(ast.body, scope=callback_scope)
         )
 
-    def unroll(self, context):
+    def generate_instructions(self, context):
         logger.debug(f"unrolling callback {self.name}")
 
         global_frame = context.call.frame.global_frame
@@ -126,13 +126,13 @@ class Callback(Callable):
                 context=context,
                 parameters_frame=parameters_frame,
             )
-            yield from self.body.unroll(parameters_frame)
+            yield from self.body.generate_instructions(parameters_frame)
 
 
 class CallbackCallInstruction(Instruction):
     __slots__ = ["callback", "context", "parameters_frame"]
 
-    def run_driver_post(self):
+    def on_generate_response(self):
         parameters = [
             VariableReference(frame=self.parameters_frame, variable=p).get()
             for p in self.callback.signature.parameters

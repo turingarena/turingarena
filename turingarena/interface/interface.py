@@ -5,7 +5,8 @@ from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
-from turingarena.interface.executable import ExecutableStructure, Instruction
+from turingarena.interface.executable import Instruction
+from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.parser import parse_interface
 from turingarena.interface.scope import Scope
 
@@ -16,7 +17,7 @@ class InterfaceSignature(TupleLikeObject):
     __slots__ = ["variables", "functions", "callbacks"]
 
 
-class InterfaceDefinition(ExecutableStructure):
+class InterfaceDefinition(AbstractSyntaxNode):
     __slots__ = ["signature", "body", "source_text", "ast"]
 
     @staticmethod
@@ -43,12 +44,12 @@ class InterfaceDefinition(ExecutableStructure):
             body=body,
         )
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         main = self.body.scope.main["main"]
 
         yield MainBeginInstruction(interface=self, global_frame=frame)
         try:
-            yield from main.body.unroll(frame)
+            yield from main.body.generate_instructions(frame)
         except InterfaceExit:
             pass
         else:
@@ -58,7 +59,7 @@ class InterfaceDefinition(ExecutableStructure):
 class MainBeginInstruction(Instruction):
     __slots__ = ["interface", "global_frame"]
 
-    def run_driver_pre(self, request):
+    def on_request_lookahead(self, request):
         assert isinstance(request, MainBegin)
         variables = self.interface.signature.variables
         assert len(request.global_variables) == len(variables)
@@ -66,10 +67,10 @@ class MainBeginInstruction(Instruction):
             value = request.global_variables[name]
             self.global_frame[variable] = variable.value_type.ensure(value)
 
-    def run_driver_post(self):
+    def on_generate_response(self):
         return []
 
 
 class MainEndInstruction(Instruction):
-    def run_driver_post(self):
+    def on_generate_response(self):
         return []

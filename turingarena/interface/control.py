@@ -16,7 +16,7 @@ class ExitStatement(ImperativeStatement):
     def compile(ast, scope):
         return ExitStatement()
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield ExitInstruction()
         raise InterfaceExit
 
@@ -27,10 +27,10 @@ class ExitStatement(ImperativeStatement):
 class ExitInstruction(Instruction):
     __slots__ = []
 
-    def run_driver_pre(self, request):
+    def on_request_lookahead(self, request):
         assert isinstance(request, Exit)
 
-    def run_driver_post(self):
+    def on_generate_response(self):
         return []
 
 
@@ -48,7 +48,7 @@ class IfStatement(ImperativeStatement):
             ),
         )
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         condition = self.condition.evaluate_in(frame)
         if not condition.is_resolved():
             # FIXME: use a stricter logic here
@@ -58,9 +58,9 @@ class IfStatement(ImperativeStatement):
                 condition.resolve(0)
 
         if condition.get():
-            yield from self.then_body.unroll(frame)
+            yield from self.then_body.generate_instructions(frame)
         elif self.else_body is not None:
-            yield from self.else_body.unroll(frame)
+            yield from self.else_body.generate_instructions(frame)
 
     def first_calls(self):
         return self.then_body.first_calls() | (
@@ -90,7 +90,7 @@ class ForStatement(ImperativeStatement):
             scope=for_scope,
         )
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         if not self.may_call():
             yield SimpleForInstruction(statement=self, frame=frame)
         else:
@@ -101,7 +101,7 @@ class ForStatement(ImperativeStatement):
         for i in range(size):
             with frame.child(self.scope) as inner_frame:
                 inner_frame[self.index.variable] = i
-                yield from self.body.unroll(inner_frame)
+                yield from self.body.generate_instructions(inner_frame)
 
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
@@ -119,9 +119,9 @@ class SimpleForInstruction(Instruction):
 
     __slots__ = ["statement", "frame"]
 
-    def run_sandbox(self, connection):
+    def on_communicate_with_process(self, connection):
         for instruction in self.statement.do_unroll(self.frame):
-            instruction.run_sandbox(connection)
+            instruction.on_communicate_with_process(connection)
 
 
 class LoopStatement(ImperativeStatement):

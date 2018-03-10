@@ -111,7 +111,7 @@ class CallStatement(ImperativeStatement):
     def first_calls(self):
         return {self.function.name}
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         context = FunctionCallContext(frame=frame)
 
         yield FunctionCallInstruction(statement=self, context=context)
@@ -128,13 +128,13 @@ class CallStatement(ImperativeStatement):
             if context.callback is None:
                 break
 
-            yield from context.callback.unroll(context)
+            yield from context.callback.generate_instructions(context)
 
 
 class FunctionCallInstruction(Instruction):
     __slots__ = ["statement", "context"]
 
-    def run_driver_pre(self, request):
+    def on_request_lookahead(self, request):
         fun = self.statement.function
         parameters = self.statement.parameters
 
@@ -159,7 +159,7 @@ class FunctionCallInstruction(Instruction):
 class FunctionReturnInstruction(Instruction):
     __slots__ = ["statement", "context"]
 
-    def run_driver_post(self):
+    def on_generate_response(self):
         if self.statement.function.signature.return_type:
             return_value = self.statement.return_value.evaluate_in(self.context.frame).get()
             return_response = [1, return_value]
@@ -177,7 +177,7 @@ class AcceptCallbackInstruction(Instruction):
     def should_send_input(self):
         return True
 
-    def run_sandbox(self, connection):
+    def on_communicate_with_process(self, connection):
         logger.debug("accepting callbacks...")
         connection.downward.flush()
         callback_name = read_line(connection.upward).strip()
@@ -197,14 +197,14 @@ class ReturnStatement(ImperativeStatement):
             value=Expression.compile(ast.value, scope=scope),
         )
 
-    def unroll(self, frame):
+    def generate_instructions(self, frame):
         yield ReturnInstruction(value=self.value, frame=frame)
 
 
 class ReturnInstruction(Instruction):
     __slots__ = ["value", "frame"]
 
-    def run_driver_pre(self, request):
+    def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
         self.value.evaluate_in(self.frame).resolve(
             self.value.value_type.ensure(request.return_value)

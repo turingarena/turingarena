@@ -19,7 +19,7 @@ def drive_interface(*, interface, sandbox_connection):
     # driver_iterator is for handling driver requests (main begin/end, function call, callback return and exit)
     # sandbox_iterator is for communicating with sandbox (input/output)
     driver_iterator, sandbox_iterator = itertools.tee(
-        interface.unroll(frame=global_frame)
+        interface.generate_instructions(frame=global_frame)
     )
 
     # a generator that executes the instructions in sandbox_iterator
@@ -45,13 +45,13 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
 
         logger.debug(f"executing with driver {instruction!r:.50}")
 
-        instruction.run_driver_pre(current_request)
+        instruction.on_request_lookahead(current_request)
         if instruction.should_send_input() and not input_sent:
             # advance fully the current communication block
             next(run_sandbox_iterator)
             input_sent = True
 
-        response = instruction.run_driver_post()
+        response = instruction.on_generate_response()
         if response is not None:
             assert (yield response) is None
             current_request = None
@@ -73,7 +73,7 @@ def send_response(driver_connection, response):
 def run_sandbox(instructions, *, sandbox_connection):
     for instruction in instructions:
         logger.debug(f"executing with SANDBOX {instruction!r:.200}")
-        instruction.run_sandbox(sandbox_connection)
+        instruction.on_communicate_with_process(sandbox_connection)
         if instruction.is_flush():
             yield
     yield
