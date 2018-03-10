@@ -1,12 +1,6 @@
 import random
 
 import networkx as nx
-import pkg_resources
-import pytest
-
-from turingarena.problem import AlgorithmicProblem
-
-interface_text = pkg_resources.resource_string(__name__, "interface.txt").decode()
 
 
 def evaluate(algorithm):
@@ -37,22 +31,3 @@ def evaluate(algorithm):
 
             connected = p.call.is_there_a_path(u, v)
             print(f"Nodes {u} {v} -> {connected}")
-
-
-problem = AlgorithmicProblem(
-    interface_text=interface_text,
-    evaluator=evaluate,
-)
-
-
-@pytest.mark.parametrize(
-    "solution,language",
-    [
-        ("dummy.cpp", "c++"),
-    ]
-)
-def test_solution(solution, language):
-    problem.evaluate(
-        pkg_resources.resource_string(__name__, f"solutions/{solution}").decode(),
-        language=language,
-    )
