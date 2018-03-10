@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "preact": "^8.2.7",
-    "preact-compat": "^3.18.0"
+    "preact-compat": "^3.18.0",
+    "prop-types": "^15.6.1"
   },
   "devDependencies": {
     "@neutrinojs/airbnb": "^8.1.2",

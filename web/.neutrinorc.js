@@ -8,6 +8,9 @@ module.exports = {
           title: 'web'
         }
       }
+    ],
+    [
+      '@neutrinojs/env', ['TURINGARENA_EVALUATE_ENDPOINT']
     ]
   ]
 };
