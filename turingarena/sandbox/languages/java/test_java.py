@@ -1,6 +1,7 @@
+from contextlib import contextmanager
+
 import pytest
 
-from contextlib import contextmanager
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
 from turingarena.tests.test_utils import define_algorithms
 
@@ -47,10 +48,9 @@ def test_security():
         public class Solution extends Skeleton {
             public int test() {
                 try {
-                    FileReader f = new FileReader("/etc/passwd");
+                    FileReader f = new FileReader("/dev/null");
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.exit(1);
+                    throw new RuntimeException(e);
                 }
                 return 3;
             }
