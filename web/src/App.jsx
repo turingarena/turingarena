@@ -3,11 +3,17 @@ import './App.css';
 
 const UploadView = ({ onSubmit }) => (
   <form onSubmit={(e) => { onSubmit(e.target); e.preventDefault(); }}>
-    <input type="file" name="solution_file" />
+    <select name="problem">
+      <option>turingarena.problems.sum_of_two_numbers</option>
+      <option>turingarena.problems.max_in_sequence</option>
+      <option>turingarena.problems.triangle_dynamic_programming</option>
+    </select>
+    <input type="file" name="source_file" />
     <select name="language">
-      <option>C/C++</option>
-      <option>Python</option>
-      <option>Java</option>
+      <option value="c++">C/C++</option>
+      <option value="python">Python</option>
+      <option value="java">Java</option>
+      <option value="javascript">Javascript</option>
     </select>
     <button type="submit">Submit</button>
   </form>
