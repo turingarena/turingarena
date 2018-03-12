@@ -1,10 +1,10 @@
 import logging
 import signal
 from abc import abstractmethod
+from contextlib import contextmanager
 from subprocess import TimeoutExpired
 
 import psutil
-from decorator import contextmanager
 
 from turingarena.common import ImmutableObject
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
