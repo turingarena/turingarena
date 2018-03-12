@@ -1,17 +1,6 @@
 import os
 
-from turingarena.problem.problem import AlgorithmicProblem
-from turingarena.problem.python import PythonEvaluator
-
-
-def make_problem(dirname):
-    with open(os.path.join(dirname, "interface.txt")) as f:
-        interface_text = f.read()
-
-    return AlgorithmicProblem(
-        interface_text=interface_text,
-        evaluator=PythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
-    )
+from turingarena.problem.problem import make_problem
 
 
 def find_solutions(dirname):

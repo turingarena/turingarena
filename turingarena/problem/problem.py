@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
+from turingarena.problem.python import PythonEvaluator
 from turingarena.sandbox.sources import load_source
 
 
@@ -22,4 +23,14 @@ class AlgorithmicProblem(ImmutableObject):
                 interface=interface,
             )
             source.compile(algorithm_dir=algorithm_dir)
-            self.evaluator.evaluate(algorithm_dir)
+            return self.evaluator.evaluate(algorithm_dir)
+
+
+def make_problem(dirname):
+    with open(os.path.join(dirname, "interface.txt")) as f:
+        interface_text = f.read()
+
+    return AlgorithmicProblem(
+        interface_text=interface_text,
+        evaluator=PythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
+    )

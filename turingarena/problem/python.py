@@ -2,15 +2,17 @@ import logging
 import subprocess
 import sys
 
+from turingarena.common import ImmutableObject
 from turingarena.interface.algorithm import Algorithm
 
 logger = logging.getLogger(__name__)
 
 
-class PythonEvaluator:
+class PythonEvaluator(ImmutableObject):
+    __slots__ = ["script_path", "function_name"]
+
     def __init__(self, script_path, function_name="evaluate"):
-        self.script_path = script_path
-        self.function_name = function_name
+        super().__init__(script_path=script_path, function_name=function_name)
 
     def evaluate(self, algorithm_dir):
         cli = [
@@ -21,10 +23,13 @@ class PythonEvaluator:
             algorithm_dir,
         ]
         logger.info("running {cli}")
-        subprocess.run(
+        evaluation = subprocess.run(
             cli,
             check=True,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
         )
+        return evaluation.stdout
 
 
 def do_evaluate():
