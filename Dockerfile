@@ -21,4 +21,3 @@ RUN python setup.py develop
 ENTRYPOINT ["turingarena"]
 
 COPY turingarena/ /turingarena/
-COPY test_challenge/ /test_challenge/
