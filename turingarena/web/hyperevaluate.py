@@ -4,7 +4,7 @@ Evaluate a solution provided via a Web form (using Hyper.sh conventions).
 
 import sys
 
-sys.stderr = sys.stdin
+sys.stderr = sys.stdout
 
 import cgi
 import os
