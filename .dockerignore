@@ -2,7 +2,8 @@
 .gitignore
 LICENSE*
 README*
-/logo.svg
+logo.svg
+web/node_modules
 
 # IntelliJ project files
 .idea
