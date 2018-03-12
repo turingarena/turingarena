@@ -1,9 +1,13 @@
 """
 Evaluate a solution provided via a Web form (using Hyper.sh conventions).
 """
+
+import sys
+
+sys.stderr = sys.stdin
+
 import cgi
 import os
-import sys
 import traceback
 
 from turingarena.web.formevaluate import form_evaluate
@@ -21,7 +25,7 @@ def evaluate():
         evaluation = form_evaluate(fields)
     except:
         print("ERROR during evaluation:")
-        traceback.print_exc(file=sys.stdout)
+        traceback.print_exc()
         raise
 
     print(evaluation)
