@@ -1,7 +1,19 @@
 sudo: required
 
-services:
-  - docker
+cache:
+  yarn
 
 script:
-  - docker build -t turingarena .
+  - cd web/ && yarn && yarn build
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: web/build/
+  repo: turingarena/demo
+  target-branch: gh-pages
+  verbose: true
+  on:
+    branch: master
