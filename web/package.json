@@ -11,7 +11,8 @@
   "dependencies": {
     "preact": "^8.2.7",
     "preact-compat": "^3.18.0",
-    "prop-types": "^15.6.1"
+    "prop-types": "^15.6.1",
+    "react-modal": "^3.3.2"
   },
   "devDependencies": {
     "@neutrinojs/airbnb": "^8.1.2",

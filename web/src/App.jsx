@@ -1,8 +1,11 @@
+import React from 'preact';
+import ReactModal from 'react-modal';
 import PropTypes from 'prop-types';
 import './App.css';
 
+
 const UploadView = ({ onSubmit }) => (
-  <form onSubmit={(e) => { onSubmit(e.target); e.preventDefault(); }}>
+  <form onSubmit={(e) => { e.preventDefault(); onSubmit(e.target); }}>
     <select name="problem">
       <option>turingarena.problems.sum_of_two_numbers</option>
       <option>turingarena.problems.max_in_sequence</option>
@@ -25,17 +28,35 @@ UploadView.propTypes = {
 
 const submit = (form) => {
   console.log(process.env.TURINGARENA_EVALUATE_ENDPOINT);
-  fetch(process.env.TURINGARENA_EVALUATE_ENDPOINT, {
+  return fetch(process.env.TURINGARENA_EVALUATE_ENDPOINT, {
     method: 'post',
     body: new FormData(form),
   }).then((response) => {
-    console.log(response);
+    if (response.status !== 200) {
+      return Promise.reject(response);
+    }
+    return response.text();
   });
 };
 
-const SubmitView = () => (
-  <UploadView onSubmit={submit} />
-);
+class SubmitView extends React.Component {
+  state = {
+    result: null,
+  };
+
+  render() {
+    return (
+      <React.Fragment>
+        <UploadView onSubmit={t => submit(t).then(r => this.setState({ result: r }))} />
+        <ReactModal isOpen={!!this.state.result}>
+          <pre>
+            {this.state.result}
+          </pre>
+        </ReactModal>
+      </React.Fragment>
+    );
+  }
+}
 
 export default () => (
   <div>
