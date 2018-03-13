@@ -29,7 +29,7 @@ class Algorithm:
 
         with ExitStack() as stack:
             sandbox_dir = stack.enter_context(
-                TemporaryDirectory(dir="/dev/shm", prefix="sandbox_server_")
+                TemporaryDirectory(dir="/tmp", prefix="sandbox_server_")
             )
 
             sandbox_server = SandboxServer(sandbox_dir)
@@ -42,7 +42,7 @@ class Algorithm:
 
             sandbox_process_dir = stack.enter_context(sandbox_client.run(self.algorithm_dir))
             driver_dir = stack.enter_context(
-                TemporaryDirectory(dir="/dev/shm", prefix="driver_server_")
+                TemporaryDirectory(dir="/tmp", prefix="driver_server_")
             )
             sandbox_process_client = SandboxProcessClient(sandbox_process_dir)
 
@@ -120,7 +120,7 @@ def load_algorithm(*, interface_text, language, source_text):
         language=language,
     )
 
-    with TemporaryDirectory(dir="/dev/shm") as temp_dir:
+    with TemporaryDirectory(dir="/tmp") as temp_dir:
         algorithm_dir = os.path.join(temp_dir, "algorithm")
         algorithm_source.compile(algorithm_dir)
 

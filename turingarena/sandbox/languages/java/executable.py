@@ -23,7 +23,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
         solution_path = os.path.join(self.algorithm_dir, "Solution.class")
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
-        with TemporaryDirectory(dir="/dev/shm", prefix="java_cwd_") as cwd:
+        with TemporaryDirectory(dir="/tmp", prefix="java_cwd_") as cwd:
             # copy class files to current directory
             shutil.copy(skeleton_path, cwd)
             shutil.copy(solution_path, cwd)

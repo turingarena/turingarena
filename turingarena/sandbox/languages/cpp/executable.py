@@ -16,7 +16,7 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
     @contextmanager
     def run(self, connection):
         executable_filename = os.path.join(self.algorithm_dir, "algorithm")
-        with TemporaryDirectory(dir="/dev/shm", prefix="elf_cwd_") as cwd:
+        with TemporaryDirectory(dir="/tmp", prefix="elf_cwd_") as cwd:
             with self.manage_process(
                     subprocess.Popen(
                         [executable_filename],

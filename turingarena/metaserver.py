@@ -62,7 +62,7 @@ class MetaServer:
     def handle_request(self, **request_payloads):
         self.handle_stop_request(request_payloads)
 
-        child_server_dir = TemporaryDirectory(dir="/dev/shm")
+        child_server_dir = TemporaryDirectory(dir="/tmp")
         child_server = self.create_child_server(
             child_server_dir.name, **request_payloads
         )

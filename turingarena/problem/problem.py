@@ -15,7 +15,7 @@ class AlgorithmicProblem(ImmutableObject):
 
     def evaluate(self, source_text, *, language):
         interface = InterfaceDefinition.compile(self.interface_text)
-        with TemporaryDirectory(dir="/dev/shm") as temp_dir:
+        with TemporaryDirectory(dir="/tmp") as temp_dir:
             algorithm_dir = os.path.join(temp_dir, "algorithm")
             source = load_source(
                 source_text,

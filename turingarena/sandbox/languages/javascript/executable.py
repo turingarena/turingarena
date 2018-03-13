@@ -24,7 +24,7 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
         skeleton_path = os.path.join(self.algorithm_dir, "skeleton.js")
 
         # create tmp directory
-        with TemporaryDirectory(dir="/dev/shm", prefix="javascript_cwd_") as cwd:
+        with TemporaryDirectory(dir="/tmp", prefix="javascript_cwd_") as cwd:
             # copy files into tmp dir
             shutil.copy(sandbox_path, cwd)
             shutil.copy(source_path, cwd)

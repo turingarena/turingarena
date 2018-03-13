@@ -22,7 +22,7 @@ class PythonEvaluator(ImmutableObject):
             self.function_name,
             algorithm_dir,
         ]
-        logger.info("running {cli}")
+        logger.info(f"running {cli}")
         evaluation = subprocess.run(
             cli,
             check=True,
@@ -34,6 +34,8 @@ class PythonEvaluator(ImmutableObject):
 
 def do_evaluate():
     script_path, function_name, algorithm_dir = sys.argv[1:]
+
+    print(script_path, function_name, algorithm_dir, file=sys.stderr)
 
     script_globals = {}
     with open(script_path) as f:

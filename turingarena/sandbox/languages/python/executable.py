@@ -23,7 +23,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
         skeleton_path = os.path.join(self.algorithm_dir, "skeleton.py")
 
         # create tmp directory
-        with TemporaryDirectory(dir="/dev/shm", prefix="python_cwd_") as cwd:
+        with TemporaryDirectory(dir="/tmp", prefix="python_cwd_") as cwd:
             # copy files into tmp dir
             shutil.copyfile(sandbox_path, os.path.join(cwd, "sandbox.py"))
             shutil.copy(source_path, cwd)
