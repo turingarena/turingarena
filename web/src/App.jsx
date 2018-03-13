@@ -6,9 +6,9 @@ import './App.css';
 const UploadView = ({ onSubmit, disabled }) => (
   <form disabled={disabled} onSubmit={(e) => { e.preventDefault(); onSubmit(e.target); }}>
     <select name="problem">
-      <option>turingarena.problems.sum_of_two_numbers</option>
-      <option>turingarena.problems.max_in_sequence</option>
-      <option>turingarena.problems.triangle_dynamic_programming</option>
+      <option>sum_of_two_numbers</option>
+      <option>max_in_sequence</option>
+      <option>triangle_dynamic_programming</option>
     </select>
     <input type="file" name="source_file" />
     <select name="language">
