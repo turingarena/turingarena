@@ -1,8 +1,7 @@
-import os
 import sys
 
 from turingarena.cli import docopt_cli
-from turingarena.problem.problem import make_problem
+from turingarena.problem.problem import load_problem
 
 
 @docopt_cli
@@ -17,12 +16,8 @@ def evaluate_cli(args):
         -x --language=<lang>  Language of the solution [default: c++]
     """
 
-    problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
-
-    problem = make_problem(os.path.join(problems_dir, args["--problem"]))
-
     source_text = sys.stdin.read()
-
+    problem = load_problem(args["--problem"])
     evaluation = problem.evaluate(source_text, language=args["--language"])
 
     print(evaluation)

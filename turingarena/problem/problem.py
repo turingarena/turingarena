@@ -34,3 +34,8 @@ def make_problem(dirname):
         interface_text=interface_text,
         evaluator=PythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
     )
+
+
+def load_problem(problem_name):
+    problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
+    return make_problem(os.path.join(problems_dir, problem_name))

@@ -17,3 +17,4 @@ ENV TURINGARENA_PROBLEMS_PATH /problems
 ENTRYPOINT ["turingarena"]
 
 COPY turingarena/ /turingarena/
+COPY examples/ /problems/
