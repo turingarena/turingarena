@@ -1,0 +1,26 @@
+var int N; // number of nodes
+var int E; // number of edges
+var int Q; // number of queries
+
+function add_edge(int u, int v, int weight);
+function shortest_path(int u, int v) -> int;
+
+main {
+    input N, E;
+
+    for (e : E) {
+        var int u, v, w;
+        input u, v, w;
+        call add_edge(u, v, w);
+    }
+
+    input Q;
+
+    for (i : Q) {
+        var int u, v, ans;
+        input u, v;
+        call shortest_path(u, v) -> ans;
+        output ans;
+        flush;
+    }
+}
