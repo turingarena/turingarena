@@ -29,6 +29,8 @@ class CppAlgorithmSource(AlgorithmSource):
 
         cli = [
             "g++",
+            "-std=c++14",
+            "-Wno-unused-result",
             "-g", "-O2", "-static",
             "-o", "algorithm",
             sandbox_path,
