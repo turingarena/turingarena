@@ -1,8 +1,8 @@
 import random
 import networkx as nx
 
-N = 1000  # number of nodes
-Q = 1000  # number of queries
+N = 100  # number of nodes
+Q = 100   # number of queries
 
 
 def evaluate(algorithm):
