@@ -13,7 +13,7 @@ deploy:
   keep-history: true
   local-dir: web/build/
   repo: turingarena/demo
-  target-branch: gh-pages
+  target-branch: master
   verbose: true
   on:
     branch: master
