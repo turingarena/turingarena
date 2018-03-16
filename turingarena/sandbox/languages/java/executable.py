@@ -48,3 +48,15 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
 
             with self.manage_process(popen) as p:
                 yield p
+
+    def get_memory_usage(self, process):
+        cmd = [
+            'bash', '-c',
+            "jcmd Skeleton GC.class_histogram | tail -n 1 | awk '{print $3}'"
+        ]
+        try:
+            memory_utilization = int(subprocess.check_output(cmd))
+        except ValueError:
+            memory_utilization = 0
+        logger.debug(f"memory usage : {memory_utilization / 1000000}Mb")
+        return memory_utilization
