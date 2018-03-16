@@ -66,8 +66,6 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(statement, *, interface):
-    global first_call_generated
-    first_call_generated = False
     yield "public static void main(String args[]) {"
     yield indent("Solution s = null;")
     yield from indent_all(generate_block(statement.main.body, interface=interface))
