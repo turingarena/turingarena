@@ -19,14 +19,15 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
     @contextmanager
     def run(self, connection):
         # get class files
-        skeleton_path = os.path.join(self.algorithm_dir, "Skeleton.class")
-        solution_path = os.path.join(self.algorithm_dir, "Solution.class")
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
         with TemporaryDirectory(dir="/tmp", prefix="java_cwd_") as cwd:
-            # copy class files to current directory
-            shutil.copy(skeleton_path, cwd)
-            shutil.copy(solution_path, cwd)
+            # copy all .class file in cwd: need to copy all files because of inner classes!
+            for name in os.listdir(self.algorithm_dir):
+                if name.endswith(".class"):
+                    shutil.copy(os.path.join(self.algorithm_dir, name), cwd)
+
+            # copy security.policy file
             shutil.copy(security_policy_path, cwd)
 
             cli = [
