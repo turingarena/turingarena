@@ -20,7 +20,7 @@ class Solution extends Skeleton {
     List[] adj; 
     boolean initialized = false; 
 
-    void init() {
+    Solution() {
         // init adj
         adj = new List[N];
         for (int i = 0; i < N; i++) {
@@ -58,10 +58,6 @@ class Solution extends Skeleton {
     }
 
     void add_edge(int from, int to, int weight) {
-        if (!initialized) {
-            init();
-            initialized = true;
-        }
         System.err.println("Add edge " + from + " <-> " + to + " weight " + weight);
         adj[from].add(new Edge(to, weight));
         adj[to].add(new Edge(from, weight));

@@ -5,13 +5,12 @@ def generate_skeleton_java(interface):
     yield "import java.util.Scanner;"
     yield
     yield "abstract class Skeleton {"
-    yield indent("private Scanner in = new Scanner(System.in);")
+    yield indent("private static final Scanner in = new Scanner(System.in);")
     for statement in interface.body.statements:
         yield
         yield from indent_all(generate_skeleton_statement(statement, interface=interface))
-    yield
-    yield from indent_all(generate_main_method())
     yield "}"
+    yield
 
 
 def generate_template_java(interface):
@@ -21,15 +20,9 @@ def generate_template_java(interface):
     yield "}"
 
 
-def generate_main_method():
-    yield "public static void main(String args[]) {"
-    yield indent("new Solution();")
-    yield "}"
-
-
 def generate_skeleton_statement(statement, *, interface):
     generators = {
-        "var": lambda: [build_declaration(statement)],
+        "var": lambda: ["static " + build_declaration(statement)],
         "function": lambda: generate_function(statement),
         "callback": lambda: generate_callback(statement, interface=interface),
         "main": lambda: generate_main(statement, interface=interface),
@@ -73,7 +66,10 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(statement, *, interface):
-    yield "public Skeleton() {"
+    global first_call_generated
+    first_call_generated = False
+    yield "public static void main(String args[]) {"
+    yield indent("Solution s = null;")
     yield from indent_all(generate_block(statement.main.body, interface=interface))
     yield "}"
 
@@ -90,7 +86,7 @@ def generate_block_statement(statement, *, interface):
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
         "flush": lambda: ["System.out.flush();"],
-        "call": lambda: generate_call(statement, interface=interface),
+        "call": lambda: generate_call(statement, interface=interface,),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),
         "exit": lambda: ["System.exit(0);"],
@@ -116,13 +112,21 @@ def build_alloc_type(var_type, size):
 
 
 def generate_call(statement, *, interface):
+    global first_call_generated
     function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
+
+    # if solution was not initialize, then initialize it now
+    # this must be done because the solution constructor must be called
+    # after global variables initialization!
+    yield "if (s == null)"
+    yield indent("s = new Solution();")
+
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
-        yield f"{return_value} = {function_name}({parameters});"
+        yield f"{return_value} = s.{function_name}({parameters});"
     else:
-        yield f"{function_name}({parameters});"
+        yield f"s.{function_name}({parameters});"
     if interface.signature.callbacks:
         yield 'System.out.println("return");'
 
@@ -142,19 +146,18 @@ def generate_input(statement):
 
 def generate_if(statement, *, interface):
     condition = build_expression(statement.condition)
-    yield f"if( {condition} )" " {"
+    yield f"if ({condition})" " {"
     yield from indent_all(generate_block(statement.then_body, interface=interface))
-    yield "}"
     if statement.else_body is not None:
-        yield "else {"
+        yield "} else {"
         yield from indent_all(generate_block(statement.else_body, interface=interface))
-        yield "}"
+    yield "}"
 
 
 def generate_for(statement, *, interface):
     index_name = statement.index.variable.name
     size = build_expression(statement.index.range)
-    yield f"for(int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
+    yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
     yield from indent_all(generate_block(statement.body, interface=interface))
     yield "}"
 
