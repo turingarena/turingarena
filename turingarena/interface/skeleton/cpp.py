@@ -7,6 +7,8 @@ def generate_skeleton_cpp(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
+    yield
+    yield from generate_main(interface)
 
 
 def generate_template_cpp(interface):
@@ -20,7 +22,8 @@ def generate_skeleton_statement(statement, *, interface):
         "var": lambda: ["extern " + build_declaration(statement)],
         "function": lambda: generate_function(statement),
         "callback": lambda: generate_callback(statement, interface=interface),
-        "main": lambda: generate_main(statement, interface=interface),
+        "init": lambda: [],
+        "main": lambda: [],
     }
     return generators[statement.statement_type]()
 
@@ -30,6 +33,7 @@ def generate_template_statement(statement, *, interface):
         "var": lambda: [build_declaration(statement)],
         "function": lambda: generate_function_template(statement),
         "callback": lambda: generate_callback_template(statement, interface=interface),
+        "init": lambda: [],
         "main": lambda: [],
     }
     return generators[statement.statement_type]()
@@ -58,9 +62,15 @@ def generate_callback_template(statement, *, interface):
     yield f"{build_callable_declarator(callback)};"
 
 
-def generate_main(statement, *, interface):
+def generate_main(interface):
     yield "int main() {"
-    yield from indent_all(generate_block(statement.main.body, interface=interface))
+    for which in ("init", "main"):
+        try:
+            main = interface.body.scope.main[which]
+        except KeyError:
+            pass
+        else:
+            yield from indent_all(generate_block(main.body, interface=interface))
     yield "}"
 
 

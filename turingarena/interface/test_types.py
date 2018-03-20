@@ -12,7 +12,7 @@ def test_valid_types():
                 function get_ia(int j) -> int;
                 function get_iaa(int j, int k) -> int;
             
-                main {
+                init {
                     input i;
                     alloc ia, iaa : i;
                     for(j : i) {
@@ -22,7 +22,9 @@ def test_valid_types():
                             input iaa[j][k];
                         }
                     }
+                }
             
+                main {
                     var int o;
                     var int[] oa;
                     var int[][] oaa;

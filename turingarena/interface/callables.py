@@ -14,20 +14,6 @@ from turingarena.interface.variables import Variable
 logger = logging.getLogger(__name__)
 
 
-class Main(ImmutableObject):
-    __slots__ = ["body"]
-
-
-class MainStatement(Statement):
-    __slots__ = ["main"]
-
-    @staticmethod
-    def compile(ast, scope):
-        main = Main(body=Body.compile(ast.body, scope=scope))
-        scope.main["main"] = main
-        return MainStatement(main=main)
-
-
 class CallableSignature(TupleLikeObject):
     __slots__ = ["name", "parameters", "return_type"]
 

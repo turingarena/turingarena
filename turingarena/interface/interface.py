@@ -49,10 +49,16 @@ class InterfaceDefinition(AbstractSyntaxNode):
         global_context = GlobalContext(self)
         main_context = MainContext(global_context=global_context)
 
+        try:
+            init = self.body.scope.main["init"]
+        except KeyError:
+            init = None
         main = self.body.scope.main["main"]
 
         yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
+            if init is not None:
+                yield from init.body.generate_instructions(main_context)
             yield from main.body.generate_instructions(main_context)
         except InterfaceExit:
             pass

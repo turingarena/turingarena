@@ -19,6 +19,7 @@ def generate_skeleton_statement(statement, *, interface):
         "var": lambda: generate_var(statement),
         "function": lambda: [],
         "callback": lambda: generate_callback(statement, interface=interface),
+        "init": lambda: generate_init(statement, interface=interface),
         "main": lambda: generate_main(statement, interface=interface),
     }
 
@@ -71,6 +72,10 @@ def generate_callback(statement, *, interface):
 def generate_callback_template(statement, *, interface):
     callback = statement.callback
     yield f"from skeleton import {callback.name}"
+
+
+def generate_init(statement, *, interface):
+    yield from generate_block(statement.init.body, interface=interface)
 
 
 def generate_main(statement, *, interface):

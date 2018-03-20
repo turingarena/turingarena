@@ -10,6 +10,7 @@ grammar_ebnf = r"""
         | var_statement
         | statement_type:'function' ~ declarator:callable_declarator ';'
         | statement_type:'callback' ~ declarator:callable_declarator body:block
+        | statement_type:'init' ~ body:block
         | statement_type:'main' ~ body:block
     ;
 
