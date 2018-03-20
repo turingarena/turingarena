@@ -3,7 +3,7 @@ var int[][] V;
 
 function find_best_sum() -> int;
 
-main {
+init {
     input N;
     alloc V : N;
     for(i : N) {
@@ -12,7 +12,9 @@ main {
             input V[i][j];
         }
     }
+}
 
+main {
     var int S;
     call find_best_sum() -> S;
     output S;

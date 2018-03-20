@@ -1,21 +1,28 @@
+// adjacency list
 var int N; // number of nodes
-var int E; // number of edges
+var int[] D; // D[u] = degree of node u
+var int[][] A; // A[u][i] = i-th out-neighbor of node u
+var int[][] W; // W[u][i] = weight of i-th out-edge of node u
+
 var int Q; // number of queries
 
-function add_edge(int u, int v, int weight);
 function shortest_path(int u, int v) -> int;
 
-main {
-    input N, E;
-
-    for (e : E) {
-        var int u, v, w;
-        input u, v, w;
-        call add_edge(u, v, w);
+init {
+    input N;
+    alloc D, A, W : N;
+    for (u : N) {
+        input D[u];
+        alloc A[u], W[u] : D[u];
+        for(i : D[u]) {
+            input A[u][i], W[u][i];
+        }
     }
 
     input Q;
+}
 
+main {
     for (i : Q) {
         var int u, v, ans;
         input u, v;

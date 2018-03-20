@@ -5,13 +5,12 @@
 using namespace std;
 
 int N; // number of nodes
-int E; // number of edges
+int* D; // node degree
+int** A; // adjacency
+int** W; // weights
 int Q; // number of queries
 
-vector<pair<int, int> > adj[10000];
-
 int dijkstra(int source, int destination) {
-
     priority_queue<pair<int, int> > Q;
     vector<int> dist(N, INT_MAX); // set initial distance to infinity
 
@@ -22,9 +21,9 @@ int dijkstra(int source, int destination) {
         int u = Q.top().second; // node with shortest distance from source
         Q.pop();
 
-        for (auto e : adj[u]) {
-            int v = e.first;
-            int w = e.second;
+        for (int i = 0; i < D[u]; i++) {
+            int v = A[u][i];
+            int w = W[u][i];
 
             if (dist[v] > dist[u] + w) { // if it costs less to go to v trough u
                 dist[v] = dist[u] + w;   // update v distance
@@ -36,10 +35,6 @@ int dijkstra(int source, int destination) {
     return dist[destination];
 }
 
-void add_edge(int u, int v, int w) {
-    adj[u].push_back(make_pair(v, w));
-    adj[v].push_back(make_pair(u, w));
-}
 
 int shortest_path(int u, int v) {
     int dist = dijkstra(u, v);
