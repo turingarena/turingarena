@@ -3,10 +3,11 @@ from turingarena.common import indent_all, indent
 
 def generate_skeleton_javascript(interface):
     for statement in interface.body.statements:
-        yield
         yield from generate_skeleton_statement(statement, interface=interface)
         yield
-    yield "main();"
+    yield "__init__();"
+    yield "__load_source__();"
+    yield "__main__();"
     yield
 
 
@@ -21,7 +22,8 @@ def generate_skeleton_statement(statement, *, interface):
         "var": lambda: generate_var(statement),
         "function": lambda: [],
         "callback": lambda: generate_callback(statement, interface=interface),
-        "main": lambda: generate_main(statement, interface=interface),
+        "main": lambda: generate_function("__main__", statement.main.body, interface=interface),
+        "init": lambda: generate_function("__init__", statement.init.body, interface=interface),
     }
     return generators[statement.statement_type]()
 
@@ -32,6 +34,7 @@ def generate_template_statement(statement, *, interface):
         "function": lambda: generate_function_template(statement),
         "callback": lambda: generate_callback_template(statement, interface=interface),
         "main": lambda: [],
+        "init": lambda: [],
     }
     return generators[statement.statement_type]()
 
@@ -67,10 +70,10 @@ def generate_callback_template(statement, *, interface):
     yield f"// callback {statement.callback.name}"
 
 
-def generate_main(statement, *, interface):
-    yield 'function main() {'
-    yield from indent_all(generate_block(statement.main.body, interface=interface))
-    yield '}'
+def generate_function(name, body, interface):
+    yield f"function {name}() " "{"
+    yield from indent_all(generate_block(body, interface=interface))
+    yield "}"
 
 
 def generate_block(block, *, interface):
@@ -104,7 +107,6 @@ def generate_alloc(statement):
 
 def generate_call(statement, *, interface):
     function_name = statement.function.name
-    yield f"__load_source__()"
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
@@ -112,17 +114,17 @@ def generate_call(statement, *, interface):
     else:
         yield f"{function_name}({parameters});"
     if interface.signature.callbacks:
-        yield 'print("return");'
+        yield "print('return');"
 
 
 def generate_output(statement):
-    args = ', '.join(build_expression(v) for v in statement.arguments)
-    yield f'print({args});'
+    args = ", ".join(build_expression(v) for v in statement.arguments)
+    yield f"print({args});"
 
 
 def generate_input(statement):
     for arg in statement.arguments:
-        yield f'{build_expression(arg)} = readInteger();'
+        yield f"{build_expression(arg)} = readInteger();"
 
 
 def generate_if(statement, *, interface):
@@ -145,12 +147,12 @@ def generate_for(statement, *, interface):
 
 def build_callable_declarator(callable):
     signature = callable.signature
-    arguments = ', '.join(build_parameter(p) for p in signature.parameters)
+    arguments = ", ".join(build_parameter(p) for p in signature.parameters)
     return f"{callable.name}({arguments})"
 
 
 def build_parameter(parameter):
-    return f'{parameter.name}'
+    return f"{parameter.name}"
 
 
 def build_subscript(expression):
