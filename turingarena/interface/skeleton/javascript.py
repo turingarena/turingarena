@@ -4,10 +4,8 @@ from turingarena.common import indent_all, indent
 def generate_skeleton_javascript(interface):
     for statement in interface.body.statements:
         yield from generate_skeleton_statement(statement, interface=interface)
-        yield
-    yield "__init__();"
-    yield "__load_source__();"
-    yield "__main__();"
+    yield
+    yield from generate_main(interface)
     yield
 
 
@@ -22,8 +20,8 @@ def generate_skeleton_statement(statement, *, interface):
         "var": lambda: generate_var(statement),
         "function": lambda: [],
         "callback": lambda: generate_callback(statement, interface=interface),
-        "main": lambda: generate_function("__main__", statement.main.body, interface=interface),
-        "init": lambda: generate_function("__init__", statement.init.body, interface=interface),
+        "main": lambda: [],
+        "init": lambda: [],
     }
     return generators[statement.statement_type]()
 
@@ -64,16 +62,23 @@ def generate_callback(statement, *, interface):
     yield indent(f"print('{callback.name}');")
     yield from indent_all(generate_block(callback.body, interface=interface))
     yield "}"
+    yield
 
 
 def generate_callback_template(statement, *, interface):
     yield f"// callback {statement.callback.name}"
 
 
-def generate_function(name, body, interface):
-    yield f"function {name}() " "{"
-    yield from indent_all(generate_block(body, interface=interface))
-    yield "}"
+def generate_main(interface):
+    if "init" in interface.body.scope.main:
+        yield "// init {"
+        yield from indent_all(generate_block(interface.body.scope.main["init"].body, interface=interface))
+        yield "// }"
+    yield
+    yield "// main {"
+    yield indent("__load_source__(); // load user source file")
+    yield from indent_all(generate_block(interface.body.scope.main["main"].body, interface=interface))
+    yield "// }"
 
 
 def generate_block(block, *, interface):
