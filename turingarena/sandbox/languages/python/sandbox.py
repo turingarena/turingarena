@@ -40,20 +40,8 @@ sys.modules["skeleton"] = types.ModuleType("skeleton")
 import source
 import skeleton
 
-source_loaded = False
-
 
 def load_source():
-    """
-    Executes the algorithm source.
-
-    Called by the skeleton on demand, at the first function invocation.
-    At that time, all the global variables are loaded
-    and can be simply import'd by the algorithm source.
-    """
-    global source_loaded
-    if source_loaded: return
-    source_loaded = True
     exec(source_string, source.__dict__)
 
 

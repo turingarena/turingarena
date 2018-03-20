@@ -6,6 +6,9 @@ def generate_skeleton_python(interface):
     for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement, interface=interface)
+    yield
+    yield f"__load_source__()"
+    yield f"import source as _source"
 
 
 def generate_template_python(interface):
@@ -115,14 +118,12 @@ def generate_alloc(statement):
 
 def generate_call(statement, *, interface):
     function_name = statement.function.name
-    yield f"__load_source__()"
-    yield f"from source import {function_name}"
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
-        yield f"{return_value} = {function_name}({parameters})"
+        yield f"{return_value} = _source.{function_name}({parameters})"
     else:
-        yield f"{function_name}({parameters})"
+        yield f"_source.{function_name}({parameters})"
     if interface.signature.callbacks:
         yield r"""print("return")"""
 
