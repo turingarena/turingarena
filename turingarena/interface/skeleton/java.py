@@ -22,10 +22,11 @@ def generate_template_java(interface):
 
 def generate_skeleton_statement(statement, *, interface):
     generators = {
-        "var": lambda: ["static " + build_declaration(statement)],
+        "var": lambda: ["final " + build_declaration(statement)],
         "function": lambda: generate_function(statement),
         "callback": lambda: generate_callback(statement, interface=interface),
         "main": lambda: generate_main(statement, interface=interface),
+        "init": lambda: generate_constructor(statement, interface=interface),
     }
     return generators[statement.statement_type]()
 
@@ -36,6 +37,7 @@ def generate_template_statement(statement, *, interface):
         "function": lambda: generate_function_template(statement),
         "callback": lambda: [],
         "main": lambda: [],
+        "init": lambda: [],
     }
     return generators[statement.statement_type]()
 
@@ -66,9 +68,18 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(statement, *, interface):
-    yield "public static void main(String args[]) {"
-    yield indent("Solution s = null;")
+    yield "void _run() {"
     yield from indent_all(generate_block(statement.main.body, interface=interface))
+    yield "}"
+    yield
+    yield "public static void main(String args[]) {"
+    yield indent("new Solution()._run();")
+    yield "}"
+
+
+def generate_constructor(statement, *, interface):
+    yield "Skeleton() {"
+    yield from indent_all(generate_block(statement.init.body, interface=interface))
     yield "}"
 
 
@@ -113,18 +124,11 @@ def generate_call(statement, *, interface):
     global first_call_generated
     function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
-
-    # if solution was not initialize, then initialize it now
-    # this must be done because the solution constructor must be called
-    # after global variables initialization!
-    yield "if (s == null)"
-    yield indent("s = new Solution();")
-
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
-        yield f"{return_value} = s.{function_name}({parameters});"
+        yield f"{return_value} = {function_name}({parameters});"
     else:
-        yield f"s.{function_name}({parameters});"
+        yield f"{function_name}({parameters});"
     if interface.signature.callbacks:
         yield 'System.out.println("return");'
 

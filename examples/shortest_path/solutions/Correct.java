@@ -17,17 +17,6 @@ class Solution extends Skeleton {
         }
     }
 
-    List[] adj; 
-    boolean initialized = false; 
-
-    Solution() {
-        // init adj
-        adj = new List[N];
-        for (int i = 0; i < N; i++) {
-            adj[i] = new ArrayList<Edge>();
-        }
-    }
-
     int dijkstra(int from, int to) {
         PriorityQueue<Edge> Q = new PriorityQueue<>();
         int d[] = new int[N];
@@ -43,9 +32,9 @@ class Solution extends Skeleton {
         while (!Q.isEmpty()) {
             int u = Q.poll().to;
             
-            for (Edge e : (List<Edge>) adj[u]) {
-                int v = e.to;
-                int w = e.weight;
+            for (int i = 0; i < D[u]; i++) {
+                int v = A[u][i];
+                int w = W[u][i];
                 
                 if (d[v] > d[u] + w) {
                     d[v] = d[u] + w;
@@ -57,12 +46,6 @@ class Solution extends Skeleton {
         return d[to];
     }
 
-    void add_edge(int from, int to, int weight) {
-        System.err.println("Add edge " + from + " <-> " + to + " weight " + weight);
-        adj[from].add(new Edge(to, weight));
-        adj[to].add(new Edge(from, weight));
-    }
- 
     int shortest_path(int from, int to) {
         int res = dijkstra(from, to);
         if (res == Integer.MAX_VALUE) 
