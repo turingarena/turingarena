@@ -10,7 +10,6 @@ var int[] D;
 // adj[u][] adjacent list for node u
 var int[][] adj;
 
-function preprocess();
 function is_there_a_path(int u, int v) -> int;
 
 init {
@@ -18,19 +17,17 @@ init {
     alloc D : N;
     alloc adj: N;
 
-    for(u : N) {
+    for (u : N) {
         input D[u];
         alloc adj[u] : D[u];
-        for(i : D[u]) {
+        for (i : D[u]) {
                 input adj[u][i];
         }
     }
 }
 
 main {
-    call preprocess();
-
-    for(q : Q) {
+    for (q : Q) {
         var int u, v, ans;
         input u, v;
         call is_there_a_path(u, v) -> ans;

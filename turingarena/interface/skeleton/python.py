@@ -35,6 +35,7 @@ def generate_template_statement(statement, *, interface):
         "function": lambda: generate_function_template(statement),
         "callback": lambda: generate_callback_template(statement, interface=interface),
         "main": lambda: [],
+        "init": lambda: [],
     }
     return generators[statement.statement_type]()
 

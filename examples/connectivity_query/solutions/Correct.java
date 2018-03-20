@@ -4,9 +4,6 @@ class Solution extends Skeleton {
     // global int[] D;
     // global int[][] adj;
 
-    void preprocess() {
-    }
-
     boolean DFS(int u, int v, boolean a[]) {
         a[u] = true;
         if (u == v) 

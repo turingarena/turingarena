@@ -19,7 +19,6 @@ def evaluate(algorithm):
     adj = [list(graph.neighbors(u)) for u in graph.nodes()]
 
     with algorithm.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
-        p.call.preprocess()
 
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")
@@ -27,7 +26,11 @@ def evaluate(algorithm):
         for _ in range(Q):
             u = v = None
             while u == v:
-                u, v = random.randint(1, N), random.randint(1, N)
+                u, v = random.randint(0, N - 1), random.randint(0, N - 1)
 
-            connected = p.call.is_there_a_path(u, v)
+            connected = bool(p.call.is_there_a_path(u, v))
+            if nx.has_path(graph, u, v) == connected:
+                print("Correct")
+            else:
+                print("Wrong")
             print(f"Nodes {u} {v} -> {connected}")
