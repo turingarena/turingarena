@@ -33,7 +33,7 @@ def generate_skeleton_statement(statement, *, interface):
 
 def generate_template_statement(statement, *, interface):
     generators = {
-        "var": lambda: [],
+        "var": lambda: ["// global " + build_declaration(statement)],
         "function": lambda: generate_function_template(statement),
         "callback": lambda: [],
         "main": lambda: [],
@@ -47,11 +47,12 @@ def generate_function(statement):
 
 
 def generate_function_template(statement):
+    yield
     yield f"{build_callable_declarator(statement.function)}" " {"
     yield indent("// TODO")
-    yield indent("return 0;")
+    if statement.function.signature.return_type:
+        yield indent("return 0;")
     yield "}"
-    yield
 
 
 def generate_callback(statement, *, interface):
@@ -121,7 +122,6 @@ def build_alloc_type(var_type, size):
 
 
 def generate_call(statement, *, interface):
-    global first_call_generated
     function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:

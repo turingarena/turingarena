@@ -1,32 +1,35 @@
 // number of nodes
 var int N;
+
+// number of queries
 var int Q;
 
-function preprocess(int[] D, int[][] adj);
+// D[u] degree of u
+var int[] D;
+
+// adj[u][] adjacent list for node u
+var int[][] adj;
+
+function preprocess();
 function is_there_a_path(int u, int v) -> int;
 
-main {
-    input N;
+init {
+    input N, Q;
+    alloc D : N;
+    alloc adj: N;
 
-    /* block { */
-        // D[u] = degree of u
-        var int[] D;
-
-        // adj[u][i] = destination of i-th edge out of u (zero-based)
-        var int[][] adj;
-
-        for(u : N) {
-            input D[u];
-            alloc adj[u] : D[u];
-            for(i : D[u]) {
+    for(u : N) {
+        input D[u];
+        alloc adj[u] : D[u];
+        for(i : D[u]) {
                 input adj[u][i];
-            }
         }
+    }
+}
 
-        call preprocess(D, adj);
-    /* } */
+main {
+    call preprocess();
 
-    input Q;
     for(q : Q) {
         var int u, v, ans;
         input u, v;

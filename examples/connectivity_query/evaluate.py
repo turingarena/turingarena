@@ -18,8 +18,8 @@ def evaluate(algorithm):
     D = [graph.degree(u) for u in graph.nodes()]
     adj = [list(graph.neighbors(u)) for u in graph.nodes()]
 
-    with algorithm.run(global_variables=dict(N=N, Q=Q)) as p:
-        p.call.preprocess(D, adj)
+    with algorithm.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
+        p.call.preprocess()
 
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")
