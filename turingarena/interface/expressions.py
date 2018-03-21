@@ -6,6 +6,7 @@ from bidict import bidict
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
+from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError
 
 expression_classes = bidict()
 
@@ -36,6 +37,9 @@ class Expression(AbstractSyntaxNode):
     @abstractmethod
     def do_evaluate(self, context):
         pass
+
+    def resolve_variable(self):
+        return None
 
 
 class LiteralExpression(Expression):
@@ -78,6 +82,13 @@ class ReferenceExpression(Expression):
             variable=self.variable,
         )
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        if self.variable not in initialized_variables:
+            raise VariableNotInitializedError(f"Variable '{self.variable.name}' used before initialization")
+
+    def resolve_variable(self):
+        return self.variable
+
 
 @expression_class("subscript")
 class SubscriptExpression(Expression):
@@ -99,3 +110,12 @@ class SubscriptExpression(Expression):
             array=self.array.evaluate_in(context).get(),
             index=self.index.evaluate_in(context).get(),
         )
+
+    def check_variables(self, initialized_variables, allocated_variables):
+        if self.array.variable not in allocated_variables:
+            raise VariableNotAllocatedError(f"Variable '{self.array.resolve_variable().name}' used before allocation")
+        self.index.check_variables(initialized_variables, allocated_variables)
+        self.array.check_variables(initialized_variables, allocated_variables)
+
+    def resolve_variable(self):
+        return self.array.resolve_variable()

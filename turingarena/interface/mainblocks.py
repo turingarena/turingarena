@@ -6,6 +6,9 @@ from turingarena.interface.statement import Statement
 class Init(ImmutableObject):
     __slots__ = ["body"]
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.body.check_variables(initialized_variables, allocated_variables)
+
 
 class InitStatement(Statement):
     __slots__ = ["init"]
@@ -16,9 +19,15 @@ class InitStatement(Statement):
         scope.main["init"] = init
         return InitStatement(init=init)
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.init.check_variables(initialized_variables, allocated_variables)
+
 
 class Main(ImmutableObject):
     __slots__ = ["body"]
+
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.body.check_variables(initialized_variables, allocated_variables)
 
 
 class MainStatement(Statement):
@@ -29,3 +38,6 @@ class MainStatement(Statement):
         main = Main(body=Body.compile(ast.body, scope=scope))
         scope.main["main"] = main
         return MainStatement(main=main)
+
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.main.check_variables(initialized_variables, allocated_variables)

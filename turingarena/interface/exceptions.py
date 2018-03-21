@@ -19,6 +19,18 @@ class InterfaceError(Exception):
         return f"{lineinfo.filename}:{lineinfo.line+1}:{lineinfo.col+1}: {self.message}"
 
 
+class VariableNotInitializedError(InterfaceError):
+    """
+    Raised when a variable is used before it's initialized
+    """
+
+
+class VariableNotAllocatedError(InterfaceError):
+    """
+    Raised when a variable is used before it's allocated
+    """
+
+
 class CommunicationBroken(Exception):
     """
     Raised when the communication with a process is interrupted.

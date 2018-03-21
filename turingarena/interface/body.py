@@ -23,6 +23,12 @@ class Body(AbstractSyntaxNode):
             statements=statements
         )
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        for statement in self.statements:
+            initialized_variables += statement.initialized_variables()
+            allocated_variables += statement.allocated_variables()
+            statement.check_variables(initialized_variables, allocated_variables)
+
     def generate_instructions(self, context):
         inner_context = context.child(self.scope)
         for statement in self.statements:

@@ -7,3 +7,5 @@ class Statement(AbstractSyntaxNode):
 
     def __init__(self, **kwargs):
         super().__init__(statement_type=get_statement_classes().inv[self.__class__], **kwargs)
+
+

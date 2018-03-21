@@ -93,6 +93,15 @@ class CallStatement(ImperativeStatement):
     def first_calls(self):
         return {self.function.name}
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        for exp in self.parameters:
+            exp.check_variable(initialized_variables, allocated_variables)
+        if self.return_value:
+            self.return_value.check_variables(initialized_variables, allocated_variables)
+
+    def initialized_variables(self):
+        return [self.return_value]
+
     def generate_instructions(self, context):
         call_context = FunctionCallContext(local_context=context)
 

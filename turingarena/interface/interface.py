@@ -45,6 +45,9 @@ class InterfaceDefinition(AbstractSyntaxNode):
             body=body,
         )
 
+    def static_analyze_variables(self):
+        self.body.check_variables([], [])
+
     def generate_instructions(self):
         global_context = GlobalContext(self)
         main_context = MainContext(global_context=global_context)
