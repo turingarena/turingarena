@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.problem.python import PythonEvaluator
+from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.sources import load_source
 
 
@@ -32,7 +32,7 @@ def make_problem(dirname):
 
     return AlgorithmicProblem(
         interface_text=interface_text,
-        evaluator=PythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
+        evaluator=HostPythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
     )
 
 
