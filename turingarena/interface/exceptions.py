@@ -30,6 +30,10 @@ class VariableNotAllocatedError(InterfaceError):
     Raised when a variable is used before it's allocated
     """
 
+class VariableNotDeclaredError(InterfaceError):
+    """
+    Raised when a variable is not defined in a scope
+    """
 
 class CommunicationBroken(Exception):
     """

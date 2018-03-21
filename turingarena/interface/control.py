@@ -109,6 +109,9 @@ class ForStatement(ImperativeStatement):
             inner_context.bindings[self.index.variable] = i
             yield from self.body.generate_instructions(inner_context)
 
+    def initialized_variables(self):
+        return [self.index.variable]
+
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
 

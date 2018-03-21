@@ -6,7 +6,7 @@ from bidict import bidict
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
-from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError
+from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, VariableNotDeclaredError
 
 expression_classes = bidict()
 
@@ -70,11 +70,15 @@ class ReferenceExpression(Expression):
 
     @staticmethod
     def compile(ast, scope):
-        variable = scope.variables[ast.variable_name]
-        return ReferenceExpression(
-            value_type=variable.value_type,
-            variable=variable,
-        )
+        try:
+            variable = scope.variables[ast.variable_name]
+        except KeyError:
+            raise VariableNotDeclaredError(f"Variable {ast.variable_name} is not declared")
+        else:
+            return ReferenceExpression(
+                value_type=variable.value_type,
+                variable=variable,
+            )
 
     def do_evaluate(self, context):
         return VariableReference(
