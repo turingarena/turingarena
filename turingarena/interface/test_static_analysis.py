@@ -54,6 +54,32 @@ def test_variable_initialized_if():
     """).static_analyze_variables()
 
 
+def test_variable_initialized_call():
+    InterfaceDefinition.compile("""
+        function test(int a, int b) -> int;
+        
+        main {
+            var int a, b, c;
+            input a, b;
+            call test(a, b) -> c;
+            output c; 
+        }
+    """)
+
+
+def test_variable_not_initialized_call():
+    InterfaceDefinition.compile("""
+        function test(int a, int b) -> int;
+
+        main {
+            var int a, b, c;
+            input a;
+            call test(a, b) -> c;
+            output c; 
+        }
+    """)
+
+
 def test_local_variable():
     InterfaceDefinition.compile("""
             main {
