@@ -1,0 +1,43 @@
+
+// first sequence
+var int M;
+var int[] X;
+
+// second sequence
+var int N;
+var int[] Y;
+
+// compute the longest common subsequence
+function compute();
+
+// return the length of the sequence
+function length() -> int;
+
+// return the i-th element of the sequence
+function element(int i) -> int;
+
+init {
+    input M;
+    alloc X : M;
+    for (i : M) {
+        input X[i];
+    }
+    input N;
+    alloc Y : N;
+    for (i : N) {
+        input Y[i];
+    }
+}
+
+main {
+    call compute();
+
+    var int l;
+    call length() -> l;
+    output l;
+    for(i : l) {
+        var int x;
+        call element(i) -> x;
+        output x;
+    }
+}
