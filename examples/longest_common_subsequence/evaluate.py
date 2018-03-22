@@ -56,4 +56,4 @@ def evaluate(submission):
         if evaluate_test_case(submission, n):
             print(f'test case N = {n} correct')
         else:
-            print(f'test case N = {i} wrong')
+            print(f'test case N = {n} wrong')
