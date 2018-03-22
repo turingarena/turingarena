@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.common import ImmutableObject
@@ -9,29 +10,48 @@ from turingarena.sandbox.sources import load_source
 
 class AlgorithmicProblem(ImmutableObject):
     __slots__ = [
-        "interface_text",
+        "interface",
+        "algorithm_sources",
         "evaluator",
     ]
 
-    def evaluate(self, source_text, *, language):
-        interface = InterfaceDefinition.compile(self.interface_text)
-        with TemporaryDirectory(dir="/tmp") as temp_dir:
-            algorithm_dir = os.path.join(temp_dir, "algorithm")
-            source = load_source(
-                source_text,
-                language=language,
-                interface=interface,
-            )
+    def compile_algorithms(self, evaluation_dir):
+        algorithms_dir = os.path.join(evaluation_dir, "algorithms")
+        os.mkdir(algorithms_dir)
+        for name, source in self.algorithm_sources.items():
+            algorithm_dir = os.path.join(algorithms_dir, name)
             source.compile(algorithm_dir=algorithm_dir)
-            return self.evaluator.evaluate(algorithm_dir)
+
+    @contextmanager
+    def prepare(self):
+        with TemporaryDirectory(dir="/tmp", prefix="turingarena_problem_") as prepared_problem_dir:
+            self.compile_algorithms(prepared_problem_dir)
+            yield prepared_problem_dir
+
+    @contextmanager
+    def prepare_submission(self, source):
+        with TemporaryDirectory(dir="/tmp", prefix="turingarena_submission_") as temp_dir:
+            submission_dir = os.path.join(temp_dir, "algorithm")
+            source.compile(algorithm_dir=submission_dir)
+            yield submission_dir
+
+    def evaluate(self, source):
+        with self.prepare() as prepared_problem_dir:
+            with self.prepare_submission(source) as submission_dir:
+                return self.evaluator.evaluate(
+                    prepared_problem_dir=prepared_problem_dir,
+                    submission_dir=submission_dir,
+                )
 
 
 def make_problem(dirname):
     with open(os.path.join(dirname, "interface.txt")) as f:
         interface_text = f.read()
 
+    interface = InterfaceDefinition.compile(interface_text)
     return AlgorithmicProblem(
-        interface_text=interface_text,
+        interface=interface,
+        algorithm_sources=dict(find_algorithm_sources(os.path.join(dirname, "algorithms"), interface=interface)),
         evaluator=HostPythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
     )
 
@@ -39,3 +59,25 @@ def make_problem(dirname):
 def load_problem(problem_name):
     problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
     return make_problem(os.path.join(problems_dir, problem_name))
+
+
+def find_algorithm_sources(directory, *, interface):
+    language_by_extension = {
+        ".cpp": "c++",
+        ".py": "python",
+        ".java": "java",
+        ".js": "javascript",
+    }
+
+    root, directories, files = next(os.walk(directory))
+
+    for source_filename in files:
+        base, ext = os.path.splitext(source_filename)
+        source_path = os.path.join(directory, source_filename)
+        with open(source_path) as f:
+            source_text = f.read()
+        yield source_filename, load_source(
+            source_text,
+            language=language_by_extension[ext],
+            interface=interface,
+        )

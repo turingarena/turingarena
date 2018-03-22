@@ -3,7 +3,7 @@ import random
 import networkx as nx
 
 
-def evaluate(algorithm):
+def evaluate(submission):
     parts = (
         [nx.complete_graph(10) for _ in range(3)] +
         [nx.cycle_graph(10) for _ in range(3)]
@@ -18,7 +18,7 @@ def evaluate(algorithm):
     D = [graph.degree(u) for u in graph.nodes()]
     adj = [list(graph.neighbors(u)) for u in graph.nodes()]
 
-    with algorithm.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
+    with submission.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
 
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")

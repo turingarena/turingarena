@@ -1,4 +1,5 @@
 from turingarena.problem.problem import load_problem
+from turingarena.sandbox.sources import load_source
 
 
 def form_evaluate(fields):
@@ -9,4 +10,4 @@ def form_evaluate(fields):
     else:
         source_text = fields["source_file"].value.decode()
     problem = load_problem(problem_name)
-    return problem.evaluate(source_text, language=language)
+    return problem.evaluate(load_source(source_text, language=language, interface=problem.interface))

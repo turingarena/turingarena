@@ -1,23 +1,15 @@
 import os
 
-from turingarena.problem.problem import make_problem
+from turingarena.problem.problem import make_problem, find_algorithm_sources
 
 
-def find_solutions(dirname):
-    solutions_dir = os.path.join(dirname, "solutions")
-    files = next(fs for r, ds, fs in os.walk(solutions_dir))
-    langauge_by_extension = {
-        ".cpp": "c++",
-        ".py": "python",
-        ".java": "java",
-        ".js": "javascript",
-    }
-    for source_filename in files:
-        base, ext = os.path.splitext(source_filename)
-        source_path = os.path.join(solutions_dir, source_filename)
-        with open(source_path) as f:
-            source_text = f.read()
-        yield base, ext, source_text, langauge_by_extension[ext]
+def find_solutions(problem_dir, problem):
+    for subdir in ["algorithms", "solutions"]:
+        for name, source in find_algorithm_sources(
+                os.path.join(problem_dir, subdir),
+                interface=problem.interface,
+        ):
+            yield name, source
 
 
 def pytest_generate_tests(metafunc):
@@ -31,13 +23,13 @@ def pytest_generate_tests(metafunc):
         }
 
         tests = {
-            f"{os.path.basename(problem_dir)}/{base}/{ext[1:]}": (problem, source_text, language)
+            f"{os.path.basename(problem_dir)}/{name}": (problem, source)
             for problem_dir, problem in problems.items()
-            for base, ext, source_text, language in find_solutions(problem_dir)
+            for name, source in find_solutions(problem_dir, problem)
         }
 
         metafunc.parametrize(
-            "problem,source_text,language",
+            "problem,source",
             list(tests.values()),
             ids=list(tests.keys()),
         )

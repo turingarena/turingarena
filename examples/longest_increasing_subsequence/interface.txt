@@ -1,0 +1,27 @@
+var int n;
+var int[] a;
+
+function compute();
+function length() -> int;
+function element(int i) -> int;
+
+init {
+    input n;
+    alloc a : n;
+    for(i : n) {
+        input a[i];
+    }
+}
+
+main {
+    call compute();
+
+    var int l;
+    call length() -> l;
+    output l;
+    for(i : l) {
+        var int x;
+        call element(i) -> x;
+        output x;
+    }
+}

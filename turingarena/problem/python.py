@@ -1,11 +1,29 @@
 import logging
+import os
 import subprocess
 import sys
 
+from turingarena.common import ImmutableObject
 from turingarena.interface.algorithm import Algorithm
 from turingarena.problem.evaluator import ProblemEvaluator
 
 logger = logging.getLogger(__name__)
+
+
+class ProblemEvaluationContext(ImmutableObject):
+    __slots__ = ["evaluation_dir"]
+
+    @property
+    def submission(self):
+        return Algorithm(os.path.join(self.evaluation_dir, "submission"))
+
+    @property
+    def algorithms(self):
+        root, dirs, files = next(os.walk(os.path.join(self.evaluation_dir, "algorithms")))
+        return {
+            name: Algorithm(os.path.join(root, name))
+            for name in dirs
+        }
 
 
 class PythonEvaluator(ProblemEvaluator):
@@ -22,15 +40,16 @@ class HostPythonEvaluator(PythonEvaluator):
 
     __slots__ = []
 
-    def evaluate(self, algorithm_dir):
-        print(self.script_path, self.function_name, algorithm_dir, file=sys.stderr)
-
+    def evaluate(self, *, prepared_problem_dir, submission_dir):
         script_globals = {}
         with open(self.script_path) as f:
             script = compile(f.read(), self.script_path, mode="exec")
+
+        context = ProblemEvaluationContext(prepared_problem_dir)
+        script_globals["context"] = context
         exec(script, script_globals)
 
-        script_globals[self.function_name](Algorithm(algorithm_dir))
+        script_globals[self.function_name](Algorithm(submission_dir))
 
 
 class SubprocessPythonEvaluator(PythonEvaluator):
@@ -40,13 +59,14 @@ class SubprocessPythonEvaluator(PythonEvaluator):
 
     __slots__ = []
 
-    def evaluate(self, algorithm_dir):
+    def evaluate(self, *, prepared_problem_dir, submission_dir):
         cli = [
             "python",
             "-m", __name__,
             self.script_path,
             self.function_name,
-            algorithm_dir,
+            prepared_problem_dir,
+            submission_dir,
         ]
         logger.info(f"running {cli}")
         evaluation = subprocess.run(
@@ -61,5 +81,8 @@ class SubprocessPythonEvaluator(PythonEvaluator):
 
 
 if __name__ == "__main__":
-    script_path, function_name, algorithm_dir = sys.argv[1:]
-    HostPythonEvaluator(script_path, function_name).evaluate(algorithm_dir)
+    script_path, function_name, prepared_problem_dir, submission_dir = sys.argv[1:]
+    HostPythonEvaluator(script_path, function_name).evaluate(
+        prepared_problem_dir=prepared_problem_dir,
+        submission_dir=submission_dir,
+    )

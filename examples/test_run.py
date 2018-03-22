@@ -1,2 +1,2 @@
-def test_run(problem, source_text, language):
-    print(problem.evaluate(source_text, language=language))
+def test_run(problem, source):
+    print(problem.evaluate(source))
