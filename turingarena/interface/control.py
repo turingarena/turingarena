@@ -14,7 +14,7 @@ class ExitStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        return ExitStatement()
+        return ExitStatement(ast=ast)
 
     def generate_instructions(self, context):
         yield ExitInstruction()
@@ -40,6 +40,7 @@ class IfStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         return IfStatement(
+            ast=ast,
             condition=Expression.compile(ast.condition, scope=scope),
             then_body=Body.compile(ast.then_body, scope=scope),
             else_body=(
@@ -88,6 +89,7 @@ class ForStatement(ImperativeStatement):
         index_var = Variable(value_type=ScalarType(int), name=ast.index.declarator.name)
         for_scope.variables[index_var.name] = index_var
         return ForStatement(
+            ast=ast,
             index=ForIndex(
                 variable=index_var,
                 range=Expression.compile(ast.index.range, scope=scope),
@@ -142,6 +144,7 @@ class LoopStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         return LoopStatement(
+            ast=ast,
             body=Body.compile(ast.body, scope=scope),
         )
 

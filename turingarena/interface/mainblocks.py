@@ -1,7 +1,7 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body
-from turingarena.interface.statement import Statement
 from turingarena.interface.exceptions import GlobalVariableNotInitializedError
+from turingarena.interface.statement import Statement
 
 
 class Init(ImmutableObject):
@@ -22,7 +22,7 @@ class InitStatement(Statement):
     def compile(ast, scope):
         init = Init(body=Body.compile(ast.body, scope=scope))
         scope.main["init"] = init
-        return InitStatement(init=init)
+        return InitStatement(ast=ast, init=init)
 
     def check_variables(self, initialized_variables, allocated_variables):
         self.init.check_variables(initialized_variables, allocated_variables)
@@ -42,7 +42,7 @@ class MainStatement(Statement):
     def compile(ast, scope):
         main = Main(body=Body.compile(ast.body, scope=scope))
         scope.main["main"] = main
-        return MainStatement(main=main)
+        return MainStatement(ast=ast, main=main)
 
     def check_variables(self, initialized_variables, allocated_variables):
         self.main.check_variables(initialized_variables, allocated_variables)

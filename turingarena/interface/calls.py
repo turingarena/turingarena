@@ -73,6 +73,7 @@ class CallStatement(ImperativeStatement):
             )
 
         return CallStatement(
+            ast=ast,
             function=fun,
             parameters=parameters,
             return_value=return_value,
@@ -184,6 +185,7 @@ class ReturnStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         return ReturnStatement(
+            ast=ast,
             value=Expression.compile(ast.value, scope=scope),
         )
 

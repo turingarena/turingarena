@@ -11,6 +11,7 @@ class AllocStatement(ImperativeStatement):
         arguments = [Expression.compile(arg, scope=scope) for arg in ast.arguments]
         assert all(isinstance(a.value_type, ArrayType) for a in arguments)
         return AllocStatement(
+            ast=ast,
             arguments=arguments,
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )

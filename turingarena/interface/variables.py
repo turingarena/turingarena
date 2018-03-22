@@ -20,6 +20,7 @@ class VarStatement(Statement):
         for v in variables:
             scope.variables[v.name] = v
         return VarStatement(
+            ast=ast,
             value_type=value_type,
             variables=variables
         )

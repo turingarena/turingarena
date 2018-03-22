@@ -3,10 +3,11 @@ from abc import abstractmethod
 
 from bidict import bidict
 
+from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, \
+    VariableNotDeclaredError
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
-from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, VariableNotDeclaredError
 
 expression_classes = bidict()
 

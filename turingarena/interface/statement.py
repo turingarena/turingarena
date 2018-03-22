@@ -3,7 +3,7 @@ from turingarena.interface.statements import get_statement_classes
 
 
 class Statement(AbstractSyntaxNode):
-    __slots__ = []
+    __slots__ = ["ast"]
 
     @property
     def statement_type(self):

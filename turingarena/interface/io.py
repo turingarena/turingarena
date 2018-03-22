@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.interface.exceptions import CommunicationBroken, InterfaceError
+from turingarena.interface.exceptions import CommunicationBroken
 from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import Expression
 
@@ -19,7 +19,7 @@ class CheckpointStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        return CheckpointStatement()
+        return CheckpointStatement(ast=ast)
 
     def generate_instructions(self, context):
         yield CheckpointInstruction()
@@ -45,6 +45,7 @@ class InputOutputStatement(ImperativeStatement):
     @classmethod
     def compile(cls, ast, scope):
         return cls(
+            ast=ast,
             arguments=[
                 Expression.compile(arg, scope=scope)
                 for arg in ast.arguments
@@ -108,7 +109,7 @@ class FlushStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        return FlushStatement()
+        return FlushStatement(ast=ast)
 
     def generate_instructions(self, context):
         yield FlushInstruction()

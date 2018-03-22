@@ -67,7 +67,8 @@ class FunctionStatement(Statement):
         fun = Function.compile(ast, scope)
         scope.functions[fun.name] = fun
         return FunctionStatement(
-            function=fun
+            ast=ast,
+            function=fun,
         )
 
 
@@ -143,4 +144,4 @@ class CallbackStatement(Statement):
     def compile(ast, scope):
         callback = Callback.compile(ast, scope=scope)
         scope.callbacks[callback.name] = callback
-        return CallbackStatement(callback=callback)
+        return CallbackStatement(ast=ast, callback=callback)
