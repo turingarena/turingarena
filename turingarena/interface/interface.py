@@ -48,21 +48,27 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def static_analysis(self):
         self.body.check_variables([], [])
 
+    @property
+    def main(self):
+        return self.body.scope.main["main"]
+
+    @property
+    def init(self):
+        try:
+            return self.body.scope.main["init"]
+        except KeyError:
+            return None
+
+
     def generate_instructions(self):
         global_context = GlobalContext(self)
         main_context = MainContext(global_context=global_context)
 
-        try:
-            init = self.body.scope.main["init"]
-        except KeyError:
-            init = None
-        main = self.body.scope.main["main"]
-
         yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
-            if init is not None:
-                yield from init.body.generate_instructions(main_context)
-            yield from main.body.generate_instructions(main_context)
+            if self.init is not None:
+                yield from self.init.body.generate_instructions(main_context)
+            yield from self.main.body.generate_instructions(main_context)
         except InterfaceExit:
             pass
         else:

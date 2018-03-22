@@ -36,7 +36,6 @@ class DriverProcessServer:
         self.sandbox_dir = sandbox_process_dir
         self.boundary = PipeBoundary(driver_process_dir)
         self.interface = InterfaceDefinition.compile(interface_text)
-        self.main = self.interface.body.scope.main["main"]
 
         self.boundary.create_queue(DRIVER_PROCESS_QUEUE)
         self.run_driver_iterator = None

@@ -70,14 +70,14 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(interface):
-    if "init" in interface.body.scope.main:
+    if interface.init is not None:
         yield "// init {"
-        yield from indent_all(generate_block(interface.body.scope.main["init"].body, interface=interface))
+        yield from indent_all(generate_block(interface.init.body, interface=interface))
         yield "// }"
     yield
     yield "// main {"
     yield indent("__load_source__(); // load user source file")
-    yield from indent_all(generate_block(interface.body.scope.main["main"].body, interface=interface))
+    yield from indent_all(generate_block(interface.main.body, interface=interface))
     yield "// }"
 
 
