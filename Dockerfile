@@ -1,9 +1,10 @@
 FROM python:3.6-stretch
 
-RUN apt update && apt install -y \
+RUN apt-get update && apt-get install -y \
 #    ca-certificates \
 #    g++ \
 #    gcc \
+    openjdk-8-jdk \
     gdb \
     libseccomp-dev \
     linux-headers-amd64 \

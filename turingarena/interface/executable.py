@@ -32,3 +32,4 @@ class ImperativeStatement(Statement):
 
     def first_calls(self):
         return {None}
+

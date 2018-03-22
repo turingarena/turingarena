@@ -19,7 +19,45 @@ class InterfaceError(Exception):
         return f"{lineinfo.filename}:{lineinfo.line+1}:{lineinfo.col+1}: {self.message}"
 
 
+class VariableNotInitializedError(InterfaceError):
+    """
+    Raised when a variable is used before it's initialized
+    """
+
+
+class GlobalVariableNotInitializedError(VariableNotInitializedError):
+    """
+    Raised when a global variable is used before it's initialized
+    """
+
+
+class VariableNotAllocatedError(InterfaceError):
+    """
+    Raised when a variable is used before it's allocated
+    """
+
+
+class VariableNotDeclaredError(InterfaceError):
+    """
+    Raised when a variable is not defined in a scope
+    """
+
+
+class FunctionCallError(InterfaceError):
+    """
+    Raised when there is an error in a function call
+    """
+
+
+class FunctionNotDeclaredError(FunctionCallError):
+    """
+    Raised when you try to call a function that was not defined
+    """
+
+
 class CommunicationBroken(Exception):
     """
     Raised when the communication with a process is interrupted.
     """
+
+

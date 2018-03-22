@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.interface.exceptions import CommunicationBroken
+from turingarena.interface.exceptions import CommunicationBroken, InterfaceError
 from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import Expression
 
@@ -51,12 +51,21 @@ class InputOutputStatement(ImperativeStatement):
             ],
         )
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        for exp in self.arguments:
+            exp.check_variables(initialized_variables, allocated_variables)
 
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
     def generate_instructions(self, context):
         yield InputInstruction(arguments=self.arguments, context=context)
+
+    def initialized_variables(self):
+        return [
+            exp.resolve_variable()
+            for exp in self.arguments
+        ]
 
 
 class InputInstruction(Instruction):
@@ -78,6 +87,7 @@ class OutputStatement(InputOutputStatement):
 
     def generate_instructions(self, context):
         yield OutputInstruction(arguments=self.arguments, context=context)
+
 
 
 class OutputInstruction(Instruction):

@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
-from turingarena.interface.exceptions import InterfaceError
+from turingarena.interface.exceptions import InterfaceError, FunctionCallError, FunctionNotDeclaredError
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
 from turingarena.interface.io import read_line
@@ -31,13 +31,13 @@ class CallStatement(ImperativeStatement):
         try:
             fun = scope.functions[ast.function_name]
         except KeyError:
-            raise InterfaceError(
+            raise FunctionNotDeclaredError(
                 f"function {ast.function_name} is not defined",
                 parseinfo=ast.parseinfo,
             ) from None
 
         if len(ast.parameters) != len(fun.signature.parameters):
-            raise InterfaceError(
+            raise FunctionCallError(
                 f"function {fun.name} "
                 f"expects {len(fun.signature.parameters)} argument(s), "
                 f"got {len(ast.parameters)}",
@@ -54,19 +54,19 @@ class CallStatement(ImperativeStatement):
 
         return_type = fun.signature.return_type
         if return_type is not None and return_value is None:
-            raise InterfaceError(
+            raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, but no return expression given",
                 parseinfo=ast.parseinfo,
             )
 
         if return_type is None and return_value is not None:
-            raise InterfaceError(
+            raise FunctionCallError(
                 f"function {fun.name} does not return a value",
                 parseinfo=ast.return_value.parseinfo,
             )
 
         if return_value is not None and return_value.value_type != return_type:
-            raise InterfaceError(
+            raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, "
                 f"but return expression is {return_value.value_type}",
                 parseinfo=ast.return_value.parseinfo,
@@ -92,6 +92,15 @@ class CallStatement(ImperativeStatement):
 
     def first_calls(self):
         return {self.function.name}
+
+    def check_variables(self, initialized_variables, allocated_variables):
+        for exp in self.parameters:
+            exp.check_variable(initialized_variables, allocated_variables)
+        if self.return_value:
+            self.return_value.check_variables(initialized_variables, allocated_variables)
+
+    def initialized_variables(self):
+        return [self.return_value]
 
     def generate_instructions(self, context):
         call_context = FunctionCallContext(local_context=context)

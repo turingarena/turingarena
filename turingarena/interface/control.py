@@ -62,6 +62,12 @@ class IfStatement(ImperativeStatement):
         elif self.else_body is not None:
             yield from self.else_body.generate_instructions(context)
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.condition.check_variables(initialized_variables, allocated_variables)
+        self.then_body.check_variables(initialized_variables, allocated_variables)
+        if self.else_body:
+            self.else_body.check_variables(initialized_variables, allocated_variables)
+
     def first_calls(self):
         return self.then_body.first_calls() | (
             {None} if self.else_body is not None else
@@ -103,8 +109,14 @@ class ForStatement(ImperativeStatement):
             inner_context.bindings[self.index.variable] = i
             yield from self.body.generate_instructions(inner_context)
 
+    def initialized_variables(self):
+        return [self.index.variable]
+
     def may_call(self):
         return any(f is not None for f in self.body.first_calls())
+
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.body.check_variables(initialized_variables, allocated_variables)
 
     def first_calls(self):
         return self.body.first_calls() | {None}

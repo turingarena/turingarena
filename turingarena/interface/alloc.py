@@ -18,6 +18,14 @@ class AllocStatement(ImperativeStatement):
     def generate_instructions(self, context):
         yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        self.size.check_variables(initialized_variables, allocated_variables)
+
+    def allocated_variables(self):
+        return [
+            exp.resolve_variable()
+            for exp in self.arguments
+        ]
 
 class AllocInstruction(Instruction):
     __slots__ = ["arguments", "size", "context"]
