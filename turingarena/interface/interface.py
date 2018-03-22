@@ -45,7 +45,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             body=body,
         )
 
-    def static_analyze_variables(self):
+    def static_analysis(self):
         self.body.check_variables([], [])
 
     def generate_instructions(self):

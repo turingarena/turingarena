@@ -1,6 +1,7 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body
 from turingarena.interface.statement import Statement
+from turingarena.interface.exceptions import GlobalVariableNotInitializedError
 
 
 class Init(ImmutableObject):
@@ -8,6 +9,10 @@ class Init(ImmutableObject):
 
     def check_variables(self, initialized_variables, allocated_variables):
         self.body.check_variables(initialized_variables, allocated_variables)
+
+        for var in list(self.body.scope.variables.values()):
+            if var not in initialized_variables:
+                raise GlobalVariableNotInitializedError(f"Global variable '{var.name}' not initialized in 'init' block")
 
 
 class InitStatement(Statement):

@@ -1,7 +1,7 @@
 import pytest
 
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.interface.expressions import VariableNotAllocatedError, VariableNotInitializedError, VariableNotDeclaredError
+from turingarena.interface.exceptions import *
 
 
 def test_variable_not_initialized():
@@ -12,7 +12,7 @@ def test_variable_not_initialized():
             main {
                 output a;
             }
-        """).static_analyze_variables()
+        """).static_analysis()
 
 
 def test_variable_not_allocated():
@@ -23,7 +23,7 @@ def test_variable_not_allocated():
             main {
                 input a[0];
             }
-        """).static_analyze_variables()
+        """).static_analysis()
 
 
 def test_variable_initialized_for():
@@ -36,7 +36,7 @@ def test_variable_initialized_for():
                     output i;
                 }
             }
-    """).static_analyze_variables()
+    """).static_analysis()
 
 
 def test_variable_initialized_if():
@@ -51,7 +51,7 @@ def test_variable_initialized_if():
                     output 2;
                 }
             }
-    """).static_analyze_variables()
+    """).static_analysis()
 
 
 def test_variable_initialized_call():
@@ -87,7 +87,7 @@ def test_local_variable():
                 input a;
                 output a;
             }
-    """).static_analyze_variables()
+    """).static_analysis()
 
 
 def test_local_variable_not_initialized():
@@ -97,7 +97,7 @@ def test_local_variable_not_initialized():
                 var int a;
                 output a;
             }
-        """).static_analyze_variables()
+        """).static_analysis()
 
 
 def test_variable_not_defined():
@@ -106,4 +106,40 @@ def test_variable_not_defined():
         main {
             output a;
         }
-        """).static_analyze_variables()
+        """).static_analysis()
+
+
+def test_global_variables():
+    with pytest.raises(GlobalVariableNotInitializedError):
+        InterfaceDefinition.compile("""
+        var int a, b;
+        
+        init {
+            input a;
+        }
+        
+        main {
+            input b;
+        }
+        """).static_analysis()
+
+
+def test_function_not_defined_error():
+    with pytest.raises(FunctionNotDeclaredError):
+        InterfaceDefinition.compile("""              
+            main {
+                call a();
+            }
+        """).static_analysis()
+
+
+def test_wrong_function_call():
+    with pytest.raises(FunctionCallError):
+        InterfaceDefinition.compile("""   
+            function a(int a);
+
+            main {
+                call a();
+            }
+        """).static_analysis()
+
