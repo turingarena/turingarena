@@ -3,9 +3,8 @@ from turingarena.interface.statements import get_statement_classes
 
 
 class Statement(AbstractSyntaxNode):
-    __slots__ = ["statement_type"]
+    __slots__ = []
 
-    def __init__(self, **kwargs):
-        super().__init__(statement_type=get_statement_classes().inv[self.__class__], **kwargs)
-
-
+    @property
+    def statement_type(self):
+        return get_statement_classes().inv[self.__class__]
