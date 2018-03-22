@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Body(AbstractSyntaxNode):
-    __slots__ = ["statements", "scope"]
+    __slots__ = ["ast", "statements", "scope"]
 
     @staticmethod
     def compile(ast, *, scope):
@@ -19,6 +19,7 @@ class Body(AbstractSyntaxNode):
             for s in ast.statements
         ]
         return Body(
+            ast=ast,
             scope=scope,
             statements=statements
         )
