@@ -71,10 +71,12 @@ def generate_main(interface):
             yield from indent_all(
                 generate_block(
                     main.body,
+                    # FIXME: the following should not be needed
                     context=StaticContext(
                         scope=main.body.scope,
                         declared_callbacks=interface.callbacks,
                         global_variables=interface.global_variables,
+                        variables=interface.global_variables,
                     ),
                 )
             )
@@ -112,7 +114,7 @@ def generate_alloc(statement, *, context):
     for argument in statement.arguments:
         arg = build_expression(argument)
         value_type = build_full_type(argument.value_type(
-            declared_variables=context.scope.variables,
+            declared_variables=context.variables,
         ).item_type)
         size = build_expression(statement.size)
         yield f"{arg} = new {value_type}[{size}];"

@@ -77,6 +77,7 @@ class Body(AbstractSyntaxNode):
                 scope=scope,
                 declared_callbacks=context.declared_callbacks,
                 global_variables=context.global_variables,
+                variables=dict(context.variables, **self.declared_variables()),
             )
             yield s, inner_context
 

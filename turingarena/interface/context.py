@@ -9,6 +9,7 @@ StaticContext = namedtuple("StaticContext", [
     "scope",
     "declared_callbacks",
     "global_variables",
+    "variables",
 ])
 
 
@@ -38,17 +39,14 @@ class BindingStorage:
 
 
 class GlobalContext(ImmutableObject):
-    __slots__ = ["interface", "bindings"]
+    __slots__ = ["interface", "variables", "bindings"]
 
     def __init__(self, interface):
         super().__init__(
             interface=interface,
-            bindings=BindingStorage(local_variables=interface.body.scope.variables.locals(), parent=None),
+            variables=interface.global_variables,
+            bindings=BindingStorage(local_variables=interface.global_variables, parent=None),
         )
-
-    @property
-    def variables(self):
-        return self.interface.body.scope.variables.locals()
 
 
 class ProcedureContext(ImmutableObject):

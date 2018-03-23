@@ -104,6 +104,7 @@ class ForStatement(ImperativeStatement):
             scope=self.body.scope,
             declared_callbacks=context.declared_callbacks,
             global_variables=context.global_variables,
+            variables=dict(context.variables, **{self.index.variable.name: self.index.variable}),
         )
 
     def generate_instructions(self, context):

@@ -1,5 +1,4 @@
 import logging
-from collections import OrderedDict
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
@@ -50,6 +49,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
                     scope=self.body.scope,
                     declared_callbacks=[],  # FIXME: hack to avoid infinite recursion
                     global_variables=self.global_variables,
+                    variables=self.global_variables,
                 )
             )
             if s.statement_type == "callback"
@@ -61,13 +61,14 @@ class InterfaceDefinition(AbstractSyntaxNode):
                 scope=self.body.scope,
                 declared_callbacks=self.callbacks,
                 global_variables=self.global_variables,
+                variables=self.global_variables,
             )
         )
 
     @property
     def signature(self):
         return InterfaceSignature(
-            variables=OrderedDict(self.body.scope.variables.items()),
+            variables=self.body.declared_variables(),
             functions={
                 c.name: c.signature
                 for c in self.functions

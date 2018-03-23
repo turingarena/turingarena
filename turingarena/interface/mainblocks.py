@@ -10,7 +10,7 @@ class Init(ImmutableObject):
     def check_variables(self, initialized_variables, allocated_variables):
         self.body.check_variables(initialized_variables, allocated_variables)
 
-        for var in list(self.body.scope.variables.values()):
+        for var in self.body.declared_variables().values():
             if var not in initialized_variables:
                 raise GlobalVariableNotInitializedError(f"Global variable '{var.name}' not initialized in 'init' block")
 
