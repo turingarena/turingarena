@@ -1,5 +1,5 @@
 from turingarena.common import ImmutableObject
-from turingarena.interface.body import Body, ExitCall
+from turingarena.interface.block import ImperativeBlock, ExitCall
 from turingarena.interface.context import StaticContext
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
@@ -39,13 +39,13 @@ class IfStatement(ImperativeStatement):
 
     @property
     def then_body(self):
-        return Body(self.ast.then_body)
+        return ImperativeBlock(self.ast.then_body)
 
     @property
     def else_body(self):
         if self.ast.else_body is None:
             return None
-        return Body(self.ast.then_body)
+        return ImperativeBlock(self.ast.then_body)
 
     def generate_instructions(self, context):
         condition = self.condition.evaluate_in(context)
@@ -91,7 +91,7 @@ class ForStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return Body(self.ast.body)
+        return ImperativeBlock(self.ast.body)
 
     def validate(self, context):
         body, inner_context = self.contextualized_body(context)
@@ -152,7 +152,7 @@ class LoopStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return Body(self.ast.body),
+        return ImperativeBlock(self.ast.body),
 
     def first_calls(self):
         return self.body.first_calls() | {None}

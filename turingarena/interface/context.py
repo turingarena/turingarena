@@ -36,13 +36,19 @@ StaticLocalContext = namedtuple("StaticLocalContext", [
     "local_variables",
 ])
 
-# TODO: drop this
-StaticContext = namedtuple("StaticContext", [
+
+class StaticContext(namedtuple("StaticContext", [
     "callbacks",
     "global_variables",
     "variables",
     "functions",
-])
+])):
+    def with_variables(self, local_variables):
+        variables = dict(self.variables)
+        variables.update({
+            v.name: v for v in local_variables
+        })
+        return self._replace(variables=variables)
 
 
 class GlobalContext(ImmutableObject):

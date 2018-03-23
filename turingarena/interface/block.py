@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 
-from turingarena.interface.context import StaticContext
+from turingarena.interface.context import StaticContext, StaticGlobalContext
 from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.statements import compile_statement
@@ -9,7 +9,7 @@ from turingarena.interface.statements import compile_statement
 logger = logging.getLogger(__name__)
 
 
-class Body(AbstractSyntaxNode):
+class Block(AbstractSyntaxNode):
     __slots__ = ["ast"]
 
     @property
@@ -28,6 +28,16 @@ class Body(AbstractSyntaxNode):
             for v in s.variables
         )
 
+    def check_variables(self, initialized_variables, allocated_variables):
+        for statement in self.statements:
+            initialized_variables += statement.initialized_variables()
+            allocated_variables += statement.allocated_variables()
+            statement.check_variables(initialized_variables, allocated_variables)
+
+
+class InterfaceBody(Block):
+    __slots__ = []
+
     def declared_functions(self):
         function_statements = [
             compile_statement(s)
@@ -39,28 +49,24 @@ class Body(AbstractSyntaxNode):
             for s in function_statements
         }
 
-    def contextualized_statements(self, context):
-        for ast in self.ast.statements:
-            s = compile_statement(ast)
-            variables = dict(context.variables)
-            variables.update(self.declared_variables())
-            inner_context = StaticContext(
-                callbacks=context.callbacks,
-                global_variables=context.global_variables,
-                functions=context.functions,
-                variables=variables,
-            )
-            yield s, inner_context
-
-    def validate(self, context):
-        for statement, inner_context in self.contextualized_statements(context):
-            statement.validate(inner_context)
-
-    def check_variables(self, initialized_variables, allocated_variables):
+    def contextualized_statements(self):
+        context = StaticGlobalContext(
+            functions={},
+            callbacks={},
+            global_variables={},
+        )
         for statement in self.statements:
-            initialized_variables += statement.initialized_variables()
-            allocated_variables += statement.allocated_variables()
-            statement.check_variables(initialized_variables, allocated_variables)
+            yield statement, context
+            context = statement.update_context(context)
+        return context
+
+    def validate(self):
+        for statement, context in self.contextualized_statements():
+            statement.validate(context)
+
+
+class ImperativeBlock(Block):
+    __slots__ = []
 
     def generate_instructions(self, context):
         inner_context = context.child(self.declared_variables())
@@ -89,6 +95,22 @@ class Body(AbstractSyntaxNode):
             ans.remove(None)
             ans.update(s.first_calls())
         return ans
+
+    def contextualized_statements(self, context):
+        inner_context = StaticContext(
+            callbacks=context.callbacks,
+            global_variables=context.global_variables,
+            functions=context.functions,
+            variables=context.variables,
+        )
+        for s in self.statements:
+            yield s, inner_context
+            inner_context = s.update_context(inner_context)
+        return inner_context
+
+    def validate(self, context):
+        for statement, inner_context in self.contextualized_statements(context):
+            statement.validate(inner_context)
 
 
 ExitCall = object()

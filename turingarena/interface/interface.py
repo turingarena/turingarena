@@ -1,8 +1,8 @@
 import logging
 
 from turingarena.common import TupleLikeObject
-from turingarena.interface.body import Body
-from turingarena.interface.context import GlobalContext, MainContext, StaticContext, StaticGlobalContext
+from turingarena.interface.block import InterfaceBody
+from turingarena.interface.context import GlobalContext, MainContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -23,7 +23,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
 
-        body = Body(ast.body)
+        body = InterfaceBody(ast.body)
         definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body)
         definition.validate()
         return definition
@@ -40,39 +40,15 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def callbacks(self):
         return {
             s.callback.name: s.callback
-            for s, context in self.body.contextualized_statements(
-            StaticContext(
-                callbacks=[],  # FIXME: hack to avoid infinite recursion
-                functions=self.functions,
-                global_variables=self.global_variables,
-                variables=self.global_variables,
-            )
-        )
+            for s in self.body.statements
             if s.statement_type == "callback"
         }
 
     def validate(self):
-        self.body.validate(self.global_context)
+        self.body.validate()
 
     def contextualized_statements(self):
-        context = StaticGlobalContext(
-            functions={},
-            callbacks={},
-            global_variables={},
-        )
-        for statement in self.body.statements:
-            yield statement, context
-            context = statement.update_context(context)
-        return context
-
-    @property
-    def global_context(self):
-        return StaticContext(
-            callbacks=self.callbacks,
-            functions=self.functions,
-            global_variables=self.global_variables,
-            variables=self.global_variables,
-        )
+        return self.body.contextualized_statements()
 
     @property
     def signature(self):

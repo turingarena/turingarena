@@ -1,7 +1,7 @@
 import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
-from turingarena.interface.body import Body
+from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext, StaticContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
@@ -93,7 +93,7 @@ class Callback(Callable):
         return Callback(
             name=ast.declarator.name,
             signature=signature,
-            body=Body(ast.body)
+            body=ImperativeBlock(ast.body)
         )
 
     def contextualized_body(self, context):
