@@ -21,7 +21,6 @@ class InitStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         init = Init(body=Body.compile(ast.body, scope=scope))
-        scope.main["init"] = init
         return InitStatement(ast=ast, init=init)
 
     def check_variables(self, initialized_variables, allocated_variables):
@@ -41,7 +40,6 @@ class MainStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         main = Main(body=Body.compile(ast.body, scope=scope))
-        scope.main["main"] = main
         return MainStatement(ast=ast, main=main)
 
     def check_variables(self, initialized_variables, allocated_variables):

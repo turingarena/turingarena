@@ -51,7 +51,7 @@ class ScopeNamespace:
 
 
 class Scope:
-    namespaces = ["variables", "functions", "callbacks", "main"]
+    namespaces = ["variables", "functions"]
     __slots__ = namespaces + ["parent"]
 
     def __init__(self, parent=None):

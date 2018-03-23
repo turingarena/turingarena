@@ -146,5 +146,4 @@ class CallbackStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         callback = Callback.compile(ast, scope=scope)
-        scope.callbacks[callback.name] = callback
         return CallbackStatement(ast=ast, callback=callback)

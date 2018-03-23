@@ -43,8 +43,8 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
     @property
     def callbacks(self):
-        return [
-            s.callback
+        return {
+            s.callback.name: s.callback
             for s, context in self.body.contextualized_statements(
                 StaticContext(
                     scope=self.body.scope,
@@ -53,7 +53,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
                 )
             )
             if s.statement_type == "callback"
-        ]
+        }
 
     def contextualized_statements(self):
         return self.body.contextualized_statements(
@@ -74,7 +74,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             },
             callbacks={
                 c.name: c.signature
-                for c in self.body.scope.callbacks.values()
+                for c in self.callbacks.values()
             },
         )
 
@@ -83,13 +83,24 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
     @property
     def main(self):
-        return self.body.scope.main["main"]
+        [main] = [
+            s.main
+            for s, context in self.contextualized_statements()
+            if s.statement_type == "main"
+        ]
+        return main
 
     @property
     def init(self):
-        try:
-            return self.body.scope.main["init"]
-        except KeyError:
+        inits = [
+            s.init
+            for s, context in self.contextualized_statements()
+            if s.statement_type == "init"
+        ]
+        if inits:
+            [init] = inits
+            return init
+        else:
             return None
 
     def generate_instructions(self):

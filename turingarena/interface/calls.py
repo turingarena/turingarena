@@ -181,7 +181,7 @@ class AcceptCallbackInstruction(Instruction):
             self.context.callback = None
         else:
             interface = self.context.call_context.local_context.procedure.global_context.interface
-            self.context.callback = interface.body.scope.callbacks[callback_name]
+            self.context.callback = interface.callbacks[callback_name]
 
 
 class ReturnStatement(ImperativeStatement):

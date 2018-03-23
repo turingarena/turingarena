@@ -66,11 +66,8 @@ def generate_callback_template(statement, *, context):
 def generate_main(interface):
     yield "int main() {"
     for which in ("init", "main"):
-        try:
-            main = interface.body.scope.main[which]
-        except KeyError:
-            pass
-        else:
+        main = getattr(interface, which)
+        if main is not None:
             yield from indent_all(
                 generate_block(
                     main.body,
