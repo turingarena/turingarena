@@ -1,6 +1,7 @@
 import logging
+from collections import namedtuple
 
-from turingarena.common import TupleLikeObject, ImmutableObject
+from turingarena.common import ImmutableObject
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
@@ -12,50 +13,52 @@ from turingarena.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
+CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
 
-class CallableSignature(TupleLikeObject):
-    __slots__ = ["name", "parameters", "return_type"]
 
-    @staticmethod
-    def compile(ast):
-        parameters = [
+class Callable(ImmutableObject):
+    __slots__ = ["ast"]
+
+    @property
+    def name(self):
+        return self.ast.declarator.name
+
+    @property
+    def parameters(self):
+        return [
             Variable(
                 value_type=ValueType.compile(p.type.expression),
                 name=p.declarator.name,
             )
-            for p in ast.parameters
+            for p in self.ast.declarator.parameters
         ]
 
-        if ast.return_type is None:
-            return_type = None
+    @property
+    def return_type(self):
+        return_type_ast = self.ast.declarator.return_type
+        if return_type_ast is None:
+            return None
         else:
-            return_type = ValueType.compile(ast.return_type.expression)
-            if not isinstance(return_type, ScalarType):
-                raise InterfaceError(
-                    "return type must be a scalar",
-                    parseinfo=ast.return_type.parseinfo,
-                )
+            return ValueType.compile(return_type_ast.expression)
 
+    def validate(self):
+        if self.return_type is not None and not isinstance(self.return_type, ScalarType):
+            raise InterfaceError(
+                "return type must be a scalar",
+                parseinfo=self.ast.declarator.return_type.parseinfo,
+            )
+
+    @property
+    def signature(self):
         return CallableSignature(
-            name=ast.name,
-            parameters=parameters,
-            return_type=return_type
+            name=self.name,
+            parameters=self.parameters,
+            return_type=self.return_type,
         )
-
-
-class Callable(ImmutableObject):
-    __slots__ = ["name", "signature"]
 
 
 class Function(Callable):
     __slots__ = []
-
-    @staticmethod
-    def compile(ast):
-        return Function(
-            name=ast.declarator.name,
-            signature=CallableSignature.compile(ast.declarator),
-        )
 
 
 class FunctionStatement(Statement):
@@ -63,22 +66,28 @@ class FunctionStatement(Statement):
 
     @property
     def function(self):
-        return Function.compile(self.ast)
+        return Function(self.ast)
+
+    def validate(self, context):
+        self.function.validate()
 
     def update_context(self, context):
         return context.with_function(self.function)
 
 
 class Callback(Callable):
-    __slots__ = ["body"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast):
-        signature = CallableSignature.compile(ast.declarator)
+    @property
+    def body(self):
+        return ImperativeBlock(self.ast.body)
+
+    def validate(self):
+        super().validate()
 
         invalid_parameter = next(
             (
-                a for p, a in zip(signature.parameters, ast.declarator.parameters)
+                a for p, a in zip(self.parameters, self.ast.declarator.parameters)
                 if not isinstance(p.value_type, ScalarType)
             ),
             None
@@ -89,12 +98,6 @@ class Callback(Callable):
                 "callback arguments must be scalars",
                 parseinfo=invalid_parameter.parseinfo,
             )
-
-        return Callback(
-            name=ast.declarator.name,
-            signature=signature,
-            body=ImperativeBlock(ast.body)
-        )
 
     def contextualized_body(self, context):
         return self.body, context.create_local().with_variables(self.signature.parameters)
@@ -145,7 +148,10 @@ class CallbackStatement(Statement):
 
     @property
     def callback(self):
-        return Callback.compile(self.ast)
+        return Callback(self.ast)
+
+    def validate(self, context):
+        self.callback.validate()
 
     def update_context(self, context):
         return context.with_callback(self.callback)
