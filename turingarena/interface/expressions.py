@@ -23,14 +23,15 @@ def expression_class(meta_type):
 
 
 class Expression(AbstractSyntaxNode):
-    __slots__ = ["expression_type", "value_type"]
-
-    def __init__(self, **kwargs):
-        super().__init__(expression_type=expression_classes.inv[self.__class__], **kwargs)
+    __slots__ = ["value_type"]
 
     @staticmethod
     def compile(ast, *, scope, expected_type=None):
         return expression_classes[ast.expression_type].compile(ast, scope)
+
+    @property
+    def expression_type(self):
+        return expression_classes.inv[self.__class__]
 
     def evaluate_in(self, context):
         return self.do_evaluate(context)
