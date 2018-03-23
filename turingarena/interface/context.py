@@ -53,11 +53,11 @@ class GlobalContext(ImmutableObject):
 class ProcedureContext(ImmutableObject):
     __slots__ = ["global_context"]
 
-    def child(self, scope):
+    def child(self, local_variables):
         return LocalContext(
             procedure=self,
             outer=self.global_context,
-            local_variables=scope.variables.locals(),
+            local_variables=local_variables,
         )
 
 
@@ -89,11 +89,11 @@ class LocalContext:
     def variables(self):
         return dict(self.outer.variables, **self.local_variables)
 
-    def child(self, scope):
+    def child(self, local_variables):
         return LocalContext(
             procedure=self.procedure,
             outer=self,
-            local_variables=scope.variables.locals(),
+            local_variables=local_variables,
         )
 
 

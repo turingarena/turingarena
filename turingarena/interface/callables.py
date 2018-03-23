@@ -107,7 +107,7 @@ class Callback(Callable):
         global_context = context.call_context.local_context.procedure.global_context
         callback_context = CallbackContext(accept_context=context, global_context=global_context)
 
-        local_context = callback_context.child(self.scope)
+        local_context = callback_context.child(self.scope.variables.locals())
         yield CallbackCallInstruction(
             callback_context=callback_context,
             local_context=local_context,

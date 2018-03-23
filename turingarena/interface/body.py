@@ -48,7 +48,7 @@ class Body(AbstractSyntaxNode):
             statement.check_variables(initialized_variables, allocated_variables)
 
     def generate_instructions(self, context):
-        inner_context = context.child(self.scope)
+        inner_context = context.child(self.scope.variables.locals())
         for statement in self.statements:
             if not isinstance(statement, ImperativeStatement):
                 continue
