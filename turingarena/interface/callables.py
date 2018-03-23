@@ -95,7 +95,10 @@ class Callback(Callable):
 
     def generate_instructions(self, context):
         global_context = context.call_context.local_context.procedure.global_context
-        callback_context = CallbackContext(accept_context=context, global_context=global_context)
+        callback_context = CallbackContext(
+            accept_context=context,
+            global_context=global_context,
+        )
 
         local_context = callback_context.child({p.name: p for p in self.signature.parameters})
         yield CallbackCallInstruction(

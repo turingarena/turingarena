@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 
 from turingarena.common import ImmutableObject
+from turingarena.interface.bindings import BindingStorage
 
 logger = logging.getLogger(__name__)
 
@@ -11,31 +12,6 @@ StaticContext = namedtuple("StaticContext", [
     "variables",
     "functions",
 ])
-
-
-class BindingStorage:
-    def __init__(self, *, local_variables, parent):
-        self.local_variables = local_variables
-        self.parent = parent
-        self.values = {
-            l: None for l in self.local_variables.values()
-        }
-
-    def __getitem__(self, variable):
-        if variable in self.values:
-            return self.values[variable]
-        elif self.parent:
-            return self.parent[variable]
-        else:
-            raise KeyError(variable)
-
-    def __setitem__(self, variable, value):
-        if variable in self.values:
-            self.values[variable] = value
-        elif self.parent:
-            self.parent[variable] = value
-        else:
-            raise KeyError(variable)
 
 
 class GlobalContext(ImmutableObject):
@@ -49,9 +25,7 @@ class GlobalContext(ImmutableObject):
         )
 
 
-class ProcedureContext(ImmutableObject):
-    __slots__ = ["global_context"]
-
+class ProcedureContext:
     def child(self, local_variables):
         return LocalContext(
             procedure=self,
@@ -60,15 +34,15 @@ class ProcedureContext(ImmutableObject):
         )
 
 
-class MainContext(ProcedureContext):
+class MainContext(ProcedureContext, namedtuple("MainContext", ["global_context"])):
     __slots__ = []
 
 
-class CallbackContext(ProcedureContext):
-    __slots__ = ["accept_context", "parameters"]
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs, parameters=None)
+class CallbackContext(ProcedureContext, namedtuple("CallbackContext", [
+    "global_context",
+    "accept_context",
+])):
+    __slots__ = []
 
 
 class LocalContext:
