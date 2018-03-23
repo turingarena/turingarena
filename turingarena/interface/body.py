@@ -25,7 +25,7 @@ class Body(AbstractSyntaxNode):
         return OrderedDict(
             (v.name, v)
             for s in var_statements
-            for v in s.declared_variables()
+            for v in s.variables
         )
 
     def declared_functions(self):
@@ -42,11 +42,13 @@ class Body(AbstractSyntaxNode):
     def contextualized_statements(self, context):
         for ast in self.ast.statements:
             s = compile_statement(ast)
+            variables = dict(context.variables)
+            variables.update(self.declared_variables())
             inner_context = StaticContext(
-                declared_callbacks=context.declared_callbacks,
+                callbacks=context.callbacks,
                 global_variables=context.global_variables,
                 functions=context.functions,
-                variables=dict(context.variables, **self.declared_variables()),
+                variables=variables,
             )
             yield s, inner_context
 

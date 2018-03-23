@@ -1,4 +1,5 @@
 from turingarena.interface.body import Body
+from turingarena.interface.context import StaticContext
 from turingarena.interface.exceptions import GlobalVariableNotInitializedError
 from turingarena.interface.statement import Statement
 
@@ -9,6 +10,14 @@ class EntryPointStatement(Statement):
     @property
     def body(self):
         return Body(self.ast.body)
+
+    def contextualized_body(self, context):
+        return self.body, StaticContext(
+            callbacks=context.callbacks,
+            functions=context.functions,
+            global_variables=context.global_variables,
+            variables=context.global_variables,
+        )
 
     def validate(self, context):
         self.body.validate(context)

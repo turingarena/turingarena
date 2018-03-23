@@ -98,11 +98,13 @@ class ForStatement(ImperativeStatement):
         body.validate(inner_context)
 
     def contextualized_body(self, context):
+        variables = dict(context.variables)
+        variables.update({self.index.variable.name: self.index.variable})
         return self.body, StaticContext(
-            declared_callbacks=context.declared_callbacks,
+            callbacks=context.callbacks,
             global_variables=context.global_variables,
             functions=context.functions,
-            variables=dict(context.variables, **{self.index.variable.name: self.index.variable}),
+            variables=variables,
         )
 
     def generate_instructions(self, context):

@@ -2,7 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.interface.body import Body
-from turingarena.interface.context import CallbackContext
+from turingarena.interface.context import CallbackContext, StaticContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
 from turingarena.interface.references import VariableReference
@@ -65,6 +65,9 @@ class FunctionStatement(Statement):
     def function(self):
         return Function.compile(self.ast)
 
+    def update_context(self, context):
+        return context.with_function(self.function)
+
 
 class Callback(Callable):
     __slots__ = ["body"]
@@ -91,6 +94,16 @@ class Callback(Callable):
             name=ast.declarator.name,
             signature=signature,
             body=Body(ast.body)
+        )
+
+    def contextualized_body(self, context):
+        variables = dict(context.global_variables)
+        variables.update({p.name: p for p in self.signature.parameters})
+        return self.body, StaticContext(
+            callbacks=context.callbacks,
+            functions=context.functions,
+            global_variables=context.global_variables,
+            variables=variables,
         )
 
     def generate_instructions(self, context):
@@ -140,3 +153,6 @@ class CallbackStatement(Statement):
     @property
     def callback(self):
         return Callback.compile(self.ast)
+
+    def update_context(self, context):
+        return context.with_callback(self.callback)

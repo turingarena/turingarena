@@ -52,9 +52,10 @@ def generate_function_template(statement):
 
 def generate_callback(statement, *, context):
     callback = statement.callback
+    body, body_context = callback.contextualized_body(context)
     yield f"{build_callable_declarator(callback)}" " {"
     yield indent(rf"""printf("%s\n", "{callback.name}");""")
-    yield from indent_all(generate_block(callback.body, context=context))
+    yield from indent_all(generate_block(body, context=body_context))
     yield "}"
 
 
@@ -73,7 +74,7 @@ def generate_main(interface):
                     body,
                     # FIXME: the following should not be needed
                     context=StaticContext(
-                        declared_callbacks=interface.callbacks,
+                        callbacks=interface.callbacks,
                         global_variables=interface.global_variables,
                         functions=interface.functions,
                         variables=interface.global_variables,
@@ -128,7 +129,7 @@ def generate_call(statement, *, context):
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if context.declared_callbacks:
+    if context.callbacks:
         yield r"""printf("return\n");"""
 
 

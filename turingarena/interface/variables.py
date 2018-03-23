@@ -15,11 +15,10 @@ class VarStatement(Statement):
 
     @property
     def variables(self):
-        # FIXME: for skeleton generation
-        return self.declared_variables()
-
-    def declared_variables(self):
         return [
             Variable(value_type=self.value_type, name=d.name)
             for d in self.ast.declarators
         ]
+
+    def update_context(self, context):
+        return context.with_variables(self.variables)

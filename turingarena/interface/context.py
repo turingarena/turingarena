@@ -6,8 +6,39 @@ from turingarena.interface.bindings import BindingStorage
 
 logger = logging.getLogger(__name__)
 
+
+class StaticGlobalContext(namedtuple("StaticGlobalContext", [
+    "functions",
+    "callbacks",
+    "global_variables",
+])):
+    def with_variables(self, variables):
+        global_variables = dict(self.global_variables)
+        global_variables.update({
+            v.name: v for v in variables
+        })
+        return self._replace(global_variables=global_variables)
+
+    def with_function(self, f):
+        functions = dict(self.functions)
+        functions[f.name] = f
+        return self._replace(functions=functions)
+
+    def with_callback(self, c):
+        callbacks = dict(self.callbacks)
+        callbacks[c.name] = c
+        return self._replace(callbacks=callbacks)
+
+
+StaticLocalContext = namedtuple("StaticLocalContext", [
+    "global_context",
+    "outer_context",
+    "local_variables",
+])
+
+# TODO: drop this
 StaticContext = namedtuple("StaticContext", [
-    "declared_callbacks",
+    "callbacks",
     "global_variables",
     "variables",
     "functions",

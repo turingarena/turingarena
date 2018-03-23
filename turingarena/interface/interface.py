@@ -2,7 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
-from turingarena.interface.context import GlobalContext, MainContext, StaticContext
+from turingarena.interface.context import GlobalContext, MainContext, StaticContext, StaticGlobalContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -41,26 +41,34 @@ class InterfaceDefinition(AbstractSyntaxNode):
         return {
             s.callback.name: s.callback
             for s, context in self.body.contextualized_statements(
-                StaticContext(
-                    declared_callbacks=[],  # FIXME: hack to avoid infinite recursion
-                    functions=self.functions,
-                    global_variables=self.global_variables,
-                    variables=self.global_variables,
-                )
+            StaticContext(
+                callbacks=[],  # FIXME: hack to avoid infinite recursion
+                functions=self.functions,
+                global_variables=self.global_variables,
+                variables=self.global_variables,
             )
+        )
             if s.statement_type == "callback"
         }
 
     def validate(self):
-        self.body.validate(self.root_context)
+        self.body.validate(self.global_context)
 
     def contextualized_statements(self):
-        return self.body.contextualized_statements(self.root_context)
+        context = StaticGlobalContext(
+            functions={},
+            callbacks={},
+            global_variables={},
+        )
+        for statement in self.body.statements:
+            yield statement, context
+            context = statement.update_context(context)
+        return context
 
     @property
-    def root_context(self):
+    def global_context(self):
         return StaticContext(
-            declared_callbacks=self.callbacks,
+            callbacks=self.callbacks,
             functions=self.functions,
             global_variables=self.global_variables,
             variables=self.global_variables,

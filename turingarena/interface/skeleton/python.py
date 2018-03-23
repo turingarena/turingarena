@@ -77,13 +77,15 @@ def generate_callback_template(statement, *, context):
 
 
 def generate_init(statement, *, context):
-    yield from generate_block(statement.body, context=context)
+    body, body_context = statement.contextualized_body(context)
+    yield from generate_block(body, context=body_context)
 
 
 def generate_main(statement, *, context):
+    body, body_context = statement.contextualized_body(context)
     yield 'def main():'
     yield from indent_all(generate_globals(context))
-    yield from indent_all(generate_block(statement.body, context=context))
+    yield from indent_all(generate_block(body, context=body_context))
 
 
 def generate_block(block, *, context):
@@ -123,7 +125,7 @@ def generate_call(statement, *, context):
         yield f"{return_value} = _source.{function_name}({parameters})"
     else:
         yield f"_source.{function_name}({parameters})"
-    if context.declared_callbacks:
+    if context.callbacks:
         yield r"""print("return")"""
 
 
