@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 
-from turingarena.interface.context import StaticContext, StaticGlobalContext
+from turingarena.interface.context import StaticContext
 from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.statements import compile_statement
@@ -33,36 +33,6 @@ class Block(AbstractSyntaxNode):
             initialized_variables += statement.initialized_variables()
             allocated_variables += statement.allocated_variables()
             statement.check_variables(initialized_variables, allocated_variables)
-
-
-class InterfaceBody(Block):
-    __slots__ = []
-
-    def declared_functions(self):
-        function_statements = [
-            compile_statement(s)
-            for s in self.ast.statements
-            if s.statement_type == "function"
-        ]
-        return {
-            s.function.name: s.function
-            for s in function_statements
-        }
-
-    def contextualized_statements(self):
-        context = StaticGlobalContext(
-            functions={},
-            callbacks={},
-            global_variables={},
-        )
-        for statement in self.statements:
-            yield statement, context
-            context = statement.update_context(context)
-        return context
-
-    def validate(self):
-        for statement, context in self.contextualized_statements():
-            statement.validate(context)
 
 
 class ImperativeBlock(Block):

@@ -2,9 +2,7 @@ grammar_ebnf = r"""
     @@comments :: /\/\*((?!\*\/).)*\*\//
     @@eol_comments :: /\/\/.*$/
 
-    interface = body:interface_body $ ;
-    
-    interface_body = statements:{ interface_statement }* ;
+    interface = statements:{ interface_statement }* $ ;
     
     interface_statement =
         | var_statement

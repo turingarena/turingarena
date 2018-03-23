@@ -1,12 +1,11 @@
 import logging
 
 from turingarena.common import TupleLikeObject
-from turingarena.interface.block import InterfaceBody
-from turingarena.interface.context import GlobalContext, MainContext
+from turingarena.interface.block import Block
+from turingarena.interface.context import GlobalContext, MainContext, StaticGlobalContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
-from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.parser import parse_interface
 
 logger = logging.getLogger(__name__)
@@ -16,44 +15,55 @@ class InterfaceSignature(TupleLikeObject):
     __slots__ = ["variables", "functions", "callbacks"]
 
 
-class InterfaceDefinition(AbstractSyntaxNode):
-    __slots__ = ["body", "source_text", "ast"]
+class InterfaceDefinition(Block):
+    __slots__ = ["source_text"]
 
     @staticmethod
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
-
-        body = InterfaceBody(ast.body)
-        definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body)
+        definition = InterfaceDefinition(source_text=source_text, ast=ast)
         definition.validate()
         return definition
 
-    @property
-    def global_variables(self):
-        return self.body.declared_variables()
+    def contextualized_statements(self):
+        context = StaticGlobalContext(
+            functions={},
+            callbacks={},
+            global_variables={},
+        )
+        for statement in self.statements:
+            yield statement, context
+            context = statement.update_context(context)
+        return context
+
+    def validate(self):
+        for statement, context in self.contextualized_statements():
+            statement.validate(context)
 
     @property
     def functions(self):
-        return self.body.declared_functions()
+        return {
+            s.function.name: s.function
+            for s in self.statements
+            if s.statement_type == "function"
+        }
 
     @property
     def callbacks(self):
         return {
             s.callback.name: s.callback
-            for s in self.body.statements
+            for s in self.statements
             if s.statement_type == "callback"
         }
 
-    def validate(self):
-        self.body.validate()
-
-    def contextualized_statements(self):
-        return self.body.contextualized_statements()
+    @property
+    def global_variables(self):
+        return self.declared_variables()
 
     @property
     def signature(self):
         return InterfaceSignature(
-            variables=self.body.declared_variables(),
+            variables=self.global_variables,
             functions={
                 c.name: c.signature
                 for c in self.functions.values()
@@ -65,7 +75,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
         )
 
     def static_analysis(self):
-        self.body.check_variables([], [])
+        self.check_variables([], [])
 
     @property
     def main_body(self):
