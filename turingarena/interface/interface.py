@@ -8,7 +8,6 @@ from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.parser import parse_interface
-from turingarena.interface.scope import Scope
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +23,8 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
 
-        scope = Scope()
-        body = Body.compile(ast.body, scope=scope)
-        definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body, )
+        body = Body.compile(ast.body)
+        definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body)
         definition.validate()
         return definition
 
@@ -44,7 +42,6 @@ class InterfaceDefinition(AbstractSyntaxNode):
             s.callback.name: s.callback
             for s, context in self.body.contextualized_statements(
                 StaticContext(
-                    scope=self.body.scope,
                     declared_callbacks=[],  # FIXME: hack to avoid infinite recursion
                     functions=self.functions,
                     global_variables=self.global_variables,
@@ -63,7 +60,6 @@ class InterfaceDefinition(AbstractSyntaxNode):
     @property
     def root_context(self):
         return StaticContext(
-            scope=self.body.scope,
             declared_callbacks=self.callbacks,
             functions=self.functions,
             global_variables=self.global_variables,

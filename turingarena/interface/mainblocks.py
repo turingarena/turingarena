@@ -16,12 +16,11 @@ class Init(ImmutableObject):
 
 
 class InitStatement(Statement):
-    __slots__ = ["init"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        init = Init(body=Body.compile(ast.body, scope=scope))
-        return InitStatement(ast=ast, init=init)
+    @property
+    def init(self):
+        return Init(body=Body.compile(self.ast.body))
 
     def validate(self, context):
         self.init.body.validate(context)
@@ -38,12 +37,11 @@ class Main(ImmutableObject):
 
 
 class MainStatement(Statement):
-    __slots__ = ["main"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        main = Main(body=Body.compile(ast.body, scope=scope))
-        return MainStatement(ast=ast, main=main)
+    @property
+    def main(self):
+        return Main(body=Body.compile(self.ast.body))
 
     def validate(self, context):
         self.main.body.validate(context)

@@ -20,7 +20,7 @@ class AlgorithmicProblem(ImmutableObject):
         os.mkdir(algorithms_dir)
         for name, source in self.algorithm_sources.items():
             algorithm_dir = os.path.join(algorithms_dir, name)
-            source.compile(algorithm_dir=algorithm_dir)
+            source.compile(ast=algorithm_dir)
 
     @contextmanager
     def prepare(self):
@@ -32,7 +32,7 @@ class AlgorithmicProblem(ImmutableObject):
     def prepare_submission(self, source):
         with TemporaryDirectory(dir="/tmp", prefix="turingarena_submission_") as temp_dir:
             submission_dir = os.path.join(temp_dir, "algorithm")
-            source.compile(algorithm_dir=submission_dir)
+            source.compile(ast=submission_dir)
             yield submission_dir
 
     def evaluate(self, source):

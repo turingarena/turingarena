@@ -14,7 +14,7 @@ class CallStatement(ImperativeStatement):
     __slots__ = []
 
     @staticmethod
-    def compile(ast, scope):
+    def compile(ast):
         return CallStatement(ast=ast)
 
     @property
@@ -191,14 +191,11 @@ class AcceptCallbackInstruction(Instruction):
 
 
 class ReturnStatement(ImperativeStatement):
-    __slots__ = ["value"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return ReturnStatement(
-            ast=ast,
-            value=Expression.compile(ast.value),
-        )
+    @property
+    def value(self):
+        return Expression.compile(self.ast.value)
 
     def generate_instructions(self, context):
         yield ReturnInstruction(value=self.value, context=context)

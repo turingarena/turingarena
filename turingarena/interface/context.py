@@ -6,7 +6,6 @@ from turingarena.common import ImmutableObject
 logger = logging.getLogger(__name__)
 
 StaticContext = namedtuple("StaticContext", [
-    "scope",
     "declared_callbacks",
     "global_variables",
     "variables",

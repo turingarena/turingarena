@@ -73,7 +73,6 @@ def generate_main(interface):
                     main.body,
                     # FIXME: the following should not be needed
                     context=StaticContext(
-                        scope=main.body.scope,
                         declared_callbacks=interface.callbacks,
                         global_variables=interface.global_variables,
                         functions=interface.functions,

@@ -6,10 +6,6 @@ from turingarena.interface.type_expressions import ArrayType
 class AllocStatement(ImperativeStatement):
     __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return AllocStatement(ast=ast)
-
     @property
     def size(self):
         return Expression.compile(self.ast.size)

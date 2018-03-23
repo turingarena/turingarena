@@ -5,17 +5,12 @@ from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
-from turingarena.interface.scope import Scope
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
 
 
 class ExitStatement(ImperativeStatement):
     __slots__ = []
-
-    @staticmethod
-    def compile(ast, scope):
-        return ExitStatement(ast=ast)
 
     def generate_instructions(self, context):
         yield ExitInstruction()
@@ -36,19 +31,21 @@ class ExitInstruction(Instruction):
 
 
 class IfStatement(ImperativeStatement):
-    __slots__ = ["condition", "then_body", "else_body"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return IfStatement(
-            ast=ast,
-            condition=Expression.compile(ast.condition),
-            then_body=Body.compile(ast.then_body, scope=scope),
-            else_body=(
-                None if ast.else_body is None else
-                Body.compile(ast.then_body, scope=scope)
-            ),
-        )
+    @property
+    def condition(self):
+        return Expression.compile(self.ast.condition)
+
+    @property
+    def then_body(self):
+        return Body.compile(self.ast.then_body)
+
+    @property
+    def else_body(self):
+        if self.ast.else_body is None:
+            return None
+        return Body.compile(self.ast.then_body)
 
     def generate_instructions(self, context):
         condition = self.condition.evaluate_in(context)
@@ -82,22 +79,19 @@ class ForIndex(ImmutableObject):
 
 
 class ForStatement(ImperativeStatement):
-    __slots__ = ["scope", "index", "body"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        for_scope = Scope(scope)
-        index_var = Variable(value_type=ScalarType(int), name=ast.index.declarator.name)
-        for_scope.variables[index_var.name] = index_var
-        return ForStatement(
-            ast=ast,
-            index=ForIndex(
-                variable=index_var,
-                range=Expression.compile(ast.index.range),
-            ),
-            body=Body.compile(ast.body, scope=for_scope),
-            scope=for_scope,
+    @property
+    def index(self):
+        ast = self.ast.index
+        return ForIndex(
+            variable=Variable(value_type=ScalarType(int), name=ast.declarator.name),
+            range=Expression.compile(ast.range),
         )
+
+    @property
+    def body(self):
+        return Body.compile(self.ast.body)
 
     def validate(self, context):
         body, inner_context = self.contextualized_body(context)
@@ -105,7 +99,6 @@ class ForStatement(ImperativeStatement):
 
     def contextualized_body(self, context):
         return self.body, StaticContext(
-            scope=self.body.scope,
             declared_callbacks=context.declared_callbacks,
             global_variables=context.global_variables,
             functions=context.functions,
@@ -153,14 +146,11 @@ class SimpleForInstruction(Instruction):
 
 
 class LoopStatement(ImperativeStatement):
-    __slots__ = ["body"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return LoopStatement(
-            ast=ast,
-            body=Body.compile(ast.body, scope=scope),
-        )
+    @property
+    def body(self):
+        return Body.compile(self.ast.body),
 
     def first_calls(self):
         return self.body.first_calls() | {None}

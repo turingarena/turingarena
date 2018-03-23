@@ -9,10 +9,6 @@ Variable = namedtuple("Variable", ["name", "value_type"])
 class VarStatement(Statement):
     __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return VarStatement(ast=ast)
-
     @property
     def value_type(self):
         return ValueType.compile(self.ast.type.expression)

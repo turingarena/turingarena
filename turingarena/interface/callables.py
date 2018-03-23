@@ -6,7 +6,6 @@ from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
 from turingarena.interface.references import VariableReference
-from turingarena.interface.scope import Scope
 from turingarena.interface.statement import Statement
 from turingarena.interface.type_expressions import ValueType, ScalarType
 from turingarena.interface.variables import Variable
@@ -18,7 +17,7 @@ class CallableSignature(TupleLikeObject):
     __slots__ = ["name", "parameters", "return_type"]
 
     @staticmethod
-    def compile(ast, scope):
+    def compile(ast):
         parameters = [
             Variable(
                 value_type=ValueType.compile(p.type.expression),
@@ -52,31 +51,27 @@ class Function(Callable):
     __slots__ = []
 
     @staticmethod
-    def compile(ast, scope):
+    def compile(ast):
         return Function(
             name=ast.declarator.name,
-            signature=CallableSignature.compile(ast.declarator, scope),
+            signature=CallableSignature.compile(ast.declarator),
         )
 
 
 class FunctionStatement(Statement):
-    __slots__ = ["function"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        fun = Function.compile(ast, scope)
-        return FunctionStatement(
-            ast=ast,
-            function=fun,
-        )
+    @property
+    def function(self):
+        return Function.compile(self.ast)
 
 
 class Callback(Callable):
-    __slots__ = ["scope", "body"]
+    __slots__ = ["body"]
 
     @staticmethod
-    def compile(ast, scope):
-        signature = CallableSignature.compile(ast.declarator, scope)
+    def compile(ast):
+        signature = CallableSignature.compile(ast.declarator)
 
         invalid_parameter = next(
             (
@@ -92,14 +87,10 @@ class Callback(Callable):
                 parseinfo=invalid_parameter.parseinfo,
             )
 
-        callback_scope = Scope(scope)
-        for p in signature.parameters:
-            callback_scope.variables[p.name] = p
         return Callback(
             name=ast.declarator.name,
             signature=signature,
-            scope=callback_scope,
-            body=Body.compile(ast.body, scope=callback_scope)
+            body=Body.compile(ast.body)
         )
 
     def generate_instructions(self, context):
@@ -141,9 +132,8 @@ class CallbackCallInstruction(Instruction):
 
 
 class CallbackStatement(Statement):
-    __slots__ = ["callback"]
+    __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        callback = Callback.compile(ast, scope=scope)
-        return CallbackStatement(ast=ast, callback=callback)
+    @property
+    def callback(self):
+        return Callback.compile(self.ast)

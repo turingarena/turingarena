@@ -4,40 +4,28 @@ from collections import OrderedDict
 from turingarena.interface.context import StaticContext
 from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
-from turingarena.interface.scope import Scope
 from turingarena.interface.statements import compile_statement
-from turingarena.interface.variables import VarStatement
 
 logger = logging.getLogger(__name__)
 
 
 class Body(AbstractSyntaxNode):
-    __slots__ = ["ast", "statements", "scope"]
+    __slots__ = ["ast", "statements"]
 
     @staticmethod
-    def compile(ast, *, scope):
-        scope = Scope(scope)
-
-        statements = list(Body.generate_statements(ast, scope))
+    def compile(ast):
+        statements = list(Body.generate_statements(ast))
 
         return Body(
             ast=ast,
-            scope=scope,
             statements=statements
         )
 
     @staticmethod
-    def generate_statements(ast, scope):
+    def generate_statements(ast):
         # FIXME: remove this method
         for s in ast.statements:
-            compiled_s = compile_statement(s, scope=scope)
-            if isinstance(compiled_s, VarStatement):
-                for v in compiled_s.declared_variables():
-                    scope.variables[v.name] = v
-            if compiled_s.statement_type == "function":
-                fun = compiled_s.function
-                scope.functions[fun.name] = fun
-
+            compiled_s = compile_statement(s)
             yield compiled_s
 
     def declared_variables(self):
@@ -64,17 +52,9 @@ class Body(AbstractSyntaxNode):
         }
 
     def contextualized_statements(self, context):
-        scope = Scope(context.scope)
-        for fun in self.declared_functions().values():
-            scope.functions[fun.name] = fun
-
         for ast in self.ast.statements:
-            s = compile_statement(ast, scope=scope)
-            if isinstance(s, VarStatement):
-                for v in s.declared_variables():
-                    scope.variables[v.name] = v
+            s = compile_statement(ast)
             inner_context = StaticContext(
-                scope=scope,
                 declared_callbacks=context.declared_callbacks,
                 global_variables=context.global_variables,
                 functions=context.functions,

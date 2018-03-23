@@ -17,10 +17,6 @@ def read_line(pipe):
 class CheckpointStatement(ImperativeStatement):
     __slots__ = []
 
-    @staticmethod
-    def compile(ast, scope):
-        return CheckpointStatement(ast=ast)
-
     def generate_instructions(self, context):
         yield CheckpointInstruction()
 
@@ -40,17 +36,14 @@ class CheckpointInstruction(Instruction):
 
 
 class InputOutputStatement(ImperativeStatement):
-    __slots__ = ["arguments"]
+    __slots__ = []
 
-    @classmethod
-    def compile(cls, ast, scope):
-        return cls(
-            ast=ast,
-            arguments=[
-                Expression.compile(arg)
-                for arg in ast.arguments
-            ],
-        )
+    @property
+    def arguments(self):
+        return [
+            Expression.compile(arg)
+            for arg in self.ast.arguments
+        ]
 
     def check_variables(self, initialized_variables, allocated_variables):
         for exp in self.arguments:
@@ -108,10 +101,6 @@ class OutputInstruction(Instruction):
 
 class FlushStatement(ImperativeStatement):
     __slots__ = []
-
-    @staticmethod
-    def compile(ast, scope):
-        return FlushStatement(ast=ast)
 
     def generate_instructions(self, context):
         yield FlushInstruction()
