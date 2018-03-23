@@ -97,10 +97,10 @@ class ReferenceExpression(Expression):
         return self.variable(declared_variables=declared_variables).value_type
 
     def do_evaluate(self, context):
-        value_type = self.value_type(declared_variables=context.scope.variables)
+        value_type = self.value_type(declared_variables=context.variables)
         return VariableReference(
             context=context,
-            variable=self.variable(declared_variables=context.scope.variables),
+            variable=self.variable(declared_variables=context.variables),
             value_type=value_type,
         )
 
@@ -128,7 +128,7 @@ class SubscriptExpression(Expression):
 
     def do_evaluate(self, context):
         return ArrayItemReference(
-            value_type=self.array.value_type(declared_variables=context.scope.variables).item_type,
+            value_type=self.array.value_type(declared_variables=context.variables).item_type,
             array=self.array.evaluate_in(context).get(),
             index=self.index.evaluate_in(context).get(),
         )

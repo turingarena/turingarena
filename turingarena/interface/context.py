@@ -42,15 +42,23 @@ class GlobalContext(ImmutableObject):
     def __init__(self, interface):
         super().__init__(
             interface=interface,
-            bindings=BindingStorage(local_variables=interface.body.scope.variables, parent=None),
+            bindings=BindingStorage(local_variables=interface.body.scope.variables.locals(), parent=None),
         )
+
+    @property
+    def variables(self):
+        return self.interface.body.scope.variables.locals()
 
 
 class ProcedureContext(ImmutableObject):
     __slots__ = ["global_context"]
 
     def child(self, scope):
-        return LocalContext(procedure=self, outer=None, scope=scope)
+        return LocalContext(
+            procedure=self,
+            outer=self.global_context,
+            local_variables=scope.variables.locals(),
+        )
 
 
 class MainContext(ProcedureContext):
@@ -65,20 +73,28 @@ class CallbackContext(ProcedureContext):
 
 
 class LocalContext:
-    __slots__ = ["procedure", "scope", "outer", "bindings"]
+    __slots__ = ["procedure", "outer", "local_variables", "bindings"]
 
-    def __init__(self, *, procedure, outer, scope):
+    def __init__(self, *, procedure, outer, local_variables):
         if outer is None:
             parent = procedure.global_context.bindings
         else:
             parent = outer.bindings
-        self.scope = scope
-        self.bindings = BindingStorage(local_variables=scope.variables.locals(), parent=parent)
+        self.local_variables = local_variables
+        self.bindings = BindingStorage(local_variables=local_variables, parent=parent)
         self.procedure = procedure
         self.outer = outer
 
+    @property
+    def variables(self):
+        return dict(self.outer.variables, **self.local_variables)
+
     def child(self, scope):
-        return LocalContext(procedure=self.procedure, outer=self, scope=scope)
+        return LocalContext(
+            procedure=self.procedure,
+            outer=self,
+            local_variables=scope.variables.locals(),
+        )
 
 
 class FunctionCallContext:

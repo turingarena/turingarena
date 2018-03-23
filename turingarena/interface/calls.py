@@ -140,7 +140,7 @@ class FunctionCallInstruction(Instruction):
 
         for value_expr, value in zip(parameters, request.parameters):
             value_type = value_expr.value_type(
-                declared_variables=self.context.local_context.scope.variables,
+                declared_variables=self.context.local_context.variables,
             )
             value_expr.evaluate_in(self.context.local_context).resolve(
                 value_type.ensure(value)
@@ -205,6 +205,6 @@ class ReturnInstruction(Instruction):
         assert isinstance(request, CallbackReturn)
         self.value.evaluate_in(self.context).resolve(
             self.value.value_type(
-                declared_variables=self.context.scope.variables,
+                declared_variables=self.context.variables,
             ).ensure(request.return_value)
         )
