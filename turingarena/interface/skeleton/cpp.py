@@ -76,6 +76,7 @@ def generate_main(interface):
                         scope=main.body.scope,
                         declared_callbacks=interface.callbacks,
                         global_variables=interface.global_variables,
+                        functions=interface.functions,
                         variables=interface.global_variables,
                     ),
                 )
@@ -121,7 +122,7 @@ def generate_alloc(statement, *, context):
 
 
 def generate_call(statement, *, context):
-    function_name = statement.function.name
+    function_name = statement.function(context).name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)

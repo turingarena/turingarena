@@ -10,6 +10,7 @@ StaticContext = namedtuple("StaticContext", [
     "declared_callbacks",
     "global_variables",
     "variables",
+    "functions",
 ])
 
 
@@ -72,7 +73,12 @@ class CallbackContext(ProcedureContext):
 
 
 class LocalContext:
-    __slots__ = ["procedure", "outer", "local_variables", "bindings"]
+    __slots__ = [
+        "procedure",
+        "outer",
+        "local_variables",
+        "bindings",
+    ]
 
     def __init__(self, *, procedure, outer, local_variables):
         if outer is None:

@@ -48,6 +48,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
                 StaticContext(
                     scope=self.body.scope,
                     declared_callbacks=[],  # FIXME: hack to avoid infinite recursion
+                    functions=self.functions,
                     global_variables=self.global_variables,
                     variables=self.global_variables,
                 )
@@ -60,6 +61,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             StaticContext(
                 scope=self.body.scope,
                 declared_callbacks=self.callbacks,
+                functions=self.functions,
                 global_variables=self.global_variables,
                 variables=self.global_variables,
             )
@@ -71,7 +73,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             variables=self.body.declared_variables(),
             functions={
                 c.name: c.signature
-                for c in self.functions
+                for c in self.functions.values()
             },
             callbacks={
                 c.name: c.signature

@@ -117,7 +117,7 @@ def generate_alloc(statement):
 
 
 def generate_call(statement, *, context):
-    function_name = statement.function.name
+    function_name = statement.function_name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)

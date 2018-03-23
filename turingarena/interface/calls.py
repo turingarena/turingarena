@@ -11,90 +11,86 @@ logger = logging.getLogger(__name__)
 
 
 class CallStatement(ImperativeStatement):
-    __slots__ = ["function", "parameters", "return_value"]
-
-    @staticmethod
-    def compile_parameter(ast, *, fun, decl, scope):
-        expr = Expression.compile(ast)
-
-        expr_value_type = expr.value_type(declared_variables=scope.variables)
-
-        if expr_value_type != decl.value_type:
-            raise InterfaceError(
-                f"argument {decl.name} "
-                f"of function {fun.name}: "
-                f"expected {decl.value_type}, "
-                f"got {expr_value_type}",
-                parseinfo=ast.parseinfo,
-            )
-        return expr
+    __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
+        return CallStatement(ast=ast)
+
+    @property
+    def function_name(self):
+        return self.ast.function_name
+
+    @property
+    def parameters(self):
+        return [Expression.compile(p) for p in self.ast.parameters]
+
+    @property
+    def return_value(self):
+        if self.ast.return_value is None:
+            return None
+        else:
+            return Expression.compile(self.ast.return_value)
+
+    def function(self, context):
         try:
-            fun = scope.functions[ast.function_name]
+            return context.functions[self.ast.function_name]
         except KeyError:
             raise FunctionNotDeclaredError(
-                f"function {ast.function_name} is not defined",
-                parseinfo=ast.parseinfo,
+                f"function {self.ast.function_name} is not defined",
+                parseinfo=self.ast.parseinfo,
             ) from None
 
-        if len(ast.parameters) != len(fun.signature.parameters):
+    def validate(self, context):
+        self.validate_parameters(context)
+        self.validate_return_value(context)
+
+    def validate_parameters(self, context):
+        fun = self.function(context)
+        if len(self.parameters) != len(fun.signature.parameters):
             raise FunctionCallError(
                 f"function {fun.name} "
                 f"expects {len(fun.signature.parameters)} argument(s), "
-                f"got {len(ast.parameters)}",
-                parseinfo=ast.parseinfo,
+                f"got {len(self.parameters)}",
+                parseinfo=self.ast.parseinfo,
             )
+        for parameter, expression in zip(fun.signature.parameters, self.parameters):
+            expr_value_type = expression.value_type(declared_variables=context.variables)
 
-        parameters = [
-            CallStatement.compile_parameter(param_ast, fun=fun, decl=decl, scope=scope)
-            for decl, param_ast in
-            zip(fun.signature.parameters, ast.parameters)
-        ]
+            if expr_value_type != parameter.value_type:
+                raise InterfaceError(
+                    f"argument {parameter.name} "
+                    f"of function {fun.name}: "
+                    f"expected {parameter.value_type}, "
+                    f"got {expr_value_type}",
+                    parseinfo=expression.ast.parseinfo,
+                )
 
-        return_value = CallStatement.compile_return_value(ast.return_value, fun=fun, scope=scope)
-
+    def validate_return_value(self, context):
+        fun = self.function(context)
         return_type = fun.signature.return_type
-        if return_type is not None and return_value is None:
+        if return_type is not None and self.return_value is None:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, but no return expression given",
-                parseinfo=ast.parseinfo,
+                parseinfo=self.ast.parseinfo,
             )
-
-        if return_type is None and return_value is not None:
+        if return_type is None and self.return_value is not None:
             raise FunctionCallError(
                 f"function {fun.name} does not return a value",
-                parseinfo=ast.return_value.parseinfo,
+                parseinfo=self.ast.self.return_value.parseinfo,
             )
-
-        return_expression_type = return_value and return_value.value_type(
-            declared_variables=scope.variables,
+        return_expression_type = self.return_value and self.return_value.value_type(
+            declared_variables=context.variables,
         )
-        if return_value is not None and return_expression_type != return_type:
+        if self.return_value is not None and return_expression_type != return_type:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, "
                 f"but return expression is {return_expression_type}",
-                parseinfo=ast.return_value.parseinfo,
+                parseinfo=self.ast.return_value.parseinfo,
             )
 
-        return CallStatement(
-            ast=ast,
-            function=fun,
-            parameters=parameters,
-            return_value=return_value,
-        )
-
-    @staticmethod
-    def compile_return_value(ast, *, fun, scope):
-        if ast is None:
-            return_value = None
-        else:
-            return_value = Expression.compile(ast)
-        return return_value
-
     def first_calls(self):
-        return {self.function.name}
+        return {self.function_name}
 
     def check_variables(self, initialized_variables, allocated_variables):
         for exp in self.parameters:
@@ -106,14 +102,25 @@ class CallStatement(ImperativeStatement):
         return [self.return_value]
 
     def generate_instructions(self, context):
+        interface = context.procedure.global_context.interface
         call_context = FunctionCallContext(local_context=context)
 
-        yield FunctionCallInstruction(statement=self, context=call_context)
+        function = interface.functions[self.function_name]
 
-        if context.procedure.global_context.interface.signature.callbacks:
+        yield FunctionCallInstruction(
+            statement=self,
+            context=call_context,
+            function=function,
+        )
+
+        if interface.signature.callbacks:
             yield from self.unroll_callbacks(call_context)
 
-        yield FunctionReturnInstruction(statement=self, context=call_context)
+        yield FunctionReturnInstruction(
+            statement=self,
+            context=call_context,
+            function=function,
+        )
 
     def unroll_callbacks(self, call_context):
         while True:
@@ -126,10 +133,10 @@ class CallStatement(ImperativeStatement):
 
 
 class FunctionCallInstruction(Instruction):
-    __slots__ = ["statement", "context"]
+    __slots__ = ["statement", "context", "function"]
 
     def on_request_lookahead(self, request):
-        fun = self.statement.function
+        fun = self.function
         parameters = self.statement.parameters
 
         if not isinstance(request, FunctionCall):
@@ -149,15 +156,14 @@ class FunctionCallInstruction(Instruction):
         self.context.accepted_callbacks = request.accepted_callbacks
 
     def should_send_input(self):
-        has_return_type = (self.statement.function.signature.return_type is not None)
-        return has_return_type
+        return self.function.signature.return_type is not None
 
 
 class FunctionReturnInstruction(Instruction):
-    __slots__ = ["statement", "context"]
+    __slots__ = ["statement", "context", "function"]
 
     def on_generate_response(self):
-        if self.statement.function.signature.return_type:
+        if self.function.signature.return_type:
             return_value = self.statement.return_value.evaluate_in(self.context.local_context).get()
             return_response = [1, return_value]
         else:

@@ -58,14 +58,14 @@ class Body(AbstractSyntaxNode):
             for s in self.ast.statements
             if s.statement_type == "function"
         ]
-        return [
-            s.function
+        return {
+            s.function.name: s.function
             for s in function_statements
-        ]
+        }
 
     def contextualized_statements(self, context):
         scope = Scope(context.scope)
-        for fun in self.declared_functions():
+        for fun in self.declared_functions().values():
             scope.functions[fun.name] = fun
 
         for ast in self.ast.statements:
@@ -77,6 +77,7 @@ class Body(AbstractSyntaxNode):
                 scope=scope,
                 declared_callbacks=context.declared_callbacks,
                 global_variables=context.global_variables,
+                functions=context.functions,
                 variables=dict(context.variables, **self.declared_variables()),
             )
             yield s, inner_context
