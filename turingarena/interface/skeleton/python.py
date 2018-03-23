@@ -125,7 +125,7 @@ def generate_call(statement, *, context):
         yield f"{return_value} = _source.{function_name}({parameters})"
     else:
         yield f"_source.{function_name}({parameters})"
-    if context.callbacks:
+    if context.global_context.callbacks:
         yield r"""print("return")"""
 
 

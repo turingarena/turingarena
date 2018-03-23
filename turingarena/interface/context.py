@@ -29,26 +29,42 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
         callbacks[c.name] = c
         return self._replace(callbacks=callbacks)
 
+    def create_local(self):
+        return StaticLocalContext(
+            global_context=self,
+            outer_context=None,
+            local_variables={},
+        )
 
-StaticLocalContext = namedtuple("StaticLocalContext", [
+
+class StaticLocalContext(namedtuple("StaticLocalContext", [
     "global_context",
     "outer_context",
     "local_variables",
-])
-
-
-class StaticContext(namedtuple("StaticContext", [
-    "callbacks",
-    "global_variables",
-    "variables",
-    "functions",
 ])):
-    def with_variables(self, local_variables):
-        variables = dict(self.variables)
-        variables.update({
-            v.name: v for v in local_variables
+    def with_variables(self, variables):
+        local_variables = dict(self.local_variables)
+        local_variables.update({
+            v.name: v for v in variables
         })
-        return self._replace(variables=variables)
+        return self._replace(local_variables=local_variables)
+
+    @property
+    def variables(self):
+        # FIXME: useless copies, use an immutable collection instead
+        if self.outer_context:
+            ans = dict(self.outer_context.variables)
+        else:
+            ans = dict(self.global_context.global_variables)
+        ans.update(self.local_variables)
+        return ans
+
+    def create_inner(self):
+        return StaticLocalContext(
+            global_context=self.global_context,
+            outer_context=self,
+            local_variables={},
+        )
 
 
 class GlobalContext(ImmutableObject):

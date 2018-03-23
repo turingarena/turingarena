@@ -1,5 +1,4 @@
 from turingarena.common import indent_all, indent
-from turingarena.interface.context import StaticContext
 
 
 def generate_skeleton_cpp(interface):
@@ -66,21 +65,10 @@ def generate_callback_template(statement, *, context):
 
 def generate_main(interface):
     yield "int main() {"
-    for which in ("init_body", "main_body"):
-        body = getattr(interface, which)
-        if body is not None:
-            yield from indent_all(
-                generate_block(
-                    body,
-                    # FIXME: the following should not be needed
-                    context=StaticContext(
-                        callbacks=interface.callbacks,
-                        global_variables=interface.global_variables,
-                        functions=interface.functions,
-                        variables=interface.global_variables,
-                    ),
-                )
-            )
+    for statement, context in interface.contextualized_statements():
+        if statement.statement_type in ("init", "main"):
+            body, body_context = statement.contextualized_body(context)
+            yield from indent_all(generate_block(body, context=body_context))
     yield "}"
 
 
@@ -129,7 +117,7 @@ def generate_call(statement, *, context):
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if context.callbacks:
+    if context.global_context.callbacks:
         yield r"""printf("return\n");"""
 
 

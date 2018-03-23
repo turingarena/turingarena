@@ -1,5 +1,4 @@
 from turingarena.interface.block import ImperativeBlock
-from turingarena.interface.context import StaticContext
 from turingarena.interface.exceptions import GlobalVariableNotInitializedError
 from turingarena.interface.statement import Statement
 
@@ -12,18 +11,10 @@ class EntryPointStatement(Statement):
         return ImperativeBlock(self.ast.body)
 
     def contextualized_body(self, context):
-        return self.body, self.body_context(context)
-
-    def body_context(self, context):
-        return StaticContext(
-            callbacks=context.callbacks,
-            functions=context.functions,
-            global_variables=context.global_variables,
-            variables=context.global_variables,
-        )
+        return self.body, context.create_local()
 
     def validate(self, context):
-        self.body.validate(self.body_context(context))
+        self.body.validate(context.create_local())
 
 
 class InitStatement(EntryPointStatement):

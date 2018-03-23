@@ -34,7 +34,7 @@ class CallStatement(ImperativeStatement):
 
     def function(self, context):
         try:
-            return context.functions[self.ast.function_name]
+            return context.global_context.functions[self.ast.function_name]
         except KeyError:
             raise FunctionNotDeclaredError(
                 f"function {self.ast.function_name} is not defined",

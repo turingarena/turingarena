@@ -1,6 +1,5 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.block import ImperativeBlock, ExitCall
-from turingarena.interface.context import StaticContext
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, Instruction
@@ -98,14 +97,7 @@ class ForStatement(ImperativeStatement):
         body.validate(inner_context)
 
     def contextualized_body(self, context):
-        variables = dict(context.variables)
-        variables.update({self.index.variable.name: self.index.variable})
-        return self.body, StaticContext(
-            callbacks=context.callbacks,
-            global_variables=context.global_variables,
-            functions=context.functions,
-            variables=variables,
-        )
+        return self.body, context.create_inner().with_variables([self.index.variable])
 
     def generate_instructions(self, context):
         if not self.may_call():

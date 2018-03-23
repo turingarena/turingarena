@@ -2,7 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject, ImmutableObject
 from turingarena.interface.block import ImperativeBlock
-from turingarena.interface.context import CallbackContext, StaticContext
+from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
 from turingarena.interface.references import VariableReference
@@ -97,14 +97,7 @@ class Callback(Callable):
         )
 
     def contextualized_body(self, context):
-        variables = dict(context.global_variables)
-        variables.update({p.name: p for p in self.signature.parameters})
-        return self.body, StaticContext(
-            callbacks=context.callbacks,
-            functions=context.functions,
-            global_variables=context.global_variables,
-            variables=variables,
-        )
+        return self.body, context.create_local().with_variables(self.signature.parameters)
 
     def generate_instructions(self, context):
         global_context = context.call_context.local_context.procedure.global_context

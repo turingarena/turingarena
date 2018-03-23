@@ -1,7 +1,6 @@
 import logging
 from collections import OrderedDict
 
-from turingarena.interface.context import StaticContext
 from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.statements import compile_statement
@@ -67,12 +66,7 @@ class ImperativeBlock(Block):
         return ans
 
     def contextualized_statements(self, context):
-        inner_context = StaticContext(
-            callbacks=context.callbacks,
-            global_variables=context.global_variables,
-            functions=context.functions,
-            variables=context.variables,
-        )
+        inner_context = context.create_inner()
         for s in self.statements:
             yield s, inner_context
             inner_context = s.update_context(inner_context)
