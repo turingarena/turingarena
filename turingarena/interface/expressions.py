@@ -23,7 +23,7 @@ def expression_class(meta_type):
 
 
 class Expression(AbstractSyntaxNode):
-    __slots__ = ["ast", "value_type"]
+    __slots__ = ["ast"]
 
     @staticmethod
     def compile(ast, *, scope, expected_type=None):
@@ -32,6 +32,10 @@ class Expression(AbstractSyntaxNode):
     @property
     def expression_type(self):
         return expression_classes.inv[self.__class__]
+
+    @abstractmethod
+    def value_type(self, *, scope):
+        pass
 
     def evaluate_in(self, context):
         return self.do_evaluate(context)
@@ -62,9 +66,11 @@ class IntLiteralExpression(LiteralExpression):
     def compile(ast, scope):
         return IntLiteralExpression(
             ast=ast,
-            value_type=ScalarType(int),
             value=int(ast.int_literal),
         )
+
+    def value_type(self, *, scope):
+        return ScalarType(int)
 
 
 @expression_class("reference")
@@ -80,9 +86,11 @@ class ReferenceExpression(Expression):
         else:
             return ReferenceExpression(
                 ast=ast,
-                value_type=variable.value_type,
                 variable=variable,
             )
+
+    def value_type(self, *, scope):
+        return scope.variables[self.ast.variable_name].value_type
 
     def do_evaluate(self, context):
         return VariableReference(
@@ -110,15 +118,17 @@ class SubscriptExpression(Expression):
             ast=ast,
             array=array,
             index=index,
-            value_type=array.value_type.item_type,
         )
 
     def do_evaluate(self, context):
         return ArrayItemReference(
-            value_type=self.array.value_type.item_type,
+            value_type=self.array.value_type(scope=context.scope).item_type,
             array=self.array.evaluate_in(context).get(),
             index=self.index.evaluate_in(context).get(),
         )
+
+    def value_type(self, *, scope):
+        return self.array.value_type(scope=scope).item_type
 
     def check_variables(self, initialized_variables, allocated_variables):
         if self.array.variable not in allocated_variables:

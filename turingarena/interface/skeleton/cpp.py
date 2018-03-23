@@ -104,7 +104,7 @@ def generate_declarators(declaration):
 def generate_alloc(statement):
     for argument in statement.arguments:
         arg = build_expression(argument)
-        value_type = build_full_type(argument.value_type.item_type)
+        value_type = build_full_type(argument.value_type(scope=statement.scope).item_type)
         size = build_expression(statement.size)
         yield f"{arg} = new {value_type}[{size}];"
 
@@ -122,13 +122,13 @@ def generate_call(statement, *, interface):
 
 
 def generate_output(statement):
-    format_string = ' '.join(build_format(v) for v in statement.arguments) + r'\n'
+    format_string = ' '.join("%d" for _ in statement.arguments) + r'\n'
     args = ', '.join(build_expression(v) for v in statement.arguments)
     yield f'printf("{format_string}", {args});'
 
 
 def generate_input(statement):
-    format_string = ''.join(build_format(v) for v in statement.arguments)
+    format_string = ''.join("%d" for _ in statement.arguments)
     args = ', '.join("&" + build_expression(v) for v in statement.arguments)
     yield f'scanf("{format_string}", {args});'
 
@@ -209,9 +209,3 @@ def build_type_specifier(value_type):
 
 def build_full_type(value_type):
     return build_type_specifier(value_type) + build_declarator(value_type, "")
-
-
-def build_format(expr):
-    return {
-        int: "%d",
-    }[expr.value_type.base_type]

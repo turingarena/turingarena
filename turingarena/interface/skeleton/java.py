@@ -134,7 +134,7 @@ def generate_call(statement, *, interface):
 
 
 def generate_output(statement):
-    format_string = ' '.join(build_format(v) for v in statement.arguments) + r'\n'
+    format_string = ' '.join("%d" for _ in statement.arguments) + r'\n'
     args = ', '.join(build_expression(v) for v in statement.arguments)
     yield f'System.out.printf("{format_string}", {args});'
 
@@ -207,9 +207,3 @@ def build_type(value_type):
         "array": lambda: f"{build_type(value_type.item_type)}[]"
     }
     return builders[value_type.meta_type]()
-
-
-def build_format(expr):
-    return {
-        int: "%d",
-    }[expr.value_type.base_type]

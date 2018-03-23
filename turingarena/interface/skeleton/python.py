@@ -141,8 +141,7 @@ def generate_input(statement):
     )
 
     formats = ", ".join(
-        build_format(v.value_type.base_type)
-        for v in statement.arguments
+        "int" for v in statement.arguments
     )
 
     yield f"[{arguments}] = (fmt(v) for fmt, v in zip([{formats}], sys.stdin.readline().split()))"
@@ -190,15 +189,9 @@ def build_expression(expression):
     return builders[expression.expression_type]()
 
 
-def build_format(t):
-    return {
-        int: "int",
-    }[t]
-
-
 def build_type(t):
     builders = {
-        "scalar": lambda: f"{build_format(t.base_type)}",
+        "scalar": lambda: f"int",
         "array": lambda: f"List[{build_type(t.item_type)}]",
     }
     return builders[t.meta_type]()

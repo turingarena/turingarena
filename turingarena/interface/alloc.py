@@ -4,14 +4,15 @@ from turingarena.interface.type_expressions import ArrayType, ScalarType
 
 
 class AllocStatement(ImperativeStatement):
-    __slots__ = ["arguments", "size"]
+    __slots__ = ["scope", "arguments", "size"]
 
     @staticmethod
     def compile(ast, scope):
         arguments = [Expression.compile(arg, scope=scope) for arg in ast.arguments]
-        assert all(isinstance(a.value_type, ArrayType) for a in arguments)
+        assert all(isinstance(a.value_type(scope=scope), ArrayType) for a in arguments)
         return AllocStatement(
             ast=ast,
+            scope=scope,
             arguments=arguments,
             size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
         )

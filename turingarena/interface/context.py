@@ -59,13 +59,14 @@ class CallbackContext(ProcedureContext):
 
 
 class LocalContext:
-    __slots__ = ["procedure", "outer", "bindings"]
+    __slots__ = ["procedure", "scope", "outer", "bindings"]
 
     def __init__(self, *, procedure, outer, scope):
         if outer is None:
             parent = procedure.global_context.bindings
         else:
             parent = outer.bindings
+        self.scope = scope
         self.bindings = BindingStorage(scope=scope, parent=parent)
         self.procedure = procedure
         self.outer = outer

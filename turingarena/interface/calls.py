@@ -11,17 +11,20 @@ logger = logging.getLogger(__name__)
 
 
 class CallStatement(ImperativeStatement):
-    __slots__ = ["function", "parameters", "return_value"]
+    __slots__ = ["scope", "function", "parameters", "return_value"]
 
     @staticmethod
     def compile_parameter(ast, *, fun, decl, scope):
         expr = Expression.compile(ast, scope=scope)
-        if expr.value_type != decl.value_type:
+
+        expr_value_type = expr.value_type(scope=scope)
+
+        if expr_value_type != decl.value_type:
             raise InterfaceError(
                 f"argument {decl.name} "
                 f"of function {fun.name}: "
                 f"expected {decl.value_type}, "
-                f"got {expr.value_type}",
+                f"got {expr_value_type}",
                 parseinfo=ast.parseinfo,
             )
         return expr
@@ -65,15 +68,17 @@ class CallStatement(ImperativeStatement):
                 parseinfo=ast.return_value.parseinfo,
             )
 
-        if return_value is not None and return_value.value_type != return_type:
+        return_expression_type = return_value and return_value.value_type(scope=scope)
+        if return_value is not None and return_expression_type != return_type:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, "
-                f"but return expression is {return_value.value_type}",
+                f"but return expression is {return_expression_type}",
                 parseinfo=ast.return_value.parseinfo,
             )
 
         return CallStatement(
             ast=ast,
+            scope=scope,
             function=fun,
             parameters=parameters,
             return_value=return_value,
@@ -137,8 +142,9 @@ class FunctionCallInstruction(Instruction):
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
+            value_type = value_expr.value_type(scope=self.statement.scope)
             value_expr.evaluate_in(self.context.local_context).resolve(
-                value_expr.value_type.ensure(value)
+                value_type.ensure(value)
             )
 
         self.context.accepted_callbacks = request.accepted_callbacks
@@ -199,5 +205,5 @@ class ReturnInstruction(Instruction):
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
         self.value.evaluate_in(self.context).resolve(
-            self.value.value_type.ensure(request.return_value)
+            self.value.value_type(scope=self.context.scope).ensure(request.return_value)
         )

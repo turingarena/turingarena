@@ -40,12 +40,13 @@ class CheckpointInstruction(Instruction):
 
 
 class InputOutputStatement(ImperativeStatement):
-    __slots__ = ["arguments"]
+    __slots__ = ["scope", "arguments"]
 
     @classmethod
     def compile(cls, ast, scope):
         return cls(
             ast=ast,
+            scope=scope,
             arguments=[
                 Expression.compile(arg, scope=scope)
                 for arg in ast.arguments
@@ -55,6 +56,7 @@ class InputOutputStatement(ImperativeStatement):
     def check_variables(self, initialized_variables, allocated_variables):
         for exp in self.arguments:
             exp.check_variables(initialized_variables, allocated_variables)
+
 
 class InputStatement(InputOutputStatement):
     __slots__ = []
@@ -74,7 +76,7 @@ class InputInstruction(Instruction):
 
     def on_communicate_with_process(self, connection):
         raw_values = [
-            a.value_type.format(a.evaluate_in(self.context).get())
+            a.value_type(scope=self.context.scope).format(a.evaluate_in(self.context).get())
             for a in self.arguments
         ]
         try:
@@ -90,7 +92,6 @@ class OutputStatement(InputOutputStatement):
         yield OutputInstruction(arguments=self.arguments, context=context)
 
 
-
 class OutputInstruction(Instruction):
     __slots__ = ["arguments", "context"]
 
@@ -100,7 +101,7 @@ class OutputInstruction(Instruction):
 
         raw_values = read_line(connection.upward).strip().split()
         for a, v in zip(self.arguments, raw_values):
-            value = a.value_type.parse(v)
+            value = a.value_type(scope=self.context.scope).parse(v)
             a.evaluate_in(self.context).resolve(value)
 
 
