@@ -113,7 +113,9 @@ def generate_declarators(declaration):
 def generate_alloc(statement, *, context):
     for argument in statement.arguments:
         arg = build_expression(argument)
-        value_type = build_full_type(argument.value_type(scope=context.scope).item_type)
+        value_type = build_full_type(argument.value_type(
+            declared_variables=context.scope.variables,
+        ).item_type)
         size = build_expression(statement.size)
         yield f"{arg} = new {value_type}[{size}];"
 

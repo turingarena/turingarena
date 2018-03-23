@@ -34,7 +34,7 @@ class Expression(AbstractSyntaxNode):
         return expression_classes.inv[self.__class__]
 
     @abstractmethod
-    def value_type(self, *, scope):
+    def value_type(self, *, declared_variables):
         pass
 
     def evaluate_in(self, context):
@@ -69,7 +69,7 @@ class IntLiteralExpression(LiteralExpression):
             value=int(ast.int_literal),
         )
 
-    def value_type(self, *, scope):
+    def value_type(self, *, declared_variables):
         return ScalarType(int)
 
 
@@ -87,20 +87,20 @@ class ReferenceExpression(Expression):
     def variable_name(self):
         return self.ast.variable_name
 
-    def variable(self, *, scope):
+    def variable(self, *, declared_variables):
         try:
-            return scope.variables[self.variable_name]
+            return declared_variables[self.variable_name]
         except KeyError:
             raise VariableNotDeclaredError(f"Variable {self.variable_name} is not declared")
 
-    def value_type(self, *, scope):
-        return self.variable(scope=scope).value_type
+    def value_type(self, *, declared_variables):
+        return self.variable(declared_variables=declared_variables).value_type
 
     def do_evaluate(self, context):
-        value_type = self.value_type(scope=context.scope)
+        value_type = self.value_type(declared_variables=context.scope.variables)
         return VariableReference(
             context=context,
-            variable=self.variable(scope=context.scope),
+            variable=self.variable(declared_variables=context.scope.variables),
             value_type=value_type,
         )
 
@@ -128,13 +128,13 @@ class SubscriptExpression(Expression):
 
     def do_evaluate(self, context):
         return ArrayItemReference(
-            value_type=self.array.value_type(scope=context.scope).item_type,
+            value_type=self.array.value_type(declared_variables=context.scope.variables).item_type,
             array=self.array.evaluate_in(context).get(),
             index=self.index.evaluate_in(context).get(),
         )
 
-    def value_type(self, *, scope):
-        return self.array.value_type(scope=scope).item_type
+    def value_type(self, *, declared_variables):
+        return self.array.value_type(declared_variables=declared_variables).item_type
 
     def check_variables(self, initialized_variables, allocated_variables):
         if self.array.variable not in allocated_variables:

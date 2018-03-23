@@ -17,7 +17,7 @@ class CallStatement(ImperativeStatement):
     def compile_parameter(ast, *, fun, decl, scope):
         expr = Expression.compile(ast)
 
-        expr_value_type = expr.value_type(scope=scope)
+        expr_value_type = expr.value_type(declared_variables=scope.variables)
 
         if expr_value_type != decl.value_type:
             raise InterfaceError(
@@ -68,7 +68,9 @@ class CallStatement(ImperativeStatement):
                 parseinfo=ast.return_value.parseinfo,
             )
 
-        return_expression_type = return_value and return_value.value_type(scope=scope)
+        return_expression_type = return_value and return_value.value_type(
+            declared_variables=scope.variables,
+        )
         if return_value is not None and return_expression_type != return_type:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, "
@@ -137,7 +139,9 @@ class FunctionCallInstruction(Instruction):
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
-            value_type = value_expr.value_type(scope=self.context.local_context.scope)
+            value_type = value_expr.value_type(
+                declared_variables=self.context.local_context.scope.variables,
+            )
             value_expr.evaluate_in(self.context.local_context).resolve(
                 value_type.ensure(value)
             )
@@ -200,5 +204,7 @@ class ReturnInstruction(Instruction):
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
         self.value.evaluate_in(self.context).resolve(
-            self.value.value_type(scope=self.context.scope).ensure(request.return_value)
+            self.value.value_type(
+                declared_variables=self.context.scope.variables,
+            ).ensure(request.return_value)
         )

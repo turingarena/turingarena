@@ -9,7 +9,7 @@ class AllocStatement(ImperativeStatement):
     @staticmethod
     def compile(ast, scope):
         arguments = [Expression.compile(arg) for arg in ast.arguments]
-        assert all(isinstance(a.value_type(scope=scope), ArrayType) for a in arguments)
+        assert all(isinstance(a.value_type(declared_variables=scope.variables), ArrayType) for a in arguments)
         return AllocStatement(
             ast=ast,
             arguments=arguments,

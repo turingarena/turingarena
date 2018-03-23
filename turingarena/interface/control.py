@@ -81,7 +81,7 @@ class ForIndex(ImmutableObject):
 
 
 class ForStatement(ImperativeStatement):
-    __slots__ = ["index", "body", "scope"]
+    __slots__ = ["scope", "index", "body"]
 
     @staticmethod
     def compile(ast, scope):

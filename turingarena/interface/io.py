@@ -75,7 +75,9 @@ class InputInstruction(Instruction):
 
     def on_communicate_with_process(self, connection):
         raw_values = [
-            a.value_type(scope=self.context.scope).format(a.evaluate_in(self.context).get())
+            a.value_type(
+                declared_variables=self.context.scope.variables,
+            ).format(a.evaluate_in(self.context).get())
             for a in self.arguments
         ]
         try:
@@ -100,7 +102,7 @@ class OutputInstruction(Instruction):
 
         raw_values = read_line(connection.upward).strip().split()
         for a, v in zip(self.arguments, raw_values):
-            value = a.value_type(scope=self.context.scope).parse(v)
+            value = a.value_type(declared_variables=self.context.scope.variables).parse(v)
             a.evaluate_in(self.context).resolve(value)
 
 
