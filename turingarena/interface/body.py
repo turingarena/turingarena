@@ -27,7 +27,10 @@ class Body(AbstractSyntaxNode):
 
     def contextualized_statements(self, context):
         for s in self.statements:
-            yield s, StaticContext(scope=self.scope)
+            yield s, StaticContext(
+                scope=self.scope,
+                global_variables=context.global_variables,
+            )
 
     def check_variables(self, initialized_variables, allocated_variables):
         for statement in self.statements:

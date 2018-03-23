@@ -3,37 +3,37 @@ from turingarena.common import indent_all, indent
 
 def generate_skeleton_python(interface):
     yield "import sys"
-    for statement in interface.body.statements:
+    for statement, context in interface.contextualized_statements():
         yield
-        yield from generate_skeleton_statement(statement, interface=interface)
+        yield from generate_skeleton_statement(statement, context=context)
     yield
     yield f"__load_source__()"
     yield f"import source as _source"
 
 
 def generate_template_python(interface):
-    for statement in interface.body.statements:
+    for statement, context in interface.contextualized_statements():
         yield
-        yield from generate_template_statement(statement, interface=interface)
+        yield from generate_template_statement(statement, context=context)
 
 
-def generate_skeleton_statement(statement, *, interface):
+def generate_skeleton_statement(statement, *, context):
     generators = {
         "var": lambda: generate_var(statement),
         "function": lambda: [],
-        "callback": lambda: generate_callback(statement, interface=interface),
-        "init": lambda: generate_init(statement, interface=interface),
-        "main": lambda: generate_main(statement, interface=interface),
+        "callback": lambda: generate_callback(statement, context=context),
+        "init": lambda: generate_init(statement, context=context),
+        "main": lambda: generate_main(statement, context=context),
     }
 
     return generators[statement.statement_type]()
 
 
-def generate_template_statement(statement, *, interface):
+def generate_template_statement(statement, *, context):
     generators = {
         "var": lambda: generate_global_var_template(statement),
         "function": lambda: generate_function_template(statement),
-        "callback": lambda: generate_callback_template(statement, interface=interface),
+        "callback": lambda: generate_callback_template(statement, context=context),
         "main": lambda: [],
         "init": lambda: [],
     }
@@ -58,42 +58,41 @@ def generate_function_template(statement):
     yield indent("pass")
 
 
-def generate_globals(interface):
-    variables = interface.body.scope.variables
-    if variables:
-        variables = ", ".join(variables)
+def generate_globals(context):
+    if context.global_variables:
+        variables = ", ".join(context.global_variables)
         yield f"global {variables}"
 
 
-def generate_callback(statement, *, interface):
+def generate_callback(statement, *, context):
     callback = statement.callback
     yield f"def {build_callable_declarator(callback)}:"
-    yield from indent_all(generate_globals(interface))
+    yield from indent_all(generate_globals(context))
     yield indent(f"print('{callback.name}')")
-    yield from indent_all(generate_block(callback.body, interface=interface))
+    yield from indent_all(generate_block(callback.body, context=context))
 
 
-def generate_callback_template(statement, *, interface):
+def generate_callback_template(statement, *, context):
     callback = statement.callback
     yield f"from skeleton import {callback.name}"
 
 
-def generate_init(statement, *, interface):
-    yield from generate_block(statement.init.body, interface=interface)
+def generate_init(statement, *, context):
+    yield from generate_block(statement.init.body, context=context)
 
 
-def generate_main(statement, *, interface):
+def generate_main(statement, *, context):
     yield 'def main():'
-    yield from indent_all(generate_globals(interface))
-    yield from indent_all(generate_block(statement.main.body, interface=interface))
+    yield from indent_all(generate_globals(context))
+    yield from indent_all(generate_block(statement.main.body, context=context))
 
 
-def generate_block(block, *, interface):
+def generate_block(block, *, context):
     for statement in block.statements:
-        yield from generate_block_statement(statement, interface=interface)
+        yield from generate_block_statement(statement, context=context)
 
 
-def generate_block_statement(statement, *, interface):
+def generate_block_statement(statement, *, context):
     generators = {
         "var": lambda: generate_var(statement),
         "alloc": lambda: generate_alloc(statement),
@@ -101,9 +100,9 @@ def generate_block_statement(statement, *, interface):
         "output": lambda: generate_output(statement),
         "checkpoint": lambda: ["""print(0)"""],
         "flush": lambda: ["""sys.stdout.flush()"""],
-        "call": lambda: generate_call(statement, interface=interface),
-        "for": lambda: generate_for(statement, interface=interface),
-        "if": lambda: generate_if(statement, interface=interface),
+        "call": lambda: generate_call(statement, context=context),
+        "for": lambda: generate_for(statement, context=context),
+        "if": lambda: generate_if(statement, context=context),
         "exit": lambda: ["sys.exit(0)"],
         "return": lambda: [f"return {build_expression(statement.value)}"],
     }
@@ -117,7 +116,7 @@ def generate_alloc(statement):
         yield f"{arg} = [None] * {size}"
 
 
-def generate_call(statement, *, interface):
+def generate_call(statement, *, context):
     function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
@@ -125,7 +124,7 @@ def generate_call(statement, *, interface):
         yield f"{return_value} = _source.{function_name}({parameters})"
     else:
         yield f"_source.{function_name}({parameters})"
-    if interface.signature.callbacks:
+    if context.scope.callbacks:
         yield r"""print("return")"""
 
 
@@ -147,21 +146,21 @@ def generate_input(statement):
     yield f"[{arguments}] = (fmt(v) for fmt, v in zip([{formats}], sys.stdin.readline().split()))"
 
 
-def generate_if(statement, *, interface):
+def generate_if(statement, *, context):
     condition = build_expression(statement.condition)
     yield f"if {condition}:"
-    yield from indent_all(generate_block(statement.then_body, interface=interface))
+    yield from indent_all(generate_block(statement.then_body, context=context))
     if statement.else_body is None:
         return
     yield "else:"
-    yield from indent_all(generate_block(statement.else_body, interface=interface))
+    yield from indent_all(generate_block(statement.else_body, context=context))
 
 
-def generate_for(statement, *, interface):
+def generate_for(statement, *, context):
     index_name = statement.index.variable.name
     size = build_expression(statement.index.range)
     yield f"for {index_name} in range({size}):"
-    yield from indent_all(generate_block(statement.body, interface=interface))
+    yield from indent_all(generate_block(statement.body, context=context))
 
 
 def build_callable_declarator(callable):

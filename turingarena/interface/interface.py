@@ -34,7 +34,12 @@ class InterfaceDefinition(AbstractSyntaxNode):
         )
 
     def contextualized_statements(self):
-        return self.body.contextualized_statements(StaticContext(scope=self.body.scope))
+        return self.body.contextualized_statements(
+            StaticContext(
+                scope=self.body.scope,
+                global_variables=self.body.scope.variables.locals(),
+            )
+        )
 
     @property
     def signature(self):

@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 StaticContext = namedtuple("StaticContext", [
     "scope",
+    "global_variables",
 ])
 
 

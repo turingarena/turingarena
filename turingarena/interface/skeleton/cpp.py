@@ -71,7 +71,15 @@ def generate_main(interface):
         except KeyError:
             pass
         else:
-            yield from indent_all(generate_block(main.body, context=StaticContext(scope=main.body.scope)))
+            yield from indent_all(
+                generate_block(
+                    main.body,
+                    context=StaticContext(
+                        scope=main.body.scope,
+                        global_variables=None,  # FIXME: temp
+                    ),
+                )
+            )
     yield "}"
 
 
