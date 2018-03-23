@@ -160,7 +160,8 @@ def generate_for(statement, *, context):
     index_name = statement.index.variable.name
     size = build_expression(statement.index.range)
     yield f"for {index_name} in range({size}):"
-    yield from indent_all(generate_block(statement.body, context=context))
+    body, body_context = statement.contextualized_body(context)
+    yield from indent_all(generate_block(body, context=body_context))
 
 
 def build_callable_declarator(callable):

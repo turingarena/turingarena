@@ -33,11 +33,15 @@ class InterfaceDefinition(AbstractSyntaxNode):
             body=body,
         )
 
+    @property
+    def global_variables(self):
+        return self.body.declared_variables()
+
     def contextualized_statements(self):
         return self.body.contextualized_statements(
             StaticContext(
                 scope=self.body.scope,
-                global_variables=self.body.scope.variables.locals(),
+                global_variables=self.global_variables,
             )
         )
 

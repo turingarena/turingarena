@@ -13,9 +13,9 @@ def generate_skeleton_cpp(interface):
 
 
 def generate_template_cpp(interface):
-    for statement in interface.body.statements:
+    for statement, context in interface.contextualized_statements():
         yield
-        yield from generate_template_statement(statement, interface=interface)
+        yield from generate_template_statement(statement, context=context)
 
 
 def generate_skeleton_statement(statement, *, context):
@@ -29,11 +29,11 @@ def generate_skeleton_statement(statement, *, context):
     return generators[statement.statement_type]()
 
 
-def generate_template_statement(statement, *, interface):
+def generate_template_statement(statement, *, context):
     generators = {
         "var": lambda: [build_declaration(statement)],
         "function": lambda: generate_function_template(statement),
-        "callback": lambda: generate_callback_template(statement, interface=interface),
+        "callback": lambda: generate_callback_template(statement, context=context),
         "init": lambda: [],
         "main": lambda: [],
     }
@@ -58,7 +58,7 @@ def generate_callback(statement, *, context):
     yield "}"
 
 
-def generate_callback_template(statement, *, interface):
+def generate_callback_template(statement, *, context):
     callback = statement.callback
     yield f"{build_callable_declarator(callback)};"
 
@@ -76,7 +76,7 @@ def generate_main(interface):
                     main.body,
                     context=StaticContext(
                         scope=main.body.scope,
-                        global_variables=None,  # FIXME: temp
+                        global_variables=interface.global_variables,
                     ),
                 )
             )
@@ -159,7 +159,8 @@ def generate_for(statement, *, context):
     index_name = statement.index.variable.name
     size = build_expression(statement.index.range)
     yield f"for(int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-    yield from indent_all(generate_block(statement.body, context=context))
+    body, body_context = statement.contextualized_body(context)
+    yield from indent_all(generate_block(body, context=body_context))
     yield "}"
 
 

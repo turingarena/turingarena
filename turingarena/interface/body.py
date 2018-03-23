@@ -34,12 +34,29 @@ class Body(AbstractSyntaxNode):
                     scope.variables[v.name] = v
             yield compiled_s
 
+    def declared_variables(self):
+        return {
+            v.name: v
+            for s in [
+            compile_statement(ss)
+            for ss in self.ast.statements
+            if ss.statement_type == "var"
+        ]
+            for v in s.declared_variables()
+        }
+
     def contextualized_statements(self, context):
-        for s in self.statements:
-            yield s, StaticContext(
-                scope=self.scope,
+        scope = Scope(context.scope)
+        for ast in self.ast.statements:
+            s = compile_statement(ast, scope=scope)
+            if isinstance(s, VarStatement):
+                for v in s.declared_variables():
+                    scope.variables[v.name] = v
+            inner_context = StaticContext(
+                scope=scope,
                 global_variables=context.global_variables,
             )
+            yield s, inner_context
 
     def check_variables(self, initialized_variables, allocated_variables):
         for statement in self.statements:
@@ -48,7 +65,7 @@ class Body(AbstractSyntaxNode):
             statement.check_variables(initialized_variables, allocated_variables)
 
     def generate_instructions(self, context):
-        inner_context = context.child(self.scope.variables.locals())
+        inner_context = context.child(self.declared_variables())
         for statement in self.statements:
             if not isinstance(statement, ImperativeStatement):
                 continue

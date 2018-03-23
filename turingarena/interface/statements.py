@@ -1,7 +1,7 @@
 from bidict import bidict
 
 
-def compile_statement(ast, *, scope):
+def compile_statement(ast, *, scope=None):  # FIXME: scope=None is temporary
     return get_statement_classes()[ast.statement_type].compile(ast, scope)
 
 

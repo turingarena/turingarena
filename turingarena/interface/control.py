@@ -1,5 +1,6 @@
 from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body, ExitCall
+from turingarena.interface.context import StaticContext
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, Instruction
@@ -96,6 +97,12 @@ class ForStatement(ImperativeStatement):
             ),
             body=Body.compile(ast.body, scope=for_scope),
             scope=for_scope,
+        )
+
+    def contextualized_body(self, context):
+        return self.body, StaticContext(
+            scope=self.body.scope,
+            global_variables=context.global_variables,
         )
 
     def generate_instructions(self, context):
