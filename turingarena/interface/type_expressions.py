@@ -13,8 +13,8 @@ class ValueType(TupleLikeObject):
         super().__init__(**kwargs)
 
     @staticmethod
-    def compile(ast, *, scope):
-        return type_expression_classes[ast.meta_type].compile(ast, scope)
+    def compile(ast):
+        return type_expression_classes[ast.meta_type].do_compile(ast)
 
     def ensure(self, value):
         value = self.intern(value)
@@ -76,7 +76,7 @@ class ScalarType(PrimaryType):
         return self.base_type.__name__
 
     @staticmethod
-    def compile(ast, scope):
+    def do_compile(ast):
         bases = {
             "int": int,
         }
@@ -103,9 +103,9 @@ class ArrayType(ValueType):
     __slots__ = ["item_type"]
 
     @staticmethod
-    def compile(ast, scope):
+    def do_compile(ast):
         return ArrayType(
-            item_type=ValueType.compile(ast.item_type, scope=scope),
+            item_type=ValueType.compile(ast.item_type),
         )
 
     def __str__(self):
@@ -126,7 +126,7 @@ class ArrayType(ValueType):
         value = list(value)
         yield from ScalarType(int).serialize(len(value))
         for item in value:
-            yield from serialize(item)
+            yield from self.item_type.serialize(item)
 
     def deserialize(self, lines):
         size = ScalarType(int).deserialize(lines)

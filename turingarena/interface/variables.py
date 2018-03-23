@@ -12,7 +12,7 @@ class VarStatement(Statement):
 
     @staticmethod
     def compile(ast, scope):
-        value_type = ValueType.compile(ast.type.expression, scope=scope)
+        value_type = ValueType.compile(ast.type.expression)
         variables = [
             Variable(value_type=value_type, name=d.name)
             for d in ast.declarators
