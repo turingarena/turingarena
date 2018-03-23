@@ -19,7 +19,7 @@ class InterfaceSignature(TupleLikeObject):
 
 
 class InterfaceDefinition(AbstractSyntaxNode):
-    __slots__ = ["signature", "body", "source_text", "ast"]
+    __slots__ = ["body", "source_text", "ast"]
 
     @staticmethod
     def compile(source_text, **kwargs):
@@ -27,23 +27,26 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
         scope = Scope()
         body = Body.compile(ast.body, scope=scope)
-        signature = InterfaceSignature(
-            variables=OrderedDict(body.scope.variables.items()),
-            functions={
-                c.name: c.signature
-                for c in body.scope.functions.values()
-            },
-            callbacks={
-                c.name: c.signature
-                for c in body.scope.callbacks.values()
-            },
-        )
         return InterfaceDefinition(
             source_text=source_text,
             ast=ast,
-            signature=signature,
             body=body,
         )
+
+    @property
+    def signature(self):
+        return InterfaceSignature(
+            variables=OrderedDict(self.body.scope.variables.items()),
+            functions={
+                c.name: c.signature
+                for c in self.body.scope.functions.values()
+            },
+            callbacks={
+                c.name: c.signature
+                for c in self.body.scope.callbacks.values()
+            },
+        )
+
 
     def static_analysis(self):
         self.body.check_variables([], [])
@@ -58,7 +61,6 @@ class InterfaceDefinition(AbstractSyntaxNode):
             return self.body.scope.main["init"]
         except KeyError:
             return None
-
 
     def generate_instructions(self):
         global_context = GlobalContext(self)
