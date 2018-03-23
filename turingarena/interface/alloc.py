@@ -4,16 +4,24 @@ from turingarena.interface.type_expressions import ArrayType
 
 
 class AllocStatement(ImperativeStatement):
-    __slots__ = ["arguments", "size"]
+    __slots__ = []
 
     @staticmethod
     def compile(ast, scope):
-        arguments = [Expression.compile(arg) for arg in ast.arguments]
-        assert all(isinstance(a.value_type(declared_variables=scope.variables), ArrayType) for a in arguments)
-        return AllocStatement(
-            ast=ast,
-            arguments=arguments,
-            size=Expression.compile(ast.size),
+        return AllocStatement(ast=ast)
+
+    @property
+    def size(self):
+        return Expression.compile(self.ast.size)
+
+    @property
+    def arguments(self):
+        return [Expression.compile(arg) for arg in self.ast.arguments]
+
+    def validate(self, context):
+        assert all(
+            isinstance(a.value_type(declared_variables=context.variables), ArrayType)
+            for a in self.arguments
         )
 
     def generate_instructions(self, context):
@@ -27,6 +35,7 @@ class AllocStatement(ImperativeStatement):
             exp.resolve_variable()
             for exp in self.arguments
         ]
+
 
 class AllocInstruction(Instruction):
     __slots__ = ["arguments", "size", "context"]
