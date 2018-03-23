@@ -23,7 +23,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
 
-        body = Body.compile(ast.body)
+        body = Body(ast.body)
         definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body)
         definition.validate()
         return definition

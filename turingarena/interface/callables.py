@@ -90,7 +90,7 @@ class Callback(Callable):
         return Callback(
             name=ast.declarator.name,
             signature=signature,
-            body=Body.compile(ast.body)
+            body=Body(ast.body)
         )
 
     def generate_instructions(self, context):

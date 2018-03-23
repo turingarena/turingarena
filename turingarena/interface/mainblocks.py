@@ -20,7 +20,7 @@ class InitStatement(Statement):
 
     @property
     def init(self):
-        return Init(body=Body.compile(self.ast.body))
+        return Init(body=Body(self.ast.body))
 
     def validate(self, context):
         self.init.body.validate(context)
@@ -41,7 +41,7 @@ class MainStatement(Statement):
 
     @property
     def main(self):
-        return Main(body=Body.compile(self.ast.body))
+        return Main(body=Body(self.ast.body))
 
     def validate(self, context):
         self.main.body.validate(context)

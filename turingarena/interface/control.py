@@ -39,13 +39,13 @@ class IfStatement(ImperativeStatement):
 
     @property
     def then_body(self):
-        return Body.compile(self.ast.then_body)
+        return Body(self.ast.then_body)
 
     @property
     def else_body(self):
         if self.ast.else_body is None:
             return None
-        return Body.compile(self.ast.then_body)
+        return Body(self.ast.then_body)
 
     def generate_instructions(self, context):
         condition = self.condition.evaluate_in(context)
@@ -91,7 +91,7 @@ class ForStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return Body.compile(self.ast.body)
+        return Body(self.ast.body)
 
     def validate(self, context):
         body, inner_context = self.contextualized_body(context)
@@ -150,7 +150,7 @@ class LoopStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return Body.compile(self.ast.body),
+        return Body(self.ast.body),
 
     def first_calls(self):
         return self.body.first_calls() | {None}

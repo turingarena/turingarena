@@ -10,23 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class Body(AbstractSyntaxNode):
-    __slots__ = ["ast", "statements"]
+    __slots__ = ["ast"]
 
-    @staticmethod
-    def compile(ast):
-        statements = list(Body.generate_statements(ast))
-
-        return Body(
-            ast=ast,
-            statements=statements
-        )
-
-    @staticmethod
-    def generate_statements(ast):
-        # FIXME: remove this method
-        for s in ast.statements:
-            compiled_s = compile_statement(s)
-            yield compiled_s
+    @property
+    def statements(self):
+        return [compile_statement(s) for s in self.ast.statements]
 
     def declared_variables(self):
         var_statements = [
