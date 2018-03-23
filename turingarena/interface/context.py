@@ -12,11 +12,11 @@ StaticContext = namedtuple("StaticContext", [
 
 
 class BindingStorage:
-    def __init__(self, *, scope, parent):
-        self.scope = scope
+    def __init__(self, *, local_variables, parent):
+        self.local_variables = local_variables
         self.parent = parent
         self.values = {
-            l: None for l in self.scope.variables.locals().values()
+            l: None for l in self.local_variables.values()
         }
 
     def __getitem__(self, variable):
@@ -42,7 +42,7 @@ class GlobalContext(ImmutableObject):
     def __init__(self, interface):
         super().__init__(
             interface=interface,
-            bindings=BindingStorage(scope=interface.body.scope, parent=None),
+            bindings=BindingStorage(local_variables=interface.body.scope.variables, parent=None),
         )
 
 
@@ -73,7 +73,7 @@ class LocalContext:
         else:
             parent = outer.bindings
         self.scope = scope
-        self.bindings = BindingStorage(scope=scope, parent=parent)
+        self.bindings = BindingStorage(local_variables=scope.variables.locals(), parent=parent)
         self.procedure = procedure
         self.outer = outer
 
