@@ -84,18 +84,18 @@ class InterfaceDefinition(AbstractSyntaxNode):
         self.body.check_variables([], [])
 
     @property
-    def main(self):
+    def main_body(self):
         [main] = [
-            s.main
+            s.body
             for s, context in self.contextualized_statements()
             if s.statement_type == "main"
         ]
         return main
 
     @property
-    def init(self):
+    def init_body(self):
         inits = [
-            s.init
+            s.body
             for s, context in self.contextualized_statements()
             if s.statement_type == "init"
         ]
@@ -111,9 +111,9 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
         yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
-            if self.init is not None:
-                yield from self.init.body.generate_instructions(main_context)
-            yield from self.main.body.generate_instructions(main_context)
+            if self.init_body is not None:
+                yield from self.init_body.generate_instructions(main_context)
+            yield from self.main_body.generate_instructions(main_context)
         except InterfaceExit:
             pass
         else:

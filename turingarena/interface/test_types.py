@@ -1,8 +1,41 @@
-from turingarena.tests.test_utils import define_algorithms
+import pytest
+
+from turingarena.interface.algorithm import load_algorithm
+
+sources = {
+    "c++": """
+        int i, *ia, **iaa;
+    
+        int get_i() {
+            return i;
+        }
+        
+        int get_ia(int j) {
+            return ia[j];
+        }
+        
+        int get_iaa(int j, int k) {
+            return iaa[j][k];
+        }
+    """,
+    "python": """if True:
+        from skeleton import i, ia, iaa
+    
+        def get_i():
+            return i
+    
+        def get_ia(j):
+            return ia[j]
+    
+        def get_iaa(j, k):
+            return iaa[j][k]
+    """
+}
 
 
-def test_valid_types():
-    for algo in define_algorithms(
+@pytest.mark.parametrize("language,source_text", sources.items(), ids=list(sources.keys()))
+def test_valid_types(language, source_text):
+    with load_algorithm(
             interface_text="""
                 var int i;
                 var int[] ia;
@@ -48,36 +81,9 @@ def test_valid_types():
                     }
                 }
             """,
-            sources={
-                'python': """if True:
-                    from skeleton import i, ia, iaa
-    
-                    def get_i():
-                        return i
-    
-                    def get_ia(j):
-                        return ia[j]
-    
-                    def get_iaa(j, k):
-                        return iaa[j][k]
-                """,
-                'c++': """
-                    int i, *ia, **iaa;
-                
-                    int get_i() {
-                        return i;
-                    }
-                    
-                    int get_ia(int j) {
-                        return ia[j];
-                    }
-                    
-                    int get_iaa(int j, int k) {
-                        return iaa[j][k];
-                    }
-                """,
-            },
-    ):
+            language=language,
+            source_text=source_text,
+    ) as algo:
         iaa = [
             [1, 2, 3],
             [],

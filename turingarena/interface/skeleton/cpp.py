@@ -65,12 +65,12 @@ def generate_callback_template(statement, *, context):
 
 def generate_main(interface):
     yield "int main() {"
-    for which in ("init", "main"):
-        main = getattr(interface, which)
-        if main is not None:
+    for which in ("init_body", "main_body"):
+        body = getattr(interface, which)
+        if body is not None:
             yield from indent_all(
                 generate_block(
-                    main.body,
+                    body,
                     # FIXME: the following should not be needed
                     context=StaticContext(
                         declared_callbacks=interface.callbacks,

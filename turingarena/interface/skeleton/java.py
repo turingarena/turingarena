@@ -70,7 +70,7 @@ def generate_callback_template(statement, *, interface):
 
 def generate_main(statement, *, interface):
     yield "void _run() {"
-    yield from indent_all(generate_block(statement.main.body, interface=interface))
+    yield from indent_all(generate_block(statement.body, interface=interface))
     yield "}"
     yield
     yield "public static void main(String args[]) {"
@@ -80,7 +80,7 @@ def generate_main(statement, *, interface):
 
 def generate_constructor(statement, *, interface):
     yield "Skeleton() {"
-    yield from indent_all(generate_block(statement.init.body, interface=interface))
+    yield from indent_all(generate_block(statement.body, interface=interface))
     yield "}"
 
 

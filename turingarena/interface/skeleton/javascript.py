@@ -70,14 +70,14 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(interface):
-    if interface.init is not None:
+    if interface.init_body is not None:
         yield "// init {"
-        yield from indent_all(generate_block(interface.init.body, interface=interface))
+        yield from indent_all(generate_block(interface.init_body, interface=interface))
         yield "// }"
     yield
     yield "// main {"
     yield indent("__load_source__(); // load user source file")
-    yield from indent_all(generate_block(interface.main.body, interface=interface))
+    yield from indent_all(generate_block(interface.main_body, interface=interface))
     yield "// }"
 
 

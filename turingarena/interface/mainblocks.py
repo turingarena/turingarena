@@ -1,11 +1,21 @@
-from turingarena.common import ImmutableObject
 from turingarena.interface.body import Body
 from turingarena.interface.exceptions import GlobalVariableNotInitializedError
 from turingarena.interface.statement import Statement
 
 
-class Init(ImmutableObject):
-    __slots__ = ["body"]
+class EntryPointStatement(Statement):
+    __slots__ = []
+
+    @property
+    def body(self):
+        return Body(self.ast.body)
+
+    def validate(self, context):
+        self.body.validate(context)
+
+
+class InitStatement(EntryPointStatement):
+    __slots__ = []
 
     def check_variables(self, initialized_variables, allocated_variables):
         self.body.check_variables(initialized_variables, allocated_variables)
@@ -15,36 +25,8 @@ class Init(ImmutableObject):
                 raise GlobalVariableNotInitializedError(f"Global variable '{var.name}' not initialized in 'init' block")
 
 
-class InitStatement(Statement):
+class MainStatement(EntryPointStatement):
     __slots__ = []
 
-    @property
-    def init(self):
-        return Init(body=Body(self.ast.body))
-
-    def validate(self, context):
-        self.init.body.validate(context)
-
     def check_variables(self, initialized_variables, allocated_variables):
-        self.init.check_variables(initialized_variables, allocated_variables)
-
-
-class Main(ImmutableObject):
-    __slots__ = ["body"]
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.body.check_variables(initialized_variables, allocated_variables)
-
-
-class MainStatement(Statement):
-    __slots__ = []
-
-    @property
-    def main(self):
-        return Main(body=Body(self.ast.body))
-
-    def validate(self, context):
-        self.main.body.validate(context)
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.main.check_variables(initialized_variables, allocated_variables)
+        self.check_variables(initialized_variables, allocated_variables)

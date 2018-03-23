@@ -78,13 +78,13 @@ def generate_callback_template(statement, *, context):
 
 
 def generate_init(statement, *, context):
-    yield from generate_block(statement.init.body, context=context)
+    yield from generate_block(statement.body, context=context)
 
 
 def generate_main(statement, *, context):
     yield 'def main():'
     yield from indent_all(generate_globals(context))
-    yield from indent_all(generate_block(statement.main.body, context=context))
+    yield from indent_all(generate_block(statement.body, context=context))
 
 
 def generate_block(block, *, context):
