@@ -102,6 +102,7 @@ class ForStatement(ImperativeStatement):
     def contextualized_body(self, context):
         return self.body, StaticContext(
             scope=self.body.scope,
+            declared_callbacks=context.declared_callbacks,
             global_variables=context.global_variables,
         )
 

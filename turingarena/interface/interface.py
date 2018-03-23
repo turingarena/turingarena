@@ -41,10 +41,25 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def functions(self):
         return self.body.declared_functions()
 
+    @property
+    def callbacks(self):
+        return [
+            s.callback
+            for s, context in self.body.contextualized_statements(
+                StaticContext(
+                    scope=self.body.scope,
+                    declared_callbacks=[],  # FIXME: hack to avoid infinite recursion
+                    global_variables=self.global_variables,
+                )
+            )
+            if s.statement_type == "callback"
+        ]
+
     def contextualized_statements(self):
         return self.body.contextualized_statements(
             StaticContext(
                 scope=self.body.scope,
+                declared_callbacks=self.callbacks,
                 global_variables=self.global_variables,
             )
         )
@@ -62,7 +77,6 @@ class InterfaceDefinition(AbstractSyntaxNode):
                 for c in self.body.scope.callbacks.values()
             },
         )
-
 
     def static_analysis(self):
         self.body.check_variables([], [])

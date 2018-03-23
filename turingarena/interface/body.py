@@ -75,6 +75,7 @@ class Body(AbstractSyntaxNode):
                     scope.variables[v.name] = v
             inner_context = StaticContext(
                 scope=scope,
+                declared_callbacks=context.declared_callbacks,
                 global_variables=context.global_variables,
             )
             yield s, inner_context

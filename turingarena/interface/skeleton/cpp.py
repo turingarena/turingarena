@@ -76,6 +76,7 @@ def generate_main(interface):
                     main.body,
                     context=StaticContext(
                         scope=main.body.scope,
+                        declared_callbacks=interface.callbacks,
                         global_variables=interface.global_variables,
                     ),
                 )
@@ -128,7 +129,7 @@ def generate_call(statement, *, context):
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if context.scope.callbacks:
+    if context.declared_callbacks:
         yield r"""printf("return\n");"""
 
 
