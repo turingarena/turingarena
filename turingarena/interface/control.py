@@ -99,6 +99,10 @@ class ForStatement(ImperativeStatement):
             scope=for_scope,
         )
 
+    def validate(self, context):
+        body, inner_context = self.contextualized_body(context)
+        body.validate(inner_context)
+
     def contextualized_body(self, context):
         return self.body, StaticContext(
             scope=self.body.scope,

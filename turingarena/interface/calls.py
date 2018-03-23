@@ -77,7 +77,7 @@ class CallStatement(ImperativeStatement):
         if return_type is None and self.return_value is not None:
             raise FunctionCallError(
                 f"function {fun.name} does not return a value",
-                parseinfo=self.ast.self.return_value.parseinfo,
+                parseinfo=self.ast.return_value.parseinfo,
             )
         return_expression_type = self.return_value and self.return_value.value_type(
             declared_variables=context.variables,

@@ -8,3 +8,6 @@ class Statement(AbstractSyntaxNode):
     @property
     def statement_type(self):
         return get_statement_classes().inv[self.__class__]
+
+    def validate(self, context):
+        pass

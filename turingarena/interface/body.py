@@ -82,6 +82,10 @@ class Body(AbstractSyntaxNode):
             )
             yield s, inner_context
 
+    def validate(self, context):
+        for statement, inner_context in self.contextualized_statements(context):
+            statement.validate(inner_context)
+
     def check_variables(self, initialized_variables, allocated_variables):
         for statement in self.statements:
             initialized_variables += statement.initialized_variables()

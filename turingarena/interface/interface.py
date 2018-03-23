@@ -26,11 +26,9 @@ class InterfaceDefinition(AbstractSyntaxNode):
 
         scope = Scope()
         body = Body.compile(ast.body, scope=scope)
-        return InterfaceDefinition(
-            source_text=source_text,
-            ast=ast,
-            body=body,
-        )
+        definition = InterfaceDefinition(source_text=source_text, ast=ast, body=body, )
+        definition.validate()
+        return definition
 
     @property
     def global_variables(self):
@@ -56,15 +54,20 @@ class InterfaceDefinition(AbstractSyntaxNode):
             if s.statement_type == "callback"
         }
 
+    def validate(self):
+        self.body.validate(self.root_context)
+
     def contextualized_statements(self):
-        return self.body.contextualized_statements(
-            StaticContext(
-                scope=self.body.scope,
-                declared_callbacks=self.callbacks,
-                functions=self.functions,
-                global_variables=self.global_variables,
-                variables=self.global_variables,
-            )
+        return self.body.contextualized_statements(self.root_context)
+
+    @property
+    def root_context(self):
+        return StaticContext(
+            scope=self.body.scope,
+            declared_callbacks=self.callbacks,
+            functions=self.functions,
+            global_variables=self.global_variables,
+            variables=self.global_variables,
         )
 
     @property

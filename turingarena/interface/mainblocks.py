@@ -23,6 +23,9 @@ class InitStatement(Statement):
         init = Init(body=Body.compile(ast.body, scope=scope))
         return InitStatement(ast=ast, init=init)
 
+    def validate(self, context):
+        self.init.body.validate(context)
+
     def check_variables(self, initialized_variables, allocated_variables):
         self.init.check_variables(initialized_variables, allocated_variables)
 
@@ -41,6 +44,9 @@ class MainStatement(Statement):
     def compile(ast, scope):
         main = Main(body=Body.compile(ast.body, scope=scope))
         return MainStatement(ast=ast, main=main)
+
+    def validate(self, context):
+        self.main.body.validate(context)
 
     def check_variables(self, initialized_variables, allocated_variables):
         self.main.check_variables(initialized_variables, allocated_variables)
