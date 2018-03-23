@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.body import Body
-from turingarena.interface.context import GlobalContext, MainContext
+from turingarena.interface.context import GlobalContext, MainContext, StaticContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -32,6 +32,9 @@ class InterfaceDefinition(AbstractSyntaxNode):
             ast=ast,
             body=body,
         )
+
+    def contextualized_statements(self):
+        return self.body.contextualized_statements(StaticContext(scope=self.body.scope))
 
     @property
     def signature(self):

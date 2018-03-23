@@ -1,5 +1,6 @@
 import logging
 
+from turingarena.interface.context import StaticContext
 from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.scope import Scope
@@ -23,6 +24,10 @@ class Body(AbstractSyntaxNode):
             scope=scope,
             statements=statements
         )
+
+    def contextualized_statements(self, context):
+        for s in self.statements:
+            yield s, StaticContext(scope=self.scope)
 
     def check_variables(self, initialized_variables, allocated_variables):
         for statement in self.statements:

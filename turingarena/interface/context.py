@@ -1,8 +1,13 @@
 import logging
+from collections import namedtuple
 
 from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)
+
+StaticContext = namedtuple("StaticContext", [
+    "scope",
+])
 
 
 class BindingStorage:

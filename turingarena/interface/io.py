@@ -40,13 +40,12 @@ class CheckpointInstruction(Instruction):
 
 
 class InputOutputStatement(ImperativeStatement):
-    __slots__ = ["scope", "arguments"]
+    __slots__ = ["arguments"]
 
     @classmethod
     def compile(cls, ast, scope):
         return cls(
             ast=ast,
-            scope=scope,
             arguments=[
                 Expression.compile(arg)
                 for arg in ast.arguments

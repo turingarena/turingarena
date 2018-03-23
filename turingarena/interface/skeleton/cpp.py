@@ -1,12 +1,13 @@
 from turingarena.common import indent_all, indent
+from turingarena.interface.context import StaticContext
 
 
 def generate_skeleton_cpp(interface):
     yield "#include <cstdio>"
     yield "#include <cstdlib>"
-    for statement in interface.body.statements:
+    for statement, context in interface.contextualized_statements():
         yield
-        yield from generate_skeleton_statement(statement, interface=interface)
+        yield from generate_skeleton_statement(statement, context=context)
     yield
     yield from generate_main(interface)
 
@@ -17,11 +18,11 @@ def generate_template_cpp(interface):
         yield from generate_template_statement(statement, interface=interface)
 
 
-def generate_skeleton_statement(statement, *, interface):
+def generate_skeleton_statement(statement, *, context):
     generators = {
         "var": lambda: ["extern " + build_declaration(statement)],
         "function": lambda: generate_function(statement),
-        "callback": lambda: generate_callback(statement, interface=interface),
+        "callback": lambda: generate_callback(statement, context=context),
         "init": lambda: [],
         "main": lambda: [],
     }
@@ -49,11 +50,11 @@ def generate_function_template(statement):
     yield "}"
 
 
-def generate_callback(statement, *, interface):
+def generate_callback(statement, *, context):
     callback = statement.callback
     yield f"{build_callable_declarator(callback)}" " {"
     yield indent(rf"""printf("%s\n", "{callback.name}");""")
-    yield from indent_all(generate_block(callback.body, interface=interface))
+    yield from indent_all(generate_block(callback.body, context=context))
     yield "}"
 
 
@@ -70,16 +71,16 @@ def generate_main(interface):
         except KeyError:
             pass
         else:
-            yield from indent_all(generate_block(main.body, interface=interface))
+            yield from indent_all(generate_block(main.body, context=StaticContext(scope=main.body.scope)))
     yield "}"
 
 
-def generate_block(block, *, interface):
-    for statement in block.statements:
-        yield from generate_block_statement(statement, interface=interface)
+def generate_block(block, *, context):
+    for statement, inner_context in block.contextualized_statements(context):
+        yield from generate_block_statement(statement, context=inner_context)
 
 
-def generate_block_statement(statement, *, interface):
+def generate_block_statement(statement, *, context):
     generators = {
         "var": lambda: [build_declaration(statement)],
         "alloc": lambda: generate_alloc(statement),
@@ -87,9 +88,9 @@ def generate_block_statement(statement, *, interface):
         "output": lambda: generate_output(statement),
         "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
         "flush": lambda: ["fflush(stdout);"],
-        "call": lambda: generate_call(statement, interface=interface),
-        "for": lambda: generate_for(statement, interface=interface),
-        "if": lambda: generate_if(statement, interface=interface),
+        "call": lambda: generate_call(statement, context=context),
+        "for": lambda: generate_for(statement, context=context),
+        "if": lambda: generate_if(statement, context=context),
         "exit": lambda: ["exit(0);"],
         "return": lambda: [f"return {build_expression(statement.value)};"],
     }
@@ -109,7 +110,7 @@ def generate_alloc(statement):
         yield f"{arg} = new {value_type}[{size}];"
 
 
-def generate_call(statement, *, interface):
+def generate_call(statement, *, context):
     function_name = statement.function.name
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
@@ -117,7 +118,7 @@ def generate_call(statement, *, interface):
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if interface.signature.callbacks:
+    if context.scope.callbacks:
         yield r"""printf("return\n");"""
 
 
@@ -133,22 +134,22 @@ def generate_input(statement):
     yield f'scanf("{format_string}", {args});'
 
 
-def generate_if(statement, *, interface):
+def generate_if(statement, *, context):
     condition = build_expression(statement.condition)
     yield f"if( {condition} )" " {"
-    yield from indent_all(generate_block(statement.then_body, interface=interface))
+    yield from indent_all(generate_block(statement.then_body, context=context))
     yield "}"
     if statement.else_body is not None:
         yield "else {"
-        yield from indent_all(generate_block(statement.else_body, interface=interface))
+        yield from indent_all(generate_block(statement.else_body, context=context))
         yield "}"
 
 
-def generate_for(statement, *, interface):
+def generate_for(statement, *, context):
     index_name = statement.index.variable.name
     size = build_expression(statement.index.range)
     yield f"for(int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-    yield from indent_all(generate_block(statement.body, interface=interface))
+    yield from indent_all(generate_block(statement.body, context=context))
     yield "}"
 
 
