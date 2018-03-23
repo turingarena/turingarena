@@ -40,9 +40,14 @@ sys.modules["skeleton"] = types.ModuleType("skeleton")
 import source
 import skeleton
 
+source_loaded = False
+
 
 def load_source():
+    global source_loaded
+    if source_loaded: return
     exec(source_string, source.__dict__)
+    source_loaded = True
 
 
 def my_import(name, *args, **kwargs):
