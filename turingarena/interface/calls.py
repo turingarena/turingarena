@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CallStatement(ImperativeStatement):
-    __slots__ = ["scope", "function", "parameters", "return_value"]
+    __slots__ = ["function", "parameters", "return_value"]
 
     @staticmethod
     def compile_parameter(ast, *, fun, decl, scope):
@@ -78,7 +78,6 @@ class CallStatement(ImperativeStatement):
 
         return CallStatement(
             ast=ast,
-            scope=scope,
             function=fun,
             parameters=parameters,
             return_value=return_value,
@@ -89,10 +88,7 @@ class CallStatement(ImperativeStatement):
         if ast is None:
             return_value = None
         else:
-            return_value = Expression.compile(
-                ast,
-                expected_type=fun.signature.return_type,
-            )
+            return_value = Expression.compile(ast)
         return return_value
 
     def first_calls(self):
@@ -141,7 +137,7 @@ class FunctionCallInstruction(Instruction):
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
-            value_type = value_expr.value_type(scope=self.statement.scope)
+            value_type = value_expr.value_type(scope=self.context.local_context.scope)
             value_expr.evaluate_in(self.context.local_context).resolve(
                 value_type.ensure(value)
             )

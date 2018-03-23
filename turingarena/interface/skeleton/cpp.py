@@ -91,7 +91,7 @@ def generate_block(block, *, context):
 def generate_block_statement(statement, *, context):
     generators = {
         "var": lambda: [build_declaration(statement)],
-        "alloc": lambda: generate_alloc(statement),
+        "alloc": lambda: generate_alloc(statement, context=context),
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
         "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
@@ -110,10 +110,10 @@ def generate_declarators(declaration):
         yield build_declarator(declaration.value_type, variable.name)
 
 
-def generate_alloc(statement):
+def generate_alloc(statement, *, context):
     for argument in statement.arguments:
         arg = build_expression(argument)
-        value_type = build_full_type(argument.value_type(scope=statement.scope).item_type)
+        value_type = build_full_type(argument.value_type(scope=context.scope).item_type)
         size = build_expression(statement.size)
         yield f"{arg} = new {value_type}[{size}];"
 

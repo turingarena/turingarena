@@ -26,7 +26,7 @@ class Expression(AbstractSyntaxNode):
     __slots__ = ["ast"]
 
     @staticmethod
-    def compile(ast, *, expected_type=None):
+    def compile(ast):
         return expression_classes[ast.expression_type].do_compile(ast)
 
     @property
@@ -119,7 +119,7 @@ class SubscriptExpression(Expression):
     @staticmethod
     def do_compile(ast):
         array = Expression.compile(ast.array)
-        index = Expression.compile(ast.index, expected_type=ScalarType(int))
+        index = Expression.compile(ast.index)
         return SubscriptExpression(
             ast=ast,
             array=array,

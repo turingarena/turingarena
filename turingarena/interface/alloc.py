@@ -1,10 +1,10 @@
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression
-from turingarena.interface.type_expressions import ArrayType, ScalarType
+from turingarena.interface.type_expressions import ArrayType
 
 
 class AllocStatement(ImperativeStatement):
-    __slots__ = ["scope", "arguments", "size"]
+    __slots__ = ["arguments", "size"]
 
     @staticmethod
     def compile(ast, scope):
@@ -12,9 +12,8 @@ class AllocStatement(ImperativeStatement):
         assert all(isinstance(a.value_type(scope=scope), ArrayType) for a in arguments)
         return AllocStatement(
             ast=ast,
-            scope=scope,
             arguments=arguments,
-            size=Expression.compile(ast.size, expected_type=ScalarType(int)),
+            size=Expression.compile(ast.size),
         )
 
     def generate_instructions(self, context):
