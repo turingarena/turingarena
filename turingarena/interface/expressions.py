@@ -23,7 +23,7 @@ def expression_class(meta_type):
 
 
 class Expression(AbstractSyntaxNode):
-    __slots__ = ["value_type"]
+    __slots__ = ["ast", "value_type"]
 
     @staticmethod
     def compile(ast, *, scope, expected_type=None):
@@ -61,6 +61,7 @@ class IntLiteralExpression(LiteralExpression):
     @staticmethod
     def compile(ast, scope):
         return IntLiteralExpression(
+            ast=ast,
             value_type=ScalarType(int),
             value=int(ast.int_literal),
         )
@@ -78,6 +79,7 @@ class ReferenceExpression(Expression):
             raise VariableNotDeclaredError(f"Variable {ast.variable_name} is not declared")
         else:
             return ReferenceExpression(
+                ast=ast,
                 value_type=variable.value_type,
                 variable=variable,
             )
@@ -105,6 +107,7 @@ class SubscriptExpression(Expression):
         array = Expression.compile(ast.array, scope=scope)
         index = Expression.compile(ast.index, scope=scope, expected_type=ScalarType(int))
         return SubscriptExpression(
+            ast=ast,
             array=array,
             index=index,
             value_type=array.value_type.item_type,
