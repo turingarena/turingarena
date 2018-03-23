@@ -1,5 +1,5 @@
 from turingarena.common import ImmutableObject
-from turingarena.interface.block import ImperativeBlock, ExitCall
+from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, Instruction
@@ -15,8 +15,8 @@ class ExitStatement(ImperativeStatement):
         yield ExitInstruction()
         raise InterfaceExit
 
-    def first_calls(self):
-        return {ExitCall}
+    def expects_request(self, request):
+        return request is not None and request.request_type == "exit"
 
 
 class ExitInstruction(Instruction):
@@ -66,10 +66,10 @@ class IfStatement(ImperativeStatement):
         if self.else_body:
             self.else_body.check_variables(initialized_variables, allocated_variables)
 
-    def first_calls(self):
-        return self.then_body.first_calls() | (
-            {None} if self.else_body is not None else
-            self.else_body.first_calls()
+    def expects_request(self, request):
+        return (
+            self.then_body.expects_request(request) or
+            self.else_body is not None and self.else_body.expects_request(request)
         )
 
 
@@ -97,10 +97,13 @@ class ForStatement(ImperativeStatement):
         body.validate(inner_context)
 
     def contextualized_body(self, context):
-        return self.body, context.create_inner().with_variables([self.index.variable])
+        return self.body, self.body_context(context)
+
+    def body_context(self, context):
+        return context.create_inner().with_variables([self.index.variable])
 
     def generate_instructions(self, context):
-        if not self.may_call():
+        if self.body.expects_request(None):
             yield SimpleForInstruction(statement=self, context=context)
         else:
             yield from self.do_generate_instruction(context)
@@ -115,14 +118,14 @@ class ForStatement(ImperativeStatement):
     def initialized_variables(self):
         return [self.index.variable]
 
-    def may_call(self):
-        return any(f is not None for f in self.body.first_calls())
-
     def check_variables(self, initialized_variables, allocated_variables):
         self.body.check_variables(initialized_variables, allocated_variables)
 
-    def first_calls(self):
-        return self.body.first_calls() | {None}
+    def expects_request(self, request):
+        return (
+            request is None
+            or self.body.expects_request(request)
+        )
 
 
 class SimpleForInstruction(Instruction):
@@ -146,5 +149,5 @@ class LoopStatement(ImperativeStatement):
     def body(self):
         return ImperativeBlock(self.ast.body),
 
-    def first_calls(self):
-        return self.body.first_calls() | {None}
+    def expects_request(self, request):
+        return self.body.expects_request(request)

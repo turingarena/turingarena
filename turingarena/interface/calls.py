@@ -89,8 +89,12 @@ class CallStatement(ImperativeStatement):
                 parseinfo=self.ast.return_value.parseinfo,
             )
 
-    def first_calls(self):
-        return {self.function_name}
+    def expects_request(self, request):
+        return (
+            request is not None
+            and request.request_type == "function_call"
+            and request.function_name == self.function_name
+        )
 
     def check_variables(self, initialized_variables, allocated_variables):
         for exp in self.parameters:

@@ -30,6 +30,5 @@ class ImperativeStatement(Statement):
     def generate_instructions(self, context):
         pass
 
-    def first_calls(self):
-        return {None}
-
+    def expects_request(self, request):
+        return request is None

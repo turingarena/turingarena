@@ -44,26 +44,12 @@ class ImperativeBlock(Block):
                 continue
             yield from statement.generate_instructions(inner_context)
 
-    def is_possible_branch(self, *, context):
-        request = context.engine.peek_request()
-        if request.message_type == "function_call":
-            call = request.function_name
-        elif request.message_type == "exit":
-            call = ExitCall
-        else:
-            call = None
-        return call is not None and call in self.first_calls()
-
-    def first_calls(self):
-        ans = {None}
+    def expects_request(self, request):
         for s in self.statements:
-            if not isinstance(s, ImperativeStatement):
-                continue
-            if None not in ans:
+            if s.expects_request(request):
+                return True
+            if not s.expects_request(None):
                 break
-            ans.remove(None)
-            ans.update(s.first_calls())
-        return ans
 
     def contextualized_statements(self, context):
         inner_context = context.create_inner()
