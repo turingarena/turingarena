@@ -37,6 +37,10 @@ class InterfaceDefinition(AbstractSyntaxNode):
     def global_variables(self):
         return self.body.declared_variables()
 
+    @property
+    def functions(self):
+        return self.body.declared_functions()
+
     def contextualized_statements(self):
         return self.body.contextualized_statements(
             StaticContext(
@@ -51,7 +55,7 @@ class InterfaceDefinition(AbstractSyntaxNode):
             variables=OrderedDict(self.body.scope.variables.items()),
             functions={
                 c.name: c.signature
-                for c in self.body.scope.functions.values()
+                for c in self.functions
             },
             callbacks={
                 c.name: c.signature

@@ -65,7 +65,6 @@ class FunctionStatement(Statement):
     @staticmethod
     def compile(ast, scope):
         fun = Function.compile(ast, scope)
-        scope.functions[fun.name] = fun
         return FunctionStatement(
             ast=ast,
             function=fun,

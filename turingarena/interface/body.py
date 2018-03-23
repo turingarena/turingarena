@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 from turingarena.interface.context import StaticContext
 from turingarena.interface.executable import ImperativeStatement
@@ -27,26 +28,46 @@ class Body(AbstractSyntaxNode):
 
     @staticmethod
     def generate_statements(ast, scope):
+        # FIXME: remove this method
         for s in ast.statements:
             compiled_s = compile_statement(s, scope=scope)
             if isinstance(compiled_s, VarStatement):
                 for v in compiled_s.declared_variables():
                     scope.variables[v.name] = v
+            if compiled_s.statement_type == "function":
+                fun = compiled_s.function
+                scope.functions[fun.name] = fun
+
             yield compiled_s
 
     def declared_variables(self):
-        return {
-            v.name: v
-            for s in [
-            compile_statement(ss)
-            for ss in self.ast.statements
-            if ss.statement_type == "var"
+        var_statements = [
+            compile_statement(s)
+            for s in self.ast.statements
+            if s.statement_type == "var"
         ]
+        return OrderedDict(
+            (v.name, v)
+            for s in var_statements
             for v in s.declared_variables()
-        }
+        )
+
+    def declared_functions(self):
+        function_statements = [
+            compile_statement(s)
+            for s in self.ast.statements
+            if s.statement_type == "function"
+        ]
+        return [
+            s.function
+            for s in function_statements
+        ]
 
     def contextualized_statements(self, context):
         scope = Scope(context.scope)
+        for fun in self.declared_functions():
+            scope.functions[fun.name] = fun
+
         for ast in self.ast.statements:
             s = compile_statement(ast, scope=scope)
             if isinstance(s, VarStatement):
