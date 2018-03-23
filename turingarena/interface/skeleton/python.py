@@ -7,7 +7,6 @@ def generate_skeleton_python(interface):
         yield
         yield from generate_skeleton_statement(statement, context=context)
     yield
-    yield f"__load_source__()"
     yield f"import source as _source"
 
 

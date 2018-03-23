@@ -45,7 +45,18 @@ def load_source():
     exec(source_string, source.__dict__)
 
 
-skeleton.__dict__["__load_source__"] = load_source
+def my_import(name, *args, **kwargs):
+    if name == "source":
+        load_source()
+    return __import__(name, *args, **kwargs)
+
+
+import builtins
+
+skeleton.__builtins__ = dict(
+    builtins.__dict__,
+    __import__=my_import,
+)
 
 # execute the modules source file
 exec(skeleton_string, skeleton.__dict__)
