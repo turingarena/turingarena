@@ -19,7 +19,7 @@ class BindingStorage:
         elif self.parent:
             return self.parent[variable]
         else:
-            raise KeyError
+            raise KeyError(variable)
 
     def __setitem__(self, variable, value):
         if variable in self.values:
@@ -27,7 +27,7 @@ class BindingStorage:
         elif self.parent:
             self.parent[variable] = value
         else:
-            raise KeyError
+            raise KeyError(variable)
 
 
 class GlobalContext(ImmutableObject):

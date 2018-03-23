@@ -41,7 +41,7 @@ class IfStatement(ImperativeStatement):
     def compile(ast, scope):
         return IfStatement(
             ast=ast,
-            condition=Expression.compile(ast.condition, scope=scope),
+            condition=Expression.compile(ast.condition),
             then_body=Body.compile(ast.then_body, scope=scope),
             else_body=(
                 None if ast.else_body is None else
@@ -92,7 +92,7 @@ class ForStatement(ImperativeStatement):
             ast=ast,
             index=ForIndex(
                 variable=index_var,
-                range=Expression.compile(ast.index.range, scope=scope),
+                range=Expression.compile(ast.index.range),
             ),
             body=Body.compile(ast.body, scope=for_scope),
             scope=for_scope,

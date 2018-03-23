@@ -48,7 +48,7 @@ class InputOutputStatement(ImperativeStatement):
             ast=ast,
             scope=scope,
             arguments=[
-                Expression.compile(arg, scope=scope)
+                Expression.compile(arg)
                 for arg in ast.arguments
             ],
         )

@@ -183,7 +183,7 @@ def build_subscript(expression):
 def build_expression(expression):
     builders = {
         "int_literal": lambda: f"{expression.value}",
-        "reference": lambda: f"{expression.variable.name}",
+        "reference": lambda: f"{expression.variable_name}",
         "subscript": lambda: build_subscript(expression),
     }
     return builders[expression.expression_type]()

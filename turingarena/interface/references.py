@@ -60,10 +60,6 @@ class ConstantReference(Reference):
 class VariableReference(Reference):
     __slots__ = ["context", "variable"]
 
-    def __init__(self, **kwargs):
-        kwargs.setdefault("value_type", kwargs["variable"].value_type)
-        super().__init__(**kwargs)
-
     def do_get(self):
         return self.context.bindings[self.variable]
 

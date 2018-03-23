@@ -8,13 +8,13 @@ class AllocStatement(ImperativeStatement):
 
     @staticmethod
     def compile(ast, scope):
-        arguments = [Expression.compile(arg, scope=scope) for arg in ast.arguments]
+        arguments = [Expression.compile(arg) for arg in ast.arguments]
         assert all(isinstance(a.value_type(scope=scope), ArrayType) for a in arguments)
         return AllocStatement(
             ast=ast,
             scope=scope,
             arguments=arguments,
-            size=Expression.compile(ast.size, scope=scope, expected_type=ScalarType(int)),
+            size=Expression.compile(ast.size, expected_type=ScalarType(int)),
         )
 
     def generate_instructions(self, context):

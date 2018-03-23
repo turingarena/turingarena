@@ -124,7 +124,11 @@ class CallbackCallInstruction(Instruction):
 
     def on_generate_response(self):
         parameters = [
-            VariableReference(context=self.local_context, variable=p).get()
+            VariableReference(
+                context=self.local_context,
+                variable=p,
+                value_type=p.value_type,
+            ).get()
             for p in self.callback.signature.parameters
         ]
 

@@ -15,7 +15,7 @@ class CallStatement(ImperativeStatement):
 
     @staticmethod
     def compile_parameter(ast, *, fun, decl, scope):
-        expr = Expression.compile(ast, scope=scope)
+        expr = Expression.compile(ast)
 
         expr_value_type = expr.value_type(scope=scope)
 
@@ -91,7 +91,6 @@ class CallStatement(ImperativeStatement):
         else:
             return_value = Expression.compile(
                 ast,
-                scope=scope,
                 expected_type=fun.signature.return_type,
             )
         return return_value
@@ -192,7 +191,7 @@ class ReturnStatement(ImperativeStatement):
     def compile(ast, scope):
         return ReturnStatement(
             ast=ast,
-            value=Expression.compile(ast.value, scope=scope),
+            value=Expression.compile(ast.value),
         )
 
     def generate_instructions(self, context):

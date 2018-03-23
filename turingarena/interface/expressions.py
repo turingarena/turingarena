@@ -26,8 +26,8 @@ class Expression(AbstractSyntaxNode):
     __slots__ = ["ast"]
 
     @staticmethod
-    def compile(ast, *, scope, expected_type=None):
-        return expression_classes[ast.expression_type].compile(ast, scope)
+    def compile(ast, *, expected_type=None):
+        return expression_classes[ast.expression_type].do_compile(ast)
 
     @property
     def expression_type(self):
@@ -63,7 +63,7 @@ class IntLiteralExpression(LiteralExpression):
     __slots__ = []
 
     @staticmethod
-    def compile(ast, scope):
+    def do_compile(ast):
         return IntLiteralExpression(
             ast=ast,
             value=int(ast.int_literal),
@@ -75,27 +75,33 @@ class IntLiteralExpression(LiteralExpression):
 
 @expression_class("reference")
 class ReferenceExpression(Expression):
-    __slots__ = ["variable"]
+    __slots__ = []
 
     @staticmethod
-    def compile(ast, scope):
+    def do_compile(ast):
+        return ReferenceExpression(
+            ast=ast,
+        )
+
+    @property
+    def variable_name(self):
+        return self.ast.variable_name
+
+    def variable(self, *, scope):
         try:
-            variable = scope.variables[ast.variable_name]
+            return scope.variables[self.variable_name]
         except KeyError:
-            raise VariableNotDeclaredError(f"Variable {ast.variable_name} is not declared")
-        else:
-            return ReferenceExpression(
-                ast=ast,
-                variable=variable,
-            )
+            raise VariableNotDeclaredError(f"Variable {self.variable_name} is not declared")
 
     def value_type(self, *, scope):
-        return scope.variables[self.ast.variable_name].value_type
+        return self.variable(scope=scope).value_type
 
     def do_evaluate(self, context):
+        value_type = self.value_type(scope=context.scope)
         return VariableReference(
             context=context,
-            variable=self.variable,
+            variable=self.variable(scope=context.scope),
+            value_type=value_type,
         )
 
     def check_variables(self, initialized_variables, allocated_variables):
@@ -111,9 +117,9 @@ class SubscriptExpression(Expression):
     __slots__ = ["array", "index"]
 
     @staticmethod
-    def compile(ast, scope):
-        array = Expression.compile(ast.array, scope=scope)
-        index = Expression.compile(ast.index, scope=scope, expected_type=ScalarType(int))
+    def do_compile(ast):
+        array = Expression.compile(ast.array)
+        index = Expression.compile(ast.index, expected_type=ScalarType(int))
         return SubscriptExpression(
             ast=ast,
             array=array,
