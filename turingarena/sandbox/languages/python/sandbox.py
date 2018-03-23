@@ -22,52 +22,40 @@ def init_sandbox():
     filter.load()
 
 
-# read source and skeleton files to string
-with open("source.py", "r") as source_file:
-    source_string = source_file.read()
+def main():
+    with open("source.py", "r") as source_file:
+        source_string = source_file.read()
+    with open("skeleton.py", "r") as skeleton_file:
+        skeleton_string = skeleton_file.read()
 
-with open("skeleton.py", "r") as skeleton_file:
-    skeleton_string = skeleton_file.read()
+    init_sandbox()
 
-# enter sandbox enviroment. From here every system call that is not allowed will result in an Exception 
-init_sandbox()
+    # From here every system call that is not allowed will result in an Exception
 
-# create source and skeleton modules 
-sys.modules["source"] = types.ModuleType("source")
-sys.modules["skeleton"] = types.ModuleType("skeleton")
-
-# import modules (because they are in sys.modules it will not try to access the filesystem)
-import source
-import skeleton
-
-source_loaded = False
+    run_skeleton(skeleton_string, source_string)
 
 
-def load_source():
-    global source_loaded
-    if source_loaded: return
-    exec(source_string, source.__dict__)
-    source_loaded = True
+def run_skeleton(skeleton_string, source_string):
+    # hook on 'import source'
+    def my_import(name, *args, **kwargs):
+        if name == "source":
+            source = types.ModuleType("source")
+            exec(source_string, source.__dict__)
+            return source
+        return __import__(name, *args, **kwargs)
+
+    # create skeleton module
+    skeleton = sys.modules["skeleton"] = types.ModuleType("skeleton")
+    # patch skeleton builtins to add import hook
+    import builtins
+    skeleton.__builtins__ = dict(
+        builtins.__dict__,
+        __import__=my_import,
+    )
+    # run skeleton
+    exec(skeleton_string, skeleton.__dict__)
+    skeleton.main()
 
 
-def my_import(name, *args, **kwargs):
-    if name == "source":
-        load_source()
-    return __import__(name, *args, **kwargs)
-
-
-import builtins
-
-skeleton.__builtins__ = dict(
-    builtins.__dict__,
-    __import__=my_import,
-)
-
-# execute the modules source file
-exec(skeleton_string, skeleton.__dict__)
-
-# execute skeleton main
-skeleton.main()
-
-# terminate sandbox 
-exit(0)
+if __name__ == "__main__":
+    main()
