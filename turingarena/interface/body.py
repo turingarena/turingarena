@@ -5,6 +5,7 @@ from turingarena.interface.executable import ImperativeStatement
 from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.scope import Scope
 from turingarena.interface.statements import compile_statement
+from turingarena.interface.variables import VarStatement
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +16,23 @@ class Body(AbstractSyntaxNode):
     @staticmethod
     def compile(ast, *, scope):
         scope = Scope(scope)
-        statements = [
-            compile_statement(s, scope=scope)
-            for s in ast.statements
-        ]
+
+        statements = list(Body.generate_statements(ast, scope))
+
         return Body(
             ast=ast,
             scope=scope,
             statements=statements
         )
+
+    @staticmethod
+    def generate_statements(ast, scope):
+        for s in ast.statements:
+            compiled_s = compile_statement(s, scope=scope)
+            if isinstance(compiled_s, VarStatement):
+                for v in compiled_s.declared_variables():
+                    scope.variables[v.name] = v
+            yield compiled_s
 
     def contextualized_statements(self, context):
         for s in self.statements:
