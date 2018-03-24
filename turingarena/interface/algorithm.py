@@ -15,12 +15,20 @@ from turingarena.sandbox.sources import load_source
 logger = logging.getLogger(__name__)
 
 
+class TimeLimitExceeded(AlgorithmRuntimeError):
+    pass
+
+
+class MemoryLimitExceeded(AlgorithmRuntimeError):
+    pass
+
+
 class Algorithm:
     def __init__(self, algorithm_dir):
         self.algorithm_dir = algorithm_dir
 
     @contextmanager
-    def run(self, global_variables=None):
+    def run(self, global_variables=None, time_limit=None):
         if global_variables is None:
             global_variables = {}
 
@@ -71,6 +79,9 @@ class Algorithm:
                 )
                 yield algorithm_process
                 driver_process_client.send_end_main()
+
+                if time_limit is not None:
+                    algorithm_process.time_limit(time_limit)
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:
@@ -109,6 +120,16 @@ class AlgorithmProcess:
         finally:
             info_after = self.sandbox.get_info()
             section_info.finished(info_before, info_after)
+
+    def time_limit(self, value):
+        info = self.sandbox.get_info()
+        if info.time_usage > value:
+            raise TimeLimitExceeded(info.time_usage, value)
+
+    def memory_limit(self, value):
+        info = self.sandbox.get_info()
+        if info.memory_usage > value:
+            raise MemoryLimitExceeded(info.memory_usage, value)
 
 
 @contextmanager

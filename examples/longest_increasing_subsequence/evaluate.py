@@ -1,5 +1,7 @@
 import random
 
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+
 
 def evaluate(submission):
     exponential = all(
@@ -8,11 +10,11 @@ def evaluate(submission):
     )
     quadratic = exponential and all(
         evaluate_test_case(submission, n)
-        for n in [100] * 10 + [1000] * 10
+        for n in [100] * 5 + [1000] * 5
     )
     n_log_n = quadratic and all(
         evaluate_test_case(submission, n)
-        for n in [10000] * 5
+        for n in [100000] * 5
     )
 
     return dict(
@@ -29,10 +31,13 @@ def evaluate_test_case(submission, n):
     value_range = range(10 ** digits, 10 ** (digits + 1))
     a = random.sample(value_range, n)
 
-    with submission.run(global_variables=dict(n=len(a), a=a)) as process:
-        process.call.compute()
-        l = process.call.length()
-        s = [process.call.element(i) for i in range(l)]
+    try:
+        with submission.run(global_variables=dict(n=len(a), a=a)) as process:
+            process.call.compute()
+            l = process.call.length()
+            s = [process.call.element(i) for i in range(l)]
+    except AlgorithmRuntimeError:
+        return False
 
     with context.algorithms["correct.cpp"].run(
             global_variables=dict(n=len(a), a=a)

@@ -1,25 +1,17 @@
 import random
-from functools import lru_cache
 
 
 def evaluate(algorithm):
-    cases = [
-        (random.randrange(0, 1000), random.randrange(0, 1000))
-        for _ in range(20)
-    ]
-    return dict(goals=dict(
-        correct=all(
-            evaluate_test_case(algorithm, a, b)
-            for a, b in cases
+    return dict(goals={
+        "correct": all(
+            evaluate_test_case(algorithm, (random.randrange(0, 1000), random.randrange(0, 1000)))
+            for _ in range(20)
         ),
-        correct_fraction=sum(
-            evaluate_test_case(algorithm, a, b)
-            for a, b in cases
-        ) / len(cases),
-    ))
+    })
 
 
-def evaluate_test_case(algorithm, a, b):
+def evaluate_test_case(algorithm, case):
+    a, b = case
     c = compute(algorithm, a, b)
     print(f"{a:3d} + {b:3d} == {c:4d}", end=" ")
     if c == a + b:
@@ -30,7 +22,6 @@ def evaluate_test_case(algorithm, a, b):
         return False
 
 
-@lru_cache(maxsize=None)
 def compute(algorithm, a, b):
     with algorithm.run() as process:
         return process.call.sum(a, b)
