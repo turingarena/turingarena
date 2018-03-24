@@ -4,7 +4,7 @@ from turingarena.interface.context import FunctionCallContext, AcceptCallbackCon
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
 from turingarena.interface.exceptions import InterfaceError, FunctionCallError, FunctionNotDeclaredError
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import compile_expression
 from turingarena.interface.io import read_line
 
 logger = logging.getLogger(__name__)
@@ -23,14 +23,14 @@ class CallStatement(ImperativeStatement):
 
     @property
     def parameters(self):
-        return [Expression.compile(p) for p in self.ast.parameters]
+        return [compile_expression(p, self.context) for p in self.ast.parameters]
 
     @property
     def return_value(self):
         if self.ast.return_value is None:
             return None
         else:
-            return Expression.compile(self.ast.return_value)
+            return compile_expression(self.ast.return_value, self.context)
 
     @property
     def function(self):
@@ -56,7 +56,7 @@ class CallStatement(ImperativeStatement):
                 parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(fun.signature.parameters, self.parameters):
-            expr_value_type = expression.value_type(declared_variables=self.context.variables)
+            expr_value_type = expression.value_type
 
             if expr_value_type != parameter.value_type:
                 raise InterfaceError(
@@ -80,9 +80,7 @@ class CallStatement(ImperativeStatement):
                 f"function {fun.name} does not return a value",
                 parseinfo=self.ast.return_value.parseinfo,
             )
-        return_expression_type = self.return_value and self.return_value.value_type(
-            declared_variables=self.context.variables,
-        )
+        return_expression_type = self.return_value and self.return_value.value_type
         if self.return_value is not None and return_expression_type != return_type:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, "
@@ -151,9 +149,7 @@ class FunctionCallInstruction(Instruction):
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
         for value_expr, value in zip(parameters, request.parameters):
-            value_type = value_expr.value_type(
-                declared_variables=self.context.local_context.variables,
-            )
+            value_type = value_expr.value_type
             value_expr.evaluate_in(self.context.local_context).resolve(
                 value_type.ensure(value)
             )
@@ -200,7 +196,7 @@ class ReturnStatement(ImperativeStatement):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value)
+        return compile_expression(self.ast.value, self.context)
 
     def generate_instructions(self, context):
         yield ReturnInstruction(value=self.value, context=context)
@@ -212,7 +208,5 @@ class ReturnInstruction(Instruction):
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
         self.value.evaluate_in(self.context).resolve(
-            self.value.value_type(
-                declared_variables=self.context.variables,
-            ).ensure(request.return_value)
+            self.value.value_type.ensure(request.return_value)
         )

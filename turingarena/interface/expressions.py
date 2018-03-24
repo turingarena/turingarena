@@ -1,11 +1,11 @@
 import logging
 from abc import abstractmethod
+from collections import namedtuple
 
 from bidict import bidict
 
 from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, \
     VariableNotDeclaredError
-from turingarena.interface.node import AbstractSyntaxNode
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
 
@@ -22,19 +22,20 @@ def expression_class(meta_type):
     return decorator
 
 
-class Expression(AbstractSyntaxNode):
-    __slots__ = ["ast"]
+def compile_expression(ast, context):
+    return expression_classes[ast.expression_type](ast=ast, context=context)
 
-    @staticmethod
-    def compile(ast):
-        return expression_classes[ast.expression_type].do_compile(ast)
+
+class Expression(namedtuple("Expression", ["ast", "context"])):
+    __slots__ = []
 
     @property
     def expression_type(self):
         return expression_classes.inv[self.__class__]
 
+    @property
     @abstractmethod
-    def value_type(self, *, declared_variables):
+    def value_type(self):
         pass
 
     def evaluate_in(self, context):
@@ -49,7 +50,12 @@ class Expression(AbstractSyntaxNode):
 
 
 class LiteralExpression(Expression):
-    __slots__ = ["value"]
+    __slots__ = []
+
+    @property
+    @abstractmethod
+    def value(self):
+        pass
 
     def do_evaluate(self, context):
         return ConstantReference(
@@ -62,14 +68,12 @@ class LiteralExpression(Expression):
 class IntLiteralExpression(LiteralExpression):
     __slots__ = []
 
-    @staticmethod
-    def do_compile(ast):
-        return IntLiteralExpression(
-            ast=ast,
-            value=int(ast.int_literal),
-        )
+    @property
+    def value(self):
+        return int(self.ast.int_literal)
 
-    def value_type(self, *, declared_variables):
+    @property
+    def value_type(self):
         return ScalarType(int)
 
 
@@ -77,31 +81,26 @@ class IntLiteralExpression(LiteralExpression):
 class ReferenceExpression(Expression):
     __slots__ = []
 
-    @staticmethod
-    def do_compile(ast):
-        return ReferenceExpression(
-            ast=ast,
-        )
-
     @property
     def variable_name(self):
         return self.ast.variable_name
 
-    def variable(self, *, declared_variables):
+    @property
+    def variable(self):
         try:
-            return declared_variables[self.variable_name]
+            return self.context.variable_mapping[self.variable_name]
         except KeyError:
             raise VariableNotDeclaredError(f"Variable {self.variable_name} is not declared")
 
-    def value_type(self, *, declared_variables):
-        return self.variable(declared_variables=declared_variables).value_type
+    @property
+    def value_type(self):
+        return self.variable.value_type
 
     def do_evaluate(self, context):
-        value_type = self.value_type(declared_variables=context.variables)
         return VariableReference(
             context=context,
-            variable=self.variable(declared_variables=context.variables),
-            value_type=value_type,
+            variable=self.variable,
+            value_type=self.value_type,
         )
 
     def check_variables(self, initialized_variables, allocated_variables):
@@ -114,27 +113,26 @@ class ReferenceExpression(Expression):
 
 @expression_class("subscript")
 class SubscriptExpression(Expression):
-    __slots__ = ["array", "index"]
+    __slots__ = []
 
-    @staticmethod
-    def do_compile(ast):
-        array = Expression.compile(ast.array)
-        index = Expression.compile(ast.index)
-        return SubscriptExpression(
-            ast=ast,
-            array=array,
-            index=index,
-        )
+    @property
+    def array(self):
+        return compile_expression(self.ast.array, self.context)
+
+    @property
+    def index(self):
+        return compile_expression(self.ast.index, self.context)
 
     def do_evaluate(self, context):
         return ArrayItemReference(
-            value_type=self.array.value_type(declared_variables=context.variables).item_type,
+            value_type=self.array.value_type.item_type,
             array=self.array.evaluate_in(context).get(),
             index=self.index.evaluate_in(context).get(),
         )
 
-    def value_type(self, *, declared_variables):
-        return self.array.value_type(declared_variables=declared_variables).item_type
+    @property
+    def value_type(self):
+        return self.array.value_type.item_type
 
     def check_variables(self, initialized_variables, allocated_variables):
         if self.array.variable not in allocated_variables:

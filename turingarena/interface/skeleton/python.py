@@ -59,7 +59,7 @@ def generate_function_template(statement):
 
 def generate_globals(context):
     if context.global_variables:
-        variables = ", ".join(context.global_variables)
+        variables = ", ".join(v.name for v in context.global_variables)
         yield f"global {variables}"
 
 

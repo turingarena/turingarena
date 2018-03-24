@@ -1,5 +1,5 @@
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import compile_expression
 from turingarena.interface.type_expressions import ArrayType
 
 
@@ -8,15 +8,15 @@ class AllocStatement(ImperativeStatement):
 
     @property
     def size(self):
-        return Expression.compile(self.ast.size)
+        return compile_expression(self.ast.size, self.context)
 
     @property
     def arguments(self):
-        return [Expression.compile(arg) for arg in self.ast.arguments]
+        return tuple(compile_expression(arg, self.context) for arg in self.ast.arguments)
 
     def validate(self):
         assert all(
-            isinstance(a.value_type(declared_variables=self.context.variables), ArrayType)
+            isinstance(a.value_type, ArrayType)
             for a in self.arguments
         )
 

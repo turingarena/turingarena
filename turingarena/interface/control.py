@@ -4,7 +4,7 @@ from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import compile_expression
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
 
@@ -35,17 +35,17 @@ class IfStatement(ImperativeStatement):
 
     @property
     def condition(self):
-        return Expression.compile(self.ast.condition)
+        return compile_expression(self.ast.condition, self.context)
 
     @property
     def then_body(self):
-        return ImperativeBlock(self.ast.then_body)
+        return ImperativeBlock(self.ast.then_body, self.context)
 
     @property
     def else_body(self):
         if self.ast.else_body is None:
             return None
-        return ImperativeBlock(self.ast.then_body)
+        return ImperativeBlock(self.ast.then_body, self.context)
 
     def generate_instructions(self, context):
         condition = self.condition.evaluate_in(context)
@@ -85,14 +85,14 @@ class ForStatement(ImperativeStatement):
         ast = self.ast.index
         return ForIndex(
             variable=Variable(value_type=ScalarType(int), name=ast.declarator.name),
-            range=Expression.compile(ast.range),
+            range=compile_expression(ast.range, self.context),
         )
 
     @property
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_inner().with_variables([self.index.variable]),
+            context=self.context.create_inner().with_variables((self.index.variable,)),
         )
 
     def validate(self):

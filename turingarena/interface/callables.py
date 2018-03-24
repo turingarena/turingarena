@@ -24,13 +24,13 @@ class Callable(namedtuple("Callable", ["ast", "context"])):
 
     @property
     def parameters(self):
-        return [
+        return tuple(
             Variable(
                 value_type=ValueType.compile(p.type.expression),
                 name=p.declarator.name,
             )
             for p in self.ast.declarator.parameters
-        ]
+        )
 
     @property
     def return_type(self):

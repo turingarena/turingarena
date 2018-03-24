@@ -15,10 +15,10 @@ class VarStatement(Statement):
 
     @property
     def variables(self):
-        return [
+        return tuple(
             Variable(value_type=self.value_type, name=d.name)
             for d in self.ast.declarators
-        ]
+        )
 
     @property
     def context_after(self):

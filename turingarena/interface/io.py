@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interface.exceptions import CommunicationBroken
 from turingarena.interface.executable import Instruction, ImperativeStatement
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import compile_expression
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class InputOutputStatement(ImperativeStatement):
     @property
     def arguments(self):
         return [
-            Expression.compile(arg)
+            compile_expression(arg, self.context)
             for arg in self.ast.arguments
         ]
 
@@ -68,9 +68,7 @@ class InputInstruction(Instruction):
 
     def on_communicate_with_process(self, connection):
         raw_values = [
-            a.value_type(
-                declared_variables=self.context.variables,
-            ).format(a.evaluate_in(self.context).get())
+            a.value_type.format(a.evaluate_in(self.context).get())
             for a in self.arguments
         ]
         try:
@@ -95,7 +93,7 @@ class OutputInstruction(Instruction):
 
         raw_values = read_line(connection.upward).strip().split()
         for a, v in zip(self.arguments, raw_values):
-            value = a.value_type(declared_variables=self.context.variables).parse(v)
+            value = a.value_type.parse(v)
             a.evaluate_in(self.context).resolve(value)
 
 

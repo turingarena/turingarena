@@ -7,14 +7,14 @@ from turingarena.interface.bindings import BindingStorage
 logger = logging.getLogger(__name__)
 
 
-class RootContext:
+class RootContext(namedtuple("RootContext", [])):
     __slots__ = []
 
     def create_inner(self):
         return StaticGlobalContext(
             functions={},
             callbacks={},
-            global_variables={},
+            global_variables=(),
         )
 
 
@@ -24,11 +24,15 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     "global_variables",
 ])):
     def with_variables(self, variables):
-        global_variables = dict(self.global_variables)
-        global_variables.update({
-            v.name: v for v in variables
-        })
-        return self._replace(global_variables=global_variables)
+        return self._replace(global_variables=self.global_variables + variables)
+
+    @property
+    def variables(self):
+        return self.global_variables
+
+    @property
+    def variable_mapping(self):
+        return {v.name: v for v in self.variables}
 
     def with_function(self, f):
         functions = dict(self.functions)
@@ -44,7 +48,7 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
         return StaticLocalContext(
             global_context=self,
             outer_context=None,
-            local_variables={},
+            local_variables=(),
         )
 
 
@@ -54,27 +58,28 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
     "local_variables",
 ])):
     def with_variables(self, variables):
-        local_variables = dict(self.local_variables)
-        local_variables.update({
-            v.name: v for v in variables
-        })
-        return self._replace(local_variables=local_variables)
+        return self._replace(local_variables=self.local_variables + variables)
+
+    @property
+    def outer_variables(self):
+        if self.outer_context:
+            return self.outer_context.variables
+        else:
+            return self.global_context.variables
 
     @property
     def variables(self):
-        # FIXME: useless copies, use an immutable collection instead
-        if self.outer_context:
-            ans = dict(self.outer_context.variables)
-        else:
-            ans = dict(self.global_context.global_variables)
-        ans.update(self.local_variables)
-        return ans
+        return self.outer_variables + self.local_variables
+
+    @property
+    def variable_mapping(self):
+        return {v.name: v for v in self.variables}
 
     def create_inner(self):
         return StaticLocalContext(
             global_context=self.global_context,
             outer_context=self,
-            local_variables={},
+            local_variables=(),
         )
 
 
