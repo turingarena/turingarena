@@ -2,32 +2,24 @@ const vm = require('vm');
 const fs = require('fs');
 const readline = require('readline');
 
-function createLinePromise() {
-    let resolve;
-    const promise = new Promise((r) => resolve = r);
-    console.assert(resolve);
-    return {
-        promise,
-        resolve,
-    };
+let onResolveLine;
+let nextLinePromise;
+
+function makeLinePromise() {
+    return new Promise((resolve) => { onResolveLine = resolve; })
 }
+nextLinePromise = makeLinePromise();
 
-// queue of promises resolving to a line
-let lineQueueFront = createLinePromise();
-let lineQueueBack = lineQueueFront;
-
-const lineInterface = readline.createInterface({input: process.stdin});
-
-lineInterface.on('line', (line) => {
-    lineQueueBack.resolve(line);
-    lineQueueBack.next = createLinePromise();
-    lineQueueBack = lineQueueBack.next;
+readline.createInterface({input: process.stdin}).on('line', (line) => {
+    const resolve = onResolveLine;
+    const next = makeLinePromise();
+    resolve({line, next});
 });
 
 
 async function readLine() {
-    line = await lineQueueFront.promise
-    lineQueueFront = lineQueueFront.next;
+    const { line, next } = await nextLinePromise
+    nextLinePromise = next;
     return line;
 }
 
