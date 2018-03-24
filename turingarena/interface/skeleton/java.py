@@ -96,6 +96,7 @@ def generate_block_statement(statement, *, interface):
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
         "flush": lambda: ["System.out.flush();"],
+        "checkpoint": lambda: ["""System.out.println("0");"""],
         "call": lambda: generate_call(statement, interface=interface,),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),

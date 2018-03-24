@@ -77,6 +77,7 @@ def test_function_return_value():
                         assert a == 1
                         return 2
                 """,
+                'javascript': """function f(a, b) { return 2; }""",
             },
     ):
         with algo.run() as p:
