@@ -17,7 +17,7 @@ CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "retu
 
 
 class Callable(ImmutableObject):
-    __slots__ = ["ast"]
+    __slots__ = ["ast", "context"]
 
     @property
     def name(self):
@@ -66,7 +66,7 @@ class FunctionStatement(Statement):
 
     @property
     def function(self):
-        return Function(self.ast)
+        return Function(ast=self.ast, context=self.context)
 
     def validate(self, context):
         self.function.validate()
@@ -80,7 +80,10 @@ class Callback(Callable):
 
     @property
     def body(self):
-        return ImperativeBlock(self.ast.body)
+        return ImperativeBlock(
+            ast=self.ast.body,
+            context=self.context.create_local().with_variables(self.signature.parameters),
+        )
 
     def validate(self):
         super().validate()
@@ -148,7 +151,7 @@ class CallbackStatement(Statement):
 
     @property
     def callback(self):
-        return Callback(self.ast)
+        return Callback(ast=self.ast, context=self.context)
 
     def validate(self, context):
         self.callback.validate()

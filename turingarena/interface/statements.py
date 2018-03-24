@@ -1,8 +1,8 @@
 from bidict import bidict
 
 
-def compile_statement(ast):
-    return get_statement_classes()[ast.statement_type](ast)
+def compile_statement(ast, context):
+    return get_statement_classes()[ast.statement_type](ast=ast, context=context)
 
 
 def get_statement_classes():

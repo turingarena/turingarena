@@ -9,21 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 class Block(AbstractSyntaxNode):
-    __slots__ = ["ast"]
+    __slots__ = ["ast", "context"]
 
     @property
     def statements(self):
-        return [compile_statement(s) for s in self.ast.statements]
+        inner_context = self.context.create_inner()
+        for s in self.ast.statements:
+            statement = compile_statement(s, inner_context)
+            yield statement
+            inner_context = statement.context_after
 
     def declared_variables(self):
-        var_statements = [
-            compile_statement(s)
-            for s in self.ast.statements
-            if s.statement_type == "var"
-        ]
         return OrderedDict(
             (v.name, v)
-            for s in var_statements
+            for s in self.statements
+            if s.statement_type == "var"
             for v in s.variables
         )
 

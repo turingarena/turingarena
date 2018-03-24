@@ -7,6 +7,17 @@ from turingarena.interface.bindings import BindingStorage
 logger = logging.getLogger(__name__)
 
 
+class RootContext:
+    __slots__ = []
+
+    def create_inner(self):
+        return StaticGlobalContext(
+            functions={},
+            callbacks={},
+            global_variables={},
+        )
+
+
 class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     "functions",
     "callbacks",

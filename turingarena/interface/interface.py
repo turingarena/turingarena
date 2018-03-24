@@ -2,7 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.block import Block
-from turingarena.interface.context import GlobalContext, MainContext, StaticGlobalContext
+from turingarena.interface.context import GlobalContext, MainContext, StaticGlobalContext, RootContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -21,7 +21,9 @@ class InterfaceDefinition(Block):
     @staticmethod
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
-        definition = InterfaceDefinition(source_text=source_text, ast=ast)
+        definition = InterfaceDefinition(
+            source_text=source_text, ast=ast, context=RootContext(),
+        )
         definition.validate()
         return definition
 

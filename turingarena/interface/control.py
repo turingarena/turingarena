@@ -90,7 +90,10 @@ class ForStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return ImperativeBlock(self.ast.body)
+        return ImperativeBlock(
+            ast=self.ast.body,
+            context=self.context.create_inner().with_variables([self.index.variable]),
+        )
 
     def validate(self, context):
         body, inner_context = self.contextualized_body(context)
