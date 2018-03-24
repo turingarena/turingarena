@@ -2,7 +2,6 @@ from turingarena.common import indent_all, indent
 
 
 def generate_skeleton_python(interface):
-    yield "import sys"
     for statement in interface.statements:
         yield
         yield from generate_skeleton_statement(statement)
@@ -98,11 +97,11 @@ def generate_block_statement(statement):
         "input": lambda: generate_input(statement),
         "output": lambda: generate_output(statement),
         "checkpoint": lambda: ["""print(0)"""],
-        "flush": lambda: ["""sys.stdout.flush()"""],
+        "flush": lambda: ["""print(end="", flush=True)"""],
         "call": lambda: generate_call(statement),
         "for": lambda: generate_for(statement),
         "if": lambda: generate_if(statement),
-        "exit": lambda: ["sys.exit(0)"],
+        "exit": lambda: ["raise SystemExit"],
         "return": lambda: [f"return {build_expression(statement.value)}"],
     }
     return generators[statement.statement_type]()
@@ -138,11 +137,7 @@ def generate_input(statement):
         for v in statement.arguments
     )
 
-    formats = ", ".join(
-        "int" for v in statement.arguments
-    )
-
-    yield f"[{arguments}] = (fmt(v) for fmt, v in zip([{formats}], sys.stdin.readline().split()))"
+    yield f"[{arguments}] = map(int, input().split())"
 
 
 def generate_if(statement):
