@@ -2,6 +2,8 @@ import logging
 import os
 import subprocess
 import sys
+from contextlib import redirect_stdout
+from io import StringIO
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.algorithm import Algorithm
@@ -47,9 +49,13 @@ class HostPythonEvaluator(PythonEvaluator):
 
         context = ProblemEvaluationContext(prepared_problem_dir)
         script_globals["context"] = context
-        exec(script, script_globals)
 
-        script_globals[self.function_name](Algorithm(submission_dir))
+        eval_stdout = StringIO()
+        with redirect_stdout(eval_stdout):
+            exec(script, script_globals)
+            data = script_globals[self.function_name](Algorithm(submission_dir))
+
+        return dict(stdout=eval_stdout.getvalue(), data=data)
 
 
 class SubprocessPythonEvaluator(PythonEvaluator):

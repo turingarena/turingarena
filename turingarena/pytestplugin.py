@@ -1,8 +1,16 @@
+import ast
 import os
+import re
 
 import pytest
+from _pytest.assertion.rewrite import rewrite_asserts
+from pytest import approx
 
 from turingarena.problem.problem import make_problem, load_source_file
+
+
+class EvaluationAssertionError(Exception):
+    pass
 
 
 class ProblemSolutionTestItem(pytest.File, pytest.Item):
@@ -12,7 +20,29 @@ class ProblemSolutionTestItem(pytest.File, pytest.Item):
         self.source = source
 
     def runtest(self):
-        self.problem.evaluate(self.source)
+        assertions = re.findall(r"evaluation_assert\s+(.+)", self.source.text)
+        result = self.problem.evaluate(self.source)
+        for condition in assertions:
+            mode = "exec"
+            tree = ast.parse(f"assert {condition}\n", mode=mode)
+            rewrite_asserts(tree)
+            co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
+            try:
+                exec(co, dict(approx=approx), result)
+            except AssertionError as e:
+                raise EvaluationAssertionError(condition) from e
+            except Exception as e:
+                raise AssertionError(f"exception while checking: {condition}") from e
+
+    def repr_failure(self, excinfo):
+        if isinstance(excinfo.value, EvaluationAssertionError):
+            [condition] = excinfo.value.args
+            return "\n".join([
+                excinfo.value.__cause__.args[0],
+                "",
+                f"Failed evaluation assert: {condition}",
+            ])
+        return super().repr_failure(excinfo)
 
 
 def pytest_collect_file(path, parent):
