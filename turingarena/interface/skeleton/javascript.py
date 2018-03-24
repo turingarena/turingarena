@@ -2,7 +2,7 @@ from turingarena.common import indent_all, indent
 
 
 def generate_skeleton_javascript(interface):
-    for statement in interface.body.statements:
+    for statement in interface.statements:
         yield from generate_skeleton_statement(statement, interface=interface)
     yield
     yield from generate_main(interface)

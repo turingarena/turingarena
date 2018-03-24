@@ -6,7 +6,7 @@ def generate_skeleton_java(interface):
     yield
     yield "abstract class Skeleton {"
     yield indent("private static final Scanner in = new Scanner(System.in);")
-    for statement in interface.body.statements:
+    for statement in interface.statements:
         yield
         yield from indent_all(generate_skeleton_statement(statement, interface=interface))
     yield "}"

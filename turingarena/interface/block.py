@@ -50,6 +50,8 @@ class ImperativeBlock(Block):
 
     def expects_request(self, request):
         for s in self.statements:
+            if not isinstance(s, ImperativeStatement):
+                continue
             if s.expects_request(request):
                 return True
             if not s.expects_request(None):

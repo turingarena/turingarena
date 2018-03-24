@@ -5,9 +5,9 @@ import pytest
 from turingarena.problem.problem import make_problem, load_source_file
 
 
-class ProblemSolutionTestItem(pytest.Item):
-    def __init__(self, name, parent, problem, source):
-        super().__init__(name, parent)
+class ProblemSolutionTestItem(pytest.File, pytest.Item):
+    def __init__(self, fspath, parent, problem, source):
+        super().__init__(fspath=fspath, parent=parent)
         self.problem = problem
         self.source = source
 
@@ -30,7 +30,7 @@ def pytest_collect_file(path, parent):
     )
 
     return ProblemSolutionTestItem(
-        name=str(path),
+        fspath=path,
         parent=parent,
         problem=problem,
         source=source,
