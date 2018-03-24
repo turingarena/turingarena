@@ -2,20 +2,30 @@ const vm = require('vm');
 const fs = require('fs');
 const readline = require('readline');
 
-let onResolveLine;
-let nextLinePromise;
-
-function makeLinePromise() {
-    return new Promise((resolve) => { onResolveLine = resolve; })
+/*
+    Creates a promise which resolves to {line, next},
+    where line is the next line received in input,
+    and next is a promise defined recursively (for successive lines).
+*/
+function createLineStream() {
+    let onResolve;
+    let onReject;
+    const createNext = () => new Promise((resolve, reject) => {
+        onResolve = resolve;
+        onReject = reject;
+    });
+    readline.createInterface({input: process.stdin}).on('line', (line) => {
+        const resolve = onResolve;
+        const next = createNext();
+        resolve({line, next});
+    }).on('close', () => {
+        onReject();
+    });
+    return createNext();
 }
-nextLinePromise = makeLinePromise();
 
-readline.createInterface({input: process.stdin}).on('line', (line) => {
-    const resolve = onResolveLine;
-    const next = makeLinePromise();
-    resolve({line, next});
-});
 
+let nextLinePromise = createLineStream();
 
 async function readLine() {
     const { line, next } = await nextLinePromise
