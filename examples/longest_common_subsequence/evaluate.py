@@ -1,5 +1,6 @@
 import random
 
+
 def LCS_length(x, y):
     m = len(x)
     n = len(y)
@@ -8,11 +9,11 @@ def LCS_length(x, y):
     for i in range(1, m + 1):
         for j in range(1, n + 1):
             if x[i - 1] == y[j - 1]:
-                c[i][j] = c[i-1][j-1] + 1
-            elif c[i-1][j] >= c[i][j-1]:
-                c[i][j] = c[i-1][j]
+                c[i][j] = c[i - 1][j - 1] + 1
+            elif c[i - 1][j] >= c[i][j - 1]:
+                c[i][j] = c[i - 1][j]
             else:
-                c[i][j] = c[i][j-1]
+                c[i][j] = c[i][j - 1]
 
     return c[m][n]
 
@@ -26,8 +27,8 @@ def is_valid_solution(x, y, sol):
             j = y.index(c)
         except ValueError:
             return False
-        x = x[i+1:]
-        y = y[j+1:]
+        x = x[i + 1:]
+        y = y[j + 1:]
     return True
 
 
@@ -52,7 +53,7 @@ def evaluate_test_case(submission, N):
 
 
 def evaluate(submission):
-    for n in range(100, 1100, 100):
+    for n in [10] * 5 + [100, 1000]:
         if evaluate_test_case(submission, n):
             print(f'test case N = {n} correct')
         else:
