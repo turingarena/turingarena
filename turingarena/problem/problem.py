@@ -61,23 +61,28 @@ def load_problem(problem_name):
     return make_problem(os.path.join(problems_dir, problem_name))
 
 
-def find_algorithm_sources(directory, *, interface):
-    language_by_extension = {
-        ".cpp": "c++",
-        ".py": "python",
-        ".java": "java",
-        ".js": "javascript",
-    }
+LANGUAGE_BY_EXTENSION = {
+    ".cpp": "c++",
+    ".py": "python",
+    ".java": "java",
+    ".js": "javascript",
+}
 
+
+def find_algorithm_sources(directory, *, interface):
     root, directories, files = next(os.walk(directory))
 
     for source_filename in files:
-        base, ext = os.path.splitext(source_filename)
-        source_path = os.path.join(directory, source_filename)
-        with open(source_path) as f:
-            source_text = f.read()
-        yield source_filename, load_source(
-            source_text,
-            language=language_by_extension[ext],
-            interface=interface,
-        )
+        yield source_filename, load_source_file(directory, source_filename, interface=interface)
+
+
+def load_source_file(directory, source_filename, *, interface):
+    base, ext = os.path.splitext(source_filename)
+    source_path = os.path.join(directory, source_filename)
+    with open(source_path) as f:
+        source_text = f.read()
+    return load_source(
+        source_text,
+        language=LANGUAGE_BY_EXTENSION[ext],
+        interface=interface,
+    )

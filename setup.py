@@ -17,6 +17,9 @@ setup(
             "turingarena-sandbox=turingarena.sandbox.main:main",
             "turingarena-driver=turingarena.interface.driver.main:main",
         ],
+        "pytest11": [
+            "turingarena=turingarena.pytestplugin",
+        ]
     },
     packages=find_packages(),
     keywords="",
