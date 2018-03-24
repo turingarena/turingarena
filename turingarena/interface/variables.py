@@ -20,5 +20,6 @@ class VarStatement(Statement):
             for d in self.ast.declarators
         ]
 
-    def update_context(self, context):
-        return context.with_variables(self.variables)
+    @property
+    def context_after(self):
+        return self.context.with_variables(self.variables)

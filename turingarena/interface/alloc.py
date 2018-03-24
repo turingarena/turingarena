@@ -14,9 +14,9 @@ class AllocStatement(ImperativeStatement):
     def arguments(self):
         return [Expression.compile(arg) for arg in self.ast.arguments]
 
-    def validate(self, context):
+    def validate(self):
         assert all(
-            isinstance(a.value_type(declared_variables=context.variables), ArrayType)
+            isinstance(a.value_type(declared_variables=self.context.variables), ArrayType)
             for a in self.arguments
         )
 

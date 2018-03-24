@@ -95,15 +95,8 @@ class ForStatement(ImperativeStatement):
             context=self.context.create_inner().with_variables([self.index.variable]),
         )
 
-    def validate(self, context):
-        body, inner_context = self.contextualized_body(context)
-        body.validate(inner_context)
-
-    def contextualized_body(self, context):
-        return self.body, self.body_context(context)
-
-    def body_context(self, context):
-        return context.create_inner().with_variables([self.index.variable])
+    def validate(self):
+        self.body.validate()
 
     def generate_instructions(self, context):
         if self.body.expects_request(None):

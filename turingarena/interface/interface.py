@@ -2,7 +2,7 @@ import logging
 
 from turingarena.common import TupleLikeObject
 from turingarena.interface.block import Block
-from turingarena.interface.context import GlobalContext, MainContext, StaticGlobalContext, RootContext
+from turingarena.interface.context import GlobalContext, MainContext, RootContext
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
@@ -26,21 +26,6 @@ class InterfaceDefinition(Block):
         )
         definition.validate()
         return definition
-
-    def contextualized_statements(self):
-        context = StaticGlobalContext(
-            functions={},
-            callbacks={},
-            global_variables={},
-        )
-        for statement in self.statements:
-            yield statement, context
-            context = statement.update_context(context)
-        return context
-
-    def validate(self):
-        for statement, context in self.contextualized_statements():
-            statement.validate(context)
 
     @property
     def functions(self):
@@ -81,20 +66,12 @@ class InterfaceDefinition(Block):
 
     @property
     def main_body(self):
-        [main] = [
-            s.body
-            for s, context in self.contextualized_statements()
-            if s.statement_type == "main"
-        ]
+        [main] = [s.body for s in self.statements if s.statement_type == "main"]
         return main
 
     @property
     def init_body(self):
-        inits = [
-            s.body
-            for s, context in self.contextualized_statements()
-            if s.statement_type == "init"
-        ]
+        inits = [s.body for s in self.statements if s.statement_type == "init"]
         if inits:
             [init] = inits
             return init

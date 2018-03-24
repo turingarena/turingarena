@@ -33,6 +33,10 @@ class Block(AbstractSyntaxNode):
             allocated_variables += statement.allocated_variables()
             statement.check_variables(initialized_variables, allocated_variables)
 
+    def validate(self):
+        for statement in self.statements:
+            statement.validate()
+
 
 class ImperativeBlock(Block):
     __slots__ = []
@@ -50,17 +54,6 @@ class ImperativeBlock(Block):
                 return True
             if not s.expects_request(None):
                 break
-
-    def contextualized_statements(self, context):
-        inner_context = context.create_inner()
-        for s in self.statements:
-            yield s, inner_context
-            inner_context = s.update_context(inner_context)
-        return inner_context
-
-    def validate(self, context):
-        for statement, inner_context in self.contextualized_statements(context):
-            statement.validate(inner_context)
 
 
 ExitCall = object()

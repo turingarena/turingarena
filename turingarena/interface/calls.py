@@ -32,21 +32,22 @@ class CallStatement(ImperativeStatement):
         else:
             return Expression.compile(self.ast.return_value)
 
-    def function(self, context):
+    @property
+    def function(self):
         try:
-            return context.global_context.functions[self.ast.function_name]
+            return self.context.global_context.functions[self.ast.function_name]
         except KeyError:
             raise FunctionNotDeclaredError(
                 f"function {self.ast.function_name} is not defined",
                 parseinfo=self.ast.parseinfo,
             ) from None
 
-    def validate(self, context):
-        self.validate_parameters(context)
-        self.validate_return_value(context)
+    def validate(self):
+        self.validate_parameters()
+        self.validate_return_value()
 
-    def validate_parameters(self, context):
-        fun = self.function(context)
+    def validate_parameters(self):
+        fun = self.function
         if len(self.parameters) != len(fun.signature.parameters):
             raise FunctionCallError(
                 f"function {fun.name} "
@@ -55,7 +56,7 @@ class CallStatement(ImperativeStatement):
                 parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(fun.signature.parameters, self.parameters):
-            expr_value_type = expression.value_type(declared_variables=context.variables)
+            expr_value_type = expression.value_type(declared_variables=self.context.variables)
 
             if expr_value_type != parameter.value_type:
                 raise InterfaceError(
@@ -66,8 +67,8 @@ class CallStatement(ImperativeStatement):
                     parseinfo=expression.ast.parseinfo,
                 )
 
-    def validate_return_value(self, context):
-        fun = self.function(context)
+    def validate_return_value(self):
+        fun = self.function
         return_type = fun.signature.return_type
         if return_type is not None and self.return_value is None:
             raise FunctionCallError(
@@ -80,7 +81,7 @@ class CallStatement(ImperativeStatement):
                 parseinfo=self.ast.return_value.parseinfo,
             )
         return_expression_type = self.return_value and self.return_value.value_type(
-            declared_variables=context.variables,
+            declared_variables=self.context.variables,
         )
         if self.return_value is not None and return_expression_type != return_type:
             raise FunctionCallError(

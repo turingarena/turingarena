@@ -68,11 +68,12 @@ class FunctionStatement(Statement):
     def function(self):
         return Function(ast=self.ast, context=self.context)
 
-    def validate(self, context):
+    def validate(self):
         self.function.validate()
 
-    def update_context(self, context):
-        return context.with_function(self.function)
+    @property
+    def context_after(self):
+        return self.context.with_function(self.function)
 
 
 class Callback(Callable):
@@ -101,9 +102,6 @@ class Callback(Callable):
                 "callback arguments must be scalars",
                 parseinfo=invalid_parameter.parseinfo,
             )
-
-    def contextualized_body(self, context):
-        return self.body, context.create_local().with_variables(self.signature.parameters)
 
     def generate_instructions(self, context):
         global_context = context.call_context.local_context.procedure.global_context
@@ -153,8 +151,9 @@ class CallbackStatement(Statement):
     def callback(self):
         return Callback(ast=self.ast, context=self.context)
 
-    def validate(self, context):
+    def validate(self):
         self.callback.validate()
 
-    def update_context(self, context):
-        return context.with_callback(self.callback)
+    @property
+    def context_after(self):
+        return self.context.with_callback(self.callback)

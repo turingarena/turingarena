@@ -10,11 +10,8 @@ class EntryPointStatement(Statement):
     def body(self):
         return ImperativeBlock(ast=self.ast.body, context=self.context.create_local())
 
-    def contextualized_body(self, context):
-        return self.body, context.create_local()
-
-    def validate(self, context):
-        self.body.validate(context.create_local())
+    def validate(self):
+        self.body.validate()
 
 
 class InitStatement(EntryPointStatement):

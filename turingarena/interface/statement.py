@@ -11,11 +11,7 @@ class Statement(AbstractSyntaxNode):
 
     @property
     def context_after(self):
-        # TODO: remove delegation
-        return self.update_context(self.context)
+        return self.context
 
-    def update_context(self, context):
-        return context
-
-    def validate(self, context):
+    def validate(self):
         pass
