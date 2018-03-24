@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
@@ -16,8 +15,8 @@ logger = logging.getLogger(__name__)
 CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
 
 
-class Callable(ImmutableObject):
-    __slots__ = ["ast", "context"]
+class Callable(namedtuple("Callable", ["ast", "context"])):
+    __slots__ = []
 
     @property
     def name(self):

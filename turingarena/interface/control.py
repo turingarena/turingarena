@@ -1,4 +1,5 @@
-from turingarena.common import ImmutableObject
+from collections import namedtuple
+
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit
@@ -73,8 +74,7 @@ class IfStatement(ImperativeStatement):
         )
 
 
-class ForIndex(ImmutableObject):
-    __slots__ = ["variable", "range"]
+ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
 class ForStatement(ImperativeStatement):

@@ -1,9 +1,10 @@
-from turingarena.interface.node import AbstractSyntaxNode
+from collections import namedtuple
+
 from turingarena.interface.statements import get_statement_classes
 
 
-class Statement(AbstractSyntaxNode):
-    __slots__ = ["ast", "context"]
+class Statement(namedtuple("Statement", ["ast", "context"])):
+    __slots__ = []
 
     @property
     def statement_type(self):
