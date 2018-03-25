@@ -1,11 +1,11 @@
 import logging
 from abc import abstractmethod
-from collections import namedtuple
 
 from bidict import bidict
 
 from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, \
     VariableNotDeclaredError
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
 
@@ -26,7 +26,7 @@ def compile_expression(ast, context):
     return expression_classes[ast.expression_type](ast=ast, context=context)
 
 
-class Expression(namedtuple("Expression", ["ast", "context"])):
+class Expression(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

@@ -1,7 +1,7 @@
-from turingarena.common import ImmutableObject
+from collections import namedtuple
 
 
-class AbstractSyntaxNode(ImmutableObject):
+class AbstractSyntaxNodeWrapper(namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])):
     __slots__ = []
 
     def check_variables(self, initialized_variables, allocated_variables):
@@ -18,4 +18,3 @@ class AbstractSyntaxNode(ImmutableObject):
 
     def allocated_variables(self):
         return []
-

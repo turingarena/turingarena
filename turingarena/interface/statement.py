@@ -1,9 +1,8 @@
-from collections import namedtuple
-
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.statements import get_statement_classes
 
 
-class Statement(namedtuple("Statement", ["ast", "context"])):
+class Statement(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

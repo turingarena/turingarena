@@ -1,13 +1,14 @@
 import logging
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 
 from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.statements import compile_statement
 
 logger = logging.getLogger(__name__)
 
 
-class Block(namedtuple("Block", ["ast", "context"])):
+class Block(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

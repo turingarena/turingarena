@@ -5,6 +5,7 @@ from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import VariableReference
 from turingarena.interface.statement import Statement
 from turingarena.interface.type_expressions import ScalarType, compile_type_expression
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
 
 
-class ParameterDeclaration(namedtuple("ParameterDeclaration", ["ast", "context"])):
+class ParameterDeclaration(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -30,7 +31,7 @@ class ParameterDeclaration(namedtuple("ParameterDeclaration", ["ast", "context"]
         )
 
 
-class Callable(namedtuple("Callable", ["ast", "context"])):
+class Callable(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

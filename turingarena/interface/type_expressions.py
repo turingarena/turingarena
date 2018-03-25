@@ -1,12 +1,14 @@
 from abc import abstractmethod
 from collections import namedtuple
 
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
+
 
 def compile_type_expression(ast, context):
     return TypeExpression(ast, context)
 
 
-class TypeExpression(namedtuple("TypeExpression", ["ast", "context"])):
+class TypeExpression(AbstractSyntaxNodeWrapper):
     def value_type_dimensions(self, dimensions):
         if not dimensions:
             return ScalarType(int)
