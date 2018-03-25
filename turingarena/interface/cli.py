@@ -8,6 +8,7 @@ from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_s
 from turingarena.interface.skeleton.java import generate_skeleton_java, generate_template_java
 from turingarena.interface.skeleton.javascript import generate_template_javascript, generate_skeleton_javascript
 from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
+from turingarena.problem.problem import load_problem
 
 
 @docopt_cli
@@ -58,13 +59,11 @@ def generate_metadata_cli(args):
         metadata [options]
 
     Options:
-        -I --interface=<file>  Interface definition file [default: interface.txt].
+        -p --problem=<problem>  Problem [default: .].
     """
 
-    with open(args["--interface"]) as f:
-        interface_text = f.read()
-    interface = InterfaceDefinition.compile(interface_text)
-    print(json.dumps(interface.metadata, indent=4))
+    problem = load_problem(args["--problem"])
+    print(json.dumps(problem.metadata, indent=4))
 
 
 def generate(args, generators):
