@@ -1,20 +1,29 @@
 from abc import abstractmethod
-
-from bidict import bidict
-
-from turingarena.common import TupleLikeObject
+from collections import namedtuple
 
 
-class ValueType(TupleLikeObject):
-    __slots__ = ["meta_type"]
+def compile_type_expression(ast, context):
+    return TypeExpression(ast, context)
 
-    def __init__(self, **kwargs):
-        kwargs.setdefault("meta_type", type_expression_classes.inv[self.__class__])
-        super().__init__(**kwargs)
 
-    @staticmethod
-    def compile(ast):
-        return type_expression_classes[ast.meta_type].do_compile(ast)
+class TypeExpression(namedtuple("TypeExpression", ["ast", "context"])):
+    def value_type_dimensions(self, dimensions):
+        if not dimensions:
+            return ScalarType(int)
+        return ArrayType(self.value_type_dimensions(dimensions[1:]))
+
+    @property
+    def value_type(self):
+        return self.value_type_dimensions(self.ast.dimensions)
+
+
+class ValueType:
+    __slots__ = []
+
+    @property
+    @abstractmethod
+    def meta_type(self):
+        pass
 
     def ensure(self, value):
         value = self.intern(value)
@@ -27,17 +36,6 @@ class ValueType(TupleLikeObject):
 
     @abstractmethod
     def check(self, value):
-        pass
-
-    def serialize(self, value):
-        yield from self.on_serialize(self.ensure(value))
-
-    @abstractmethod
-    def on_serialize(self, value):
-        pass
-
-    @abstractmethod
-    def deserialize(self, lines):
         pass
 
     @property
@@ -53,46 +51,15 @@ class ValueType(TupleLikeObject):
         pass
 
 
-class PrimaryType(ValueType):
+class ScalarType(ValueType, namedtuple("ScalarType", ["base_type"])):
     __slots__ = []
-
-    def on_serialize(self, value):
-        yield self.format(value)
-
-    def deserialize(self, lines):
-        return self.parse(next(lines))
-
-    def format(self, value):
-        self.check(value)
-        return self.do_format(value)
-
-    @abstractmethod
-    def do_format(self, value):
-        pass
-
-    @abstractmethod
-    def parse(self, string):
-        pass
-
-
-class ScalarType(PrimaryType):
-    __slots__ = ["base_type"]
-
-    def __init__(self, base_type):
-        super().__init__(base_type=base_type)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.base_type.__name__})"
 
     def __str__(self):
         return self.base_type.__name__
 
-    @staticmethod
-    def do_compile(ast):
-        bases = {
-            "int": int,
-        }
-        return ScalarType(bases[ast.base_type])
+    @property
+    def meta_type(self):
+        return "scalar"
 
     def intern(self, value):
         return value
@@ -101,31 +68,20 @@ class ScalarType(PrimaryType):
         if not isinstance(value, self.base_type):
             raise TypeError(f"expected a {self.base_type}, got {value}")
 
-    def do_format(self, value):
-        formatters = {
-            int: lambda: value,
-        }
-        return formatters[self.base_type]()
-
-    def parse(self, string):
-        return self.base_type(string)
-
     @property
     def metadata_attributes(self):
         return dict(base_type=str(self.base_type))
 
 
-class ArrayType(ValueType):
-    __slots__ = ["item_type"]
-
-    @staticmethod
-    def do_compile(ast):
-        return ArrayType(
-            item_type=ValueType.compile(ast.item_type),
-        )
+class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
+    __slots__ = []
 
     def __str__(self):
         return f"{self.item_type}[]"
+
+    @property
+    def meta_type(self):
+        return "array"
 
     @property
     def metadata_attributes(self):
@@ -141,22 +97,3 @@ class ArrayType(ValueType):
         assert type(value) == list
         for x in value:
             self.item_type.check(x)
-
-    def on_serialize(self, value):
-        value = list(value)
-        yield from ScalarType(int).serialize(len(value))
-        for item in value:
-            yield from self.item_type.serialize(item)
-
-    def deserialize(self, lines):
-        size = ScalarType(int).deserialize(lines)
-        return [
-            self.item_type.deserialize_arguments(lines)
-            for _ in range(size)
-        ]
-
-
-type_expression_classes = bidict({
-    "scalar": ScalarType,
-    "array": ArrayType,
-})

@@ -13,7 +13,7 @@ grammar_ebnf = r"""
     ;
 
     return_type_declarator =
-        '->' @:type
+        '->' @:type_expression
     ;
     
     callable_declarator =
@@ -24,7 +24,7 @@ grammar_ebnf = r"""
     ;
 
     var_statement =
-        statement_type:'var' ~ type:type declarators:','.{ declarator }+ ';'
+        statement_type:'var' ~ type:type_expression declarators:','.{ declarator }+ ';'
     ;
     
     declarator = name:identifier ;
@@ -33,7 +33,7 @@ grammar_ebnf = r"""
         declarator:declarator ':' range:expression
     ;
 
-    parameter_declaration = type:type declarator:declarator ;
+    parameter_declaration = type:type_expression declarator:declarator ;
 
     block = '{' statements:{ block_statement }* '}' ;
 
@@ -80,10 +80,7 @@ grammar_ebnf = r"""
 
     type = expression:type_expression ;
 
-    type_expression =
-        | meta_type:`array` item_type:type_expression '[' ']'
-        | meta_type:`scalar` base_type:'int'
-    ;
+    type_expression = 'int' ~ dimensions:{ '[' ']' }* ;
 
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/ ;
 

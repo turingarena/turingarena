@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
-from turingarena.interface.type_expressions import PrimaryType, ArrayType
+from turingarena.interface.type_expressions import ArrayType, ScalarType
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class ConstantReference(Reference):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        assert isinstance(self.value_type, PrimaryType)
+        assert isinstance(self.value_type, ScalarType)
         self.value_type.check(self.value)
 
     def do_get(self):

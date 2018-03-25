@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from turingarena.interface.statement import Statement
-from turingarena.interface.type_expressions import ValueType
+from turingarena.interface.type_expressions import compile_type_expression
 
 
 class Variable(namedtuple("Variable", ["name", "value_type"])):
@@ -17,8 +17,12 @@ class VarStatement(Statement):
     __slots__ = []
 
     @property
+    def type_expression(self):
+        return compile_type_expression(self.ast.type, self.context)
+
+    @property
     def value_type(self):
-        return ValueType.compile(self.ast.type.expression)
+        return self.type_expression.value_type
 
     @property
     def variables(self):

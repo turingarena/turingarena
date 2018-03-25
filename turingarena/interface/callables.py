@@ -7,7 +7,7 @@ from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.executable import Instruction
 from turingarena.interface.references import VariableReference
 from turingarena.interface.statement import Statement
-from turingarena.interface.type_expressions import ValueType, ScalarType
+from turingarena.interface.type_expressions import ScalarType, compile_type_expression
 from turingarena.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
@@ -26,19 +26,24 @@ class Callable(namedtuple("Callable", ["ast", "context"])):
     def parameters(self):
         return tuple(
             Variable(
-                value_type=ValueType.compile(p.type.expression),
+                value_type=compile_type_expression(p.type, self.context).value_type,
                 name=p.declarator.name,
             )
             for p in self.ast.declarator.parameters
         )
 
     @property
-    def return_type(self):
+    def return_type_expression(self):
         return_type_ast = self.ast.declarator.return_type
         if return_type_ast is None:
             return None
-        else:
-            return ValueType.compile(return_type_ast.expression)
+        return compile_type_expression(return_type_ast, self.context)
+
+    @property
+    def return_type(self):
+        if self.return_type_expression is None:
+            return None
+        return self.return_type_expression.value_type
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
