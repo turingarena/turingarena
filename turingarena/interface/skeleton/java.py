@@ -23,7 +23,7 @@ def generate_template_java(interface):
 
 def generate_skeleton_statement(statement, *, interface):
     generators = {
-        "var": lambda: ["final " + build_declaration(statement)],
+        "var": lambda: ["static final " + build_declaration(statement)],
         "function": lambda: generate_function(statement),
         "callback": lambda: generate_callback(statement, interface=interface),
         "main": lambda: generate_main(statement, interface=interface),
@@ -70,17 +70,14 @@ def generate_callback_template(statement, *, interface):
 
 
 def generate_main(statement, *, interface):
-    yield "void _run() {"
-    yield from indent_all(generate_block(statement.body, interface=interface))
-    yield "}"
-    yield
     yield "public static void main(String args[]) {"
-    yield indent("new Solution()._run();")
+    yield indent("Solution solution = new Solution();")
+    yield from indent_all(generate_block(statement.body, interface=interface))
     yield "}"
 
 
 def generate_constructor(statement, *, interface):
-    yield "Skeleton() {"
+    yield "static {"
     yield from indent_all(generate_block(statement.body, interface=interface))
     yield "}"
 
@@ -128,9 +125,9 @@ def generate_call(statement, *, interface):
     parameters = ", ".join(build_expression(p) for p in statement.parameters)
     if statement.return_value is not None:
         return_value = build_expression(statement.return_value)
-        yield f"{return_value} = {function_name}({parameters});"
+        yield f"{return_value} = solution.{function_name}({parameters});"
     else:
-        yield f"{function_name}({parameters});"
+        yield f"solution.{function_name}({parameters});"
     if interface.callbacks:
         yield 'System.out.println("return");'
 
