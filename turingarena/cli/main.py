@@ -1,7 +1,7 @@
 from turingarena.cli import docopt_cli
 from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
-from turingarena.interface.template import generate_template_cli, generate_skeleton_cli
+from turingarena.interface.cli import generate_metadata_cli, generate_template_cli, generate_skeleton_cli
 from turingarena.problem.cli import evaluate_cli
 from turingarena.tests.cli import test_cli
 
@@ -23,6 +23,7 @@ def main(args):
         "evaluate": evaluate_cli,
         "template": generate_template_cli,
         "skeleton": generate_skeleton_cli,
+        "metadata": generate_metadata_cli,
         "test": test_cli,
     }
     argv2 = args["<args>"]

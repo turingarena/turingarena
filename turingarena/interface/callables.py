@@ -55,6 +55,13 @@ class Callable(namedtuple("Callable", ["ast", "context"])):
             return_type=self.return_type,
         )
 
+    @property
+    def metadata(self):
+        return dict(
+            parameters=[p.metadata for p in self.parameters],
+            return_type=None if self.return_type is None else self.return_type.metadata,
+        )
+
 
 class Function(Callable):
     __slots__ = []

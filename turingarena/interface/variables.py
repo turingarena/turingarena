@@ -3,7 +3,14 @@ from collections import namedtuple
 from turingarena.interface.statement import Statement
 from turingarena.interface.type_expressions import ValueType
 
-Variable = namedtuple("Variable", ["name", "value_type"])
+
+class Variable(namedtuple("Variable", ["name", "value_type"])):
+    @property
+    def metadata(self):
+        return dict(
+            name=self.name,
+            type=self.value_type.metadata,
+        )
 
 
 class VarStatement(Statement):

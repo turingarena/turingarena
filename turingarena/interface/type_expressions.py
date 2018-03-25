@@ -40,6 +40,18 @@ class ValueType(TupleLikeObject):
     def deserialize(self, lines):
         pass
 
+    @property
+    def metadata(self):
+        return dict(
+            meta_type=self.meta_type,
+            **self.metadata_attributes
+        )
+
+    @property
+    @abstractmethod
+    def metadata_attributes(self):
+        pass
+
 
 class PrimaryType(ValueType):
     __slots__ = []
@@ -98,6 +110,10 @@ class ScalarType(PrimaryType):
     def parse(self, string):
         return self.base_type(string)
 
+    @property
+    def metadata_attributes(self):
+        return dict(base_type=str(self.base_type))
+
 
 class ArrayType(ValueType):
     __slots__ = ["item_type"]
@@ -110,6 +126,10 @@ class ArrayType(ValueType):
 
     def __str__(self):
         return f"{self.item_type}[]"
+
+    @property
+    def metadata_attributes(self):
+        return dict(item_type=self.item_type.metadata)
 
     def intern(self, value):
         return [

@@ -1,12 +1,14 @@
+import json
 import sys
 
 from turingarena.cli import docopt_cli
 from turingarena.common import write_to_file
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_skeleton_cpp
-from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
 from turingarena.interface.skeleton.java import generate_skeleton_java, generate_template_java
 from turingarena.interface.skeleton.javascript import generate_template_javascript, generate_skeleton_javascript
+from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
+
 
 @docopt_cli
 def generate_template_cli(args):
@@ -46,6 +48,23 @@ def generate_skeleton_cli(args):
         "java": generate_skeleton_java,
         "javascript": generate_skeleton_javascript,
     })
+
+
+@docopt_cli
+def generate_metadata_cli(args):
+    """Generate interface metadata.
+
+    Usage:
+        metadata [options]
+
+    Options:
+        -I --interface=<file>  Interface definition file [default: interface.txt].
+    """
+
+    with open(args["--interface"]) as f:
+        interface_text = f.read()
+    interface = InterfaceDefinition.compile(interface_text)
+    print(json.dumps(interface.metadata, indent=4))
 
 
 def generate(args, generators):

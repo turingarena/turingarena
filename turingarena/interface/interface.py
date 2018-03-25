@@ -61,6 +61,23 @@ class InterfaceDefinition(Block):
             },
         )
 
+    @property
+    def metadata(self):
+        return dict(
+            global_variables={
+                v.name: v.metadata
+                for v in self.global_variables.values()
+            },
+            callbacks={
+                c.name: c.metadata
+                for c in self.callbacks.values()
+            },
+            functions={
+                f.name: f.metadata
+                for f in self.functions.values()
+            }
+        )
+
     def static_analysis(self):
         self.check_variables([], [])
 

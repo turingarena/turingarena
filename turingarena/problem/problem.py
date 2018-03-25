@@ -35,6 +35,12 @@ class AlgorithmicProblem(ImmutableObject):
             source.compile(submission_dir)
             yield submission_dir
 
+    @property
+    def metadata(self):
+        return dict(
+            interface=self.interface.metadata,
+        )
+
     def evaluate(self, source):
         with self.prepare() as prepared_problem_dir:
             with self.prepare_submission(source) as submission_dir:
