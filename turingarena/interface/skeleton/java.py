@@ -1,4 +1,5 @@
 from turingarena.common import indent_all, indent
+from turingarena.interface.skeleton.common import ExpressionBuilder
 
 
 def generate_skeleton_java(interface):
@@ -182,17 +183,8 @@ def build_parameter(parameter):
     return f'{value_type} {parameter.name}'
 
 
-def build_reference(expression):
-    subscripts = "".join(f"[{build_expression(index)}]" for index in expression.indices)
-    return f"{expression.variable_name}{subscripts}"
-
-
 def build_expression(expression):
-    builders = {
-        "int_literal": lambda: f"{expression.value}",
-        "reference": lambda: build_reference(expression),
-    }
-    return builders[expression.expression_type]()
+    return ExpressionBuilder().build(expression)
 
 
 def build_type(value_type):
