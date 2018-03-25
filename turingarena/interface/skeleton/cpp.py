@@ -7,27 +7,19 @@ def generate_skeleton_cpp(interface):
     yield "#include <cstdio>"
     yield "#include <cstdlib>"
     yield from SkeletonCodeGen().block_content(interface)
-    yield
-    yield from generate_main(interface)
-
-
-def generate_main(interface):
-    yield "int main() {"
-    for s in interface.statements:
-        if s.statement_type in ("init", "main"):
-            yield from indent_all(SkeletonCodeGen().block_content(s.body))
-    yield "}"
 
 
 def generate_template_cpp(interface):
     yield from TemplateCodeGen().block_content(interface)
 
 
-class CppCodeGen(CodeGen):
-    pass
+class SkeletonCodeGen(CodeGen):
+    def var_statement(self, s):
+        if isinstance(s.context, StaticGlobalContext):
+            yield "extern " + build_declaration(s)
+        else:
+            yield build_declaration(s)
 
-
-class SkeletonCodeGen(CppCodeGen):
     def callback_statement(self, s):
         callback = s.callback
         yield f"{build_callable_declarator(callback)}" " {"
@@ -38,11 +30,15 @@ class SkeletonCodeGen(CppCodeGen):
     def function_statement(self, s):
         yield f"{build_callable_declarator(s.function)};"
 
-    def var_statement(self, s):
-        if isinstance(s.context, StaticGlobalContext):
-            yield "extern " + build_declaration(s)
-        else:
-            yield build_declaration(s)
+    def init_statement(self, s):
+        yield "__attribute__((constructor)) static void init() {"
+        yield from indent_all(self.block_content(s.body))
+        yield "}"
+
+    def main_statement(self, s):
+        yield "int main() {"
+        yield from indent_all(self.block_content(s.body))
+        yield "}"
 
     def alloc_statement(self, s):
         for argument in s.arguments:
@@ -101,7 +97,7 @@ class SkeletonCodeGen(CppCodeGen):
         return generators[s.statement_type]()
 
 
-class TemplateCodeGen(CppCodeGen):
+class TemplateCodeGen(CodeGen):
     def var_statement(self, s):
         yield build_declaration(s)
 
