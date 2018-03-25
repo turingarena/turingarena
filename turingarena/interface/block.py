@@ -1,15 +1,14 @@
 import logging
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
-from turingarena.interface.executable import ImperativeStatement
-from turingarena.interface.node import AbstractSyntaxNode
+from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena.interface.statements import compile_statement
 
 logger = logging.getLogger(__name__)
 
 
-class Block(AbstractSyntaxNode):
-    __slots__ = ["ast", "context"]
+class Block(namedtuple("Block", ["ast", "context"])):
+    __slots__ = []
 
     @property
     def statements(self):
@@ -38,7 +37,7 @@ class Block(AbstractSyntaxNode):
             statement.validate()
 
 
-class ImperativeBlock(Block):
+class ImperativeBlock(Block, ImperativeStructure):
     __slots__ = []
 
     def generate_instructions(self, context):

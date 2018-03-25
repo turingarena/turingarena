@@ -16,16 +16,20 @@ class InterfaceSignature(TupleLikeObject):
 
 
 class InterfaceDefinition(Block):
-    __slots__ = ["source_text"]
+    __slots__ = []
 
     @staticmethod
     def compile(source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
         definition = InterfaceDefinition(
-            source_text=source_text, ast=ast, context=RootContext(),
+            ast=ast, context=RootContext(),
         )
         definition.validate()
         return definition
+
+    @property
+    def source_text(self):
+        return self.ast.parseinfo.buffer.text
 
     @property
     def functions(self):

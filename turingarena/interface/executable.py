@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.statement import Statement
@@ -23,12 +23,20 @@ class Instruction(ImmutableObject):
         return False
 
 
-class ImperativeStatement(Statement):
+class ImperativeStructure(ABC):
     __slots__ = []
 
     @abstractmethod
     def generate_instructions(self, context):
         pass
+
+    @abstractmethod
+    def expects_request(self, request):
+        pass
+
+
+class ImperativeStatement(Statement, ImperativeStructure):
+    __slots__ = []
 
     def expects_request(self, request):
         return request is None
