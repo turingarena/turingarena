@@ -110,7 +110,7 @@ class Callback(Callable):
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_local().with_variables(self.signature.parameters),
+            context=self.context.create_local().with_variables(self.parameters),
         )
 
     def validate(self):
@@ -137,7 +137,7 @@ class Callback(Callable):
             global_context=global_context,
         )
 
-        local_context = callback_context.child({p.name: p for p in self.signature.parameters})
+        local_context = callback_context.child({p.name: p for p in self.parameters})
         yield CallbackCallInstruction(
             callback_context=callback_context,
             local_context=local_context,
@@ -159,7 +159,7 @@ class CallbackCallInstruction(Instruction):
                 variable=p,
                 value_type=p.value_type,
             ).get()
-            for p in self.callback.signature.parameters
+            for p in self.callback.parameters
         ]
 
         assert all(isinstance(v, int) for v in parameters)

@@ -48,20 +48,6 @@ class InterfaceDefinition(Block):
         return self.declared_variables()
 
     @property
-    def signature(self):
-        return InterfaceSignature(
-            variables=self.global_variables,
-            functions={
-                c.name: c.signature
-                for c in self.functions.values()
-            },
-            callbacks={
-                c.name: c.signature
-                for c in self.callbacks.values()
-            },
-        )
-
-    @property
     def metadata(self):
         return dict(
             global_variables={
@@ -115,7 +101,7 @@ class MainBeginInstruction(Instruction):
 
     def on_request_lookahead(self, request):
         assert isinstance(request, MainBegin)
-        variables = self.interface.signature.variables
+        variables = self.interface.global_variables
         assert len(request.global_variables) == len(variables)
         for name, variable in variables.items():
             value = request.global_variables[name]

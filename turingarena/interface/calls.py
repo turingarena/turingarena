@@ -48,14 +48,14 @@ class CallStatement(ImperativeStatement):
 
     def validate_parameters(self):
         fun = self.function
-        if len(self.parameters) != len(fun.signature.parameters):
+        if len(self.parameters) != len(fun.parameters):
             raise FunctionCallError(
                 f"function {fun.name} "
-                f"expects {len(fun.signature.parameters)} argument(s), "
+                f"expects {len(fun.parameters)} argument(s), "
                 f"got {len(self.parameters)}",
                 parseinfo=self.ast.parseinfo,
             )
-        for parameter, expression in zip(fun.signature.parameters, self.parameters):
+        for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
 
             if expr_value_type != parameter.value_type:
@@ -69,7 +69,7 @@ class CallStatement(ImperativeStatement):
 
     def validate_return_value(self):
         fun = self.function
-        return_type = fun.signature.return_type
+        return_type = fun.return_type
         if return_type is not None and self.return_value is None:
             raise FunctionCallError(
                 f"function {fun.name} returns {return_type}, but no return expression given",
@@ -116,7 +116,7 @@ class CallStatement(ImperativeStatement):
             function=function,
         )
 
-        if interface.signature.callbacks:
+        if interface.callbacks:
             yield from self.unroll_callbacks(call_context)
 
         yield FunctionReturnInstruction(
@@ -148,6 +148,13 @@ class FunctionCallInstruction(Instruction):
         if request.function_name != fun.name:
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
+        assert len(request.parameters) == len(fun.parameters)
+
+        for name, parameters_count in request.accepted_callbacks.items():
+            # FIXME: use the static context instead
+            callback = self.context.local_context.procedure.global_context.interface.callbacks[name]
+            assert parameters_count == len(callback.parameters)
+
         for value_expr, value in zip(parameters, request.parameters):
             value_type = value_expr.value_type
             value_expr.evaluate_in(self.context.local_context).resolve(
@@ -157,14 +164,14 @@ class FunctionCallInstruction(Instruction):
         self.context.accepted_callbacks = request.accepted_callbacks
 
     def should_send_input(self):
-        return self.function.signature.return_type is not None
+        return self.function.return_type is not None
 
 
 class FunctionReturnInstruction(Instruction):
     __slots__ = ["statement", "context", "function"]
 
     def on_generate_response(self):
-        if self.function.signature.return_type:
+        if self.function.return_type:
             return_value = self.statement.return_value.evaluate_in(self.context.local_context).get()
             return_response = [1, return_value]
         else:

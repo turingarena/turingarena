@@ -56,9 +56,6 @@ class MainBegin(ProxyRequest):
             yield name
             yield from serialize_data(value)
 
-    def validate(self, *, interface_signature):
-        assert len(self.global_variables) == len(interface_signature.variables)
-
 
 class FunctionCall(ProxyRequest):
     __slots__ = ["function_name", "parameters", "accepted_callbacks"]
@@ -92,17 +89,6 @@ class FunctionCall(ProxyRequest):
         for name, parameters_count in self.accepted_callbacks.items():
             yield name
             yield parameters_count
-
-    def validate(self, *, interface_signature):
-        function_signature = interface_signature.functions[self.function_name]
-
-        assert len(self.parameters) == len(function_signature.parameters)
-        self.validate_accepted_callbacks(interface_signature)
-
-    def validate_accepted_callbacks(self, interface_signature):
-        for name, parameters_count in self.accepted_callbacks:
-            signature = interface_signature.callbacks[name]
-            assert parameters_count == len(signature.parameters)
 
 
 class CallbackReturn(ProxyRequest):

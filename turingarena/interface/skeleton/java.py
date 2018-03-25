@@ -50,7 +50,7 @@ def generate_function_template(statement):
     yield
     yield f"{build_callable_declarator(statement.function)}" " {"
     yield indent("// TODO")
-    if statement.function.signature.return_type:
+    if statement.function.return_type:
         yield indent("return 0;")
     yield "}"
 
@@ -130,7 +130,7 @@ def generate_call(statement, *, interface):
         yield f"{return_value} = {function_name}({parameters});"
     else:
         yield f"{function_name}({parameters});"
-    if interface.signature.callbacks:
+    if interface.callbacks:
         yield 'System.out.println("return");'
 
 
@@ -166,9 +166,8 @@ def generate_for(statement, *, interface):
 
 
 def build_callable_declarator(callable):
-    signature = callable.signature
-    return_type = build_type(signature.return_type)
-    arguments = ', '.join(build_parameter(p) for p in signature.parameters)
+    return_type = build_type(callable.return_type)
+    arguments = ', '.join(build_parameter(p) for p in callable.parameters)
     return f"{return_type} {callable.name}({arguments})"
 
 

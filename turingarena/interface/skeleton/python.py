@@ -158,8 +158,7 @@ def generate_for(statement):
 
 
 def build_callable_declarator(callable):
-    signature = callable.signature
-    arguments = ', '.join(build_parameter(p) for p in signature.parameters)
+    arguments = ', '.join(build_parameter(p) for p in callable.parameters)
     return f"{callable.name}({arguments})"
 
 
