@@ -6,7 +6,6 @@ from turingarena.interface.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 
-logger.debug("compiling interface grammar")
 grammar = tatsu.compile(grammar_ebnf)
 
 

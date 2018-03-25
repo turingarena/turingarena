@@ -1,7 +1,8 @@
 grammar_ebnf = r"""
     @@comments :: /\/\*((?!\*\/).)*\*\//
     @@eol_comments :: /\/\/.*$/
-
+    @@left_recursion :: False
+    
     interface = statements:{ interface_statement }* $ ;
     
     interface_statement =
@@ -62,23 +63,62 @@ grammar_ebnf = r"""
     switch_case =
         'case' '(' value:identifier ')' body:block
     ;
-
-    atomic_expression =
-        | expression_type:`int_literal` int_literal:INT
-        | expression_type:`subscript` array:atomic_expression '[' index:expression ']'
-        | expression_type:`reference` variable_name:identifier
-        | '(' @:expression ')'
-    ;
     
-    expression =
-        | expression_type:`binary`
-            left:atomic_expression
-            operator:('=='|'!='|'<'|'<='|'>'|'>=')
-            right:atomic_expression
+    expression = or_expression ;
+    or_expression = 
+        |
+            expression_type:`or`
+            operands:and_expression
+            { '||' operands:and_expression }+
+        | and_expression
+    ;
+    and_expression =
+        |
+            expression_type:`and`
+            operands:comparison_expression
+            { '&&' operands:comparison_expression }+
+        | comparison_expression
+    ;
+    comparison_expression =
+        |
+            expression_type:`comparison`
+            operands:sum_expression
+            {
+                operators+:('=='|'!='|'<'|'<='|'>'|'>=')
+                operands:sum_expression
+            }+
+        | sum_expression
+    ;
+    sum_expression = 
+        |
+            expression_type:`sum`
+            signs:() operands:mul_expression
+            { signs:('+'|'-') operands:mul_expression }+
+        |
+            expression_type:`sum`
+            signs+:('+'|'-') operands:mul_expression
+            { signs+:('+'|'-') operands:mul_expression }*
+        | mul_expression
+    ;
+    mul_expression =
+        |
+            expression_type:`mul`
+            operands:atomic_expression
+            { '*' operands:atomic_expression }+
         | atomic_expression
     ;
-
-    type = expression:type_expression ;
+    atomic_expression =
+        |
+            expression_type:`int_literal`
+            int_literal:INT
+        |
+            expression_type:`reference`
+            variable_name:identifier ~ indices:{ subscript }*
+        |
+            expression_type:`nested`
+            '(' ~ expression:expression ')'
+    ;
+    subscript = '[' @:expression ']' ;
 
     type_expression = 'int' ~ dimensions:{ '[' ']' }* ;
 

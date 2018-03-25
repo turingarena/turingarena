@@ -97,7 +97,7 @@ def generate_block_statement(statement, *, interface):
         "output": lambda: generate_output(statement),
         "flush": lambda: ["System.out.flush();"],
         "checkpoint": lambda: ["""System.out.println("0");"""],
-        "call": lambda: generate_call(statement, interface=interface,),
+        "call": lambda: generate_call(statement, interface=interface, ),
         "for": lambda: generate_for(statement, interface=interface),
         "if": lambda: generate_if(statement, interface=interface),
         "exit": lambda: ["System.exit(0);"],
@@ -118,8 +118,8 @@ def build_alloc_type(var_type, size):
         return build_alloc_type(var_type.item_type, size) + "[]"
     else:
         return {
-            int: "int",
-        }[var_type.base_type] + f"[{size}]"
+                   int: "int",
+               }[var_type.base_type] + f"[{size}]"
 
 
 def generate_call(statement, *, interface):
@@ -182,17 +182,15 @@ def build_parameter(parameter):
     return f'{value_type} {parameter.name}'
 
 
-def build_subscript(expression):
-    array = build_expression(expression.array)
-    index = build_expression(expression.index)
-    return f"{array}[{index}]"
+def build_reference(expression):
+    subscripts = "".join(f"[{build_expression(index)}]" for index in expression.indices)
+    return f"{expression.variable_name}{subscripts}"
 
 
 def build_expression(expression):
     builders = {
         "int_literal": lambda: f"{expression.value}",
-        "reference": lambda: f"{expression.variable.name}",
-        "subscript": lambda: build_subscript(expression),
+        "reference": lambda: build_reference(expression),
     }
     return builders[expression.expression_type]()
 

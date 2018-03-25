@@ -1,25 +1,15 @@
 import logging
 from abc import abstractmethod
 
-from bidict import bidict
+from bidict import frozenbidict
 
-from turingarena.interface.exceptions import VariableNotAllocatedError, VariableNotInitializedError, \
+from turingarena.interface.exceptions import VariableNotInitializedError, \
     VariableNotDeclaredError
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType
 
-expression_classes = bidict()
-
 logger = logging.getLogger(__name__)
-
-
-def expression_class(meta_type):
-    def decorator(cls):
-        expression_classes[meta_type] = cls
-        return cls
-
-    return decorator
 
 
 def compile_expression(ast, context):
@@ -64,7 +54,6 @@ class LiteralExpression(Expression):
         )
 
 
-@expression_class("int_literal")
 class IntLiteralExpression(LiteralExpression):
     __slots__ = []
 
@@ -77,7 +66,6 @@ class IntLiteralExpression(LiteralExpression):
         return ScalarType(int)
 
 
-@expression_class("reference")
 class ReferenceExpression(Expression):
     __slots__ = []
 
@@ -93,52 +81,44 @@ class ReferenceExpression(Expression):
             raise VariableNotDeclaredError(f"Variable {self.variable_name} is not declared")
 
     @property
+    def indices(self):
+        return tuple(
+            compile_expression(index, self.context)
+            for index in self.ast.indices
+        )
+
+    @property
     def value_type(self):
-        return self.variable.value_type
+        value_type = self.variable.value_type
+        for i in self.indices:
+            value_type = value_type.item_type
+        return value_type
 
     def do_evaluate(self, context):
-        return VariableReference(
+        ref = VariableReference(
             context=context,
             variable=self.variable,
-            value_type=self.value_type,
+            value_type=self.variable.value_type,
         )
+        for index in self.indices:
+            ref = ArrayItemReference(
+                value_type=ref.value_type.item_type,
+                array=ref.get(),
+                index=index.evaluate_in(context).get(),
+            )
+        return ref
 
     def check_variables(self, initialized_variables, allocated_variables):
         if self.variable not in initialized_variables:
             raise VariableNotInitializedError(f"Variable '{self.variable.name}' used before initialization")
+        for index in self.indices:
+            index.check_variables(initialized_variables, allocated_variables)
 
     def resolve_variable(self):
         return self.variable
 
 
-@expression_class("subscript")
-class SubscriptExpression(Expression):
-    __slots__ = []
-
-    @property
-    def array(self):
-        return compile_expression(self.ast.array, self.context)
-
-    @property
-    def index(self):
-        return compile_expression(self.ast.index, self.context)
-
-    def do_evaluate(self, context):
-        return ArrayItemReference(
-            value_type=self.array.value_type.item_type,
-            array=self.array.evaluate_in(context).get(),
-            index=self.index.evaluate_in(context).get(),
-        )
-
-    @property
-    def value_type(self):
-        return self.array.value_type.item_type
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        if self.array.variable not in allocated_variables:
-            raise VariableNotAllocatedError(f"Variable '{self.array.resolve_variable().name}' used before allocation")
-        self.index.check_variables(initialized_variables, allocated_variables)
-        self.array.check_variables(initialized_variables, allocated_variables)
-
-    def resolve_variable(self):
-        return self.array.resolve_variable()
+expression_classes = frozenbidict({
+    "int_literal": IntLiteralExpression,
+    "reference": ReferenceExpression,
+})

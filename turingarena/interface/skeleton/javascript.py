@@ -156,16 +156,14 @@ def build_parameter(parameter):
     return f"{parameter.name}"
 
 
-def build_subscript(expression):
-    array = build_expression(expression.array)
-    index = build_expression(expression.index)
-    return f"{array}[{index}]"
+def build_reference(expression):
+    subscripts = "".join(f"[{build_expression(index)}]" for index in expression.indices)
+    return f"{expression.variable_name}{subscripts}"
 
 
 def build_expression(expression):
     builders = {
         "int_literal": lambda: f"{expression.value}",
-        "reference": lambda: f"{expression.variable.name}",
-        "subscript": lambda: build_subscript(expression),
+        "reference": lambda: build_reference(expression),
     }
     return builders[expression.expression_type]()
