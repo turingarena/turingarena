@@ -1,7 +1,6 @@
 import logging
 
 import tatsu
-from tatsu.ast import AST
 
 from turingarena.interface.grammar import grammar_ebnf
 
@@ -12,29 +11,7 @@ grammar = tatsu.compile(grammar_ebnf)
 
 
 def parse_interface(text, **kwargs):
-    return grammar.parse(text, **kwargs, asmodel=False, semantics=Semantics(), parseinfo=True)
-
-
-class Semantics:
-    def _default(self, ast, *args, **kwargs):
-        if isinstance(ast, AST):
-            return AbstractSyntaxNode(ast, *args, **kwargs)
-        else:
-            return ast
-
-
-class AbstractSyntaxNode:
-    def __init__(self, ast, *args, **kwargs):
-        self.parseinfo = None
-        for key, value in ast.items():
-            setattr(self, key, value)
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self._arguments = args
-        self._ast = ast
-
-    def __repr__(self):
-        return "<{}>".format(get_line(self.parseinfo))
+    return grammar.parse(text, **kwargs, asmodel=False, parseinfo=True)
 
 
 def get_line(parseinfo):
