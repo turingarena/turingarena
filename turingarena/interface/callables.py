@@ -15,6 +15,21 @@ logger = logging.getLogger(__name__)
 CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
 
 
+class ParameterDeclaration(namedtuple("ParameterDeclaration", ["ast", "context"])):
+    __slots__ = []
+
+    @property
+    def type_expression(self):
+        return compile_type_expression(self.ast.type, self.context)
+
+    @property
+    def variable(self):
+        return Variable(
+            value_type=self.type_expression.value_type,
+            name=self.ast.declarator.name,
+        )
+
+
 class Callable(namedtuple("Callable", ["ast", "context"])):
     __slots__ = []
 
@@ -23,14 +38,15 @@ class Callable(namedtuple("Callable", ["ast", "context"])):
         return self.ast.declarator.name
 
     @property
-    def parameters(self):
+    def parameter_declarations(self):
         return tuple(
-            Variable(
-                value_type=compile_type_expression(p.type, self.context).value_type,
-                name=p.declarator.name,
-            )
+            ParameterDeclaration(p, self.context)
             for p in self.ast.declarator.parameters
         )
+
+    @property
+    def parameters(self):
+        return tuple(p.variable for p in self.parameter_declarations)
 
     @property
     def return_type_expression(self):
