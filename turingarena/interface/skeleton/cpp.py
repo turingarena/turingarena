@@ -6,11 +6,11 @@ from turingarena.interface.skeleton.common import CodeGen
 def generate_skeleton_cpp(interface):
     yield "#include <cstdio>"
     yield "#include <cstdlib>"
-    yield from SkeletonCodeGen().block_content(interface)
+    yield from SkeletonCodeGen().block_content(interface.body)
 
 
 def generate_template_cpp(interface):
-    yield from TemplateCodeGen().block_content(interface)
+    yield from TemplateCodeGen().block_content(interface.body)
 
 
 class SkeletonCodeGen(CodeGen):

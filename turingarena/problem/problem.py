@@ -2,6 +2,8 @@ import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
+import yaml
+
 from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.problem.python import HostPythonEvaluator
@@ -11,6 +13,7 @@ from turingarena.sandbox.sources import load_source
 class AlgorithmicProblem(ImmutableObject):
     __slots__ = [
         "interface",
+        "extra_metadata",
         "algorithm_sources",
         "evaluator",
     ]
@@ -54,9 +57,19 @@ def make_problem(dirname):
     with open(os.path.join(dirname, "interface.txt")) as f:
         interface_text = f.read()
 
-    interface = InterfaceDefinition.compile(interface_text)
+    try:
+        with open(os.path.join(dirname, "metadata.yaml")) as f:
+            extra_metadata = yaml.safe_load(f)
+    except FileNotFoundError:
+        extra_metadata = dict()
+
+    interface = InterfaceDefinition.compile(
+        interface_text,
+        extra_metadata=extra_metadata.get("interface"),
+    )
     return AlgorithmicProblem(
         interface=interface,
+        extra_metadata=extra_metadata,
         algorithm_sources=dict(find_algorithm_sources(os.path.join(dirname, "algorithms"), interface=interface)),
         evaluator=HostPythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
     )

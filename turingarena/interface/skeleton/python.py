@@ -3,7 +3,7 @@ from turingarena.interface.skeleton.common import ExpressionBuilder
 
 
 def generate_skeleton_python(interface):
-    for statement in interface.statements:
+    for statement in interface.body.statements:
         yield
         yield from generate_skeleton_statement(statement)
     yield
@@ -11,7 +11,7 @@ def generate_skeleton_python(interface):
 
 
 def generate_template_python(interface):
-    for statement in interface.statements:
+    for statement in interface.body.statements:
         yield
         yield from generate_template_statement(statement)
 

@@ -4,7 +4,7 @@ from turingarena.interface.skeleton.common import ExpressionBuilder
 
 def generate_skeleton_javascript(interface):
     yield "async function init() {}"
-    for statement in interface.statements:
+    for statement in interface.body.statements:
         yield from generate_skeleton_statement(statement)
 
 

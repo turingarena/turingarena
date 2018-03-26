@@ -1,6 +1,5 @@
 import logging
 
-from turingarena.common import TupleLikeObject
 from turingarena.interface.block import Block
 from turingarena.interface.context import GlobalContext, MainContext, RootContext
 from turingarena.interface.driver.commands import MainBegin
@@ -11,31 +10,34 @@ from turingarena.interface.parser import parse_interface
 logger = logging.getLogger(__name__)
 
 
-class InterfaceSignature(TupleLikeObject):
-    __slots__ = ["variables", "functions", "callbacks"]
+class InterfaceBody(Block):
+    pass
 
 
-class InterfaceDefinition(Block):
-    __slots__ = []
-
-    @staticmethod
-    def compile(source_text, **kwargs):
+class InterfaceDefinition:
+    def __init__(self, source_text, extra_metadata, **kwargs):
         ast = parse_interface(source_text, **kwargs)
-        definition = InterfaceDefinition(
+        self.extra_metadata = extra_metadata
+        self.body = InterfaceBody(
             ast=ast, context=RootContext(),
         )
-        definition.validate()
-        return definition
+        self.body.validate()
+
+    @staticmethod
+    def compile(source_text, extra_metadata=None):
+        if extra_metadata is None:
+            extra_metadata = {}
+        return InterfaceDefinition(source_text, extra_metadata=extra_metadata)
 
     @property
     def source_text(self):
-        return self.ast.parseinfo.buffer.text
+        return self.body.ast.parseinfo.buffer.text
 
     @property
     def functions(self):
         return {
             s.function.name: s.function
-            for s in self.statements
+            for s in self.body.statements
             if s.statement_type == "function"
         }
 
@@ -43,13 +45,13 @@ class InterfaceDefinition(Block):
     def callbacks(self):
         return {
             s.callback.name: s.callback
-            for s in self.statements
+            for s in self.body.statements
             if s.statement_type == "callback"
         }
 
     @property
     def global_variables(self):
-        return self.declared_variables()
+        return self.body.declared_variables()
 
     @property
     def metadata(self):
@@ -69,16 +71,16 @@ class InterfaceDefinition(Block):
         )
 
     def static_analysis(self):
-        self.check_variables([], [])
+        self.body.check_variables([], [])
 
     @property
     def main_body(self):
-        [main] = [s.body for s in self.statements if s.statement_type == "main"]
+        [main] = [s.body for s in self.body.statements if s.statement_type == "main"]
         return main
 
     @property
     def init_body(self):
-        inits = [s.body for s in self.statements if s.statement_type == "init"]
+        inits = [s.body for s in self.body.statements if s.statement_type == "init"]
         if inits:
             [init] = inits
             return init
