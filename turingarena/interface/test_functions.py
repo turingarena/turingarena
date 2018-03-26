@@ -95,4 +95,4 @@ def test_callback_accept_scalars():
     compilation_fails("""
         callback f(int a, /*!*/ int[] b /*!*/) {}
         main {}
-    """, "callback arguments must be scalars")
+    """, "callback parameters must be scalars")

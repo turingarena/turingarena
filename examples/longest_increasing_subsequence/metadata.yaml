@@ -1,0 +1,23 @@
+global_variables:
+  n:
+    doc: the length of the input sequence
+  a:
+    doc: the input sequence
+interface:
+  functions:
+    compute:
+      doc: invoked once at the beginning
+    length:
+      return_value:
+        doc: the length of the output sequence
+    element:
+      parameters:
+        i:
+          doc: ~
+      return_value:
+        doc: the <param id="functions:element:i" />-th element of the output sequence
+evaluation:
+  goals:
+    correct:
+      doc: your program answers correctly to all inputs
+      points: 100

@@ -2,10 +2,15 @@ interface:
   functions:
     sum:
       doc: Compute the sum of two numbers.
-      arguments:
+      parameters:
         a:
           doc: any number
         b:
           doc: any number
       return_value:
         doc: the sum of <arg id="function:sum:a" /> and <arg id="function:sum:b" />
+evaluation:
+  goals:
+    correct:
+      doc: your program answers correctly to all inputs
+      points: 100

@@ -126,8 +126,8 @@ def generate_declarators(declaration):
 
 def build_callable_declarator(callable):
     return_type = build_full_type(callable.return_type)
-    arguments = ', '.join(build_parameter(p) for p in callable.parameters)
-    return f"{return_type} {callable.name}({arguments})"
+    parameters = ', '.join(build_parameter(p) for p in callable.parameters)
+    return f"{return_type} {callable.name}({parameters})"
 
 
 def build_declaration(statement):

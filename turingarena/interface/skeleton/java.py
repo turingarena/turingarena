@@ -165,8 +165,8 @@ def generate_for(statement, *, interface):
 
 def build_callable_declarator(callable):
     return_type = build_type(callable.return_type)
-    arguments = ', '.join(build_parameter(p) for p in callable.parameters)
-    return f"{return_type} {callable.name}({arguments})"
+    parameters = ', '.join(build_parameter(p) for p in callable.parameters)
+    return f"{return_type} {callable.name}({parameters})"
 
 
 def build_declaration(statement):

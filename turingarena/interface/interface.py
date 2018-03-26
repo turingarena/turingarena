@@ -10,6 +10,10 @@ from turingarena.interface.parser import parse_interface
 logger = logging.getLogger(__name__)
 
 
+def parse_markdown(text):
+    return text  # TODO
+
+
 class InterfaceBody(Block):
     pass
 
@@ -53,19 +57,48 @@ class InterfaceDefinition:
     def global_variables(self):
         return self.body.declared_variables()
 
+    def global_variable_metadata(self, v):
+        extra = self.extra_metadata.get("global_variables", {}).get(v.name, {})
+        return {
+            **v.metadata,
+            **dict(
+                doc=parse_markdown(extra.get("doc", {})),
+            )
+        }
+
+    def parameter_metadata(self, p, extra):
+        return {
+            **p.metadata,
+            **dict(
+                doc=parse_markdown(extra.get(p.name, {}).get("doc", "")),
+            ),
+        }
+
+    def callable_metadata(self, c, extra):
+        extra = extra.get(c.name, {})
+        return {
+            **c.metadata,
+            **dict(
+                parameters={
+                    p.name: self.parameter_metadata(p, extra.get("parameters", {}))
+                    for p in c.parameters
+                },
+            )
+        }
+
     @property
     def metadata(self):
         return dict(
             global_variables={
-                v.name: v.metadata
+                v.name: self.global_variable_metadata(v)
                 for v in self.global_variables.values()
             },
             callbacks={
-                c.name: c.metadata
+                c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
                 for c in self.callbacks.values()
             },
             functions={
-                f.name: f.metadata
+                f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
                 for f in self.functions.values()
             }
         )
