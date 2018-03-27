@@ -80,7 +80,9 @@ class Callable(AbstractSyntaxNodeWrapper):
     @property
     def metadata(self):
         return dict(
-            return_type=None if self.return_type is None else self.return_type.metadata,
+            return_value=None if self.return_type is None else dict(
+                type=self.return_type.metadata,
+            ),
         )
 
 

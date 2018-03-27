@@ -5,13 +5,10 @@ from turingarena.interface.context import GlobalContext, MainContext, RootContex
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
+from turingarena.interface.metadata import parse_markdown
 from turingarena.interface.parser import parse_interface
 
 logger = logging.getLogger(__name__)
-
-
-def parse_markdown(text):
-    return text  # TODO
 
 
 class InterfaceBody(Block):
@@ -70,7 +67,7 @@ class InterfaceDefinition:
         return {
             **p.metadata,
             **dict(
-                doc=parse_markdown(extra.get(p.name, {}).get("doc", "")),
+                doc=parse_markdown(extra.get(p.name, {}).get("doc")),
             ),
         }
 
@@ -79,10 +76,17 @@ class InterfaceDefinition:
         return {
             **c.metadata,
             **dict(
+                return_value={
+                    **c.metadata["return_value"],
+                    **dict(
+                        doc=parse_markdown(extra.get("return_value", {}).get("doc")),
+                    )
+                },
                 parameters={
                     p.name: self.parameter_metadata(p, extra.get("parameters", {}))
                     for p in c.parameters
                 },
+                doc=parse_markdown(extra.get("doc"))
             )
         }
 

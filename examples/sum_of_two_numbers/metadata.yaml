@@ -1,3 +1,16 @@
+doc: |
+  ## Sum of two numbers
+
+  Write a function that sums two numbers $a$ and $b$.
+
+  I.e.,
+  $$
+    a + b
+  $$
+
+  ## Assumptions
+
+  $0 \leq a,b \leq 1\,000$
 interface:
   functions:
     sum:

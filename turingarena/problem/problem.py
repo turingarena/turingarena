@@ -6,6 +6,7 @@ import yaml
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
+from turingarena.interface.metadata import parse_markdown
 from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.sources import load_source
 
@@ -42,6 +43,7 @@ class AlgorithmicProblem(ImmutableObject):
     def metadata(self):
         return dict(
             interface=self.interface.metadata,
+            doc=parse_markdown(self.extra_metadata.get("doc")),
         )
 
     def evaluate(self, source):

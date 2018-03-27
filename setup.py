@@ -33,6 +33,7 @@ setup(
         "bidict",
         "psutil",
         "seccomplite",
+        "commonmark",
     ],
     tests_require=[
         "pytest",
