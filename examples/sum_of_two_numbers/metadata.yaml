@@ -1,4 +1,4 @@
-doc: |
+doc: !markdown |
   ## Sum of two numbers
 
   Write a function that sums two numbers $a$ and $b$.
@@ -21,7 +21,7 @@ interface:
         b:
           doc: any number
       return_value:
-        doc: the sum of <arg id="function:sum:a" /> and <arg id="function:sum:b" />
+        doc: !markdown the sum of <arg id="function:sum:a" /> and <arg id="function:sum:b" />
 evaluation:
   goals:
     correct:

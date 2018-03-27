@@ -3,9 +3,18 @@ from xml.etree import ElementTree
 from xml.sax.saxutils import quoteattr
 
 import CommonMark
+import yaml
 
 reInlineMath = re.compile(r"\$([^\$]+)\$", flags=re.MULTILINE)
 reDisplayMath = re.compile(r"^\$\$([^\$]+)\$\$", flags=re.MULTILINE)
+
+
+class TuringarenaYamlLoader(yaml.SafeLoader):
+    def construct_markdown(self, node):
+        return parse_markdown(self.construct_scalar(node))
+
+
+TuringarenaYamlLoader.add_constructor("!markdown", TuringarenaYamlLoader.construct_markdown)
 
 
 def xml_to_dict(element):

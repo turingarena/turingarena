@@ -6,7 +6,7 @@ import yaml
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.interface.metadata import parse_markdown
+from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.sources import load_source
 
@@ -41,10 +41,12 @@ class AlgorithmicProblem(ImmutableObject):
 
     @property
     def metadata(self):
-        return dict(
-            interface=self.interface.metadata,
-            doc=parse_markdown(self.extra_metadata.get("doc")),
-        )
+        return {
+            **self.extra_metadata,
+            **dict(
+                interface=self.interface.metadata,
+            ),
+        }
 
     def evaluate(self, source):
         with self.prepare() as prepared_problem_dir:
@@ -61,7 +63,7 @@ def make_problem(dirname):
 
     try:
         with open(os.path.join(dirname, "metadata.yaml")) as f:
-            extra_metadata = yaml.safe_load(f)
+            extra_metadata = yaml.load(f, Loader=TuringarenaYamlLoader)
     except FileNotFoundError:
         extra_metadata = dict()
 

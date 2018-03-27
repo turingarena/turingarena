@@ -5,7 +5,6 @@ from turingarena.interface.context import GlobalContext, MainContext, RootContex
 from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
-from turingarena.interface.metadata import parse_markdown
 from turingarena.interface.parser import parse_interface
 
 logger = logging.getLogger(__name__)
@@ -55,57 +54,53 @@ class InterfaceDefinition:
         return self.body.declared_variables()
 
     def global_variable_metadata(self, v):
-        extra = self.extra_metadata.get("global_variables", {}).get(v.name, {})
         return {
+            **self.extra_metadata.get("global_variables", {}).get(v.name, {}),
             **v.metadata,
-            **dict(
-                doc=parse_markdown(extra.get("doc", {})),
-            )
         }
 
     def parameter_metadata(self, p, extra):
         return {
+            **extra.get(p.name, {}),
             **p.metadata,
-            **dict(
-                doc=parse_markdown(extra.get(p.name, {}).get("doc")),
-            ),
         }
 
     def callable_metadata(self, c, extra):
         extra = extra.get(c.name, {})
         return {
+            **extra,
             **c.metadata,
             **dict(
                 return_value={
+                    **extra.get("return_value", {}),
                     **c.metadata["return_value"],
-                    **dict(
-                        doc=parse_markdown(extra.get("return_value", {}).get("doc")),
-                    )
                 },
                 parameters={
                     p.name: self.parameter_metadata(p, extra.get("parameters", {}))
                     for p in c.parameters
                 },
-                doc=parse_markdown(extra.get("doc"))
             )
         }
 
     @property
     def metadata(self):
-        return dict(
-            global_variables={
-                v.name: self.global_variable_metadata(v)
-                for v in self.global_variables.values()
-            },
-            callbacks={
-                c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
-                for c in self.callbacks.values()
-            },
-            functions={
-                f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
-                for f in self.functions.values()
-            }
-        )
+        return {
+            **self.extra_metadata,
+            **dict(
+                global_variables={
+                    v.name: self.global_variable_metadata(v)
+                    for v in self.global_variables.values()
+                },
+                callbacks={
+                    c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
+                    for c in self.callbacks.values()
+                },
+                functions={
+                    f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
+                    for f in self.functions.values()
+                }
+            ),
+        }
 
     def static_analysis(self):
         self.body.check_variables([], [])
