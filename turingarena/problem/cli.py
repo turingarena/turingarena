@@ -24,4 +24,4 @@ def evaluate_cli(args):
         load_source(source_text, language=args["--language"], interface=problem.interface),
     )
 
-    print(evaluation.stdout)
+    print(evaluation["stdout"])
