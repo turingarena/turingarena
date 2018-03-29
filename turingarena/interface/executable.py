@@ -34,6 +34,10 @@ class ImperativeStructure(ABC):
     def expects_request(self, request):
         pass
 
+    @property
+    def context_after(self):
+        pass
+
 
 class ImperativeStatement(Statement, ImperativeStructure):
     __slots__ = []

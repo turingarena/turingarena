@@ -13,20 +13,23 @@ class EntryPointStatement(Statement):
     def validate(self):
         self.body.validate()
 
+    @property
+    def context_after(self):
+        return self.context.with_initialized_variables({
+            variable
+            for variable in self.body.context_after.initialized_variables
+            if variable not in self.context.initialized_variables
+        }).with_allocated_variables({
+            variable
+            for variable in self.body.context_after.allocated_variables
+            if variable not in self.context.allocated_variables
+        })
+
 
 class InitStatement(EntryPointStatement):
     __slots__ = []
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.body.check_variables(initialized_variables, allocated_variables)
-
-        for var in self.body.declared_variables().values():
-            if var not in initialized_variables:
-                raise GlobalVariableNotInitializedError(f"Global variable '{var.name}' not initialized in 'init' block")
 
 
 class MainStatement(EntryPointStatement):
     __slots__ = []
 
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.check_variables(initialized_variables, allocated_variables)

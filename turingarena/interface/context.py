@@ -15,6 +15,8 @@ class RootContext(namedtuple("RootContext", [])):
             functions={},
             callbacks={},
             global_variables=(),
+            global_allocated_variables=frozenset(),
+            global_initialized_variables=frozenset(),
         )
 
 
@@ -22,9 +24,25 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     "functions",
     "callbacks",
     "global_variables",
+    "global_initialized_variables",
+    "global_allocated_variables",
 ])):
     def with_variables(self, variables):
         return self._replace(global_variables=self.global_variables + variables)
+
+    def with_initialized_variables(self, variables):
+        return self._replace(global_initialized_variables=self.global_initialized_variables.union(variables))
+
+    def with_allocated_variables(self, variables):
+        return self._replace(global_allocated_variables=self.global_allocated_variables.union(variables))
+
+    @property
+    def initialized_variables(self):
+        return self.global_initialized_variables
+
+    @property
+    def allocated_variables(self):
+        return self.global_allocated_variables
 
     @property
     def variables(self):
@@ -49,6 +67,8 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
             global_context=self,
             outer_context=None,
             local_variables=(),
+            local_initialized_variables=frozenset(),
+            local_allocated_variables=frozenset(),
         )
 
 
@@ -56,9 +76,39 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
     "global_context",
     "outer_context",
     "local_variables",
+    "local_initialized_variables",
+    "local_allocated_variables",
 ])):
     def with_variables(self, variables):
         return self._replace(local_variables=self.local_variables + variables)
+
+    def with_initialized_variables(self, variables):
+        return self._replace(local_initialized_variables=self.local_initialized_variables.union(variables))
+
+    def with_allocated_variables(self, variables):
+        return self._replace(local_allocated_variables=self.local_allocated_variables.union(variables))
+
+    @property
+    def outer_initialized_variables(self):
+        if self.outer_context:
+            return self.outer_context.initialized_variables
+        else:
+            return self.global_context.initialized_variables
+
+    @property
+    def initialized_variables(self):
+        return self.local_initialized_variables.union(self.outer_initialized_variables)
+
+    @property
+    def outer_allocated_variables(self):
+        if self.outer_context:
+            return self.outer_context.allocated_variables
+        else:
+            return self.global_context.allocated_variables
+
+    @property
+    def allocated_variables(self):
+        return self.local_allocated_variables.union(self.outer_allocated_variables)
 
     @property
     def outer_variables(self):
@@ -80,6 +130,8 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             global_context=self.global_context,
             outer_context=self,
             local_variables=(),
+            local_initialized_variables=frozenset(),
+            local_allocated_variables=frozenset(),
         )
 
 

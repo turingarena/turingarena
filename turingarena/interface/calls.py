@@ -46,6 +46,10 @@ class CallStatement(ImperativeStatement):
         self.validate_parameters()
         self.validate_return_value()
 
+    @property
+    def context_after(self):
+        return self.context.with_initialized_variables({self.return_value.resolve_variable()})
+
     def validate_parameters(self):
         fun = self.function
         if len(self.parameters) != len(fun.parameters):
@@ -94,15 +98,6 @@ class CallStatement(ImperativeStatement):
             and request.request_type == "function_call"
             and request.function_name == self.function_name
         )
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        for exp in self.parameters:
-            exp.check_variable(initialized_variables, allocated_variables)
-        if self.return_value:
-            self.return_value.check_variables(initialized_variables, allocated_variables)
-
-    def initialized_variables(self):
-        return [self.return_value]
 
     def generate_instructions(self, context):
         interface = context.procedure.global_context.interface

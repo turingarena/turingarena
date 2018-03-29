@@ -45,10 +45,6 @@ class InputOutputStatement(ImperativeStatement):
             for arg in self.ast.arguments
         ]
 
-    def check_variables(self, initialized_variables, allocated_variables):
-        for exp in self.arguments:
-            exp.check_variables(initialized_variables, allocated_variables)
-
 
 class InputStatement(InputOutputStatement):
     __slots__ = []
@@ -56,11 +52,12 @@ class InputStatement(InputOutputStatement):
     def generate_instructions(self, context):
         yield InputInstruction(arguments=self.arguments, context=context)
 
-    def initialized_variables(self):
-        return [
+    @property
+    def context_after(self):
+        return self.context.with_initialized_variables({
             exp.resolve_variable()
             for exp in self.arguments
-        ]
+        })
 
 
 class InputInstruction(Instruction):

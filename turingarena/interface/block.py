@@ -27,12 +27,6 @@ class Block(AbstractSyntaxNodeWrapper):
             for v in s.variables
         )
 
-    def check_variables(self, initialized_variables, allocated_variables):
-        for statement in self.statements:
-            initialized_variables += statement.initialized_variables()
-            allocated_variables += statement.allocated_variables()
-            statement.check_variables(initialized_variables, allocated_variables)
-
     def validate(self):
         for statement in self.statements:
             statement.validate()
@@ -56,6 +50,20 @@ class ImperativeBlock(Block, ImperativeStructure):
                 return True
             if not s.expects_request(None):
                 break
+
+    @property
+    def context_after(self):
+        return self.context.with_initialized_variables({
+            variable
+            for statement in self.statements
+            for variable in statement.context.initialized_variables
+            if variable not in self.context.initialized_variables
+        }).with_allocated_variables({
+            variable
+            for statement in self.statements
+            for variable in statement.context.allocated_variables
+            if variable not in self.context.allocated_variables
+        })
 
 
 ExitCall = object()

@@ -102,9 +102,6 @@ class InterfaceDefinition:
             ),
         }
 
-    def static_analysis(self):
-        self.body.check_variables([], [])
-
     @property
     def main_body(self):
         [main] = [s.body for s in self.body.statements if s.statement_type == "main"]
