@@ -62,8 +62,8 @@ def generate_metadata_cli(args):
         -p --problem=<problem>  Problem [default: .].
     """
 
-    problem = load_problem(args["--problem"])
-    print(json.dumps(problem.metadata, indent=4))
+    with load_problem(args["--problem"]) as problem:
+        print(json.dumps(problem.metadata, indent=4))
 
 
 def generate(args, generators):

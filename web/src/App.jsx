@@ -32,10 +32,11 @@ const submit = form => fetch(process.env.TURINGARENA_EVALUATE_ENDPOINT, {
   method: 'post',
   body: new FormData(form),
 }).then((response) => {
+  const text = response.text();
   if (response.status !== 200) {
-    return Promise.reject(response);
+    return text.then(t => Promise.reject(t));
   }
-  return response.text();
+  return Promise.resolve(text);
 });
 
 const ResultView = ({ result }) => (
@@ -69,7 +70,7 @@ class SubmitView extends React.Component {
         <UploadView disabled={this.state.phase === 'submitted'} onSubmit={t => this.submit(t)} />
         {this.state.phase === 'submitted' && <p>Evaluating... (may take up to one minute)</p>}
         {this.state.phase === 'resolved' && <ResultView result={this.state.result} />}
-        {this.state.phase === 'rejected' && <pre>{this.state.result.error}</pre>}
+        {this.state.phase === 'rejected' && <pre className="ta-error">{this.state.result.error}</pre>}
       </React.Fragment>
     );
   }

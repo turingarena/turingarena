@@ -15,11 +15,13 @@ def evaluate():
         evaluation = form_evaluate(fields)
     except:
         print("500 Internal Server Error")
+        print("Access-Control-Allow-Origin:", "*")
         print()
         traceback.print_exc(file=sys.stdout)
         raise
 
     print("200 OK")
+    print("Access-Control-Allow-Origin:", "*")
     print()
     print(evaluation)
 
