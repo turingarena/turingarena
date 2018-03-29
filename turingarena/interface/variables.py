@@ -34,3 +34,4 @@ class VarStatement(Statement):
     @property
     def context_after(self):
         return self.context.with_variables(self.variables)
+

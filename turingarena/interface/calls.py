@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
-from turingarena.interface.exceptions import InterfaceError, FunctionCallError, FunctionNotDeclaredError
+from turingarena.interface.exceptions import InterfaceError, FunctionCallError, FunctionNotDeclaredError, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
 from turingarena.interface.io import read_line
@@ -43,8 +43,8 @@ class CallStatement(ImperativeStatement):
             ) from None
 
     def validate(self):
-        self.validate_parameters()
-        self.validate_return_value()
+        yield from self.validate_parameters()
+        yield from self.validate_return_value()
 
     @property
     def context_after(self):
@@ -53,43 +53,47 @@ class CallStatement(ImperativeStatement):
     def validate_parameters(self):
         fun = self.function
         if len(self.parameters) != len(fun.parameters):
-            raise FunctionCallError(
+            yield Diagnostic.create_message(
                 f"function {fun.name} "
                 f"expects {len(fun.parameters)} argument(s), "
                 f"got {len(self.parameters)}",
-                parseinfo=self.ast.parseinfo,
+                # parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
 
             if expr_value_type != parameter.value_type:
-                raise InterfaceError(
+                yield Diagnostic.create_message(
                     f"argument {parameter.name} "
                     f"of function {fun.name}: "
                     f"expected {parameter.value_type}, "
                     f"got {expr_value_type}",
-                    parseinfo=expression.ast.parseinfo,
+                    # parseinfo=expression.ast.parseinfo,
                 )
+
+            yield from parameter.validate()
 
     def validate_return_value(self):
         fun = self.function
         return_type = fun.return_type
+        if return_type is not None:
+            yield from self.return_value.validate()
         if return_type is not None and self.return_value is None:
-            raise FunctionCallError(
+            yield Diagnostic.create_message(
                 f"function {fun.name} returns {return_type}, but no return expression given",
-                parseinfo=self.ast.parseinfo,
+                # parseinfo=self.ast.parseinfo,
             )
         if return_type is None and self.return_value is not None:
-            raise FunctionCallError(
+            yield Diagnostic.create_message(
                 f"function {fun.name} does not return a value",
-                parseinfo=self.ast.return_value.parseinfo,
+                # parseinfo=self.ast.return_value.parseinfo,
             )
         return_expression_type = self.return_value and self.return_value.value_type
         if self.return_value is not None and return_expression_type != return_type:
-            raise FunctionCallError(
+            yield Diagnostic.create_message(
                 f"function {fun.name} returns {return_type}, "
                 f"but return expression is {return_expression_type}",
-                parseinfo=self.ast.return_value.parseinfo,
+                # parseinfo=self.ast.return_value.parseinfo,
             )
 
     def expects_request(self, request):
@@ -202,6 +206,9 @@ class ReturnStatement(ImperativeStatement):
 
     def generate_instructions(self, context):
         yield ReturnInstruction(value=self.value, context=context)
+
+    def validate(self):
+        yield from self.value.validate()
 
 
 class ReturnInstruction(Instruction):

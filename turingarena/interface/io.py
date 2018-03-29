@@ -3,6 +3,7 @@ import logging
 from turingarena.interface.exceptions import CommunicationBroken
 from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import compile_expression
+from turingarena.interface.exceptions import Diagnostic
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,10 @@ class InputOutputStatement(ImperativeStatement):
             for arg in self.ast.arguments
         ]
 
+    def validate(self):
+        for exp in self.arguments:
+            yield from exp.validate()
+
 
 class InputStatement(InputOutputStatement):
     __slots__ = []
@@ -58,6 +63,10 @@ class InputStatement(InputOutputStatement):
             exp.resolve_variable()
             for exp in self.arguments
         })
+
+    def validate(self):
+        for exp in self.arguments:
+            yield from exp.validate(lvalue=True)
 
 
 class InputInstruction(Instruction):

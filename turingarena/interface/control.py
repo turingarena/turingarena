@@ -47,6 +47,11 @@ class IfStatement(ImperativeStatement):
             return None
         return ImperativeBlock(self.ast.then_body, self.context)
 
+    def validate(self):
+        yield from self.then_body.validate()
+        if self.else_body:
+            yield from self.else_body.validate()
+
     def generate_instructions(self, context):
         condition = self.condition.evaluate_in(context)
         if not condition.is_resolved():
@@ -96,7 +101,7 @@ class ForStatement(ImperativeStatement):
         )
 
     def validate(self):
-        self.body.validate()
+        yield from self.body.validate()
 
     def generate_instructions(self, context):
         if self.body.expects_request(None):
@@ -147,3 +152,6 @@ class LoopStatement(ImperativeStatement):
 
     def expects_request(self, request):
         return self.body.expects_request(request)
+
+    def validate(self):
+        yield from self.body.validate()

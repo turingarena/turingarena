@@ -1,7 +1,6 @@
-from turingarena.interface.block import ImperativeBlock
-from turingarena.interface.exceptions import GlobalVariableNotInitializedError
+from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.statement import Statement
-
+from turingarena.interface.block import ImperativeBlock
 
 class EntryPointStatement(Statement):
     __slots__ = []
@@ -11,7 +10,7 @@ class EntryPointStatement(Statement):
         return ImperativeBlock(ast=self.ast.body, context=self.context.create_local())
 
     def validate(self):
-        self.body.validate()
+        yield from self.body.validate()
 
     @property
     def context_after(self):
@@ -28,6 +27,14 @@ class EntryPointStatement(Statement):
 
 class InitStatement(EntryPointStatement):
     __slots__ = []
+
+    def validate(self):
+        yield from self.body.validate()
+
+        new_context = self.body.context_after
+        for var in self.context.global_variables:
+            if var not in new_context.initialized_variables:
+                yield Diagnostic.create_message(f"Global variable {var.name} not initialized in init block")
 
 
 class MainStatement(EntryPointStatement):

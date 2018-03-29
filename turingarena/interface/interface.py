@@ -6,6 +6,8 @@ from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit
 from turingarena.interface.executable import Instruction
 from turingarena.interface.parser import parse_interface
+from turingarena.interface.exceptions import Diagnostic
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,11 @@ class InterfaceDefinition:
         self.body = InterfaceBody(
             ast=ast, context=RootContext(),
         )
-        self.body.validate()
+
+    def validate(self):
+        if self.global_variables and not self.init_body:
+            yield Diagnostic.create_message("Global variables declared but no init {} block found")
+        yield from self.body.validate()
 
     @staticmethod
     def compile(source_text, extra_metadata=None):

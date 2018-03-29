@@ -3,11 +3,10 @@ from abc import abstractmethod
 
 from bidict import frozenbidict
 
-from turingarena.interface.exceptions import VariableNotInitializedError, \
-    VariableNotDeclaredError
+from turingarena.interface.exceptions import Diagnostic, VariableNotDeclaredError
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
-from turingarena.interface.type_expressions import ScalarType
+from turingarena.interface.type_expressions import ScalarType, ArrayType
 
 logger = logging.getLogger(__name__)
 
@@ -108,11 +107,13 @@ class ReferenceExpression(Expression):
             )
         return ref
 
-    def check_variables(self, initialized_variables, allocated_variables):
-        if self.variable not in initialized_variables:
-            raise VariableNotInitializedError(f"Variable '{self.variable.name}' used before initialization")
-        for index in self.indices:
-            index.check_variables(initialized_variables, allocated_variables)
+    def validate(self, lvalue=False):
+        if self.variable not in self.context.initialized_variables and not lvalue:
+            yield Diagnostic.create_message(f"variable {self.variable.name} used before initialization")
+        if self.variable.value_type == ArrayType:
+            if self.variable not in self.context.initialized_variables:
+                yield Diagnostic.create_message(f"variable {self.variable.name} used before initialization")
+            yield from self.index.validate()
 
     def resolve_variable(self):
         return self.variable

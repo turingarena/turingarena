@@ -1,6 +1,7 @@
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
 from turingarena.interface.type_expressions import ArrayType
+from turingarena.interface.exceptions import Diagnostic
 
 
 class AllocStatement(ImperativeStatement):
@@ -15,22 +16,15 @@ class AllocStatement(ImperativeStatement):
         return tuple(compile_expression(arg, self.context) for arg in self.ast.arguments)
 
     def validate(self):
-        assert all(
-            isinstance(a.value_type, ArrayType)
-            for a in self.arguments
-        )
+        yield from self.size.validate()
+        for arg in self.arguments:
+            if not isinstance(arg.resolve_variable().value_type, ArrayType):
+                yield Diagnostic.create_message(f"Argument {arg} is not an array type")
+            else:
+                yield from arg.index.validate()
 
     def generate_instructions(self, context):
         yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.size.check_variables(initialized_variables, allocated_variables)
-
-    def allocated_variables(self):
-        return [
-            exp.resolve_variable()
-            for exp in self.arguments
-        ]
 
 
 class AllocInstruction(Instruction):

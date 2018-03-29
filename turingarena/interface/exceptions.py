@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 class InterfaceExit(Exception):
     pass
 
@@ -17,6 +19,14 @@ class InterfaceError(Exception):
         lineinfo, endlineinfo = self.line_info()
         # lines are zero-based-numbered
         return f"{lineinfo.filename}:{lineinfo.line+1}:{lineinfo.col+1}: {self.message}"
+
+
+class Diagnostic(namedtuple("Diagnostic", [
+    "message"
+])):
+    @staticmethod
+    def create_message(message):
+        return Diagnostic(message=message)
 
 
 class VariableNotInitializedError(InterfaceError):

@@ -14,4 +14,4 @@ class Statement(AbstractSyntaxNodeWrapper):
         return self.context
 
     def validate(self):
-        pass
+        yield

@@ -29,7 +29,7 @@ class Block(AbstractSyntaxNodeWrapper):
 
     def validate(self):
         for statement in self.statements:
-            statement.validate()
+            yield from statement.validate()
 
 
 class ImperativeBlock(Block, ImperativeStructure):
