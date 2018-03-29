@@ -140,20 +140,3 @@ def test_init_block():
     """)
 
 
-def test_function_not_defined_error():
-    assert_error("""              
-            main {
-                call a();
-            }
-        """, "")
-
-def test_wrong_function_call():
-    with pytest.raises(FunctionCallError):
-        InterfaceDefinition.compile("""   
-            function a(int a);
-
-            main {
-                call a();
-            }
-        """).static_analysis()
-
