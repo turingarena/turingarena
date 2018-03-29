@@ -80,7 +80,7 @@ class ReferenceExpression(Expression):
         try:
             return self.context.variable_mapping[self.variable_name]
         except KeyError:
-            raise VariableNotDeclaredError(f"Variable {self.variable_name} is not declared")
+            return None
 
     @property
     def indices(self):
@@ -111,13 +111,15 @@ class ReferenceExpression(Expression):
         return ref
 
     def validate(self, lvalue=False):
-        if self.variable not in self.context.initialized_variables and not lvalue:
-            yield Diagnostic.create_message(f"variable {self.variable.name} used before initialization")
-        if self.variable.value_type == ArrayType:
-            if self.variable not in self.context.initialized_variables:
-                yield Diagnostic.create_message(f"variable {self.variable.name} used before initialization")
-        for index in self.indices:
-            yield from index.validate()
+        if not self.variable:
+            yield Diagnostic("variable a not declared")
+        elif self.variable not in self.context.initialized_variables and not lvalue:
+            yield Diagnostic(f"variable {self.variable.name} used before initialization")
+        elif isinstance(self.variable.value_type, ArrayType):
+            if self.variable not in self.context.allocated_variables:
+                yield Diagnostic(f"variable {self.variable.name} used before allocation")
+            for index in self.indices:
+                yield from index.validate()
 
     def resolve_variable(self):
         return self.variable

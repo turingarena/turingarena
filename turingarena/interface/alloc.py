@@ -18,11 +18,18 @@ class AllocStatement(ImperativeStatement):
     def validate(self):
         yield from self.size.validate()
         for arg in self.arguments:
-            if not isinstance(arg.resolve_variable().value_type, ArrayType):
+            if not isinstance(arg.variable.value_type, ArrayType):
                 yield Diagnostic.create_message(f"Argument {arg} is not an array type")
             else:
                 for index in arg.indices:
                     yield from index.validate()
+
+    @property
+    def context_after(self):
+        return self.context.with_allocated_variables({
+            arg.variable
+            for arg in self.arguments
+        })
 
     def generate_instructions(self, context):
         yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)

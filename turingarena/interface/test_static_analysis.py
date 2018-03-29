@@ -14,15 +14,17 @@ def assert_no_error(text):
 def assert_error(text, error):
     i = InterfaceDefinition.compile(text)
     for m in i.validate():
-        assert m.message == error
+        if m.message == error:
+            return
+    raise AssertionError
 
 
 def test_variable_not_initialized():
     assert_error("""
-            main {
-                var int a;
-                output a;
-            }
+        main {
+            var int a;
+            output a;
+        }
     """, "variable a used before initialization")
 
 
@@ -37,22 +39,31 @@ def test_variable_not_initialized_subscript():
 
 
 def test_variable_not_initialized_array():
-    assert_error("""
+    assert_no_error("""
         main {
             var int[] A;
             alloc A : 5;
             input A[0];
         }
-    """, "variable A used before initialization")
+    """)
 
 
 def test_variable_not_allocated():
     assert_error("""
-            main {
-                var int[] a; 
-                input a[0];
-            }
+        main {
+            var int[] a; 
+            input a[0];
+        }
     """, "variable a used before allocation")
+
+
+def test_array_not_allocated():
+    assert_error("""
+        main {
+            var int[] A;
+            input A[0];
+        }
+    """, "variable A used before allocation")
 
 
 def test_array_alloc():
@@ -89,27 +100,27 @@ def test_array_access():
 
 def test_variable_initialized_for():
     assert_no_error("""
-            main {
-                var int a;
-                input a;
-                for (i : a) {
-                    output i;
-                }
+        main {
+            var int a;
+            input a;
+            for (i : a) {
+                output i;
             }
+        }
     """)
 
 
 def test_variable_initialized_if():
     assert_no_error("""
-            main {
-                var int a; 
-                input a;
-                if (a) {
-                    output 1;
-                } else {
-                    output 2;
-                }
+        main {
+             var int a; 
+             input a;
+             if (a) {
+                output 1;
+             } else {
+                output 2;
             }
+        }
     """)
 
 
@@ -141,21 +152,21 @@ def test_variable_not_initialized_call():
 
 def test_local_variable():
     assert_no_error("""
-            main {
-                var int a;
-                input a;
-                output a;
-            }
+        main {
+            var int a;
+            input a;
+            output a;
+        }
     """)
 
 
 def test_local_variable_not_initialized():
     assert_error("""
-            main {
-                var int a;
-                output a;
-            }
-        """, "variable a used before initialization")
+         main {
+            var int a;
+            output a;
+        }
+    """, "variable a used before initialization")
 
 
 def test_global_variables():
@@ -167,7 +178,7 @@ def test_global_variables():
         
         main {
         }
-        """, "global variable a not initialized in init block")
+    """, "global variable a not initialized in init block")
 
 
 def test_no_init_block():
@@ -192,3 +203,9 @@ def test_init_block():
     """)
 
 
+def test_variable_not_defined():
+    assert_error("""
+        main {
+            output a;
+        }
+    """, "variable a not declared")
