@@ -9,5 +9,9 @@ def form_evaluate(fields):
         source_text = fields["source_text"].value
     else:
         source_text = fields["source_file"].value.decode()
-    problem = load_problem(problem_name)
+    if "git_url" in fields:
+        git_url = fields["git_url"]
+    else:
+        git_url = None
+    problem = load_problem(problem_name, git_url=git_url)
     return problem.evaluate(load_source(source_text, language=language, interface=problem.interface))

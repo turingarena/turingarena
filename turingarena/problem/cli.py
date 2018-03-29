@@ -15,10 +15,16 @@ def evaluate_cli(args):
     Options:
         -p --problem=<id>  Problem to evaluate [default: .]
         -x --language=<lang>  Language of the solution [default: c++]
+        -g --git=<url>  Clone problem from git
     """
 
     source_text = sys.stdin.read()
-    problem = load_problem(args["--problem"])
+    if "--git" in args:
+        git_url = args["--git"]
+    else:
+        git_url = None
+
+    problem = load_problem(args["--problem"], git_url=git_url)
 
     evaluation = problem.evaluate(
         load_source(source_text, language=args["--language"], interface=problem.interface),
