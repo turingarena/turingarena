@@ -1,9 +1,8 @@
+import logging
 import os
 import subprocess
-import logging
-
-from tempfile import TemporaryDirectory, mkdtemp
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
+from tempfile import TemporaryDirectory
 
 import yaml
 
@@ -12,7 +11,6 @@ from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.sources import load_source
-
 
 logger = logging.getLogger(__name__)
 
@@ -85,25 +83,27 @@ def make_problem(dirname):
     )
 
 
+@contextmanager
 def clone_from_git(url):
-    git_dir = mkdtemp(dir="/tmp", prefix="turingarena_git")
-    logger.info(f"cloning problem {url} from git into directory {git_dir}")
-    cmd = [
-        "git",
-        "clone",
-        url,
-        git_dir,
-    ]
-    subprocess.run(cmd, cwd=git_dir, check=True)
-    return git_dir
+    with TemporaryDirectory(dir="/tmp", prefix="turingarena_git") as git_dir:
+        logger.info(f"cloning problem {url} from git into directory {git_dir}")
+        cmd = [
+            "git",
+            "clone",
+            url,
+            git_dir,
+        ]
+        subprocess.run(cmd, cwd=git_dir, check=True)
+        yield git_dir
 
 
 def load_problem(problem_name, git_url=None):
-    if git_url:
-        problems_dir = clone_from_git(git_url)
-    else:
-        problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
-    return make_problem(os.path.join(problems_dir, problem_name))
+    with ExitStack() as stack:
+        if git_url is not None:
+            problems_dir = stack.enter_context(clone_from_git(git_url))
+        else:
+            problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
+        return make_problem(os.path.join(problems_dir, problem_name))
 
 
 LANGUAGE_BY_EXTENSION = {
