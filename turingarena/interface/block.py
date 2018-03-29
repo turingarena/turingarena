@@ -56,12 +56,12 @@ class ImperativeBlock(Block, ImperativeStructure):
         return self.context.with_initialized_variables({
             variable
             for statement in self.statements
-            for variable in statement.context.initialized_variables
+            for variable in statement.context_after.initialized_variables
             if variable not in self.context.initialized_variables
         }).with_allocated_variables({
             variable
             for statement in self.statements
-            for variable in statement.context.allocated_variables
+            for variable in statement.context_after.allocated_variables
             if variable not in self.context.allocated_variables
         })
 

@@ -116,6 +116,7 @@ class ForStatement(ImperativeStatement):
             inner_context.bindings[self.index.variable] = i
             yield from self.body.generate_instructions(inner_context)
 
+    @property
     def context_after(self):
         return self.body.context_after
 
