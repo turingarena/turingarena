@@ -2,7 +2,7 @@ import logging
 
 from turingarena.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
-from turingarena.interface.exceptions import InterfaceError, FunctionCallError, FunctionNotDeclaredError, Diagnostic
+from turingarena.interface.exceptions import InterfaceError, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
 from turingarena.interface.io import read_line

@@ -1,7 +1,6 @@
 import pytest
 
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.interface.exceptions import *
 
 
 def assert_no_error(text):

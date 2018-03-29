@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 from bidict import frozenbidict
 
-from turingarena.interface.exceptions import Diagnostic, VariableNotDeclaredError
+from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType, ArrayType

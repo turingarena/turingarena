@@ -3,7 +3,6 @@ import logging
 from turingarena.interface.exceptions import CommunicationBroken
 from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import compile_expression
-from turingarena.interface.exceptions import Diagnostic
 
 logger = logging.getLogger(__name__)
 
