@@ -45,9 +45,10 @@ class IfStatement(ImperativeStatement):
     def else_body(self):
         if self.ast.else_body is None:
             return None
-        return ImperativeBlock(self.ast.then_body, self.context)
+        return ImperativeBlock(self.ast.else_body, self.context)
 
     def validate(self):
+        yield from self.condition.validate()
         yield from self.then_body.validate()
         if self.else_body:
             yield from self.else_body.validate()

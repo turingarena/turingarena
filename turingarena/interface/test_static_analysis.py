@@ -158,6 +158,19 @@ def test_variable_initialized_if():
     """)
 
 
+def test_variable_in_if_body():
+    assert_error("""
+        main {
+            var int a;
+            if (1) {
+                output 1;
+            } else {
+                output a;
+            }
+        }
+    """, "variable a used before initialization")
+
+
 def test_variable_initialized_call():
     assert_no_error("""
         function test(int a, int b) -> int;
@@ -278,6 +291,7 @@ def test_function_return_value():
             call f();
         }
     """, "function f returns int, but no return expression given")
+
 
 def test_function_no_return_value():
     assert_error("""
