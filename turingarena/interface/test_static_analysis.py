@@ -28,6 +28,40 @@ def test_variable_not_initialized():
     """, "variable a used before initialization")
 
 
+def test_variable_initialized():
+    assert_no_error("""
+        function f() -> int;
+        main {
+            var int a;
+            call f() -> a;
+            output a;
+        }
+    """)
+
+
+def test_init_block():
+    assert_no_error("""
+        var int a;
+        function f() -> int;
+        init {
+            f() -> a;
+        }
+        main {
+            output a;
+        }
+    """)
+
+
+def test_call_on_itself():
+    assert_error("""
+        function f(int a) -> int;
+        main {
+            var int a;
+            call f(a) -> a;
+        }
+    """, "variable a used before initialization")
+
+
 def test_variable_not_initialized_subscript():
     assert_error("""
         main {
@@ -209,3 +243,47 @@ def test_variable_not_defined():
             output a;
         }
     """, "variable a not declared")
+
+
+def test_function_not_defined():
+    assert_error("""
+        main {
+            call f();
+        }
+    """, "function f not declared")
+
+
+def test_wrong_parameters():
+    assert_error("""
+        function f(int a);
+        main {
+            call f();
+        }
+    """, "function f expects 1 argument(s), got 0")
+
+
+def test_function_wrong_type():
+    assert_error("""
+        function f(int[] a);
+        main {
+            call f(5);
+        }
+    """, "argument a of function f: expected int[], got int")
+
+
+def test_function_return_value():
+    assert_error("""
+        function f() -> int;
+        main {
+            call f();
+        }
+    """, "function f returns int, but no return expression given")
+
+def test_function_no_return_value():
+    assert_error("""
+        function f();
+        main {
+            var int a;
+            call f() -> a;
+        }
+    """, "function f does not return a value")

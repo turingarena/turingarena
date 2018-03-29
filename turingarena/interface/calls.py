@@ -37,16 +37,14 @@ class CallStatement(ImperativeStatement):
         try:
             return self.context.global_context.functions[self.ast.function_name]
         except KeyError:
-            raise FunctionNotDeclaredError(
-                f"function {self.ast.function_name} is not defined",
-                parseinfo=self.ast.parseinfo,
-            ) from None
+            return None
 
     def validate(self):
-        yield from self.validate_parameters()
-        yield from self.validate_return_value()
-        if self.function_name not in self.context.global_context.functions:
+        if not self.function:
             yield Diagnostic(f"function {self.function_name} not declared")
+        else:
+            yield from self.validate_parameters()
+            yield from self.validate_return_value()
 
     @property
     def context_after(self):
@@ -58,7 +56,7 @@ class CallStatement(ImperativeStatement):
     def validate_parameters(self):
         fun = self.function
         if len(self.parameters) != len(fun.parameters):
-            yield Diagnostic.create_message(
+            yield Diagnostic(
                 f"function {fun.name} "
                 f"expects {len(fun.parameters)} argument(s), "
                 f"got {len(self.parameters)}",
@@ -68,7 +66,7 @@ class CallStatement(ImperativeStatement):
             expr_value_type = expression.value_type
 
             if expr_value_type != parameter.value_type:
-                yield Diagnostic.create_message(
+                yield Diagnostic(
                     f"argument {parameter.name} "
                     f"of function {fun.name}: "
                     f"expected {parameter.value_type}, "
@@ -81,21 +79,21 @@ class CallStatement(ImperativeStatement):
     def validate_return_value(self):
         fun = self.function
         return_type = fun.return_type
-        if return_type is not None:
+        if self.return_value is not None:
             yield from self.return_value.validate(lvalue=True)
         if return_type is not None and self.return_value is None:
-            yield Diagnostic.create_message(
+            yield Diagnostic(
                 f"function {fun.name} returns {return_type}, but no return expression given",
                 # parseinfo=self.ast.parseinfo,
             )
         if return_type is None and self.return_value is not None:
-            yield Diagnostic.create_message(
+            yield Diagnostic(
                 f"function {fun.name} does not return a value",
                 # parseinfo=self.ast.return_value.parseinfo,
             )
         return_expression_type = self.return_value and self.return_value.value_type
         if self.return_value is not None and return_expression_type != return_type:
-            yield Diagnostic.create_message(
+            yield Diagnostic(
                 f"function {fun.name} returns {return_type}, "
                 f"but return expression is {return_expression_type}",
                 # parseinfo=self.ast.return_value.parseinfo,
