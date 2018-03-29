@@ -21,7 +21,8 @@ class AllocStatement(ImperativeStatement):
             if not isinstance(arg.resolve_variable().value_type, ArrayType):
                 yield Diagnostic.create_message(f"Argument {arg} is not an array type")
             else:
-                yield from arg.index.validate()
+                for index in arg.indices:
+                    yield from index.validate()
 
     def generate_instructions(self, context):
         yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)

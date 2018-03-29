@@ -26,6 +26,26 @@ def test_variable_not_initialized():
     """, "variable a used before initialization")
 
 
+def test_variable_not_initialized_subscript():
+    assert_error("""
+        main {
+            var int a;
+            var int[] A;
+            input A[a];
+        }
+    """, "variable a used before initialization")
+
+
+def test_variable_not_initialized_array():
+    assert_error("""
+        main {
+            var int[] A;
+            alloc A : 5;
+            input A[0];
+        }
+    """, "variable A used before initialization")
+
+
 def test_variable_not_allocated():
     assert_error("""
             main {
@@ -33,6 +53,38 @@ def test_variable_not_allocated():
                 input a[0];
             }
     """, "variable a used before allocation")
+
+
+def test_array_alloc():
+    assert_no_error("""
+        main {
+            var int[] A; 
+            alloc A : 10;
+            input A[5];
+            output A[5];
+        }
+    """)
+
+
+def test_array_access():
+    assert_no_error("""
+        var int[] A;
+        var int s;
+        
+        init {
+            input s;
+            alloc A : s;
+            for (i : s) {
+                input A[i];
+            }
+        }
+        
+        main {
+            for (i : s) {
+                output A[i];            
+            }
+        }
+    """)
 
 
 def test_variable_initialized_for():

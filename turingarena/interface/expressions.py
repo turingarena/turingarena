@@ -38,7 +38,7 @@ class Expression(AbstractSyntaxNodeWrapper):
         return None
 
     def validate(self):
-        yield from ()
+        return []
 
 
 class LiteralExpression(Expression):
@@ -116,7 +116,8 @@ class ReferenceExpression(Expression):
         if self.variable.value_type == ArrayType:
             if self.variable not in self.context.initialized_variables:
                 yield Diagnostic.create_message(f"variable {self.variable.name} used before initialization")
-            yield from self.index.validate()
+        for index in self.indices:
+            yield from index.validate()
 
     def resolve_variable(self):
         return self.variable
