@@ -97,7 +97,7 @@ class ForStatement(ImperativeStatement):
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_inner().with_variables((self.index.variable,)),
+            context=self.context.create_inner().with_variables((self.index.variable,)).with_initialized_variables({self.index.variable}),
         )
 
     def validate(self):
@@ -116,11 +116,8 @@ class ForStatement(ImperativeStatement):
             inner_context.bindings[self.index.variable] = i
             yield from self.body.generate_instructions(inner_context)
 
-    def initialized_variables(self):
-        return [self.index.variable]
-
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.body.check_variables(initialized_variables, allocated_variables)
+    def context_after(self):
+        return self.body.context_after
 
     def expects_request(self, request):
         return (

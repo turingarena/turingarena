@@ -37,6 +37,9 @@ class Expression(AbstractSyntaxNodeWrapper):
     def resolve_variable(self):
         return None
 
+    def validate(self):
+        yield from ()
+
 
 class LiteralExpression(Expression):
     __slots__ = []

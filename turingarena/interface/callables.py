@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext
-from turingarena.interface.exceptions import InterfaceError
+from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.executable import Instruction
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import VariableReference
@@ -64,9 +64,9 @@ class Callable(AbstractSyntaxNodeWrapper):
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
-            raise InterfaceError(
+            yield Diagnostic(
                 "return type must be a scalar",
-                parseinfo=self.ast.declarator.return_type.parseinfo,
+                # parseinfo=self.ast.declarator.return_type.parseinfo,
             )
 
     @property
@@ -98,7 +98,7 @@ class FunctionStatement(Statement):
         return Function(ast=self.ast, context=self.context)
 
     def validate(self):
-        self.function.validate()
+        yield from self.function.validate()
 
     @property
     def context_after(self):
@@ -127,9 +127,9 @@ class Callback(Callable):
         )
 
         if invalid_parameter is not None:
-            raise InterfaceError(
+            raise Diagnostic(
                 "callback arguments must be scalars",
-                parseinfo=invalid_parameter.parseinfo,
+                # parseinfo=invalid_parameter.parseinfo,
             )
 
     def generate_instructions(self, context):
@@ -181,7 +181,7 @@ class CallbackStatement(Statement):
         return Callback(ast=self.ast, context=self.context)
 
     def validate(self):
-        self.callback.validate()
+        yield from self.callback.validate()
 
     @property
     def context_after(self):

@@ -45,10 +45,15 @@ class CallStatement(ImperativeStatement):
     def validate(self):
         yield from self.validate_parameters()
         yield from self.validate_return_value()
+        if self.function_name not in self.context.global_context.functions:
+            yield Diagnostic(f"function {self.function_name} not declared")
 
     @property
     def context_after(self):
-        return self.context.with_initialized_variables({self.return_value.resolve_variable()})
+        if self.return_value:
+            return self.context.with_initialized_variables({self.return_value.resolve_variable()})
+        else:
+            return self.context
 
     def validate_parameters(self):
         fun = self.function
@@ -71,13 +76,13 @@ class CallStatement(ImperativeStatement):
                     # parseinfo=expression.ast.parseinfo,
                 )
 
-            yield from parameter.validate()
+            yield from expression.validate()
 
     def validate_return_value(self):
         fun = self.function
         return_type = fun.return_type
         if return_type is not None:
-            yield from self.return_value.validate()
+            yield from self.return_value.validate(lvalue=True)
         if return_type is not None and self.return_value is None:
             yield Diagnostic.create_message(
                 f"function {fun.name} returns {return_type}, but no return expression given",

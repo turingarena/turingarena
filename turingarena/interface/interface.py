@@ -26,7 +26,7 @@ class InterfaceDefinition:
 
     def validate(self):
         if self.global_variables and not self.init_body:
-            yield Diagnostic.create_message("Global variables declared but no init {} block found")
+            yield Diagnostic.create_message("global variables declared but missing init block")
         yield from self.body.validate()
 
     @staticmethod
