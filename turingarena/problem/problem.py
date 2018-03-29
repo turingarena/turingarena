@@ -91,19 +91,20 @@ def clone_from_git(url):
             "git",
             "clone",
             url,
-            git_dir,
+            ".",
         ]
         subprocess.run(cmd, cwd=git_dir, check=True)
         yield git_dir
 
 
+@contextmanager
 def load_problem(problem_name, git_url=None):
     with ExitStack() as stack:
         if git_url is not None:
             problems_dir = stack.enter_context(clone_from_git(git_url))
         else:
             problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
-        return make_problem(os.path.join(problems_dir, problem_name))
+        yield make_problem(os.path.join(problems_dir, problem_name))
 
 
 LANGUAGE_BY_EXTENSION = {

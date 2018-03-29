@@ -24,10 +24,9 @@ def evaluate_cli(args):
     else:
         git_url = None
 
-    problem = load_problem(args["--problem"], git_url=git_url)
-
-    evaluation = problem.evaluate(
-        load_source(source_text, language=args["--language"], interface=problem.interface),
-    )
+    with load_problem(args["--problem"], git_url=git_url) as problem:
+        evaluation = problem.evaluate(
+            load_source(source_text, language=args["--language"], interface=problem.interface),
+        )
 
     print(evaluation["stdout"])
