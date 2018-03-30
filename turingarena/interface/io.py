@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.interface.exceptions import CommunicationBroken
+from turingarena.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena.interface.executable import Instruction, ImperativeStatement
 from turingarena.interface.expressions import compile_expression
 
@@ -19,6 +19,9 @@ class CheckpointStatement(ImperativeStatement):
 
     def generate_instructions(self, context):
         yield CheckpointInstruction()
+
+    def context_after(self):
+        return self.context.with_flushed_output(False)
 
 
 class CheckpointInstruction(Instruction):
@@ -64,6 +67,8 @@ class InputStatement(InputOutputStatement):
         })
 
     def validate(self):
+        if not self.context.has_flushed_output:
+            yield Diagnostic("missing flush between output and input instructions", parseinfo=self.ast.parseinfo)
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
 
@@ -88,6 +93,10 @@ class OutputStatement(InputOutputStatement):
     def generate_instructions(self, context):
         yield OutputInstruction(arguments=self.arguments, context=context)
 
+    @property
+    def context_after(self):
+        return self.context.with_flushed_output(False)
+
 
 class OutputInstruction(Instruction):
     __slots__ = ["arguments", "context"]
@@ -107,6 +116,10 @@ class FlushStatement(ImperativeStatement):
 
     def generate_instructions(self, context):
         yield FlushInstruction()
+
+    @property
+    def context_after(self):
+        return self.context.with_flushed_output(True)
 
 
 class FlushInstruction(Instruction):

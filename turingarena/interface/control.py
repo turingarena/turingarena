@@ -2,11 +2,12 @@ from collections import namedtuple
 
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
-from turingarena.interface.exceptions import InterfaceExit
+from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
+from turingarena.interface.io import FlushStatement, InputStatement
 
 
 class ExitStatement(ImperativeStatement):
@@ -67,17 +68,27 @@ class IfStatement(ImperativeStatement):
         elif self.else_body is not None:
             yield from self.else_body.generate_instructions(context)
 
-    def check_variables(self, initialized_variables, allocated_variables):
-        self.condition.check_variables(initialized_variables, allocated_variables)
-        self.then_body.check_variables(initialized_variables, allocated_variables)
-        if self.else_body:
-            self.else_body.check_variables(initialized_variables, allocated_variables)
-
     def expects_request(self, request):
         return (
             self.then_body.expects_request(request) or
             self.else_body is not None and self.else_body.expects_request(request)
         )
+
+    @property
+    def context_after(self):
+        initialized_variables = {
+            var
+            for var in self.then_body.context_after.initialized_variables
+            if not self.else_body or var in self.else_body.context_after.initialized_variables
+        }
+        allocated_variable = {
+            var
+            for var in self.then_body.context_after.allocated_variables
+            if not self.else_body or var in self.else_body.context_after.allocated_variables
+        }
+        has_flush = self.then_body.context_after.has_flushed_output and (not self.else_body or self.else_body.context_after.has_flushed_output)
+        return self.context.with_initialized_variables(initialized_variables)\
+            .with_allocated_variables(allocated_variable).with_flushed_output(has_flush)
 
 
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
@@ -102,6 +113,12 @@ class ForStatement(ImperativeStatement):
         )
 
     def validate(self):
+        if not self.body.context_after.has_flushed_output:
+            for statement in self.body.statements:
+                if isinstance(statement, FlushStatement):
+                    break
+                if isinstance(statement, InputStatement):
+                    yield Diagnostic("missing flush between output and input instructions", parseinfo=self.ast.parseinfo)
         yield from self.body.validate()
 
     def generate_instructions(self, context):

@@ -38,9 +38,8 @@ class ImperativeBlock(Block, ImperativeStructure):
     def generate_instructions(self, context):
         inner_context = context.child(self.declared_variables())
         for statement in self.statements:
-            if not isinstance(statement, ImperativeStatement):
-                continue
-            yield from statement.generate_instructions(inner_context)
+            if isinstance(statement, ImperativeStatement):
+                yield from statement.generate_instructions(inner_context)
 
     def expects_request(self, request):
         for s in self.statements:
@@ -53,17 +52,19 @@ class ImperativeBlock(Block, ImperativeStructure):
 
     @property
     def context_after(self):
+        statements = [s for s in self.statements]
+        if not statements:
+            return self.context
+        statement_ctx = statements[-1].context_after
         return self.context.with_initialized_variables({
             variable
-            for statement in self.statements
-            for variable in statement.context_after.initialized_variables
+            for variable in statement_ctx.initialized_variables
             if variable not in self.context.initialized_variables
         }).with_allocated_variables({
             variable
-            for statement in self.statements
-            for variable in statement.context_after.allocated_variables
+            for variable in statement_ctx.allocated_variables
             if variable not in self.context.allocated_variables
-        })
+        }).with_flushed_output(statement_ctx.has_flushed_output)
 
 
 ExitCall = object()
