@@ -39,8 +39,6 @@ def parse_markdown(text):
 
     text = reDisplayMath.sub(lambda m: f'<math src={quoteattr(m.group(1))} />', text)
     text = reInlineMath.sub(lambda m: f'<math src={quoteattr(m.group(1))} />', text)
-    print(text)
     html = CommonMark.commonmark(text)
-    print(html)
     ast = ElementTree.fromstring(f"<turingarena>{html}</turingarena>")
     return list(xml_children(ast))
