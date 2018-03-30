@@ -3,6 +3,7 @@ from turingarena.cli.loggerinit import init_logger
 from turingarena.container.cli import container_cli
 from turingarena.interface.cli import generate_metadata_cli, generate_template_cli, generate_skeleton_cli
 from turingarena.problem.cli import evaluate_cli
+from turingarena.siteinstall import install_cli, uninstall_cli
 from turingarena.tests.cli import test_cli
 from turingarena.web.serve import serve_cli
 
@@ -27,6 +28,8 @@ def main(args):
         "metadata": generate_metadata_cli,
         "serve": serve_cli,
         "test": test_cli,
+        "install": install_cli,
+        "uninstall": uninstall_cli,
     }
     argv2 = args["<args>"]
     commands[args["<cmd>"]](argv2)
