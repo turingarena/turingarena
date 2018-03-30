@@ -18,4 +18,9 @@ ENTRYPOINT ["turingarena"]
 COPY turingarena/ /turingarena/
 COPY examples/ /examples/
 
-RUN turingarena pythonsite && turingarena install /examples
+RUN true \
+    && turingarena pythonsite \
+    && turingarena install /examples \
+    && mkdir /problems \
+    && turingarena install /problems \
+    && true
