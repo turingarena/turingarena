@@ -1,4 +1,4 @@
-from turingarena.interface.algorithm import load_algorithm
+from turingarena.algorithm import load_algorithm
 
 interface_text = """
     function test() -> int;

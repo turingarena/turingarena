@@ -1,6 +1,6 @@
 import pytest
 
-from turingarena.interface.algorithm import load_algorithm
+from turingarena.algorithm import load_algorithm
 from turingarena.interface.driver.client import SandboxError
 
 

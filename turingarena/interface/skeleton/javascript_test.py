@@ -1,4 +1,4 @@
-from turingarena.interface.algorithm import load_algorithm
+from turingarena.algorithm import load_algorithm
 
 
 def test_multiple_inputs():

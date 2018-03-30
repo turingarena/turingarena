@@ -3,7 +3,7 @@ from collections import deque
 import pytest
 import tatsu
 
-from turingarena.interface.algorithm import load_algorithm
+from turingarena.algorithm import load_algorithm
 from turingarena.interface.exceptions import InterfaceError
 from turingarena.interface.interface import InterfaceDefinition
 

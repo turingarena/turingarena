@@ -6,8 +6,8 @@ import sys
 from contextlib import redirect_stdout
 from io import StringIO
 
+from turingarena.algorithm import Algorithm
 from turingarena.common import ImmutableObject
-from turingarena.interface.algorithm import Algorithm
 from turingarena.problem.evaluation import Evaluation
 from turingarena.problem.evaluator import ProblemEvaluator
 
