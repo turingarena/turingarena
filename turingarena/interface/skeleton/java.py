@@ -1,4 +1,3 @@
-from turingarena.common import indent_all, indent
 from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 from turingarena.interface.context import StaticGlobalContext
 
@@ -8,9 +7,9 @@ class JavaSkeletonCodeGen(CodeGen):
         yield "import java.util.Scanner;"
         yield
         yield "abstract class Skeleton {"
-        yield indent("private static final Scanner in = new Scanner(System.in);")
+        yield self.indent("private static final Scanner in = new Scanner(System.in);")
         yield
-        yield from indent_all(self.block_content(self.interface.body))
+        yield from self.block_content(self.interface.body)
         yield "}"
         yield
 
@@ -20,22 +19,22 @@ class JavaSkeletonCodeGen(CodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"{build_callable_declarator(callback)}" " {"
-        yield indent(f'System.out.println("{callback.name}");')
-        yield from indent_all(self.block_content(statement.callback.body))
+        yield self.indent(f'System.out.println("{callback.name}");')
+        yield from self.block_content(statement.callback.body)
         yield "}"
         yield
 
     def main_statement(self, statement):
         yield
         yield "public static void main(String args[]) {"
-        yield indent("Solution solution = new Solution();")
-        yield from indent_all(self.block_content(statement.body))
+        yield self.indent("Solution solution = new Solution();")
+        yield from self.block_content(statement.body)
         yield "}"
 
     def init_statement(self, statement):
         yield
         yield "static {"
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.block_content(statement.body)
         yield "}"
 
     def alloc_statement(self, statement):
@@ -69,17 +68,17 @@ class JavaSkeletonCodeGen(CodeGen):
     def if_statement(self, statement):
         condition = build_expression(statement.condition)
         yield f"if ({condition})" " {"
-        yield from indent_all(self.block_content(statement.then_body))
+        yield from self.block_content(statement.then_body)
         if statement.else_body is not None:
             yield "} else {"
-            yield from indent_all(self.block_content(statement.else_body))
+            yield from self.block_content(statement.else_body)
         yield "}"
 
     def for_statement(self, statement):
         index_name = statement.index.variable.name
         size = build_expression(statement.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.block_content(statement.body)
         yield "}"
 
     def var_statement(self, s):
@@ -101,15 +100,15 @@ class JavaSkeletonCodeGen(CodeGen):
 class JavaTemplateCodeGen(CodeGen):
     def generate(self):
         yield "class Solution extends Skeleton {"
-        yield from indent_all(self.block_content(self.interface.body))
+        yield from self.block_content(self.interface.body)
         yield "}"
 
     def function_statement(self, statement):
         yield
         yield f"{build_callable_declarator(statement.function)}" " {"
-        yield indent("// TODO")
+        yield self.indent("// TODO")
         if statement.function.return_type:
-            yield indent("return 0;")
+            yield self.indent("return 0;")
         yield "}"
 
 

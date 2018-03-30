@@ -1,4 +1,3 @@
-from turingarena.common import indent_all, indent
 from turingarena.interface.context import StaticGlobalContext
 from turingarena.interface.skeleton.common import CodeGen
 
@@ -7,7 +6,7 @@ class CppSkeletonCodeGen(CodeGen):
     def generate(self):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
-        yield from self.block_content(self.interface.body)
+        yield from self.block_content(self.interface.body, indent=False)
 
     def var_statement(self, s):
         if isinstance(s.context, StaticGlobalContext):
@@ -18,8 +17,8 @@ class CppSkeletonCodeGen(CodeGen):
     def callback_statement(self, s):
         callback = s.callback
         yield f"{build_callable_declarator(callback)}" " {"
-        yield indent(rf"""printf("%s\n", "{callback.name}");""")
-        yield from indent_all(self.block_content(callback.body))
+        yield self.indent(fr'printf("%s\n", "{callback.name}");')
+        yield from self.block_content(callback.body)
         yield "}"
 
     def function_statement(self, s):
@@ -27,12 +26,12 @@ class CppSkeletonCodeGen(CodeGen):
 
     def init_statement(self, s):
         yield "__attribute__((constructor)) static void init() {"
-        yield from indent_all(self.block_content(s.body))
+        yield from self.block_content(s.body)
         yield "}"
 
     def main_statement(self, s):
         yield "int main() {"
-        yield from indent_all(self.block_content(s.body))
+        yield from self.block_content(s.body)
         yield "}"
 
     def alloc_statement(self, s):
@@ -66,18 +65,18 @@ class CppSkeletonCodeGen(CodeGen):
     def if_statement(self, s):
         condition = self.expression(s.condition)
         yield f"if( {condition} )" " {"
-        yield from indent_all(self.block_content(s.then_body))
+        yield from self.block_content(s.then_body)
         yield "}"
         if s.else_body is not None:
             yield "else {"
-            yield from indent_all(self.block_content(s.else_body))
+            yield from self.block_content(s.else_body)
             yield "}"
 
     def for_statement(self, s):
         index_name = s.index.variable.name
         size = self.expression(s.index.range)
         yield f"for(int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from indent_all(self.block_content(s.body))
+        yield from self.block_content(s.body)
         yield "}"
 
     def any_statement(self, s):
@@ -97,7 +96,7 @@ class CppTemplateCodeGen(CodeGen):
     def function_statement(self, s):
         yield
         yield f"{build_callable_declarator(s.function)}" " {"
-        yield indent("// TODO")
+        yield self.indent("// TODO")
         yield "}"
 
     def callback_statement(self, s):

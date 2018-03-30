@@ -55,11 +55,14 @@ class CodeGen:
             raise RuntimeError(f"Language {language} not supported by TuringArena")
 
     def generate(self):
-        yield from self.block_content(self.interface.body)
+        yield from self.block_content(self.interface.body, indent=False)
 
-    def block_content(self, b):
+    def block_content(self, b, indent=True):
         for s in b.statements:
-            yield from self.statement(s)
+            if indent:
+                yield from self.indent_all(self.statement(s))
+            else:
+                yield from self.statement(s)
 
     def statement(self, s):
         method_name = f"{s.statement_type}_statement"
@@ -137,3 +140,15 @@ class CodeGen:
     def reference_expression(self, e):
         subscripts = "".join(f"[{self.expression(index)}]" for index in e.indices)
         return f"{e.variable_name}{subscripts}"
+
+    @staticmethod
+    def indent_all(lines):
+        for line in lines:
+            yield CodeGen.indent(line)
+
+    @staticmethod
+    def indent(line):
+        if line is None:
+            return None
+        else:
+            return "    " + line
