@@ -77,10 +77,10 @@ class JavaSkeletonCodeGen(CodeGen):
     def if_statement(self, statement):
         condition = build_expression(statement.condition)
         yield f"if ({condition})" " {"
-        yield from indent_all(self.block_content(statement.body))
+        yield from indent_all(self.block_content(statement.then_body))
         if statement.else_body is not None:
             yield "} else {"
-            yield from indent_all(self.block_content(statement.body))
+            yield from indent_all(self.block_content(statement.else_body))
         yield "}"
 
     def for_statement(self, statement):
@@ -164,4 +164,3 @@ def build_alloc_type(var_type, size):
         return {
             int: "int",
         }[var_type.base_type] + f"[{size}]"
-
