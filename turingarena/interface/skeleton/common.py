@@ -11,6 +11,13 @@ class ExpressionBuilder:
 
 
 class CodeGen:
+
+    def __init__(self, interface):
+        self.interface = interface
+
+    def generate(self):
+        pass
+
     def block_content(self, b):
         for s in b.statements:
             yield from self.statement(s)
