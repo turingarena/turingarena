@@ -49,6 +49,26 @@ def generate_skeleton_cli(args):
 
 
 @docopt_cli
+def validate_interface_cli(args):
+    """Validate interface file
+
+    Usage:
+        validate [options]
+
+    Options:
+        -I --interface=<file>  Interface definition file [default: interface.txt].
+    """
+
+    with open(args["--interface"]) as f:
+        interface_text = f.read()
+
+    interface = InterfaceDefinition.compile(interface_text)
+
+    for message in interface.validate():
+        print(message)
+
+
+@docopt_cli
 def generate_metadata_cli(args):
     """Generate interface metadata.
 
