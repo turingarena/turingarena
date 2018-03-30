@@ -2,14 +2,6 @@ from turingarena.common import indent_all, indent
 from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 
 
-def generate_skeleton_javascript(interface):
-    yield from JavaScriptSkeletonCodeGen(interface).generate()
-
-
-def generate_template_javascript(interface):
-    yield from JavaScriptTemplateCodeGen(interface).generate()
-
-
 class JavaScriptSkeletonCodeGen(CodeGen):
     def generate(self):
         yield "async function init() {}"

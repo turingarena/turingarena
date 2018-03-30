@@ -3,14 +3,6 @@ from turingarena.interface.context import StaticGlobalContext
 from turingarena.interface.skeleton.common import CodeGen
 
 
-def generate_skeleton_cpp(interface):
-    yield from CppSkeletonCodeGen(interface).generate()
-
-
-def generate_template_cpp(interface):
-    yield from CppTemplateCodeGen(interface).generate()
-
-
 class CppSkeletonCodeGen(CodeGen):
     def generate(self):
         yield "#include <cstdio>"

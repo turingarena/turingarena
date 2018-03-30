@@ -3,14 +3,6 @@ from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 from turingarena.interface.context import StaticGlobalContext
 
 
-def generate_skeleton_java(interface):
-    yield from JavaSkeletonCodeGen(interface).generate()
-
-
-def generate_template_java(interface):
-    yield from JavaTemplateCodeGen(interface).generate()
-
-
 class JavaSkeletonCodeGen(CodeGen):
     def generate(self):
         yield "import java.util.Scanner;"

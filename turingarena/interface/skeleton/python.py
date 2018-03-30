@@ -2,14 +2,6 @@ from turingarena.common import indent_all, indent
 from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 
 
-def generate_skeleton_python(interface):
-    yield from PythonSkeletonCodeGen(interface).generate()
-
-
-def generate_template_python(interface):
-    yield from PythonTemplateCodeGen(interface).generate()
-
-
 class PythonSkeletonCodeGen(CodeGen):
     def generate(self):
         yield from self.block_content(self.interface.body)
