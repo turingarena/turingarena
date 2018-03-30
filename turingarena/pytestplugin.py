@@ -13,9 +13,9 @@ class EvaluationAssertionError(Exception):
     pass
 
 
-class ProblemSolutionTestItem(pytest.File, pytest.Item):
-    def __init__(self, fspath, parent, problem, source):
-        super().__init__(fspath=fspath, parent=parent)
+class ProblemSolutionTestItem(pytest.Item):
+    def __init__(self, parent, problem, source):
+        super().__init__("test_solution", parent)
         self.problem = problem
         self.source = source
 
@@ -45,6 +45,16 @@ class ProblemSolutionTestItem(pytest.File, pytest.Item):
         return super().repr_failure(excinfo)
 
 
+class ProblemSolutionTestFile(pytest.File):
+    def __init__(self, fspath, parent, problem, source):
+        super().__init__(fspath=fspath, parent=parent)
+        self.problem = problem
+        self.source = source
+
+    def collect(self):
+        yield ProblemSolutionTestItem(self, self.problem, self.source)
+
+
 def pytest_collect_file(path, parent):
     solutions_dir, source_filename = os.path.split(path)
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
@@ -59,7 +69,7 @@ def pytest_collect_file(path, parent):
         interface=problem.interface,
     )
 
-    return ProblemSolutionTestItem(
+    return ProblemSolutionTestFile(
         fspath=path,
         parent=parent,
         problem=problem,
