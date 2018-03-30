@@ -112,12 +112,12 @@ class ReferenceExpression(Expression):
 
     def validate(self, lvalue=False):
         if not self.variable:
-            yield Diagnostic("variable a not declared")
+            yield Diagnostic("variable a not declared", parseinfo=self.ast.parseinfo)
         elif self.variable not in self.context.initialized_variables and not lvalue:
-            yield Diagnostic(f"variable {self.variable.name} used before initialization")
+            yield Diagnostic(f"variable {self.variable.name} used before initialization", parseinfo=self.ast.parseinfo)
         elif isinstance(self.variable.value_type, ArrayType):
             if self.variable not in self.context.allocated_variables:
-                yield Diagnostic(f"variable {self.variable.name} used before allocation")
+                yield Diagnostic(f"variable {self.variable.name} used before allocation", parseinfo=self.ast.parseinfo)
             for index in self.indices:
                 yield from index.validate()
 

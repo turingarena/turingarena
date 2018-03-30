@@ -13,6 +13,7 @@ def assert_no_error(text):
 def assert_error(text, error):
     i = InterfaceDefinition.compile(text)
     for m in i.validate():
+        print(m)
         if m.message == error:
             return
     raise AssertionError
@@ -38,12 +39,12 @@ def test_variable_initialized():
     """)
 
 
-def test_init_block():
+def test_init_block_call():
     assert_no_error("""
         var int a;
         function f() -> int;
         init {
-            f() -> a;
+            call f() -> a;
         }
         main {
             output a;

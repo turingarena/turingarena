@@ -22,11 +22,17 @@ class InterfaceError(Exception):
 
 
 class Diagnostic(namedtuple("Diagnostic", [
-    "message"
+    "message",
+    "parseinfo",
 ])):
-    @staticmethod
-    def create_message(message):
-        return Diagnostic(message=message)
+
+    @property
+    def line_info(self):
+        return self.parseinfo.buffer.line_info(self.parseinfo.pos)
+
+    def __str__(self):
+        lineinfo = self.line_info
+        return f"line {lineinfo.line + 1}: {self.message}"
 
 
 class CommunicationBroken(Exception):

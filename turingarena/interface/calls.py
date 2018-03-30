@@ -41,7 +41,7 @@ class CallStatement(ImperativeStatement):
 
     def validate(self):
         if not self.function:
-            yield Diagnostic(f"function {self.function_name} not declared")
+            yield Diagnostic(f"function {self.function_name} not declared", parseinfo=self.ast.parseinfo)
         else:
             yield from self.validate_parameters()
             yield from self.validate_return_value()
@@ -60,7 +60,7 @@ class CallStatement(ImperativeStatement):
                 f"function {fun.name} "
                 f"expects {len(fun.parameters)} argument(s), "
                 f"got {len(self.parameters)}",
-                # parseinfo=self.ast.parseinfo,
+                parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
@@ -71,7 +71,7 @@ class CallStatement(ImperativeStatement):
                     f"of function {fun.name}: "
                     f"expected {parameter.value_type}, "
                     f"got {expr_value_type}",
-                    # parseinfo=expression.ast.parseinfo,
+                    parseinfo=expression.ast.parseinfo,
                 )
 
             yield from expression.validate()
@@ -84,19 +84,19 @@ class CallStatement(ImperativeStatement):
         if return_type is not None and self.return_value is None:
             yield Diagnostic(
                 f"function {fun.name} returns {return_type}, but no return expression given",
-                # parseinfo=self.ast.parseinfo,
+                parseinfo=self.ast.parseinfo,
             )
         if return_type is None and self.return_value is not None:
             yield Diagnostic(
                 f"function {fun.name} does not return a value",
-                # parseinfo=self.ast.return_value.parseinfo,
+                parseinfo=self.ast.return_value.parseinfo,
             )
         return_expression_type = self.return_value and self.return_value.value_type
         if self.return_value is not None and return_expression_type != return_type:
             yield Diagnostic(
                 f"function {fun.name} returns {return_type}, "
                 f"but return expression is {return_expression_type}",
-                # parseinfo=self.ast.return_value.parseinfo,
+                parseinfo=self.ast.return_value.parseinfo,
             )
 
     def expects_request(self, request):
