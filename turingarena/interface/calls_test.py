@@ -64,3 +64,4 @@ def test_call_return_expression_wrong_type():
             call f() -> /*!*/ a /*!*/;
         }
     """, "function f returns int, but return expression is int[]")
+
