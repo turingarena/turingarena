@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import subprocess
@@ -7,6 +8,7 @@ from io import StringIO
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.algorithm import Algorithm
+from turingarena.problem.evaluation import Evaluation
 from turingarena.problem.evaluator import ProblemEvaluator
 
 logger = logging.getLogger(__name__)
@@ -38,6 +40,7 @@ class PythonEvaluator(ProblemEvaluator):
 class HostPythonEvaluator(PythonEvaluator):
     """
     Evaluates a Python problem in the host interpreter.
+    Stdout is captured by changing sys.stdout.
     """
 
     __slots__ = []
@@ -55,7 +58,7 @@ class HostPythonEvaluator(PythonEvaluator):
             exec(script, script_globals)
             data = script_globals[self.function_name](Algorithm(submission_dir))
 
-        return dict(stdout=eval_stdout.getvalue(), data=data)
+        return Evaluation(stdout=eval_stdout.getvalue(), data=data)
 
 
 class SubprocessPythonEvaluator(PythonEvaluator):
@@ -75,20 +78,19 @@ class SubprocessPythonEvaluator(PythonEvaluator):
             submission_dir,
         ]
         logger.info(f"running {cli}")
-        evaluation = subprocess.run(
+        process = subprocess.run(
             cli,
             check=True,
             stdout=subprocess.PIPE,
             universal_newlines=True,
         )
-        return dict(
-            stdout=evaluation.stdout,
-        )
+        return Evaluation(**json.loads(process.stdout))
 
 
 if __name__ == "__main__":
     script_path, function_name, prepared_problem_dir, submission_dir = sys.argv[1:]
-    HostPythonEvaluator(script_path, function_name).evaluate(
+    evaluation = HostPythonEvaluator(script_path, function_name).evaluate(
         prepared_problem_dir=prepared_problem_dir,
         submission_dir=submission_dir,
     )
+    json.dump(evaluation._asdict(), fp=sys.stdout)

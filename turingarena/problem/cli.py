@@ -30,3 +30,4 @@ def evaluate_cli(args):
         )
 
     print(evaluation["stdout"])
+    print(evaluation["data"])
