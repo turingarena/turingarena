@@ -1,4 +1,3 @@
-from turingarena.common import indent_all, indent
 from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 
 
@@ -14,22 +13,22 @@ class JavaScriptSkeletonCodeGen(CodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"function {build_callable_declarator(callback)}" + "{"
-        yield indent(f"print('{callback.name}');")
-        yield from indent_all(self.block_content(callback.body))
+        yield self.indent(f"print('{callback.name}');")
+        yield from self.block_content(callback.body)
         yield "}"
         yield
 
     def main_statement(self, statement):
         yield
         yield "async function main() {"
-        yield indent("__load_source__(); // load user source file")
-        yield from indent_all(self.block_content(statement.body))
+        yield self.indent("__load_source__(); // load user source file")
+        yield from self.block_content(statement.body)
         yield "}"
 
     def init_statement(self, statement):
         yield
         yield "async function init() {"
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.block_content(statement.body)
         yield "}"
 
     def any_statement(self, statement):
@@ -70,17 +69,17 @@ class JavaScriptSkeletonCodeGen(CodeGen):
     def if_statement(self, statement):
         condition = build_expression(statement.condition)
         yield f"if ({condition})" " {"
-        yield from indent_all(self.block_content(statement.then_body))
+        yield from self.block_content(statement.then_body)
         if statement.else_body is not None:
             yield "} else {"
-            yield from indent_all(self.block_content(statement.else_body))
+            yield from self.block_content(statement.else_body)
         yield "}"
 
     def for_statement(self, statement):
         index_name = statement.index.variable.name
         size = build_expression(statement.index.range)
         yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.block_content(statement.body)
         yield "}"
 
 
@@ -88,7 +87,7 @@ class JavaScriptTemplateCodeGen(CodeGen):
     def function_statement(self, statement):
         yield
         yield f"function {build_callable_declarator(statement.function)}" + "{"
-        yield indent("// TODO")
+        yield self.indent("// TODO")
         yield "}"
 
 

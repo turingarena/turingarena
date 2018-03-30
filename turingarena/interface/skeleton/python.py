@@ -1,10 +1,9 @@
-from turingarena.common import indent_all, indent
 from turingarena.interface.skeleton.common import ExpressionBuilder, CodeGen
 
 
 class PythonSkeletonCodeGen(CodeGen):
     def generate(self):
-        yield from self.block_content(self.interface.body)
+        yield from self.block_content(self.interface.body, indent=False)
         yield
         yield "import source as _source"
 
@@ -16,20 +15,20 @@ class PythonSkeletonCodeGen(CodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"def {build_callable_declarator(callback)}:"
-        yield from indent_all(generate_globals(statement.context))
-        yield indent(f"print('{callback.name}')")
-        yield from indent_all(self.block_content(callback.body))
+        yield from self.indent_all(generate_globals(statement.context))
+        yield self.indent(f"print('{callback.name}')")
+        yield from self.block_content(callback.body)
 
     def init_statement(self, statement):
         yield
         yield "# init block"
-        yield from self.block_content(statement.body)
+        yield from self.block_content(statement.body, indent=False)
 
     def main_statement(self, statement):
         yield
         yield 'def main():'
-        yield from indent_all(generate_globals(statement.context))
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.indent_all(generate_globals(statement.context))
+        yield from self.block_content(statement.body)
 
     def any_statement(self, statement):
         generators = {
@@ -73,25 +72,24 @@ class PythonSkeletonCodeGen(CodeGen):
     def if_statement(self, statement):
         condition = build_expression(statement.condition)
         yield f"if {condition}:"
-        yield from indent_all(self.block_content(statement.then_body))
-        if statement.else_body is None:
-            return
-        yield "else:"
-        yield from indent_all(self.block_content(statement.else_body))
+        yield from self.block_content(statement.then_body)
+        if statement.else_body:
+            yield "else:"
+            yield from self.block_content(statement.else_body)
 
     def for_statement(self, statement):
         index_name = statement.index.variable.name
         size = build_expression(statement.index.range)
         yield f"for {index_name} in range({size}):"
-        yield from indent_all(self.block_content(statement.body))
+        yield from self.block_content(statement.body)
 
 
 class PythonTemplateCodeGen(CodeGen):
     def function_statement(self, statement):
         yield
         yield f"def {build_callable_declarator(statement.function)}:"
-        yield indent("# TODO")
-        yield indent("pass")
+        yield self.indent("# TODO")
+        yield self.indent("pass")
 
 
 def generate_globals(context):
