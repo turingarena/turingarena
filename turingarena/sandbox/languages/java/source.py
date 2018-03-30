@@ -1,10 +1,9 @@
 import logging
 import os
 import subprocess
-from subprocess import CalledProcessError
 
 from turingarena.common import write_to_file
-from turingarena.interface.skeleton.java import generate_skeleton_java
+from turingarena.interface.skeleton.common import CodeGen
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -21,7 +20,7 @@ class JavaAlgorithmSource(AlgorithmSource):
         solution_filename = os.path.join(algorithm_dir, "Solution.java")
 
         with open(skeleton_filename, "w") as f:
-            write_to_file(generate_skeleton_java(self.interface), f)
+            write_to_file(CodeGen.get_skeleton_generator("java")(self.interface).generate(), f)
 
         with open(solution_filename, "w") as f:
             f.write(self.text)
