@@ -1,7 +1,10 @@
+import importlib
+import importlib.util
 import logging
 import os
 import subprocess
 from contextlib import contextmanager, ExitStack
+from importlib.machinery import FileFinder
 from tempfile import TemporaryDirectory
 
 import yaml
@@ -102,9 +105,19 @@ def load_problem(problem_name, git_url=None):
     with ExitStack() as stack:
         if git_url is not None:
             problems_dir = stack.enter_context(clone_from_git(git_url))
+            spec = FileFinder(problems_dir).find_spec(problem_name)
         else:
-            problems_dir = os.environ.get("TURINGARENA_PROBLEMS_PATH", ".")
-        yield make_problem(os.path.join(problems_dir, problem_name))
+            spec = importlib.util.find_spec(problem_name)
+        problem_package = importlib.util.module_from_spec(spec)
+        try:
+            paths = problem_package.__path__
+        except AttributeError:
+            raise ValueError(f"problem module {problem_package} is not a package")
+        assert len(paths) >= 1
+        if len(paths) > 1:
+            raise ValueError(f"problem package {problem_package} has multiple paths: {paths}")
+        [path] = paths
+        yield make_problem(path)
 
 
 LANGUAGE_BY_EXTENSION = {
