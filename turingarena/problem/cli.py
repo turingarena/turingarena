@@ -19,8 +19,6 @@ def evaluate_cli(args):
         -g --git=<url>  Clone problem from git
     """
 
-    source_text = sys.stdin.read()
-
     with ExitStack() as stack:
         git_url = args["--git"]
         if git_url is not None:
@@ -29,7 +27,11 @@ def evaluate_cli(args):
         sys.path.append(".")
         problem = load_problem(args["--problem"])
         evaluation = problem.evaluate(
-            load_source(source_text, language=args["--language"], interface=problem.interface),
+            load_source(
+                sys.stdin.read(),
+                language=args["--language"],
+                interface=problem.interface,
+            ),
         )
 
     print(evaluation.stdout)

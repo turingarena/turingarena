@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
 COPY setup.py /setup.py
 RUN python setup.py develop
 
-ENV TURINGARENA_PROBLEMS_PATH /problems
-
 ENTRYPOINT ["turingarena"]
 
 COPY turingarena/ /turingarena/
-COPY examples/ /problems/
+COPY examples/ /examples/
+
+RUN turingarena pythonsite && turingarena install /examples
