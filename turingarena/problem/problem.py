@@ -92,9 +92,15 @@ def clone_from_git(url):
         cmd = [
             "git",
             "clone",
+            "--depth=1",
+            "--recurse-submodules",
+            "--shallow-submodules",
+            "--jobs=8",
+            "--quiet",
             url,
             ".",
         ]
+        logger.info(f"running {cmd}")
         subprocess.run(cmd, cwd=git_dir, check=True)
 
         import sys
