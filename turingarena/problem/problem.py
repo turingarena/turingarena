@@ -3,8 +3,7 @@ import importlib.util
 import logging
 import os
 import subprocess
-from contextlib import contextmanager, ExitStack
-from importlib.machinery import FileFinder
+from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 import yaml
@@ -97,27 +96,24 @@ def clone_from_git(url):
             ".",
         ]
         subprocess.run(cmd, cwd=git_dir, check=True)
-        yield git_dir
+
+        import sys
+        sys.path.append(git_dir)
+        yield
+        sys.path.remove(git_dir)
 
 
-@contextmanager
-def load_problem(problem_name, git_url=None):
-    with ExitStack() as stack:
-        if git_url is not None:
-            problems_dir = stack.enter_context(clone_from_git(git_url))
-            spec = FileFinder(problems_dir).find_spec(problem_name)
-        else:
-            spec = importlib.util.find_spec(problem_name)
-        problem_package = importlib.util.module_from_spec(spec)
-        try:
-            paths = problem_package.__path__
-        except AttributeError:
-            raise ValueError(f"problem module {problem_package} is not a package")
-        assert len(paths) >= 1
-        if len(paths) > 1:
-            raise ValueError(f"problem package {problem_package} has multiple paths: {paths}")
-        [path] = paths
-        yield make_problem(path)
+def load_problem(problem_name):
+    problem_package = importlib.import_module(problem_name)
+    try:
+        paths = problem_package.__path__
+    except AttributeError:
+        raise ValueError(f"problem module {problem_package} is not a package")
+    assert len(paths) >= 1
+    if len(paths) > 1:
+        raise ValueError(f"problem package {problem_package} has multiple paths: {paths}")
+    [path] = paths
+    return make_problem(path)
 
 
 LANGUAGE_BY_EXTENSION = {

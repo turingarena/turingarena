@@ -1,7 +1,8 @@
 import sys
+from contextlib import ExitStack
 
 from turingarena.cli import docopt_cli
-from turingarena.problem.problem import load_problem
+from turingarena.problem.problem import load_problem, clone_from_git
 from turingarena.sandbox.sources import load_source
 
 
@@ -19,15 +20,17 @@ def evaluate_cli(args):
     """
 
     source_text = sys.stdin.read()
-    if "--git" in args:
-        git_url = args["--git"]
-    else:
-        git_url = None
 
-    with load_problem(args["--problem"], git_url=git_url) as problem:
+    with ExitStack() as stack:
+        git_url = args["--git"]
+        if git_url is not None:
+            stack.enter_context(clone_from_git(git_url))
+
+        sys.path.append(".")
+        problem = load_problem(args["--problem"])
         evaluation = problem.evaluate(
             load_source(source_text, language=args["--language"], interface=problem.interface),
         )
 
-    print(evaluation["stdout"])
-    print(evaluation["data"])
+    print(evaluation.stdout)
+    print(evaluation.data)

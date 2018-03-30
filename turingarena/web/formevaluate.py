@@ -1,4 +1,6 @@
-from turingarena.problem.problem import load_problem
+from contextlib import ExitStack
+
+from turingarena.problem.problem import load_problem, clone_from_git
 from turingarena.sandbox.sources import load_source
 
 
@@ -10,10 +12,13 @@ def form_evaluate(fields):
     else:
         source_text = fields["source_file"].value.decode()
 
-    if problem_name == "git":
-        problem_loader = load_problem(".", git_url=fields["git_url"].value)
-    else:
-        problem_loader = load_problem(problem_name)
+    with ExitStack() as stack:
+        try:
+            git_url = fields["git_url"].value
+        except KeyError:
+            git_url = None
+        if git_url:
+            stack.enter_context(clone_from_git(git_url))
 
-    with problem_loader as problem:
+        problem = load_problem(problem_name)
         return problem.evaluate(load_source(source_text, language=language, interface=problem.interface))

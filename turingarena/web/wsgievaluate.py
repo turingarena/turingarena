@@ -14,4 +14,4 @@ def application(environ, start_response):
         yield traceback.format_exc().encode()
     else:
         start_response("200 OK", headers)
-        yield response["stdout"].encode()
+        yield response.stdout.encode()

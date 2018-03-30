@@ -5,14 +5,15 @@ import './App.css';
 
 const UploadView = ({ onSubmit, disabled }) => (
   <form disabled={disabled} onSubmit={(e) => { e.preventDefault(); onSubmit(e.target); }}>
-    <select name="problem">
-      <option>git</option>
-      <option>sum_of_two_numbers</option>
-      <option>max_in_sequence</option>
-      <option>triangle_dynamic_programming</option>
-    </select>
-    <input type="text" name="git_url" />
-    <input type="file" name="source_file" />
+    <label htmlFor="git_url">
+      Git URL: <input id="git_url" type="text" name="git_url" />
+    </label>
+    <label htmlFor="problem">
+      Problem name: <input id="problem" type="text" name="problem" />
+    </label>
+    <label htmlFor="source_file">
+      Source file: <input id="source_file" type="file" name="source_file" />
+    </label>
     <select name="language">
       <option value="c++">C/C++</option>
       <option value="python">Python</option>
