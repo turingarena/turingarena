@@ -120,9 +120,6 @@ class JavaTemplateCodeGen(CodeGen):
             yield indent("return 0;")
         yield "}"
 
-    def any_statement(self, s):
-        return []
-
 
 def build_callable_declarator(callable):
     return_type = build_type(callable.return_type)

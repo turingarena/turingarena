@@ -4,10 +4,7 @@ import sys
 from turingarena.cli import docopt_cli
 from turingarena.common import write_to_file
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.interface.skeleton.cpp import generate_template_cpp, generate_skeleton_cpp
-from turingarena.interface.skeleton.java import generate_skeleton_java, generate_template_java
-from turingarena.interface.skeleton.javascript import generate_template_javascript, generate_skeleton_javascript
-from turingarena.interface.skeleton.python import generate_template_python, generate_skeleton_python
+from turingarena.interface.skeleton.common import CodeGen
 from turingarena.problem.problem import load_problem
 
 
@@ -23,12 +20,12 @@ def generate_template_cli(args):
         -I --interface=<file>  Interface definition file [default: interface.txt].
     """
 
-    generate(args, {
-        "c++": generate_template_cpp,
-        "python": generate_template_python,
-        "java": generate_template_java,
-        "javascript": generate_template_javascript,
-    })
+    with open(args["--interface"]) as f:
+        interface_text = f.read()
+
+    interface = InterfaceDefinition.compile(interface_text)
+    generator = CodeGen.get_template_generator(args["--language"])(interface)
+    write_to_file(generator.generate(), sys.stdout)
 
 
 @docopt_cli
@@ -43,12 +40,12 @@ def generate_skeleton_cli(args):
         -I --interface=<file>  Interface definition file [default: interface.txt].
     """
 
-    generate(args, {
-        "c++": generate_skeleton_cpp,
-        "python": generate_skeleton_python,
-        "java": generate_skeleton_java,
-        "javascript": generate_skeleton_javascript,
-    })
+    with open(args["--interface"]) as f:
+        interface_text = f.read()
+
+    interface = InterfaceDefinition.compile(interface_text)
+    generator = CodeGen.get_skeleton_generator(args["--language"])(interface)
+    write_to_file(generator.generate(), sys.stdout)
 
 
 @docopt_cli
@@ -64,11 +61,3 @@ def generate_metadata_cli(args):
 
     with load_problem(args["--problem"]) as problem:
         print(json.dumps(problem.metadata, indent=4))
-
-
-def generate(args, generators):
-    with open(args["--interface"]) as f:
-        interface_text = f.read()
-    interface = InterfaceDefinition.compile(interface_text)
-    generator = generators[args["--language"]]
-    write_to_file(generator(interface), sys.stdout)

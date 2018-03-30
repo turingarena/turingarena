@@ -99,13 +99,11 @@ class CppSkeletonCodeGen(CodeGen):
 
 
 class CppTemplateCodeGen(CodeGen):
-    def generate(self):
-        yield from self.block_content(self.interface.body)
-
     def var_statement(self, s):
         yield build_declaration(s)
 
     def function_statement(self, s):
+        yield
         yield f"{build_callable_declarator(s.function)}" " {"
         yield indent("// TODO")
         yield "}"
@@ -118,8 +116,10 @@ class CppTemplateCodeGen(CodeGen):
         generators = {
             "var": lambda: ["extern " + build_declaration(s)],
         }
-        return generators[s.statement_type]()
-
+        try:
+            return generators[s.statement_type]()
+        except KeyError:
+            return []
 
 def generate_declarators(declaration):
     for variable in declaration.variables:
