@@ -38,6 +38,36 @@ def test_missing_flush_for_2():
     """, "missing flush between output and input instructions")
 
 
+def test_missing_flush_for_3():
+    assert_error("""
+        main {
+            var int a, b;
+
+            for (i : 5) {
+                flush;
+                input a;
+                output 4;
+            }
+            input b;
+        }
+    """, "missing flush between output and input instructions")
+
+
+def test_for():
+    assert_no_error("""
+        main {
+            var int a;
+
+            for (i : 5) {
+                input a;
+                output 4;
+                flush;
+            }
+            output 4;
+        }
+    """)
+
+
 def test_missing_flush_if():
     assert_error("""
         main {
