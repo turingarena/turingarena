@@ -54,3 +54,19 @@ def assert_at_markers(x, markers):
     start, end = markers
     (px, ps, pe) = map(lambda y: y.parseinfo, (x, start, end))
     assert px.pos == ps.endpos and px.endpos == pe.pos
+
+
+def assert_no_error(text):
+    i = InterfaceDefinition.compile(text)
+    for m in i.validate():
+        print(m.message)
+        raise AssertionError
+
+
+def assert_error(text, error):
+    i = InterfaceDefinition.compile(text)
+    for m in i.validate():
+        print(m)
+        if m.message == error:
+            return
+    raise AssertionError

@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+
 class InterfaceExit(Exception):
     pass
 
@@ -39,5 +40,3 @@ class CommunicationBroken(Exception):
     """
     Raised when the communication with a process is interrupted.
     """
-
-

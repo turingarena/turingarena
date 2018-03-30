@@ -1,4 +1,4 @@
-from turingarena.tests.test_utils import define_algorithms, compilation_fails
+from turingarena.tests.test_utils import define_algorithms, assert_error
 
 
 def test_function_no_arguments():
@@ -85,14 +85,14 @@ def test_function_return_value():
 
 
 def test_function_returns_scalar():
-    compilation_fails("""
+    assert_error("""
         function f() -> /*!*/ int[] /*!*/ ;
         main {}
     """, "return type must be a scalar")
 
 
 def test_callback_accept_scalars():
-    compilation_fails("""
+    assert_error("""
         callback f(int a, /*!*/ int[] b /*!*/) {}
         main {}
     """, "callback parameters must be scalars")

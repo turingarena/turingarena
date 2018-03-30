@@ -1,22 +1,4 @@
-import pytest
-
-from turingarena.interface.interface import InterfaceDefinition
-
-
-def assert_no_error(text):
-    i = InterfaceDefinition.compile(text)
-    for m in i.validate():
-        print(m.message)
-        raise AssertionError
-
-
-def assert_error(text, error):
-    i = InterfaceDefinition.compile(text)
-    for m in i.validate():
-        print(m)
-        if m.message == error:
-            return
-    raise AssertionError
+from turingarena.tests.test_utils import assert_no_error, assert_error
 
 
 def test_variable_not_initialized():
