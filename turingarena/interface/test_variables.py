@@ -153,6 +153,34 @@ def test_variable_in_if_body():
     """, "variable a used before initialization")
 
 
+def test_variable_initialized_if_2():
+    assert_no_error("""
+        main {
+             var int a;
+             if (1) {
+                 input a;
+             } else {
+                 input a;
+             }
+             output a;
+        }
+    """)
+
+
+def test_variable_initialized_if_3():
+    assert_error("""
+        main {
+             var int a, b;
+             if (1) {
+                 input b;
+             } else {
+                 input a;
+             }
+             output a;
+        }
+    """, "variable a used before initialization")
+
+
 def test_variable_initialized_call():
     assert_no_error("""
         function test(int a, int b) -> int;
