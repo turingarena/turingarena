@@ -42,15 +42,23 @@ def parse_markers(interface_text):
     )
 
 
-def compilation_fails(interface_text, message):
-    markers = parse_markers(interface_text)
-    with pytest.raises(InterfaceError) as excinfo:
-        InterfaceDefinition.compile(interface_text)
-    assert excinfo.value.message == message
-    assert_at_markers(excinfo.value, markers)
-
-
 def assert_at_markers(x, markers):
     start, end = markers
     (px, ps, pe) = map(lambda y: y.parseinfo, (x, start, end))
     assert px.pos == ps.endpos and px.endpos == pe.pos
+
+
+def assert_no_error(text):
+    i = InterfaceDefinition.compile(text)
+    for m in i.validate():
+        print(m.message)
+        raise AssertionError
+
+
+def assert_error(text, error):
+    i = InterfaceDefinition.compile(text)
+    for m in i.validate():
+        print(m)
+        if m.message == error:
+            return
+    raise AssertionError

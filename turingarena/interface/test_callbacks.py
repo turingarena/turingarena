@@ -1,4 +1,4 @@
-from turingarena.tests.test_utils import callback_mock, define_algorithms, compilation_fails
+from turingarena.tests.test_utils import callback_mock, define_algorithms, assert_error
 
 
 def test_callback_no_arguments_cpp():
@@ -121,7 +121,7 @@ def test_callback_return_value():
 
 
 def test_callback_returns_scalar():
-    compilation_fails("""
+    assert_error("""
         callback f(int a) -> /*!*/ int[] /*!*/ {}  
         main {}
     """, "return type must be a scalar")

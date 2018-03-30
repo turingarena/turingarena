@@ -1,8 +1,8 @@
 import pytest
 
 from contextlib import contextmanager
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
-from turingarena.tests.test_utils import define_algorithms
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena.tests.test_utils import define_algorithms, load_algorithm
 
 
 interface_text = """
@@ -16,10 +16,11 @@ interface_text = """
 
 
 @contextmanager
-def javascript_algorithm(javascript_source):
-    return define_algorithms(
+def javascript_algorithm(source):
+    return load_algorithm(
         interface_text=interface_text,
-        sources={"javascript": javascript_source},
+        language="javascript",
+        source_text=source,
     )
 
 
@@ -30,7 +31,7 @@ def should_raise(javascript_source):
                 p.call.test()
 
 
-def test_java():
+def test_javascript():
     with javascript_algorithm("""
         function test() {
                 return 3;
@@ -50,3 +51,22 @@ def test_loop():
     should_raise("""
         while (true) {}
     """)
+
+
+def test_multiple_inputs():
+    with load_algorithm(
+            interface_text="""
+                function f(int a, int b) -> int;
+                main {
+                    var int a, b, c;
+                    input a;
+                    input b;
+                    call f(a, b) -> c;
+                    output c;
+                }
+            """,
+            language="javascript",
+            source_text="function f(a, b) { return 1; }"
+    ) as algo:
+        with algo.run() as process:
+            assert process.call.f(2, 5) == 1

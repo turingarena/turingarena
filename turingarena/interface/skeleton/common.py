@@ -11,6 +11,52 @@ class ExpressionBuilder:
 
 
 class CodeGen:
+    def __init__(self, interface):
+        self.interface = interface
+
+    @staticmethod
+    def get_skeleton_generator(language):
+        from turingarena.interface.skeleton.cpp import CppSkeletonCodeGen
+        from turingarena.interface.skeleton.java import JavaSkeletonCodeGen
+        from turingarena.interface.skeleton.javascript import JavaScriptSkeletonCodeGen
+        from turingarena.interface.skeleton.python import PythonSkeletonCodeGen
+
+        generators = {
+            "java": JavaSkeletonCodeGen,
+            "javascript": JavaScriptSkeletonCodeGen,
+            "c++": CppSkeletonCodeGen,
+            "cpp": CppSkeletonCodeGen,
+            "python": PythonSkeletonCodeGen,
+        }
+
+        try:
+            return generators[language]
+        except KeyError:
+            raise RuntimeError(f"Language {language} not supported by TuringArena")
+
+    @staticmethod
+    def get_template_generator(language):
+        from turingarena.interface.skeleton.cpp import CppTemplateCodeGen
+        from turingarena.interface.skeleton.java import JavaTemplateCodeGen
+        from turingarena.interface.skeleton.javascript import JavaScriptTemplateCodeGen
+        from turingarena.interface.skeleton.python import PythonTemplateCodeGen
+
+        generators = {
+            "java": JavaTemplateCodeGen,
+            "javascript": JavaScriptTemplateCodeGen,
+            "c++": CppTemplateCodeGen,
+            "cpp": CppTemplateCodeGen,
+            "python": PythonTemplateCodeGen,
+        }
+
+        try:
+            return generators[language]
+        except KeyError:
+            raise RuntimeError(f"Language {language} not supported by TuringArena")
+
+    def generate(self):
+        yield from self.block_content(self.interface.body)
+
     def block_content(self, b):
         for s in b.statements:
             yield from self.statement(s)
@@ -80,7 +126,7 @@ class CodeGen:
         raise NotImplementedError
 
     def any_statement(self, s):
-        raise NotImplementedError
+        return []
 
     def expression(self, e):
         return getattr(self, f"{e.expression_type}_expression")(e)

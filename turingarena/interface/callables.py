@@ -66,7 +66,7 @@ class Callable(AbstractSyntaxNodeWrapper):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
             yield Diagnostic(
                 "return type must be a scalar",
-                # parseinfo=self.ast.declarator.return_type.parseinfo,
+                parseinfo=self.ast.declarator.return_type.parseinfo,
             )
 
     @property
@@ -116,7 +116,7 @@ class Callback(Callable):
         )
 
     def validate(self):
-        super().validate()
+        yield from super().validate()
 
         invalid_parameter = next(
             (
@@ -127,9 +127,9 @@ class Callback(Callable):
         )
 
         if invalid_parameter is not None:
-            raise Diagnostic(
-                "callback arguments must be scalars",
-                # parseinfo=invalid_parameter.parseinfo,
+            yield Diagnostic(
+                "callback parameters must be scalars",
+                parseinfo=invalid_parameter.parseinfo,
             )
 
     def generate_instructions(self, context):

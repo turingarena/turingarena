@@ -1,17 +1,17 @@
-from turingarena.tests.test_utils import compilation_fails
+from turingarena.tests.test_utils import assert_error
 
 
 def test_call_not_defined():
-    compilation_fails("""
+    assert_error("""
         function f();
         main {
             /*!*/ call g(); /*!*/
         }
-    """, "function g is not defined")
+    """, "function g not declared")
 
 
 def test_call_extra_arguments():
-    compilation_fails("""
+    assert_error("""
         function f();
         main {
             /*!*/ call f(0, 1); /*!*/
@@ -20,7 +20,7 @@ def test_call_extra_arguments():
 
 
 def test_call_missing_arguments():
-    compilation_fails("""
+    assert_error("""
         function f(int a, int b);
         main {
             /*!*/ call f(0); /*!*/
@@ -29,7 +29,7 @@ def test_call_missing_arguments():
 
 
 def test_call_argument_wrong_type():
-    compilation_fails("""
+    assert_error("""
         function f(int[] a);
         main {
             call f(/*!*/ 0 /*!*/);
@@ -38,7 +38,7 @@ def test_call_argument_wrong_type():
 
 
 def test_call_missing_return_expression():
-    compilation_fails("""
+    assert_error("""
         function f() -> int;
         main {
             /*!*/ call f(); /*!*/
@@ -47,7 +47,7 @@ def test_call_missing_return_expression():
 
 
 def test_call_extra_return_expression():
-    compilation_fails("""
+    assert_error("""
         function f();
         main {
             var int a;
@@ -57,10 +57,11 @@ def test_call_extra_return_expression():
 
 
 def test_call_return_expression_wrong_type():
-    compilation_fails("""
+    assert_error("""
         function f() -> int;
         main {
             var int[] a;
             call f() -> /*!*/ a /*!*/;
         }
     """, "function f returns int, but return expression is int[]")
+

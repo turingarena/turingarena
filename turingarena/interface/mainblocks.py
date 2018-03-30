@@ -35,7 +35,7 @@ class InitStatement(EntryPointStatement):
         new_context = self.context_after
         for var in self.context.global_variables:
             if var not in new_context.initialized_variables:
-                yield Diagnostic(f"global variable {var.name} not initialized in init block")
+                yield Diagnostic(f"global variable {var.name} not initialized in init block", parseinfo=self.ast.parseinfo)
 
 
 class MainStatement(EntryPointStatement):

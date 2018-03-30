@@ -3,17 +3,12 @@ from turingarena.interface.context import StaticGlobalContext
 from turingarena.interface.skeleton.common import CodeGen
 
 
-def generate_skeleton_cpp(interface):
-    yield "#include <cstdio>"
-    yield "#include <cstdlib>"
-    yield from SkeletonCodeGen().block_content(interface.body)
+class CppSkeletonCodeGen(CodeGen):
+    def generate(self):
+        yield "#include <cstdio>"
+        yield "#include <cstdlib>"
+        yield from self.block_content(self.interface.body)
 
-
-def generate_template_cpp(interface):
-    yield from TemplateCodeGen().block_content(interface.body)
-
-
-class SkeletonCodeGen(CodeGen):
     def var_statement(self, s):
         if isinstance(s.context, StaticGlobalContext):
             yield "extern " + build_declaration(s)
@@ -91,17 +86,16 @@ class SkeletonCodeGen(CodeGen):
             "flush": lambda: ["fflush(stdout);"],
             "exit": lambda: ["exit(0);"],
             "return": lambda: [f"return {self.expression(s.value)};"],
-            "main": lambda: [],
-            "init": lambda: [],
         }
         return generators[s.statement_type]()
 
 
-class TemplateCodeGen(CodeGen):
+class CppTemplateCodeGen(CodeGen):
     def var_statement(self, s):
         yield build_declaration(s)
 
     def function_statement(self, s):
+        yield
         yield f"{build_callable_declarator(s.function)}" " {"
         yield indent("// TODO")
         yield "}"
@@ -113,11 +107,11 @@ class TemplateCodeGen(CodeGen):
     def any_statement(self, s):
         generators = {
             "var": lambda: ["extern " + build_declaration(s)],
-            "init": lambda: [],
-            "main": lambda: [],
         }
-        return generators[s.statement_type]()
-
+        try:
+            return generators[s.statement_type]()
+        except KeyError:
+            return []
 
 def generate_declarators(declaration):
     for variable in declaration.variables:
