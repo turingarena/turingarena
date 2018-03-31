@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ProblemView from './ProblemView';
 import './App.css';
 
 const UploadView = ({ onSubmit, disabled }) => (
@@ -100,6 +101,7 @@ class SubmitView extends React.Component {
 
 export default () => (
   <div>
+    {process.env.TURINGARENA_PROBLEM_URL && <ProblemView />}
     <SubmitView />
   </div>
 );
