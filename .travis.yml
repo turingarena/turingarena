@@ -1,10 +1,10 @@
 sudo: required
+language: shell
 
 services:
   - docker
 
-cache:
-  - yarn
+cache: yarn
 
 stages:
   - prepare
