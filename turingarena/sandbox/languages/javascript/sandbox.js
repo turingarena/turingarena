@@ -62,6 +62,8 @@ Promise.resolve().then(() => {
     return sandbox.init();
 }).then(() => {
     return sandbox.main();
+}).catch(e => {
+    process.exit(1);
 }).then(() => {
     process.exit(0);
 })

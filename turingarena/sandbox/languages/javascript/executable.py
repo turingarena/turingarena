@@ -23,7 +23,7 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
             process = subprocess.Popen(
                 ["node", sandbox_path],
                 universal_newlines=True,
-                preexec_fn=lambda : set_memory_and_time_limits(memory_limit=None, time_limit=5),
+                preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=5),
                 cwd=cwd,
                 stdin=connection.downward,
                 stdout=connection.upward,
