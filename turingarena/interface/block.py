@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
-from turingarena.interface.statements import compile_statement
+from turingarena.interface.statement import Statement
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Block(AbstractSyntaxNodeWrapper):
     def statements(self):
         inner_context = self.context.create_inner()
         for s in self.ast.statements:
-            statement = compile_statement(s, inner_context)
+            statement = Statement.compile(s, inner_context)
             yield statement
             inner_context = statement.context_after
 
