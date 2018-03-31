@@ -1,6 +1,5 @@
 import logging
 import os
-from abc import abstractmethod
 
 from turingarena.common import ImmutableObject
 from turingarena.interface.skeleton.common import CodeGen
