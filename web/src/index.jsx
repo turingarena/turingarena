@@ -1,4 +1,4 @@
-import { render } from 'preact';
+import { render } from 'react-dom';
 
 let mount;
 const root = document.getElementById('root');

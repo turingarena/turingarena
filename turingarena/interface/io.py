@@ -20,6 +20,7 @@ class CheckpointStatement(ImperativeStatement):
     def generate_instructions(self, context):
         yield CheckpointInstruction()
 
+    @property
     def context_after(self):
         return self.context.with_flushed_output(False)
 

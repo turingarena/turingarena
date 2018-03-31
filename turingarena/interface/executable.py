@@ -35,6 +35,7 @@ class ImperativeStructure(ABC):
         pass
 
     @property
+    @abstractmethod
     def context_after(self):
         pass
 

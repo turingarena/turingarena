@@ -9,13 +9,13 @@
     "lint": "neutrino lint"
   },
   "dependencies": {
-    "preact": "^8.2.7",
-    "preact-compat": "^3.18.0",
-    "prop-types": "^15.6.1"
+    "prop-types": "^15.6.1",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "@neutrinojs/airbnb": "^8.1.2",
-    "@neutrinojs/preact": "^8.1.2",
-    "neutrino": "^8.1.2"
+    "@neutrinojs/airbnb": "^8.2.1",
+    "@neutrinojs/react": "^8.2.1",
+    "neutrino": "^8.2.1"
   }
 }

@@ -1,7 +1,15 @@
+body {
+  zoom: 1.5;
+}
+
 .App {
   padding: 20px;
 }
 
 .ta-error {
   color: firebrick;
+}
+
+.ta-form-control {
+  display: block;
 }
