@@ -39,6 +39,41 @@ class VariablesContextMixin:
             locally_allocated_variables=self.locally_allocated_variables | variables
         )
 
+    def with_flushed_output(self, flush):
+        return self._replace(last_output_flushed=flush)
+
+    @property
+    def has_flushed_output(self):
+        return self.last_output_flushed
+
+    @property
+    def initialized_variables(self):
+        return self.outer_initialized_variables | self.locally_initialized_variables
+
+    @property
+    def allocated_variables(self):
+        return self.outer_allocated_variables | self.locally_allocated_variables
+
+    @property
+    def variables(self):
+        return self.outer_variables + self.locally_defined_variables
+
+    @property
+    def variable_mapping(self):
+        return {v.name: v for v in self.variables}
+
+    @property
+    def outer_variables(self):
+        return ()
+
+    @property
+    def outer_allocated_variables(self):
+        return {None}
+
+    @property
+    def outer_initialized_variables(self):
+        return {None}
+
 
 class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     "functions",
@@ -49,24 +84,8 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     "last_output_flushed",
 ]), VariablesContextMixin):
     @property
-    def initialized_variables(self):
-        return self.locally_initialized_variables
-
-    @property
-    def allocated_variables(self):
-        return self.locally_allocated_variables
-
-    @property
     def global_variables(self):
-        return self.locally_defined_variables
-
-    @property
-    def variables(self):
-        return self.global_variables
-
-    @property
-    def variable_mapping(self):
-        return {v.name: v for v in self.variables}
+        return self.variables
 
     def with_function(self, f):
         functions = dict(self.functions)
@@ -77,13 +96,6 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
         callbacks = dict(self.callbacks)
         callbacks[c.name] = c
         return self._replace(callbacks=callbacks)
-
-    @property
-    def has_flushed_output(self):
-        return self.last_output_flushed
-
-    def with_flushed_output(self, flush):
-        return self._replace(last_output_flushed=flush)
 
     def create_local(self):
         return StaticLocalContext(
@@ -112,10 +124,6 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             return self.global_context.initialized_variables
 
     @property
-    def initialized_variables(self):
-        return self.outer_initialized_variables | self.locally_initialized_variables
-
-    @property
     def outer_allocated_variables(self):
         if self.outer_context:
             return self.outer_context.allocated_variables
@@ -123,30 +131,11 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             return self.global_context.allocated_variables
 
     @property
-    def allocated_variables(self):
-        return self.outer_allocated_variables | self.locally_allocated_variables
-
-    @property
     def outer_variables(self):
         if self.outer_context:
             return self.outer_context.variables
         else:
             return self.global_context.variables
-
-    @property
-    def variables(self):
-        return self.outer_variables + self.locally_defined_variables
-
-    @property
-    def variable_mapping(self):
-        return {v.name: v for v in self.variables}
-
-    @property
-    def has_flushed_output(self):
-        return self.last_output_flushed
-
-    def with_flushed_output(self, flush):
-        return self._replace(last_output_flushed=flush)
 
     def create_inner(self):
         return StaticLocalContext(
