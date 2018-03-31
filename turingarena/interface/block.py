@@ -59,11 +59,11 @@ class ImperativeBlock(Block, ImperativeStructure):
         return self.context.with_initialized_variables({
             variable
             for variable in statement_ctx.initialized_variables
-            if variable not in self.context.initialized_variables
+            if variable in self.context.variables
         }).with_allocated_variables({
             variable
             for variable in statement_ctx.allocated_variables
-            if variable not in self.context.allocated_variables
+            if variable in self.context.variables
         }).with_flushed_output(statement_ctx.has_flushed_output)
 
 
