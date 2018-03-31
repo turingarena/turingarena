@@ -1,5 +1,6 @@
 import logging
 from collections import OrderedDict
+from functools import lru_cache
 
 from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
@@ -13,12 +14,15 @@ class Block(AbstractSyntaxNodeWrapper):
 
     @property
     def statements(self):
+        statements = []
         inner_context = self.context.create_inner()
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
-            yield statement
             inner_context = statement.context_after
+            statements.append(statement)
+        return statements
 
+    @property
     def declared_variables(self):
         return OrderedDict(
             (v.name, v)
@@ -36,7 +40,7 @@ class ImperativeBlock(Block, ImperativeStructure):
     __slots__ = []
 
     def generate_instructions(self, context):
-        inner_context = context.child(self.declared_variables())
+        inner_context = context.child(self.declared_variables)
         for statement in self.statements:
             if isinstance(statement, ImperativeStatement):
                 yield from statement.generate_instructions(inner_context)
@@ -52,10 +56,9 @@ class ImperativeBlock(Block, ImperativeStructure):
 
     @property
     def context_after(self):
-        statements = [s for s in self.statements]
-        if not statements:
+        if not self.statements:
             return self.context
-        statement_ctx = statements[-1].context_after
+        statement_ctx = self.statements[-1].context_after
         return self.context.with_initialized_variables({
             variable
             for variable in statement_ctx.initialized_variables

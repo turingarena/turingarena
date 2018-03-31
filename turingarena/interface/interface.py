@@ -57,7 +57,7 @@ class InterfaceDefinition:
 
     @property
     def global_variables(self):
-        return self.body.declared_variables()
+        return self.body.declared_variables
 
     def global_variable_metadata(self, v):
         return {
