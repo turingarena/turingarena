@@ -16,7 +16,7 @@ jobs:
     - stage: prepare
       script: docker build -t turingarena/turingarena .
     - stage: test
-      script: cd examples/ && docker run --rm turingarena test
+      script: cd examples/ && docker run --rm turingarena/turingarena test
     - script: cd web/ && yarn && yarn build
     - stage: deploy
       script:
