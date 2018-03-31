@@ -97,6 +97,6 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
     def function_statement(self, statement):
         yield
-        yield f"function {build_callable_declarator(statement.function)}" + "{"
+        yield f"function {self.build_callable_declarator(statement.function)}" + "{"
         yield self.indent("// TODO")
         yield "}"
