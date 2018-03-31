@@ -2,7 +2,7 @@ import logging
 import os
 from abc import abstractmethod
 
-from turingarena.common import ImmutableObject, write_to_file
+from turingarena.common import ImmutableObject
 from turingarena.interface.skeleton.common import CodeGen
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class AlgorithmSource(ImmutableObject):
             print(self.text, file=f)
 
         with open(f"{algorithm_dir}/skeleton.{self.language_extension}", "w") as f:
-            write_to_file(CodeGen.get_skeleton_generator(self.language)(self.interface).generate(), f)
+            CodeGen.get_skeleton_generator(self.language)(self.interface).write_to_file(f)
 
         logger.debug("Starting language-specific compilation")
         self.do_compile(algorithm_dir)

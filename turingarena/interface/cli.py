@@ -2,7 +2,6 @@ import json
 import sys
 
 from turingarena.cli import docopt_cli
-from turingarena.common import write_to_file
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.skeleton.common import CodeGen
 from turingarena.problem.problem import load_problem
@@ -25,7 +24,7 @@ def generate_template_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text)
     generator = CodeGen.get_template_generator(args["--language"])(interface)
-    write_to_file(generator.generate(), sys.stdout)
+    generator.write_to_file(sys.stdout)
 
 
 @docopt_cli
@@ -45,7 +44,7 @@ def generate_skeleton_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text)
     generator = CodeGen.get_skeleton_generator(args["--language"])(interface)
-    write_to_file(generator.generate(), sys.stdout)
+    generator.write_to_file(sys.stdout)
 
 
 @docopt_cli

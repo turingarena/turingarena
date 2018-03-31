@@ -43,10 +43,3 @@ class TupleLikeObject(ImmutableObject):
     def __hash__(self):
         return hash(self._to_tuple())
 
-
-def write_to_file(lines, file):
-    for line in lines:
-        if line is None:
-            print("", file=file)
-        else:
-            print(line, file=file)

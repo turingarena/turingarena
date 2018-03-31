@@ -42,6 +42,13 @@ class CodeGen:
         except KeyError:
             raise RuntimeError(f"Language {language} not supported by TuringArena")
 
+    def write_to_file(self, file):
+        for line in self.generate():
+            if line is None:
+                print("", file=file)
+            else:
+                print(line, file=file)
+
     def generate(self):
         yield from self.block_content(self.interface.body, indent=False)
 
