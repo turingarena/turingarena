@@ -1,6 +1,5 @@
 import logging
 from collections import OrderedDict
-from functools import lru_cache
 
 from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena.interface.node import AbstractSyntaxNodeWrapper

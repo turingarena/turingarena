@@ -2,7 +2,57 @@ from turingarena.interface.context import StaticGlobalContext
 from turingarena.interface.skeleton.common import CodeGen
 
 
-class CppSkeletonCodeGen(CodeGen):
+class CppCodeGen(CodeGen):
+    @classmethod
+    def generate_declarators(cls, declaration):
+        for variable in declaration.variables:
+            yield cls.build_declarator(declaration.value_type, variable.name)
+
+    @classmethod
+    def build_callable_declarator(cls, callable):
+        return_type = cls.build_full_type(callable.return_type)
+        parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
+        return f"{return_type} {callable.name}({parameters})"
+
+    @classmethod
+    def build_declaration(cls, statement):
+        type_specifier = cls.build_type_specifier(statement.value_type)
+        declarators = ', '.join(cls.generate_declarators(statement))
+        return f'{type_specifier} {declarators};'
+
+    @classmethod
+    def build_parameter(cls, parameter):
+        full_type = cls.build_full_type(parameter.value_type)
+        return f'{full_type} {parameter.name}'
+
+    @classmethod
+    def build_declarator(cls, value_type, name):
+        if value_type is None:
+            return name
+        builders = {
+            "scalar": lambda: name,
+            "array": lambda: "*" + cls.build_declarator(value_type.item_type, name),
+        }
+        return builders[value_type.meta_type]()
+
+    @classmethod
+    def build_type_specifier(cls, value_type):
+        if value_type is None:
+            return "void"
+        builders = {
+            "scalar": lambda: {
+                int: "int",
+            }[value_type.base_type],
+            "array": lambda: cls.build_type_specifier(value_type.item_type)
+        }
+        return builders[value_type.meta_type]()
+
+    @classmethod
+    def build_full_type(cls, value_type):
+        return cls.build_type_specifier(value_type) + cls.build_declarator(value_type, "")
+
+
+class CppSkeletonCodeGen(CppCodeGen):
     def generate(self):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
@@ -10,19 +60,19 @@ class CppSkeletonCodeGen(CodeGen):
 
     def var_statement(self, s):
         if isinstance(s.context, StaticGlobalContext):
-            yield "extern " + build_declaration(s)
+            yield "extern " + self.build_declaration(s)
         else:
-            yield build_declaration(s)
+            yield self.build_declaration(s)
 
     def callback_statement(self, s):
         callback = s.callback
-        yield f"{build_callable_declarator(callback)}" " {"
+        yield f"{self.build_callable_declarator(callback)}" " {"
         yield self.indent(fr'printf("%s\n", "{callback.name}");')
         yield from self.block_content(callback.body)
         yield "}"
 
     def function_statement(self, s):
-        yield f"{build_callable_declarator(s.function)};"
+        yield f"{self.build_callable_declarator(s.function)};"
 
     def init_statement(self, s):
         yield "__attribute__((constructor)) static void init() {"
@@ -37,7 +87,7 @@ class CppSkeletonCodeGen(CodeGen):
     def alloc_statement(self, s):
         for argument in s.arguments:
             arg = self.expression(argument)
-            value_type = build_full_type(argument.value_type.item_type)
+            value_type = self.build_full_type(argument.value_type.item_type)
             size = self.expression(s.size)
             yield f"{arg} = new {value_type}[{size}];"
 
@@ -89,72 +139,16 @@ class CppSkeletonCodeGen(CodeGen):
         return generators[s.statement_type]()
 
 
-class CppTemplateCodeGen(CodeGen):
+class CppTemplateCodeGen(CppCodeGen):
     def var_statement(self, s):
-        yield build_declaration(s)
+        yield self.build_declaration(s)
 
     def function_statement(self, s):
         yield
-        yield f"{build_callable_declarator(s.function)}" " {"
+        yield f"{self.build_callable_declarator(s.function)}" " {"
         yield self.indent("// TODO")
         yield "}"
 
     def callback_statement(self, s):
         callback = s.callback
-        yield f"{build_callable_declarator(callback)};"
-
-    def any_statement(self, s):
-        generators = {
-            "var": lambda: ["extern " + build_declaration(s)],
-        }
-        try:
-            return generators[s.statement_type]()
-        except KeyError:
-            return []
-
-def generate_declarators(declaration):
-    for variable in declaration.variables:
-        yield build_declarator(declaration.value_type, variable.name)
-
-
-def build_callable_declarator(callable):
-    return_type = build_full_type(callable.return_type)
-    parameters = ', '.join(build_parameter(p) for p in callable.parameters)
-    return f"{return_type} {callable.name}({parameters})"
-
-
-def build_declaration(statement):
-    type_specifier = build_type_specifier(statement.value_type)
-    declarators = ', '.join(generate_declarators(statement))
-    return f'{type_specifier} {declarators};'
-
-
-def build_parameter(parameter):
-    full_type = build_full_type(parameter.value_type)
-    return f'{full_type} {parameter.name}'
-
-
-def build_declarator(value_type, name):
-    if value_type is None:
-        return name
-    builders = {
-        "scalar": lambda: name,
-        "array": lambda: "*" + build_declarator(value_type.item_type, name),
-    }
-    return builders[value_type.meta_type]()
-
-
-def build_type_specifier(value_type):
-    if value_type is None:
-        return "void"
-    builders = {
-        "scalar": lambda: {
-            int: "int",
-        }[value_type.base_type],
-        "array": lambda: build_type_specifier(value_type.item_type)
-    }
-    return builders[value_type.meta_type]()
-
-
-def build_full_type(value_type):
-    return build_type_specifier(value_type) + build_declarator(value_type, "")
+        yield f"{self.build_callable_declarator(callback)};"
