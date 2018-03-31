@@ -31,11 +31,11 @@ UploadView.propTypes = {
 const submit = form => fetch(process.env.TURINGARENA_EVALUATE_ENDPOINT, {
   method: 'post',
   body: new FormData(form),
-}).then((response) => {
-  if (response.status !== 200) {
-    return response.text().then(t => Promise.reject(new Error(t)));
+}).then(response => response.json()).then((response) => {
+  if (response.error) {
+    return Promise.reject(response.error);
   }
-  return response.json();
+  return response;
 });
 
 const GoalsView = ({ goals }) => (
