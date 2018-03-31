@@ -99,3 +99,16 @@ def test_missing_flush_if_2():
             input b;
         }
     """)
+
+
+def test_missing_flush_init():
+    assert_error("""
+        init {
+            output 4;
+        }
+        
+        main {
+            var int a;
+            input a;
+        }
+    """, "missing flush between output and input instructions")

@@ -15,15 +15,10 @@ class EntryPointStatement(Statement):
 
     @property
     def context_after(self):
-        return self.context.with_initialized_variables({
-            variable
-            for variable in self.body.context_after.initialized_variables
-            if variable not in self.context.initialized_variables
-        }).with_allocated_variables({
-            variable
-            for variable in self.body.context_after.allocated_variables
-            if variable not in self.context.allocated_variables
-        })
+        new_context = self.body.context_after
+        return self.context.with_initialized_variables(new_context.initialized_variables)\
+            .with_allocated_variables(new_context.allocated_variables)\
+            .with_flushed_output(new_context.has_flushed_output)
 
 
 class InitStatement(EntryPointStatement):
