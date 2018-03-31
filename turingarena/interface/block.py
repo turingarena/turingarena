@@ -65,6 +65,3 @@ class ImperativeBlock(Block, ImperativeStructure):
             for variable in statement_ctx.allocated_variables
             if variable in self.context.variables
         }).with_flushed_output(statement_ctx.has_flushed_output)
-
-
-ExitCall = object()
