@@ -1,9 +1,7 @@
 import logging
-import os
 import subprocess
+import shutil
 
-from turingarena.common import write_to_file
-from turingarena.interface.skeleton.common import CodeGen
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
 
@@ -14,16 +12,11 @@ class JavaAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
     def do_compile(self, algorithm_dir):
-        
-        # get files 
-        skeleton_filename = os.path.join(algorithm_dir, "Skeleton.java")
-        solution_filename = os.path.join(algorithm_dir, "Solution.java")
 
-        with open(skeleton_filename, "w") as f:
-            write_to_file(CodeGen.get_skeleton_generator("java")(self.interface).generate(), f)
-
-        with open(solution_filename, "w") as f:
-            f.write(self.text)
+        # rename files because javac will complain if the file doesn't have
+        # the same name of the class defined in it. 
+        shutil.move(f"{algorithm_dir}/source.java", f"{algorithm_dir}/Solution.java")
+        shutil.move(f"{algorithm_dir}/skeleton.java", f"{algorithm_dir}/Skeleton.java")
 
         cli = [
             "javac",

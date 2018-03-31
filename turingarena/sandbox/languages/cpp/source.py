@@ -1,14 +1,11 @@
 import logging
-import os
 import subprocess
 from subprocess import CalledProcessError
 
 import pkg_resources
 
-from turingarena.common import write_to_file
 from turingarena.sandbox.exceptions import CompilationFailed
 from turingarena.sandbox.source import AlgorithmSource
-from turingarena.interface.skeleton.common import CodeGen
 
 logger = logging.getLogger(__name__)
 
@@ -18,14 +15,6 @@ class CppAlgorithmSource(AlgorithmSource):
 
     def do_compile(self, algorithm_dir):
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.c")
-
-        skeleton_filename = os.path.join(algorithm_dir, "skeleton.cpp")
-        with open(skeleton_filename, "w") as f:
-            write_to_file(CodeGen.get_skeleton_generator("c++")(self.interface).generate(), f)
-
-        source_filename = os.path.join(algorithm_dir, "source.cpp")
-        with open(source_filename, "w") as f:
-            f.write(self.text)
 
         cli = [
             "g++",

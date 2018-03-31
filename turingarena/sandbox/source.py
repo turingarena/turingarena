@@ -2,7 +2,8 @@ import logging
 import os
 from abc import abstractmethod
 
-from turingarena.common import ImmutableObject
+from turingarena.common import ImmutableObject, write_to_file
+from turingarena.interface.skeleton.common import CodeGen
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,15 @@ class AlgorithmSource(ImmutableObject):
             interface=interface,
         )
 
+    @property
+    def language_extension(self):
+        return {
+            "javascript": "js",
+            "java": "java",
+            "python": "py",
+            "c++": "cpp",
+        }[self.language]
+
     def compile(self, algorithm_dir):
         logger.info(f"Compiling algorithm source into dir '{algorithm_dir}'")
 
@@ -42,9 +52,14 @@ class AlgorithmSource(ImmutableObject):
         with open(f"{algorithm_dir}/interface.txt", "w") as f:
             print(self.interface.source_text, file=f)
 
+        with open(f"{algorithm_dir}/source.{self.language_extension}", "w") as f:
+            print(self.text, file=f)
+
+        with open(f"{algorithm_dir}/skeleton.{self.language_extension}", "w") as f:
+            write_to_file(CodeGen.get_skeleton_generator(self.language)(self.interface).generate(), f)
+
         logger.debug("Starting language-specific compilation")
         self.do_compile(algorithm_dir)
 
-    @abstractmethod
     def do_compile(self, algorithm_dir):
         pass
