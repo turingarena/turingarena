@@ -3,7 +3,10 @@ module.exports = {
     '@neutrinojs/airbnb',
     '@neutrinojs/react',
     [
-      '@neutrinojs/env', ['TURINGARENA_EVALUATE_ENDPOINT']
+      '@neutrinojs/env', [
+        'TURINGARENA_EVALUATE_ENDPOINT',
+        'TURINGARENA_PROBLEM_URL',
+      ]
     ]
   ]
 };

@@ -2,7 +2,7 @@
 Evaluate a solution provided via a Web form (CGI).
 """
 import cgi
-import sys
+import json
 import traceback
 
 from turingarena.web.formevaluate import form_evaluate
@@ -16,8 +16,11 @@ def evaluate():
     except:
         print("500 Internal Server Error")
         print("Access-Control-Allow-Origin:", "*")
-        print()
-        traceback.print_exc(file=sys.stdout)
+        print(json.dumps({
+            "error": {
+                "message": traceback.format_exc(),
+            },
+        }))
         raise
 
     print("200 OK")

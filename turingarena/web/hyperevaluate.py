@@ -3,6 +3,7 @@ Evaluate a solution provided via a Web form (using Hyper.sh conventions).
 """
 
 import cgi
+import json
 import os
 import sys
 import traceback
@@ -13,11 +14,19 @@ from turingarena.web.formevaluate import form_evaluate
 def main():
     sys.stderr = sys.stdout
 
-    debug = "debug" in os.environ
+    try:
+        response = do_evaluate()
+    except:
+        response = json.dumps({
+            "error": {
+                "message": traceback.format_exc(),
+            },
+        })
 
-    if debug:
-        print(os.environ)
+    print(response)
 
+
+def do_evaluate():
     fields = cgi.FieldStorage(
         environ=dict(
             REQUEST_METHOD="POST",
@@ -25,17 +34,8 @@ def main():
             CONTENT_LENGTH=os.environ["content_length"],
         ),
     )
-    if debug:
-        print(fields)
-
-    try:
-        evaluation = form_evaluate(fields)
-    except:
-        print("ERROR during evaluation:")
-        traceback.print_exc()
-        raise
-
-    print(evaluation)
+    evaluation = form_evaluate(fields)
+    return evaluation
 
 
 if __name__ == "__main__":
