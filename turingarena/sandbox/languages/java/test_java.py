@@ -1,9 +1,7 @@
-from contextlib import contextmanager
-
 import pytest
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
-from turingarena.tests.test_utils import define_algorithms
+from turingarena.algorithm import load_algorithm
 
 interface_text = """
     function test() -> int;
@@ -15,19 +13,12 @@ interface_text = """
 """
 
 
-@contextmanager
 def java_algorithm(interface, java_source):
-    return define_algorithms(
+    return load_algorithm(
         interface_text=interface,
-        sources={"java": java_source},
+        language="java",
+        source_text=java_source,
     )
-
-
-def should_raise(java_source):
-    with java_algorithm(interface_text, java_source) as algo:
-        with pytest.raises(AlgorithmRuntimeError):
-            with algo.run() as p:
-                p.call.test()
 
 
 def test_java():
@@ -43,7 +34,7 @@ def test_java():
 
 
 def test_security():
-    should_raise("""
+    with java_algorithm(interface_text, """
         import java.io.*;
         public class Solution extends Skeleton {
             public int test() {
@@ -55,7 +46,10 @@ def test_security():
                 return 3;
             }
         }
-    """)
+    """) as algo:
+        with pytest.raises(AlgorithmRuntimeError):
+            with algo.run() as p:
+                p.call.test()
 
 
 def test_compile_failure():

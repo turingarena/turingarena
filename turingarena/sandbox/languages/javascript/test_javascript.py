@@ -2,7 +2,7 @@ import pytest
 
 from contextlib import contextmanager
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.tests.test_utils import load_algorithm
+from turingarena.algorithm import load_algorithm
 
 
 interface_text = """
@@ -15,14 +15,12 @@ interface_text = """
 """
 
 
-@contextmanager
 def javascript_algorithm(source):
-    with load_algorithm(
+    return load_algorithm(
         interface_text=interface_text,
         language="javascript",
         source_text=source,
-    ) as algo:
-        yield algo
+    )
 
 
 def should_raise(javascript_source):
