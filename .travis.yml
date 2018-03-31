@@ -1,19 +1,43 @@
 sudo: required
 
+services:
+  - docker
+
 cache:
-  yarn
+  - yarn
 
-script:
-  - cd web/ && yarn && yarn build
+stages:
+  - prepare
+  - test
+  - deploy
 
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  keep-history: false
-  local-dir: web/build/
-  repo: turingarena/demo
-  target-branch: master
-  verbose: true
-  on:
-    branch: master
+jobs:
+  include:
+    - stage: prepare
+      script: docker build -t turingarena/turingarena .
+    - stage: test
+      script: cd examples/ && docker run --rm turingarena test
+    - script: cd web/ && yarn && yarn build
+    - stage: deploy
+      script:
+        - wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz
+        - tar xzf hyper-linux-x86_64.tar.gz
+        - >
+          ./hyper config
+          --accesskey $HYPER_ACCESS_KEY
+          --secretkey $HYPER_SECRET_KEY
+          --region us-west-1
+        - hyper rmi -f turingarena/turingarena
+        - hyper load --local turingarena/turingarena
+    - stage: deploy
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN
+        keep-history: false
+        local-dir: web/build/
+        repo: turingarena/demo
+        target-branch: master
+        verbose: true
+        on:
+          branch: master
