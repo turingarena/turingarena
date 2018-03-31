@@ -1,26 +1,25 @@
-import React from 'preact';
+import React from 'react';
 import PropTypes from 'prop-types';
 import './App.css';
 
-
 const UploadView = ({ onSubmit, disabled }) => (
   <form disabled={disabled} onSubmit={(e) => { e.preventDefault(); onSubmit(e.target); }}>
-    <label htmlFor="git_url">
-      Git URL: <input id="git_url" type="text" name="git_url" />
+    <label className="ta-form-control" htmlFor="git_url">
+      Git URL (optional): <input id="git_url" type="text" name="git_url" />
     </label>
-    <label htmlFor="problem">
+    <label className="ta-form-control" htmlFor="problem">
       Problem name: <input id="problem" type="text" name="problem" />
     </label>
-    <label htmlFor="source_file">
+    <label className="ta-form-control" htmlFor="source_file">
       Source file: <input id="source_file" type="file" name="source_file" />
     </label>
-    <select name="language">
+    <select className="ta-form-control" name="language">
       <option value="c++">C/C++</option>
       <option value="python">Python</option>
       <option value="java">Java</option>
       <option value="javascript">Javascript</option>
     </select>
-    <button type="submit" disabled={disabled}>Submit</button>
+    <button className="ta-form-control" type="submit" disabled={disabled}>Submit</button>
   </form>
 );
 
@@ -33,21 +32,43 @@ const submit = form => fetch(process.env.TURINGARENA_EVALUATE_ENDPOINT, {
   method: 'post',
   body: new FormData(form),
 }).then((response) => {
-  const text = response.text();
   if (response.status !== 200) {
-    return text.then(t => Promise.reject(t));
+    return response.text().then(t => Promise.reject(new Error(t)));
   }
-  return Promise.resolve(text);
+  return response.json();
 });
 
+const GoalsView = ({ goals }) => (
+  <React.Fragment>
+    {Object.entries(goals).map(([name, result]) => (
+      <p key={name}>
+        {name}: {
+          result
+            ? <span style={{ color: 'darkgreen' }}>Success!</span>
+            : <span style={{ color: 'darkred' }}>Failed.</span>
+        }
+      </p>
+    ))}
+  </React.Fragment>
+);
+
+GoalsView.propTypes = { goals: PropTypes.objectOf(PropTypes.any).isRequired };
+
 const ResultView = ({ result }) => (
-  <pre>
-    {result.evaluation}
-  </pre>
+  <React.Fragment>
+    {
+      result.evaluation.data
+      && result.evaluation.data.goals
+      && <GoalsView goals={result.evaluation.data.goals} />
+    }
+    <pre>
+      {result.evaluation.stdout.join('\n')}
+    </pre>
+  </React.Fragment>
 );
 
 ResultView.propTypes = {
-  result: PropTypes.shape({ evaluation: PropTypes.string.isRequired }).isRequired,
+  result: PropTypes.shape({ evaluation: PropTypes.any.isRequired }).isRequired,
 };
 
 class SubmitView extends React.Component {
@@ -71,7 +92,7 @@ class SubmitView extends React.Component {
         <UploadView disabled={this.state.phase === 'submitted'} onSubmit={t => this.submit(t)} />
         {this.state.phase === 'submitted' && <p>Evaluating... (may take up to one minute)</p>}
         {this.state.phase === 'resolved' && <ResultView result={this.state.result} />}
-        {this.state.phase === 'rejected' && <pre className="ta-error">{this.state.result.error}</pre>}
+        {this.state.phase === 'rejected' && <pre className="ta-error">{this.state.result.error.message}</pre>}
       </React.Fragment>
     );
   }

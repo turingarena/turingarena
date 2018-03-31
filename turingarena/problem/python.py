@@ -58,7 +58,10 @@ class HostPythonEvaluator(PythonEvaluator):
             exec(script, script_globals)
             data = script_globals[self.function_name](Algorithm(submission_dir))
 
-        return Evaluation(stdout=eval_stdout.getvalue(), data=data)
+        return Evaluation(
+            stdout=eval_stdout.getvalue().splitlines(),
+            data=data,
+        )
 
 
 class SubprocessPythonEvaluator(PythonEvaluator):

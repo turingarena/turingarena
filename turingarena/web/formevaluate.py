@@ -1,3 +1,4 @@
+import json
 from contextlib import ExitStack
 
 from turingarena.problem.problem import load_problem, clone_from_git
@@ -21,4 +22,5 @@ def form_evaluate(fields):
             stack.enter_context(clone_from_git(git_url))
 
         problem = load_problem(problem_name)
-        return problem.evaluate(load_source(source_text, language=language, interface=problem.interface))
+        evaluation = problem.evaluate(load_source(source_text, language=language, interface=problem.interface))
+        return json.dumps(evaluation._asdict())
