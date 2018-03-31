@@ -12,7 +12,7 @@ from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
-from turingarena.sandbox.sources import load_source
+from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ def load_source_file(directory, source_filename, *, interface):
     source_path = os.path.join(directory, source_filename)
     with open(source_path) as f:
         source_text = f.read()
-    return load_source(
+    return AlgorithmSource.load(
         source_text,
         language=LANGUAGE_BY_EXTENSION[ext],
         interface=interface,

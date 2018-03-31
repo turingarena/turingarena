@@ -1,5 +1,7 @@
 import logging
 import signal
+import os
+
 from abc import abstractmethod
 from contextlib import contextmanager
 from subprocess import TimeoutExpired
@@ -16,8 +18,27 @@ class AlgorithmExecutable(ImmutableObject):
     __slots__ = [
         "algorithm_dir",
         "language",
-        "interface",
     ]
+
+    @staticmethod
+    def load(algorithm_dir):
+        from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
+        from turingarena.sandbox.languages.java.executable import JavaAlgorithmExecutable
+        from turingarena.sandbox.languages.python.executable import PythonAlgorithmExecutableScript
+        from turingarena.sandbox.languages.javascript.executable import JavaScriptAlgorithmExecutableScript
+
+        with open(os.path.join(algorithm_dir, "language.txt")) as f:
+            language = f.read().strip()
+
+        return {
+            "c++": ElfAlgorithmExecutable,
+            "python": PythonAlgorithmExecutableScript,
+            "java": JavaAlgorithmExecutable,
+            "javascript": JavaScriptAlgorithmExecutableScript,
+        }[language](
+            algorithm_dir=algorithm_dir,
+            language=language,
+        )
 
     def _wait_or_send(self, process, which_signal):
         logger.debug(f"waiting for process...")

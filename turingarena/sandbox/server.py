@@ -6,7 +6,7 @@ from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.sandbox.executables import load_executable
+from turingarena.sandbox.executable import AlgorithmExecutable
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class SandboxServer(MetaServer):
         return SANDBOX_QUEUE
 
     def create_child_server(self, child_server_dir, *, algorithm_dir):
-        executable = load_executable(algorithm_dir)
+        executable = AlgorithmExecutable.load(algorithm_dir)
         return SandboxProcessServer(executable=executable, sandbox_dir=child_server_dir)
 
     def run_child_server(self, child_server):

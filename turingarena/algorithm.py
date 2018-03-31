@@ -10,7 +10,7 @@ from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.server import SandboxServer
-from turingarena.sandbox.sources import load_source
+from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class AlgorithmProcess:
 @contextmanager
 def load_algorithm(*, interface_text, language, source_text):
     interface = InterfaceDefinition.compile(interface_text)
-    algorithm_source = load_source(
+    algorithm_source = AlgorithmSource.load(
         source_text,
         interface=interface,
         language=language,
