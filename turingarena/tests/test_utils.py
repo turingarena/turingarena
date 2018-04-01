@@ -1,7 +1,5 @@
 from collections import deque
 
-import tatsu
-
 from turingarena.algorithm import Algorithm
 from turingarena.interface.interface import InterfaceDefinition
 
@@ -27,23 +25,6 @@ def define_algorithms(interface_text, sources):
                 interface_text=interface_text,
         ) as impl:
             yield impl
-
-
-def parse_markers(interface_text):
-    return tatsu.parse(
-        """
-            main = { ->(MARKER|$) }*;
-            MARKER = /\s*/ '/*!' name:[/\w+/] '*/' /\s*/ ;
-        """,
-        interface_text,
-        parseinfo=True,
-    )
-
-
-def assert_at_markers(x, markers):
-    start, end = markers
-    (px, ps, pe) = map(lambda y: y.parseinfo, (x, start, end))
-    assert px.pos == ps.endpos and px.endpos == pe.pos
 
 
 def assert_no_error(text):
