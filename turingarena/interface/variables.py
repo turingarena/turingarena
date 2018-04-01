@@ -2,6 +2,7 @@ from collections import namedtuple
 
 from turingarena.interface.statement import Statement
 from turingarena.interface.type_expressions import compile_type_expression
+from turingarena.interface.exceptions import Diagnostic
 
 
 class Variable(namedtuple("Variable", ["name", "value_type"])):
@@ -34,4 +35,9 @@ class VarStatement(Statement):
     @property
     def context_after(self):
         return self.context.with_variables(self.variables)
+
+    def validate(self):
+        for var in self.variables:
+            if var.name in self.context.variable_mapping.keys():
+                yield Diagnostic(f"variable {var.name} redeclared", parseinfo=self.ast.parseinfo)
 

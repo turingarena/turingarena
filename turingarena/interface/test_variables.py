@@ -268,3 +268,11 @@ def test_variable_not_declared():
     """, "variable a not declared")
 
 
+def test_variable_redeclared():
+    assert_error("""
+        var int a; 
+        
+        main {
+            var int a;
+        }
+    """, "variable a redeclared")
