@@ -1,6 +1,6 @@
 import pytest
 
-from turingarena.algorithm import load_algorithm
+from turingarena.algorithm import Algorithm
 
 sources = {
     "c++": """
@@ -35,7 +35,7 @@ sources = {
 
 @pytest.mark.parametrize("language,source_text", sources.items(), ids=list(sources.keys()))
 def test_valid_types(language, source_text):
-    with load_algorithm(
+    with Algorithm.load(
             interface_text="""
                 var int i;
                 var int[] ia;

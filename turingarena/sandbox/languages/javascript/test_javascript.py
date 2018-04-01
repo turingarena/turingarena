@@ -1,8 +1,7 @@
 import pytest
 
-from contextlib import contextmanager
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.algorithm import load_algorithm
+from turingarena.algorithm import Algorithm
 
 
 interface_text = """
@@ -16,7 +15,7 @@ interface_text = """
 
 
 def javascript_algorithm(source):
-    return load_algorithm(
+    return Algorithm.load(
         interface_text=interface_text,
         language="javascript",
         source_text=source,
@@ -54,7 +53,7 @@ def test_loop():
 
 
 def test_multiple_inputs():
-    with load_algorithm(
+    with Algorithm.load(
             interface_text="""
                 function f(int a, int b) -> int;
                 main {

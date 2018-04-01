@@ -8,24 +8,32 @@ from turingarena.interface.driver.client import DriverClient, DriverProcessClien
 from turingarena.interface.driver.server import DriverServer
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
 from turingarena.sandbox.server import SandboxServer
 from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
 
-class TimeLimitExceeded(AlgorithmRuntimeError):
-    pass
-
-
-class MemoryLimitExceeded(AlgorithmRuntimeError):
-    pass
-
-
 class Algorithm:
     def __init__(self, algorithm_dir):
         self.algorithm_dir = algorithm_dir
+
+    @staticmethod
+    @contextmanager
+    def load(*, source_text, interface_text, language):
+        interface = InterfaceDefinition.compile(interface_text)
+        algorithm_source = AlgorithmSource.load(
+            source_text,
+            interface=interface,
+            language=language,
+        )
+
+        with TemporaryDirectory(dir="/tmp") as temp_dir:
+            algorithm_dir = os.path.join(temp_dir, "algorithm")
+            algorithm_source.compile(algorithm_dir)
+
+            yield Algorithm(algorithm_dir)
 
     @contextmanager
     def run(self, global_variables=None, time_limit=None):
@@ -130,19 +138,3 @@ class AlgorithmProcess:
         info = self.sandbox.get_info()
         if info.memory_usage > value:
             raise MemoryLimitExceeded(info.memory_usage, value)
-
-
-@contextmanager
-def load_algorithm(*, interface_text, language, source_text):
-    interface = InterfaceDefinition.compile(interface_text)
-    algorithm_source = AlgorithmSource.load(
-        source_text,
-        interface=interface,
-        language=language,
-    )
-
-    with TemporaryDirectory(dir="/tmp") as temp_dir:
-        algorithm_dir = os.path.join(temp_dir, "algorithm")
-        algorithm_source.compile(algorithm_dir)
-
-        yield Algorithm(algorithm_dir)

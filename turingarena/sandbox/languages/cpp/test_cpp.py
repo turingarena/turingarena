@@ -1,7 +1,7 @@
 import pytest
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.algorithm import load_algorithm
+from turingarena.algorithm import Algorithm
 
 protocol_text = """
     function test() -> int;
@@ -14,7 +14,7 @@ protocol_text = """
 
 
 def cpp_algorithm(source):
-    return load_algorithm(
+    return Algorithm.load(
         interface_text=protocol_text,
         language="c++",
         source_text=source,
@@ -148,7 +148,7 @@ def test_segmentation_fault():
 
 
 def test_get_time_memory_usage():
-    with load_algorithm(
+    with Algorithm.load(
             interface_text="""
                 function test(int i) -> int;
                 main {

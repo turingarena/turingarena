@@ -1,10 +1,8 @@
 from collections import deque
 
-import pytest
 import tatsu
 
-from turingarena.algorithm import load_algorithm
-from turingarena.interface.exceptions import InterfaceError
+from turingarena.algorithm import Algorithm
 from turingarena.interface.interface import InterfaceDefinition
 
 
@@ -23,7 +21,7 @@ def callback_mock(calls, return_values=None):
 
 def define_algorithms(interface_text, sources):
     for language, source in sources.items():
-        with load_algorithm(
+        with Algorithm.load(
                 source_text=source,
                 language=language,
                 interface_text=interface_text,

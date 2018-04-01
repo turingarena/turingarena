@@ -1,11 +1,11 @@
 import pytest
 
-from turingarena.algorithm import load_algorithm
+from turingarena.algorithm import Algorithm
 from turingarena.interface.driver.client import SandboxError
 
 
 def test_sandbox_error():
-    with load_algorithm(
+    with Algorithm.load(
             interface_text="""
                 function test();
                 main {
