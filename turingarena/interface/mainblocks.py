@@ -25,7 +25,7 @@ class InitStatement(EntryPointStatement):
     __slots__ = []
 
     def validate(self):
-        super().validate()
+        yield from super().validate()
 
         new_context = self.context_after
         for var in self.context.global_variables:
