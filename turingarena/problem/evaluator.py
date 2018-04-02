@@ -1,9 +1,7 @@
 from abc import abstractmethod
 
-from turingarena.common import ImmutableObject
 
-
-class ProblemEvaluator(ImmutableObject):
+class ProblemEvaluator:
     __slots__ = []
 
     @abstractmethod

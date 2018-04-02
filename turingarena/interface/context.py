@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.bindings import BindingStorage
 
 logger = logging.getLogger(__name__)
@@ -148,18 +147,18 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
         )
 
 
-class GlobalContext(ImmutableObject):
+class GlobalContext:
     __slots__ = ["interface", "variables", "bindings"]
 
     def __init__(self, interface):
-        super().__init__(
-            interface=interface,
-            variables=interface.global_variables,
-            bindings=BindingStorage(local_variables=interface.global_variables, parent=None),
-        )
+        self.interface = interface
+        self.variables = interface.global_variables
+        self.bindings = BindingStorage(local_variables=interface.global_variables, parent=None)
 
 
 class ProcedureContext:
+    __slots__ = []
+
     def child(self, local_variables):
         return LocalContext(
             procedure=self,

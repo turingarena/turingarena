@@ -100,11 +100,10 @@ class ReferenceExpression(Expression):
         ref = VariableReference(
             context=context,
             variable=self.variable,
-            value_type=self.variable.value_type,
         )
         for index in self.indices:
             ref = ArrayItemReference(
-                value_type=ref.value_type.item_type,
+                array_type=ref.value_type,
                 array=ref.get(),
                 index=index.evaluate_in(context).get(),
             )

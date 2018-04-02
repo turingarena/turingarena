@@ -1,13 +1,12 @@
 import logging
+from collections import namedtuple
 
 from turingarena.interface.block import Block
 from turingarena.interface.context import GlobalContext, MainContext, RootContext
 from turingarena.interface.driver.commands import MainBegin
-from turingarena.interface.exceptions import InterfaceExit
+from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import Instruction
 from turingarena.interface.parser import parse_interface
-from turingarena.interface.exceptions import Diagnostic
-
 
 logger = logging.getLogger(__name__)
 
@@ -137,8 +136,10 @@ class InterfaceDefinition:
             yield MainEndInstruction()
 
 
-class MainBeginInstruction(Instruction):
-    __slots__ = ["interface", "global_context"]
+class MainBeginInstruction(Instruction, namedtuple("MainBeginInstruction", [
+    "interface", "global_context"
+])):
+    __slots__ = []
 
     def on_request_lookahead(self, request):
         assert isinstance(request, MainBegin)

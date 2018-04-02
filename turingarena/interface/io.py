@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 
 from turingarena.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena.interface.executable import Instruction, ImperativeStatement
@@ -54,6 +55,12 @@ class InputOutputStatement(ImperativeStatement):
             yield from exp.validate()
 
 
+class InputOutputInstruction(Instruction, namedtuple("InputInstruction", [
+    "arguments", "context"
+])):
+    __slots__ = []
+
+
 class InputStatement(InputOutputStatement):
     __slots__ = []
 
@@ -74,8 +81,8 @@ class InputStatement(InputOutputStatement):
             yield from exp.validate(lvalue=True)
 
 
-class InputInstruction(Instruction):
-    __slots__ = ["arguments", "context"]
+class InputInstruction(InputOutputInstruction):
+    __slots__ = []
 
     def on_communicate_with_process(self, connection):
         raw_values = [
@@ -99,8 +106,8 @@ class OutputStatement(InputOutputStatement):
         return self.context.with_flushed_output(False)
 
 
-class OutputInstruction(Instruction):
-    __slots__ = ["arguments", "context"]
+class OutputInstruction(InputOutputInstruction):
+    __slots__ = []
 
     def on_communicate_with_process(self, connection):
         # make sure all input was sent before receiving output

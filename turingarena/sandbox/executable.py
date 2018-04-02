@@ -1,24 +1,23 @@
 import logging
-import signal
 import os
-
+import signal
 from abc import abstractmethod
+from collections import namedtuple
 from contextlib import contextmanager
 from subprocess import TimeoutExpired
 
 import psutil
 
-from turingarena.common import ImmutableObject
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 logger = logging.getLogger(__name__)
 
 
-class AlgorithmExecutable(ImmutableObject):
-    __slots__ = [
-        "algorithm_dir",
-        "language",
-    ]
+class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
+    "algorithm_dir",
+    "language",
+])):
+    __slots__ = []
 
     @staticmethod
     def load(algorithm_dir):

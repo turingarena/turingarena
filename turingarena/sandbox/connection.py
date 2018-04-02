@@ -1,14 +1,12 @@
 import logging
+from collections import namedtuple
 
-from turingarena.common import ImmutableObject
 from turingarena.pipeboundary import PipeChannelDescriptor, PipeDescriptor, PipeSynchronousQueueDescriptor
 
 logger = logging.getLogger(__name__)
 
-
-class SandboxConnection(ImmutableObject):
-    __slots__ = ["request", "response"]
-
+SandboxConnection = namedtuple("SandboxConnection", ["request", "response"])
+SandboxProcessConnection = namedtuple("SandboxProcessConnection", ["downward", "upward"])
 
 SANDBOX_QUEUE = PipeSynchronousQueueDescriptor(
     request_pipes=dict(
@@ -37,7 +35,3 @@ SANDBOX_REQUEST_QUEUE = PipeSynchronousQueueDescriptor(
         memory_usage=PipeDescriptor("memory_usage.pipe", ("r", "w")),
     ),
 )
-
-
-class SandboxProcessConnection(ImmutableObject):
-    __slots__ = ["downward", "upward"]

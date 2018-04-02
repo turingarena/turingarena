@@ -5,9 +5,9 @@ from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
+from turingarena.interface.io import FlushStatement, InputStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
-from turingarena.interface.io import FlushStatement, InputStatement
 
 
 class ExitStatement(ImperativeStatement):
@@ -145,14 +145,16 @@ class ForStatement(ImperativeStatement):
         )
 
 
-class SimpleForInstruction(Instruction):
+class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
+    "statement", "context"
+])):
     """
     Corresponds to a for-loop which does not perform any function call.
     This is seen as a single instruction so that it can be fully skipped
     in the preflight phase, when the number of iterations is not yet known.
     """
 
-    __slots__ = ["statement", "context"]
+    __slots__ = []
 
     def on_communicate_with_process(self, connection):
         for instruction in self.statement.do_generate_instruction(self.context):

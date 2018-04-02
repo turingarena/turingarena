@@ -1,18 +1,18 @@
 import logging
 import os
+from collections import namedtuple
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.skeleton.common import CodeGen
 
 logger = logging.getLogger(__name__)
 
 
-class AlgorithmSource(ImmutableObject):
-    __slots__ = [
-        "interface",
-        "language",
-        "text",
-    ]
+class AlgorithmSource(namedtuple("AlgorithmSource", [
+    "interface",
+    "language",
+    "text",
+])):
+    __slots__ = []
 
     @staticmethod
     def load(source_text, *, language, interface):
