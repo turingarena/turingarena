@@ -1,7 +1,7 @@
 function sum(int a, int b) -> int;
 main {
     var int a, b, c;
-    input a, b;
+    read a, b;
     call sum(a, b) -> c;
-    output c;
+    write c;
 }

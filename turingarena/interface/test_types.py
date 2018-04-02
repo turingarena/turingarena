@@ -46,13 +46,13 @@ def test_valid_types(language, source_text):
                 function get_iaa(int j, int k) -> int;
             
                 init {
-                    input i;
+                    read i;
                     alloc ia, iaa : i;
                     for(j : i) {
-                        input ia[j];
+                        read ia[j];
                         alloc iaa[j] : ia[j];
                         for(k : ia[j]) {
-                            input iaa[j][k];
+                            read iaa[j][k];
                         }
                     }
                 }
@@ -72,11 +72,11 @@ def test_valid_types(language, source_text):
                         }
                     }
             
-                    output o;
+                    write o;
                     for(j : i) {
-                        output oa[j];
+                        write oa[j];
                         for(k : ia[j]) {
-                            output oaa[j][k];
+                            write oaa[j][k];
                         }
                     }
                 }

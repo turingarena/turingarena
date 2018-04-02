@@ -1,5 +1,5 @@
-from turingarena.interface.skeleton.common import CodeGen
 from turingarena.interface.context import StaticGlobalContext
+from turingarena.interface.skeleton.common import CodeGen
 
 
 class JavaCodeGen(CodeGen):
@@ -94,12 +94,12 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         if statement.context.global_context.callbacks:
             yield 'System.out.println("return");'
 
-    def output_statement(self, statement):
+    def write_statement(self, statement):
         format_string = ' '.join("%d" for _ in statement.arguments) + r'\n'
         args = ', '.join(self.expression(v) for v in statement.arguments)
         yield f'System.out.printf("{format_string}", {args});'
 
-    def input_statement(self, statement):
+    def read_statement(self, statement):
         for arg in statement.arguments:
             yield f"{self.expression(arg)} = " + {
                 int: "in.nextInt()",

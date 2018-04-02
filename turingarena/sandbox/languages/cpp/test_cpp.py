@@ -1,14 +1,14 @@
 import pytest
 
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.algorithm import Algorithm
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 protocol_text = """
     function test() -> int;
     main {
         var int o;
         call test() -> o;
-        output o;
+        write o;
     }
 """
 
@@ -153,13 +153,13 @@ def test_get_time_memory_usage():
                 function test(int i) -> int;
                 main {
                     var int i1, i2, o1, o2;
-                    input i1;
+                    read i1;
                     call test(i1) -> o1;
-                    output o1;
+                    write o1;
                     flush;
-                    input i2;
+                    read i2;
                     call test(i2) -> o2;
-                    output o2;
+                    write o2;
                 }
             """,
             language="c++",

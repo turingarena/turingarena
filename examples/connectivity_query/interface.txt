@@ -13,15 +13,15 @@ var int[][] adj;
 function is_there_a_path(int u, int v) -> int;
 
 init {
-    input N, Q;
+    read N, Q;
     alloc D : N;
     alloc adj: N;
 
     for (u : N) {
-        input D[u];
+        read D[u];
         alloc adj[u] : D[u];
         for (i : D[u]) {
-                input adj[u][i];
+                read adj[u][i];
         }
     }
 }
@@ -29,9 +29,9 @@ init {
 main {
     for (q : Q) {
         var int u, v, ans;
-        input u, v;
+        read u, v;
         call is_there_a_path(u, v) -> ans;
-        output ans;
+        write ans;
         flush;
     }
 }

@@ -5,7 +5,7 @@ interface_text = """
     main {
         var int o;
         call test() -> o;
-        output o;
+        write o;
     }
 """
 

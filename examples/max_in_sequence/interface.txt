@@ -4,13 +4,13 @@ main {
     var int n;
     var int[] a;
 
-    input n;
+    read n;
     alloc a : n;
     for(i : n) {
-        input a[i];
+        read a[i];
     }
 
     var int index;
     call max_index(n, a) -> index;
-    output index;
+    write index;
 }

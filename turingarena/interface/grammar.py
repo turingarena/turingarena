@@ -42,7 +42,7 @@ grammar_ebnf = r"""
 
     block_statement =
         | var_statement
-        | statement_type:('input'|'output') ~ arguments:expression_list ';'
+        | statement_type:('read'|'write') ~ arguments:expression_list ';'
         | statement_type:('checkpoint'|'flush'|'break'|'continue'|'exit') ~ ';'
         | statement_type:'alloc' ~ arguments:expression_list ':' size:expression ';'
         | statement_type:'return' ~ value:expression ';'

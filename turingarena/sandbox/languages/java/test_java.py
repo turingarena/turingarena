@@ -1,14 +1,14 @@
 import pytest
 
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
 from turingarena.algorithm import Algorithm
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
 
 interface_text = """
     function test() -> int;
     main {
         var int o;
         call test() -> o;
-        output o;
+        write o;
     }
 """
 
@@ -67,14 +67,14 @@ def test_memory_usage():
                 
                 main {
                     var int a, out; 
-                    input a; 
+                    read a; 
                     call test1(a) -> out;
-                    output out; 
+                    write out; 
                     flush;
                     var int b, out2; 
-                    input b; 
+                    read b; 
                     call test2(b) -> out2;
-                    output out2;
+                    write out2;
                     flush;
                 }
             """, """

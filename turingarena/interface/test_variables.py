@@ -5,7 +5,7 @@ def test_variable_not_initialized():
     assert_error("""
         main {
             var int a;
-            output a;
+            write a;
         }
     """, "variable a used before initialization")
 
@@ -16,7 +16,7 @@ def test_variable_initialized():
         main {
             var int a;
             call f() -> a;
-            output a;
+            write a;
         }
     """)
 
@@ -29,7 +29,7 @@ def test_init_block_call():
             call f() -> a;
         }
         main {
-            output a;
+            write a;
         }
     """)
 
@@ -49,7 +49,7 @@ def test_variable_not_initialized_subscript():
         main {
             var int a;
             var int[] A;
-            input A[a];
+            read A[a];
         }
     """, "variable a used before initialization")
 
@@ -59,7 +59,7 @@ def test_variable_not_initialized_array():
         main {
             var int[] A;
             alloc A : 5;
-            input A[0];
+            read A[0];
         }
     """)
 
@@ -68,7 +68,7 @@ def test_variable_not_allocated():
     assert_error("""
         main {
             var int[] a; 
-            input a[0];
+            read a[0];
         }
     """, "variable a used before allocation")
 
@@ -77,7 +77,7 @@ def test_array_not_allocated():
     assert_error("""
         main {
             var int[] A;
-            input A[0];
+            read A[0];
         }
     """, "variable A used before allocation")
 
@@ -87,8 +87,8 @@ def test_array_alloc():
         main {
             var int[] A; 
             alloc A : 10;
-            input A[5];
-            output A[5];
+            read A[5];
+            write A[5];
         }
     """)
 
@@ -99,16 +99,16 @@ def test_array_access():
         var int s;
         
         init {
-            input s;
+            read s;
             alloc A : s;
             for (i : s) {
-                input A[i];
+                read A[i];
             }
         }
         
         main {
             for (i : s) {
-                output A[i];            
+                write A[i];            
             }
         }
     """)
@@ -118,9 +118,9 @@ def test_variable_initialized_for():
     assert_no_error("""
         main {
             var int a;
-            input a;
+            read a;
             for (i : a) {
-                output i;
+                write i;
             }
         }
     """)
@@ -130,11 +130,11 @@ def test_variable_initialized_if():
     assert_no_error("""
         main {
              var int a; 
-             input a;
+             read a;
              if (a) {
-                output 1;
+                write 1;
              } else {
-                output 2;
+                write 2;
             }
         }
     """)
@@ -145,9 +145,9 @@ def test_variable_in_if_body():
         main {
             var int a;
             if (1) {
-                output 1;
+                write 1;
             } else {
-                output a;
+                write a;
             }
         }
     """, "variable a used before initialization")
@@ -158,11 +158,11 @@ def test_variable_initialized_if_2():
         main {
              var int a;
              if (1) {
-                 input a;
+                 read a;
              } else {
-                 input a;
+                 read a;
              }
-             output a;
+             write a;
         }
     """)
 
@@ -172,11 +172,11 @@ def test_variable_initialized_if_3():
         main {
              var int a, b;
              if (1) {
-                 input b;
+                 read b;
              } else {
-                 input a;
+                 read a;
              }
-             output a;
+             write a;
         }
     """, "variable a used before initialization")
 
@@ -187,9 +187,9 @@ def test_variable_initialized_call():
         
         main {
             var int a, b, c;
-            input a, b;
+            read a, b;
             call test(a, b) -> c;
-            output c; 
+            write c; 
         }
     """)
 
@@ -200,9 +200,9 @@ def test_variable_not_initialized_call():
 
         main {
             var int a, b, c;
-            input a;
+            read a;
             call test(a, b) -> c;
-            output c; 
+            write c; 
         }
     """, "variable b used before initialization")
 
@@ -211,8 +211,8 @@ def test_local_variable():
     assert_no_error("""
         main {
             var int a;
-            input a;
-            output a;
+            read a;
+            write a;
         }
     """)
 
@@ -221,7 +221,7 @@ def test_local_variable_not_initialized():
     assert_error("""
          main {
             var int a;
-            output a;
+            write a;
         }
     """, "variable a used before initialization")
 
@@ -251,11 +251,11 @@ def test_init_block():
         var int a;
         
         init {
-            input a;
+            read a;
         }
         
         main {
-            output a;
+            write a;
         }
     """)
 
@@ -263,7 +263,7 @@ def test_init_block():
 def test_variable_not_declared():
     assert_error("""
         main {
-            output a;
+            write a;
         }
     """, "variable a not declared")
 

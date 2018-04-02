@@ -81,10 +81,10 @@ class CodeGen:
     def main_statement(self, s):
         raise NotImplementedError
 
-    def input_statement(self, s):
+    def read_statement(self, s):
         raise NotImplementedError
 
-    def output_statement(self, s):
+    def write_statement(self, s):
         raise NotImplementedError
 
     def checkpoint_statement(self, s):

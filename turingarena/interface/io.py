@@ -54,11 +54,11 @@ class InputOutputStatement(ImperativeStatement):
             yield from exp.validate()
 
 
-class InputStatement(InputOutputStatement):
+class ReadStatement(InputOutputStatement):
     __slots__ = []
 
     def generate_instructions(self, context):
-        yield InputInstruction(arguments=self.arguments, context=context)
+        yield ReadInstruction(arguments=self.arguments, context=context)
 
     @property
     def context_after(self):
@@ -69,12 +69,12 @@ class InputStatement(InputOutputStatement):
 
     def validate(self):
         if not self.context.has_flushed_output:
-            yield Diagnostic("missing flush between output and input instructions", parseinfo=self.ast.parseinfo)
+            yield Diagnostic("missing flush between write and read instructions", parseinfo=self.ast.parseinfo)
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
 
 
-class InputInstruction(Instruction):
+class ReadInstruction(Instruction):
     __slots__ = ["arguments", "context"]
 
     def on_communicate_with_process(self, connection):
@@ -88,18 +88,18 @@ class InputInstruction(Instruction):
             raise CommunicationBroken
 
 
-class OutputStatement(InputOutputStatement):
+class WriteStatement(InputOutputStatement):
     __slots__ = []
 
     def generate_instructions(self, context):
-        yield OutputInstruction(arguments=self.arguments, context=context)
+        yield WriteInstruction(arguments=self.arguments, context=context)
 
     @property
     def context_after(self):
         return self.context.with_flushed_output(False)
 
 
-class OutputInstruction(Instruction):
+class WriteInstruction(Instruction):
     __slots__ = ["arguments", "context"]
 
     def on_communicate_with_process(self, connection):

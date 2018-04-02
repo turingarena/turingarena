@@ -69,11 +69,11 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
             size = self.expression(statement.size)
             yield f"{arg} = Array({size});"
 
-    def output_statement(self, statement):
+    def write_statement(self, statement):
         args = ", ".join(self.expression(v) for v in statement.arguments)
         yield f"print({args});"
 
-    def input_statement(self, statement):
+    def read_statement(self, statement):
         args = ", ".join(self.expression(arg) for arg in statement.arguments)
         yield f"[{args}] = await readIntegers();"
 

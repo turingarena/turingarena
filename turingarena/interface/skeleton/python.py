@@ -82,11 +82,11 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         if statement.context.global_context.callbacks:
             yield r"""print("return")"""
 
-    def output_statement(self, statement):
+    def write_statement(self, statement):
         args = ', '.join(self.expression(v) for v in statement.arguments)
         yield f'print({args})'
 
-    def input_statement(self, statement):
+    def read_statement(self, statement):
         arguments = ", ".join(
             self.expression(v)
             for v in statement.arguments
