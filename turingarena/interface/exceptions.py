@@ -26,7 +26,7 @@ class Diagnostic(namedtuple("Diagnostic", [
     "message",
     "parseinfo",
 ])):
-    class Messages:
+    class Messages():
         VARIABLE_NOT_DECLARED = "variable {} not declared"
         VARIABLE_NOT_INITIALIZED = "variable {} not initialized before use"
         VARIABLE_NOT_ALLOCATED = "variable {}' not allocated before use"

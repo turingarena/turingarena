@@ -35,8 +35,8 @@ class PythonEvaluator(ProblemEvaluator, namedtuple("PythonEvaluator", [
 ])):
     __slots__ = []
 
-    def __init__(self, script_path, function_name="evaluate"):
-        super().__init__(script_path=script_path, function_name=function_name)
+    def __new__(cls, script_path, function_name="evaluate"):
+        return super().__new__(cls, script_path=script_path, function_name=function_name)
 
 
 class HostPythonEvaluator(PythonEvaluator):
