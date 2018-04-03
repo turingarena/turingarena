@@ -2,10 +2,10 @@ import logging
 import os
 import shutil
 import subprocess
+import pkg_resources
+
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
-
-import pkg_resources
 
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.rlimits import set_memory_and_time_limits
@@ -27,17 +27,14 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                 if name.endswith(".class"):
                     shutil.copy(os.path.join(self.algorithm_dir, name), cwd)
 
-            # copy security.policy file
-            shutil.copy(security_policy_path, cwd)
-
             cli = [
                 "java",
                 "-Djava.security.manager",
-                "-Djava.security.policy==security.policy",
+                f"-Djava.security.policy=={security_policy_path}",
                 "Skeleton",
             ]
 
-            popen = subprocess.Popen(
+            process = subprocess.Popen(
                 cli,
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
@@ -47,7 +44,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                 bufsize=1,
             )
 
-            with self.manage_process(popen) as p:
+            with self.manage_process(process) as p:
                 yield p
 
     def get_memory_usage(self, process):

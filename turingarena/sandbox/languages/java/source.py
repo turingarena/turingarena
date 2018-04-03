@@ -23,6 +23,7 @@ class JavaAlgorithmSource(AlgorithmSource):
             "Skeleton.java", 
             "Solution.java"
         ]
+
         logger.debug(f"Running {' '.join(cli)}")
 
         with subprocess.Popen(
