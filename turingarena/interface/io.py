@@ -40,7 +40,7 @@ class CheckpointInstruction(Instruction):
         assert line == str(0)
 
 
-class InputOutputStatement(ImperativeStatement):
+class ReadWriteStatement(ImperativeStatement):
     __slots__ = []
 
     @property
@@ -55,13 +55,13 @@ class InputOutputStatement(ImperativeStatement):
             yield from exp.validate()
 
 
-class InputOutputInstruction(Instruction, namedtuple("InputInstruction", [
+class ReadWriteInstruction(Instruction, namedtuple("ReadWriteInstruction", [
     "arguments", "context"
 ])):
     __slots__ = []
 
 
-class ReadStatement(InputOutputStatement):
+class ReadStatement(ReadWriteStatement):
     __slots__ = []
 
     def generate_instructions(self, context):
@@ -81,7 +81,7 @@ class ReadStatement(InputOutputStatement):
             yield from exp.validate(lvalue=True)
 
 
-class ReadInstruction(InputOutputInstruction):
+class ReadInstruction(ReadWriteInstruction):
 
     def on_communicate_with_process(self, connection):
         raw_values = [
@@ -94,7 +94,7 @@ class ReadInstruction(InputOutputInstruction):
             raise CommunicationBroken
 
 
-class WriteStatement(InputOutputStatement):
+class WriteStatement(ReadWriteStatement):
     __slots__ = []
 
     def generate_instructions(self, context):
@@ -105,7 +105,7 @@ class WriteStatement(InputOutputStatement):
         return self.context.with_flushed_output(False)
 
 
-class WriteInstruction(InputOutputInstruction):
+class WriteInstruction(ReadWriteInstruction):
     __slots__ = []
 
     def on_communicate_with_process(self, connection):
