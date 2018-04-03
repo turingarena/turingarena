@@ -1,5 +1,5 @@
 from turingarena.tests.test_utils import assert_error, assert_no_error
-
+from turingarena.interface.exceptions import Diagnostic
 
 def test_missing_local_flush():
     assert_error("""
@@ -8,7 +8,7 @@ def test_missing_local_flush():
             write 5;
             read a;
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)
 
 
 def test_missing_flush_for():
@@ -22,7 +22,7 @@ def test_missing_flush_for():
             
             read a;
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)
 
 
 def test_missing_flush_for_2():
@@ -35,7 +35,7 @@ def test_missing_flush_for_2():
                 write 4;
             }
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)
 
 
 def test_missing_flush_for_3():
@@ -50,7 +50,7 @@ def test_missing_flush_for_3():
             }
             read b;
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)
 
 
 def test_for():
@@ -81,7 +81,7 @@ def test_missing_flush_if():
             
             read b;
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)
 
 
 def test_missing_flush_if_2():
@@ -111,4 +111,4 @@ def test_missing_flush_init():
             var int a;
             read a;
         }
-    """, "missing flush between write and read instructions")
+    """, Diagnostic.Messages.MISSING_FLUSH)

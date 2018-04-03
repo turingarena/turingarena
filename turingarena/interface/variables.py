@@ -39,5 +39,5 @@ class VarStatement(Statement):
     def validate(self):
         for var in self.variables:
             if var.name in self.context.variable_mapping.keys():
-                yield Diagnostic(f"variable {var.name} redeclared", parseinfo=self.ast.parseinfo)
+                yield Diagnostic(Diagnostic.Messages.VARIABLE_REDECLARED, var.name, parseinfo=self.ast.parseinfo)
 

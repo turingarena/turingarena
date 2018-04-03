@@ -1,5 +1,5 @@
 from turingarena.tests.test_utils import assert_error
-
+from turingarena.interface.exceptions import Diagnostic
 
 def test_call_not_defined():
     assert_error("""
@@ -7,7 +7,7 @@ def test_call_not_defined():
         main {
             /*!*/ call g(); /*!*/
         }
-    """, "function g not declared")
+    """, Diagnostic.Messages.FUNCTION_NOT_DECLARED, "g")
 
 
 def test_call_extra_arguments():
@@ -16,7 +16,7 @@ def test_call_extra_arguments():
         main {
             /*!*/ call f(0, 1); /*!*/
         }
-    """, "function f expects 0 argument(s), got 2")
+    """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 0, 2)
 
 
 def test_call_missing_arguments():
@@ -25,7 +25,7 @@ def test_call_missing_arguments():
         main {
             /*!*/ call f(0); /*!*/
         }
-    """, "function f expects 2 argument(s), got 1")
+    """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 2, 1)
 
 
 def test_call_argument_wrong_type():
@@ -34,7 +34,7 @@ def test_call_argument_wrong_type():
         main {
             call f(/*!*/ 0 /*!*/);
         }
-    """, "argument a of function f: expected int[], got int")
+    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "int[]", "int")
 
 
 def test_call_missing_return_expression():
@@ -43,7 +43,7 @@ def test_call_missing_return_expression():
         main {
             /*!*/ call f(); /*!*/
         }
-    """, "function f returns int, but no return expression given")
+    """, Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, "f", "int")
 
 
 def test_call_extra_return_expression():
@@ -53,7 +53,7 @@ def test_call_extra_return_expression():
             var int a;
             call f() -> /*!*/ a /*!*/;
         }
-    """, "function f does not return a value")
+    """, Diagnostic.Messages.FUNCTION_DOES_NOT_RETURN_VALUE, "f")
 
 
 def test_call_return_expression_wrong_type():
@@ -63,5 +63,5 @@ def test_call_return_expression_wrong_type():
             var int[] a;
             call f() -> /*!*/ a /*!*/;
         }
-    """, "function f returns int, but return expression is int[]")
+    """, Diagnostic.Messages.CALL_WRONG_RETURN_EXPRESSION, "f", "int", "int[]")
 

@@ -21,7 +21,7 @@ class AllocStatement(ImperativeStatement):
         yield from self.size.validate()
         for arg in self.arguments:
             if not isinstance(arg.variable.value_type, ArrayType):
-                yield Diagnostic.create_message(f"Argument {arg} is not an array type", parseinfo=self.ast.parseinfo)
+                yield Diagnostic.create_message(Diagnostic.Messages.NOT_ARRAY_TYPE, arg, parseinfo=self.ast.parseinfo)
             else:
                 for index in arg.indices:
                     yield from index.validate()

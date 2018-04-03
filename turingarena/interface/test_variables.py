@@ -1,5 +1,5 @@
 from turingarena.tests.test_utils import assert_no_error, assert_error
-
+from turingarena.interface.exceptions import Diagnostic
 
 def test_variable_not_initialized():
     assert_error("""
@@ -7,7 +7,7 @@ def test_variable_not_initialized():
             var int a;
             write a;
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_variable_initialized():
@@ -41,7 +41,7 @@ def test_call_on_itself():
             var int a;
             call f(a) -> a;
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_variable_not_initialized_subscript():
@@ -51,7 +51,7 @@ def test_variable_not_initialized_subscript():
             var int[] A;
             read A[a];
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_variable_not_initialized_array():
@@ -70,7 +70,7 @@ def test_variable_not_allocated():
             var int[] a; 
             read a[0];
         }
-    """, "variable a used before allocation")
+    """, Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, "a")
 
 
 def test_array_not_allocated():
@@ -79,7 +79,7 @@ def test_array_not_allocated():
             var int[] A;
             read A[0];
         }
-    """, "variable A used before allocation")
+    """, Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, "A")
 
 
 def test_array_alloc():
@@ -150,7 +150,7 @@ def test_variable_in_if_body():
                 write a;
             }
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_variable_initialized_if_2():
@@ -178,7 +178,7 @@ def test_variable_initialized_if_3():
              }
              write a;
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_variable_initialized_call():
@@ -204,7 +204,7 @@ def test_variable_not_initialized_call():
             call test(a, b) -> c;
             write c; 
         }
-    """, "variable b used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "b")
 
 
 def test_local_variable():
@@ -223,7 +223,7 @@ def test_local_variable_not_initialized():
             var int a;
             write a;
         }
-    """, "variable a used before initialization")
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_global_variables():
@@ -235,7 +235,7 @@ def test_global_variables():
         
         main {
         }
-    """, "global variable a not initialized in init block")
+    """, Diagnostic.Messages.GLOBAL_VARIABLE_NOT_INITIALIZED, "a")
 
 
 def test_no_init_block():
@@ -243,7 +243,7 @@ def test_no_init_block():
         var int a;
         
         main {}
-    """, "global variables declared but missing init block")
+    """, Diagnostic.Messages.INIT_BLOCK_MISSING)
 
 
 def test_init_block():
@@ -265,7 +265,7 @@ def test_variable_not_declared():
         main {
             write a;
         }
-    """, "variable a not declared")
+    """, Diagnostic.Messages.VARIABLE_NOT_DECLARED, "a")
 
 
 def test_variable_redeclared():
@@ -275,4 +275,4 @@ def test_variable_redeclared():
         main {
             var int a;
         }
-    """, "variable a redeclared")
+    """, Diagnostic.Messages.VARIABLE_REDECLARED, "a")

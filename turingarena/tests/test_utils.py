@@ -2,7 +2,7 @@ from collections import deque
 
 from turingarena.algorithm import Algorithm
 from turingarena.interface.interface import InterfaceDefinition
-
+from turingarena.interface.exceptions import Diagnostic
 
 def callback_mock(calls, return_values=None):
     if return_values is not None:
@@ -34,8 +34,9 @@ def assert_no_error(text):
         raise AssertionError
 
 
-def assert_error(text, error):
+def assert_error(text, error, *args):
     i = InterfaceDefinition.compile(text)
+    error = Diagnostic.build_message(error, *args)
     for m in i.validate():
         print(m)
         if m.message == error:

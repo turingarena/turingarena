@@ -76,7 +76,7 @@ class ReadStatement(InputOutputStatement):
 
     def validate(self):
         if not self.context.has_flushed_output:
-            yield Diagnostic("missing flush between write and read instructions", parseinfo=self.ast.parseinfo)
+            yield Diagnostic(Diagnostic.Messages.MISSING_FLUSH, parseinfo=self.ast.parseinfo)
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
 
