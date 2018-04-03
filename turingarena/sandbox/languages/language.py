@@ -11,6 +11,11 @@ class Language(namedtuple("Language", [
 ])):
     __slots__ = []
 
+    def __new__(cls, *args, **kwargs):
+        if args:
+            return cls.from_name(args[0])
+        return super().__new__(cls, *args, **kwargs)
+
     @staticmethod
     def from_name(name):
         from .cpp import language as cpp

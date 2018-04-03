@@ -23,7 +23,7 @@ def generate_template_cli(args):
         interface_text = f.read()
 
     interface = InterfaceDefinition.compile(interface_text)
-    language = Language.from_name(args["--language"])
+    language = Language(args["--language"])
     generator = language.skeleton_generator(interface)
     generator.write_to_file(sys.stdout)
 
@@ -44,7 +44,7 @@ def generate_skeleton_cli(args):
         interface_text = f.read()
 
     interface = InterfaceDefinition.compile(interface_text)
-    language = Language.from_name(args["--language"])
+    language = Language(args["--language"])
     generator = language.skeleton_generator(interface)
     generator.write_to_file(sys.stdout)
 
