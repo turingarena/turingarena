@@ -32,7 +32,10 @@ class InterfaceDefinition:
     def compile(source_text, extra_metadata=None):
         if extra_metadata is None:
             extra_metadata = {}
-        return InterfaceDefinition(source_text, extra_metadata=extra_metadata)
+        interface = InterfaceDefinition(source_text, extra_metadata=extra_metadata)
+        for msg in interface.validate():
+            logger.warning(f"interface contains an error: {msg}")
+        return interface
 
     @property
     def source_text(self):

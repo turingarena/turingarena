@@ -28,21 +28,21 @@ class Diagnostic(namedtuple("Diagnostic", [
 ])):
     class Messages:
         VARIABLE_NOT_DECLARED = "variable {} not declared"
-        VARIABLE_NOT_INITIALIZED = "variable {} used before initialization"
-        VARIABLE_NOT_ALLOCATED = "variable {} used before allocation"
-        VARIABLE_REDECLARED = "variable {} redeclared"
+        VARIABLE_NOT_INITIALIZED = "variable {} not initialized before use"
+        VARIABLE_NOT_ALLOCATED = "variable {}' not allocated before use"
+        VARIABLE_REDECLARED = "variable {} has been already declared"
         GLOBAL_VARIABLE_NOT_INITIALIZED = "global variable {} not initialized in init block"
-        INIT_BLOCK_MISSING = "global variables declared but missing init block"
-        NOT_ARRAY_TYPE = "Argument {} is not an array type"
+        INIT_BLOCK_MISSING = "global variables declared but init block is missing"
+        NOT_ARRAY_TYPE = "argument {} type is not array"
         MISSING_FLUSH = "missing flush between write and read instructions"
         FUNCTION_NOT_DECLARED = "function {} not declared"
+        FUNCTION_DOES_NOT_RETURN_VALUE = "function {} does not return a value"
+        RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
         CALL_WRONG_ARGS_NUMBER = "function {} expects {} argument(s), got {}"
-        CALL_WRONG_ARGS_TYPE = "argument {} of function {}: expected {}, got {}"
+        CALL_WRONG_ARGS_TYPE = "wrong type for argument {} of function {}: expected {}, got {}"
         CALL_NO_RETURN_EXPRESSION = "function {} returns {}, but no return expression given"
         CALL_WRONG_RETURN_EXPRESSION = "function {} returns {}, but return expression is {}"
-        FUNCTION_DOES_NOT_RETURN_VALUE = "function {} does not return a value"
         CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
-        RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
 
     @staticmethod
     def build_message(msg, *args):

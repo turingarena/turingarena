@@ -9,6 +9,7 @@ class Language(namedtuple("Language", [
     "skeleton_generator",
     "template_generator",
 ])):
+    __slots__ = []
 
     @staticmethod
     def from_name(name):

@@ -1,4 +1,6 @@
 class CodeGen:
+    __slots__ = ["interface"]
+
     def __init__(self, interface):
         self.interface = interface
 
