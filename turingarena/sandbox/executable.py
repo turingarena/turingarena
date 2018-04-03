@@ -31,7 +31,8 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
             language=language,
         )
 
-    def _wait_or_send(self, process, which_signal):
+    @staticmethod
+    def _wait_or_send(process, which_signal):
         logger.debug(f"waiting for process...")
         try:
             process.wait(timeout=1.0)
@@ -50,15 +51,10 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
                 self._wait_or_send(process, signal.SIGKILL)
 
             if process.returncode != 0:
-                if get_stack_trace is not None:
-                    st = get_stack_trace()
-                else:
-                    st = ""
-
                 logger.warning(f"process terminated with returncode {process.returncode}")
                 raise AlgorithmRuntimeError(
                     f"invalid return code {process.returncode}",
-                    st,
+                    get_stack_trace() if get_stack_trace else None,
                 )
 
     def get_time_usage(self, process):
