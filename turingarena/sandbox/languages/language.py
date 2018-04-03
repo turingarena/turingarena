@@ -11,7 +11,7 @@ class Language(namedtuple("Language", [
 ])):
 
     @staticmethod
-    def for_name(name):
+    def from_name(name):
         from .cpp import language as cpp
         from .java import language as java
         from .javascript import language as javascript
@@ -27,4 +27,4 @@ class Language(namedtuple("Language", [
         try:
             return languages[name]
         except KeyError:
-            raise RuntimeError(f"Language {language} not supported by TuringArena")
+            raise RuntimeError(f"Language {name} not supported by TuringArena")

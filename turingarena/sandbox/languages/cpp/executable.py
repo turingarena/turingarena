@@ -31,7 +31,8 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
             ) as process:
                 yield process
 
-    def get_back_trace(self, executable_filename, cwd):
+    @staticmethod
+    def get_back_trace(executable_filename, cwd):
         gdb_run = subprocess.run(
             [
                 "gdb",

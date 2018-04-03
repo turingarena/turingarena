@@ -24,7 +24,7 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
         from turingarena.sandbox.languages.language import Language
 
         with open(os.path.join(algorithm_dir, "language.txt")) as f:
-            language = Language.for_name(f.read().strip())
+            language = Language.from_name(f.read().strip())
 
         return language.executable(
             algorithm_dir=algorithm_dir,

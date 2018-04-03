@@ -16,7 +16,7 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
     def load(source_text, *, language, interface):
         from turingarena.sandbox.languages.language import Language
 
-        language = Language.for_name(language)
+        language = Language.from_name(language)
 
         return language.source(
             text=source_text,
