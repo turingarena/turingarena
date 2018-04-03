@@ -1,41 +1,32 @@
 import logging
-import signal
 import os
-
+import signal
 from abc import abstractmethod
+from collections import namedtuple
 from contextlib import contextmanager
 from subprocess import TimeoutExpired
 
 import psutil
 
-from turingarena.common import ImmutableObject
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 logger = logging.getLogger(__name__)
 
 
-class AlgorithmExecutable(ImmutableObject):
-    __slots__ = [
-        "algorithm_dir",
-        "language",
-    ]
+class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
+    "algorithm_dir",
+    "language",
+])):
+    __slots__ = []
 
     @staticmethod
     def load(algorithm_dir):
-        from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
-        from turingarena.sandbox.languages.java.executable import JavaAlgorithmExecutable
-        from turingarena.sandbox.languages.python.executable import PythonAlgorithmExecutableScript
-        from turingarena.sandbox.languages.javascript.executable import JavaScriptAlgorithmExecutableScript
+        from turingarena.sandbox.languages.language import Language
 
         with open(os.path.join(algorithm_dir, "language.txt")) as f:
-            language = f.read().strip()
+            language = Language.for_name(f.read().strip())
 
-        return {
-            "c++": ElfAlgorithmExecutable,
-            "python": PythonAlgorithmExecutableScript,
-            "java": JavaAlgorithmExecutable,
-            "javascript": JavaScriptAlgorithmExecutableScript,
-        }[language](
+        return language.executable(
             algorithm_dir=algorithm_dir,
             language=language,
         )

@@ -1,14 +1,19 @@
 import logging
 from abc import abstractmethod
+from collections import namedtuple
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.type_expressions import ArrayType, ScalarType
 
 logger = logging.getLogger(__name__)
 
 
-class Reference(ImmutableObject):
-    __slots__ = ["value_type"]
+class Reference:
+    __slots__ = []
+
+    @property
+    @abstractmethod
+    def value_type(self):
+        pass
 
     def get(self):
         assert self.is_resolved()
@@ -42,11 +47,17 @@ class Reference(ImmutableObject):
         pass
 
 
-class ConstantReference(Reference):
-    __slots__ = ["value"]
+class ConstantReference(Reference, namedtuple("ConstantReference", [
+    "value_type", "value"
+])):
+    __slots__ = []
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    @property
+    def value_type(self):
+        return self.value_type
+
+    def validate(self):
+        # TODO: never called
         assert isinstance(self.value_type, ScalarType)
         self.value_type.check(self.value)
 
@@ -57,8 +68,14 @@ class ConstantReference(Reference):
         pass
 
 
-class VariableReference(Reference):
-    __slots__ = ["context", "variable"]
+class VariableReference(Reference, namedtuple("VariableReference", [
+    "context", "variable"
+])):
+    __slots__ = []
+
+    @property
+    def value_type(self):
+        return self.variable.value_type
 
     def do_get(self):
         return self.context.bindings[self.variable]
@@ -70,11 +87,17 @@ class VariableReference(Reference):
         return f"var({self.variable.name})"
 
 
-class ArrayItemReference(Reference):
-    __slots__ = ["array", "index"]
+# FIXME: merge VariableReference and ArrayItemReference (using a tuple of indices?)
+class ArrayItemReference(Reference, namedtuple("ArrayItemReference", [
+    "array_type", "array", "index"
+])):
+    __slots__ = []
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    @property
+    def value_type(self):
+        return self.array_type.item_type
+
+    def validate(self):
         assert isinstance(self.index, int)
         assert isinstance(self.array, list)
 

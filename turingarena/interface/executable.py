@@ -1,10 +1,9 @@
 from abc import abstractmethod, ABC
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.statement import Statement
 
 
-class Instruction(ImmutableObject):
+class Instruction:
     __slots__ = []
 
     def on_request_lookahead(self, request):

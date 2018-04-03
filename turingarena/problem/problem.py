@@ -3,12 +3,12 @@ import importlib.util
 import logging
 import os
 import subprocess
+from collections import namedtuple
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 import yaml
 
-from turingarena.common import ImmutableObject
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
@@ -17,13 +17,13 @@ from turingarena.sandbox.source import AlgorithmSource
 logger = logging.getLogger(__name__)
 
 
-class AlgorithmicProblem(ImmutableObject):
-    __slots__ = [
-        "interface",
-        "extra_metadata",
-        "algorithm_sources",
-        "evaluator",
-    ]
+class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
+    "interface",
+    "extra_metadata",
+    "algorithm_sources",
+    "evaluator",
+])):
+    __slots__ = []
 
     def compile_algorithms(self, evaluation_dir):
         algorithms_dir = os.path.join(evaluation_dir, "algorithms")

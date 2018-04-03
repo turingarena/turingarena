@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 
 from turingarena.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
@@ -137,8 +138,10 @@ class CallStatement(ImperativeStatement):
             yield from context.callback.generate_instructions(context)
 
 
-class FunctionCallInstruction(Instruction):
-    __slots__ = ["statement", "context", "function"]
+class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction", [
+    "statement", "context", "function"
+])):
+    __slots__ = []
 
     def on_request_lookahead(self, request):
         fun = self.function
@@ -169,8 +172,10 @@ class FunctionCallInstruction(Instruction):
         return self.function.return_type is not None
 
 
-class FunctionReturnInstruction(Instruction):
-    __slots__ = ["statement", "context", "function"]
+class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstruction", [
+    "statement", "context", "function"
+])):
+    __slots__ = []
 
     def on_generate_response(self):
         if self.function.return_type:
@@ -184,8 +189,8 @@ class FunctionReturnInstruction(Instruction):
         )
 
 
-class AcceptCallbackInstruction(Instruction):
-    __slots__ = ["context"]
+class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", ["context"])):
+    __slots__ = []
 
     def should_send_input(self):
         return True
@@ -214,8 +219,10 @@ class ReturnStatement(ImperativeStatement):
         yield from self.value.validate()
 
 
-class ReturnInstruction(Instruction):
-    __slots__ = ["value", "context"]
+class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
+    "value", "context"
+])):
+    __slots__ = []
 
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)

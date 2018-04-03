@@ -1,5 +1,5 @@
 from turingarena.interface.context import StaticGlobalContext
-from turingarena.interface.skeleton.common import CodeGen
+from turingarena.sandbox.languages.generator import CodeGen
 
 
 class JavaCodeGen(CodeGen):

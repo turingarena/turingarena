@@ -1,7 +1,9 @@
+from collections import namedtuple
+
+from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
 from turingarena.interface.type_expressions import ArrayType
-from turingarena.interface.exceptions import Diagnostic
 
 
 class AllocStatement(ImperativeStatement):
@@ -35,8 +37,10 @@ class AllocStatement(ImperativeStatement):
         yield AllocInstruction(arguments=self.arguments, size=self.size, context=context)
 
 
-class AllocInstruction(Instruction):
-    __slots__ = ["arguments", "size", "context"]
+class AllocInstruction(Instruction, namedtuple("AllocInstruction", [
+    "arguments", "size", "context"
+])):
+    __slots__ = []
 
     def on_communicate_with_process(self, connection):
         size = self.size.evaluate_in(self.context).get()

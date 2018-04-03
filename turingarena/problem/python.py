@@ -3,19 +3,19 @@ import logging
 import os
 import subprocess
 import sys
+from collections import namedtuple
 from contextlib import redirect_stdout
 from io import StringIO
 
 from turingarena.algorithm import Algorithm
-from turingarena.common import ImmutableObject
 from turingarena.problem.evaluation import Evaluation
 from turingarena.problem.evaluator import ProblemEvaluator
 
 logger = logging.getLogger(__name__)
 
 
-class ProblemEvaluationContext(ImmutableObject):
-    __slots__ = ["evaluation_dir"]
+class ProblemEvaluationContext(namedtuple("ProblemEvaluationContext", ["evaluation_dir"])):
+    __slots__ = []
 
     @property
     def submission(self):
@@ -30,8 +30,10 @@ class ProblemEvaluationContext(ImmutableObject):
         }
 
 
-class PythonEvaluator(ProblemEvaluator):
-    __slots__ = ["script_path", "function_name"]
+class PythonEvaluator(ProblemEvaluator, namedtuple("PythonEvaluator", [
+    "script_path", "function_name"
+])):
+    __slots__ = []
 
     def __init__(self, script_path, function_name="evaluate"):
         super().__init__(script_path=script_path, function_name=function_name)

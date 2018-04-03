@@ -147,9 +147,10 @@ class Callback(Callable):
         yield from self.body.generate_instructions(local_context)
 
 
-class CallbackCallInstruction(Instruction):
-    __slots__ = ["callback_context", "local_context"]
-
+class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", [
+    "callback_context",
+    "local_context",
+])):
     @property
     def callback(self):
         return self.callback_context.accept_context.callback
@@ -159,7 +160,6 @@ class CallbackCallInstruction(Instruction):
             VariableReference(
                 context=self.local_context,
                 variable=p,
-                value_type=p.value_type,
             ).get()
             for p in self.callback.parameters
         ]

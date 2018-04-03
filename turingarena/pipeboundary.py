@@ -1,10 +1,9 @@
 import itertools
 import logging
 import os
+from collections import namedtuple
 from contextlib import ExitStack, contextmanager
 from enum import Enum
-
-from turingarena.common import ImmutableObject
 
 logger = logging.getLogger(__name__)
 
@@ -14,27 +13,19 @@ class PipeBoundarySide(Enum):
     SERVER = 1
 
 
-class PipeDescriptor(ImmutableObject):
-    __slots__ = ["filename", "flags"]
-
-    def __init__(self, filename, flags):
-        super().__init__(filename=filename, flags=flags)
-
-
-class PipeChannelDescriptor(ImmutableObject):
-    __slots__ = ["pipes"]
+PipeDescriptor = namedtuple("PipeDescriptor", ["filename", "flags"])
+PipeChannelDescriptor = namedtuple("PipeChannelDescriptor", ["pipes"])
+PipeSynchronousQueueDescriptor = namedtuple("PipeSynchronousQueueDescriptor", [
+    "request_pipes", "response_pipes"
+])
 
 
-class PipeSynchronousQueueDescriptor(ImmutableObject):
-    __slots__ = ["request_pipes", "response_pipes"]
-
-
-class PipeBoundary(ImmutableObject):
+class PipeBoundary:
     __slots__ = ["directory"]
 
     def __init__(self, directory):
         assert os.path.isdir(directory)
-        super().__init__(directory=directory)
+        self.directory = directory
 
     def pipe_path(self, descriptor):
         return os.path.join(self.directory, descriptor.filename)

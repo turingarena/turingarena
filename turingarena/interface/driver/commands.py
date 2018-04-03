@@ -1,16 +1,15 @@
 import collections
 import logging
 import numbers
+from collections import namedtuple
 from enum import IntEnum
 
 from bidict import bidict
 
-from turingarena.common import ImmutableObject
-
 logger = logging.getLogger(__name__)
 
 
-class ProxyRequest(ImmutableObject):
+class ProxyRequest:
     __slots__ = []
 
     def serialize_arguments(self):
@@ -31,8 +30,8 @@ def serialize_request(request):
     yield from request.serialize_arguments()
 
 
-class MainBegin(ProxyRequest):
-    __slots__ = ["global_variables"]
+class MainBegin(ProxyRequest, namedtuple("MainBegin", ["global_variables"])):
+    __slots__ = []
 
     @staticmethod
     def deserialize_arguments():
@@ -57,8 +56,10 @@ class MainBegin(ProxyRequest):
             yield from serialize_data(value)
 
 
-class FunctionCall(ProxyRequest):
-    __slots__ = ["function_name", "parameters", "accepted_callbacks"]
+class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
+    "function_name", "parameters", "accepted_callbacks"
+])):
+    __slots__ = []
 
     @staticmethod
     def deserialize_arguments():
@@ -91,8 +92,10 @@ class FunctionCall(ProxyRequest):
             yield parameters_count
 
 
-class CallbackReturn(ProxyRequest):
-    __slots__ = ["return_value"]
+class CallbackReturn(ProxyRequest, namedtuple("CallbackReturn", [
+    "return_value"
+])):
+    __slots__ = []
 
     @staticmethod
     def deserialize_arguments():
