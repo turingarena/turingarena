@@ -1,5 +1,6 @@
-from turingarena.tests.test_utils import assert_error, assert_no_error
+from turingarena.interface.tests.test_utils import assert_error, assert_no_error
 from turingarena.interface.exceptions import Diagnostic
+
 
 def test_missing_local_flush():
     assert_error("""

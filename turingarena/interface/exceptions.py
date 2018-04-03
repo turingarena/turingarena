@@ -41,6 +41,8 @@ class Diagnostic(namedtuple("Diagnostic", [
         CALL_NO_RETURN_EXPRESSION = "function {} returns {}, but no return expression given"
         CALL_WRONG_RETURN_EXPRESSION = "function {} returns {}, but return expression is {}"
         FUNCTION_DOES_NOT_RETURN_VALUE = "function {} does not return a value"
+        CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
+        RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
 
     @staticmethod
     def build_message(msg, *args):

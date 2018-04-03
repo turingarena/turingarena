@@ -1,4 +1,4 @@
-from turingarena.tests.test_utils import callback_mock, define_algorithms, assert_error
+from turingarena.interface.tests.test_utils import callback_mock, define_algorithms, assert_error
 
 
 def test_callback_no_arguments_cpp():

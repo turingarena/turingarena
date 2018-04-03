@@ -65,7 +65,7 @@ class Callable(AbstractSyntaxNodeWrapper):
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
             yield Diagnostic(
-                "return type must be a scalar",
+                Diagnostic.Messages.RETURN_TYPE_MUST_BE_SCALAR,
                 parseinfo=self.ast.declarator.return_type.parseinfo,
             )
 
@@ -128,7 +128,7 @@ class Callback(Callable):
 
         if invalid_parameter is not None:
             yield Diagnostic(
-                "callback parameters must be scalars",
+                Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS ,
                 parseinfo=invalid_parameter.parseinfo,
             )
 

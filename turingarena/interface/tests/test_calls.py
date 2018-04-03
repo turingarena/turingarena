@@ -1,4 +1,4 @@
-from turingarena.tests.test_utils import assert_error
+from turingarena.interface.tests.test_utils import assert_error
 from turingarena.interface.exceptions import Diagnostic
 
 def test_call_not_defined():

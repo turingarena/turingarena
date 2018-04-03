@@ -4,6 +4,7 @@ from turingarena.algorithm import Algorithm
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.exceptions import Diagnostic
 
+
 def callback_mock(calls, return_values=None):
     if return_values is not None:
         return_values = deque(return_values)
