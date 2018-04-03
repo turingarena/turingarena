@@ -14,7 +14,7 @@ class Statement(AbstractSyntaxNodeWrapper):
         from turingarena.interface.callables import FunctionStatement, CallbackStatement
         from turingarena.interface.mainblocks import InitStatement, MainStatement
         from turingarena.interface.variables import VarStatement
-        from turingarena.interface.io import CheckpointStatement, InputStatement, OutputStatement, FlushStatement
+        from turingarena.interface.io import CheckpointStatement, ReadStatement, WriteStatement, FlushStatement
 
         return bidict({
             "var": VarStatement,
@@ -24,8 +24,8 @@ class Statement(AbstractSyntaxNodeWrapper):
             "main": MainStatement,
             "alloc": AllocStatement,
             "checkpoint": CheckpointStatement,
-            "input": InputStatement,
-            "output": OutputStatement,
+            "read": ReadStatement,
+            "write": WriteStatement,
             "flush": FlushStatement,
             "call": CallStatement,
             "return": ReturnStatement,

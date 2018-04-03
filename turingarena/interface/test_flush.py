@@ -5,10 +5,10 @@ def test_missing_local_flush():
     assert_error("""
         main {
             var int a;
-            output 5;
-            input a;
+            write 5;
+            read a;
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")
 
 
 def test_missing_flush_for():
@@ -17,12 +17,12 @@ def test_missing_flush_for():
             var int a;
             
             for (i : 5) {
-                output 4;
+                write 4;
             }
             
-            input a;
+            read a;
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")
 
 
 def test_missing_flush_for_2():
@@ -31,11 +31,11 @@ def test_missing_flush_for_2():
             var int a;
 
             for (i : 5) {
-                input a;
-                output 4;
+                read a;
+                write 4;
             }
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")
 
 
 def test_missing_flush_for_3():
@@ -45,12 +45,12 @@ def test_missing_flush_for_3():
 
             for (i : 5) {
                 flush;
-                input a;
-                output 4;
+                read a;
+                write 4;
             }
-            input b;
+            read b;
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")
 
 
 def test_for():
@@ -59,11 +59,11 @@ def test_for():
             var int a;
 
             for (i : 5) {
-                input a;
-                output 4;
+                read a;
+                write 4;
                 flush;
             }
-            output 4;
+            write 4;
         }
     """)
 
@@ -72,31 +72,31 @@ def test_missing_flush_if():
     assert_error("""
         main {
             var int a, b;
-            input a;
+            read a;
             if (a) {
                 flush;
             } else {
-                output 4;
+                write 4;
             }
             
-            input b;
+            read b;
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")
 
 
 def test_missing_flush_if_2():
     assert_no_error("""
         main {
             var int a, b;
-            input a;
+            read a;
             if (a) {
                 flush;
             } else {
-                output 4;
+                write 4;
                 flush;
             }
 
-            input b;
+            read b;
         }
     """)
 
@@ -104,11 +104,11 @@ def test_missing_flush_if_2():
 def test_missing_flush_init():
     assert_error("""
         init {
-            output 4;
+            write 4;
         }
         
         main {
             var int a;
-            input a;
+            read a;
         }
-    """, "missing flush between output and input instructions")
+    """, "missing flush between write and read instructions")

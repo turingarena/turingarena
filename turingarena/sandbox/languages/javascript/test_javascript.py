@@ -1,15 +1,14 @@
 import pytest
 
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.algorithm import Algorithm
-
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 interface_text = """
     function test() -> int;
     main {
         var int o;
         call test() -> o;
-        output o;
+        write o;
     }
 """
 
@@ -52,16 +51,16 @@ def test_loop():
     """)
 
 
-def test_multiple_inputs():
+def test_multiple_reads():
     with Algorithm.load(
             interface_text="""
                 function f(int a, int b) -> int;
                 main {
                     var int a, b, c;
-                    input a;
-                    input b;
+                    read a;
+                    read b;
                     call f(a, b) -> c;
-                    output c;
+                    write c;
                 }
             """,
             language="javascript",

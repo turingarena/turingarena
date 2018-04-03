@@ -4,12 +4,12 @@ var int[][] V;
 function find_best_sum() -> int;
 
 init {
-    input N;
+    read N;
     alloc V : N;
     for(i : N) {
         alloc V[i] : i;
         for(j : i) {
-            input V[i][j];
+            read V[i][j];
         }
     }
 }
@@ -17,5 +17,5 @@ init {
 main {
     var int S;
     call find_best_sum() -> S;
-    output S;
+    write S;
 }

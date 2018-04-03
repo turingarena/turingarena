@@ -31,7 +31,7 @@ def test_function_with_arguments():
                 function f(int a, int b);
                 main {
                     var int a, b;
-                    input a, b;
+                    read a, b;
                     call f(a, b);
                     checkpoint;
                 }
@@ -59,9 +59,9 @@ def test_function_return_value():
                 function f(int a) -> int;
                 main {
                     var int a, b;
-                    input a;
+                    read a;
                     call f(a) -> b;
-                    output b;
+                    write b;
                 }
             """,
             sources={

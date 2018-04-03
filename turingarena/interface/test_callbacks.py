@@ -42,7 +42,7 @@ def test_callback_with_arguments():
     for algo in define_algorithms(
             interface_text="""
                 callback c(int a, int b) {
-                    output a, b;
+                    write a, b;
                 }
                 function test();
                 main {
@@ -80,10 +80,10 @@ def test_callback_return_value():
     for algo in define_algorithms(
             interface_text="""
                 callback c(int a) -> int {
-                    output a;
+                    write a;
                     flush;
                     var int b;
-                    input b;
+                    read b;
                     return b;
                 }
                 function test();
@@ -134,7 +134,7 @@ def test_interface_no_callbacks():
                 main {
                     var int o;
                     call test() -> o;
-                    output o;
+                    write o;
                 }
             """,
             sources={
@@ -161,7 +161,7 @@ def test_interface_one_callback():
                 main {
                     var int o;
                     call test() -> o;
-                    output o;
+                    write o;
                 }
             """,
             sources={
@@ -203,7 +203,7 @@ def test_interface_multiple_callbacks():
                 main {
                     var int o;
                     call test() -> o;
-                    output o;
+                    write o;
                 }
             """,
             sources={

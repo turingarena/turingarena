@@ -5,7 +5,7 @@ from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import compile_expression
-from turingarena.interface.io import FlushStatement, InputStatement
+from turingarena.interface.io import FlushStatement, ReadStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
 
@@ -117,8 +117,8 @@ class ForStatement(ImperativeStatement):
             for statement in self.body.statements:
                 if isinstance(statement, FlushStatement):
                     break
-                if isinstance(statement, InputStatement):
-                    yield Diagnostic("missing flush between output and input instructions", parseinfo=self.ast.parseinfo)
+                if isinstance(statement, ReadStatement):
+                    yield Diagnostic("missing flush between write and read instructions", parseinfo=self.ast.parseinfo)
         yield from self.body.validate()
 
     def generate_instructions(self, context):

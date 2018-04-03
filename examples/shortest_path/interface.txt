@@ -9,25 +9,25 @@ var int Q; // number of queries
 function shortest_path(int u, int v) -> int;
 
 init {
-    input N;
+    read N;
     alloc D, A, W : N;
     for (u : N) {
-        input D[u];
+        read D[u];
         alloc A[u], W[u] : D[u];
         for(i : D[u]) {
-            input A[u][i], W[u][i];
+            read A[u][i], W[u][i];
         }
     }
 
-    input Q;
+    read Q;
 }
 
 main {
     for (i : Q) {
         var int u, v, ans;
-        input u, v;
+        read u, v;
         call shortest_path(u, v) -> ans;
-        output ans;
+        write ans;
         flush;
     }
 }

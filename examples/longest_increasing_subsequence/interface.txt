@@ -6,10 +6,10 @@ function length() -> int;
 function element(int i) -> int;
 
 init {
-    input n;
+    read n;
     alloc a : n;
     for(i : n) {
-        input a[i];
+        read a[i];
     }
 }
 
@@ -18,10 +18,10 @@ main {
 
     var int l;
     call length() -> l;
-    output l;
+    write l;
     for(i : l) {
         var int x;
         call element(i) -> x;
-        output x;
+        write x;
     }
 }
