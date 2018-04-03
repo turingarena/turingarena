@@ -110,6 +110,8 @@ def clone_from_git(url):
 
 
 def load_problem(problem_name):
+    if problem_name == ".":
+        return make_problem(".")
     problem_package = importlib.import_module(problem_name)
     try:
         paths = problem_package.__path__
