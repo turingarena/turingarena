@@ -21,20 +21,12 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
 
     @staticmethod
     def load(algorithm_dir):
-        from turingarena.sandbox.languages.cpp.executable import ElfAlgorithmExecutable
-        from turingarena.sandbox.languages.java.executable import JavaAlgorithmExecutable
-        from turingarena.sandbox.languages.python.executable import PythonAlgorithmExecutableScript
-        from turingarena.sandbox.languages.javascript.executable import JavaScriptAlgorithmExecutableScript
+        from turingarena.sandbox.languages.language import Language
 
         with open(os.path.join(algorithm_dir, "language.txt")) as f:
-            language = f.read().strip()
+            language = Language.for_name(f.read().strip())
 
-        return {
-            "c++": ElfAlgorithmExecutable,
-            "python": PythonAlgorithmExecutableScript,
-            "java": JavaAlgorithmExecutable,
-            "javascript": JavaScriptAlgorithmExecutableScript,
-        }[language](
+        return language.executable(
             algorithm_dir=algorithm_dir,
             language=language,
         )

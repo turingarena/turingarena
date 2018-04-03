@@ -1,4 +1,4 @@
-from turingarena.interface.skeleton.common import CodeGen
+from turingarena.sandbox.languages.generator import CodeGen
 
 
 class JavaScriptCodeGen(CodeGen):

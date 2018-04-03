@@ -3,8 +3,8 @@ import sys
 
 from turingarena.cli import docopt_cli
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.interface.skeleton.common import CodeGen
 from turingarena.problem.problem import load_problem
+from turingarena.sandbox.languages.language import Language
 
 
 @docopt_cli
@@ -23,7 +23,8 @@ def generate_template_cli(args):
         interface_text = f.read()
 
     interface = InterfaceDefinition.compile(interface_text)
-    generator = CodeGen.get_template_generator(args["--language"])(interface)
+    language = Language.for_name(args["--language"])
+    generator = language.skeleton_generator(interface)
     generator.write_to_file(sys.stdout)
 
 
@@ -43,7 +44,8 @@ def generate_skeleton_cli(args):
         interface_text = f.read()
 
     interface = InterfaceDefinition.compile(interface_text)
-    generator = CodeGen.get_skeleton_generator(args["--language"])(interface)
+    language = Language.for_name(args["--language"])
+    generator = language.skeleton_generator(interface)
     generator.write_to_file(sys.stdout)
 
 
