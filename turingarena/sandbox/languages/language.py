@@ -1,3 +1,4 @@
+import os
 import pkgutil
 import importlib
 
@@ -23,12 +24,12 @@ class Language(namedtuple("Language", [
 
     @staticmethod
     def languages():
-        import turingarena.sandbox.languages as language_mod
+        mod_name = os.path.splitext(__name__)[0]
 
         languages = []
-        for mod in pkgutil.iter_modules(language_mod.__path__):
+        for mod in pkgutil.iter_modules(importlib.import_module(mod_name).__path__):
             if mod.ispkg:
-                mod = importlib.import_module(f"turingarena.sandbox.languages.{mod.name}")
+                mod = importlib.import_module(f"{mod_name}.{mod.name}")
                 try:
                     languages.append(getattr(mod, "language"))
                 except AttributeError:

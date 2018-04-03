@@ -12,7 +12,7 @@ import yaml
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
-from turingarena.sandbox.source import AlgorithmSource
+from turingarena.sandbox.languages.language import Language
 
 logger = logging.getLogger(__name__)
 
@@ -124,14 +124,6 @@ def load_problem(problem_name):
     return make_problem(path)
 
 
-LANGUAGE_BY_EXTENSION = {
-    ".cpp": "c++",
-    ".py": "python",
-    ".java": "java",
-    ".js": "javascript",
-}
-
-
 def find_algorithm_sources(directory, *, interface):
     root, directories, files = next(os.walk(directory))
 
@@ -144,8 +136,9 @@ def load_source_file(directory, source_filename, *, interface):
     source_path = os.path.join(directory, source_filename)
     with open(source_path) as f:
         source_text = f.read()
-    return AlgorithmSource.load(
+    language = Language(ext)
+    return language.source(
         source_text,
-        language=LANGUAGE_BY_EXTENSION[ext],
+        language=language,
         interface=interface,
     )
