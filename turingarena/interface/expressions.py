@@ -115,30 +115,36 @@ class ReferenceExpression(Expression):
             )
         return ref
 
+    def validate_array_indexes(self):
+        last_index = 0
+        index_var = {index.variable: index.range for index in self.context.index_variables}
+        for index in self.indices:
+            if isinstance(index, LiteralExpression):
+                yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.value, parseinfo=self.ast.parseinfo)
+            else:
+                idx = 0
+                try:
+                    idx = list(index_var).index(index.variable)
+                except ValueError:
+                    yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name,
+                                     parseinfo=self.ast.parseinfo)
+                if idx < last_index:
+                    yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, self.variable_name,
+                                     parseinfo=self.ast.parseinfo)
+                last_index = idx
+
     def validate(self, lvalue=False):
         if not self.variable:
             yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name, parseinfo=self.ast.parseinfo)
         elif self.variable not in self.context.initialized_variables and not lvalue:
             yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, self.variable.name, parseinfo=self.ast.parseinfo)
         elif isinstance(self.variable.value_type, ArrayType):
-            if self.variable not in [t[0] for t in self.context.allocated_variables if t]:
+            if self.variable not in self.context.allocated_variables_mapping:
                 yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name, parseinfo=self.ast.parseinfo)
             for index in self.indices:
                 yield from index.validate()
             if lvalue:
-                last_index = 0
-                index_var = {index.variable: index.range for index in self.context.index_variables}
-                for index in self.indices:
-                    if isinstance(index, LiteralExpression):
-                        yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.value, parseinfo=self.ast.parseinfo)
-                    else:
-                        try:
-                            idx = list(index_var).index(index.variable)
-                        except ValueError:
-                            yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name, parseinfo=self.ast.parseinfo)
-                        if idx < last_index:
-                            yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, self.variable_name, parseinfo=self.ast.parseinfo)
-                        last_index = idx
+                yield from self.validate_array_indexes()
 
 
 expression_classes = frozenbidict({

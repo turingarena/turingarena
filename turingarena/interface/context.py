@@ -50,6 +50,14 @@ class VariablesContextMixin:
         return self.outer_initialized_variables | self.locally_initialized_variables
 
     @property
+    def allocated_variables_mapping(self):
+        return {
+            var[0]: var[1]
+            for var in self.allocated_variables
+            if var
+        }
+
+    @property
     def allocated_variables(self):
         return self.outer_allocated_variables | self.locally_allocated_variables
 
