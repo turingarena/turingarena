@@ -34,6 +34,7 @@ class Expression(AbstractSyntaxNodeWrapper):
     def do_evaluate(self, context):
         pass
 
+    @property
     @abstractmethod
     def canonical_form(self):
         pass
@@ -62,6 +63,10 @@ class LiteralExpression(Expression):
 
 class IntLiteralExpression(LiteralExpression):
     __slots__ = []
+
+    @property
+    def canonical_form(self):
+        return self.value
 
     @property
     def value(self):
@@ -123,9 +128,6 @@ class ReferenceExpression(Expression):
                 yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name, parseinfo=self.ast.parseinfo)
             for index in self.indices:
                 yield from index.validate()
-
-    def resolve_variable(self):
-        return self.variable
 
 
 expression_classes = frozenbidict({

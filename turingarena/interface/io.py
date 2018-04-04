@@ -70,7 +70,7 @@ class ReadStatement(ReadWriteStatement):
     @property
     def context_after(self):
         return self.context.with_initialized_variables({
-            exp.resolve_variable()
+            exp.variable
             for exp in self.arguments
         })
 
