@@ -11,10 +11,6 @@ from turingarena.interface.type_expressions import ScalarType, ArrayType
 logger = logging.getLogger(__name__)
 
 
-def compile_expression(ast, context):
-    return expression_classes[ast.expression_type](ast=ast, context=context)
-
-
 class Expression(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
