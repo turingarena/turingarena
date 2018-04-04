@@ -5,7 +5,7 @@ from turingarena.interface.context import FunctionCallContext, AcceptCallbackCon
 from turingarena.interface.driver.commands import CallbackReturn, FunctionCall
 from turingarena.interface.exceptions import InterfaceError, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import compile_expression
+from turingarena.interface.expressions import Expression
 from turingarena.interface.io import read_line
 
 logger = logging.getLogger(__name__)
@@ -24,14 +24,14 @@ class CallStatement(ImperativeStatement):
 
     @property
     def parameters(self):
-        return [compile_expression(p, self.context) for p in self.ast.parameters]
+        return [Expression.compile(p, self.context) for p in self.ast.parameters]
 
     @property
     def return_value(self):
         if self.ast.return_value is None:
             return None
         else:
-            return compile_expression(self.ast.return_value, self.context)
+            return Expression.compile(self.ast.return_value, self.context)
 
     @property
     def function(self):
@@ -206,7 +206,7 @@ class ReturnStatement(ImperativeStatement):
 
     @property
     def value(self):
-        return compile_expression(self.ast.value, self.context)
+        return Expression.compile(self.ast.value, self.context)
 
     def generate_instructions(self, context):
         yield ReturnInstruction(value=self.value, context=context)

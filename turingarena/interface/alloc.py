@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import compile_expression
+from turingarena.interface.expressions import Expression
 from turingarena.interface.type_expressions import ArrayType
 
 
@@ -11,11 +11,11 @@ class AllocStatement(ImperativeStatement):
 
     @property
     def size(self):
-        return compile_expression(self.ast.size, self.context)
+        return Expression.compile(self.ast.size, self.context)
 
     @property
     def arguments(self):
-        return tuple(compile_expression(arg, self.context) for arg in self.ast.arguments)
+        return tuple(Expression.compile(arg, self.context) for arg in self.ast.arguments)
 
     def validate(self):
         yield from self.size.validate()

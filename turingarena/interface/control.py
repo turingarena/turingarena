@@ -4,7 +4,7 @@ from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import compile_expression
+from turingarena.interface.expressions import Expression
 from turingarena.interface.io import FlushStatement, ReadStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
@@ -36,7 +36,7 @@ class IfStatement(ImperativeStatement):
 
     @property
     def condition(self):
-        return compile_expression(self.ast.condition, self.context)
+        return Expression.compile(self.ast.condition, self.context)
 
     @property
     def then_body(self):
@@ -102,7 +102,7 @@ class ForStatement(ImperativeStatement):
         ast = self.ast.index
         return ForIndex(
             variable=Variable(value_type=ScalarType(int), name=ast.declarator.name),
-            range=compile_expression(ast.range, self.context),
+            range=Expression.compile(ast.range, self.context),
         )
 
     @property

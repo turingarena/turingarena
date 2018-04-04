@@ -18,6 +18,10 @@ def compile_expression(ast, context):
 class Expression(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
+    @staticmethod
+    def compile(ast, context):
+        return expression_classes[ast.expression_type](ast, context)
+
     @property
     def expression_type(self):
         return expression_classes.inv[self.__class__]
@@ -32,6 +36,10 @@ class Expression(AbstractSyntaxNodeWrapper):
 
     @abstractmethod
     def do_evaluate(self, context):
+        pass
+
+    @abstractmethod
+    def canonical_form(self):
         pass
 
     def resolve_variable(self):
@@ -85,7 +93,7 @@ class ReferenceExpression(Expression):
     @property
     def indices(self):
         return tuple(
-            compile_expression(index, self.context)
+            Expression.compile(index, self.context)
             for index in self.ast.indices
         )
 

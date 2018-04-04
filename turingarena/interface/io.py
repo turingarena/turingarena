@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from turingarena.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena.interface.executable import Instruction, ImperativeStatement
-from turingarena.interface.expressions import compile_expression
+from turingarena.interface.expressions import Expression
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class ReadWriteStatement(ImperativeStatement):
     @property
     def arguments(self):
         return [
-            compile_expression(arg, self.context)
+            Expression.compile(arg, self.context)
             for arg in self.ast.arguments
         ]
 
