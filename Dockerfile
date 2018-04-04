@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     gdb \
     libseccomp-dev \
     linux-headers-amd64 \
+    nodejs \
     && true
 
 COPY setup.py /setup.py
