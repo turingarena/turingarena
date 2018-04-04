@@ -121,7 +121,7 @@ class ReferenceExpression(Expression):
         elif self.variable not in self.context.initialized_variables and not lvalue:
             yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, self.variable.name, parseinfo=self.ast.parseinfo)
         elif isinstance(self.variable.value_type, ArrayType):
-            if self.variable not in self.context.allocated_variables:
+            if self.variable not in [t[0] for t in self.context.allocated_variables if t]:
                 yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name, parseinfo=self.ast.parseinfo)
             for index in self.indices:
                 yield from index.validate()

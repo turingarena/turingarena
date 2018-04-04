@@ -65,5 +65,5 @@ class ImperativeBlock(Block, ImperativeStructure):
         }).with_allocated_variables({
             variable
             for variable in statement_ctx.allocated_variables
-            if variable in self.context.variables
+            if variable and variable[0] in self.context.variables
         }).with_flushed_output(statement_ctx.has_flushed_output)

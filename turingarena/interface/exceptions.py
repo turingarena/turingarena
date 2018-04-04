@@ -29,7 +29,7 @@ class Diagnostic(namedtuple("Diagnostic", [
     class Messages():
         VARIABLE_NOT_DECLARED = "variable {} not declared"
         VARIABLE_NOT_INITIALIZED = "variable {} not initialized before use"
-        VARIABLE_NOT_ALLOCATED = "variable {}' not allocated before use"
+        VARIABLE_NOT_ALLOCATED = "variable {} not allocated before use"
         VARIABLE_REDECLARED = "variable {} has been already declared"
         GLOBAL_VARIABLE_NOT_INITIALIZED = "global variable {} not initialized in init block"
         INIT_BLOCK_MISSING = "global variables declared but init block is missing"

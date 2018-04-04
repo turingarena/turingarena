@@ -29,7 +29,7 @@ class AllocStatement(ImperativeStatement):
     @property
     def context_after(self):
         return self.context.with_allocated_variables({
-            arg.variable
+            (arg.variable, self.size.canonical_form)
             for arg in self.arguments
         })
 
