@@ -50,7 +50,7 @@ class CallStatement(ImperativeStatement):
     @property
     def context_after(self):
         if self.return_value:
-            return self.context.with_initialized_variables({self.return_value.resolve_variable()})
+            return self.context.with_initialized_variables({self.return_value.variable})
         else:
             return self.context
 

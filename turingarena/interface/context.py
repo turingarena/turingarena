@@ -104,6 +104,7 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
             locally_allocated_variables=frozenset(),
             locally_initialized_variables=frozenset(),
             last_output_flushed=self.last_output_flushed,
+            index_variables=(),
         )
 
 
@@ -114,6 +115,7 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
     "locally_initialized_variables",
     "locally_allocated_variables",
     "last_output_flushed",
+    "index_variables",
 ]), VariablesContextMixin):
     @property
     def outer_initialized_variables(self):
@@ -136,6 +138,10 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
         else:
             return self.global_context.variables
 
+    def with_index_variables(self, variables):
+        return self._replace(index_variables=self.index_variables + variables)
+
+
     def create_inner(self):
         return StaticLocalContext(
             global_context=self.global_context,
@@ -144,6 +150,7 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             locally_allocated_variables=frozenset(),
             locally_initialized_variables=frozenset(),
             last_output_flushed=self.last_output_flushed,
+            index_variables=self.index_variables,
         )
 
 

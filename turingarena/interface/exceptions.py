@@ -43,6 +43,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         CALL_NO_RETURN_EXPRESSION = "function {} returns {}, but no return expression given"
         CALL_WRONG_RETURN_EXPRESSION = "function {} returns {}, but return expression is {}"
         CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
+        ARRAY_INDEX_NOT_VALID = "array index {} is not a for index variable"
 
     @staticmethod
     def build_message(msg, *args):

@@ -1,14 +1,10 @@
-import logging
 from abc import abstractmethod
-
 from bidict import frozenbidict
 
 from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena.interface.type_expressions import ScalarType, ArrayType
-
-logger = logging.getLogger(__name__)
 
 
 class Expression(AbstractSyntaxNodeWrapper):
@@ -38,9 +34,6 @@ class Expression(AbstractSyntaxNodeWrapper):
     @abstractmethod
     def canonical_form(self):
         pass
-
-    def resolve_variable(self):
-        return None
 
     def validate(self):
         return []
@@ -81,6 +74,10 @@ class ReferenceExpression(Expression):
     __slots__ = []
 
     @property
+    def canonical_form(self):
+        return self.variable_name
+
+    @property
     def variable_name(self):
         return self.ast.variable_name
 
@@ -101,7 +98,7 @@ class ReferenceExpression(Expression):
     @property
     def value_type(self):
         value_type = self.variable.value_type
-        for i in self.indices:
+        for _ in self.indices:
             value_type = value_type.item_type
         return value_type
 
