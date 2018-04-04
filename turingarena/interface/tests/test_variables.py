@@ -1,6 +1,7 @@
 from turingarena.interface.tests.test_utils import assert_no_error, assert_error
 from turingarena.interface.exceptions import Diagnostic
 
+
 def test_variable_not_initialized():
     assert_error("""
         main {

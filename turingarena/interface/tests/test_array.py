@@ -6,8 +6,12 @@ def test_variable_not_initialized_array():
     assert_no_error("""
         main {
             var int[] A;
-            alloc A : 5;
-            read A[0];
+            var int s; 
+            read s;
+            alloc A : s;
+            for (i : s) {
+                read A[i];
+            }
         }
     """)
 
@@ -16,20 +20,22 @@ def test_array_not_allocated():
     assert_error("""
         main {
             var int[] A;
-            read A[0];
+            for (i : 10) {
+                read A[i];
+            }
         }
     """, Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, "A")
 
 
 def test_array_alloc():
-    assert_no_error("""
+    assert_error("""
         main {
             var int[] A; 
             alloc A : 10;
             read A[5];
             write A[5];
         }
-    """)
+    """, Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, "5")
 
 
 def test_array_access():

@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import Expression, ReferenceExpression
 from turingarena.interface.type_expressions import ArrayType
 
 
@@ -20,7 +20,7 @@ class AllocStatement(ImperativeStatement):
     def validate(self):
         yield from self.size.validate()
         for arg in self.arguments:
-            if not isinstance(arg.variable.value_type, ArrayType):
+            if not isinstance(arg, ReferenceExpression) or not arg.variable or not isinstance(arg.variable.value_type, ArrayType):
                 yield Diagnostic.create_message(Diagnostic.Messages.NOT_ARRAY_TYPE, arg, parseinfo=self.ast.parseinfo)
             else:
                 for index in arg.indices:

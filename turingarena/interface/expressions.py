@@ -127,7 +127,9 @@ class ReferenceExpression(Expression):
                 yield from index.validate()
             if lvalue:
                 for index in self.indices:
-                    if isinstance(index, ReferenceExpression) and index.variable not in self.context.index_variables:
+                    if isinstance(index, LiteralExpression):
+                        yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.value, parseinfo=self.ast.parseinfo)
+                    elif index.variable not in self.context.index_variables:
                         yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name, parseinfo=self.ast.parseinfo)
 
 
