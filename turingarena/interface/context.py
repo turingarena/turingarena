@@ -138,9 +138,12 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
         else:
             return self.global_context.variables
 
-    def with_index_variables(self, variables):
-        return self._replace(index_variables=self.index_variables + variables)
-
+    def with_index_variable(self, variable):
+        return self._replace(
+            index_variables=self.index_variables + (variable,),
+            locally_initialized_variables=self.locally_initialized_variables | {variable},
+            locally_defined_variables=self.locally_defined_variables + (variable,),
+        )
 
     def create_inner(self):
         return StaticLocalContext(
