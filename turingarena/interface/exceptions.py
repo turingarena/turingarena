@@ -44,6 +44,8 @@ class Diagnostic(namedtuple("Diagnostic", [
         CALL_WRONG_RETURN_EXPRESSION = "function {} returns {}, but return expression is {}"
         CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
         ARRAY_INDEX_NOT_VALID = "array index {} is not a for index variable"
+        ARRAY_INDEX_WRONG_ORDER = "array {} indexes are in wrong order"
+        ARRAY_INDEX_DIFFERENT_ALLOC = "array {} index {} different from allocated "
 
     @staticmethod
     def build_message(msg, *args):

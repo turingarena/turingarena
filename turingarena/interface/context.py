@@ -141,8 +141,8 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
     def with_index_variable(self, variable):
         return self._replace(
             index_variables=self.index_variables + (variable,),
-            locally_initialized_variables=self.locally_initialized_variables | {variable},
-            locally_defined_variables=self.locally_defined_variables + (variable,),
+            locally_initialized_variables=self.locally_initialized_variables | {variable.variable},
+            locally_defined_variables=self.locally_defined_variables + (variable.variable,),
         )
 
     def create_inner(self):

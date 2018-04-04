@@ -95,3 +95,22 @@ def test_array_basic_error():
             }
         }
     """, Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, "k")
+
+
+def test_array_wrong_order():
+    assert_error("""
+        main {
+            var int[][] A;
+            var int s;
+            read s; 
+            alloc A : s;
+            for (i : s) {
+                var int k;
+                read k;
+                alloc A[i] : k;
+                for (j : k) {
+                    read A[j][i];
+                } 
+            }
+        }
+    """, Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, "A")

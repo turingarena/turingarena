@@ -126,11 +126,19 @@ class ReferenceExpression(Expression):
             for index in self.indices:
                 yield from index.validate()
             if lvalue:
+                last_index = 0
+                index_var = {index.variable: index.range for index in self.context.index_variables}
                 for index in self.indices:
                     if isinstance(index, LiteralExpression):
                         yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.value, parseinfo=self.ast.parseinfo)
-                    elif index.variable not in self.context.index_variables:
-                        yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name, parseinfo=self.ast.parseinfo)
+                    else:
+                        try:
+                            idx = list(index_var).index(index.variable)
+                        except ValueError:
+                            yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name, parseinfo=self.ast.parseinfo)
+                        if idx < last_index:
+                            yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, self.variable_name, parseinfo=self.ast.parseinfo)
+                        last_index = idx
 
 
 expression_classes = frozenbidict({

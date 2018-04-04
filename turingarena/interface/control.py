@@ -109,7 +109,7 @@ class ForStatement(ImperativeStatement):
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_inner().with_index_variable(self.index.variable),
+            context=self.context.create_inner().with_index_variable(self.index),
         )
 
     def validate(self):
