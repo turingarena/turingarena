@@ -1,9 +1,13 @@
 sudo: required
 
+services:
+  - docker
+
 cache:
   yarn
 
 script:
+  - docker run turingarena/turingarena test /turingarena
   - cd web/ && yarn && yarn build
 
 deploy:
