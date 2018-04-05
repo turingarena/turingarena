@@ -7,7 +7,7 @@ cache:
   yarn
 
 script:
-  - docker run turingarena/turingarena test /turingarena
+  - docker run turingarena/turingarena -v $PWD/turingarena:/turingarena test /turingarena
   - cd web/ && yarn && yarn build
 
 deploy:
