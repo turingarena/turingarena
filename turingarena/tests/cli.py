@@ -12,4 +12,5 @@ def test_cli(args):
     Options:
         <pytestargs>  Options to pass to pytest
     """
-    return pytest.main(args["<pytestargs>"])
+
+    return pytest.main(["-p", "no:cacheprovider"] + args["<pytestargs>"])
