@@ -11,15 +11,27 @@ logger = logging.getLogger(__name__)
 class Block(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
-    @property
-    def statements(self):
-        statements = []
-        inner_context = self.context.create_inner()
+    def _generate_statements(self):
+        inner_context = self.inner_context_at_begin
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
             inner_context = statement.context_after
-            statements.append(statement)
-        return statements
+            yield statement
+
+    @property
+    def statements(self):
+        return list(self._generate_statements())
+
+    @property
+    def inner_context_at_begin(self):
+        return self.context.create_inner()
+
+    @property
+    def inner_context_at_end(self):
+        if self.statements:
+            return self.statements[-1].context_after
+        else:
+            return self.inner_context_at_begin
 
     @property
     def declared_variables(self):
@@ -55,15 +67,13 @@ class ImperativeBlock(Block, ImperativeStructure):
 
     @property
     def context_after(self):
-        if not self.statements:
-            return self.context
-        statement_ctx = self.statements[-1].context_after
+        inner_context = self.inner_context_at_end
         return self.context.with_initialized_variables({
             variable
-            for variable in statement_ctx.initialized_variables
+            for variable in inner_context.initialized_variables
             if variable in self.context.variables
         }).with_allocated_variables({
             variable
-            for variable in statement_ctx.allocated_variables
+            for variable in inner_context.allocated_variables
             if variable and variable[0] in self.context.variables
-        }).with_flushed_output(statement_ctx.has_flushed_output)
+        }).with_flushed_output(inner_context.has_flushed_output)
