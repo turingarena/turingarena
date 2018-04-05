@@ -24,7 +24,7 @@ def generate_template_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text)
     language = Language(args["--language"])
-    generator = language.skeleton_generator(interface)
+    generator = language.template_generator(interface)
     generator.write_to_file(sys.stdout)
 
 
