@@ -1,0 +1,21 @@
+FROM python:3.6-stretch
+
+RUN true \
+    && apt-get update \
+    && apt-get install -y \
+        openjdk-8-jdk \
+        gdb \
+        libseccomp-dev \
+        linux-headers-amd64 \
+        nodejs \
+    && pip install \
+        bidict \
+        coloredlogs \
+        commonmark \
+        docopt \
+        pyyaml \
+        psutil \
+        seccomplite \
+        pytest \
+        tatsu \
+    && true
