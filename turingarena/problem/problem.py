@@ -138,7 +138,7 @@ def load_source_file(directory, source_filename, *, interface):
         source_text = f.read()
     language = Language(ext)
     return language.source(
-        source_text,
-        language=language,
         interface=interface,
+        language=language,
+        text=source_text,
     )
