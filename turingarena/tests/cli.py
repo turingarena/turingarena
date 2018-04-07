@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 from turingarena.cli import docopt_cli
@@ -13,4 +15,6 @@ def test_cli(args):
         <pytestargs>  Options to pass to pytest
     """
 
-    return pytest.main(["-p", "no:cacheprovider"] + args["<pytestargs>"])
+    sys.exit(
+        pytest.main(["-p", "no:cacheprovider"] + args["<pytestargs>"])
+    )
