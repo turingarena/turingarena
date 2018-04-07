@@ -8,6 +8,7 @@ RUN true \
         libseccomp-dev \
         linux-headers-amd64 \
         nodejs \
+        nodejs-legacy \
     && pip install \
         bidict \
         coloredlogs \
