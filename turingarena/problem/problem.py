@@ -136,7 +136,7 @@ def load_source_file(directory, source_filename, *, interface):
     source_path = os.path.join(directory, source_filename)
     with open(source_path) as f:
         source_text = f.read()
-    language = Language(ext)
+    language = Language.from_extension(ext)
     return language.source(
         source_text,
         language=language,

@@ -2,6 +2,7 @@ import pytest
 
 from turingarena.algorithm import Algorithm
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena.sandbox.languages import javascript
 
 interface_text = """
     function test() -> int;
@@ -16,7 +17,7 @@ interface_text = """
 def javascript_algorithm(source):
     return Algorithm.load(
         interface_text=interface_text,
-        language="javascript",
+        language=javascript.language,
         source_text=source,
     )
 
@@ -63,7 +64,7 @@ def test_multiple_reads():
                     write c;
                 }
             """,
-            language="javascript",
+            language=javascript.language,
             source_text="function f(a, b) { return 1; }"
     ) as algo:
         with algo.run() as process:

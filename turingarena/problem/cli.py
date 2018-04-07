@@ -3,6 +3,7 @@ from contextlib import ExitStack
 
 from turingarena.cli import docopt_cli
 from turingarena.problem.problem import load_problem, clone_from_git
+from turingarena.sandbox.languages.language import Language
 from turingarena.sandbox.source import AlgorithmSource
 
 
@@ -26,10 +27,11 @@ def evaluate_cli(args):
 
         sys.path.append(".")
         problem = load_problem(args["--problem"])
+        language = Language.from_name(args["--language"])
         evaluation = problem.evaluate(
             AlgorithmSource.load(
                 sys.stdin.read(),
-                language=args["--language"],
+                language=language,
                 interface=problem.interface,
             ),
         )

@@ -1,8 +1,9 @@
 from collections import deque
 
 from turingarena.algorithm import Algorithm
-from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.exceptions import Diagnostic
+from turingarena.interface.interface import InterfaceDefinition
+from turingarena.sandbox.languages.language import Language
 
 
 def callback_mock(calls, return_values=None):
@@ -19,10 +20,10 @@ def callback_mock(calls, return_values=None):
 
 
 def define_algorithms(interface_text, sources):
-    for language, source in sources.items():
+    for language_name, source_text in sources.items():
         with Algorithm.load(
-                source_text=source,
-                language=language,
+                source_text=source_text,
+                language=Language.from_name(language_name),
                 interface_text=interface_text,
         ) as impl:
             yield impl

@@ -2,6 +2,7 @@ import pytest
 
 from turingarena.algorithm import Algorithm
 from turingarena.interface.driver.client import SandboxError
+from turingarena.sandbox.languages import cpp
 
 
 def test_sandbox_error():
@@ -19,7 +20,7 @@ def test_sandbox_error():
                     exit(0);
                 }
             """,
-            language="c++",
+            language=cpp.language,
     ) as algo:
         with pytest.raises(SandboxError):
             with algo.run() as p:

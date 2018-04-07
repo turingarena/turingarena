@@ -2,12 +2,13 @@ import json
 from contextlib import ExitStack
 
 from turingarena.problem.problem import load_problem, clone_from_git
+from turingarena.sandbox.languages.language import Language
 from turingarena.sandbox.source import AlgorithmSource
 
 
 def form_evaluate(fields):
     problem_name = fields["problem"].value
-    language = fields["language"].value
+    language = Language.from_name(fields["language"].value)
     if "source_text" in fields:
         source_text = fields["source_text"].value
     else:

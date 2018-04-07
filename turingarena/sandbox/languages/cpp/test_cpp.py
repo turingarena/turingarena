@@ -2,6 +2,7 @@ import pytest
 
 from turingarena.algorithm import Algorithm
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena.sandbox.languages import cpp
 
 protocol_text = """
     function test() -> int;
@@ -16,7 +17,7 @@ protocol_text = """
 def cpp_algorithm(source):
     return Algorithm.load(
         interface_text=protocol_text,
-        language="c++",
+        language=cpp.language,
         source_text=source,
     )
 
@@ -162,7 +163,7 @@ def test_get_time_memory_usage():
                     write o2;
                 }
             """,
-            language="c++",
+            language=cpp.language,
             source_text="""
                 int test(int i) {
                     char x[1024 * 1024];

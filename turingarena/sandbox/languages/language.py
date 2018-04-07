@@ -1,7 +1,6 @@
+import importlib
 import os
 import pkgutil
-import importlib
-
 from collections import namedtuple
 
 
@@ -14,13 +13,6 @@ class Language(namedtuple("Language", [
     "template_generator",
 ])):
     __slots__ = []
-
-    def __new__(cls, *args, **kwargs):
-        if args:
-            if args[0][0] == ".":
-                return cls.from_extension(args[0][1:])
-            return cls.from_name(args[0])
-        return super().__new__(cls, *args, **kwargs)
 
     @staticmethod
     def languages():

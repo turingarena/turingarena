@@ -1,6 +1,7 @@
 import pytest
 
 from turingarena.algorithm import Algorithm
+from turingarena.sandbox.languages.language import Language
 
 sources = {
     "c++": """
@@ -33,8 +34,9 @@ sources = {
 }
 
 
-@pytest.mark.parametrize("language,source_text", sources.items(), ids=list(sources.keys()))
-def test_valid_types(language, source_text):
+@pytest.mark.parametrize("language_name,source_text", sources.items(), ids=list(sources.keys()))
+def test_valid_types(language_name, source_text):
+    language = Language.from_name(language_name)
     with Algorithm.load(
             interface_text="""
                 var int i;
