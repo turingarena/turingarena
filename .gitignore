@@ -1,5 +1,6 @@
 /.idea/
 node_modules/
+.dockerignore
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 
