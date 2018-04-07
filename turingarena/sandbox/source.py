@@ -30,10 +30,10 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
         with open(f"{algorithm_dir}/interface.txt", "w") as f:
             print(self.interface.source_text, file=f)
 
-        with open(f"{algorithm_dir}/source.{self.language.extension}", "w") as f:
+        with open(f"{algorithm_dir}/source{self.language.extension}", "w") as f:
             print(self.text, file=f)
 
-        with open(f"{algorithm_dir}/skeleton.{self.language.extension}", "w") as f:
+        with open(f"{algorithm_dir}/skeleton{self.language.extension}", "w") as f:
             self.language.skeleton_generator(self.interface).write_to_file(f)
 
         logger.debug("Starting language-specific compilation")

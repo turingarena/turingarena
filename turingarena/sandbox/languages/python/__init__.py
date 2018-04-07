@@ -1,11 +1,11 @@
-from .executable import PythonAlgorithmExecutableScript
-from .source import PythonAlgorithmSource
-from .generator import PythonSkeletonCodeGen, PythonTemplateCodeGen
 from turingarena.sandbox.languages.language import Language
+from .executable import PythonAlgorithmExecutableScript
+from .generator import PythonSkeletonCodeGen, PythonTemplateCodeGen
+from .source import PythonAlgorithmSource
 
 language = Language(
     name="python",
-    extension="py",
+    extension=".py",
     source=PythonAlgorithmSource,
     executable=PythonAlgorithmExecutableScript,
     skeleton_generator=PythonSkeletonCodeGen,
