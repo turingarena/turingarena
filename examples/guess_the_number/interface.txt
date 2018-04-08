@@ -1,0 +1,17 @@
+callback guess(int n) -> int {
+    write n;
+    flush;
+    var int ans;
+    read ans;
+    return ans;
+}
+
+function play(int n) -> int;
+
+main {
+    var int n;
+    read n;
+    var int ans;
+    call play(n) -> ans;
+    write ans;
+}
