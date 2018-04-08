@@ -2,7 +2,7 @@ import resource
 
 
 def set_memory_and_time_limits(
-        memory_limit=16 * 1024 * 1024,
+        memory_limit=256 * 1024 * 1024,
         time_limit=1,
 ):
     core_limit = 32 * 1024 * 1024
