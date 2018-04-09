@@ -1,14 +1,16 @@
-FROM python:3.6-stretch
+FROM alpine:3.7
 
 RUN true \
-    && apt-get update \
-    && apt-get install -y \
-        openjdk-8-jdk \
+    && apk add --no-cache \
+        python3 \
+        python3-dev \
+        gcc \
+        g++ \
         gdb \
+        openjdk8 \
+        linux-vanilla-dev \
         libseccomp-dev \
-        linux-headers-amd64 \
         nodejs \
-        nodejs-legacy \
     && pip install \
         bidict \
         coloredlogs \
