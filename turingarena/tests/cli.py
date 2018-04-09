@@ -9,7 +9,7 @@ from turingarena.cli import docopt_cli
 def test_cli(args):
     """
     Usage:
-        test [<pytestargs>...]
+        test [--] [<pytestargs>...]
 
     Options:
         <pytestargs>  Options to pass to pytest
