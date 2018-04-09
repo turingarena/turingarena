@@ -28,7 +28,7 @@ class ProblemSolutionTestItem(pytest.Item):
             rewrite_asserts(tree)
             co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
             try:
-                exec(co, dict(approx=approx), result)
+                exec(co, dict(approx=approx), result._asdict())
             except AssertionError as e:
                 raise EvaluationAssertionError(condition) from e
             except Exception as e:
