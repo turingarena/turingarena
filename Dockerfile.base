@@ -11,7 +11,7 @@ RUN true \
         linux-vanilla-dev \
         libseccomp-dev \
         nodejs \
-    && pip install \
+    && pip3 install \
         bidict \
         coloredlogs \
         commonmark \
