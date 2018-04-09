@@ -1,28 +1,22 @@
 import errno
-import sys
 import os
-
-from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ, TRAP
+import sys
+from seccomplite import Filter, ERRNO, ALLOW, TRAP
 
 
 def init_sandbox():
     filter = Filter(TRAP)
-    filter.add_rule(ALLOW, "read", Arg(0, EQ, 0))
-    filter.add_rule(ALLOW, "write", Arg(0, EQ, 1))
-    filter.add_rule(ALLOW, "write", Arg(0, EQ, 2))
-    filter.add_rule(ALLOW, "exit")
-    filter.add_rule(ALLOW, "exit_group")
-    filter.add_rule(ALLOW, "rt_sigreturn")
-    filter.add_rule(ALLOW, "mmap")
-    filter.add_rule(ALLOW, "munmap")
-    filter.add_rule(ALLOW, "mremap")
-    filter.add_rule(ALLOW, "brk")
-    filter.add_rule(ALLOW, "lseek")
-    filter.add_rule(ALLOW, "ioctl")
-    filter.add_rule(ALLOW, "execve")
-    filter.add_rule(ALLOW, "arch_prctl")
-    filter.add_rule(ALLOW, "uname")
-    filter.add_rule(ALLOW, "fstat")
+    # no need to specify arguments of read/write (there should not be any other readable/writable fd)
+    for syscall in [
+        "read", "write", "readv", "writev",  # base I/O
+        "lseek", "ioctl", "fstat",  # used by
+        "exit", "exit_group", "rt_sigreturn",
+        "mmap", "munmap", "mremap", "brk",
+        "execve", "arch_prctl",
+        "uname", "set_tid_address",
+    ]:
+        filter.add_rule(ALLOW, syscall)
+    filter.add_rule(ERRNO(errno.EACCES), "madvise")
     filter.add_rule(ERRNO(errno.EACCES), "readlink")
     filter.load()
 
