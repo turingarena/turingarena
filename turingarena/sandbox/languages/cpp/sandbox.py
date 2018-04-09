@@ -9,15 +9,17 @@ def init_sandbox():
     # no need to specify arguments of read/write (there should not be any other readable/writable fd)
     for syscall in [
         "read", "write", "readv", "writev",  # base I/O
-        "lseek", "ioctl", "fstat",  # used by
+        "lseek", "ioctl", "fstat",
         "exit", "exit_group", "rt_sigreturn",
         "mmap", "munmap", "mremap", "brk",
-        "execve", "arch_prctl",
-        "uname", "set_tid_address",
+        "execve",
+        "arch_prctl", "uname", "set_tid_address",
     ]:
         filter.add_rule(ALLOW, syscall)
-    filter.add_rule(ERRNO(errno.EACCES), "madvise")
-    filter.add_rule(ERRNO(errno.EACCES), "readlink")
+    for syscall in [
+        "access", "madvise", "readlink"
+    ]:
+        filter.add_rule(ERRNO(errno.EACCES), syscall)
     filter.load()
 
 
