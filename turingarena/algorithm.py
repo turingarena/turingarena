@@ -85,11 +85,9 @@ class Algorithm:
                     sandbox=sandbox_process_client,
                     driver=driver_process_client,
                 )
-                yield algorithm_process
-                driver_process_client.send_end_main()
-
-                if time_limit is not None:
-                    algorithm_process.time_limit(time_limit)
+                with algorithm_process.section(time_limit=time_limit):
+                    yield algorithm_process
+                    driver_process_client.send_end_main()
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:
@@ -120,21 +118,16 @@ class AlgorithmProcess:
         self.call = driver.proxy
 
     @contextmanager
-    def section(self):
+    def section(self, *, time_limit=None):
         section_info = AlgorithmSection()
         info_before = self.sandbox.get_info()
-        try:
-            yield section_info
-        finally:
-            info_after = self.sandbox.get_info()
-            section_info.finished(info_before, info_after)
+        yield section_info
+        info_after = self.sandbox.get_info()
+        section_info.finished(info_before, info_after)
+        if time_limit is not None and section_info.time_usage > time_limit:
+            raise TimeLimitExceeded(section_info.time_usage, time_limit)
 
-    def time_limit(self, value):
-        info = self.sandbox.get_info()
-        if info.time_usage > value:
-            raise TimeLimitExceeded(info.time_usage, value)
-
-    def memory_limit(self, value):
+    def limit_memory(self, value):
         info = self.sandbox.get_info()
         if info.memory_usage > value:
             raise MemoryLimitExceeded(info.memory_usage, value)
