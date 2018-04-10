@@ -1,4 +1,5 @@
-FROM turingarena/turingarena-base
+ARG BASE_IMAGE=turingarena/turingarena-base
+FROM $BASE_IMAGE
 
 COPY . /usr/local/turingarena/
 RUN true \

@@ -1,15 +1,27 @@
 sudo: required
+language: bash
 
 services:
   - docker
 
-cache:
-  yarn
+cache: yarn
 
 script:
-  - docker build --network none -t turingarena/turingarena .
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - >
+    docker build
+    -t turingarena/turingarena-base:$TRAVIS_BRANCH
+    -f Dockerfile.base
+    .
+  - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
+  - >
+    docker build
+    --network none
+    --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
+    -t turingarena/turingarena:$TRAVIS_BRANCH
+    .
+  - docker push turingarena/turingarena:$TRAVIS_BRANCH
   - docker run --rm turingarena/turingarena test /usr/local/turingarena/turingarena
-  - cd web/ && yarn && yarn build
 
 deploy:
   provider: pages
