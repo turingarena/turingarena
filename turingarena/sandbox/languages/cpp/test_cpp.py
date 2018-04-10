@@ -182,7 +182,7 @@ def test_get_time_memory_usage():
                 p.call.test(2)
             info2 = p.sandbox.get_info()
 
-    assert 0 < section1.time_usage == info1.time_usage < 0.5
+    assert 0 < section1.time_usage < 0.5
     assert 0 < section2.time_usage < 0.5
 
     assert section1.time_usage + section2.time_usage == pytest.approx(info2.time_usage)
