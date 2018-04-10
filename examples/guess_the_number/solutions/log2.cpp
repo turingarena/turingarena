@@ -2,7 +2,6 @@ int guess(int n);
 
 int play(int n) {
     int min = 1, max = n, mid;
-
     while (true) {
         mid = (min+max)/2;
         switch ( guess(mid) ) {
