@@ -44,7 +44,7 @@ def compute_moving(algorithm):
         def guess(n):
             nonlocal number_of_guess, min_value, max_value # closure
             number_of_guess += 1
-            if min_value == max_value:
+            if min_value == max_value and n == min_value:
                 return 0  # correct, only a single possibility
             elif n < min_value or (n-min_value) <= (max_value-n):
                 min_value = max( min_value, n+1)
@@ -54,4 +54,4 @@ def compute_moving(algorithm):
                 return 1 # too high
 
         player_answer =  process.call.play(N,guess=guess)
-        return min_value==max_value, number_of_guess
+        return min_value==max_value and player_answer == min_value, number_of_guess
