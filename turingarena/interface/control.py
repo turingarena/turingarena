@@ -178,11 +178,12 @@ class LoopStatement(ImperativeStatement):
     def validate(self):
         yield from self.body.validate()
 
-        # TODO: check that the loop {} terminates
+        if not self.body.context_after.has_break:
+            yield Diagnostic(Diagnostic.Messages.INFINITE_LOOP, parseinfo=self.ast.parseinfo)
 
     @property
     def context_after(self):
-        return self.body.context_after
+        return self.body.context_after.with_break(False)
 
 
 class ContinueStatement(ImperativeStatement):
@@ -205,6 +206,10 @@ class BreakStatement(ImperativeStatement):
     def validate(self):
         if not self.context.in_loop:
             yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=self.ast.parseinfo)
+
+    @property
+    def context_after(self):
+        return self.context.with_break(True)
 
 
 class BreakInstruction(Instruction):
@@ -240,9 +245,14 @@ class SwitchStatement(ImperativeStatement):
 
     @property
     def context_after(self):
-        # TODO: think what context after to return
-
-        return self.context
+        contexts = [case.context_after for case in self.cases]
+        if self.default:
+            contexts.append(self.default.context_after)
+        variables = [ctx.initialized_variables for ctx in contexts]
+        initialized_variables = set.intersection(*variables)
+        return self.context.with_break(
+            any(1 for context in contexts if context.has_break)
+        ).with_initialized_variables(initialized_variables)
 
 
 class SwitchInstruction(Instruction):
@@ -266,7 +276,7 @@ class CaseStatement(ImperativeStatement):
 
     @property
     def context_after(self):
-        return self.body.context
+        return self.body.context_after
 
     def validate(self):
         for label in self.labels:

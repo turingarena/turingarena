@@ -4,6 +4,7 @@ from collections import OrderedDict
 from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.statement import Statement
+from turingarena.interface.exceptions import Diagnostic
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +44,15 @@ class Block(AbstractSyntaxNodeWrapper):
         )
 
     def validate(self):
-        for statement in self.statements:
+        from turingarena.interface.control import ContinueStatement, BreakStatement
+
+        for i, statement in enumerate(self.statements):
             yield from statement.validate()
+
+            if isinstance(statement, ContinueStatement) or isinstance(statement, BreakStatement):
+                if i < len(self.statements) - 1:
+                    yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
+                    break
 
 
 class ImperativeBlock(Block, ImperativeStructure):
@@ -76,4 +84,6 @@ class ImperativeBlock(Block, ImperativeStructure):
             variable
             for variable in inner_context.allocated_variables
             if variable and variable[0] in self.context.variables
-        }).with_flushed_output(inner_context.has_flushed_output)
+        }).with_flushed_output(inner_context.has_flushed_output).with_break(
+            inner_context.has_break
+        )

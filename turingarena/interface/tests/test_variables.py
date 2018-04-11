@@ -226,3 +226,55 @@ def test_variable_redeclared():
             var int a;
         }
     """, Diagnostic.Messages.VARIABLE_REDECLARED, "a")
+
+
+def test_variable_initialized_switch():
+    assert_no_error("""
+        main {
+            var int a;
+            switch (1) {
+                case 1 {
+                    read a;
+                }
+                case 2 {
+                    read a;
+                }
+                default {
+                    read a;
+                }
+            }
+            write a;
+        }    
+    """)
+
+
+def test_variable_not_initialized_switch():
+    assert_error("""
+        main {
+            var int a;
+            switch (1) {
+                case 1 {
+                    read a;
+                }
+                case 2 {
+                }
+            }
+            write a;
+        }    
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")
+
+
+def test_variable_not_initialized_switch_default():
+    assert_error("""
+        main {
+            var int a;
+            switch (1) {
+                case 1 {
+                    read a;
+                }
+                default {
+                }
+            }
+            write a;
+        }    
+    """, Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, "a")

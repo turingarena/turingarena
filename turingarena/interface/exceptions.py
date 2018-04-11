@@ -52,8 +52,8 @@ class Diagnostic(namedtuple("Diagnostic", [
         UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
         INVALID_CASE_EXPRESSION = "case expression must be an int literal"
         CASE_FALLTROUGH = "case must terminate either with a break, continue, return or exit in every possible branch"
-        INFINITE_LOOP = "loop must contain at least a break, exit or return statement"
-        UNREACHED_STATEMENT = "statement {} is never reached reached"
+        INFINITE_LOOP = "loop must contain at least a break statement"
+        UNREACHABLE_CODE = "unreachable code after break/continue"
 
     @staticmethod
     def build_message(msg, *args):
