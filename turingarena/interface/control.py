@@ -170,7 +170,7 @@ class LoopStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return ImperativeBlock(ast=self.ast.body, context=self.context)
+        return ImperativeBlock(ast=self.ast.body, context=self.context.with_loop())
 
     def expects_request(self, request):
         return self.body.expects_request(request)
@@ -190,8 +190,9 @@ class ContinueStatement(ImperativeStatement):
         return ContinueInstruction()
 
     def validate(self):
-        # TODO: check that we are in a loop {}, and if not launch Message.UNEXPECTED_CONTINUE
-        return []
+        def validate(self):
+            if not self.context.in_loop:
+                yield Diagnostic(Diagnostic.Message.UNEXPECTED_BREAK)
 
 
 class ContinueInstruction(Instruction):
@@ -203,8 +204,8 @@ class BreakStatement(ImperativeStatement):
         return BreakInstruction()
 
     def validate(self):
-        # TODO: check that we are in a loop {} or a in switch-case, and if not launch Message.UNEXPECTED_BREAK error
-        return []
+        if not self.context.in_loop:
+            yield Diagnostic(Diagnostic.Message.UNEXPECTED_CONTINUE)
 
 
 class BreakInstruction(Instruction):
@@ -272,8 +273,6 @@ class CaseStatement(ImperativeStatement):
         for label in self.labels:
             if not isinstance(label, LiteralExpression):
                 yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
-
-        # TODO: check that every execution flow ends with a break or a continue statement
 
 
 class CaseInstruction(Instruction):
