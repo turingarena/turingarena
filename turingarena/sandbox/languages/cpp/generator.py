@@ -75,11 +75,13 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield f"{self.build_callable_declarator(s.function)};"
 
     def init_statement(self, s):
+        yield
         yield "__attribute__((constructor)) static void init() {"
         yield from self.block_content(s.body)
         yield "}"
 
     def main_statement(self, s):
+        yield
         yield "int main() {"
         yield from self.block_content(s.body)
         yield "}"
@@ -129,11 +131,28 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield from self.block_content(s.body)
         yield "}"
 
+    def loop_statement(self, s):
+        yield "while (true) {"
+        yield from self.block_content(s.body)
+        yield "}"
+
+    def switch_statement(self, s):
+        yield f"switch ({self.expression(s.value)}) " "{"
+        for case in s.cases:
+            yield from self.indent_all(self.case_statement(case))
+        yield "}"
+
+    def case_statement(self, s):
+        yield f"case {s.label}:"
+        yield from self.block_content(s.body)
+
     def any_statement(self, s):
         generators = {
             "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
             "flush": lambda: ["fflush(stdout);"],
             "exit": lambda: ["exit(0);"],
+            "continue": lambda: ["continue;"],
+            "break": lambda: ["break"],
             "return": lambda: [f"return {self.expression(s.value)};"],
         }
         return generators[s.statement_type]()

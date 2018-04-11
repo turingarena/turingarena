@@ -166,10 +166,47 @@ class LoopStatement(ImperativeStatement):
 
     @property
     def body(self):
-        return ImperativeBlock(self.ast.body),
+        return ImperativeBlock(ast=self.ast.body, context=self.context)
 
     def expects_request(self, request):
         return self.body.expects_request(request)
 
     def validate(self):
         yield from self.body.validate()
+
+    @property
+    def context_after(self):
+        return self.body.context_after
+
+
+class ContinueStatement(ImperativeStatement):
+    pass
+
+
+class BreakStatement(ImperativeStatement):
+    pass
+
+
+class SwitchStatement(ImperativeStatement):
+    @property
+    def cases(self):
+        for case in self.ast.cases:
+            yield CaseStatement(ast=case, context=self.context)
+
+    @property
+    def value(self):
+        return self.ast.value
+
+
+class CaseStatement(ImperativeStatement):
+    @property
+    def body(self):
+        return ImperativeBlock(ast=self.ast.body, context=self.context)
+
+    @property
+    def label(self):
+        return self.ast.value
+
+    @property
+    def context_after(self):
+        return self.body.context

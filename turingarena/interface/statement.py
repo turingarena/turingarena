@@ -11,6 +11,7 @@ class Statement(AbstractSyntaxNodeWrapper):
         from turingarena.interface.alloc import AllocStatement
         from turingarena.interface.calls import CallStatement, ReturnStatement
         from turingarena.interface.control import ForStatement, IfStatement, LoopStatement, ExitStatement
+        from turingarena.interface.control import BreakStatement, ContinueStatement, SwitchStatement, CaseStatement
         from turingarena.interface.callables import FunctionStatement, CallbackStatement
         from turingarena.interface.mainblocks import InitStatement, MainStatement
         from turingarena.interface.variables import VarStatement
@@ -33,6 +34,10 @@ class Statement(AbstractSyntaxNodeWrapper):
             "for": ForStatement,
             "if": IfStatement,
             "loop": LoopStatement,
+            "continue": ContinueStatement,
+            "break": BreakStatement,
+            "switch": SwitchStatement,
+            "case": CaseStatement,
         })
 
     @staticmethod

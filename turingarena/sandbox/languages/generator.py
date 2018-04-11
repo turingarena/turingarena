@@ -79,6 +79,9 @@ class CodeGen:
     def switch_statement(self, s):
         raise NotImplementedError
 
+    def case_statement(self, s):
+        raise NotImplementedError
+
     def for_statement(self, s):
         raise NotImplementedError
 
