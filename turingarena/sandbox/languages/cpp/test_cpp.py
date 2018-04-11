@@ -57,15 +57,6 @@ def test_constructor():
     """, "init ()")
 
 
-def test_preinit():
-    expect_bad_syscall(r"""
-        #include <stdio.h>
-        static void init() { fopen("name", "r"); }
-        __attribute__((section(".preinit_array"), used)) static void (*preinit_fun)(void) = init;
-        int test() {}
-    """, "init ()")
-
-
 def test_istream():
     expect_bad_syscall(r"""
         #include <fstream>
