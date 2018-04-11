@@ -45,9 +45,9 @@ class PopenProcess(Process):
     @staticmethod
     def get_process_status_error(status_code: int) -> (ProcessStatus, str):
         """
-        Process the return code of a process and return a tuple (status, error) where status is the process status
+        Process the status code of a process and return a tuple (status, error) where status is the process status
         and error is the eventual error message in case the process fails either with non zero return code or with a
-        signal.
+        signal (for example is killed for exceeding time/memory limits or for trying to perform a blacklisted syscall).
 
         See man wait(2) for more info.
         """
@@ -67,19 +67,20 @@ class PopenProcess(Process):
     def get_status(self, wait_termination=False) -> ProcessInfo:
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
-        maximum memory utilization in bytes (maximum segment size), user cpu time utilization
-        (with milliseconds precision), and eventual error code information.
-
-        Note: the memory usage is 20/30Mb even for small programs. This is due to the fact that Linux calculates the
-        maximum segment size since the process creation (fork()) and not since the exec(): after a fork the entire
-        process address space is duplicated, and so the initial MSS is as big as the mss of the father process at the
-        moment of child creation. Unfortunately there aren't simple workaround (or at least we didn't find any).
-
-        But process that uses more than 30Mb of memory the calculation is precise, so this shouldn't be a problem in
-        most applications.
+        maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
+        user cpu time utilization (with milliseconds precision), and eventual error code information.
 
         If param wait_termination is set, we wait for the process to terminate and then return the final resource
-        utilization. 
+        utilization.
+
+        Note: the memory usage is at least 20/30Mb even for small programs.
+
+        This is due to the fact that Linux calculates the maximum segment size since the process creation (fork())
+        and not since the effective program execution (exec()): after a fork the entire process address space is
+        duplicated, so the new process MSS is as big as the MSS of the father process.
+
+        Unfortunately there aren't simple workaround (or at least we didn't find any). But for processes that use more
+        than 30Mb of memory the value is correct, so this shouldn't be a problem in most applications.
         """
 
         # if the process is already terminated, return the cached info
