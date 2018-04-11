@@ -127,12 +127,29 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         else:
             yield self.build_declaration(s)
 
+    def loop_statement(self, s):
+        yield "while (true) {"
+        yield from self.block_content(s.body)
+        yield "}"
+
+    def switch_statement(self, s):
+        yield f"switch ({self.expression(s.value)}) " "{"
+        for case in s.cases:
+            yield from self.indent_all(self.case_statement(case))
+        yield "}"
+
+    def case_statement(self, s):
+        yield f"case {s.label}:"
+        yield from self.block_content(s.body)
+
     def any_statement(self, statement):
         generators = {
             "flush": lambda: ["System.out.flush();"],
             "checkpoint": lambda: ["""System.out.println("0");"""],
             "exit": lambda: ["System.exit(0);"],
             "return": lambda: [f"return {self.expression(statement.value)};"],
+            "continue": lambda: ["continue;"],
+            "break": lambda: ["break;"],
         }
         return generators[statement.statement_type]()
 

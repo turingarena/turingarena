@@ -47,6 +47,8 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
             "checkpoint": lambda: ["print(0);"],
             "flush": lambda: ["flush();"],
             "exit": lambda: ["exit(0);"],
+            "continue": lambda: ["continue;"],
+            "break": lambda: ["break;"],
             "return": lambda: [f"return {self.expression(statement.value)};"],
             "function": lambda: [],
         }
@@ -92,6 +94,21 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
         yield from self.block_content(statement.body)
         yield "}"
+
+    def loop_statement(self, s):
+        yield "while (true) {"
+        yield from self.block_content(s.body)
+        yield "}"
+
+    def switch_statement(self, s):
+        yield f"switch ({self.expression(s.value)}) " "{"
+        for case in s.cases:
+            yield from self.indent_all(self.case_statement(case))
+        yield "}"
+
+    def case_statement(self, s):
+        yield f"case {s.label}:"
+        yield from self.block_content(s.body)
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):

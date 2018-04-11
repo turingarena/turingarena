@@ -60,6 +60,8 @@ class PythonSkeletonCodeGen(PythonCodeGen):
             "checkpoint": lambda: ["""print(0)"""],
             "flush": lambda: ["""print(end="", flush=True)"""],
             "exit": lambda: ["raise SystemExit"],
+            "continue": lambda: ["continue"],
+            "break": lambda: ["break"],
             "return": lambda: [f"return {self.expression(statement.value)}"],
             "function": lambda: [],
         }
@@ -107,6 +109,15 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         size = self.expression(statement.index.range)
         yield f"for {index_name} in range({size}):"
         yield from self.block_content(statement.body)
+
+    def loop_statement(self, s):
+        yield "while True:"
+        yield from self.block_content(s.body)
+
+    def switch_statement(self, s):
+        for case in s.cases:
+            yield f"if {self.expression(s.value)} == {case.label}:"
+            yield from self.block_content(case.body)
 
 
 class PythonTemplateCodeGen(PythonCodeGen):
