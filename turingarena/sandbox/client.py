@@ -43,7 +43,6 @@ class SandboxProcessClient:
             SANDBOX_REQUEST_QUEUE,
             wait=str(int(bool(wait))),
         )
-
         response["time_usage"] = float(response["time_usage"])
         response["memory_usage"] = int(response["memory_usage"])
         return SandboxProcessInfo(**response)
