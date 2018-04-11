@@ -17,6 +17,10 @@ class ExitStatement(ImperativeStatement):
         yield ExitInstruction()
         raise InterfaceExit
 
+    def validate(self):
+        # TODO: check that exit is used only in valid places
+        return []
+
     def expects_request(self, request):
         return request is not None and request.request_type == "exit"
 
@@ -180,14 +184,35 @@ class LoopStatement(ImperativeStatement):
 
 
 class ContinueStatement(ImperativeStatement):
+    def generate_instructions(self, context):
+        return ContinueInstruction()
+
+    def validate(self):
+        # TODO: check that we are in a loop {}, and if not launch Message.UNEXPECTED_CONTINUE
+        return []
+
+
+class ContinueInstruction(Instruction):
     pass
 
 
 class BreakStatement(ImperativeStatement):
+    def generate_instructions(self, context):
+        return BreakInstruction()
+
+    def validate(self):
+        # TODO: check that we are in a loop {} or a in switch-case, and if not launch Message.UNEXPECTED_BREAK error
+        return []
+
+
+class BreakInstruction(Instruction):
     pass
 
 
 class SwitchStatement(ImperativeStatement):
+    def generate_instructions(self, context):
+        return SwitchInstruction()
+
     @property
     def cases(self):
         for case in self.ast.cases:
@@ -195,18 +220,44 @@ class SwitchStatement(ImperativeStatement):
 
     @property
     def value(self):
-        return self.ast.value
+        return Expression.compile(self.ast.value, self.context)
+
+    def validate(self):
+        yield from self.value.validate()
+
+        cases = [case for case in self.cases]
+        if len(cases) == 0:
+            yield Diagnostic(Diagnostic.Messages.EMPTY_SWITCH_BODY, parseinfo=self.ast.parseinfo)
+
+        for case in cases:
+            yield from case.validate()
+
+
+class SwitchInstruction(Instruction):
+    pass
 
 
 class CaseStatement(ImperativeStatement):
+    def generate_instructions(self, context):
+        return CaseInstruction()
+
     @property
     def body(self):
         return ImperativeBlock(ast=self.ast.body, context=self.context)
 
     @property
     def label(self):
-        return self.ast.value
+        return Expression.compile(self.ast.value, self.context)
 
     @property
     def context_after(self):
         return self.body.context
+
+    def validate(self):
+        yield from self.label.validate()
+
+        # TODO: check that every execution flow ends with a break or a continue statement
+
+
+class CaseInstruction(Instruction):
+    pass

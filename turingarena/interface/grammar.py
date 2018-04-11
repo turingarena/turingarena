@@ -61,7 +61,7 @@ grammar_ebnf = r"""
     expression_list = ','.{ expression }* ;
 
     switch_case =
-        'case' '(' value:identifier ')' body:block
+        'case' '(' value:expression ')' body:block
     ;
     
     expression = or_expression ;

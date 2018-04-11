@@ -63,7 +63,7 @@ def validate_interface_cli(args):
     with open(args["--interface"]) as f:
         interface_text = f.read()
 
-    interface = InterfaceDefinition.compile(interface_text)
+    interface = InterfaceDefinition.compile(interface_text, validate=False)
 
     for message in interface.validate():
         print(message)

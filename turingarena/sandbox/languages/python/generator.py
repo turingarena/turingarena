@@ -116,7 +116,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
 
     def switch_statement(self, s):
         for case in s.cases:
-            yield f"if {self.expression(s.value)} == {case.label}:"
+            yield f"if {self.expression(s.value)} == {self.expression(case.label)}:"
             yield from self.block_content(case.body)
 
 

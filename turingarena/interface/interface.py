@@ -29,12 +29,13 @@ class InterfaceDefinition:
         yield from self.body.validate()
 
     @staticmethod
-    def compile(source_text, extra_metadata=None):
+    def compile(source_text, extra_metadata=None, validate=True):
         if extra_metadata is None:
             extra_metadata = {}
         interface = InterfaceDefinition(source_text, extra_metadata=extra_metadata)
-        for msg in interface.validate():
-            logger.warning(f"interface contains an error: {msg}")
+        if validate:
+            for msg in interface.validate():
+                logger.warning(f"interface contains an error: {msg}")
         return interface
 
     @property

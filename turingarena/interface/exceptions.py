@@ -45,7 +45,11 @@ class Diagnostic(namedtuple("Diagnostic", [
         CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
         ARRAY_INDEX_NOT_VALID = "array index {} is not a for index variable"
         ARRAY_INDEX_WRONG_ORDER = "array {} indexes are in wrong order"
-        ARRAY_INDEX_DIFFERENT_ALLOC = "array {} index {} different from allocated "
+        ARRAY_INDEX_DIFFERENT_ALLOC = "array {} index {} different from allocated"
+        EMPTY_SWITCH_BODY = "switch statement body must contain at least one case"
+        UNEXPECTED_BREAK = "break statement should only appear inside loop {} or switch case() {} blocks"
+        UNEXPECTED_CONTINUE = "continue should only appear inside loop {} statements"
+        UNEXPECTED_RETURN = "return statement should appear inside a callback declaration"
 
     @staticmethod
     def build_message(msg, *args):

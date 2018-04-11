@@ -143,7 +143,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "}"
 
     def case_statement(self, s):
-        yield f"case {s.label}:"
+        yield f"case {self.expression(s.label)}:"
         yield from self.block_content(s.body)
 
     def any_statement(self, s):
