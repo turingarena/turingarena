@@ -1,11 +1,11 @@
 import shutil
-import subprocess
 import pkg_resources
 
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.process import PopenProcess
 
 
 class PythonAlgorithmExecutableScript(AlgorithmExecutable):
@@ -23,7 +23,7 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
             shutil.copy(f"{self.algorithm_dir}/skeleton.py", cwd)
 
             # run process
-            popen = subprocess.Popen(
+            with PopenProcess.run(
                 ["python", sandbox_path],
                 universal_newlines=True,
                 # preexec_fn=lambda: set_memory_and_time_limits(),
@@ -31,7 +31,5 @@ class PythonAlgorithmExecutableScript(AlgorithmExecutable):
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,
-            )
-
-            with self.manage_process(popen) as process:
+            ) as process:
                 yield process
