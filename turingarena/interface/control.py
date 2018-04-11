@@ -224,6 +224,10 @@ class SwitchStatement(ImperativeStatement):
     def value(self):
         return Expression.compile(self.ast.value, self.context)
 
+    @property
+    def default(self):
+        return ImperativeBlock(ast=self.ast.default.body, context=self.context) if self.ast.default else None
+
     def validate(self):
         yield from self.value.validate()
 
@@ -234,6 +238,7 @@ class SwitchStatement(ImperativeStatement):
         for case in cases:
             yield from case.validate()
 
+    @property
     def context_after(self):
         # TODO: think what context after to return
 

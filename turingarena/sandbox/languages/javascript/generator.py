@@ -103,7 +103,10 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
     def switch_statement(self, s):
         yield f"switch ({self.expression(s.value)}) " "{"
         for case in s.cases:
-            yield from self.indent_all(self.case_statement(case))
+            yield from self.case_statement(case)
+        if s.default:
+            yield "default: "
+            yield from self.block_content(s.default)
         yield "}"
 
     def case_statement(self, s):

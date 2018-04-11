@@ -115,9 +115,17 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         yield from self.block_content(s.body)
 
     def switch_statement(self, s):
-        for case in s.cases:
-            yield f"if {self.expression(s.value)} == {self.expression(case.label)}:"
+        cases = [case for case in s.cases]
+        yield f"if {self.expression(s.value)} == {self.expression(cases[0].label)}:"
+        yield from self.block_content(cases[0].body)
+
+        for case in cases[1:]:
+            yield f"elif {self.expression(s.value)} == {self.expression(case.label)}:"
             yield from self.block_content(case.body)
+
+        if s.default:
+            yield "else:"
+            yield from self.block_content(s.default)
 
 
 class PythonTemplateCodeGen(PythonCodeGen):
