@@ -49,7 +49,11 @@ class Diagnostic(namedtuple("Diagnostic", [
         EMPTY_SWITCH_BODY = "switch statement body must contain at least one case"
         UNEXPECTED_BREAK = "break statement should only appear inside loop {} or switch case() {} blocks"
         UNEXPECTED_CONTINUE = "continue should only appear inside loop {} statements"
-        UNEXPECTED_RETURN = "return statement should appear inside a callback declaration"
+        UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
+        INVALID_CASE_EXPRESSION = "case expression should be an int literal"
+        CASE_FALLTROUGH = "case must terminate either with a break, continue, return or exit in every possible branch"
+        INFINITE_LOOP = "loop must contain at least a break, exit or return statement"
+        UNREACHED_STATEMENT = "statement {} is never reached reached"
 
     @staticmethod
     def build_message(msg, *args):
