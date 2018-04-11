@@ -132,18 +132,24 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield from self.block_content(s.body)
         yield "}"
 
+    def build_switch_condition(self, variable, labels):
+        variable = self.expression(variable)
+        result = f"{variable} == {self.expression(labels[0])}"
+        for label in labels[1:]:
+            result += f" || {variable} == {self.expression(label)}"
+        return result
+
     def switch_statement(self, s):
-        yield f"switch ({self.expression(s.value)}) " "{"
-        for case in s.cases:
-            yield from self.case_statement(case)
+        cases = [case for case in s.cases]
+        yield f"if ({self.build_switch_condition(s.variable, cases[0].labels)}) " "{"
+        yield from self.block_content(cases[0].body)
+        for case in cases[1:]:
+            yield "}" f" else if ({self.build_switch_condition(s.variable, case.labels)}) " "{"
+            yield from self.block_content(case.body)
         if s.default:
-            yield "default: "
+            yield "} else {"
             yield from self.block_content(s.default)
         yield "}"
-
-    def case_statement(self, s):
-        yield f"case {self.expression(s.label)}:"
-        yield from self.block_content(s.body)
 
     def any_statement(self, statement):
         generators = {

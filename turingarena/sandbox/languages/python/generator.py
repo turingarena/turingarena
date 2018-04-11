@@ -114,13 +114,20 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         yield "while True:"
         yield from self.block_content(s.body)
 
+    def build_switch_cases(self, variable, labels):
+        variable = self.expression(variable)
+        result = f"{variable} == {self.expression(labels[0])}"
+        for label in labels[1:]:
+            result += f" or {variable} == {self.expression(label)}"
+        return result
+
     def switch_statement(self, s):
         cases = [case for case in s.cases]
-        yield f"if {self.expression(s.value)} == {self.expression(cases[0].label)}:"
+        yield f"if {self.build_switch_cases(s.variable, cases[0].labels)}:"
         yield from self.block_content(cases[0].body)
 
         for case in cases[1:]:
-            yield f"elif {self.expression(s.value)} == {self.expression(case.label)}:"
+            yield f"elif {self.build_switch_cases(s.variable, case.labels)}:"
             yield from self.block_content(case.body)
 
         if s.default:

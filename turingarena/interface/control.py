@@ -221,7 +221,7 @@ class SwitchStatement(ImperativeStatement):
             yield CaseStatement(ast=case, context=self.context)
 
     @property
-    def value(self):
+    def variable(self):
         return Expression.compile(self.ast.value, self.context)
 
     @property
@@ -229,7 +229,7 @@ class SwitchStatement(ImperativeStatement):
         return ImperativeBlock(ast=self.ast.default.body, context=self.context) if self.ast.default else None
 
     def validate(self):
-        yield from self.value.validate()
+        yield from self.variable.validate()
 
         cases = [case for case in self.cases]
         if len(cases) == 0:
@@ -258,16 +258,20 @@ class CaseStatement(ImperativeStatement):
         return ImperativeBlock(ast=self.ast.body, context=self.context)
 
     @property
-    def label(self):
-        return Expression.compile(self.ast.value, self.context)
+    def labels(self):
+        return [
+            Expression.compile(label, self.context)
+            for label in self.ast.labels
+        ]
 
     @property
     def context_after(self):
         return self.body.context
 
     def validate(self):
-        if not isinstance(self.label, LiteralExpression):
-            yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
+        for label in self.labels:
+            if not isinstance(label, LiteralExpression):
+                yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
 
         # TODO: check that every execution flow ends with a break or a continue statement
 

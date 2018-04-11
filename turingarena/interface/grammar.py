@@ -51,7 +51,7 @@ grammar_ebnf = r"""
             return_value:[ return_value_expression ] ';'
         | statement_type:'if' ~ '(' condition:expression ')'
             then_body:block else_body:[ else_body ]
-        | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }* default:[default_case] '}'
+        | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }+ default:[default_case] '}'
         | statement_type:'for' ~ '(' index:index_declaration ')' body:block
         | statement_type:'loop' ~ body:block
     ;
@@ -65,7 +65,7 @@ grammar_ebnf = r"""
     ;
 
     switch_case =
-        'case' value:expression body:block
+        'case' labels:','.{expression}+ body:block
     ;
     
     expression = or_expression ;
