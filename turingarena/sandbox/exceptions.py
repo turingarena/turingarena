@@ -1,12 +1,10 @@
 class AlgorithmRuntimeError(Exception):
-    def __init__(self, message, stacktrace=None):
-        self.message = message
-        self.stacktrace = stacktrace
+    pass
 
 
 class CompilationFailed(Exception):
     def __init__(self, output=None):
-        self.compilation_output=output
+        self.compilation_output = output
 
 
 class TimeLimitExceeded(AlgorithmRuntimeError):

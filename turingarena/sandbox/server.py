@@ -68,18 +68,17 @@ class SandboxProcessServer:
         time_usage = self.executable.get_time_usage(self.process)
         memory_usage = self.executable.get_memory_usage(self.process)
 
-        message = stacktrace = ""
+        message = ""
         if wait == "1":
             self.done = True
             self.process = None
             try:
                 self.process_exit_stack.close()
             except AlgorithmRuntimeError as e:
-                message, stacktrace = e.args
+                [message] = e.args
 
         return {
             "error": message,
-            "stacktrace": stacktrace,
             "time_usage": str(time_usage),
             "memory_usage": str(memory_usage),
         }

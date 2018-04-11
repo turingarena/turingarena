@@ -1,3 +1,5 @@
+import signal
+
 import pytest
 
 from turingarena.algorithm import Algorithm
@@ -22,11 +24,12 @@ def cpp_algorithm(source):
     )
 
 
-def should_raise(cpp_source):
+def should_raise(cpp_source, sig):
     with cpp_algorithm(cpp_source) as algo:
         with pytest.raises(AlgorithmRuntimeError) as excinfo:
             with algo.run() as p:
                 p.call.test()
+    assert str(-sig) in str(excinfo.value)
     return excinfo
 
 
@@ -36,32 +39,26 @@ def should_succeed(cpp_source):
             p.call.test()
 
 
-def expect_bad_syscall(code, where):
-    excinfo = should_raise(code)
-    assert "Bad system call" in excinfo.value.stacktrace
-    assert where in excinfo.value.stacktrace
-
-
 def test_open():
-    expect_bad_syscall(r"""
+    should_raise(r"""
         #include <cstdio>
         int test() { fopen("name", "r"); }
-    """, "test ()")
+    """, signal.SIGSYS)
 
 
 def test_constructor():
-    expect_bad_syscall(r"""
+    should_raise(r"""
         #include <stdio.h>
         __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
         int test() {}
-    """, "init ()")
+    """, signal.SIGSYS)
 
 
 def test_istream():
-    expect_bad_syscall(r"""
+    should_raise(r"""
         #include <fstream>
         int test() { std::ifstream in("name"); }
-    """, "test ()")
+    """, signal.SIGSYS)
 
 
 def test_malloc_succeeds():
@@ -99,10 +96,9 @@ def test_vector_succeeds():
 
 
 def test_time_limit():
-    excinfo = should_raise("""
+    should_raise("""
         int test() { for(;;) {} }
-    """)
-    assert "CPU time limit exceeded" in excinfo.value.stacktrace
+    """, signal.SIGXCPU)
 
 
 def test_memory_limit_static():
@@ -110,7 +106,7 @@ def test_memory_limit_static():
         const int size = 1 * 1024 * 1024 * 1024;
         char big[size];
         int test() {}
-    """)
+    """, signal.SIGSEGV)
 
 
 def test_memory_limit_malloc():
@@ -129,14 +125,13 @@ def test_memory_limit_malloc():
 def test_memory_limit_new():
     should_raise("""
         int test() { new int[1 * 1024 * 1024 * 1024]; }
-    """)
+    """, signal.SIGSYS)
 
 
 def test_segmentation_fault():
-    excinfo = should_raise("""
+    should_raise("""
         int test() { *((int*) 0) = 1; }
-    """)
-    assert "Segmentation fault" in excinfo.value.stacktrace
+    """, signal.SIGSEGV)
 
 
 def test_get_time_memory_usage():

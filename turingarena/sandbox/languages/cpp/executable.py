@@ -1,10 +1,10 @@
 import logging
 import os
 import subprocess
-import pkg_resources
-
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
+
+import pkg_resources
 
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.rlimits import set_memory_and_time_limits
@@ -31,22 +31,5 @@ class ElfAlgorithmExecutable(AlgorithmExecutable):
                         stdout=connection.upward,
                         bufsize=1,
                     ),
-                    get_stack_trace=lambda: self.get_back_trace(executable_filename, cwd)
             ) as process:
                 yield process
-
-    @staticmethod
-    def get_back_trace(executable_filename, cwd):
-        gdb_run = subprocess.run(
-            [
-                "gdb",
-                "-se", executable_filename,
-                "-c", os.path.join(cwd, "core"),
-                "-q",
-                "-batch",
-                "-ex", "backtrace",
-            ],
-            stdout=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        return gdb_run.stdout
