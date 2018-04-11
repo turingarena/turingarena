@@ -4,7 +4,7 @@ from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
 from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import ImperativeStatement, Instruction
-from turingarena.interface.expressions import Expression
+from turingarena.interface.expressions import Expression, LiteralExpression
 from turingarena.interface.io import FlushStatement, ReadStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
@@ -178,6 +178,8 @@ class LoopStatement(ImperativeStatement):
     def validate(self):
         yield from self.body.validate()
 
+        # TODO: check that the loop {} terminates
+
     @property
     def context_after(self):
         return self.body.context_after
@@ -232,6 +234,11 @@ class SwitchStatement(ImperativeStatement):
         for case in cases:
             yield from case.validate()
 
+    def context_after(self):
+        # TODO: think what context after to return
+
+        return self.context
+
 
 class SwitchInstruction(Instruction):
     pass
@@ -254,7 +261,8 @@ class CaseStatement(ImperativeStatement):
         return self.body.context
 
     def validate(self):
-        yield from self.label.validate()
+        if not isinstance(self.label, LiteralExpression):
+            yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
 
         # TODO: check that every execution flow ends with a break or a continue statement
 
