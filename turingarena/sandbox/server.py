@@ -5,7 +5,6 @@ from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 from turingarena.sandbox.executable import AlgorithmExecutable
 
 logger = logging.getLogger(__name__)
@@ -61,25 +60,27 @@ class SandboxProcessServer:
                 self.handle_request,
             )
 
+        logger.debug("process terminated")
+
     def handle_request(self, *, wait):
+        logger.debug(f"get_info(wait={wait})")
+
         assert not self.done
         assert wait in ("0", "1")
 
-        time_usage = self.executable.get_time_usage(self.process)
-        memory_usage = self.executable.get_memory_usage(self.process)
+        info = self.process.get_status(wait_termination=bool(int(wait)))
 
-        message = stacktrace = ""
+        time_usage = info.time_usage
+        memory_usage = info.memory_usage
+        logger.debug(f"Process info = {info}")
+
         if wait == "1":
             self.done = True
             self.process = None
-            try:
-                self.process_exit_stack.close()
-            except AlgorithmRuntimeError as e:
-                message, stacktrace = e.args
 
         return {
-            "error": message,
-            "stacktrace": stacktrace,
+            "error": info.error,
+            "stacktrace": "",
             "time_usage": str(time_usage),
             "memory_usage": str(memory_usage),
         }
