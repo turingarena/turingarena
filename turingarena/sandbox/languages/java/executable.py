@@ -9,6 +9,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.rlimits import set_memory_and_time_limits
+from turingarena.sandbox.process import PopenProcess
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                 "Skeleton",
             ]
 
-            process = subprocess.Popen(
+            with PopenProcess.run(
                 cli,
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
@@ -42,10 +43,8 @@ class JavaAlgorithmExecutable(AlgorithmExecutable):
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,
-            )
-
-            with self.manage_process(process) as p:
-                yield p
+            ) as process:
+                yield process
 
     def get_memory_usage(self, process):
         cmd = [

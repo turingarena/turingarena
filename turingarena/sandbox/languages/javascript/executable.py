@@ -1,12 +1,12 @@
 import shutil
-import subprocess
 import pkg_resources
 
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena.sandbox.executable import AlgorithmExecutable
 from turingarena.sandbox.rlimits import set_memory_and_time_limits
+from turingarena.sandbox.executable import AlgorithmExecutable
+from turingarena.sandbox.process import PopenProcess
 
 
 class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
@@ -20,7 +20,7 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
             shutil.copy(f"{self.algorithm_dir}/source.js", cwd)
             shutil.copy(f"{self.algorithm_dir}/skeleton.js", cwd)
 
-            process = subprocess.Popen(
+            with PopenProcess.run(
                 ["node", sandbox_path],
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=5),
@@ -28,7 +28,5 @@ class JavaScriptAlgorithmExecutableScript(AlgorithmExecutable):
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,
-            )
-
-            with self.manage_process(process) as p:
-                yield p
+            ) as process:
+                yield process
