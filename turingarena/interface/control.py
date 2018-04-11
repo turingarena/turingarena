@@ -190,9 +190,8 @@ class ContinueStatement(ImperativeStatement):
         return ContinueInstruction()
 
     def validate(self):
-        def validate(self):
-            if not self.context.in_loop:
-                yield Diagnostic(Diagnostic.Message.UNEXPECTED_BREAK)
+        if not self.context.in_loop:
+            yield Diagnostic(Diagnostic.Messages.UNEXPECTED_CONTINUE, parseinfo=self.ast.parseinfo)
 
 
 class ContinueInstruction(Instruction):
@@ -205,7 +204,7 @@ class BreakStatement(ImperativeStatement):
 
     def validate(self):
         if not self.context.in_loop:
-            yield Diagnostic(Diagnostic.Message.UNEXPECTED_CONTINUE)
+            yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=self.ast.parseinfo)
 
 
 class BreakInstruction(Instruction):
