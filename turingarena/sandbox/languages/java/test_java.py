@@ -76,7 +76,6 @@ def test_memory_usage():
                     read b; 
                     call test2(b) -> out2;
                     write out2;
-                    flush;
                 }
             """, """
         class Solution extends Skeleton {
@@ -97,6 +96,6 @@ def test_memory_usage():
         with algo.run() as p:
             assert p.call.test1(1) == 1
             i = p.sandbox.get_info()
-            # TODO: fix this test
-            #assert 4000000 < i.memory_usage < 6000000
+            assert 4000000 < i.memory_usage
+            assert i.memory_usage < 60000000
             assert p.call.test2(2) == 2

@@ -68,7 +68,7 @@ class PopenProcess(Process):
 
         info = ProcessInfo(
             status=status,
-            memory_usage=rusage.ru_maxrss,
+            memory_usage=rusage.ru_maxrss * 1024,
             time_usage=rusage.ru_utime,
             error=error,
         )

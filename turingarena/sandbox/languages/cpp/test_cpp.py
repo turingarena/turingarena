@@ -173,3 +173,6 @@ def test_get_time_memory_usage():
     assert 0 < section2.time_usage < 0.5
 
     assert section1.time_usage + section2.time_usage == pytest.approx(info2.time_usage - info0.time_usage, 0.01)
+
+    # TODO: memory info is not that precise due to problem with fork() + exec()
+    assert 1024 * 1024 < info1.memory_usage < 1024 * 1024 * 40

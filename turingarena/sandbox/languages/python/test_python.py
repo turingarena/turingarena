@@ -22,5 +22,3 @@ def test_sandbox_smoke():
     ) as algo:
         with algo.run() as p:
             assert p.call.test() == 3
-
-# TODO: add more tests for python
