@@ -91,10 +91,7 @@ class Algorithm:
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:
-                    raise AlgorithmRuntimeError(
-                        info.error,
-                        info.stacktrace,
-                    )
+                    raise AlgorithmRuntimeError(info.error)
 
 
 class AlgorithmSection:

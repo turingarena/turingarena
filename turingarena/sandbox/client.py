@@ -28,7 +28,6 @@ class SandboxClient:
 
 SandboxProcessInfo = namedtuple("SandboxProcessInfo", [
     "error",
-    "stacktrace",
     "time_usage",
     "memory_usage",
 ])

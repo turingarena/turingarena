@@ -6,8 +6,6 @@ from collections import namedtuple
 from contextlib import contextmanager
 from subprocess import TimeoutExpired
 
-import psutil
-
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 logger = logging.getLogger(__name__)
@@ -41,7 +39,7 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
             process.send_signal(which_signal)
 
     @contextmanager
-    def manage_process(self, process, get_stack_trace=None):
+    def manage_process(self, process):
         logger.debug(f"starting process")
         with process:
             try:
@@ -54,10 +52,7 @@ class AlgorithmExecutable(namedtuple("AlgorithmExecutable", [
 
             if process.returncode != 0:
                 logger.warning(f"process terminated with returncode {process.returncode}")
-                raise AlgorithmRuntimeError(
-                    f"invalid return code {process.returncode}",
-                    get_stack_trace() if get_stack_trace else None,
-                )
+                raise AlgorithmRuntimeError(f"invalid return code {process.returncode}")
 
     @staticmethod
     def get_rusage(process):

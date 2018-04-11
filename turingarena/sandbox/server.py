@@ -80,7 +80,6 @@ class SandboxProcessServer:
 
         return {
             "error": info.error,
-            "stacktrace": "",
             "time_usage": str(time_usage),
             "memory_usage": str(memory_usage),
         }
