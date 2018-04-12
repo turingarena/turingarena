@@ -7,7 +7,7 @@ from _pytest.assertion.rewrite import rewrite_asserts
 from future.moves import sys
 from pytest import approx
 
-from turingarena.problem.problem import make_problem, load_source_file, root_problem_module
+from turingarena.problem.problem import load_source_file, load_problem
 
 
 class EvaluationAssertionError(Exception):
@@ -65,7 +65,7 @@ def pytest_collect_file(path, parent):
     if sys.path[0] != problem_dir:
         sys.path.insert(0, problem_dir)
 
-    problem = make_problem(root_problem_module)
+    problem = load_problem()
     source = load_source_file(
         path,
         interface=problem.interface,

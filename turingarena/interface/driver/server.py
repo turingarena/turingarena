@@ -5,9 +5,9 @@ from turingarena.interface.driver.commands import deserialize_request
 from turingarena.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.interface.engine import drive_interface
 from turingarena.interface.exceptions import CommunicationBroken
-from turingarena.interface.interface import InterfaceDefinition
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundary
+from turingarena.problem.problem import load_interface
 from turingarena.sandbox.client import SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -17,10 +17,10 @@ class DriverServer(MetaServer):
     def get_queue_descriptor(self):
         return DRIVER_QUEUE
 
-    def create_child_server(self, child_server_dir, *, sandbox_process_dir, interface_text):
+    def create_child_server(self, child_server_dir, *, sandbox_process_dir, interface_name):
         return DriverProcessServer(
             sandbox_process_dir=sandbox_process_dir,
-            interface_text=interface_text,
+            interface_name=interface_name,
             driver_process_dir=child_server_dir,
         )
 
@@ -32,10 +32,10 @@ class DriverServer(MetaServer):
 
 
 class DriverProcessServer:
-    def __init__(self, *, interface_text, sandbox_process_dir, driver_process_dir):
+    def __init__(self, *, interface_name, sandbox_process_dir, driver_process_dir):
         self.sandbox_dir = sandbox_process_dir
         self.boundary = PipeBoundary(driver_process_dir)
-        self.interface = InterfaceDefinition.compile(interface_text)
+        self.interface = load_interface(interface_name)
 
         self.boundary.create_queue(DRIVER_PROCESS_QUEUE)
         self.run_driver_iterator = None

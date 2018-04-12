@@ -4,7 +4,7 @@ from turingarena.pipeboundary import PipeDescriptor, PipeSynchronousQueueDescrip
 DRIVER_QUEUE = PipeSynchronousQueueDescriptor(
     request_pipes=dict(
         sandbox_process_dir=PipeDescriptor("sandbox_process_dir.pipe", ("w", "r")),
-        interface_text=PipeDescriptor("interface.pipe", ("w", "r")),
+        interface_name=PipeDescriptor("interface_name.pipe", ("w", "r")),
     ),
     response_pipes=dict(
         driver_process_dir=PipeDescriptor("driver_process_dir.pipe", ("r", "w")),

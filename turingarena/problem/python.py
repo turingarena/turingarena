@@ -8,7 +8,6 @@ from collections import namedtuple
 from contextlib import redirect_stdout
 from io import StringIO
 
-from turingarena.algorithm import Algorithm
 from turingarena.problem.evaluation import Evaluation
 from turingarena.problem.evaluator import ProblemEvaluator
 
@@ -37,7 +36,8 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", ["module"])):
 
         eval_stdout = StringIO()
         with redirect_stdout(eval_stdout):
-            data = mod.evaluate(Algorithm(submission_dir))
+            from turingarena.algorithm import Algorithm
+            data = mod.evaluate(Algorithm(submission_dir, interface_name=self.module.__name__))
 
         return Evaluation(
             stdout=eval_stdout.getvalue().splitlines(),

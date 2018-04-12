@@ -71,20 +71,13 @@ class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
                 )
 
 
-def make_problem(mod):
-    interface_text = load_interface_text(mod)
-    extra_metadata = load_problem_metadata(mod)
-
-    interface = InterfaceDefinition.compile(
-        interface_text,
-        extra_metadata=extra_metadata.get("interface"),
-    )
-    return AlgorithmicProblem(
-        interface=interface,
-        extra_metadata=extra_metadata,
-        algorithm_sources=dict(find_algorithm_sources(mod, interface=interface)),
-        evaluator=HostPythonEvaluator(mod),
-    )
+def load_interface(interface_name=None):
+    if interface_name is None:
+        mod = root_problem_module
+    else:
+        mod = importlib.import_module(interface_name)
+    text = load_interface_text(mod)
+    return InterfaceDefinition.compile(text)
 
 
 def load_interface_text(mod):
@@ -133,15 +126,16 @@ def clone_from_git(url):
 
 def load_problem(problem_name=None):
     if problem_name is None:
-        problem_module = root_problem_module
+        mod = root_problem_module
     else:
-        problem_module = importlib.import_module(problem_name)
-    paths = get_problem_paths(problem_module)
-    assert len(paths) >= 1
-    if len(paths) > 1:
-        raise ValueError(f"problem package {problem_module} has multiple paths: {paths}")
-    [path] = paths
-    return make_problem(path)
+        mod = importlib.import_module(problem_name)
+    interface = load_interface(problem_name)
+    return AlgorithmicProblem(
+        interface=interface,
+        extra_metadata=dict(),  # FIXME
+        algorithm_sources=dict(find_algorithm_sources(mod, interface=interface)),
+        evaluator=HostPythonEvaluator(mod),
+    )
 
 
 def get_problem_paths(problem_module):

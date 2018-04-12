@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from turingarena.interface.driver.client import DriverClient, DriverProcessClient
 from turingarena.interface.driver.server import DriverServer
 from turingarena.interface.interface import InterfaceDefinition
+from turingarena.problem.problem import load_interface_text
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
 from turingarena.sandbox.server import SandboxServer
@@ -16,12 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 class Algorithm:
-    def __init__(self, algorithm_dir):
+    def __init__(self, algorithm_dir, *, interface_name):
         self.algorithm_dir = algorithm_dir
+        self.interface_name = interface_name
 
     @staticmethod
     @contextmanager
-    def load(*, source_text, interface_text, language):
+    def load(*, source_text, interface_name, language):
+        interface_text = load_interface_text(interface_name)
+        # FIXME: we should not compile the source here
         interface = InterfaceDefinition.compile(interface_text)
         algorithm_source = AlgorithmSource.load(
             source_text,
@@ -33,15 +37,12 @@ class Algorithm:
             algorithm_dir = os.path.join(temp_dir, "algorithm")
             algorithm_source.compile(algorithm_dir)
 
-            yield Algorithm(algorithm_dir)
+            yield Algorithm(algorithm_dir, interface_name=interface_name)
 
     @contextmanager
     def run(self, global_variables=None, time_limit=None):
         if global_variables is None:
             global_variables = {}
-
-        with open(os.path.join(self.algorithm_dir, "interface.txt")) as f:
-            interface_text = f.read()
 
         with ExitStack() as stack:
             sandbox_dir = stack.enter_context(
@@ -71,8 +72,8 @@ class Algorithm:
             stack.callback(driver_server.stop)
 
             driver_process_dir = stack.enter_context(
-                driver_client.run(
-                    interface_text=interface_text,
+                driver_client.run_driver(
+                    interface_name=self.interface_name,
                     sandbox_process_dir=sandbox_process_dir,
                 )
             )
