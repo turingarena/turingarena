@@ -54,6 +54,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         CASE_FALLTROUGH = "case must terminate either with a break, continue, return or exit in every possible branch"
         INFINITE_LOOP = "loop must contain at least a break statement"
         UNREACHABLE_CODE = "unreachable code after break/continue"
+        DUPLICATED_CASE_LABEL = "duplicated case label {}"
 
     @staticmethod
     def build_message(msg, *args):
