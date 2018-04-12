@@ -55,6 +55,7 @@ class DriverProcessServer:
 
     def handle_request(self, request):
         current_request = self.deserialize(request)
+        logger.debug(f"recieved request {current_request}")
         try:
             response = self.run_driver_iterator.send(current_request)
         except CommunicationBroken:

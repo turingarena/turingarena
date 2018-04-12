@@ -161,7 +161,7 @@ class CppSkeletonCodeGen(CppCodeGen):
             "flush": lambda: ["fflush(stdout);"],
             "exit": lambda: ["exit(0);"],
             "continue": lambda: ["continue;"],
-            "break": lambda: ["break"],
+            "break": lambda: ["break;"],
             "return": lambda: [f"return {self.expression(s.value)};"],
         }
         return generators[s.statement_type]()

@@ -1,13 +1,16 @@
+import logging
 from collections import namedtuple
 
 from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.driver.commands import Exit
-from turingarena.interface.exceptions import InterfaceExit, Diagnostic
+from turingarena.interface.exceptions import InterfaceExit, Diagnostic, InterfaceError
 from turingarena.interface.executable import ImperativeStatement, Instruction
 from turingarena.interface.expressions import Expression, LiteralExpression
 from turingarena.interface.io import FlushStatement, ReadStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
+
+logger = logging.getLogger(__name__)
 
 
 class ExitStatement(ImperativeStatement):
@@ -168,6 +171,15 @@ class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
 class LoopStatement(ImperativeStatement):
     __slots__ = []
 
+    def generate_instructions(self, context):
+        while True:
+            for instruction in self.body.generate_instructions(context):
+                if isinstance(instruction, BreakInstruction):
+                    return
+                if isinstance(instruction, ContinueInstruction):
+                    break  # break from the for and thus continue in the while
+                yield instruction
+
     @property
     def body(self):
         return ImperativeBlock(ast=self.ast.body, context=self.context.with_loop())
@@ -188,7 +200,7 @@ class LoopStatement(ImperativeStatement):
 
 class ContinueStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return ContinueInstruction()
+        yield ContinueInstruction()
 
     def validate(self):
         if not self.context.in_loop:
@@ -201,7 +213,7 @@ class ContinueInstruction(Instruction):
 
 class BreakStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return BreakInstruction()
+        yield BreakInstruction()
 
     def validate(self):
         if not self.context.in_loop:
@@ -216,9 +228,45 @@ class BreakInstruction(Instruction):
     pass
 
 
+class SwitchInstruction(Instruction):
+    def __init__(self, switch, condition):
+        self.switch = switch
+        self.condition = condition
+
+    def on_request_lookahead(self, request):
+        if not self.condition.is_resolved():
+            for case in self.switch.cases:
+                if case.expects_request(request):
+                    self.condition.resolve(case.labels[0].value)
+                    logger.debug(f"resolved switch condition to {self.condition.get()}")
+                    return
+            self.condition.resolve(-1)
+
+
 class SwitchStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return SwitchInstruction()
+        condition = self.variable.evaluate_in(context)
+
+        yield SwitchInstruction(self, condition)
+
+        value = condition.get()
+
+        if value == -1:
+            if self.default:
+                yield from self.default.generate_instructions(context)
+            else:
+                raise InterfaceError("unresolvable switch statement!")
+        else:
+            for case in self.cases:
+                for label in case.labels:
+                    if value == label.value:
+                        yield from case.generate_instructions(context)
+
+    def expects_request(self, request):
+        for case in self.cases:
+            if case.expects_request(request):
+                return True
+        return False
 
     @property
     def cases(self):
@@ -240,7 +288,12 @@ class SwitchStatement(ImperativeStatement):
         if len(cases) == 0:
             yield Diagnostic(Diagnostic.Messages.EMPTY_SWITCH_BODY, parseinfo=self.ast.parseinfo)
 
+        labels = []
         for case in cases:
+            for label in case.labels:
+                if label in labels:
+                    yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=self.ast.parseinfo)
+                labels.append(label)
             yield from case.validate()
 
     @property
@@ -255,13 +308,12 @@ class SwitchStatement(ImperativeStatement):
         ).with_initialized_variables(initialized_variables)
 
 
-class SwitchInstruction(Instruction):
-    pass
-
-
 class CaseStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return CaseInstruction()
+        yield from self.body.generate_instructions(context)
+
+    def expects_request(self, request):
+        return self.body.expects_request(request)
 
     @property
     def body(self):
@@ -283,6 +335,3 @@ class CaseStatement(ImperativeStatement):
             if not isinstance(label, LiteralExpression):
                 yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
 
-
-class CaseInstruction(Instruction):
-    pass
