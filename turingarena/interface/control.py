@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 
 from turingarena.interface.block import ImperativeBlock
@@ -8,6 +9,8 @@ from turingarena.interface.expressions import Expression, LiteralExpression
 from turingarena.interface.io import FlushStatement, ReadStatement
 from turingarena.interface.type_expressions import ScalarType
 from turingarena.interface.variables import Variable
+
+logger = logging.getLogger(__name__)
 
 
 class ExitStatement(ImperativeStatement):
@@ -216,25 +219,42 @@ class BreakInstruction(Instruction):
     pass
 
 
+class SwitchInstruction(Instruction):
+    def __init__(self, switch, condition):
+        self.switch = switch
+        self.condition = condition
+
+    def on_request_lookahead(self, request):
+        if not self.condition.is_resolved():
+            for case in self.switch.cases:
+                if case.expects_request(request):
+                    self.condition.resolve(case.labels[0].value)
+                    logger.debug(f"resolved switch condition to {self.condition.get()}")
+                    return
+            self.condition.resolve(-1)
+
+
 class SwitchStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        condition = self.condition.evaluate_in(context)
-        if not condition.is_resolved():
-            raise InterfaceError("Switch variable not resolved")
+        condition = self.variable.evaluate_in(context)
+
+        yield SwitchInstruction(self, condition)
+
         value = condition.get()
 
-        for case in self.cases:
-            for label in case.labels:
-                if value == label.value():
-                    yield from case.generate_instructions(context)
-                    return
+        if value == -1:
+            yield from self.default.generate_instructions(context)
+        else:
+            for case in self.cases:
+                for label in case.labels:
+                    if value == label.value:
+                        yield from case.generate_instructions(context)
 
     def expects_request(self, request):
         for case in self.cases:
             if case.expects_request(request):
                 return True
         return False
-
 
     @property
     def cases(self):

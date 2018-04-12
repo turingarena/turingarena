@@ -99,7 +99,7 @@ class CallStatement(ImperativeStatement):
     def expects_request(self, request):
         return (
             request is not None
-            and request.request_type == "function_call"
+            and isinstance(request, FunctionCall)
             and request.function_name == self.function_name
         )
 
