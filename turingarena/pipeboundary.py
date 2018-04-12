@@ -54,13 +54,10 @@ class PipeBoundary:
                 for name, pipe in descriptor.pipes.items()
             }
 
-    def sync_empty(self, descriptor, side):
-        with self.open_pipe(descriptor, side) as p:
-            pass
-
     def sync_write(self, descriptor, side, payload):
         with self.open_pipe(descriptor, side) as p:
-            p.write(payload)
+            if payload is not None:
+                p.write(payload)
 
     def sync_read(self, descriptor, side):
         with self.open_pipe(descriptor, side) as p:
@@ -74,12 +71,7 @@ class PipeBoundary:
             os.mkfifo(self.pipe_path(pipe))
 
     def send_empty_request(self, descriptor):
-        for name, pipe in descriptor.request_pipes.items():
-            self.sync_empty(pipe, PipeBoundarySide.CLIENT)
-        return {
-            name: self.sync_read(pipe, PipeBoundarySide.CLIENT)
-            for name, pipe in descriptor.response_pipes.items()
-        }
+        return self.send_request(descriptor, **{n: None for n in descriptor.request_pipes})
 
     def send_request(self, descriptor, **request_payloads):
         assert len(descriptor.request_pipes) == len(request_payloads)
@@ -106,7 +98,4 @@ class PipeBoundary:
     def _send_payloads(self, descriptor, response_payloads):
         for name, pipe in descriptor.response_pipes.items():
             payload = response_payloads.get(name)
-            if payload is not None:
-                self.sync_write(pipe, PipeBoundarySide.SERVER, payload)
-            else:
-                self.sync_empty(pipe, PipeBoundarySide.SERVER)
+            self.sync_write(pipe, PipeBoundarySide.SERVER, payload)

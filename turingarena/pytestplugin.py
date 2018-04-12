@@ -4,10 +4,10 @@ import re
 
 import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
-from future.moves import sys
 from pytest import approx
 
-from turingarena.problem.problem import load_source_file, load_problem
+from turingarena.problem.problem import load_problem
+from turingarena.sandbox.source import AlgorithmSource
 
 
 class EvaluationAssertionError(Exception):
@@ -62,12 +62,9 @@ def pytest_collect_file(path, parent):
 
     if solutions_dirname != "solutions": return
 
-    if sys.path[0] != problem_dir:
-        sys.path.insert(0, problem_dir)
-
     problem = load_problem()
-    source = load_source_file(
-        path,
+    source = AlgorithmSource.load(
+        f":{path}",
         interface=problem.interface,
     )
 

@@ -2,6 +2,9 @@ import logging
 import os
 from collections import namedtuple
 
+from turingarena.loader import find_package_path, split_module
+from turingarena.sandbox.languages.language import Language
+
 logger = logging.getLogger(__name__)
 
 
@@ -13,11 +16,21 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
     __slots__ = []
 
     @staticmethod
-    def load(source_text, *, language, interface):
+    def load(name, *, language=None, interface):
+        mod, rel_path = split_module(name)
+        source_path = find_package_path(mod, rel_path)
+
+        if language is None:
+            base, ext = os.path.splitext(source_path)
+            language = Language.from_extension(ext)
+
+        with open(source_path) as f:
+            source_text = f.read()
+
         return language.source(
-            text=source_text,
-            language=language,
             interface=interface,
+            language=language,
+            text=source_text,
         )
 
     def compile(self, algorithm_dir):

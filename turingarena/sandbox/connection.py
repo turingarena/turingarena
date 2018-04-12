@@ -10,7 +10,9 @@ SandboxProcessConnection = namedtuple("SandboxProcessConnection", ["downward", "
 
 SANDBOX_QUEUE = PipeSynchronousQueueDescriptor(
     request_pipes=dict(
-        algorithm_dir=PipeDescriptor("algorithm_dir.pipe", ("w", "r")),
+        language_name=PipeDescriptor("language_name.pipe", ("w", "r")),
+        source_name=PipeDescriptor("source_name.pipe", ("w", "r")),
+        interface_name=PipeDescriptor("interface_name.pipe", ("w", "r")),
     ),
     response_pipes=dict(
         sandbox_process_dir=PipeDescriptor("sandbox_process_dir.pipe", ("r", "w")),

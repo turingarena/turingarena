@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 from threading import Thread
 
@@ -32,11 +33,7 @@ class MetaServer:
         pass
 
     @abstractmethod
-    def create_child_server(self, child_server_dir, **request_payloads):
-        pass
-
-    @abstractmethod
-    def run_child_server(self, child_server):
+    def run_child_server(self, child_server_dir, **request_payloads):
         pass
 
     @abstractmethod
@@ -53,9 +50,9 @@ class MetaServer:
             except StopMetaServer:
                 break
 
-    def _run_child_server(self, child_server, child_server_dir):
+    def do_run_child(self, stack, child_server_dir):
         try:
-            self.run_child_server(child_server)
+            stack.close()
         finally:
             child_server_dir.cleanup()
 
@@ -63,11 +60,12 @@ class MetaServer:
         self.handle_stop_request(request_payloads)
 
         child_server_dir = TemporaryDirectory(dir="/tmp")
-        child_server = self.create_child_server(
-            child_server_dir.name, **request_payloads
-        )
 
-        Thread(target=lambda: self._run_child_server(child_server, child_server_dir)).start()
+        stack = ExitStack()
+        stack.enter_context(
+            self.run_child_server(child_server_dir.name, **request_payloads)
+        )
+        Thread(target=lambda: self.do_run_child(stack, child_server_dir)).start()
         return self.create_response(child_server_dir.name)
 
     def handle_stop_request(self, request_payloads):

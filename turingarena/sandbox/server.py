@@ -1,8 +1,9 @@
 import logging
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.sandbox.algorithm import CompiledAlgorithm
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena.sandbox.executable import AlgorithmExecutable
@@ -18,12 +19,20 @@ class SandboxServer(MetaServer):
     def get_queue_descriptor(self):
         return SANDBOX_QUEUE
 
-    def create_child_server(self, child_server_dir, *, algorithm_dir):
-        executable = AlgorithmExecutable.load(algorithm_dir)
-        return SandboxProcessServer(executable=executable, sandbox_dir=child_server_dir)
-
-    def run_child_server(self, child_server):
-        child_server.run()
+    @contextmanager
+    def run_child_server(self, child_server_dir, *, language_name, source_name, interface_name):
+        with CompiledAlgorithm.load(
+                source_name=source_name,
+                interface_name=interface_name,
+                language_name=language_name
+        ) as algo:
+            executable = AlgorithmExecutable.load(algo.algorithm_dir)
+            server = SandboxProcessServer(
+                executable=executable,
+                sandbox_dir=child_server_dir,
+            )
+            yield
+            server.run()
 
     def create_response(self, child_server_dir):
         return dict(sandbox_process_dir=child_server_dir)

@@ -18,10 +18,12 @@ class SandboxClient:
         self.boundary = PipeBoundary(sandbox_dir)
 
     @contextmanager
-    def run(self, algorithm_dir):
+    def run(self, *, language_name, source_name, interface_name):
         response = self.boundary.send_request(
             SANDBOX_QUEUE,
-            algorithm_dir=algorithm_dir,
+            language_name=language_name,
+            source_name=source_name,
+            interface_name=interface_name,
         )
         yield response["sandbox_process_dir"]
 

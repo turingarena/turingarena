@@ -7,6 +7,7 @@ from turingarena.interface.driver.commands import MainBegin
 from turingarena.interface.exceptions import InterfaceExit, Diagnostic
 from turingarena.interface.executable import Instruction
 from turingarena.interface.parser import parse_interface
+from turingarena.loader import find_package_path, split_module
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,12 @@ class InterfaceDefinition:
         if self.global_variables and not self.init_body:
             yield Diagnostic(Diagnostic.Messages.INIT_BLOCK_MISSING, parseinfo=self.body.ast.parseinfo)
         yield from self.body.validate()
+
+    @staticmethod
+    def load(name):
+        mod, rel_path = split_module(name, default_arg="interface.txt")
+        with open(find_package_path(mod, rel_path)) as f:
+            return InterfaceDefinition.compile(f.read())
 
     @staticmethod
     def compile(source_text, extra_metadata=None, validate=True):
