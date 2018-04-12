@@ -6,7 +6,7 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena.problem.problem import make_problem, load_source_file
+from turingarena.problem.problem import make_problem, load_source_file, load_problem_module_directory
 
 
 class EvaluationAssertionError(Exception):
@@ -62,10 +62,9 @@ def pytest_collect_file(path, parent):
     if solutions_dirname != "solutions": return
     if not os.path.isfile(os.path.join(problem_dir, "interface.txt")): return
 
-    problem = make_problem(problem_dir)
+    problem = make_problem(load_problem_module_directory(problem_dir))
     source = load_source_file(
-        solutions_dir,
-        source_filename,
+        path,
         interface=problem.interface,
     )
 

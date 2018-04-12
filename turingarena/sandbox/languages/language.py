@@ -4,6 +4,10 @@ import pkgutil
 from collections import namedtuple
 
 
+class UnknownFileExtension(Exception):
+    pass
+
+
 class Language(namedtuple("Language", [
     "name",
     "extension",
@@ -33,11 +37,11 @@ class Language(namedtuple("Language", [
         for language in cls.languages():
             if language.name == name:
                 return language
-        raise RuntimeError(f"language {name} not supported by TuringArena")
+        raise ValueError(f"language {name} not supported by TuringArena")
 
     @classmethod
     def from_extension(cls, extension):
         for language in cls.languages():
             if language.extension == extension:
                 return language
-        raise RuntimeError(f"no language with extension{extension} is supported by TuringArena")
+        raise UnknownFileExtension

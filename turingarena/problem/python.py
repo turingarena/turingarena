@@ -1,6 +1,7 @@
+import importlib
+import importlib.util
 import json
 import logging
-import os
 import subprocess
 import sys
 from collections import namedtuple
@@ -14,22 +15,6 @@ from turingarena.problem.evaluator import ProblemEvaluator
 logger = logging.getLogger(__name__)
 
 
-class ProblemEvaluationContext(namedtuple("ProblemEvaluationContext", ["evaluation_dir"])):
-    __slots__ = []
-
-    @property
-    def submission(self):
-        return Algorithm(os.path.join(self.evaluation_dir, "submission"))
-
-    @property
-    def algorithms(self):
-        root, dirs, files = next(os.walk(os.path.join(self.evaluation_dir, "algorithms")))
-        return {
-            name: Algorithm(os.path.join(root, name))
-            for name in dirs
-        }
-
-
 class PythonEvaluator(ProblemEvaluator, namedtuple("PythonEvaluator", [
     "script_path", "function_name"
 ])):
@@ -39,7 +24,7 @@ class PythonEvaluator(ProblemEvaluator, namedtuple("PythonEvaluator", [
         return super().__new__(cls, script_path=script_path, function_name=function_name)
 
 
-class HostPythonEvaluator(PythonEvaluator):
+class HostPythonEvaluator(namedtuple("HostPythonEvaluator", ["module"])):
     """
     Evaluates a Python problem in the host interpreter.
     Stdout is captured by changing sys.stdout.
@@ -48,17 +33,11 @@ class HostPythonEvaluator(PythonEvaluator):
     __slots__ = []
 
     def evaluate(self, *, prepared_problem_dir, submission_dir):
-        script_globals = {}
-        with open(self.script_path) as f:
-            script = compile(f.read(), self.script_path, mode="exec")
-
-        context = ProblemEvaluationContext(prepared_problem_dir)
-        script_globals["context"] = context
+        mod = importlib.import_module(".evaluate", self.module.__package__)
 
         eval_stdout = StringIO()
         with redirect_stdout(eval_stdout):
-            exec(script, script_globals)
-            data = script_globals[self.function_name](Algorithm(submission_dir))
+            data = mod.evaluate(Algorithm(submission_dir))
 
         return Evaluation(
             stdout=eval_stdout.getvalue().splitlines(),

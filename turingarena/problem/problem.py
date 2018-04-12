@@ -2,17 +2,21 @@ import importlib
 import importlib.util
 import logging
 import os
+import random
+import string
 import subprocess
+import types
 from collections import namedtuple
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 import yaml
+from future.moves import sys
 
 from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.problem.python import HostPythonEvaluator
-from turingarena.sandbox.languages.language import Language
+from turingarena.sandbox.languages.language import Language, UnknownFileExtension
 
 logger = logging.getLogger(__name__)
 
@@ -63,15 +67,9 @@ class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
                 )
 
 
-def make_problem(dirname):
-    with open(os.path.join(dirname, "interface.txt")) as f:
-        interface_text = f.read()
-
-    try:
-        with open(os.path.join(dirname, "metadata.yaml")) as f:
-            extra_metadata = yaml.load(f, Loader=TuringarenaYamlLoader)
-    except FileNotFoundError:
-        extra_metadata = dict()
+def make_problem(mod):
+    interface_text = load_interface_text(mod)
+    extra_metadata = load_problem_metadata(mod)
 
     interface = InterfaceDefinition.compile(
         interface_text,
@@ -80,9 +78,29 @@ def make_problem(dirname):
     return AlgorithmicProblem(
         interface=interface,
         extra_metadata=extra_metadata,
-        algorithm_sources=dict(find_algorithm_sources(os.path.join(dirname, "algorithms"), interface=interface)),
-        evaluator=HostPythonEvaluator(script_path=os.path.join(dirname, "evaluate.py"))
+        algorithm_sources=dict(find_algorithm_sources(mod, interface=interface)),
+        evaluator=HostPythonEvaluator(mod),
     )
+
+
+def load_interface_text(mod):
+    for path in get_problem_paths(mod):
+        try:
+            with open(os.path.join(path, "interface.txt")) as f:
+                return f.read()
+        except FileNotFoundError:
+            pass
+    raise ValueError("no interface file found")
+
+
+def load_problem_metadata(mod):
+    for path in get_problem_paths(mod):
+        try:
+            with open(os.path.join(path, "metadata.yaml")) as f:
+                return yaml.load(f, Loader=TuringarenaYamlLoader)
+        except FileNotFoundError:
+            pass
+    return dict()
 
 
 @contextmanager
@@ -109,14 +127,20 @@ def clone_from_git(url):
         sys.path.remove(git_dir)
 
 
+def load_problem_module_directory(directory="."):
+    module_name = "_turingarena_problem_" + "".join(random.choices(string.ascii_lowercase, k=6))
+    problem_module = types.ModuleType(module_name)
+    problem_module.__package__ = problem_module.__name__
+    problem_module.__path__ = [os.path.abspath(directory)]
+    sys.modules[module_name] = problem_module
+    return problem_module
+
+
 def load_problem(problem_name):
     if problem_name == ".":
         return make_problem(".")
     problem_package = importlib.import_module(problem_name)
-    try:
-        paths = problem_package.__path__
-    except AttributeError:
-        raise ValueError(f"problem module {problem_package} is not a package")
+    paths = get_problem_paths(problem_package)
     assert len(paths) >= 1
     if len(paths) > 1:
         raise ValueError(f"problem package {problem_package} has multiple paths: {paths}")
@@ -124,19 +148,33 @@ def load_problem(problem_name):
     return make_problem(path)
 
 
-def find_algorithm_sources(directory, *, interface):
-    root, directories, files = next(os.walk(directory))
+def get_problem_paths(problem_module):
+    try:
+        return problem_module.__path__
+    except AttributeError:
+        raise ValueError(f"problem module {problem_module} is not a package")
 
-    for source_filename in files:
-        yield source_filename, load_source_file(directory, source_filename, interface=interface)
+
+def find_algorithm_sources(mod, *, interface, directory_name="solutions"):
+    for path in get_problem_paths(mod):
+        for root, directories, files in os.walk(os.path.join(path, directory_name)):
+            for source_filename in files:
+                source_path = os.path.join(root, source_filename)
+                try:
+                    yield source_filename, load_source_file(
+                        source_path,
+                        interface=interface,
+                    )
+                except UnknownFileExtension:
+                    logger.warning(f"skipping file with unknown extension: {source_path}")
 
 
-def load_source_file(directory, source_filename, *, interface):
+def load_source_file(source_path, *, interface):
+    directory, source_filename = os.path.split(source_path)
     base, ext = os.path.splitext(source_filename)
-    source_path = os.path.join(directory, source_filename)
+    language = Language.from_extension(ext)
     with open(source_path) as f:
         source_text = f.read()
-    language = Language.from_extension(ext)
     return language.source(
         interface=interface,
         language=language,
