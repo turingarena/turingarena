@@ -27,7 +27,6 @@ sys.modules[root_module_name] = root_problem_module
 
 class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
     "interface",
-    "extra_metadata",
     "algorithm_sources",
     "evaluator",
 ])):
@@ -132,7 +131,6 @@ def load_problem(problem_name=None):
     interface = load_interface(problem_name)
     return AlgorithmicProblem(
         interface=interface,
-        extra_metadata=dict(),  # FIXME
         algorithm_sources=dict(find_algorithm_sources(mod, interface=interface)),
         evaluator=HostPythonEvaluator(mod),
     )
