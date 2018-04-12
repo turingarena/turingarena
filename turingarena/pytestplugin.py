@@ -4,9 +4,10 @@ import re
 
 import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
+from future.moves import sys
 from pytest import approx
 
-from turingarena.problem.problem import make_problem, load_source_file, load_problem_module_directory
+from turingarena.problem.problem import make_problem, load_source_file, root_problem_module
 
 
 class EvaluationAssertionError(Exception):
@@ -60,9 +61,11 @@ def pytest_collect_file(path, parent):
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
 
     if solutions_dirname != "solutions": return
-    if not os.path.isfile(os.path.join(problem_dir, "interface.txt")): return
 
-    problem = make_problem(load_problem_module_directory(problem_dir))
+    if sys.path[0] != problem_dir:
+        sys.path.insert(0, problem_dir)
+
+    problem = make_problem(root_problem_module)
     source = load_source_file(
         path,
         interface=problem.interface,

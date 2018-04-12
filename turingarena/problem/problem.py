@@ -2,8 +2,6 @@ import importlib
 import importlib.util
 import logging
 import os
-import random
-import string
 import subprocess
 import types
 from collections import namedtuple
@@ -19,6 +17,12 @@ from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.languages.language import Language, UnknownFileExtension
 
 logger = logging.getLogger(__name__)
+
+root_module_name = "__turingarena_root__"
+root_problem_module = types.ModuleType(root_module_name)
+root_problem_module.__package__ = root_problem_module.__name__
+root_problem_module.__path__ = sys.path
+sys.modules[root_module_name] = root_problem_module
 
 
 class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
@@ -127,23 +131,15 @@ def clone_from_git(url):
         sys.path.remove(git_dir)
 
 
-def load_problem_module_directory(directory="."):
-    module_name = "_turingarena_problem_" + "".join(random.choices(string.ascii_lowercase, k=6))
-    problem_module = types.ModuleType(module_name)
-    problem_module.__package__ = problem_module.__name__
-    problem_module.__path__ = [os.path.abspath(directory)]
-    sys.modules[module_name] = problem_module
-    return problem_module
-
-
-def load_problem(problem_name):
-    if problem_name == ".":
-        return make_problem(".")
-    problem_package = importlib.import_module(problem_name)
-    paths = get_problem_paths(problem_package)
+def load_problem(problem_name=None):
+    if problem_name is None:
+        problem_module = root_problem_module
+    else:
+        problem_module = importlib.import_module(problem_name)
+    paths = get_problem_paths(problem_module)
     assert len(paths) >= 1
     if len(paths) > 1:
-        raise ValueError(f"problem package {problem_package} has multiple paths: {paths}")
+        raise ValueError(f"problem package {problem_module} has multiple paths: {paths}")
     [path] = paths
     return make_problem(path)
 
