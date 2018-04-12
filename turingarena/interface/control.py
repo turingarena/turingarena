@@ -171,6 +171,15 @@ class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
 class LoopStatement(ImperativeStatement):
     __slots__ = []
 
+    def generate_instructions(self, context):
+        while True:
+            for instruction in self.body.generate_instructions(context):
+                if isinstance(instruction, BreakInstruction):
+                    return
+                if isinstance(instruction, ContinueInstruction):
+                    break  # break from the for and thus continue in the while
+                yield instruction
+
     @property
     def body(self):
         return ImperativeBlock(ast=self.ast.body, context=self.context.with_loop())
@@ -191,7 +200,7 @@ class LoopStatement(ImperativeStatement):
 
 class ContinueStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return ContinueInstruction()
+        yield ContinueInstruction()
 
     def validate(self):
         if not self.context.in_loop:
@@ -204,7 +213,7 @@ class ContinueInstruction(Instruction):
 
 class BreakStatement(ImperativeStatement):
     def generate_instructions(self, context):
-        return BreakInstruction()
+        yield BreakInstruction()
 
     def validate(self):
         if not self.context.in_loop:
@@ -243,7 +252,10 @@ class SwitchStatement(ImperativeStatement):
         value = condition.get()
 
         if value == -1:
-            yield from self.default.generate_instructions(context)
+            if self.default:
+                yield from self.default.generate_instructions(context)
+            else:
+                raise InterfaceError("unresolvable switch statement!")
         else:
             for case in self.cases:
                 for label in case.labels:
