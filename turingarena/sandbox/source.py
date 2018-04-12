@@ -19,10 +19,8 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
     def load(name, *, language=None, interface):
         mod, rel_path = split_module(name)
         source_path = find_package_path(mod, rel_path)
-
         if language is None:
-            base, ext = os.path.splitext(source_path)
-            language = Language.from_extension(ext)
+            language = Language.from_source_name(name)
 
         with open(source_path) as f:
             source_text = f.read()

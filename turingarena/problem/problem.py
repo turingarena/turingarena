@@ -1,54 +1,14 @@
 import logging
-import os
 import subprocess
-from collections import namedtuple
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 import yaml
 
-from turingarena.interface.interface import InterfaceDefinition
 from turingarena.interface.metadata import TuringarenaYamlLoader
 from turingarena.loader import find_package_path, split_module
-from turingarena.problem.python import HostPythonEvaluator
 
 logger = logging.getLogger(__name__)
-
-
-class AlgorithmicProblem(namedtuple("AlgorithmicProblem", [
-    "interface",
-    "evaluator",
-])):
-    __slots__ = []
-
-    @property
-    def metadata(self):
-        return {
-            **self.extra_metadata,
-            **dict(
-                interface=self.interface.metadata,
-            ),
-        }
-
-    def evaluate(self, source):
-        # FIXME: we should expect source_name, language_name
-        with TemporaryDirectory() as temp_dir:
-            source_path = os.path.join(temp_dir, "source.txt")
-            with open(source_path, "w") as f:
-                f.write(source.text)
-            return self.evaluator.evaluate(
-                source_name=f":{source_path}",
-                language_name=source.language.name,
-            )
-
-
-def load_problem(problem_name=None):
-    mod, _ = split_module(problem_name)
-    interface_name = problem_name
-    return AlgorithmicProblem(
-        interface=InterfaceDefinition.load(interface_name),
-        evaluator=HostPythonEvaluator(mod, interface_name=interface_name),
-    )
 
 
 def load_problem_metadata(name):

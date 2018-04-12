@@ -6,7 +6,9 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena.problem.problem import load_problem
+from turingarena.interface.interface import InterfaceDefinition
+from turingarena.loader import make_dummy_package
+from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.source import AlgorithmSource
 
 
@@ -15,14 +17,20 @@ class EvaluationAssertionError(Exception):
 
 
 class ProblemSolutionTestItem(pytest.Item):
-    def __init__(self, parent, problem, source):
+    def __init__(self, parent, evaluator_name, source_name):
         super().__init__("test_solution", parent)
-        self.problem = problem
-        self.source = source
+        self.evaluator_name = evaluator_name
+        self.source_name = source_name
 
     def runtest(self):
-        assertions = re.findall(r"evaluation_assert\s+(.+)", self.source.text)
-        result = self.problem.evaluate(self.source)
+        interface = InterfaceDefinition.load(self.evaluator_name)
+        source = AlgorithmSource.load(self.source_name, interface=interface)
+        assertions = re.findall(r"evaluation_assert\s+(.+)", source.text)
+
+        result = HostPythonEvaluator(
+            self.evaluator_name,
+            interface_name=self.evaluator_name,
+        ).evaluate(self.source_name)
         for condition in assertions:
             mode = "exec"
             tree = ast.parse(f"assert {condition}\n", mode=mode)
@@ -47,13 +55,13 @@ class ProblemSolutionTestItem(pytest.Item):
 
 
 class ProblemSolutionTestFile(pytest.File):
-    def __init__(self, fspath, parent, problem, source):
+    def __init__(self, fspath, parent, evaluator_name, source_name):
         super().__init__(fspath=fspath, parent=parent)
-        self.problem = problem
-        self.source = source
+        self.evaluator_name = evaluator_name
+        self.source_name = source_name
 
     def collect(self):
-        yield ProblemSolutionTestItem(self, self.problem, self.source)
+        yield ProblemSolutionTestItem(self, self.evaluator_name, self.source_name)
 
 
 def pytest_collect_file(path, parent):
@@ -62,15 +70,12 @@ def pytest_collect_file(path, parent):
 
     if solutions_dirname != "solutions": return
 
-    problem = load_problem()
-    source = AlgorithmSource.load(
-        f":{path}",
-        interface=problem.interface,
-    )
+    module_name = "__turingarena_current_test__"
+    make_dummy_package(module_name, [problem_dir])
 
     return ProblemSolutionTestFile(
         fspath=path,
         parent=parent,
-        problem=problem,
-        source=source,
+        evaluator_name=f"{module_name}",
+        source_name=f"{module_name}:{path}",
     )

@@ -6,13 +6,15 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 from turingarena.algorithm import Algorithm
+from turingarena.loader import split_module
 from turingarena.problem.evaluation import Evaluation
+from turingarena.sandbox.languages.language import Language
 
 logger = logging.getLogger(__name__)
 
 
 class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
-    "module",
+    "name",
     "interface_name",
 ])):
     """
@@ -22,17 +24,22 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 
     __slots__ = []
 
-    def evaluate(self, *, source_name, language_name):
-        mod = importlib.import_module(".evaluate", self.module.__package__)
+    def evaluate(self, source_name, *, language=None):
+        if language is None:
+            language = Language.from_source_name(source_name)
+
+        mod, arg = split_module(self.name)
+        assert arg is None
+        evaluator_mod = importlib.import_module(".evaluate", mod.__package__)
 
         eval_stdout = StringIO()
         with redirect_stdout(eval_stdout):
             algorithm = Algorithm(
                 source_name=source_name,
-                language_name=language_name,
+                language_name=language.name,
                 interface_name=self.interface_name,
             )
-            data = mod.evaluate(algorithm)
+            data = evaluator_mod.evaluate(algorithm)
 
         return Evaluation(
             stdout=eval_stdout.getvalue().splitlines(),
