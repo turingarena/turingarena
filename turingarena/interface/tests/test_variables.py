@@ -1,9 +1,9 @@
-from turingarena.interface.tests.test_utils import assert_no_error, assert_error
+from turingarena.interface.tests.test_utils import assert_no_interface_errors, assert_interface_error
 from turingarena.interface.exceptions import Diagnostic
 
 
 def test_variable_not_initialized():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             write a;
@@ -12,7 +12,7 @@ def test_variable_not_initialized():
 
 
 def test_variable_initialized():
-    assert_no_error("""
+    assert_no_interface_errors("""
         function f() -> int;
         main {
             var int a;
@@ -23,7 +23,7 @@ def test_variable_initialized():
 
 
 def test_init_block_call():
-    assert_no_error("""
+    assert_no_interface_errors("""
         var int a;
         function f() -> int;
         init {
@@ -36,7 +36,7 @@ def test_init_block_call():
 
 
 def test_call_on_itself():
-    assert_error("""
+    assert_interface_error("""
         function f(int a) -> int;
         main {
             var int a;
@@ -46,7 +46,7 @@ def test_call_on_itself():
 
 
 def test_variable_not_initialized_subscript():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             var int[] A;
@@ -56,7 +56,7 @@ def test_variable_not_initialized_subscript():
 
 
 def test_variable_not_allocated():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int[] a; 
             read a[0];
@@ -65,7 +65,7 @@ def test_variable_not_allocated():
 
 
 def test_variable_initialized_for():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int a;
             read a;
@@ -77,7 +77,7 @@ def test_variable_initialized_for():
 
 
 def test_variable_initialized_if():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
              var int a; 
              read a;
@@ -91,7 +91,7 @@ def test_variable_initialized_if():
 
 
 def test_variable_in_if_body():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             if (1) {
@@ -104,7 +104,7 @@ def test_variable_in_if_body():
 
 
 def test_variable_initialized_if_2():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
              var int a;
              if (1) {
@@ -118,7 +118,7 @@ def test_variable_initialized_if_2():
 
 
 def test_variable_initialized_if_3():
-    assert_error("""
+    assert_interface_error("""
         main {
              var int a, b;
              if (1) {
@@ -132,7 +132,7 @@ def test_variable_initialized_if_3():
 
 
 def test_variable_initialized_call():
-    assert_no_error("""
+    assert_no_interface_errors("""
         function test(int a, int b) -> int;
         
         main {
@@ -145,7 +145,7 @@ def test_variable_initialized_call():
 
 
 def test_variable_not_initialized_call():
-    assert_error("""
+    assert_interface_error("""
         function test(int a, int b) -> int;
 
         main {
@@ -158,7 +158,7 @@ def test_variable_not_initialized_call():
 
 
 def test_local_variable():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int a;
             read a;
@@ -168,7 +168,7 @@ def test_local_variable():
 
 
 def test_local_variable_not_initialized():
-    assert_error("""
+    assert_interface_error("""
          main {
             var int a;
             write a;
@@ -177,7 +177,7 @@ def test_local_variable_not_initialized():
 
 
 def test_global_variables():
-    assert_error("""
+    assert_interface_error("""
         var int a;
         
         init {
@@ -189,7 +189,7 @@ def test_global_variables():
 
 
 def test_no_init_block():
-    assert_error("""
+    assert_interface_error("""
         var int a;
         
         main {}
@@ -197,7 +197,7 @@ def test_no_init_block():
 
 
 def test_init_block():
-    assert_no_error("""
+    assert_no_interface_errors("""
         var int a;
         
         init {
@@ -211,7 +211,7 @@ def test_init_block():
 
 
 def test_variable_not_declared():
-    assert_error("""
+    assert_interface_error("""
         main {
             write a;
         }
@@ -219,7 +219,7 @@ def test_variable_not_declared():
 
 
 def test_variable_redeclared():
-    assert_error("""
+    assert_interface_error("""
         var int a; 
         
         main {
@@ -229,7 +229,7 @@ def test_variable_redeclared():
 
 
 def test_variable_initialized_switch():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int a;
             switch (1) {
@@ -249,7 +249,7 @@ def test_variable_initialized_switch():
 
 
 def test_variable_not_initialized_switch():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             switch (1) {
@@ -265,7 +265,7 @@ def test_variable_not_initialized_switch():
 
 
 def test_variable_not_initialized_switch_default():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             switch (1) {

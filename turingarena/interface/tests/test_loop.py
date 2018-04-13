@@ -1,4 +1,4 @@
-from .test_utils import assert_error, assert_no_error, define_algorithm
+from .test_utils import assert_interface_error, assert_no_interface_errors, define_algorithm
 from turingarena.interface.exceptions import Diagnostic
 
 
@@ -53,7 +53,7 @@ def test_loop():
 
 
 def test_correct():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             loop {
                 var int a;
@@ -77,7 +77,7 @@ def test_correct():
 
 
 def test_unexpected_break():
-    assert_error("""
+    assert_interface_error("""
         main {
             break;
         }
@@ -85,7 +85,7 @@ def test_unexpected_break():
 
 
 def test_unexpected_continue():
-    assert_error("""
+    assert_interface_error("""
         main {
             continue;
         }
@@ -93,7 +93,7 @@ def test_unexpected_continue():
 
 
 def test_unreachable_code():
-    assert_error("""
+    assert_interface_error("""
         main {
             loop {
                 write 1;
@@ -105,7 +105,7 @@ def test_unreachable_code():
 
 
 def test_infinite_loop():
-    assert_error("""
+    assert_interface_error("""
         main {
             loop {
                 write 4;

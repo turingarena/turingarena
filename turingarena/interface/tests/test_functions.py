@@ -1,4 +1,4 @@
-from turingarena.interface.tests.test_utils import define_algorithms, assert_error
+from turingarena.interface.tests.test_utils import define_algorithms, assert_interface_error
 from turingarena.interface.exceptions import Diagnostic
 
 
@@ -86,14 +86,14 @@ def test_function_return_value():
 
 
 def test_function_returns_scalar():
-    assert_error("""
+    assert_interface_error("""
         function f() -> /*!*/ int[] /*!*/ ;
         main {}
     """, Diagnostic.Messages.RETURN_TYPE_MUST_BE_SCALAR)
 
 
 def test_callback_accept_scalars():
-    assert_error("""
+    assert_interface_error("""
         callback f(int a, /*!*/ int[] b /*!*/) {}
         main {}
     """, Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS)

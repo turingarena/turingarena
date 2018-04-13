@@ -1,9 +1,9 @@
-from turingarena.interface.tests.test_utils import assert_error, assert_no_error
+from turingarena.interface.tests.test_utils import assert_interface_error, assert_no_interface_errors
 from turingarena.interface.exceptions import Diagnostic
 
 
 def test_missing_local_flush():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             write 5;
@@ -13,7 +13,7 @@ def test_missing_local_flush():
 
 
 def test_missing_flush_for():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
             
@@ -27,7 +27,7 @@ def test_missing_flush_for():
 
 
 def test_missing_flush_for_2():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a;
 
@@ -40,7 +40,7 @@ def test_missing_flush_for_2():
 
 
 def test_missing_flush_for_3():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a, b;
 
@@ -55,7 +55,7 @@ def test_missing_flush_for_3():
 
 
 def test_for():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int a;
 
@@ -70,7 +70,7 @@ def test_for():
 
 
 def test_missing_flush_if():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int a, b;
             read a;
@@ -86,7 +86,7 @@ def test_missing_flush_if():
 
 
 def test_missing_flush_if_2():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int a, b;
             read a;
@@ -103,7 +103,7 @@ def test_missing_flush_if_2():
 
 
 def test_missing_flush_init():
-    assert_error("""
+    assert_interface_error("""
         init {
             write 4;
         }

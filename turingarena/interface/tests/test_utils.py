@@ -1,6 +1,6 @@
-from collections import deque
 from tempfile import TemporaryDirectory
 from contextlib import contextmanager
+from typing import Dict, List, Generator, ContextManager
 
 from turingarena.algorithm import Algorithm
 from turingarena.interface.exceptions import Diagnostic
@@ -8,25 +8,13 @@ from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.languages.language import Language
 from turingarena.loader import make_dummy_package
 
-def callback_mock(calls, return_values=None):
-    if return_values is not None:
-        return_values = deque(return_values)
-
-    def mock(*args):
-        calls.append((mock, args))
-
-        if return_values is not None:
-            return return_values.popleft()
-
-    return mock
-
 
 @contextmanager
-def define_algorithm(interface_text, source_text, language_name):
+def define_algorithm(interface_text: str, source_text: str, language_name: str) -> ContextManager[Algorithm]:
     language = Language.from_name(language_name)
 
     with TemporaryDirectory(dir="/tmp") as tmp_dir:
-        mod = make_dummy_package("test", [tmp_dir])
+        make_dummy_package("test", [tmp_dir])
         source_file_name = f"source{language.extension}"
         interface_file_name = "interface.txt"
 
@@ -43,7 +31,7 @@ def define_algorithm(interface_text, source_text, language_name):
         )
 
 
-def define_algorithms(interface_text, sources):
+def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[ContextManager[Algorithm], None, None]:
     for language_name, source_text in sources.items():
         with define_algorithm(
                 source_text=source_text,
@@ -53,14 +41,14 @@ def define_algorithms(interface_text, sources):
             yield impl
 
 
-def assert_no_error(text):
+def assert_no_interface_errors(text: str):
     i = InterfaceDefinition.compile(text)
     for m in i.validate():
         print(m.message)
         raise AssertionError
 
 
-def assert_error(text, error, *args):
+def assert_interface_error(text: str, error: str, *args: List[str]):
     i = InterfaceDefinition.compile(text)
     error = Diagnostic.build_message(error, *args)
     for m in i.validate():
@@ -68,22 +56,3 @@ def assert_error(text, error, *args):
         if m.message == error:
             return
     raise AssertionError
-
-
-def test_problem_loading():
-    with define_algorithm(
-        interface_text="""
-            function f() -> int;
-            main {
-                var int res;
-                call f() -> res;
-                write res;
-            }
-        """,
-        source_text="""
-            int f() {return 1;}
-        """,
-        language_name="c++",
-    ) as algo:
-        with algo.run() as p:
-            assert p.call.f() == 1
