@@ -1,5 +1,5 @@
-from turingarena.algorithm import Algorithm
-from turingarena.sandbox.languages import python
+from turingarena.interface.tests.test_utils import define_algorithm
+
 
 interface_text = """
     function test() -> int;
@@ -12,9 +12,9 @@ interface_text = """
 
 
 def test_sandbox_smoke():
-    with Algorithm.load(
+    with define_algorithm(
             interface_text=interface_text,
-            language=python.language,
+            language_name="python",
             source_text="""if True:
                 def test():
                     return 3

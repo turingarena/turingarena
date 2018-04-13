@@ -1,8 +1,7 @@
 import pytest
 
-from turingarena.algorithm import Algorithm
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, CompilationFailed
-from turingarena.sandbox.languages import java
+from turingarena.interface.tests.test_utils import define_algorithm
 
 interface_text = """
     function test() -> int;
@@ -15,9 +14,9 @@ interface_text = """
 
 
 def java_algorithm(interface, java_source):
-    return Algorithm.load(
+    return define_algorithm(
         interface_text=interface,
-        language=java.language,
+        language_name="java",
         source_text=java_source,
     )
 

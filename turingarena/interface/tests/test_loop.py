@@ -1,7 +1,5 @@
-from .test_utils import assert_error, assert_no_error
+from .test_utils import assert_interface_error, assert_no_interface_errors, define_algorithm
 from turingarena.interface.exceptions import Diagnostic
-from turingarena.algorithm import Algorithm
-from turingarena.sandbox.languages.language import Language
 
 
 interface_text = """
@@ -12,7 +10,7 @@ interface_text = """
         loop {
             var int a;
             read a;
-            switch (a) {
+            switch a {
                 case 1 {
                     var int b;
                     call f1() -> b;
@@ -35,9 +33,9 @@ interface_text = """
 
 
 def test_loop():
-    with Algorithm.load(
+    with define_algorithm(
         interface_text=interface_text,
-        language=Language.from_name("c++"),
+        language_name="c++",
         source_text="""
             int compute(int a) {return a;}
             int f1() {return 1;}
@@ -55,12 +53,12 @@ def test_loop():
 
 
 def test_correct():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             loop {
                 var int a;
                 read a;
-                switch (a) {
+                switch a {
                     case 1 {
                         write 5;
                         break;
@@ -79,7 +77,7 @@ def test_correct():
 
 
 def test_unexpected_break():
-    assert_error("""
+    assert_interface_error("""
         main {
             break;
         }
@@ -87,7 +85,7 @@ def test_unexpected_break():
 
 
 def test_unexpected_continue():
-    assert_error("""
+    assert_interface_error("""
         main {
             continue;
         }
@@ -95,7 +93,7 @@ def test_unexpected_continue():
 
 
 def test_unreachable_code():
-    assert_error("""
+    assert_interface_error("""
         main {
             loop {
                 write 1;
@@ -107,7 +105,7 @@ def test_unreachable_code():
 
 
 def test_infinite_loop():
-    assert_error("""
+    assert_interface_error("""
         main {
             loop {
                 write 4;

@@ -1,10 +1,8 @@
 import signal
-
 import pytest
 
-from turingarena.algorithm import Algorithm
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.sandbox.languages import cpp
+from turingarena.interface.tests.test_utils import define_algorithm
 
 protocol_text = """
     function test() -> int;
@@ -17,9 +15,9 @@ protocol_text = """
 
 
 def cpp_algorithm(source):
-    return Algorithm.load(
+    return define_algorithm(
         interface_text=protocol_text,
-        language=cpp.language,
+        language_name="c++",
         source_text=source,
     )
 

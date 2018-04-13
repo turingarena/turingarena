@@ -1,8 +1,7 @@
 import pytest
 
-from turingarena.algorithm import Algorithm
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
-from turingarena.sandbox.languages import javascript
+from turingarena.interface.tests.test_utils import define_algorithm
 
 interface_text = """
     function test() -> int;
@@ -15,9 +14,9 @@ interface_text = """
 
 
 def javascript_algorithm(source):
-    return Algorithm.load(
+    return define_algorithm(
         interface_text=interface_text,
-        language=javascript.language,
+        language_name="java",
         source_text=source,
     )
 

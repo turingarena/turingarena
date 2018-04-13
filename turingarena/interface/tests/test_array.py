@@ -1,9 +1,9 @@
-from .test_utils import assert_error, assert_no_error
+from .test_utils import assert_interface_error, assert_no_interface_errors
 from turingarena.interface.exceptions import Diagnostic
 
 
 def test_variable_not_initialized_array():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int[] A;
             var int s; 
@@ -17,7 +17,7 @@ def test_variable_not_initialized_array():
 
 
 def test_array_not_allocated():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int[] A;
             for (i : 10) {
@@ -28,7 +28,7 @@ def test_array_not_allocated():
 
 
 def test_array_alloc():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int[] A; 
             alloc A : 10;
@@ -39,7 +39,7 @@ def test_array_alloc():
 
 
 def test_array_access():
-    assert_no_error("""
+    assert_no_interface_errors("""
         var int[] A;
         var int s;
 
@@ -60,7 +60,7 @@ def test_array_access():
 
 
 def test_array_basic():
-    assert_no_error("""
+    assert_no_interface_errors("""
         main {
             var int[][] A;
             var int s;
@@ -79,7 +79,7 @@ def test_array_basic():
 
 
 def test_array_basic_error():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int[][] A;
             var int s;
@@ -98,7 +98,7 @@ def test_array_basic_error():
 
 
 def test_array_wrong_order():
-    assert_error("""
+    assert_interface_error("""
         main {
             var int[][] A;
             var int s;

@@ -1,4 +1,19 @@
-from turingarena.interface.tests.test_utils import callback_mock, define_algorithms, assert_error
+from collections import deque
+
+from turingarena.interface.tests.test_utils import define_algorithms, assert_interface_error
+
+
+def callback_mock(calls, return_values=None):
+    if return_values is not None:
+        return_values = deque(return_values)
+
+    def mock(*args):
+        calls.append((mock, args))
+
+        if return_values is not None:
+            return return_values.popleft()
+
+    return mock
 
 
 def test_callback_no_arguments_cpp():
@@ -121,7 +136,7 @@ def test_callback_return_value():
 
 
 def test_callback_returns_scalar():
-    assert_error("""
+    assert_interface_error("""
         callback f(int a) -> /*!*/ int[] /*!*/ {}  
         main {}
     """, "return type must be a scalar")
