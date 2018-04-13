@@ -10,7 +10,7 @@ from turingarena.loader import make_dummy_package
 
 
 @contextmanager
-def define_algorithm(interface_text: str, source_text: str, language_name: str) -> ContextManager[Algorithm]:
+def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Algorithm:
     language = Language.from_name(language_name)
 
     with TemporaryDirectory(dir="/tmp") as tmp_dir:
@@ -31,7 +31,7 @@ def define_algorithm(interface_text: str, source_text: str, language_name: str) 
         )
 
 
-def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[ContextManager[Algorithm], None, None]:
+def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[Algorithm, None, None]:
     for language_name, source_text in sources.items():
         with define_algorithm(
                 source_text=source_text,
@@ -48,7 +48,7 @@ def assert_no_interface_errors(text: str):
         raise AssertionError
 
 
-def assert_interface_error(text: str, error: str, *args: List[str]):
+def assert_interface_error(text: str, error: str, *args: str):
     i = InterfaceDefinition.compile(text)
     error = Diagnostic.build_message(error, *args)
     for m in i.validate():
