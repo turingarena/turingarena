@@ -1,7 +1,5 @@
-from .test_utils import assert_error, assert_no_error
+from .test_utils import assert_error, assert_no_error, define_algorithm
 from turingarena.interface.exceptions import Diagnostic
-from turingarena.algorithm import Algorithm
-from turingarena.sandbox.languages.language import Language
 
 
 interface_text = """
@@ -35,9 +33,9 @@ interface_text = """
 
 
 def test_loop():
-    with Algorithm.load(
+    with define_algorithm(
         interface_text=interface_text,
-        language=Language.from_name("c++"),
+        language_name="c++",
         source_text="""
             int compute(int a) {return a;}
             int f1() {return 1;}

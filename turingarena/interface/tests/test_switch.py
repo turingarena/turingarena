@@ -1,5 +1,4 @@
-from turingarena.algorithm import Algorithm
-from turingarena.sandbox.languages.language import Language
+from turingarena.interface.tests.test_utils import define_algorithm
 
 interface_text = """
     function f1() -> int;
@@ -28,9 +27,9 @@ interface_text = """
 
 
 def test_switch():
-    with Algorithm.load(
+    with define_algorithm(
         interface_text=interface_text,
-        language=Language.from_name("c++"),
+        language_name="c++",
         source_text="""
         int f1() {return 1;}
         int f2() {return 2;}
