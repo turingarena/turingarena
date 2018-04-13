@@ -6,10 +6,8 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena.interface.interface import InterfaceDefinition
-from turingarena.loader import make_dummy_package
+from turingarena.loader import make_dummy_package, split_module, find_package_path
 from turingarena.problem.python import HostPythonEvaluator
-from turingarena.sandbox.source import AlgorithmSource
 
 
 class EvaluationAssertionError(Exception):
@@ -23,14 +21,13 @@ class ProblemSolutionTestItem(pytest.Item):
         self.source_name = source_name
 
     def runtest(self):
-        interface = InterfaceDefinition.load(self.evaluator_name)
-        source = AlgorithmSource.load(self.source_name, interface=interface)
-        assertions = re.findall(r"evaluation_assert\s+(.+)", source.text)
+        assertions = self.load_assertion_in_source()
 
         result = HostPythonEvaluator(
             self.evaluator_name,
             interface_name=self.evaluator_name,
         ).evaluate(self.source_name)
+
         for condition in assertions:
             mode = "exec"
             tree = ast.parse(f"assert {condition}\n", mode=mode)
@@ -42,6 +39,12 @@ class ProblemSolutionTestItem(pytest.Item):
                 raise EvaluationAssertionError(condition) from e
             except Exception as e:
                 raise AssertionError(f"exception while checking: {condition}") from e
+
+    def load_assertion_in_source(self):
+        mod, rel_path = split_module(self.source_name, default_arg="interface.txt")
+        with open(find_package_path(mod, rel_path)) as f:
+            source_text = f.read()
+        return re.findall(r"evaluation_assert\s+(.+)", source_text)
 
     def repr_failure(self, excinfo):
         if isinstance(excinfo.value, EvaluationAssertionError):
