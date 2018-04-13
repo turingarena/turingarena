@@ -10,7 +10,7 @@ interface_text = """
         read operation;
     
         var int result;
-        switch (operation) {
+        switch operation {
             case 1 {
                 call f1() -> result;
             }

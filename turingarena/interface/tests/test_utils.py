@@ -1,6 +1,6 @@
 from tempfile import TemporaryDirectory
 from contextlib import contextmanager
-from typing import Dict, List, Generator, ContextManager
+from typing import Dict, Generator
 
 from turingarena.algorithm import Algorithm
 from turingarena.interface.exceptions import Diagnostic

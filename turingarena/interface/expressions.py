@@ -150,4 +150,5 @@ class ReferenceExpression(Expression):
 expression_classes = frozenbidict({
     "int_literal": IntLiteralExpression,
     "reference": ReferenceExpression,
+    "nested": lambda ast, context: Expression.compile(ast.expression, context),
 })

@@ -49,9 +49,9 @@ grammar_ebnf = r"""
         | statement_type:'call' ~ function_name:identifier
             '(' parameters:expression_list ')'
             return_value:[ return_value_expression ] ';'
-        | statement_type:'if' ~ '(' condition:expression ')'
+        | statement_type:'if' ~ condition:expression
             then_body:block else_body:[ else_body ]
-        | statement_type:'switch' ~ '(' value:expression ')' '{' cases:{ switch_case }+ default:[default_case] '}'
+        | statement_type:'switch' ~ value:expression '{' cases:{ switch_case }+ default:[default_case] '}'
         | statement_type:'for' ~ '(' index:index_declaration ')' body:block
         | statement_type:'loop' ~ body:block
     ;

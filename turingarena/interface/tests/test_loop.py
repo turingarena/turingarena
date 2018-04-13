@@ -10,7 +10,7 @@ interface_text = """
         loop {
             var int a;
             read a;
-            switch (a) {
+            switch a {
                 case 1 {
                     var int b;
                     call f1() -> b;
@@ -58,7 +58,7 @@ def test_correct():
             loop {
                 var int a;
                 read a;
-                switch (a) {
+                switch a {
                     case 1 {
                         write 5;
                         break;
