@@ -1,27 +1,30 @@
 import random
 
+from turingarena.evaluation import *
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
-def evaluate(algorithm):
-    return dict(goals={
-        "correct": all(
-            evaluate_test_case(algorithm, (random.randrange(0, 1000), random.randrange(0, 1000)))
-            for _ in range(20)
-        ),
-    })
+algorithm = submitted_algorithm(interface_name="sum_of_two_numbers")
 
+correct = True
 
-def evaluate_test_case(algorithm, case):
-    a, b = case
-    c = compute(algorithm, a, b)
-    print(f"{a:3d} + {b:3d} == {c:4d}", end=" ")
+for _ in range(10):
+    a, b = random.randrange(0, 1000), random.randrange(0, 1000)
+
+    try:
+        print(f"{a:3d} + {b:3d} ==", end=" ")
+        with algorithm.run() as process:
+            c = process.call.sum(a, b)
+        print(f"{c:4d}", end=" ")
+    except AlgorithmRuntimeError as e:
+        print("error!")
+        correct = False
+        break
+
     if c == a + b:
         print("correct!")
-        return True
     else:
         print("WRONG!")
-        return False
+        correct = False
+        break
 
-
-def compute(algorithm, a, b):
-    with algorithm.run() as process:
-        return process.call.sum(a, b)
+evaluation_result(goals=dict(correct=correct))
