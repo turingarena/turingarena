@@ -14,10 +14,6 @@ logger = logging.getLogger(__name__)
 class CallStatement(ImperativeStatement):
     __slots__ = []
 
-    @staticmethod
-    def compile(ast):
-        return CallStatement(ast=ast)
-
     @property
     def function_name(self):
         return self.ast.function_name
@@ -42,7 +38,11 @@ class CallStatement(ImperativeStatement):
 
     def validate(self):
         if not self.function:
-            yield Diagnostic(Diagnostic.Messages.FUNCTION_NOT_DECLARED, self.function_name, parseinfo=self.ast.parseinfo)
+            yield Diagnostic(
+                Diagnostic.Messages.FUNCTION_NOT_DECLARED,
+                self.function_name,
+                parseinfo=self.ast.parseinfo,
+            )
         else:
             yield from self.validate_parameters()
             yield from self.validate_return_value()
