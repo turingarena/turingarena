@@ -1,4 +1,5 @@
 import ast
+import json
 import os
 import re
 
@@ -27,6 +28,9 @@ class ProblemSolutionTestItem(pytest.Item):
             self.evaluator_name,
             interface_name=self.evaluator_name,
         ).evaluate(self.source_name)
+
+        self.add_report_section("call", "evaluation_stdout", "\n".join(result.stdout))
+        self.add_report_section("call", "evaluation_result", json.dumps(result.data, indent=4))
 
         for condition in assertions:
             mode = "exec"
