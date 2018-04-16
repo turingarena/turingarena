@@ -8,21 +8,19 @@ algorithm = submitted_algorithm()
 correct = False
 
 for _ in range(10):
-    a = random.randrange(0, 1000)
-    b = random.randrange(0, 1000)
+    value_range = range(10 ** 3, 5 * 10 ** 3)
+    a, b = random.choices(value_range, k=2)
 
     try:
-        print(f"{a:3d} + {b:3d} --->", end=" ")
         with algorithm.run() as process:
             c = process.call.sum(a, b)
-        print(f"{c:4d}", end=" ")
     except AlgorithmRuntimeError as e:
-        print(e)
+        print(f"{a} + {b} --> {e}")
         break
     if c != a + b:
-        print("WRONG!")
+        print(f"{a} + {b} --> {c} (wrong!)")
         break
-    print("correct")
+    print(f"{a} + {b} --> {c} (correct)")
 else:  # no break occurred
     correct = True
 
