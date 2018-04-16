@@ -7,9 +7,13 @@ logger = logging.getLogger(__name__)
 from turingarena.algorithm import Algorithm
 
 
-def submitted_algorithm(name="algorithm", *, interface_name):
+def submitted_algorithm(name="algorithm", *, interface_name=None):
+    problem_name = os.environ[f"problem_name"]
     source_name = os.environ[f"submission_{name}_source"]
     language_name = os.environ[f"submission_{name}_language"]
+
+    if interface_name is None:
+        interface_name = problem_name
 
     return Algorithm(
         interface_name=interface_name,

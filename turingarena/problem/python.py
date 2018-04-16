@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from collections import namedtuple
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, contextmanager, ExitStack
 from io import StringIO
 from tempfile import TemporaryDirectory
 
@@ -33,28 +33,29 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
         assert arg is None
 
         eval_stdout = StringIO()
-        with redirect_stdout(eval_stdout):
-            with TemporaryDirectory() as temp_dir:
-                result_path = os.path.join(temp_dir, "result.json")
-                script_path = find_package_path(mod, "evaluate.py")
+        with ExitStack() as stack:
+            stack.enter_context(redirect_stdout(eval_stdout))
+            temp_dir = stack.enter_context(TemporaryDirectory())
+            result_path = os.path.join(temp_dir, "result.json")
+            script_path = find_package_path(mod, "evaluate.py")
 
-                os.environ["submission_algorithm_source"] = source_name
-                os.environ["submission_algorithm_language"] = language.name
-                os.environ["result_path"] = result_path
-                try:
-                    with open(script_path) as f:
-                        code = compile(f.read(), script_path, "exec")
-                    script_globals = {}
-                    exec(code, script_globals)
-                    data = self.compat_evaluate(script_globals, language, source_name)
-                finally:
-                    del os.environ["submission_algorithm_source"]
-                    del os.environ["submission_algorithm_language"]
-                    del os.environ["result_path"]
-                if os.path.exists(result_path):
-                    assert data is None
-                    with open(result_path) as f:
-                        data = json.load(f)
+            stack.enter_context(env_extension(
+                submission_algorithm_source=source_name,
+                submission_algorithm_language=language.name,
+                result_path=result_path,
+                problem_name=self.name
+            ))
+
+            with open(script_path) as f:
+                code = compile(f.read(), script_path, "exec")
+            script_globals = {}
+            exec(code, script_globals)
+            data = self.compat_evaluate(script_globals, language, source_name)
+
+            if os.path.exists(result_path):
+                assert data is None
+                with open(result_path) as f:
+                    data = json.load(f)
 
         return Evaluation(
             stdout=eval_stdout.getvalue().splitlines(),
@@ -70,3 +71,12 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
                 interface_name=self.interface_name,
             )
             return script_globals["evaluate"](algorithm)
+
+
+@contextmanager
+def env_extension(**d):
+    assert all(k not in os.environ for k in d)
+    os.environ.update(d)
+    yield
+    for k in d:
+        del os.environ[k]
