@@ -1,13 +1,11 @@
-import subprocess
-import signal
-import os
 import logging
-
+import os
+import signal
+import subprocess
+from abc import abstractmethod
 from collections import namedtuple
 from contextlib import contextmanager
-from abc import abstractmethod
 from enum import Enum
-
 
 logger = logging.Logger(__name__)
 
@@ -61,7 +59,13 @@ class PopenProcess(Process):
             else:
                 return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with status {exit_code}"
         if os.WIFSIGNALED(status_code):
-            return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {os.WTERMSIG(status_code)}"
+            signal_number = os.WTERMSIG(status_code)
+            signal_message = {
+                signal.SIGXCPU: "CPU time limit exceeded",
+                signal.SIGSEGV: "Segmentation fault",
+                signal.SIGSYS: "Bad system call",
+            }.get(signal_number, signal.Signals(signal_number).name)
+            return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} ({signal_message})"
         assert False, "This should not be reached"
 
     def get_status(self, wait_termination=False) -> ProcessInfo:
@@ -109,4 +113,3 @@ class PopenProcess(Process):
             self.termination_info = info
 
         return info
-
