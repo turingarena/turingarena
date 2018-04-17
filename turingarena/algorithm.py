@@ -1,8 +1,7 @@
 import logging
-import threading
+import os
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
-from tempfile import TemporaryDirectory
 from time import sleep
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
@@ -25,36 +24,24 @@ class Algorithm(namedtuple("Algorithm", [
             global_variables = {}
 
         with ExitStack() as stack:
-            sandbox_dir = stack.enter_context(
-                TemporaryDirectory(dir="/tmp", prefix="sandbox_server_")
-            )
+            sandbox_dir = os.environ.get("TURINGARENA_SANDBOX_DIR", None)
+            if sandbox_dir is None:
+                sandbox_dir = stack.enter_context(SandboxServer.run())
 
-            sandbox_server = SandboxServer(sandbox_dir)
             sandbox_client = SandboxClient(sandbox_dir)
-
-            sandbox_server_thread = threading.Thread(target=sandbox_server.run)
-            sandbox_server_thread.start()
-            stack.callback(sandbox_server_thread.join)
-            stack.callback(sandbox_server.stop)
-
             sandbox_process_dir = stack.enter_context(sandbox_client.run(
                 source_name=self.source_name,
                 language_name=self.language_name,
                 interface_name=self.interface_name,
             ))
-            driver_dir = stack.enter_context(
-                TemporaryDirectory(dir="/tmp", prefix="driver_server_")
-            )
+
             sandbox_process_client = SandboxProcessClient(sandbox_process_dir)
 
-            driver_server = DriverServer(driver_dir)
+            driver_dir = os.environ.get("TURINGARENA_DRIVER_DIR", None)
+            if driver_dir is None:
+                driver_dir = stack.enter_context(DriverServer.run())
+
             driver_client = DriverClient(driver_dir)
-
-            driver_server_thread = threading.Thread(target=driver_server.run)
-            driver_server_thread.start()
-            stack.callback(driver_server_thread.join)
-            stack.callback(driver_server.stop)
-
             driver_process_dir = stack.enter_context(
                 driver_client.run_driver(
                     interface_name=self.interface_name,

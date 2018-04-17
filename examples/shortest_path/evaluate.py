@@ -15,7 +15,7 @@ def evaluate(algorithm):
         d['weight'] = random.randint(1, 1000)
 
     print("running algorithm")
-    with algorithm.run(global_variables=dict(
+    with algorithm.run(dict(
             N=N,
             D=[g.degree(u) for u in g],
             A=[g.neighbors(u) for u in g],

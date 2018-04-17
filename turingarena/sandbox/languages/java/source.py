@@ -4,7 +4,6 @@ import shutil
 import subprocess
 from contextlib import contextmanager
 from subprocess import CalledProcessError
-from tempfile import TemporaryDirectory
 
 import pkg_resources
 
@@ -19,52 +18,52 @@ logger = logging.getLogger(__name__)
 class JavaAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
+    def compile(self, compilation_dir):
+        # rename files because javac will complain if the file doesn't have
+        # the same name of the class defined in it.
+        shutil.copy(self.source_path, os.path.join(compilation_dir, "Solution.java"))
+
+        with open(os.path.join(compilation_dir, "Skeleton.java"), "w") as f:
+            self.language.skeleton_generator(self.interface).write_to_file(f)
+
+        try:
+            subprocess.run(
+                [
+                    "javac",
+                    "Skeleton.java",
+                    "Solution.java",
+                ],
+                cwd=compilation_dir,
+                universal_newlines=True,
+                bufsize=1,
+                check=True,
+            )
+        except CalledProcessError as e:
+            raise CompilationFailed from e
+
+        logger.info("Java file compilation succeded")
+
     @contextmanager
-    def run(self, connection):
+    def run(self, compilation_dir, connection):
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
-        with TemporaryDirectory(dir="/tmp", prefix="java_cwd_") as cwd:
-            # rename files because javac will complain if the file doesn't have
-            # the same name of the class defined in it.
-            shutil.copy(self.source_path, os.path.join(cwd, "Solution.java"))
+        cli = [
+            "java",
+            "-Djava.security.manager",
+            f"-Djava.security.policy=={security_policy_path}",
+            "Skeleton",
+        ]
 
-            with open(os.path.join(cwd, "Skeleton.java"), "w") as f:
-                self.language.skeleton_generator(self.interface).write_to_file(f)
-
-            try:
-                subprocess.run(
-                    [
-                        "javac",
-                        "Skeleton.java",
-                        "Solution.java",
-                    ],
-                    cwd=cwd,
-                    universal_newlines=True,
-                    bufsize=1,
-                    check=True,
-                )
-            except CalledProcessError as e:
-                raise CompilationFailed from e
-
-            logger.info("Java file compilation succeded")
-
-            cli = [
-                "java",
-                "-Djava.security.manager",
-                f"-Djava.security.policy=={security_policy_path}",
-                "Skeleton",
-            ]
-
-            with PopenProcess.run(
-                    cli,
-                    universal_newlines=True,
-                    preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
-                    cwd=cwd,
-                    stdin=connection.downward,
-                    stdout=connection.upward,
-                    bufsize=1,
-            ) as process:
-                yield process
+        with PopenProcess.run(
+                cli,
+                universal_newlines=True,
+                preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
+                cwd=compilation_dir,
+                stdin=connection.downward,
+                stdout=connection.upward,
+                bufsize=1,
+        ) as process:
+            yield process
 
     def get_memory_usage(self, process):
         # FIXME: unused

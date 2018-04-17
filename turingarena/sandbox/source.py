@@ -29,5 +29,9 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
         )
 
     @abstractmethod
-    def run(self, connection):
+    def compile(self, compilation_dir):
+        pass
+
+    @abstractmethod
+    def run(self, compilation_dir, connection):
         pass

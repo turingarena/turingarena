@@ -7,9 +7,11 @@ from io import StringIO
 from tempfile import TemporaryDirectory
 
 from turingarena.algorithm import Algorithm
+from turingarena.interface.driver.server import DriverServer
 from turingarena.loader import split_module, find_package_path
 from turingarena.problem.evaluation import Evaluation
 from turingarena.sandbox.languages.language import Language
+from turingarena.sandbox.server import SandboxServer
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +41,12 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
             result_path = os.path.join(temp_dir, "result.json")
             script_path = find_package_path(mod, "evaluate.py")
 
+            sandbox_dir = stack.enter_context(SandboxServer.run())
+            driver_dir = stack.enter_context(DriverServer.run())
+
             stack.enter_context(env_extension(
+                TURINGARENA_SANDBOX_DIR=sandbox_dir,
+                TURINGARENA_DRIVER_DIR=driver_dir,
                 submission_algorithm_source=source_name,
                 submission_algorithm_language=language.name,
                 result_path=result_path,

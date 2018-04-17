@@ -1,5 +1,7 @@
 import logging
 from contextlib import ExitStack, contextmanager
+from functools import lru_cache
+from tempfile import TemporaryDirectory
 
 from turingarena.algorithm import Algorithm
 from turingarena.interface.interface import InterfaceDefinition
@@ -27,6 +29,7 @@ class SandboxServer(MetaServer):
         server = SandboxProcessServer(
             algorithm=algorithm,
             sandbox_dir=child_server_dir,
+            meta_server=self,
         )
         yield
         server.run()
@@ -34,10 +37,24 @@ class SandboxServer(MetaServer):
     def create_response(self, child_server_dir):
         return dict(sandbox_process_dir=child_server_dir)
 
+    @lru_cache(maxsize=None)
+    def compile_algorithm(self, algorithm):
+        compilation_dir = self.exit_stack.enter_context(TemporaryDirectory(prefix="turingarena_"))
+        language = Language.from_name(algorithm.language_name)
+        interface = InterfaceDefinition.load(algorithm.interface_name)
+        source = AlgorithmSource.load(
+            algorithm.source_name,
+            interface=interface,
+            language=language,
+        )
+        source.compile(compilation_dir)
+        return source, compilation_dir
+
 
 class SandboxProcessServer:
-    def __init__(self, *, sandbox_dir, algorithm):
+    def __init__(self, *, sandbox_dir, algorithm, meta_server):
         self.algorithm = algorithm
+        self.meta_server = meta_server
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
@@ -52,17 +69,10 @@ class SandboxProcessServer:
         logger.debug("starting process...")
 
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
+            source, compilation_dir = self.meta_server.compile_algorithm(self.algorithm)
             connection = SandboxProcessConnection(**pipes)
-            language = Language.from_name(self.algorithm.language_name)
-            interface = InterfaceDefinition.load(self.algorithm.interface_name)
-            source = AlgorithmSource.load(
-                self.algorithm.source_name,
-                interface=interface,
-                language=language,
-            )
-
             self.process = self.process_exit_stack.enter_context(
-                source.run(connection)
+                source.run(compilation_dir, connection)
             )
 
         logger.debug("process started")

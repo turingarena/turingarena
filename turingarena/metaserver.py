@@ -1,6 +1,7 @@
 import logging
+import threading
 from abc import abstractmethod
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 from threading import Thread
 
@@ -27,6 +28,18 @@ class MetaServer:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
         self.boundary.create_queue(self.get_queue_descriptor())
+        self.exit_stack = ExitStack()
+
+    @classmethod
+    @contextmanager
+    def run(cls):
+        with TemporaryDirectory(dir="/tmp", prefix="turingarena_metaserver_") as boundary_dir:
+            meta_server = cls(boundary_dir)
+            meta_server_thread = threading.Thread(target=meta_server.do_run)
+            meta_server_thread.start()
+            yield boundary_dir
+            meta_server.stop()
+            meta_server_thread.join()
 
     @abstractmethod
     def get_queue_descriptor(self):
@@ -40,7 +53,7 @@ class MetaServer:
     def create_response(self, child_server_dir):
         pass
 
-    def run(self):
+    def do_run(self):
         while True:
             try:
                 self.boundary.handle_request(
@@ -49,6 +62,7 @@ class MetaServer:
                 )
             except StopMetaServer:
                 break
+        self.exit_stack.close()
 
     def do_run_child(self, stack, child_server_dir):
         try:
