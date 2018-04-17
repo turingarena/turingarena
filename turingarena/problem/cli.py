@@ -2,9 +2,9 @@ import sys
 from contextlib import ExitStack
 
 from turingarena.cli import docopt_cli
-from turingarena.problem.problem import load_problem, clone_from_git
+from turingarena.problem.problem import clone_from_git
+from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.languages.language import Language
-from turingarena.sandbox.source import AlgorithmSource
 
 
 @docopt_cli
@@ -12,10 +12,10 @@ def evaluate_cli(args):
     """Read a solution from stdin and evaluates it!
 
     Usage:
-        evaluate [options]
+        evaluate [options] <source>
 
     Options:
-        -p --problem=<id>  Problem to evaluate [default: .]
+        -p --problem=<id>  Problem to evaluate
         -x --language=<lang>  Language of the solution [default: c++]
         -g --git=<url>  Clone problem from git
     """
@@ -26,14 +26,13 @@ def evaluate_cli(args):
             stack.enter_context(clone_from_git(git_url))
 
         sys.path.append(".")
-        problem = load_problem(args["--problem"])
+        problem_name = args["--problem"] or ""
+        evaluator = HostPythonEvaluator(name=problem_name, interface_name=problem_name)
         language = Language.from_name(args["--language"])
-        evaluation = problem.evaluate(
-            AlgorithmSource.load(
-                sys.stdin.read(),
-                language=language,
-                interface=problem.interface,
-            ),
+        source_path = args["<source>"]
+        evaluation = evaluator.evaluate(
+            f":{source_path}",
+            language=language,
         )
 
     print(evaluation.stdout)

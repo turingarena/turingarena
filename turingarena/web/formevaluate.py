@@ -1,9 +1,11 @@
 import json
+import os
 from contextlib import ExitStack
+from tempfile import TemporaryDirectory
 
-from turingarena.problem.problem import load_problem, clone_from_git
+from turingarena.problem.problem import clone_from_git
+from turingarena.problem.python import HostPythonEvaluator
 from turingarena.sandbox.languages.language import Language
-from turingarena.sandbox.source import AlgorithmSource
 
 
 def form_evaluate(fields):
@@ -22,6 +24,10 @@ def form_evaluate(fields):
         if git_url:
             stack.enter_context(clone_from_git(git_url))
 
-        problem = load_problem(problem_name)
-        evaluation = problem.evaluate(AlgorithmSource.load(source_text, language=language, interface=problem.interface))
+        temp_dir = stack.enter_context(TemporaryDirectory())
+        source_path = os.path.join(temp_dir, f"source{language.extension}")
+        with open(source_path, "x") as f:
+            f.write(source_text)
+        problem = HostPythonEvaluator(problem_name, interface_name=problem_name)
+        evaluation = problem.evaluate(f":{source_path}")
         return json.dumps(evaluation._asdict())

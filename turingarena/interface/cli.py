@@ -1,9 +1,7 @@
-import json
 import sys
 
 from turingarena.cli import docopt_cli
 from turingarena.interface.interface import InterfaceDefinition
-from turingarena.problem.problem import load_problem
 from turingarena.sandbox.languages.language import Language
 
 
@@ -67,18 +65,3 @@ def validate_interface_cli(args):
 
     for message in interface.validate():
         print(message)
-
-
-@docopt_cli
-def generate_metadata_cli(args):
-    """Generate interface metadata.
-
-    Usage:
-        metadata [options]
-
-    Options:
-        -p --problem=<problem>  Problem [default: .].
-    """
-
-    problem = load_problem(args["--problem"])
-    print(json.dumps(problem.metadata, indent=4))
