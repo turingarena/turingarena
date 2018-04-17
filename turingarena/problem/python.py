@@ -48,7 +48,7 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 
             with open(script_path) as f:
                 code = compile(f.read(), script_path, "exec")
-            script_globals = {}
+            script_globals = dict(__name__="__main__")
             exec(code, script_globals)
             data = self.compat_evaluate(script_globals, language, source_name)
 
