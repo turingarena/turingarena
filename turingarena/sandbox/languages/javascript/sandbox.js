@@ -40,7 +40,7 @@ async function readIntegers() {
 
 // read skeleton and source
 const skeleton = fs.readFileSync('skeleton.js', 'utf8');
-const source = fs.readFileSync('source.js', 'utf8');
+const source = fs.readFileSync(process.argv[2], 'utf8');
 
 // sandbox context
 const sandbox = {
