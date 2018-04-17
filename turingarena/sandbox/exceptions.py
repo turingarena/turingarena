@@ -3,8 +3,7 @@ class AlgorithmRuntimeError(Exception):
 
 
 class CompilationFailed(Exception):
-    def __init__(self, output=None):
-        self.compilation_output = output
+    pass
 
 
 class TimeLimitExceeded(AlgorithmRuntimeError):

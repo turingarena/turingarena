@@ -23,9 +23,10 @@ def init_sandbox():
 
 
 def main():
-    with open("source.py", "r") as source_file:
+    source_path, skeleton_path = sys.argv[1:]
+    with open(source_path) as source_file:
         source_string = source_file.read()
-    with open("skeleton.py", "r") as skeleton_file:
+    with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
 
     init_sandbox()

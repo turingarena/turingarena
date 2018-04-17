@@ -2,10 +2,13 @@ import logging
 from contextlib import ExitStack, contextmanager
 
 from turingarena.algorithm import Algorithm
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
+from turingarena.sandbox.languages.language import Language
+from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +53,16 @@ class SandboxProcessServer:
 
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
-            executable = self.process_exit_stack.enter_context(
-                self.algorithm.compile()
+            language = Language.from_name(self.algorithm.language_name)
+            interface = InterfaceDefinition.load(self.algorithm.interface_name)
+            source = AlgorithmSource.load(
+                self.algorithm.source_name,
+                interface=interface,
+                language=language,
             )
+
             self.process = self.process_exit_stack.enter_context(
-                executable.run(connection)
+                source.run(connection)
             )
 
         logger.debug("process started")

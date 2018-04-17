@@ -1,7 +1,5 @@
 import logging
-import os
-import shutil
-
+from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena.loader import find_package_path, split_module
@@ -30,20 +28,6 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
             source_path=source_path,
         )
 
-    def compile(self, algorithm_dir):
-        logger.info(f"Compiling algorithm source into dir '{algorithm_dir}'")
-
-        os.mkdir(algorithm_dir)
-        shutil.copyfile(self.source_path, f"{algorithm_dir}/source{self.language.extension}")
-
-        with open(f"{algorithm_dir}/language.txt", "w") as f:
-            print(self.language.name, file=f)
-
-        with open(f"{algorithm_dir}/skeleton{self.language.extension}", "w") as f:
-            self.language.skeleton_generator(self.interface).write_to_file(f)
-
-        logger.debug("Starting language-specific compilation")
-        self.do_compile(algorithm_dir)
-
-    def do_compile(self, algorithm_dir):
+    @abstractmethod
+    def run(self, connection):
         pass

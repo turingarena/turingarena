@@ -14,7 +14,6 @@ class Language(namedtuple("Language", [
     "name",
     "extension",
     "source",
-    "executable",
     "skeleton_generator",
     "template_generator",
 ])):
