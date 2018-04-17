@@ -5,8 +5,6 @@ from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 algorithm = submitted_algorithm()
 
-correct = False
-
 for _ in range(10):
     value_range = range(10 ** 3, 5 * 10 ** 3)
     a, b = random.choices(value_range, k=2)
@@ -16,9 +14,11 @@ for _ in range(10):
             c = process.call.sum(a, b)
     except AlgorithmRuntimeError as e:
         print(f"{a} + {b} --> {e}")
+        correct = False
         break
     if c != a + b:
         print(f"{a} + {b} --> {c} (wrong!)")
+        correct = False
         break
     print(f"{a} + {b} --> {c} (correct)")
 else:  # no break occurred

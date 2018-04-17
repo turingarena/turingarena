@@ -1,3 +1,4 @@
+// evaluation_assert data["goals"]["correct"]
 function max_index(n, a) {
     var j = 0;
     for (var i = 0; i < n; i++)

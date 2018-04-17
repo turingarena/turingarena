@@ -1,21 +1,28 @@
 import random
 
+from turingarena.evaluation import *
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
-def evaluate(algorithm):
-    for _ in range(10):
-        a = [
-            random.randrange(0, 100)
-            for _ in range(10)
-        ]
+algorithm = submitted_algorithm()
 
-        index = compute(algorithm, a)
+for _ in range(10):
+    a = random.choices(range(10 ** 4, 10 ** 5), k=20)
+    max_value = max(a)
 
-        if a[index] == max(a):
-            print("correct!")
-        else:
-            print("WRONG!")
+    try:
+        with algorithm.run() as process:
+            index = process.call.max_index(len(a), a)
+    except AlgorithmRuntimeError as e:
+        print(e)
+        correct = False
+        break
 
+    if a[index] != max_value:
+        print("WRONG!")
+        correct = False
+        break
+    print("correct!")
+else:
+    correct = True
 
-def compute(algorithm, a):
-    with algorithm.run() as process:
-        return process.call.max_index(len(a), a)
+evaluation_result(goals=dict(correct=correct))

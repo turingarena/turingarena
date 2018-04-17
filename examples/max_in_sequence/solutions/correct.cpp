@@ -1,3 +1,4 @@
+// evaluation_assert data["goals"]["correct"]
 int max_index(int n, int* a) {
     int j = 0;
     for(int i = 0; i < n; i++)

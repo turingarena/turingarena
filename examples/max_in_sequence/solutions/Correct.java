@@ -1,3 +1,4 @@
+// evaluation_assert data["goals"]["correct"]
 class Solution extends Skeleton {
     public int max_index(int n, int[] a) {
         int j = 0;
