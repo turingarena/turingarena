@@ -2,7 +2,6 @@ import logging
 import os
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
-from time import sleep
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
 
@@ -56,8 +55,6 @@ class Algorithm(namedtuple("Algorithm", [
                     sandbox=sandbox_process_client,
                     driver=driver_process_client,
                 )
-                # FIXME: not cool
-                sleep(3)  # wait for sandbox to settle before measuring time
                 with algorithm_process.run(algorithm_process.sandbox, time_limit):
                     driver_process_client.send_begin_main(global_variables)
                     yield algorithm_process
