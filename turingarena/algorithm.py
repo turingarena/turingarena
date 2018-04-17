@@ -3,6 +3,7 @@ import threading
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
+from time import sleep
 
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
 
@@ -12,7 +13,6 @@ logger = logging.getLogger(__name__)
 class Algorithm(namedtuple("Algorithm", [
     "source_name", "language_name", "interface_name",
 ])):
-
     @contextmanager
     def run(self, global_variables=None, time_limit=None):
         # FIXME: make imports global
@@ -65,12 +65,14 @@ class Algorithm(namedtuple("Algorithm", [
             driver_process_client = DriverProcessClient(driver_process_dir)
 
             try:
-                driver_process_client.send_begin_main(global_variables)
                 algorithm_process = AlgorithmProcess(
                     sandbox=sandbox_process_client,
                     driver=driver_process_client,
                 )
-                with algorithm_process.section(time_limit=time_limit):
+                # FIXME: not cool
+                sleep(3)  # wait for sandbox to settle before measuring time
+                with algorithm_process.run(algorithm_process.sandbox, time_limit):
+                    driver_process_client.send_begin_main(global_variables)
                     yield algorithm_process
                     driver_process_client.send_end_main()
             finally:
@@ -88,26 +90,30 @@ class AlgorithmSection:
         self.info_before = info_before
         self.info_after = info_after
 
+    @contextmanager
+    def run(self, sandbox, time_limit):
+        info_before = sandbox.get_info()
+        yield self
+        info_after = sandbox.get_info()
+        self.finished(info_before, info_after)
+        if time_limit is not None and self.time_usage > time_limit:
+            raise TimeLimitExceeded(self.time_usage, time_limit)
+
     @property
     def time_usage(self):
         return self.info_after.time_usage - self.info_before.time_usage
 
 
-class AlgorithmProcess:
+class AlgorithmProcess(AlgorithmSection):
     def __init__(self, *, sandbox, driver):
+        super().__init__()
         self.sandbox = sandbox
         self.driver = driver
         self.call = driver.proxy
 
-    @contextmanager
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection()
-        info_before = self.sandbox.get_info()
-        yield section_info
-        info_after = self.sandbox.get_info()
-        section_info.finished(info_before, info_after)
-        if time_limit is not None and section_info.time_usage > time_limit:
-            raise TimeLimitExceeded(section_info.time_usage, time_limit)
+        return section_info.run(self.sandbox, time_limit=time_limit)
 
     def limit_memory(self, value):
         info = self.sandbox.get_info()

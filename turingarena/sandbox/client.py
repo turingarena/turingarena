@@ -46,7 +46,9 @@ class SandboxProcessClient:
         )
         response["time_usage"] = float(response["time_usage"])
         response["memory_usage"] = int(response["memory_usage"])
-        return SandboxProcessInfo(**response)
+        info = SandboxProcessInfo(**response)
+        logger.info(f"Process info: {info}")
+        return info
 
     @contextmanager
     def connect(self):

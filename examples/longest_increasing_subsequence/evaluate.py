@@ -1,64 +1,78 @@
 import random
+import sys
 
+from turingarena.evaluation import *
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 
-def evaluate(submission):
-    exponential = all(
-        evaluate_test_case(submission, n)
-        for n in [5] * 10 + [10] * 10
-    )
-    quadratic = exponential and all(
-        evaluate_test_case(submission, n)
-        for n in [100] * 5 + [1000] * 5
-    )
-    n_log_n = quadratic and all(
-        evaluate_test_case(submission, n)
-        for n in [100000] * 5
-    )
-
-    return dict(
-        goals=dict(
-            exponential=exponential,
-            quadratic=quadratic,
-            n_log_n=n_log_n,
-        ),
-    )
-
-
-def evaluate_test_case(submission, n):
-    digits = 6
-    value_range = range(10 ** digits, 10 ** (digits + 1))
-    a = random.sample(value_range, n)
-
-    try:
-        with submission.run(global_variables=dict(n=len(a), a=a)) as process:
-            process.call.compute()
-            l = process.call.length()
-            s = [process.call.element(i) for i in range(l)]
-    except AlgorithmRuntimeError:
-        return False
-
-    with context.algorithms["correct.cpp"].run(
-            global_variables=dict(n=len(a), a=a)
-    ) as process:
+def run(algorithm, a, time_limit=None):
+    with algorithm.run(dict(n=len(a), a=a), time_limit=time_limit) as process:
         process.call.compute()
-        opt_l = process.call.length()
-        opt_s = [process.call.element(i) for i in range(l)]
-
-    print(s)
-    print(opt_s)
-    if n <= 10:
-        exponential_s = compute_subsequence_exponential(a)
-        print(exponential_s)
-
-    return True
+        subsequence = [x for i, x in enumerate(a) if process.call.takes(i)]
+    print(f"Time usage: {process.time_usage}", file=sys.stderr)
+    return subsequence
 
 
-def compute_subsequence_exponential(seq):
-    assert len(seq) <= 10
+def get_optimal_subsequence(a):
+    correct_algorithm = Algorithm(
+        source_name="longest_increasing_subsequence:solutions/correct.cpp",
+        language_name="c++",
+        interface_name="longest_increasing_subsequence",
+    )
+
+    return run(correct_algorithm, a)
+
+
+def create_random_instance(n, digits=6):
+    value_range = range(10 ** (digits - 1), 10 ** digits)
+    return random.sample(value_range, k=n)
+
+
+def main():
+    algorithm = submitted_algorithm()
+    goals = {
+        "exponential": True,
+        "quadratic": True,
+        "n_log_n": True,
+    }
+
+    for gs, ns in [
+        (["exponential", "quadratic", "n_log_n"], [10] * 3),
+        (["quadratic", "n_log_n"], [100]),
+        (["n_log_n"], [1000]),
+    ]:
+        for n in ns:
+            if not any(goals[g] for g in gs):
+                break
+
+            print(f"Testing n={n}", file=sys.stderr)
+
+            a = create_random_instance(n)
+            optimal_subsequence = get_optimal_subsequence(a)
+            try:
+                subsequence = run(algorithm, a, time_limit=0.001)
+            except AlgorithmRuntimeError as e:
+                print("Error:", e)
+                correct = False
+            else:
+                print("Subsequence:", subsequence)
+                print("Optimal subsequence:", optimal_subsequence)
+                correct = (
+                    is_subsequence(subsequence, a) and
+                    is_increasing(subsequence) and
+                    len(subsequence) == len(optimal_subsequence)
+                )
+                print("Correct:", correct)
+            if not correct:
+                for g in gs:
+                    goals[g] = False
+    evaluation_result(goals=goals)
+
+
+def optimal_subsequence_exponential(a):
+    assert len(a) <= 10
     return max(
-        (s for s in subsequences(seq) if increasing(s)),
+        (s for s in subsequences(a) if is_increasing(s)),
         key=len,
     )
 
@@ -74,16 +88,28 @@ def subsequences(seq):
 
 
 def is_subsequence(a, b):
-    if not a:
-        return True
-    if not b:
-        return False
-    try:
-        start = b.index(a[0])
-    except ValueError:
-        return False
-    return is_subsequence(a[1:], b[start + 1:])
+    j = 0
+    for x in a:
+        try:
+            j += b[j:].index(x) + 1
+        except ValueError:
+            return False
+    return True
 
 
-def increasing(s):
+def is_increasing(s):
     return all(x < y for x, y in zip(s, s[1:]))
+
+
+def test_correct_algorithm():
+    for _ in range(10):
+        a = create_random_instance(10, digits=2)
+        s = get_optimal_subsequence(a)
+        print(s, a)
+        assert is_subsequence(s, a)
+        assert is_increasing(s)
+        assert len(s) == len(optimal_subsequence_exponential(a))
+
+
+if __name__ == "__main__":
+    main()

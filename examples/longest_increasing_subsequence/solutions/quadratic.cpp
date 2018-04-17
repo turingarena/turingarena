@@ -6,7 +6,7 @@
 int n;
 int* a;
 
-std::vector<int> s;
+std::vector<bool> taken;
 
 void compute() {
     int prev[n], len[n];
@@ -28,17 +28,14 @@ void compute() {
         }
     }
 
+    taken.resize(n);
     while(best_len) {
-        s.push_back(best);
+        taken[best] = true;
         best = prev[best];
         best_len--;
     }
 }
 
-int length() {
-    return s.size();
-}
-
-int element(int i) {
-    return s[s.size()-i-1];
+int takes(int i) {
+    return taken[i];
 }

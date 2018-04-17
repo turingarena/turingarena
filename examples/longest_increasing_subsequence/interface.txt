@@ -2,8 +2,7 @@ var int n;
 var int[] a;
 
 function compute();
-function length() -> int;
-function element(int i) -> int;
+function takes(int i) -> int;
 
 init {
     read n;
@@ -16,12 +15,9 @@ init {
 main {
     call compute();
 
-    var int l;
-    call length() -> l;
-    write l;
-    for(i : l) {
+    for(i : n) {
         var int x;
-        call element(i) -> x;
+        call takes(i) -> x;
         write x;
     }
 }
