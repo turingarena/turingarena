@@ -1,5 +1,4 @@
 // evaluation_assert data["goals"]["n_log_n"]
-// evaluation_assert False
 #include <vector>
 #include <algorithm>
 #include <cassert>
