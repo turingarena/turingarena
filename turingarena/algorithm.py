@@ -1,14 +1,14 @@
 import logging
+import os
 import threading
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.interface.driver.client import DriverClient, DriverProcessClient
-from turingarena.interface.driver.server import DriverServer
-from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
+from turingarena.interface.interface import InterfaceDefinition
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
-from turingarena.sandbox.server import SandboxServer
+from turingarena.sandbox.languages.language import Language
+from turingarena.sandbox.source import AlgorithmSource
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,29 @@ class Algorithm(namedtuple("Algorithm", [
     "source_name", "language_name", "interface_name",
 ])):
     @contextmanager
+    def compile(self):
+        language = Language.from_name(self.language_name)
+        interface = InterfaceDefinition.load(self.interface_name)
+        source = AlgorithmSource.load(
+            self.source_name,
+            interface=interface,
+            language=language,
+        )
+
+        with TemporaryDirectory(dir="/tmp") as temp_dir:
+            algorithm_dir = os.path.join(temp_dir, "algorithm")
+            source.compile(algorithm_dir)
+
+            yield language.executable(algorithm_dir, language=language, interface=interface)
+
+    @contextmanager
     def run(self, global_variables=None, time_limit=None):
+        # FIXME: make imports global
+        from turingarena.interface.driver.client import DriverClient, DriverProcessClient
+        from turingarena.interface.driver.server import DriverServer
+        from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
+        from turingarena.sandbox.server import SandboxServer
+
         if global_variables is None:
             global_variables = {}
 

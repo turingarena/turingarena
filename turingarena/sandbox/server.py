@@ -1,12 +1,11 @@
 import logging
 from contextlib import ExitStack, contextmanager
 
+from turingarena.algorithm import Algorithm
 from turingarena.metaserver import MetaServer
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena.sandbox.algorithm import CompiledAlgorithm
 from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
-from turingarena.sandbox.executable import AlgorithmExecutable
 
 logger = logging.getLogger(__name__)
 
@@ -21,26 +20,21 @@ class SandboxServer(MetaServer):
 
     @contextmanager
     def run_child_server(self, child_server_dir, *, language_name, source_name, interface_name):
-        with CompiledAlgorithm.load(
-                source_name=source_name,
-                interface_name=interface_name,
-                language_name=language_name
-        ) as algo:
-            executable = AlgorithmExecutable.load(algo.algorithm_dir)
-            server = SandboxProcessServer(
-                executable=executable,
-                sandbox_dir=child_server_dir,
-            )
-            yield
-            server.run()
+        algorithm = Algorithm(language_name=language_name, source_name=source_name, interface_name=interface_name)
+        server = SandboxProcessServer(
+            algorithm=algorithm,
+            sandbox_dir=child_server_dir,
+        )
+        yield
+        server.run()
 
     def create_response(self, child_server_dir):
         return dict(sandbox_process_dir=child_server_dir)
 
 
 class SandboxProcessServer:
-    def __init__(self, *, sandbox_dir, executable):
-        self.executable = executable
+    def __init__(self, *, sandbox_dir, algorithm):
+        self.algorithm = algorithm
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
@@ -56,8 +50,11 @@ class SandboxProcessServer:
 
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
             connection = SandboxProcessConnection(**pipes)
+            executable = self.process_exit_stack.enter_context(
+                self.algorithm.compile()
+            )
             self.process = self.process_exit_stack.enter_context(
-                self.executable.run(connection)
+                executable.run(connection)
             )
 
         logger.debug("process started")
