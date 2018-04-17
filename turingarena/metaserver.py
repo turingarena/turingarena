@@ -37,9 +37,11 @@ class MetaServer:
             meta_server = cls(boundary_dir)
             meta_server_thread = threading.Thread(target=meta_server.do_run)
             meta_server_thread.start()
-            yield boundary_dir
-            meta_server.stop()
-            meta_server_thread.join()
+            try:
+                yield boundary_dir
+            finally:
+                meta_server.stop()
+                meta_server_thread.join()
 
     @abstractmethod
     def get_queue_descriptor(self):
@@ -64,23 +66,17 @@ class MetaServer:
                 break
         self.exit_stack.close()
 
-    def do_run_child(self, stack, child_server_dir):
-        try:
-            stack.close()
-        finally:
-            child_server_dir.cleanup()
-
     def handle_request(self, **request_payloads):
         self.handle_stop_request(request_payloads)
 
-        child_server_dir = TemporaryDirectory(dir="/tmp")
-
         stack = ExitStack()
+        child_server_dir = stack.enter_context(TemporaryDirectory(dir="/tmp"))
         stack.enter_context(
-            self.run_child_server(child_server_dir.name, **request_payloads)
+            self.run_child_server(child_server_dir, **request_payloads)
         )
-        Thread(target=lambda: self.do_run_child(stack, child_server_dir)).start()
-        return self.create_response(child_server_dir.name)
+        thread = Thread(target=lambda: stack.close())
+        thread.start()
+        return self.create_response(child_server_dir)
 
     def handle_stop_request(self, request_payloads):
         if any(request_payloads.values()): return

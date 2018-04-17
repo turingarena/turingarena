@@ -84,6 +84,8 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 def env_extension(**d):
     assert all(k not in os.environ for k in d)
     os.environ.update(d)
-    yield
-    for k in d:
-        del os.environ[k]
+    try:
+        yield
+    finally:
+        for k in d:
+            del os.environ[k]
