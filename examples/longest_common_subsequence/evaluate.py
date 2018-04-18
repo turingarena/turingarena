@@ -1,5 +1,8 @@
 import random
 
+from turingarena.evaluation import *
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+
 
 def LCS_length(x, y):
     m = len(x)
@@ -52,9 +55,23 @@ def evaluate_test_case(submission, N):
         return is_valid_solution(x, y, sol)
 
 
-def evaluate(submission):
+cases = []
+algorithm = submitted_algorithm()
+
+try:
+    i = 0
     for n in [10] * 5 + [100, 1000]:
-        if evaluate_test_case(submission, n):
+        i += 1
+        if evaluate_test_case(algorithm, n):
             print(f'test case N = {n} correct')
+            cases.append((i, n, True))
         else:
             print(f'test case N = {n} wrong')
+            cases.append((i, n, False))
+except AlgorithmRuntimeError:
+    correct = False
+
+evaluation_result(goals={
+    f"case {i} (N={n})": "ok" if ok else "no"
+    for i, n, ok in cases
+})

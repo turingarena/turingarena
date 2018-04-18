@@ -1,6 +1,5 @@
 import random
 import networkx as nx
-import sys
 
 from turingarena.evaluation import *
 from turingarena.sandbox.exceptions import AlgorithmRuntimeError
@@ -9,10 +8,11 @@ N = 100  # number of nodes
 Q = 100  # number of queries
 
 algorithm = submitted_algorithm()
-correct = True
 
 # create random graph
 g = nx.fast_gnp_random_graph(N, 0.1)
+
+cases = []
 
 # set random edge weight
 for u, v, d in g.edges(data=True):
@@ -44,11 +44,15 @@ try:
             res = p.call.shortest_path(u, v)
             if res != r:
                 print(f"Wrong! {res} != {r}")
-                correct = False
+                cases.append((k, False))
             else:
                 print("ok")
+                cases.append((k, True))
 
 except AlgorithmRuntimeError:
     correct = False
 
-evaluation_result(goals=dict(correct=correct))
+evaluation_result(goals={
+    f"case {i}:": "ok" if ok else "wrong"
+    for i, ok in cases
+})

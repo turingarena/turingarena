@@ -129,7 +129,7 @@ class ForStatement(ImperativeStatement):
         yield from self.body.validate()
 
     def generate_instructions(self, context):
-        if not self.body.expects_request(None):
+        if self.body.expects_request(None):
             yield SimpleForInstruction(statement=self, context=context)
         else:
             yield from self.do_generate_instruction(context)
