@@ -1,36 +1,48 @@
 import random
-
 import networkx as nx
 
+from turingarena.evaluation import *
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
-def evaluate(submission):
-    parts = (
-        [nx.complete_graph(10) for _ in range(3)] +
-        [nx.cycle_graph(10) for _ in range(3)]
-    )
+algorithm = submitted_algorithm()
 
-    graph = nx.disjoint_union_all(parts)
+parts = (
+    [nx.complete_graph(10) for _ in range(3)] +
+    [nx.cycle_graph(10) for _ in range(3)]
+)
 
-    N = len(graph.nodes())
-    assert list(graph.nodes()) == list(range(N))  # check nodes are zero-based
+graph = nx.disjoint_union_all(parts)
 
-    Q = 10
-    D = [graph.degree(u) for u in graph.nodes()]
-    adj = [list(graph.neighbors(u)) for u in graph.nodes()]
+N = len(graph.nodes())
+assert list(graph.nodes()) == list(range(N))  # check nodes are zero-based
 
-    with submission.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
+Q = 10
+D = [graph.degree(u) for u in graph.nodes()]
+adj = [list(graph.neighbors(u)) for u in graph.nodes()]
+
+cases = []
+fail = False
+
+try:
+    with algorithm.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
 
         memory_usage = p.sandbox.get_info().memory_usage
-        print(f"Memory usage: {memory_usage} bytes")
 
-        for _ in range(Q):
+        for t in range(Q):
             u = v = None
             while u == v:
                 u, v = random.randint(0, N - 1), random.randint(0, N - 1)
 
             connected = bool(p.call.is_there_a_path(u, v))
             if nx.has_path(graph, u, v) == connected:
-                print("Correct")
+                cases.append((t, True))
             else:
-                print("Wrong")
+                cases.append((t, False))
             print(f"Nodes {u} {v} -> {connected}")
+except AlgorithmRuntimeError:
+    fail = True
+
+evaluation_result(goals={
+    f"case {i}:": "ok" if ok else "wrong"
+    for i, ok in cases
+})
