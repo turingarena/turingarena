@@ -59,8 +59,7 @@ class JavaSkeletonCodeGen(JavaCodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"{self.build_callable_declarator(callback)}" " {"
-        yield self.indent(f'System.out.println("{callback.name}");')
-        yield from self.block_content(statement.callback.body)
+        yield from self.block_content(statement.callback.synthetic_body)
         yield "}"
         yield
 
@@ -91,8 +90,6 @@ class JavaSkeletonCodeGen(JavaCodeGen):
             yield f"{return_value} = solution.{function_name}({parameters});"
         else:
             yield f"solution.{function_name}({parameters});"
-        if statement.context.global_context.callbacks:
-            yield 'System.out.println("return");'
 
     def write_statement(self, statement):
         format_string = ' '.join("%d" for _ in statement.arguments) + r'\n'

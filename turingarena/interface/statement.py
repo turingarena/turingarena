@@ -54,3 +54,11 @@ class Statement(AbstractSyntaxNodeWrapper):
 
     def validate(self):
         return []
+
+
+class SyntheticStatement:
+    __slots__ = ["statement_type", "__dict__"]
+
+    def __init__(self, statement_type, **kwargs):
+        self.statement_type = statement_type
+        self.__dict__ = kwargs

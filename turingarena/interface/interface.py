@@ -49,21 +49,31 @@ class InterfaceDefinition:
     def source_text(self):
         return self.body.ast.parseinfo.buffer.text
 
+    # FIXME: the following properties could be taken from the context instead
+
     @property
     def functions(self):
-        return {
-            s.function.name: s.function
+        return tuple(
+            s.function
             for s in self.body.statements
             if s.statement_type == "function"
-        }
+        )
+
+    @property
+    def function_map(self):
+        return {f.name: f for f in self.functions}
 
     @property
     def callbacks(self):
-        return {
-            s.callback.name: s.callback
+        return tuple(
+            s.callback
             for s in self.body.statements
             if s.statement_type == "callback"
-        }
+        )
+
+    @property
+    def callback_map(self):
+        return {c.name: c for c in self.callbacks}
 
     @property
     def global_variables(self):
@@ -109,11 +119,11 @@ class InterfaceDefinition:
                 },
                 callbacks={
                     c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
-                    for c in self.callbacks.values()
+                    for c in self.callbacks
                 },
                 functions={
                     f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
-                    for f in self.functions.values()
+                    for f in self.functions
                 }
             ),
         }

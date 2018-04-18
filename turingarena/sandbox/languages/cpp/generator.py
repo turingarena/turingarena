@@ -67,8 +67,7 @@ class CppSkeletonCodeGen(CppCodeGen):
     def callback_statement(self, s):
         callback = s.callback
         yield f"{self.build_callable_declarator(callback)}" " {"
-        yield self.indent(fr'printf("%s\n", "{callback.name}");')
-        yield from self.block_content(callback.body)
+        yield from self.block_content(callback.synthetic_body)
         yield "}"
 
     def function_statement(self, s):
@@ -101,8 +100,6 @@ class CppSkeletonCodeGen(CppCodeGen):
             yield f"{return_value} = {function_name}({parameters});"
         else:
             yield f"{function_name}({parameters});"
-        if s.context.global_context.callbacks:
-            yield r"""printf("return\n");"""
 
     def write_statement(self, s):
         format_string = ' '.join("%d" for _ in s.arguments) + r'\n'

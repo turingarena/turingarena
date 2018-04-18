@@ -41,8 +41,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         callback = statement.callback
         yield f"def {self.build_callable_declarator(callback)}:"
         yield from self.indent_all(self.generate_globals(statement.context))
-        yield self.indent(f"print('{callback.name}')")
-        yield from self.block_content(callback.body)
+        yield from self.block_content(callback.synthetic_body)
 
     def init_statement(self, statement):
         yield
@@ -81,8 +80,6 @@ class PythonSkeletonCodeGen(PythonCodeGen):
             yield f"{return_value} = _source.{function_name}({parameters})"
         else:
             yield f"_source.{function_name}({parameters})"
-        if statement.context.global_context.callbacks:
-            yield r"""print("return")"""
 
     def write_statement(self, statement):
         args = ', '.join(self.expression(v) for v in statement.arguments)

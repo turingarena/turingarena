@@ -24,8 +24,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"function {build_callable_declarator(callback)}" + "{"
-        yield self.indent(f"print('{callback.name}');")
-        yield from self.block_content(callback.body)
+        yield from self.block_content(callback.synthetic_body)
         yield "}"
         yield
 
@@ -62,8 +61,6 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
             yield f"{return_value} = {function_name}({parameters});"
         else:
             yield f"{function_name}({parameters});"
-        if statement.context.global_context.callbacks:
-            yield "print('return');"
 
     def alloc_statement(self, statement):
         for argument in statement.arguments:

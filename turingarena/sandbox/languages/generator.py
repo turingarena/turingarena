@@ -15,7 +15,7 @@ class CodeGen:
         yield from self.block_content(self.interface.body, indent=False)
 
     def block_content(self, b, indent=True):
-        for s in b.statements:
+        for s in b.synthetic_statements:
             if indent:
                 yield from self.indent_all(self.statement(s))
             else:

@@ -1,10 +1,11 @@
 import logging
 from collections import OrderedDict
 
-from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
-from turingarena.interface.node import AbstractSyntaxNodeWrapper
-from turingarena.interface.statement import Statement
 from turingarena.interface.exceptions import Diagnostic
+from turingarena.interface.executable import ImperativeStatement, ImperativeStructure
+from turingarena.interface.expressions import SyntheticExpression
+from turingarena.interface.node import AbstractSyntaxNodeWrapper
+from turingarena.interface.statement import Statement, SyntheticStatement
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ class Block(AbstractSyntaxNodeWrapper):
     @property
     def statements(self):
         return list(self._generate_statements())
+
+    @property
+    def synthetic_statements(self):
+        return self.statements
 
     @property
     def inner_context_at_begin(self):
@@ -57,6 +62,16 @@ class Block(AbstractSyntaxNodeWrapper):
 
 class ImperativeBlock(Block, ImperativeStructure):
     __slots__ = []
+
+    @property
+    def synthetic_statements(self):
+        for s in self.statements:
+            yield s
+            if (s.statement_type == "call" and
+                    self.context.global_context.callbacks):
+                yield SyntheticStatement("write", arguments=[
+                    SyntheticExpression("int_literal", value=0),  # no more callbacks
+                ])
 
     def generate_instructions(self, context):
         inner_context = context.child(self.declared_variables)

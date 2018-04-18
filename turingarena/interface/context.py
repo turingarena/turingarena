@@ -11,8 +11,8 @@ class RootContext(namedtuple("RootContext", [])):
 
     def create_inner(self):
         return StaticGlobalContext(
-            functions={},
-            callbacks={},
+            functions=(),
+            callbacks=(),
             locally_defined_variables=(),
             locally_allocated_variables=frozenset(),
             locally_initialized_variables=frozenset(),
@@ -94,15 +94,19 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
     def global_variables(self):
         return self.variables
 
+    @property
+    def function_map(self):
+        return {f.name: f for f in self.functions}
+
+    @property
+    def callback_map(self):
+        return {c.name: c for c in self.callbacks}
+
     def with_function(self, f):
-        functions = dict(self.functions)
-        functions[f.name] = f
-        return self._replace(functions=functions)
+        return self._replace(functions=self.functions + (f,))
 
     def with_callback(self, c):
-        callbacks = dict(self.callbacks)
-        callbacks[c.name] = c
-        return self._replace(callbacks=callbacks)
+        return self._replace(callbacks=self.callbacks + (c,))
 
     def create_local(self):
         return StaticLocalContext(

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+
 from bidict import frozenbidict
 
 from turingarena.interface.exceptions import Diagnostic
@@ -135,16 +136,27 @@ class ReferenceExpression(Expression):
 
     def validate(self, lvalue=False):
         if not self.variable:
-            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name, parseinfo=self.ast.parseinfo)
+            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name,
+                             parseinfo=self.ast.parseinfo)
         elif self.variable not in self.context.initialized_variables and not lvalue:
-            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, self.variable.name, parseinfo=self.ast.parseinfo)
+            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, self.variable.name,
+                             parseinfo=self.ast.parseinfo)
         elif isinstance(self.variable.value_type, ArrayType):
             if self.variable not in self.context.allocated_variables_mapping:
-                yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name, parseinfo=self.ast.parseinfo)
+                yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name,
+                                 parseinfo=self.ast.parseinfo)
             for index in self.indices:
                 yield from index.validate()
             if lvalue:
                 yield from self.validate_array_indexes()
+
+
+class SyntheticExpression:
+    __slots__ = ["expression_type", "__dict__"]
+
+    def __init__(self, expression_type, **kwargs):
+        self.expression_type = expression_type
+        self.__dict__ = kwargs
 
 
 expression_classes = frozenbidict({

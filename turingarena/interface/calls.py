@@ -32,7 +32,7 @@ class CallStatement(ImperativeStatement):
     @property
     def function(self):
         try:
-            return self.context.global_context.functions[self.ast.function_name]
+            return self.context.global_context.function_map[self.ast.function_name]
         except KeyError:
             return None
 
@@ -107,7 +107,7 @@ class CallStatement(ImperativeStatement):
         interface = context.procedure.global_context.interface
         call_context = FunctionCallContext(local_context=context)
 
-        function = interface.functions[self.function_name]
+        function = interface.function_map[self.function_name]
 
         yield FunctionCallInstruction(
             statement=self,
@@ -153,7 +153,8 @@ class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction",
 
         for name, parameters_count in request.accepted_callbacks.items():
             # FIXME: use the static context instead
-            callback = self.context.local_context.procedure.global_context.interface.callbacks[name]
+            interface = self.context.local_context.procedure.global_context.interface
+            callback = interface.callback_map[name]
             assert parameters_count == len(callback.parameters)
 
         for value_expr, value in zip(parameters, request.parameters):
@@ -193,12 +194,13 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
 
     def on_communicate_with_process(self, connection):
         connection.downward.flush()
-        callback_name = read_line(connection.upward).strip()
-        if callback_name == "return":
-            self.context.callback = None
-        else:
+        has_callback = int(read_line(connection.upward).strip())
+        if has_callback:
+            callback_index = int(read_line(connection.upward).strip())
             interface = self.context.call_context.local_context.procedure.global_context.interface
-            self.context.callback = interface.callbacks[callback_name]
+            self.context.callback = interface.callbacks[callback_index]
+        else:
+            self.context.callback = None
 
 
 class ReturnStatement(ImperativeStatement):

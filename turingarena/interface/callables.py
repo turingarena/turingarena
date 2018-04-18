@@ -5,9 +5,10 @@ from turingarena.interface.block import ImperativeBlock
 from turingarena.interface.context import CallbackContext
 from turingarena.interface.exceptions import Diagnostic
 from turingarena.interface.executable import Instruction
+from turingarena.interface.expressions import SyntheticExpression
 from turingarena.interface.node import AbstractSyntaxNodeWrapper
 from turingarena.interface.references import VariableReference
-from turingarena.interface.statement import Statement
+from turingarena.interface.statement import Statement, SyntheticStatement
 from turingarena.interface.type_expressions import ScalarType, compile_type_expression
 from turingarena.interface.variables import Variable
 
@@ -105,8 +106,28 @@ class FunctionStatement(Statement):
         return self.context.with_function(self.function)
 
 
+class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
+    @property
+    def synthetic_statements(self):
+        callback_index = len(self.context.callbacks)
+        yield SyntheticStatement("write", arguments=[
+            SyntheticExpression("int_literal", value=1),  # more callbacks
+        ])
+        yield SyntheticStatement("write", arguments=[
+            SyntheticExpression("int_literal", value=callback_index),
+        ])
+        yield from self.body.synthetic_statements
+
+
 class Callback(Callable):
     __slots__ = []
+
+    @property
+    def synthetic_body(self):
+        return SyntheticCallbackBody(
+            self.context,
+            self.body,
+        )
 
     @property
     def body(self):
@@ -128,7 +149,7 @@ class Callback(Callable):
 
         if invalid_parameter is not None:
             yield Diagnostic(
-                Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS ,
+                Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
                 parseinfo=invalid_parameter.parseinfo,
             )
 
