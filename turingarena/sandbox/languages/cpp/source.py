@@ -26,15 +26,14 @@ class CppAlgorithmSource(AlgorithmSource):
             "-std=c++14",
             "-Wno-unused-result",
             "-g", "-O2", "-static",
-            "-o", "algorithm",
-            "skeleton.cpp",
+            "-o", self.executable_path(compilation_dir),
+            os.path.join(compilation_dir, "skeleton.cpp"),
             self.source_path,
         ]
         logger.debug(f"Running {' '.join(cli)}")
         try:
             subprocess.run(
                 cli,
-                cwd=compilation_dir,
                 universal_newlines=True,
                 check=True,
             )
@@ -43,15 +42,17 @@ class CppAlgorithmSource(AlgorithmSource):
                 raise CompilationFailed
             raise
 
+    def executable_path(self, compilation_dir):
+        return os.path.join(compilation_dir, "algorithm")
+
     @contextmanager
     def run(self, compilation_dir, connection):
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.py")
 
         with PopenProcess.run(
-                ["python3", sandbox_path, "algorithm"],
+                ["python3", sandbox_path, self.executable_path(compilation_dir)],
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(),
-                cwd=compilation_dir,
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,

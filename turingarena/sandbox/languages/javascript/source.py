@@ -23,7 +23,6 @@ class JavascriptAlgorithmSource(AlgorithmSource):
                 ["node", sandbox_path, self.source_path],
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=5),
-                cwd=compilation_dir,
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,

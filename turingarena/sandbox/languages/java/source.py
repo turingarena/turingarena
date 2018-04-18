@@ -21,19 +21,20 @@ class JavaAlgorithmSource(AlgorithmSource):
     def compile(self, compilation_dir):
         # rename files because javac will complain if the file doesn't have
         # the same name of the class defined in it.
-        shutil.copy(self.source_path, os.path.join(compilation_dir, "Solution.java"))
+        solution_path = os.path.join(compilation_dir, "Solution.java")
+        shutil.copy(self.source_path, solution_path)
 
-        with open(os.path.join(compilation_dir, "Skeleton.java"), "w") as f:
+        skeleton_path = self.skeleton_path(compilation_dir)
+        with open(skeleton_path, "w") as f:
             self.language.skeleton_generator(self.interface).write_to_file(f)
 
         try:
             subprocess.run(
                 [
                     "javac",
-                    "Skeleton.java",
-                    "Solution.java",
+                    skeleton_path,
+                    solution_path,
                 ],
-                cwd=compilation_dir,
                 universal_newlines=True,
                 bufsize=1,
                 check=True,
@@ -43,12 +44,16 @@ class JavaAlgorithmSource(AlgorithmSource):
 
         logger.info("Java file compilation succeded")
 
+    def skeleton_path(self, compilation_dir):
+        return os.path.join(compilation_dir, "Skeleton.java")
+
     @contextmanager
     def run(self, compilation_dir, connection):
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
         cli = [
             "java",
+            "-cp", compilation_dir,
             "-Djava.security.manager",
             f"-Djava.security.policy=={security_policy_path}",
             "Skeleton",
@@ -58,7 +63,6 @@ class JavaAlgorithmSource(AlgorithmSource):
                 cli,
                 universal_newlines=True,
                 preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
-                cwd=compilation_dir,
                 stdin=connection.downward,
                 stdout=connection.upward,
                 bufsize=1,
