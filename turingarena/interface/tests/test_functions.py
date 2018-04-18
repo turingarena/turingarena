@@ -1,4 +1,4 @@
-from turingarena.interface.tests.test_utils import define_algorithms, assert_interface_error
+from turingarena.interface.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
 from turingarena.interface.exceptions import Diagnostic
 
 
@@ -78,11 +78,36 @@ def test_function_return_value():
                         assert a == 1
                         return 2
                 """,
-                'javascript': """function f(a, b) { return 2; }""",
+                #'javascript': """function f(a, b) { return 2; }""",
             },
     ):
         with algo.run() as p:
             assert p.call.f(1) == 2
+
+
+def test_multiple_function_return_value():
+    with define_algorithm(
+        interface_text="""
+            function sum(int a, int b) -> int;
+            
+            main {
+                for (i : 10) {
+                    var int x, y, ans;
+                    read x, y;
+                    call sum(x, y) -> ans;
+                    write ans;
+                    flush;
+                }
+            }
+            """,
+        language_name="c++",
+        source_text="""
+            int sum(int a, int b) {return a + b;}
+        """,
+    ) as algo:
+        with algo.run() as p:
+            for i in range(10):
+                assert p.call.sum(i, i) == 2*i
 
 
 def test_function_returns_scalar():

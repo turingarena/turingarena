@@ -1,20 +1,26 @@
 import random
-
 import networkx as nx
+import sys
+
+from turingarena.evaluation import *
+from turingarena.sandbox.exceptions import AlgorithmRuntimeError
 
 N = 100  # number of nodes
 Q = 100  # number of queries
 
+algorithm = submitted_algorithm()
+correct = True
 
-def evaluate(algorithm):
-    # create random graph
-    g = nx.fast_gnp_random_graph(N, 0.1)
+# create random graph
+g = nx.fast_gnp_random_graph(N, 0.1)
 
-    # set random edge weight
-    for u, v, d in g.edges(data=True):
-        d['weight'] = random.randint(1, 1000)
+# set random edge weight
+for u, v, d in g.edges(data=True):
+    d['weight'] = random.randint(1, 1000)
 
-    print("running algorithm")
+print("running algorithm")
+
+try:
     with algorithm.run(dict(
             N=N,
             D=[g.degree(u) for u in g],
@@ -25,7 +31,7 @@ def evaluate(algorithm):
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")
 
-        for _ in range(Q):
+        for k in range(Q):
             u = v = None
             while u == v:
                 u, v = random.randint(0, N - 1), random.randint(0, N - 1)
@@ -36,8 +42,13 @@ def evaluate(algorithm):
                 r = -1
 
             res = p.call.shortest_path(u, v)
-
             if res != r:
                 print(f"Wrong! {res} != {r}")
+                correct = False
             else:
                 print("ok")
+
+except AlgorithmRuntimeError:
+    correct = False
+
+evaluation_result(goals=dict(correct=correct))

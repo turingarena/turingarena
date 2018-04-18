@@ -47,7 +47,7 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
             assert input_sent
             input_sent = False
 
-    assert input_sent
+    # assert input_sent
 
 
 def send_response(driver_connection, response):

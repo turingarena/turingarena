@@ -25,7 +25,7 @@ class PythonAlgorithmSource(AlgorithmSource):
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.py")
 
         with PopenProcess.run(
-                ["python", sandbox_path, self.source_path, self.skeleton_path(compilation_dir)],
+                ["python3", sandbox_path, self.source_path, self.skeleton_path(compilation_dir)],
                 universal_newlines=True,
                 # preexec_fn=lambda: set_memory_and_time_limits(),
                 stdin=connection.downward,
