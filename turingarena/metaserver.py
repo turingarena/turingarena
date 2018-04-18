@@ -1,9 +1,10 @@
 import logging
+import shutil
+import tempfile
 import threading
 from abc import abstractmethod
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
-from threading import Thread
 
 from turingarena.pipeboundary import PipeBoundary
 
@@ -70,11 +71,13 @@ class MetaServer:
         self.handle_stop_request(request_payloads)
 
         stack = ExitStack()
-        child_server_dir = stack.enter_context(TemporaryDirectory(dir="/tmp"))
+        # do not use TemporaryDirectory since it has a finalizer
+        child_server_dir = tempfile.mkdtemp()
+        stack.callback(lambda: shutil.rmtree(child_server_dir))
         stack.enter_context(
             self.run_child_server(child_server_dir, **request_payloads)
         )
-        thread = Thread(target=lambda: stack.close())
+        thread = threading.Thread(target=lambda: stack.close())
         thread.start()
         return self.create_response(child_server_dir)
 
