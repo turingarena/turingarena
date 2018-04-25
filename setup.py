@@ -34,8 +34,6 @@ setup(
         "psutil",
         "seccomplite",
         "commonmark",
-    ],
-    tests_require=[
         "pytest",
     ],
     zip_safe=False,
