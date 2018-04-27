@@ -5,10 +5,9 @@ def set_memory_and_time_limits(
         memory_limit=256 * 1024 * 1024,
         time_limit=1,
 ):
-    core_limit = 32 * 1024 * 1024
     resource.setrlimit(
         resource.RLIMIT_CORE,
-        (core_limit, resource.RLIM_INFINITY),
+        (0, resource.RLIM_INFINITY),
     )
     resource.setrlimit(
         resource.RLIMIT_STACK,
