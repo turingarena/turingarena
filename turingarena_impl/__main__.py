@@ -1,8 +1,6 @@
 from turingarena_impl.cli import docopt_cli, init_logger
-from turingarena_impl.config import install_cli, uninstall_cli
 from turingarena_impl.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli
 from turingarena_impl.problem.cli import evaluate_cli
-from turingarena_impl.pythonsite import configure_python_site_cli
 from turingarena_impl.tests.cli import test_cli
 from turingarena_impl.web.serve import serve_cli
 
@@ -28,9 +26,6 @@ def main(args):
         "validate": validate_interface_cli,
         "serve": serve_cli,
         "test": test_cli,
-        "install": install_cli,
-        "uninstall": uninstall_cli,
-        "pythonsite": configure_python_site_cli,
     }
 
     if args["--help-commands"]:
