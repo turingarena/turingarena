@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import runpy
 from collections import namedtuple
 from contextlib import redirect_stdout, contextmanager, ExitStack
 from io import StringIO
@@ -53,10 +54,7 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
                 problem_name=self.name
             ))
 
-            with open(script_path) as f:
-                code = compile(f.read(), script_path, "exec")
-            script_globals = dict(__name__="__main__")
-            exec(code, script_globals)
+            script_globals = runpy.run_path(script_path)
             data = self.compat_evaluate(script_globals, language, source_name)
 
             if os.path.exists(result_path):
