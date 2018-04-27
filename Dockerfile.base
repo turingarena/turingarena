@@ -7,6 +7,7 @@ RUN true \
         gcc \
         g++ \
         gdb \
+        git \
         linux-vanilla-dev \
         libseccomp-dev \
         nodejs \

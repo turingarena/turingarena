@@ -1,5 +1,4 @@
-from turingarena_impl.cli import docopt_cli
-from turingarena_impl.cli.loggerinit import init_logger
+from turingarena_impl.cli import docopt_cli, init_logger
 from turingarena_impl.config import install_cli, uninstall_cli
 from turingarena_impl.container.cli import container_cli
 from turingarena_impl.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli
