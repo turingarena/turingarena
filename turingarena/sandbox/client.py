@@ -2,8 +2,8 @@ import logging
 from collections import namedtuple
 from contextlib import contextmanager
 
-from turingarena_impl.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena_impl.sandbox.connection import SandboxProcessConnection, \
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.sandbox.connection import SandboxProcessConnection, \
     SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 
 logger = logging.getLogger(__name__)

@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from typing import Dict, Generator
 
-from turingarena_impl.algorithm import Algorithm
+from turingarena.algorithm import Algorithm
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.loader import make_dummy_package

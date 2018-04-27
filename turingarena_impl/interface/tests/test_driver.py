@@ -1,6 +1,6 @@
 import pytest
 
-from turingarena_impl.interface.driver.client import SandboxError
+from turingarena.driver.client import SandboxError
 from .test_utils import define_algorithm
 
 

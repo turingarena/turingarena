@@ -7,11 +7,10 @@ from contextlib import redirect_stdout, contextmanager, ExitStack
 from io import StringIO
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.algorithm import Algorithm
-from turingarena_impl.interface.driver.server import DriverServer
+from turingarena.algorithm import Algorithm
+from turingarena_impl.interface.driver import DriverServer
 from turingarena_impl.loader import split_module, find_package_path
 from turingarena_impl.problem.evaluation import Evaluation
-from turingarena_impl.sandbox.languages.language import Language
 from turingarena_impl.sandbox.server import SandboxServer
 
 logger = logging.getLogger(__name__)
@@ -28,10 +27,7 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 
     __slots__ = []
 
-    def evaluate(self, source_name, *, language=None):
-        if language is None:
-            language = Language.from_source_name(source_name)
-
+    def evaluate(self, source_name, *, language_name=None):
         mod, arg = split_module(self.name)
         assert arg is None
 
@@ -49,13 +45,13 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
                 TURINGARENA_SANDBOX_DIR=sandbox_dir,
                 TURINGARENA_DRIVER_DIR=driver_dir,
                 submission_algorithm_source=source_name,
-                submission_algorithm_language=language.name,
+                submission_algorithm_language=language_name,
                 result_path=result_path,
                 problem_name=self.name
             ))
 
             script_globals = runpy.run_path(script_path)
-            data = self.compat_evaluate(script_globals, language, source_name)
+            data = self.compat_evaluate(script_globals, language_name, source_name)
 
             if os.path.exists(result_path):
                 assert data is None
@@ -67,12 +63,12 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
             data=data,
         )
 
-    def compat_evaluate(self, script_globals, language, source_name):
+    def compat_evaluate(self, script_globals, language_name, source_name):
         """For compatibility with problems defining evaluate(algorithm)"""
         if "evaluate" in script_globals:
             algorithm = Algorithm(
                 source_name=source_name,
-                language_name=language.name,
+                language_name=language_name,
                 interface_name=self.interface_name,
             )
             return script_globals["evaluate"](algorithm)
@@ -80,10 +76,13 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 
 @contextmanager
 def env_extension(**d):
-    assert all(k not in os.environ for k in d)
-    os.environ.update(d)
+    for k in d:
+        assert k not in os.environ
+        if d[k] is not None:
+            os.environ[k] = d[k]
     try:
         yield
     finally:
         for k in d:
-            del os.environ[k]
+            if d[k] is not None:
+                del os.environ[k]

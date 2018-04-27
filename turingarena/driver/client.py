@@ -1,12 +1,12 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena_impl.interface.driver.commands import MainBegin, serialize_request, MainEnd, Exit, FunctionCall, \
+from turingarena import InterfaceError
+from turingarena.driver.commands import MainBegin, serialize_request, MainEnd, Exit, FunctionCall, \
     CallbackReturn
-from turingarena_impl.interface.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
-from turingarena_impl.interface.exceptions import InterfaceError
-from turingarena_impl.interface.proxy import InterfaceProxy
-from turingarena_impl.pipeboundary import PipeBoundary
+from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
+from turingarena.driver.proxy import InterfaceProxy
+from turingarena.pipeboundary import PipeBoundary
 
 logger = logging.getLogger(__name__)
 

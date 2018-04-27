@@ -14,8 +14,8 @@ class Algorithm(namedtuple("Algorithm", [
     @contextmanager
     def run(self, global_variables=None, time_limit=None):
         # FIXME: make imports global
-        from turingarena_impl.interface.driver.client import DriverClient, DriverProcessClient
-        from turingarena_impl.sandbox.client import SandboxClient, SandboxProcessClient
+        from turingarena.driver.client import DriverClient, DriverProcessClient
+        from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
         if global_variables is None:
             global_variables = {}

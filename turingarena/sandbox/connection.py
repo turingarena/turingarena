@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.pipeboundary import PipeChannelDescriptor, PipeDescriptor, PipeSynchronousQueueDescriptor
+from turingarena.pipeboundary import PipeChannelDescriptor, PipeDescriptor, PipeSynchronousQueueDescriptor
 
 logger = logging.getLogger(__name__)
 

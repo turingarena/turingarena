@@ -3,12 +3,12 @@ from contextlib import ExitStack, contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.algorithm import Algorithm
+from turingarena.algorithm import Algorithm
+from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
+from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
+    SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
-from turingarena_impl.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena_impl.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
-    SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena_impl.sandbox.languages.language import Language
 from turingarena_impl.sandbox.process import CompilationFailedProcess
 from turingarena_impl.sandbox.source import AlgorithmSource, CompilationFailed
@@ -40,7 +40,10 @@ class SandboxServer(MetaServer):
 
     @lru_cache(maxsize=None)
     def compile_algorithm(self, algorithm):
-        language = Language.from_name(algorithm.language_name)
+        if algorithm.language_name is not None:
+            language = Language.from_name(algorithm.language_name)
+        else:
+            language = None
         interface = InterfaceDefinition.load(algorithm.interface_name)
         source = AlgorithmSource.load(
             algorithm.source_name,

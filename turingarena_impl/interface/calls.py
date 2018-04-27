@@ -1,9 +1,10 @@
 import logging
 from collections import namedtuple
 
+from turingarena import InterfaceError
+from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.context import FunctionCallContext, AcceptCallbackContext
-from turingarena_impl.interface.driver.commands import CallbackReturn, FunctionCall
-from turingarena_impl.interface.exceptions import InterfaceError, Diagnostic
+from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.io import read_line

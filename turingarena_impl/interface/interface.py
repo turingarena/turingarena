@@ -2,9 +2,9 @@ import logging
 from collections import namedtuple
 
 from turingarena import InterfaceExit
+from turingarena.driver.commands import MainBegin
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.context import GlobalContext, MainContext, RootContext
-from turingarena_impl.interface.driver.commands import MainBegin
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.parser import parse_interface

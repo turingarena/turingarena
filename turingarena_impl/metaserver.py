@@ -6,7 +6,7 @@ from abc import abstractmethod
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.pipeboundary import PipeBoundary
+from turingarena.pipeboundary import PipeBoundary
 
 logger = logging.getLogger(__name__)
 

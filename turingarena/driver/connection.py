@@ -1,4 +1,4 @@
-from turingarena_impl.pipeboundary import PipeDescriptor, PipeSynchronousQueueDescriptor
+from turingarena.pipeboundary import PipeDescriptor, PipeSynchronousQueueDescriptor
 
 
 DRIVER_QUEUE = PipeSynchronousQueueDescriptor(

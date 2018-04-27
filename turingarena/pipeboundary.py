@@ -61,7 +61,7 @@ class PipeBoundary:
 
     def sync_read(self, descriptor, side):
         with self.open_pipe(descriptor, side) as p:
-            return p.read()
+            return p.read() or None
 
     def create_queue(self, descriptor):
         for name, pipe in itertools.chain(
