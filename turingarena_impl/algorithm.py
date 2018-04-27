@@ -101,3 +101,6 @@ class AlgorithmProcess(AlgorithmSection):
         info = self.sandbox.get_info()
         if info.memory_usage > value:
             raise MemoryLimitExceeded(info.memory_usage, value)
+
+    def exit(self):
+        raise InterfaceExit

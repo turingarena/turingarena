@@ -1,0 +1,9 @@
+callback pong() {
+    exit;
+}
+
+function ping();
+
+main {
+    call ping();
+}
