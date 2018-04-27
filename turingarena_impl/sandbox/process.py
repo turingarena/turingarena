@@ -116,9 +116,6 @@ class PopenProcess(Process):
 
 
 class CompilationFailedProcess(Process):
-    def __init__(self, *args):
-        self.args = args
-
     def get_status(self, wait_termination=False):
         return ProcessInfo(
             status=ProcessStatus.TERMINATED_WITH_ERROR,

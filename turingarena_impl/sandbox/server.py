@@ -40,7 +40,6 @@ class SandboxServer(MetaServer):
 
     @lru_cache(maxsize=None)
     def compile_algorithm(self, algorithm):
-        compilation_dir = self.exit_stack.enter_context(TemporaryDirectory(prefix="turingarena_"))
         language = Language.from_name(algorithm.language_name)
         interface = InterfaceDefinition.load(algorithm.interface_name)
         source = AlgorithmSource.load(
@@ -48,8 +47,16 @@ class SandboxServer(MetaServer):
             interface=interface,
             language=language,
         )
-        source.compile(compilation_dir)
-        return source, compilation_dir
+        try:
+            with ExitStack() as exit:
+                compilation_dir = exit.enter_context(TemporaryDirectory(prefix="turingarena_"))
+                source.compile(compilation_dir)
+                # if everything went ok, keep the temporary dir until we stop
+                self.exit_stack.push(exit.pop_all())
+        except CompilationFailed:
+            return source, None
+        else:
+            return source, compilation_dir
 
 
 class SandboxProcessServer:
@@ -69,15 +76,15 @@ class SandboxProcessServer:
     def run(self):
         logger.debug("starting process...")
 
-        try:
-            with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
-                source, compilation_dir = self.meta_server.compile_algorithm(self.algorithm)
-                connection = SandboxProcessConnection(**pipes)
+        with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
+            source, compilation_dir = self.meta_server.compile_algorithm(self.algorithm)
+            connection = SandboxProcessConnection(**pipes)
+            if compilation_dir:
                 self.process = self.process_exit_stack.enter_context(
                     source.run(compilation_dir, connection)
                 )
-        except CompilationFailed as e:
-            self.process = CompilationFailedProcess(e.args)
+            else:
+                self.process = CompilationFailedProcess()
 
         logger.debug("process started")
 
