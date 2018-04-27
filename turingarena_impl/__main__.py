@@ -1,6 +1,5 @@
 from turingarena_impl.cli import docopt_cli, init_logger
 from turingarena_impl.config import install_cli, uninstall_cli
-from turingarena_impl.container.cli import container_cli
 from turingarena_impl.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli
 from turingarena_impl.problem.cli import evaluate_cli
 from turingarena_impl.pythonsite import configure_python_site_cli
@@ -23,7 +22,6 @@ def main(args):
     init_logger(args)
 
     commands = {
-        "container": container_cli,
         "evaluate": evaluate_cli,
         "template": generate_template_cli,
         "skeleton": generate_skeleton_cli,
