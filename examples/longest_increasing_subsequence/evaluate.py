@@ -1,8 +1,7 @@
 import random
 import sys
 
-from turingarena.evaluation import *
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena import *
 
 
 def run(algorithm, a, time_limit=None):
@@ -14,12 +13,7 @@ def run(algorithm, a, time_limit=None):
 
 
 def get_optimal_subsequence(a):
-    correct_algorithm = Algorithm(
-        source_name="longest_increasing_subsequence:solutions/correct.cpp",
-        language_name="c++",
-        interface_name="longest_increasing_subsequence",
-    )
-
+    correct_algorithm = algorithm("longest_increasing_subsequence:solutions/correct.cpp")
     return run(correct_algorithm, a)
 
 
@@ -51,7 +45,7 @@ def main():
             optimal_subsequence = get_optimal_subsequence(a)
             try:
                 subsequence = run(algorithm, a, time_limit=0.001)
-            except AlgorithmRuntimeError as e:
+            except AlgorithmError as e:
                 print("Error:", e)
                 correct = False
             else:

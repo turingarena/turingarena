@@ -1,7 +1,6 @@
 import random
 
-from turingarena.evaluation import *
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena import *
 
 algorithm = submitted_algorithm()
 
@@ -12,7 +11,7 @@ for _ in range(10):
     try:
         with algorithm.run() as process:
             index = process.call.max_index(len(a), a)
-    except AlgorithmRuntimeError as e:
+    except AlgorithmError as e:
         print(e)
         correct = False
         break

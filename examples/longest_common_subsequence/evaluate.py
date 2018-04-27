@@ -1,7 +1,6 @@
 import random
 
-from turingarena.evaluation import *
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena import *
 
 
 def LCS_length(x, y):
@@ -68,7 +67,7 @@ try:
         else:
             print(f'test case N = {n} wrong')
             cases.append((i, n, False))
-except AlgorithmRuntimeError:
+except AlgorithmError:
     correct = False
 
 evaluation_result(goals={

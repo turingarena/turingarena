@@ -1,8 +1,8 @@
 import random
+
 import networkx as nx
 
-from turingarena.evaluation import *
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena import *
 
 N = 100  # number of nodes
 Q = 100  # number of queries
@@ -49,7 +49,7 @@ try:
                 print("ok")
                 cases.append((k, True))
 
-except AlgorithmRuntimeError:
+except AlgorithmError:
     correct = False
 
 evaluation_result(goals={

@@ -7,12 +7,12 @@ setup(
     name="turingarena",
     entry_points={
         "console_scripts": [
-            "turingarena=turingarena.cli.main:main",
-            "turingarena-sandbox=turingarena.sandbox.main:main",
-            "turingarena-driver=turingarena.interface.driver.main:main",
+            "turingarena=turingarena_impl.cli.main:main",
+            "turingarena-sandbox=turingarena_impl.sandbox.main:main",
+            "turingarena-driver=turingarena_impl.interface.driver.main:main",
         ],
         "pytest11": [
-            "turingarena=turingarena.pytestplugin",
+            "turingarena=turingarena_impl.pytestplugin",
         ]
     },
 )

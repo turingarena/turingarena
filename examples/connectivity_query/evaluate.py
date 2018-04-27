@@ -1,8 +1,8 @@
 import random
+
 import networkx as nx
 
-from turingarena.evaluation import *
-from turingarena.sandbox.exceptions import AlgorithmRuntimeError
+from turingarena import *
 
 algorithm = submitted_algorithm()
 
@@ -39,7 +39,7 @@ try:
             else:
                 cases.append((t, False))
             print(f"Nodes {u} {v} -> {connected}")
-except AlgorithmRuntimeError:
+except AlgorithmError:
     fail = True
 
 evaluation_result(goals={
