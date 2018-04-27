@@ -7,10 +7,12 @@ RUN true \
         gcc \
         g++ \
         gdb \
-        openjdk8 \
         linux-vanilla-dev \
         libseccomp-dev \
         nodejs \
+        openjdk8 \
+        openssh \
+        socat \
     && pip3 install \
         bidict \
         coloredlogs \

@@ -1,7 +1,11 @@
+import logging
 import subprocess
 
 from turingarena.cli import docopt_cli
-from turingarena.container.sshd import serve_sshd
+
+logger = logging.getLogger(__name__)
+
+SOCKET_PATH = "/run/turingarena/sshd.sock"
 
 
 @docopt_cli
@@ -10,23 +14,18 @@ def container_cli(args):
 
     Usage:
       container [options] <cmd> [<args>...]
-
-    Options:
-      --name=<name>  Name of the container
     """
 
     commands = {
-        "sshd": container_sshd_cli,
         "run": container_run_cli,
-        "serve": container_serve_cli,
         "git": container_git_cli,
     }
     argv2 = args["<args>"]
-    return commands[args["<cmd>"]](argv=argv2, name=args["--name"])
+    return commands[args["<cmd>"]](argv=argv2)
 
 
 @docopt_cli
-def container_run_cli(args, name):
+def container_run_cli(args):
     """TuringArena container run CLI.
 
     Usage:
@@ -35,10 +34,10 @@ def container_run_cli(args, name):
     Options:
     """
 
-    subprocess.run(
+    cli = (
         [
             "ssh",
-            "-o", f"ProxyCommand=socat - UNIX-CONNECT:/var/run/turingarena/{name}/sshd.sock",
+            "-o", f"ProxyCommand=socat - UNIX-CONNECT:{SOCKET_PATH}",
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "StrictHostKeyChecking=no",
             "root@localhost",
@@ -46,52 +45,13 @@ def container_run_cli(args, name):
             *args["<args>"],
         ]
     )
+    logger.info(" ".join(cli))
+    subprocess.run(cli)
 
 
 @docopt_cli
-def container_sshd_cli(args, name):
-    """TuringArena container SSH server CLI.
-
-    Usage:
-      sshd [options]
-
-    Options:
-    """
-
-    serve_sshd(name)
-
-
-@docopt_cli
-def container_serve_cli(args, name):
-    """TuringArena container serve CLI.
-
-    Usage:
-      serve [options]
-
-    Options:
-      --sudo  Use sudo
-      --image=<image>  Docker image to run [default: turingarena]
-    """
-
-    sudo = ["sudo"] if args["--sudo"] else []
-    subprocess.run(
-        [
-            *sudo,
-            "docker",
-            "run",
-            "--rm",
-            f"--volume=/var/run/turingarena/{name}/:/var/run/turingarena/{name}/",
-            args["--image"],
-            "container",
-            "sshd",
-            f"--name={name}",
-        ],
-    )
-
-
-@docopt_cli
-def container_git_cli(args, name):
-    """TuringArena container serve CLI.
+def container_git_cli(args):
+    """TuringArena container git CLI.
 
     Usage:
       git [--] [<args>...]
@@ -101,7 +61,7 @@ def container_git_cli(args, name):
 
     ssh_command = (
         f'ssh'
-        f' -o ProxyCommand="socat - UNIX-CONNECT:/var/run/turingarena/{name}/sshd.sock"'
+        f' -o ProxyCommand="socat - UNIX-CONNECT:{SOCKET_PATH}"'
         f' -o UserKnownHostsFile=/dev/null'
         f' -o StrictHostKeyChecking=no'
     )
