@@ -9,10 +9,8 @@ RUN true \
     && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/local/bin/jcmd \
     && cd /usr/local/turingarena/ \
     && python setup.py develop \
-    && turingarena pythonsite \
-    && turingarena install examples \
-    && mkdir /problems \
-    && turingarena install /problems \
+    && python -m turingarena_impl.cli.main pythonsite \
+    && python -m turingarena_impl.cli.main install examples \
     && true
 
 ENTRYPOINT ["turingarena"]
