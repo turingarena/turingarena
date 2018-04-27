@@ -1,9 +1,10 @@
 import logging
 from collections import namedtuple
 
+from turingarena import InterfaceExit
 from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.driver.commands import Exit
-from turingarena_impl.interface.exceptions import InterfaceExit, Diagnostic, InterfaceError
+from turingarena_impl.interface.exceptions import Diagnostic, InterfaceError
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
 from turingarena_impl.interface.io import FlushStatement, ReadStatement

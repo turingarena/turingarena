@@ -7,6 +7,10 @@ from turingarena_impl.sandbox.languages.language import Language
 logger = logging.getLogger(__name__)
 
 
+class InterfaceExit(BaseException):
+    pass
+
+
 class AlgorithmError(Exception):
     pass
 

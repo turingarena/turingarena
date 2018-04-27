@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 
-from turingarena import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded
+from turingarena import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded, InterfaceExit
 
 logger = logging.getLogger(__name__)
 
@@ -15,17 +15,13 @@ class Algorithm(namedtuple("Algorithm", [
     def run(self, global_variables=None, time_limit=None):
         # FIXME: make imports global
         from turingarena_impl.interface.driver.client import DriverClient, DriverProcessClient
-        from turingarena_impl.interface.driver.server import DriverServer
         from turingarena_impl.sandbox.client import SandboxClient, SandboxProcessClient
-        from turingarena_impl.sandbox.server import SandboxServer
 
         if global_variables is None:
             global_variables = {}
 
         with ExitStack() as stack:
             sandbox_dir = os.environ.get("TURINGARENA_SANDBOX_DIR", None)
-            if sandbox_dir is None:
-                sandbox_dir = stack.enter_context(SandboxServer.run())
 
             sandbox_client = SandboxClient(sandbox_dir)
             sandbox_process_dir = stack.enter_context(sandbox_client.run(
@@ -37,8 +33,6 @@ class Algorithm(namedtuple("Algorithm", [
             sandbox_process_client = SandboxProcessClient(sandbox_process_dir)
 
             driver_dir = os.environ.get("TURINGARENA_DRIVER_DIR", None)
-            if driver_dir is None:
-                driver_dir = stack.enter_context(DriverServer.run())
 
             driver_client = DriverClient(driver_dir)
             driver_process_dir = stack.enter_context(
@@ -50,15 +44,19 @@ class Algorithm(namedtuple("Algorithm", [
 
             driver_process_client = DriverProcessClient(driver_process_dir)
 
+            algorithm_process = AlgorithmProcess(
+                sandbox=sandbox_process_client,
+                driver=driver_process_client,
+            )
             try:
-                algorithm_process = AlgorithmProcess(
-                    sandbox=sandbox_process_client,
-                    driver=driver_process_client,
-                )
                 with algorithm_process.run(algorithm_process.sandbox, time_limit):
                     driver_process_client.send_begin_main(global_variables)
-                    yield algorithm_process
-                    driver_process_client.send_end_main()
+                    try:
+                        yield algorithm_process
+                    except InterfaceExit:
+                        driver_process_client.send_exit()
+                    else:
+                        driver_process_client.send_end_main()
             finally:
                 info = sandbox_process_client.wait()
                 if info.error:

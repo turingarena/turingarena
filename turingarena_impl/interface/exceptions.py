@@ -1,10 +1,6 @@
 from collections import namedtuple
 
 
-class InterfaceExit(Exception):
-    pass
-
-
 class InterfaceError(Exception):
     def __init__(self, message, *, parseinfo=None):
         self.message = message
