@@ -6,8 +6,9 @@ services:
     tmpfs:
       - /run
       - /tmp
-    command:
+    entrypoint:
       - socat
+    command:
       - TCP-LISTEN:22,fork
       - EXEC:/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o PermitRootLogin=yes -o Protocol=2,nofork
     expose:
@@ -17,7 +18,8 @@ services:
     read_only: true
     volumes:
       - /run/turingarena:/run/turingarena
-    entrypoint: socat
+    entrypoint:
+      - socat
     command:
       - UNIX-LISTEN:/run/turingarena/sshd.sock,fork,mode=0666,reuseaddr
       - TCP:turingarena:22

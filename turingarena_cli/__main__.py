@@ -7,6 +7,11 @@ from turingarena_impl.cli import docopt_cli, init_logger
 logger = logging.getLogger(__name__)
 
 
+def run(*args, **kwargs):
+    logger.debug(f"running: {args} {kwargs}")
+    return subprocess.run(*args, **kwargs)
+
+
 @docopt_cli
 def turingarena_cli(args):
     """TuringArena command line interface.
@@ -26,6 +31,7 @@ def turingarena_cli(args):
     ssh_command = (
         [
             "ssh",
+            "-q",
             "-o", f"ProxyCommand=socat - UNIX-CONNECT:{socket_path}",
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "StrictHostKeyChecking=no",
@@ -33,11 +39,11 @@ def turingarena_cli(args):
     )
     ssh_cli = [*ssh_command, "root@localhost"]
 
-    working_dir = subprocess.run(
+    working_dir = run(
         ["git", "rev-parse", "--show-toplevel"],
         stdout=subprocess.PIPE,
         universal_newlines=True,
-    ).stdout
+    ).stdout.strip()
     logger.info(f"Workdir: {working_dir}")
 
     git_env = {
@@ -48,12 +54,26 @@ def turingarena_cli(args):
 
     git_popen_args = dict(env=git_env, stdout=subprocess.PIPE, universal_newlines=True)
 
-    subprocess.run(["git", "add", "-A", "."], **git_popen_args)
-    tree_id = subprocess.run(["git", "write-tree"], **git_popen_args).stdout
-    commit_id = subprocess.run(["git", "commit-tree", tree_id], **git_popen_args).stdout
-    subprocess.run(["git", "push", "root@localhost:db.git", f"{commit_id}:sha-{commit_id}"], **git_popen_args)
+    run(["git", "add", "-A", "."], **git_popen_args)
 
-    subprocess.run([
+    tree_id = run(["git", "write-tree"], **git_popen_args).stdout.strip()
+
+    commit_message = "Turingarena payload."
+    commit_id = run(
+        ["git", "commit-tree", tree_id],
+        input=commit_message,
+        **git_popen_args,
+    ).stdout.strip()
+
+    run([*ssh_cli, "mkdir -p /run/turingarena && git init /run/turingarena/db.git -q"])
+
+    run([
+        "git", "push", "-q",
+        "root@localhost:/run/turingarena/db.git",
+        f"{commit_id}:refs/heads/sha-{commit_id}",
+    ], **git_popen_args)
+
+    run([
         *ssh_cli,
         "/usr/local/bin/python", "-m", "turingarena_impl",
         args["<cmd>"],
