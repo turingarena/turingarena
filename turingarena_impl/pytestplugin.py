@@ -1,7 +1,9 @@
 import ast
 import json
 import os
+import random
 import re
+import string
 from functools import lru_cache
 
 import pytest
@@ -91,7 +93,8 @@ def pytest_collect_file(path, parent):
 
     if solutions_dirname != "solutions": return
 
-    module_name = "__turingarena_current_test__"
+    key = "".join(random.choices(string.ascii_lowercase, k=6))
+    module_name = f"__turingarena_test_{key}"
     make_dummy_package(module_name, [problem_dir])
 
     return ProblemSolutionTestFile(
