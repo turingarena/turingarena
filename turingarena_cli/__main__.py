@@ -65,16 +65,18 @@ def turingarena_cli(args):
         **git_popen_args,
     ).stdout.strip()
 
-    run([*ssh_cli, "mkdir -p /run/turingarena && git init /run/turingarena/db.git -q"])
+    run([*ssh_cli, "mkdir -p /run/turingarena && git init --bare /run/turingarena/db.git -q"])
 
     run([
         "git", "push", "-q",
         "root@localhost:/run/turingarena/db.git",
         f"{commit_id}:refs/heads/sha-{commit_id}",
+        f":refs/heads/sha-{commit_id}",
     ], **git_popen_args)
 
     run([
         *ssh_cli,
+        f"TURINGARENA_TREE_ID={tree_id}",
         "/usr/local/bin/python", "-m", "turingarena_impl",
         args["<cmd>"],
         *args["<args>"],

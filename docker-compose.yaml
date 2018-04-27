@@ -3,6 +3,8 @@ services:
   turingarena:
     image: turingarena/turingarena
     read_only: true
+    volumes:
+      - ./:/usr/local/turingarena/:ro
     tmpfs:
       - /run
       - /tmp
