@@ -44,9 +44,8 @@ def turingarena_cli(args):
         stdout=subprocess.PIPE,
         universal_newlines=True,
     ).stdout.strip()
-    logger.info(f"Workdir: {working_dir}")
-
     current_dir = os.path.relpath(os.curdir, working_dir)
+    logger.info(f"Sending work dir: {working_dir} (current dir: {current_dir})...")
 
     git_env = {
         "GIT_WORK_TREE": working_dir,
@@ -81,6 +80,8 @@ def turingarena_cli(args):
         "root@localhost:/run/turingarena/db.git",
         f":refs/heads/sha-{commit_id}",
     ], **git_popen_args)
+
+    logger.info(f"Work dir sent. Running command...")
 
     run([
         *ssh_cli,
