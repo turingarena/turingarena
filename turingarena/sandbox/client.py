@@ -1,10 +1,10 @@
 import logging
-from collections import namedtuple
 from contextlib import contextmanager
 
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, \
     SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
+from turingarena_impl.sandbox.processinfo import SandboxProcessInfo
 
 logger = logging.getLogger(__name__)
 
@@ -28,13 +28,6 @@ class SandboxClient:
         yield response["sandbox_process_dir"]
 
 
-SandboxProcessInfo = namedtuple("SandboxProcessInfo", [
-    "error",
-    "time_usage",
-    "memory_usage",
-])
-
-
 class SandboxProcessClient:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
@@ -44,9 +37,7 @@ class SandboxProcessClient:
             SANDBOX_REQUEST_QUEUE,
             wait=str(int(bool(wait))),
         )
-        response["time_usage"] = float(response["time_usage"])
-        response["memory_usage"] = int(response["memory_usage"])
-        info = SandboxProcessInfo(**response)
+        info = SandboxProcessInfo.from_payloads(response)
         logger.info(f"Process info: {info}")
         return info
 

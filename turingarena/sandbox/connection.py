@@ -31,8 +31,9 @@ SANDBOX_REQUEST_QUEUE = PipeSynchronousQueueDescriptor(
         wait=PipeDescriptor("wait.pipe", ("w", "r")),
     ),
     response_pipes=dict(
-        error=PipeDescriptor("error.pipe", ("r", "w")),
+        status=PipeDescriptor("status.pipe", ("r", "w")),
         time_usage=PipeDescriptor("time_usage.pipe", ("r", "w")),
         memory_usage=PipeDescriptor("memory_usage.pipe", ("r", "w")),
+        error=PipeDescriptor("error.pipe", ("r", "w")),
     ),
 )

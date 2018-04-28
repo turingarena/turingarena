@@ -3,30 +3,16 @@ import os
 import signal
 import subprocess
 from abc import abstractmethod
-from collections import namedtuple
 from contextlib import contextmanager
-from enum import Enum
+
+from turingarena_impl.sandbox.processinfo import SandboxProcessInfo, ProcessStatus
 
 logger = logging.Logger(__name__)
 
 
-class ProcessStatus(Enum):
-    RUNNING = 0
-    TERMINATED_SUCCESSFULLY = 1
-    TERMINATED_WITH_ERROR = 2
-
-
-ProcessInfo = namedtuple("ProcessInfo", [
-    "status",
-    "memory_usage",
-    "time_usage",
-    "error",
-])
-
-
 class Process:
     @abstractmethod
-    def get_status(self, wait_termination=False) -> ProcessInfo:
+    def get_status(self, wait_termination=False) -> SandboxProcessInfo:
         pass
 
 
@@ -68,7 +54,7 @@ class PopenProcess(Process):
             return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} ({signal_message})"
         assert False, "This should not be reached"
 
-    def get_status(self, wait_termination=False) -> ProcessInfo:
+    def get_status(self, wait_termination=False) -> SandboxProcessInfo:
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
         maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
@@ -99,7 +85,7 @@ class PopenProcess(Process):
         _, exit_status, rusage = os.wait4(self.os_process.pid, 0 if wait_termination else os.WUNTRACED)
 
         status, error = self.get_process_status_error(exit_status)
-        info = ProcessInfo(
+        info = SandboxProcessInfo(
             status=status,
             memory_usage=rusage.ru_maxrss * 1024,
             time_usage=rusage.ru_utime,
@@ -117,7 +103,7 @@ class PopenProcess(Process):
 
 class CompilationFailedProcess(Process):
     def get_status(self, wait_termination=False):
-        return ProcessInfo(
+        return SandboxProcessInfo(
             status=ProcessStatus.TERMINATED_WITH_ERROR,
             memory_usage=0,
             time_usage=0.0,

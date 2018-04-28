@@ -107,17 +107,10 @@ class SandboxProcessServer:
         assert wait in ("0", "1")
 
         info = self.process.get_status(wait_termination=bool(int(wait)))
-
-        time_usage = info.time_usage
-        memory_usage = info.memory_usage
         logger.debug(f"Process info = {info}")
 
         if wait == "1":
             self.done = True
             self.process = None
 
-        return {
-            "error": info.error,
-            "time_usage": str(time_usage),
-            "memory_usage": str(memory_usage),
-        }
+        return info.to_payloads()
