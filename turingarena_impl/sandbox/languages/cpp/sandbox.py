@@ -17,7 +17,7 @@ def init_sandbox():
     ]:
         filter.add_rule(ALLOW, syscall)
     for syscall in [
-        "access", "madvise", "readlink"
+        "access", "madvise", "readlink",
     ]:
         filter.add_rule(ERRNO(errno.EACCES), syscall)
     filter.load()

@@ -6,8 +6,8 @@ services:
     volumes:
       - ./:/usr/local/turingarena/:ro
     tmpfs:
-      - /run
-      - /tmp
+      - /run:exec,mode=777
+      - /tmp:exec,mode=777
     entrypoint:
       - socat
     command:
