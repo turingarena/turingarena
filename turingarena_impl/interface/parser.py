@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 import tatsu
 
@@ -6,11 +7,14 @@ from turingarena_impl.interface.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 
-grammar = tatsu.compile(grammar_ebnf)
+
+@lru_cache(None)
+def get_grammar():
+    return tatsu.compile(grammar_ebnf)
 
 
 def parse_interface(text, **kwargs):
-    return grammar.parse(text, **kwargs, asmodel=False, parseinfo=True)
+    return get_grammar().parse(text, **kwargs, asmodel=False, parseinfo=True)
 
 
 def get_line(parseinfo):
