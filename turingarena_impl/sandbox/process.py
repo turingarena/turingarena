@@ -12,7 +12,7 @@ logger = logging.Logger(__name__)
 
 class Process:
     @abstractmethod
-    def get_status(self, wait_termination=False) -> SandboxProcessInfo:
+    def get_status(self, kill=False) -> SandboxProcessInfo:
         pass
 
 
@@ -54,7 +54,7 @@ class PopenProcess(Process):
             return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} ({signal_message})"
         assert False, "This should not be reached"
 
-    def get_status(self, wait_termination=False) -> SandboxProcessInfo:
+    def get_status(self, kill=False) -> SandboxProcessInfo:
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
         maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
@@ -77,12 +77,14 @@ class PopenProcess(Process):
         if self.termination_info:
             return self.termination_info
 
-        # first send SIGSTOP to stop the process
-        if not wait_termination:
+        # first send SIGTERM/SIGSTOP to stop the process
+        if kill:
+            self.os_process.send_signal(signal.SIGTERM)
+        else:
             self.os_process.send_signal(signal.SIGSTOP)
 
         # then, use wait to get rusage struct (see man getrusage(2))
-        _, exit_status, rusage = os.wait4(self.os_process.pid, 0 if wait_termination else os.WUNTRACED)
+        _, exit_status, rusage = os.wait4(self.os_process.pid, 0 if kill else os.WUNTRACED)
 
         status, error = self.get_process_status_error(exit_status)
         info = SandboxProcessInfo(
@@ -93,6 +95,7 @@ class PopenProcess(Process):
         )
 
         if status is ProcessStatus.RUNNING:
+            assert not kill
             # if process is not terminated, restart it with a SIGCONT
             self.os_process.send_signal(signal.SIGCONT)
         else:
@@ -102,7 +105,7 @@ class PopenProcess(Process):
 
 
 class CompilationFailedProcess(Process):
-    def get_status(self, wait_termination=False):
+    def get_status(self, kill=False):
         return SandboxProcessInfo(
             status=ProcessStatus.TERMINATED_WITH_ERROR,
             memory_usage=0,

@@ -77,6 +77,13 @@ class SandboxProcessServer:
         self.process_exit_stack = ExitStack()
 
     def run(self):
+        with self.process_exit_stack:
+            self.start_process()
+            self.handle_requests()
+
+        logger.debug("process terminated")
+
+    def start_process(self):
         logger.debug("starting process...")
 
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
@@ -86,11 +93,14 @@ class SandboxProcessServer:
                 self.process = self.process_exit_stack.enter_context(
                     source.run(compilation_dir, connection)
                 )
+                self.process_exit_stack.callback(self.terminate_process)
             else:
                 self.process = CompilationFailedProcess()
 
-        logger.debug("process started")
+    def terminate_process(self):
+        return self.process.get_status(kill=True)
 
+    def handle_requests(self):
         while not self.done:
             logger.debug("handling requests...")
             self.boundary.handle_request(
@@ -98,19 +108,16 @@ class SandboxProcessServer:
                 self.handle_request,
             )
 
-        logger.debug("process terminated")
-
-    def handle_request(self, *, wait):
-        logger.debug(f"get_info(wait={wait})")
+    def handle_request(self, *, kill):
+        logger.debug(f"get_info(kill={kill})")
 
         assert not self.done
-        assert wait in ("0", "1")
+        assert kill in ("0", "1")
 
-        info = self.process.get_status(wait_termination=bool(int(wait)))
+        info = self.process.get_status(kill=bool(int(kill)))
         logger.debug(f"Process info = {info}")
 
-        if wait == "1":
+        if kill == "1":
             self.done = True
-            self.process = None
 
         return info.to_payloads()

@@ -28,7 +28,7 @@ SANDBOX_PROCESS_CHANNEL = PipeChannelDescriptor(
 
 SANDBOX_REQUEST_QUEUE = PipeSynchronousQueueDescriptor(
     request_pipes=dict(
-        wait=PipeDescriptor("wait.pipe", ("w", "r")),
+        kill=PipeDescriptor("kill.pipe", ("w", "r")),
     ),
     response_pipes=dict(
         status=PipeDescriptor("status.pipe", ("r", "w")),

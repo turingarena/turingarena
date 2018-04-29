@@ -48,19 +48,19 @@ class Algorithm(namedtuple("Algorithm", [
                 sandbox=sandbox_process_client,
                 driver=driver_process_client,
             )
-            try:
-                with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                    driver_process_client.send_begin_main(global_variables)
-                    try:
-                        yield algorithm_process
-                    except InterfaceExit:
-                        driver_process_client.send_exit()
-                    else:
-                        driver_process_client.send_end_main()
-            finally:
-                info = sandbox_process_client.wait()
-                if info.error:
-                    raise AlgorithmRuntimeError(info.error)
+
+            with algorithm_process.run(algorithm_process.sandbox, time_limit):
+                driver_process_client.send_begin_main(global_variables)
+                try:
+                    yield algorithm_process
+                except InterfaceExit:
+                    driver_process_client.send_exit()
+                else:
+                    driver_process_client.send_end_main()
+
+            info = sandbox_process_client.get_info(kill=True)
+            if info.error:
+                raise AlgorithmRuntimeError(info.error)
 
 
 class AlgorithmSection:

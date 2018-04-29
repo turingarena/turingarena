@@ -89,11 +89,8 @@ class PipeBoundary:
             name: self.sync_read(pipe, PipeBoundarySide.SERVER)
             for name, pipe in descriptor.request_pipes.items()
         }
-        response_payloads = {}
-        try:
-            response_payloads = handler(**request_payloads)
-        finally:
-            self._send_payloads(descriptor, response_payloads)
+        response_payloads = handler(**request_payloads)
+        self._send_payloads(descriptor, response_payloads)
 
     def _send_payloads(self, descriptor, response_payloads):
         for name, pipe in descriptor.response_pipes.items():

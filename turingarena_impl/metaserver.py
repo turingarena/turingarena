@@ -1,5 +1,7 @@
 import logging
+import multiprocessing
 import shutil
+import signal
 import tempfile
 import threading
 from abc import abstractmethod
@@ -9,10 +11,6 @@ from tempfile import TemporaryDirectory
 from turingarena.pipeboundary import PipeBoundary
 
 logger = logging.getLogger(__name__)
-
-
-class StopMetaServer(Exception):
-    pass
 
 
 class MetaServer:
@@ -36,13 +34,13 @@ class MetaServer:
     def run(cls):
         with TemporaryDirectory(dir="/tmp", prefix="turingarena_metaserver_") as boundary_dir:
             meta_server = cls(boundary_dir)
-            meta_server_thread = threading.Thread(target=meta_server.do_run)
-            meta_server_thread.start()
+            process = multiprocessing.Process(target=meta_server.do_run)
+            process.start()
             try:
                 yield boundary_dir
             finally:
-                meta_server.stop()
-                meta_server_thread.join()
+                process.terminate()
+                process.join()
 
     @abstractmethod
     def get_queue_descriptor(self):
@@ -57,33 +55,37 @@ class MetaServer:
         pass
 
     def do_run(self):
-        while True:
-            try:
+        def handler(signum, frame):
+            raise SystemExit
+
+        signal.signal(signal.SIGTERM, handler)
+
+        try:
+            while True:
                 self.boundary.handle_request(
                     self.get_queue_descriptor(),
                     self.handle_request,
                 )
-            except StopMetaServer:
-                break
-        self.exit_stack.close()
+        finally:
+            signal.signal(signal.SIGTERM, signal.SIG_IGN)
+            self.exit_stack.close()
 
     def handle_request(self, **request_payloads):
-        self.handle_stop_request(request_payloads)
+        child_stack = ExitStack()
 
-        stack = ExitStack()
         # do not use TemporaryDirectory since it has a finalizer
         child_server_dir = tempfile.mkdtemp()
-        stack.callback(lambda: shutil.rmtree(child_server_dir))
-        stack.enter_context(
+
+        def cleanup():
+            shutil.rmtree(child_server_dir, ignore_errors=True)
+
+        self.exit_stack.callback(cleanup)
+        child_stack.callback(cleanup)
+
+        child_stack.enter_context(
             self.run_child_server(child_server_dir, **request_payloads)
         )
-        thread = threading.Thread(target=lambda: stack.close())
+        thread = threading.Thread(target=child_stack.close)
+
         thread.start()
         return self.create_response(child_server_dir)
-
-    def handle_stop_request(self, request_payloads):
-        if any(request_payloads.values()): return
-        raise StopMetaServer
-
-    def stop(self):
-        self.boundary.send_empty_request(self.get_queue_descriptor())
