@@ -39,6 +39,7 @@ class MetaServer:
             try:
                 yield boundary_dir
             finally:
+                assert process.is_alive()
                 process.terminate()
                 process.join()
 
@@ -55,7 +56,13 @@ class MetaServer:
         pass
 
     def do_run(self):
+        stopped = False
+
         def handler(signum, frame):
+            nonlocal stopped
+
+            signal.signal(signal.SIGTERM, signal.SIG_IGN)
+            stopped = True
             raise SystemExit
 
         signal.signal(signal.SIGTERM, handler)
@@ -66,9 +73,24 @@ class MetaServer:
                     self.get_queue_descriptor(),
                     self.handle_request,
                 )
+        except SystemExit:
+            logger.info("Meta-server terminating")
+            raise
+        except:
+            logger.exception("Exception in meta-server loop")
         finally:
-            signal.signal(signal.SIGTERM, signal.SIG_IGN)
             self.exit_stack.close()
+            if not stopped:
+                logger.info("Meta-server waiting for SIGTERM")
+                signal.sigwait([signal.SIGTERM])
+                logger.info("Meta-server terminated (exception)")
+
+    @contextmanager
+    def child_finalizer(self):
+        try:
+            yield
+        except Exception:
+            logger.exception("Exception in child server.")
 
     def handle_request(self, **request_payloads):
         child_stack = ExitStack()
@@ -80,8 +102,9 @@ class MetaServer:
             shutil.rmtree(child_server_dir, ignore_errors=True)
 
         self.exit_stack.callback(cleanup)
-        child_stack.callback(cleanup)
 
+        child_stack.enter_context(self.child_finalizer())
+        child_stack.callback(cleanup)
         child_stack.enter_context(
             self.run_child_server(child_server_dir, **request_payloads)
         )

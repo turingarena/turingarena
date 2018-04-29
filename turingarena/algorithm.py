@@ -4,6 +4,7 @@ from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 
 from turingarena import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded, InterfaceExit
+from turingarena.driver.client import SandboxError
 
 logger = logging.getLogger(__name__)
 
@@ -49,18 +50,21 @@ class Algorithm(namedtuple("Algorithm", [
                 driver=driver_process_client,
             )
 
-            with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                driver_process_client.send_begin_main(global_variables)
-                try:
-                    yield algorithm_process
-                except InterfaceExit:
-                    driver_process_client.send_exit()
-                else:
-                    driver_process_client.send_end_main()
-
-            info = sandbox_process_client.get_info(kill=True)
-            if info.error:
-                raise AlgorithmRuntimeError(info.error)
+            try:
+                with algorithm_process.run(algorithm_process.sandbox, time_limit):
+                    driver_process_client.send_begin_main(global_variables)
+                    try:
+                        yield algorithm_process
+                    except InterfaceExit:
+                        driver_process_client.send_exit()
+                    else:
+                        driver_process_client.send_end_main()
+            except SandboxError:
+                info = sandbox_process_client.get_info(kill=True)
+                if info.error:
+                    raise AlgorithmRuntimeError(info.error) from None
+                raise
+            sandbox_process_client.get_info(kill=True)
 
 
 class AlgorithmSection:

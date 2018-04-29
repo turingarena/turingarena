@@ -80,7 +80,9 @@ def env_extension(**d):
         assert k not in os.environ
         if d[k] is not None:
             os.environ[k] = d[k]
-    yield
-    for k in d:
-        if d[k] is not None:
-            del os.environ[k]
+    try:
+        yield
+    finally:
+        for k in d:
+            if d[k] is not None:
+                del os.environ[k]

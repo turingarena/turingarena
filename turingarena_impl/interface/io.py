@@ -1,6 +1,8 @@
 import logging
 from collections import namedtuple
 
+from decorator import contextmanager
+
 from turingarena_impl.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
 from turingarena_impl.interface.expressions import Expression
@@ -13,6 +15,19 @@ def read_line(pipe):
     if not line:
         raise CommunicationBroken
     return line
+
+
+@contextmanager
+def writing_to_process():
+    try:
+        yield
+    except BrokenPipeError:
+        raise CommunicationBroken
+
+
+def do_flush(connection):
+    with writing_to_process():
+        connection.downward.flush()
 
 
 class CheckpointStatement(ImperativeStatement):
@@ -33,8 +48,7 @@ class CheckpointInstruction(Instruction):
         return True
 
     def on_communicate_with_process(self, connection):
-        # make sure all input was sent before receiving output
-        connection.downward.flush()
+        do_flush(connection)
 
         line = read_line(connection.upward).strip()
         assert line == str(0)
@@ -82,16 +96,13 @@ class ReadStatement(ReadWriteStatement):
 
 
 class ReadInstruction(ReadWriteInstruction):
-
     def on_communicate_with_process(self, connection):
         raw_values = [
             a.evaluate_in(self.context).get()
             for a in self.arguments
         ]
-        try:
+        with writing_to_process():
             print(*raw_values, file=connection.downward)
-        except BrokenPipeError:
-            raise CommunicationBroken
 
 
 class WriteStatement(ReadWriteStatement):
@@ -110,7 +121,7 @@ class WriteInstruction(ReadWriteInstruction):
 
     def on_communicate_with_process(self, connection):
         # make sure all input was sent before receiving output
-        connection.downward.flush()
+        do_flush(connection)
 
         raw_values = read_line(connection.upward).strip().split()
         for a, v in zip(self.arguments, raw_values):
