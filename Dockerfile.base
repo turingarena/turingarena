@@ -25,4 +25,5 @@ RUN true \
         seccomplite \
         pytest \
         tatsu \
+        networkx \
     && true
