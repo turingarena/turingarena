@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
-
-from decorator import contextmanager
+from contextlib import contextmanager
 
 from turingarena_impl.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
