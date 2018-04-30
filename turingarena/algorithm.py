@@ -22,7 +22,7 @@ class Algorithm(namedtuple("Algorithm", [
             global_variables = {}
 
         with ExitStack() as stack:
-            sandbox_dir = os.environ.get("TURINGARENA_SANDBOX_DIR", None)
+            sandbox_dir = os.environ["TURINGARENA_SANDBOX_DIR"]
 
             sandbox_client = SandboxClient(sandbox_dir)
             sandbox_process_dir = stack.enter_context(sandbox_client.run(
@@ -33,7 +33,7 @@ class Algorithm(namedtuple("Algorithm", [
 
             sandbox_process_client = SandboxProcessClient(sandbox_process_dir)
 
-            driver_dir = os.environ.get("TURINGARENA_DRIVER_DIR", None)
+            driver_dir = os.environ["TURINGARENA_DRIVER_DIR"]
 
             driver_client = DriverClient(driver_dir)
             driver_process_dir = stack.enter_context(

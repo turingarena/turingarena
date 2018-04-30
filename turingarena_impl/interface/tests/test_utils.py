@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from typing import Dict, Generator
@@ -5,7 +6,6 @@ from typing import Dict, Generator
 from turingarena.algorithm import Algorithm
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.interface import InterfaceDefinition
-from turingarena_impl.loader import make_dummy_package
 from turingarena_impl.sandbox.languages.language import Language
 
 
@@ -14,19 +14,18 @@ def define_algorithm(interface_text: str, source_text: str, language_name: str) 
     language = Language.from_name(language_name)
 
     with TemporaryDirectory(dir="/tmp") as tmp_dir:
-        make_dummy_package("test", [tmp_dir])
-        source_file_name = f"source{language.extension}"
-        interface_file_name = "interface.txt"
+        source_file_name = os.path.join(tmp_dir, f"source{language.extension}")
+        interface_file_name = os.path.join(tmp_dir, "interface.txt")
 
-        with open(f"{tmp_dir}/{interface_file_name}", "w") as f:
+        with open(interface_file_name, "w") as f:
             print(interface_text, file=f)
 
-        with open(f"{tmp_dir}/{source_file_name}", "w") as f:
+        with open(source_file_name, "w") as f:
             print(source_text, file=f)
 
         yield Algorithm(
-            source_name=f"test:{source_file_name}",
-            interface_name=f"test:{interface_file_name}",
+            source_name=f":{source_file_name}",
+            interface_name=f":{interface_file_name}",
             language_name=language_name,
         )
 

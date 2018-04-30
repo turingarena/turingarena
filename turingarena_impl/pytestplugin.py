@@ -1,17 +1,16 @@
 import ast
 import json
 import os
-import random
 import re
-import string
 from functools import lru_cache
 
 import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.loader import make_dummy_package, split_module, find_package_path
+from turingarena_impl.loader import split_module, find_package_path
 from turingarena_impl.problem.python import HostPythonEvaluator
+from turingarena_impl.problem.segi import run_metaservers
 
 
 class EvaluationAssertionError(Exception):
@@ -90,16 +89,19 @@ class ProblemSolutionTestFile(pytest.File):
 def pytest_collect_file(path, parent):
     solutions_dir, source_filename = os.path.split(path)
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
+    evaluator_path = os.path.join(problem_dir, "evaluate.py")
 
     if solutions_dirname != "solutions": return
-
-    key = "".join(random.choices(string.ascii_lowercase, k=6))
-    module_name = f"__turingarena_test_{key}"
-    make_dummy_package(module_name, [problem_dir])
 
     return ProblemSolutionTestFile(
         fspath=path,
         parent=parent,
-        evaluator_name=f"{module_name}",
-        source_name=f"{module_name}:{path}",
+        evaluator_name=f":{evaluator_path}",
+        source_name=f":{path}",
     )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def turingarena_metaservers():
+    with run_metaservers():
+        yield

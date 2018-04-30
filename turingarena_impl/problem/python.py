@@ -3,14 +3,13 @@ import logging
 import os
 import runpy
 from collections import namedtuple
-from contextlib import redirect_stdout, contextmanager, ExitStack
+from contextlib import redirect_stdout, ExitStack
 from io import StringIO
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.interface.driver import DriverServer
 from turingarena_impl.loader import split_module, find_package_path
 from turingarena_impl.problem.evaluation import Evaluation
-from turingarena_impl.sandbox.server import SandboxServer
+from turingarena_impl.problem.segi import env_extension, run_metaservers
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +36,9 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
             result_path = os.path.join(temp_dir, "result.json")
             script_path = find_package_path(mod, "evaluate.py")
 
-            sandbox_dir = stack.enter_context(SandboxServer.run())
-            driver_dir = stack.enter_context(DriverServer.run())
+            stack.enter_context(run_metaservers())
 
             stack.enter_context(env_extension(
-                TURINGARENA_SANDBOX_DIR=sandbox_dir,
-                TURINGARENA_DRIVER_DIR=driver_dir,
                 submission_algorithm_source=source_name,
                 submission_algorithm_language=language_name,
                 result_path=result_path,
@@ -61,13 +57,3 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
             stdout=eval_stdout.getvalue().splitlines(),
             data=data,
         )
-
-
-@contextmanager
-def env_extension(**d):
-    old_env = os.environ
-    os.environ = d
-    try:
-        yield
-    finally:
-        os.environ = old_env

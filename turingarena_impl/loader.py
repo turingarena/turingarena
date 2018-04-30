@@ -1,29 +1,16 @@
 import importlib
+import importlib.util
 import os
-import types
-
-from future.moves import sys
-
-
-def make_dummy_package(name, path):
-    """
-    Creates a dummy python package with a given path,
-    used for looking for submodules and turingarena data.
-    """
-    mod = types.ModuleType(name)
-    mod.__package__ = mod.__name__
-    mod.__path__ = path
-    sys.modules[name] = mod
-    return mod
-
-
-base_problem_module = make_dummy_package("__turingarena_base__", [""])
 
 
 def find_package_path(mod, rel_path):
-    for path in find_package_path_all(mod, rel_path):
-        return path
-    raise FileNotFoundError(f"package file not found: {mod.__name__}:{rel_path}")
+    if not mod:
+        if os.path.exists(rel_path):
+            return rel_path
+    else:
+        for path in find_package_path_all(mod, rel_path):
+            return path
+    raise FileNotFoundError(f"package file not found: {mod}:{rel_path}")
 
 
 def find_package_path_all(mod, rel_path):
@@ -43,7 +30,7 @@ def split_module(name, *, default_arg=None):
     if mod_name:
         mod = importlib.import_module(mod_name)
     else:
-        mod = base_problem_module
+        mod = None
 
     if rest:
         arg = rest[0]
