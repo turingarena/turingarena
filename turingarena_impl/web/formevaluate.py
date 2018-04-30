@@ -28,6 +28,6 @@ def form_evaluate(fields):
         source_path = os.path.join(temp_dir, f"source{language.extension}")
         with open(source_path, "x") as f:
             f.write(source_text)
-        problem = HostPythonEvaluator(problem_name, interface_name=problem_name)
+        problem = HostPythonEvaluator(problem_name)
         evaluation = problem.evaluate(f":{source_path}")
         return json.dumps(evaluation._asdict())

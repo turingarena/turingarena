@@ -2,13 +2,12 @@ import ast
 import json
 import os
 import re
-from functools import lru_cache
 
 import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.loader import split_module, find_package_path
+from turingarena_impl.loader import find_package_path
 from turingarena_impl.problem.python import HostPythonEvaluator
 from turingarena_impl.problem.segi import run_metaservers
 
@@ -17,32 +16,36 @@ class EvaluationAssertionError(Exception):
     pass
 
 
-class ProblemSolutionEvaluationItem(pytest.Item):
+class EvaluationAssertionFailed(Exception):
+    pass
+
+
+class ProblemSolutionItem(pytest.Item):
     def __init__(self, parent):
-        super().__init__("evaluation", parent)
+        super().__init__(f"evaluation", parent)
+
+    def load_assertion_in_source(self):
+        with open(find_package_path(self.parent.source_name)) as f:
+            source_text = f.read()
+        return re.findall(r"evaluation_assert\s+(.+)", source_text)
 
     def runtest(self):
-        self.parent.evaluate(self)
+        evaluator = HostPythonEvaluator(self.parent.evaluator_name)
+        result = evaluator.evaluate(self.parent.source_name)
+        self.add_report_section("call", "evaluation_stdout", "\n".join(result.stdout))
+        self.add_report_section("call", "evaluation_result", json.dumps(result.data, indent=4))
 
-
-class ProblemSolutionAssertionItem(pytest.Item):
-    def __init__(self, parent, assertion):
-        super().__init__(f"evaluation_assert {assertion}", parent)
-        self.assertion = assertion
-
-    def runtest(self):
-        result = self.parent.evaluate(self)
-
-        mode = "exec"
-        tree = ast.parse(f"assert {self.assertion}\n", mode=mode)
-        rewrite_asserts(tree)
-        co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
-        try:
-            exec(co, dict(approx=approx), result._asdict())
-        except AssertionError as e:
-            raise EvaluationAssertionError(self.assertion) from e
-        except Exception as e:
-            raise AssertionError(f"exception while checking: {self.assertion}") from e
+        for assertion in self.load_assertion_in_source():
+            mode = "exec"
+            tree = ast.parse(f"assert {assertion}\n", mode=mode)
+            rewrite_asserts(tree)
+            co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
+            try:
+                exec(co, dict(approx=approx), result._asdict())
+            except AssertionError as e:
+                raise EvaluationAssertionError(assertion) from e
+            except Exception as e:
+                raise EvaluationAssertionFailed(assertion) from e
 
     def repr_failure(self, excinfo):
         if isinstance(excinfo.value, EvaluationAssertionError):
@@ -51,6 +54,13 @@ class ProblemSolutionAssertionItem(pytest.Item):
                 excinfo.value.__cause__.args[0],
                 "",
                 f"Failed evaluation assert: {condition}",
+            ])
+        if isinstance(excinfo.value, EvaluationAssertionFailed):
+            [condition] = excinfo.value.args
+            return "\n".join([
+                excinfo.value.__cause__.args[0],
+                "",
+                f"Exception while checking evaluation assert: {condition}",
             ])
         return super().repr_failure(excinfo)
 
@@ -61,29 +71,8 @@ class ProblemSolutionTestFile(pytest.File):
         self.evaluator_name = evaluator_name
         self.source_name = source_name
 
-    @lru_cache(None)
-    def _do_evaluate(self):
-        return HostPythonEvaluator(
-            self.evaluator_name,
-            interface_name=self.evaluator_name,
-        ).evaluate(self.source_name)
-
-    def evaluate(self, item):
-        result = self._do_evaluate()
-        item.add_report_section("call", "evaluation_stdout", "\n".join(result.stdout))
-        item.add_report_section("call", "evaluation_result", json.dumps(result.data, indent=4))
-        return result
-
-    def load_assertion_in_source(self):
-        mod, rel_path = split_module(self.source_name, default_arg="interface.txt")
-        with open(find_package_path(mod, rel_path)) as f:
-            source_text = f.read()
-        return re.findall(r"evaluation_assert\s+(.+)", source_text)
-
     def collect(self):
-        yield ProblemSolutionEvaluationItem(self)
-        for assertion in self.load_assertion_in_source():
-            yield ProblemSolutionAssertionItem(self, assertion)
+        yield ProblemSolutionItem(self)
 
 
 def pytest_collect_file(path, parent):

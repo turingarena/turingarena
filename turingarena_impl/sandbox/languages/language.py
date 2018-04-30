@@ -49,6 +49,6 @@ class Language(namedtuple("Language", [
 
     @staticmethod
     def from_source_name(source_name):
-        mod, rel_path = split_module(source_name)
+        mod_name, rel_path = split_module(source_name)
         base, ext = os.path.splitext(rel_path)
         return Language.from_extension(ext)

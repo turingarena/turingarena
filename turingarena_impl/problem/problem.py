@@ -6,15 +6,14 @@ from tempfile import TemporaryDirectory
 import yaml
 
 from turingarena_impl.interface.metadata import TuringarenaYamlLoader
-from turingarena_impl.loader import find_package_path, split_module
+from turingarena_impl.loader import find_package_path
 
 logger = logging.getLogger(__name__)
 
 
 def load_problem_metadata(name):
-    mod, rel_path = split_module(name, default_arg="metadata.yaml")
     try:
-        with open(find_package_path(mod, rel_path)) as f:
+        with open(find_package_path(name, "metadata.yaml")) as f:
             return yaml.load(f, Loader=TuringarenaYamlLoader)
     except FileNotFoundError:
         return dict()

@@ -8,7 +8,7 @@ from turingarena_impl.interface.context import GlobalContext, MainContext, RootC
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.parser import parse_interface
-from turingarena_impl.loader import find_package_path, split_module
+from turingarena_impl.loader import find_package_path
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,7 @@ class InterfaceDefinition:
 
     @staticmethod
     def load(name):
-        mod, rel_path = split_module(name, default_arg="interface.txt")
-        with open(find_package_path(mod, rel_path)) as f:
+        with open(find_package_path(name, "interface.txt")) as f:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod

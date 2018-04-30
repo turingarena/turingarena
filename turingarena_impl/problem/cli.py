@@ -26,7 +26,7 @@ def evaluate_cli(args):
 
         sys.path.append(".")
         problem_name = args["--problem"] or ""
-        evaluator = HostPythonEvaluator(name=problem_name, interface_name=problem_name)
+        evaluator = HostPythonEvaluator(name=problem_name)
         source_path = args["<source>"]
         evaluation = evaluator.evaluate(
             f":{source_path}",

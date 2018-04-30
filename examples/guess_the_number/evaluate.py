@@ -45,7 +45,7 @@ def compute_fixed(correct):
         return player_answer == correct, number_of_guess
 
 
-def compute_moving(algorithm):
+def compute_moving():
     with algorithm.run() as process:
         number_of_guess = 0
         min_value, max_value = 1, N
