@@ -46,12 +46,17 @@ class PopenProcess(Process):
                 return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with status {exit_code}"
         if os.WIFSIGNALED(status_code):
             signal_number = os.WTERMSIG(status_code)
+            signal_name = signal.Signals(signal_number).name
             signal_message = {
                 signal.SIGXCPU: "CPU time limit exceeded",
                 signal.SIGSEGV: "Segmentation fault",
                 signal.SIGSYS: "Bad system call",
-            }.get(signal_number, signal.Signals(signal_number).name)
-            return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} ({signal_message})"
+            }.get(signal_number, None)
+            if signal_message is not None:
+                signal_explaination = f"({signal_name}: {signal_message})"
+            else:
+                signal_explaination = f"({signal_name})"
+            return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} {signal_explaination}"
         assert False, "This should not be reached"
 
     def get_status(self, wait=False) -> SandboxProcessInfo:
