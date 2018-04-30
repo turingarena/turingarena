@@ -98,7 +98,7 @@ class SandboxProcessServer:
                 self.process = CompilationFailedProcess()
 
     def terminate_process(self):
-        return self.process.get_status(kill=True)
+        return self.process.get_status(wait=True)
 
     def handle_requests(self):
         while not self.done:
@@ -108,16 +108,16 @@ class SandboxProcessServer:
                 self.handle_request,
             )
 
-    def handle_request(self, *, kill):
-        logger.debug(f"get_info(kill={kill})")
+    def handle_request(self, *, wait):
+        logger.debug(f"get_info(wait={wait})")
 
         assert not self.done
-        assert kill in ("0", "1")
+        assert wait in ("0", "1")
 
-        info = self.process.get_status(kill=bool(int(kill)))
+        info = self.process.get_status(wait=bool(int(wait)))
         logger.debug(f"Process info = {info}")
 
-        if kill == "1":
+        if wait == "1":
             self.done = True
 
         return info.to_payloads()

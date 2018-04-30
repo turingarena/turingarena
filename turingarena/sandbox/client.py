@@ -32,10 +32,10 @@ class SandboxProcessClient:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
 
-    def get_info(self, *, kill=False):
+    def get_info(self, *, wait=False):
         response = self.boundary.send_request(
             SANDBOX_REQUEST_QUEUE,
-            kill=str(int(bool(kill))),
+            wait=str(int(bool(wait))),
         )
         info = SandboxProcessInfo.from_payloads(response)
         logger.info(f"Process info: {info}")

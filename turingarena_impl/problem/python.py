@@ -65,13 +65,9 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
 
 @contextmanager
 def env_extension(**d):
-    for k in d:
-        assert k not in os.environ
-        if d[k] is not None:
-            os.environ[k] = d[k]
+    old_env = os.environ
+    os.environ = d
     try:
         yield
     finally:
-        for k in d:
-            if d[k] is not None:
-                del os.environ[k]
+        os.environ = old_env

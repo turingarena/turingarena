@@ -12,7 +12,7 @@ logger = logging.Logger(__name__)
 
 class Process:
     @abstractmethod
-    def get_status(self, kill=False) -> SandboxProcessInfo:
+    def get_status(self, wait=False) -> SandboxProcessInfo:
         pass
 
 
@@ -31,7 +31,7 @@ class PopenProcess(Process):
         """
         Process the status code of a process and return a tuple (status, error) where status is the process status
         and error is the eventual error message in case the process fails either with non zero return code or with a
-        signal (for example is killed for exceeding time/memory limits or for trying to perform a blacklisted syscall).
+        signal (for example is waited for exceeding time/memory limits or for trying to perform a blacklisted syscall).
 
         See man wait(2) for more info.
         """
@@ -54,13 +54,13 @@ class PopenProcess(Process):
             return ProcessStatus.TERMINATED_WITH_ERROR, f"Exited with signal {signal_number} ({signal_message})"
         assert False, "This should not be reached"
 
-    def get_status(self, kill=False) -> SandboxProcessInfo:
+    def get_status(self, wait=False) -> SandboxProcessInfo:
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
         maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
         user cpu time utilization (with milliseconds precision), and eventual error code information.
 
-        If param wait_termination is set, we wait for the process to terminate and then return the final resource
+        If param wait is set, we wait for the process to terminate and then return the final resource
         utilization.
 
         Note: the memory usage is at least 20/30Mb even for small programs.
@@ -77,14 +77,12 @@ class PopenProcess(Process):
         if self.termination_info:
             return self.termination_info
 
-        # first send SIGTERM/SIGSTOP to stop the process
-        if kill:
-            self.os_process.send_signal(signal.SIGTERM)
-        else:
+        if not wait:
+            # first send SIGSTOP to stop the process
             self.os_process.send_signal(signal.SIGSTOP)
 
         # then, use wait to get rusage struct (see man getrusage(2))
-        _, exit_status, rusage = os.wait4(self.os_process.pid, 0 if kill else os.WUNTRACED)
+        _, exit_status, rusage = os.wait4(self.os_process.pid, 0 if wait else os.WUNTRACED)
 
         status, error = self.get_process_status_error(exit_status)
         info = SandboxProcessInfo(
@@ -95,7 +93,7 @@ class PopenProcess(Process):
         )
 
         if status is ProcessStatus.RUNNING:
-            assert not kill
+            assert not wait
             # if process is not terminated, restart it with a SIGCONT
             self.os_process.send_signal(signal.SIGCONT)
         else:
@@ -105,7 +103,7 @@ class PopenProcess(Process):
 
 
 class CompilationFailedProcess(Process):
-    def get_status(self, kill=False):
+    def get_status(self, wait=False):
         return SandboxProcessInfo(
             status=ProcessStatus.TERMINATED_WITH_ERROR,
             memory_usage=0,

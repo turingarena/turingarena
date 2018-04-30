@@ -60,11 +60,11 @@ class Algorithm(namedtuple("Algorithm", [
                     else:
                         driver_process_client.send_end_main()
             except SandboxError:
-                info = sandbox_process_client.get_info(kill=True)
+                info = sandbox_process_client.get_info(wait=True)
                 if info.error:
                     raise AlgorithmRuntimeError(info.error) from None
                 raise
-            sandbox_process_client.get_info(kill=True)
+            sandbox_process_client.get_info(wait=True)
 
 
 class AlgorithmSection:
