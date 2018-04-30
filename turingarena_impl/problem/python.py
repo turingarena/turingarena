@@ -7,7 +7,6 @@ from contextlib import redirect_stdout, contextmanager, ExitStack
 from io import StringIO
 from tempfile import TemporaryDirectory
 
-from turingarena.algorithm import Algorithm
 from turingarena_impl.interface.driver import DriverServer
 from turingarena_impl.loader import split_module, find_package_path
 from turingarena_impl.problem.evaluation import Evaluation
@@ -50,28 +49,18 @@ class HostPythonEvaluator(namedtuple("HostPythonEvaluator", [
                 problem_name=self.name
             ))
 
-            script_globals = runpy.run_path(script_path)
-            data = self.compat_evaluate(script_globals, language_name, source_name)
+            runpy.run_path(script_path)
 
             if os.path.exists(result_path):
-                assert data is None
                 with open(result_path) as f:
                     data = json.load(f)
+            else:
+                data = None
 
         return Evaluation(
             stdout=eval_stdout.getvalue().splitlines(),
             data=data,
         )
-
-    def compat_evaluate(self, script_globals, language_name, source_name):
-        """For compatibility with problems defining evaluate(algorithm)"""
-        if "evaluate" in script_globals:
-            algorithm = Algorithm(
-                source_name=source_name,
-                language_name=language_name,
-                interface_name=self.interface_name,
-            )
-            return script_globals["evaluate"](algorithm)
 
 
 @contextmanager

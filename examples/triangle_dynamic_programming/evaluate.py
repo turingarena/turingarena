@@ -1,23 +1,8 @@
 import random
 
+from turingarena import *
 
-def evaluate(algorithm):
-    N = 10
-    V = [
-        [
-            random.randrange(0, 100)
-            for j in range(i)
-        ]
-        for i in range(N)
-    ]
-
-    right = solve(V)
-    S = compute(algorithm, V)
-    if right == S:
-        print("correct!")
-    else:
-        print(S, "!=", right)
-        print("WRONG!")
+algorithm = submitted_algorithm()
 
 
 def solve(V):
@@ -32,6 +17,22 @@ def solve(V):
     return S
 
 
-def compute(algorithm, V):
-    with algorithm.run(global_variables=dict(N=len(V), V=V)) as process:
-        return process.call.find_best_sum()
+N = 10
+V = [
+    [
+        random.randrange(0, 100)
+        for j in range(i)
+    ]
+    for i in range(N)
+]
+
+right = solve(V)
+
+with algorithm.run(global_variables=dict(N=len(V), V=V)) as process:
+    S = process.call.find_best_sum()
+
+if right == S:
+    print("correct!")
+else:
+    print(S, "!=", right)
+    print("WRONG!")

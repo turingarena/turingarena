@@ -1,27 +1,31 @@
-import random
+from turingarena import *
 
 NUMBER_OF_MATCH = 100
 
+
 def pos_to_yx(pos):
-    return pos//3, pos%3
+    return pos // 3, pos % 3
 
-def yx_to_pos(y,x):
-    return y*3 + x
 
-def evaluate(algorithm):
+def yx_to_pos(y, x):
+    return y * 3 + x
 
-    print("running game")
 
-    with algorithm.run(global_variables=dict(
-            position_mapping = [ [0,1,2], [3,4,5], [6,7,8] ]
-    )) as p:
-        memory_usage = p.sandbox.get_info().memory_usage
-        print(f"Memory usage: {memory_usage} bytes")
+algorithm = submitted_algorithm()
 
-        number_of_match = NUMBER_OF_MATCH
-        result = p.call.play_first_round()
-        print(result, pos_to_yx(result))
+print("running game")
 
+with algorithm.run(global_variables=dict(
+        position_mapping=[[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+)) as p:
+    memory_usage = p.sandbox.get_info().memory_usage
+    print(f"Memory usage: {memory_usage} bytes")
+
+    number_of_match = NUMBER_OF_MATCH
+    result = p.call.play_first_round()
+    print(result, pos_to_yx(result))
+
+#
 #        number_of_match = None
 #        number_of_match = NUMBER_OF_MATCH
 #
