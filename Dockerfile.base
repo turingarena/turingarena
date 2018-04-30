@@ -13,7 +13,6 @@ RUN true \
         nodejs \
         openjdk8 \
         openssh \
-        socat \
     && pip3 install \
         bidict \
         coloredlogs \

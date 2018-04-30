@@ -6,22 +6,9 @@ services:
     volumes:
       - ./:/usr/local/turingarena/:ro
     tmpfs:
-      - /run:exec,mode=777
-      - /tmp:exec,mode=777
-    entrypoint:
-      - socat
-    command:
-      - TCP-LISTEN:22,fork
-      - EXEC:/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o PermitRootLogin=yes -o Protocol=2,nofork
-    expose:
-      - 22
-  sshd_proxy:
-    image: turingarena/turingarena
-    read_only: true
-    volumes:
-      - /run/turingarena:/run/turingarena
-    entrypoint:
-      - socat
-    command:
-      - UNIX-LISTEN:/run/turingarena/sshd.sock,fork,mode=0666,reuseaddr
-      - TCP:turingarena:22
+      - /run/turingarena:exec,mode=1777
+      - /tmp:exec,mode=1777
+    entrypoint: /usr/sbin/sshd
+    command: -D -e -o PermitEmptyPasswords=yes -o Protocol=2
+    ports:
+      - "127.0.0.1:20122:22"
