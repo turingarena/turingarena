@@ -9,6 +9,6 @@ RUN true \
     && ln -s /usr/lib/jvm/default-jvm/bin/javac /usr/local/bin/javac \
     && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/local/bin/jcmd \
     && cd /usr/local/turingarena/ \
-    && python setup.py develop \
+    && python turingarena_impl/setup.py develop \
     && echo '/usr/local/turingarena/examples' >> $TURINGARENA_PATH_FILE \
     && true
