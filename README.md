@@ -20,10 +20,8 @@ used to install and run the CLI client
 - **Docker CE** 
 ([how to install](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce)),
 used to run the CLI server
-- **Docker Compose** ([how to install](https://docs.docker.com/compose/install/#install-compose)),
-a useful wrapper over Docker to simplify launching the CLI server
 - **Git** ([how to install](https://git-scm.com/download/linux)),
-used to download the TuringArena source code, and internally to send data to and from the CLI server.
+used internally to send data to and from the CLI server.
 
 ### Installation
 
@@ -43,7 +41,7 @@ sudo pip install -e .
 
 To start the server, run (from the repository directory):
 ```bash
-sudo docker-compose up
+sudo sh start-server.sh
 ```
 
 You can terminate the server by pressing `Ctrl-C`.

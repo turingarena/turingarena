@@ -2,6 +2,7 @@ ARG BASE_IMAGE=turingarena/turingarena-base
 FROM $BASE_IMAGE
 
 ENV TURINGARENA_PATH_FILE=/usr/lib/python3.6/site-packages/turingarena.pth
+ENTRYPOINT []
 
 COPY . /usr/local/turingarena/
 
