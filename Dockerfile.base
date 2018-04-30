@@ -19,6 +19,8 @@ RUN true \
         commonmark \
         docopt \
         pyyaml \
+        pytest-sugar \
+        pytest-xdist \
         psutil \
         seccomplite \
         pytest \

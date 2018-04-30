@@ -134,7 +134,7 @@ def test_segmentation_fault():
 
 
 def test_get_time_memory_usage():
-    with Algorithm.load(
+    with define_algorithm(
             interface_text="""
                 function test(int i) -> int;
                 main {
@@ -148,7 +148,7 @@ def test_get_time_memory_usage():
                     write o2;
                 }
             """,
-            language=cpp.language,
+            language_name="c++",
             source_text="""
                 int test(int i) {
                     char x[1024 * 1024];

@@ -2,19 +2,22 @@ import sys
 
 import pytest
 
-from turingarena_impl.cli import docopt_cli
 
-
-@docopt_cli
-def test_cli(args):
+def test_cli(argv):
     """
     Usage:
-        test [--] [<pytestargs>...]
+        test [<pytestargs>...]
 
     Options:
         <pytestargs>  Options to pass to pytest
     """
 
+    return_code = pytest.main(
+        [
+            "-p", "no:cacheprovider",
+            "-n", "8",
+        ] + argv
+    )
     sys.exit(
-        pytest.main(["-p", "no:cacheprovider"] + args["<pytestargs>"])
+        return_code
     )
