@@ -43,4 +43,6 @@ class ImperativeStatement(Statement, ImperativeStructure):
     __slots__ = []
 
     def expects_request(self, request):
+        if request is None:
+            return True
         return False
