@@ -7,7 +7,7 @@ from turingarena_impl.interface.context import FunctionCallContext, AcceptCallba
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.io import read_line
+from turingarena_impl.interface.io import read_line, do_flush
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +194,7 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
         return True
 
     def on_communicate_with_process(self, connection):
-        connection.downward.flush()
+        do_flush(connection)
         has_callback = int(read_line(connection.upward).strip())
         if has_callback:
             callback_index = int(read_line(connection.upward).strip())

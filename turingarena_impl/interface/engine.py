@@ -28,6 +28,7 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
     input_sent = False
 
     for instruction in driver_iterator:
+        logger.debug(f"control: processing instruction {type(instruction)}")
         if current_request is None:
             current_request = yield
             assert current_request is not None
@@ -46,8 +47,9 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
         if instruction.is_flush():
             assert input_sent
             input_sent = False
+        logger.debug(f"control: instruction {type(instruction)} processed")
 
-    # assert input_sent
+        # assert input_sent
 
 
 def send_response(driver_connection, response):
@@ -59,7 +61,9 @@ def send_response(driver_connection, response):
 
 def run_sandbox(instructions, *, sandbox_connection):
     for instruction in instructions:
+        logger.debug(f"communication: processing instruction {type(instruction)}")
         instruction.on_communicate_with_process(sandbox_connection)
         if instruction.is_flush():
             yield
+        logger.debug(f"communication: instruction {type(instruction)} processed")
     yield
