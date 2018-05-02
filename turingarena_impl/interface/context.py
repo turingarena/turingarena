@@ -12,54 +12,42 @@ class RootContext(namedtuple("RootContext", [])):
     def create_inner(self):
         return StaticGlobalContext(
             functions=(),
-            callbacks=(),
-            locally_defined_variables=(),
-            locally_allocated_variables=frozenset(),
-            locally_initialized_variables=frozenset(),
-            last_output_flushed=True
         )
 
 
-class VariablesContextMixin:
-    __slots__ = []
+class StaticGlobalContext(namedtuple("StaticGlobalContext", [
+    "functions",
+])):
+    @property
+    def function_map(self):
+        return {f.name: f for f in self.functions}
 
+    def with_function(self, f):
+        return self._replace(functions=self.functions + (f,))
+
+    def create_local(self):
+        return StaticLocalContext(
+            global_context=self,
+            outer_context=None,
+            locally_defined_variables=(),
+            index_variables=(),
+            in_loop=False,
+            has_break=False,
+        )
+
+
+class StaticLocalContext(namedtuple("StaticLocalContext", [
+    "global_context",
+    "outer_context",
+    "locally_defined_variables",
+    "index_variables",
+    "in_loop",
+    "has_break",
+])):
     def with_variables(self, variables):
         return self._replace(
             locally_defined_variables=self.locally_defined_variables + variables
         )
-
-    def with_initialized_variables(self, variables):
-        return self._replace(
-            locally_initialized_variables=self.locally_initialized_variables | variables
-        )
-
-    def with_allocated_variables(self, variables):
-        return self._replace(
-            locally_allocated_variables=self.locally_allocated_variables | variables
-        )
-
-    def with_flushed_output(self, flush):
-        return self._replace(last_output_flushed=flush)
-
-    @property
-    def has_flushed_output(self):
-        return self.last_output_flushed
-
-    @property
-    def initialized_variables(self):
-        return self.outer_initialized_variables | self.locally_initialized_variables
-
-    @property
-    def allocated_variables_mapping(self):
-        return {
-            var[0]: var[1]
-            for var in self.allocated_variables
-            if var
-        }
-
-    @property
-    def allocated_variables(self):
-        return self.outer_allocated_variables | self.locally_allocated_variables
 
     @property
     def variables(self):
@@ -71,93 +59,11 @@ class VariablesContextMixin:
 
     @property
     def outer_variables(self):
-        return ()
-
-    @property
-    def outer_allocated_variables(self):
-        return {None}
-
-    @property
-    def outer_initialized_variables(self):
-        return {None}
-
-
-class StaticGlobalContext(namedtuple("StaticGlobalContext", [
-    "functions",
-    "callbacks",
-    "locally_defined_variables",
-    "locally_initialized_variables",
-    "locally_allocated_variables",
-    "last_output_flushed",
-]), VariablesContextMixin):
-    @property
-    def global_variables(self):
-        return self.variables
-
-    @property
-    def function_map(self):
-        return {f.name: f for f in self.functions}
-
-    @property
-    def callback_map(self):
-        return {c.name: c for c in self.callbacks}
-
-    def with_function(self, f):
-        return self._replace(functions=self.functions + (f,))
-
-    def with_callback(self, c):
-        return self._replace(callbacks=self.callbacks + (c,))
-
-    def create_local(self):
-        return StaticLocalContext(
-            global_context=self,
-            outer_context=None,
-            locally_defined_variables=(),
-            locally_allocated_variables=frozenset(),
-            locally_initialized_variables=frozenset(),
-            last_output_flushed=self.last_output_flushed,
-            index_variables=(),
-            in_loop=False,
-            has_break=False,
-        )
-
-
-class StaticLocalContext(namedtuple("StaticLocalContext", [
-    "global_context",
-    "outer_context",
-    "locally_defined_variables",
-    "locally_initialized_variables",
-    "locally_allocated_variables",
-    "last_output_flushed",
-    "index_variables",
-    "in_loop",
-    "has_break",
-]), VariablesContextMixin):
-    @property
-    def outer_initialized_variables(self):
-        if self.outer_context:
-            return self.outer_context.initialized_variables
-        else:
-            return self.global_context.initialized_variables
-
-    @property
-    def outer_allocated_variables(self):
-        if self.outer_context:
-            return self.outer_context.allocated_variables
-        else:
-            return self.global_context.allocated_variables
-
-    @property
-    def outer_variables(self):
-        if self.outer_context:
-            return self.outer_context.variables
-        else:
-            return self.global_context.variables
+        return self.outer_context.variables if self.outer_context else ()
 
     def with_index_variable(self, variable):
         return self._replace(
             index_variables=self.index_variables + (variable,),
-            locally_initialized_variables=self.locally_initialized_variables | {variable.variable},
             locally_defined_variables=self.locally_defined_variables + (variable.variable,),
         )
 
@@ -172,9 +78,6 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             global_context=self.global_context,
             outer_context=self,
             locally_defined_variables=(),
-            locally_allocated_variables=frozenset(),
-            locally_initialized_variables=frozenset(),
-            last_output_flushed=self.last_output_flushed,
             index_variables=self.index_variables,
             in_loop=self.in_loop,
             has_break=False,
