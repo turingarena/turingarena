@@ -121,4 +121,4 @@ class CallbackType(ValueType, namedtuple("CallbackType", ["number_of_arguments",
         return "callback"
 
     def __str__(self):
-        return f"{'int' if self.has_return_value else 'void' } ({self.number_of_arguments})"
+        return f"{'int' if self.has_return_value else 'void' } ({', '.join(['int' for _ in range(self.number_of_arguments)])})"
