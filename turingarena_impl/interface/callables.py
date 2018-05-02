@@ -26,6 +26,11 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
 
     @property
     def variable(self):
+        if self.type_expression.value_type.meta_type == 'callback':
+            return Variable(
+                value_type=self.type_expression.value_type,
+                name=self.ast.prototype.name
+            )
         return Variable(
             value_type=self.type_expression.value_type,
             name=self.ast.name,

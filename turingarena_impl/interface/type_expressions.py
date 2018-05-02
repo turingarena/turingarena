@@ -117,17 +117,21 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
             self.item_type.check(x)
 
 
-class CallbackType(ValueType, namedtuple("CallbackType", ["number_of_arguments", "has_return_value"])):
+class CallbackType(ValueType, namedtuple("CallbackType", ["arguments", "has_return_value"])):
     @staticmethod
     def compile(ast):
         return CallbackType(
-            number_of_arguments=len(ast.parameters),
+            arguments=tuple(p.name for p in ast.parameters),
             has_return_value=ast.return_type == "int",
         )
+
+    @property
+    def number_of_arguments(self):
+        return len(self.arguments)
 
     @property
     def meta_type(self):
         return "callback"
 
     def __str__(self):
-        return f"{'int' if self.has_return_value else 'void' } ({', '.join(['int' for _ in range(self.number_of_arguments)])})"
+        return f"{'int' if self.has_return_value else 'void'} ({', '.join([f'int' for a in self.arguments])})"

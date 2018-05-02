@@ -3,57 +3,16 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 class CppCodeGen(CodeGen):
     @classmethod
-    def generate_declarators(cls, declaration):
-        for variable in declaration.variables:
-            yield cls.build_declarator(declaration.value_type, variable.name)
-
-    @classmethod
     def build_callable_declarator(cls, callable):
         return_type = 'int' if callable.return_type else 'void'
         parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
         return f"{return_type} {callable.name}({parameters})"
 
-    @classmethod
-    def build_declaration(cls, statement):
-        type_specifier = cls.build_type_specifier(statement.value_type)
-        declarators = ', '.join(cls.generate_declarators(statement))
-        return f'{type_specifier} {declarators};'
-
-    @classmethod
-    def build_parameter(cls, parameter):
-        full_type = cls.build_full_type(parameter.value_type, parameter.name)
-        return f'{full_type}'
-
-    @classmethod
-    def build_declarator(cls, value_type, name):
-        if value_type is None:
-            return name
-        builders = {
-            "scalar": lambda: name,
-            "array": lambda: "*" + cls.build_declarator(value_type.item_type, name),
-        }
-        return builders[value_type.meta_type]()
-
     @staticmethod
     def build_callback_signature(parameter):
         return_type = 'int' if parameter.value_type.has_return_value else "void"
-        parameters = ', '.join(['int' for _ in range(parameter.value_type.number_of_arguments)])
-        return f'{return_type} (*)({parameters})'
-
-    @classmethod
-    def build_type_specifier(cls, value_type, name):
-        if value_type is None:
-            return "void"
-        builders = {
-            "scalar": lambda: f'int {name}',
-            "array": lambda: f"int {'*' * value_type.dimensions}  {name}",
-            "callback": lambda: cls.build_callback_signature(value_type, name)
-        }
-        return builders[value_type.meta_type]()
-
-    @classmethod
-    def build_full_type(cls, value_type, name):  # TODO: elimina
-        return cls.build_type_specifier(value_type, name)
+        parameters = ', '.join([f'int {a}' for a in parameter.value_type.arguments])
+        return f'{return_type} (*{parameter.name})({parameters})'
 
     @classmethod
     def build_parameter(cls, parameter):
