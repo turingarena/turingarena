@@ -7,13 +7,7 @@ class Diagnostic(namedtuple("Diagnostic", [
 ])):
     class Messages():
         VARIABLE_NOT_DECLARED = "variable {} not declared"
-        VARIABLE_NOT_INITIALIZED = "variable {} not initialized before use"
-        VARIABLE_NOT_ALLOCATED = "variable {} not allocated before use"
-        VARIABLE_REDECLARED = "variable {} has been already declared"
-        GLOBAL_VARIABLE_NOT_INITIALIZED = "global variable {} not initialized in init block"
-        INIT_BLOCK_MISSING = "global variables declared but init block is missing"
         NOT_ARRAY_TYPE = "argument {} type is not array"
-        MISSING_FLUSH = "missing flush between write and read instructions"
         FUNCTION_NOT_DECLARED = "function {} not declared"
         FUNCTION_DOES_NOT_RETURN_VALUE = "function {} does not return a value"
         RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
@@ -30,7 +24,6 @@ class Diagnostic(namedtuple("Diagnostic", [
         UNEXPECTED_CONTINUE = "continue statement used outside a loop"
         UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
         INVALID_CASE_EXPRESSION = "case expression must be an int literal"
-        CASE_FALLTROUGH = "case must terminate either with a break, continue, return or exit in every possible branch"
         INFINITE_LOOP = "loop must contain at least a break statement"
         UNREACHABLE_CODE = "unreachable code after break/continue"
         DUPLICATED_CASE_LABEL = "duplicated case label {}"
