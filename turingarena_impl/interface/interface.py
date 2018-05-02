@@ -36,6 +36,7 @@ class InterfaceBody(Block):
 class InterfaceDefinition:
     def __init__(self, source_text, extra_metadata, **kwargs):
         ast = parse_interface(source_text, **kwargs)
+        logger.debug(f"Parsed interface {ast}")
         self.extra_metadata = extra_metadata
         self.body = InterfaceBody(
             ast=ast, context=RootContext(),

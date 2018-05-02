@@ -14,7 +14,7 @@ def get_grammar():
 
 
 def parse_interface(text, **kwargs):
-    return get_grammar().parse(text, **kwargs, asmodel=False, parseinfo=True)
+    return get_grammar().parse(text, **kwargs, start="interface", asmodel=False, parseinfo=True)
 
 
 def get_line(parseinfo):

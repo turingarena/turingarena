@@ -2,12 +2,12 @@ grammar_ebnf = r"""
     @@comments :: /\/\*((?!\*\/).)*\*\//
     @@eol_comments :: /\/\/.*$/
     @@left_recursion :: False
-    
+        
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/;
     string_literal = '"' @:/([^"\n]|\\")*/ '"';
     int_literal = /0|-?[1-9][0-9]*/;
 
-    interface = functions_declarations:function_declarations ~ main_block:block $;
+    interface = functions_declarations:function_declarations ~ 'main' main_block:block $;
     
     function_prototype = return_type:('int' | 'void') name:identifier '(' parameters:','.{ parameter_type }* ')';
     function_declarations = functions:{ function_declaration }*;
