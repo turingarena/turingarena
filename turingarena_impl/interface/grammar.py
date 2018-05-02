@@ -25,7 +25,7 @@ grammar_ebnf = r"""
         | statement_type:'return' ~ value:expression ';'
         | statement_type:'if' ~ condition:expression then_body:block else_body:[ else_body ]
         | statement_type:'switch' ~ value:expression '{' cases:{ switch_case }+ '}'
-        | statement_type:'for' ~ index:identifier 'to' range:identifier body:block
+        | statement_type:'for' ~ index:identifier 'to' range:expression body:block
         | statement_type:'loop' ~ body:block
         | statement_type:'call' ~ [return_value:return_expression] name:identifier '(' parameters:','.{ expression }* ')' ';'
         | statement_type:`callback` prototype:function_prototype ~ (body:block | 'default' ';')

@@ -91,15 +91,4 @@ class ImperativeBlock(Block, ImperativeStructure):
 
     @property
     def context_after(self):
-        inner_context = self.inner_context_at_end
-        return self.context.with_initialized_variables({
-            variable
-            for variable in inner_context.initialized_variables
-            if variable in self.context.variables
-        }).with_allocated_variables({
-            variable
-            for variable in inner_context.allocated_variables
-            if variable and variable[0] in self.context.variables
-        }).with_flushed_output(inner_context.has_flushed_output).with_break(
-            inner_context.has_break
-        )
+        return self.context

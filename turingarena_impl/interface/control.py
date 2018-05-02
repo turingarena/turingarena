@@ -107,24 +107,19 @@ class ForStatement(ImperativeStatement):
 
     @property
     def index(self):
-        ast = self.ast.index
         return ForIndex(
-            variable=Variable(value_type=ScalarType(int), name=ast.index.name),
-            range=Expression.compile(ast.range, self.context),
+            variable=Variable(value_type=ScalarType(int), name=self.ast.index),
+            range=Expression.compile(self.ast.range, self.context),
         )
 
     @property
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_inner().with_index_variable(self.index),
+            context=self.context.create_inner().with_variables((self.index.variable,)),
         )
 
     def validate(self):
-        if not self.body.context_after.has_flushed_output:
-            for statement in self.body.statements:
-                if isinstance(statement, ReadStatement):
-                    yield Diagnostic("missing flush between write and read instructions", parseinfo=self.ast.parseinfo)
         yield from self.body.validate()
 
     def generate_instructions(self, context):
