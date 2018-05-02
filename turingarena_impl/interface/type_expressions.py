@@ -89,6 +89,15 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
         return f"{self.item_type}[]"
 
     @property
+    def dimensions(self):
+        dimensions = 0
+        item_type = self
+        while item_type.meta_type == 'array':
+            dimensions += 1
+            item_type = item_type.item_type
+        return dimensions
+
+    @property
     def meta_type(self):
         return "array"
 

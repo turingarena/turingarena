@@ -85,7 +85,7 @@ class Function(Callable):
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
     @property
     def synthetic_statements(self):
-        callback_index = len(self.context.callbacks)
+        callback_index = 42 # TODO: calculate callback index # len(self.context.callbacks)
         yield SyntheticStatement("write", arguments=[
             SyntheticExpression("int_literal", value=1),  # more callbacks
         ])
@@ -110,7 +110,7 @@ class Callback(Callable):
         # TODO: generate block if body is None ('default' is specified)
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_local().with_variables(self.parameters),
+            context=self.context.create_inner().with_variables(self.parameters),
         )
 
     def validate(self):

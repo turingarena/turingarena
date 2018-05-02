@@ -53,7 +53,7 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield "}"
         yield
 
-    def function_statement(self, statement):
+    def function_declaration(self, statement):
         yield f"abstract {self.build_callable_declarator(statement.function)};"
 
     def callback_statement(self, statement):
@@ -166,7 +166,7 @@ class JavaTemplateCodeGen(JavaCodeGen):
         yield from self.block_content(self.interface.body)
         yield "}"
 
-    def function_statement(self, statement):
+    def function_declaration(self, statement):
         yield
         yield f"{self.build_callable_declarator(statement.function)}" " {"
         yield self.indent("// TODO")

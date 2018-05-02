@@ -133,7 +133,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
 
 
 class PythonTemplateCodeGen(PythonCodeGen):
-    def function_statement(self, statement):
+    def function_declaration(self, statement):
         yield
         yield f"def {self.build_callable_declarator(statement.function)}:"
         yield self.indent("# TODO")

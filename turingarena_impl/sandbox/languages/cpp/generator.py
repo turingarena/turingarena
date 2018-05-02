@@ -1,4 +1,3 @@
-from turingarena_impl.interface.context import StaticGlobalContext
 from turingarena_impl.sandbox.languages.generator import CodeGen
 
 
@@ -10,7 +9,7 @@ class CppCodeGen(CodeGen):
 
     @classmethod
     def build_callable_declarator(cls, callable):
-        return_type = cls.build_full_type(callable.return_type)
+        return_type = 'int' if callable.return_type else 'void'
         parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
         return f"{return_type} {callable.name}({parameters})"
 
@@ -22,8 +21,8 @@ class CppCodeGen(CodeGen):
 
     @classmethod
     def build_parameter(cls, parameter):
-        full_type = cls.build_full_type(parameter.value_type)
-        return f'{full_type} {parameter.name}'
+        full_type = cls.build_full_type(parameter.value_type, parameter.name)
+        return f'{full_type}'
 
     @classmethod
     def build_declarator(cls, value_type, name):
@@ -35,69 +34,71 @@ class CppCodeGen(CodeGen):
         }
         return builders[value_type.meta_type]()
 
+    @staticmethod
+    def build_callback_signature(parameter):
+        return_type = 'int' if parameter.value_type.has_return_value else "void"
+        parameters = ', '.join(['int' for _ in range(parameter.value_type.number_of_arguments)])
+        return f'{return_type} (*)({parameters})'
+
     @classmethod
-    def build_type_specifier(cls, value_type):
+    def build_type_specifier(cls, value_type, name):
         if value_type is None:
             return "void"
         builders = {
-            "scalar": lambda: {
-                int: "int",
-            }[value_type.base_type],
-            "array": lambda: cls.build_type_specifier(value_type.item_type)
+            "scalar": lambda: f'int {name}',
+            "array": lambda: f"int {'*' * value_type.dimensions}  {name}",
+            "callback": lambda: cls.build_callback_signature(value_type, name)
         }
         return builders[value_type.meta_type]()
 
     @classmethod
-    def build_full_type(cls, value_type):
-        return cls.build_type_specifier(value_type) + cls.build_declarator(value_type, "")
+    def build_full_type(cls, value_type, name):  # TODO: elimina
+        return cls.build_type_specifier(value_type, name)
+
+    @classmethod
+    def build_parameter(cls, parameter):
+        if parameter.value_type.meta_type == 'callback':
+            return cls.build_callback_signature(parameter)
+        else:
+            indirections = '*' * parameter.value_type.dimensions if parameter.value_type == 'array' else ''
+            return f'int {indirections}{parameter.name}'
+
+    @classmethod
+    def build_function_signature(cls, func):
+        return_type = 'int' if func.return_type else 'void'
+        parameters = ', '.join([cls.build_parameter(p) for p in func.parameters])
+        return f'{return_type} {func.name}({parameters})'
 
 
 class CppSkeletonCodeGen(CppCodeGen):
-    def generate(self):
+    def generate_header(self):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
-        yield from self.block_content(self.interface.body, indent=False)
-
-    def var_statement(self, s):
-        if isinstance(s.context, StaticGlobalContext):
-            yield "extern " + self.build_declaration(s)
-        else:
-            yield self.build_declaration(s)
+        yield
 
     def callback_statement(self, s):
         callback = s.callback
-        yield f"{self.build_callable_declarator(callback)}" " {"
+        parameters = ', '.join(f'int {p.name}' for p in callback.parameters)
+        return_value = '-> int' if callback.return_type else ''
+        yield f"auto {callback.name} = []({parameters}) {return_value}" " {"
         yield from self.block_content(callback.synthetic_body)
         yield "}"
 
-    def function_statement(self, s):
-        yield f"{self.build_callable_declarator(s.function)};"
+    def function_declaration(self, s):
+        yield f"{self.build_function_signature(s)};"
 
-    def init_statement(self, s):
-        yield
-        yield "__attribute__((constructor)) static void init() {"
-        yield from self.block_content(s.body)
-        yield "}"
-
-    def main_statement(self, s):
+    def generate_main(self):
         yield
         yield "int main() {"
-        yield from self.block_content(s.body)
+        yield from self.block_content(self.interface.body.main_block)
         yield "}"
-
-    def alloc_statement(self, s):
-        for argument in s.arguments:
-            arg = self.expression(argument)
-            value_type = self.build_full_type(argument.value_type.item_type)
-            size = self.expression(s.size)
-            yield f"{arg} = new {value_type}[{size}];"
 
     def call_statement(self, s):
         function_name = s.function.name
         parameters = ", ".join(self.expression(p) for p in s.parameters)
         if s.return_value is not None:
             return_value = self.expression(s.return_value)
-            yield f"{return_value} = {function_name}({parameters});"
+            yield f"int {return_value} = {function_name}({parameters});"
         else:
             yield f"{function_name}({parameters});"
 
@@ -108,8 +109,11 @@ class CppSkeletonCodeGen(CppCodeGen):
 
     def read_statement(self, statement):
         format_string = ''.join("%d" for _ in statement.arguments)
-        args = ', '.join("&" + self.expression(v) for v in statement.arguments)
-        yield f'scanf("{format_string}", {args});'
+        scanf_args = ', '.join("&" + self.expression(v) for v in statement.arguments)
+        variables = ', '.join(self.expression(v) for v in statement.arguments)
+        yield f'static int {variables};'  # TODO: array allocation
+        yield f'fflush(stdout);'
+        yield f'scanf("{format_string}", {scanf_args});'
 
     def if_statement(self, s):
         condition = self.expression(s.condition)
@@ -155,7 +159,6 @@ class CppSkeletonCodeGen(CppCodeGen):
     def any_statement(self, s):
         generators = {
             "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
-            "flush": lambda: ["fflush(stdout);"],
             "exit": lambda: ["exit(0);"],
             "continue": lambda: ["continue;"],
             "break": lambda: ["break;"],
@@ -165,15 +168,8 @@ class CppSkeletonCodeGen(CppCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen):
-    def var_statement(self, s):
-        yield self.build_declaration(s)
-
-    def function_statement(self, s):
+    def function_declaration(self, s):
         yield
         yield f"{self.build_callable_declarator(s.function)}" " {"
         yield self.indent("// TODO")
         yield "}"
-
-    def callback_statement(self, s):
-        callback = s.callback
-        yield f"{self.build_callable_declarator(callback)};"

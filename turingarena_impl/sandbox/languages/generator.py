@@ -12,10 +12,12 @@ class CodeGen:
                 print(line, file=file)
 
     def generate(self):
-        yield from self.block_content(self.interface.body, indent=False)
+        yield from self.generate_header()
+        yield from self.generate_functions()
+        yield from self.generate_main()
 
-    def block_content(self, b, indent=True):
-        for s in b.synthetic_statements:
+    def block_content(self, block, indent=True):
+        for s in block.synthetic_statements:
             if indent:
                 yield from self.indent_all(self.statement(s))
             else:
@@ -28,19 +30,20 @@ class CodeGen:
         except NotImplementedError:
             return self.any_statement(s)
 
-    def var_statement(self, s):
+    def generate_header(self):
+        return []
+
+    def generate_functions(self):
+        for func in self.interface.body.functions:
+            yield from self.function_declaration(func)
+
+    def function_declaration(self, s):
         raise NotImplementedError
 
-    def function_statement(self, s):
-        raise NotImplementedError
+    def generate_main(self, main_block):
+        yield from self.block_content(main_block, indent=False)
 
     def callback_statement(self, s):
-        raise NotImplementedError
-
-    def init_statement(self, s):
-        raise NotImplementedError
-
-    def main_statement(self, s):
         raise NotImplementedError
 
     def read_statement(self, s):
@@ -52,9 +55,6 @@ class CodeGen:
     def checkpoint_statement(self, s):
         raise NotImplementedError
 
-    def flush_statement(self, s):
-        raise NotImplementedError
-
     def break_statement(self, s):
         raise NotImplementedError
 
@@ -62,9 +62,6 @@ class CodeGen:
         raise NotImplementedError
 
     def exit_statement(self, s):
-        raise NotImplementedError
-
-    def alloc_statement(self, s):
         raise NotImplementedError
 
     def return_statement(self, s):

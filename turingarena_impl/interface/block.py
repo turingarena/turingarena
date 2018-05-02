@@ -67,8 +67,9 @@ class ImperativeBlock(Block, ImperativeStructure):
     def synthetic_statements(self):
         for s in self.statements:
             yield s
-            if (s.statement_type == "call" and
-                    self.context.global_context.callbacks):
+            if (s.statement_type == "call" and # TODO: has callbacks
+                    #  self.context.global_context.callbacks
+                    True):
                 yield SyntheticStatement("write", arguments=[
                     SyntheticExpression("int_literal", value=0),  # no more callbacks
                 ])
