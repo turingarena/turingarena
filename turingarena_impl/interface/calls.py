@@ -25,7 +25,7 @@ class CallStatement(ImperativeStatement):
 
     @property
     def return_value(self):
-        if self.ast.return_variable is None:
+        if self.ast.return_value is None:
             return None
         else:
             return Expression.compile(self.ast.return_value, self.context)

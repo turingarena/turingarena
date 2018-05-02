@@ -28,10 +28,11 @@ grammar_ebnf = r"""
         | statement_type:'switch' ~ value:expression '{' cases:{ switch_case }+ '}'
         | statement_type:'for' ~ index:identifier 'to' range:identifier body:block
         | statement_type:'loop' ~ body:block
-        | statement_type:'call' ~ [return_variable:identifier '='] name:identifier '(' parameters:','.{ expression }* ')' ';'
+        | statement_type:'call' ~ [return_value:return_expression] name:identifier '(' parameters:','.{ expression }* ')' ';'
         | statement_type:`callback` prototype:function_prototype ~ (body:block | 'default' ';')
         ;
 
+    return_expression = @:expression '=';
     else_body = 'else' ~ @:block;
     switch_case = labels:','.{ int_literal }+ body:block;
     

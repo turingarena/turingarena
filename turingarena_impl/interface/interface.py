@@ -27,7 +27,7 @@ class InterfaceBody(Block):
 
     @property
     def main_block(self):
-        return ImperativeBlock(ast=self.ast.main_block, context=self.context.create_local())
+        return ImperativeBlock(ast=self.ast.main_block, context=self.context.create_inner().create_local())
 
     def validate(self):
         return self.main_block.validate()
