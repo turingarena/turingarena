@@ -7,14 +7,12 @@ grammar_ebnf = r"""
     string_literal = '"' @:/([^"\n]|\\")*/ '"';
     int_literal = /0|-?[1-9][0-9]*/;
 
-    interface = function_declarations ~ main_block $;
+    interface = functions_declarations:function_declarations ~ main_block:block $;
     
     function_prototype = return_type:('int' | 'void') name:identifier '(' parameters:','.{ parameter_type }* ')';
-    function_declarations = block_name:`function_declarations` functions:{ function_declaration }*;
+    function_declarations = functions:{ function_declaration }*;
     function_declaration = @:function_prototype ~ ';';
-    
-    main_block = block_name:'main' body:block;
-    
+        
     parameter_type = 
         | type:`callback` prototype:function_prototype
         | type:`variable` 'int' name:identifier indexes:{'[' ']'}*
