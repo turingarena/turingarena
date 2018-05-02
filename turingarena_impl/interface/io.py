@@ -126,21 +126,3 @@ class WriteInstruction(ReadWriteInstruction):
         for a, v in zip(self.arguments, raw_values):
             value = int(v)
             a.evaluate_in(self.context).resolve(value)
-
-
-class FlushStatement(ImperativeStatement):
-    __slots__ = []
-
-    def generate_instructions(self, context):
-        yield FlushInstruction()
-
-    @property
-    def context_after(self):
-        return self.context.with_flushed_output(True)
-
-
-class FlushInstruction(Instruction):
-    __slots__ = []
-
-    def is_flush(self):
-        return True
