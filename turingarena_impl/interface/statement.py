@@ -8,26 +8,19 @@ class Statement(AbstractSyntaxNodeWrapper):
 
     @staticmethod
     def get_statement_classes():
-        from turingarena_impl.interface.alloc import AllocStatement
         from turingarena_impl.interface.calls import CallStatement, ReturnStatement
         from turingarena_impl.interface.control import ForStatement, IfStatement, LoopStatement, ExitStatement
         from turingarena_impl.interface.control import BreakStatement, ContinueStatement, SwitchStatement, CaseStatement
         from turingarena_impl.interface.callables import FunctionStatement, CallbackStatement
-        from turingarena_impl.interface.mainblocks import InitStatement, MainStatement
-        from turingarena_impl.interface.variables import VarStatement
+        from turingarena_impl.interface.mainblocks import MainStatement
         from turingarena_impl.interface.io import CheckpointStatement, ReadStatement, WriteStatement, FlushStatement
 
         return bidict({
-            "var": VarStatement,
             "function": FunctionStatement,
-            "callback": CallbackStatement,
-            "init": InitStatement,
             "main": MainStatement,
-            "alloc": AllocStatement,
             "checkpoint": CheckpointStatement,
             "read": ReadStatement,
             "write": WriteStatement,
-            "flush": FlushStatement,
             "call": CallStatement,
             "return": ReturnStatement,
             "exit": ExitStatement,
