@@ -18,33 +18,35 @@ is evaluated by an evaluator.
 
 ## Submissions
 
-The format of submission is chosen so that it maps naturally to HTML *forms*,
-and the `multipart/form-data` content type in HTTP requests for Web based APIs.
-
 A **submission** is a collection of **fields**, each comprising
 
 - a **name**, containing only ASCII lowercase letters (`a-z`) and underscores (`_`), and
 - a **value**, which can be either a **string** or a **file**.
 
-Names must be unique inside a submission, and are associated to a single value (unlike HTML forms).
+Field names must be unique inside a submission, and are associated to a single value.
 
 - String values are (short) *Unicode strings*.
 - File values are files (i.e., byte buffers) in an *unspecified format*.
 (File values can be associated with metadata such as filename and MIME type,
-but these should not be used as part of the evaluation.)
+but these metadata should not be used as part of the evaluation.)
+
+### Rationale
+
+The format of submissions is chosen so that it maps naturally to HTML *forms*,
+and the `multipart/form-data` content type in HTTP requests, for Web based APIs.
 
 ## Evaluation and evaluators
 
 An evaluation comprises:
 
-- a **text**, which is a stream of text,
-- a **data**, which is a JSON object.
+- a **text**, which is a textual (i.e., UTF-8 encoded) stream,
+- a **data**, which is a stream of JSON objects.
 
 An evaluation is possibly associated with other metadata such as
 - a checksum of the evaluated submission
 - a checksum of the evaluator and its data
 - the time of evaluation
-- extra metadata provided 
+- extra metadata provided at the time of submission
 
 An **evaluator** is a program that takes a submission in input
 and produces an evaluation as output.
