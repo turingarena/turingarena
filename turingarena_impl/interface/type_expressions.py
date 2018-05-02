@@ -21,6 +21,8 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
 
     @property
     def value_type(self):
+        if self.ast.prototype:
+            return CallbackType.compile(self.ast.prototype)
         return self.value_type_dimensions(self.ast.indexes)
 
 
@@ -104,3 +106,19 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
         assert type(value) == list
         for x in value:
             self.item_type.check(x)
+
+
+class CallbackType(ValueType, namedtuple("CallbackType", ["number_of_arguments", "has_return_value"])):
+    @staticmethod
+    def compile(ast):
+        return CallbackType(
+            number_of_arguments=len(ast.parameters),
+            has_return_value=ast.return_type == "int",
+        )
+
+    @property
+    def meta_type(self):
+        return "callback"
+
+    def __str__(self):
+        return f"{'int' if self.has_return_value else 'void' } ({self.number_of_arguments})"

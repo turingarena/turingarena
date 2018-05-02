@@ -9,7 +9,7 @@ from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import VariableReference
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.type_expressions import ScalarType, compile_type_expression
+from turingarena_impl.interface.type_expressions import ScalarType, compile_type_expression, CallbackType
 from turingarena_impl.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ class Callback(Callable):
 
         invalid_parameter = next(
             (
-                a for p, a in zip(self.parameters, self.ast.declarator.parameters)
+                a for p, a in zip(self.parameters, self.ast.prototype.parameters)
                 if not isinstance(p.value_type, ScalarType)
             ),
             None
@@ -182,5 +182,9 @@ class CallbackStatement(Statement):
         yield from self.callback.validate()
 
     @property
+    def variable(self):
+        return Variable(name=self.callback.name, value_type=CallbackType.compile(self.ast.prototype))
+
+    @property
     def context_after(self):
-        return self.context.with_callback(self.callback)
+        return self.context.with_variables((self.variable,))

@@ -103,7 +103,10 @@ class ReferenceExpression(Expression):
 
     @property
     def value_type(self):
-        value_type = ScalarType(int)
+        if self.variable:
+            value_type = self.variable.value_type
+        else:
+            value_type = ScalarType(int)
         for _ in self.indices:
             value_type = value_type.item_type
         return value_type
