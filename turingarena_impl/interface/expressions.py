@@ -7,6 +7,10 @@ from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena_impl.interface.type_expressions import ScalarType, ArrayType
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Expression(AbstractSyntaxNodeWrapper):
     __slots__ = []
@@ -91,6 +95,7 @@ class ReferenceExpression(Expression):
 
     @property
     def indices(self):
+        logger.debug(f"{self.ast}")
         return tuple(
             Expression.compile(index, self.context)
             for index in self.ast.indices
@@ -98,7 +103,7 @@ class ReferenceExpression(Expression):
 
     @property
     def value_type(self):
-        value_type = self.variable.value_type
+        value_type = ScalarType(int)
         for _ in self.indices:
             value_type = value_type.item_type
         return value_type
@@ -135,20 +140,15 @@ class ReferenceExpression(Expression):
                 last_index = idx
 
     def validate(self, lvalue=False):
-        if not self.variable:
+        if not lvalue and self.variable_name not in self.context.variable_mapping:
             yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name,
                              parseinfo=self.ast.parseinfo)
-        elif self.variable not in self.context.initialized_variables and not lvalue:
-            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_INITIALIZED, self.variable.name,
-                             parseinfo=self.ast.parseinfo)
-        elif isinstance(self.variable.value_type, ArrayType):
-            if self.variable not in self.context.allocated_variables_mapping:
-                yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_ALLOCATED, self.variable.name,
-                                 parseinfo=self.ast.parseinfo)
-            for index in self.indices:
-                yield from index.validate()
-            if lvalue:
-                yield from self.validate_array_indexes()
+
+        #if isinstance(self.variable.value_type, ArrayType):
+        #    for index in self.indices:
+        #        yield from index.validate()
+        #    if lvalue:
+        #        yield from self.validate_array_indexes()
 
 
 class SyntheticExpression:

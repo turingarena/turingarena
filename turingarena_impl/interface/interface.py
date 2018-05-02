@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena import InterfaceExit
 from turingarena.driver.commands import MainBegin
 from turingarena_impl.interface.block import Block, ImperativeBlock
-from turingarena_impl.interface.context import GlobalContext, MainContext, RootContext
+from turingarena_impl.interface.context import GlobalContext, MainContext, RootContext, StaticGlobalContext
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
@@ -27,7 +27,7 @@ class InterfaceBody(Block):
 
     @property
     def main_block(self):
-        return ImperativeBlock(ast=self.ast.main_block, context=self.context.create_inner().create_local())
+        return ImperativeBlock(ast=self.ast.main_block, context=StaticGlobalContext(functions=self.functions).create_local())
 
     def validate(self):
         return self.main_block.validate()

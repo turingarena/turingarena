@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from turingarena_impl.interface.exceptions import CommunicationBroken, Diagnostic
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.variables import Variable
+from turingarena_impl.interface.type_expressions import TypeExpression
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +84,12 @@ class ReadStatement(ReadWriteStatement):
 
     @property
     def context_after(self):
-        return self.context.with_declared_variables({
-            exp.variable
+        return self.context.with_variables(tuple(
+            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(len(exp.indices)))
             for exp in self.arguments
-        })
+        ))
 
     def validate(self):
-        if not self.context.has_flushed_output:
-            yield Diagnostic(Diagnostic.Messages.MISSING_FLUSH, parseinfo=self.ast.parseinfo)
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
 
@@ -109,10 +109,6 @@ class WriteStatement(ReadWriteStatement):
 
     def generate_instructions(self, context):
         yield WriteInstruction(arguments=self.arguments, context=context)
-
-    @property
-    def context_after(self):
-        return self.context.with_flushed_output(False)
 
 
 class WriteInstruction(ReadWriteInstruction):

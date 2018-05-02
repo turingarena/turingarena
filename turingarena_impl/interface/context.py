@@ -55,6 +55,7 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
 
     @property
     def variable_mapping(self):
+        logger.debug(f"variable {self.variables}")
         return {v.name: v for v in self.variables}
 
     @property

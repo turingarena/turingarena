@@ -7,10 +7,9 @@ grammar_ebnf = r"""
     string_literal = '"' @:/([^"\n]|\\")*/ '"';
     int_literal = /0|-?[1-9][0-9]*/;
 
-    interface = functions_declarations:function_declarations ~ 'main' main_block:block $;
+    interface = function_declarations:{ function_declaration }* ~ 'main' main_block:block $;
     
     function_prototype = return_type:('int' | 'void') name:identifier '(' parameters:','.{ parameter_type }* ')';
-    function_declarations = functions:{ function_declaration }*;
     function_declaration = prototype:function_prototype ~ ';';
         
     parameter_type = 

@@ -8,6 +8,8 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.io import read_line, do_flush
+from turingarena_impl.interface.variables import Variable
+from turingarena_impl.interface.type_expressions import TypeExpression
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class CallStatement(ImperativeStatement):
 
     @property
     def function_name(self):
-        return self.ast.function_name
+        return self.ast.name
 
     @property
     def parameters(self):
@@ -33,7 +35,7 @@ class CallStatement(ImperativeStatement):
     @property
     def function(self):
         try:
-            return self.context.global_context.function_map[self.ast.function_name]
+            return self.context.global_context.function_map[self.ast.name]
         except KeyError:
             return None
 
@@ -51,7 +53,9 @@ class CallStatement(ImperativeStatement):
     @property
     def context_after(self):
         if self.return_value:
-            return self.context.with_initialized_variables({self.return_value.variable})
+            var = Variable(name=self.return_value.variable_name,
+                           value_type=TypeExpression.value_type_dimensions(len(self.return_value.indices)))
+            return self.context.with_variables((var,))
         else:
             return self.context
 

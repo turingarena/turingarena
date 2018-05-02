@@ -22,13 +22,13 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
 
     @property
     def type_expression(self):
-        return compile_type_expression(self.ast.type, self.context)
+        return compile_type_expression(self.ast, self.context)
 
     @property
     def variable(self):
         return Variable(
             value_type=self.type_expression.value_type,
-            name=self.ast.declarator.name,
+            name=self.ast.name,
         )
 
 
@@ -51,13 +51,8 @@ class Callable(AbstractSyntaxNodeWrapper):
         return tuple(p.variable for p in self.parameter_declarations)
 
     @property
-    def return_type_expression(self):
-        return_type = self.ast.prototype.return_type
-        return compile_type_expression(return_type, self.context) if return_type else None
-
-    @property
     def return_type(self):
-        return self.return_type_expression.value_type if self.return_type_expression else None
+        return ScalarType(int) if self.ast.prototype.return_type else None
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):

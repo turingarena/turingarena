@@ -1,7 +1,11 @@
+import logging
+
 from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
+
+logger = logging.getLogger(__name__)
 
 
 def compile_type_expression(ast, context):
@@ -9,14 +13,15 @@ def compile_type_expression(ast, context):
 
 
 class TypeExpression(AbstractSyntaxNodeWrapper):
-    def value_type_dimensions(self, dimensions):
+    @staticmethod
+    def value_type_dimensions(dimensions):
         if not dimensions:
             return ScalarType(int)
-        return ArrayType(self.value_type_dimensions(dimensions[1:]))
+        return ArrayType(TypeExpression.value_type_dimensions(dimensions[1:]))
 
     @property
     def value_type(self):
-        return self.value_type_dimensions(self.ast.dimensions)
+        return self.value_type_dimensions(self.ast.indexes)
 
 
 class ValueType:
