@@ -11,7 +11,7 @@ grammar_ebnf = r"""
     
     function_prototype = return_type:('int' | 'void') name:identifier '(' parameters:','.{ parameter_type }* ')';
     function_declarations = functions:{ function_declaration }*;
-    function_declaration = @:function_prototype ~ ';';
+    function_declaration = prototype:function_prototype ~ ';';
         
     parameter_type = 
         | type:`callback` prototype:function_prototype

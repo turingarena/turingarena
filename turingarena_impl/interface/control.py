@@ -7,7 +7,7 @@ from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
-from turingarena_impl.interface.io import FlushStatement, ReadStatement
+from turingarena_impl.interface.io import ReadStatement
 from turingarena_impl.interface.type_expressions import ScalarType
 from turingarena_impl.interface.variables import Variable
 
@@ -109,7 +109,7 @@ class ForStatement(ImperativeStatement):
     def index(self):
         ast = self.ast.index
         return ForIndex(
-            variable=Variable(value_type=ScalarType(int), name=ast.declarator.name),
+            variable=Variable(value_type=ScalarType(int), name=ast.index.name),
             range=Expression.compile(ast.range, self.context),
         )
 
@@ -123,8 +123,6 @@ class ForStatement(ImperativeStatement):
     def validate(self):
         if not self.body.context_after.has_flushed_output:
             for statement in self.body.statements:
-                if isinstance(statement, FlushStatement):
-                    break
                 if isinstance(statement, ReadStatement):
                     yield Diagnostic("missing flush between write and read instructions", parseinfo=self.ast.parseinfo)
         yield from self.body.validate()
@@ -237,11 +235,10 @@ class SwitchInstruction(Instruction):
     def on_request_lookahead(self, request):
         if not self.condition.is_resolved():
             for case in self.switch.cases:
-                if case.expects_request(request):
+                if len(case.labels) == 1 and case.expects_request(request):
                     self.condition.resolve(case.labels[0].value)
                     logger.debug(f"resolved switch condition to {self.condition.get()}")
                     return
-            self.condition.resolve(-1)
 
 
 class SwitchStatement(ImperativeStatement):
@@ -250,18 +247,15 @@ class SwitchStatement(ImperativeStatement):
 
         yield SwitchInstruction(self, condition)
 
+        if not condition.is_resolved():
+            raise InterfaceError("Unresolved switch condition")
+
         value = condition.get()
 
-        if value == -1:
-            if self.default:
-                yield from self.default.generate_instructions(context)
-            else:
-                raise InterfaceError("unresolvable switch statement!")
-        else:
-            for case in self.cases:
-                for label in case.labels:
-                    if value == label.value:
-                        yield from case.generate_instructions(context)
+        for case in self.cases:
+            for label in case.labels:
+                if value == label.value:
+                    yield from case.generate_instructions(context)
 
     def expects_request(self, request):
         for case in self.cases:
@@ -277,10 +271,6 @@ class SwitchStatement(ImperativeStatement):
     @property
     def variable(self):
         return Expression.compile(self.ast.value, self.context)
-
-    @property
-    def default(self):
-        return ImperativeBlock(ast=self.ast.default.body, context=self.context) if self.ast.default else None
 
     def validate(self):
         yield from self.variable.validate()

@@ -37,13 +37,13 @@ class Callable(AbstractSyntaxNodeWrapper):
 
     @property
     def name(self):
-        return self.ast.declarator.name
+        return self.ast.prototype.name
 
     @property
     def parameter_declarations(self):
         return tuple(
             ParameterDeclaration(p, self.context)
-            for p in self.ast.declarator.parameters
+            for p in self.ast.prototype.parameters
         )
 
     @property
@@ -52,16 +52,12 @@ class Callable(AbstractSyntaxNodeWrapper):
 
     @property
     def return_type_expression(self):
-        return_type_ast = self.ast.declarator.return_type
-        if return_type_ast is None:
-            return None
-        return compile_type_expression(return_type_ast, self.context)
+        return_type = self.ast.prototype.return_type
+        return compile_type_expression(return_type, self.context) if return_type else None
 
     @property
     def return_type(self):
-        if self.return_type_expression is None:
-            return None
-        return self.return_type_expression.value_type
+        return self.return_type_expression.value_type if self.return_type_expression else None
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
@@ -91,21 +87,6 @@ class Function(Callable):
     __slots__ = []
 
 
-class FunctionStatement(Statement):
-    __slots__ = []
-
-    @property
-    def function(self):
-        return Function(ast=self.ast, context=self.context)
-
-    def validate(self):
-        yield from self.function.validate()
-
-    @property
-    def context_after(self):
-        return self.context.with_function(self.function)
-
-
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
     @property
     def synthetic_statements(self):
@@ -131,6 +112,7 @@ class Callback(Callable):
 
     @property
     def body(self):
+        # TODO: generate block if body is None ('default' is specified)
         return ImperativeBlock(
             ast=self.ast.body,
             context=self.context.create_local().with_variables(self.parameters),

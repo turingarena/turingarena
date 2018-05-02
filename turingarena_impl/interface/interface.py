@@ -3,18 +3,34 @@ from collections import namedtuple
 
 from turingarena import InterfaceExit
 from turingarena.driver.commands import MainBegin
-from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.block import Block, ImperativeBlock
 from turingarena_impl.interface.context import GlobalContext, MainContext, RootContext
-from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
+from turingarena_impl.interface.callables import Function
 
 logger = logging.getLogger(__name__)
 
 
 class InterfaceBody(Block):
-    pass
+    @property
+    def functions(self):
+        return tuple(
+            Function(ast=func, context=self.context)
+            for func in self.ast.function_declarations
+        )
+
+    @property
+    def function_map(self):
+        return {f.name: f for f in self.functions}
+
+    @property
+    def main_block(self):
+        return ImperativeBlock(ast=self.ast.main_block, context=self.context.create_local())
+
+    def validate(self):
+        return self.main_block.validate()
 
 
 class InterfaceDefinition:
@@ -26,8 +42,6 @@ class InterfaceDefinition:
         )
 
     def validate(self):
-        if self.global_variables and not self.init_body:
-            yield Diagnostic(Diagnostic.Messages.INIT_BLOCK_MISSING, parseinfo=self.body.ast.parseinfo)
         yield from self.body.validate()
 
     @staticmethod
@@ -50,40 +64,6 @@ class InterfaceDefinition:
         return self.body.ast.parseinfo.buffer.text
 
     # FIXME: the following properties could be taken from the context instead
-
-    @property
-    def functions(self):
-        return tuple(
-            s.function
-            for s in self.body.statements
-            if s.statement_type == "function"
-        )
-
-    @property
-    def function_map(self):
-        return {f.name: f for f in self.functions}
-
-    @property
-    def callbacks(self):
-        return tuple(
-            s.callback
-            for s in self.body.statements
-            if s.statement_type == "callback"
-        )
-
-    @property
-    def callback_map(self):
-        return {c.name: c for c in self.callbacks}
-
-    @property
-    def global_variables(self):
-        return self.body.declared_variables
-
-    def global_variable_metadata(self, v):
-        return {
-            **self.extra_metadata.get("global_variables", {}).get(v.name, {}),
-            **v.metadata,
-        }
 
     def parameter_metadata(self, p, extra):
         return {
@@ -113,10 +93,6 @@ class InterfaceDefinition:
         return {
             **self.extra_metadata,
             **dict(
-                global_variables={
-                    v.name: self.global_variable_metadata(v)
-                    for v in self.global_variables.values()
-                },
                 callbacks={
                     c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
                     for c in self.callbacks
@@ -128,29 +104,13 @@ class InterfaceDefinition:
             ),
         }
 
-    @property
-    def main_body(self):
-        [main] = [s.body for s in self.body.statements if s.statement_type == "main"]
-        return main
-
-    @property
-    def init_body(self):
-        inits = [s.body for s in self.body.statements if s.statement_type == "init"]
-        if inits:
-            [init] = inits
-            return init
-        else:
-            return None
-
     def generate_instructions(self):
         global_context = GlobalContext(self)
         main_context = MainContext(global_context=global_context)
 
         yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
-            if self.init_body is not None:
-                yield from self.init_body.generate_instructions(main_context)
-            yield from self.main_body.generate_instructions(main_context)
+            yield from self.body.main_block.generate_instructions(main_context)
         except InterfaceExit:
             pass
         else:
