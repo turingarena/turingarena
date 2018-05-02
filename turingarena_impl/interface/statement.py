@@ -12,12 +12,10 @@ class Statement(AbstractSyntaxNodeWrapper):
         from turingarena_impl.interface.control import ForStatement, IfStatement, LoopStatement, ExitStatement
         from turingarena_impl.interface.control import BreakStatement, ContinueStatement, SwitchStatement, CaseStatement
         from turingarena_impl.interface.callables import FunctionStatement, CallbackStatement
-        from turingarena_impl.interface.mainblocks import MainStatement
         from turingarena_impl.interface.io import CheckpointStatement, ReadStatement, WriteStatement, FlushStatement
 
         return bidict({
             "function": FunctionStatement,
-            "main": MainStatement,
             "checkpoint": CheckpointStatement,
             "read": ReadStatement,
             "write": WriteStatement,
