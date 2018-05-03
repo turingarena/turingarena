@@ -3,8 +3,8 @@ from collections import namedtuple
 
 from turingarena import InterfaceExit
 from turingarena.driver.commands import MainBegin
-from turingarena_impl.interface.block import Block, ImperativeBlock
-from turingarena_impl.interface.context import GlobalContext, MainContext, RootContext, StaticGlobalContext
+from turingarena_impl.interface.block import ImperativeBlock
+from turingarena_impl.interface.context import GlobalContext, MainContext, StaticGlobalContext
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
@@ -13,37 +13,23 @@ from turingarena_impl.interface.callables import Function
 logger = logging.getLogger(__name__)
 
 
-class InterfaceBody(Block):
-    @property
-    def functions(self):
-        return tuple(
-            Function(ast=func, context=self.context)
-            for func in self.ast.function_declarations
-        )
-
-    @property
-    def function_map(self):
-        return {f.name: f for f in self.functions}
-
-    @property
-    def main_block(self):
-        return ImperativeBlock(ast=self.ast.main_block, context=StaticGlobalContext(functions=self.functions).create_local())
-
-    def validate(self):
-        return self.main_block.validate()
-
-
 class InterfaceDefinition:
     def __init__(self, source_text, extra_metadata, **kwargs):
         ast = parse_interface(source_text, **kwargs)
         logger.debug(f"Parsed interface {ast}")
         self.extra_metadata = extra_metadata
-        self.body = InterfaceBody(
-            ast=ast, context=RootContext(),
+        self.ast = ast
+        self.main = ImperativeBlock(
+            ast=self.ast.main_block,
+            context=StaticGlobalContext(functions=self.functions).create_local()
         )
 
     def validate(self):
-        yield from self.body.validate()
+        yield from self.main.validate()
+
+    @property
+    def declared_variable(self):
+        return self.main.context_after.variables
 
     @staticmethod
     def load(name):
@@ -62,7 +48,18 @@ class InterfaceDefinition:
 
     @property
     def source_text(self):
-        return self.body.ast.parseinfo.buffer.text
+        return self.ast.parseinfo.buffer.text
+
+    @property
+    def functions(self):
+        return tuple(
+            Function(ast=func, context=StaticGlobalContext(functions=()))
+            for func in self.ast.function_declarations
+        )
+
+    @property
+    def function_map(self):
+        return {f.name: f for f in self.functions}
 
     # FIXME: the following properties could be taken from the context instead
 
@@ -111,7 +108,7 @@ class InterfaceDefinition:
 
         yield MainBeginInstruction(interface=self, global_context=global_context)
         try:
-            yield from self.body.main_block.generate_instructions(main_context)
+            yield from self.main.generate_instructions(main_context)
         except InterfaceExit:
             pass
         else:

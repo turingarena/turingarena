@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from contextlib import contextmanager
 
-from turingarena_impl.interface.exceptions import CommunicationBroken, Diagnostic
+from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.variables import Variable
@@ -85,7 +85,7 @@ class ReadStatement(ReadWriteStatement):
     @property
     def context_after(self):
         return self.context.with_variables(tuple(
-            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(len(exp.indices)))
+            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
             for exp in self.arguments
         ))
 

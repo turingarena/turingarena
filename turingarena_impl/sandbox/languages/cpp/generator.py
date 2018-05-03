@@ -49,7 +49,7 @@ class CppSkeletonCodeGen(CppCodeGen):
     def generate_main(self):
         yield
         yield "int main() {"
-        yield from self.block_content(self.interface.body.main_block)
+        yield from self.block_content(self.interface.main)
         yield "}"
 
     def call_statement(self, s):

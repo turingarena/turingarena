@@ -34,14 +34,14 @@ class CodeGen:
         return []
 
     def generate_functions(self):
-        for func in self.interface.body.functions:
+        for func in self.interface.functions:
             yield from self.function_declaration(func)
 
     def function_declaration(self, s):
         raise NotImplementedError
 
-    def generate_main(self, main_block):
-        yield from self.block_content(main_block, indent=False)
+    def generate_main(self):
+        yield from self.block_content(self.interface.main, indent=False)
 
     def callback_statement(self, s):
         raise NotImplementedError

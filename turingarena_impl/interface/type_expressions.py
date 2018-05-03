@@ -8,10 +8,6 @@ from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 logger = logging.getLogger(__name__)
 
 
-def compile_type_expression(ast, context):
-    return TypeExpression(ast, context)
-
-
 class TypeExpression(AbstractSyntaxNodeWrapper):
     @staticmethod
     def value_type_dimensions(dimensions):
@@ -118,6 +114,8 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
 
 
 class CallbackType(ValueType, namedtuple("CallbackType", ["arguments", "has_return_value"])):
+    __slots__ = []
+
     @staticmethod
     def compile(ast):
         return CallbackType(

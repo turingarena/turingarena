@@ -7,7 +7,6 @@ from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
-from turingarena_impl.interface.io import ReadStatement
 from turingarena_impl.interface.type_expressions import ScalarType
 from turingarena_impl.interface.variables import Variable
 
@@ -52,9 +51,7 @@ class IfStatement(ImperativeStatement):
 
     @property
     def else_body(self):
-        if self.ast.else_body is None:
-            return None
-        return ImperativeBlock(self.ast.else_body, self.context)
+        return ImperativeBlock(self.ast.else_body, self.context) if self.ast.else_body else None
 
     def validate(self):
         yield from self.condition.validate()
@@ -116,7 +113,7 @@ class ForStatement(ImperativeStatement):
     def body(self):
         return ImperativeBlock(
             ast=self.ast.body,
-            context=self.context.create_inner().with_variables((self.index.variable,)),
+            context=self.context.create_inner().with_index_variable(self.index),
         )
 
     def validate(self):

@@ -9,7 +9,7 @@ from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import VariableReference
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.type_expressions import ScalarType, compile_type_expression, CallbackType
+from turingarena_impl.interface.type_expressions import ScalarType, TypeExpression, CallbackType
 from turingarena_impl.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
 
     @property
     def type_expression(self):
-        return compile_type_expression(self.ast, self.context)
+        return TypeExpression(self.ast, self.context)
 
     @property
     def variable(self):
