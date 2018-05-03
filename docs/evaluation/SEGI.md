@@ -81,10 +81,65 @@ and two environment variables are provided to the evaluator:
     SUBMISSION_VALUE_SOURCE_LANGUAGE=c++
     SUBMISSION_FILE_SOURCE=/tmp/submission_42/source.cpp
 
-## Evaluation text
+## Evaluation
 
-TODO
+An evaluation is generated from the process `stdout`.
 
-## Evaluation data
+Normally, whatever is written to `stdout`
+results in *text* events (with the requirement that line terminators
+are recorded in their own event).
+
+In order to generate *data* events,
+escape sequences are used.
+Specifically,
+two hard-to-guess strings are provided as enviroment variables:
+
+- `EVALUATION_DATA_BEGIN`
+- `EVALUATION_DATA_END`
+
+These strings must not be valid JSON.
+In order to generate data events,
+the process must:
+
+1. print a line terminator
+2. print the value of `EVALUATION_DATA_BEGIN`, followed by a line terminator
+3. for every data event to generate, print its payload as JSON in a single line, followed by a line terminator
+4. print  the value of `EVALUATION_DATA_END`, followed by a line terminator
+
+### Example
+
+- `EVALUATION_DATA_BEGIN` is set to `--evaluation-data-begin-7e112fc35845cd01d454`
+- `EVALUATION_DATA_END` is set to `--evaluation-data-end---46c11713eef6050e3ca6`
+
+Consider the following `stdout` stream:
+```
+Hello.
+I'm a very very ... very long line.
+
+--evaluation-data-begin-7e112fc35845cd01d454
+{"type": "goal", "name": "correct", "outcome": true}
+{"type": "goal", "name": "linear_time", "outcome": false}
+--evaluation-data-end---46c11713eef6050e3ca6
+Nice! You got 60 points!
+
+--evaluation-data-begin-7e112fc35845cd01d454
+{"type": "score", "value": 60}
+--evaluation-data-end---46c11713eef6050e3ca6
+```
+
+It could result in the following events:
+
+- text: `"Hello."`
+- text: `"\n"`
+- text: `"I'm a very very ..."`
+- text: `" very long line"`
+- text: `"\n"`
+- data: `{"type": "goal", "name": "correct", "outcome": true}`
+- data: `{"type": "goal", "name": "linear_time", "outcome": false}`
+- text: `"Nice! You got 60 points!"`
+- text: `"\n"`
+- data: `{"type": "score", "value": 60}`
+
+### Rationale
 
 TODO

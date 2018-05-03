@@ -37,10 +37,16 @@ and the `multipart/form-data` content type in HTTP requests, for Web based APIs.
 
 ## Evaluation and evaluators
 
-An evaluation comprises:
+An evaluation is a stream of **events**.
+Events can be of two types, **text** and **data**,
+and contain a **payload**.
 
-- a **text**, which is a textual (i.e., UTF-8 encoded) stream,
-- a **data**, which is a stream of JSON objects.
+The payload of *text* events is a Unicode string.
+The payload string must be non-empty, and either:
+- does *not* contain any line terminator, or
+- consist of a single line terminator only.
+
+The payload of *data* events is a JSON object.
 
 An evaluation is possibly associated with other metadata such as
 - a checksum of the evaluated submission
