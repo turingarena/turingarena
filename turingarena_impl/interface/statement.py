@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.block import AbstractSyntaxNodeWrapper
 
 
 class Statement(AbstractSyntaxNodeWrapper):

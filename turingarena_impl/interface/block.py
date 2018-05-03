@@ -1,13 +1,14 @@
 import logging
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
 
 logger = logging.getLogger(__name__)
+
+AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
 
 class Block(AbstractSyntaxNodeWrapper):

@@ -1,12 +1,11 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.block import ImperativeBlock
+from turingarena_impl.interface.block import ImperativeBlock, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.context import CallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import VariableReference
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
 from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType, CallbackType

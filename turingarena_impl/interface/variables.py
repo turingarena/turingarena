@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from collections import namedtuple
 
-from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.block import AbstractSyntaxNodeWrapper
 
 
 class Variable(namedtuple("Variable", ["name", "value_type"])):
