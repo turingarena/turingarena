@@ -9,8 +9,7 @@ from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import VariableReference
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.type_expressions import ScalarType, TypeExpression, CallbackType
-from turingarena_impl.interface.variables import Variable
+from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType, CallbackType
 
 logger = logging.getLogger(__name__)
 

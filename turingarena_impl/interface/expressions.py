@@ -5,7 +5,7 @@ from bidict import frozenbidict
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.node import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
-from turingarena_impl.interface.type_expressions import ScalarType, ArrayType
+from turingarena_impl.interface.variables import ScalarType, ArrayType
 
 import logging
 

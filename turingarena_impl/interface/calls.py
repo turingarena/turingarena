@@ -8,8 +8,7 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.io import read_line, do_flush
-from turingarena_impl.interface.variables import Variable
-from turingarena_impl.interface.type_expressions import TypeExpression
+from turingarena_impl.interface.variables import Variable, TypeExpression
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 from collections import namedtuple
 
-from turingarena_impl.interface.type_expressions import ArrayType, ScalarType
+from turingarena_impl.interface.variables import ScalarType, ArrayType
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,7 @@ from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
-from turingarena_impl.interface.type_expressions import ScalarType
-from turingarena_impl.interface.variables import Variable
+from turingarena_impl.interface.variables import Variable, ScalarType
 
 logger = logging.getLogger(__name__)
 

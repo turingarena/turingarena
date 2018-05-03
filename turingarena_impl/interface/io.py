@@ -5,8 +5,7 @@ from contextlib import contextmanager
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.variables import Variable
-from turingarena_impl.interface.type_expressions import TypeExpression
+from turingarena_impl.interface.variables import Variable, TypeExpression
 
 logger = logging.getLogger(__name__)
 
