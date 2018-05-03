@@ -1,7 +1,8 @@
 # Submission Evaluation Gateway Interface (SEGI)
 
 The **Submission Evaluation Gateway Interface (SEGI)**
-is a protocol to communicate with an evaluator in order to evaluate a submission, inspired by the Common Gateway Interface (CGI) for responding to HTTP requests.
+is a set of conventions used to communicate with an evaluator in order to evaluate a submission.
+It is inspired by the Common Gateway Interface (CGI), used for responding to HTTP requests.
 
 SEGI is a low-level interface:
 it is designed to easily integrate evaluators written using different programming languages and technologies,
@@ -9,29 +10,33 @@ as it relies only on the abstraction offered by POSIX.
 
 ## General assumptions
 
-- Evaluations occur sequentially in a (POSIX) process.
-    - For each submission to evaluate, the evaluator program is executed once.
-    How the evaluator program is loaded and started is not specified by SEGI.
-    Possible options:
-        - Launching an executable as a child process.
-        - Running a Python script in an existing Python interpreter process.
-        - ...
-    - At most one submission is evaluated in the same process at the same time.
-    (But more than one submission may be evaluated in the same process sequentially.)
-    - The evaluation stops when the evaluator program terminates.
-    How the termination of the evaluator program is determined is not specified by SEGI.
-- The communication with the evaluator program occurs only through the process context.
-Specifically:
-    - No extra arguments depending on the submission are passed directly to the evaluator program
-    (say, function arguments).
-    - No output is taken directly from the evaluator program
-    (say, function return value).
-    - All the communication occurs through:
-        - enviroment variables,
-        - standard file descriptors, and
-        - files on the local filesystem, whose path is specified in enviroment variables.
-    - Other data can be provided to the evaluator program, preferably through enviroment variables,
-    as long as they do not depend on the submission.
+In SEGI, the evaluations occur sequentially in a (POSIX) process,
+and the communication with the evaluator program
+occurs only through the process context.
+More specifically, the following assumptions hold.
+
+- For each submission to evaluate, the evaluator program is executed once.
+How the evaluator program is loaded and started is not specified by SEGI.
+Possible options:
+    - Launching an executable as a child process.
+    - Running a Python script in an existing Python interpreter process.
+    - ...
+- At most one submission is evaluated in the same process at the same time.
+(But more than one submission may be evaluated in the same process sequentially.)
+- The evaluation stops when the evaluator program terminates.
+How the termination of the evaluator program is determined is not specified by SEGI.
+- No extra arguments depending on the submission are passed directly to the evaluator program
+(say, function arguments).
+- No output is taken directly from the evaluator program
+(say, function return value).
+- All the communication occurs through:
+    - enviroment variables,
+    - standard file descriptors, and
+    - files on the local filesystem, whose path is specified in enviroment variables.
+- Other data can be provided to the evaluator program, preferably through enviroment variables,
+as long as they do not depend on the submission.
+
+The details of the communication with the evaluation are described in the following.
 
 ### Rationale
 
