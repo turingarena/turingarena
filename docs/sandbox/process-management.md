@@ -9,7 +9,7 @@ A protocol for interacting with a running sandbox is described.
 
 ## Protocol
 
-The sandbox process is associated with two named pipes:
+The sandbox process exposes two named pipes:
 
 - the `wait` pipe, and
 - the `status` pipe.
