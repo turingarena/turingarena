@@ -44,6 +44,7 @@ and contain a **payload**.
 
 The payload of *text* events is a Unicode string.
 The payload string must be non-empty, and either:
+
 - does *not* contain any line-terminator, or
 - consist of a single line-terminator only.
 
@@ -68,4 +69,4 @@ Each evaluation event is represented as a JSON object, with the following fields
 
 ## Evaluation as JSON Lines streams
 
-An evaluation is represented over a stream using the JSON Lines format (jsonlines.org).
+An evaluation is represented over a stream using the [JSON Lines format](http://jsonlines.org).
