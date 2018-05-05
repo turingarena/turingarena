@@ -13,8 +13,8 @@ for example if the different files are written by different people
 and should be evaluated one against the other
 (e.g., bots in a two-player game).
 
-TuringArena defines a standard way in which a submission
-is evaluated by an evaluator.
+TuringArena defines exactly what submission and evaluations are,
+and how they should be represented.
 
 ## Submissions
 
@@ -34,6 +34,7 @@ but these metadata should not be used as part of the evaluation.)
 
 The format of submissions is chosen so that it maps naturally to HTML *forms*,
 and the `multipart/form-data` content type in HTTP requests, for Web based APIs.
+(See [SEWI](SEWI.md) for more info.)
 
 ## Evaluation and evaluators
 
@@ -43,10 +44,10 @@ and contain a **payload**.
 
 The payload of *text* events is a Unicode string.
 The payload string must be non-empty, and either:
-- does *not* contain any line terminator, or
-- consist of a single line terminator only.
+- does *not* contain any line-terminator, or
+- consist of a single line-terminator only.
 
-The payload of *data* events is a JSON object.
+The payload of *data* events is any JSON value.
 
 An evaluation is possibly associated with other metadata such as
 
@@ -57,3 +58,14 @@ An evaluation is possibly associated with other metadata such as
 
 An **evaluator** is a program that takes a submission in input
 and produces an evaluation as output.
+
+## Evaluation events as JSON
+
+Each evaluation event is represented as a JSON object, with the following fields.
+
+- `type`: a string, with value either `data` or `text`, according to the type of the event.
+- `payload`: the event payload, i.e., either a JSON string (for text events) or any JSON value (for data events).
+
+## Evaluation as JSON Lines streams
+
+An evaluation is represented over a stream using the JSON Lines format (jsonlines.org).
