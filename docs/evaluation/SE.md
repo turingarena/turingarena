@@ -49,6 +49,7 @@ The payload string must be non-empty, and either:
 The payload of *data* events is a JSON object.
 
 An evaluation is possibly associated with other metadata such as
+
 - a checksum of the evaluated submission
 - a checksum of the evaluator and its data
 - the time of evaluation

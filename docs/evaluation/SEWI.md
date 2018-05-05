@@ -27,7 +27,7 @@ the form contains exactly one field, defined by:
 The form may have other fields,
 but it must not contain any other field whose name starts with a submission base name.
 
-**Example**
+### Example
 
 Consider two submissions:
 

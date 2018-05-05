@@ -9,11 +9,13 @@ by directly calling its functions.
 The driver manager exposes a directory with the following named pipes:
 
 Request pipes:
+
 - `interface`
 - `source`
 - `language`
 
 Response pipes:
+
 - `connection_dir`
 
 To start a process, the client does the following.
