@@ -15,7 +15,7 @@ def evaluate_cli(args):
 
     Options:
         -p --problem=<id>  Problem to evaluate
-        -x --language=<lang>  Language of the solution [default: c++]
+        -x --language=<lang>  Language of the solution
         -g --git=<url>  Clone problem from git
     """
 
