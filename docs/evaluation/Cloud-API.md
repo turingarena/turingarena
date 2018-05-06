@@ -5,16 +5,16 @@ meant to perform submission evaluations based on TuringArena in the cloud.
 
 The API supports two methods:
 
-- `evaluate`, used to start a new evaluation, using a given evaluator and a given submission, and
-- `evaluation_events`, used to get a page of evaluation events of an ongoing evaluation.
+- *evaluate*, used to start a new evaluation, using a given evaluator and a given submission, and
+- *evaluation events*, used to get a page of evaluation events of an ongoing evaluation.
 
-Let `$BASE_URL` denote the base URL where the API is deployed.
+Let `base_url` denote the base URL where the API is deployed.
 
 ## Evaluate
 
-A call to `evaluate` is SEWI request with:
+A call to *evaluate* is SEWI request with:
 
-- URL `$BASE_URL/evaluate`,
+- URL template: `{+base_url}/evaluate`,
 - only one submission with base name `submission`,
 - some extra form fields described below.
 
@@ -24,12 +24,15 @@ TODO: response body
 
 ## Evaluation events
 
-A call to `evaluation_events` is an *form-like* request with the following fields.
+A call to *evaluation events* is an HTTP request as follows.
 
-- `evaluation`, required, containing the ID of the evaluation,
-- `after`, optional,
-a cursor indicating the beginning of the desired page
-(the cursor is implicitly `null` if this field is absent).
+- Method: `GET`.
+- URL template: `{+base_url}/evaluation/{id}/events{?after}`,
+- Template parameters
+    - `evaluation`, required, containing the ID of the evaluation,
+    - `after`, optional,
+    a cursor indicating the beginning of the desired page
+    (the cursor is implicitly `null` if this parameter is absent).
 
 In normal conditions, the response body is a page of evaluation events, represented as JSON,
 starting at the cursor provided in the `after` parameter
@@ -46,7 +49,7 @@ but still allows an implementation to delete the events when it is sure that the
 
 ## Implementation details
 
-Every time an implementation receives a call to `evaluation_events`,
+Every time an implementation receives a call to *evaluation events*,
 it can delete all the events before the `after` parameter.
 In order to be able to safely delete also the last page of events, an implementation may do the following.
 
