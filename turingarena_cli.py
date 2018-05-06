@@ -33,10 +33,17 @@ def turingarena_cli():
     ))
 
     git_dir = os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
+    author_name = "TuringArena"
+    author_email = "contact@turingarena.org"
+
     git_env = {
         "GIT_WORK_TREE": working_dir,
         "GIT_DIR": git_dir,
         "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_command),
+        "GIT_AUTHOR_NAME": author_name,
+        "GIT_AUTHOR_EMAIL": author_email,
+        "GIT_COMMITTER_NAME": author_name,
+        "GIT_COMMITTER_EMAIL": author_email,
     }
 
     git_popen_args = dict(env=git_env, universal_newlines=True)
