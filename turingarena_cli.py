@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import argparse
 import os
 import subprocess
 import sys
@@ -10,7 +11,16 @@ def info(*args):
 
 
 def turingarena_daemon():
-    os.execvp("docker", [
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dev-dir", type=str, help="source code directory of TuringArena (for development)")
+
+    args = parser.parse_args()
+
+    volumes = []
+    if args.dev_dir is not None:
+        dev_dir = os.path.abspath(args.dev_dir)
+        volumes.append("--mount=type=bind,src={},dst=/usr/local/turingarena/,readonly".format(dev_dir))
+    cli = [
         "docker",
         "run",
         "--name=turingarena",
@@ -18,13 +28,15 @@ def turingarena_daemon():
         "--read-only",
         "--tmpfs=/run/turingarena:exec,mode=1777",
         "--tmpfs=/tmp:exec,mode=1777",
-        # "--volume=$PWD:/usr/local/turingarena/:ro",
+          ] + volumes + [
         "--publish=127.0.0.1:20122:22",
         "turingarena/turingarena",
         "socat",
         "TCP-LISTEN:22,fork",
         """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
-    ])
+          ]
+    info(*cli)
+    os.execvp("docker", cli)
 
 
 def turingarena_cli():
