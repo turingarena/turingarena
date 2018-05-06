@@ -13,6 +13,7 @@ setup(
     entry_points={
         'console_scripts': [
             "turingarena=turingarena_cli:turingarena_cli",
+            "turingarenad=turingarena_cli:turingarena_daemon",
         ],
     }
 )
