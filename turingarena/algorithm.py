@@ -1,10 +1,9 @@
-import logging
-import os
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 
-from turingarena import AlgorithmRuntimeError, TimeLimitExceeded, MemoryLimitExceeded, InterfaceExit
-from turingarena.driver.client import SandboxError
+from turingarena import *
+from turingarena.driver.client import SandboxError, DriverClient, DriverProcessClient
+from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +13,6 @@ class Algorithm(namedtuple("Algorithm", [
 ])):
     @contextmanager
     def run(self, global_variables=None, time_limit=None):
-        # FIXME: make imports global
-        from turingarena.driver.client import DriverClient, DriverProcessClient
-        from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
-
         if global_variables is None:
             global_variables = {}
 
