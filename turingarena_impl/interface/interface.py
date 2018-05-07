@@ -122,11 +122,6 @@ class MainBeginInstruction(Instruction, namedtuple("MainBeginInstruction", [
 
     def on_request_lookahead(self, request):
         assert isinstance(request, MainBegin)
-        variables = self.interface.global_variables
-        assert len(request.global_variables) == len(variables)
-        for name, variable in variables.items():
-            value = request.global_variables[name]
-            self.global_context.bindings[variable] = variable.value_type.ensure(value)
 
     def on_generate_response(self):
         return []

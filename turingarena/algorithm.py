@@ -13,13 +13,10 @@ class Algorithm(namedtuple("Algorithm", [
     "source_name", "language_name", "interface_name",
 ])):
     @contextmanager
-    def run(self, global_variables=None, time_limit=None):
+    def run(self, time_limit=None):
         # FIXME: make imports global
         from turingarena.driver.client import DriverClient, DriverProcessClient
         from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
-
-        if global_variables is None:
-            global_variables = {}
 
         with ExitStack() as stack:
             sandbox_dir = os.environ["TURINGARENA_SANDBOX_DIR"]
@@ -52,7 +49,7 @@ class Algorithm(namedtuple("Algorithm", [
 
             try:
                 with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                    driver_process_client.send_begin_main(global_variables)
+                    driver_process_client.send_begin_main()
                     try:
                         yield algorithm_process
                     except InterfaceExit:

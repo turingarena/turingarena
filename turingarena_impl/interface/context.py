@@ -76,12 +76,10 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
 
 
 class GlobalContext:
-    __slots__ = ["interface", "variables", "bindings"]
+    __slots__ = ["interface"]
 
     def __init__(self, interface):
         self.interface = interface
-        self.variables = interface.global_variables
-        self.bindings = BindingStorage(local_variables=interface.global_variables, parent=None)
 
 
 class ProcedureContext:

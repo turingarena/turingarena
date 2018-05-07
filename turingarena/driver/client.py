@@ -62,8 +62,8 @@ class DriverProcessClient:
     def send_callback_return(self, return_value):
         return self.send_request(CallbackReturn(return_value=return_value))
 
-    def send_begin_main(self, global_variables):
-        return self.send_request(MainBegin(global_variables=global_variables))
+    def send_begin_main(self):
+        return self.send_request(MainBegin())
 
     def send_end_main(self):
         return self.send_request(MainEnd())

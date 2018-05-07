@@ -120,6 +120,9 @@ class ForStatement(ImperativeStatement):
     def variable_to_allocate(self):
         for stmt in self.body.statements:
             if isinstance(stmt, ReadStatement):
+                pass
+
+        return None
 
 
     def validate(self):

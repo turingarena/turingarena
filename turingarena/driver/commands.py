@@ -30,30 +30,13 @@ def serialize_request(request):
     yield from request.serialize_arguments()
 
 
-class MainBegin(ProxyRequest, namedtuple("MainBegin", ["global_variables"])):
+class MainBegin(ProxyRequest):
     __slots__ = []
 
     @staticmethod
     def deserialize_arguments():
-        return MainBegin(
-            global_variables=(yield from MainBegin.deserialize_global_variables())
-        )
-
-    @staticmethod
-    def deserialize_global_variables():
-        size = int((yield))
-        result = {}
-        for _ in range(size):
-            name = yield
-            value = yield from deserialize_data()
-            result[name] = value
-        return result
-
-    def serialize_arguments(self):
-        yield len(self.global_variables)
-        for name, value in self.global_variables.items():
-            yield name
-            yield from serialize_data(value)
+        yield from []
+        return MainBegin()
 
 
 class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
