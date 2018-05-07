@@ -14,11 +14,48 @@ Let `base_url` denote the base URL where the API is deployed.
 
 A call to *evaluate* is SEWI request with:
 
-- URL template: `{+base_url}/evaluate`,
-- only one submission with base name `submission`,
-- some extra form fields described below.
+- URL template: `{+base_url}/evaluate`.
 
-TODO: extra fields
+### Request
+
+The request includes the provided submission, with base name `submission`.
+
+The  specifies which [*packs*](../packs.md)
+should be available for the evaluation.
+For each pack,
+a field is added, with:
+
+- name: `packs[]`,
+- value: the pack SHA-1 hash, in lower-case hex.
+
+In order to obtain the content of the packs,
+the request also specifies zero or more [*pack repositories*](../packs.md#pack-repositories).
+At a minimum, Git repositories should be supported as pack repositories.
+
+For each Git repository to clone, the following fields are to be provided.
+
+- `repositories[<name>][type]`: the constant `git_clone`.
+- `repositories[<name>][url]`: the URL of the repo to clone.
+- `repositories[<name>][branch]`, optional.
+- `repositories[<name>][depth]`, optional.
+
+The value `<name>` is a string identifying the repository.
+It must match the following regexp `[_a-zA-Z][_a-zA-Z0-9]*`.
+
+#### Rationale
+
+Requiring the packs SHA-1 hash in the requests allows effective caching.
+If they are all available locally, the repositories are not used.
+
+In the future, each pack can be mapped to a repository,
+so that only the needed repositories are queried when some pack is not available.
+However, since this is an optimization feature,
+this map should be specified *aside* the list of packs,
+in order not to complicate the unoptimized version of the API.
+Giving a name to each repository makes this extension easier.
+
+The repositories could be entirely omitted
+if the server contains the provided packs as built-in. 
 
 ### Response
 

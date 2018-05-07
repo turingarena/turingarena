@@ -37,3 +37,32 @@ when looking for specific files.
 Instead of developing a new module system used to identify, find and load different software components (in the form of files), the Python module system is exploited.
 Thanks to *namespace packages* of Python 3, no extra effort is required to map module names to directories in packs,
 and portions of the same package can be distributed in different packs.
+
+## Pack repositories
+
+Some mechanisms are presented to load the content of a pack,
+identified by its SHA-1 hash,
+when it is not available.
+Such a mechanism is called a **pack repository**.
+
+### Git
+
+A Git clone is performed with some specified parameters,
+including the following.
+
+- Git repository URL, required.
+- A Git *ref*, optional, the default is provided by the repository itself.
+- The clone *depth*, optional, defaulting to no depth (deep clone).
+
+All the git tree objects present in the repository after the clone
+are made available as packs.
+
+### Archive
+
+A provided file archive (e.g., *tar* or *zip*) is extracted.
+Then, the content of the archive is added to a Git index and a Git tree object is created.
+The tree object obtained and all of its subtrees are made available as packs.
+
+### Archive URL
+
+An URL is used to download a file archive, which is then processed as above. 
