@@ -1,0 +1,15 @@
+service: turingarena
+
+provider:
+  name: aws
+  runtime: python3.6
+
+package:
+  include:
+    - turingarena_impl/**
+
+functions:
+  api_handler:
+    handler: turingarena_impl.api.lambda_proxy.main
+    events:
+      - http: ANY /

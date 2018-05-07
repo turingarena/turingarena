@@ -86,9 +86,8 @@ to the location *between* two consecutive events.
 
 A page is represented as a JSON object with the following fields.
 
-- `page`: a JSON object containing the following fields.
-    - `begin`: the cursor at the beginning of this page.
-    - `end`: the cursor at the end of this page.
+- `begin`: the cursor at the beginning of this page.
+- `end`: the cursor at the end of this page.
 - `data`: a JSON array containing the events in the page.
 
 If the `begin` (resp. `end`) cursor is `null`,
