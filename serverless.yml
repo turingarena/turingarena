@@ -12,4 +12,4 @@ functions:
   api_handler:
     handler: turingarena_impl.api.lambda_proxy.main
     events:
-      - http: ANY /
+      - http: ANY /{proxy+}

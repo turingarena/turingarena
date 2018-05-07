@@ -12,6 +12,11 @@ meaning that no cloud resources are used
 when no evaluations are performed
 (excluding cloud data storage).
 
+## Infrastructure as Code
+
+The [serverless](https://serverless.com) tool is used
+to develop and deploy the infrastructure.
+
 ## API Gateway
 
 The Amazon Web Services (AWS) [API Gateway](https://aws.amazon.com/api-gateway/)
