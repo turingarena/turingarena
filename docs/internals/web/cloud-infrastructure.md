@@ -7,14 +7,12 @@ for challenges created using TuringArena.
 
 Some implementation ideas are presented.
 
-## Architecture
-
 The cloud infrastructure is server-less,
 meaning that no cloud resources are used
 when no evaluations are performed
 (excluding cloud data storage).
 
-### API Gateway
+## API Gateway
 
 The Amazon Web Services (AWS) [API Gateway](https://aws.amazon.com/api-gateway/)
 is used to publish the API over the internet.
@@ -26,7 +24,7 @@ The maximum timeout is 29 second, which is potentially less than the duration of
 This should be acceptable when sending submissions (via SEWI).
 - The response is fully-buffered.
 
-### API backend
+## API backend
 
 To implement the API,
 all the requests
@@ -36,7 +34,7 @@ using the *HTTP Proxy* integration of AWS API Gateway.
 Using AWS Lambda all the requests must be asynchronous,
 since AWS Lambda is billed by time.
 
-### Evaluation storage
+## Evaluation storage
 
 The evaluation is stored using [AWS DynamoDB](https://aws.amazon.com/dynamodb/),
 which is especially cheap.
@@ -59,7 +57,7 @@ A new event page is created when either
 When the end of stream is reached,
 a new page is created, containing an end-of-stream marker, and no payload.
 
-#### Cursors and queries
+### Cursors and queries
 
 Cursors are based on the page index.
 (Perhaps, using odd numbers for pages and even numbers for cursors
@@ -78,7 +76,7 @@ starting from the beginning of the query, until either:
 
 The latter check is needed to avoid problems arising from eventual consistency.
 
-#### Rationale
+### Rationale
 
 While DynamoDB does not apply naturally to representing streams,
 it is a good compromise: it's fast and cheap, and (using eventually consistent reads) 
@@ -94,7 +92,7 @@ This improves both efficiency and simplifies the implementation.
 JSON Lines is chosen instead of JSON arrays so that an implementation
 cloud split and join pages of events without the need of parsing JSON.
 
-### Evaluations
+## Evaluations
 
 The evaluation itself is performed in a Docker container.
 The [Hyper.sh](www.hyper.sh) service offers on-demand Docker containers,
