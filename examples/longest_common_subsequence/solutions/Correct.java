@@ -1,9 +1,4 @@
 class Solution extends Skeleton {
-    // global int M;
-    // global int[] X;
-    // global int N;
-    // global int[] Y;
-
     int[][] b, c;
     int[] seq;
 
@@ -23,7 +18,7 @@ class Solution extends Skeleton {
     }
 
 
-    void compute() {
+    int compute(int M, int X, int N, int Y) {
         b = new int[M+1][];
         c = new int[M+1][];
 
@@ -57,9 +52,7 @@ class Solution extends Skeleton {
 
         seq = new int[c[M][N]];
         build_sequence(c[M][N] - 1, M, N);
-    }
 
-    int length() {
         return c[M][N];
     }
 

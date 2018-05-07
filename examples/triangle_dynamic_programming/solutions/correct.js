@@ -2,7 +2,7 @@ function max(a, b) {
     return a > b ? a : b;
 }
 
-function find_best_sum() {
+function find_best_sum(N, V) {
     dyn = new Array(N+1);
     for (var i = 0; i <= N; i++)
         dyn[i] = new Array(N+1);

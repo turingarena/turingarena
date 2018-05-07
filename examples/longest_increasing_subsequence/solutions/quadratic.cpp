@@ -3,12 +3,9 @@
 #include <vector>
 #include <algorithm>
 
-int n;
-int* a;
-
 std::vector<bool> taken;
 
-void compute() {
+void compute(int n, int *a) {
     int prev[n], len[n];
     int best, best_len;
 

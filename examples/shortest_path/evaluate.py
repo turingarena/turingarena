@@ -21,13 +21,13 @@ for u, v, d in g.edges(data=True):
 print("running algorithm")
 
 try:
-    with algorithm.run(dict(
-            N=N,
-            D=[g.degree(u) for u in g],
-            A=[g.neighbors(u) for u in g],
-            W=[[w for _, _, w in g.edges(u, data="weight")] for u in g],
-            Q=Q,
-    )) as p:
+    with algorithm.run() as p:
+        D = [g.degree(u) for u in g]
+        A = [g.neighbors(u) for u in g]
+        W = [[w for _, _, w in g.edges(u, data="weight")] for u in g]
+
+        p.call.init(N, Q, D, A, W)
+
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")
 

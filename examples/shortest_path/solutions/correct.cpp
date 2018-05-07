@@ -8,7 +8,13 @@ int N; // number of nodes
 int* D; // node degree
 int** A; // adjacency
 int** W; // weights
-int Q; // number of queries
+
+void init(int _N, int _Q, int _D, int _A, int _W) {
+    N = _N;
+    D = _D;
+    A = _A;
+    W = _W;
+}
 
 int dijkstra(int source, int destination) {
     priority_queue<pair<int, int> > Q;

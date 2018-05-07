@@ -83,14 +83,26 @@ class ReadStatement(ReadWriteStatement):
 
     @property
     def context_after(self):
-        return self.context.with_variables(tuple(
+        return self.context.with_variables(self.declared_variables)
+
+    @property
+    def declared_variables(self):
+        return tuple(
             Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
             for exp in self.arguments
-        ))
+        )
 
     def validate(self):
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
+
+    @property
+    def variables_to_allocate(self):
+        return tuple(
+            var
+            for var in self.declared_variables
+            if var.value_type.metatype == 'array'
+        )
 
 
 class ReadInstruction(ReadWriteInstruction):

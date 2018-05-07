@@ -1,16 +1,11 @@
-function max_index(int n, int[] a) -> int;
+int max_index(int n, int a[]);
 
 main {
-    var int n;
-    var int[] a;
-
     read n;
-    alloc a : n;
-    for(i : n) {
+    for i to n {
         read a[i];
     }
 
-    var int index;
-    call max_index(n, a) -> index;
+    call index = max_index(n, a);
     write index;
 }

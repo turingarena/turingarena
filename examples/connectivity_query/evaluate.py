@@ -24,7 +24,8 @@ cases = []
 fail = False
 
 try:
-    with algorithm.run(global_variables=dict(N=N, Q=Q, D=D, adj=adj)) as p:
+    with algorithm.run() as p:
+        p.call.init(N, Q, D, adj)
 
         memory_usage = p.sandbox.get_info().memory_usage
 

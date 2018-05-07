@@ -1,12 +1,3 @@
-
-int M;
-
-int *X;
-
-int N;
-
-int *Y;
-
 int **b;
 int **c;
 int *seq;
@@ -26,7 +17,7 @@ void build_sequence(int x, int i, int j) {
     }
 }
 
-void compute() {
+int compute(int M, int X, int N, int Y) {
     b = new int*[M+1];
     c = new int*[M+1];
 
@@ -60,10 +51,8 @@ void compute() {
 
     seq = new int[c[M][N]];
     build_sequence(c[M][N] - 1, M, N);
-}
 
-int length() {
-    return c[M][N];
+    return c[M][N]
 }
 
 int element(int i) {

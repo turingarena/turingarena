@@ -1,9 +1,9 @@
-callback pong() {
-    exit;
-}
-
-function ping();
+void ping(void pong());
 
 main {
-    call ping();
+    void pong() {
+        exit;
+    }
+
+    call ping(pong);
 }

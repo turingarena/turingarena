@@ -1,37 +1,22 @@
-// number of nodes
-var int N;
+void init(int N, int Q, int D[], int adj[][]);
 
-// number of queries
-var int Q;
-
-// D[u] degree of u
-var int[] D;
-
-// adj[u][] adjacent list for node u
-var int[][] adj;
-
-function is_there_a_path(int u, int v) -> int;
-
-init {
-    read N, Q;
-    alloc D : N;
-    alloc adj: N;
-
-    for (u : N) {
-        read D[u];
-        alloc adj[u] : D[u];
-        for (i : D[u]) {
-                read adj[u][i];
-        }
-    }
-}
+int is_there_a_path(int u, int v);
 
 main {
-    for (q : Q) {
-        var int u, v, ans;
+    read N, Q;
+
+    for u to N {
+        read D[u];
+        for i to D[u] {
+            read adj[u][i];
+        }
+    }
+
+    call init(N, Q, D, adj);
+
+    for q to Q {
         read u, v;
-        call is_there_a_path(u, v) -> ans;
+        call ans = is_there_a_path(u, v);
         write ans;
-        flush;
     }
 }

@@ -1,21 +1,13 @@
-var int N;
-var int[][] V;
+int find_best_sum(int N, int V[][]);
 
-function find_best_sum() -> int;
-
-init {
+main {
     read N;
-    alloc V : N;
-    for(i : N) {
-        alloc V[i] : i;
-        for(j : i) {
+    for i to N {
+        for j to i {
             read V[i][j];
         }
     }
-}
 
-main {
-    var int S;
-    call find_best_sum() -> S;
+    call S = find_best_sum(N, V);
     write S;
 }

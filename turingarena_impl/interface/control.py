@@ -7,6 +7,7 @@ from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
+from turingarena_impl.interface.io import ReadStatement
 from turingarena_impl.interface.variables import Variable, ScalarType
 
 logger = logging.getLogger(__name__)
@@ -114,6 +115,12 @@ class ForStatement(ImperativeStatement):
             ast=self.ast.body,
             context=self.context.create_inner().with_index_variable(self.index),
         )
+
+    @property
+    def variable_to_allocate(self):
+        for stmt in self.body.statements:
+            if isinstance(stmt, ReadStatement):
+
 
     def validate(self):
         yield from self.body.validate()

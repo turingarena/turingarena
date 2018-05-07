@@ -1,14 +1,12 @@
-// number of nodes
 int N;
-
-// number of queries
-int Q;
-
-// edge degree
 int *D;
-
-// adjacent list
 int **adj;
+
+void init(int _N, int _Q, int *_D, int **_adj) {
+    N = _N;
+    D = _D;
+    adj = _adj;
+}
 
 bool DFS(int u, int v, bool a[]) {
     a[u] = true;

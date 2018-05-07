@@ -45,11 +45,11 @@ def evaluate_test_case(submission, N):
     ]
     m = len(x)
     n = len(y)
-    with submission.run(global_variables=dict(X=x, Y=y, M=m, N=n)) as process:
-        process.call.compute()
+    with submission.run() as process:
+        l = process.call.compute(m, x, n, y)
         sol = [
             process.call.element(i)
-            for i in range(process.call.length())
+            for i in range(l)
         ]
         return is_valid_solution(x, y, sol)
 

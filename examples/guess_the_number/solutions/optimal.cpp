@@ -1,6 +1,4 @@
-int guess(int n);
-
-int play(int n) {
+int play(int n, int guess(int n)) {
     int min = 1, max = n, mid;
     while (true) {
         if ( min == max )

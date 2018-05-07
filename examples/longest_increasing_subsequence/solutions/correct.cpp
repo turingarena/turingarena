@@ -6,12 +6,9 @@
 
 using std::vector;
 
-int n;
-int* a;
-
 vector<bool> taken;
 
-void compute() {
+void compute(int n, int *a) {
     int values[n+1];
     vector<int> antichains[n+1];
     int prev[n+1], len[n+1];

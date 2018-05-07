@@ -1,9 +1,6 @@
 #include <algorithm>
 
-int N;
-int** V;
-
-int find_best_sum() {
+int find_best_sum(int N, int **V) {
     int dyn[N+1][N+1];
     for(int i = 0; i < N+1; i++)
         dyn[N][i] = 0;

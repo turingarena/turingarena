@@ -1,33 +1,29 @@
 // adjacency list
-var int N; // number of nodes
-var int[] D; // D[u] = degree of node u
-var int[][] A; // A[u][i] = i-th out-neighbor of node u
-var int[][] W; // W[u][i] = weight of i-th out-edge of node u
+// N = number of nodes
+// D[u] = degree of node u
+// A[u][i] = i-th out-neighbor of node u
+// W[u][i] = weight of i-th out-edge of node u
 
-var int Q; // number of queries
+void init(int N, int Q, int D[], int A[][], int W[][]);
 
-function shortest_path(int u, int v) -> int;
+int shortest_path(int u, int v);
 
-init {
+main {
     read N;
-    alloc D, A, W : N;
-    for (u : N) {
+    for u to N {
         read D[u];
-        alloc A[u], W[u] : D[u];
-        for(i : D[u]) {
+        for i to D[u] {
             read A[u][i], W[u][i];
         }
     }
 
     read Q;
-}
 
-main {
-    for (i : Q) {
-        var int u, v, ans;
+    call init(N, Q, D, A, W);
+
+    for i to Q {
         read u, v;
-        call shortest_path(u, v) -> ans;
+        call ans = shortest_path(u, v);
         write ans;
-        flush;
     }
 }

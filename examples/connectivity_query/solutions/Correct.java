@@ -1,8 +1,13 @@
 class Solution extends Skeleton {
-    // global int N;
-    // global int Q;
-    // global int[] D;
-    // global int[][] adj;
+    int N;
+    int[] D;
+    int[][] adj;
+
+    void init(int _N, int _Q, int *_D, int **_adj) {
+        N = _N;
+        D = _D;
+        adj = _adj;
+    }
 
     boolean DFS(int u, int v, boolean a[]) {
         a[u] = true;
