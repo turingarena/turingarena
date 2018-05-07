@@ -25,12 +25,15 @@ used internally to send data to and from the CLI server.
 
 ### Installation
 
-1. Clone this repository and `cd` into it.
+1. Clone this repository.
 ```bash
 git clone https://github.com/turingarena/turingarena.git
+```
+2. `cd` into the cloned repository directory
+```bash
 cd turingarena/
 ```
-2. Install the CLI client
+3. Install the CLI client
 (you may prefer to use a *virtualenv* or the `--user` option to install for the current user only, see
 [this tutorial](https://packaging.python.org/tutorials/installing-packages/#installing-from-a-local-src-tree))
 ```bash
@@ -51,4 +54,19 @@ At the moment, to work on a challenge, the code must be placed in a (local) Git 
 To evaluate a solution, `cd` in the directory of the problem and run:
 ```bash
 turingarena evaluate <solution-file>
+```
+
+## First tests (running the example problems)
+
+1. `cd` into any of the example problem directories. Example:
+```bash
+cd examples/sum_of_two_numbers/
+```
+2. Evaluate a solution, say, `correct.cpp`:
+```bash
+turingarena evaluate solutions/correct.cpp
+```
+3. Test all the provided solutions:
+```bash
+turingarena test
 ```

@@ -4,6 +4,7 @@ from turingarena import *
 
 algorithm = submitted_algorithm()
 
+all_passed = True
 for _ in range(10):
     value_range = range(10 ** 3, 5 * 10 ** 3)
     a, b = random.choices(value_range, k=2)
@@ -13,14 +14,10 @@ for _ in range(10):
             c = process.call.sum(a, b)
     except AlgorithmError as e:
         print(f"{a} + {b} --> {e}")
-        correct = False
-        break
+        all_passed = False
     if c != a + b:
         print(f"{a} + {b} --> {c} (wrong!)")
-        correct = False
-        break
+        all_passed = False
     print(f"{a} + {b} --> {c} (correct)")
-else:  # no break occurred
-    correct = True
 
-evaluation_result(goals=dict(correct=correct))
+evaluation_result(goals=dict(correct=all_passed))
