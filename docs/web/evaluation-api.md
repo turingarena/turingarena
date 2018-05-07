@@ -1,11 +1,11 @@
-# TuringArena Cloud API
+# TuringArena Web Evaluation API
 
 A Web API based on SEWI is described,
-meant to perform submission evaluations based on TuringArena in the cloud.
+meant to perform submission evaluations based on TuringArena via Web.
 
-The API supports two methods:
+The API supports the following methods.
 
-- *evaluate*, used to start a new evaluation, using a given evaluator and a given submission, and
+- *evaluate*, used to start a new evaluation, using a given evaluator and a given submission,
 - *evaluation events*, used to get a page of evaluation events of an ongoing evaluation.
 
 Let `base_url` denote the base URL where the API is deployed.
@@ -20,16 +20,20 @@ A call to *evaluate* is SEWI request with:
 
 TODO: extra fields
 
-TODO: response body
+### Response
+
+The response body of *evaluate* is a JSON object, with the following fields.
+
+- `evaluation_id`: a *string* identifying the newly created evaluation.
 
 ## Evaluation events
 
 A call to *evaluation events* is an HTTP request as follows.
 
 - Method: `GET`.
-- URL template: `{+base_url}/evaluation/{id}/events{?after}`,
+- URL template: `{+base_url}/evaluation/{evaluation_id}/events{?after}`,
 - Template parameters
-    - `evaluation`, required, containing the ID of the evaluation,
+    - `evaluation_id`, required, containing the ID of the evaluation,
     - `after`, optional,
     a cursor indicating the beginning of the desired page
     (the cursor is implicitly `null` if this parameter is absent).
@@ -41,9 +45,9 @@ The page can be empty.
 
 A request should be repeatable in case of errors,
 until the client actually reads *after* the returned page.
-More precisely, a call to `evaluation` (request 1) should succeed as long as
-no other requests to `evaluation` have been performed (request 2),
-with the `after` parameter of request 2 occurring strictly later than the `after` parameter of request 1.
+More precisely, a call to *evaluation events* (request 1) should succeed as long as
+no other requests to *evaluation events* have been performed (request 2),
+such that the `after` parameter of request 2 occurs strictly later than the `after` parameter of request 1.
 This assumption makes the protocol robust under HTTP errors,
 but still allows an implementation to delete the events when it is sure that the client has received those.
 
