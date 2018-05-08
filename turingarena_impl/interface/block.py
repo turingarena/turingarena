@@ -1,15 +1,14 @@
 import logging
 
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
-from turingarena_impl.interface.statement import Statement, SyntheticStatement
+from turingarena_impl.interface.statements.statement import SyntheticStatement, Statement
+from turingarena_impl.interface.common import ImperativeStructure
 
 logger = logging.getLogger(__name__)
 
 
-class Block(AbstractSyntaxNodeWrapper):
+class Block(ImperativeStructure):
     __slots__ = []
 
     def _generate_statements(self):
@@ -43,7 +42,7 @@ class Block(AbstractSyntaxNodeWrapper):
         return self.body.declared_variables
 
     def validate(self):
-        from turingarena_impl.interface.control import BreakStatement
+        from turingarena_impl.interface.statements.loop_statement import BreakStatement
 
         for i, statement in enumerate(self.statements):
             yield from statement.validate()
@@ -52,10 +51,6 @@ class Block(AbstractSyntaxNodeWrapper):
                 if i < len(self.statements) - 1:
                     yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
                     break
-
-
-class ImperativeBlock(Block, ImperativeStructure):
-    __slots__ = []
 
     @property
     def synthetic_statements(self):
@@ -71,12 +66,12 @@ class ImperativeBlock(Block, ImperativeStructure):
     def generate_instructions(self, context):
         inner_context = context.child(self.declared_variables)
         for statement in self.statements:
-            if isinstance(statement, ImperativeStatement):
+            if isinstance(statement, Statement):
                 yield from statement.generate_instructions(inner_context)
 
     def expects_request(self, request):
         for s in self.statements:
-            if not isinstance(s, ImperativeStatement):
+            if not isinstance(s, Statement):
                 continue
             if s.expects_request(request):
                 return True

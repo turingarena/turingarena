@@ -3,9 +3,9 @@ from abc import abstractmethod
 from bidict import frozenbidict
 
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
-from turingarena_impl.interface.variables import ScalarType, ArrayType
+from turingarena_impl.interface.variables import ScalarType
 
 import logging
 
@@ -150,12 +150,6 @@ class ReferenceExpression(Expression):
         if not lvalue and self.variable_name not in self.context.variable_mapping:
             yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name,
                              parseinfo=self.ast.parseinfo)
-
-        #if isinstance(self.variable.value_type, ArrayType):
-        #    for index in self.indices:
-        #        yield from index.validate()
-        #    if lvalue:
-        #        yield from self.validate_array_indexes()
 
 
 class SyntheticExpression:

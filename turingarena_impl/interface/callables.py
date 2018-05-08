@@ -1,14 +1,13 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.block import ImperativeBlock
-from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruction
 from turingarena_impl.interface.context import CallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.executable import Instruction
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.references import VariableReference
-from turingarena_impl.interface.statement import Statement, SyntheticStatement
+from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType, CallbackType
 
 logger = logging.getLogger(__name__)
@@ -25,14 +24,9 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
 
     @property
     def variable(self):
-        if self.type_expression.value_type.meta_type == 'callback':
-            return Variable(
-                value_type=self.type_expression.value_type,
-                name=self.ast.prototype.name
-            )
         return Variable(
             value_type=self.type_expression.value_type,
-            name=self.ast.name,
+            name=self.ast.prototype.name if self.type_expression.value_type.meta_type == "callback" else self.ast.name
         )
 
 
@@ -56,7 +50,7 @@ class Callable(AbstractSyntaxNodeWrapper):
 
     @property
     def return_type(self):
-        return ScalarType(int) if self.ast.prototype.return_type else None
+        return ScalarType(int) if self.ast.prototype.return_type == 'int' else None
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
@@ -112,7 +106,7 @@ class Callback(Callable):
     @property
     def body(self):
         # TODO: generate block if body is None ('default' is specified)
-        return ImperativeBlock(
+        return Block(
             ast=self.ast.body,
             context=self.context.create_inner().with_variables(self.parameters),
         )
@@ -149,10 +143,7 @@ class Callback(Callable):
         yield from self.body.generate_instructions(local_context)
 
 
-class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", [
-    "callback_context",
-    "local_context",
-])):
+class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", ["callback_context", "local_context"])):
     @property
     def callback(self):
         return self.callback_context.accept_context.callback

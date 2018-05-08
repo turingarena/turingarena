@@ -3,9 +3,9 @@ from collections import namedtuple
 
 from turingarena import InterfaceExit
 from turingarena.driver.commands import MainBegin
-from turingarena_impl.interface.block import ImperativeBlock
+from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.context import GlobalContext, MainContext, StaticGlobalContext
-from turingarena_impl.interface.executable import Instruction
+from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
 from turingarena_impl.interface.callables import Function
@@ -19,7 +19,7 @@ class InterfaceDefinition:
         logger.debug(f"Parsed interface {ast}")
         self.extra_metadata = extra_metadata
         self.ast = ast
-        self.main = ImperativeBlock(
+        self.main = Block(
             ast=self.ast.main_block,
             context=StaticGlobalContext(functions=self.functions).create_local()
         )

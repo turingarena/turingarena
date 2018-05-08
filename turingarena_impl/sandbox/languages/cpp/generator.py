@@ -66,7 +66,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         parameters = ", ".join(self.expression(p) for p in s.parameters)
         if s.return_value is not None:
             return_value = self.expression(s.return_value)
-            yield f"int {return_value} = {function_name}({parameters});"
+            yield f"{return_value} = {function_name}({parameters});"
         else:
             yield f"{function_name}({parameters});"
 

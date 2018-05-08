@@ -1,5 +1,4 @@
 import logging
-from collections.__init__ import namedtuple
 from functools import lru_cache
 
 import tatsu
@@ -30,4 +29,3 @@ def get_line(parseinfo):
         return lines[0][start:].strip() + "..."
 
 
-AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])

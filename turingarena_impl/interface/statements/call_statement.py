@@ -5,15 +5,16 @@ from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.executable import ImperativeStatement, Instruction
+from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.io import read_line, do_flush
+from turingarena_impl.interface.statements.io_statements import read_line, do_flush
 from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
 
-class CallStatement(ImperativeStatement):
+class CallStatement(Statement):
     __slots__ = []
 
     @property
@@ -77,6 +78,7 @@ class CallStatement(ImperativeStatement):
         for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
 
+            logger.info(expression)
             if expr_value_type != parameter.value_type:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
@@ -215,7 +217,7 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
             self.context.callback = None
 
 
-class ReturnStatement(ImperativeStatement):
+class ReturnStatement(Statement):
     __slots__ = []
 
     @property

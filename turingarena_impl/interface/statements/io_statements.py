@@ -1,9 +1,11 @@
 import logging
+
 from collections import namedtuple
 from contextlib import contextmanager
 
 from turingarena_impl.interface.exceptions import CommunicationBroken
-from turingarena_impl.interface.executable import Instruction, ImperativeStatement
+from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
@@ -30,7 +32,7 @@ def do_flush(connection):
         connection.downward.flush()
 
 
-class CheckpointStatement(ImperativeStatement):
+class CheckpointStatement(Statement):
     __slots__ = []
 
     def generate_instructions(self, context):
@@ -54,7 +56,7 @@ class CheckpointInstruction(Instruction):
         assert line == str(0)
 
 
-class ReadWriteStatement(ImperativeStatement):
+class ReadWriteStatement(Statement):
     __slots__ = []
 
     @property
