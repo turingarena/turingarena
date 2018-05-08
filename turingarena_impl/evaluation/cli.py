@@ -1,9 +1,9 @@
 import sys
 from contextlib import ExitStack
 
+from turingarena_impl.api.git import clone_from_git
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.problem.problem import clone_from_git
-from turingarena_impl.problem.python import HostPythonEvaluator
+from turingarena_impl.evaluation.python import HostPythonEvaluator
 
 
 @docopt_cli

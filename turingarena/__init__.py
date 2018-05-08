@@ -25,12 +25,22 @@ class MemoryLimitExceeded(AlgorithmError):
     pass
 
 
-def submitted_algorithm(name="algorithm", *, interface_name=None):
-    source_name = os.environ[f"submission_{name}_source"]
-    language_name = os.environ.get(f"submission_{name}_language", None)
+def get_default_interface():
+    return os.environ[f"TURINGARENA_DEFAULT_INTERFACE"]
+
+
+def submitted_algorithm(name=None, *, interface_name=None):
+    if name is None:
+        source_field_name = "source"
+    else:
+        source_field_name = "algorithm_" + name + "_source"
+    language_field_name = source_field_name + "_language"
+
+    source_name = ":" + os.environ["SUBMISSION_FILE_" + source_field_name.upper()]
+    language_name = os.environ.get("SUBMISSION_VALUE_" + language_field_name.upper(), None)
 
     if interface_name is None:
-        interface_name = os.environ[f"turingarena_default_interface"]
+        interface_name = get_default_interface()
 
     from turingarena.algorithm import Algorithm
     return Algorithm(
@@ -41,9 +51,8 @@ def submitted_algorithm(name="algorithm", *, interface_name=None):
 
 
 def algorithm(source_name, *, language_name=None, interface_name=None):
-    problem_name = os.environ[f"problem_name"]
     if interface_name is None:
-        interface_name = problem_name
+        interface_name = get_default_interface()
 
     from turingarena.algorithm import Algorithm
     return Algorithm(

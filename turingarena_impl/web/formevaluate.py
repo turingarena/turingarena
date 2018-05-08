@@ -3,8 +3,8 @@ import os
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.problem.problem import clone_from_git
-from turingarena_impl.problem.python import HostPythonEvaluator
+from turingarena_impl.api.git import clone_from_git
+from turingarena_impl.evaluation.python import HostPythonEvaluator
 from turingarena_impl.sandbox.languages.language import Language
 
 

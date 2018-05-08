@@ -7,9 +7,9 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
+from turingarena_impl.evaluation.python import HostPythonEvaluator
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.loader import find_package_path
-from turingarena_impl.problem.python import HostPythonEvaluator
-from turingarena_impl.problem.segi import run_metaservers
 
 
 class EvaluationAssertionError(Exception):
