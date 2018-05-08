@@ -11,20 +11,9 @@ from turingarena_impl.interface.statements.statement import Statement
 logger = logging.getLogger(__name__)
 
 
-class SwitchInstruction(Instruction):
-    def __init__(self, switch, condition):
-        self.switch = switch
-        self.condition = condition
-
-    def on_request_lookahead(self, request):
-        if not self.condition.is_resolved():
-            for case in self.switch.cases:
-                if len(case.labels) == 1 and case.expects_request(request):
-                    self.condition.resolve(case.labels[0].value)
-                    return
-
-
 class SwitchStatement(Statement):
+    __slots__ = []
+
     def generate_instructions(self, context):
         condition = self.variable.evaluate_in(context)
 
@@ -83,6 +72,8 @@ class SwitchStatement(Statement):
 
 
 class CaseStatement(Statement):
+    __slots__ = []
+
     def generate_instructions(self, context):
         yield from self.body.generate_instructions(context)
 
@@ -108,3 +99,18 @@ class CaseStatement(Statement):
         for label in self.labels:
             if not isinstance(label, LiteralExpression):
                 yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
+
+
+class SwitchInstruction(Instruction):
+    def __init__(self, switch, condition):
+        self.switch = switch
+        self.condition = condition
+
+    def on_request_lookahead(self, request):
+        if not self.condition.is_resolved():
+            for case in self.switch.cases:
+                if len(case.labels) == 1 and case.expects_request(request):
+                    self.condition.resolve(case.labels[0].value)
+                    return
+
+

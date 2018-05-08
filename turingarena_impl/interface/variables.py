@@ -21,6 +21,8 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
     def value_type_dimensions(dimensions):
         if not dimensions:
             return ScalarType(int)
+        if type(dimensions) is int:
+            return ArrayType(TypeExpression.value_type_dimensions(dimensions - 1))
         return ArrayType(TypeExpression.value_type_dimensions(dimensions[1:]))
 
     @property

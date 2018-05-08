@@ -16,11 +16,11 @@ class IfStatement(Statement):
 
     @property
     def then_body(self):
-        return Block(self.ast.then_body, self.context)
+        return Block(ast=self.ast.then_body, context=self.context)
 
     @property
     def else_body(self):
-        return Block(self.ast.else_body, self.context) if self.ast.else_body else None
+        return Block(ast=self.ast.else_body, context=self.context) if self.ast.else_body else None
 
     def validate(self):
         yield from self.condition.validate()

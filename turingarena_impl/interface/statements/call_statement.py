@@ -3,13 +3,14 @@ from collections import namedtuple
 
 from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, FunctionCall
+from turingarena_impl.interface.callables import Callback
 from turingarena_impl.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io_statements import read_line, do_flush
-from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
+from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration, CallbackType
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,7 @@ class CallStatement(Statement):
 
     @property
     def return_value(self):
-        if self.ast.return_value is None:
-            return None
-        else:
-            return Expression.compile(self.ast.return_value, self.context)
+        return Expression.compile(self.ast.return_value, self.context) if self.ast.return_value else None
 
     @property
     def declared_variables(self):
@@ -45,6 +43,7 @@ class CallStatement(Statement):
         try:
             return self.context.global_context.function_map[self.ast.name]
         except KeyError:
+            logger.warning("Function not defined")
             return None
 
     def validate(self):
@@ -78,7 +77,6 @@ class CallStatement(Statement):
         for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
 
-            logger.info(expression)
             if expr_value_type != parameter.value_type:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
@@ -241,3 +239,22 @@ class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
         self.value.evaluate_in(self.context).resolve(
             self.value.value_type.ensure(request.return_value)
         )
+
+
+class CallbackStatement(Statement):
+    __slots__ = []
+
+    @property
+    def callback(self):
+        return Callback(ast=self.ast, context=self.context)
+
+    def validate(self):
+        yield from self.callback.validate()
+
+    @property
+    def variable(self):
+        return Variable(name=self.callback.name, value_type=CallbackType.compile(self.ast.prototype))
+
+    @property
+    def context_after(self):
+        return self.context.with_variables((self.variable,))

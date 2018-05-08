@@ -5,7 +5,7 @@ from collections import namedtuple
 AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
 
-class ImperativeStructure(AbstractSyntaxNodeWrapper, ABC):
+class ImperativeStructure(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @abstractmethod

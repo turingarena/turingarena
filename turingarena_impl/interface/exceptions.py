@@ -5,7 +5,7 @@ class Diagnostic(namedtuple("Diagnostic", [
     "message",
     "parseinfo",
 ])):
-    class Messages():
+    class Messages:
         VARIABLE_NOT_DECLARED = "variable {} not declared"
         NOT_ARRAY_TYPE = "argument {} type is not array"
         FUNCTION_NOT_DECLARED = "function {} not declared"
@@ -21,7 +21,6 @@ class Diagnostic(namedtuple("Diagnostic", [
         ARRAY_INDEX_DIFFERENT_ALLOC = "array {} index {} different from allocated"
         EMPTY_SWITCH_BODY = "switch statement body must contain at least one case"
         UNEXPECTED_BREAK = "break statement used outside a loop"
-        UNEXPECTED_CONTINUE = "continue statement used outside a loop"
         UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
         INVALID_CASE_EXPRESSION = "case expression must be an int literal"
         INFINITE_LOOP = "loop must contain at least a break statement"

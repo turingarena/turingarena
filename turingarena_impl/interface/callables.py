@@ -7,8 +7,8 @@ from turingarena_impl.interface.context import CallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.references import VariableReference
-from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType, CallbackType
+from turingarena_impl.interface.statements.statement import SyntheticStatement
+from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType
 
 logger = logging.getLogger(__name__)
 
@@ -166,20 +166,3 @@ class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction",
         )
 
 
-class CallbackStatement(Statement):
-    __slots__ = []
-
-    @property
-    def callback(self):
-        return Callback(ast=self.ast, context=self.context)
-
-    def validate(self):
-        yield from self.callback.validate()
-
-    @property
-    def variable(self):
-        return Variable(name=self.callback.name, value_type=CallbackType.compile(self.ast.prototype))
-
-    @property
-    def context_after(self):
-        return self.context.with_variables((self.variable,))

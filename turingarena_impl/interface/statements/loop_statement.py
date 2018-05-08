@@ -38,6 +38,8 @@ class LoopStatement(Statement):
 
 
 class BreakStatement(Statement):
+    __slots__ = []
+
     def generate_instructions(self, context):
         yield BreakInstruction()
 

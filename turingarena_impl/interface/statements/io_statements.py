@@ -111,6 +111,8 @@ class ReadStatement(ReadWriteStatement):
 
 
 class ReadInstruction(ReadWriteInstruction):
+    __slots__ = []
+
     def on_communicate_with_process(self, connection):
         raw_values = [
             a.evaluate_in(self.context).get()

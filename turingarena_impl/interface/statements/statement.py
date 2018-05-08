@@ -8,15 +8,13 @@ class Statement(ImperativeStructure):
 
     @staticmethod
     def get_statement_classes():
-        from turingarena_impl.interface.statements.call_statement import CallStatement, ReturnStatement
-        from turingarena_impl.interface.statements.loop_statement import LoopStatement
-        from turingarena_impl.interface.statements.for_statement import ForStatement
-        from turingarena_impl.interface.statements.if_statement import IfStatement
-        from turingarena_impl.interface.statements.exit_statement import ExitStatement
-        from turingarena_impl.interface.statements.switch_statement import SwitchStatement
-        from turingarena_impl.interface.statements.loop_statement import BreakStatement
-        from turingarena_impl.interface.statements.io_statements import CheckpointStatement, ReadStatement, WriteStatement
-        from turingarena_impl.interface.callables import CallbackStatement
+        from .call_statement import CallStatement, ReturnStatement, CallbackStatement
+        from .loop_statement import LoopStatement, BreakStatement
+        from .for_statement import ForStatement
+        from .if_statement import IfStatement
+        from .exit_statement import ExitStatement
+        from .switch_statement import SwitchStatement
+        from .io_statements import CheckpointStatement, ReadStatement, WriteStatement
 
         return bidict({
             "checkpoint": CheckpointStatement,

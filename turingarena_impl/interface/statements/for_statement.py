@@ -6,7 +6,7 @@ from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation
+from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation, TypeExpression
 
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,13 @@ class ForStatement(Statement):
             if var.to_allocate > 0
         )
 
+    @property
+    def variables(self):
+        return tuple(
+            Variable(name=var.name, value_type=TypeExpression.value_type_dimensions(var.dimensions))
+            for var in self.variables_to_declare
+        )
+
     def validate(self):
         yield from self.body.validate()
 
@@ -76,7 +83,7 @@ class ForStatement(Statement):
 
     @property
     def context_after(self):
-        return self.body.context_after
+        return self.body.context_after.with_variables(self.variables)
 
     def expects_request(self, request):
         return (
