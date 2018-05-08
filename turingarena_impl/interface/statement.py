@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from turingarena_impl.interface.block import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
 
 
 class Statement(AbstractSyntaxNodeWrapper):
@@ -10,7 +10,7 @@ class Statement(AbstractSyntaxNodeWrapper):
     def get_statement_classes():
         from turingarena_impl.interface.calls import CallStatement, ReturnStatement
         from turingarena_impl.interface.control import ForStatement, IfStatement, LoopStatement, ExitStatement
-        from turingarena_impl.interface.control import BreakStatement, ContinueStatement, SwitchStatement
+        from turingarena_impl.interface.control import BreakStatement, SwitchStatement
         from turingarena_impl.interface.io import CheckpointStatement, ReadStatement, WriteStatement
         from turingarena_impl.interface.callables import CallbackStatement
 
@@ -24,7 +24,6 @@ class Statement(AbstractSyntaxNodeWrapper):
             "for": ForStatement,
             "if": IfStatement,
             "loop": LoopStatement,
-            "continue": ContinueStatement,
             "break": BreakStatement,
             "switch": SwitchStatement,
             "callback": CallbackStatement,

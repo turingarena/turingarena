@@ -2,7 +2,7 @@
 int compute(int M, int X[], int N, int Y[]);
 
 // return the i-th element of the sequence
-function element(int i) -> int;
+int element(int i);
 
 main {
     read M;

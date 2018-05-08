@@ -7,8 +7,7 @@ from turingarena_impl.interface.block import ImperativeBlock
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression, LiteralExpression
-from turingarena_impl.interface.io import ReadStatement
-from turingarena_impl.interface.variables import Variable, ScalarType
+from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation
 
 logger = logging.getLogger(__name__)
 
@@ -117,13 +116,30 @@ class ForStatement(ImperativeStatement):
         )
 
     @property
-    def variable_to_allocate(self):
-        for stmt in self.body.statements:
-            if isinstance(stmt, ReadStatement):
-                pass
+    def declared_variables(self):
+        return tuple(
+            VariableDeclaration(name=var.name, dimensions=var.dimensions, to_allocate=var.to_allocate - 1)
+            for stmt in self.body.statements
+            for var in stmt.declared_variables
+            if var.to_allocate >= 0
+        )
 
-        return None
-
+    @property
+    def variables_to_allocate(self):
+        return tuple(
+            VariableAllocation(
+                name=var.name,
+                size=self.index.range.variable_name,
+                dimensions=var.dimensions - var.to_allocate,
+                indexes=tuple(
+                    idx.variable.name
+                    for idx in self.context.index_variables[1-var.to_allocate:]
+                ) if var.to_allocate > 1 else ()
+            )
+            for stmt in self.body.statements
+            for var in stmt.declared_variables
+            if var.to_allocate > 0
+        )
 
     def validate(self):
         yield from self.body.validate()
@@ -176,8 +192,6 @@ class LoopStatement(ImperativeStatement):
             for instruction in self.body.generate_instructions(context):
                 if isinstance(instruction, BreakInstruction):
                     return
-                if isinstance(instruction, ContinueInstruction):
-                    break  # break from the for and thus continue in the while
                 yield instruction
 
     @property
@@ -196,19 +210,6 @@ class LoopStatement(ImperativeStatement):
     @property
     def context_after(self):
         return self.body.context_after.with_break(False)
-
-
-class ContinueStatement(ImperativeStatement):
-    def generate_instructions(self, context):
-        yield ContinueInstruction()
-
-    def validate(self):
-        if not self.context.in_loop:
-            yield Diagnostic(Diagnostic.Messages.UNEXPECTED_CONTINUE, parseinfo=self.ast.parseinfo)
-
-
-class ContinueInstruction(Instruction):
-    pass
 
 
 class BreakStatement(ImperativeStatement):

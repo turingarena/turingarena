@@ -1,7 +1,8 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.block import ImperativeBlock, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.block import ImperativeBlock
+from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.context import CallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import Instruction

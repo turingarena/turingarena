@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.executable import Instruction, ImperativeStatement
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.variables import Variable, TypeExpression
+from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -83,26 +83,29 @@ class ReadStatement(ReadWriteStatement):
 
     @property
     def context_after(self):
-        return self.context.with_variables(self.declared_variables)
+        return self.context.with_variables(self.variables)
+
+    @property
+    def variables(self):
+        return tuple(
+            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
+            for exp in self.arguments
+        )
 
     @property
     def declared_variables(self):
         return tuple(
-            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
+            VariableDeclaration(
+                name=exp.variable_name,
+                dimensions=len(exp.indices),
+                to_allocate=len(exp.indices),
+            )
             for exp in self.arguments
         )
 
     def validate(self):
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
-
-    @property
-    def variables_to_allocate(self):
-        return tuple(
-            var
-            for var in self.declared_variables
-            if var.value_type.metatype == 'array'
-        )
 
 
 class ReadInstruction(ReadWriteInstruction):

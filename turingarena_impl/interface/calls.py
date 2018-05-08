@@ -8,7 +8,7 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.io import read_line, do_flush
-from turingarena_impl.interface.variables import Variable, TypeExpression
+from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,14 @@ class CallStatement(ImperativeStatement):
             return None
         else:
             return Expression.compile(self.ast.return_value, self.context)
+
+    @property
+    def declared_variables(self):
+        return (VariableDeclaration(
+                    name=self.return_value.variable_name,
+                    dimensions=len(self.return_value.indices),
+                    to_allocate=len(self.return_value.indices),
+                ),) if self.return_value else ()
 
     @property
     def function(self):

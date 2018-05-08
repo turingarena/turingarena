@@ -17,18 +17,23 @@ class CodeGen:
         yield from self.generate_main()
 
     def block_content(self, block, indent=True):
-        for s in block.synthetic_statements:
+        for s in block.statements:
             if indent:
                 yield from self.indent_all(self.statement(s))
             else:
                 yield from self.statement(s)
 
-    def statement(self, s):
-        method_name = f"{s.statement_type}_statement"
+    def statement(self, stmt):
+        for var in stmt.variables_to_declare:
+            yield from self.generate_variable_declaration(var)
+        for var in stmt.variables_to_allocate:
+            yield from self.generate_variable_allocation(var)
+
+        method_name = f"{stmt.statement_type}_statement"
         try:
-            return getattr(self, method_name)(s)
+            yield from getattr(self, method_name)(stmt)
         except NotImplementedError:
-            return self.any_statement(s)
+            yield from self.any_statement(stmt)
 
     def generate_header(self):
         return []
@@ -36,6 +41,12 @@ class CodeGen:
     def generate_functions(self):
         for func in self.interface.functions:
             yield from self.function_declaration(func)
+
+    def generate_variable_allocation(self, var):
+        raise NotImplementedError
+
+    def generate_variable_declaration(self, var):
+        raise NotImplementedError
 
     def function_declaration(self, s):
         raise NotImplementedError

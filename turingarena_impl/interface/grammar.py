@@ -21,7 +21,7 @@ grammar_ebnf = r"""
 
     block_statement =
         | statement_type:('read' | 'write') ~ arguments:','.{ expression }* ';'
-        | statement_type:('checkpoint' | 'break' | 'continue' | 'exit') ~ ';'
+        | statement_type:('checkpoint' | 'break' | 'exit') ~ ';'
         | statement_type:'return' ~ value:expression ';'
         | statement_type:'if' ~ condition:expression then_body:block else_body:[ else_body ]
         | statement_type:'switch' ~ value:expression '{' cases:{ switch_case }+ '}'

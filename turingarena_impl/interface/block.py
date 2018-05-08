@@ -1,14 +1,12 @@
 import logging
-from collections import OrderedDict, namedtuple
 
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.executable import ImperativeStatement, ImperativeStructure
 from turingarena_impl.interface.expressions import SyntheticExpression
+from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.statement import Statement, SyntheticStatement
 
 logger = logging.getLogger(__name__)
-
-AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
 
 class Block(AbstractSyntaxNodeWrapper):
@@ -42,20 +40,15 @@ class Block(AbstractSyntaxNodeWrapper):
 
     @property
     def declared_variables(self):
-        return OrderedDict(
-            (v.name, v)
-            for s in self.statements
-            if s.statement_type == "var"
-            for v in s.variables
-        )
+        return self.body.declared_variables
 
     def validate(self):
-        from turingarena_impl.interface.control import ContinueStatement, BreakStatement
+        from turingarena_impl.interface.control import BreakStatement
 
         for i, statement in enumerate(self.statements):
             yield from statement.validate()
 
-            if isinstance(statement, ContinueStatement) or isinstance(statement, BreakStatement):
+            if isinstance(statement, BreakStatement):
                 if i < len(self.statements) - 1:
                     yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
                     break

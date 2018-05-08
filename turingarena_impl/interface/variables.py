@@ -1,7 +1,10 @@
 from abc import abstractmethod
 from collections import namedtuple
 
-from turingarena_impl.interface.block import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
+
+VariableDeclaration = namedtuple("VariableDeclaration", ["name", "dimensions", "to_allocate"])
+VariableAllocation = namedtuple("VariableAllocation", ["name", "dimensions", "indexes", "size"])
 
 
 class Variable(namedtuple("Variable", ["name", "value_type"])):

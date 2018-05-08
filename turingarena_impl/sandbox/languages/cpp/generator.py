@@ -19,7 +19,7 @@ class CppCodeGen(CodeGen):
         if parameter.value_type.meta_type == 'callback':
             return cls.build_callback_signature(parameter)
         else:
-            indirections = '*' * parameter.value_type.dimensions if parameter.value_type == 'array' else ''
+            indirections = '*' * parameter.value_type.dimensions if parameter.value_type.meta_type == 'array' else ''
             return f'int {indirections}{parameter.name}'
 
     @classmethod
@@ -34,6 +34,15 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
         yield
+
+    def generate_variable_declaration(self, var):
+        yield f"static int {'*' * var.dimensions}{var.name};"
+
+    def generate_variable_allocation(self, var):
+        indexes = ""
+        for idx in var.indexes:
+            indexes += f"[{idx}]"
+        yield f"{var.name}{indexes} = new int{'*' * var.dimensions}[{var.size}];"
 
     def callback_statement(self, s):
         callback = s.callback
@@ -69,25 +78,22 @@ class CppSkeletonCodeGen(CppCodeGen):
     def read_statement(self, statement):
         format_string = ''.join("%d" for _ in statement.arguments)
         scanf_args = ', '.join("&" + self.expression(v) for v in statement.arguments)
-        variables = ', '.join(self.expression(v) for v in statement.arguments)
-        yield f'static int {variables};'  # TODO: array allocation
         yield f'fflush(stdout);'
         yield f'scanf("{format_string}", {scanf_args});'
 
     def if_statement(self, s):
         condition = self.expression(s.condition)
-        yield f"if( {condition} )" " {"
+        yield f"if ({condition})" " {"
         yield from self.block_content(s.then_body)
-        yield "}"
-        if s.else_body is not None:
-            yield "else {"
+        if s.else_body:
+            yield "} else {"
             yield from self.block_content(s.else_body)
-            yield "}"
+        yield "}"
 
     def for_statement(self, s):
         index_name = s.index.variable.name
         size = self.expression(s.index.range)
-        yield f"for(int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
+        yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
         yield from self.block_content(s.body)
         yield "}"
 
@@ -117,9 +123,8 @@ class CppSkeletonCodeGen(CppCodeGen):
 
     def any_statement(self, s):
         generators = {
-            "checkpoint": lambda: [r"""printf("%d\n", 0);"""],
+            "checkpoint": lambda: [r'printf("%d\n", 0);'],
             "exit": lambda: ["exit(0);"],
-            "continue": lambda: ["continue;"],
             "break": lambda: ["break;"],
             "return": lambda: [f"return {self.expression(s.value)};"],
         }

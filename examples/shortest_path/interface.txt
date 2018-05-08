@@ -10,6 +10,7 @@ int shortest_path(int u, int v);
 
 main {
     read N;
+
     for u to N {
         read D[u];
         for i to D[u] {

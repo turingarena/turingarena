@@ -3,7 +3,7 @@ from abc import abstractmethod
 from bidict import frozenbidict
 
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.block import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.parser import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena_impl.interface.variables import ScalarType, ArrayType
 
@@ -73,6 +73,10 @@ class IntLiteralExpression(LiteralExpression):
     @property
     def value_type(self):
         return ScalarType(int)
+
+    @property
+    def variable_name(self):
+        return str(self.value)
 
 
 class ReferenceExpression(Expression):
