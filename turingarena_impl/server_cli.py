@@ -4,11 +4,11 @@ import subprocess
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
+from turingarena_impl.api.serve import serve_cli
 from turingarena_impl.cli import docopt_cli, init_logger
 from turingarena_impl.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli
 from turingarena_impl.problem.cli import evaluate_cli
 from turingarena_impl.tests.cli import test_cli
-from turingarena_impl.web.serve import serve_cli
 
 logger = logging.getLogger(__name__)
 

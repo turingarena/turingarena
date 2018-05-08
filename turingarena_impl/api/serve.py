@@ -1,7 +1,7 @@
 from wsgiref.simple_server import make_server
 
+from turingarena_impl.api.wsgi_proxy import application
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.web.wsgievaluate import application
 
 
 @docopt_cli
@@ -20,3 +20,7 @@ def serve_cli(args):
     print(f"Serving on {host}:{port}...")
     with make_server(host, port, app=application) as httpd:
         httpd.serve_forever()
+
+
+if __name__ == '__main__':
+    serve_cli()
