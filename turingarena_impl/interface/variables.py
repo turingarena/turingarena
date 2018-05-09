@@ -20,7 +20,7 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
     @staticmethod
     def value_type_dimensions(dimensions):
         if not dimensions:
-            return ScalarType(int)
+            return ScalarType()
         if type(dimensions) is int:
             return ArrayType(TypeExpression.value_type_dimensions(dimensions - 1))
         return ArrayType(TypeExpression.value_type_dimensions(dimensions[1:]))
@@ -34,6 +34,9 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
 
 class ValueType:
     __slots__ = []
+
+    def __eq__(self, other):
+        return str(self) == str(other)
 
     @property
     @abstractmethod
@@ -66,11 +69,11 @@ class ValueType:
         pass
 
 
-class ScalarType(ValueType, namedtuple("ScalarType", ["base_type"])):
+class ScalarType(ValueType):
     __slots__ = []
 
     def __str__(self):
-        return self.base_type.__name__
+        return "int"
 
     @property
     def meta_type(self):
@@ -80,8 +83,8 @@ class ScalarType(ValueType, namedtuple("ScalarType", ["base_type"])):
         return value
 
     def check(self, value):
-        if not isinstance(value, self.base_type):
-            raise TypeError(f"expected a {self.base_type}, got {value}")
+        if not isinstance(value, int):
+            raise TypeError(f"expected a int, got {value}")
 
     @property
     def metadata_attributes(self):

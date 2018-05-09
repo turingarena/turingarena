@@ -72,7 +72,7 @@ class IntLiteralExpression(LiteralExpression):
 
     @property
     def value_type(self):
-        return ScalarType(int)
+        return ScalarType()
 
     @property
     def variable_name(self):
@@ -110,7 +110,7 @@ class ReferenceExpression(Expression):
         if self.variable:
             value_type = self.variable.value_type
         else:
-            value_type = ScalarType(int)
+            value_type = ScalarType()
         for _ in self.indices:
             value_type = value_type.item_type
         return value_type

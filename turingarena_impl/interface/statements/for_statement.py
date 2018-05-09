@@ -21,7 +21,7 @@ class ForStatement(Statement):
     @property
     def index(self):
         return ForIndex(
-            variable=Variable(value_type=ScalarType(int), name=self.ast.index),
+            variable=Variable(value_type=ScalarType(), name=self.ast.index),
             range=Expression.compile(self.ast.range, self.context),
         )
 

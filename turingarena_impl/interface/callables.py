@@ -12,6 +12,7 @@ from turingarena_impl.interface.variables import Variable, TypeExpression, Scala
 
 logger = logging.getLogger(__name__)
 
+
 CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
 
 
@@ -40,7 +41,7 @@ class Callable(AbstractSyntaxNodeWrapper):
     @property
     def parameter_declarations(self):
         return tuple(
-            ParameterDeclaration(p, self.context)
+            ParameterDeclaration(ast=p, context=self.context)
             for p in self.ast.prototype.parameters
         )
 
@@ -50,7 +51,7 @@ class Callable(AbstractSyntaxNodeWrapper):
 
     @property
     def return_type(self):
-        return ScalarType(int) if self.ast.prototype.return_type == 'int' else None
+        return ScalarType() if self.ast.prototype.return_type == 'int' else None
 
     def validate(self):
         if self.return_type is not None and not isinstance(self.return_type, ScalarType):
