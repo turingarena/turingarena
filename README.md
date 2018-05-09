@@ -70,3 +70,10 @@ turingarena evaluate solutions/correct.cpp
 ```bash
 turingarena test
 ```
+
+## Update the Docker image
+
+Run the following regularly, to update the server.
+```bash
+sudo docker pull turingarena/turingarena
+```
