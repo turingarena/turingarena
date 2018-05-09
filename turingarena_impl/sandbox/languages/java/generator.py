@@ -1,4 +1,3 @@
-from turingarena_impl.interface.context import StaticGlobalContext
 from turingarena_impl.sandbox.languages.generator import CodeGen
 
 
@@ -43,15 +42,14 @@ class JavaCodeGen(CodeGen):
 
 
 class JavaSkeletonCodeGen(JavaCodeGen):
-    def generate(self):
+    def generate_header(self):
         yield "import java.util.Scanner;"
         yield
         yield "abstract class Skeleton {"
         yield self.indent("private static final Scanner in = new Scanner(System.in);")
-        yield
-        yield from self.block_content(self.interface.body)
+
+    def generate_footer(self):
         yield "}"
-        yield
 
     def generate_function_declaration(self, statement):
         yield f"abstract {self.build_callable_declarator(statement.function)};"
@@ -67,12 +65,6 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield
         yield "public static void main(String args[]) {"
         yield self.indent("Solution solution = new Solution();")
-        yield from self.block_content(statement.body)
-        yield "}"
-
-    def init_statement(self, statement):
-        yield
-        yield "static {"
         yield from self.block_content(statement.body)
         yield "}"
 
@@ -118,15 +110,9 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def var_statement(self, s):
-        if isinstance(s.context, StaticGlobalContext):
-            yield "static final " + self.build_declaration(s)
-        else:
-            yield self.build_declaration(s)
-
-    def loop_statement(self, s):
+    def loop_statement(self, loop_statement):
         yield "while (true) {"
-        yield from self.block_content(s.body)
+        yield from self.block_content(loop_statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -136,34 +122,36 @@ class JavaSkeletonCodeGen(JavaCodeGen):
             result += f" || {variable} == {self.expression(label)}"
         return result
 
-    def switch_statement(self, s):
-        cases = [case for case in s.cases]
-        yield f"if ({self.build_switch_condition(s.variable, cases[0].labels)}) " "{"
+    def switch_statement(self, switch_statement):
+        cases = [case for case in switch_statement.cases]
+        yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
         yield from self.block_content(cases[0].body)
         for case in cases[1:]:
-            yield "}" f" else if ({self.build_switch_condition(s.variable, case.labels)}) " "{"
+            yield "}" f" else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) " "{"
             yield from self.block_content(case.body)
-        if s.default:
-            yield "} else {"
-            yield from self.block_content(s.default)
         yield "}"
 
-    def any_statement(self, statement):
-        generators = {
-            "flush": lambda: ["System.out.flush();"],
-            "checkpoint": lambda: ["""System.out.println("0");"""],
-            "exit": lambda: ["System.exit(0);"],
-            "return": lambda: [f"return {self.expression(statement.value)};"],
-            "continue": lambda: ["continue;"],
-            "break": lambda: ["break;"],
-        }
-        return generators[statement.statement_type]()
+    def generate_flush(self):
+        yield 'System.out.flush();'
+
+    def checkpoint_statement(self, checkpoint_statement):
+        yield 'System.out.println(0);'
+
+    def exit_statement(self, exit_statement):
+        yield 'System.exit(0);'
+
+    def return_statement(self, return_statement):
+        yield f'return {self.expression(return_statement.value)};'
+
+    def break_statement(self, break_statement):
+        yield 'break;'
 
 
 class JavaTemplateCodeGen(JavaCodeGen):
-    def generate(self):
+    def generate_header(self):
         yield "class Solution extends Skeleton {"
-        yield from self.block_content(self.interface.body)
+
+    def generate_footer(self):
         yield "}"
 
     def generate_function_declaration(self, statement):
@@ -171,3 +159,6 @@ class JavaTemplateCodeGen(JavaCodeGen):
         yield f"{self.build_callable_declarator(statement.function)}" " {"
         yield self.indent("// TODO")
         yield "}"
+
+    def generate_main_block(self):
+        yield from ()

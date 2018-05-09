@@ -59,17 +59,6 @@ class SwitchStatement(Statement):
                 labels.append(label)
             yield from case.validate()
 
-    @property
-    def context_after(self):
-        contexts = [case.context_after for case in self.cases]
-        if self.default:
-            contexts.append(self.default.context_after)
-        variables = [ctx.initialized_variables for ctx in contexts]
-        initialized_variables = set.intersection(*variables)
-        return self.context.with_break(
-            any(1 for context in contexts if context.has_break)
-        ).with_initialized_variables(initialized_variables)
-
 
 class CaseStatement(Statement):
     __slots__ = []
@@ -86,19 +75,11 @@ class CaseStatement(Statement):
 
     @property
     def labels(self):
-        return [
-            Expression.compile(label, self.context)
-            for label in self.ast.labels
-        ]
+        return self.ast.labels
 
     @property
     def context_after(self):
         return self.body.context_after
-
-    def validate(self):
-        for label in self.labels:
-            if not isinstance(label, LiteralExpression):
-                yield Diagnostic(Diagnostic.Messages.INVALID_CASE_EXPRESSION, parseinfo=self.ast.parseinfo)
 
 
 class SwitchInstruction(Instruction):

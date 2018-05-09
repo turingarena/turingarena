@@ -92,9 +92,9 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def loop_statement(self, s):
+    def loop_statement(self, loop_statement):
         yield "while (true) {"
-        yield from self.block_content(s.body)
+        yield from self.block_content(loop_statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -104,16 +104,16 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
             result += f" || {variable} == {self.expression(label)}"
         return result
 
-    def switch_statement(self, s):
-        cases = [case for case in s.cases]
-        yield f"if ({self.build_switch_condition(s.variable, cases[0].labels)}) " "{"
+    def switch_statement(self, switch_statement):
+        cases = [case for case in switch_statement.cases]
+        yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
         yield from self.block_content(cases[0].body)
         for case in cases[1:]:
-            yield "}" f" else if ({self.build_switch_condition(s.variable, case.labels)}) " "{"
+            yield "}" f" else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) " "{"
             yield from self.block_content(case.body)
-        if s.default:
+        if switch_statement.default:
             yield "} else {"
-            yield from self.block_content(s.default)
+            yield from self.block_content(switch_statement.default)
         yield "}"
 
 

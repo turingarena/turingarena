@@ -10,8 +10,8 @@ class Statement(ImperativeStructure):
     def get_statement_classes():
         from .call import CallStatement, ReturnStatement, CallbackStatement
         from .loop import LoopStatement, BreakStatement
-        from .For import ForStatement
-        from .If import IfStatement
+        from .for_loop import ForStatement
+        from .if_else import IfStatement
         from .exit import ExitStatement
         from .switch import SwitchStatement
         from .io import CheckpointStatement, ReadStatement, WriteStatement
@@ -67,6 +67,9 @@ class Statement(ImperativeStructure):
     def variables_to_allocate(self):
         return ()
 
+    @property
+    def needs_flush(self):
+        return False
 
 class SyntheticStatement:
     __slots__ = ["statement_type", "__dict__"]

@@ -109,6 +109,10 @@ class ReadStatement(ReadWriteStatement):
         for exp in self.arguments:
             yield from exp.validate(lvalue=True)
 
+    @property
+    def needs_flush(self):
+        return True
+
 
 class ReadInstruction(ReadWriteInstruction):
     __slots__ = []
