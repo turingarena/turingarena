@@ -1,3 +1,4 @@
+import json
 import os
 import secrets
 import selectors
@@ -5,6 +6,7 @@ import subprocess
 import time
 from contextlib import ExitStack, contextmanager
 
+from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
 from turingarena_impl.evaluation.submission import SubmissionFieldType
 
 
@@ -47,8 +49,8 @@ def segi_subprocess(submission, cmd, *, env=None):
         env = {}
 
     data_begin, data_end = (
-        f"--begin-data-{secrets.token_hex(5)}--",
-        f"----end-data-{secrets.token_hex(5)}--",
+        f"@DATA_BEGIN_{secrets.token_hex(5)}--".encode(),
+        f"@DATA_END___{secrets.token_hex(5)}--".encode(),
     )
 
     env = {
@@ -59,25 +61,96 @@ def segi_subprocess(submission, cmd, *, env=None):
     }
 
     with process_stdout_pipe(cmd, env=env) as fd:
-        yield from get_lines(fd)
+        yield from process_segi_output(fd, data_begin, data_end)
 
 
-def get_lines(fd, interval=0.02):
+def process_segi_output(fd, data_begin, data_end):
+    parts = generate_chunks(fd)
+    parts = split_line_terminators(parts)
+    parts = join_text_parts(parts)
+    yield from generate_events(parts, data_begin, data_end)
+
+
+def generate_events(parts, data_begin, data_end):
+    pending_newline = ()
+    for part in parts:
+        newline = list(pending_newline)
+        if newline and part == data_begin:
+            assert next(parts) == b"\n"
+            yield from parse_data_events(parts, data_end)
+            pending_newline = iter(newline)
+        else:
+            yield from pending_newline
+            event = EvaluationEvent(EvaluationEventType.TEXT, part.decode())
+            if part == b"\n":
+                pending_newline = iter((event,))
+            else:
+                yield event
+    yield from pending_newline
+
+
+def collect_joinable_parts(parts):
+    for part in parts:
+        yield part
+        if not part or part == b"\n":
+            break
+
+
+def join_text_parts(parts):
+    while True:
+        joinable_parts = list(collect_joinable_parts(parts))
+        if not joinable_parts:
+            break
+        line = b"".join(joinable_parts[:-1])
+        if line:
+            yield line
+        if joinable_parts[-1]:
+            yield joinable_parts[-1]
+
+
+def parse_data_events(parts, data_end):
     """
-    Reads from the given file descriptor and generates text parts.
-    Each text part is either:
-    - non-empty and without line terminators '\n', or
-    - a single line terminator '\n'
-
-    Input on a single line is split into separate events
-    about once each `interval` seconds.
+    Process a stream of parts,
+    *after* '\n' $EVALUATION_DATA_BEGIN '\n',
+    and until $EVALUATION_DATA_END '\n' is encountered.
+    Generates the data event payloads parsed.
     """
+    while True:
+        line = b"".join(iter(lambda: next(parts), b"\n"))
+        if line == data_end:
+            break
+        yield EvaluationEvent(EvaluationEventType.DATA, json.loads(line))
 
-    # TODO: implement splitting also by length
 
+def split_line_terminators(parts):
+    """
+    Splits the parts so that '\n' occur in their own parts.
+    """
+    for part in parts:
+        lines = part.splitlines(keepends=True)
+        if not lines:
+            yield b""
+            continue
+        if lines[-1].endswith(b"\n"):
+            lines.append(None)
+
+        for line in lines[:-1]:
+            assert line.endswith(b"\n")
+            yield line[:-1]
+            yield b"\n"
+        if lines[-1] is not None:
+            yield lines[-1]
+
+
+def generate_chunks(fd, line_timeout=0.02):
+    """
+    Reads from the given file descriptor and generates data chunks.
+    If some data is read and '\n' is not encountered within `line_timeout` seconds,
+    then an empty chunk is generated as a sentinel.
+    """
+    # FIXME: currently it generate sentinels also when no data is pending after '\n'
     selector = selectors.DefaultSelector()
     selector.register(fd, selectors.EVENT_READ)
-    buffer = ()
     timeout = 0
     while True:
         before = time.monotonic()
@@ -85,44 +158,33 @@ def get_lines(fd, interval=0.02):
         after = time.monotonic()
         timeout -= (after - before)
         if not events:
-            yield from buffer
+            yield b""
             selector.select()
-            timeout = interval
-
+            timeout = line_timeout
         data = os.read(fd, 2 ** 16)
         if not data:
             break
-
-        lines = data.splitlines(keepends=True)
-        if lines[-1].endswith(b"\n"):
-            lines.append(None)
-
-        lines[0] = b"".join(buffer) + lines[0]
-        for line in lines[:-1]:
-            assert line.endswith(b"\n")
-            yield from generate_text_part(line[:-1])
-            yield b"\n"
-            timeout = interval
-
-        buffer = generate_text_part(lines[-1])
-    yield from buffer
-
-
-def generate_text_part(part):
-    if part:
-        yield part
+        if b"\n" in data:
+            timeout = line_timeout
+        yield data
 
 
 def test_get_lines():
     with process_stdout_pipe(["bash", "-c", """
         for i in `seq 9`; do
-            for i in `seq 9`; do
-                echo -n $i
+            for j in `seq 9`; do
+                echo -n $j
                 sleep 0.005
             done
             echo ' line end'
+            echo
+            echo B
+            echo -n '{"a":'
+            sleep 0.1
+            echo $i '}'
+            echo E
         done
-        echo
+        echo last text
     """]) as fd:
-        for line in get_lines(fd):
-            print(line)
+        for event in process_segi_output(fd, b"B", b"E"):
+            print(event)
