@@ -7,7 +7,7 @@ from .test_utils import define_algorithm
 def test_sandbox_error():
     with define_algorithm(
             interface_text="""
-                function test();
+                void test();
                 main {
                     call test();
                     checkpoint;

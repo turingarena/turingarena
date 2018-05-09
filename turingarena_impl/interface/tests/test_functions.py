@@ -5,7 +5,7 @@ from turingarena_impl.interface.tests.test_utils import define_algorithms, asser
 def test_function_no_arguments():
     for algo in define_algorithms(
             interface_text="""
-                function f();
+                void f();
                 main {
                     call f();
                     checkpoint;
@@ -29,9 +29,8 @@ def test_function_no_arguments():
 def test_function_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                function f(int a, int b);
+                void f(int a, int b);
                 main {
-                    var int a, b;
                     read a, b;
                     call f(a, b);
                     checkpoint;
@@ -57,11 +56,10 @@ def test_function_with_arguments():
 def test_function_return_value():
     for algo in define_algorithms(
             interface_text="""
-                function f(int a) -> int;
+                int f(int a);
                 main {
-                    var int a, b;
                     read a;
-                    call f(a) -> b;
+                    call b = f(a);
                     write b;
                 }
             """,
@@ -88,15 +86,13 @@ def test_function_return_value():
 def test_multiple_function_return_value():
     with define_algorithm(
         interface_text="""
-            function sum(int a, int b) -> int;
+            int sum(int a, int b);
             
             main {
                 for (i : 10) {
-                    var int x, y, ans;
                     read x, y;
-                    call sum(x, y) -> ans;
+                    call ans = sum(x, y);
                     write ans;
-                    flush;
                 }
             }
             """,
@@ -110,15 +106,9 @@ def test_multiple_function_return_value():
                 assert p.call.sum(i, i) == 2*i
 
 
-def test_function_returns_scalar():
-    assert_interface_error("""
-        function f() -> /*!*/ int[] /*!*/ ;
-        main {}
-    """, Diagnostic.Messages.RETURN_TYPE_MUST_BE_SCALAR)
-
-
 def test_callback_accept_scalars():
     assert_interface_error("""
-        callback f(int a, /*!*/ int[] b /*!*/) {}
-        main {}
+        main {
+            void f(int a, int b[]) {}
+        }
     """, Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS)

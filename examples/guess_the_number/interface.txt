@@ -1,7 +1,11 @@
 int play(int n, int guess(int n));
 
 main {
-    int guess(int n) default;
+    int guess(int n) {
+        write n;
+        read ans;
+        return ans;
+    }
 
     read n;
     call ans = play(n, guess);

@@ -19,24 +19,21 @@ def callback_mock(calls, return_values=None):
 def test_callback_no_arguments_cpp():
     for algo in define_algorithms(
             interface_text="""
-                callback c() {}
-                function test();
+                void test(void c());
                 main {
-                    call test();
+                    void c() {}
+                    call test(c);
                 }
             """,
             sources={
                 'c++': """
-                    void c();
-                    void test() {
+                    void test(void c()) {
                         c();
                         c();
                     }
                 """,
-                'python': """if True:
-                    from skeleton import c
-                    
-                    def test():
+                'python': """if True:                    
+                    def test(c):
                         c()
                         c()
                 """,
@@ -56,25 +53,25 @@ def test_callback_no_arguments_cpp():
 def test_callback_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                callback c(int a, int b) {
-                    write a, b;
-                }
-                function test();
+                void test(void c(int a, int b));
+                
                 main {
-                    call test();
+                    void c(int a, int b) {
+                        write a, b;
+                    }
+
+                    call test(c);
                 }
             """,
             sources={
                 'c++': """
-                    void c(int a, int b);
-                    void test() {
+                    void test(void c(int a, int b)) {
                         c(1, 2);
                         c(3, 4);
                     }
                 """,
                 'python': """if True:
-                    from skeleton import c
-                    def test():
+                    def test(c):
                         c(1, 2)
                         c(3, 4)
                 """,
@@ -94,31 +91,28 @@ def test_callback_with_arguments():
 def test_callback_return_value():
     for algo in define_algorithms(
             interface_text="""
-                callback c(int a) -> int {
-                    write a;
-                    flush;
-                    var int b;
-                    read b;
-                    return b;
-                }
-                function test();
+                void test(int c(int a));
                 main {
-                    call test();
+                    int c(int a) {
+                        write a;
+                        read b;
+                        return b;
+                    }
+
+                    call test(c);
                     checkpoint;
                 }
             """,
             sources={
                 'c++': """
                     #include <cassert>
-                    int c(int a);
-                    void test() {
+                    void test(int c(int a)) {
                         assert(c(1) == 2);
                         assert(c(3) == 4);
                     }
                 """,
                 'python': """if True:
-                    from skeleton import c
-                    def test():
+                    def test(c):
                         assert c(1) == 2
                         assert c(3) == 4
                 """
@@ -135,20 +129,12 @@ def test_callback_return_value():
             ]
 
 
-def test_callback_returns_scalar():
-    assert_interface_error("""
-        callback f(int a) -> /*!*/ int[] /*!*/ {}  
-        main {}
-    """, "return type must be a scalar")
-
-
 def test_interface_no_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                function test() -> int;
+                int test();
                 main {
-                    var int o;
-                    call test() -> o;
+                    call o = test();
                     write o;
                 }
             """,
@@ -171,27 +157,22 @@ def test_interface_no_callbacks():
 def test_interface_one_callback():
     for algo in define_algorithms(
             interface_text="""
-                callback cb() {}
-                function test() -> int;
+                int test(void cb());
                 main {
-                    var int o;
-                    call test() -> o;
+                    void cb() {}
+                    call o = test(cb);
                     write o;
                 }
             """,
             sources={
                 'c++': """
-                    void cb();
-                    
-                    int test() {
+                    int test(void cb()) {
                         cb();
                         cb();
                         return 1;
                     }
                 """,
                 'python': """if True:
-                    from skeleton import cb
-                    
                     def test():
                         cb()
                         cb()
@@ -212,21 +193,17 @@ def test_interface_one_callback():
 def test_interface_multiple_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                callback cb1() {}
-                callback cb2() {}
-                function test() -> int;
+                function test(void cb1(), void cb2()) -> int;
                 main {
-                    var int o;
-                    call test() -> o;
+                    void cb1() {}
+                    void cb2() {}
+                    call o = test(cb1, cb2);
                     write o;
                 }
             """,
             sources={
                 'c++': """
-                    void cb1();
-                    void cb2();
-                    
-                    int test() {
+                    int test(void cb1, void cb2) {
                         cb1();
                         cb2();
                         cb2();
@@ -235,8 +212,7 @@ def test_interface_multiple_callbacks():
                     }
                 """,
                 'python': """if True:
-                    from skeleton import cb1, cb2
-                    def test():
+                    def test(cb1, cb2):
                         cb1()
                         cb2()
                         cb2()

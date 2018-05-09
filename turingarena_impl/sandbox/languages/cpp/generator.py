@@ -6,7 +6,7 @@ class CppCodeGen(CodeGen):
     def build_callback_signature(parameter):
         return_type = 'int' if parameter.value_type.has_return_value else "void"
         parameters = ', '.join([f'int {a}' for a in parameter.value_type.arguments])
-        return f'{return_type} (*{parameter.name})({parameters})'
+        return f'{return_type} {parameter.name}({parameters})'
 
     @classmethod
     def build_parameter(cls, parameter):

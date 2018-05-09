@@ -7,6 +7,7 @@ class Diagnostic(namedtuple("Diagnostic", [
 ])):
     class Messages:
         VARIABLE_NOT_DECLARED = "variable {} not declared"
+        VARIABLE_REUSED = "variable {} already used"
         NOT_ARRAY_TYPE = "argument {} type is not array"
         FUNCTION_NOT_DECLARED = "function {} not declared"
         FUNCTION_DOES_NOT_RETURN_VALUE = "function {} does not return a value"
