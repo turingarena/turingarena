@@ -63,5 +63,10 @@ def validate_interface_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text, validate=False)
 
+    errors = False
     for message in interface.validate():
+        errors = True
         print(message)
+
+    if not errors:
+        print("Interface file validation succeded")

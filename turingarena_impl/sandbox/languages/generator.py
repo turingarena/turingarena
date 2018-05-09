@@ -14,23 +14,23 @@ class CodeGen:
     def generate(self):
         yield from self.generate_header()
         yield from self.generate_functions()
-        yield from self.generate_main()
+        yield from self.generate_main_block()
 
     def block_content(self, block, indent=True):
-        for s in block.statements:
+        for statement in block.statements:
             if indent:
-                yield from self.indent_all(self.statement(s))
+                yield from self.indent_all(self.generate_statement(statement))
             else:
-                yield from self.statement(s)
+                yield from self.generate_statement(statement)
 
-    def statement(self, stmt):
+    def generate_statement(self, stmt):
         for var in stmt.variables_to_declare:
             yield from self.generate_variable_declaration(var)
         for var in stmt.variables_to_allocate:
             yield from self.generate_variable_allocation(var)
 
-        method_name = f"{stmt.statement_type}_statement"
         try:
+            method_name = f"{stmt.statement_type}_statement"
             yield from getattr(self, method_name)(stmt)
         except NotImplementedError:
             yield from self.any_statement(stmt)
@@ -40,7 +40,7 @@ class CodeGen:
 
     def generate_functions(self):
         for func in self.interface.functions:
-            yield from self.function_declaration(func)
+            yield from self.generate_function_declaration(func)
 
     def generate_variable_allocation(self, var):
         raise NotImplementedError
@@ -48,10 +48,10 @@ class CodeGen:
     def generate_variable_declaration(self, var):
         raise NotImplementedError
 
-    def function_declaration(self, s):
+    def generate_function_declaration(self, s):
         raise NotImplementedError
 
-    def generate_main(self):
+    def generate_main_block(self):
         yield from self.block_content(self.interface.main, indent=False)
 
     def callback_statement(self, s):
@@ -69,9 +69,6 @@ class CodeGen:
     def break_statement(self, s):
         raise NotImplementedError
 
-    def continue_statement(self, s):
-        raise NotImplementedError
-
     def exit_statement(self, s):
         raise NotImplementedError
 
@@ -87,9 +84,6 @@ class CodeGen:
     def switch_statement(self, s):
         raise NotImplementedError
 
-    def case_statement(self, s):
-        raise NotImplementedError
-
     def for_statement(self, s):
         raise NotImplementedError
 
@@ -97,13 +91,10 @@ class CodeGen:
         raise NotImplementedError
 
     def any_statement(self, s):
-        return []
+        raise NotImplementedError
 
     def expression(self, e):
         return getattr(self, f"{e.expression_type}_expression")(e)
-
-    def int_literal_expression(self, e):
-        return f"{e.value}"
 
     def reference_expression(self, e):
         subscripts = "".join(f"[{self.expression(index)}]" for index in e.indices)

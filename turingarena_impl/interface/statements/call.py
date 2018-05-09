@@ -9,7 +9,7 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.statements.io_statements import read_line, do_flush
+from turingarena_impl.interface.statements.io import read_line, do_flush
 from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration, CallbackType
 
 logger = logging.getLogger(__name__)

@@ -42,7 +42,7 @@ class Block(ImperativeStructure):
         return self.body.declared_variables
 
     def validate(self):
-        from turingarena_impl.interface.statements.loop_statement import BreakStatement
+        from turingarena_impl.interface.statements.loop import BreakStatement
 
         for i, statement in enumerate(self.statements):
             yield from statement.validate()

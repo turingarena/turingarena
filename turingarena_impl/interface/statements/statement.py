@@ -8,13 +8,13 @@ class Statement(ImperativeStructure):
 
     @staticmethod
     def get_statement_classes():
-        from .call_statement import CallStatement, ReturnStatement, CallbackStatement
-        from .loop_statement import LoopStatement, BreakStatement
-        from .for_statement import ForStatement
-        from .if_statement import IfStatement
-        from .exit_statement import ExitStatement
-        from .switch_statement import SwitchStatement
-        from .io_statements import CheckpointStatement, ReadStatement, WriteStatement
+        from .call import CallStatement, ReturnStatement, CallbackStatement
+        from .loop import LoopStatement, BreakStatement
+        from .For import ForStatement
+        from .If import IfStatement
+        from .exit import ExitStatement
+        from .switch import SwitchStatement
+        from .io import CheckpointStatement, ReadStatement, WriteStatement
 
         return bidict({
             "checkpoint": CheckpointStatement,

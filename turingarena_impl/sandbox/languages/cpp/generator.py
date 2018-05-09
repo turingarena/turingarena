@@ -2,12 +2,6 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 
 class CppCodeGen(CodeGen):
-    @classmethod
-    def build_callable_declarator(cls, callable):
-        return_type = 'int' if callable.return_type else 'void'
-        parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
-        return f"{return_type} {callable.name}({parameters})"
-
     @staticmethod
     def build_callback_signature(parameter):
         return_type = 'int' if parameter.value_type.has_return_value else "void"
@@ -32,7 +26,6 @@ class CppCodeGen(CodeGen):
 class CppSkeletonCodeGen(CppCodeGen):
     def generate_header(self):
         yield "#include <cstdio>"
-        yield "#include <cstdlib>"
         yield
 
     def generate_variable_declaration(self, var):
@@ -47,15 +40,15 @@ class CppSkeletonCodeGen(CppCodeGen):
     def callback_statement(self, s):
         callback = s.callback
         parameters = ', '.join(f'int {p.name}' for p in callback.parameters)
-        return_value = '-> int' if callback.return_type else ''
-        yield f"auto {callback.name} = []({parameters}) {return_value}" " {"
-        yield from self.block_content(callback.synthetic_body)
-        yield "}"
+        return_value = ' -> int' if callback.return_type else ''
+        yield f"auto {callback.name} = []({parameters}){return_value}" " {"
+        yield from self.block_content(callback.body)
+        yield "};"
 
-    def function_declaration(self, s):
+    def generate_function_declaration(self, s):
         yield f"{self.build_function_signature(s)};"
 
-    def generate_main(self):
+    def generate_main_block(self):
         yield
         yield "int main() {"
         yield from self.block_content(self.interface.main)
@@ -121,19 +114,22 @@ class CppSkeletonCodeGen(CppCodeGen):
             yield from self.block_content(s.default)
         yield "}"
 
-    def any_statement(self, s):
-        generators = {
-            "checkpoint": lambda: [r'printf("%d\n", 0);'],
-            "exit": lambda: ["exit(0);"],
-            "break": lambda: ["break;"],
-            "return": lambda: [f"return {self.expression(s.value)};"],
-        }
-        return generators[s.statement_type]()
+    def checkpoint_statement(self, s):
+        yield 'puts("0");'
+
+    def exit_statement(self, s):
+        yield 'exit(0);'
+
+    def return_statement(self, s):
+        yield f'return {self.expression(s.value)};'
+
+    def break_statement(self, s):
+        yield 'break;'
 
 
 class CppTemplateCodeGen(CppCodeGen):
-    def function_declaration(self, s):
+    def generate_function_declaration(self, s):
         yield
-        yield f"{self.build_callable_declarator(s.function)}" " {"
+        yield f"{self.build_function_signature(s.signature)}" " {"
         yield self.indent("// TODO")
         yield "}"
