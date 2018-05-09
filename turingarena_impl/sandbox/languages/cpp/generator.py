@@ -94,12 +94,9 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def build_switch_condition(self, variable, labels):
+    def build_switch_cases(self, variable, labels):
         variable = self.expression(variable)
-        result = f"{variable} == {self.expression(labels[0])}"
-        for label in labels[1:]:
-            result += f" || {variable} == {self.expression(label)}"
-        return result
+        return ' || '.join(f'{variable} == {label}' for label in labels)
 
     def switch_statement(self, statement):
         cases = [case for case in statement.cases]
