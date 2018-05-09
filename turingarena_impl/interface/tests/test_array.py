@@ -13,7 +13,7 @@ def test_array_alloc():
 
 def test_array_basic():
     assert_no_interface_errors("""
-        void f(int array[][]);
+        void f(int A[][]);
     
         main {
             for i to 10 {
@@ -21,44 +21,48 @@ def test_array_basic():
                     read A[i][j];
                 } 
             }
-            f(A);
+            call f(A);
         }
     """)
 
 
 def test_array_basic_error():
     assert_interface_error("""
+        void f(int A[][]);
+        void i(int i);
+    
         main {
-            var int[][] A;
-            var int s;
             read s; 
-            alloc A : s;
-            for (i : s) {
-                var int k;
+            call i(s);
+            for i to s {
                 read k;
-                alloc A[i] : k;
-                for (j : k) {
+                call i(k);
+                for j to k {
                     read A[i][k];
                 } 
             }
+            
+            call f(A);
         }
     """, Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, "k")
 
 
 def test_array_wrong_order():
     assert_interface_error("""
+        void f(int A[][]);
+        void i(int i);
+
         main {
-            var int[][] A;
-            var int s;
             read s; 
-            alloc A : s;
-            for (i : s) {
-                var int k;
+            call i(s);
+            for i to s {
                 read k;
-                alloc A[i] : k;
-                for (j : k) {
+                call i(k);
+                for j to k {
                     read A[j][i];
                 } 
             }
+            
+            call f(A);
         }
     """, Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, "A")
