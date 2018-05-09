@@ -29,7 +29,7 @@ def test_call_missing_arguments():
     """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 2, 1)
 
 
-def test_call_argument_wrong_type():
+def   test_call_argument_wrong_type():
     assert_interface_error("""
         void f(int[] a);
         main {
