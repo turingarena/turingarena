@@ -11,7 +11,7 @@ the evaluator has to start a solution *process*,
 using the TuringArena library.
 Then, it can communicate with the process
 by *calling directly the functions*
-implemented by the solutions.
+implemented by the solution.
 The evaluator can start a solution process
 as many times as it wants.
 

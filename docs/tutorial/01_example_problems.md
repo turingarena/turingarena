@@ -25,7 +25,7 @@ int sum(int a, int b) {
 
 You can test this solution by running
 ```bash
-turingarena evaluate solution/correct.cpp
+turingarena evaluate solutions/correct.cpp
 ```
 
 ## Try it yourself!
