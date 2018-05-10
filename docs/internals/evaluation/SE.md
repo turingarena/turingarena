@@ -40,6 +40,9 @@ Names must:
 - File values are files (i.e., byte buffers) in an *unspecified format*.
 (File values can be associated with metadata such as filename and MIME type,
 but these metadata should not be used as part of the evaluation.)
+TODO: Filename is currently used for determining the programming language.
+Consider adding some standard metadata to files (i.e., filename and/or type),
+or find another way for automatic language recognition.
 
 ### Rationale
 

@@ -34,18 +34,21 @@ For each of the four option, the argument has the form
 
 ### Source file arguments
 
-A sequence of paths, say, given as a positional argument,
+A sequence of file paths, say, given as a positional argument,
 can be used to define fields.
 
 For a single path, it is equivalent to
 
-- `--file source=<path>`, and
-- `--string source_filename=<path>`.
+- `--file source=<path>`.
 
 For more than one path, it is equivalent to:
 
 - `--file source1=<path>`,
-- `--string source1_filename=<path>`.
 - `--file source2=<path>`,
-- `--string source2_filename=<path>`,
 - and so on.
+
+## Evaluations
+
+A command line tool can output an evaluation
+by printing its event stream to `stdout`,
+in JSON Lines (http://jsonlines.org/) format.

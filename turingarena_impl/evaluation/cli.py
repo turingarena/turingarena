@@ -27,7 +27,6 @@ def evaluate_cli(args):
 
     for i, f in enumerate_files(args["<files>"]):
         args["--file"].append(f"source{i}={f}")
-        args["--string"].append(f"source{i}_filename={f}")
 
     submission = dict(get_submission_fields(args))
 
