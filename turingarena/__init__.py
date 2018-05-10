@@ -2,6 +2,8 @@ import json
 import logging
 import os
 
+from future.moves import sys
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +28,7 @@ class MemoryLimitExceeded(AlgorithmError):
 
 
 def get_default_interface():
-    return os.environ[f"TURINGARENA_DEFAULT_INTERFACE"]
+    return ":interface.txt"
 
 
 def submitted_algorithm(name=None, *, interface_name=None):
@@ -62,12 +64,17 @@ def algorithm(source_name, *, language_name=None, interface_name=None):
     )
 
 
+def evaluation_data(*data):
+    print()
+    print(os.environ["EVALUATION_DATA_BEGIN"])
+    for d in data:
+        print(json.dumps(d))
+    print(os.environ["EVALUATION_DATA_END"])
+    sys.stdout.flush()
+
+
 def evaluation_result(**data):
-    logger.info(f"evaluation result: {data}")
-    path = os.environ[f"result_path"]
-    assert path
-    with open(path, "w") as f:
-        json.dump(data, f, indent=4)
+    evaluation_data(data)
 
 
 class InterfaceError(Exception):

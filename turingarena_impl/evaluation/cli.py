@@ -1,37 +1,61 @@
-import sys
-from contextlib import ExitStack
+import re
 
-from turingarena_impl.api.git import clone_from_git
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.evaluation.python import HostPythonEvaluator
+from turingarena_impl.evaluation.python import PythonEvaluator
+from turingarena_impl.evaluation.submission import SubmissionField, SubmissionFieldType
+
+PREFIX_REGEX = re.compile(r"^[a-z][a-z0-9_]*=([sf]?[@+])?")
 
 
 @docopt_cli
 def evaluate_cli(args):
-    """Read a solution from stdin and evaluates it!
+    # FIXME: drop docopt, use argparse
+    """Evaluates a submission.
 
     Usage:
-        evaluate [options] <source>
+        evaluate [options] [] [-F <f>]... [-S <s>]... <files> ...
 
     Options:
-        -p --problem=<id>  Problem to evaluate
-        -x --language=<lang>  Language of the solution
-        -g --git=<url>  Clone problem from git
+        -e --evaluator=<id>  Evaluator [default: ./evaluate.py]
+
+        -F --file=<field>  Specifies a submission field.
+        --file-as-string=<field>  Specifies a submission field.
+        -S --string=<field>  Specifies a submission field.
+        --string-as-file=<field>  Specifies a submission field.
+
     """
 
-    with ExitStack() as stack:
-        git_url = args["--git"]
-        if git_url is not None:
-            stack.enter_context(clone_from_git(git_url))
+    for i, f in enumerate_files(args["<files>"]):
+        args["--file"].append(f"source{i}={f}")
+        args["--string"].append(f"source{i}_filename={f}")
 
-        sys.path.append(".")
-        problem_name = args["--problem"] or ""
-        evaluator = HostPythonEvaluator(name=problem_name)
-        source_path = args["<source>"]
-        evaluation = evaluator.evaluate(
-            f":{source_path}",
-            language_name=args["--language"],
-        )
+    submission = dict(get_submission_fields(args))
 
-    print(evaluation.stdout)
-    print(evaluation.data)
+    evaluation = PythonEvaluator(args["--evaluator"]).evaluate(submission)
+
+    for event in evaluation:
+        print(event)
+
+
+def enumerate_files(files):
+    if len(files) == 1:
+        yield "", files[0]
+    else:
+        for i, f in enumerate(files):
+            yield str(i), f
+
+
+def get_submission_fields(args):
+    for option_name, in_type, out_type in (
+            ("--file", "file", "file"),
+            # ("--file-as-string", "file", "string"),
+            ("--string", "string", "string"),
+            # ("--string-as-file", "string", "file"),
+    ):
+        for arg in args[option_name]:
+            name, value = arg.split("=", 1)
+            yield name, make_field(out_type, value)
+
+
+def make_field(t, value):
+    return SubmissionField(SubmissionFieldType(t), value)

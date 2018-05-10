@@ -16,7 +16,7 @@ def submission_environ(submission_fields):
         SubmissionFieldType.FILE: "SUBMISSION_FILE_",
     }
     return {
-        prefixes[v.type + name.upper()]: v
+        prefixes[v.type] + name.upper(): v.value
         for name, v in submission_fields.items()
     }
 
@@ -72,21 +72,20 @@ def process_segi_output(fd, data_begin, data_end):
 
 
 def generate_events(parts, data_begin, data_end):
-    pending_newline = ()
+    pending_newlines = []
     for part in parts:
-        newline = list(pending_newline)
-        if newline and part == data_begin:
+        if pending_newlines and part == data_begin:
             assert next(parts) == b"\n"
             yield from parse_data_events(parts, data_end)
-            pending_newline = iter(newline)
         else:
-            yield from pending_newline
+            yield from pending_newlines
+            pending_newlines = []
             event = EvaluationEvent(EvaluationEventType.TEXT, part.decode())
             if part == b"\n":
-                pending_newline = iter((event,))
+                pending_newlines = [event]
             else:
                 yield event
-    yield from pending_newline
+    yield from pending_newlines
 
 
 def collect_joinable_parts(parts):

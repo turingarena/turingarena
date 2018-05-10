@@ -1,6 +1,5 @@
 from contextlib import contextmanager, ExitStack
 
-from turingarena_impl.evaluation.environ import env_extension
 from turingarena_impl.interface.driver import DriverServer
 from turingarena_impl.sandbox.server import SandboxServer
 
@@ -10,8 +9,7 @@ def run_metaservers():
     with ExitStack() as stack:
         sandbox_dir = stack.enter_context(SandboxServer.run())
         driver_dir = stack.enter_context(DriverServer.run())
-        stack.enter_context(env_extension(
+        yield dict(
             TURINGARENA_SANDBOX_DIR=sandbox_dir,
             TURINGARENA_DRIVER_DIR=driver_dir,
-        ))
-        yield
+        )

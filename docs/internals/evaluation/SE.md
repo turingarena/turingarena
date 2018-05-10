@@ -20,10 +20,21 @@ and how they should be represented.
 
 A **submission** is a collection of **fields**, each comprising
 
-- a **name**, containing only ASCII lowercase letters (`a-z`) and underscores (`_`), and
+- a **name**, an ASCII string, and
 - a **value**, which can be either a **string** or a **file**.
 
-Field names must be unique inside a submission, and are associated to a single value.
+### Names
+
+Names must:
+
+- contain only 
+    - lowercase letters (`a-z`),
+    - numbers (`0-9`),
+    - underscores (`_`);
+- start with a letter;
+- be unique inside a submission (they are associated to a single value).
+
+### Values
 
 - String values are (short) *Unicode strings*.
 - File values are files (i.e., byte buffers) in an *unspecified format*.

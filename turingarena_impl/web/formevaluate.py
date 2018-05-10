@@ -4,7 +4,7 @@ from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.api.git import clone_from_git
-from turingarena_impl.evaluation.python import HostPythonEvaluator
+from turingarena_impl.evaluation.python import PythonEvaluator
 from turingarena_impl.sandbox.languages.language import Language
 
 
@@ -28,6 +28,6 @@ def form_evaluate(fields):
         source_path = os.path.join(temp_dir, f"source{language.extension}")
         with open(source_path, "x") as f:
             f.write(source_text)
-        problem = HostPythonEvaluator(problem_name)
+        problem = PythonEvaluator(problem_name)
         evaluation = problem.evaluate(f":{source_path}")
         return json.dumps(evaluation._asdict())

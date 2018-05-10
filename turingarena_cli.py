@@ -110,7 +110,6 @@ def turingarena_cli():
     info("Work dir sent. Running command...")
 
     subprocess.call(ssh_command + [
-        "-t",
         "turingarena@localhost",
         "TURINGARENA_TREE_ID=" + tree_id,
         "TURINGARENA_CURRENT_DIR=" + current_dir,
