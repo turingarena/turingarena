@@ -1,11 +1,16 @@
-Interface syntax
-================
+# TuringArena Interface Definition Language
 
-The interface files is composed by two sections, that should be present in the following order: 
+The interface file is composed by two sections:
+ 
 - function declarations
 - main block 
 
+They must occur in the above order.
+
+## Comments
+
 In the whole interface you can insert comment with the C++ syntax: 
+
 ```C
 // single line comment
 
@@ -14,18 +19,49 @@ In the whole interface you can insert comment with the C++ syntax:
  */
 ```
 
-Function delarations
----------------------
+## Types
 
-In this section you declare the functions that who writes the solution needs to implement. 
-Every problem must declare at least one function. 
-The syntax of function declaration is similary to the C syntax, with some minor differences:
-- the only return types permitted are `int` and `void`. Function cannot return arrays
-- if you need to pass an array to a function you put squared brackets after the variable name, without specifying the size. You cannot use pointer syntax to pass arrays
-- functions that don't take parameters should be declared with an empty parameters list, `void` in the parameters list is not allowed
-- functions can take callbacks as parameters, with the usual C syntax.
-- callbacks declaration must specify the parameters names, not only their type
-- callbacks must only take scalar (`int`) parameters and return only `int` or `void`, they are not allowed to take arrays or other functions as parameters
+The following types are defined.
+
+- the *void* type,
+- *value* types, which are *k-dimesional* arrays (for any natural number k),
+- *function* and *callback* types, defined by:
+    - a *return type*,
+    - zero or more *positional arguments*, each specifying a *name* (unique among parameters) and a *type*.
+
+The *scalar* type is the zero-dimensional value type.
+
+### Limitations
+
+- Functions and callbacks return either void or a scalar.
+(Returning arrays or other functions is not allowed.)
+- Function parameters must be either values (scalars/arrays) or callbacks.
+(A void parameter is not allowed.)
+- Callback parameters must be scalars.
+(They are not allowed to take arrays or other functions/callbacks as parameters.)
+
+## Function declarations
+
+The first section of the interface declares the functions that an algorithm needs to implement.
+Every interface must declare at least one function.
+Each function has a *name* (unique in the interface) and a function *type*.
+
+- Functions and callbacks can only return `int` scalars or `void`, the cannot return arrays.
+- Callbacks can only accept `int` scalars as parameters.
+They are not allowed to take arrays or other functions as parameters.
+
+### Syntax
+
+The syntax of function declaration is similar to the C syntax, with the following differences.
+
+- Parameters of array type are declared putting squared brackets after the parameter name.
+    - Array size must not be specified.
+    - Pointer syntax cannot be used.
+    - Multi-dimensional arrays are specified using two or more pairs of brackets `[` and `]` (e.g., `int a[][]`).
+    Notice that this is not allowed in C.
+- Functions that accept zero parameters must be declared with an empty parameters list.
+    - `void` in the parameters list is not allowed
+- The parameter name cannot be omitted, in both functions and callbacks.
 
 ### Examples
 Valid declarations:
