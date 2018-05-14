@@ -7,17 +7,12 @@ import time
 from contextlib import ExitStack, contextmanager
 
 from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
-from turingarena_impl.evaluation.submission import SubmissionFieldType
 
 
 def submission_environ(submission_fields):
-    prefixes = {
-        SubmissionFieldType.STRING: "SUBMISSION_VALUE_",
-        SubmissionFieldType.FILE: "SUBMISSION_FILE_",
-    }
     return {
-        prefixes[v.type] + name.upper(): v.value
-        for name, v in submission_fields.items()
+        "SUBMISSION_FILE_" + name.upper(): path
+        for name, path in submission_fields.items()
     }
 
 
