@@ -18,9 +18,8 @@ class InterfaceBody(Block):
 
 
 class InterfaceDefinition:
-    def __init__(self, source_text, extra_metadata, **kwargs):
+    def __init__(self, source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
-        self.extra_metadata = extra_metadata
         self.body = InterfaceBody(
             ast=ast, context=RootContext(),
         )
@@ -36,10 +35,8 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, extra_metadata=None, validate=True):
-        if extra_metadata is None:
-            extra_metadata = {}
-        interface = InterfaceDefinition(source_text, extra_metadata=extra_metadata)
+    def compile(source_text, validate=True):
+        interface = InterfaceDefinition(source_text)
         if validate:
             for msg in interface.validate():
                 logger.warning(f"interface contains an error: {msg}")
@@ -78,55 +75,6 @@ class InterfaceDefinition:
     @property
     def global_variables(self):
         return self.body.declared_variables
-
-    def global_variable_metadata(self, v):
-        return {
-            **self.extra_metadata.get("global_variables", {}).get(v.name, {}),
-            **v.metadata,
-        }
-
-    def parameter_metadata(self, p, extra):
-        return {
-            **extra.get(p.name, {}),
-            **p.metadata,
-        }
-
-    def callable_metadata(self, c, extra):
-        extra = extra.get(c.name, {})
-        return {
-            **extra,
-            **c.metadata,
-            **dict(
-                return_value={
-                    **extra.get("return_value", {}),
-                    **c.metadata["return_value"],
-                },
-                parameters={
-                    p.name: self.parameter_metadata(p, extra.get("parameters", {}))
-                    for p in c.parameters
-                },
-            )
-        }
-
-    @property
-    def metadata(self):
-        return {
-            **self.extra_metadata,
-            **dict(
-                global_variables={
-                    v.name: self.global_variable_metadata(v)
-                    for v in self.global_variables.values()
-                },
-                callbacks={
-                    c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
-                    for c in self.callbacks
-                },
-                functions={
-                    f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
-                    for f in self.functions
-                }
-            ),
-        }
 
     @property
     def main_body(self):

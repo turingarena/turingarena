@@ -78,14 +78,6 @@ class Callable(AbstractSyntaxNodeWrapper):
             return_type=self.return_type,
         )
 
-    @property
-    def metadata(self):
-        return dict(
-            return_value=None if self.return_type is None else dict(
-                type=self.return_type.metadata,
-            ),
-        )
-
 
 class Function(Callable):
     __slots__ = []

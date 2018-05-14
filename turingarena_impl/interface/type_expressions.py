@@ -40,18 +40,6 @@ class ValueType:
     def check(self, value):
         pass
 
-    @property
-    def metadata(self):
-        return dict(
-            meta_type=self.meta_type,
-            **self.metadata_attributes
-        )
-
-    @property
-    @abstractmethod
-    def metadata_attributes(self):
-        pass
-
 
 class ScalarType(ValueType, namedtuple("ScalarType", ["base_type"])):
     __slots__ = []
@@ -70,10 +58,6 @@ class ScalarType(ValueType, namedtuple("ScalarType", ["base_type"])):
         if not isinstance(value, self.base_type):
             raise TypeError(f"expected a {self.base_type}, got {value}")
 
-    @property
-    def metadata_attributes(self):
-        return dict(base_type=str(self.base_type))
-
 
 class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
     __slots__ = []
@@ -84,10 +68,6 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
     @property
     def meta_type(self):
         return "array"
-
-    @property
-    def metadata_attributes(self):
-        return dict(item_type=self.item_type.metadata)
 
     def intern(self, value):
         return [
