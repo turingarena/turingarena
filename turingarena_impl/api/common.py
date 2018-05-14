@@ -23,9 +23,9 @@ def get_method(endpoints, http_method, path):
         raise ProxyError(HTTPStatus.METHOD_NOT_ALLOWED, dict(message=f"Method not allowed: {http_method}"))
 
 
-def execute_api(entpoints, http_method, path, *, get_query, get_fields):
+def execute_api(endpoints, http_method, path, *, get_query, get_fields):
     try:
-        method = get_method(entpoints, http_method, path)
+        method = get_method(endpoints, http_method, path)
 
         if http_method == "GET":
             params = get_query()
