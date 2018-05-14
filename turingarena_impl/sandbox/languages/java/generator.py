@@ -1,18 +1,11 @@
 from turingarena_impl.sandbox.languages.generator import CodeGen
 
-
 class JavaCodeGen(CodeGen):
     @classmethod
     def build_callable_declarator(cls, callable):
         return_type = cls.build_type(callable.return_type)
         parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
         return f"{return_type} {callable.name}({parameters})"
-
-    @classmethod
-    def build_declaration(cls, statement):
-        type = cls.build_type(statement.value_type)
-        declarators = ', '.join(v.name for v in statement.variables)
-        return f'{type} {declarators};'
 
     @classmethod
     def build_parameter(cls, parameter):
@@ -30,15 +23,6 @@ class JavaCodeGen(CodeGen):
             "array": lambda: f"{cls.build_type(value_type.item_type)}[]"
         }
         return builders[value_type.meta_type]()
-
-    @classmethod
-    def build_alloc_type(cls, var_type, size):
-        if var_type.meta_type == "array":
-            return cls.build_alloc_type(var_type.item_type, size) + "[]"
-        else:
-            return {
-                       int: "int",
-                   }[var_type.base_type] + f"[{size}]"
 
     def generate_footer(self):
         yield "}"

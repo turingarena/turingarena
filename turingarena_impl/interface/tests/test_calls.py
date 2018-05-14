@@ -31,7 +31,7 @@ def test_call_missing_arguments():
 
 def   test_call_argument_wrong_type():
     assert_interface_error("""
-        void f(int[] a);
+        void f(int a[]);
         main {
             call f(/*!*/ 0 /*!*/);
         }

@@ -128,7 +128,7 @@ class ReferenceExpression(Expression):
             )
         return ref
 
-    def validate_array_indexes(self):
+    def validate(self, lvalue=False):
         last_index = 0
         index_var = {index.variable: index.range for index in self.context.index_variables}
         for index in self.indices:
@@ -145,11 +145,6 @@ class ReferenceExpression(Expression):
                     yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, self.variable_name,
                                      parseinfo=self.ast.parseinfo)
                 last_index = idx
-
-    def validate(self, lvalue=False):
-        if not lvalue and self.variable_name not in self.context.variable_mapping:
-            yield Diagnostic(Diagnostic.Messages.VARIABLE_NOT_DECLARED, self.variable_name,
-                             parseinfo=self.ast.parseinfo)
 
 
 class SyntheticExpression:

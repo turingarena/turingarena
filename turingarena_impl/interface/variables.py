@@ -35,8 +35,8 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
 class ValueType:
     __slots__ = []
 
-    def __eq__(self, other):
-        return str(self) == str(other)
+    #def __eq__(self, other):
+    #    return str(self) == str(other)
 
     @property
     @abstractmethod
@@ -88,7 +88,7 @@ class ScalarType(ValueType):
 
     @property
     def metadata_attributes(self):
-        return dict(base_type=str(self.base_type))
+        return dict(base_type="int")
 
 
 class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):

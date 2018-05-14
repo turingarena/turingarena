@@ -1,6 +1,8 @@
 import itertools
 import logging
 
+from .statements.io import ReadInstruction, WriteInstruction
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +51,7 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
             input_sent = False
         logger.debug(f"control: instruction {type(instruction)} processed")
 
-        # assert input_sent
+        assert input_sent
 
 
 def send_response(driver_connection, response):
@@ -60,10 +62,13 @@ def send_response(driver_connection, response):
 
 
 def run_sandbox(instructions, *, sandbox_connection):
+    last_write = False
     for instruction in instructions:
         logger.debug(f"communication: processing instruction {type(instruction)}")
         instruction.on_communicate_with_process(sandbox_connection)
-        if instruction.is_flush():
+        if isinstance(instruction, WriteInstruction):
+            last_write = True
+        if last_write and isinstance(instruction, ReadInstruction):
             yield
         logger.debug(f"communication: instruction {type(instruction)} processed")
     yield

@@ -77,7 +77,7 @@ class CallStatement(Statement):
         for parameter, expression in zip(fun.parameters, self.parameters):
             expr_value_type = expression.value_type
 
-            if expr_value_type != parameter.value_type:
+            if str(expr_value_type) != str(parameter.value_type):
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
                     parameter.name, fun.name, parameter.value_type, expr_value_type,
