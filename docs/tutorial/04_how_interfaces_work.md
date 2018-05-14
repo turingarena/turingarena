@@ -1,6 +1,6 @@
 # How interfaces work
 
-When the evaluator start a solution process and calls its functions,
+When the evaluator starts a solution process and calls its functions,
 the TuringArena engine automatically
 generates the input, sends it to the solution process, receives its output,
 and makes it available to the evaluator.
