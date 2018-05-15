@@ -1,12 +1,11 @@
 import logging
-
 from collections import namedtuple
 from contextlib import contextmanager
 
-from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.statements.statement import Statement
+from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
 logger = logging.getLogger(__name__)
@@ -58,7 +57,7 @@ class ReadWriteStatement(Statement):
     @property
     def arguments(self):
         return [
-            Expression.compile(arg, self.context)
+            Expression.compile(arg, self.context_after)
             for arg in self.ast.arguments
         ]
 
@@ -87,7 +86,7 @@ class ReadStatement(ReadWriteStatement):
     def variables(self):
         return tuple(
             Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
-            for exp in self.arguments
+            for exp in self.ast.arguments
         )
 
     @property
