@@ -88,7 +88,7 @@ class ProcedureContext:
     def child(self, local_variables):
         return LocalContext(
             procedure=self,
-            outer=self.global_context,
+            outer=None,
             local_variables=local_variables,
         )
 
@@ -113,12 +113,10 @@ class LocalContext:
     ]
 
     def __init__(self, *, procedure, outer, local_variables):
-        if outer is None:
-            parent = procedure.global_context.bindings
-        else:
-            parent = outer.bindings
+        parent = outer.bindings if outer else None
         self.local_variables = local_variables
         self.bindings = BindingStorage(local_variables=local_variables, parent=parent)
+        logger.debug(f"bindings {self.bindings.values}")
         self.procedure = procedure
         self.outer = outer
 

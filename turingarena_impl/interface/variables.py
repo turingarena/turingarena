@@ -35,9 +35,6 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
 class ValueType:
     __slots__ = []
 
-    #def __eq__(self, other):
-    #    return str(self) == str(other)
-
     @property
     @abstractmethod
     def meta_type(self):

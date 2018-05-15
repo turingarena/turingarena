@@ -92,10 +92,8 @@ class ReferenceExpression(Expression):
 
     @property
     def variable(self):
-        try:
-            return self.context.variable_mapping[self.variable_name]
-        except KeyError:
-            return None
+        logger.debug(self.context.variable_mapping)
+        return self.context.variable_mapping[self.variable_name]
 
     @property
     def indices(self):

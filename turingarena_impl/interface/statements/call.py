@@ -24,6 +24,7 @@ class CallStatement(Statement):
 
     @property
     def parameters(self):
+        logger.debug(self.context)
         return [Expression.compile(p, self.context) for p in self.ast.parameters]
 
     @property
@@ -127,7 +128,7 @@ class CallStatement(Statement):
             function=function,
         )
 
-        if interface.callbacks:
+        if function.has_callbacks:
             yield from self.unroll_callbacks(call_context)
 
         yield FunctionReturnInstruction(

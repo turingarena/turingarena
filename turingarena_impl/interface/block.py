@@ -16,6 +16,7 @@ class Block(ImperativeStructure):
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
             inner_context = statement.context_after
+            logger.debug(inner_context.variable_mapping)
             yield statement
 
     @property
@@ -39,15 +40,19 @@ class Block(ImperativeStructure):
 
     @property
     def declared_variables(self):
-        return self.body.declared_variables
+        return tuple(
+            var
+            for stmt in self.statements
+            for var in stmt.declared_variables
+        )
 
     def validate(self):
         from turingarena_impl.interface.statements.loop import BreakStatement
+        from turingarena_impl.interface.statements.exit import ExitStatement
 
         for i, statement in enumerate(self.statements):
             yield from statement.validate()
-
-            if isinstance(statement, BreakStatement):
+            if isinstance(statement, BreakStatement) or isinstance(statement, ExitStatement):
                 if i < len(self.statements) - 1:
                     yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
                     break
@@ -64,7 +69,7 @@ class Block(ImperativeStructure):
                 ])
 
     def generate_instructions(self, context):
-        inner_context = context.child(self.declared_variables)
+        inner_context = context.child(tuple(var.name for var in self.declared_variables))
         for statement in self.statements:
             if isinstance(statement, Statement):
                 yield from statement.generate_instructions(inner_context)

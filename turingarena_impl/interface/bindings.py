@@ -3,7 +3,7 @@ class BindingStorage:
         self.local_variables = local_variables
         self.parent = parent
         self.values = {
-            l: None for l in self.local_variables.values()
+            l: None for l in self.local_variables
         }
 
     def __getitem__(self, variable):

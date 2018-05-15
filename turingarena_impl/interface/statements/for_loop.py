@@ -77,7 +77,7 @@ class ForStatement(Statement):
     def do_generate_instruction(self, context):
         size = self.index.range.evaluate_in(context=context).get()
         for i in range(size):
-            inner_context = context.child({self.index.variable.name: self.index.variable})
+            inner_context = context.child(tuple(self.index.variable.name,))
             inner_context.bindings[self.index.variable] = i
             yield from self.body.generate_instructions(inner_context)
 

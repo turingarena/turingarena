@@ -78,10 +78,10 @@ class VariableReference(Reference, namedtuple("VariableReference", [
         return self.variable.value_type
 
     def do_get(self):
-        return self.context.bindings[self.variable]
+        return self.context.bindings[self.variable.name]
 
     def do_set(self, value):
-        self.context.bindings[self.variable] = value
+        self.context.bindings[self.variable.name] = value
 
     def __str__(self):
         return f"var({self.variable.name})"

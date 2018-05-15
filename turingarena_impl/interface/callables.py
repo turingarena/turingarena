@@ -80,6 +80,11 @@ class Callable(AbstractSyntaxNodeWrapper):
 class Function(Callable):
     __slots__ = []
 
+    @property
+    def has_callbacks(self):
+        return False # TODO
+
+
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
     @property
@@ -142,6 +147,7 @@ class Callback(Callable):
             local_context=local_context,
         )
         yield from self.body.generate_instructions(local_context)
+
 
 
 class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", ["callback_context", "local_context"])):

@@ -24,37 +24,24 @@ def init_sandbox():
 
 def main():
     source_path, skeleton_path = sys.argv[1:]
+
     with open(source_path) as source_file:
         source_string = source_file.read()
     with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
 
+    print(skeleton_string, file=sys.stderr)
+
     init_sandbox()
-
-    # From here every system call that is not allowed will result in an Exception
-
-    run_skeleton(skeleton_string, source_string)
-
-
-def run_skeleton(skeleton_string, source_string):
-    # hook on 'import source'
-    def my_import(name, *args, **kwargs):
-        if name == "source":
-            source = types.ModuleType("source")
-            exec(source_string, source.__dict__)
-            return source
-        return __import__(name, *args, **kwargs)
 
     # create skeleton module
     skeleton = sys.modules["skeleton"] = types.ModuleType("skeleton")
-    # patch skeleton builtins to add import hook
-    import builtins
-    skeleton.__builtins__ = dict(
-        builtins.__dict__,
-        __import__=my_import,
-    )
-    # run skeleton
+    source = sys.modules["_source"] = types.ModuleType("_source")
+
+    # run skeleton and source
+    exec(source_string, source.__dict__)
     exec(skeleton_string, skeleton.__dict__)
+
     skeleton.main()
 
 
