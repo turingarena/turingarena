@@ -108,9 +108,10 @@ def test_multiple_function_return_value():
 
 def test_callback_accept_scalars():
     assert_interface_error("""
+        procedure f() callbacks {
+            procedure cb(a[]);
+        }
+
         main {
-            procedure f() {
-                procedure cb(a[]);
-            }
         }
     """, Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS)

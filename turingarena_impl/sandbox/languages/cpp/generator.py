@@ -18,7 +18,7 @@ class CppCodeGen(CodeGen):
 
     @classmethod
     def build_function_signature(cls, func):
-        return_type = 'int' if func.return_type else 'void'
+        return_type = 'int' if func.has_return_value else 'void'
         parameters = ', '.join([cls.build_parameter(p) for p in func.parameters])
         return f'{return_type} {func.name}({parameters})'
 

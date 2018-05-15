@@ -27,7 +27,7 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
     def variable(self):
         return Variable(
             value_type=self.type_expression.value_type,
-            name=self.ast.prototype.name if self.type_expression.value_type.meta_type == "callback" else self.ast.name
+            name=self.ast.name
         )
 
 
@@ -72,6 +72,7 @@ class Callable(AbstractSyntaxNodeWrapper):
     def is_procedure(self):
         return not self.has_return_value
 
+
 class Function(Callable):
     __slots__ = []
 
@@ -94,6 +95,16 @@ class Function(Callable):
     @property
     def has_callbacks(self):
         return self.callbacks_signature is not None
+
+    def validate(self):
+        if self.has_callbacks:
+            for callback_signature in self.callbacks_signature:
+                for parameter in callback_signature.parameters:
+                    if parameter.type_expression.value_type.meta_type != 'scalar':
+                        yield Diagnostic(
+                            Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
+                            parseinfo=self.ast.parseinfo
+                        )
 
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):

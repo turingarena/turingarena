@@ -40,7 +40,7 @@ class CallStatement(Statement):
 
     @property
     def function(self):
-        return self.context.global_context.function_map[self.ast.name]
+        return self.context.global_context.function_map[self.function_name]
 
     @property
     def callbacks(self):
@@ -56,7 +56,7 @@ class CallStatement(Statement):
         return self.callbacks is not None
 
     def validate(self):
-        if not self.function:
+        if self.function_name not in self.context.global_context.function_map:
             yield Diagnostic(
                 Diagnostic.Messages.FUNCTION_NOT_DECLARED,
                 self.function_name,
@@ -184,7 +184,7 @@ class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction",
             )
 
     def should_send_input(self):
-        return self.function.return_type is not None
+        return self.function.has_return_value
 
 
 class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstruction", [
@@ -193,7 +193,7 @@ class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstructi
     __slots__ = []
 
     def on_generate_response(self):
-        if self.function.return_type:
+        if self.function.has_return_value:
             return_value = self.statement.return_value.evaluate_in(self.context.local_context).get()
             return_response = [1, return_value]
         else:

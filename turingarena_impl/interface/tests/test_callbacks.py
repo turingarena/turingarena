@@ -24,7 +24,7 @@ def test_callback_no_arguments():
                 }
                 
                 main {
-                    call test(c) callbacks {
+                    call test() callbacks {
                         procedure c() {}
                     }
                 }
