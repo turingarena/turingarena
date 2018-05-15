@@ -5,7 +5,7 @@ from turingarena_impl.interface.tests.test_utils import define_algorithm
 from turingarena_impl.sandbox.source import CompilationFailed
 
 interface_text = """
-    int test();
+    function test();
     main {
         call o = test();
         write o;
@@ -62,8 +62,8 @@ def test_compile_failure():
 
 def test_memory_usage():
     with java_algorithm("""
-                int test1(int a);
-                int test2(int b);
+                function test1(int a);
+                function test2(int b);
                 
                 main {
                     read a; 

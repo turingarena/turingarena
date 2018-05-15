@@ -2,7 +2,7 @@ from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 
 interface_text = """
-    int test();
+    function test();
     main {
         call o = test();
         write o;

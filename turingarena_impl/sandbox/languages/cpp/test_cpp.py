@@ -6,7 +6,7 @@ from turingarena import AlgorithmRuntimeError
 from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 protocol_text = """
-    int test();
+    function test();
     main {
         call o = test();
         write o;
@@ -135,7 +135,7 @@ def test_segmentation_fault():
 def test_get_time_memory_usage():
     with define_algorithm(
             interface_text="""
-                int test(int i);
+                function test(i);
                 main {
                     read i1;
                     call o1 = test(i1);

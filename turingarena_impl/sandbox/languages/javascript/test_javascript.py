@@ -6,7 +6,7 @@ from turingarena_impl.interface.tests.test_utils import define_algorithm
 from turingarena_impl.sandbox.languages import javascript
 
 interface_text = """
-    int test();
+    function test();
     main {
         call o = test();
         write o;
@@ -55,7 +55,7 @@ def test_loop():
 def test_multiple_reads():
     with Algorithm.load(
             interface_text="""
-                int f(int a, int b);
+                function f(a, b);
                 main {
                     read a;
                     read b;
