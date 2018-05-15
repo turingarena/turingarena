@@ -1,6 +1,6 @@
 from collections import deque
 
-from turingarena_impl.interface.tests.test_utils import define_algorithms, assert_interface_error
+from turingarena_impl.interface.tests.test_utils import define_algorithms
 
 
 def callback_mock(calls, return_values=None):
@@ -16,7 +16,7 @@ def callback_mock(calls, return_values=None):
     return mock
 
 
-def test_callback_no_arguments_cpp():
+def test_callback_no_arguments():
     for algo in define_algorithms(
             interface_text="""
                 void test(void c());
@@ -42,7 +42,7 @@ def test_callback_no_arguments_cpp():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls)
-            p.call.test(c=lambda: c())
+            p.call.test(lambda: c())
 
             assert calls == [
                 (c, ()),
@@ -80,7 +80,7 @@ def test_callback_with_arguments():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls)
-            p.call.test(c=lambda a, b: c(a, b))
+            p.call.test(lambda a, b: c(a, b))
 
             assert calls == [
                 (c, (1, 2)),
@@ -121,7 +121,7 @@ def test_callback_return_value():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls, [2, 4])
-            p.call.test(c=lambda a: c(a))
+            p.call.test(lambda a: c(a))
 
             assert calls == [
                 (c, (1,)),
@@ -183,7 +183,7 @@ def test_interface_one_callback():
         with algo.run() as p:
             calls = []
             cb = callback_mock(calls)
-            assert p.call.test(cb=cb) == 1
+            assert p.call.test(cb) == 1
             assert calls == [
                 (cb, ()),
                 (cb, ()),

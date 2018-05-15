@@ -74,14 +74,17 @@ class Function(Callable):
 
     @property
     def has_callbacks(self):
-        return False # TODO
+        return any(
+            p.value_type.meta_type == "callback"
+            for p in self.parameters
+        )
 
 
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
     @property
     def synthetic_statements(self):
-        callback_index = 42 # TODO: calculate callback index # len(self.context.callbacks)
+        callback_index = self.context.callback_count
         yield SyntheticStatement("write", arguments=[
             SyntheticExpression("int_literal", value=1),  # more callbacks
         ])

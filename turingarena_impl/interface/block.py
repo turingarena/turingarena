@@ -1,6 +1,6 @@
 import logging
 
-from turingarena_impl.interface.common import ImperativeStructure
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement, Statement
@@ -8,7 +8,7 @@ from turingarena_impl.interface.statements.statement import SyntheticStatement, 
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure):
+class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
@@ -60,8 +60,8 @@ class Block(ImperativeStructure):
     def synthetic_statements(self):
         for s in self.statements:
             yield s
-            if (s.statement_type == "call" and # TODO: has callbacks
-                    #  self.context.global_context.callbacks
+            if (s.statement_type == "call" and  # TODO: has callbacks
+                #  self.context.global_context.callbacks
                     True):
                 yield SyntheticStatement("write", arguments=[
                     SyntheticExpression("int_literal", value=0),  # no more callbacks

@@ -1,11 +1,10 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from collections import namedtuple
-
 
 AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
 
-class ImperativeStructure(AbstractSyntaxNodeWrapper):
+class ImperativeStructure(metaclass=ABCMeta):
     __slots__ = []
 
     @abstractmethod

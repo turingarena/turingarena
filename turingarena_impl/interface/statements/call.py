@@ -170,21 +170,19 @@ class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction",
         if request.function_name != fun.name:
             raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
 
-        assert len(request.parameters) == len(fun.parameters)
-
-        for name, parameters_count in request.accepted_callbacks.items():
-            # FIXME: use the static context instead
-            interface = self.context.local_context.procedure.global_context.interface
-            callback = interface.callback_map[name]
-            assert parameters_count == len(callback.parameters)
+        if len(request.parameters) != len(fun.parameters):
+            raise InterfaceError(
+                f"'{fun.name}' expects {len(fun.parameters)} arguments, "
+                f"got {len(request.parameters)}"
+            )
 
         for value_expr, value in zip(parameters, request.parameters):
+            if value_expr.value_type.meta_type == "callback":
+                continue
             value_type = value_expr.value_type
             value_expr.evaluate_in(self.context.local_context).resolve(
                 value_type.ensure(value)
             )
-
-        self.context.accepted_callbacks = request.accepted_callbacks
 
     def should_send_input(self):
         return self.function.return_type is not None
@@ -257,6 +255,9 @@ class CallbackStatement(Statement):
     def callback(self):
         return Callback(ast=self.ast, context=self.context)
 
+    def generate_instructions(self, context):
+        return []
+
     def validate(self):
         yield from self.callback.validate()
 
@@ -266,4 +267,4 @@ class CallbackStatement(Statement):
 
     @property
     def context_after(self):
-        return self.context.with_variables((self.variable,))
+        return self.context.with_variables((self.variable,)).with_callback()

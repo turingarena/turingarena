@@ -34,9 +34,8 @@ class DriverProcessClient:
         self.boundary = PipeBoundary(driver_process_dir)
         self.proxy = InterfaceProxy(self)
 
-    def call(self, name, args, callbacks):
-        callback_list = list(callbacks.items())
-        response = self.send_call(args, name, callback_list)
+    def call(self, name, args):
+        response = self.send_call(args, name)
         while True:
             response_it = self.response_iterator(response)
             if next(response_it):  # has callback
@@ -53,11 +52,11 @@ class DriverProcessClient:
         else:
             return None
 
-    def send_call(self, args, name, callback_list):
-        return self.send_request(FunctionCall(function_name=name, parameters=args, accepted_callbacks={
-            name: f.__code__.co_argcount
-            for name, f in callback_list
-        }))
+    def send_call(self, args, name):
+        return self.send_request(FunctionCall(
+            function_name=name,
+            parameters=args,
+        ))
 
     def send_callback_return(self, return_value):
         return self.send_request(CallbackReturn(return_value=return_value))

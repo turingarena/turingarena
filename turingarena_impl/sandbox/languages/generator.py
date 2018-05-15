@@ -1,5 +1,5 @@
-from collections import namedtuple
 from abc import ABC, abstractmethod
+from collections import namedtuple
 
 
 class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
@@ -19,7 +19,7 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
         yield from self.generate_footer()
 
     def block_content(self, block, indent=True):
-        for statement in block.statements:
+        for statement in block.synthetic_statements:
             if indent:
                 yield from self.indent_all(self.generate_statement(statement))
             else:

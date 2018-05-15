@@ -14,7 +14,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
 
     def callback_statement(self, callback_statement):
         yield from self.build_function_declaration(callback_statement.callback)
-        yield from self.block_content(callback_statement.callback.body)
+        yield from self.block_content(callback_statement.callback.synthetic_body)
 
     def main_statement(self, statement):
         yield

@@ -42,7 +42,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         parameters = ', '.join(f'int {p.name}' for p in callback.parameters)
         return_value = ' -> int' if callback.return_type else ''
         yield f"auto {callback.name} = []({parameters}){return_value}" " {"
-        yield from self.block_content(callback.body)
+        yield from self.block_content(callback.synthetic_body)
         yield "};"
 
     def generate_function_declaration(self, s):
