@@ -148,9 +148,9 @@ class CppSkeletonCodeGen(CppCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen):
-    def generate_function_declaration(self, s):
+    def generate_function_declaration(self, func):
         yield
-        yield f"{self.build_function_signature(s.signature)}" " {"
+        yield f"{self.build_function_signature(func)}" " {"
         yield self.indent("// TODO")
         yield "}"
 
