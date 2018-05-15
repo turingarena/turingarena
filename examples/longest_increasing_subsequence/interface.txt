@@ -1,5 +1,8 @@
-void compute(int n, int a[]);
-int takes(int i);
+// compute sequence
+procedure compute(n, a[]);
+
+// return i-th sequence element
+function takes(i);
 
 main {
     read n;

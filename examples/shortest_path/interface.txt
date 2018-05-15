@@ -4,9 +4,9 @@
 // A[u][i] = i-th out-neighbor of node u
 // W[u][i] = weight of i-th out-edge of node u
 
-void init(int N, int Q, int D[], int A[][], int W[][]);
+procedure init(N, Q, D[], A[][], W[][]);
 
-int shortest_path(int u, int v);
+function shortest_path(u, v);
 
 main {
     read N;

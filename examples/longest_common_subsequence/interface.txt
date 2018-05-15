@@ -1,8 +1,8 @@
 // compute the longest common subsequence, return the sequence length
-int compute(int M, int X[], int N, int Y[]);
+function compute(M, X[], N, Y[]);
 
 // return the i-th element of the sequence
-int element(int i);
+function element(i);
 
 main {
     read M;

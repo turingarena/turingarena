@@ -1,4 +1,4 @@
-int find_best_sum(int N, int V[][]);
+function find_best_sum(N, V[][]);
 
 main {
     read N;

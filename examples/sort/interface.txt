@@ -1,22 +1,17 @@
-function sort(int n, int[] a);
-function get_element(int i) -> int;
+procedure sort(n, a[]);
+function get_element(i);
 
 main {
-    var int n;
-    var int[] a;
-
     read n;
-    alloc a : n;
-    
-    for(i : n) {
+
+    for i to n {
         read a[i];
     }
 
     call sort(n, a);
     
-    for(i : n) {
-        var int ans;
-        call get_element(i) -> ans;
+    for i to n {
+        call ans = get_element(i);
         write ans;
     }
 }

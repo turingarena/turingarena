@@ -1,4 +1,4 @@
-int max_index(int n, int a[]);
+function max_index(n, a[]);
 
 main {
     read n;

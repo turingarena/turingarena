@@ -1,6 +1,6 @@
-void init(int N, int Q, int D[], int adj[][]);
+procedure init(N, Q, D[], adj[][]);
 
-int is_there_a_path(int u, int v);
+function is_there_a_path(u, v);
 
 main {
     read N, Q;

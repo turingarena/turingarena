@@ -1,64 +1,11 @@
-procedure ping(a[][], b[]) callbacks {
+procedure ping() callbacks {
     procedure pong();
 }
 
-function sum(a, b);
-
 main {
-
-    procedure pong() {
-        exit;
-    }
-
-    call ping(pong);
-
-    use call_ping();
-
     call ping() {
         void pong() {
             exit;
         }
     }
-
-    call ping();
-
-    call ping() {
-        void pong() {
-            exit;
-        }
-    }
-
-    call ping() {
-        void pong() {
-            exit;
-        }
-    }
-
 }
-
-ping(new Object {
-        void pong() {
-
-        }
-   }
-}
-
-
-// C
-
-ping([](int a, int b) {
-    printf("0");
-
-
-    fakldjfadl;
-
-
-    fadkjl;j
-}, [](int c) {
-    printf("1");
-
-    fkl;adfla
-
-    ljfkadl;
-})
-

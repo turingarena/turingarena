@@ -1,13 +1,17 @@
-int play(int n, int guess(int n));
+function play(n) callbacks {
+    function guess(n);
+}
 
 main {
-    int guess(int n) {
-        write n;
-        read ans;
-        return ans;
+    read n;
+
+    call ans = play(n) callbacks {
+        int guess(int n) {
+            write n;
+            read ans;
+            return ans;
+        }
     }
 
-    read n;
-    call ans = play(n, guess);
     write ans;
 }
