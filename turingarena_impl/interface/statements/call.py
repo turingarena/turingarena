@@ -10,7 +10,7 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration, CallbackType
+from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +28,7 @@ class CallStatement(Statement):
 
     @property
     def return_value(self):
-        if self.ast.return_value is None:
-            return None
-        return Expression.compile(self.ast.return_value, self.context_after)
+        return Expression.compile(self.ast.return_value, self.context_after) if self.ast.return_value else None
 
     @property
     def declared_variables(self):
@@ -42,11 +40,20 @@ class CallStatement(Statement):
 
     @property
     def function(self):
-        try:
-            return self.context.global_context.function_map[self.ast.name]
-        except KeyError:
-            logger.warning("Function not defined")
+        return self.context.global_context.function_map[self.ast.name]
+
+    @property
+    def callbacks(self):
+        if not self.ast.callbacks:
             return None
+        return [
+            Callback(ast=callback, context=self.context)
+            for callback in self.ast.callbacks
+        ]
+
+    @property
+    def has_callbacks(self):
+        return self.callbacks is not None
 
     def validate(self):
         if not self.function:
@@ -92,24 +99,16 @@ class CallStatement(Statement):
             yield from expression.validate()
 
     def validate_return_value(self):
-        fun = self.function
-        return_type = fun.return_type
         if self.return_value is not None:
             yield from self.return_value.validate(lvalue=True)
-        if return_type is not None and self.return_value is None:
+        if self.function.has_return_value and self.return_value is None:
             yield Diagnostic(
-                Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, fun.name, return_type,
+                Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, self.function.name,
                 parseinfo=self.ast.parseinfo,
             )
-        if return_type is None and self.return_value is not None:
+        if not self.function.has_return_value and self.return_value is not None:
             yield Diagnostic(
-                Diagnostic.Messages.FUNCTION_DOES_NOT_RETURN_VALUE, fun.name,
-                parseinfo=self.ast.return_value.parseinfo,
-            )
-        return_expression_type = self.return_value and self.return_value.value_type
-        if self.return_value is not None and return_expression_type != return_type:
-            yield Diagnostic(
-                Diagnostic.Messages.CALL_WRONG_RETURN_EXPRESSION, fun.name, return_type, return_expression_type,
+                Diagnostic.Messages.FUNCTION_DOES_NOT_RETURN_VALUE, self.function.name,
                 parseinfo=self.ast.return_value.parseinfo,
             )
 
@@ -246,25 +245,3 @@ class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
         self.value.evaluate_in(self.context).resolve(
             self.value.value_type.ensure(request.return_value)
         )
-
-
-class CallbackStatement(Statement):
-    __slots__ = []
-
-    @property
-    def callback(self):
-        return Callback(ast=self.ast, context=self.context)
-
-    def generate_instructions(self, context):
-        return []
-
-    def validate(self):
-        yield from self.callback.validate()
-
-    @property
-    def variable(self):
-        return Variable(name=self.callback.name, value_type=CallbackType.compile(self.ast.prototype))
-
-    @property
-    def context_after(self):
-        return self.context.with_variables((self.variable,)).with_callback()

@@ -13,7 +13,7 @@ from turingarena_impl.interface.variables import Variable, TypeExpression, Scala
 logger = logging.getLogger(__name__)
 
 
-CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "return_type"])
+CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "has_return_value"])
 
 
 class ParameterDeclaration(AbstractSyntaxNodeWrapper):
@@ -50,35 +50,50 @@ class Callable(AbstractSyntaxNodeWrapper):
         return tuple(p.variable for p in self.parameter_declarations)
 
     @property
-    def return_type(self):
-        return ScalarType() if self.ast.prototype.return_type == 'int' else None
+    def has_return_value(self):
+        return self.ast.prototype.type == 'function'
 
     def validate(self):
-        if self.return_type is not None and not isinstance(self.return_type, ScalarType):
-            yield Diagnostic(
-                Diagnostic.Messages.RETURN_TYPE_MUST_BE_SCALAR,
-                parseinfo=self.ast.declarator.return_type.parseinfo,
-            )
+        pass
 
     @property
     def signature(self):
         return CallableSignature(
             name=self.name,
             parameters=self.parameters,
-            return_type=self.return_type,
+            has_return_value=self.has_return_value,
         )
 
+    @property
+    def is_function(self):
+        return self.has_return_value
+
+    @property
+    def is_procedure(self):
+        return not self.has_return_value
 
 class Function(Callable):
     __slots__ = []
 
     @property
-    def has_callbacks(self):
-        return any(
-            p.value_type.meta_type == "callback"
-            for p in self.parameters
+    def callbacks_signature(self):
+        if not self.ast.callbacks:
+            return None
+        return tuple(
+            CallableSignature(
+                name=callback.prototype.name,
+                has_return_value=callback.prototype.type == 'function',
+                parameters=tuple(
+                    ParameterDeclaration(ast=p, context=self.context)
+                    for p in callback.prototype.parameters
+                )
+            )
+            for callback in self.ast.callbacks
         )
 
+    @property
+    def has_callbacks(self):
+        return self.callbacks_signature is not None
 
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
@@ -142,7 +157,6 @@ class Callback(Callable):
             local_context=local_context,
         )
         yield from self.body.generate_instructions(local_context)
-
 
 
 class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", ["callback_context", "local_context"])):

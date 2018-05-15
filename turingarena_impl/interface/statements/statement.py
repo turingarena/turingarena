@@ -47,7 +47,7 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
 
     @staticmethod
     def get_statement_classes():
-        from .call import CallStatement, ReturnStatement, CallbackStatement
+        from .call import CallStatement, ReturnStatement
         from .loop import LoopStatement, BreakStatement
         from .for_loop import ForStatement
         from .if_else import IfStatement
@@ -67,7 +67,6 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
             "loop": LoopStatement,
             "break": BreakStatement,
             "switch": SwitchStatement,
-            "callback": CallbackStatement,
         })
 
     @staticmethod

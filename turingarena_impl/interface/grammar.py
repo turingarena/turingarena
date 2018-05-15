@@ -9,15 +9,17 @@ grammar_ebnf = r"""
 
     interface = function_declarations:{ function_declaration }* ~ 'main' main_block:block $;
     
-    function_prototype = return_type:('int' | 'void') name:identifier '(' parameters:','.{ parameter_type }* ')';
-    function_declaration = prototype:function_prototype ~ ';';
+    function_prototype = type:('function' | 'procedure') name:identifier '(' parameters:','.{ parameter_type }* ')';
+    function_declaration = prototype:function_prototype ~ (';' | callbacks:callback_prototype_block);
+    callback_declaration = prototype:function_prototype ~ ';';
         
-    parameter_type = 
-        | type:`callback` prototype:function_prototype
-        | type:`variable` 'int' name:identifier indexes:{'[' ']'}*
-        ;
+    parameter_type = name:identifier indexes:{'[' ']'}*;
+    callback_prototype_block = 'callbacks' '{' @:{callback_declaration}* '}';
 
     block = '{' statements:{ block_statement }* '}';
+    
+    callback_implementation = prototype:function_prototype body:block;
+    callback_block = 'callbacks' '{' @:{callback_implementation}* '}'; 
 
     block_statement =
         | statement_type:('read' | 'write') ~ arguments:','.{ expression }* ';'
@@ -27,11 +29,10 @@ grammar_ebnf = r"""
         | statement_type:'switch' ~ value:expression '{' cases:{ switch_case }+ '}'
         | statement_type:'for' ~ index:identifier 'to' range:expression body:block
         | statement_type:'loop' ~ body:block
-        | statement_type:'call' ~ [return_value:return_expression] name:identifier '(' parameters:','.{ expression }* ')' ';'
-        | statement_type:`callback` prototype:function_prototype ~ (body:block | 'default' ';')
+        | statement_type:'call' ~ [return_value:return_exp] name:identifier '(' parameters:','.{ expression }* ')' (callbacks:callback_block | ';')
         ;
 
-    return_expression = @:expression '=';
+    return_exp = @:expression '=';
     else_body = 'else' ~ @:block;
     switch_case = labels:','.{ int_literal }+ body:block;
     
@@ -58,7 +59,7 @@ grammar_ebnf = r"""
         | atomic_expression
         ;
     atomic_expression =
-        | expression_type:`int_literal` int_literal:int_literal
+        | expression_type:`int_literal` int:int_literal
         | expression_type:`reference` variable_name:identifier ~ indices:{ subscript }*
         | expression_type:`nested` '(' ~ expression:expression ')'
         ;
