@@ -131,13 +131,13 @@ Note: if the funzion takes callbacks but you don't implement all the callbacks (
 
 Examples:
 ``` C
-call func(a, b); // void function
-call result = func(a, b); // save return value into result
+call func(a, b); // procedure call
+call result = func(a, b); // function call, save return value into result
 call func(a, b) callbacks {
     function sum(a, b) { // callback definition
         return a + b;
     }
-    procedure cb(int a) {
+    procedure cb(a) {
         write a;
     }
 }
