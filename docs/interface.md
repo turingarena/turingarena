@@ -125,7 +125,9 @@ The call statement lets you call a function or a procedure, and it's composed by
     * one or more function or procedure implementation
     * closing brace `}`
     
+    
 Note: if the funzion takes callbacks but you don't implement all the callbacks (or none of them), they are assumed as thefault, that is a function or procedure that writes all it's arguments, and if it's a function reads the return value and returns it. 
+
 
 Examples:
 ``` C
