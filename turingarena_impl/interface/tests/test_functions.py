@@ -89,7 +89,7 @@ def test_multiple_function_return_value():
             int sum(int a, int b);
             
             main {
-                for (i : 10) {
+                for i to 10 {
                     read x, y;
                     call ans = sum(x, y);
                     write ans;

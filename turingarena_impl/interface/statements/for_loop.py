@@ -1,13 +1,12 @@
 import logging
-
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation, TypeExpression
-
+from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation, \
+    TypeExpression
 
 logger = logging.getLogger(__name__)
 
@@ -69,21 +68,25 @@ class ForStatement(Statement):
         yield from self.body.validate()
 
     def generate_instructions(self, context):
-        if self.body.expects_request(None):
-            yield SimpleForInstruction(statement=self, context=context)
-        else:
+        if self.may_process_requests:
             yield from self.do_generate_instruction(context)
+        else:
+            yield SimpleForInstruction(statement=self, context=context)
 
     def do_generate_instruction(self, context):
         size = self.index.range.evaluate_in(context=context).get()
         for i in range(size):
             inner_context = context.child(tuple(self.index.variable.name,))
-            inner_context.bindings[self.index.variable] = i
+            inner_context.bindings[self.index.variable.name] = i
             yield from self.body.generate_instructions(inner_context)
 
     @property
     def context_after(self):
         return self.body.context_after.with_variables(self.variables)
+
+    @property
+    def may_process_requests(self):
+        return self.body.may_process_requests
 
     def expects_request(self, request):
         return (

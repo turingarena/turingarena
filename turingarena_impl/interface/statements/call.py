@@ -24,7 +24,6 @@ class CallStatement(Statement):
 
     @property
     def parameters(self):
-        logger.debug(self.context)
         return [Expression.compile(p, self.context) for p in self.ast.parameters]
 
     @property
@@ -120,6 +119,10 @@ class CallStatement(Statement):
             and isinstance(request, FunctionCall)
             and request.function_name == self.function_name
         )
+
+    @property
+    def may_process_requests(self):
+        return True
 
     def generate_instructions(self, context):
         interface = context.procedure.global_context.interface

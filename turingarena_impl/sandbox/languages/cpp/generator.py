@@ -82,7 +82,7 @@ class CppSkeletonCodeGen(CppCodeGen):
             yield from self.block_content(statement.else_body)
         yield "}"
 
-    def for_statement(self, statement):
+    def for_statement(self, s):
         index_name = s.index.variable.name
         size = self.expression(s.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"

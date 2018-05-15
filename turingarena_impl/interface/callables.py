@@ -133,7 +133,7 @@ class Callback(Callable):
             global_context=global_context,
         )
 
-        local_context = callback_context.child({p.name: p for p in self.parameters})
+        local_context = callback_context.child(tuple(p.name for p in self.parameters))
         yield CallbackCallInstruction(
             callback_context=callback_context,
             local_context=local_context,

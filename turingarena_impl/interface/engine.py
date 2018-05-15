@@ -38,6 +38,7 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
 
         instruction.on_request_lookahead(current_request)
         if instruction.should_send_input() and not input_sent:
+            logger.debug(f"control: advancing communication block")
             # advance fully the current communication block
             next(run_sandbox_iterator)
             input_sent = True
@@ -71,11 +72,11 @@ def run_sandbox(instructions, *, sandbox_connection):
     last_write = False
     for instruction in instructions:
         logger.debug(f"communication: processing instruction {type(instruction)}")
-        instruction.on_communicate_with_process(sandbox_connection)
         if isinstance(instruction, WriteInstruction):
             last_write = True
         if last_write and isinstance(instruction, ReadInstruction):
             last_write = False
             yield
+        instruction.on_communicate_with_process(sandbox_connection)
         logger.debug(f"communication: instruction {type(instruction)} processed")
     yield

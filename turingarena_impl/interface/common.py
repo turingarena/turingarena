@@ -17,6 +17,10 @@ class ImperativeStructure(AbstractSyntaxNodeWrapper):
         pass
 
     @property
+    def may_process_requests(self):
+        return False
+
+    @property
     @abstractmethod
     def context_after(self):
         pass

@@ -1,13 +1,12 @@
+import logging
 from abc import abstractmethod
 
 from bidict import frozenbidict
 
-from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena_impl.interface.variables import ScalarType
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -92,12 +91,10 @@ class ReferenceExpression(Expression):
 
     @property
     def variable(self):
-        logger.debug(self.context.variable_mapping)
         return self.context.variable_mapping[self.variable_name]
 
     @property
     def indices(self):
-        logger.debug(f"{self.ast}")
         return tuple(
             Expression.compile(index, self.context)
             for index in self.ast.indices

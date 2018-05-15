@@ -53,9 +53,8 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
         return self.outer_context.variables if self.outer_context else ()
 
     def with_index_variable(self, variable):
-        return self._replace(
+        return self.with_variables((variable.variable,))._replace(
             index_variables=self.index_variables + (variable,),
-            locally_defined_variables=self.locally_defined_variables + (variable.variable,),
         )
 
     def with_loop(self):

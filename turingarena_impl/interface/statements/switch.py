@@ -2,11 +2,10 @@ import logging
 
 from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.expressions import Expression, LiteralExpression
+from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +57,13 @@ class SwitchStatement(Statement):
                     yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=self.ast.parseinfo)
                 labels.append(label)
             yield from case.validate()
+
+    @property
+    def may_process_requests(self):
+        return any(
+            case.body.may_process_requests
+            for case in self.cases
+        )
 
 
 class CaseStatement(Statement):

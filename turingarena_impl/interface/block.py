@@ -1,9 +1,9 @@
 import logging
 
+from turingarena_impl.interface.common import ImperativeStructure
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement, Statement
-from turingarena_impl.interface.common import ImperativeStructure
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,6 @@ class Block(ImperativeStructure):
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
             inner_context = statement.context_after
-            logger.debug(inner_context.variable_mapping)
             yield statement
 
     @property
@@ -82,6 +81,13 @@ class Block(ImperativeStructure):
                 return True
             if not s.expects_request(None):
                 break
+
+    @property
+    def may_process_requests(self):
+        return any(
+            s.may_process_requests
+            for s in self.statements
+        )
 
     @property
     def context_after(self):
