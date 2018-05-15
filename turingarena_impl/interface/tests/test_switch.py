@@ -1,9 +1,9 @@
 from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 interface_text = """
-    int f1();
-    int f2();
-    int f3();
+    function f1();
+    function f2();
+    function f3();
     
     main {
         read operation;

@@ -2,8 +2,8 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from .test_utils import assert_interface_error, assert_no_interface_errors, define_algorithm
 
 interface_text = """
-    int f1();
-    int f2();
+    function f1();
+    function f2();
 
     main {
         loop {

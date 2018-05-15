@@ -13,7 +13,7 @@ def test_array_alloc():
 
 def test_array_basic():
     assert_no_interface_errors("""
-        void f(int A[][]);
+        procedure f(A[][]);
     
         main {
             for i to 10 {
@@ -28,8 +28,8 @@ def test_array_basic():
 
 def test_array_basic_error():
     assert_interface_error("""
-        void f(int A[][]);
-        void i(int i);
+        procedure f(A[][]);
+        procedure i(i);
     
         main {
             read s; 
@@ -49,8 +49,8 @@ def test_array_basic_error():
 
 def test_array_wrong_order():
     assert_interface_error("""
-        void f(int A[][]);
-        void i(int i);
+        procedure f(A[][]);
+        procedure i(i);
 
         main {
             read s; 

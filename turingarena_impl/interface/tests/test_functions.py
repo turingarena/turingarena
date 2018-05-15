@@ -5,7 +5,7 @@ from turingarena_impl.interface.tests.test_utils import define_algorithms, asser
 def test_function_no_arguments():
     for algo in define_algorithms(
             interface_text="""
-                void f();
+                procedure f();
                 main {
                     call f();
                     checkpoint;
@@ -29,7 +29,7 @@ def test_function_no_arguments():
 def test_function_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                void f(int a, int b);
+                procedure f(a, b);
                 main {
                     read a, b;
                     call f(a, b);
@@ -56,7 +56,7 @@ def test_function_with_arguments():
 def test_function_return_value():
     for algo in define_algorithms(
             interface_text="""
-                int f(int a);
+                function f(a);
                 main {
                     read a;
                     call b = f(a);
@@ -86,7 +86,7 @@ def test_function_return_value():
 def test_multiple_function_return_value():
     with define_algorithm(
         interface_text="""
-            int sum(int a, int b);
+            function sum(a, b);
             
             main {
                 for i to 10 {
@@ -109,6 +109,8 @@ def test_multiple_function_return_value():
 def test_callback_accept_scalars():
     assert_interface_error("""
         main {
-            void f(int a, int b[]) {}
+            procedure f() {
+                procedure cb(a[]);
+            }
         }
     """, Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS)

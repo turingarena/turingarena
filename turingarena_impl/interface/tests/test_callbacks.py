@@ -19,10 +19,14 @@ def callback_mock(calls, return_values=None):
 def test_callback_no_arguments():
     for algo in define_algorithms(
             interface_text="""
-                void test(void c());
+                procedure test() callbacks {
+                    procedure c();
+                }
+                
                 main {
-                    void c() {}
-                    call test(c);
+                    call test(c) callbacks {
+                        procedure c() {}
+                    }
                 }
             """,
             sources={
@@ -53,14 +57,16 @@ def test_callback_no_arguments():
 def test_callback_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                void test(void c(int a, int b));
+                procedure test() callbacks {
+                    procedure c(a, b)
+                }
                 
                 main {
-                    void c(int a, int b) {
-                        write a, b;
+                    call test() callbacks {
+                        void c(a, b) {
+                            write a, b;
+                        }
                     }
-
-                    call test(c);
                 }
             """,
             sources={
@@ -91,15 +97,17 @@ def test_callback_with_arguments():
 def test_callback_return_value():
     for algo in define_algorithms(
             interface_text="""
-                void test(int c(int a));
+                procedure test() callbacks {
+                    function c(a);
+                }
                 main {
-                    int c(int a) {
-                        write a;
-                        read b;
-                        return b;
+                    call test() callbacks {
+                        function c(a) {
+                            write a;
+                            read b;
+                            return b;
+                        }
                     }
-
-                    call test(c);
                     checkpoint;
                 }
             """,
@@ -132,7 +140,7 @@ def test_callback_return_value():
 def test_interface_no_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                int test();
+                function test();
                 main {
                     call o = test();
                     write o;
@@ -157,10 +165,13 @@ def test_interface_no_callbacks():
 def test_interface_one_callback():
     for algo in define_algorithms(
             interface_text="""
-                int test(void cb());
+                function test() callbacks {
+                    procedure cb();
+                }
                 main {
-                    void cb() {}
-                    call o = test(cb);
+                    call o = test(cb) callbacks {
+                        procedure cb() {}
+                    }
                     write o;
                 }
             """,
@@ -193,11 +204,16 @@ def test_interface_one_callback():
 def test_interface_multiple_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                function test(void cb1(), void cb2()) -> int;
+                function test() callbacks {
+                    procedure cb1();
+                    procedure cb2();
+                }
+                    
                 main {
-                    void cb1() {}
-                    void cb2() {}
-                    call o = test(cb1, cb2);
+                    call o = test(cb1, cb2) callbacks {
+                        procedure cb1() {}
+                        procedure cb2() {}
+                    }
                     write o;
                 }
             """,
