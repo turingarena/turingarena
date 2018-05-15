@@ -1,0 +1,31 @@
+service: turingarena
+
+provider:
+  name: aws
+  runtime: python3.6
+
+plugins:
+  #- serverless-python-requirements
+  - serverless-apigw-binary
+
+package:
+  individually: true
+  excludeDevDependencies: false
+
+functions:
+  apihandler:
+    package:
+      exclude:
+        - "**"
+      include:
+        - "turingarena_impl/**"
+    handler: turingarena_impl.api.lambda_proxy.main
+    events:
+      - http: ANY /{proxy+}
+
+custom:
+  apigwBinary:
+    types:
+      - 'multipart/form-data'
+  pythonRequirements:
+    fileName: lambda-requirements.txt

@@ -1,0 +1,22 @@
+function sort(int n, int[] a);
+function get_element(int i) -> int;
+
+main {
+    var int n;
+    var int[] a;
+
+    read n;
+    alloc a : n;
+    
+    for(i : n) {
+        read a[i];
+    }
+
+    call sort(n, a);
+    
+    for(i : n) {
+        var int ans;
+        call get_element(i) -> ans;
+        write ans;
+    }
+}

@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import argparse
 import os
 import subprocess
 import sys
@@ -7,6 +8,35 @@ import sys
 
 def info(*args):
     print(*args, file=sys.stderr)
+
+
+def turingarena_daemon():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dev-dir", type=str, help="source code directory of TuringArena (for development)")
+
+    args = parser.parse_args()
+
+    volumes = []
+    if args.dev_dir is not None:
+        dev_dir = os.path.abspath(args.dev_dir)
+        volumes.append("--mount=type=bind,src={},dst=/usr/local/turingarena/,readonly".format(dev_dir))
+    cli = [
+        "docker",
+        "run",
+        "--name=turingarena",
+        "--rm",
+        "--read-only",
+        "--tmpfs=/run/turingarena:exec,mode=1777",
+        "--tmpfs=/tmp:exec,mode=1777",
+          ] + volumes + [
+        "--publish=127.0.0.1:20122:22",
+        "turingarena/turingarena",
+        "socat",
+        "TCP-LISTEN:22,fork",
+        """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
+          ]
+    info(*cli)
+    os.execvp("docker", cli)
 
 
 def turingarena_cli():
@@ -33,10 +63,17 @@ def turingarena_cli():
     ))
 
     git_dir = os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
+    author_name = "TuringArena"
+    author_email = "contact@turingarena.org"
+
     git_env = {
         "GIT_WORK_TREE": working_dir,
         "GIT_DIR": git_dir,
         "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_command),
+        "GIT_AUTHOR_NAME": author_name,
+        "GIT_AUTHOR_EMAIL": author_email,
+        "GIT_COMMITTER_NAME": author_name,
+        "GIT_COMMITTER_EMAIL": author_email,
     }
 
     git_popen_args = dict(env=git_env, universal_newlines=True)
@@ -73,7 +110,6 @@ def turingarena_cli():
     info("Work dir sent. Running command...")
 
     subprocess.call(ssh_command + [
-        "-t",
         "turingarena@localhost",
         "TURINGARENA_TREE_ID=" + tree_id,
         "TURINGARENA_CURRENT_DIR=" + current_dir,

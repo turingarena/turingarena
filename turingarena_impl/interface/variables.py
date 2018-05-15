@@ -8,12 +8,7 @@ VariableAllocation = namedtuple("VariableAllocation", ["name", "dimensions", "in
 
 
 class Variable(namedtuple("Variable", ["name", "value_type"])):
-    @property
-    def metadata(self):
-        return dict(
-            name=self.name,
-            type=self.value_type.metadata,
-        )
+    pass
 
 
 class TypeExpression(AbstractSyntaxNodeWrapper):

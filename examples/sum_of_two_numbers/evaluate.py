@@ -12,12 +12,13 @@ for _ in range(10):
     try:
         with algorithm.run() as process:
             c = process.call.sum(a, b)
+        if c == a + b:
+            print(f"{a} + {b} --> {c} (correct)")
+        else:
+            print(f"{a} + {b} --> {c} (wrong!)")
+            all_passed = False
     except AlgorithmError as e:
         print(f"{a} + {b} --> {e}")
         all_passed = False
-    if c != a + b:
-        print(f"{a} + {b} --> {c} (wrong!)")
-        all_passed = False
-    print(f"{a} + {b} --> {c} (correct)")
 
 evaluation_result(goals=dict(correct=all_passed))

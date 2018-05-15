@@ -42,9 +42,9 @@ sudo pip install -e .
 
 ### Usage
 
-To start the server, run (from the repository directory):
+To start the server, run:
 ```bash
-sudo sh start-server.sh
+sudo turingarenad
 ```
 
 You can terminate the server by pressing `Ctrl-C`.
@@ -53,7 +53,7 @@ At the moment, to work on a challenge, the code must be placed in a (local) Git 
 
 To evaluate a solution, `cd` in the directory of the problem and run:
 ```bash
-turingarena evaluate <solution-file>
+turingarena evaluate path/to/solution.cpp
 ```
 
 ## First tests (running the example problems)
@@ -69,4 +69,11 @@ turingarena evaluate solutions/correct.cpp
 3. Test all the provided solutions:
 ```bash
 turingarena test
+```
+
+## Update the Docker image
+
+Run the following regularly, to update the server.
+```bash
+sudo docker pull turingarena/turingarena
 ```

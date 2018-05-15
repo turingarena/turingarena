@@ -13,11 +13,14 @@ from turingarena_impl.interface.callables import Function
 logger = logging.getLogger(__name__)
 
 
+class InterfaceBody(Block):
+    pass
+
+
 class InterfaceDefinition:
     def __init__(self, source_text, extra_metadata, **kwargs):
         ast = parse_interface(source_text, **kwargs)
         logger.debug(f"Parsed interface {ast}")
-        self.extra_metadata = extra_metadata
         self.ast = ast
         self.main = Block(
             ast=self.ast.main_block,
@@ -37,10 +40,8 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, extra_metadata=None, validate=True):
-        if extra_metadata is None:
-            extra_metadata = {}
-        interface = InterfaceDefinition(source_text, extra_metadata=extra_metadata)
+    def compile(source_text, validate=True):
+        interface = InterfaceDefinition(source_text)
         if validate:
             for msg in interface.validate():
                 logger.warning(f"interface contains an error: {msg}")
@@ -48,7 +49,9 @@ class InterfaceDefinition:
 
     @property
     def source_text(self):
-        return self.ast.parseinfo.buffer.text
+        return self.body.ast.parseinfo.buffer.text
+
+    # FIXME: the following properties could be taken from the context instead
 
     @property
     def functions(self):
@@ -60,47 +63,6 @@ class InterfaceDefinition:
     @property
     def function_map(self):
         return {f.name: f for f in self.functions}
-
-    # FIXME: the following properties could be taken from the context instead
-
-    def parameter_metadata(self, p, extra):
-        return {
-            **extra.get(p.name, {}),
-            **p.metadata,
-        }
-
-    def callable_metadata(self, c, extra):
-        extra = extra.get(c.name, {})
-        return {
-            **extra,
-            **c.metadata,
-            **dict(
-                return_value={
-                    **extra.get("return_value", {}),
-                    **c.metadata["return_value"],
-                },
-                parameters={
-                    p.name: self.parameter_metadata(p, extra.get("parameters", {}))
-                    for p in c.parameters
-                },
-            )
-        }
-
-    @property
-    def metadata(self):
-        return {
-            **self.extra_metadata,
-            **dict(
-                callbacks={
-                    c.name: self.callable_metadata(c, self.extra_metadata.get("callbacks", {}))
-                    for c in self.callbacks
-                },
-                functions={
-                    f.name: self.callable_metadata(f, self.extra_metadata.get("functions", {}))
-                    for f in self.functions
-                }
-            ),
-        }
 
     def generate_instructions(self):
         global_context = GlobalContext(self)

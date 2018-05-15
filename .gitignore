@@ -2,6 +2,9 @@
 node_modules/
 /site
 .dockerignore
+.serverless
+# just for Serverless plugins, not a Web project
+/package-lock.json
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 
