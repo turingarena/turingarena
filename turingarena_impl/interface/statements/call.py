@@ -4,12 +4,12 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.callables import Callback
+from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.context import FunctionCallContext, AcceptCallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
+from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration, CallbackType
 
 logger = logging.getLogger(__name__)
@@ -29,15 +29,17 @@ class CallStatement(Statement):
 
     @property
     def return_value(self):
-        return Expression.compile(self.ast.return_value, self.context) if self.ast.return_value else None
+        if self.ast.return_value is None:
+            return None
+        return Expression.compile(self.ast.return_value, self.context_after)
 
     @property
     def declared_variables(self):
         return (VariableDeclaration(
-                    name=self.return_value.variable_name,
-                    dimensions=len(self.return_value.indices),
-                    to_allocate=len(self.return_value.indices),
-                ),) if self.return_value else ()
+            name=self.return_value.variable_name,
+            dimensions=len(self.return_value.indices),
+            to_allocate=len(self.return_value.indices),
+        ),) if self.return_value else ()
 
     @property
     def function(self):
@@ -60,9 +62,12 @@ class CallStatement(Statement):
 
     @property
     def context_after(self):
-        if self.return_value:
-            var = Variable(name=self.return_value.variable_name,
-                           value_type=TypeExpression.value_type_dimensions(len(self.return_value.indices)))
+        return_value_ast = self.ast.return_value
+        if return_value_ast is not None:
+            var = Variable(
+                name=return_value_ast.variable_name,
+                value_type=TypeExpression.value_type_dimensions(len(return_value_ast.indices)),
+            )
             return self.context.with_variables((var,))
         else:
             return self.context
