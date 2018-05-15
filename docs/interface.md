@@ -2,7 +2,7 @@
 
 The interface file is composed by two sections:
  
-- function declarations
+- function and procedure declarations
 - main block 
 
 They must occur in the above order.
@@ -20,64 +20,56 @@ In the whole interface you can insert comment with the C++ syntax:
 ```
 
 ## Types
+In TuringArena we have only 2 data types:
+- *scalar* types, that are signed integer types
+- *array* types, that are k-dimensional arrays of scalar types
 
-The following types are defined.
+## Function and procedure declarations
 
-- the *void* type,
-- *value* types, which are *k-dimesional* arrays (for any natural number k),
-- *function* and *callback* types, defined by:
-    - a *return type*,
-    - zero or more *positional arguments*, each specifying a *name* (unique among parameters) and a *type*.
+The first section of the interface declares the functions and procedures that an algorithm needs to implement.
+Every interface must declare at least one function or procedure.
+Each function or procedure has a *name* (unique in the interface) and a *type*.
 
-The *scalar* type is the zero-dimensional value type.
+As in Pascal, the difference between a function and a procedure is that a function returns a value while the procedure don't. 
 
-### Limitations
+A function or a procedure can have callbacks, functions that who writes that function can call to comunicate with the problem. A callback could be a function or a procedure, that can take only scalar parameters (no arrays). 
 
-- Functions and callbacks return either void or a scalar.
-(Returning arrays or other functions is not allowed.)
-- Function parameters must be either values (scalars/arrays) or callbacks.
-(A void parameter is not allowed.)
-- Callback parameters must be scalars.
-(They are not allowed to take arrays or other functions/callbacks as parameters.)
-
-## Function declarations
-
-The first section of the interface declares the functions that an algorithm needs to implement.
-Every interface must declare at least one function.
-Each function has a *name* (unique in the interface) and a function *type*.
-
-- Functions and callbacks can only return `int` scalars or `void`, the cannot return arrays.
-- Callbacks can only accept `int` scalars as parameters.
-They are not allowed to take arrays or other functions as parameters.
 
 ### Syntax
 
-The syntax of function declaration is similar to the C syntax, with the following differences.
-
-- Parameters of array type are declared putting squared brackets after the parameter name.
-    - Array size must not be specified.
-    - Pointer syntax cannot be used.
-    - Multi-dimensional arrays are specified using two or more pairs of brackets `[` and `]` (e.g., `int a[][]`).
-    Notice that this is not allowed in C.
-- Functions that accept zero parameters must be declared with an empty parameters list.
-    - `void` in the parameters list is not allowed
-- The parameter name cannot be omitted, in both functions and callbacks.
+The syntax of a function or procedure delaration is the following:
+- either `procedure` or `function` keyword
+- a *name*, that must be a valid identifier (as the notion of identifier of most programming languages)
+- open round bracket `(`
+- zero or more parameters declarations, that are composed by:
+   * the parameter *name*, that must be a valid identifier
+   * optionally, a set of `[]` for each dimension of the array (like C)
+- close round bracket `)`
+- either one of the following options:
+   * if the function does not accept callbacks, `;`
+   * otherwise, a callback definition block that is composed of:
+      * the `callback` keyword, followed by open brace `{
+      * one or more function or procedure declarations (with the same syntax already described)
+      * closed brace `}`
 
 ### Examples
 Valid declarations:
 ```C
-int sum(int a, int b);
-void init(); 
-int with_callback(int a, int func(int a, int b), void func2(int d), void not_very_useful());
-void init_graph(int N, int adj[][]); 
+function sum(a, b); 
+procedure init(); 
+procedure init_graph(N, d[], adj[][]); // d is a simple array, adj is a multidimensional array (a matrix) 
+function with_callback(a) callbacks {
+    function func(a, b);
+    procedure func2(d);
+    procedure not_very_useful());
+}
 ```
 
 Invalid declarations:
 ```C
-int[] returns_array(); // must return only scalars 
-void init(void); // void not allowed, declare as void init();
-int invalid_callback(void callback(int a[])); // array parameters not allowed in callback
-int invalid_callback2(int sum(int, int)); // must specify callback argument name
+procedure invalid_callback() {
+    procedure callback(a[])); // error: array parameters not allowed in callback
+}
 ```
 
 Main body
@@ -98,7 +90,7 @@ main {
 ### Read statemenent 
 The read setaments lets you read one or more variables from the problem, and has the following syntax:
 ```C 
-read var1, var2, array[i], matrix[i][j], ...;
+read var1, var2, array[i], matrix[i][j];
 ```
 Variables are automatically declared as you read them, and shouldn't been already declared.  
 For array variables, they must be read only inside a for loop and they are declared as big as the corrisponding for index variable range. Every variable that you read should be passed to a function. 
@@ -106,7 +98,7 @@ For array variables, they must be read only inside a for loop and they are decla
 ### Write statement 
 The write statement lets you write one or more variables to the problem, and has the following syntax:
 ```C
-write var1, var2, array[i], matrix[i][j], ...; 
+write var1, var2, array[i], matrix[i][j]; 
 ```
 You must write only variables that are the result of a function call. 
 
@@ -123,34 +115,29 @@ exit;
 ```
 
 ### Call statement 
-The call statement lets you call a function, and has the following syntax:
+The call statement lets you call a function or a procedure, and it's composed by:
+- the `call` keyword
+- only if you are calling a function, a lvalue expression followed by the `=` sign
+- the function or procedure name
+- a list of parameters, between round brackets 
+- if the funzion accepts callbacks, a callback definition block that it's composed of:
+    * the `callback` keyword followed by open brace `{`
+    * one or more function or procedure implementation
+    * closing brace `}`
+    
+Note: if the funzion takes callbacks but you don't implement all the callbacks (or none of them), they are assumed as thefault, that is a function or procedure that writes all it's arguments, and if it's a function reads the return value and returns it. 
+
+Examples:
 ``` C
 call func(a, b); // void function
 call result = func(a, b); // save return value into result
-``` 
-
-### Callback declaration syntax
-In the interface you can declare callback, that you can pass to function. The declaration syntax is similar to the function declaration 
-syntax of the C language, with the exception the you must take only `int` parameters and return either `int` or `void`. 
-Callbacks can use variables defined in the scope where you declare the callback. 
-Example:
-```C
-int func(int a, int b) {
-  // do something
-}
-```
-
-It's common in a callback declaration to write all the parameter and read back the return value, for this common use case you can omit the 
-function body and put the default keyword, like this:
-```C
-int callback(int a, int b) default;
-``` 
-This is the equivalent to:
-```C
-int callback(int a, int b) {
-  write a, b; 
-  read result;
-  return result;
+call func(a, b) callbacks {
+    function sum(a, b) { // callback definition
+        return a + b;
+    }
+    procedure cb(int a) {
+        write a;
+    }
 }
 ``` 
 
@@ -201,6 +188,6 @@ switch expression {
   ...
 }
 ```
-Unline C, switch cases does not falltrough. Case labels should be int litterals, and you could put more labels to a case separated by a comma. 
-The switch xpression should be an integer expression. There is no default case. 
+Unlike C, switch cases does not falltrough. Case labels should be int literals, and you could put more labels to a case separated by a comma. 
+The switch expression should be an integer expression. There is no default case. 
 
