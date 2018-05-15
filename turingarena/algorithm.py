@@ -44,7 +44,7 @@ class Algorithm(namedtuple("Algorithm", [
 
             try:
                 with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                    driver_process_client.send_begin_main(global_variables)
+                    driver_process_client.send_begin_main()
                     try:
                         yield algorithm_process
                     except InterfaceExit:

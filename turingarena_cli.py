@@ -21,19 +21,19 @@ def turingarena_daemon():
         dev_dir = os.path.abspath(args.dev_dir)
         volumes.append("--mount=type=bind,src={},dst=/usr/local/turingarena/,readonly".format(dev_dir))
     cli = [
-        "docker",
-        "run",
-        "--name=turingarena",
-        "--rm",
-        "--read-only",
-        "--tmpfs=/run/turingarena:exec,mode=1777",
-        "--tmpfs=/tmp:exec,mode=1777",
+              "docker",
+              "run",
+              "--name=turingarena",
+              "--rm",
+              "--read-only",
+              "--tmpfs=/run/turingarena:exec,mode=1777",
+              "--tmpfs=/tmp:exec,mode=1777",
           ] + volumes + [
-        "--publish=127.0.0.1:20122:22",
-        "turingarena/turingarena",
-        "socat",
-        "TCP-LISTEN:22,fork",
-        """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
+              "--publish=127.0.0.1:20122:22",
+              "turingarena/turingarena",
+              "socat",
+              "TCP-LISTEN:22,fork",
+              """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
     info(*cli)
     os.execvp("docker", cli)

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def env_extension(**d):
+def env_extension(d):
     old_env = dict(os.environ)
     os.environ.update(d)
     try:

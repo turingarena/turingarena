@@ -30,8 +30,6 @@ def main():
     with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
 
-    print(skeleton_string, file=sys.stderr)
-
     init_sandbox()
 
     # create skeleton module
@@ -41,8 +39,6 @@ def main():
     # run skeleton and source
     exec(source_string, source.__dict__)
     exec(skeleton_string, skeleton.__dict__)
-
-    skeleton.main()
 
 
 if __name__ == "__main__":

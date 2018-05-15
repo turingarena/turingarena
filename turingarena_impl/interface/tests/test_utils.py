@@ -1,35 +1,39 @@
 import os
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 from typing import Dict, Generator
 
 from turingarena.algorithm import Algorithm
+from turingarena_impl.evaluation.environ import env_extension
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.sandbox.languages.language import Language
-from turingarena_impl.problem.segi import run_metaservers
+
 
 @contextmanager
 def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Algorithm:
     language = Language.from_name(language_name)
 
-    with run_metaservers():
-        print("Running algorithm")
-        with TemporaryDirectory(dir="/tmp") as tmp_dir:
-            source_file_name = os.path.join(tmp_dir, f"source{language.extension}")
-            interface_file_name = os.path.join(tmp_dir, "interface.txt")
+    with ExitStack() as stack:
+        metaserver_env = stack.enter_context(run_metaservers())
+        stack.enter_context(env_extension(metaserver_env))
+        tmp_dir = stack.enter_context(TemporaryDirectory())
 
-            with open(interface_file_name, "w") as f:
-                print(interface_text, file=f)
+        source_file_name = os.path.join(tmp_dir, f"source{language.extension}")
+        interface_file_name = os.path.join(tmp_dir, "interface.txt")
 
-            with open(source_file_name, "w") as f:
-                print(source_text, file=f)
+        with open(interface_file_name, "w") as f:
+            print(interface_text, file=f)
 
-            yield Algorithm(
-                source_name=f":{source_file_name}",
-                interface_name=f":{interface_file_name}",
-                language_name=language_name,
-            )
+        with open(source_file_name, "w") as f:
+            print(source_text, file=f)
+
+        yield Algorithm(
+            source_name=f":{source_file_name}",
+            interface_name=f":{interface_file_name}",
+            language_name=language_name,
+        )
 
 
 def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[Algorithm, None, None]:

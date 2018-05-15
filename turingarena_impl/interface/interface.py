@@ -4,11 +4,11 @@ from collections import namedtuple
 from turingarena import InterfaceExit
 from turingarena.driver.commands import MainBegin
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.context import GlobalContext, MainContext, StaticGlobalContext
+from turingarena_impl.interface.callables import Function
 from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.context import GlobalContext, MainContext, StaticGlobalContext
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
-from turingarena_impl.interface.callables import Function
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class InterfaceBody(Block):
 
 
 class InterfaceDefinition:
-    def __init__(self, source_text, extra_metadata, **kwargs):
+    def __init__(self, source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
         logger.debug(f"Parsed interface {ast}")
         self.ast = ast
@@ -49,7 +49,7 @@ class InterfaceDefinition:
 
     @property
     def source_text(self):
-        return self.body.ast.parseinfo.buffer.text
+        return self.ast.parseinfo.buffer.text
 
     # FIXME: the following properties could be taken from the context instead
 
