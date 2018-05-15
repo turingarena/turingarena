@@ -108,7 +108,7 @@ def test_memory_limit_static():
 
 
 def test_memory_limit_malloc():
-    should_succeed(r"""
+    should_raise(r"""
         #include <cstdlib>
         #include <cstring>
         #include <cassert>
@@ -117,7 +117,7 @@ def test_memory_limit_malloc():
             char* a = (char*) malloc(size);
             assert(a == NULL);
         }
-    """)
+    """, signal.SIGSYS)
 
 
 def test_memory_limit_new():

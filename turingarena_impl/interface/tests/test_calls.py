@@ -35,7 +35,7 @@ def   test_call_argument_wrong_type():
         main {
             call f(/*!*/ 0 /*!*/);
         }
-    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "int[]", "int")
+    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "scalar[]", "scalar")
 
 
 def test_call_missing_return_expression():

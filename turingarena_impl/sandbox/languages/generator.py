@@ -66,10 +66,6 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
         pass
 
     @abstractmethod
-    def callback_statement(self, callback_statement):
-        pass
-
-    @abstractmethod
     def read_statement(self, read_statement):
         pass
 

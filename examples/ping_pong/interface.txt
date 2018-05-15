@@ -3,8 +3,8 @@ procedure ping() callbacks {
 }
 
 main {
-    call ping() {
-        void pong() {
+    call ping() callbacks {
+        procedure pong() {
             exit;
         }
     }

@@ -4,8 +4,8 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 class CppCodeGen(CodeGen):
     @staticmethod
     def build_callback_signature(parameter):
-        return_type = 'int' if parameter.value_type.has_return_value else "void"
-        parameters = ', '.join([f'int {a}' for a in parameter.value_type.arguments])
+        return_type = 'int' if parameter.has_return_value else "void"
+        parameters = ', '.join([f'int {a}' for a in parameter.parameters])
         return f'{return_type} {parameter.name}({parameters})'
 
     @classmethod
@@ -19,8 +19,11 @@ class CppCodeGen(CodeGen):
     @classmethod
     def build_function_signature(cls, func):
         return_type = 'int' if func.has_return_value else 'void'
-        parameters = ', '.join([cls.build_parameter(p) for p in func.parameters])
-        return f'{return_type} {func.name}({parameters})'
+        parameters = ', '.join(cls.build_parameter(p) for p in func.parameters)
+        callbacks = ', '.join(cls.build_callback_signature(callback) for callback in func.callbacks_signature)
+        if len(parameters) > 0 and len(callbacks) > 0:
+            parameters += ', '
+        return f'{return_type} {func.name}({parameters}{callbacks})'
 
 
 class CppSkeletonCodeGen(CppCodeGen):
@@ -54,14 +57,35 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield from self.block_content(self.interface.main)
         yield "}"
 
+    @staticmethod
+    def find_callback(callback_signature, call_statement):
+        for callback in call_statement.callbacks:
+            if callback.name == callback_signature.name:
+                return callback
+
+    def build_callback(self, callback, prev):
+        prototype = f'  {"," if prev else ""}[]('
+        prototype += ', '.join(f'int {parameter.name}' for parameter in callback.parameters)
+        prototype += ') '
+        if callback.has_return_value:
+            prototype += '-> int '
+        prototype += '{'
+        yield prototype
+        yield from self.block_content(callback.body)
+        yield '}'
+
     def call_statement(self, call_statement):
         function_name = call_statement.function.name
+        func = call_statement.function
         parameters = ", ".join(self.expression(p) for p in call_statement.parameters)
-        if call_statement.return_value is not None:
-            return_value = self.expression(call_statement.return_value)
-            yield f"{return_value} = {function_name}({parameters});"
-        else:
-            yield f"{function_name}({parameters});"
+        return_value = f'{self.expression(call_statement.return_value)} = ' if func.has_return_value else ''
+        prev = len(call_statement.parameters)
+
+        yield f"{return_value}{function_name}({parameters}"
+        for callback_signature in func.callbacks_signature:
+            yield from self.build_callback(self.find_callback(callback_signature, call_statement), prev)
+            prev = True
+        yield ");"
 
     def write_statement(self, write_statement):
         format_string = ' '.join("%d" for _ in write_statement.arguments) + r'\n'
@@ -77,7 +101,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         condition = self.expression(statement.condition)
         yield f"if ({condition})" " {"
         yield from self.block_content(statement.then_body)
-        if s.else_body:
+        if statement.else_body:
             yield "} else {"
             yield from self.block_content(statement.else_body)
         yield "}"

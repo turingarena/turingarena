@@ -6,7 +6,7 @@ main {
     read n;
 
     call ans = play(n) callbacks {
-        int guess(int n) {
+        function guess(n) {
             write n;
             read ans;
             return ans;
