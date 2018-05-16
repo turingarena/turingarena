@@ -82,7 +82,7 @@ class Function(Callable):
                 name=callback.prototype.name,
                 has_return_value=callback.prototype.type == 'function',
                 parameters=tuple(
-                    ParameterDeclaration(ast=p, context=self.context)
+                    ParameterDeclaration(ast=p, context=self.context).variable
                     for p in callback.prototype.parameters
                 )
             )
@@ -97,7 +97,7 @@ class Function(Callable):
         if self.has_callbacks:
             for callback_signature in self.callbacks_signature:
                 for parameter in callback_signature.parameters:
-                    if parameter.type_expression.value_type.meta_type != 'scalar':
+                    if parameter.value_type.meta_type != 'scalar':
                         yield Diagnostic(
                             Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
                             parseinfo=self.ast.parseinfo

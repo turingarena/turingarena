@@ -3,12 +3,12 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 class CppCodeGen(CodeGen):
     def build_parameter(self, parameter):
-        value_type = parameter.variable.value_type
+        value_type = parameter.value_type
         if value_type.meta_type == "array":
             indirections = "*" * value_type.dimensions
         else:
             indirections = ""
-        return f"int {indirections}{parameter.variable.name}"
+        return f"int {indirections}{parameter.name}"
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
@@ -51,7 +51,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield from self.block_content(self.interface.main)
         yield "}"
 
-    def generate_callback(self, callback, index):
+    def generate_callback(self, callback):
         params = ", ".join(f"int {parameter.name}" for parameter in callback.parameters)
         if callback.has_return_value:
             return_value = " -> int"
@@ -66,8 +66,8 @@ class CppSkeletonCodeGen(CppCodeGen):
         function_name = call_statement.function.name
         func = call_statement.function
 
-        for i, callback in enumerate(call_statement.callbacks):
-            yield from self.generate_callback(callback, i)
+        for callback in call_statement.callbacks:
+            yield from self.generate_callback(callback)
 
         value_arguments = [self.expression(p) for p in call_statement.parameters]
         callback_arguments = [

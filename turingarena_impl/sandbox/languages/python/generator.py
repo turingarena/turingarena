@@ -49,14 +49,28 @@ class PythonSkeletonCodeGen(PythonCodeGen):
     def generate_variable_declaration(self, declared_variable):
         yield from ()
 
+    def generate_callback(self, callback):
+        params = ", ".join(parameter.name for parameter in callback.parameters)
+        yield f"def _callback_{callback.name}({params}):"
+        yield from self.block_content(callback.synthetic_body)
+
     def call_statement(self, call_statement):
         function_name = call_statement.function_name
-        parameters = ", ".join(self.expression(p) for p in call_statement.parameters)
+
+        for callback in call_statement.callbacks:
+            yield from self.generate_callback(callback)
+
+        value_arguments = [self.expression(p) for p in call_statement.parameters]
+        callback_arguments = [
+            f"_callback_{callback.name}"
+            for callback in call_statement.callbacks
+        ]
+        arguments = ", ".join(value_arguments + callback_arguments)
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
-            yield f'{return_value} = _source.{function_name}({parameters})'
+            yield f'{return_value} = _source.{function_name}({arguments})'
         else:
-            yield f'_source.{function_name}({parameters})'
+            yield f'_source.{function_name}({arguments})'
 
     def write_statement(self, write_statement):
         args = ', '.join(self.expression(arg) for arg in write_statement.arguments)

@@ -169,7 +169,7 @@ def test_interface_one_callback():
                     procedure cb();
                 }
                 main {
-                    call o = test(cb) callbacks {
+                    call o = test() callbacks {
                         procedure cb() {}
                     }
                     write o;
@@ -184,7 +184,7 @@ def test_interface_one_callback():
                     }
                 """,
                 'python': """if True:
-                    def test():
+                    def test(cb):
                         cb()
                         cb()
                         return 1
@@ -210,7 +210,7 @@ def test_interface_multiple_callbacks():
                 }
                     
                 main {
-                    call o = test(cb1, cb2) callbacks {
+                    call o = test() callbacks {
                         procedure cb1() {}
                         procedure cb2() {}
                     }
@@ -219,7 +219,7 @@ def test_interface_multiple_callbacks():
             """,
             sources={
                 'c++': """
-                    int test(void cb1, void cb2) {
+                    int test(void cb1(), void cb2()) {
                         cb1();
                         cb2();
                         cb2();
