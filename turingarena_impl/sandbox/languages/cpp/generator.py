@@ -4,27 +4,32 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 class CppCodeGen(CodeGen):
     @staticmethod
     def build_callback_signature(parameter):
-        return_type = 'int' if parameter.has_return_value else "void"
-        parameters = ', '.join([f'int {a}' for a in parameter.parameters])
-        return f'{return_type} {parameter.name}({parameters})'
+        return_type = "int" if parameter.has_return_value else "void"
+        parameters = ", ".join([f"int {a}" for a in parameter.parameters])
+        return f"{return_type} {parameter.name}({parameters})"
 
     @classmethod
     def build_parameter(cls, parameter):
-        if parameter.value_type.meta_type == 'callback':
+        if parameter.value_type.meta_type == "callback":
             return cls.build_callback_signature(parameter)
         else:
-            indirections = '*' * parameter.value_type.dimensions if parameter.value_type.meta_type == 'array' else ''
-            return f'int {indirections}{parameter.name}'
+            indirections = "*" * parameter.value_type.dimensions if parameter.value_type.meta_type == "array" else ""
+            return f"int {indirections}{parameter.name}"
 
     @classmethod
     def build_function_signature(cls, func):
-        return_type = 'int' if func.has_return_value else 'void'
-        parameters = ', '.join(cls.build_parameter(p) for p in func.parameters)
-        callbacks = ', '.join(cls.build_callback_signature(callback) for callback in
-                              func.callbacks_signature) if func.has_callbacks else ""
+        return_type = "int" if func.has_return_value else "void"
+        parameters = ", ".join(cls.build_parameter(p) for p in func.parameters)
+        if func.has_callbacks:
+            callbacks = ", ".join(
+                cls.build_callback_signature(callback)
+                for callback in func.callbacks_signature
+            )
+        else:
+            callbacks = ""
         if len(parameters) > 0 and len(callbacks) > 0:
-            parameters += ', '
-        return f'{return_type} {func.name}({parameters}{callbacks})'
+            parameters += ", "
+        return f"{return_type} {func.name}({parameters}{callbacks})"
 
 
 class CppSkeletonCodeGen(CppCodeGen):
@@ -34,21 +39,15 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield
 
     def generate_variable_declaration(self, declared_variable):
-        yield f"static int {'*' * declared_variable.dimensions}{declared_variable.name};"
+        pointers = "*" * declared_variable.dimensions
+        yield f"static int {pointers}{declared_variable.name};"
 
     def generate_variable_allocation(self, allocated_variable):
         indexes = ""
         for idx in allocated_variable.indexes:
             indexes += f"[{idx}]"
-        yield f"{allocated_variable.name}{indexes} = new int{'*' * allocated_variable.dimensions}[{allocated_variable.size}];"
-
-    def callback_statement(self, callback_statement):
-        callback = callback_statement.callback
-        parameters = ', '.join(f'int {p.name}' for p in callback.parameters)
-        return_value = ' -> int' if callback.return_type else ''
-        yield f"auto {callback.name} = []({parameters}){return_value}" " {"
-        yield from self.block_content(callback.synthetic_body)
-        yield "};"
+        dimensions = "*" * allocated_variable.dimensions
+        yield f"{allocated_variable.name}{indexes} = new int{dimensions}[{allocated_variable.size}];"
 
     def generate_function_declaration(self, s):
         yield f"{self.build_function_signature(s)};"
@@ -60,16 +59,16 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "}"
 
     def generate_callback(self, callback, index):
-        params = ', '.join(f'int {parameter.name}' for parameter in callback.parameters)
+        params = ", ".join(f"int {parameter.name}" for parameter in callback.parameters)
         if callback.has_return_value:
-            return_value = ' -> int'
+            return_value = " -> int"
         else:
-            return_value = ''
+            return_value = ""
 
-        yield f'auto {callback.name} = []({params}){return_value}' ' {'
-        yield self.indent(fr"""printf("%d\n", "{index}");""")
+        yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
+        yield self.indent(fr"""printf("%d\n", {index});""")
         yield from self.block_content(callback.body)
-        yield '};'
+        yield "};"
 
     def call_statement_body(self, call_statement):
         function_name = call_statement.function.name
@@ -80,14 +79,14 @@ class CppSkeletonCodeGen(CppCodeGen):
 
         value_arguments = [self.expression(p) for p in call_statement.parameters]
         callback_arguments = [
-            callback_signature.name
+            f"_callback_{callback_signature.name}"
             for callback_signature in func.callbacks_signature
         ]
         parameters = ", ".join(value_arguments + callback_arguments)
         if func.has_return_value:
-            return_value = f'{self.expression(call_statement.return_value)} = '
+            return_value = f"{self.expression(call_statement.return_value)} = "
         else:
-            return_value = ''
+            return_value = ""
 
         yield f"{return_value}{function_name}({parameters});"
 
@@ -100,14 +99,14 @@ class CppSkeletonCodeGen(CppCodeGen):
             yield from self.call_statement_body(call_statement)
 
     def write_statement(self, write_statement):
-        format_string = ' '.join("%d" for _ in write_statement.arguments) + r'\n'
-        args = ', '.join(self.expression(v) for v in write_statement.arguments)
-        yield f'printf("{format_string}", {args});'
+        format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
+        args = ", ".join(self.expression(v) for v in write_statement.arguments)
+        yield f"""printf("{format_string}", {args});"""
 
     def read_statement(self, statement):
-        format_string = ''.join("%d" for _ in statement.arguments)
-        scanf_args = ', '.join("&" + self.expression(v) for v in statement.arguments)
-        yield f'scanf("{format_string}", {scanf_args});'
+        format_string = "".join("%d" for _ in statement.arguments)
+        scanf_args = ", ".join("&" + self.expression(v) for v in statement.arguments)
+        yield f"""scanf("{format_string}", {scanf_args});"""
 
     def if_statement(self, statement):
         condition = self.expression(statement.condition)
@@ -132,7 +131,7 @@ class CppSkeletonCodeGen(CppCodeGen):
 
     def build_switch_cases(self, variable, labels):
         variable = self.expression(variable)
-        return ' || '.join(f'{variable} == {label}' for label in labels)
+        return " || ".join(f"{variable} == {label}" for label in labels)
 
     def switch_statement(self, statement):
         cases = [case for case in statement.cases]
@@ -144,19 +143,19 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "}"
 
     def checkpoint_statement(self, statement):
-        yield 'puts("0");'
+        yield r"""printf("%d\n", 0);"""
 
     def exit_statement(self, statement):
-        yield 'exit(0);'
+        yield "exit(0);"
 
     def return_statement(self, statement):
-        yield f'return {self.expression(statement.value)};'
+        yield f"return {self.expression(statement.value)};"
 
     def break_statement(self, statement):
-        yield 'break;'
+        yield "break;"
 
     def generate_flush(self):
-        yield 'fflush(stdout);'
+        yield "fflush(stdout);"
 
 
 class CppTemplateCodeGen(CppCodeGen):
