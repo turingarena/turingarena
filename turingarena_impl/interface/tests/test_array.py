@@ -1,4 +1,4 @@
-from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.interface.diagnostics import Diagnostic
 from .test_utils import assert_interface_error, assert_no_interface_errors
 
 

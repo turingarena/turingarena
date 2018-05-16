@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruction
-from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement
 from turingarena_impl.interface.variables import Variable, ScalarType

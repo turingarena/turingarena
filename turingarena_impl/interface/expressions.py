@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bidict import frozenbidict
 
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
-from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.variables import ScalarType
 
 logger = logging.getLogger(__name__)

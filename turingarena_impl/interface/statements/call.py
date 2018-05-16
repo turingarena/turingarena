@@ -6,7 +6,7 @@ from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.callables import Callback
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.context import StaticCallbackBlockContext
-from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
 from turingarena_impl.interface.statements.statement import Statement
