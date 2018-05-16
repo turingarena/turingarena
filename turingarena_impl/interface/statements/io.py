@@ -22,6 +22,9 @@ class CheckpointInstruction(Instruction):
     def should_send_input(self):
         return True
 
+    def has_upward(self):
+        return True
+
     def on_communicate_upward(self, lines):
         assert next(lines) == (0,)
 
@@ -106,6 +109,9 @@ class WriteStatement(ReadWriteStatement):
 
 class WriteInstruction(ReadWriteInstruction):
     __slots__ = []
+
+    def has_upward(self):
+        return True
 
     def on_communicate_upward(self, lines):
         for a, value in zip(self.arguments, next(lines)):

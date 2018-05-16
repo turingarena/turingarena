@@ -3,16 +3,15 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.exceptions import CommunicationBroken
-from .statements.io import ReadInstruction, WriteInstruction
 
 logger = logging.getLogger(__name__)
 
 
 def drive_interface(*, interface, sandbox_connection):
-    # maintain two "instruction pointers" in the form of paraller iterators
+    # maintain two "instruction pointers" in the form of parallel iterators
     # over the same sequence of instructions (see itertools.tee).
-    # driver_iterator is for handling driver requests (main begin/end, function call, callback return and exit)
-    # sandbox_iterator is for communicating with sandbox (input/output)
+    # driver_iterator is for handling driver requests (function call, callback return and exit)
+    # sandbox_iterator is for communicating with sandbox (read/write)
     driver_iterator, sandbox_iterator = itertools.tee(
         interface.generate_instructions()
     )
@@ -30,7 +29,7 @@ def drive_interface(*, interface, sandbox_connection):
 def run_driver(driver_iterator, *, run_sandbox_iterator):
     current_request = None
     input_sent = False
-    last_write = False
+    last_upward = False
 
     for instruction in driver_iterator:
         logger.debug(f"control: processing instruction {type(instruction)}")
@@ -50,13 +49,13 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
             assert (yield response) is None
             current_request = None
 
-        if isinstance(instruction, WriteInstruction):
-            last_write = True
+        if instruction.has_upward():
+            last_upward = True
 
-        if last_write and isinstance(instruction, ReadInstruction):
+        if last_upward and instruction.has_downward():
+            last_upward = False
             assert input_sent
             input_sent = False
-            last_write = False
 
         logger.debug(f"control: instruction {type(instruction)} processed")
 
@@ -100,10 +99,11 @@ def run_sandbox(instructions, *, sandbox_connection):
     for instruction in instructions:
         logger.debug(f"communication: processing instruction {type(instruction)}")
 
-        upward_result = instruction.on_communicate_upward(upward_lines)
-
-        if upward_result is not NotImplemented:
+        if instruction.has_upward():
+            instruction.on_communicate_upward(upward_lines)
             last_upward = True
+        else:
+            assert instruction.on_communicate_upward(upward_lines) is NotImplemented
 
         if instruction.has_downward():
             if last_upward:

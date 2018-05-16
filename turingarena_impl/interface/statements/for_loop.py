@@ -109,6 +109,9 @@ class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
     def has_downward(self):
         return any(i.has_downward() for i in self.statement.do_generate_instruction(self.context))
 
+    def has_upward(self):
+        return any(i.has_upward() for i in self.statement.do_generate_instruction(self.context))
+
     def on_communicate_downward(self, lines):
         for instruction in self.statement.do_generate_instruction(self.context):
             instruction.on_communicate_downward(lines)

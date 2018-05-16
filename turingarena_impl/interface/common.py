@@ -37,6 +37,9 @@ class Instruction:
     def has_downward(self):
         return False
 
+    def has_upward(self):
+        return False
+
     def on_communicate_downward(self, lines):
         return NotImplemented
 

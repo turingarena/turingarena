@@ -209,6 +209,9 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
     def should_send_input(self):
         return True
 
+    def has_upward(self):
+        return True
+
     def on_communicate_upward(self, lines):
         [has_callback] = next(lines)
         if has_callback:
