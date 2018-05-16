@@ -3,9 +3,9 @@ import logging
 from turingarena import InterfaceExit
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.callables import Function
-from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.context import StaticGlobalContext
 from turingarena_impl.interface.parser import parse_interface
+from turingarena_impl.interface.statements.exit import ExitInstruction
 from turingarena_impl.loader import find_package_path
 
 logger = logging.getLogger(__name__)
@@ -70,8 +70,3 @@ class InterfaceDefinition:
         except InterfaceExit:
             pass
         yield ExitInstruction()
-
-
-class ExitInstruction(Instruction):
-    def on_generate_response(self):
-        return []

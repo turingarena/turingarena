@@ -1,7 +1,6 @@
 import logging
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.statements.statement import Statement
 
@@ -14,8 +13,8 @@ class LoopStatement(Statement):
     def generate_instructions(self, bindings):
         while True:
             for instruction in self.body.generate_instructions(bindings):
-                if isinstance(instruction, BreakInstruction):
-                    return
+                if instruction is BreakSentinel:
+                    break
                 yield instruction
 
     @property
@@ -44,7 +43,7 @@ class BreakStatement(Statement):
     __slots__ = []
 
     def generate_instructions(self, bindings):
-        yield BreakInstruction()
+        yield BreakSentinel
 
     def validate(self):
         if not self.context.in_loop:
@@ -55,5 +54,4 @@ class BreakStatement(Statement):
         return self.context.with_break(True)
 
 
-class BreakInstruction(Instruction):
-    pass
+BreakSentinel = object()
