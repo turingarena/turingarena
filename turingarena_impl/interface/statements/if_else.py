@@ -29,15 +29,15 @@ class IfStatement(Statement):
             yield from self.else_body.validate()
 
     def generate_instructions(self, bindings):
-        condition = self.condition.evaluate_in(bindings)
-        if not condition.is_resolved():
+        # FIXME: check that the condition is not yet resolved
+        if self.condition.is_assignable():
             # FIXME: use a stricter logic here
             if self.then_body.is_possible_branch(bindings):
-                condition.resolve(1)
+                self.condition.assign(bindings, 1)
             else:
-                condition.resolve(0)
+                self.condition.assign(bindings, 0)
 
-        if condition.get():
+        if self.condition.evaluate(bindings):
             yield from self.then_body.generate_instructions(bindings)
         elif self.else_body is not None:
             yield from self.else_body.generate_instructions(bindings)

@@ -17,7 +17,7 @@ interface_text = """
                 call res = f2();
                 write res;
             }
-            default {
+            case 3 {
                 call res = f3();
                 write res;
             }

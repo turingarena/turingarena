@@ -220,19 +220,18 @@ class ReturnStatement(Statement):
         return Expression.compile(self.ast.value, self.context)
 
     def generate_instructions(self, bindings):
-        yield ReturnInstruction(value=self.value, context=bindings)
+        yield ReturnInstruction(value=self.value, bindings=bindings)
 
     def validate(self):
         yield from self.value.validate()
 
 
 class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
-    "value", "context"
+    "value", "bindings"
 ])):
     __slots__ = []
 
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
-        self.value.evaluate_in(self.context).resolve(
-            self.value.value_type.ensure(request.return_value)
-        )
+        assert self.value.is_assignable()
+        self.value.assign(self.bindings, self.value.value_type.ensure(request.return_value))

@@ -1,6 +1,7 @@
 import logging
+import warnings
+from collections import namedtuple
 
-from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.exceptions import Diagnostic
@@ -14,14 +15,9 @@ class SwitchStatement(Statement):
     __slots__ = []
 
     def generate_instructions(self, bindings):
-        condition = self.variable.evaluate_in(bindings)
+        yield SwitchInstruction(self, bindings)
 
-        yield SwitchInstruction(self, condition)
-
-        if not condition.is_resolved():
-            raise InterfaceError("Unresolved switch condition")
-
-        value = condition.get()
+        value = self.value.evaluate(bindings)
 
         for case in self.cases:
             for label in case.labels:
@@ -41,10 +37,15 @@ class SwitchStatement(Statement):
 
     @property
     def variable(self):
+        warnings.warn("use value", DeprecationWarning)
+        return self.value
+
+    @property
+    def value(self):
         return Expression.compile(self.ast.value, self.context)
 
     def validate(self):
-        yield from self.variable.validate()
+        yield from self.value.validate()
 
         cases = [case for case in self.cases]
         if len(cases) == 0:
@@ -88,16 +89,10 @@ class CaseStatement(Statement):
         return self.body.context_after
 
 
-class SwitchInstruction(Instruction):
-    def __init__(self, switch, condition):
-        self.switch = switch
-        self.condition = condition
-
+class SwitchInstruction(Instruction, namedtuple("SwitchInstruction", ["statement", "bindings"])):
     def on_request_lookahead(self, request):
-        if not self.condition.is_resolved():
-            for case in self.switch.cases:
+        if self.statement.value.is_assignable():
+            for case in self.statement.cases:
                 if len(case.labels) == 1 and case.expects_request(request):
-                    self.condition.resolve(case.labels[0].value)
+                    self.statement.value.assign(self.bindings, case.labels[0].value)
                     return
-
-
