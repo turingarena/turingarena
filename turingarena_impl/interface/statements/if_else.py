@@ -28,19 +28,19 @@ class IfStatement(Statement):
         if self.else_body:
             yield from self.else_body.validate()
 
-    def generate_instructions(self, context):
-        condition = self.condition.evaluate_in(context)
+    def generate_instructions(self, bindings):
+        condition = self.condition.evaluate_in(bindings)
         if not condition.is_resolved():
             # FIXME: use a stricter logic here
-            if self.then_body.is_possible_branch(context):
+            if self.then_body.is_possible_branch(bindings):
                 condition.resolve(1)
             else:
                 condition.resolve(0)
 
         if condition.get():
-            yield from self.then_body.generate_instructions(context)
+            yield from self.then_body.generate_instructions(bindings)
         elif self.else_body is not None:
-            yield from self.else_body.generate_instructions(context)
+            yield from self.else_body.generate_instructions(bindings)
 
     def expects_request(self, request):
         return (

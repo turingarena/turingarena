@@ -2,7 +2,7 @@ import logging
 from contextlib import contextmanager
 
 from turingarena import InterfaceError
-from turingarena.driver.commands import MainBegin, serialize_request, MainEnd, Exit, FunctionCall, \
+from turingarena.driver.commands import serialize_request, Exit, FunctionCall, \
     CallbackReturn
 from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.driver.proxy import InterfaceProxy
@@ -60,12 +60,6 @@ class DriverProcessClient:
 
     def send_callback_return(self, return_value):
         return self.send_request(CallbackReturn(return_value=return_value))
-
-    def send_begin_main(self):
-        return self.send_request(MainBegin())
-
-    def send_end_main(self):
-        return self.send_request(MainEnd())
 
     def send_exit(self):
         return self.send_request(Exit())

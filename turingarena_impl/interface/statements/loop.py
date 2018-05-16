@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 class LoopStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         while True:
-            for instruction in self.body.generate_instructions(context):
+            for instruction in self.body.generate_instructions(bindings):
                 if isinstance(instruction, BreakInstruction):
                     return
                 yield instruction
@@ -43,7 +43,7 @@ class LoopStatement(Statement):
 class BreakStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         yield BreakInstruction()
 
     def validate(self):

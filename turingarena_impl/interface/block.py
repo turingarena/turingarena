@@ -2,8 +2,7 @@ import logging
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.statements.statement import SyntheticStatement, Statement
+from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +63,15 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             ##        SyntheticExpression("int_literal", value=0),  # no more callbacks
             ##    ])
 
-    def generate_instructions(self, context):
-        inner_context = context.child(tuple(var.name for var in self.declared_variables))
+    def generate_instructions(self, bindings):
+        inner_bindings = {
+            **bindings,
+            **{
+                var.name: None for var in self.declared_variables
+            },
+        }
         for statement in self.statements:
-            if isinstance(statement, Statement):
-                yield from statement.generate_instructions(inner_context)
+            yield from statement.generate_instructions(inner_bindings)
 
     def expects_request(self, request):
         for s in self.statements:

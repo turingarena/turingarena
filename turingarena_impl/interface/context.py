@@ -1,8 +1,6 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.bindings import BindingStorage
-
 logger = logging.getLogger(__name__)
 
 
@@ -68,63 +66,6 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
             outer_context=self,
             locally_defined_variables=(),
             has_break=False
-        )
-
-
-class GlobalContext:
-    __slots__ = ["interface"]
-
-    def __init__(self, interface):
-        self.interface = interface
-
-
-class ProcedureContext:
-    __slots__ = []
-
-    def child(self, local_variables):
-        return LocalContext(
-            procedure=self,
-            outer=None,
-            local_variables=local_variables,
-        )
-
-
-class MainContext(ProcedureContext, namedtuple("MainContext", ["global_context"])):
-    __slots__ = []
-
-
-class CallbackContext(ProcedureContext, namedtuple("CallbackContext", [
-    "global_context",
-    "accept_context",
-])):
-    __slots__ = []
-
-
-class LocalContext:
-    __slots__ = [
-        "procedure",
-        "outer",
-        "local_variables",
-        "bindings",
-    ]
-
-    def __init__(self, *, procedure, outer, local_variables):
-        parent = outer.bindings if outer else None
-        self.local_variables = local_variables
-        self.bindings = BindingStorage(local_variables=local_variables, parent=parent)
-        logger.debug(f"bindings {self.bindings.values}")
-        self.procedure = procedure
-        self.outer = outer
-
-    @property
-    def variables(self):
-        return dict(self.outer.variables, **self.local_variables)
-
-    def child(self, local_variables):
-        return LocalContext(
-            procedure=self.procedure,
-            outer=self,
-            local_variables=local_variables,
         )
 
 

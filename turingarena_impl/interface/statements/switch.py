@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 class SwitchStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
-        condition = self.variable.evaluate_in(context)
+    def generate_instructions(self, bindings):
+        condition = self.variable.evaluate_in(bindings)
 
         yield SwitchInstruction(self, condition)
 
@@ -26,7 +26,7 @@ class SwitchStatement(Statement):
         for case in self.cases:
             for label in case.labels:
                 if value == label.value:
-                    yield from case.generate_instructions(context)
+                    yield from case.generate_instructions(bindings)
 
     def expects_request(self, request):
         for case in self.cases:
@@ -69,8 +69,8 @@ class SwitchStatement(Statement):
 class CaseStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
-        yield from self.body.generate_instructions(context)
+    def generate_instructions(self, bindings):
+        yield from self.body.generate_instructions(bindings)
 
     def expects_request(self, request):
         return self.body.expects_request(request)

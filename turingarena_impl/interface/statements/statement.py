@@ -38,7 +38,7 @@ class AbstractStatement(ImperativeStructure):
     def needs_flush(self):
         return False
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         raise NotImplementedError
 
 

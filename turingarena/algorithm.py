@@ -44,13 +44,11 @@ class Algorithm(namedtuple("Algorithm", [
 
             try:
                 with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                    driver_process_client.send_begin_main()
                     try:
                         yield algorithm_process
                     except InterfaceExit:
-                        driver_process_client.send_exit()
-                    else:
-                        driver_process_client.send_end_main()
+                        pass
+                    driver_process_client.send_exit()
             except SandboxError:
                 info = sandbox_process_client.get_info(wait=True)
                 if info.error:

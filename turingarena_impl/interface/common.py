@@ -8,7 +8,7 @@ class ImperativeStructure(metaclass=ABCMeta):
     __slots__ = []
 
     @abstractmethod
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         pass
 
     @abstractmethod

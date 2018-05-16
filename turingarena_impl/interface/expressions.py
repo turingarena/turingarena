@@ -5,7 +5,6 @@ from bidict import frozenbidict
 
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.references import ConstantReference, VariableReference, ArrayItemReference
 from turingarena_impl.interface.variables import ScalarType
 
 logger = logging.getLogger(__name__)
@@ -20,24 +19,25 @@ class Expression(AbstractSyntaxNodeWrapper):
 
     @property
     def expression_type(self):
-        return expression_classes.inv[self.__class__]
+        return self.ast.expression_type
 
     @property
     @abstractmethod
     def value_type(self):
         pass
 
-    def evaluate_in(self, context):
-        return self.do_evaluate(context)
-
     @abstractmethod
-    def do_evaluate(self, context):
+    def evaluate(self, bindings):
         pass
 
-    @property
-    @abstractmethod
-    def canonical_form(self):
-        pass
+    def is_assignable(self):
+        return False
+
+    def assign(self, bindings, value):
+        raise NotImplementedError
+
+    def alloc(self, bindings, size):
+        raise NotImplementedError
 
     def validate(self):
         return []
@@ -51,11 +51,8 @@ class LiteralExpression(Expression):
     def value(self):
         pass
 
-    def do_evaluate(self, context):
-        return ConstantReference(
-            value_type=self.value_type,
-            value=self.value,
-        )
+    def evaluate(self, bindings):
+        return self.value
 
 
 class IntLiteralExpression(LiteralExpression):
@@ -73,17 +70,9 @@ class IntLiteralExpression(LiteralExpression):
     def value_type(self):
         return ScalarType()
 
-    @property
-    def variable_name(self):
-        return str(self.value)
-
 
 class ReferenceExpression(Expression):
     __slots__ = []
-
-    @property
-    def canonical_form(self):
-        return self.variable_name
 
     @property
     def variable_name(self):
@@ -92,13 +81,6 @@ class ReferenceExpression(Expression):
     @property
     def variable(self):
         return self.context.variable_mapping[self.variable_name]
-
-    @property
-    def indices(self):
-        return tuple(
-            Expression.compile(index, self.context)
-            for index in self.ast.indices
-        )
 
     @property
     def value_type(self):
@@ -110,18 +92,31 @@ class ReferenceExpression(Expression):
             value_type = value_type.item_type
         return value_type
 
-    def do_evaluate(self, context):
-        ref = VariableReference(
-            context=context,
-            variable=self.variable,
+    @property
+    def indices(self):
+        return tuple(
+            Expression.compile(index, self.context)
+            for index in self.ast.indices
         )
+
+    def evaluate(self, bindings):
+        value = bindings[self.variable.name]
         for index in self.indices:
-            ref = ArrayItemReference(
-                array_type=ref.value_type,
-                array=ref.get(),
-                index=index.evaluate_in(context).get(),
-            )
-        return ref
+            assert value is not None
+            value = value[index.evaluate(bindings)]
+        assert value is not None
+        return value
+
+    def is_assignable(self):
+        return True
+
+    def assign(self, bindings, value):
+        # TODO: handle indices
+        bindings[self.variable.name] = value
+
+    def alloc(self, bindings, size):
+        # TODO: handle indices
+        bindings[self.variable.name] = [None] * size
 
     def validate(self, lvalue=False):
         last_index = 0

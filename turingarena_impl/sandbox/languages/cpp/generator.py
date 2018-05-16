@@ -36,6 +36,7 @@ class CppSkeletonCodeGen(CppCodeGen):
     def generate_header(self):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
+        yield "#include <cassert>"
         yield
 
     def generate_variable_declaration(self, declared_variable):
@@ -106,7 +107,9 @@ class CppSkeletonCodeGen(CppCodeGen):
     def read_statement(self, statement):
         format_string = "".join("%d" for _ in statement.arguments)
         scanf_args = ", ".join("&" + self.expression(v) for v in statement.arguments)
-        yield f"""scanf("{format_string}", {scanf_args});"""
+        scanf_call = f"""scanf("{format_string}", {scanf_args})"""
+        error_message = '"unable to read input"'
+        yield f"assert({scanf_call} == {len(statement.arguments)} && {error_message});"
 
     def if_statement(self, statement):
         condition = self.expression(statement.condition)

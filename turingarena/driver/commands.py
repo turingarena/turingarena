@@ -30,15 +30,6 @@ def serialize_request(request):
     yield from request.serialize_arguments()
 
 
-class MainBegin(ProxyRequest):
-    __slots__ = []
-
-    @staticmethod
-    def deserialize_arguments():
-        yield from []
-        return MainBegin()
-
-
 class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
     "function_name", "parameters"
 ])):
@@ -87,15 +78,6 @@ class CallbackReturn(ProxyRequest, namedtuple("CallbackReturn", [
             yield int(self.return_value)
 
 
-class MainEnd(ProxyRequest):
-    __slots__ = []
-
-    @staticmethod
-    def deserialize_arguments():
-        yield from []
-        return MainEnd()
-
-
 class Exit(ProxyRequest):
     __slots__ = []
 
@@ -106,8 +88,6 @@ class Exit(ProxyRequest):
 
 
 request_types = bidict({
-    "main_begin": MainBegin,
-    "main_end": MainEnd,
     "function_call": FunctionCall,
     "callback_return": CallbackReturn,
     "exit": Exit,

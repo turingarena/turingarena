@@ -5,7 +5,7 @@ from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.callables import Callback
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.context import FunctionCallContext, AcceptCallbackContext
+from turingarena_impl.interface.context import AcceptCallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
@@ -123,28 +123,23 @@ class CallStatement(Statement):
     def may_process_requests(self):
         return True
 
-    def generate_instructions(self, context):
-        interface = context.procedure.global_context.interface
-        call_context = FunctionCallContext(local_context=context)
-
-        function = interface.function_map[self.function_name]
+    def generate_instructions(self, bindings):
+        function = self.context.global_context.function_map[self.function_name]
 
         yield FunctionCallInstruction(
             statement=self,
-            context=call_context,
-            function=function,
+            bindings=bindings,
         )
 
         if function.has_callbacks:
-            yield from self.unroll_callbacks(call_context)
+            yield from self.unroll_callbacks(bindings)
 
         yield FunctionReturnInstruction(
             statement=self,
-            context=call_context,
-            function=function,
+            bindings=bindings,
         )
 
-    def unroll_callbacks(self, call_context):
+    def unroll_callbacks(self, bindings):
         while True:
             context = AcceptCallbackContext(call_context)
             yield AcceptCallbackInstruction(context=context)
@@ -155,12 +150,12 @@ class CallStatement(Statement):
 
 
 class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction", [
-    "statement", "context", "function"
+    "statement", "bindings"
 ])):
     __slots__ = []
 
     def on_request_lookahead(self, request):
-        fun = self.function
+        fun = self.statement.function
         parameters = self.statement.parameters
 
         if not isinstance(request, FunctionCall):
@@ -176,25 +171,21 @@ class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction",
             )
 
         for value_expr, value in zip(parameters, request.parameters):
-            if value_expr.value_type.meta_type == "callback":
-                continue
-            value_type = value_expr.value_type
-            value_expr.evaluate_in(self.context.local_context).resolve(
-                value_type.ensure(value)
-            )
+            if value_expr.is_assignable():
+                value_expr.assign(self.bindings, value)
 
     def should_send_input(self):
-        return self.function.has_return_value
+        return self.statement.function.has_return_value
 
 
 class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstruction", [
-    "statement", "context", "function"
+    "statement", "bindings"
 ])):
     __slots__ = []
 
     def on_generate_response(self):
-        if self.function.has_return_value:
-            return_value = self.statement.return_value.evaluate_in(self.context.local_context).get()
+        if self.statement.function.has_return_value:
+            return_value = self.statement.return_value.evaluate(self.bindings)
             return_response = [1, return_value]
         else:
             return_response = [0]
@@ -204,7 +195,7 @@ class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstructi
         )
 
 
-class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", ["context"])):
+class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", ["bindings"])):
     __slots__ = []
 
     def should_send_input(self):
@@ -228,8 +219,8 @@ class ReturnStatement(Statement):
     def value(self):
         return Expression.compile(self.ast.value, self.context)
 
-    def generate_instructions(self, context):
-        yield ReturnInstruction(value=self.value, context=context)
+    def generate_instructions(self, bindings):
+        yield ReturnInstruction(value=self.value, context=bindings)
 
     def validate(self):
         yield from self.value.validate()

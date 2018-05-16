@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ExitStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         yield ExitInstruction()
         raise InterfaceExit
 

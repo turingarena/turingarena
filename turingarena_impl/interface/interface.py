@@ -1,12 +1,10 @@
 import logging
-from collections import namedtuple
 
 from turingarena import InterfaceExit
-from turingarena.driver.commands import MainBegin
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.callables import Function
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.context import GlobalContext, MainContext, StaticGlobalContext
+from turingarena_impl.interface.context import StaticGlobalContext
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
 
@@ -66,30 +64,14 @@ class InterfaceDefinition:
         return {f.name: f for f in self.functions}
 
     def generate_instructions(self):
-        global_context = GlobalContext(self)
-        main_context = MainContext(global_context=global_context)
-
-        yield MainBeginInstruction(interface=self, global_context=global_context)
+        bindings = {}
         try:
-            yield from self.main.generate_instructions(main_context)
+            yield from self.main.generate_instructions(bindings)
         except InterfaceExit:
             pass
-        else:
-            yield MainEndInstruction()
+        yield ExitInstruction()
 
 
-class MainBeginInstruction(Instruction, namedtuple("MainBeginInstruction", [
-    "interface", "global_context"
-])):
-    __slots__ = []
-
-    def on_request_lookahead(self, request):
-        assert isinstance(request, MainBegin)
-
-    def on_generate_response(self):
-        return []
-
-
-class MainEndInstruction(Instruction):
+class ExitInstruction(Instruction):
     def on_generate_response(self):
         return []

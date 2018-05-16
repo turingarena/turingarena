@@ -34,7 +34,7 @@ def do_flush(connection):
 class CheckpointStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         yield CheckpointInstruction()
 
 
@@ -67,7 +67,7 @@ class ReadWriteStatement(Statement):
 
 
 class ReadWriteInstruction(Instruction, namedtuple("ReadWriteInstruction", [
-    "arguments", "context"
+    "arguments", "bindings"
 ])):
     __slots__ = []
 
@@ -75,8 +75,8 @@ class ReadWriteInstruction(Instruction, namedtuple("ReadWriteInstruction", [
 class ReadStatement(ReadWriteStatement):
     __slots__ = []
 
-    def generate_instructions(self, context):
-        yield ReadInstruction(arguments=self.arguments, context=context)
+    def generate_instructions(self, bindings):
+        yield ReadInstruction(arguments=self.arguments, bindings=bindings)
 
     @property
     def context_after(self):
@@ -114,9 +114,10 @@ class ReadInstruction(ReadWriteInstruction):
 
     def on_communicate_with_process(self, connection):
         raw_values = [
-            a.evaluate_in(self.context).get()
+            a.evaluate(self.bindings)
             for a in self.arguments
         ]
+        logger.debug(f"raw_values: {raw_values}")
         with writing_to_process():
             print(*raw_values, file=connection.downward)
 
@@ -124,8 +125,8 @@ class ReadInstruction(ReadWriteInstruction):
 class WriteStatement(ReadWriteStatement):
     __slots__ = []
 
-    def generate_instructions(self, context):
-        yield WriteInstruction(arguments=self.arguments, context=context)
+    def generate_instructions(self, bindings):
+        yield WriteInstruction(arguments=self.arguments, bindings=bindings)
 
 
 class WriteInstruction(ReadWriteInstruction):
@@ -138,4 +139,5 @@ class WriteInstruction(ReadWriteInstruction):
         raw_values = read_line(connection.upward).strip().split()
         for a, v in zip(self.arguments, raw_values):
             value = int(v)
-            a.evaluate_in(self.context).resolve(value)
+            assert a.is_assignable()
+            a.assign(self.bindings, value)

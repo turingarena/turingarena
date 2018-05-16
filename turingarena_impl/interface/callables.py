@@ -3,15 +3,12 @@ from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruction
-from turingarena_impl.interface.context import CallbackContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.references import VariableReference
 from turingarena_impl.interface.statements.statement import SyntheticStatement
 from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType
 
 logger = logging.getLogger(__name__)
-
 
 CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "has_return_value"])
 
@@ -79,7 +76,7 @@ class Function(Callable):
     @property
     def callbacks_signature(self):
         if not self.ast.callbacks:
-            return None
+            return ()
         return tuple(
             CallableSignature(
                 name=callback.prototype.name,
@@ -94,7 +91,7 @@ class Function(Callable):
 
     @property
     def has_callbacks(self):
-        return self.callbacks_signature is not None
+        return bool(self.callbacks_signature)
 
     def validate(self):
         if self.has_callbacks:
@@ -157,11 +154,6 @@ class Callback(Callable):
 
     def generate_instructions(self, context):
         global_context = context.call_context.local_context.procedure.global_context
-        callback_context = CallbackContext(
-            accept_context=context,
-            global_context=global_context,
-        )
-
         local_context = callback_context.child(tuple(p.name for p in self.parameters))
         yield CallbackCallInstruction(
             callback_context=callback_context,
@@ -170,7 +162,9 @@ class Callback(Callable):
         yield from self.body.generate_instructions(local_context)
 
 
-class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", ["callback_context", "local_context"])):
+class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", [
+    "callback_context", "local_context"
+])):
     @property
     def callback(self):
         return self.callback_context.accept_context.callback
@@ -191,5 +185,3 @@ class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction",
             [accepted_callbacks.index(self.callback.name)] +
             parameters
         )
-
-

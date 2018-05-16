@@ -67,18 +67,20 @@ class ForStatement(Statement):
     def validate(self):
         yield from self.body.validate()
 
-    def generate_instructions(self, context):
+    def generate_instructions(self, bindings):
         if self.may_process_requests:
-            yield from self.do_generate_instruction(context)
+            yield from self.do_generate_instruction(bindings)
         else:
-            yield SimpleForInstruction(statement=self, context=context)
+            yield SimpleForInstruction(statement=self, context=bindings)
 
-    def do_generate_instruction(self, context):
-        size = self.index.range.evaluate_in(context=context).get()
+    def do_generate_instruction(self, bindings):
+        size = self.index.range.evaluate(bindings)
         for i in range(size):
-            inner_context = context.child(tuple(self.index.variable.name,))
-            inner_context.bindings[self.index.variable.name] = i
-            yield from self.body.generate_instructions(inner_context)
+            inner_bindings = {
+                **bindings,
+                self.index.variable.name: i,
+            }
+            yield from self.body.generate_instructions(inner_bindings)
 
     @property
     def context_after(self):
