@@ -240,4 +240,4 @@ class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
     def on_request_lookahead(self, request):
         assert isinstance(request, CallbackReturn)
         assert self.value.is_assignable()
-        self.value.assign(self.bindings, self.value.value_type.ensure(request.return_value))
+        self.value.assign(self.bindings, request.return_value)

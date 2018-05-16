@@ -20,10 +20,6 @@ class TypeExpression(AbstractSyntaxNodeWrapper):
             return ArrayType(TypeExpression.value_type_dimensions(dimensions - 1))
         return ArrayType(TypeExpression.value_type_dimensions(dimensions[1:]))
 
-    @property
-    def value_type(self):
-        return self.value_type_dimensions(self.ast.indexes)
-
 
 class ValueType:
     __slots__ = []
@@ -31,31 +27,6 @@ class ValueType:
     @property
     @abstractmethod
     def meta_type(self):
-        pass
-
-    def ensure(self, value):
-        value = self.intern(value)
-        self.check(value)
-        return value
-
-    @abstractmethod
-    def intern(self, value):
-        pass
-
-    @abstractmethod
-    def check(self, value):
-        pass
-
-    @property
-    def metadata(self):
-        return dict(
-            meta_type=self.meta_type,
-            **self.metadata_attributes
-        )
-
-    @property
-    @abstractmethod
-    def metadata_attributes(self):
         pass
 
 
@@ -68,17 +39,6 @@ class ScalarType(ValueType):
     @property
     def meta_type(self):
         return "scalar"
-
-    def intern(self, value):
-        return value
-
-    def check(self, value):
-        if not isinstance(value, int):
-            raise TypeError(f"expected a int, got {value}")
-
-    @property
-    def metadata_attributes(self):
-        return dict(base_type="int")
 
 
 class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
@@ -99,18 +59,3 @@ class ArrayType(ValueType, namedtuple("ArrayType", ["item_type"])):
     @property
     def meta_type(self):
         return "array"
-
-    @property
-    def metadata_attributes(self):
-        return dict(item_type=self.item_type.metadata)
-
-    def intern(self, value):
-        return [
-            self.item_type.ensure(x)
-            for x in value
-        ]
-
-    def check(self, value):
-        assert type(value) == list
-        for x in value:
-            self.item_type.check(x)
