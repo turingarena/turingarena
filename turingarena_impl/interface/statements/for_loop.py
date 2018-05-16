@@ -106,16 +106,11 @@ class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
 
     __slots__ = []
 
-    def has_downward(self):
-        return any(i.has_downward() for i in self.statement.do_generate_instruction(self.context))
+    # FIXME: should only be generated when it contains no writes!
 
-    def has_upward(self):
-        return any(i.has_upward() for i in self.statement.do_generate_instruction(self.context))
+    def has_downward(self):
+        return True
 
     def on_communicate_downward(self, lines):
-        for instruction in self.statement.do_generate_instruction(self.context):
-            instruction.on_communicate_downward(lines)
-
-    def on_communicate_upward(self, lines):
         for instruction in self.statement.do_generate_instruction(self.context):
             instruction.on_communicate_downward(lines)

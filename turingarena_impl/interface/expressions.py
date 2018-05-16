@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from collections import namedtuple
 
 from bidict import frozenbidict
 
@@ -71,6 +72,34 @@ class IntLiteralExpression(LiteralExpression):
         return ScalarType()
 
 
+class Reference:
+    __slots__ = []
+
+    @abstractmethod
+    def get(self):
+        pass
+
+    @abstractmethod
+    def set(self, value):
+        pass
+
+
+class VariableReference(Reference, namedtuple("VariableReference", ["bindings", "name"])):
+    def get(self):
+        return self.bindings[self.name][0]
+
+    def set(self, value):
+        self.bindings[self.name][0] = value
+
+
+class ArrayItemReference(Reference, namedtuple("VariableReference", ["data", "index"])):
+    def get(self):
+        return self.data[self.index]
+
+    def set(self, value):
+        self.data[self.index] = value
+
+
 class ReferenceExpression(Expression):
     __slots__ = []
 
@@ -99,11 +128,17 @@ class ReferenceExpression(Expression):
             for index in self.ast.indices
         )
 
-    def evaluate(self, bindings):
-        value = bindings[self.variable.name][0]
+    def get_reference(self, bindings):
+        ref = VariableReference(bindings, self.variable.name)
         for index in self.indices:
-            assert value is not None
-            value = value[index.evaluate(bindings)]
+            data = ref.get()
+            assert data is not None
+            ref = ArrayItemReference(data, index.evaluate(bindings))
+        return ref
+
+    def evaluate(self, bindings):
+        logger.debug(f"BINDINGS: {bindings}")
+        value = self.get_reference(bindings).get()
         assert value is not None
         return value
 
@@ -111,12 +146,10 @@ class ReferenceExpression(Expression):
         return True
 
     def assign(self, bindings, value):
-        # TODO: handle indices
-        bindings[self.variable.name][0] = value
+        self.get_reference(bindings).set(value)
 
     def alloc(self, bindings, size):
-        # TODO: handle indices
-        bindings[self.variable.name][0] = [None] * size
+        self.assign(bindings, [None] * size)
 
     def validate(self, lvalue=False):
         last_index = 0
