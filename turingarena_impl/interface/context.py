@@ -69,17 +69,8 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
         )
 
 
-class FunctionCallContext:
-    __slots__ = ["local_context", "accepted_callbacks"]
-
-    def __init__(self, local_context):
-        self.local_context = local_context
-        self.accepted_callbacks = None
-
-
-class AcceptCallbackContext:
-    __slots__ = ["call_context", "callback"]
-
-    def __init__(self, call_context):
-        self.call_context = call_context
-        self.callback = None
+class StaticCallbackBlockContext(namedtuple("StaticCallbackBlockContext", [
+    "local_context",
+    "callback_index",
+])):
+    pass

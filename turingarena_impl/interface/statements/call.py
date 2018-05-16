@@ -5,7 +5,7 @@ from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, FunctionCall
 from turingarena_impl.interface.callables import Callback
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.context import AcceptCallbackContext
+from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
@@ -44,12 +44,17 @@ class CallStatement(Statement):
 
     @property
     def callbacks(self):
-        if not self.ast.callbacks:
-            return None
-        return [
-            Callback(ast=callback, context=self.context)
-            for callback in self.ast.callbacks
-        ]
+        return tuple(
+            next(
+                Callback(ast=c, context=StaticCallbackBlockContext(
+                    local_context=self.context,
+                    callback_index=i,
+                ))
+                for c in self.ast.callbacks
+                if c.prototype.name == s.name
+            )
+            for i, s in enumerate(self.function.callbacks_signature)
+        )
 
     @property
     def has_callbacks(self):
@@ -140,13 +145,15 @@ class CallStatement(Statement):
         )
 
     def unroll_callbacks(self, bindings):
+        accepted_callback_holder = []
         while True:
-            context = AcceptCallbackContext(call_context)
-            yield AcceptCallbackInstruction(context=context)
-            if context.callback is None:
+            yield AcceptCallbackInstruction(bindings=bindings, accepted_callback_holder=accepted_callback_holder)
+            if accepted_callback_holder:
+                [accepted_callback_index] = accepted_callback_holder
+                callback = self.callbacks[accepted_callback_index]
+                yield from callback.generate_instructions(bindings)
+            else:
                 break
-
-            yield from context.callback.generate_instructions(context)
 
 
 class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction", [
@@ -195,7 +202,9 @@ class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstructi
         )
 
 
-class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", ["bindings"])):
+class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", [
+    "bindings", "accepted_callback_holder"
+])):
     __slots__ = []
 
     def should_send_input(self):
@@ -206,10 +215,7 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
         has_callback = int(read_line(connection.upward).strip())
         if has_callback:
             callback_index = int(read_line(connection.upward).strip())
-            interface = self.context.call_context.local_context.procedure.global_context.interface
-            self.context.callback = interface.callbacks[callback_index]
-        else:
-            self.context.callback = None
+            self.accepted_callback_holder[:] = [callback_index]
 
 
 class ReturnStatement(Statement):

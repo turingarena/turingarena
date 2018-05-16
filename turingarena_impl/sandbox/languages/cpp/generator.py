@@ -2,34 +2,26 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 
 class CppCodeGen(CodeGen):
-    @staticmethod
-    def build_callback_signature(parameter):
-        return_type = "int" if parameter.has_return_value else "void"
-        parameters = ", ".join([f"int {a}" for a in parameter.parameters])
-        return f"{return_type} {parameter.name}({parameters})"
-
-    @classmethod
-    def build_parameter(cls, parameter):
-        if parameter.value_type.meta_type == "callback":
-            return cls.build_callback_signature(parameter)
+    def build_parameter(self, parameter):
+        value_type = parameter.variable.value_type
+        if value_type.meta_type == "array":
+            indirections = "*" * value_type.dimensions
         else:
-            indirections = "*" * parameter.value_type.dimensions if parameter.value_type.meta_type == "array" else ""
-            return f"int {indirections}{parameter.name}"
+            indirections = ""
+        return f"int {indirections}{parameter.variable.name}"
 
-    @classmethod
-    def build_function_signature(cls, func):
-        return_type = "int" if func.has_return_value else "void"
-        parameters = ", ".join(cls.build_parameter(p) for p in func.parameters)
-        if func.has_callbacks:
-            callbacks = ", ".join(
-                cls.build_callback_signature(callback)
-                for callback in func.callbacks_signature
-            )
-        else:
-            callbacks = ""
-        if len(parameters) > 0 and len(callbacks) > 0:
-            parameters += ", "
-        return f"{return_type} {func.name}({parameters}{callbacks})"
+    def build_signature(self, callable, callbacks):
+        return_type = "int" if callable.has_return_value else "void"
+        value_parameters = [self.build_parameter(p) for p in callable.parameters]
+        callback_parameters = [
+            self.build_signature(callback, [])
+            for callback in callbacks
+        ]
+        parameters = ", ".join(value_parameters + callback_parameters)
+        return f"{return_type} {callable.name}({parameters})"
+
+    def build_function_signature(self, func):
+        return self.build_signature(func, func.callbacks_signature)
 
 
 class CppSkeletonCodeGen(CppCodeGen):
@@ -67,16 +59,15 @@ class CppSkeletonCodeGen(CppCodeGen):
             return_value = ""
 
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
-        yield self.indent(fr"""printf("%d\n", {index});""")
-        yield from self.block_content(callback.body)
+        yield from self.block_content(callback.synthetic_body)
         yield "};"
 
     def call_statement_body(self, call_statement):
         function_name = call_statement.function.name
         func = call_statement.function
 
-        for callback_signature in func.callbacks_signature:
-            yield from self.generate_callback(*self.find_callback(callback_signature, call_statement))
+        for i, callback in enumerate(call_statement.callbacks):
+            yield from self.generate_callback(callback, i)
 
         value_arguments = [self.expression(p) for p in call_statement.parameters]
         callback_arguments = [

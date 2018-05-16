@@ -107,7 +107,7 @@ class Function(Callable):
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
     @property
     def synthetic_statements(self):
-        callback_index = self.context.callback_count
+        callback_index = self.context.callback_index
         yield SyntheticStatement("write", arguments=[
             SyntheticExpression("int_literal", value=1),  # more callbacks
         ])
@@ -132,7 +132,7 @@ class Callback(Callable):
         # TODO: generate block if body is None ('default' is specified)
         return Block(
             ast=self.ast.body,
-            context=self.context.create_inner().with_variables(self.parameters),
+            context=self.context.local_context.create_inner().with_variables(self.parameters),
         )
 
     def validate(self):
@@ -152,36 +152,29 @@ class Callback(Callable):
                 parseinfo=invalid_parameter.parseinfo,
             )
 
-    def generate_instructions(self, context):
-        global_context = context.call_context.local_context.procedure.global_context
-        local_context = callback_context.child(tuple(p.name for p in self.parameters))
-        yield CallbackCallInstruction(
-            callback_context=callback_context,
-            local_context=local_context,
-        )
-        yield from self.body.generate_instructions(local_context)
+    def generate_instructions(self, bindings):
+        inner_bindings = {
+            **bindings,
+            **{
+                p.name: None for p in self.parameters
+            }
+        }
+        yield CallbackCallInstruction(self, bindings=inner_bindings)
+        yield from self.body.generate_instructions(inner_bindings)
 
 
 class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", [
-    "callback_context", "local_context"
+    "callback", "bindings",
 ])):
-    @property
-    def callback(self):
-        return self.callback_context.accept_context.callback
-
     def on_generate_response(self):
         parameters = [
-            VariableReference(
-                context=self.local_context,
-                variable=p,
-            ).get()
+            self.bindings[p.name]
             for p in self.callback.parameters
         ]
 
         assert all(isinstance(v, int) for v in parameters)
-        accepted_callbacks = list(self.callback_context.accept_context.call_context.accepted_callbacks.keys())
         return (
             [1] +  # has callback
-            [accepted_callbacks.index(self.callback.name)] +
+            [self.callback.context.callback_index] +
             parameters
         )

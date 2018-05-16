@@ -31,7 +31,7 @@ def serialize_request(request):
 
 
 class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
-    "function_name", "parameters"
+    "function_name", "parameters", "accepted_callbacks"
 ])):
     __slots__ = []
 
@@ -42,10 +42,17 @@ class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
         parameters = [None] * parameters_count
         for i in range(parameters_count):
             parameters[i] = yield from deserialize_data()
+        callbacks_count = int((yield))
+        accepted_callbacks = {}
+        for _ in range(callbacks_count):
+            callback_name = yield
+            callback_parameters_count = int((yield))
+            accepted_callbacks[callback_name] = callback_parameters_count
 
         return FunctionCall(
             function_name=function_name,
             parameters=parameters,
+            accepted_callbacks=accepted_callbacks,
         )
 
     def serialize_arguments(self):
@@ -53,6 +60,10 @@ class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
         yield len(self.parameters)
         for value in self.parameters:
             yield from serialize_data(value)
+        yield len(self.accepted_callbacks)
+        for name, parameters_count in self.accepted_callbacks.items():
+            yield name
+            yield parameters_count
 
 
 class CallbackReturn(ProxyRequest, namedtuple("CallbackReturn", [
@@ -97,7 +108,6 @@ request_types = bidict({
 class MetaType(IntEnum):
     SCALAR = 0
     ARRAY = 1
-    CALLBACK = 2
 
 
 def get_meta_type(value):
@@ -105,8 +115,6 @@ def get_meta_type(value):
         return MetaType.ARRAY
     if isinstance(value, numbers.Integral):
         return MetaType.SCALAR
-    if isinstance(value, collections.Callable):
-        return MetaType.CALLBACK
     raise AssertionError(f"unsupported type for value: {value}")
 
 
@@ -120,8 +128,6 @@ def serialize_data(value):
             yield from serialize_data(item)
     elif meta_type == MetaType.SCALAR:
         yield int(value)
-    elif meta_type == MetaType.CALLBACK:
-        pass
     else:
         raise AssertionError
 
@@ -135,8 +141,6 @@ def deserialize_data():
             value[i] = yield from deserialize_data()
     elif meta_type == MetaType.SCALAR:
         value = int((yield))
-    elif meta_type == MetaType.CALLBACK:
-        value = None
     else:
         raise AssertionError
     return value
