@@ -106,6 +106,13 @@ class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [
 
     __slots__ = []
 
-    def on_communicate_with_process(self, connection):
+    def has_downward(self):
+        return any(i.has_downward() for i in self.statement.do_generate_instruction(self.context))
+
+    def on_communicate_downward(self, lines):
         for instruction in self.statement.do_generate_instruction(self.context):
-            instruction.on_communicate_with_process(connection)
+            instruction.on_communicate_downward(lines)
+
+    def on_communicate_upward(self, lines):
+        for instruction in self.statement.do_generate_instruction(self.context):
+            instruction.on_communicate_downward(lines)

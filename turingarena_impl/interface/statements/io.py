@@ -1,34 +1,12 @@
 import logging
 from collections import namedtuple
-from contextlib import contextmanager
 
 from turingarena_impl.interface.common import Instruction
-from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
 logger = logging.getLogger(__name__)
-
-
-def read_line(pipe):
-    line = pipe.readline()
-    if not line:
-        raise CommunicationBroken
-    return line
-
-
-@contextmanager
-def writing_to_process():
-    try:
-        yield
-    except BrokenPipeError:
-        raise CommunicationBroken
-
-
-def do_flush(connection):
-    with writing_to_process():
-        connection.downward.flush()
 
 
 class CheckpointStatement(Statement):
@@ -44,11 +22,8 @@ class CheckpointInstruction(Instruction):
     def should_send_input(self):
         return True
 
-    def on_communicate_with_process(self, connection):
-        do_flush(connection)
-
-        line = read_line(connection.upward).strip()
-        assert line == str(0)
+    def on_communicate_upward(self, lines):
+        assert next(lines) == (0,)
 
 
 class ReadWriteStatement(Statement):
@@ -112,14 +87,14 @@ class ReadStatement(ReadWriteStatement):
 class ReadInstruction(ReadWriteInstruction):
     __slots__ = []
 
-    def on_communicate_with_process(self, connection):
-        raw_values = [
+    def has_downward(self):
+        return True
+
+    def on_communicate_downward(self, lines):
+        lines.send([
             a.evaluate(self.bindings)
             for a in self.arguments
-        ]
-        logger.debug(f"raw_values: {raw_values}")
-        with writing_to_process():
-            print(*raw_values, file=connection.downward)
+        ])
 
 
 class WriteStatement(ReadWriteStatement):
@@ -132,12 +107,7 @@ class WriteStatement(ReadWriteStatement):
 class WriteInstruction(ReadWriteInstruction):
     __slots__ = []
 
-    def on_communicate_with_process(self, connection):
-        # make sure all input was sent before receiving output
-        do_flush(connection)
-
-        raw_values = read_line(connection.upward).strip().split()
-        for a, v in zip(self.arguments, raw_values):
-            value = int(v)
+    def on_communicate_upward(self, lines):
+        for a, value in zip(self.arguments, next(lines)):
             assert a.is_assignable()
             a.assign(self.bindings, value)

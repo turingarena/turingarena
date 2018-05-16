@@ -34,8 +34,14 @@ class Instruction:
     def on_generate_response(self):
         pass
 
-    def on_communicate_with_process(self, connection):
-        pass
+    def has_downward(self):
+        return False
+
+    def on_communicate_downward(self, lines):
+        return NotImplemented
+
+    def on_communicate_upward(self, lines):
+        return NotImplemented
 
     def should_send_input(self):
         return False

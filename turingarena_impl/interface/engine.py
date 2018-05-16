@@ -1,6 +1,8 @@
 import itertools
 import logging
+from collections import namedtuple
 
+from turingarena_impl.interface.exceptions import CommunicationBroken
 from .statements.io import ReadInstruction, WriteInstruction
 
 logger = logging.getLogger(__name__)
@@ -68,15 +70,48 @@ def send_response(driver_connection, response):
     driver_connection.response.flush()
 
 
+def upward_reader(sandbox_connection):
+    while True:
+        try:
+            sandbox_connection.downward.flush()
+        except BrokenPipeError:
+            raise CommunicationBroken
+
+        line = sandbox_connection.upward.readline()
+        if not line:
+            raise CommunicationBroken
+        yield tuple(map(int, line.strip().split()))
+
+
+class DownwardWriter(namedtuple("DownwardWriter", ["sandbox_connection"])):
+    def send(self, values):
+        try:
+            logger.debug(f"DOWNWARD: {values}")
+            print(*values, file=self.sandbox_connection.downward)
+        except BrokenPipeError:
+            raise CommunicationBroken
+
+
 def run_sandbox(instructions, *, sandbox_connection):
-    last_write = False
+    last_upward = False
+    upward_lines = upward_reader(sandbox_connection)
+    downward_lines = DownwardWriter(sandbox_connection)
+
     for instruction in instructions:
         logger.debug(f"communication: processing instruction {type(instruction)}")
-        if isinstance(instruction, WriteInstruction):
-            last_write = True
-        if last_write and isinstance(instruction, ReadInstruction):
-            last_write = False
-            yield
-        instruction.on_communicate_with_process(sandbox_connection)
+
+        upward_result = instruction.on_communicate_upward(upward_lines)
+
+        if upward_result is not NotImplemented:
+            last_upward = True
+
+        if instruction.has_downward():
+            if last_upward:
+                yield
+            last_upward = False
+            instruction.on_communicate_downward(downward_lines)
+        else:
+            assert instruction.on_communicate_downward(downward_lines) is NotImplemented
+
         logger.debug(f"communication: instruction {type(instruction)} processed")
     yield

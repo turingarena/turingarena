@@ -8,7 +8,6 @@ from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.statements.io import read_line, do_flush
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
@@ -210,11 +209,10 @@ class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstructi
     def should_send_input(self):
         return True
 
-    def on_communicate_with_process(self, connection):
-        do_flush(connection)
-        has_callback = int(read_line(connection.upward).strip())
+    def on_communicate_upward(self, lines):
+        [has_callback] = next(lines)
         if has_callback:
-            callback_index = int(read_line(connection.upward).strip())
+            [callback_index] = next(lines)
             self.accepted_callback_holder[:] = [callback_index]
 
 
