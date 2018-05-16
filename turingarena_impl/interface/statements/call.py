@@ -145,8 +145,8 @@ class CallStatement(Statement):
         )
 
     def unroll_callbacks(self, bindings):
-        accepted_callback_holder = []
         while True:
+            accepted_callback_holder = []
             yield AcceptCallbackInstruction(bindings=bindings, accepted_callback_holder=accepted_callback_holder)
             if accepted_callback_holder:
                 [accepted_callback_index] = accepted_callback_holder

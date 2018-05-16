@@ -100,7 +100,7 @@ class ReferenceExpression(Expression):
         )
 
     def evaluate(self, bindings):
-        value = bindings[self.variable.name]
+        value = bindings[self.variable.name][0]
         for index in self.indices:
             assert value is not None
             value = value[index.evaluate(bindings)]
@@ -112,11 +112,11 @@ class ReferenceExpression(Expression):
 
     def assign(self, bindings, value):
         # TODO: handle indices
-        bindings[self.variable.name] = value
+        bindings[self.variable.name][0] = value
 
     def alloc(self, bindings, size):
         # TODO: handle indices
-        bindings[self.variable.name] = [None] * size
+        bindings[self.variable.name][0] = [None] * size
 
     def validate(self, lvalue=False):
         last_index = 0

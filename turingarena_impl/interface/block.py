@@ -65,7 +65,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
         inner_bindings = {
             **bindings,
             **{
-                var.name: None for var in self.declared_variables
+                var.name: [None] for var in self.declared_variables
             },
         }
         for statement in self.statements:

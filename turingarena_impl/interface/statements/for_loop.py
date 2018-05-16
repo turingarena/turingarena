@@ -78,7 +78,7 @@ class ForStatement(Statement):
         for i in range(size):
             inner_bindings = {
                 **bindings,
-                self.index.variable.name: i,
+                self.index.variable.name: [i],
             }
             yield from self.body.generate_instructions(inner_bindings)
 

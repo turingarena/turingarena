@@ -156,7 +156,7 @@ class Callback(Callable):
         inner_bindings = {
             **bindings,
             **{
-                p.name: None for p in self.parameters
+                p.name: [None] for p in self.parameters
             }
         }
         yield CallbackCallInstruction(self, bindings=inner_bindings)
@@ -168,7 +168,7 @@ class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction",
 ])):
     def on_generate_response(self):
         parameters = [
-            self.bindings[p.name]
+            self.bindings[p.name][0]
             for p in self.callback.parameters
         ]
 
