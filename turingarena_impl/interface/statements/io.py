@@ -6,7 +6,7 @@ from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
+from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ class ReadStatement(ReadWriteStatement):
     @property
     def variables(self):
         return tuple(
-            Variable(name=exp.variable_name, value_type=TypeExpression.value_type_dimensions(exp.indices))
+            Variable(name=exp.variable_name, value_type=Variable.value_type_dimensions(exp.indices))
             for exp in self.ast.arguments
         )
 

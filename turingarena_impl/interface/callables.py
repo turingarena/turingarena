@@ -6,7 +6,7 @@ from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruc
 from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement
-from turingarena_impl.interface.variables import Variable, TypeExpression, ScalarType
+from turingarena_impl.interface.variables import Variable, ScalarType
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +17,9 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
-    def type_expression(self):
-        return TypeExpression(self.ast, self.context)
-
-    @property
     def variable(self):
         return Variable(
-            value_type=TypeExpression.value_type_dimensions(self.ast.indexes),
+            value_type=Variable.value_type_dimensions(self.ast.indexes),
             name=self.ast.name,
         )
 
@@ -97,7 +93,7 @@ class Function(Callable):
         if self.has_callbacks:
             for callback_signature in self.callbacks_signature:
                 for parameter in callback_signature.parameters:
-                    if parameter.value_type.meta_type != 'scalar':
+                    if parameter.value_type.dimensions > 0:
                         yield Diagnostic(
                             Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
                             parseinfo=self.ast.parseinfo

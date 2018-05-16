@@ -10,7 +10,7 @@ from turingarena_impl.interface.exceptions import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.io import read_line, do_flush
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, TypeExpression, VariableDeclaration
+from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class CallStatement(Statement):
         if return_value_ast is not None:
             var = Variable(
                 name=return_value_ast.variable_name,
-                value_type=TypeExpression.value_type_dimensions(len(return_value_ast.indices)),
+                value_type=Variable.value_type_dimensions(len(return_value_ast.indices)),
             )
             return self.context.with_variables((var,))
         else:

@@ -5,11 +5,9 @@ from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation, \
-    TypeExpression
+from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation
 
 logger = logging.getLogger(__name__)
-
 
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
@@ -49,7 +47,7 @@ class ForStatement(Statement):
                 dimensions=var.dimensions - var.to_allocate,
                 indexes=tuple(
                     idx.variable.name
-                    for idx in self.context.index_variables[1-var.to_allocate:]
+                    for idx in self.context.index_variables[1 - var.to_allocate:]
                 ) if var.to_allocate > 1 else ()
             )
             for stmt in self.body.statements
@@ -60,7 +58,7 @@ class ForStatement(Statement):
     @property
     def variables(self):
         return tuple(
-            Variable(name=var.name, value_type=TypeExpression.value_type_dimensions(var.dimensions))
+            Variable(name=var.name, value_type=Variable.value_type_dimensions(var.dimensions))
             for var in self.variables_to_declare
         )
 

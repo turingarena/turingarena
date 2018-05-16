@@ -4,10 +4,7 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 class CppCodeGen(CodeGen):
     def build_parameter(self, parameter):
         value_type = parameter.value_type
-        if value_type.meta_type == "array":
-            indirections = "*" * value_type.dimensions
-        else:
-            indirections = ""
+        indirections = "*" * value_type.dimensions
         return f"int {indirections}{parameter.name}"
 
     def build_signature(self, callable, callbacks):
