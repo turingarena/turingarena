@@ -40,25 +40,25 @@ grammar_ebnf = r"""
     
     expression = or_expression;
     or_expression = 
+        | expression_type:`or` operands:and_expression { '||' operands:and_expression }+
         | and_expression
-        | expression_type:`or` operands:'||'.{ and_expression }+
         ;
     and_expression =
+        | expression_type:`and` operands:comparison_expression { '&&' operands:comparison_expression }+
         | comparison_expression
-        | expression_type:`and` operands:'&&'.{ comparison_expression }+
         ;
     comparison_expression =
+        | expression_type:`comparison` operands:sum_expression { operators+:('=='|'!='|'<'|'<='|'>'|'>=') operands:sum_expression }+
         | sum_expression
-        | expression_type:`comparison` operands:( operators+:('=='|'!='|'<'|'<='|'>'|'>=') ).{ sum_expression }+
         ;
     sum_expression = 
+        | expression_type:`sum` signs:() operands:mul_expression { signs:('+'|'-') operands:mul_expression }+
+        | expression_type:`sum` signs+:('+'|'-') operands:mul_expression { signs+:('+'|'-') operands:mul_expression }*
         | mul_expression
-        | expression_type:`sum` signs+:() operands:( signs+:('+'|'-') ).{ mul_expression }+
-        | expression_type:`sum` { signs+:('+'|'-') operands+:mul_expression }+
         ;
     mul_expression =
+        | expression_type:`mul` operands:atomic_expression { '*' operands:atomic_expression }+
         | atomic_expression
-        | expression_type:`mul` operands:'*'.{ atomic_expression }+
         ;
     atomic_expression =
         | expression_type:`int_literal` int_literal:int_literal
