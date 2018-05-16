@@ -49,6 +49,17 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
     def generate_main_block(self):
         yield from self.block_content(self.interface.main, indent=False)
 
+    @staticmethod
+    def find_callback(callback_signature, call_statement):
+        """
+        Find the callback that correspond to callback_signature in the call statement,
+        return a tuple (Callback, index) if found, otherwise None
+        """
+        for i, callback in enumerate(call_statement.callbacks):
+            if callback.name == callback_signature.name:
+                return callback, i
+        return None
+
     @abstractmethod
     def generate_variable_allocation(self, allocated_variable):
         pass

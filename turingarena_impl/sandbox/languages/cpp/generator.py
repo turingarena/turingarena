@@ -20,7 +20,7 @@ class CppCodeGen(CodeGen):
     def build_function_signature(cls, func):
         return_type = 'int' if func.has_return_value else 'void'
         parameters = ', '.join(cls.build_parameter(p) for p in func.parameters)
-        callbacks = ', '.join(cls.build_callback_signature(callback) for callback in func.callbacks_signature)
+        callbacks = ', '.join(cls.build_callback_signature(callback) for callback in func.callbacks_signature) if func.has_callbacks else ""
         if len(parameters) > 0 and len(callbacks) > 0:
             parameters += ', '
         return f'{return_type} {func.name}({parameters}{callbacks})'
@@ -57,13 +57,8 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield from self.block_content(self.interface.main)
         yield "}"
 
-    @staticmethod
-    def find_callback(callback_signature, call_statement):
-        for callback in call_statement.callbacks:
-            if callback.name == callback_signature.name:
-                return callback
-
-    def build_callback(self, callback, prev):
+    def build_callback(self, callback_tuple, prev):
+        callback, index = callback_tuple
         prototype = f'  {"," if prev else ""}[]('
         prototype += ', '.join(f'int {parameter.name}' for parameter in callback.parameters)
         prototype += ') '
@@ -71,6 +66,7 @@ class CppSkeletonCodeGen(CppCodeGen):
             prototype += '-> int '
         prototype += '{'
         yield prototype
+        yield self.indent(f'print("{index}");')
         yield from self.block_content(callback.body)
         yield '}'
 
@@ -81,11 +77,14 @@ class CppSkeletonCodeGen(CppCodeGen):
         return_value = f'{self.expression(call_statement.return_value)} = ' if func.has_return_value else ''
         prev = len(call_statement.parameters)
 
-        yield f"{return_value}{function_name}({parameters}"
-        for callback_signature in func.callbacks_signature:
-            yield from self.build_callback(self.find_callback(callback_signature, call_statement), prev)
-            prev = True
-        yield ");"
+        if call_statement.has_callbacks:
+            yield f"{return_value}{function_name}({parameters}"
+            for callback_signature in func.callbacks_signature:
+                yield from self.build_callback(self.find_callback(callback_signature, call_statement), prev)
+                prev = True
+            yield ");"
+        else:
+            yield f"{return_value}{function_name}({parameters});"
 
     def write_statement(self, write_statement):
         format_string = ' '.join("%d" for _ in write_statement.arguments) + r'\n'

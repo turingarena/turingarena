@@ -24,7 +24,6 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
             index_variables=(),
             in_loop=False,
             has_break=False,
-            callback_count=0,
         )
 
 
@@ -35,7 +34,6 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
     "index_variables",
     "in_loop",
     "has_break",
-    "callback_count",
 ])):
     def with_variables(self, variables):
         return self._replace(
@@ -64,9 +62,6 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
 
     def with_break(self, has_break):
         return self._replace(has_break=has_break)
-
-    def with_callback(self):
-        return self._replace(callback_count=self.callback_count + 1)
 
     def create_inner(self):
         return self._replace(
