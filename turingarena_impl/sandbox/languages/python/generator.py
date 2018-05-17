@@ -41,7 +41,8 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         for idx in allocated_variable.indexes:
             indexes += f'[{idx}]'
 
-        yield f'{allocated_variable.name}{indexes} = [None] * {allocated_variable.size}'
+        size = self.expression(allocated_variable.size)
+        yield f'{allocated_variable.name}{indexes} = [None] * {size}'
 
     def generate_function_declaration(self, function_declaration):
         yield from ()

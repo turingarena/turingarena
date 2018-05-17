@@ -37,9 +37,6 @@ class Expression(AbstractSyntaxNodeWrapper):
     def assign(self, bindings, value):
         raise NotImplementedError
 
-    def alloc(self, bindings, size):
-        raise NotImplementedError
-
     def validate(self):
         return []
 
@@ -147,9 +144,6 @@ class ReferenceExpression(Expression):
 
     def assign(self, bindings, value):
         self.get_reference(bindings).set(value)
-
-    def alloc(self, bindings, size):
-        self.assign(bindings, [None] * size)
 
     def validate(self, lvalue=False):
         last_index = 0

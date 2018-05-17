@@ -37,7 +37,8 @@ class CppSkeletonCodeGen(CppCodeGen):
         for idx in allocated_variable.indexes:
             indexes += f"[{idx}]"
         dimensions = "*" * allocated_variable.dimensions
-        yield f"{allocated_variable.name}{indexes} = new int{dimensions}[{allocated_variable.size}];"
+        size = self.expression(allocated_variable.size)
+        yield f"{allocated_variable.name}{indexes} = new int{dimensions}[{size}];"
 
     def generate_function_declaration(self, s):
         yield f"{self.build_function_signature(s)};"

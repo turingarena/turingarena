@@ -56,7 +56,8 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         var = allocated_variable.name
         for index in allocated_variable.indexes:
             var += f'[{index}]'
-        yield f'{var} = new int{"[]" * allocated_variable.dimensions}({allocated_variable.size};'
+        size = self.expression(allocated_variable.size)
+        yield f'{var} = new int{"[]" * allocated_variable.dimensions}[{size}];'
 
     def generate_variable_declaration(self, declared_variable):
         yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name}'

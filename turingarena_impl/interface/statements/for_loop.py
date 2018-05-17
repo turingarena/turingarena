@@ -43,7 +43,7 @@ class ForStatement(Statement):
         return tuple(
             VariableAllocation(
                 name=var.name,
-                size=self.index.range.variable_name,
+                size=self.index.range,
                 dimensions=var.dimensions - var.to_allocate,
                 indexes=tuple(
                     idx.variable.name
