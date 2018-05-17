@@ -13,7 +13,7 @@ class LoopStatement(Statement):
     def generate_instructions(self, bindings):
         while True:
             for instruction in self.body.generate_instructions(bindings):
-                if instruction is BreakSentinel:
+                if instruction is BREAK_SENTINEL:
                     break
                 yield instruction
 
@@ -43,7 +43,7 @@ class BreakStatement(Statement):
     __slots__ = []
 
     def generate_instructions(self, bindings):
-        yield BreakSentinel
+        yield BREAK_SENTINEL
 
     def validate(self):
         if not self.context.in_loop:
@@ -54,4 +54,4 @@ class BreakStatement(Statement):
         return self.context.with_break(True)
 
 
-BreakSentinel = object()
+BREAK_SENTINEL = object()
