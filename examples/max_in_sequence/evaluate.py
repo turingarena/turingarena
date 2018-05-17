@@ -10,15 +10,14 @@ for _ in range(10):
 
     try:
         with algorithm.run() as process:
-            process.call.sort(len(a), a)
             index = process.call.max_index(len(a), a)
+        if a[index] == max(a):
+            print("correct!")
+        else:
+            print("WRONG!")
+            all_passed = False
     except AlgorithmError as e:
         print(e)
-        all_passed = False
-    if a[index] == max_value:
-        print("correct!")
-    else:
-        print("WRONG!")
         all_passed = False
 
 evaluation_result(goals=dict(correct=all_passed))

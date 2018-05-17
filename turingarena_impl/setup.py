@@ -7,7 +7,7 @@ setup(
     name="turingarena_impl",
     entry_points={
         "pytest11": [
-            "turingarena=turingarena_impl.pytestplugin",
+            "turingarena=turingarena_impl.tests.pytestplugin",
         ]
     },
 )

@@ -7,9 +7,9 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
+from turingarena_impl.evaluation.python import PythonEvaluator
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.loader import find_package_path
-from turingarena_impl.problem.python import HostPythonEvaluator
-from turingarena_impl.problem.segi import run_metaservers
 
 
 class EvaluationAssertionError(Exception):
@@ -30,7 +30,7 @@ class ProblemSolutionItem(pytest.Item):
         return re.findall(r"evaluation_assert\s+(.+)", source_text)
 
     def runtest(self):
-        evaluator = HostPythonEvaluator(self.parent.evaluator_name)
+        evaluator = PythonEvaluator(self.parent.evaluator_name)
         result = evaluator.evaluate(self.parent.source_name)
         self.add_report_section("call", "evaluation_stdout", "\n".join(result.stdout))
         self.add_report_section("call", "evaluation_result", json.dumps(result.data, indent=4))

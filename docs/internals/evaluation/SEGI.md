@@ -36,8 +36,6 @@ How the termination of the evaluator program is determined is not specified by S
 - Other data can be provided to the evaluator program, preferably through enviroment variables,
 as long as they do not depend on the submission.
 
-The details of the communication with the evaluation are described in the following.
-
 ### Rationale
 
 Thanks to the above assumptions, the evaluator program can easily invoke other executables (as child processes)
@@ -57,31 +55,14 @@ is already considered unsafe, and it is run in a container.
 
 ## Submission
 
-For each field in the submission, an enviroment variable is provided.
+For each field in the submission, an environment variable is provided, defined by:
 
-- If the field is of type *string*, the variable is defined by:
-    - name: `SUBMISSION_VALUE_` followed by the field name *to upper case*,
-    - value: the string value of the field (verbatim).
-- If the field is of type *file*, the variable is defined by:
-    - name: `SUBMISSION_FILE_` followed by the field name *to upper case*,
-    - value: the *absolute* path to a *regular* file on the filesystem
-    whose content is the value of the field.
-    (The process must be able to open the file for reading.)
+- name: `SUBMISSION_FILE_` followed by the field name *to upper case*,
+- value: the *absolute* path to a *regular* file on the filesystem,
+whose content and basename correspond to the submission file.
+(The process must be able to open the file for reading.)
 
-**Example.**
-For a submission with two fields
-    
-- name: `source_language`, type: *string*, value: `c++`
-- name: `source`, type: *file*
-
-the content of the file in `source` is saved to
-a temporary file `/tmp/submission_42/source.cpp`
-and two environment variables are provided to the evaluator:
-    
-    SUBMISSION_VALUE_SOURCE_LANGUAGE=c++
-    SUBMISSION_FILE_SOURCE=/tmp/submission_42/source.cpp
-
-## Evaluation
+## Evaluations
 
 An evaluation is generated from the process `stdout`.
 
