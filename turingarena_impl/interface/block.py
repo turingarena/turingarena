@@ -1,8 +1,9 @@
 import logging
+from collections import namedtuple
 
-from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, Instruction
 from turingarena_impl.interface.diagnostics import Diagnostic
-from turingarena_impl.interface.expressions import SyntheticExpression
+from turingarena_impl.interface.expressions import SyntheticExpression, VariableReference, ArrayItemReference
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
 
 logger = logging.getLogger(__name__)
@@ -63,12 +64,15 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 
     def generate_instructions(self, bindings):
         inner_bindings = {
-            **bindings,
             **{
                 var.name: [None] for var in self.declared_variables
             },
+            **bindings,
         }
         for statement in self.statements:
+            # FIXME
+            # for allocation in statement.variables_to_allocate:
+            #    yield AllocationInstruction(allocation, inner_bindings)
             yield from statement.generate_instructions(inner_bindings)
 
     def expects_request(self, request):
@@ -90,3 +94,20 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     @property
     def context_after(self):
         return self.context
+
+
+class AllocationInstruction(Instruction, namedtuple("AllocationInstruction", [
+    "allocation", "bindings"
+])):
+    # FIXME: downward or upward? should be implemented differently (say, in for loops)
+
+    def has_downward(self):
+        return True
+
+    def on_communicate_downward(self, lines):
+        logger.debug(f"ALLOCATION: {self}")
+        ref = VariableReference(name=self.allocation.name, bindings=self.bindings)
+        for index in self.allocation.indexes:
+            index_ref = VariableReference(name=index, bindings=self.bindings)
+            ref = ArrayItemReference(ref.get(), index_ref.get())
+        ref.set([None] * self.allocation.size.evaluate(self.bindings))

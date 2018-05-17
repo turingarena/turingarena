@@ -81,7 +81,7 @@ class Reference:
         pass
 
 
-class VariableReference(Reference, namedtuple("VariableReference", ["bindings", "name"])):
+class VariableReference(Reference, namedtuple("VariableReference", ["name", "bindings"])):
     def get(self):
         return self.bindings[self.name][0]
 
@@ -126,7 +126,7 @@ class ReferenceExpression(Expression):
         )
 
     def get_reference(self, bindings):
-        ref = VariableReference(bindings, self.variable.name)
+        ref = VariableReference(name=self.variable.name, bindings=bindings)
         for index in self.indices:
             data = ref.get()
             assert data is not None
@@ -134,7 +134,6 @@ class ReferenceExpression(Expression):
         return ref
 
     def evaluate(self, bindings):
-        logger.debug(f"BINDINGS: {bindings}")
         value = self.get_reference(bindings).get()
         assert value is not None
         return value
