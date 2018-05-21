@@ -3,7 +3,7 @@ import logging
 from turingarena import InterfaceExit
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.callables import MethodPrototype
-from turingarena_impl.interface.context import StaticGlobalContext
+from turingarena_impl.interface.context import InterfaceContext
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.interface.statements.exit import ExitInstruction
 from turingarena_impl.loader import find_package_path
@@ -21,10 +21,13 @@ class InterfaceDefinition:
         self.ast = ast
         self.main = Block(
             ast=self.ast.main_block,
-            context=StaticGlobalContext(methods=self.methods).create_local()
+            context=InterfaceContext(methods=self.methods).main_block_context()
         )
 
     def validate(self):
+        return list(self.do_validate())
+
+    def do_validate(self):
         for method in self.methods:
             yield from method.validate()
         yield from self.main.validate()

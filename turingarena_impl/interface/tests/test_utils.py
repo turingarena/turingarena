@@ -1,7 +1,7 @@
 import os
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
-from typing import Dict, Generator
+from typing import Dict, Generator, Sequence
 
 from turingarena.algorithm import Algorithm
 from turingarena_impl.evaluation.environ import env_extension
@@ -47,17 +47,14 @@ def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator
 
 
 def assert_no_interface_errors(text: str):
-    i = InterfaceDefinition.compile(text)
-    for m in i.validate():
-        print(m.message)
-        raise AssertionError
+    assert_interface_diagnostics(text, [])
 
 
 def assert_interface_error(text: str, error: str, *args: str):
-    i = InterfaceDefinition.compile(text)
     error = Diagnostic.build_message(error, *args)
-    for m in i.validate():
-        print(m)
-        if m.message == error:
-            return
-    raise AssertionError
+    assert_interface_diagnostics(text, [error])
+
+
+def assert_interface_diagnostics(interface_text: str, messages: Sequence[str]):
+    interface = InterfaceDefinition.compile(interface_text)
+    assert [m.message for m in interface.validate()] == messages

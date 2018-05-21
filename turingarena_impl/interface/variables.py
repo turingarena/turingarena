@@ -15,6 +15,10 @@ class Variable(namedtuple("Variable", ["name", "value_type"])):
         return ArrayType(Variable.value_type_dimensions(dimensions[1:]))
 
 
+class DataReference(namedtuple("DataReference", ["variable", "indexes"])):
+    pass
+
+
 class ValueType:
     __slots__ = []
 

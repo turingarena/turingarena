@@ -1,14 +1,17 @@
 from turingarena_impl.interface.diagnostics import Diagnostic
-from .test_utils import assert_interface_error, assert_no_interface_errors
+from turingarena_impl.interface.tests.test_utils import assert_interface_diagnostics
+from .test_utils import assert_no_interface_errors
 
 
 def test_array_alloc():
-    assert_interface_error("""
+    assert_interface_diagnostics("""
+        procedure p(a[]);
         main {
-            read A[5];
-            write A[5];
+            read a[5];
+            call p(a);
+            checkpoint;
         }
-    """, Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, "5")
+    """, [Diagnostic.build_message(Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX)] * 2)
 
 
 def test_array_basic():
@@ -24,45 +27,3 @@ def test_array_basic():
             call f(A);
         }
     """)
-
-
-def test_array_basic_error():
-    assert_interface_error("""
-        procedure f(A[][]);
-        procedure i(i);
-    
-        main {
-            read s; 
-            call i(s);
-            for i to s {
-                read k;
-                call i(k);
-                for j to k {
-                    read A[i][k];
-                } 
-            }
-            
-            call f(A);
-        }
-    """, Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, "k")
-
-
-def test_array_wrong_order():
-    assert_interface_error("""
-        procedure f(A[][]);
-        procedure i(i);
-
-        main {
-            read s; 
-            call i(s);
-            for i to s {
-                read k;
-                call i(k);
-                for j to k {
-                    read A[j][i];
-                } 
-            }
-            
-            call f(A);
-        }
-    """, Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, "A")

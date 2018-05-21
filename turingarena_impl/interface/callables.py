@@ -80,7 +80,6 @@ class CallbackPrototype(CallablePrototype):
             if parameter.variable.value_type.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
-                    callback.name,
                     parseinfo=parameter.ast.parseinfo,
                 )
 

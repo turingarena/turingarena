@@ -41,7 +41,7 @@ class ReadWriteStatement(Statement):
 
     def validate(self):
         for exp in self.arguments:
-            yield from exp.validate()
+            yield from exp.validate_reference()
 
 
 class ReadWriteInstruction(Instruction, namedtuple("ReadWriteInstruction", [
@@ -62,25 +62,21 @@ class ReadStatement(ReadWriteStatement):
 
     @property
     def variables(self):
-        return tuple(
+        return [
             Variable(name=exp.variable_name, value_type=Variable.value_type_dimensions(exp.indices))
             for exp in self.ast.arguments
-        )
+        ]
 
     @property
     def declared_variables(self):
-        return tuple(
+        return [
             VariableDeclaration(
                 name=exp.variable_name,
                 dimensions=len(exp.indices),
                 to_allocate=len(exp.indices),
             )
             for exp in self.arguments
-        )
-
-    def validate(self):
-        for exp in self.arguments:
-            yield from exp.validate(lvalue=True)
+        ]
 
     @property
     def needs_flush(self):

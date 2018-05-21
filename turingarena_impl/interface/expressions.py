@@ -1,12 +1,12 @@
 import logging
 from abc import abstractmethod
-from collections import namedtuple
+from itertools import zip_longest
 
 from bidict import frozenbidict
 
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
-from turingarena_impl.interface.variables import ScalarType
+from turingarena_impl.interface.variables import ScalarType, DataReference
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,9 @@ class Expression(AbstractSyntaxNodeWrapper):
     @abstractmethod
     def evaluate(self, bindings):
         pass
+
+    def is_scalar_reference_to(self, variable):
+        return False
 
     def is_assignable(self):
         return False
@@ -69,34 +72,6 @@ class IntLiteralExpression(LiteralExpression):
         return ScalarType()
 
 
-class Reference:
-    __slots__ = []
-
-    @abstractmethod
-    def get(self):
-        pass
-
-    @abstractmethod
-    def set(self, value):
-        pass
-
-
-class VariableReference(Reference, namedtuple("VariableReference", ["name", "bindings"])):
-    def get(self):
-        return self.bindings[self.name][0]
-
-    def set(self, value):
-        self.bindings[self.name][0] = value
-
-
-class ArrayItemReference(Reference, namedtuple("VariableReference", ["data", "index"])):
-    def get(self):
-        return self.data[self.index]
-
-    def set(self, value):
-        self.data[self.index] = value
-
-
 class ReferenceExpression(Expression):
     __slots__ = []
 
@@ -107,6 +82,36 @@ class ReferenceExpression(Expression):
     @property
     def variable(self):
         return self.context.variable_mapping[self.variable_name]
+
+    @property
+    def reference(self):
+        return DataReference(
+            variable=self.variable,
+            indexes=tuple(None for _ in self.indices),
+        )
+
+    def is_scalar_reference_to(self, variable):
+        return self.variable == variable and not self.indices
+
+    def validate_reference(self):
+        for expected_index, index_expression in zip_longest(
+                reversed(self.context.index_variables),
+                reversed(self.indices),
+        ):
+            if index_expression is None:
+                continue
+
+            if expected_index is None:
+                yield Diagnostic(
+                    Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
+                    parseinfo=self.ast.parseinfo,
+                )
+            elif not index_expression.is_scalar_reference_to(expected_index):
+                yield Diagnostic(
+                    Diagnostic.Messages.WRONG_ARRAY_INDEX,
+                    expected_index.name,
+                    parseinfo=self.ast.parseinfo,
+                )
 
     @property
     def value_type(self):
@@ -125,14 +130,6 @@ class ReferenceExpression(Expression):
             for index in self.ast.indices
         )
 
-    def get_reference(self, bindings):
-        ref = VariableReference(name=self.variable.name, bindings=bindings)
-        for index in self.indices:
-            data = ref.get()
-            assert data is not None
-            ref = ArrayItemReference(data, index.evaluate(bindings))
-        return ref
-
     def evaluate(self, bindings):
         value = self.get_reference(bindings).get()
         assert value is not None
@@ -144,23 +141,8 @@ class ReferenceExpression(Expression):
     def assign(self, bindings, value):
         self.get_reference(bindings).set(value)
 
-    def validate(self, lvalue=False):
-        last_index = 0
-        index_var = {index.variable: index.range for index in self.context.index_variables}
-        for index in self.indices:
-            if isinstance(index, LiteralExpression):
-                yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.value, parseinfo=self.ast.parseinfo)
-            else:
-                idx = 0
-                try:
-                    idx = list(index_var).index(index.variable)
-                except ValueError:
-                    yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_NOT_VALID, index.variable_name,
-                                     parseinfo=self.ast.parseinfo)
-                if idx < last_index:
-                    yield Diagnostic(Diagnostic.Messages.ARRAY_INDEX_WRONG_ORDER, self.variable_name,
-                                     parseinfo=self.ast.parseinfo)
-                last_index = idx
+    def validate(self):
+        return []
 
 
 class SyntheticExpression:

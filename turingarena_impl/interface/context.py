@@ -4,15 +4,15 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 
 
-class StaticGlobalContext(namedtuple("StaticGlobalContext", [
+class InterfaceContext(namedtuple("InterfaceContext", [
     "methods",
 ])):
     @property
     def methods_by_name(self):
         return {m.name: m for m in self.methods}
 
-    def create_local(self):
-        return StaticLocalContext(
+    def main_block_context(self):
+        return StatementContext(
             global_context=self,
             outer_context=None,
             locally_defined_variables=(),
@@ -22,7 +22,7 @@ class StaticGlobalContext(namedtuple("StaticGlobalContext", [
         )
 
 
-class StaticLocalContext(namedtuple("StaticLocalContext", [
+class StatementContext(namedtuple("StatementContext", [
     "global_context",
     "outer_context",
     "locally_defined_variables",
