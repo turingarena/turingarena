@@ -2,7 +2,7 @@ from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
 
 
-def test_function_no_arguments():
+def test_method_no_arguments():
     for algo in define_algorithms(
             interface_text="""
                 procedure f();
@@ -26,7 +26,7 @@ def test_function_no_arguments():
             p.call.f()
 
 
-def test_function_with_arguments():
+def test_method_with_arguments():
     for algo in define_algorithms(
             interface_text="""
                 procedure f(a, b);
@@ -53,7 +53,7 @@ def test_function_with_arguments():
             p.call.f(1, 2)
 
 
-def test_function_return_value():
+def test_method_return_value():
     for algo in define_algorithms(
             interface_text="""
                 function f(a);

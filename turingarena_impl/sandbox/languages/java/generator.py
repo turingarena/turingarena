@@ -35,8 +35,8 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield 'abstract class Skeleton {'
         yield self.indent('private static final Scanner in = new Scanner(System.in);')
 
-    def generate_function_declaration(self, function):
-        yield f'abstract {self.build_callable_declarator(function)};'
+    def generate_method_declaration(self, method_declaration):
+        yield f'abstract {self.build_callable_declarator(method_declaration)};'
 
     def callback_statement(self, statement):
         callback = statement.callback
@@ -134,9 +134,9 @@ class JavaTemplateCodeGen(JavaCodeGen):
     def generate_header(self):
         yield 'class Solution extends Skeleton {'
 
-    def generate_function_declaration(self, statement):
+    def generate_method_declaration(self, method_declaration):
         yield
-        yield f'{self.build_callable_declarator(statement.function)}'' {'
+        yield f'{self.build_callable_declarator(method_declaration.function)}'' {'
         yield self.indent('// TODO')
         yield '}'
 

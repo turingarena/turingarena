@@ -14,7 +14,7 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
 
     def generate(self):
         yield from self.generate_header()
-        yield from self.generate_functions()
+        yield from self.generate_method_declarations()
         yield from self.generate_main_block()
         yield from self.generate_footer()
 
@@ -42,9 +42,9 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
     def generate_footer(self):
         yield from ()
 
-    def generate_functions(self):
+    def generate_method_declarations(self):
         for func in self.interface.methods:
-            yield from self.generate_function_declaration(func)
+            yield from self.generate_method_declaration(func)
 
     def generate_main_block(self):
         yield from self.block_content(self.interface.main, indent=False)
@@ -58,7 +58,7 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
         pass
 
     @abstractmethod
-    def generate_function_declaration(self, function_declaration):
+    def generate_method_declaration(self, method_declaration):
         pass
 
     @abstractmethod

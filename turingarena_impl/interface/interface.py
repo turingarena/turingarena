@@ -25,8 +25,8 @@ class InterfaceDefinition:
         )
 
     def validate(self):
-        for function in self.methods:
-            yield from function.validate()
+        for method in self.methods:
+            yield from method.validate()
         yield from self.main.validate()
 
     @property

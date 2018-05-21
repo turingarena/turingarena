@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def drive_interface(*, interface, sandbox_connection):
     # maintain two "instruction pointers" in the form of parallel iterators
     # over the same sequence of instructions (see itertools.tee).
-    # driver_iterator is for handling driver requests (function call, callback return and exit)
+    # driver_iterator is for handling driver requests (method call, callback return and exit)
     # sandbox_iterator is for communicating with sandbox (read/write)
     driver_iterator, sandbox_iterator = itertools.tee(
         interface.generate_instructions()

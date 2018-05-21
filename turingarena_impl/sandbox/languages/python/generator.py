@@ -3,7 +3,7 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 class PythonCodeGen(CodeGen):
     @classmethod
-    def build_function_declaration(cls, func):
+    def build_method_declaration(cls, func):
         arguments = ', '.join(p.name for p in func.parameters)
         yield f'def {func.name}({arguments}):'
 
@@ -13,7 +13,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         yield 'import _source'
 
     def callback_statement(self, callback_statement):
-        yield from self.build_function_declaration(callback_statement.callback)
+        yield from self.build_method_declaration(callback_statement.callback)
         yield from self.block_content(callback_statement.callback.synthetic_body)
 
     def main_statement(self, statement):
@@ -44,7 +44,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         size = self.expression(allocated_variable.size)
         yield f'{allocated_variable.name}{indexes} = [None] * {size}'
 
-    def generate_function_declaration(self, function_declaration):
+    def generate_method_declaration(self, method_declaration):
         yield from ()
 
     def generate_variable_declaration(self, declared_variable):
@@ -56,7 +56,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         yield from self.block_content(callback.synthetic_body)
 
     def call_statement(self, call_statement):
-        function_name = call_statement.method_name
+        method_name = call_statement.method_name
 
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)
@@ -69,9 +69,9 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         arguments = ", ".join(value_arguments + callback_arguments)
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
-            yield f'{return_value} = _source.{function_name}({arguments})'
+            yield f'{return_value} = _source.{method_name}({arguments})'
         else:
-            yield f'_source.{function_name}({arguments})'
+            yield f'_source.{method_name}({arguments})'
 
     def write_statement(self, write_statement):
         args = ', '.join(self.expression(arg) for arg in write_statement.arguments)
@@ -113,9 +113,9 @@ class PythonSkeletonCodeGen(PythonCodeGen):
 
 
 class PythonTemplateCodeGen(PythonCodeGen):
-    def generate_function_declaration(self, function_declaration):
+    def generate_method_declaration(self, method_declaration):
         yield
-        yield from self.build_function_declaration(function_declaration)
+        yield from self.build_method_declaration(method_declaration)
         yield self.indent('pass')
 
     def generate_main_block(self):

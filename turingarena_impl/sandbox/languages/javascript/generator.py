@@ -35,12 +35,6 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def init_statement(self, statement):
-        yield
-        yield "async function init() {"
-        yield from self.block_content(statement.body)
-        yield "}"
-
     def any_statement(self, statement):
         generators = {
             "checkpoint": lambda: ["print(0);"],
@@ -54,13 +48,13 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         return generators[statement.statement_type]()
 
     def call_statement(self, statement):
-        function_name = statement.function.name
+        method_name = statement.method.name
         parameters = ", ".join(self.expression(p) for p in statement.parameters)
         if statement.return_value is not None:
             return_value = self.expression(statement.return_value)
-            yield f"{return_value} = {function_name}({parameters});"
+            yield f"{return_value} = {method_name}({parameters});"
         else:
-            yield f"{function_name}({parameters});"
+            yield f"{method_name}({parameters});"
 
     def alloc_statement(self, statement):
         for argument in statement.arguments:
@@ -118,8 +112,8 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
-    def generate_function_declaration(self, statement):
+    def generate_method_declaration(self, method_declaration):
         yield
-        yield f"function {self.build_callable_declarator(statement.function)}" + "{"
+        yield f"function {self.build_callable_declarator(method_declaration.function)}" + "{"
         yield self.indent("// TODO")
         yield "}"

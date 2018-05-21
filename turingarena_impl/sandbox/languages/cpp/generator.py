@@ -17,7 +17,7 @@ class CppCodeGen(CodeGen):
         parameters = ", ".join(value_parameters + callback_parameters)
         return f"{return_type} {callable.name}({parameters})"
 
-    def build_function_signature(self, func):
+    def build_method_signature(self, func):
         return self.build_signature(func, func.callbacks)
 
 
@@ -40,8 +40,8 @@ class CppSkeletonCodeGen(CppCodeGen):
         size = self.expression(allocated_variable.size)
         yield f"{allocated_variable.name}{indexes} = new int{dimensions}[{size}];"
 
-    def generate_function_declaration(self, s):
-        yield f"{self.build_function_signature(s)};"
+    def generate_method_declaration(self, method_declaration):
+        yield f"{self.build_method_signature(method_declaration)};"
 
     def generate_main_block(self):
         yield
@@ -150,9 +150,9 @@ class CppSkeletonCodeGen(CppCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen):
-    def generate_function_declaration(self, func):
+    def generate_method_declaration(self, method_declaration):
         yield
-        yield f"{self.build_function_signature(func)}" " {"
+        yield f"{self.build_method_signature(method_declaration)}" " {"
         yield self.indent("// TODO")
         yield "}"
 
