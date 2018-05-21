@@ -40,6 +40,17 @@ def test_read_array_1():
         }
     """)
     assert not interface.diagnostics()
+    steps = interface.main_block.steps
+    statements = interface.main_block.statements
+    assert steps == [
+        Step([
+            statements[0],
+            MethodCallInstruction(statements[1]),
+        ]),
+        Step([
+            statements[2],
+        ]),
+    ]
 
 
 def test_read_array_2():
@@ -56,6 +67,17 @@ def test_read_array_2():
         }
     """)
     assert not interface.diagnostics()
+    steps = interface.main_block.steps
+    statements = interface.main_block.statements
+    assert steps == [
+        Step([
+            statements[0],
+            MethodCallInstruction(statements[1]),
+        ]),
+        Step([
+            statements[2],
+        ]),
+    ]
 
 
 def test_read_array_pass_slice():
@@ -72,6 +94,25 @@ def test_read_array_pass_slice():
         }
     """)
     assert not interface.diagnostics()
+    steps1 = interface.main_block.steps
+    statements1 = interface.main_block.statements
+    assert steps1 == [
+        Step([
+            statements1[0],
+        ]),
+        Step([
+            statements1[1],
+        ]),
+    ]
+
+    steps2 = statements1[0].body.steps
+    statements2 = statements1[0].body.statements
+    assert steps2 == [
+        Step([
+            statements2[0],
+            MethodCallInstruction(statements2[1]),
+        ]),
+    ]
 
 
 def test_write_scalar():
