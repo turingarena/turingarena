@@ -10,18 +10,6 @@ class ImperativeStructure(metaclass=ABCMeta):
     __slots__ = []
 
     @abstractmethod
-    def generate_instructions(self, bindings):
-        pass
-
-    @property
-    def instructions(self):
-        return list(self._get_instructions())
-
-    @abstractmethod
-    def _get_instructions(self):
-        pass
-
-    @abstractmethod
     def expects_request(self, request):
         pass
 
@@ -42,6 +30,33 @@ class Instruction:
     def _get_reference_actions(self):
         return []
 
+    @property
+    def has_downward(self):
+        return False
+
+    @property
+    def has_upward(self):
+        return False
+
+    def generate_child_instructions(self, bindings):
+        pass
+
+    def on_request_lookahead(self, bindings, request):
+        pass
+
+    def on_generate_response(self, bindings):
+        pass
+
+    def on_communicate_upward(self, bindings, lines):
+        pass
+
+    def on_communicate_downward(self, bindings, lines):
+        pass
+
+
+class Step(namedtuple("Step", ["instructions"])):
+    __slots__ = []
+
 
 class StatementInstruction(Instruction, namedtuple("StatementInstruction", ["statement"])):
-    pass
+    __slots__ = []

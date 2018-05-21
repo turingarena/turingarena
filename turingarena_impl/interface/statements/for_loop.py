@@ -30,17 +30,18 @@ class ForStatement(Statement, Instruction):
         )
 
     def _get_allocations(self):
-        for inst in self.body.instructions:
-            for a in inst.reference_actions:
-                if a.reference.variable.dimensions == 0:
-                    continue
-                if a.action_type == ReferenceActionType.DECLARED:
-                    yield Allocation(
-                        reference=a.reference._replace(
-                            index_count=a.reference.index_count - 1,
-                        ),
-                        size=self.index.range,
-                    )
+        for step in self.body.steps:
+            for inst in step.instructions:
+                for a in inst.reference_actions:
+                    if a.reference.variable.dimensions == 0:
+                        continue
+                    if a.action_type == ReferenceActionType.DECLARED:
+                        yield Allocation(
+                            reference=a.reference._replace(
+                                index_count=a.reference.index_count - 1,
+                            ),
+                            size=self.index.range,
+                        )
 
     def _get_instructions(self):
         yield self
@@ -74,11 +75,10 @@ class ForStatement(Statement, Instruction):
         )
 
     def _get_reference_actions(self):
-        for inst in self.body.instructions:
-            for a in inst.reference_actions:
-                r = a.reference
-                if r.index_count > 0:
-                    yield a._replace(reference=r._replace(index_count=r.index_count - 1))
+        for a in self.body.reference_actions:
+            r = a.reference
+            if r.index_count > 0:
+                yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
 
 class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [

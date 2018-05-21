@@ -1,9 +1,10 @@
 import logging
 
-from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, Step
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
+from turingarena_impl.interface.variables import ReferenceActionType
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +46,44 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
                     SyntheticExpression("int_literal", value=0),  # no more callbacks
                 ])
 
-    def _get_instructions(self):
+    def collect_step_instructions(self, instructions):
+        unresolved_references = set()
+        for inst in instructions:
+            yield inst
+            for a in inst.reference_actions:
+                if a.action_type is ReferenceActionType.DECLARED:
+                    unresolved_references.add(a.reference)
+                if a.action_type is ReferenceActionType.RESOLVED:
+                    assert a.reference in unresolved_references
+                    unresolved_references.remove(a.reference)
+            logger.debug(f"Inst: {type(inst).__name__}. unresolved_references: {unresolved_references}")
+            if not unresolved_references:
+                return
+
+    def _generate_instructions(self):
         for s in self.statements:
-            for inst in s.instructions:
-                yield inst
+            yield from s.instructions
+
+    @property
+    def steps(self):
+        return list(self._generate_steps())
+
+    def _generate_steps(self):
+        instructions = self._generate_instructions()
+        while True:
+            step_instructions = list(self.collect_step_instructions(instructions))
+            if not step_instructions:
+                break
+            yield Step(step_instructions)
+
+    @property
+    def reference_actions(self):
+        return [
+            a
+            for step in self.steps
+            for inst in step.instructions
+            for a in inst.reference_actions
+        ]
 
     def expects_request(self, request):
         for s in self.statements:

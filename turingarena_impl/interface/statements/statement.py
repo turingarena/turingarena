@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from bidict import bidict
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
@@ -74,6 +76,14 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     @property
     def statement_type(self):
         return self.ast.statement_type
+
+    @property
+    def instructions(self):
+        return list(self._get_instructions())
+
+    @abstractmethod
+    def _get_instructions(self):
+        pass
 
 
 class SyntheticStatement(AbstractStatement):

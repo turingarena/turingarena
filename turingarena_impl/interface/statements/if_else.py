@@ -57,10 +57,6 @@ class IfStatement(Statement, Instruction):
         )
 
     def _get_reference_actions(self):
-        for inst in self.then_body.instructions:
-            for r in inst.reference_actions:
-                yield r
+        yield from self.then_body.reference_actions
         if self.else_body is not None:
-            for inst in self.else_body.instructions:
-                for r in inst.reference_actions:
-                    yield r
+            yield from self.else_body.reference_actions
