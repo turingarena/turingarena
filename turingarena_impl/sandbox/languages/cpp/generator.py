@@ -3,8 +3,7 @@ from turingarena_impl.sandbox.languages.generator import CodeGen
 
 class CppCodeGen(CodeGen):
     def build_parameter(self, parameter):
-        value_type = parameter.value_type
-        indirections = "*" * value_type.dimensions
+        indirections = "*" * parameter.dimensions
         return f"int {indirections}{parameter.name}"
 
     def build_signature(self, callable, callbacks):

@@ -5,7 +5,7 @@ from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, ScalarType, VariableDeclaration, VariableAllocation
+from turingarena_impl.interface.variables import Variable, VariableDeclaration, VariableAllocation
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class ForStatement(Statement):
     @property
     def index(self):
         return ForIndex(
-            variable=Variable(value_type=ScalarType(), name=self.ast.index),
+            variable=Variable(name=self.ast.index, dimensions=0),
             range=Expression.compile(self.ast.range, self.context),
         )
 
@@ -58,7 +58,7 @@ class ForStatement(Statement):
     @property
     def variables(self):
         return tuple(
-            Variable(name=var.name, value_type=Variable.value_type_dimensions(var.dimensions))
+            Variable(name=var.name, dimensions=var.dimensions)
             for var in self.variables_to_declare
         )
 

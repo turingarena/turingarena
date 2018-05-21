@@ -63,7 +63,7 @@ class ReadStatement(ReadWriteStatement):
     @property
     def variables(self):
         return [
-            Variable(name=exp.variable_name, value_type=Variable.value_type_dimensions(exp.indices))
+            Variable(name=exp.variable_name, dimensions=len(exp.indices))
             for exp in self.ast.arguments
         ]
 
@@ -111,5 +111,5 @@ class WriteInstruction(ReadWriteInstruction):
 
     def on_communicate_upward(self, lines):
         for a, value in zip(self.arguments, next(lines)):
-            assert a.is_assignable()
-            a.assign(self.bindings, value)
+            pass
+            # a.assign(self.bindings, value)

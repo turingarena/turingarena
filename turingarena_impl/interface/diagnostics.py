@@ -13,7 +13,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         METHOD_DOES_NOT_RETURN_VALUE = "method {} (procedure) does not return a value"
         RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
         CALL_WRONG_ARGS_NUMBER = "method {} expects {} argument(s), got {}"
-        CALL_WRONG_ARGS_TYPE = "wrong type for argument {} of method {}: expected {}, got {}"
+        CALL_WRONG_ARGS_TYPE = "argument {} of method {}: expected {} dimensions, got {}"
         CALL_NO_RETURN_EXPRESSION = "function call with no return expression given"
         CALL_WRONG_RETURN_EXPRESSION = "method {} (function) returns {}, but return expression is {}"
         CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"

@@ -17,8 +17,8 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
     @property
     def variable(self):
         return Variable(
-            value_type=Variable.value_type_dimensions(self.ast.indexes),
             name=self.ast.name,
+            dimensions=len(self.ast.indexes),
         )
 
 

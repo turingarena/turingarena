@@ -75,7 +75,7 @@ class CallStatement(Statement):
         if return_value_ast is not None:
             var = Variable(
                 name=return_value_ast.variable_name,
-                value_type=Variable.value_type_dimensions(len(return_value_ast.indices)),
+                dimensions=len(return_value_ast.indices),
             )
             return self.context.with_variables((var,))
         else:
@@ -90,12 +90,10 @@ class CallStatement(Statement):
                 parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(method.parameters, self.parameters):
-            expr_value_type = expression.value_type
-
-            if str(expr_value_type) != str(parameter.value_type):
+            if expression.dimensions != parameter.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter.name, method.name, parameter.value_type, expr_value_type,
+                    parameter.name, method.name, parameter.dimensions, expression.dimensions,
                     parseinfo=expression.ast.parseinfo,
                 )
 
@@ -104,7 +102,7 @@ class CallStatement(Statement):
     def validate_return_value(self):
         method = self.method
         if self.return_value is not None:
-            yield from self.return_value.validate(lvalue=True)
+            yield from self.return_value.validate_reference()
         if method.has_return_value and self.return_value is None:
             yield Diagnostic(
                 Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, method.name,

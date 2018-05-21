@@ -6,7 +6,7 @@ from bidict import frozenbidict
 
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
-from turingarena_impl.interface.variables import ScalarType, DataReference
+from turingarena_impl.interface.variables import DataReference
 
 logger = logging.getLogger(__name__)
 
@@ -22,23 +22,16 @@ class Expression(AbstractSyntaxNodeWrapper):
     def expression_type(self):
         return self.ast.expression_type
 
-    @property
-    @abstractmethod
-    def value_type(self):
-        pass
-
     @abstractmethod
     def evaluate(self, bindings):
         pass
 
-    def is_scalar_reference_to(self, variable):
-        return False
+    @property
+    def dimensions(self):
+        return 0
 
-    def is_assignable(self):
+    def is_reference_to(self, variable):
         return False
-
-    def assign(self, bindings, value):
-        raise NotImplementedError
 
     def validate(self):
         return []
@@ -60,16 +53,8 @@ class IntLiteralExpression(LiteralExpression):
     __slots__ = []
 
     @property
-    def canonical_form(self):
-        return self.value
-
-    @property
     def value(self):
         return int(self.ast.int_literal)
-
-    @property
-    def value_type(self):
-        return ScalarType()
 
 
 class ReferenceExpression(Expression):
@@ -90,7 +75,11 @@ class ReferenceExpression(Expression):
             indexes=tuple(None for _ in self.indices),
         )
 
-    def is_scalar_reference_to(self, variable):
+    @property
+    def dimensions(self):
+        return self.variable.dimensions - len(self.indices)
+
+    def is_reference_to(self, variable):
         return self.variable == variable and not self.indices
 
     def validate_reference(self):
@@ -106,22 +95,12 @@ class ReferenceExpression(Expression):
                     Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
                     parseinfo=self.ast.parseinfo,
                 )
-            elif not index_expression.is_scalar_reference_to(expected_index):
+            elif not index_expression.is_reference_to(expected_index.variable):
                 yield Diagnostic(
                     Diagnostic.Messages.WRONG_ARRAY_INDEX,
-                    expected_index.name,
+                    expected_index.variable.name,
                     parseinfo=self.ast.parseinfo,
                 )
-
-    @property
-    def value_type(self):
-        if self.variable:
-            value_type = self.variable.value_type
-        else:
-            value_type = ScalarType()
-        for _ in self.indices:
-            value_type = value_type.item_type
-        return value_type
 
     @property
     def indices(self):
@@ -134,12 +113,6 @@ class ReferenceExpression(Expression):
         value = self.get_reference(bindings).get()
         assert value is not None
         return value
-
-    def is_assignable(self):
-        return True
-
-    def assign(self, bindings, value):
-        self.get_reference(bindings).set(value)
 
     def validate(self):
         return []

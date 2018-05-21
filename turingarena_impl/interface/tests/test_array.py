@@ -11,7 +11,7 @@ def test_array_alloc():
             call p(a);
             checkpoint;
         }
-    """, [Diagnostic.build_message(Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX)] * 2)
+    """, [Diagnostic.build_message(Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX)])
 
 
 def test_array_basic():

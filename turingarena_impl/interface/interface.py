@@ -24,10 +24,10 @@ class InterfaceDefinition:
             context=InterfaceContext(methods=self.methods).main_block_context()
         )
 
-    def validate(self):
-        return list(self.do_validate())
+    def diagnostics(self):
+        return list(self.validate())
 
-    def do_validate(self):
+    def validate(self):
         for method in self.methods:
             yield from method.validate()
         yield from self.main.validate()
