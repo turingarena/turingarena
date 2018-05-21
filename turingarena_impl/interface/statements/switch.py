@@ -84,10 +84,6 @@ class CaseStatement(Statement):
     def labels(self):
         return self.ast.labels
 
-    @property
-    def context_after(self):
-        return self.body.context_after
-
 
 class SwitchInstruction(Instruction, namedtuple("SwitchInstruction", ["statement", "bindings"])):
     def on_request_lookahead(self, request):

@@ -48,18 +48,16 @@ class IfStatement(Statement):
             self.else_body is not None and self.else_body.expects_request(request)
         )
 
-    @property
-    def context_after(self):
-        initialized_variables = {
-            var
-            for var in self.then_body.context_after.initialized_variables
-            if not self.else_body or var in self.else_body.context_after.initialized_variables
-        }
-        allocated_variable = {
-            var
-            for var in self.then_body.context_after.allocated_variables
-            if not self.else_body or var in self.else_body.context_after.allocated_variables
-        }
-        has_flush = self.then_body.context_after.has_flushed_output and (not self.else_body or self.else_body.context_after.has_flushed_output)
-        return self.context.with_initialized_variables(initialized_variables)\
-            .with_allocated_variables(allocated_variable).with_flushed_output(has_flush)
+    def _get_declared_references(self):
+        for r in self.then_body.declared_references:
+            yield r
+        if self.else_body is not None:
+            for r in self.else_body.declared_references:
+                yield r
+
+    def _get_resolved_references(self):
+        for r in self.then_body.resolved_references:
+            yield r
+        if self.else_body is not None:
+            for r in self.else_body.resolved_references:
+                yield r

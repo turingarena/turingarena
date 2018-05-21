@@ -6,10 +6,6 @@ from turingarena_impl.interface.common import ImperativeStructure, AbstractSynta
 class AbstractStatement(ImperativeStructure):
     __slots__ = []
 
-    @property
-    def context_after(self):
-        return self.context
-
     def validate(self):
         return []
 

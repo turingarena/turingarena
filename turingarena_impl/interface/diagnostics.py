@@ -22,7 +22,6 @@ class Diagnostic(namedtuple("Diagnostic", [
         EMPTY_SWITCH_BODY = "switch statement body must contain at least one case"
         UNEXPECTED_BREAK = "break statement used outside a loop"
         UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
-        INFINITE_LOOP = "loop must contain at least a break statement"
         UNREACHABLE_CODE = "unreachable code after break/exit"
         DUPLICATED_CASE_LABEL = "duplicated case label {}"
         UNEXPECTED_CALLBACK = "callback {} not allowed here"

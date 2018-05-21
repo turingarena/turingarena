@@ -32,10 +32,6 @@ class InterfaceDefinition:
             yield from method.validate()
         yield from self.main.validate()
 
-    @property
-    def declared_variable(self):
-        return self.main.context_after.variables
-
     @staticmethod
     def load(name):
         with open(find_package_path(name, "interface.txt")) as f:

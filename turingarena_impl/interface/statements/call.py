@@ -9,7 +9,6 @@ from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +30,14 @@ class CallStatement(Statement):
 
     @property
     def return_value(self):
-        return Expression.compile(self.ast.return_value, self.context_after) if self.ast.return_value else None
+        if self.ast.return_value:
+            return Expression.compile(self.ast.return_value, self.context)
+        else:
+            return None
 
-    @property
-    def declared_variables(self):
-        return (VariableDeclaration(
-            name=self.return_value.variable_name,
-            dimensions=len(self.return_value.indices),
-            to_allocate=len(self.return_value.indices),
-        ),) if self.return_value else ()
+    def _get_declared_references(self):
+        if self.return_value is not None:
+            yield self.return_value.reference
 
     def find_callback_implementation(self, index, callback):
         return next(
@@ -69,18 +67,6 @@ class CallStatement(Statement):
             yield from self.validate_parameters()
             yield from self.validate_return_value()
 
-    @property
-    def context_after(self):
-        return_value_ast = self.ast.return_value
-        if return_value_ast is not None:
-            var = Variable(
-                name=return_value_ast.variable_name,
-                dimensions=len(return_value_ast.indices),
-            )
-            return self.context.with_variables((var,))
-        else:
-            return self.context
-
     def validate_parameters(self):
         method = self.method
         if len(self.parameters) != len(method.parameters):
@@ -90,14 +76,13 @@ class CallStatement(Statement):
                 parseinfo=self.ast.parseinfo,
             )
         for parameter, expression in zip(method.parameters, self.parameters):
+            yield from expression.validate()
             if expression.dimensions != parameter.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
                     parameter.name, method.name, parameter.dimensions, expression.dimensions,
                     parseinfo=expression.ast.parseinfo,
                 )
-
-            yield from expression.validate()
 
     def validate_return_value(self):
         method = self.method

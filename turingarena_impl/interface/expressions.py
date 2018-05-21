@@ -6,7 +6,7 @@ from bidict import frozenbidict
 
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
-from turingarena_impl.interface.variables import DataReference
+from turingarena_impl.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,10 @@ class Expression(AbstractSyntaxNodeWrapper):
     @property
     def dimensions(self):
         return 0
+
+    @property
+    def reference(self):
+        return None
 
     def is_reference_to(self, variable):
         return False
@@ -66,13 +70,20 @@ class ReferenceExpression(Expression):
 
     @property
     def variable(self):
-        return self.context.variable_mapping[self.variable_name]
+        # FIXME: using 'get' for both declarations and as quirk, should we?
+        return self.context.variable_mapping.get(
+            self.variable_name,
+            Variable(
+                name=self.variable_name,
+                dimensions=len(self.indices),
+            ),
+        )
 
     @property
     def reference(self):
-        return DataReference(
+        return Reference(
             variable=self.variable,
-            indexes=tuple(None for _ in self.indices),
+            index_count=len(self.indices),
         )
 
     @property
@@ -115,7 +126,12 @@ class ReferenceExpression(Expression):
         return value
 
     def validate(self):
-        return []
+        if self.variable_name not in self.context.variable_mapping:
+            yield Diagnostic(
+                Diagnostic.Messages.VARIABLE_NOT_DECLARED,
+                self.variable_name,
+                parseinfo=self.ast.parseinfo,
+            )
 
 
 class SyntheticExpression:

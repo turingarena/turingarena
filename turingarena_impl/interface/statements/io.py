@@ -4,7 +4,6 @@ from collections import namedtuple
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, VariableDeclaration
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class ReadWriteStatement(Statement):
     @property
     def arguments(self):
         return [
-            Expression.compile(arg, self.context_after)
+            Expression.compile(arg, self.context)
             for arg in self.ast.arguments
         ]
 
@@ -56,27 +55,9 @@ class ReadStatement(ReadWriteStatement):
     def generate_instructions(self, bindings):
         yield ReadInstruction(arguments=self.arguments, bindings=bindings)
 
-    @property
-    def context_after(self):
-        return self.context.with_variables(self.variables)
-
-    @property
-    def variables(self):
-        return [
-            Variable(name=exp.variable_name, dimensions=len(exp.indices))
-            for exp in self.ast.arguments
-        ]
-
-    @property
-    def declared_variables(self):
-        return [
-            VariableDeclaration(
-                name=exp.variable_name,
-                dimensions=len(exp.indices),
-                to_allocate=len(exp.indices),
-            )
-            for exp in self.arguments
-        ]
+    def _get_declared_references(self):
+        for exp in self.arguments:
+            yield exp.reference
 
     @property
     def needs_flush(self):

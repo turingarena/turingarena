@@ -6,7 +6,7 @@ from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruc
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement
-from turingarena_impl.interface.variables import Variable
+from turingarena_impl.interface.variables import Variable, Reference
 
 logger = logging.getLogger(__name__)
 
@@ -110,9 +110,13 @@ class CallbackImplementation(CallbackPrototype):
     @property
     def body(self):
         # TODO: generate block if body is None ('default' is specified)
+        inner_context = self.context.local_context.with_declared_references(
+            Reference(variable=p, index_count=0)
+            for p in self.parameters
+        )
         return Block(
             ast=self.ast.body,
-            context=self.context.local_context.create_inner().with_variables(self.parameters),
+            context=inner_context,
         )
 
     def validate(self):

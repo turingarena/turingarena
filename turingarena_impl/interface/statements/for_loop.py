@@ -5,7 +5,7 @@ from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, VariableDeclaration, VariableAllocation
+from turingarena_impl.interface.variables import Variable, Allocation
 
 logger = logging.getLogger(__name__)
 
@@ -26,22 +26,18 @@ class ForStatement(Statement):
     def body(self):
         return Block(
             ast=self.ast.body,
-            context=self.context.create_inner().with_index_variable(self.index),
+            context=self.context.with_index_variable(self.index),
         )
 
-    @property
-    def declared_variables(self):
-        return tuple(
-            VariableDeclaration(name=var.name, dimensions=var.dimensions, to_allocate=var.to_allocate - 1)
-            for stmt in self.body.statements
-            for var in stmt.declared_variables
-            if var.to_allocate >= 0
-        )
+    def _get_declared_references(self):
+        for ref in self.body.declared_references:
+            if ref.index_count > 0:
+                yield ref._replace(index_count=ref.index_count - 1)
 
     @property
     def variables_to_allocate(self):
         return tuple(
-            VariableAllocation(
+            Allocation(
                 name=var.name,
                 size=self.index.range,
                 dimensions=var.dimensions - var.to_allocate,
@@ -79,10 +75,6 @@ class ForStatement(Statement):
                 self.index.variable.name: [i],
             }
             yield from self.body.generate_instructions(inner_bindings)
-
-    @property
-    def context_after(self):
-        return self.body.context_after.with_variables(self.variables)
 
     @property
     def may_process_requests(self):

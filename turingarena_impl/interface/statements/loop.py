@@ -27,13 +27,6 @@ class LoopStatement(Statement):
     def validate(self):
         yield from self.body.validate()
 
-        if not self.body.context_after.has_break:
-            yield Diagnostic(Diagnostic.Messages.INFINITE_LOOP, parseinfo=self.ast.parseinfo)
-
-    @property
-    def context_after(self):
-        return self.body.context_after.with_break(False)
-
     @property
     def may_process_requests(self):
         return True
@@ -48,10 +41,6 @@ class BreakStatement(Statement):
     def validate(self):
         if not self.context.in_loop:
             yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=self.ast.parseinfo)
-
-    @property
-    def context_after(self):
-        return self.context.with_break(True)
 
 
 BREAK_SENTINEL = object()

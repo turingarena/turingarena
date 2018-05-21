@@ -12,26 +12,35 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
-        inner_context = self.inner_context_at_begin
+        inner_context = self.context
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
-            inner_context = statement.context_after
+
+            inner_context = (
+                inner_context
+                    .with_declared_references(statement.declared_references)
+                    .with_resolved_references(statement.resolved_references)
+            )
+
             yield statement
+
+    def _get_declared_references(self):
+        return [
+            r
+            for s in self.statements
+            for r in s.declared_references
+        ]
+
+    def _get_resolved_references(self):
+        return [
+            r
+            for s in self.statements
+            for r in s.resolved_references
+        ]
 
     @property
     def statements(self):
         return list(self._generate_statements())
-
-    @property
-    def inner_context_at_begin(self):
-        return self.context.create_inner()
-
-    @property
-    def inner_context_at_end(self):
-        if self.statements:
-            return self.statements[-1].context_after
-        else:
-            return self.inner_context_at_begin
 
     @property
     def declared_variables(self):
@@ -69,9 +78,6 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             **bindings,
         }
         for statement in self.statements:
-            # FIXME
-            # for allocation in statement.variables_to_allocate:
-            #    yield AllocationInstruction(allocation, inner_bindings)
             yield from statement.generate_instructions(inner_bindings)
 
     def expects_request(self, request):
@@ -89,7 +95,3 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             s.may_process_requests
             for s in self.statements
         )
-
-    @property
-    def context_after(self):
-        return self.context
