@@ -48,16 +48,9 @@ class IfStatement(Statement):
             self.else_body is not None and self.else_body.expects_request(request)
         )
 
-    def _get_declared_references(self):
-        for r in self.then_body.declared_references:
+    def _get_reference_actions(self):
+        for r in self.then_body.reference_actions:
             yield r
         if self.else_body is not None:
-            for r in self.else_body.declared_references:
-                yield r
-
-    def _get_resolved_references(self):
-        for r in self.then_body.resolved_references:
-            yield r
-        if self.else_body is not None:
-            for r in self.else_body.resolved_references:
+            for r in self.else_body.reference_actions:
                 yield r

@@ -9,6 +9,7 @@ from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType, ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +36,20 @@ class CallStatement(Statement):
         else:
             return None
 
-    def _get_declared_references(self):
+    def _get_reference_actions(self):
         if self.return_value is not None:
-            yield self.return_value.reference
+            yield ReferenceAction(
+                reference=self.return_value.reference,
+                direction=ReferenceDirection.UPWARD,
+                action_type=ReferenceActionType.DECLARED,
+            )
+        for p in self.parameters:
+            if p.reference is not None and p.reference not in self.context.get_references(ReferenceActionType.RESOLVED):
+                yield ReferenceAction(
+                    p.reference,
+                    direction=ReferenceDirection.DOWNWARD,
+                    action_type=ReferenceActionType.RESOLVED,
+                )
 
     def find_callback_implementation(self, index, callback):
         return next(
@@ -64,8 +76,15 @@ class CallStatement(Statement):
                 parseinfo=self.ast.parseinfo,
             )
         else:
+            yield from self.validate_parameters_resolved()
             yield from self.validate_parameters()
             yield from self.validate_return_value()
+
+    def validate_parameters_resolved(self):
+        for p in self.parameters:
+            if p.reference is not None:
+                continue
+            yield from p.validate_resolved()
 
     def validate_parameters(self):
         method = self.method

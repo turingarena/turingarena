@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.variables import Reference
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,7 @@ class InterfaceContext(namedtuple("InterfaceContext", [
     def main_block_context(self):
         return StatementContext(
             global_context=self,
-            declared_references=(),
-            resolved_references=(),
+            reference_actions=(),
             index_variables=(),
             in_loop=False,
         )
@@ -25,34 +24,30 @@ class InterfaceContext(namedtuple("InterfaceContext", [
 
 class StatementContext(namedtuple("StatementContext", [
     "global_context",
-    "declared_references",
-    "resolved_references",
+    "reference_actions",
     "index_variables",
     "in_loop",
 ])):
-    def with_declared_references(self, references):
-        references = self._check_references(references)
+    def with_reference_actions(self, actions):
+        actions = tuple(actions)
+        assert all(isinstance(r, ReferenceAction) for r in actions)
         return self._replace(
-            declared_references=self.declared_references + references
+            reference_actions=self.reference_actions + actions
         )
 
-    def with_resolved_references(self, references):
-        references = self._check_references(references)
-        return self._replace(
-            resolved_references=self.resolved_references + references
-        )
-
-    def _check_references(self, references):
-        references = tuple(references)
-        assert all(isinstance(r, Reference) for r in references)
-        return references
+    def get_references(self, action_type):
+        return {
+            a.reference
+            for a in self.reference_actions
+            if a.action_type is action_type
+        }
 
     @property
     def declared_variables(self):
-        return [
+        return {
             r.variable
-            for r in self.declared_references
-        ]
+            for r in self.get_references(ReferenceActionType.DECLARED)
+        }
 
     @property
     def variable_mapping(self):

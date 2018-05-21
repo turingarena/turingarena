@@ -15,22 +15,6 @@ class AbstractStatement(ImperativeStructure):
         return False
 
     @property
-    def variables_to_declare(self):
-        return tuple(
-            var
-            for var in self.declared_variables
-            if var.to_allocate == 0
-        )
-
-    @property
-    def declared_variables(self):
-        return ()
-
-    @property
-    def variables_to_allocate(self):
-        return ()
-
-    @property
     def needs_flush(self):
         return False
 

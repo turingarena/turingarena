@@ -16,26 +16,15 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
 
-            inner_context = (
-                inner_context
-                    .with_declared_references(statement.declared_references)
-                    .with_resolved_references(statement.resolved_references)
-            )
+            inner_context = inner_context.with_reference_actions(statement.reference_actions)
 
             yield statement
 
-    def _get_declared_references(self):
+    def _get_reference_actions(self):
         return [
             r
             for s in self.statements
-            for r in s.declared_references
-        ]
-
-    def _get_resolved_references(self):
-        return [
-            r
-            for s in self.statements
-            for r in s.resolved_references
+            for r in s.reference_actions
         ]
 
     @property

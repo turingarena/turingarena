@@ -40,6 +40,12 @@ class Expression(AbstractSyntaxNodeWrapper):
     def validate(self):
         return []
 
+    def validate_reference(self):
+        return []
+
+    def validate_resolved(self):
+        return []
+
 
 class LiteralExpression(Expression):
     __slots__ = []
@@ -126,6 +132,8 @@ class ReferenceExpression(Expression):
         return value
 
     def validate(self):
+        for index in self.indices:
+            yield from index.validate_resolved()
         if self.variable_name not in self.context.variable_mapping:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_NOT_DECLARED,

@@ -29,10 +29,11 @@ class ForStatement(Statement):
             context=self.context.with_index_variable(self.index),
         )
 
-    def _get_declared_references(self):
-        for ref in self.body.declared_references:
-            if ref.index_count > 0:
-                yield ref._replace(index_count=ref.index_count - 1)
+    def _get_reference_actions(self):
+        for a in self.body.reference_actions:
+            r = a.reference
+            if r.index_count > 0:
+                yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
     @property
     def variables_to_allocate(self):
@@ -49,13 +50,6 @@ class ForStatement(Statement):
             for stmt in self.body.statements
             for var in stmt.declared_variables
             if var.to_allocate > 0
-        )
-
-    @property
-    def variables(self):
-        return tuple(
-            Variable(name=var.name, dimensions=var.dimensions)
-            for var in self.variables_to_declare
         )
 
     def validate(self):

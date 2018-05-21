@@ -4,6 +4,7 @@ from collections import namedtuple
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType, ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
@@ -55,9 +56,13 @@ class ReadStatement(ReadWriteStatement):
     def generate_instructions(self, bindings):
         yield ReadInstruction(arguments=self.arguments, bindings=bindings)
 
-    def _get_declared_references(self):
+    def _get_reference_actions(self):
         for exp in self.arguments:
-            yield exp.reference
+            yield ReferenceAction(
+                reference=exp.reference,
+                direction=ReferenceDirection.DOWNWARD,
+                action_type=ReferenceActionType.DECLARED,
+            )
 
     @property
     def needs_flush(self):
@@ -82,6 +87,14 @@ class WriteStatement(ReadWriteStatement):
 
     def generate_instructions(self, bindings):
         yield WriteInstruction(arguments=self.arguments, bindings=bindings)
+
+    def _get_reference_actions(self):
+        for exp in self.arguments:
+            yield ReferenceAction(
+                reference=exp.reference,
+                direction=ReferenceDirection.UPWARD,
+                action_type=ReferenceActionType.RESOLVED,
+            )
 
 
 class WriteInstruction(ReadWriteInstruction):

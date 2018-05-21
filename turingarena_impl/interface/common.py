@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta
 from collections import namedtuple
 
-from turingarena_impl.interface.variables import Reference
+from turingarena_impl.interface.variables import ReferenceAction
 
 AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
@@ -14,21 +14,12 @@ class ImperativeStructure(metaclass=ABCMeta):
         pass
 
     @property
-    def declared_references(self):
-        references = list(self._get_declared_references())
-        assert all(isinstance(r, Reference) for r in references)
+    def reference_actions(self):
+        references = list(self._get_reference_actions())
+        assert all(isinstance(r, ReferenceAction) for r in references)
         return references
 
-    def _get_declared_references(self):
-        return []
-
-    @property
-    def resolved_references(self):
-        references = list(self._get_resolved_references())
-        assert all(isinstance(r, Reference) for r in references)
-        return references
-
-    def _get_resolved_references(self):
+    def _get_reference_actions(self):
         return []
 
     @abstractmethod
