@@ -56,7 +56,7 @@ class PythonSkeletonCodeGen(PythonCodeGen):
         yield from self.block_content(callback.synthetic_body)
 
     def call_statement(self, call_statement):
-        function_name = call_statement.function_name
+        function_name = call_statement.method_name
 
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)

@@ -2,7 +2,7 @@ import logging
 from contextlib import contextmanager
 
 from turingarena import InterfaceError
-from turingarena.driver.commands import serialize_request, Exit, FunctionCall, \
+from turingarena.driver.commands import serialize_request, Exit, MethodCall, \
     CallbackReturn
 from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
 from turingarena.driver.proxy import InterfaceProxy
@@ -54,7 +54,7 @@ class DriverProcessClient:
             return None
 
     def send_call(self, args, name, callback_list):
-        return self.send_request(FunctionCall(function_name=name, parameters=args, accepted_callbacks={
+        return self.send_request(MethodCall(method_name=name, parameters=args, accepted_callbacks={
             name: f.__code__.co_argcount
             for name, f in callback_list
         }))

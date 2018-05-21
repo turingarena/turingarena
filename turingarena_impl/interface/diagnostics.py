@@ -9,8 +9,8 @@ class Diagnostic(namedtuple("Diagnostic", [
         VARIABLE_NOT_DECLARED = "variable {} not declared"
         VARIABLE_REUSED = "variable {} already used"
         NOT_ARRAY_TYPE = "argument {} type is not array"
-        FUNCTION_NOT_DECLARED = "function {} not declared"
-        FUNCTION_DOES_NOT_RETURN_VALUE = "procedure {} does not return a value"
+        METHOD_NOT_DECLARED = "method {} not declared"
+        METHOD_DOES_NOT_RETURN_VALUE = "procedure {} does not return a value"
         RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
         CALL_WRONG_ARGS_NUMBER = "function {} expects {} argument(s), got {}"
         CALL_WRONG_ARGS_TYPE = "wrong type for argument {} of function {}: expected {}, got {}"
@@ -26,6 +26,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         INFINITE_LOOP = "loop must contain at least a break statement"
         UNREACHABLE_CODE = "unreachable code after break/exit"
         DUPLICATED_CASE_LABEL = "duplicated case label {}"
+        UNEXPECTED_CALLBACK = "callback {} not allowed here"
 
     @staticmethod
     def build_message(msg, *args):

@@ -63,7 +63,7 @@ class JavaSkeletonCodeGen(JavaCodeGen):
         yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name}'
 
     def call_statement(self, statement):
-        function_name = statement.function_name
+        function_name = statement.method_name
         parameters = ', '.join(self.expression(p) for p in statement.parameters)
         if statement.return_value is not None:
             return_value = self.expression(statement.return_value)

@@ -18,7 +18,7 @@ class CppCodeGen(CodeGen):
         return f"{return_type} {callable.name}({parameters})"
 
     def build_function_signature(self, func):
-        return self.build_signature(func, func.callbacks_signature)
+        return self.build_signature(func, func.callbacks)
 
 
 class CppSkeletonCodeGen(CppCodeGen):
@@ -61,8 +61,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "};"
 
     def call_statement_body(self, call_statement):
-        function_name = call_statement.function.name
-        func = call_statement.function
+        method = call_statement.method
 
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)
@@ -70,18 +69,18 @@ class CppSkeletonCodeGen(CppCodeGen):
         value_arguments = [self.expression(p) for p in call_statement.parameters]
         callback_arguments = [
             f"_callback_{callback_signature.name}"
-            for callback_signature in func.callbacks_signature
+            for callback_signature in method.callbacks
         ]
         parameters = ", ".join(value_arguments + callback_arguments)
-        if func.has_return_value:
+        if method.has_return_value:
             return_value = f"{self.expression(call_statement.return_value)} = "
         else:
             return_value = ""
 
-        yield f"{return_value}{function_name}({parameters});"
+        yield f"{return_value}{method.name}({parameters});"
 
     def call_statement(self, call_statement):
-        if call_statement.has_callbacks:
+        if call_statement.method.has_callbacks:
             yield "{"
             yield from self.indent_all(self.call_statement_body(call_statement))
             yield "}"

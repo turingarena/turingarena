@@ -2,7 +2,7 @@ import logging
 
 from turingarena import InterfaceExit
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.callables import Function
+from turingarena_impl.interface.callables import MethodPrototype
 from turingarena_impl.interface.context import StaticGlobalContext
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.interface.statements.exit import ExitInstruction
@@ -21,11 +21,11 @@ class InterfaceDefinition:
         self.ast = ast
         self.main = Block(
             ast=self.ast.main_block,
-            context=StaticGlobalContext(functions=self.functions).create_local()
+            context=StaticGlobalContext(methods=self.methods).create_local()
         )
 
     def validate(self):
-        for function in self.functions:
+        for function in self.methods:
             yield from function.validate()
         yield from self.main.validate()
 
@@ -50,18 +50,12 @@ class InterfaceDefinition:
     def source_text(self):
         return self.ast.parseinfo.buffer.text
 
-    # FIXME: the following properties could be taken from the context instead
-
     @property
-    def functions(self):
-        return tuple(
-            Function(ast=func, context=StaticGlobalContext(functions=()))
-            for func in self.ast.function_declarations
-        )
-
-    @property
-    def function_map(self):
-        return {f.name: f for f in self.functions}
+    def methods(self):
+        return [
+            MethodPrototype(ast=method, context=None)
+            for method in self.ast.method_declarations
+        ]
 
     def generate_instructions(self):
         bindings = {}

@@ -8,7 +8,7 @@ def test_call_not_defined():
         main {
             /*!*/ call g(); /*!*/
         }
-    """, Diagnostic.Messages.FUNCTION_NOT_DECLARED, "g")
+    """, Diagnostic.Messages.METHOD_NOT_DECLARED, "g")
 
 
 def test_call_extra_arguments():
@@ -53,4 +53,4 @@ def test_call_extra_return_expression():
         main {
             call a = f();
         }
-    """, Diagnostic.Messages.FUNCTION_DOES_NOT_RETURN_VALUE, "f")
+    """, Diagnostic.Messages.METHOD_DOES_NOT_RETURN_VALUE, "f")

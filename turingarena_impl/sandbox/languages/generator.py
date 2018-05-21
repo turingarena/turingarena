@@ -43,7 +43,7 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
         yield from ()
 
     def generate_functions(self):
-        for func in self.interface.functions:
+        for func in self.interface.methods:
             yield from self.generate_function_declaration(func)
 
     def generate_main_block(self):

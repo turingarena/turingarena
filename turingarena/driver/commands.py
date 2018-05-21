@@ -30,14 +30,14 @@ def serialize_request(request):
     yield from request.serialize_arguments()
 
 
-class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
-    "function_name", "parameters", "accepted_callbacks"
+class MethodCall(ProxyRequest, namedtuple("MethodCall", [
+    "method_name", "parameters", "accepted_callbacks"
 ])):
     __slots__ = []
 
     @staticmethod
     def deserialize_arguments():
-        function_name = yield
+        method_name = yield
         parameters_count = int((yield))
         parameters = [None] * parameters_count
         for i in range(parameters_count):
@@ -49,14 +49,14 @@ class FunctionCall(ProxyRequest, namedtuple("FunctionCall", [
             callback_parameters_count = int((yield))
             accepted_callbacks[callback_name] = callback_parameters_count
 
-        return FunctionCall(
-            function_name=function_name,
+        return MethodCall(
+            method_name=method_name,
             parameters=parameters,
             accepted_callbacks=accepted_callbacks,
         )
 
     def serialize_arguments(self):
-        yield self.function_name
+        yield self.method_name
         yield len(self.parameters)
         for value in self.parameters:
             yield from serialize_data(value)
@@ -99,7 +99,7 @@ class Exit(ProxyRequest):
 
 
 request_types = bidict({
-    "function_call": FunctionCall,
+    "method_call": MethodCall,
     "callback_return": CallbackReturn,
     "exit": Exit,
 })

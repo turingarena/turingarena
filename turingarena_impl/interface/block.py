@@ -57,7 +57,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     def synthetic_statements(self):
         for s in self.statements:
             yield s
-            if s.statement_type == "call" and s.function.has_callbacks:
+            if s.statement_type == "call" and s.method.has_callbacks:
                 yield SyntheticStatement("write", arguments=[
                     SyntheticExpression("int_literal", value=0),  # no more callbacks
                 ])

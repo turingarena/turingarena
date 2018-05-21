@@ -6,19 +6,22 @@ grammar_ebnf = r"""
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/;
     int_literal = /0|-?[1-9][0-9]*/;
 
-    interface = function_declarations:{ callable_declaration }* ~ 'main' main_block:block $;
+    interface = method_declarations:{ callable_declaration }* ~ 'main' main_block:block $;
     
-    callable_declaration = prototype:prototype ~ callbacks:callbacks_prototype_block;
-    prototype = type:('function' | 'procedure') name:identifier '(' parameters:','.{ parameter_declaration }* ')';
+    callable_declarator =
+        type:('function' | 'procedure')
+        ~
+        name:identifier
+        '(' parameters:','.{ parameter_declaration }* ')'
+        ;
     parameter_declaration = name:identifier indexes:{'[' ']'}*;
 
-    callbacks_prototype_block = 'callbacks' ~ '{' @:{ callable_declaration }* '}' | ';' @:{} ;
+    callable_declaration = declarator:callable_declarator callbacks:callback_declarations ;
+
+    callback_declarations = 'callbacks' ~ '{' @:{ callable_declaration }* '}' | ';' @:{} ;
 
     block = '{' statements:{ statement }* '}';
     
-    callback_implementation = prototype:prototype body:block;
-    callback_block = 'callbacks' ~ '{' @:{callback_implementation}* '}' | ';' @:{} ; 
-
     statement =
         | statement_type:('read' | 'write') ~ arguments:','.{ expression }* ';'
         | statement_type:('checkpoint' | 'break' | 'exit') ~ ';'
@@ -31,8 +34,11 @@ grammar_ebnf = r"""
             return_value:[ return_exp ]
             name:identifier
             '(' parameters:','.{ expression }* ')'
-            callbacks:callback_block
+            callbacks:callback_implementations
         ;
+
+    callback_implementation = declarator:callable_declarator body:block;
+    callback_implementations = 'callbacks' ~ '{' @:{callback_implementation}+ '}' | ';' @:{} ; 
 
     return_exp = @:expression '=';
     else_body = 'else' ~ @:block;

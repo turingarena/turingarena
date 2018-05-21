@@ -6,11 +6,9 @@ from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruc
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement
-from turingarena_impl.interface.variables import Variable, ScalarType
+from turingarena_impl.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
-
-CallableSignature = namedtuple("CallableSignature", ["name", "parameters", "has_return_value"])
 
 
 class ParameterDeclaration(AbstractSyntaxNodeWrapper):
@@ -24,80 +22,67 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
         )
 
 
-class Callable(AbstractSyntaxNodeWrapper):
+class CallablePrototype(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
     def name(self):
-        return self.ast.prototype.name
+        return self.ast.declarator.name
 
     @property
     def parameter_declarations(self):
-        return tuple(
+        return [
             ParameterDeclaration(ast=p, context=self.context)
-            for p in self.ast.prototype.parameters
-        )
+            for p in self.ast.declarator.parameters
+        ]
 
     @property
     def parameters(self):
-        return tuple(p.variable for p in self.parameter_declarations)
+        return [
+            p.variable
+            for p in self.parameter_declarations
+        ]
 
     @property
     def has_return_value(self):
-        return self.ast.prototype.type == 'function'
-
-    def validate(self):
-        pass
+        return self.ast.declarator.type == 'function'
 
     @property
-    def signature(self):
-        return CallableSignature(
-            name=self.name,
-            parameters=self.parameters,
-            has_return_value=self.has_return_value,
-        )
-
-    @property
-    def is_function(self):
-        return self.has_return_value
-
-    @property
-    def is_procedure(self):
-        return not self.has_return_value
-
-
-class Function(Callable):
-    __slots__ = []
-
-    @property
-    def callbacks_signature(self):
-        if not self.ast.callbacks:
-            return ()
-        return tuple(
-            CallableSignature(
-                name=callback.prototype.name,
-                has_return_value=callback.prototype.type == 'function',
-                parameters=tuple(
-                    ParameterDeclaration(ast=p, context=self.context).variable
-                    for p in callback.prototype.parameters
-                )
-            )
+    def callbacks(self):
+        return [
+            CallbackPrototype(callback, self.context)
             for callback in self.ast.callbacks
-        )
+        ]
 
     @property
     def has_callbacks(self):
-        return bool(self.callbacks_signature)
+        return bool(self.callbacks)
 
     def validate(self):
-        if self.has_callbacks:
-            for callback_signature in self.callbacks_signature:
-                for parameter in callback_signature.parameters:
-                    if parameter.value_type.dimensions > 0:
-                        yield Diagnostic(
-                            Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
-                            parseinfo=self.ast.parseinfo
-                        )
+        return []
+
+
+class MethodPrototype(CallablePrototype):
+    __slots__ = []
+
+
+class CallbackPrototype(CallablePrototype):
+    __slots__ = []
+
+    def validate(self):
+        for callback in self.callbacks:
+            yield Diagnostic(
+                Diagnostic.Messages.UNEXPECTED_CALLBACK,
+                callback.name,
+                parseinfo=callback.ast.parseinfo,
+            )
+        for parameter in self.parameter_declarations:
+            if parameter.variable.value_type.dimensions:
+                yield Diagnostic(
+                    Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
+                    callback.name,
+                    parseinfo=parameter.ast.parseinfo,
+                )
 
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
@@ -113,7 +98,7 @@ class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "bod
         yield from self.body.synthetic_statements
 
 
-class Callback(Callable):
+class CallbackImplementation(CallbackPrototype):
     __slots__ = []
 
     @property
@@ -132,21 +117,7 @@ class Callback(Callable):
         )
 
     def validate(self):
-        yield from super().validate()
-
-        invalid_parameter = next(
-            (
-                a for p, a in zip(self.parameters, self.ast.prototype.parameters)
-                if not isinstance(p.value_type, ScalarType)
-            ),
-            None
-        )
-
-        if invalid_parameter is not None:
-            yield Diagnostic(
-                Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
-                parseinfo=invalid_parameter.parseinfo,
-            )
+        yield from self.prototype.validate()
 
     def generate_instructions(self, bindings):
         inner_bindings = {

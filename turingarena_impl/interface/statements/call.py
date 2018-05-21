@@ -2,8 +2,8 @@ import logging
 from collections import namedtuple
 
 from turingarena import InterfaceError
-from turingarena.driver.commands import CallbackReturn, FunctionCall
-from turingarena_impl.interface.callables import Callback
+from turingarena.driver.commands import CallbackReturn, MethodCall
+from turingarena_impl.interface.callables import CallbackImplementation
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
@@ -18,8 +18,12 @@ class CallStatement(Statement):
     __slots__ = []
 
     @property
-    def function_name(self):
+    def method_name(self):
         return self.ast.name
+
+    @property
+    def method(self):
+        return self.context.global_context.methods_by_name[self.method_name]
 
     @property
     def parameters(self):
@@ -37,33 +41,28 @@ class CallStatement(Statement):
             to_allocate=len(self.return_value.indices),
         ),) if self.return_value else ()
 
-    @property
-    def function(self):
-        return self.context.global_context.function_map[self.function_name]
-
-    @property
-    def callbacks(self):
-        return tuple(
-            next(
-                Callback(ast=c, context=StaticCallbackBlockContext(
-                    local_context=self.context,
-                    callback_index=i,
-                ))
-                for c in self.ast.callbacks
-                if c.prototype.name == s.name
-            )
-            for i, s in enumerate(self.function.callbacks_signature)
+    def find_callback_implementation(self, index, callback):
+        return next(
+            CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
+                local_context=self.context,
+                callback_index=index,
+            ))
+            for implementation in self.ast.callbacks
+            if implementation.declarator.name == callback.name
         )
 
     @property
-    def has_callbacks(self):
-        return self.callbacks is not None
+    def callbacks(self):
+        return [
+            self.find_callback_implementation(i, s)
+            for i, s in enumerate(self.method.callbacks)
+        ]
 
     def validate(self):
-        if self.function_name not in self.context.global_context.function_map:
+        if self.method_name not in self.context.global_context.methods_by_name:
             yield Diagnostic(
-                Diagnostic.Messages.FUNCTION_NOT_DECLARED,
-                self.function_name,
+                Diagnostic.Messages.METHOD_NOT_DECLARED,
+                self.method_name,
                 parseinfo=self.ast.parseinfo,
             )
         else:
@@ -83,44 +82,45 @@ class CallStatement(Statement):
             return self.context
 
     def validate_parameters(self):
-        fun = self.function
-        if len(self.parameters) != len(fun.parameters):
+        method = self.method
+        if len(self.parameters) != len(method.parameters):
             yield Diagnostic(
                 Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
-                fun.name, len(fun.parameters), len(self.parameters),
+                method.name, len(method.parameters), len(self.parameters),
                 parseinfo=self.ast.parseinfo,
             )
-        for parameter, expression in zip(fun.parameters, self.parameters):
+        for parameter, expression in zip(method.parameters, self.parameters):
             expr_value_type = expression.value_type
 
             if str(expr_value_type) != str(parameter.value_type):
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter.name, fun.name, parameter.value_type, expr_value_type,
+                    parameter.name, method.name, parameter.value_type, expr_value_type,
                     parseinfo=expression.ast.parseinfo,
                 )
 
             yield from expression.validate()
 
     def validate_return_value(self):
+        method = self.method
         if self.return_value is not None:
             yield from self.return_value.validate(lvalue=True)
-        if self.function.has_return_value and self.return_value is None:
+        if method.has_return_value and self.return_value is None:
             yield Diagnostic(
-                Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, self.function.name,
+                Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, method.name,
                 parseinfo=self.ast.parseinfo,
             )
-        if not self.function.has_return_value and self.return_value is not None:
+        if not method.has_return_value and self.return_value is not None:
             yield Diagnostic(
-                Diagnostic.Messages.FUNCTION_DOES_NOT_RETURN_VALUE, self.function.name,
+                Diagnostic.Messages.METHOD_DOES_NOT_RETURN_VALUE, method.name,
                 parseinfo=self.ast.return_value.parseinfo,
             )
 
     def expects_request(self, request):
         return (
             request is not None
-            and isinstance(request, FunctionCall)
-            and request.function_name == self.function_name
+            and isinstance(request, MethodCall)
+            and request.method_name == self.method_name
         )
 
     @property
@@ -128,17 +128,17 @@ class CallStatement(Statement):
         return True
 
     def generate_instructions(self, bindings):
-        function = self.context.global_context.function_map[self.function_name]
+        method = self.method
 
-        yield FunctionCallInstruction(
+        yield MethodCallInstruction(
             statement=self,
             bindings=bindings,
         )
 
-        if function.has_callbacks:
+        if method.has_callbacks:
             yield from self.unroll_callbacks(bindings)
 
-        yield FunctionReturnInstruction(
+        yield MethodReturnInstruction(
             statement=self,
             bindings=bindings,
         )
@@ -155,24 +155,24 @@ class CallStatement(Statement):
                 break
 
 
-class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction", [
+class MethodCallInstruction(Instruction, namedtuple("MethodCallInstruction", [
     "statement", "bindings"
 ])):
     __slots__ = []
 
     def on_request_lookahead(self, request):
-        fun = self.statement.function
+        method = self.statement.method
         parameters = self.statement.parameters
 
-        if not isinstance(request, FunctionCall):
-            raise InterfaceError(f"expected call to '{fun.name}', got {request}")
+        if not isinstance(request, MethodCall):
+            raise InterfaceError(f"expected call to '{method.name}', got {request}")
 
-        if request.function_name != fun.name:
-            raise InterfaceError(f"expected call to '{fun.name}', got call to '{request.function_name}'")
+        if request.method_name != method.name:
+            raise InterfaceError(f"expected call to '{method.name}', got call to '{request.method_name}'")
 
-        if len(request.parameters) != len(fun.parameters):
+        if len(request.parameters) != len(method.parameters):
             raise InterfaceError(
-                f"'{fun.name}' expects {len(fun.parameters)} arguments, "
+                f"'{method.name}' expects {len(method.parameters)} arguments, "
                 f"got {len(request.parameters)}"
             )
 
@@ -181,16 +181,16 @@ class FunctionCallInstruction(Instruction, namedtuple("FunctionCallInstruction",
                 value_expr.assign(self.bindings, value)
 
     def should_send_input(self):
-        return self.statement.function.has_return_value
+        return self.statement.method.has_return_value
 
 
-class FunctionReturnInstruction(Instruction, namedtuple("FunctionReturnInstruction", [
+class MethodReturnInstruction(Instruction, namedtuple("MethodReturnInstruction", [
     "statement", "bindings"
 ])):
     __slots__ = []
 
     def on_generate_response(self):
-        if self.statement.function.has_return_value:
+        if self.statement.method.has_return_value:
             return_value = self.statement.return_value.evaluate(self.bindings)
             return_response = [1, return_value]
         else:

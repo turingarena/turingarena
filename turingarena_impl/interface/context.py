@@ -5,14 +5,11 @@ logger = logging.getLogger(__name__)
 
 
 class StaticGlobalContext(namedtuple("StaticGlobalContext", [
-    "functions",
+    "methods",
 ])):
     @property
-    def function_map(self):
-        return {f.name: f for f in self.functions}
-
-    def with_function(self, f):
-        return self._replace(functions=self.functions + (f,))
+    def methods_by_name(self):
+        return {m.name: m for m in self.methods}
 
     def create_local(self):
         return StaticLocalContext(
@@ -35,7 +32,7 @@ class StaticLocalContext(namedtuple("StaticLocalContext", [
 ])):
     def with_variables(self, variables):
         return self._replace(
-            locally_defined_variables=self.locally_defined_variables + variables
+            locally_defined_variables=self.locally_defined_variables + tuple(variables)
         )
 
     @property
