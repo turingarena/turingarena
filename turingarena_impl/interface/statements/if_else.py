@@ -1,13 +1,14 @@
 import logging
 
 from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
 
-class IfStatement(Statement):
+class IfStatement(Statement, Instruction):
     __slots__ = []
 
     @property
@@ -20,13 +21,20 @@ class IfStatement(Statement):
 
     @property
     def else_body(self):
-        return Block(ast=self.ast.else_body, context=self.context) if self.ast.else_body else None
+        if self.ast.else_body is not None:
+            return Block(ast=self.ast.else_body, context=self.context)
+        else:
+            return None
 
     def validate(self):
         yield from self.condition.validate()
         yield from self.then_body.validate()
-        if self.else_body:
+        if self.else_body is not None:
             yield from self.else_body.validate()
+
+    def _get_instructions(self):
+        # TODO: yield ResolveConditionInstruction(self), if needed
+        yield self
 
     def generate_instructions(self, bindings):
         # FIXME: check that the condition is not yet resolved
@@ -49,8 +57,10 @@ class IfStatement(Statement):
         )
 
     def _get_reference_actions(self):
-        for r in self.then_body.reference_actions:
-            yield r
-        if self.else_body is not None:
-            for r in self.else_body.reference_actions:
+        for inst in self.then_body.instructions:
+            for r in inst.reference_actions:
                 yield r
+        if self.else_body is not None:
+            for inst in self.else_body.instructions:
+                for r in inst.reference_actions:
+                    yield r

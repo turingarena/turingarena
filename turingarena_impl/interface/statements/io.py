@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
@@ -9,15 +8,11 @@ from turingarena_impl.interface.variables import ReferenceAction, ReferenceActio
 logger = logging.getLogger(__name__)
 
 
-class CheckpointStatement(Statement):
+class CheckpointStatement(Statement, Instruction):
     __slots__ = []
 
-    def generate_instructions(self, bindings):
-        yield CheckpointInstruction()
-
-
-class CheckpointInstruction(Instruction):
-    __slots__ = []
+    def _get_instructions(self):
+        yield self
 
     def should_send_input(self):
         return True
@@ -44,17 +39,15 @@ class ReadWriteStatement(Statement):
             yield from exp.validate_reference()
 
 
-class ReadWriteInstruction(Instruction, namedtuple("ReadWriteInstruction", [
-    "arguments", "bindings"
-])):
+class ReadStatement(ReadWriteStatement, Instruction):
     __slots__ = []
 
+    def _get_instructions(self):
+        yield self
 
-class ReadStatement(ReadWriteStatement):
-    __slots__ = []
-
-    def generate_instructions(self, bindings):
-        yield ReadInstruction(arguments=self.arguments, bindings=bindings)
+    @property
+    def needs_flush(self):
+        return True
 
     def _get_reference_actions(self):
         for exp in self.arguments:
@@ -63,14 +56,6 @@ class ReadStatement(ReadWriteStatement):
                 direction=ReferenceDirection.DOWNWARD,
                 action_type=ReferenceActionType.DECLARED,
             )
-
-    @property
-    def needs_flush(self):
-        return True
-
-
-class ReadInstruction(ReadWriteInstruction):
-    __slots__ = []
 
     def has_downward(self):
         return True
@@ -82,11 +67,11 @@ class ReadInstruction(ReadWriteInstruction):
         ])
 
 
-class WriteStatement(ReadWriteStatement):
+class WriteStatement(ReadWriteStatement, Instruction):
     __slots__ = []
 
-    def generate_instructions(self, bindings):
-        yield WriteInstruction(arguments=self.arguments, bindings=bindings)
+    def _get_instructions(self):
+        yield self
 
     def _get_reference_actions(self):
         for exp in self.arguments:
@@ -95,10 +80,6 @@ class WriteStatement(ReadWriteStatement):
                 direction=ReferenceDirection.UPWARD,
                 action_type=ReferenceActionType.RESOLVED,
             )
-
-
-class WriteInstruction(ReadWriteInstruction):
-    __slots__ = []
 
     def has_upward(self):
         return True

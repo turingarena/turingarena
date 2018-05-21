@@ -5,14 +5,14 @@ from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, Allocation
+from turingarena_impl.interface.variables import Variable, Allocation, ReferenceActionType
 
 logger = logging.getLogger(__name__)
 
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
-class ForStatement(Statement):
+class ForStatement(Statement, Instruction):
     __slots__ = []
 
     @property
@@ -29,28 +29,19 @@ class ForStatement(Statement):
             context=self.context.with_index_variable(self.index),
         )
 
-    def _get_reference_actions(self):
-        for a in self.body.reference_actions:
-            r = a.reference
-            if r.index_count > 0:
-                yield a._replace(reference=r._replace(index_count=r.index_count - 1))
+    def _get_allocations(self):
+        for inst in self.body.instructions:
+            for a in inst.reference_actions:
+                if a.reference.variable.dimensions == 0:
+                    continue
+                if a.action_type == ReferenceActionType.DECLARED:
+                    yield Allocation(
+                        reference=a.reference,
+                        size=self.index.range,
+                    )
 
-    @property
-    def variables_to_allocate(self):
-        return tuple(
-            Allocation(
-                name=var.name,
-                size=self.index.range,
-                dimensions=var.dimensions - var.to_allocate,
-                indexes=tuple(
-                    idx.variable.name
-                    for idx in self.context.index_variables[1 - var.to_allocate:]
-                ) if var.to_allocate > 1 else ()
-            )
-            for stmt in self.body.statements
-            for var in stmt.declared_variables
-            if var.to_allocate > 0
-        )
+    def _get_instructions(self):
+        yield self
 
     def validate(self):
         yield from self.body.validate()
@@ -79,6 +70,13 @@ class ForStatement(Statement):
             request is None
             or self.body.expects_request(request)
         )
+
+    def _get_reference_actions(self):
+        for inst in self.body.instructions:
+            for a in inst.reference_actions:
+                r = a.reference
+                if r.index_count > 0:
+                    yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
 
 class SimpleForInstruction(Instruction, namedtuple("SimpleForInstruction", [

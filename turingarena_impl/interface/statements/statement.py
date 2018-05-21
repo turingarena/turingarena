@@ -1,6 +1,7 @@
 from bidict import bidict
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.variables import ReferenceActionType
 
 
 class AbstractStatement(ImperativeStructure):
@@ -20,6 +21,23 @@ class AbstractStatement(ImperativeStructure):
 
     def generate_instructions(self, bindings):
         raise NotImplementedError
+
+    @property
+    def variables_to_declare(self):
+        return list(self._get_variables_to_declare())
+
+    def _get_variables_to_declare(self):
+        for inst in self.instructions:
+            for a in inst.reference_actions:
+                if a.reference.index_count == 0 and a.action_type == ReferenceActionType.DECLARED:
+                    yield a.reference.variable
+
+    @property
+    def variables_to_allocate(self):
+        return list(self._get_allocations())
+
+    def _get_allocations(self):
+        return []
 
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):

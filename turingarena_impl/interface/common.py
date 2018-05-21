@@ -14,13 +14,12 @@ class ImperativeStructure(metaclass=ABCMeta):
         pass
 
     @property
-    def reference_actions(self):
-        references = list(self._get_reference_actions())
-        assert all(isinstance(r, ReferenceAction) for r in references)
-        return references
+    def instructions(self):
+        return list(self._get_instructions())
 
-    def _get_reference_actions(self):
-        return []
+    @abstractmethod
+    def _get_instructions(self):
+        pass
 
     @abstractmethod
     def expects_request(self, request):
@@ -34,23 +33,15 @@ class ImperativeStructure(metaclass=ABCMeta):
 class Instruction:
     __slots__ = []
 
-    def on_request_lookahead(self, request):
-        pass
+    @property
+    def reference_actions(self):
+        references = list(self._get_reference_actions())
+        assert all(isinstance(r, ReferenceAction) for r in references)
+        return references
 
-    def on_generate_response(self):
-        pass
+    def _get_reference_actions(self):
+        return []
 
-    def has_downward(self):
-        return False
 
-    def has_upward(self):
-        return False
-
-    def on_communicate_downward(self, lines):
-        return NotImplemented
-
-    def on_communicate_upward(self, lines):
-        return NotImplemented
-
-    def should_send_input(self):
-        return False
+class StatementInstruction(Instruction, namedtuple("StatementInstruction", ["statement"])):
+    pass

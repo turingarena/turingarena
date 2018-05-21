@@ -19,7 +19,7 @@ class InterfaceDefinition:
     def __init__(self, source_text, **kwargs):
         ast = parse_interface(source_text, **kwargs)
         self.ast = ast
-        self.main = Block(
+        self.main_block = Block(
             ast=self.ast.main_block,
             context=InterfaceContext(methods=self.methods).main_block_context()
         )
@@ -30,7 +30,7 @@ class InterfaceDefinition:
     def validate(self):
         for method in self.methods:
             yield from method.validate()
-        yield from self.main.validate()
+        yield from self.main_block.validate()
 
     @staticmethod
     def load(name):
@@ -59,7 +59,7 @@ class InterfaceDefinition:
     def generate_instructions(self):
         bindings = {}
         try:
-            yield from self.main.generate_instructions(bindings)
+            yield from self.main_block.generate_instructions(bindings)
         except InterfaceExit:
             pass
         yield ExitInstruction()

@@ -1,9 +1,8 @@
 import logging
 import warnings
-from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.common import StatementInstruction
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
@@ -13,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 class SwitchStatement(Statement):
     __slots__ = []
+
+    def _get_instructions(self):
+        yield SwitchInstruction(self)
 
     def generate_instructions(self, bindings):
         yield SwitchInstruction(self, bindings)
@@ -70,12 +72,6 @@ class SwitchStatement(Statement):
 class CaseStatement(Statement):
     __slots__ = []
 
-    def generate_instructions(self, bindings):
-        yield from self.body.generate_instructions(bindings)
-
-    def expects_request(self, request):
-        return self.body.expects_request(request)
-
     @property
     def body(self):
         return Block(ast=self.ast.body, context=self.context)
@@ -85,7 +81,7 @@ class CaseStatement(Statement):
         return self.ast.labels
 
 
-class SwitchInstruction(Instruction, namedtuple("SwitchInstruction", ["statement", "bindings"])):
+class SwitchInstruction(StatementInstruction):
     def on_request_lookahead(self, request):
         if self.statement.value.is_assignable():
             for case in self.statement.cases:

@@ -59,6 +59,8 @@ def test_read_array_pass_slice():
         }
     """)
     assert not interface.diagnostics()
+    for inst in interface.main_block.instructions:
+        print(type(inst))
 
 
 def test_write_scalar():

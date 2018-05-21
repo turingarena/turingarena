@@ -31,13 +31,11 @@ class CppSkeletonCodeGen(CppCodeGen):
         pointers = "*" * declared_variable.dimensions
         yield f"static int {pointers}{declared_variable.name};"
 
-    def generate_variable_allocation(self, allocated_variable):
-        indexes = ""
-        for idx in allocated_variable.indexes:
-            indexes += f"[{idx}]"
-        dimensions = "*" * allocated_variable.dimensions
-        size = self.expression(allocated_variable.size)
-        yield f"{allocated_variable.name}{indexes} = new int{dimensions}[{size}];"
+    def generate_variable_allocation(self, variable, indexes, size):
+        indexes = "".join(f"[{idx}]" for idx in indexes)
+        dimensions = "*" * (variable.dimensions - len(indexes))
+        size = self.expression(size)
+        yield f"{variable.name}{indexes} = new int{dimensions}[{size}];"
 
     def generate_method_declaration(self, method_declaration):
         yield f"{self.build_method_signature(method_declaration)};"
@@ -45,7 +43,7 @@ class CppSkeletonCodeGen(CppCodeGen):
     def generate_main_block(self):
         yield
         yield "int main() {"
-        yield from self.block_content(self.interface.main)
+        yield from self.block_content(self.interface.main_block)
         yield "}"
 
     def generate_callback(self, callback):

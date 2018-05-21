@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, MethodCall
 from turingarena_impl.interface.callables import CallbackImplementation
-from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.common import Instruction, StatementInstruction
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
@@ -35,21 +35,6 @@ class CallStatement(Statement):
             return Expression.compile(self.ast.return_value, self.context)
         else:
             return None
-
-    def _get_reference_actions(self):
-        if self.return_value is not None:
-            yield ReferenceAction(
-                reference=self.return_value.reference,
-                direction=ReferenceDirection.UPWARD,
-                action_type=ReferenceActionType.DECLARED,
-            )
-        for p in self.parameters:
-            if p.reference is not None and p.reference not in self.context.get_references(ReferenceActionType.RESOLVED):
-                yield ReferenceAction(
-                    p.reference,
-                    direction=ReferenceDirection.DOWNWARD,
-                    action_type=ReferenceActionType.RESOLVED,
-                )
 
     def find_callback_implementation(self, index, callback):
         return next(
@@ -129,6 +114,15 @@ class CallStatement(Statement):
     def may_process_requests(self):
         return True
 
+    def _get_instructions(self):
+        yield MethodCallInstruction(self)
+
+        if self.method.has_callbacks:
+            yield MethodCallbacksInstruction(self)
+
+        if self.method.has_return_value:
+            yield MethodReturnInstruction(self)
+
     def generate_instructions(self, bindings):
         method = self.method
 
@@ -157,10 +151,18 @@ class CallStatement(Statement):
                 break
 
 
-class MethodCallInstruction(Instruction, namedtuple("MethodCallInstruction", [
-    "statement", "bindings"
-])):
+class MethodCallInstruction(StatementInstruction):
     __slots__ = []
+
+    def _get_reference_actions(self):
+        references = self.statement.context.get_references(ReferenceActionType.RESOLVED)
+        for p in self.statement.parameters:
+            if p.reference is not None and p.reference not in references:
+                yield ReferenceAction(
+                    p.reference,
+                    direction=ReferenceDirection.DOWNWARD,
+                    action_type=ReferenceActionType.RESOLVED,
+                )
 
     def on_request_lookahead(self, request):
         method = self.statement.method
@@ -186,10 +188,15 @@ class MethodCallInstruction(Instruction, namedtuple("MethodCallInstruction", [
         return self.statement.method.has_return_value
 
 
-class MethodReturnInstruction(Instruction, namedtuple("MethodReturnInstruction", [
-    "statement", "bindings"
-])):
+class MethodReturnInstruction(StatementInstruction):
     __slots__ = []
+
+    def _get_reference_actions(self):
+        yield ReferenceAction(
+            reference=self.statement.return_value.reference,
+            direction=ReferenceDirection.UPWARD,
+            action_type=ReferenceActionType.DECLARED,
+        )
 
     def on_generate_response(self):
         if self.statement.method.has_return_value:

@@ -28,8 +28,12 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
     def generate_statement(self, statement):
         for var in statement.variables_to_declare:
             yield from self.generate_variable_declaration(var)
-        for var in statement.variables_to_allocate:
-            yield from self.generate_variable_allocation(var)
+
+        for allocation in statement.variables_to_allocate:
+            variable = allocation.reference.variable
+            indexes = statement.context.index_variables[-allocation.reference.index_count:]
+            yield from self.generate_variable_allocation(variable, indexes, allocation.size)
+
         if statement.needs_flush:
             yield from self.generate_flush()
 
@@ -47,10 +51,10 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
             yield from self.generate_method_declaration(func)
 
     def generate_main_block(self):
-        yield from self.block_content(self.interface.main, indent=False)
+        yield from self.block_content(self.interface.main_block, indent=False)
 
     @abstractmethod
-    def generate_variable_allocation(self, allocated_variable):
+    def generate_variable_allocation(self, variables, indexes, size):
         pass
 
     @abstractmethod
