@@ -32,8 +32,8 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield f"static int {pointers}{declared_variable.name};"
 
     def generate_variable_allocation(self, variable, indexes, size):
-        indexes = "".join(f"[{idx}]" for idx in indexes)
-        dimensions = "*" * (variable.dimensions - len(indexes))
+        indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
+        dimensions = "*" * (variable.dimensions - len(indexes) - 1)
         size = self.expression(size)
         yield f"{variable.name}{indexes} = new int{dimensions}[{size}];"
 
@@ -92,9 +92,7 @@ class CppSkeletonCodeGen(CppCodeGen):
     def read_statement(self, statement):
         format_string = "".join("%d" for _ in statement.arguments)
         scanf_args = ", ".join("&" + self.expression(v) for v in statement.arguments)
-        scanf_call = f"""scanf("{format_string}", {scanf_args})"""
-        error_message = '"unable to read input"'
-        yield f"assert({scanf_call} == {len(statement.arguments)} && {error_message});"
+        yield f"""scanf("{format_string}", {scanf_args});"""
 
     def if_statement(self, statement):
         condition = self.expression(statement.condition)

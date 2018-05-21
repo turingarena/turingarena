@@ -36,7 +36,9 @@ class ForStatement(Statement, Instruction):
                     continue
                 if a.action_type == ReferenceActionType.DECLARED:
                     yield Allocation(
-                        reference=a.reference,
+                        reference=a.reference._replace(
+                            index_count=a.reference.index_count - 1,
+                        ),
                         size=self.index.range,
                     )
 
