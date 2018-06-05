@@ -2,8 +2,20 @@
 
 *Create algorithmic challenges!*
 
-TuringArena is a toolkit to define challenges which require an algorithmic solution,
-and to automatically test the code of solutions.
+[TuringArena](http://turingarena.org "TuringArena") is a toolkit and platform which allows to:
+
+* define challenges which require an algorithmic solution;
+* get/provide automatic evaluation of submitted solutions for an immidiate feedback to the problem recipient (student, class, employee/user/costumer to be trained/evaluated upon some competences), or for problem/system testing for the problem maker or proposer (teacher, trainer, advisor), or for student/team evaluation purposes;
+* allow and organize the immidiate use, the shared development, the publication and the promoting of the problem with possibly an eye to the respecting of the paternity and intellectual property of the problems that we fully recognize as forms of valuable content (we ourselves started this up as problem developers as part of our service for the italian olympiads in informatics and within our classes). 
+
+Some of the innovative features are:
+
+* a language independent workflow, the problem designer is required a basic knowledge in just one programming language of its choice, and can always decide to which languages the evaluation service of solutions is open;
+* virtually no restriction on the generality of challanges that can be represented;
+* support for defining and implementing with minimum effort meaty problems from various fields (mainly in computer science and mathematics, but let's offer more concrete hints: algorithms, reductions between problems, computational complexity, games in a broad sense, mathematical programming, criptography, zero-knowledge proofs, programming tasks in specific languages or environments, workflows, ... and even support for problem solving without programming);  
+* high levels of interactivity allowed and open ends for gamifications;
+* an effective problem sharing approach which allows teachers and the like to organize in networks collaborating to the joint development of problem based didactive projects for the active learner and open source publishing the problems without neither spoiling them nor giving up their paternity, possibly even copyrighting them.
+
 
 ## Getting started
 
