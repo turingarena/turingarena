@@ -3,7 +3,7 @@ from abc import abstractmethod
 from bidict import bidict
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
-from turingarena_impl.interface.variables import ReferenceActionType
+from turingarena_impl.interface.variables import ReferenceStatus
 
 
 class AbstractStatement(ImperativeStructure):
@@ -31,7 +31,7 @@ class AbstractStatement(ImperativeStructure):
     def _get_variables_to_declare(self):
         for inst in self.instructions:
             for a in inst.reference_actions:
-                if a.reference.index_count == 0 and a.action_type == ReferenceActionType.DECLARED:
+                if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
                     yield a.reference.variable
 
     @property

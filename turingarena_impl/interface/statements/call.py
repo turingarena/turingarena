@@ -9,7 +9,7 @@ from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType, ReferenceDirection
+from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -154,15 +154,14 @@ class CallStatement(Statement):
 class MethodCallInstruction(StatementInstruction):
     __slots__ = []
 
+    def _get_direction(self):
+        return ReferenceDirection.DOWNWARD
+
     def _get_reference_actions(self):
-        references = self.statement.context.get_references(ReferenceActionType.RESOLVED)
+        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
         for p in self.statement.parameters:
             if p.reference is not None and p.reference not in references:
-                yield ReferenceAction(
-                    p.reference,
-                    direction=ReferenceDirection.DOWNWARD,
-                    action_type=ReferenceActionType.RESOLVED,
-                )
+                yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
     def on_request_lookahead(self, request):
         method = self.statement.method
@@ -191,12 +190,11 @@ class MethodCallInstruction(StatementInstruction):
 class MethodReturnInstruction(StatementInstruction):
     __slots__ = []
 
+    def _get_direction(self):
+        return ReferenceDirection.UPWARD
+
     def _get_reference_actions(self):
-        yield ReferenceAction(
-            reference=self.statement.return_value.reference,
-            direction=ReferenceDirection.UPWARD,
-            action_type=ReferenceActionType.DECLARED,
-        )
+        yield ReferenceAction(self.statement.return_value.reference, ReferenceStatus.DECLARED)
 
     def on_generate_response(self):
         if self.statement.method.has_return_value:

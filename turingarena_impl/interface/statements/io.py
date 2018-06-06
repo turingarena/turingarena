@@ -3,7 +3,7 @@ import logging
 from turingarena_impl.interface.common import Instruction
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType, ReferenceDirection
+from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +13,12 @@ class CheckpointStatement(Statement, Instruction):
 
     def _get_instructions(self):
         yield self
+
+    def _get_direction(self):
+        return ReferenceDirection.UPWARD
+
+    def _get_reference_actions(self):
+        return []
 
     def should_send_input(self):
         return True
@@ -51,14 +57,10 @@ class ReadStatement(ReadWriteStatement, Instruction):
 
     def _get_reference_actions(self):
         for exp in self.arguments:
-            yield ReferenceAction(
-                reference=exp.reference,
-                direction=ReferenceDirection.DOWNWARD,
-                action_type=ReferenceActionType.DECLARED,
-            )
+            yield ReferenceAction(exp.reference, ReferenceStatus.DECLARED)
 
-    def has_downward(self):
-        return True
+    def _get_direction(self):
+        return ReferenceDirection.DOWNWARD
 
     def on_communicate_downward(self, lines):
         lines.send([
@@ -75,11 +77,10 @@ class WriteStatement(ReadWriteStatement, Instruction):
 
     def _get_reference_actions(self):
         for exp in self.arguments:
-            yield ReferenceAction(
-                reference=exp.reference,
-                direction=ReferenceDirection.UPWARD,
-                action_type=ReferenceActionType.RESOLVED,
-            )
+            yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
+
+    def _get_direction(self):
+        return ReferenceDirection.UPWARD
 
     def has_upward(self):
         return True

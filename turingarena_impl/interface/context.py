@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceActionType
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -30,23 +30,23 @@ class StatementContext(namedtuple("StatementContext", [
 ])):
     def with_reference_actions(self, actions):
         actions = tuple(actions)
-        assert all(isinstance(r, ReferenceAction) for r in actions)
+        assert all(isinstance(a, ReferenceAction) for a in actions)
         return self._replace(
             reference_actions=self.reference_actions + actions
         )
 
-    def get_references(self, action_type):
+    def get_references(self, status):
         return {
             a.reference
             for a in self.reference_actions
-            if a.action_type is action_type
+            if a.status is status
         }
 
     @property
     def declared_variables(self):
         return {
             r.variable
-            for r in self.get_references(ReferenceActionType.DECLARED)
+            for r in self.get_references(ReferenceStatus.DECLARED)
         }
 
     @property

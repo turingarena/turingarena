@@ -4,8 +4,8 @@ from enum import Enum
 Variable = namedtuple("Variable", ["name", "dimensions"])
 Reference = namedtuple("Reference", ["variable", "index_count"])
 
-ReferenceActionType = Enum("ReferenceActionType", names=["DECLARED", "RESOLVED"])
+ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
-ReferenceAction = namedtuple("ReferenceAction", ["reference", "direction", "action_type"])
+ReferenceAction = namedtuple("ReferenceAction", ["reference", "status"])
 
 Allocation = namedtuple("Allocation", ["reference", "size"])

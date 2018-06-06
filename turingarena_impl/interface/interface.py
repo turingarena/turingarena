@@ -16,8 +16,8 @@ class InterfaceBody(Block):
 
 
 class InterfaceDefinition:
-    def __init__(self, source_text, **kwargs):
-        ast = parse_interface(source_text, **kwargs)
+    def __init__(self, source_text):
+        ast = parse_interface(source_text)
         self.ast = ast
         self.main_block = Block(
             ast=self.ast.main_block,

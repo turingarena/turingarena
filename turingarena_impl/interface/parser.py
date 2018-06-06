@@ -13,8 +13,8 @@ def get_grammar():
     return tatsu.compile(grammar_ebnf)
 
 
-def parse_interface(text, **kwargs):
-    return get_grammar().parse(text, **kwargs, start="interface", asmodel=False, parseinfo=True)
+def parse_interface(text):
+    return get_grammar().parse(text, start="interface", asmodel=False, parseinfo=True)
 
 
 def get_line(parseinfo):
@@ -27,5 +27,3 @@ def get_line(parseinfo):
         return lines[0][start:end].strip()
     else:
         return lines[0][start:].strip() + "..."
-
-

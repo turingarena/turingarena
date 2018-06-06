@@ -56,7 +56,3 @@ class IfStatement(Statement, Instruction):
             self.else_body is not None and self.else_body.expects_request(request)
         )
 
-    def _get_reference_actions(self):
-        yield from self.then_body.reference_actions
-        if self.else_body is not None:
-            yield from self.else_body.reference_actions
