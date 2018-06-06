@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Iterable, Tuple, Any
 
 from turingarena.driver.commands import DriverMessage
@@ -8,26 +7,26 @@ CommunicationLines = Iterable[Tuple[int, ...]]
 Assignments = Iterable[Tuple[Reference, Any]]
 
 
-class Instruction:
+class UpwardDeclareInstruction:
     __slots__ = []
 
     def generate_response(self) -> Iterable[DriverMessage]:
-        pass
+        raise NotImplementedError
 
+
+class UpwardResolveInstruction:
     def communicate_upward(self, lines: CommunicationLines) -> Assignments:
-        pass
+        raise NotImplementedError
 
+
+class DownwardResolveInstruction:
     def lookahead_request(self, request: DriverMessage) -> Assignments:
-        pass
+        raise NotImplementedError
 
     def should_advance_request(self) -> bool:
-        pass
+        raise NotImplementedError
 
+
+class DownwardDeclareInstruction:
     def communicate_downward(self) -> CommunicationLines:
-        pass
-
-
-class InstructionExecutor:
-    @abstractmethod
-    def execute(self, instruction: Instruction) -> Assignments:
-        pass
+        raise NotImplementedError

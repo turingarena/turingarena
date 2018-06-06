@@ -1,19 +1,19 @@
 import logging
 from itertools import groupby
+from typing import List
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.instructions import InstructionExecutor
-from turingarena_impl.interface.nodes import IntermediateNode, Bindings
+from turingarena_impl.interface.nodes import Bindings
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.step import Step
+from turingarena_impl.interface.step import Step, RunnableNode, StepExecutor
 from turingarena_impl.interface.variables import ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
+class Block(ImperativeStructure, RunnableNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
@@ -63,7 +63,7 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
                 yield Step(list(g))
 
     @property
-    def children(self):
+    def children(self) -> List[RunnableNode]:
         return list(self._group_nodes_by_direction())
 
     def _get_reference_actions(self):
@@ -90,7 +90,7 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
             for s in self.statements
         )
 
-    def driver_run(self, bindings: Bindings, executor: InstructionExecutor):
+    def driver_run(self, bindings: Bindings, executor: StepExecutor):
         assignments = []
         for n in self.children:
             assignments.extend(n.driver_run({
