@@ -9,7 +9,7 @@ from bidict import bidict
 logger = logging.getLogger(__name__)
 
 
-class ProxyRequest:
+class DriverMessage:
     __slots__ = []
 
     def serialize_arguments(self):
@@ -30,7 +30,7 @@ def serialize_request(request):
     yield from request.serialize_arguments()
 
 
-class MethodCall(ProxyRequest, namedtuple("MethodCall", [
+class MethodCall(DriverMessage, namedtuple("MethodCall", [
     "method_name", "parameters", "accepted_callbacks"
 ])):
     __slots__ = []
@@ -66,7 +66,7 @@ class MethodCall(ProxyRequest, namedtuple("MethodCall", [
             yield parameters_count
 
 
-class CallbackReturn(ProxyRequest, namedtuple("CallbackReturn", [
+class CallbackReturn(DriverMessage, namedtuple("CallbackReturn", [
     "return_value"
 ])):
     __slots__ = []
@@ -89,7 +89,7 @@ class CallbackReturn(ProxyRequest, namedtuple("CallbackReturn", [
             yield int(self.return_value)
 
 
-class Exit(ProxyRequest):
+class Exit(DriverMessage):
     __slots__ = []
 
     @staticmethod

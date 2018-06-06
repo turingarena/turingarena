@@ -4,7 +4,8 @@ from itertools import groupby
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.nodes import IntermediateNode
+from turingarena_impl.interface.instructions import InstructionExecutor
+from turingarena_impl.interface.nodes import IntermediateNode, Bindings
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.interface.step import Step
 from turingarena_impl.interface.variables import ReferenceDirection
@@ -61,16 +62,17 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
                 assert isinstance(k, ReferenceDirection)
                 yield Step(list(g))
 
-    def _get_intermediate_nodes(self):
+    @property
+    def children(self):
         return list(self._group_nodes_by_direction())
 
     def _get_reference_actions(self):
-        for n in self.intermediate_nodes:
+        for n in self.children:
             yield from n.reference_actions
 
     def _get_direction(self):
-        if len(self.intermediate_nodes) == 1:
-            return self.intermediate_nodes[0].direction
+        if len(self.children) == 1:
+            return self.children[0].direction
         else:
             return None
 
@@ -87,3 +89,12 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
             s.may_process_requests
             for s in self.statements
         )
+
+    def driver_run(self, bindings: Bindings, executor: InstructionExecutor):
+        assignments = []
+        for n in self.children:
+            assignments.extend(n.driver_run({
+                **bindings,
+                **dict(assignments),
+            }, executor))
+        return assignments

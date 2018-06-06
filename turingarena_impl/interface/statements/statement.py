@@ -1,6 +1,10 @@
+from abc import abstractmethod
+from typing import List
+
 from bidict import bidict
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.variables import ReferenceStatus
 
 
@@ -39,6 +43,14 @@ class AbstractStatement(ImperativeStructure):
     def _get_allocations(self):
         return []
 
+    @property
+    def intermediate_nodes(self) -> List[IntermediateNode]:
+        return list(self._get_intermediate_nodes())
+
+    @abstractmethod
+    def _get_intermediate_nodes(self):
+        pass
+
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []
@@ -74,7 +86,6 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     @property
     def statement_type(self):
         return self.ast.statement_type
-
 
 
 class SyntheticStatement(AbstractStatement):

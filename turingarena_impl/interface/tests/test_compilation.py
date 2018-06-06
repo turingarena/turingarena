@@ -104,7 +104,7 @@ def test_read_array_pass_slice():
         ]),
     ]
 
-    steps2 = statements1[0].body.intermediate_nodes
+    steps2 = statements1[0].body.children
     statements2 = statements1[0].body.statements
     assert steps2 == [
         Step([

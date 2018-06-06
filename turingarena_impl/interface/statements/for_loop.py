@@ -30,17 +30,16 @@ class ForStatement(Statement, IntermediateNode):
         )
 
     def _get_allocations(self):
-        for n in self.body.intermediate_nodes:
-            for a in n.reference_actions:
-                if a.reference.variable.dimensions == 0:
-                    continue
-                if a.status == ReferenceStatus.DECLARED:
-                    yield Allocation(
-                        reference=a.reference._replace(
-                            index_count=a.reference.index_count - 1,
-                        ),
-                        size=self.index.range,
-                    )
+        for a in self.body.reference_actions:
+            if a.reference.variable.dimensions == 0:
+                continue
+            if a.status == ReferenceStatus.DECLARED:
+                yield Allocation(
+                    reference=a.reference._replace(
+                        index_count=a.reference.index_count - 1,
+                    ),
+                    size=self.index.range,
+                )
 
     def _get_intermediate_nodes(self):
         yield self

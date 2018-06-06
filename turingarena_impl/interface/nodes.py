@@ -1,8 +1,11 @@
 from abc import abstractmethod
 from collections import namedtuple
-from typing import List, Optional
+from typing import List, Optional, Mapping, Any
 
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceDirection
+from turingarena_impl.interface.instructions import InstructionExecutor, Assignments
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceDirection, Reference
+
+Bindings = Mapping[Reference, Any]
 
 
 class IntermediateNode:
@@ -29,19 +32,7 @@ class IntermediateNode:
     def _get_direction(self):
         pass
 
-    def on_execute(self, bindings, runner):
-        pass
-
-    def on_request_lookahead(self, bindings, request):
-        pass
-
-    def on_generate_response(self, bindings):
-        pass
-
-    def on_communicate_upward(self, bindings, lines):
-        pass
-
-    def on_communicate_downward(self, bindings, lines):
+    def driver_run(self, bindings: Bindings, executor: InstructionExecutor) -> Assignments:
         pass
 
 
