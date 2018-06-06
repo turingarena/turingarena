@@ -2,9 +2,9 @@ import logging
 import warnings
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import StatementIntermediateNode
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.nodes import StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)

@@ -2,8 +2,8 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus
 

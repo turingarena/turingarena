@@ -1,8 +1,7 @@
-from turingarena_impl.interface.common import Step
 from turingarena_impl.interface.interface import InterfaceDefinition
-
 # TODO: verify generated instructions
 from turingarena_impl.interface.statements.call import MethodCallInstruction, MethodReturnInstruction
+from turingarena_impl.interface.step import Step
 
 
 def test_read_scalar():

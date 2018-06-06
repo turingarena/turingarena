@@ -4,10 +4,10 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, MethodCall
 from turingarena_impl.interface.callables import CallbackImplementation
-from turingarena_impl.interface.common import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.nodes import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 

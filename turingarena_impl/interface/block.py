@@ -1,10 +1,12 @@
 import logging
 from itertools import groupby
 
-from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, Step, IntermediateNode
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
+from turingarena_impl.interface.step import Step
 from turingarena_impl.interface.variables import ReferenceDirection
 
 logger = logging.getLogger(__name__)

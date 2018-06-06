@@ -2,7 +2,7 @@ import logging
 
 from turingarena import InterfaceExit
 from turingarena.driver.commands import Exit
-from turingarena_impl.interface.common import StatementIntermediateNode
+from turingarena_impl.interface.nodes import StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)

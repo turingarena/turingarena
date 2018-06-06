@@ -1,8 +1,8 @@
 import logging
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)

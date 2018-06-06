@@ -1,7 +1,7 @@
 import logging
 
-from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
