@@ -2,7 +2,7 @@ import logging
 import warnings
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import StatementInstruction
+from turingarena_impl.interface.common import StatementIntermediateNode
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class SwitchStatement(Statement):
     __slots__ = []
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield SwitchInstruction(self)
 
     def generate_instructions(self, bindings):
@@ -81,7 +81,7 @@ class CaseStatement(Statement):
         return self.ast.labels
 
 
-class SwitchInstruction(StatementInstruction):
+class SwitchInstruction(StatementIntermediateNode):
     def on_request_lookahead(self, request):
         if self.statement.value.is_assignable():
             for case in self.statement.cases:

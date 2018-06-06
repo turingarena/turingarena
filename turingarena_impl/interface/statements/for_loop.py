@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
-class ForStatement(Statement, Instruction):
+class ForStatement(Statement, IntermediateNode):
     __slots__ = []
 
     @property
@@ -30,20 +30,19 @@ class ForStatement(Statement, Instruction):
         )
 
     def _get_allocations(self):
-        for step in self.body.instructions:
-            for inst in step.instructions:
-                for a in inst.reference_actions:
-                    if a.reference.variable.dimensions == 0:
-                        continue
-                    if a.status == ReferenceStatus.DECLARED:
-                        yield Allocation(
-                            reference=a.reference._replace(
-                                index_count=a.reference.index_count - 1,
-                            ),
-                            size=self.index.range,
-                        )
+        for n in self.body.intermediate_nodes:
+            for a in n.reference_actions:
+                if a.reference.variable.dimensions == 0:
+                    continue
+                if a.status == ReferenceStatus.DECLARED:
+                    yield Allocation(
+                        reference=a.reference._replace(
+                            index_count=a.reference.index_count - 1,
+                        ),
+                        size=self.index.range,
+                    )
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield self
 
     def validate(self):

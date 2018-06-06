@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, Instruction
+from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, IntermediateNode
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import SyntheticStatement
@@ -129,11 +129,11 @@ class CallbackImplementation(CallbackPrototype):
                 p.name: [None] for p in self.parameters
             }
         }
-        yield CallbackCallInstruction(self, bindings=inner_bindings)
+        yield CallbackCallNode(self, bindings=inner_bindings)
         yield from self.body.generate_instructions(inner_bindings)
 
 
-class CallbackCallInstruction(Instruction, namedtuple("CallbackCallInstruction", [
+class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback", "bindings",
 ])):
     def on_generate_response(self):

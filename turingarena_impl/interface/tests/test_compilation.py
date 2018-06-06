@@ -15,7 +15,7 @@ def test_read_scalar():
         }
     """)
     assert not interface.diagnostics()
-    steps = interface.main_block.instructions
+    steps = interface.main_block.intermediate_nodes
     statements = interface.main_block.statements
     assert steps == [
         Step([
@@ -40,7 +40,7 @@ def test_read_array_1():
         }
     """)
     assert not interface.diagnostics()
-    steps = interface.main_block.instructions
+    steps = interface.main_block.intermediate_nodes
     statements = interface.main_block.statements
     assert steps == [
         Step([
@@ -67,7 +67,7 @@ def test_read_array_2():
         }
     """)
     assert not interface.diagnostics()
-    steps = interface.main_block.instructions
+    steps = interface.main_block.intermediate_nodes
     statements = interface.main_block.statements
     assert steps == [
         Step([
@@ -94,7 +94,7 @@ def test_read_array_pass_slice():
         }
     """)
     assert not interface.diagnostics()
-    steps1 = interface.main_block.instructions
+    steps1 = interface.main_block.intermediate_nodes
     statements1 = interface.main_block.statements
     assert steps1 == [
         Step([
@@ -105,7 +105,7 @@ def test_read_array_pass_slice():
         ]),
     ]
 
-    steps2 = statements1[0].body.instructions
+    steps2 = statements1[0].body.intermediate_nodes
     statements2 = statements1[0].body.statements
     assert steps2 == [
         Step([
@@ -124,7 +124,7 @@ def test_write_scalar():
         }
     """)
     assert not interface.diagnostics()
-    steps = interface.main_block.instructions
+    steps = interface.main_block.intermediate_nodes
     statements = interface.main_block.statements
     assert steps == [
         Step([

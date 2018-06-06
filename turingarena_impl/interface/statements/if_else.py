@@ -1,14 +1,14 @@
 import logging
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
 
-class IfStatement(Statement, Instruction):
+class IfStatement(Statement, IntermediateNode):
     __slots__ = []
 
     @property
@@ -32,7 +32,7 @@ class IfStatement(Statement, Instruction):
         if self.else_body is not None:
             yield from self.else_body.validate()
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         # TODO: yield ResolveConditionInstruction(self), if needed
         yield self
 

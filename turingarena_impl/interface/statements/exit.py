@@ -2,7 +2,7 @@ import logging
 
 from turingarena import InterfaceExit
 from turingarena.driver.commands import Exit
-from turingarena_impl.interface.common import StatementInstruction
+from turingarena_impl.interface.common import StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ExitStatement(Statement):
     __slots__ = []
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield ExitInstruction(self)
 
     def generate_instructions(self, bindings):
@@ -30,7 +30,7 @@ class ExitStatement(Statement):
         return request is not None and request.request_type == "exit"
 
 
-class ExitInstruction(StatementInstruction):
+class ExitInstruction(StatementIntermediateNode):
     __slots__ = []
 
     def on_request_lookahead(self, request):

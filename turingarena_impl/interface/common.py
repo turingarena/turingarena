@@ -7,19 +7,7 @@ from turingarena_impl.interface.variables import ReferenceDirection, ReferenceAc
 AbstractSyntaxNodeWrapper = namedtuple("AbstractSyntaxNodeWrapper", ["ast", "context"])
 
 
-class ImperativeStructure(metaclass=ABCMeta):
-    __slots__ = []
-
-    @abstractmethod
-    def expects_request(self, request):
-        pass
-
-    @property
-    def may_process_requests(self):
-        return False
-
-
-class Instruction:
+class IntermediateNode:
     __slots__ = []
 
     @property
@@ -43,6 +31,9 @@ class Instruction:
     def _get_direction(self):
         pass
 
+    def on_execute(self, bindings, runner):
+        pass
+
     def on_request_lookahead(self, bindings, request):
         pass
 
@@ -56,25 +47,45 @@ class Instruction:
         pass
 
 
-class Step(Instruction, namedtuple("Step", ["instructions"])):
+class ImperativeStructure(metaclass=ABCMeta):
+    __slots__ = []
+
+    @abstractmethod
+    def expects_request(self, request):
+        pass
+
+    @property
+    def may_process_requests(self):
+        return False
+
+    @property
+    def intermediate_nodes(self) -> List[IntermediateNode]:
+        return list(self._get_intermediate_nodes())
+
+    @abstractmethod
+    def _get_intermediate_nodes(self):
+        pass
+
+
+class Step(IntermediateNode, namedtuple("Step", ["children"])):
     __slots__ = []
 
     def __init__(self, *args, **kwargs):
         super().__init__()
-        assert self.instructions
+        assert self.children
 
         if self.direction is None:
-            assert len(self.instructions) == 1
+            assert len(self.children) == 1
         else:
-            assert all(inst.direction is self.direction for inst in self.instructions)
+            assert all(n.direction is self.direction for n in self.children)
 
     def _get_direction(self):
-        return self.instructions[0].direction
+        return self.children[0].direction
 
     def _get_reference_actions(self):
-        for inst in self.instructions:
-            yield from inst.reference_actions
+        for n in self.children:
+            yield from n.reference_actions
 
 
-class StatementInstruction(Instruction, namedtuple("StatementInstruction", ["statement"])):
+class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []

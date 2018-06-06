@@ -1,5 +1,3 @@
-from abc import abstractmethod
-
 from bidict import bidict
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
@@ -29,7 +27,7 @@ class AbstractStatement(ImperativeStructure):
         return list(self._get_variables_to_declare())
 
     def _get_variables_to_declare(self):
-        for inst in self.instructions:
+        for inst in self.intermediate_nodes:
             for a in inst.reference_actions:
                 if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
                     yield a.reference.variable
@@ -77,13 +75,6 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     def statement_type(self):
         return self.ast.statement_type
 
-    @property
-    def instructions(self):
-        return list(self._get_instructions())
-
-    @abstractmethod
-    def _get_instructions(self):
-        pass
 
 
 class SyntheticStatement(AbstractStatement):

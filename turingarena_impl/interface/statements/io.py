@@ -1,6 +1,6 @@
 import logging
 
-from turingarena_impl.interface.common import Instruction
+from turingarena_impl.interface.common import IntermediateNode
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -8,10 +8,10 @@ from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirec
 logger = logging.getLogger(__name__)
 
 
-class CheckpointStatement(Statement, Instruction):
+class CheckpointStatement(Statement, IntermediateNode):
     __slots__ = []
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield self
 
     def _get_direction(self):
@@ -45,10 +45,10 @@ class ReadWriteStatement(Statement):
             yield from exp.validate_reference()
 
 
-class ReadStatement(ReadWriteStatement, Instruction):
+class ReadStatement(ReadWriteStatement, IntermediateNode):
     __slots__ = []
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield self
 
     @property
@@ -69,10 +69,10 @@ class ReadStatement(ReadWriteStatement, Instruction):
         ])
 
 
-class WriteStatement(ReadWriteStatement, Instruction):
+class WriteStatement(ReadWriteStatement, IntermediateNode):
     __slots__ = []
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield self
 
     def _get_reference_actions(self):

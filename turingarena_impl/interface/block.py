@@ -1,7 +1,7 @@
 import logging
 from itertools import groupby
 
-from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, Step, Instruction
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, Step, IntermediateNode
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
@@ -10,7 +10,7 @@ from turingarena_impl.interface.variables import ReferenceDirection
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure, Instruction, AbstractSyntaxNodeWrapper):
+class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
@@ -18,7 +18,7 @@ class Block(ImperativeStructure, Instruction, AbstractSyntaxNodeWrapper):
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
 
-            for inst in statement.instructions:
+            for inst in statement.intermediate_nodes:
                 inner_context = inner_context.with_reference_actions(inst.reference_actions)
 
             yield statement
@@ -47,29 +47,28 @@ class Block(ImperativeStructure, Instruction, AbstractSyntaxNodeWrapper):
                     SyntheticExpression("int_literal", value=0),  # no more callbacks
                 ])
 
-    def _generate_inner_instructions(self):
+    def _generate_flat_inner_nodes(self):
         for s in self.statements:
-            yield from s.instructions
+            yield from s.intermediate_nodes
 
-    def _generate_steps(self):
-        for k, g in groupby(self._generate_inner_instructions(), key=lambda inst: inst.direction):
+    def _group_nodes_by_direction(self):
+        for k, g in groupby(self._generate_flat_inner_nodes(), key=lambda inst: inst.direction):
             if k is None:
                 yield from g
             else:
                 assert isinstance(k, ReferenceDirection)
                 yield Step(list(g))
 
-    @property
-    def instructions(self):
-        return list(self._generate_steps())
+    def _get_intermediate_nodes(self):
+        return list(self._group_nodes_by_direction())
 
     def _get_reference_actions(self):
-        for inst in self.instructions:
-            yield from inst.reference_actions
+        for n in self.intermediate_nodes:
+            yield from n.reference_actions
 
     def _get_direction(self):
-        if len(self.instructions) == 1:
-            return self.instructions[0].direction
+        if len(self.intermediate_nodes) == 1:
+            return self.intermediate_nodes[0].direction
         else:
             return None
 

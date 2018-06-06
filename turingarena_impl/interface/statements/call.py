@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena.driver.commands import CallbackReturn, MethodCall
 from turingarena_impl.interface.callables import CallbackImplementation
-from turingarena_impl.interface.common import Instruction, StatementInstruction
+from turingarena_impl.interface.common import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
@@ -114,7 +114,7 @@ class CallStatement(Statement):
     def may_process_requests(self):
         return True
 
-    def _get_instructions(self):
+    def _get_intermediate_nodes(self):
         yield MethodCallInstruction(self)
 
         if self.method.has_callbacks:
@@ -142,7 +142,7 @@ class CallStatement(Statement):
     def unroll_callbacks(self, bindings):
         while True:
             accepted_callback_holder = []
-            yield AcceptCallbackInstruction(bindings=bindings, accepted_callback_holder=accepted_callback_holder)
+            yield AcceptCallbackNode(bindings=bindings, accepted_callback_holder=accepted_callback_holder)
             if accepted_callback_holder:
                 [accepted_callback_index] = accepted_callback_holder
                 callback = self.callbacks[accepted_callback_index]
@@ -151,7 +151,7 @@ class CallStatement(Statement):
                 break
 
 
-class MethodCallInstruction(StatementInstruction):
+class MethodCallInstruction(StatementIntermediateNode):
     __slots__ = []
 
     def _get_direction(self):
@@ -187,7 +187,7 @@ class MethodCallInstruction(StatementInstruction):
         return self.statement.method.has_return_value
 
 
-class MethodReturnInstruction(StatementInstruction):
+class MethodReturnInstruction(StatementIntermediateNode):
     __slots__ = []
 
     def _get_direction(self):
@@ -208,7 +208,7 @@ class MethodReturnInstruction(StatementInstruction):
         )
 
 
-class AcceptCallbackInstruction(Instruction, namedtuple("AcceptCallbackInstruction", [
+class AcceptCallbackNode(IntermediateNode, namedtuple("AcceptCallbackNode", [
     "bindings", "accepted_callback_holder"
 ])):
     __slots__ = []
@@ -234,13 +234,13 @@ class ReturnStatement(Statement):
         return Expression.compile(self.ast.value, self.context)
 
     def generate_instructions(self, bindings):
-        yield ReturnInstruction(value=self.value, bindings=bindings)
+        yield ReturnNode(value=self.value, bindings=bindings)
 
     def validate(self):
         yield from self.value.validate()
 
 
-class ReturnInstruction(Instruction, namedtuple("ReturnInstruction", [
+class ReturnNode(IntermediateNode, namedtuple("ReturnNode", [
     "value", "bindings"
 ])):
     __slots__ = []
