@@ -4,7 +4,7 @@ from contextlib import contextmanager, ExitStack
 from turingarena import *
 from turingarena.driver.client import SandboxError, DriverClient, DriverProcessClient
 from turingarena.driver.engine import DriverClientEngine
-from turingarena.driver.proxy import InterfaceProxy
+from turingarena.driver.proxy import FunctionProxy, ProcedureProxy
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class Algorithm(namedtuple("Algorithm", [
                         yield algorithm_process
                     except InterfaceExit:
                         pass
-                    driver_process_client.send_exit()
+                    algorithm_process.exit()
             except SandboxError:
                 info = sandbox_process_client.get_info(wait=True)
                 if info.error:
@@ -90,7 +90,11 @@ class AlgorithmProcess(AlgorithmSection):
     def __init__(self, connection):
         super().__init__()
         self._engine = DriverClientEngine(connection)
-        self.call = InterfaceProxy(self._engine)
+
+        self.procedures = ProcedureProxy(self._engine)
+        self.functions = FunctionProxy(self._engine)
+
+        self.call = self.functions  # FIXME: for partial compatibility
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection()
@@ -102,4 +106,4 @@ class AlgorithmProcess(AlgorithmSection):
             raise MemoryLimitExceeded(info.memory_usage, value)
 
     def exit(self):
-        raise InterfaceExit
+        self._engine.send_exit()

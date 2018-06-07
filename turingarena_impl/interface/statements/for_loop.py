@@ -2,10 +2,11 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.engine import NodeExecutionContext
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus
+from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus, Reference
 
 logger = logging.getLogger(__name__)
 
@@ -65,3 +66,21 @@ class ForStatement(Statement, IntermediateNode):
             r = a.reference
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
+
+    def _driver_run(self, context):
+        assignments_by_iteration = [
+            self.body.driver_run(context.with_assigments(
+                (Reference(variable=self.index.variable, index_count=0), i)
+            ))
+            for i in range(self.index.range.evaluate(context.bindings))
+        ]
+        return {
+            a.reference: [
+                assignments[a.reference._replace(
+                    index_count=a.reference.index_count + 1,
+                )]
+                for assignments in assignments_by_iteration
+            ]
+            for a in self.reference_actions
+            if a.status is ReferenceStatus.RESOLVED
+        }

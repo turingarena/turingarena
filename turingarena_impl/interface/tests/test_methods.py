@@ -23,7 +23,7 @@ def test_method_no_arguments():
             },
     ):
         with algo.run() as p:
-            p.call.f()
+            p.procedures.f()
 
 
 def test_method_with_arguments():
@@ -50,7 +50,7 @@ def test_method_with_arguments():
             }
     ):
         with algo.run() as p:
-            p.call.f(1, 2)
+            p.procedures.f(1, 2)
 
 
 def test_method_return_value():
@@ -76,16 +76,16 @@ def test_method_return_value():
                         assert a == 1
                         return 2
                 """,
-                #'javascript': """function f(a, b) { return 2; }""",
+                # 'javascript': """function f(a, b) { return 2; }""",
             },
     ):
         with algo.run() as p:
-            assert p.call.f(1) == 2
+            assert p.functions.f(1) == 2
 
 
 def test_multiple_function_return_value():
     with define_algorithm(
-        interface_text="""
+            interface_text="""
             function sum(a, b);
             
             main {
@@ -96,14 +96,14 @@ def test_multiple_function_return_value():
                 }
             }
             """,
-        language_name="c++",
-        source_text="""
+            language_name="c++",
+            source_text="""
             int sum(int a, int b) {return a + b;}
         """,
     ) as algo:
         with algo.run() as p:
             for i in range(10):
-                assert p.call.sum(i, i) == 2*i
+                assert p.call.sum(i, i) == 2 * i
 
 
 def test_callback_accept_scalars():

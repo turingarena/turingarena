@@ -50,6 +50,7 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
     def send_request(self, request):
         for l in serialize_request(request):
             print(l, file=self.connection.downward)
+        self.connection.downward.flush()  # FIXME: should not be needed
 
     def response_iterator(self, response):
         items = [int(line.strip()) for line in response.splitlines()]

@@ -1,10 +1,10 @@
-from typing import Iterable, Tuple, Any
+from typing import Iterable, Tuple, Any, List
 
 from turingarena.driver.commands import DriverMessage
 from turingarena_impl.interface.variables import Reference
 
 CommunicationLines = Iterable[Tuple[int, ...]]
-Assignments = Iterable[Tuple[Reference, Any]]
+Assignments = List[Tuple[Reference, Any]]
 
 
 class UpwardDeclareInstruction:

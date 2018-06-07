@@ -2,7 +2,9 @@ import itertools
 import logging
 from collections import namedtuple
 
+from turingarena.driver.commands import deserialize_request
 from turingarena_impl.interface.exceptions import CommunicationBroken
+from turingarena_impl.interface.instructions import Assignments
 
 logger = logging.getLogger(__name__)
 
@@ -69,28 +71,6 @@ def send_response(driver_connection, response):
     driver_connection.response.flush()
 
 
-def upward_reader(sandbox_connection):
-    while True:
-        try:
-            sandbox_connection.downward.flush()
-        except BrokenPipeError:
-            raise CommunicationBroken
-
-        line = sandbox_connection.upward.readline()
-        if not line:
-            raise CommunicationBroken
-        yield tuple(map(int, line.strip().split()))
-
-
-class DownwardWriter(namedtuple("DownwardWriter", ["sandbox_connection"])):
-    def send(self, values):
-        try:
-            logger.debug(f"DOWNWARD: {values}")
-            print(*values, file=self.sandbox_connection.downward)
-        except BrokenPipeError:
-            raise CommunicationBroken
-
-
 def run_sandbox(instructions, *, sandbox_connection):
     last_upward = False
     upward_lines = upward_reader(sandbox_connection)
@@ -115,3 +95,73 @@ def run_sandbox(instructions, *, sandbox_connection):
 
         logger.debug(f"communication: instruction {type(instruction)} processed")
     yield
+
+
+class DriverRequestStream:
+    def __init__(self, driver_connection):
+        self.driver_connection = driver_connection
+        self.peeked_request = None
+
+    def peek_request(self):
+        if self.peeked_request is None:
+            self.peeked_request = self.deserialize()
+
+        return self.peeked_request
+
+    def advance_request(self):
+        assert self.peeked_request is not None
+        self.peeked_request = None
+
+    def deserialize(self):
+        logger.debug(f"deserializing request...")
+        deserializer = deserialize_request()
+
+        assert next(deserializer) is None
+
+        lines_it = map(str.strip, iter(self.driver_connection.downward))
+        try:
+            for line in lines_it:
+                logger.debug(f"deserializing line {line}...")
+                deserializer.send(line)
+        except StopIteration as e:
+            result = e.value
+        else:
+            raise ValueError(f"too few lines")
+
+        return result
+
+
+class NodeExecutionContext(namedtuple("NodeExecutionContext", [
+    "bindings",
+    "phase",
+    "request_stream",
+    "response_stream",
+    "sandbox_process_client",
+    "sandbox_connection",
+])):
+    __slots__ = []
+
+    def send_downward(self, values):
+        try:
+            logger.debug(f"DOWNWARD: {values}")
+            print(*values, file=self.sandbox_connection.downward)
+        except BrokenPipeError:
+            raise CommunicationBroken
+
+    def receive_upward(self):
+        try:
+            self.sandbox_connection.downward.flush()
+        except BrokenPipeError:
+            raise CommunicationBroken
+
+        line = self.sandbox_connection.upward.readline()
+        if not line:
+            raise CommunicationBroken
+
+        return tuple(map(int, line.strip().split()))
+
+    def with_assigments(self, assignments: Assignments):
+        return self._replace(bindings={
+            **self.bindings,
+            **dict(assignments),
+        })

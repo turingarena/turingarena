@@ -62,11 +62,12 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
     def _get_direction(self):
         return ReferenceDirection.DOWNWARD
 
-    def on_communicate_downward(self, lines):
-        lines.send([
-            a.evaluate(self.bindings)
-            for a in self.arguments
-        ])
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.DECLARED:
+            context.send_downward([
+                a.evaluate(context.bindings)
+                for a in self.arguments
+            ])
 
 
 class WriteStatement(ReadWriteStatement, IntermediateNode):
@@ -84,6 +85,11 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
 
     def has_upward(self):
         return True
+
+    def _driver_run(self, context):
+        values = context.receive_upward()
+        for a, value in zip(self.arguments, values):
+            yield a.reference, value
 
     def on_communicate_upward(self, lines):
         for a, value in zip(self.arguments, next(lines)):

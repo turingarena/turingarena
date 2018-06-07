@@ -1,10 +1,10 @@
 import logging
 from contextlib import contextmanager, ExitStack
 
-from turingarena.driver.commands import deserialize_request
 from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_CHANNEL, DriverProcessConnection
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.sandbox.client import SandboxProcessClient
+from turingarena_impl.interface.engine import NodeExecutionContext, DriverRequestStream
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
@@ -42,18 +42,23 @@ class DriverProcessServer:
         with ExitStack() as stack:
             logger.debug("connecting to process...")
 
+            sandbox_process_client = SandboxProcessClient(self.sandbox_dir)
             sandbox_connection = stack.enter_context(
-                SandboxProcessClient(self.sandbox_dir).connect()
+                sandbox_process_client.connect()
             )
 
             pipes = stack.enter_context(self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER))
             driver_connection = DriverProcessConnection(**pipes)
 
-            self.interface.run_driver(
-                driver_connection=driver_connection,
+            context = NodeExecutionContext(
+                bindings={},
+                phase=None,
+                request_stream=DriverRequestStream(driver_connection),
+                response_stream=None,  # TODO
                 sandbox_connection=sandbox_connection,
-                sandbox_dir=self.sandbox_dir,
+                sandbox_process_client=sandbox_process_client,
             )
+            self.interface.run_driver(context)
 
     # FIXME: everything below is obsolete
 
@@ -72,27 +77,6 @@ class DriverProcessServer:
         return {
             "response": "\n".join(str(x) for x in response)
         }
-
-    def deserialize(self, request):
-        logger.debug(f"deserializing request...")
-        deserializer = deserialize_request()
-
-        assert next(deserializer) is None
-
-        lines = request.splitlines()
-        lines_it = iter(lines)
-        try:
-            for line in lines_it:
-                deserializer.send(line)
-        except StopIteration as e:
-            extra_lines = list(lines_it)
-            if extra_lines:
-                raise ValueError(f"extra lines '{extra_lines!s:.50}'") from None
-            result = e.value
-        else:
-            raise ValueError(f"too few lines")
-
-        return result
 
     def process_requests(self):
         assert next(self.run_driver_iterator) is None

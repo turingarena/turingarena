@@ -163,25 +163,30 @@ class MethodCallInstruction(StatementIntermediateNode):
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
-    def on_request_lookahead(self, request):
-        method = self.statement.method
-        parameters = self.statement.parameters
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            method = self.statement.method
+            parameters = self.statement.parameters
 
-        if not isinstance(request, MethodCall):
-            raise InterfaceError(f"expected call to '{method.name}', got {request}")
+            request = context.request_stream.peek_request()
 
-        if request.method_name != method.name:
-            raise InterfaceError(f"expected call to '{method.name}', got call to '{request.method_name}'")
+            if not isinstance(request, MethodCall):
+                raise InterfaceError(f"expected call to '{method.name}', got {request}")
 
-        if len(request.parameters) != len(method.parameters):
-            raise InterfaceError(
-                f"'{method.name}' expects {len(method.parameters)} arguments, "
-                f"got {len(request.parameters)}"
-            )
+            if request.method_name != method.name:
+                raise InterfaceError(f"expected call to '{method.name}', got call to '{request.method_name}'")
 
-        for value_expr, value in zip(parameters, request.parameters):
-            if value_expr.is_assignable():
-                value_expr.assign(self.bindings, value)
+            if len(request.parameters) != len(method.parameters):
+                raise InterfaceError(
+                    f"'{method.name}' expects {len(method.parameters)} arguments, "
+                    f"got {len(request.parameters)}"
+                )
+
+            references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
+            for p, value in zip(parameters, request.parameters):
+                if p.reference is not None and p.reference not in references:
+                    yield p.reference, value
+                    # TODO: else, check value is the one expected
 
     def should_send_input(self):
         return self.statement.method.has_return_value
@@ -196,16 +201,10 @@ class MethodReturnInstruction(StatementIntermediateNode):
     def _get_reference_actions(self):
         yield ReferenceAction(self.statement.return_value.reference, ReferenceStatus.DECLARED)
 
-    def on_generate_response(self):
-        if self.statement.method.has_return_value:
-            return_value = self.statement.return_value.evaluate(self.bindings)
-            return_response = [1, return_value]
-        else:
-            return_response = [0]
-        return (
-            [0] +  # no more callbacks
-            return_response
-        )
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.DECLARED:
+            return_value = self.statement.return_value.evaluate(context.bindings)
+            context.response_stream.send(return_value)
 
 
 class AcceptCallbackNode(IntermediateNode, namedtuple("AcceptCallbackNode", [

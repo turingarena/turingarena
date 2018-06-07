@@ -127,9 +127,11 @@ class ReferenceExpression(Expression):
         )
 
     def evaluate(self, bindings):
-        value = self.get_reference(bindings).get()
-        assert value is not None
-        return value
+        for index_count in range(self.reference.index_count + 1):
+            reference = self.reference._replace(index_count=index_count)
+            if reference in bindings:
+                return bindings[reference]
+        raise AssertionError("reference not bound")
 
     def validate(self):
         for index in self.indices:

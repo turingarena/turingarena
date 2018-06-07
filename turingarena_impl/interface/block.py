@@ -5,15 +5,15 @@ from typing import List
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.nodes import Bindings
+from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.step import Step, RunnableNode, StepExecutor
+from turingarena_impl.interface.step import Step
 from turingarena_impl.interface.variables import ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure, RunnableNode, AbstractSyntaxNodeWrapper):
+class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
@@ -63,7 +63,7 @@ class Block(ImperativeStructure, RunnableNode, AbstractSyntaxNodeWrapper):
                 yield Step(list(g))
 
     @property
-    def children(self) -> List[RunnableNode]:
+    def children(self) -> List[IntermediateNode]:
         return list(self._group_nodes_by_direction())
 
     def _get_reference_actions(self):
@@ -90,11 +90,5 @@ class Block(ImperativeStructure, RunnableNode, AbstractSyntaxNodeWrapper):
             for s in self.statements
         )
 
-    def driver_run(self, bindings: Bindings, executor: StepExecutor):
-        assignments = []
-        for n in self.children:
-            assignments.extend(n.driver_run({
-                **bindings,
-                **dict(assignments),
-            }, executor))
-        return assignments
+    def _driver_run(self, context):
+        return self._run_node_sequence(self.children, context)
