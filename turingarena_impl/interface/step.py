@@ -18,7 +18,7 @@ class RunnableNode(IntermediateNode):
         pass
 
 
-class Step(IntermediateNode, RunnableNode, namedtuple("Step", ["children"])):
+class Step(RunnableNode, namedtuple("Step", ["children"])):
     __slots__ = []
 
     def __init__(self, *args, **kwargs):

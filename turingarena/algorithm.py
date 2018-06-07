@@ -3,6 +3,8 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena import *
 from turingarena.driver.client import SandboxError, DriverClient, DriverProcessClient
+from turingarena.driver.engine import DriverClientEngine
+from turingarena.driver.proxy import InterfaceProxy
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -37,13 +39,11 @@ class Algorithm(namedtuple("Algorithm", [
 
             driver_process_client = DriverProcessClient(driver_process_dir)
 
-            algorithm_process = AlgorithmProcess(
-                sandbox=sandbox_process_client,
-                driver=driver_process_client,
-            )
+            connection = stack.enter_context(driver_process_client.connect())
+            algorithm_process = AlgorithmProcess(connection)
 
             try:
-                with algorithm_process.run(algorithm_process.sandbox, time_limit):
+                with algorithm_process.run(time_limit):
                     try:
                         yield algorithm_process
                     except InterfaceExit:
@@ -67,7 +67,13 @@ class AlgorithmSection:
         self.info_after = info_after
 
     @contextmanager
-    def run(self, sandbox, time_limit):
+    def run(self, time_limit):
+        # FIXME: implement time limit
+        yield self
+
+    # FIXME: obsolete
+    @contextmanager
+    def _old_run(self, time_limit):
         info_before = sandbox.get_info()
         yield self
         info_after = sandbox.get_info()
@@ -81,11 +87,10 @@ class AlgorithmSection:
 
 
 class AlgorithmProcess(AlgorithmSection):
-    def __init__(self, *, sandbox, driver):
+    def __init__(self, connection):
         super().__init__()
-        self.sandbox = sandbox
-        self.driver = driver
-        self.call = driver.proxy
+        self._engine = DriverClientEngine(connection)
+        self.call = InterfaceProxy(self._engine)
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection()

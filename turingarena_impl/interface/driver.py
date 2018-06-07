@@ -2,10 +2,9 @@ import logging
 from contextlib import contextmanager, ExitStack
 
 from turingarena.driver.commands import deserialize_request
-from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_QUEUE
-from turingarena.pipeboundary import PipeBoundary
+from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_CHANNEL, DriverProcessConnection
+from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.sandbox.client import SandboxProcessClient
-from turingarena_impl.interface.engine import drive_interface
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
@@ -37,21 +36,26 @@ class DriverProcessServer:
         self.boundary = PipeBoundary(driver_process_dir)
         self.interface = InterfaceDefinition.load(interface_name)
 
-        self.boundary.create_queue(DRIVER_PROCESS_QUEUE)
-        self.run_driver_iterator = None
+        self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
 
     def run(self):
         with ExitStack() as stack:
             logger.debug("connecting to process...")
+
             sandbox_connection = stack.enter_context(
                 SandboxProcessClient(self.sandbox_dir).connect()
             )
 
-            self.run_driver_iterator = drive_interface(
+            pipes = stack.enter_context(self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER))
+            driver_connection = DriverProcessConnection(**pipes)
+
+            self.interface.run_driver(
+                driver_connection=driver_connection,
                 sandbox_connection=sandbox_connection,
-                interface=self.interface
+                sandbox_dir=self.sandbox_dir,
             )
-            self.process_requests()
+
+    # FIXME: everything below is obsolete
 
     def handle_request(self, request):
         current_request = self.deserialize(request)

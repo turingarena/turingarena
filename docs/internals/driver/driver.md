@@ -33,6 +33,11 @@ of a directory, where the following pipes are exposed.
 - `input`
 - `output`
 
+NOTE: the following is obsolete.
+It is preferable to use only the two pipes,
+never close them (similarly to `stdin`/`stdout`),
+avoiding direct access to the sandbox.
+
 For each communication block, the evaluator does the following.
 1. Opens the `input` pipe, writes one or more requests, then closes the pipe (flushing the data).
 2. Opens the `output` pipes, reads it until EOF, then closes it.

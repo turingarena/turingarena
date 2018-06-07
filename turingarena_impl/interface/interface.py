@@ -1,11 +1,9 @@
 import logging
 
-from turingarena import InterfaceExit
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.callables import MethodPrototype
 from turingarena_impl.interface.context import InterfaceContext
 from turingarena_impl.interface.parser import parse_interface
-from turingarena_impl.interface.statements.exit import ExitInstruction
 from turingarena_impl.loader import find_package_path
 
 logger = logging.getLogger(__name__)
@@ -56,10 +54,5 @@ class InterfaceDefinition:
             for method in self.ast.method_declarations
         ]
 
-    def generate_instructions(self):
-        bindings = {}
-        try:
-            yield from self.main_block.generate_instructions(bindings)
-        except InterfaceExit:
-            pass
-        yield ExitInstruction()
+    def run_driver(self, *, driver_connection, sandbox_connection, sandbox_dir):
+        pass
