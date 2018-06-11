@@ -1,19 +1,16 @@
+import logging
 from collections import namedtuple
 
-import logging
-
-from turingarena.driver.commands import MethodCall, CallbackReturn, Exit, serialize_request
+from turingarena.driver.commands import serialize_data
 
 
 class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
     def call(self, name, *, args, has_return_value, callbacks):
-        callback_list = list(callbacks.items())
+        self.send_call(args, name, has_return_value, callbacks)
 
-        self.send_call(args, name, has_return_value, callback_list)
-
-        if callback_list:
+        if callbacks:
             self.connection.downward.flush()
-            self.accept_callbacks(callback_list)
+            self.accept_callbacks(callbacks)
 
         if has_return_value:
             self.connection.downward.flush()
@@ -44,24 +41,31 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
             else:  # no callbacks
                 break
 
-    def send_call(self, args, name, has_return_value, callback_list):
-        return self.send_request(MethodCall(
-            method_name=name,
-            parameters=args,
-            has_return_value=has_return_value,
-            accepted_callbacks={
-                name: f.__code__.co_argcount
-                for name, f in callback_list
-            },
-        ))
+    def send_call(self, args, name, has_return_value, callbacks):
+        return self.send_request([
+            "call",
+            name,
+            len(args),
+            *[
+                l
+                for a in args
+                for l in serialize_data(a)
+            ],
+            int(has_return_value),
+            len(callbacks),
+            *callbacks,
+        ])
 
     def send_callback_return(self, return_value):
-        return self.send_request(CallbackReturn(return_value=return_value))
+        return self.send_request([
+            "callback_return",
+        ])
 
     def send_exit(self):
-        return self.send_request(Exit())
+        return self.send_request(["exit"])
 
-    def send_request(self, request):
-        for l in serialize_request(request):
-            print(l, file=self.connection.downward)
+    def send_request(self, lines):
+        for line in lines:
+            logging.debug(f"sending request line: {line}")
+            print(line, file=self.connection.downward)
         self.connection.downward.flush()  # FIXME: should not be needed

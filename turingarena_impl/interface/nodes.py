@@ -3,8 +3,7 @@ from abc import abstractmethod
 from collections import namedtuple
 from typing import List, Optional, Mapping, Any
 
-from turingarena_impl.interface.engine import NodeExecutionContext
-from turingarena_impl.interface.instructions import Assignments
+from turingarena_impl.interface.engine import NodeExecutionContext, Assignments
 from turingarena_impl.interface.variables import ReferenceAction, ReferenceDirection, Reference
 
 Bindings = Mapping[Reference, Any]

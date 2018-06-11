@@ -1,5 +1,6 @@
 import logging
 
+from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block
 from turingarena_impl.interface.callables import MethodPrototype
 from turingarena_impl.interface.context import InterfaceContext
@@ -57,3 +58,6 @@ class InterfaceDefinition:
 
     def run_driver(self, context: NodeExecutionContext):
         self.main_block.driver_run(context=context)
+        command = context.receive_driver_downward()
+        if command != "exit":
+            raise InterfaceError(f"expecting exit, got {command}")

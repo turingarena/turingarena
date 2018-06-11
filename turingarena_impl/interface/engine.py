@@ -1,12 +1,15 @@
 import itertools
 import logging
 from collections import namedtuple
+from typing import List, Tuple, Any
 
-from turingarena.driver.commands import deserialize_request
+from turingarena.driver.commands import deserialize_data
 from turingarena_impl.interface.exceptions import CommunicationBroken
-from turingarena_impl.interface.instructions import Assignments
+from turingarena_impl.interface.variables import Reference
 
 logger = logging.getLogger(__name__)
+
+Assignments = List[Tuple[Reference, Any]]
 
 
 def drive_interface(*, interface, sandbox_connection):
@@ -139,16 +142,27 @@ class DriverResponseStream:
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "phase",
-    "request_stream",
-    "response_stream",
+    "driver_connection",
     "sandbox_process_client",
     "sandbox_connection",
 ])):
     __slots__ = []
 
+    def send_driver_upward(self, item):
+        assert isinstance(item, (int, bool))
+        logging.debug(f"send_upward: {item}")
+        print(int(item), file=self.driver_connection.upward)
+
+    def receive_driver_downward(self):
+        self.driver_connection.upward.flush()
+        logging.debug(f"receive_downward...")
+        line = self.driver_connection.downward.readline().strip()
+        logging.debug(f"receive_downward -> {line}")
+        return line
+
     def send_downward(self, values):
         try:
-            logger.debug(f"DOWNWARD: {values}")
+            logger.debug(f"send_downward: {values}")
             print(*values, file=self.sandbox_connection.downward)
         except BrokenPipeError:
             raise CommunicationBroken
@@ -159,11 +173,27 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         except BrokenPipeError:
             raise CommunicationBroken
 
-        line = self.sandbox_connection.upward.readline()
+        logger.debug(f"receive_upward...")
+        line = self.sandbox_connection.upward.readline().strip()
+        logger.debug(f"receive_upward -> {line}")
         if not line:
             raise CommunicationBroken
 
-        return tuple(map(int, line.strip().split()))
+        return tuple(map(int, line.split()))
+
+    def deserialize_request_data(self):
+        deserializer = deserialize_data()
+        next(deserializer)
+        lines_it = iter(self.receive_driver_downward, None)
+        try:
+            for line in lines_it:
+                logger.debug(f"deserializing line {line}...")
+                deserializer.send(line)
+        except StopIteration as e:
+            result = e.value
+        else:
+            raise ValueError(f"too few lines")
+        return result
 
     def with_assigments(self, assignments: Assignments):
         return self._replace(bindings={

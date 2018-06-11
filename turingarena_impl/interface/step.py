@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from collections import namedtuple
 
-from turingarena_impl.interface.engine import NodeExecutionContext
-from turingarena_impl.interface.instructions import Assignments
+from turingarena_impl.interface.engine import NodeExecutionContext, Assignments
 from turingarena_impl.interface.nodes import IntermediateNode, Bindings
 from turingarena_impl.interface.variables import ReferenceStatus
 

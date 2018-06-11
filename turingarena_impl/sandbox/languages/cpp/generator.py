@@ -63,7 +63,7 @@ class CppSkeletonCodeGen(CppCodeGen):
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)
 
-        value_arguments = [self.expression(p) for p in call_statement.parameters]
+        value_arguments = [self.expression(p) for p in call_statement.arguments]
         callback_arguments = [
             f"_callback_{callback_signature.name}"
             for callback_signature in method.callbacks

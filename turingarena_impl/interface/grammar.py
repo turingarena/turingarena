@@ -33,7 +33,7 @@ grammar_ebnf = r"""
         | statement_type:'call' ~
             return_value:[ return_exp ]
             name:identifier
-            '(' parameters:','.{ expression }* ')'
+            '(' arguments:','.{ expression }* ')'
             callbacks:callback_implementations
         ;
 

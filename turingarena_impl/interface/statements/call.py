@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 
 from turingarena import InterfaceError
-from turingarena.driver.commands import CallbackReturn, MethodCall
 from turingarena_impl.interface.callables import CallbackImplementation
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
@@ -26,8 +25,8 @@ class CallStatement(Statement):
         return self.context.global_context.methods_by_name[self.method_name]
 
     @property
-    def parameters(self):
-        return [Expression.compile(p, self.context) for p in self.ast.parameters]
+    def arguments(self):
+        return [Expression.compile(p, self.context) for p in self.ast.arguments]
 
     @property
     def return_value(self):
@@ -66,20 +65,20 @@ class CallStatement(Statement):
             yield from self.validate_return_value()
 
     def validate_parameters_resolved(self):
-        for p in self.parameters:
+        for p in self.arguments:
             if p.reference is not None:
                 continue
             yield from p.validate_resolved()
 
     def validate_parameters(self):
         method = self.method
-        if len(self.parameters) != len(method.parameters):
+        if len(self.arguments) != len(method.parameters):
             yield Diagnostic(
                 Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
-                method.name, len(method.parameters), len(self.parameters),
+                method.name, len(method.parameters), len(self.arguments),
                 parseinfo=self.ast.parseinfo,
             )
-        for parameter, expression in zip(method.parameters, self.parameters):
+        for parameter, expression in zip(method.parameters, self.arguments):
             yield from expression.validate()
             if expression.dimensions != parameter.dimensions:
                 yield Diagnostic(
@@ -159,37 +158,42 @@ class MethodCallNode(StatementIntermediateNode):
 
     def _get_reference_actions(self):
         references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-        for p in self.statement.parameters:
+        for p in self.statement.arguments:
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
             method = self.statement.method
-            parameters = self.statement.parameters
 
-            request = context.request_stream.peek_request()
+            command = context.receive_driver_downward()
+            if not command == "call":
+                raise InterfaceError(f"expected call to '{method.name}', got {command}")
 
-            if not isinstance(request, MethodCall):
-                raise InterfaceError(f"expected call to '{method.name}', got {request}")
+            method_name = context.receive_driver_downward()
+            if not method_name == method.name:
+                raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
 
-            if request.method_name != method.name:
-                raise InterfaceError(f"expected call to '{method.name}', got call to '{request.method_name}'")
-
-            if len(request.parameters) != len(method.parameters):
+            parameter_count = int(context.receive_driver_downward())
+            if parameter_count != len(method.parameters):
                 raise InterfaceError(
                     f"'{method.name}' expects {len(method.parameters)} arguments, "
-                    f"got {len(request.parameters)}"
+                    f"got {parameter_count}"
                 )
 
             references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-            for p, value in zip(parameters, request.parameters):
-                if p.reference is not None and p.reference not in references:
-                    logging.debug(f"Resolved parameter: {p.reference} -> {value}")
-                    yield p.reference, value
+            for a in self.statement.arguments:
+                value = context.deserialize_request_data()
+                if a.reference is not None and a.reference not in references:
+                    logging.debug(f"Resolved parameter: {a.reference} -> {value}")
+                    yield a.reference, value
                     # TODO: else, check value is the one expected
 
-            context.request_stream.advance_request()
+            has_return_value = bool(int(context.receive_driver_downward()))
+            assert has_return_value == (self.statement.return_value is not None)
+
+            callbacks_count = int(context.receive_driver_downward())
+            assert callbacks_count == 0  # FIXME:
 
     def should_send_input(self):
         return self.statement.method.has_return_value
@@ -207,7 +211,7 @@ class MethodReturnNode(StatementIntermediateNode):
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             return_value = self.statement.return_value.evaluate(context.bindings)
-            context.response_stream.send([return_value])
+            context.send_driver_upward(return_value)
 
 
 class MethodCallbacksNode(StatementIntermediateNode):
