@@ -20,9 +20,10 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
 
     def receive_return_value(self):
         logging.debug(f"Receiving return value...")
-        return int(self.connection.upward.readline())
+        return self.get_response_line()
 
     def get_response_line(self):
+        self.connection.downward.flush()
         line = self.connection.upward.readline().strip()
         assert line
         logging.debug(f"Read response line: {line}")
@@ -77,4 +78,3 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
         for line in lines:
             logging.debug(f"sending request line: {line}")
             print(line, file=self.connection.downward)
-        self.connection.downward.flush()  # FIXME: should not be needed

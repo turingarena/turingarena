@@ -34,7 +34,14 @@ class CallStatement(Statement):
         else:
             return None
 
-    def find_callback_implementation(self, index, callback):
+    @property
+    def callbacks(self):
+        return [
+            self._find_callback_implementation(i, s)
+            for i, s in enumerate(self.method.callbacks)
+        ]
+
+    def _find_callback_implementation(self, index, callback):
         return next(
             CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
                 local_context=self.context,
@@ -44,13 +51,6 @@ class CallStatement(Statement):
             if implementation.declarator.name == callback.name
         )
 
-    @property
-    def callbacks(self):
-        return [
-            self.find_callback_implementation(i, s)
-            for i, s in enumerate(self.method.callbacks)
-        ]
-
     def validate(self):
         if self.method_name not in self.context.global_context.methods_by_name:
             yield Diagnostic(
@@ -58,10 +58,11 @@ class CallStatement(Statement):
                 self.method_name,
                 parseinfo=self.ast.parseinfo,
             )
-        else:
-            yield from self.validate_parameters_resolved()
-            yield from self.validate_parameters()
-            yield from self.validate_return_value()
+            return
+
+        yield from self.validate_parameters_resolved()
+        yield from self.validate_parameters()
+        yield from self.validate_return_value()
 
     def validate_parameters_resolved(self):
         for p in self.arguments:
@@ -182,9 +183,6 @@ class MethodCallNode(StatementIntermediateNode):
                         f"'{c.name}' has {expected_parameter_count} parameters, "
                         f"got {parameter_count}"
                     )
-
-    def should_send_input(self):
-        return self.statement.method.has_return_value
 
 
 class MethodReturnNode(StatementIntermediateNode):

@@ -1,5 +1,6 @@
 import logging
 
+from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
@@ -20,14 +21,11 @@ class CheckpointStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def should_send_input(self):
-        return True
-
-    def has_upward(self):
-        return True
-
-    def on_communicate_upward(self, lines):
-        assert next(lines) == (0,)
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            values = context.receive_upward()
+            if values != (0,):
+                raise CommunicationBroken(f"expecting checkpoint, got {values}")
 
 
 class ReadWriteStatement(Statement):
@@ -83,9 +81,6 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
 
     def _get_direction(self):
         return ReferenceDirection.UPWARD
-
-    def has_upward(self):
-        return True
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
