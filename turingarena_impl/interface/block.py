@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from itertools import groupby
 
-from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode
@@ -27,6 +27,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             yield statement
 
     @property
+    @memoize
     def statements(self):
         return list(self._generate_statements())
 
@@ -42,6 +43,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
                     break
 
     @property
+    @memoize
     def synthetic_statements(self):
         for s in self.statements:
             yield s
@@ -51,6 +53,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
                 ])
 
     @property
+    @memoize
     def flat_inner_nodes(self):
         return list(self._generate_flat_inner_nodes())
 
