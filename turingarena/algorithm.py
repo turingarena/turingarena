@@ -39,16 +39,16 @@ class Algorithm(namedtuple("Algorithm", [
 
             driver_process_client = DriverProcessClient(driver_process_dir)
 
-            connection = stack.enter_context(driver_process_client.connect())
-            algorithm_process = AlgorithmProcess(connection)
 
             try:
-                with algorithm_process.run(time_limit):
-                    try:
-                        yield algorithm_process
-                    except InterfaceExit:
-                        pass
-                    algorithm_process.exit()
+                with driver_process_client.connect() as connection:
+                    algorithm_process = AlgorithmProcess(connection)
+                    with algorithm_process.run(time_limit):
+                        try:
+                            yield algorithm_process
+                        except InterfaceExit:
+                            pass
+                        algorithm_process.exit()
             except SandboxError:
                 info = sandbox_process_client.get_info(wait=True)
                 if info.error:

@@ -53,6 +53,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return tuple(map(int, line.split()))
 
     def deserialize_request_data(self):
+        logger.debug(f"deserialize_request_data")
         deserializer = deserialize_data()
         next(deserializer)
         lines_it = iter(self.receive_driver_downward, None)
