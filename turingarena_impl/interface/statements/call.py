@@ -220,7 +220,16 @@ class MethodCallbacksNode(StatementIntermediateNode):
         return []
 
     def _driver_run(self, context):
-        raise NotImplementedError
+        while True:
+            [has_callback] = context.receive_upward()
+            if has_callback:
+                [callback_index] = context.receive_upward()
+                callback = self.statement.callbacks[callback_index]
+                callback.driver_run(context)
+            else:
+                break
+        context.response_stream.send([0])  # no more callbacks
+        return []
 
 
 class AcceptCallbackNode(IntermediateNode, namedtuple("AcceptCallbackNode", [

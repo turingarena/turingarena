@@ -131,6 +131,7 @@ class DriverResponseStream:
     def send(self, response):
         for item in response:
             assert isinstance(item, (int, bool))
+            logging.debug(f"Response: {item}")
             print(int(item), file=self.driver_connection.upward)
         self.driver_connection.upward.flush()
 

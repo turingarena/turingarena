@@ -25,16 +25,22 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
         logging.debug(f"Receiving return value...")
         return int(self.connection.upward.readline())
 
+    def get_response_line(self):
+        line = self.connection.upward.readline().strip()
+        assert line
+        logging.debug(f"Read response line: {line}")
+        return int(line)
+
     def accept_callbacks(self, callback_list):
-        raise NotImplementedError
         while True:
-            response_it = self.response_iterator(response)
-            if next(response_it):  # has callback
-                index = next(response_it)
-                args = list(response_it)
+            if self.get_response_line():  # has callback
+                index = self.get_response_line()
+                # FIXME:
+                # args = list(response_it)
+                args = []
                 name, f = callback_list[index]
                 return_value = f(*args)
-                response = self.send_callback_return(return_value)
+                self.send_callback_return(return_value)
             else:  # no callbacks
                 break
 
@@ -59,7 +65,3 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
         for l in serialize_request(request):
             print(l, file=self.connection.downward)
         self.connection.downward.flush()  # FIXME: should not be needed
-
-    def response_iterator(self, response):
-        items = [int(line.strip()) for line in response.splitlines()]
-        return iter(items)

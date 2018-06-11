@@ -2,12 +2,12 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
+from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, ImperativeStructure
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import SyntheticStatement
-from turingarena_impl.interface.variables import Variable, Reference
+from turingarena_impl.interface.variables import Variable, Reference, ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "bod
         yield from self.body.synthetic_statements
 
 
-class CallbackImplementation(CallbackPrototype):
+class CallbackImplementation(IntermediateNode, CallbackPrototype):
     __slots__ = []
 
     @property
@@ -111,8 +111,8 @@ class CallbackImplementation(CallbackPrototype):
     @property
     def body(self):
         # TODO: generate block if body is None ('default' is specified)
-        inner_context = self.context.local_context.with_declared_references(
-            Reference(variable=p, index_count=0)
+        inner_context = self.context.local_context.with_reference_actions(
+            ReferenceAction(reference=Reference(variable=p, index_count=0), status=ReferenceStatus.DECLARED)
             for p in self.parameters
         )
         return Block(
@@ -122,6 +122,11 @@ class CallbackImplementation(CallbackPrototype):
 
     def validate(self):
         yield from self.prototype.validate()
+
+    def _driver_run(self, context):
+        context.response_stream.send([1, self.context.callback_index])
+        # TODO: arguments
+        return self.body.driver_run(context)
 
     def generate_instructions(self, bindings):
         inner_bindings = {

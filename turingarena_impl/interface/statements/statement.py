@@ -94,3 +94,6 @@ class SyntheticStatement(AbstractStatement):
     def __init__(self, statement_type, **kwargs):
         self.statement_type = statement_type
         self.__dict__ = kwargs
+
+    def _get_intermediate_nodes(self):
+        return []

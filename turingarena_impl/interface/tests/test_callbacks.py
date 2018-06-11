@@ -46,7 +46,7 @@ def test_callback_no_arguments():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls)
-            p.call.test(c=lambda: c())
+            p.procedures.test(c=lambda: c())
 
             assert calls == [
                 (c, ()),
