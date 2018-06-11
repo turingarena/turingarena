@@ -4,7 +4,7 @@ class MethodProxy:
         self._has_return_value = has_return_value
 
     def __getattr__(self, item):
-        def method(*args, callbacks):
+        def method(*args, callbacks=()):
             return self._engine.call(
                 item,
                 arguments=args,

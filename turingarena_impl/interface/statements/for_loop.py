@@ -1,8 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.engine import NodeExecutionContext
+from turingarena_impl.interface.block import Block, BlockNode
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
@@ -31,7 +30,7 @@ class ForStatement(Statement, IntermediateNode):
         )
 
     def _get_allocations(self):
-        for a in self.body.reference_actions:
+        for a in self.body_node.reference_actions:
             if a.reference.variable.dimensions == 0:
                 continue
             if a.status == ReferenceStatus.DECLARED:
@@ -59,17 +58,21 @@ class ForStatement(Statement, IntermediateNode):
         )
 
     def _get_direction(self):
-        return self.body.direction
+        return self.body_node.direction
 
     def _get_reference_actions(self):
-        for a in self.body.reference_actions:
+        for a in self.body_node.reference_actions:
             r = a.reference
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
+    @property
+    def body_node(self):
+        return BlockNode.from_nodes(self.body.flat_inner_nodes)
+
     def _driver_run(self, context):
         assignments_by_iteration = [
-            self.body.driver_run(context.with_assigments(
+            self.body_node.driver_run(context.with_assigments(
                 [(Reference(variable=self.index.variable, index_count=0), i)]
             ))
             for i in range(self.index.range.evaluate(context.bindings))

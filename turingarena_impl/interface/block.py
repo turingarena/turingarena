@@ -1,6 +1,6 @@
 import logging
+from collections import namedtuple
 from itertools import groupby
-from typing import List
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
@@ -13,7 +13,7 @@ from turingarena_impl.interface.variables import ReferenceDirection
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
+class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
@@ -50,31 +50,13 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
                     SyntheticExpression("int_literal", value=0),  # no more callbacks
                 ])
 
+    @property
+    def flat_inner_nodes(self):
+        return list(self._generate_flat_inner_nodes())
+
     def _generate_flat_inner_nodes(self):
         for s in self.statements:
             yield from s.intermediate_nodes
-
-    def _group_nodes_by_direction(self):
-        for k, g in groupby(self._generate_flat_inner_nodes(), key=lambda inst: inst.direction):
-            if k is None:
-                yield from g
-            else:
-                assert isinstance(k, ReferenceDirection)
-                yield Step(list(g))
-
-    @property
-    def children(self) -> List[IntermediateNode]:
-        return list(self._group_nodes_by_direction())
-
-    def _get_reference_actions(self):
-        for n in self.children:
-            yield from n.reference_actions
-
-    def _get_direction(self):
-        if len(self.children) == 1:
-            return self.children[0].direction
-        else:
-            return None
 
     def expects_request(self, request):
         for s in self.statements:
@@ -90,5 +72,30 @@ class Block(ImperativeStructure, IntermediateNode, AbstractSyntaxNodeWrapper):
             for s in self.statements
         )
 
+
+class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
+    @staticmethod
+    def _group_nodes_by_direction(nodes):
+        for k, g in groupby(nodes, key=lambda inst: inst.direction):
+            if k is None:
+                yield from g
+            else:
+                assert isinstance(k, ReferenceDirection)
+                yield Step(list(g))
+
+    @staticmethod
+    def from_nodes(nodes):
+        return BlockNode(list(BlockNode._group_nodes_by_direction(nodes)))
+
     def _driver_run(self, context):
         return self._run_node_sequence(self.children, context)
+
+    def _get_reference_actions(self):
+        for n in self.children:
+            yield from n.reference_actions
+
+    def _get_direction(self):
+        if len(self.children) == 1:
+            return self.children[0].direction
+        else:
+            return None

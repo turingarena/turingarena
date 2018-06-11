@@ -2,13 +2,14 @@ import logging
 from collections import namedtuple
 
 from turingarena import InterfaceError
-from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.block import Block, BlockNode
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
-from turingarena_impl.interface.nodes import IntermediateNode
+from turingarena_impl.interface.nodes import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import SyntheticStatement
-from turingarena_impl.interface.variables import Variable, Reference, ReferenceAction, ReferenceStatus
+from turingarena_impl.interface.variables import Variable, Reference, ReferenceAction, ReferenceStatus, \
+    ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
@@ -124,11 +125,19 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def validate(self):
         yield from self.prototype.validate()
 
+    def _generate_inner_nodes(self):
+        yield CallbackCallNode(self)
+        yield from self.body.flat_inner_nodes
+
+    @property
+    def body_node(self):
+        return BlockNode.from_nodes(self._generate_inner_nodes())
+
     def _driver_run(self, context):
         context.send_driver_upward(1)
         context.send_driver_upward(self.context.callback_index)
         # TODO: arguments (the body should be compiled in a different way)
-        self.body.driver_run(context)
+        self.body_node.driver_run(context)
 
         command = context.receive_driver_downward()
         if not command == "callback_return":
@@ -149,18 +158,17 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         yield from self.body.generate_instructions(inner_bindings)
 
 
-class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
-    "callback", "bindings",
-])):
-    def on_generate_response(self):
-        parameters = [
-            self.bindings[p.name][0]
-            for p in self.callback.parameters
-        ]
+class CallbackCallNode(StatementIntermediateNode):
+    def _get_direction(self):
+        return ReferenceDirection.UPWARD
 
-        assert all(isinstance(v, int) for v in parameters)
-        return (
-            [1] +  # has callback
-            [self.callback.context.callback_index] +
-            parameters
-        )
+    def _get_reference_actions(self):
+        for p in self.statement.parameters:
+            yield p.reference
+
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.DECLARED:
+            for p in self.statement.parameters:
+                r = Reference(p, index_count=0)
+                value = context.bindings[r]
+                context.send_driver_upward(value)

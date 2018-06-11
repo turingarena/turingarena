@@ -155,7 +155,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
-        logging.debug(f"receive_driver_downward...", stack_info=True)
+        logging.debug(f"receive_driver_downward...")
         line = self.driver_connection.downward.readline().strip()
         logging.debug(f"receive_driver_downward -> {line}")
         return line
