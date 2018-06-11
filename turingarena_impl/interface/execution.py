@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from typing import List, Tuple, Any
 
-from turingarena.driver.commands import deserialize_data
+from turingarena.driver.commands import deserialize_data, serialize_data
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.variables import Reference
 
@@ -21,9 +21,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     __slots__ = []
 
     def send_driver_upward(self, item):
-        assert isinstance(item, (int, bool))
         logging.debug(f"send_driver_upward: {item}")
-        print(int(item), file=self.driver_connection.upward)
+        print(item, file=self.driver_connection.upward)
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
@@ -66,6 +65,11 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             raise ValueError(f"too few lines")
         return result
+
+    def serialize_response_data(self, value):
+        lines = serialize_data(value)
+        for line in lines:
+            self.send_driver_upward(int(line))
 
     def with_assigments(self, assignments: Assignments):
         return self._replace(bindings={
