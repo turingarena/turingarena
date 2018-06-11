@@ -159,7 +159,7 @@ def test_interface_no_callbacks():
             },
     ):
         with algo.run() as p:
-            assert p.procedures.test() == 1
+            assert p.functions.test() == 1
 
 
 def test_interface_one_callback():
@@ -194,7 +194,7 @@ def test_interface_one_callback():
         with algo.run() as p:
             calls = []
             cb = callback_mock(calls)
-            assert p.procedures.test(callbacks=[cb]) == 1
+            assert p.functions.test(callbacks=[cb]) == 1
             assert calls == [
                 (cb, ()),
                 (cb, ()),
@@ -241,7 +241,7 @@ def test_interface_multiple_callbacks():
             calls = []
             cb1 = callback_mock(calls)
             cb2 = callback_mock(calls)
-            assert p.procedures.test(callbacks=[cb1, cb2]) == 1
+            assert p.functions.test(callbacks=[cb1, cb2]) == 1
             assert calls == [
                 (cb1, ()),
                 (cb2, ()),

@@ -139,23 +139,24 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         # TODO: arguments (the body should be compiled in a different way)
         self.body_node.driver_run(context)
 
-        command = context.receive_driver_downward()
-        if not command == "callback_return":
-            raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+        # FIXME: some redundancy with ReturnStatement
+        if not self.has_return_value:
+            command = context.receive_driver_downward()
+            if not command == "callback_return":
+                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
 
-        has_return_value = bool(int(context.receive_driver_downward()))
-        if has_return_value:
-            return_value = int(context.receive_driver_downward())
+            has_return_value = bool(int(context.receive_driver_downward()))
+            if has_return_value:
+                raise InterfaceError(
+                    f"callback '{self.context.callback}' is a procedure, "
+                    f"but the provided implementation returned something"
+                )
 
-    def generate_instructions(self, bindings):
-        inner_bindings = {
-            **bindings,
-            **{
-                p.name: [None] for p in self.parameters
-            }
-        }
-        yield CallbackCallNode(self, bindings=inner_bindings)
-        yield from self.body.generate_instructions(inner_bindings)
+    def _get_direction(self):
+        return self.body_node.direction
+
+    def _get_reference_actions(self):
+        return []
 
 
 class CallbackCallNode(StatementIntermediateNode):

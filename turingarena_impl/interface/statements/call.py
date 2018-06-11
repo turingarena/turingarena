@@ -192,7 +192,7 @@ class MethodCallNode(StatementIntermediateNode):
             has_return_value = bool(int(context.receive_driver_downward()))
             expects_return_value = (self.statement.return_value is not None)
             if not has_return_value == expects_return_value:
-                names = ["function", "procedure"]
+                names = ["procedure", "function"]
                 raise InterfaceError(
                     f"'{method.name}' is a {names[expects_return_value]}, "
                     f"got call to {names[has_return_value]}"
@@ -256,44 +256,37 @@ class MethodCallbacksNode(StatementIntermediateNode):
         return []
 
 
-class AcceptCallbackNode(IntermediateNode, namedtuple("AcceptCallbackNode", [
-    "bindings", "accepted_callback_holder"
-])):
-    __slots__ = []
 
-    def should_send_input(self):
-        return True
-
-    def has_upward(self):
-        return True
-
-    def on_communicate_upward(self, lines):
-        [has_callback] = next(lines)
-        if has_callback:
-            [callback_index] = next(lines)
-            self.accepted_callback_holder[:] = [callback_index]
-
-
-class ReturnStatement(Statement):
+class ReturnStatement(Statement, IntermediateNode):
     __slots__ = []
 
     @property
     def value(self):
         return Expression.compile(self.ast.value, self.context)
 
-    def generate_instructions(self, bindings):
-        yield ReturnNode(value=self.value, bindings=bindings)
+    def _get_intermediate_nodes(self):
+        yield self
 
     def validate(self):
         yield from self.value.validate()
 
+    def _get_direction(self):
+        return ReferenceDirection.DOWNWARD
 
-class ReturnNode(IntermediateNode, namedtuple("ReturnNode", [
-    "value", "bindings"
-])):
-    __slots__ = []
+    def _get_reference_actions(self):
+        yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
 
-    def on_request_lookahead(self, request):
-        assert isinstance(request, CallbackReturn)
-        assert self.value.is_assignable()
-        self.value.assign(self.bindings, request.return_value)
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            command = context.receive_driver_downward()
+            if not command == "callback_return":
+                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+            has_return_value = int(context.receive_driver_downward())
+            if not has_return_value:
+                raise InterfaceError(
+                    f"callback '{self.context.callback}' is a function, "
+                    f"but the provided implementation did not return anything"
+                )
+            value = int(context.receive_driver_downward())
+
+            yield self.value.reference, value
