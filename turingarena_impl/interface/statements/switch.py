@@ -1,30 +1,40 @@
 import logging
 import warnings
 
-from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.block import Block, BlockNode
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.nodes import StatementIntermediateNode
+from turingarena_impl.interface.nodes import StatementIntermediateNode, IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
 
-class SwitchStatement(Statement):
+class SwitchStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        yield SwitchInstruction(self)
+        # TODO: resolution node
+        yield self
 
-    def generate_instructions(self, bindings):
-        yield SwitchInstruction(self, bindings)
+    def _get_direction(self):
+        direction = self.cases[0].body_node.direction
+        if all(c.body_node.direction == direction for c in self.cases):
+            return direction
+        else:
+            return None
 
-        value = self.value.evaluate(bindings)
+    def _get_reference_actions(self):
+        for c in self.cases:
+            yield from c.body_node.reference_actions
+
+    def _driver_run(self, context):
+        value = self.value.evaluate(context.bindings)
 
         for case in self.cases:
             for label in case.labels:
                 if value == label.value:
-                    yield from case.generate_instructions(bindings)
+                    return case.body_node.driver_run(context)
 
     def expects_request(self, request):
         for case in self.cases:
@@ -34,6 +44,9 @@ class SwitchStatement(Statement):
 
     @property
     def cases(self):
+        return list(self._get_cases())
+
+    def _get_cases(self):
         for case in self.ast.cases:
             yield CaseStatement(ast=case, context=self.context)
 
@@ -68,6 +81,10 @@ class CaseStatement(Statement):
     @property
     def body(self):
         return Block(ast=self.ast.body, context=self.context)
+
+    @property
+    def body_node(self):
+        return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     @property
     def labels(self):
