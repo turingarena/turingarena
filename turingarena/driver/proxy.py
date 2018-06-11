@@ -4,7 +4,7 @@ class FunctionProxy:
 
     def __getattr__(self, item):
         def method(*args, **kwargs):
-            return self._engine.call(item, args=args, has_return=True, callbacks=kwargs)
+            return self._engine.call(item, args=args, has_return_value=True, callbacks=kwargs)
 
         return method
 
@@ -15,6 +15,6 @@ class ProcedureProxy:
 
     def __getattr__(self, item):
         def method(*args, **kwargs):
-            return self._engine.call(item, args=args, has_return=False, callbacks=kwargs)
+            return self._engine.call(item, args=args, has_return_value=False, callbacks=kwargs)
 
         return method

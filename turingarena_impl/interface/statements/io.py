@@ -64,6 +64,7 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
+            logging.debug(f"Bindings: {context.bindings}")
             context.send_downward([
                 a.evaluate(context.bindings)
                 for a in self.arguments
@@ -87,11 +88,7 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
         return True
 
     def _driver_run(self, context):
-        values = context.receive_upward()
-        for a, value in zip(self.arguments, values):
-            yield a.reference, value
-
-    def on_communicate_upward(self, lines):
-        for a, value in zip(self.arguments, next(lines)):
-            pass
-            # a.assign(self.bindings, value)
+        if context.phase is ReferenceStatus.RESOLVED:
+            values = context.receive_upward()
+            for a, value in zip(self.arguments, values):
+                yield a.reference, value

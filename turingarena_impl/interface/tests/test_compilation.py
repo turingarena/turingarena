@@ -1,6 +1,6 @@
 from turingarena_impl.interface.interface import InterfaceDefinition
 # TODO: verify generated instructions
-from turingarena_impl.interface.statements.call import MethodCallInstruction, MethodReturnInstruction
+from turingarena_impl.interface.statements.call import MethodCallNode, MethodReturnNode
 from turingarena_impl.interface.step import Step
 
 
@@ -14,12 +14,12 @@ def test_read_scalar():
         }
     """)
     assert not interface.diagnostics()
-    steps = interface.main_block.intermediate_nodes
     statements = interface.main_block.statements
-    assert steps == [
+    nodes = interface.main_block.children
+    assert nodes == [
         Step([
             statements[0],
-            MethodCallInstruction(statements[1]),
+            MethodCallNode(statements[1]),
         ]),
         Step([
             statements[2],
@@ -44,7 +44,7 @@ def test_read_array_1():
     assert steps == [
         Step([
             statements[0],
-            MethodCallInstruction(statements[1]),
+            MethodCallNode(statements[1]),
         ]),
         Step([
             statements[2],
@@ -71,7 +71,7 @@ def test_read_array_2():
     assert steps == [
         Step([
             statements[0],
-            MethodCallInstruction(statements[1]),
+            MethodCallNode(statements[1]),
         ]),
         Step([
             statements[2],
@@ -109,7 +109,7 @@ def test_read_array_pass_slice():
     assert steps2 == [
         Step([
             statements2[0],
-            MethodCallInstruction(statements2[1]),
+            MethodCallNode(statements2[1]),
         ]),
     ]
 
@@ -127,10 +127,10 @@ def test_write_scalar():
     statements = interface.main_block.statements
     assert steps == [
         Step([
-            MethodCallInstruction(statements[0]),
+            MethodCallNode(statements[0]),
         ]),
         Step([
-            MethodReturnInstruction(statements[0]),
+            MethodReturnNode(statements[0]),
             statements[1],
         ]),
     ]

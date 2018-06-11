@@ -115,18 +115,18 @@ class CallStatement(Statement):
         return True
 
     def _get_intermediate_nodes(self):
-        yield MethodCallInstruction(self)
+        yield MethodCallNode(self)
 
         if self.method.has_callbacks:
-            yield MethodCallbacksInstruction(self)
+            yield MethodCallbacksNode(self)
 
         if self.method.has_return_value:
-            yield MethodReturnInstruction(self)
+            yield MethodReturnNode(self)
 
     def generate_instructions(self, bindings):
         method = self.method
 
-        yield MethodCallInstruction(
+        yield MethodCallNode(
             statement=self,
             bindings=bindings,
         )
@@ -134,7 +134,7 @@ class CallStatement(Statement):
         if method.has_callbacks:
             yield from self.unroll_callbacks(bindings)
 
-        yield MethodReturnInstruction(
+        yield MethodReturnNode(
             statement=self,
             bindings=bindings,
         )
@@ -151,7 +151,7 @@ class CallStatement(Statement):
                 break
 
 
-class MethodCallInstruction(StatementIntermediateNode):
+class MethodCallNode(StatementIntermediateNode):
     __slots__ = []
 
     def _get_direction(self):
@@ -185,14 +185,17 @@ class MethodCallInstruction(StatementIntermediateNode):
             references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
             for p, value in zip(parameters, request.parameters):
                 if p.reference is not None and p.reference not in references:
+                    logging.debug(f"Resolved parameter: {p.reference} -> {value}")
                     yield p.reference, value
                     # TODO: else, check value is the one expected
+
+            context.request_stream.advance_request()
 
     def should_send_input(self):
         return self.statement.method.has_return_value
 
 
-class MethodReturnInstruction(StatementIntermediateNode):
+class MethodReturnNode(StatementIntermediateNode):
     __slots__ = []
 
     def _get_direction(self):
@@ -204,7 +207,20 @@ class MethodReturnInstruction(StatementIntermediateNode):
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             return_value = self.statement.return_value.evaluate(context.bindings)
-            context.response_stream.send(return_value)
+            context.response_stream.send([return_value])
+
+
+class MethodCallbacksNode(StatementIntermediateNode):
+    __slots__ = []
+
+    def _get_direction(self):
+        return None
+
+    def _get_reference_actions(self):
+        return []
+
+    def _driver_run(self, context):
+        raise NotImplementedError
 
 
 class AcceptCallbackNode(IntermediateNode, namedtuple("AcceptCallbackNode", [

@@ -4,7 +4,7 @@ from contextlib import contextmanager, ExitStack
 from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_CHANNEL, DriverProcessConnection
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.sandbox.client import SandboxProcessClient
-from turingarena_impl.interface.engine import NodeExecutionContext, DriverRequestStream
+from turingarena_impl.interface.engine import NodeExecutionContext, DriverRequestStream, DriverResponseStream
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
@@ -54,7 +54,7 @@ class DriverProcessServer:
                 bindings={},
                 phase=None,
                 request_stream=DriverRequestStream(driver_connection),
-                response_stream=None,  # TODO
+                response_stream=DriverResponseStream(driver_connection),  # TODO
                 sandbox_connection=sandbox_connection,
                 sandbox_process_client=sandbox_process_client,
             )

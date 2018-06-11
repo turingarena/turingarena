@@ -31,7 +31,7 @@ def serialize_request(request):
 
 
 class MethodCall(DriverMessage, namedtuple("MethodCall", [
-    "method_name", "parameters", "accepted_callbacks"
+    "method_name", "parameters", "has_return_value", "accepted_callbacks"
 ])):
     __slots__ = []
 
@@ -42,6 +42,7 @@ class MethodCall(DriverMessage, namedtuple("MethodCall", [
         parameters = [None] * parameters_count
         for i in range(parameters_count):
             parameters[i] = yield from deserialize_data()
+        has_return_value = bool(int((yield)))
         callbacks_count = int((yield))
         accepted_callbacks = {}
         for _ in range(callbacks_count):
@@ -52,6 +53,7 @@ class MethodCall(DriverMessage, namedtuple("MethodCall", [
         return MethodCall(
             method_name=method_name,
             parameters=parameters,
+            has_return_value=has_return_value,
             accepted_callbacks=accepted_callbacks,
         )
 
@@ -60,6 +62,7 @@ class MethodCall(DriverMessage, namedtuple("MethodCall", [
         yield len(self.parameters)
         for value in self.parameters:
             yield from serialize_data(value)
+        yield int(self.has_return_value)
         yield len(self.accepted_callbacks)
         for name, parameters_count in self.accepted_callbacks.items():
             yield name

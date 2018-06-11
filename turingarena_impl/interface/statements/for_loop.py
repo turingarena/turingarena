@@ -70,7 +70,7 @@ class ForStatement(Statement, IntermediateNode):
     def _driver_run(self, context):
         assignments_by_iteration = [
             self.body.driver_run(context.with_assigments(
-                (Reference(variable=self.index.variable, index_count=0), i)
+                [(Reference(variable=self.index.variable, index_count=0), i)]
             ))
             for i in range(self.index.range.evaluate(context.bindings))
         ]

@@ -64,13 +64,6 @@ def run_driver(driver_iterator, *, run_sandbox_iterator):
         # assert input_sent
 
 
-def send_response(driver_connection, response):
-    for item in response:
-        assert isinstance(item, (int, bool))
-        print(int(item), file=driver_connection.response)
-    driver_connection.response.flush()
-
-
 def run_sandbox(instructions, *, sandbox_connection):
     last_upward = False
     upward_lines = upward_reader(sandbox_connection)
@@ -129,6 +122,17 @@ class DriverRequestStream:
             raise ValueError(f"too few lines")
 
         return result
+
+
+class DriverResponseStream:
+    def __init__(self, driver_connection):
+        self.driver_connection = driver_connection
+
+    def send(self, response):
+        for item in response:
+            assert isinstance(item, (int, bool))
+            print(int(item), file=self.driver_connection.upward)
+        self.driver_connection.upward.flush()
 
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
