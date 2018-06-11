@@ -1,8 +1,9 @@
 import logging
 from collections import namedtuple
 
+from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block
-from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper, ImperativeStructure
+from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode
@@ -124,9 +125,18 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         yield from self.prototype.validate()
 
     def _driver_run(self, context):
-        context.response_stream.send([1, self.context.callback_index])
-        # TODO: arguments
-        return self.body.driver_run(context)
+        context.send_driver_upward(1)
+        context.send_driver_upward(self.context.callback_index)
+        # TODO: arguments (the body should be compiled in a different way)
+        self.body.driver_run(context)
+
+        command = context.receive_driver_downward()
+        if not command == "callback_return":
+            raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+
+        has_return_value = bool(int(context.receive_driver_downward()))
+        if has_return_value:
+            return_value = int(context.receive_driver_downward())
 
     def generate_instructions(self, bindings):
         inner_bindings = {

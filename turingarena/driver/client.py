@@ -3,7 +3,6 @@ from contextlib import contextmanager
 
 from turingarena.driver.connection import DRIVER_QUEUE, DriverProcessConnection, \
     DRIVER_PROCESS_CHANNEL
-from turingarena.driver.proxy import FunctionProxy
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 
 logger = logging.getLogger(__name__)
@@ -30,7 +29,6 @@ class DriverClient:
 class DriverProcessClient:
     def __init__(self, driver_process_dir):
         self.boundary = PipeBoundary(driver_process_dir)
-        self.proxy = FunctionProxy(self)
 
     @contextmanager
     def connect(self):

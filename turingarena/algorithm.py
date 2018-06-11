@@ -4,7 +4,7 @@ from contextlib import contextmanager, ExitStack
 from turingarena import *
 from turingarena.driver.client import SandboxError, DriverClient, DriverProcessClient
 from turingarena.driver.engine import DriverClientEngine
-from turingarena.driver.proxy import FunctionProxy, ProcedureProxy
+from turingarena.driver.proxy import MethodProxy
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -91,8 +91,8 @@ class AlgorithmProcess(AlgorithmSection):
         super().__init__()
         self._engine = DriverClientEngine(connection)
 
-        self.procedures = ProcedureProxy(self._engine)
-        self.functions = FunctionProxy(self._engine)
+        self.procedures = MethodProxy(self._engine, has_return_value=False)
+        self.functions = MethodProxy(self._engine, has_return_value=True)
 
         self.call = self.functions  # FIXME: for partial compatibility
 

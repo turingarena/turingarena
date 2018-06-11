@@ -190,10 +190,30 @@ class MethodCallNode(StatementIntermediateNode):
                     # TODO: else, check value is the one expected
 
             has_return_value = bool(int(context.receive_driver_downward()))
-            assert has_return_value == (self.statement.return_value is not None)
+            expects_return_value = (self.statement.return_value is not None)
+            if not has_return_value == expects_return_value:
+                names = ["function", "procedure"]
+                raise InterfaceError(
+                    f"'{method.name}' is a {names[expects_return_value]}, "
+                    f"got call to {names[has_return_value]}"
+                )
 
-            callbacks_count = int(context.receive_driver_downward())
-            assert callbacks_count == 0  # FIXME:
+            callback_count = int(context.receive_driver_downward())
+            expected_callback_count = len(self.statement.callbacks)
+            if not callback_count == expected_callback_count:
+                raise InterfaceError(
+                    f"'{method.name}' has a {expected_callback_count} callbacks, "
+                    f"got {callback_count}"
+                )
+
+            for c in self.statement.callbacks:
+                parameter_count = int(context.receive_driver_downward())
+                expected_parameter_count = len(c.parameters)
+                if not parameter_count == expected_parameter_count:
+                    raise InterfaceError(
+                        f"'{c.name}' has {expected_parameter_count} parameters, "
+                        f"got {parameter_count}"
+                    )
 
     def should_send_input(self):
         return self.statement.method.has_return_value
@@ -232,7 +252,7 @@ class MethodCallbacksNode(StatementIntermediateNode):
                 callback.driver_run(context)
             else:
                 break
-        context.response_stream.send([0])  # no more callbacks
+        context.send_driver_upward(0)  # no more callbacks
         return []
 
 

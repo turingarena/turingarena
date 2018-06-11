@@ -150,14 +150,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def send_driver_upward(self, item):
         assert isinstance(item, (int, bool))
-        logging.debug(f"send_upward: {item}")
+        logging.debug(f"send_driver_upward: {item}")
         print(int(item), file=self.driver_connection.upward)
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
-        logging.debug(f"receive_downward...")
+        logging.debug(f"receive_driver_downward...", stack_info=True)
         line = self.driver_connection.downward.readline().strip()
-        logging.debug(f"receive_downward -> {line}")
+        logging.debug(f"receive_driver_downward -> {line}")
         return line
 
     def send_downward(self, values):
