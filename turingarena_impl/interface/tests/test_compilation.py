@@ -1,5 +1,4 @@
 from turingarena_impl.interface.interface import InterfaceDefinition
-# TODO: verify generated instructions
 from turingarena_impl.interface.statements.call import MethodCallNode, MethodReturnNode
 from turingarena_impl.interface.step import Step
 

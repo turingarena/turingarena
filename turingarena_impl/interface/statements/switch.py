@@ -61,13 +61,6 @@ class SwitchStatement(Statement):
                 labels.append(label)
             yield from case.validate()
 
-    @property
-    def may_process_requests(self):
-        return any(
-            case.body.may_process_requests
-            for case in self.cases
-        )
-
 
 class CaseStatement(Statement):
     __slots__ = []

@@ -27,10 +27,6 @@ class LoopStatement(Statement):
     def validate(self):
         yield from self.body.validate()
 
-    @property
-    def may_process_requests(self):
-        return True
-
 
 class BreakStatement(Statement):
     __slots__ = []

@@ -47,10 +47,6 @@ class ForStatement(Statement, IntermediateNode):
     def validate(self):
         yield from self.body.validate()
 
-    @property
-    def may_process_requests(self):
-        return self.body.may_process_requests
-
     def expects_request(self, request):
         return (
             request is None

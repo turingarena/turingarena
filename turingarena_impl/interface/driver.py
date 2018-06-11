@@ -4,8 +4,7 @@ from contextlib import contextmanager, ExitStack
 from turingarena.driver.connection import DRIVER_QUEUE, DRIVER_PROCESS_CHANNEL, DriverProcessConnection
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.sandbox.client import SandboxProcessClient
-from turingarena_impl.interface.engine import NodeExecutionContext
-from turingarena_impl.interface.exceptions import CommunicationBroken
+from turingarena_impl.interface.execution import NodeExecutionContext
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
 
@@ -58,30 +57,3 @@ class DriverProcessServer:
                 sandbox_process_client=sandbox_process_client,
             )
             self.interface.run_driver(context)
-
-    # FIXME: everything below is obsolete
-
-    def handle_request(self, request):
-        current_request = self.deserialize(request)
-        logger.debug(f"received request {type(current_request)}")
-        try:
-            response = self.run_driver_iterator.send(current_request)
-        except CommunicationBroken:
-            logger.warning(f"communication with process broken")
-            return {
-                "sandbox_error": "communication broken",
-            }
-
-        assert all(isinstance(x, int) for x in response)
-        return {
-            "response": "\n".join(str(x) for x in response)
-        }
-
-    def process_requests(self):
-        assert next(self.run_driver_iterator) is None
-        while True:
-            self.boundary.handle_request(DRIVER_PROCESS_QUEUE, self.handle_request)
-            try:
-                assert next(self.run_driver_iterator) is None
-            except StopIteration:
-                break

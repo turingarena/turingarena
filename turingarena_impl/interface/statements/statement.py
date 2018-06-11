@@ -23,9 +23,6 @@ class AbstractStatement(ImperativeStructure):
     def needs_flush(self):
         return False
 
-    def generate_instructions(self, bindings):
-        raise NotImplementedError
-
     @property
     def variables_to_declare(self):
         return list(self._get_variables_to_declare())

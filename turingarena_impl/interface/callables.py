@@ -136,7 +136,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def _driver_run(self, context):
         context.send_driver_upward(1)
         context.send_driver_upward(self.context.callback_index)
-        # TODO: arguments (the body should be compiled in a different way)
         self.body_node.driver_run(context)
 
         # FIXME: some redundancy with ReturnStatement

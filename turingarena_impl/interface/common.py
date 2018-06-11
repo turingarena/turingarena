@@ -10,7 +10,3 @@ class ImperativeStructure(metaclass=ABCMeta):
     @abstractmethod
     def expects_request(self, request):
         pass
-
-    @property
-    def may_process_requests(self):
-        return False

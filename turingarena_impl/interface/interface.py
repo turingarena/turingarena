@@ -4,7 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block, BlockNode
 from turingarena_impl.interface.callables import MethodPrototype
 from turingarena_impl.interface.context import InterfaceContext
-from turingarena_impl.interface.engine import NodeExecutionContext
+from turingarena_impl.interface.execution import NodeExecutionContext
 from turingarena_impl.interface.parser import parse_interface
 from turingarena_impl.loader import find_package_path
 

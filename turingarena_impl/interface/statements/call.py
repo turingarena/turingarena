@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 
 from turingarena import InterfaceError
 from turingarena_impl.interface.callables import CallbackImplementation
@@ -109,10 +108,6 @@ class CallStatement(Statement):
             and request.method_name == self.method_name
         )
 
-    @property
-    def may_process_requests(self):
-        return True
-
     def _get_intermediate_nodes(self):
         yield MethodCallNode(self)
 
@@ -121,33 +116,6 @@ class CallStatement(Statement):
 
         if self.method.has_return_value:
             yield MethodReturnNode(self)
-
-    def generate_instructions(self, bindings):
-        method = self.method
-
-        yield MethodCallNode(
-            statement=self,
-            bindings=bindings,
-        )
-
-        if method.has_callbacks:
-            yield from self.unroll_callbacks(bindings)
-
-        yield MethodReturnNode(
-            statement=self,
-            bindings=bindings,
-        )
-
-    def unroll_callbacks(self, bindings):
-        while True:
-            accepted_callback_holder = []
-            yield AcceptCallbackNode(bindings=bindings, accepted_callback_holder=accepted_callback_holder)
-            if accepted_callback_holder:
-                [accepted_callback_index] = accepted_callback_holder
-                callback = self.callbacks[accepted_callback_index]
-                yield from callback.generate_instructions(bindings)
-            else:
-                break
 
 
 class MethodCallNode(StatementIntermediateNode):
@@ -254,7 +222,6 @@ class MethodCallbacksNode(StatementIntermediateNode):
                 break
         context.send_driver_upward(0)  # no more callbacks
         return []
-
 
 
 class ReturnStatement(Statement, IntermediateNode):
