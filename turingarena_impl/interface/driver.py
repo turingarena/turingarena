@@ -6,6 +6,7 @@ from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 from turingarena.sandbox.client import SandboxProcessClient
 from turingarena_impl.interface.execution import NodeExecutionContext
 from turingarena_impl.interface.interface import InterfaceDefinition
+from turingarena_impl.interface.variables import ReferenceDirection
 from turingarena_impl.metaserver import MetaServer
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ class DriverProcessServer:
             context = NodeExecutionContext(
                 bindings={},
                 phase=None,
+                direction=None,
                 driver_connection=driver_connection,
                 sandbox_connection=sandbox_connection,
                 sandbox_process_client=sandbox_process_client,

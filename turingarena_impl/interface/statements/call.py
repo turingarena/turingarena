@@ -110,11 +110,8 @@ class CallStatement(Statement):
         )
 
     def _get_intermediate_nodes(self):
-        resolve_arguments_node = MethodResolveArgumentsNode(self)
-        if resolve_arguments_node.reference_actions:
-            yield resolve_arguments_node
-        else:
-            yield MethodSendArgumentsNode(self)
+        # FIXME: if there are arguments to resolve
+        yield MethodResolveArgumentsNode(self)
 
         if self.method.has_callbacks:
             yield MethodCallbacksNode(self)
@@ -187,36 +184,6 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                         f"'{c.name}' has {expected_parameter_count} parameters, "
                         f"got {parameter_count}"
                     )
-
-
-class MethodSendArgumentsNode(StatementIntermediateNode):
-    __slots__ = []
-
-    def _get_direction(self):
-        return ReferenceDirection.UPWARD
-
-    def _get_reference_actions(self):
-        return []
-
-    def _driver_run(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
-            # FIXME: redundant with MethodResolveArgumentsNode
-
-            method = self.statement.method
-
-            context.send_driver_upward("call")
-            context.send_driver_upward(method.name)
-
-            context.send_driver_upward(len(method.parameters))
-            for a in self.statement.arguments:
-                value = a.evaluate(context.bindings)
-                context.serialize_response_data(value)
-
-            context.send_driver_upward(int(self.statement.return_value is not None))
-            context.send_driver_upward(len(self.statement.callbacks))
-
-            for c in self.statement.callbacks:
-                context.send_driver_upward(len(c.parameters))
 
 
 class MethodReturnNode(StatementIntermediateNode):

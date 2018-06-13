@@ -48,12 +48,5 @@ class IntermediateNode:
     def _driver_run(self, context):
         pass
 
-    def _run_node_sequence(self, nodes, context: NodeExecutionContext):
-        assignments = []
-        for n in nodes:
-            assignments.extend(n.driver_run(context.with_assigments(assignments)))
-        return assignments
-
-
 class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []

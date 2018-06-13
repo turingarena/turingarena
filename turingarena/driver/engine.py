@@ -1,26 +1,58 @@
 import logging
 from collections import namedtuple
+from enum import Enum
 
 from turingarena.driver.commands import serialize_data
 
+CallRequest = namedtuple("CallRequest", ["method_name", "arguments", "has_return_value", "callbacks"])
 
-class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
-    def call(self, name, *, arguments, has_return_value, callbacks):
-        self.send_call(arguments, name, has_return_value, callbacks)
+DriverClientPhase = Enum("DriverClientPhase", ["PRISTINE", "DOWNWARD", "UPWARD"])
 
-        if callbacks:
-            self.connection.downward.flush()
-            self.accept_callbacks(callbacks)
 
-        if has_return_value:
-            self.connection.downward.flush()
-            return self.receive_return_value()
+class DriverClientEngine:
+    __slots__ = ["connection", "phase"]
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.phase = DriverClientPhase.PRISTINE
+
+    def call(self, request):
+        if self.phase is DriverClientPhase.PRISTINE:
+            self.phase = DriverClientPhase.DOWNWARD
+
+        if self.phase is DriverClientPhase.UPWARD:
+            upward_request = self.get_response_line()
+            if upward_request:
+                pass
+                # TODO: send the request somewhere to check it is the one expected
+            else:
+                logging.debug("flush")
+                self.phase = DriverClientPhase.DOWNWARD
+
+        if self.phase is DriverClientPhase.DOWNWARD:
+            logging.debug("sending call")
+            for line in self.call_lines(request):
+                self.send_request(line)
+
+        if request.callbacks:
+            self.accept_callbacks(request.callbacks)
+
+        if request.has_return_value:
+            self.flush_downward()
+            logging.debug(f"Receiving return value...")
+            return self.get_response_line()
         else:
             return None
 
-    def receive_return_value(self):
-        logging.debug(f"Receiving return value...")
-        return self.get_response_line()
+    def check_flush_needed(self):
+        assert self.phase is DriverClientPhase.UPWARD
+        if self.get_response_line():
+            self.phase = DriverClientPhase.PRISTINE
+
+    def flush_downward(self):
+        if self.phase is DriverClientPhase.DOWNWARD:
+            self.connection.downward.flush()
+            self.phase = DriverClientPhase.UPWARD
 
     def get_response_line(self):
         self.connection.downward.flush()
@@ -31,6 +63,7 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
 
     def accept_callbacks(self, callback_list):
         while True:
+            self.flush_downward()
             if self.get_response_line():  # has callback
                 logging.debug(f"has callback")
                 index = self.get_response_line()
@@ -45,23 +78,16 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
             else:  # no callbacks
                 break
 
-    def send_call(self, args, name, has_return_value, callbacks):
-        return self.send_request([
-            "call",
-            name,
-            len(args),
-            *[
-                l
-                for a in args
-                for l in serialize_data(a)
-            ],
-            int(has_return_value),
-            len(callbacks),
-            *[
-                c.__code__.co_argcount
-                for c in callbacks
-            ],
-        ])
+    def call_lines(self, request):
+        yield "call"
+        yield request.method_name
+        yield len(request.arguments)
+        for a in request.arguments:
+            yield from serialize_data(a)
+        yield int(request.has_return_value)
+        yield len(request.callbacks)
+        for c in request.callbacks:
+            yield c.__code__.co_argcount
 
     def send_callback_return(self, return_value):
         request = ["callback_return"]
@@ -72,9 +98,8 @@ class DriverClientEngine(namedtuple("DriverClientEngine", ["connection"])):
         return self.send_request(request)
 
     def send_exit(self):
-        return self.send_request(["exit"])
+        return self.send_request("exit")
 
-    def send_request(self, lines):
-        for line in lines:
-            logging.debug(f"sending request line: {line}")
-            print(line, file=self.connection.downward)
+    def send_request(self, line):
+        logging.debug(f"sending request line: {line}")
+        print(line, file=self.connection.downward)

@@ -84,7 +84,14 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         return BlockNode(list(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
-        return self._run_node_sequence(self.children, context)
+        assignments = []
+        for n in self.children:
+            inner_assigments = n.driver_run(context)
+            assignments.extend(inner_assigments)
+            context = context.with_assigments(inner_assigments)
+            if n.direction is ReferenceDirection.UPWARD:
+                context.send_driver_upward(False)
+        return assignments
 
     def _get_reference_actions(self):
         for n in self.children:

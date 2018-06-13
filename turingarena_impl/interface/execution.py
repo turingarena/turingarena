@@ -14,6 +14,7 @@ Assignments = List[Tuple[Reference, Any]]
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "phase",
+    "direction",
     "driver_connection",
     "sandbox_process_client",
     "sandbox_connection",
@@ -22,6 +23,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def send_driver_upward(self, item):
         logging.debug(f"send_driver_upward: {item}")
+        assert isinstance(item, (int, bool))
+        item = int(item)
         print(item, file=self.driver_connection.upward)
 
     def receive_driver_downward(self):

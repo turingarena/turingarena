@@ -26,12 +26,20 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
 
     def _driver_run(self, context: NodeExecutionContext):
         assert context.phase is None
-        assignments = self._run_node_sequence(self.children, context._replace(
-            phase=ReferenceStatus.RESOLVED,
-        ))
-        self._run_node_sequence(self.children, context.with_assigments(assignments)._replace(
-            phase=ReferenceStatus.DECLARED,
-        ))
+        assignments = []
+        for n in self.children:
+            inner_assigments = n.driver_run(context._replace(
+                phase=ReferenceStatus.RESOLVED,
+                direction=self.direction,
+            ))
+            assignments.extend(inner_assigments)
+            context = context.with_assigments(inner_assigments)
+
+        for n in self.children:
+            n.driver_run(context._replace(
+                phase=ReferenceStatus.DECLARED,
+                direction=self.direction,
+            ))
         return assignments
 
     def _get_direction(self):
