@@ -1,6 +1,5 @@
 import logging
 from collections import namedtuple
-from itertools import groupby
 
 from turingarena_impl.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena_impl.interface.diagnostics import Diagnostic
@@ -8,7 +7,6 @@ from turingarena_impl.interface.expressions import SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.interface.step import Step
-from turingarena_impl.interface.variables import ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
@@ -72,16 +70,31 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
     @staticmethod
     def _group_nodes_by_direction(nodes):
-        for k, g in groupby(nodes, key=lambda inst: inst.direction):
-            if k is None:
-                yield from g
+        group = []
+        for node in nodes:
+            if node.can_be_grouped and len(BlockNode.group_directions(group + [node])) <= 1:
+                group.append(node)
+                continue
+
+            if group:
+                yield Step(tuple(group))
+                group.clear()
+
+            if not node.can_be_grouped:
+                yield node
             else:
-                assert isinstance(k, ReferenceDirection)
-                yield Step(list(g))
+                group.append(node)
+
+        if group:
+            yield Step(tuple(group))
+
+    @staticmethod
+    def group_directions(group):
+        return {d for n in group for d in n.declaration_directions}
 
     @staticmethod
     def from_nodes(nodes):
-        return BlockNode(list(BlockNode._group_nodes_by_direction(nodes)))
+        return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
         assignments = []
@@ -89,16 +102,12 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
             inner_assigments = n.driver_run(context)
             assignments.extend(inner_assigments)
             context = context.with_assigments(inner_assigments)
-            if n.direction is ReferenceDirection.UPWARD:
-                context.send_driver_upward(False)
         return assignments
 
     def _get_reference_actions(self):
         for n in self.children:
             yield from n.reference_actions
 
-    def _get_direction(self):
-        if len(self.children) == 1:
-            return self.children[0].direction
-        else:
-            return None
+    def _get_directions(self):
+        for n in self.children:
+            yield from n.directions

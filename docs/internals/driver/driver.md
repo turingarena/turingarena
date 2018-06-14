@@ -1,6 +1,6 @@
 # Driver Protocol
 
-The driver is a tool offered byt TuringArena,
+The driver is a tool offered by TuringArena,
 used to start a sandboxed process and interact with it
 by directly calling its functions.
 
@@ -27,16 +27,20 @@ To start a process, the client does the following.
 
 ## Interaction with process
 
+NOTE: the following is obsolete.
+It is preferable to use only the two pipes,
+never close them (similarly to `stdin`/`stdout`),
+avoiding direct access to the sandbox.
+Also, requiring a flush per function call is still reasonable
+from a performance point of view.
+The performance breakthrough is probably obtained
+by compiling the driver code instead.
+
 The data read from `connection_dir` is an absolute path
 of a directory, where the following pipes are exposed.
 
 - `input`
 - `output`
-
-NOTE: the following is obsolete.
-It is preferable to use only the two pipes,
-never close them (similarly to `stdin`/`stdout`),
-avoiding direct access to the sandbox.
 
 For each communication block, the evaluator does the following.
 1. Opens the `input` pipe, writes one or more requests, then closes the pipe (flushing the data).

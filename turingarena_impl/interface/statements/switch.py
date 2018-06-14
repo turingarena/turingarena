@@ -17,12 +17,9 @@ class SwitchStatement(Statement, IntermediateNode):
         # TODO: resolution node
         yield self
 
-    def _get_direction(self):
-        direction = self.cases[0].body_node.direction
-        if all(c.body_node.direction == direction for c in self.cases):
-            return direction
-        else:
-            return None
+    def _get_directions(self):
+        for c in self.cases:
+            yield from c.body_node.directions
 
     def _get_reference_actions(self):
         for c in self.cases:

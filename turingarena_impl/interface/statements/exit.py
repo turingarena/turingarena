@@ -22,9 +22,6 @@ class ExitStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def _get_direction(self):
-        return None
-
     def _driver_run(self, context):
         # TODO
         pass

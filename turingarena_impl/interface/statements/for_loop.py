@@ -53,14 +53,21 @@ class ForStatement(Statement, IntermediateNode):
             or self.body.expects_request(request)
         )
 
-    def _get_direction(self):
-        return self._body_node.direction
+    def _get_directions(self):
+        return self._body_node.directions
 
     def _get_reference_actions(self):
         for a in self._body_node.reference_actions:
             r = a.reference
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
+
+    def _can_be_grouped(self):
+        # no local references
+        return all(
+            a.reference.index_count > 0
+            for a in self._body_node.reference_actions
+        )
 
     @property
     def _body_node(self):

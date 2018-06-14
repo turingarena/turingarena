@@ -25,8 +25,8 @@ class LoopStatement(Statement, IntermediateNode):
         except LoopBreak:
             pass
 
-    def _get_direction(self):
-        return None
+    def _get_directions(self):
+        return self.body_node.directions
 
     def _get_reference_actions(self):
         return []
@@ -54,9 +54,6 @@ class BreakStatement(Statement, IntermediateNode):
 
     def _driver_run(self, context):
         raise LoopBreak
-
-    def _get_direction(self):
-        return None
 
     def _get_reference_actions(self):
         return []

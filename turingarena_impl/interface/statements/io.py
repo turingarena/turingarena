@@ -9,25 +9,6 @@ from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirec
 logger = logging.getLogger(__name__)
 
 
-class CheckpointStatement(Statement, IntermediateNode):
-    __slots__ = []
-
-    def _get_intermediate_nodes(self):
-        yield self
-
-    def _get_direction(self):
-        return ReferenceDirection.UPWARD
-
-    def _get_reference_actions(self):
-        return []
-
-    def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
-            values = context.receive_upward()
-            if values != (0,):
-                raise CommunicationBroken(f"expecting checkpoint, got {values}")
-
-
 class ReadWriteStatement(Statement):
     __slots__ = []
 
@@ -57,8 +38,8 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.DECLARED)
 
-    def _get_direction(self):
-        return ReferenceDirection.DOWNWARD
+    def _get_directions(self):
+        yield ReferenceStatus.DECLARED, ReferenceDirection.DOWNWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
@@ -79,11 +60,31 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
 
-    def _get_direction(self):
-        return ReferenceDirection.UPWARD
+    def _get_directions(self):
+        yield ReferenceStatus.RESOLVED, ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             for a, value in zip(self.arguments, values):
                 yield a.reference, value
+
+
+class CheckpointStatement(Statement, IntermediateNode):
+    __slots__ = []
+
+    def _get_intermediate_nodes(self):
+        yield self
+
+    def _get_directions(self):
+        yield ReferenceStatus.DECLARED, ReferenceDirection.UPWARD
+        yield ReferenceStatus.RESOLVED, ReferenceDirection.UPWARD
+
+    def _get_reference_actions(self):
+        return []
+
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            values = context.receive_upward()
+            if values != (0,):
+                raise CommunicationBroken(f"expecting checkpoint, got {values}")

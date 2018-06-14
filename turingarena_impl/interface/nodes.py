@@ -1,10 +1,11 @@
 import logging
 from abc import abstractmethod
 from collections import namedtuple
-from typing import List, Optional, Mapping, Any
+from typing import List, Mapping, Any
 
+from turingarena_impl.interface.common import memoize
 from turingarena_impl.interface.execution import NodeExecutionContext, Assignments
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceDirection, Reference
+from turingarena_impl.interface.variables import ReferenceAction, Reference, ReferenceStatus
 
 Bindings = Mapping[Reference, Any]
 
@@ -21,17 +22,26 @@ class IntermediateNode:
         assert all(isinstance(a, ReferenceAction) for a in actions)
         return actions
 
-    @property
-    def direction(self) -> Optional[ReferenceDirection]:
-        return self._get_direction()
-
-    @abstractmethod
     def _get_reference_actions(self):
-        pass
+        return []
 
-    @abstractmethod
-    def _get_direction(self):
-        pass
+    @property
+    @memoize
+    def declaration_directions(self):
+        result = frozenset(
+            d
+            for s, d in self.directions
+            if s is ReferenceStatus.DECLARED
+        )
+        logging.debug(f"declaration_directions({type(self).__name__}) -> {result}")
+        return result
+
+    @property
+    def directions(self):
+        return frozenset(self._get_directions())
+
+    def _get_directions(self):
+        return frozenset()
 
     def driver_run(self, context: NodeExecutionContext) -> Assignments:
         logging.debug(f"driver_run: {type(self).__name__} phase: {context.phase}")
@@ -44,9 +54,17 @@ class IntermediateNode:
         assert all(isinstance(r, Reference) for r, v in assignments)
         return assignments
 
+    @property
+    def can_be_grouped(self):
+        return self._can_be_grouped() and len(self.declaration_directions) <= 1
+
+    def _can_be_grouped(self):
+        return True
+
     @abstractmethod
     def _driver_run(self, context):
         pass
+
 
 class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []

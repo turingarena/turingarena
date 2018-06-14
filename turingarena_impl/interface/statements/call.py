@@ -123,9 +123,6 @@ class CallStatement(Statement):
 class MethodResolveArgumentsNode(StatementIntermediateNode):
     __slots__ = []
 
-    def _get_direction(self):
-        return ReferenceDirection.DOWNWARD
-
     def _get_reference_actions(self):
         references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
         for p in self.statement.arguments:
@@ -189,11 +186,11 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
 class MethodReturnNode(StatementIntermediateNode):
     __slots__ = []
 
-    def _get_direction(self):
-        return ReferenceDirection.UPWARD
-
     def _get_reference_actions(self):
         yield ReferenceAction(self.statement.return_value.reference, ReferenceStatus.DECLARED)
+
+    def _get_directions(self):
+        yield ReferenceStatus.DECLARED, ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
@@ -204,11 +201,15 @@ class MethodReturnNode(StatementIntermediateNode):
 class MethodCallbacksNode(StatementIntermediateNode):
     __slots__ = []
 
-    def _get_direction(self):
-        return None
+    def _get_directions(self):
+        for callback in self.statement.callbacks:
+            yield from callback.body_node.directions
 
     def _get_reference_actions(self):
         return []
+
+    def _can_be_grouped(self):
+        return False
 
     def _driver_run(self, context):
         while True:
@@ -235,9 +236,6 @@ class ReturnStatement(Statement, IntermediateNode):
 
     def validate(self):
         yield from self.value.validate()
-
-    def _get_direction(self):
-        return ReferenceDirection.DOWNWARD
 
     def _get_reference_actions(self):
         yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)

@@ -1,12 +1,9 @@
 import logging
 from collections import namedtuple
-from enum import Enum
 
 from turingarena.driver.commands import serialize_data
 
 CallRequest = namedtuple("CallRequest", ["method_name", "arguments", "has_return_value", "callbacks"])
-
-DriverClientPhase = Enum("DriverClientPhase", ["PRISTINE", "DOWNWARD", "UPWARD"])
 
 
 class DriverClientEngine:
@@ -14,45 +11,19 @@ class DriverClientEngine:
 
     def __init__(self, connection):
         self.connection = connection
-        self.phase = DriverClientPhase.PRISTINE
 
     def call(self, request):
-        if self.phase is DriverClientPhase.PRISTINE:
-            self.phase = DriverClientPhase.DOWNWARD
-
-        if self.phase is DriverClientPhase.UPWARD:
-            upward_request = self.get_response_line()
-            if upward_request:
-                pass
-                # TODO: send the request somewhere to check it is the one expected
-            else:
-                logging.debug("flush")
-                self.phase = DriverClientPhase.DOWNWARD
-
-        if self.phase is DriverClientPhase.DOWNWARD:
-            logging.debug("sending call")
-            for line in self.call_lines(request):
-                self.send_request(line)
+        for line in self.call_lines(request):
+            self.send_request(line)
 
         if request.callbacks:
             self.accept_callbacks(request.callbacks)
 
         if request.has_return_value:
-            self.flush_downward()
             logging.debug(f"Receiving return value...")
             return self.get_response_line()
         else:
             return None
-
-    def check_flush_needed(self):
-        assert self.phase is DriverClientPhase.UPWARD
-        if self.get_response_line():
-            self.phase = DriverClientPhase.PRISTINE
-
-    def flush_downward(self):
-        if self.phase is DriverClientPhase.DOWNWARD:
-            self.connection.downward.flush()
-            self.phase = DriverClientPhase.UPWARD
 
     def get_response_line(self):
         self.connection.downward.flush()
@@ -63,7 +34,6 @@ class DriverClientEngine:
 
     def accept_callbacks(self, callback_list):
         while True:
-            self.flush_downward()
             if self.get_response_line():  # has callback
                 logging.debug(f"has callback")
                 index = self.get_response_line()
@@ -90,12 +60,12 @@ class DriverClientEngine:
             yield c.__code__.co_argcount
 
     def send_callback_return(self, return_value):
-        request = ["callback_return"]
+        self.send_request("callback_return")
         if return_value is not None:
-            request += [1, return_value]
+            self.send_request(1)
+            self.send_request(int(return_value))
         else:
-            request += [0]
-        return self.send_request(request)
+            self.send_request(0)
 
     def send_exit(self):
         return self.send_request("exit")

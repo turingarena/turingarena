@@ -151,20 +151,17 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
                     f"but the provided implementation returned something"
                 )
 
-    def _get_direction(self):
-        return self.body_node.direction
-
-    def _get_reference_actions(self):
-        return []
+    def _get_directions(self):
+        return self.body_node.directions
 
 
 class CallbackCallNode(StatementIntermediateNode):
-    def _get_direction(self):
-        return ReferenceDirection.UPWARD
-
     def _get_reference_actions(self):
         for p in self.statement.parameters:
-            yield p.reference
+            yield ReferenceAction(reference=p.reference, status=ReferenceStatus.DECLARED)
+
+    def _get_directions(self):
+        yield ReferenceStatus.DECLARED, ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:

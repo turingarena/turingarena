@@ -19,18 +19,13 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         super().__init__()
         assert self.children
 
-        if self.direction is None:
-            assert len(self.children) == 1
-        else:
-            assert all(n.direction is self.direction for n in self.children)
-
     def _driver_run(self, context: NodeExecutionContext):
         assert context.phase is None
         assignments = []
         for n in self.children:
             inner_assigments = n.driver_run(context._replace(
                 phase=ReferenceStatus.RESOLVED,
-                direction=self.direction,
+                direction=self._declaration_direction(),
             ))
             assignments.extend(inner_assigments)
             context = context.with_assigments(inner_assigments)
@@ -38,12 +33,17 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         for n in self.children:
             n.driver_run(context._replace(
                 phase=ReferenceStatus.DECLARED,
-                direction=self.direction,
+                direction=self._declaration_direction(),
             ))
         return assignments
 
-    def _get_direction(self):
-        return self.children[0].direction
+    def _declaration_direction(self):
+        for d in self.declaration_directions:
+            return d
+
+    def _get_directions(self):
+        for n in self.children:
+            yield from n.directions
 
     def _get_reference_actions(self):
         for n in self.children:
