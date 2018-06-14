@@ -25,8 +25,8 @@ class LoopStatement(Statement, IntermediateNode):
         except LoopBreak:
             pass
 
-    def _get_directions(self):
-        return self.body_node.directions
+    def _get_declaration_directions(self):
+        return self.body_node.declaration_directions
 
     def _get_reference_actions(self):
         return []

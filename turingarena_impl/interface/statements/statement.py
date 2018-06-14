@@ -54,11 +54,12 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
 
     @staticmethod
     def get_statement_classes():
-        from .call import CallStatement, ReturnStatement
+        from .call import CallStatement
+        from turingarena_impl.interface.statements.callback import ReturnStatement
         from .loop import LoopStatement, BreakStatement
         from .for_loop import ForStatement
         from .if_else import IfStatement
-        from .exit import ExitStatement
+        from turingarena_impl.interface.statements.callback import ExitStatement
         from .switch import SwitchStatement
         from .io import CheckpointStatement, ReadStatement, WriteStatement
 

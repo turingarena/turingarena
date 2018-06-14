@@ -17,9 +17,9 @@ class SwitchStatement(Statement, IntermediateNode):
         # TODO: resolution node
         yield self
 
-    def _get_directions(self):
+    def _get_declaration_directions(self):
         for c in self.cases:
-            yield from c.body_node.directions
+            yield from c.body_node.declaration_directions
 
     def _get_reference_actions(self):
         for c in self.cases:

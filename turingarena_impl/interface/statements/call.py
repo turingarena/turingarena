@@ -1,11 +1,11 @@
 import logging
 
 from turingarena import InterfaceError
-from turingarena_impl.interface.callables import CallbackImplementation
 from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
-from turingarena_impl.interface.nodes import IntermediateNode, StatementIntermediateNode
+from turingarena_impl.interface.nodes import StatementIntermediateNode
+from turingarena_impl.interface.statements.callback import CallbackImplementation
 from turingarena_impl.interface.statements.statement import Statement
 from turingarena_impl.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
@@ -189,8 +189,8 @@ class MethodReturnNode(StatementIntermediateNode):
     def _get_reference_actions(self):
         yield ReferenceAction(self.statement.return_value.reference, ReferenceStatus.DECLARED)
 
-    def _get_directions(self):
-        yield ReferenceStatus.DECLARED, ReferenceDirection.UPWARD
+    def _get_declaration_directions(self):
+        yield ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
@@ -201,9 +201,9 @@ class MethodReturnNode(StatementIntermediateNode):
 class MethodCallbacksNode(StatementIntermediateNode):
     __slots__ = []
 
-    def _get_directions(self):
+    def _get_declaration_directions(self):
         for callback in self.statement.callbacks:
-            yield from callback.body_node.directions
+            yield from callback.body_node.declaration_directions
 
     def _get_reference_actions(self):
         return []
@@ -222,35 +222,3 @@ class MethodCallbacksNode(StatementIntermediateNode):
                 break
         context.send_driver_upward(0)  # no more callbacks
         return []
-
-
-class ReturnStatement(Statement, IntermediateNode):
-    __slots__ = []
-
-    @property
-    def value(self):
-        return Expression.compile(self.ast.value, self.context)
-
-    def _get_intermediate_nodes(self):
-        yield self
-
-    def validate(self):
-        yield from self.value.validate()
-
-    def _get_reference_actions(self):
-        yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
-
-    def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
-            command = context.receive_driver_downward()
-            if not command == "callback_return":
-                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
-            has_return_value = int(context.receive_driver_downward())
-            if not has_return_value:
-                raise InterfaceError(
-                    f"callback '{self.context.callback}' is a function, "
-                    f"but the provided implementation did not return anything"
-                )
-            value = int(context.receive_driver_downward())
-
-            yield self.value.reference, value

@@ -31,7 +31,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 
     def validate(self):
         from turingarena_impl.interface.statements.loop import BreakStatement
-        from turingarena_impl.interface.statements.exit import ExitStatement
+        from turingarena_impl.interface.statements.callback import ExitStatement
 
         for i, statement in enumerate(self.statements):
             yield from statement.validate()
@@ -108,6 +108,6 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         for n in self.children:
             yield from n.reference_actions
 
-    def _get_directions(self):
+    def _get_declaration_directions(self):
         for n in self.children:
-            yield from n.directions
+            yield from n.declaration_directions

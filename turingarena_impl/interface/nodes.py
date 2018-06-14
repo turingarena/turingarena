@@ -3,9 +3,8 @@ from abc import abstractmethod
 from collections import namedtuple
 from typing import List, Mapping, Any
 
-from turingarena_impl.interface.common import memoize
 from turingarena_impl.interface.execution import NodeExecutionContext, Assignments
-from turingarena_impl.interface.variables import ReferenceAction, Reference, ReferenceStatus
+from turingarena_impl.interface.variables import ReferenceAction, Reference
 
 Bindings = Mapping[Reference, Any]
 
@@ -26,21 +25,10 @@ class IntermediateNode:
         return []
 
     @property
-    @memoize
     def declaration_directions(self):
-        result = frozenset(
-            d
-            for s, d in self.directions
-            if s is ReferenceStatus.DECLARED
-        )
-        logging.debug(f"declaration_directions({type(self).__name__}) -> {result}")
-        return result
+        return frozenset(self._get_declaration_directions())
 
-    @property
-    def directions(self):
-        return frozenset(self._get_directions())
-
-    def _get_directions(self):
+    def _get_declaration_directions(self):
         return frozenset()
 
     def driver_run(self, context: NodeExecutionContext) -> Assignments:

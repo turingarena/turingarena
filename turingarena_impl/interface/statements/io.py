@@ -38,8 +38,8 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.DECLARED)
 
-    def _get_directions(self):
-        yield ReferenceStatus.DECLARED, ReferenceDirection.DOWNWARD
+    def _get_declaration_directions(self):
+        yield ReferenceDirection.DOWNWARD
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
@@ -60,9 +60,6 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
 
-    def _get_directions(self):
-        yield ReferenceStatus.RESOLVED, ReferenceDirection.UPWARD
-
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
@@ -76,14 +73,14 @@ class CheckpointStatement(Statement, IntermediateNode):
     def _get_intermediate_nodes(self):
         yield self
 
-    def _get_directions(self):
-        yield ReferenceStatus.DECLARED, ReferenceDirection.UPWARD
-        yield ReferenceStatus.RESOLVED, ReferenceDirection.UPWARD
+    def _get_declaration_directions(self):
+        yield ReferenceDirection.UPWARD
 
     def _get_reference_actions(self):
         return []
 
     def _driver_run(self, context):
+        # TODO: in the declare phase, process the checkpoint request
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             if values != (0,):

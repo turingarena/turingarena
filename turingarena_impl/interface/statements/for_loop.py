@@ -53,8 +53,8 @@ class ForStatement(Statement, IntermediateNode):
             or self.body.expects_request(request)
         )
 
-    def _get_directions(self):
-        return self._body_node.directions
+    def _get_declaration_directions(self):
+        return self._body_node.declaration_directions
 
     def _get_reference_actions(self):
         for a in self._body_node.reference_actions:
