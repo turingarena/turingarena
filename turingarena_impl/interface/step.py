@@ -16,21 +16,31 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
     __slots__ = []
 
     def _driver_run(self, context: NodeExecutionContext):
-        assert context.phase is None
         assert self.children
 
-        assignments = []
-        for n in self.children:
-            inner_assigments = n.driver_run(context._replace(
+        if context.phase is not None:
+            return self._run_children(context)
+        else:
+            assignments = self._run_children(context._replace(
                 phase=ReferenceStatus.RESOLVED,
             ))
-            assignments.extend(inner_assigments)
-            context = context.with_assigments(inner_assigments)
+            context = context.with_assigments(assignments)
 
-        for n in self.children:
-            n.driver_run(context._replace(
+            unexpected_assignments = self._run_children(context._replace(
                 phase=ReferenceStatus.DECLARED,
             ))
+            assert not unexpected_assignments
+
+            return assignments
+
+    def _run_children(self, context):
+        assignments = []
+        for n in self.children:
+            assignments.extend(
+                n.driver_run(
+                    context.with_assigments(assignments)
+                )
+            )
         return assignments
 
     def _get_declaration_directions(self):

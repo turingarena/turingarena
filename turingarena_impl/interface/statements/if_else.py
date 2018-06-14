@@ -1,6 +1,7 @@
 import logging
 
 from turingarena_impl.interface.block import Block
+from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
@@ -13,7 +14,7 @@ class IfStatement(Statement, IntermediateNode):
 
     @property
     def condition(self):
-        return Expression.compile(self.ast.condition, self.context)
+        return Expression.compile(self.ast.condition, ExpressionContext.in_statement(self.context))
 
     @property
     def then_body(self):

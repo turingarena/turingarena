@@ -30,7 +30,11 @@ class StatementContext(namedtuple("StatementContext", [
 ])):
     def with_reference_actions(self, actions):
         actions = tuple(actions)
-        assert all(isinstance(a, ReferenceAction) for a in actions)
+        assert all(
+            isinstance(a, ReferenceAction) and
+            a.reference is not None
+            for a in actions
+        )
         return self._replace(
             reference_actions=self.reference_actions + actions
         )
@@ -60,6 +64,20 @@ class StatementContext(namedtuple("StatementContext", [
 
     def with_loop(self):
         return self._replace(in_loop=True)
+
+
+class ExpressionContext(namedtuple("ExpressionContext", [
+    "statement_context",
+    "declaring",
+    "index_count",
+])):
+    @staticmethod
+    def in_statement(statement_context, *, declaring=False):
+        return ExpressionContext(
+            statement_context=statement_context,
+            declaring=declaring,
+            index_count=0,
+        )
 
 
 class StaticCallbackBlockContext(namedtuple("StaticCallbackBlockContext", [

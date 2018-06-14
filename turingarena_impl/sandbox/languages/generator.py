@@ -116,9 +116,11 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
     def expression(self, e):
         return getattr(self, f"{e.expression_type}_expression")(e)
 
+    def subscript_expression(self, e):
+        return f"{self.expression(e.array)}[{self.expression(e.index)}]"
+
     def reference_expression(self, e):
-        subscripts = "".join(f"[{self.expression(index)}]" for index in e.indices)
-        return f"{e.variable_name}{subscripts}"
+        return e.variable_name
 
     def int_literal_expression(self, e):
         return str(e.value)

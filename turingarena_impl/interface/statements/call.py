@@ -1,7 +1,7 @@
 import logging
 
 from turingarena import InterfaceError
-from turingarena_impl.interface.context import StaticCallbackBlockContext
+from turingarena_impl.interface.context import StaticCallbackBlockContext, ExpressionContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import StatementIntermediateNode
@@ -25,12 +25,14 @@ class CallStatement(Statement):
 
     @property
     def arguments(self):
-        return [Expression.compile(p, self.context) for p in self.ast.arguments]
+        expression_context = ExpressionContext.in_statement(self.context)
+        return [Expression.compile(p, expression_context) for p in self.ast.arguments]
 
     @property
     def return_value(self):
+        expression_context = ExpressionContext.in_statement(self.context, declaring=True)
         if self.ast.return_value:
-            return Expression.compile(self.ast.return_value, self.context)
+            return Expression.compile(self.ast.return_value, expression_context)
         else:
             return None
 

@@ -1,7 +1,14 @@
 from collections import namedtuple
 from enum import Enum
 
-Variable = namedtuple("Variable", ["name", "dimensions"])
+
+class Variable(namedtuple("Variable", ["name", "dimensions"])):
+    __slots__ = []
+
+    def as_reference(self):
+        return Reference(self, index_count=0)
+
+
 Reference = namedtuple("Reference", ["variable", "index_count"])
 
 ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])

@@ -3,6 +3,7 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena_impl.interface.block import Block, BlockNode
 from turingarena_impl.interface.callables import CallbackPrototype
+from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.expressions import Expression, SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
@@ -98,7 +99,7 @@ class ReturnStatement(Statement, IntermediateNode):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, self.context)
+        return Expression.compile(self.ast.value, ExpressionContext.in_statement(self.context))
 
     def _get_intermediate_nodes(self):
         yield self

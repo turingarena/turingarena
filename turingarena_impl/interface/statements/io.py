@@ -1,5 +1,7 @@
 import logging
+from abc import abstractmethod
 
+from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
@@ -14,8 +16,9 @@ class ReadWriteStatement(Statement):
 
     @property
     def arguments(self):
+        context = ExpressionContext.in_statement(self.context, declaring=self._is_declaring())
         return [
-            Expression.compile(arg, self.context)
+            Expression.compile(arg, context)
             for arg in self.ast.arguments
         ]
 
@@ -23,9 +26,16 @@ class ReadWriteStatement(Statement):
         for exp in self.arguments:
             yield from exp.validate_reference()
 
+    @abstractmethod
+    def _is_declaring(self):
+        pass
+
 
 class ReadStatement(ReadWriteStatement, IntermediateNode):
     __slots__ = []
+
+    def _is_declaring(self):
+        return True
 
     def _get_intermediate_nodes(self):
         yield self
@@ -52,6 +62,9 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
 
 class WriteStatement(ReadWriteStatement, IntermediateNode):
     __slots__ = []
+
+    def _is_declaring(self):
+        return False
 
     def _get_intermediate_nodes(self):
         yield self

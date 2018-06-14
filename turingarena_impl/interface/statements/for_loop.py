@@ -2,10 +2,11 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block, BlockNode
+from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus, Reference
+from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus, Reference, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +18,20 @@ class ForStatement(Statement, IntermediateNode):
 
     @property
     def index(self):
+        index_context = ExpressionContext.in_statement(self.context, declaring=True)
         return ForIndex(
             variable=Variable(name=self.ast.index, dimensions=0),
-            range=Expression.compile(self.ast.range, self.context),
+            range=Expression.compile(self.ast.range, index_context),
         )
 
     @property
     def body(self):
         return Block(
             ast=self.ast.body,
-            context=self.context.with_index_variable(self.index),
+            context=self.context.with_index_variable(self.index).with_reference_actions([
+                ReferenceAction(self.index.variable.as_reference(), ReferenceStatus.DECLARED),
+                ReferenceAction(self.index.variable.as_reference(), ReferenceStatus.RESOLVED),
+            ]),
         )
 
     def _get_allocations(self):
@@ -74,19 +79,28 @@ class ForStatement(Statement, IntermediateNode):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     def _driver_run(self, context):
+        needed = not self.can_be_grouped or any(
+            a.status is context.phase
+            for a in self.reference_actions
+        )
+        if not needed:
+            logger.debug(f"skipping for (phase: {context.phase})")
+            return
+
+        for_range = self.index.range.evaluate(context.bindings)
+
         assignments_by_iteration = [
             self._body_node.driver_run(context.with_assigments(
                 [(Reference(variable=self.index.variable, index_count=0), i)]
             ))
-            for i in range(self.index.range.evaluate(context.bindings))
+            for i in range(for_range)
         ]
-        return {
-            a.reference: [
-                assignments[a.reference._replace(
-                    index_count=a.reference.index_count + 1,
-                )]
-                for assignments in assignments_by_iteration
-            ]
-            for a in self.reference_actions
-            if a.status is ReferenceStatus.RESOLVED
-        }
+
+        for a in self.reference_actions:
+            if a.status is ReferenceStatus.RESOLVED:
+                yield a.reference, [
+                    assignments[a.reference._replace(
+                        index_count=a.reference.index_count + 1,
+                    )]
+                    for assignments in assignments_by_iteration
+                ]

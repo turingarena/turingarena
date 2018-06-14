@@ -2,6 +2,7 @@ import logging
 import warnings
 
 from turingarena_impl.interface.block import Block, BlockNode
+from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import StatementIntermediateNode, IntermediateNode
@@ -54,7 +55,7 @@ class SwitchStatement(Statement, IntermediateNode):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, self.context)
+        return Expression.compile(self.ast.value, ExpressionContext.in_statement(self.context))
 
     def validate(self):
         yield from self.value.validate()

@@ -2,13 +2,16 @@ int **b;
 int **c;
 int *seq;
 
+int M, N;
+int *X;
+
 void build_sequence(int x, int i, int j) {
     if (i == 0 || j == 0) {
         return;
     }
 
     if (b[i][j] == 1) {
-        seq[x] = X[i - 1];
+        seq[x] = X[i-1];
         build_sequence(x - 1, i - 1, j - 1);
     } else if (b[i][j] == 2) {
         build_sequence(x, i - 1, j);
@@ -17,7 +20,12 @@ void build_sequence(int x, int i, int j) {
     }
 }
 
-int compute(int M, int X, int N, int Y) {
+int compute(int M, int *X, int N, int *Y) {
+    ::M = M;
+    ::N = N;
+
+    ::X = X; // FIXME: should copy instead
+
     b = new int*[M+1];
     c = new int*[M+1];
 
@@ -52,7 +60,7 @@ int compute(int M, int X, int N, int Y) {
     seq = new int[c[M][N]];
     build_sequence(c[M][N] - 1, M, N);
 
-    return c[M][N]
+    return c[M][N];
 }
 
 int element(int i) {

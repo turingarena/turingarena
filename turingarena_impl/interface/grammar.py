@@ -68,7 +68,7 @@ grammar_ebnf = r"""
         ;
     atomic_expression =
         | expression_type:`int_literal` int_literal:int_literal
-        | expression_type:`reference` variable_name:identifier ~ indices:{ subscript }*
+        | expression_type:`reference_subscript` variable_name:identifier ~ indices:{ subscript }*
         | expression_type:`nested` '(' ~ expression:expression ')'
         ;
     
