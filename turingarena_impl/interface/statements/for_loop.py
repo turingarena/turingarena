@@ -18,7 +18,7 @@ class ForStatement(Statement, IntermediateNode):
 
     @property
     def index(self):
-        index_context = ExpressionContext.in_statement(self.context, declaring=True)
+        index_context = self.context.expression(declaring=True)
         return ForIndex(
             variable=Variable(name=self.ast.index, dimensions=0),
             range=Expression.compile(self.ast.range, index_context),

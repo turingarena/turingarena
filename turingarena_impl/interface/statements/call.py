@@ -1,7 +1,7 @@
 import logging
 
 from turingarena import InterfaceError
-from turingarena_impl.interface.context import StaticCallbackBlockContext, ExpressionContext
+from turingarena_impl.interface.context import StaticCallbackBlockContext
 from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import StatementIntermediateNode
@@ -25,14 +25,18 @@ class CallStatement(Statement):
 
     @property
     def arguments(self):
-        expression_context = ExpressionContext.in_statement(self.context)
-        return [Expression.compile(p, expression_context) for p in self.ast.arguments]
+        return [
+            Expression.compile(p, self.context.expression())
+            for p in self.ast.arguments
+        ]
 
     @property
     def return_value(self):
-        expression_context = ExpressionContext.in_statement(self.context, declaring=True)
         if self.ast.return_value:
-            return Expression.compile(self.ast.return_value, expression_context)
+            return Expression.compile(self.ast.return_value, self.context.expression(
+                reference=True,
+                declaring=True,
+            ))
         else:
             return None
 
@@ -92,7 +96,7 @@ class CallStatement(Statement):
     def validate_return_value(self):
         method = self.method
         if self.return_value is not None:
-            yield from self.return_value.validate_reference()
+            yield from self.return_value.validate()
         if method.has_return_value and self.return_value is None:
             yield Diagnostic(
                 Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, method.name,

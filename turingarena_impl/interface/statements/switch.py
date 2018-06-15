@@ -55,7 +55,7 @@ class SwitchStatement(Statement, IntermediateNode):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, ExpressionContext.in_statement(self.context))
+        return Expression.compile(self.ast.value, self.context.expression())
 
     def validate(self):
         yield from self.value.validate()

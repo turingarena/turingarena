@@ -41,13 +41,6 @@ class Expression:
     def validate(self):
         return []
 
-    def validate_reference(self):
-        return []
-
-    def validate_resolved(self):
-        # TODO: implement this check in subclasses? (first, extend expression context)
-        return []
-
 
 class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):
     __slots__ = []
@@ -126,10 +119,6 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
     def _is_declared(self):
         return self._get_referenced_variable() is not None
 
-    def validate_reference(self):
-        # FIXME: the kind of validation should be determined by the context
-        yield from self.validate()
-
 
 class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
     "array",
@@ -157,10 +146,14 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
         except IndexError:
             return None
 
-    def validate_reference(self):
-        yield from self.array.validate_reference()
-        yield from self.validate_index()
+    def validate(self):
+        yield from self.array.validate()
+        yield from self.index.validate()
 
+        if self.context.reference:
+            yield from self._validate_reference_index()
+
+    def _validate_reference_index(self):
         if self.expected_for_index is None:
             yield Diagnostic(
                 Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
@@ -199,12 +192,6 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
                 self.index.evaluate(bindings)
             ]
 
-    def validate(self):
-        yield from self.array.validate()
-
-    def validate_index(self):
-        yield from self.index.validate_resolved()
-
 
 class SyntheticExpression:
     __slots__ = ["expression_type", "__dict__"]
@@ -219,8 +206,13 @@ def compile_subscript(ast, index_asts, context):
         array = compile_subscript(ast, index_asts[:-1], context._replace(
             index_count=context.index_count + 1,
         ))
-        index_ast = index_asts[-1]
-        return SubscriptExpression(array, Expression.compile(index_ast, context), context)
+        index = Expression.compile(index_asts[-1], context._replace(
+            declaring=False,
+            resolved=True,
+            reference=False,
+            index_count=0,
+        ))
+        return SubscriptExpression(array, index, context)
     else:
         return VariableReferenceExpression(ast, context)
 

@@ -65,19 +65,28 @@ class StatementContext(namedtuple("StatementContext", [
     def with_loop(self):
         return self._replace(in_loop=True)
 
+    def expression(self, **kwargs):
+        options = dict(
+            index_count=0,
+            declaring=False,
+            reference=False,
+            resolved=False,
+        )
+        options.update(kwargs)
+        return ExpressionContext(
+            statement_context=self,
+            **options,
+        )
+
 
 class ExpressionContext(namedtuple("ExpressionContext", [
     "statement_context",
     "declaring",
+    "reference",
+    "resolved",
     "index_count",
 ])):
-    @staticmethod
-    def in_statement(statement_context, *, declaring=False):
-        return ExpressionContext(
-            statement_context=statement_context,
-            declaring=declaring,
-            index_count=0,
-        )
+    pass
 
 
 class StaticCallbackBlockContext(namedtuple("StaticCallbackBlockContext", [
