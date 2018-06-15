@@ -46,9 +46,9 @@ def evaluate_test_case(submission, N):
     m = len(x)
     n = len(y)
     with submission.run() as process:
-        l = process.call.compute(m, x, n, y)
+        l = process.functions.compute(m, x, n, y)
         sol = [
-            process.call.element(i)
+            process.functions.element(i)
             for i in range(l)
         ]
         return is_valid_solution(x, y, sol)

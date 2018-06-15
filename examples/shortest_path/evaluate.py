@@ -26,7 +26,7 @@ try:
         A = [g.neighbors(u) for u in g]
         W = [[w for _, _, w in g.edges(u, data="weight")] for u in g]
 
-        p.call.init(N, Q, D, A, W)
+        p.procedures.init(N, Q, D, A, W)
 
         memory_usage = p.sandbox.get_info().memory_usage
         print(f"Memory usage: {memory_usage} bytes")
@@ -41,7 +41,7 @@ try:
             except nx.NetworkXNoPath:
                 r = -1
 
-            res = p.call.shortest_path(u, v)
+            res = p.functions.shortest_path(u, v)
             if res != r:
                 print(f"Wrong! {res} != {r}")
                 cases.append((k, False))

@@ -11,8 +11,8 @@ for _ in range(10):
 
     try:
         with algorithm.run() as process:
-            process.call.sort(n, a)
-            b = [process.call.get_element(i) for i in range(n)]
+            process.procedures.sort(n, a)
+            b = [process.functions.get_element(i) for i in range(n)]
     except AlgorithmError as e:
         print(e)
         all_passed = False

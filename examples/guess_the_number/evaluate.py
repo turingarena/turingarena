@@ -41,7 +41,7 @@ def compute_fixed(correct):
             else:
                 return 1  # too high
 
-        player_answer = process.call.play(N, guess=guess)
+        player_answer = process.functions.play(N, guess=guess)
         return player_answer == correct, number_of_guess
 
 
@@ -62,7 +62,7 @@ def compute_moving():
                 max_value = min(max_value, n - 1)
                 return 1  # too high
 
-        player_answer = process.call.play(N, guess=guess)
+        player_answer = process.functions.play(N, guess=guess)
         return min_value == max_value and player_answer == min_value, number_of_guess
 
 

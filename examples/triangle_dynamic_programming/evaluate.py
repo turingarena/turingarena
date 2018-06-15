@@ -29,7 +29,7 @@ V = [
 right = solve(V)
 
 with algorithm.run() as process:
-    S = process.call.find_best_sum(len(V), V)
+    S = process.functions.find_best_sum(len(V), V)
 
 if right == S:
     print("correct!")

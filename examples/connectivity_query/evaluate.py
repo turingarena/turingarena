@@ -25,7 +25,7 @@ fail = False
 
 try:
     with algorithm.run() as p:
-        p.call.init(N, Q, D, adj)
+        p.procedures.init(N, Q, D, adj)
 
         memory_usage = p.sandbox.get_info().memory_usage
 
@@ -34,7 +34,7 @@ try:
             while u == v:
                 u, v = random.randint(0, N - 1), random.randint(0, N - 1)
 
-            connected = bool(p.call.is_there_a_path(u, v))
+            connected = bool(p.functions.is_there_a_path(u, v))
             if nx.has_path(graph, u, v) == connected:
                 cases.append((t, True))
             else:

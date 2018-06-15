@@ -94,8 +94,6 @@ class AlgorithmProcess(AlgorithmSection):
         self.procedures = MethodProxy(self._engine, has_return_value=False)
         self.functions = MethodProxy(self._engine, has_return_value=True)
 
-        self.call = self.functions  # FIXME: for partial compatibility
-
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection()
         return section_info.run(self.sandbox, time_limit=time_limit)
