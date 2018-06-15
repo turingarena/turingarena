@@ -23,7 +23,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def body(self):
         # TODO: generate block if body is None ('default' is specified)
         inner_context = self.context.local_context.with_reference_actions(
-            ReferenceAction(reference=Reference(variable=p, index_count=0), status=ReferenceStatus.DECLARED)
+            ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
             for p in self.parameters
         )
         return Block(
@@ -88,7 +88,7 @@ class CallbackCallNode(StatementIntermediateNode):
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             for p in self.statement.parameters:
-                r = Reference(p, index_count=0)
+                r = p.as_reference()
                 value = context.bindings[r]
                 context.send_driver_upward(value)
 

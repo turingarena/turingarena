@@ -7,7 +7,7 @@ from bidict import frozenbidict
 from turingarena_impl.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.diagnostics import Diagnostic
-from turingarena_impl.interface.variables import Reference, Variable
+from turingarena_impl.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,7 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
 
     @property
     def reference(self):
-        return Reference(
-            variable=self.variable,
-            index_count=0,
-        )
+        return self.variable.as_reference()
 
     def evaluate(self, bindings):
         return bindings[self.reference]

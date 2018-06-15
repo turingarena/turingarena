@@ -2,11 +2,10 @@ import logging
 from collections import namedtuple
 
 from turingarena_impl.interface.block import Block, BlockNode
-from turingarena_impl.interface.context import ExpressionContext
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
 from turingarena_impl.interface.statements.statement import Statement
-from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus, Reference, ReferenceAction
+from turingarena_impl.interface.variables import Variable, Allocation, ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +90,7 @@ class ForStatement(Statement, IntermediateNode):
 
         assignments_by_iteration = [
             self._body_node.driver_run(context.with_assigments(
-                [(Reference(variable=self.index.variable, index_count=0), i)]
+                [(self.index.variable.as_reference(), i)]
             ))
             for i in range(for_range)
         ]
