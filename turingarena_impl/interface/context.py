@@ -86,6 +86,7 @@ class ExpressionContext(namedtuple("ExpressionContext", [
     "resolved",
     "index_count",
 ])):
+    # TODO: wrap all options into an optional field of type ReferenceContext
     pass
 
 
