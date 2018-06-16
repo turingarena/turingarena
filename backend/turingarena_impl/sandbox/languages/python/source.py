@@ -18,7 +18,7 @@ class PythonAlgorithmSource(AlgorithmSource):
         shutil.copy(self.source_path, compilation_dir)
 
         with open(self.skeleton_path(compilation_dir), "w") as f:
-            self.language.skeleton_generator(self.interface).write_to_file(f)
+            self.language.skeleton_generator().generate_to_file(self.interface, f)
 
     @contextmanager
     def run(self, compilation_dir, connection):

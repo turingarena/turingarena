@@ -1,22 +1,64 @@
 from abc import ABC, abstractmethod
-from collections import namedtuple
 
 
-class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
+class CodeGen(ABC):
     __slots__ = []
 
-    def write_to_file(self, file):
-        for line in self.generate():
+    def generate_to_file(self, data, file):
+        for line in self.generate(data):
             if line is None:
                 print("", file=file)
             else:
                 print(line, file=file)
 
-    def generate(self):
-        yield from self.generate_header()
-        yield from self.generate_method_declarations()
-        yield from self.generate_main_block()
-        yield from self.generate_footer()
+    def indent_all(self, lines):
+        for line in lines:
+            yield self.indent(line)
+
+    def indent(self, line):
+        if line is None:
+            return None
+        else:
+            return "    " + line
+
+    @abstractmethod
+    def generate(self, data):
+        yield from None
+
+
+class InterfaceCodeGen(CodeGen):
+    __slots__ = []
+
+    def generate(self, interface):
+        yield from self.generate_header(interface)
+        yield from self.generate_method_declarations(interface)
+        yield from self.generate_main_block(interface)
+        yield from self.generate_footer(interface)
+
+    def generate_header(self, interface):
+        yield from ()
+
+    def generate_footer(self, interface):
+        yield from ()
+
+    def generate_method_declarations(self, interface):
+        for func in interface.methods:
+            yield from self.generate_method_declaration(func)
+
+    @abstractmethod
+    def generate_method_declaration(self, method_declaration):
+        pass
+
+    @abstractmethod
+    def generate_main_block(self, interface):
+        pass
+
+
+class SkeletonCodeGen(InterfaceCodeGen):
+    __slots__ = []
+
+    def generate_main_block(self, interface):
+        yield from self.block_content(interface.main_block, indent=False)
 
     def block_content(self, block, indent=True):
         for statement in block.synthetic_statements:
@@ -40,29 +82,12 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
         method_name = f"{statement.statement_type}_statement"
         yield from getattr(self, method_name)(statement)
 
-    def generate_header(self):
-        yield from ()
-
-    def generate_footer(self):
-        yield from ()
-
-    def generate_method_declarations(self):
-        for func in self.interface.methods:
-            yield from self.generate_method_declaration(func)
-
-    def generate_main_block(self):
-        yield from self.block_content(self.interface.main_block, indent=False)
-
     @abstractmethod
     def generate_variable_allocation(self, variables, indexes, size):
         pass
 
     @abstractmethod
     def generate_variable_declaration(self, declared_variable):
-        pass
-
-    @abstractmethod
-    def generate_method_declaration(self, method_declaration):
         pass
 
     @abstractmethod
@@ -125,14 +150,7 @@ class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
     def int_literal_expression(self, e):
         return str(e.value)
 
-    @staticmethod
-    def indent_all(lines):
-        for line in lines:
-            yield CodeGen.indent(line)
 
-    @staticmethod
-    def indent(line):
-        if line is None:
-            return None
-        else:
-            return "    " + line
+class TemplateCodeGen(InterfaceCodeGen):
+    def generate_main_block(self, interface):
+        yield from ()

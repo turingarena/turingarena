@@ -18,7 +18,7 @@ class CppAlgorithmSource(AlgorithmSource):
 
     def compile(self, compilation_dir):
         with open(os.path.join(compilation_dir, "skeleton.cpp"), "w") as f:
-            self.language.skeleton_generator(self.interface).write_to_file(f)
+            self.language.skeleton_generator().generate_to_file(self.interface, f)
 
         cli = [
             "g++",

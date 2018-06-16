@@ -1,15 +1,14 @@
-from turingarena_impl.sandbox.languages.generator import CodeGen
+from turingarena_impl.sandbox.languages.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
 
 
-class PythonCodeGen(CodeGen):
-    @classmethod
-    def build_method_declaration(cls, func):
+class PythonCodeGen(InterfaceCodeGen):
+    def build_method_declaration(self, func):
         arguments = ', '.join(p.name for p in func.parameters)
         yield f'def {func.name}({arguments}):'
 
 
-class PythonSkeletonCodeGen(PythonCodeGen):
-    def generate_header(self):
+class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
+    def generate_header(self, interface):
         yield 'import _source'
 
     def callback_statement(self, callback_statement):
@@ -109,11 +108,8 @@ class PythonSkeletonCodeGen(PythonCodeGen):
             yield from self.block_content(case.body)
 
 
-class PythonTemplateCodeGen(PythonCodeGen):
+class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
     def generate_method_declaration(self, method_declaration):
         yield
         yield from self.build_method_declaration(method_declaration)
         yield self.indent('pass')
-
-    def generate_main_block(self):
-        yield from ()

@@ -1,7 +1,7 @@
-from turingarena_impl.sandbox.languages.generator import CodeGen
+from turingarena_impl.sandbox.languages.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
 
 
-class CppCodeGen(CodeGen):
+class CppCodeGen(InterfaceCodeGen):
     def build_parameter(self, parameter):
         indirections = "*" * parameter.dimensions
         return f"int {indirections}{parameter.name}"
@@ -20,8 +20,8 @@ class CppCodeGen(CodeGen):
         return self.build_signature(func, func.callbacks)
 
 
-class CppSkeletonCodeGen(CppCodeGen):
-    def generate_header(self):
+class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
+    def generate_header(self, interface):
         yield "#include <cstdio>"
         yield "#include <cstdlib>"
         yield "#include <cassert>"
@@ -40,10 +40,10 @@ class CppSkeletonCodeGen(CppCodeGen):
     def generate_method_declaration(self, method_declaration):
         yield f"{self.build_method_signature(method_declaration)};"
 
-    def generate_main_block(self):
+    def generate_main_block(self, interface):
         yield
         yield "int main() {"
-        yield from self.block_content(self.interface.main_block)
+        yield from self.block_content(interface.main_block)
         yield "}"
 
     def generate_callback(self, callback):
@@ -144,12 +144,9 @@ class CppSkeletonCodeGen(CppCodeGen):
         yield "fflush(stdout);"
 
 
-class CppTemplateCodeGen(CppCodeGen):
+class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
     def generate_method_declaration(self, method_declaration):
         yield
         yield f"{self.build_method_signature(method_declaration)}" " {"
         yield self.indent("// TODO")
         yield "}"
-
-    def generate_main_block(self):
-        yield from ()

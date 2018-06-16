@@ -13,7 +13,7 @@ class JavascriptAlgorithmSource(AlgorithmSource):
 
     def compile(self, compilation_dir):
         with open(self.skeleton_path(compilation_dir), "w") as f:
-            self.language.skeleton_generator(self.interface).write_to_file(f)
+            self.language.skeleton_generator().generate_to_file(self.interface, f)
 
     def skeleton_path(self, compilation_dir):
         return os.path.join(compilation_dir, "skeleton.js")

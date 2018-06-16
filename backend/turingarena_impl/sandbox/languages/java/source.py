@@ -25,7 +25,7 @@ class JavaAlgorithmSource(AlgorithmSource):
 
         skeleton_path = self.skeleton_path(compilation_dir)
         with open(skeleton_path, "w") as f:
-            self.language.skeleton_generator(self.interface).write_to_file(f)
+            self.language.skeleton_generator().generate_to_file(self.interface, f)
 
         try:
             subprocess.run(

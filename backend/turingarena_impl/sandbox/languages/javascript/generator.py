@@ -1,7 +1,7 @@
-from turingarena_impl.sandbox.languages.generator import CodeGen
+from turingarena_impl.sandbox.languages.generator import InterfaceCodeGen, SkeletonCodeGen
 
 
-class JavaScriptCodeGen(CodeGen):
+class JavaScriptCodeGen(InterfaceCodeGen):
     @classmethod
     def build_callable_declarator(cls, callable):
         arguments = ", ".join(cls.build_parameter(p) for p in callable.parameters)
@@ -12,7 +12,7 @@ class JavaScriptCodeGen(CodeGen):
         return f"{parameter.name}"
 
 
-class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
+class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def generate(self):
         yield "async function init() {}"
         yield from self.block_content(self.interface.body)

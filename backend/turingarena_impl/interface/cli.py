@@ -22,8 +22,7 @@ def generate_template_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text)
     language = Language.from_name(args["--language"])
-    generator = language.template_generator(interface)
-    generator.write_to_file(sys.stdout)
+    language.template_generator().generate_to_file(interface, sys.stdout)
 
 
 @docopt_cli
@@ -43,8 +42,7 @@ def generate_skeleton_cli(args):
 
     interface = InterfaceDefinition.compile(interface_text)
     language = Language.from_name(args["--language"])
-    generator = language.skeleton_generator(interface)
-    generator.write_to_file(sys.stdout)
+    language.skeleton_generator().generate_to_file(interface, sys.stdout)
 
 
 @docopt_cli
