@@ -193,11 +193,14 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementCodeGen, ExpressionCodeGen):
         yield from self.block_content(interface.main_block)
 
     def block(self, block):
+        yield
         yield from self.indent_all(self.block_content(block))
+        yield
 
     def block_content(self, block):
-        for statement in block.synthetic_statements:
-            yield
+        for i, statement in enumerate(block.synthetic_statements):
+            if i > 0:
+                yield
             if statement.comment is not None:
                 yield self.line_comment(statement.comment)
             else:
