@@ -1,6 +1,9 @@
 import os
-from contextlib import contextmanager
+import sys
+from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
+
+import subprocess
 
 from turingarena_impl.cli import docopt_cli
 from turingarena_impl.evaluation.python import PythonEvaluator
@@ -39,10 +42,22 @@ def evaluate_cli(args):
 
     Options:
         -e --evaluator=<id>  Evaluator [default: ./evaluate.py]
+        -r --raw  Output events in JSON Lines format.
     """
 
-    with parse_files(args["<files>"], ["source"]) as files:
+    with ExitStack() as stack:
+        if args["--raw"]:
+            output = sys.stdout
+        else:
+            jq = stack.enter_context(subprocess.Popen(
+                ["jq", "-j", ".payload"],
+                stdin=subprocess.PIPE,
+                universal_newlines=True,
+            ))
+            output = jq.stdin
+
+        files = stack.enter_context(parse_files(args["<files>"], ["source"]))
         evaluation = PythonEvaluator(args["--evaluator"]).evaluate(files)
 
         for event in evaluation:
-            print(event)
+            print(event, file=output, flush=True)

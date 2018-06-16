@@ -8,6 +8,7 @@ RUN true \
         g++ \
         gdb \
         git \
+        jq \
         linux-vanilla-dev \
         libseccomp-dev \
         nodejs \

@@ -19,4 +19,8 @@ class PythonEvaluator(namedtuple("PythonEvaluator", ["evaluator_path"])):
     def evaluate(self, submission):
         with ExitStack() as stack:
             env = stack.enter_context(run_metaservers())
-            yield from segi_subprocess(submission, [sys.executable, self.evaluator_path], env=env)
+            yield from segi_subprocess(submission, [
+                sys.executable,
+                "-u",
+                self.evaluator_path,
+            ], env=env)

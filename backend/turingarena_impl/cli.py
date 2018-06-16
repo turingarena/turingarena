@@ -28,7 +28,7 @@ def init_logger(args=None):
     if level_name is None:
         level_name = os.environ.get("TURINGARENA_LOG_LEVEL", None)
     if level_name is None:
-        level_name = "info"
+        level_name = "warning"
     level = getattr(logging, level_name.upper())
 
     coloredlogs.install(

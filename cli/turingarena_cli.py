@@ -6,8 +6,8 @@ import subprocess
 import sys
 
 
-def info(*args):
-    print(*args, file=sys.stderr)
+def info(message):
+    print(message, file=sys.stderr)
 
 
 def turingarena_daemon():
@@ -35,7 +35,7 @@ def turingarena_daemon():
               "TCP-LISTEN:22,fork",
               """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
-    info(*cli)
+    info(str(cli))
     os.execvp("docker", cli)
 
 
@@ -109,7 +109,12 @@ def turingarena_cli():
 
     info("Work dir sent. Running command...")
 
-    subprocess.call(ssh_command + [
+    if sys.stdout.isatty():
+        tty_allocation = ["-t"]
+    else:
+        tty_allocation = ["-T"]
+
+    subprocess.call(ssh_command + tty_allocation + [
         "turingarena@localhost",
         "TURINGARENA_TREE_ID=" + tree_id,
         "TURINGARENA_CURRENT_DIR=" + current_dir,
