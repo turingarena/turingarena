@@ -19,6 +19,9 @@ class CppCodeGen(InterfaceCodeGen):
     def build_method_signature(self, func):
         return self.build_signature(func, func.callbacks)
 
+    def line_comment(self, comment):
+        return f"// {comment}"
+
 
 class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
@@ -43,7 +46,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_main_block(self, interface):
         yield
         yield "int main() {"
-        yield from self.block_content(interface.main_block)
+        yield from self.block(interface.main_block)
         yield "}"
 
     def generate_callback(self, callback):
@@ -54,7 +57,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
-        yield from self.block_content(callback.synthetic_body)
+        yield from self.block(callback.synthetic_body)
         yield "};"
 
     def call_statement_body(self, call_statement):
@@ -97,22 +100,22 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def if_statement(self, statement):
         condition = self.expression(statement.condition)
         yield f"if ({condition})" " {"
-        yield from self.block_content(statement.then_body)
+        yield from self.block(statement.then_body)
         if statement.else_body:
             yield "} else {"
-            yield from self.block_content(statement.else_body)
+            yield from self.block(statement.else_body)
         yield "}"
 
     def for_statement(self, s):
         index_name = s.index.variable.name
         size = self.expression(s.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from self.block_content(s.body)
+        yield from self.block(s.body)
         yield "}"
 
     def loop_statement(self, statement):
         yield "while (true) {"
-        yield from self.block_content(statement.body)
+        yield from self.block(statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -122,10 +125,10 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def switch_statement(self, statement):
         cases = [case for case in statement.cases]
         yield f"if ({self.build_switch_condition(statement.variable, cases[0].labels)}) " "{"
-        yield from self.block_content(cases[0].body)
+        yield from self.block(cases[0].body)
         for case in cases[1:]:
             yield "}" f" else if ({self.build_switch_condition(statement.variable, case.labels)}) " "{"
-            yield from self.block_content(case.body)
+            yield from self.block(case.body)
         yield "}"
 
     def checkpoint_statement(self, statement):

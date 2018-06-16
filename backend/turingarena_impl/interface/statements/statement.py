@@ -48,6 +48,13 @@ class AbstractStatement(ImperativeStructure):
     def _get_intermediate_nodes(self):
         pass
 
+    @property
+    def comment(self):
+        return self._get_comment()
+
+    def _get_comment(self):
+        return None
+
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []
@@ -87,11 +94,15 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
 
 
 class SyntheticStatement(AbstractStatement):
-    __slots__ = ["statement_type", "__dict__"]
+    __slots__ = ["statement_type", "_comment", "__dict__"]
 
-    def __init__(self, statement_type, **kwargs):
+    def __init__(self, statement_type, comment, **kwargs):
         self.statement_type = statement_type
+        self._comment = comment
         self.__dict__ = kwargs
 
     def _get_intermediate_nodes(self):
         return []
+
+    def _get_comment(self):
+        return f"({self._comment})"

@@ -6,7 +6,7 @@ from turingarena_impl.interface.callables import CallbackPrototype
 from turingarena_impl.interface.expressions import Expression, SyntheticExpression
 from turingarena_impl.interface.nodes import IntermediateNode, StatementIntermediateNode
 from turingarena_impl.interface.statements.statement import Statement, SyntheticStatement
-from turingarena_impl.interface.variables import ReferenceAction, ReferenceStatus, Reference, ReferenceDirection
+from turingarena_impl.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 
 class CallbackImplementation(IntermediateNode, CallbackPrototype):
@@ -14,10 +14,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     @property
     def synthetic_body(self):
-        return SyntheticCallbackBody(
-            self.context,
-            self.body,
-        )
+        return SyntheticCallbackBody(self)
 
     @property
     def body(self):
@@ -64,17 +61,18 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         return self.body_node.declaration_directions
 
 
-class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["context", "body"])):
+class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["implementation"])):
     @property
     def synthetic_statements(self):
-        callback_index = self.context.callback_index
-        yield SyntheticStatement("write", arguments=[
-            SyntheticExpression("int_literal", value=1),  # more callbacks
+        callback_index = self.implementation.context.callback_index
+        yield SyntheticStatement("write", "requesting a callback", arguments=[
+            SyntheticExpression("int_literal", value=1),
         ])
-        yield SyntheticStatement("write", arguments=[
+        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
+        yield SyntheticStatement("write", comment, arguments=[
             SyntheticExpression("int_literal", value=callback_index),
         ])
-        yield from self.body.synthetic_statements
+        yield from self.implementation.body.synthetic_statements
 
 
 class CallbackCallNode(StatementIntermediateNode):
