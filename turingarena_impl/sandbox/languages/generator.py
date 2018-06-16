@@ -1,8 +1,9 @@
-class CodeGen:
-    __slots__ = ["interface"]
+from abc import ABC, abstractmethod
+from collections import namedtuple
 
-    def __init__(self, interface):
-        self.interface = interface
+
+class CodeGen(ABC, namedtuple("CodeGen", ["interface"])):
+    __slots__ = []
 
     def write_to_file(self, file):
         for line in self.generate():
@@ -12,94 +13,117 @@ class CodeGen:
                 print(line, file=file)
 
     def generate(self):
-        yield from self.block_content(self.interface.body, indent=False)
+        yield from self.generate_header()
+        yield from self.generate_method_declarations()
+        yield from self.generate_main_block()
+        yield from self.generate_footer()
 
-    def block_content(self, b, indent=True):
-        for s in b.synthetic_statements:
+    def block_content(self, block, indent=True):
+        for statement in block.synthetic_statements:
             if indent:
-                yield from self.indent_all(self.statement(s))
+                yield from self.indent_all(self.generate_statement(statement))
             else:
-                yield from self.statement(s)
+                yield from self.generate_statement(statement)
 
-    def statement(self, s):
-        method_name = f"{s.statement_type}_statement"
-        try:
-            return getattr(self, method_name)(s)
-        except NotImplementedError:
-            return self.any_statement(s)
+    def generate_statement(self, statement):
+        for var in statement.variables_to_declare:
+            yield from self.generate_variable_declaration(var)
 
-    def var_statement(self, s):
-        raise NotImplementedError
+        for allocation in statement.variables_to_allocate:
+            variable = allocation.reference.variable
+            indexes = statement.context.index_variables[-allocation.reference.index_count:]
+            yield from self.generate_variable_allocation(variable, indexes, allocation.size)
 
-    def function_statement(self, s):
-        raise NotImplementedError
+        if statement.needs_flush:
+            yield from self.generate_flush()
 
-    def callback_statement(self, s):
-        raise NotImplementedError
+        method_name = f"{statement.statement_type}_statement"
+        yield from getattr(self, method_name)(statement)
 
-    def init_statement(self, s):
-        raise NotImplementedError
+    def generate_header(self):
+        yield from ()
 
-    def main_statement(self, s):
-        raise NotImplementedError
+    def generate_footer(self):
+        yield from ()
 
-    def read_statement(self, s):
-        raise NotImplementedError
+    def generate_method_declarations(self):
+        for func in self.interface.methods:
+            yield from self.generate_method_declaration(func)
 
-    def write_statement(self, s):
-        raise NotImplementedError
+    def generate_main_block(self):
+        yield from self.block_content(self.interface.main_block, indent=False)
 
-    def checkpoint_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def generate_variable_allocation(self, variables, indexes, size):
+        pass
 
-    def flush_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def generate_variable_declaration(self, declared_variable):
+        pass
 
-    def break_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def generate_method_declaration(self, method_declaration):
+        pass
 
-    def continue_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def generate_flush(self):
+        pass
 
-    def exit_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def read_statement(self, read_statement):
+        pass
 
-    def alloc_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def write_statement(self, write_statement):
+        pass
 
-    def return_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def checkpoint_statement(self, checkpoint_statement):
+        pass
 
-    def call_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def break_statement(self, break_statement):
+        pass
 
-    def if_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def exit_statement(self, exit_statement):
+        pass
 
-    def switch_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def return_statement(self, return_statement):
+        pass
 
-    def case_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def call_statement(self, call_statement):
+        pass
 
-    def for_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def if_statement(self, if_statement):
+        pass
 
-    def loop_statement(self, s):
-        raise NotImplementedError
+    @abstractmethod
+    def switch_statement(self, switch_statement):
+        pass
 
-    def any_statement(self, s):
-        return []
+    @abstractmethod
+    def for_statement(self, for_statement):
+        pass
+
+    @abstractmethod
+    def loop_statement(self, loop_statement):
+        pass
 
     def expression(self, e):
         return getattr(self, f"{e.expression_type}_expression")(e)
 
-    def int_literal_expression(self, e):
-        return f"{e.value}"
+    def subscript_expression(self, e):
+        return f"{self.expression(e.array)}[{self.expression(e.index)}]"
 
     def reference_expression(self, e):
-        subscripts = "".join(f"[{self.expression(index)}]" for index in e.indices)
-        return f"{e.variable_name}{subscripts}"
+        return e.variable_name
+
+    def int_literal_expression(self, e):
+        return str(e.value)
 
     @staticmethod
     def indent_all(lines):

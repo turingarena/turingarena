@@ -1,27 +1,27 @@
 from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 interface_text = """
-    function f1() -> int;
-    function f2() -> int;
-    function f3() -> int;
+    function f1();
+    function f2();
+    function f3();
     
     main {
-        var int operation;
         read operation;
     
-        var int result;
         switch operation {
             case 1 {
-                call f1() -> result;
+                call res = f1();
+                write res;
             }
             case 2 {
-                call f2() -> result;
+                call res = f2();
+                write res;
             }
-            default {
-                call f3() -> result;
+            case 3 {
+                call res = f3();
+                write res;
             }
         }
-        write result;
     }
 """
 

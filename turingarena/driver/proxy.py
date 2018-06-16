@@ -1,9 +1,19 @@
-class InterfaceProxy:
-    def __init__(self, running_process):
-        self._running_process = running_process
+from turingarena.driver.engine import CallRequest
+
+
+class MethodProxy:
+    def __init__(self, engine, has_return_value):
+        self._engine = engine
+        self._has_return_value = has_return_value
 
     def __getattr__(self, item):
-        def method(*args, **kwargs):
-            return self._running_process.call(item, args=args, callbacks=kwargs)
+        def method(*args, callbacks=()):
+            request = CallRequest(
+                method_name=item,
+                arguments=args,
+                has_return_value=self._has_return_value,
+                callbacks=callbacks,
+            )
+            return self._engine.call(request)
 
         return method

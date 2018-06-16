@@ -1,10 +1,12 @@
 import os
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
-from typing import Dict, Generator
+from typing import Dict, Generator, Sequence
 
 from turingarena.algorithm import Algorithm
-from turingarena_impl.interface.exceptions import Diagnostic
+from turingarena_impl.evaluation.environ import env_extension
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
+from turingarena_impl.interface.diagnostics import Diagnostic
 from turingarena_impl.interface.interface import InterfaceDefinition
 from turingarena_impl.sandbox.languages.language import Language
 
@@ -13,7 +15,11 @@ from turingarena_impl.sandbox.languages.language import Language
 def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Algorithm:
     language = Language.from_name(language_name)
 
-    with TemporaryDirectory(dir="/tmp") as tmp_dir:
+    with ExitStack() as stack:
+        metaserver_env = stack.enter_context(run_metaservers())
+        stack.enter_context(env_extension(metaserver_env))
+        tmp_dir = stack.enter_context(TemporaryDirectory())
+
         source_file_name = os.path.join(tmp_dir, f"source{language.extension}")
         interface_file_name = os.path.join(tmp_dir, "interface.txt")
 
@@ -41,17 +47,14 @@ def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator
 
 
 def assert_no_interface_errors(text: str):
-    i = InterfaceDefinition.compile(text)
-    for m in i.validate():
-        print(m.message)
-        raise AssertionError
+    assert_interface_diagnostics(text, [])
 
 
 def assert_interface_error(text: str, error: str, *args: str):
-    i = InterfaceDefinition.compile(text)
     error = Diagnostic.build_message(error, *args)
-    for m in i.validate():
-        print(m)
-        if m.message == error:
-            return
-    raise AssertionError
+    assert_interface_diagnostics(text, [error])
+
+
+def assert_interface_diagnostics(interface_text: str, messages: Sequence[str]):
+    interface = InterfaceDefinition.compile(interface_text)
+    assert [m.message for m in interface.diagnostics()] == messages

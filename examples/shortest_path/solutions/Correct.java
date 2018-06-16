@@ -2,6 +2,10 @@ import java.util.*;
 
 class Solution extends Skeleton {
 
+    int N;
+    int[] D;
+    int[][] A, W;
+
     class Edge implements Comparable {
         public int to;
         public int weight;
@@ -15,6 +19,13 @@ class Solution extends Skeleton {
             Edge o = (Edge) other;
             return o.weight - this.weight;
         }
+    }
+
+    void init(int _N, int _Q, int _D, int _A, int _W) {
+        N = _N;
+        D = _D;
+        A = _A;
+        W = _W;
     }
 
     int dijkstra(int from, int to) {

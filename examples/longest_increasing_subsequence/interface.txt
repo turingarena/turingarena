@@ -1,23 +1,19 @@
-var int n;
-var int[] a;
+// compute sequence
+procedure compute(n, a[]);
 
-function compute();
-function takes(int i) -> int;
-
-init {
-    read n;
-    alloc a : n;
-    for(i : n) {
-        read a[i];
-    }
-}
+// return i-th sequence element
+function takes(i);
 
 main {
-    call compute();
+    read n;
+    for i to n {
+        read a[i];
+    }
 
-    for(i : n) {
-        var int x;
-        call takes(i) -> x;
+    call compute(n, a);
+
+    for i to n {
+        call x = takes(i);
         write x;
     }
 }

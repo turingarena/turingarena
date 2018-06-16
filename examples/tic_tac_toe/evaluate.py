@@ -22,7 +22,7 @@ with algorithm.run(global_variables=dict(
     print(f"Memory usage: {memory_usage} bytes")
 
     number_of_match = NUMBER_OF_MATCH
-    result = p.call.play_first_round()
+    result = p.functions.play_first_round()
     print(result, pos_to_yx(result))
 
 #
@@ -33,16 +33,16 @@ with algorithm.run(global_variables=dict(
 #
 #            first_turn_for_player = result = continue_match = None
 #
-#            p.call.start_new_game()
+#            p.procedures.start_new_game()
 #
 #            first_turn_for_player = random.randint(0,1)
 #
 #            if first_turn_for_player:
-#                result = p.call.play_first_round()
+#                result = p.functions.play_first_round()
 #
 #            continue_match = True
 #            for i in range(4):
 #                if continue_match:
-#                    result = p.call.play_a_round(
+#                    result = p.functions.play_a_round(
 #                            random.randint(0,2), random.randint(0,2))
 #                    continue_match = True

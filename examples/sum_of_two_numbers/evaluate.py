@@ -11,7 +11,7 @@ for _ in range(10):
 
     try:
         with algorithm.run() as process:
-            c = process.call.sum(a, b)
+            c = process.functions.sum(a, b)
         if c == a + b:
             print(f"{a} + {b} --> {c} (correct)")
         else:

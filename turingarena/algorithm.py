@@ -3,6 +3,8 @@ from contextlib import contextmanager, ExitStack
 
 from turingarena import *
 from turingarena.driver.client import SandboxError, DriverClient, DriverProcessClient
+from turingarena.driver.engine import DriverClientEngine
+from turingarena.driver.proxy import MethodProxy
 from turingarena.sandbox.client import SandboxClient, SandboxProcessClient
 
 logger = logging.getLogger(__name__)
@@ -12,10 +14,7 @@ class Algorithm(namedtuple("Algorithm", [
     "source_name", "language_name", "interface_name",
 ])):
     @contextmanager
-    def run(self, global_variables=None, time_limit=None):
-        if global_variables is None:
-            global_variables = {}
-
+    def run(self, time_limit=None):
         with ExitStack() as stack:
             sandbox_dir = os.environ["TURINGARENA_SANDBOX_DIR"]
 
@@ -40,20 +39,16 @@ class Algorithm(namedtuple("Algorithm", [
 
             driver_process_client = DriverProcessClient(driver_process_dir)
 
-            algorithm_process = AlgorithmProcess(
-                sandbox=sandbox_process_client,
-                driver=driver_process_client,
-            )
 
             try:
-                with algorithm_process.run(algorithm_process.sandbox, time_limit):
-                    driver_process_client.send_begin_main(global_variables)
-                    try:
-                        yield algorithm_process
-                    except InterfaceExit:
-                        driver_process_client.send_exit()
-                    else:
-                        driver_process_client.send_end_main()
+                with driver_process_client.connect() as connection:
+                    algorithm_process = AlgorithmProcess(connection)
+                    with algorithm_process.run(time_limit):
+                        try:
+                            yield algorithm_process
+                        except InterfaceExit:
+                            pass
+                        algorithm_process.exit()
             except SandboxError:
                 info = sandbox_process_client.get_info(wait=True)
                 if info.error:
@@ -72,7 +67,13 @@ class AlgorithmSection:
         self.info_after = info_after
 
     @contextmanager
-    def run(self, sandbox, time_limit):
+    def run(self, time_limit):
+        # FIXME: implement time limit
+        yield self
+
+    # FIXME: obsolete
+    @contextmanager
+    def _old_run(self, time_limit):
         info_before = sandbox.get_info()
         yield self
         info_after = sandbox.get_info()
@@ -86,11 +87,12 @@ class AlgorithmSection:
 
 
 class AlgorithmProcess(AlgorithmSection):
-    def __init__(self, *, sandbox, driver):
+    def __init__(self, connection):
         super().__init__()
-        self.sandbox = sandbox
-        self.driver = driver
-        self.call = driver.proxy
+        self._engine = DriverClientEngine(connection)
+
+        self.procedures = MethodProxy(self._engine, has_return_value=False)
+        self.functions = MethodProxy(self._engine, has_return_value=True)
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection()
@@ -102,4 +104,4 @@ class AlgorithmProcess(AlgorithmSection):
             raise MemoryLimitExceeded(info.memory_usage, value)
 
     def exit(self):
-        raise InterfaceExit
+        self._engine.send_exit()

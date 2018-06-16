@@ -35,12 +35,6 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def init_statement(self, statement):
-        yield
-        yield "async function init() {"
-        yield from self.block_content(statement.body)
-        yield "}"
-
     def any_statement(self, statement):
         generators = {
             "checkpoint": lambda: ["print(0);"],
@@ -54,13 +48,13 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         return generators[statement.statement_type]()
 
     def call_statement(self, statement):
-        function_name = statement.function.name
+        method_name = statement.method.name
         parameters = ", ".join(self.expression(p) for p in statement.parameters)
         if statement.return_value is not None:
             return_value = self.expression(statement.return_value)
-            yield f"{return_value} = {function_name}({parameters});"
+            yield f"{return_value} = {method_name}({parameters});"
         else:
-            yield f"{function_name}({parameters});"
+            yield f"{method_name}({parameters});"
 
     def alloc_statement(self, statement):
         for argument in statement.arguments:
@@ -92,9 +86,9 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
         yield from self.block_content(statement.body)
         yield "}"
 
-    def loop_statement(self, s):
+    def loop_statement(self, loop_statement):
         yield "while (true) {"
-        yield from self.block_content(s.body)
+        yield from self.block_content(loop_statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -104,22 +98,22 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen):
             result += f" || {variable} == {self.expression(label)}"
         return result
 
-    def switch_statement(self, s):
-        cases = [case for case in s.cases]
-        yield f"if ({self.build_switch_condition(s.variable, cases[0].labels)}) " "{"
+    def switch_statement(self, switch_statement):
+        cases = [case for case in switch_statement.cases]
+        yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
         yield from self.block_content(cases[0].body)
         for case in cases[1:]:
-            yield "}" f" else if ({self.build_switch_condition(s.variable, case.labels)}) " "{"
+            yield "}" f" else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) " "{"
             yield from self.block_content(case.body)
-        if s.default:
+        if switch_statement.default:
             yield "} else {"
-            yield from self.block_content(s.default)
+            yield from self.block_content(switch_statement.default)
         yield "}"
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
-    def function_statement(self, statement):
+    def generate_method_declaration(self, method_declaration):
         yield
-        yield f"function {self.build_callable_declarator(statement.function)}" + "{"
+        yield f"function {self.build_callable_declarator(method_declaration.function)}" + "{"
         yield self.indent("// TODO")
         yield "}"

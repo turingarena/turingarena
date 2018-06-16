@@ -11,7 +11,7 @@ try:
             p.exit()
 
 
-        c = p.call.ping(pong=pong)
+        p.procedures.ping(callbacks=[pong])
 except AlgorithmError:
     pass
 

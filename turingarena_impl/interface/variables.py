@@ -1,38 +1,18 @@
 from collections import namedtuple
-
-from turingarena_impl.interface.exceptions import Diagnostic
-from turingarena_impl.interface.statement import Statement
-from turingarena_impl.interface.type_expressions import compile_type_expression
+from enum import Enum
 
 
-class Variable(namedtuple("Variable", ["name", "value_type"])):
-    pass
-
-
-class VarStatement(Statement):
+class Variable(namedtuple("Variable", ["name", "dimensions"])):
     __slots__ = []
 
-    @property
-    def type_expression(self):
-        return compile_type_expression(self.ast.type, self.context)
+    def as_reference(self):
+        return Reference(self, index_count=0)
 
-    @property
-    def value_type(self):
-        return self.type_expression.value_type
 
-    @property
-    def variables(self):
-        return tuple(
-            Variable(value_type=self.value_type, name=d.name)
-            for d in self.ast.declarators
-        )
+Reference = namedtuple("Reference", ["variable", "index_count"])
 
-    @property
-    def context_after(self):
-        return self.context.with_variables(self.variables)
+ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])
+ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
+ReferenceAction = namedtuple("ReferenceAction", ["reference", "status"])
 
-    def validate(self):
-        for var in self.variables:
-            if var.name in self.context.variable_mapping.keys():
-                yield Diagnostic(Diagnostic.Messages.VARIABLE_REDECLARED, var.name, parseinfo=self.ast.parseinfo)
-
+Allocation = namedtuple("Allocation", ["reference", "size"])

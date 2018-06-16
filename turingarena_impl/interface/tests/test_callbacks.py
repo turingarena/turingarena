@@ -1,6 +1,6 @@
 from collections import deque
 
-from turingarena_impl.interface.tests.test_utils import define_algorithms, assert_interface_error
+from turingarena_impl.interface.tests.test_utils import define_algorithms
 
 
 def callback_mock(calls, return_values=None):
@@ -16,27 +16,28 @@ def callback_mock(calls, return_values=None):
     return mock
 
 
-def test_callback_no_arguments_cpp():
+def test_callback_no_arguments():
     for algo in define_algorithms(
             interface_text="""
-                callback c() {}
-                function test();
+                procedure test() callbacks {
+                    procedure c();
+                }
+                
                 main {
-                    call test();
+                    call test() callbacks {
+                        procedure c() {}
+                    }
                 }
             """,
             sources={
                 'c++': """
-                    void c();
-                    void test() {
+                    void test(void c()) {
                         c();
                         c();
                     }
                 """,
-                'python': """if True:
-                    from skeleton import c
-                    
-                    def test():
+                'python': """if True:                    
+                    def test(c):
                         c()
                         c()
                 """,
@@ -45,7 +46,7 @@ def test_callback_no_arguments_cpp():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls)
-            p.call.test(c=lambda: c())
+            p.procedures.test(callbacks=[lambda: c()])
 
             assert calls == [
                 (c, ()),
@@ -56,25 +57,27 @@ def test_callback_no_arguments_cpp():
 def test_callback_with_arguments():
     for algo in define_algorithms(
             interface_text="""
-                callback c(int a, int b) {
-                    write a, b;
+                procedure test() callbacks {
+                    procedure c(a, b);
                 }
-                function test();
+                
                 main {
-                    call test();
+                    call test() callbacks {
+                        procedure c(a, b) {
+                            write a, b;
+                        }
+                    }
                 }
             """,
             sources={
                 'c++': """
-                    void c(int a, int b);
-                    void test() {
+                    void test(void c(int a, int b)) {
                         c(1, 2);
                         c(3, 4);
                     }
                 """,
                 'python': """if True:
-                    from skeleton import c
-                    def test():
+                    def test(c):
                         c(1, 2)
                         c(3, 4)
                 """,
@@ -83,7 +86,7 @@ def test_callback_with_arguments():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls)
-            p.call.test(c=lambda a, b: c(a, b))
+            p.procedures.test(callbacks=[lambda a, b: c(a, b)])
 
             assert calls == [
                 (c, (1, 2)),
@@ -94,31 +97,30 @@ def test_callback_with_arguments():
 def test_callback_return_value():
     for algo in define_algorithms(
             interface_text="""
-                callback c(int a) -> int {
-                    write a;
-                    flush;
-                    var int b;
-                    read b;
-                    return b;
+                procedure test() callbacks {
+                    function c(a);
                 }
-                function test();
                 main {
-                    call test();
+                    call test() callbacks {
+                        function c(a) {
+                            write a;
+                            read b;
+                            return b;
+                        }
+                    }
                     checkpoint;
                 }
             """,
             sources={
                 'c++': """
                     #include <cassert>
-                    int c(int a);
-                    void test() {
+                    void test(int c(int a)) {
                         assert(c(1) == 2);
                         assert(c(3) == 4);
                     }
                 """,
                 'python': """if True:
-                    from skeleton import c
-                    def test():
+                    def test(c):
                         assert c(1) == 2
                         assert c(3) == 4
                 """
@@ -127,7 +129,7 @@ def test_callback_return_value():
         with algo.run() as p:
             calls = []
             c = callback_mock(calls, [2, 4])
-            p.call.test(c=lambda a: c(a))
+            p.procedures.test(callbacks=[lambda a: c(a)])
 
             assert calls == [
                 (c, (1,)),
@@ -135,20 +137,12 @@ def test_callback_return_value():
             ]
 
 
-def test_callback_returns_scalar():
-    assert_interface_error("""
-        callback f(int a) -> /*!*/ int[] /*!*/ {}  
-        main {}
-    """, "return type must be a scalar")
-
-
 def test_interface_no_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                function test() -> int;
+                function test();
                 main {
-                    var int o;
-                    call test() -> o;
+                    call o = test();
                     write o;
                 }
             """,
@@ -165,34 +159,32 @@ def test_interface_no_callbacks():
             },
     ):
         with algo.run() as p:
-            assert p.call.test() == 1
+            assert p.functions.test() == 1
 
 
 def test_interface_one_callback():
     for algo in define_algorithms(
             interface_text="""
-                callback cb() {}
-                function test() -> int;
+                function test() callbacks {
+                    procedure cb();
+                }
                 main {
-                    var int o;
-                    call test() -> o;
+                    call o = test() callbacks {
+                        procedure cb() {}
+                    }
                     write o;
                 }
             """,
             sources={
                 'c++': """
-                    void cb();
-                    
-                    int test() {
+                    int test(void cb()) {
                         cb();
                         cb();
                         return 1;
                     }
                 """,
                 'python': """if True:
-                    from skeleton import cb
-                    
-                    def test():
+                    def test(cb):
                         cb()
                         cb()
                         return 1
@@ -202,7 +194,7 @@ def test_interface_one_callback():
         with algo.run() as p:
             calls = []
             cb = callback_mock(calls)
-            assert p.call.test(cb=cb) == 1
+            assert p.functions.test(callbacks=[cb]) == 1
             assert calls == [
                 (cb, ()),
                 (cb, ()),
@@ -212,21 +204,22 @@ def test_interface_one_callback():
 def test_interface_multiple_callbacks():
     for algo in define_algorithms(
             interface_text="""
-                callback cb1() {}
-                callback cb2() {}
-                function test() -> int;
+                function test() callbacks {
+                    procedure cb1();
+                    procedure cb2();
+                }
+                    
                 main {
-                    var int o;
-                    call test() -> o;
+                    call o = test() callbacks {
+                        procedure cb1() {}
+                        procedure cb2() {}
+                    }
                     write o;
                 }
             """,
             sources={
                 'c++': """
-                    void cb1();
-                    void cb2();
-                    
-                    int test() {
+                    int test(void cb1(), void cb2()) {
                         cb1();
                         cb2();
                         cb2();
@@ -235,8 +228,7 @@ def test_interface_multiple_callbacks():
                     }
                 """,
                 'python': """if True:
-                    from skeleton import cb1, cb2
-                    def test():
+                    def test(cb1, cb2):
                         cb1()
                         cb2()
                         cb2()
@@ -249,7 +241,7 @@ def test_interface_multiple_callbacks():
             calls = []
             cb1 = callback_mock(calls)
             cb2 = callback_mock(calls)
-            assert p.call.test(cb1=cb1, cb2=cb2) == 1
+            assert p.functions.test(callbacks=[cb1, cb2]) == 1
             assert calls == [
                 (cb1, ()),
                 (cb2, ()),

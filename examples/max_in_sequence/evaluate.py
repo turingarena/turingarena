@@ -10,7 +10,7 @@ for _ in range(10):
 
     try:
         with algorithm.run() as process:
-            index = process.call.max_index(len(a), a)
+            index = process.functions.max_index(len(a), a)
         if a[index] == max(a):
             print("correct!")
         else:

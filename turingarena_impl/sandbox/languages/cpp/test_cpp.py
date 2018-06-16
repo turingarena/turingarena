@@ -6,10 +6,9 @@ from turingarena import AlgorithmRuntimeError
 from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 protocol_text = """
-    function test() -> int;
+    function test();
     main {
-        var int o;
-        call test() -> o;
+        call o = test();
         write o;
     }
 """
@@ -109,7 +108,7 @@ def test_memory_limit_static():
 
 
 def test_memory_limit_malloc():
-    should_succeed(r"""
+    should_raise(r"""
         #include <cstdlib>
         #include <cstring>
         #include <cassert>
@@ -118,7 +117,7 @@ def test_memory_limit_malloc():
             char* a = (char*) malloc(size);
             assert(a == NULL);
         }
-    """)
+    """, signal.SIGSYS)
 
 
 def test_memory_limit_new():
@@ -136,15 +135,13 @@ def test_segmentation_fault():
 def test_get_time_memory_usage():
     with define_algorithm(
             interface_text="""
-                function test(int i) -> int;
+                function test(i);
                 main {
-                    var int i1, i2, o1, o2;
                     read i1;
-                    call test(i1) -> o1;
+                    call o1 = test(i1);
                     write o1;
-                    flush;
                     read i2;
-                    call test(i2) -> o2;
+                    call o2 = test(i2);
                     write o2;
                 }
             """,

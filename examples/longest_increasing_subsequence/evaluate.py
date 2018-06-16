@@ -5,9 +5,9 @@ from turingarena import *
 
 
 def run(algorithm, a, time_limit=None):
-    with algorithm.run(dict(n=len(a), a=a), time_limit=time_limit) as process:
-        process.call.compute()
-        subsequence = [x for i, x in enumerate(a) if process.call.takes(i)]
+    with algorithm.run(time_limit=time_limit) as process:
+        process.procedures.compute(len(a) ,a)
+        subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
     print(f"Time usage: {process.time_usage}", file=sys.stderr)
     return subsequence
 

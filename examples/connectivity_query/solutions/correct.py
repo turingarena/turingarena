@@ -1,5 +1,7 @@
-
-from skeleton import N, adj
+def init(_N, _Q, _D, _adj):
+    global N, adj
+    N = _N
+    adj = _adj
 
 def DFS(u, v, a):
     a[u] = True

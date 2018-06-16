@@ -38,8 +38,9 @@ class PipeBoundary:
     def open_pipe(self, descriptor, side):
         path = self.pipe_path(descriptor)
         flags = descriptor.flags[side.value]
-        # logger.debug(f"open({repr(path)}, {repr(flags)})")
+        logger.debug(f"open({repr(path)}, {repr(flags)})")
         with open(path, flags, buffering=2 ** 16) as pipe:
+            logger.debug("OK")
             yield pipe
 
     def create_channel(self, descriptor):

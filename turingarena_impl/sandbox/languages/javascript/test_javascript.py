@@ -1,13 +1,14 @@
 import pytest
 
 from turingarena import AlgorithmRuntimeError
+from turingarena.algorithm import Algorithm
 from turingarena_impl.interface.tests.test_utils import define_algorithm
+from turingarena_impl.sandbox.languages import javascript
 
 interface_text = """
-    function test() -> int;
+    function test();
     main {
-        var int o;
-        call test() -> o;
+        call o = test();
         write o;
     }
 """
@@ -54,17 +55,16 @@ def test_loop():
 def test_multiple_reads():
     with Algorithm.load(
             interface_text="""
-                function f(int a, int b) -> int;
+                function f(a, b);
                 main {
-                    var int a, b, c;
                     read a;
                     read b;
-                    call f(a, b) -> c;
+                    call c = f(a, b);
                     write c;
                 }
             """,
             language=javascript.language,
-            source_text="function f(a, b) { return 1; }"
+            source_text="function f(a, b) { return a + b; }"
     ) as algo:
         with algo.run() as process:
-            assert process.call.f(2, 5) == 1
+            assert process.call.f(2, 5) == 7

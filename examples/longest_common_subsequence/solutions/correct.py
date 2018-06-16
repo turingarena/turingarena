@@ -1,11 +1,7 @@
-from skeleton import M, X, N, Y
-
 s = []
-l = 0
 
-
-def compute():
-    global l, s
+def compute(M, X, N, Y):
+    global s
     b = [[0 for _ in range(M + 1)] for _ in range(N + 1)]
     c = [[0 for _ in range(M + 1)] for _ in range(N + 1)]
     for i in range(1, M + 1):
@@ -32,8 +28,6 @@ def compute():
         else:
             j -= 1
 
-
-def length():
     return l
 
 

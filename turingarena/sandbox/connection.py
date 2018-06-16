@@ -5,7 +5,6 @@ from turingarena.pipeboundary import PipeChannelDescriptor, PipeDescriptor, Pipe
 
 logger = logging.getLogger(__name__)
 
-SandboxConnection = namedtuple("SandboxConnection", ["request", "response"])
 SandboxProcessConnection = namedtuple("SandboxProcessConnection", ["downward", "upward"])
 
 SANDBOX_QUEUE = PipeSynchronousQueueDescriptor(

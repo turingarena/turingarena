@@ -1,9 +1,11 @@
-callback pong() {
-    exit;
+procedure ping() callbacks {
+    procedure pong();
 }
 
-function ping();
-
 main {
-    call ping();
+    call ping() callbacks {
+        procedure pong() {
+            exit;
+        }
+    }
 }

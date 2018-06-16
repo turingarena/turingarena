@@ -1,7 +1,5 @@
 // evaluation_assert not data["goals"]["ponged"]
 
-void pong();
-
-void ping() {
+void ping(void pong()) {
     // pong();
 }

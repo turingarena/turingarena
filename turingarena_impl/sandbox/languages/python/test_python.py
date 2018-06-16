@@ -2,10 +2,9 @@ from turingarena_impl.interface.tests.test_utils import define_algorithm
 
 
 interface_text = """
-    function test() -> int;
+    function test();
     main {
-        var int o;
-        call test() -> o;
+        call o = test();
         write o;
     }
 """
