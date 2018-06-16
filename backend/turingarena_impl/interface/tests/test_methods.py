@@ -24,6 +24,7 @@ def test_method_no_arguments():
     ):
         with algo.run() as p:
             p.procedures.f()
+            p.checkpoint()
 
 
 def test_method_with_arguments():
@@ -51,6 +52,7 @@ def test_method_with_arguments():
     ):
         with algo.run() as p:
             p.procedures.f(1, 2)
+            p.checkpoint()
 
 
 def test_method_return_value():
@@ -103,7 +105,7 @@ def test_multiple_function_return_value():
     ) as algo:
         with algo.run() as p:
             for i in range(10):
-                assert p.call.sum(i, i) == 2 * i
+                assert p.functions.sum(i, i) == 2 * i
 
 
 def test_callback_accept_scalars():

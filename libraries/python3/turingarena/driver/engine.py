@@ -68,7 +68,12 @@ class DriverClientEngine:
             self.send_request(0)
 
     def send_exit(self):
-        return self.send_request("exit")
+        self.send_request("exit")
+
+    def send_checkpoint(self):
+        self.send_request("checkpoint")
+        response = self.get_response_line()
+        assert response == 0
 
     def send_request(self, line):
         logging.debug(f"sending request line: {line}")

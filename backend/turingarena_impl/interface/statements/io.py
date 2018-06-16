@@ -1,6 +1,7 @@
 import logging
 from abc import abstractmethod
 
+from turingarena import InterfaceError
 from turingarena_impl.interface.exceptions import CommunicationBroken
 from turingarena_impl.interface.expressions import Expression
 from turingarena_impl.interface.nodes import IntermediateNode
@@ -97,7 +98,11 @@ class CheckpointStatement(Statement, IntermediateNode):
         return []
 
     def _driver_run(self, context):
-        # TODO: in the declare phase, process the checkpoint request
+        if context.phase is ReferenceStatus.DECLARED:
+            command = context.receive_driver_downward()
+            if not command == "checkpoint":
+                raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
+            context.send_driver_upward(0)
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             if values != (0,):

@@ -103,5 +103,8 @@ class AlgorithmProcess(AlgorithmSection):
         if info.memory_usage > value:
             raise MemoryLimitExceeded(info.memory_usage, value)
 
+    def checkpoint(self):
+        self._engine.send_checkpoint()
+
     def exit(self):
         self._engine.send_exit()
