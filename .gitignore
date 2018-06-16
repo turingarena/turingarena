@@ -1,10 +1,12 @@
 /.idea/
 node_modules/
-/site
+/backend/site
 .dockerignore
 .serverless
+.pytest_cache
+
 # just for Serverless plugins, not a Web project
-/package-lock.json
+/backend/package-lock.json
 
 #### FROM: https://github.com/github/gitignore/blob/master/Python.gitignore
 
