@@ -15,4 +15,4 @@ try:
 except AlgorithmError:
     pass
 
-evaluation_result(goals=dict(ponged=ponged))
+evaluation_data(dict(goals=dict(ponged=ponged)))

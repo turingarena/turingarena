@@ -73,9 +73,5 @@ def evaluation_data(*data):
     sys.stdout.flush()
 
 
-def evaluation_result(**data):
-    evaluation_data(data)
-
-
 class InterfaceError(Exception):
     pass

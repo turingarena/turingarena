@@ -9,7 +9,8 @@ int* D; // node degree
 int** A; // adjacency
 int** W; // weights
 
-void init(int _N, int _Q, int _D, int _A, int _W) {
+void init(int _N, int _Q, int* _D, int** _A, int** _W) {
+    // FIXME: should copy instead (?)
     N = _N;
     D = _D;
     A = _A;

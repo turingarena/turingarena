@@ -22,4 +22,4 @@ for _ in range(10):
         print("WRONG!")
         all_passed = False
 
-evaluation_result(goals=dict(correct=all_passed))
+evaluation_data(dict(goals=dict(correct=all_passed)))

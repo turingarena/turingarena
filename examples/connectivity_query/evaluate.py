@@ -35,15 +35,10 @@ try:
                 u, v = random.randint(0, N - 1), random.randint(0, N - 1)
 
             connected = bool(p.functions.is_there_a_path(u, v))
-            if nx.has_path(graph, u, v) == connected:
-                cases.append((t, True))
-            else:
-                cases.append((t, False))
+
+            evaluation_data(dict(goals={
+                f"case {t}:": nx.has_path(graph, u, v) == connected
+            }))
             print(f"Nodes {u} {v} -> {connected}")
 except AlgorithmError:
     fail = True
-
-evaluation_result(goals={
-    f"case {i}:": "ok" if ok else "wrong"
-    for i, ok in cases
-})

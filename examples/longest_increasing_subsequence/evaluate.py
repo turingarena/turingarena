@@ -60,7 +60,7 @@ def main():
             if not correct:
                 for g in gs:
                     goals[g] = False
-    evaluation_result(goals=goals)
+    evaluation_data(dict(goals=goals))
 
 
 def optimal_subsequence_exponential(a):

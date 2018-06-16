@@ -21,15 +21,13 @@ for u, v, d in g.edges(data=True):
 print("running algorithm")
 
 try:
+    all_correct = True
     with algorithm.run() as p:
         D = [g.degree(u) for u in g]
         A = [g.neighbors(u) for u in g]
         W = [[w for _, _, w in g.edges(u, data="weight")] for u in g]
 
         p.procedures.init(N, Q, D, A, W)
-
-        memory_usage = p.sandbox.get_info().memory_usage
-        print(f"Memory usage: {memory_usage} bytes")
 
         for k in range(Q):
             u = v = None
@@ -44,15 +42,12 @@ try:
             res = p.functions.shortest_path(u, v)
             if res != r:
                 print(f"Wrong! {res} != {r}")
-                cases.append((k, False))
             else:
                 print("ok")
-                cases.append((k, True))
-
+            all_correct &= res == r
 except AlgorithmError:
-    correct = False
+    all_correct = False
 
-evaluation_result(goals={
-    f"case {i}:": "ok" if ok else "wrong"
-    for i, ok in cases
-})
+evaluation_data(dict(goals={
+    "correct": all_correct,
+}))
