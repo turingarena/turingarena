@@ -78,7 +78,7 @@ class ProblemSolutionTestFile(pytest.File):
 def pytest_collect_file(path, parent):
     solutions_dir, source_filename = os.path.split(path)
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
-    evaluator_path = os.path.join(problem_dir, "evaluate.py")
+    evaluator_path = os.path.join(problem_dir, "evaluator.py")
 
     if solutions_dirname != "solutions": return
 
