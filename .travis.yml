@@ -7,6 +7,12 @@ services:
 cache: yarn
 
 script:
+  - wget -O - https://bootstrap.pypa.io/get-pip.py | python - --no-setuptools --no-wheel
+  - pip install --upgrade setuptools twine wheel
+  - cd cli/
+  - python setup.py sdist
+  - twine upload dist/*
+
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - >
     docker build
@@ -38,9 +44,3 @@ deploy:
   verbose: true
   on:
     branch: master
-- provider: pypi
-  before_deploy: cd cli/
-  user: $PYPI_USER
-  password: $PYPI_PASSWORD
-  on:
-    branch: develop
