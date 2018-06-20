@@ -6,7 +6,7 @@
 
 * define challenges which require an algorithmic solution;
 * get/provide automatic evaluation of submitted solutions for an immidiate feedback to the problem recipient (student, class, employee/user/costumer to be trained/evaluated upon some competences), or for problem/system testing for the problem maker or proposer (teacher, trainer, advisor), or for student/team evaluation purposes;
-* allow and organize the immidiate use, the shared development, the publication and the promoting of the problem with possibly an eye to the respecting of the paternity and intellectual property of the problems that we fully recognize as forms of valuable content (we ourselves started this up as problem developers as part of our service for the italian olympiads in informatics and within our classes). 
+* allow and organize the immediate use, the shared development, the publication and the promoting of the problem with possibly an eye to the respecting of the paternity and intellectual property of the problems that we fully recognize as forms of valuable content (we ourselves started this up as problem developers as part of our service for the italian olympiads in informatics and within our classes).
 
 Some of the innovative features are:
 
@@ -37,19 +37,21 @@ used internally to send data to and from the CLI server.
 
 ### Installation
 
-1. Clone this repository.
+Install the CLI client:
 ```bash
-git clone https://github.com/turingarena/turingarena.git
+sudo pip3 install turingarena-cli
 ```
-2. `cd` into the cloned repository directory
+
+## Upgrading
+
+Upgrade the CLI client:
 ```bash
-cd turingarena/
+sudo pip3 install -U turingarena-cli
 ```
-3. Install the CLI client
-(you may prefer to use a *virtualenv* or the `--user` option to install for the current user only, see
-[this tutorial](https://packaging.python.org/tutorials/installing-packages/#installing-from-a-local-src-tree))
+
+Update the Docker image:
 ```bash
-sudo pip install -e .
+sudo docker pull turingarena/turingarena
 ```
 
 ### Usage
@@ -70,22 +72,15 @@ turingarena evaluate path/to/solution.cpp
 
 ## First tests (running the example problems)
 
-1. `cd` into any of the example problem directories. Example:
+1. Clone this repository.
+```bash
+git clone https://github.com/turingarena/turingarena.git
+```
+2. `cd` into any of the example problem directories. Example:
 ```bash
 cd examples/sum_of_two_numbers/
 ```
-2. Evaluate a solution, say, `correct.cpp`:
+3. Evaluate a solution, say, `correct.cpp`:
 ```bash
 turingarena evaluate solutions/correct.cpp
-```
-3. Test all the provided solutions:
-```bash
-turingarena test
-```
-
-## Update the Docker image
-
-Run the following regularly, to update the server.
-```bash
-sudo docker pull turingarena/turingarena
 ```
