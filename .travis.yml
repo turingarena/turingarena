@@ -15,10 +15,9 @@ git:
 jobs:
   include:
     - script:
-      - wget -O - https://bootstrap.pypa.io/get-pip.py | python - --no-setuptools --no-wheel
       - pip install --upgrade setuptools twine wheel
       - cd cli/
-      - python setup.py sdist
+      - python setup.py bdist_wheel
       - twine upload dist/*
     - script: ./deploy
       - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
