@@ -28,7 +28,7 @@ script:
     test /usr/local/turingarena/turingarena
 
 deploy:
-  provider: pages
+- provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN
   keep-history: false
@@ -38,3 +38,9 @@ deploy:
   verbose: true
   on:
     branch: master
+- provider: pypi
+  before_deploy: cd cli/
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
+  on:
+    branch: develop
