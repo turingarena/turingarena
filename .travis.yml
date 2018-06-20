@@ -9,41 +9,46 @@ services:
 
 cache: yarn
 
-script:
-  - wget -O - https://bootstrap.pypa.io/get-pip.py | python - --no-setuptools --no-wheel
-  - pip install --upgrade setuptools twine wheel
-  - cd cli/
-  - python setup.py sdist
-  - twine upload dist/*
+git:
+  depth: 9999999 # needed for automatic versioning
 
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - >
-    docker build
-    -t turingarena/turingarena-base:$TRAVIS_BRANCH
-    -f Dockerfile.base
-    .
-  - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
-  - >
-    docker build
-    --network none
-    --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
-    -t turingarena/turingarena:$TRAVIS_BRANCH
-    .
-  - docker push turingarena/turingarena:$TRAVIS_BRANCH
-  - >
-    docker run
-    --rm
-    turingarena/turingarena:$TRAVIS_BRANCH
-    test /usr/local/turingarena/turingarena
+jobs:
+  include:
+    - script:
+      - wget -O - https://bootstrap.pypa.io/get-pip.py | python - --no-setuptools --no-wheel
+      - pip install --upgrade setuptools twine wheel
+      - cd cli/
+      - python setup.py sdist
+      - twine upload dist/*
+    - script: ./deploy
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - >
+        docker build
+        -t turingarena/turingarena-base:$TRAVIS_BRANCH
+        -f Dockerfile.base
+        .
+      - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
+      - >
+        docker build
+        --network none
+        --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
+        -t turingarena/turingarena:$TRAVIS_BRANCH
+        .
+      - docker push turingarena/turingarena:$TRAVIS_BRANCH
+      - >
+        docker run
+        --rm
+        turingarena/turingarena:$TRAVIS_BRANCH
+        test /usr/local/turingarena/turingarena
 
 deploy:
-- provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  keep-history: false
-  local-dir: web/build/
-  repo: turingarena/demo
-  target-branch: master
-  verbose: true
-  on:
-    branch: master
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    keep-history: false
+    local-dir: web/build/
+    repo: turingarena/demo
+    target-branch: master
+    verbose: true
+    on:
+      branch: master
