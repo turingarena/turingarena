@@ -19,7 +19,7 @@ jobs:
       - cd cli/
       - python setup.py bdist_wheel
       - twine upload dist/*
-    - script: ./deploy
+    - script:
       - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - >
         docker build
