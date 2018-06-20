@@ -35,21 +35,14 @@ used to run the CLI server
 - **Git** ([how to install](https://git-scm.com/download/linux)),
 used internally to send data to and from the CLI server.
 
-### Installation
+### Install / Upgrade
 
-Install the CLI client:
-```bash
-sudo pip3 install turingarena-cli
-```
-
-## Upgrading
-
-Upgrade the CLI client:
+Install / upgrade the CLI client:
 ```bash
 sudo pip3 install -U turingarena-cli
 ```
 
-Update the Docker image:
+Install / upgrade the server (Docker image):
 ```bash
 sudo docker pull turingarena/turingarena
 ```
@@ -70,7 +63,7 @@ To evaluate a solution, `cd` in the directory of the problem and run:
 turingarena evaluate path/to/solution.cpp
 ```
 
-## First tests (running the example problems)
+### First tests (running the example problems)
 
 1. Clone this repository.
 ```bash
