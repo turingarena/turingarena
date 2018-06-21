@@ -99,6 +99,7 @@ class CheckpointStatement(Statement, IntermediateNode):
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
+            context.handle_info_requests()
             command = context.receive_driver_downward()
             if not command == "checkpoint":
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")

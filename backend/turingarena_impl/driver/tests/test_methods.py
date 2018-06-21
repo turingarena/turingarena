@@ -1,5 +1,5 @@
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
+from turingarena_impl.driver.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
 
 
 def test_method_no_arguments():

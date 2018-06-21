@@ -1,5 +1,5 @@
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.tests.test_utils import assert_interface_error
+from turingarena_impl.driver.tests.test_utils import assert_interface_error
 
 
 def test_call_not_defined():

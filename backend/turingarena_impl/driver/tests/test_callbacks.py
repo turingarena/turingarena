@@ -1,6 +1,6 @@
 from collections import deque
 
-from turingarena_impl.driver.interface.tests.test_utils import define_algorithms
+from turingarena_impl.driver.tests.test_utils import define_algorithms
 
 
 def callback_mock(calls, return_values=None):

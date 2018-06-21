@@ -1,17 +1,20 @@
 import logging
+import threading
 from contextlib import ExitStack, contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
 from turingarena.algorithm import Algorithm
+from turingarena.driver.connection import DRIVER_PROCESS_CHANNEL, DriverProcessConnection, SANDBOX_QUEUE, \
+    SANDBOX_PROCESS_CHANNEL, SANDBOX_REQUEST_QUEUE, SandboxProcessConnection
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PROCESS_CHANNEL, \
-    SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
+from turingarena.driver.client import SandboxProcessClient
+from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
-from turingarena_impl.metaserver import MetaServer
 from turingarena_impl.driver.language import Language
 from turingarena_impl.driver.sandbox.process import CompilationFailedProcess
 from turingarena_impl.driver.source import AlgorithmSource, CompilationFailed
+from turingarena_impl.metaserver import MetaServer
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,7 @@ class SandboxServer(MetaServer):
 
     @contextmanager
     def run_child_server(self, child_server_dir, *, language_name, source_name, interface_name):
+        logger.debug("Running sandbox process (server)...")
         algorithm = Algorithm(language_name=language_name, source_name=source_name, interface_name=interface_name)
         server = SandboxProcessServer(
             algorithm=algorithm,
@@ -64,12 +68,16 @@ class SandboxServer(MetaServer):
 
 class SandboxProcessServer:
     def __init__(self, *, sandbox_dir, algorithm, meta_server):
+        logger.debug("Creating SandboxProcessServer...")
         self.algorithm = algorithm
         self.meta_server = meta_server
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
         self.boundary.create_queue(SANDBOX_REQUEST_QUEUE)
+        self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
+
+        self.interface = InterfaceDefinition.load(algorithm.interface_name)
 
         self.done = False
         self.process = None
@@ -77,13 +85,36 @@ class SandboxProcessServer:
         self.process_exit_stack = ExitStack()
 
     def run(self):
-        with self.process_exit_stack:
-            self.start_process()
-            self.handle_requests()
+        with self.process_exit_stack as stack:
+            sandbox_connection = self.start_process_and_connect()
+
+            pipes = stack.enter_context(self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER))
+            driver_connection = DriverProcessConnection(**pipes)
+
+            context = NodeExecutionContext(
+                bindings={},
+                phase=None,
+                direction=None,
+                process=self.process,
+                driver_connection=driver_connection,
+                sandbox_connection=sandbox_connection,
+            )
+            self.interface.run_driver(context)
 
         logger.debug("process terminated")
 
-    def start_process(self):
+    def start_process_and_connect(self):
+        thread = threading.Thread(target=self._do_start_process)
+        thread.start()
+        logger.debug("connecting to process...")
+        sandbox_process_client = SandboxProcessClient(self.boundary.directory)
+        sandbox_connection = self.process_exit_stack.enter_context(
+            sandbox_process_client.connect()
+        )
+        thread.join()
+        return sandbox_connection
+
+    def _do_start_process(self):
         logger.debug("starting process...")
 
         with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
@@ -96,9 +127,6 @@ class SandboxProcessServer:
                 self.process_exit_stack.callback(self.terminate_process)
             else:
                 self.process = CompilationFailedProcess()
-
-    def terminate_process(self):
-        return self.process.get_status(wait=True)
 
     def handle_requests(self):
         while not self.done:

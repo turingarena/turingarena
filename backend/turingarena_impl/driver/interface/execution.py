@@ -15,16 +15,16 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "direction",
     "phase",
+    "process",
     "driver_connection",
-    "sandbox_process_client",
     "sandbox_connection",
 ])):
     __slots__ = []
 
     def send_driver_upward(self, item):
         logging.debug(f"send_driver_upward: {item}")
-        assert isinstance(item, (int, bool))
-        item = int(item)
+        if isinstance(item, bool):
+            item = int(item)
         print(item, file=self.driver_connection.upward)
 
     def receive_driver_downward(self):
@@ -33,6 +33,19 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         line = self.driver_connection.downward.readline().strip()
         logging.debug(f"receive_driver_downward -> {line}")
         return line
+
+    def handle_info_requests(self):
+        while True:
+            command = self.receive_driver_downward()
+            if command == "wait":
+                wait = int(self.receive_driver_downward())
+                info = self.process.get_status(wait=wait)
+                self.send_driver_upward(info.time_usage)
+                self.send_driver_upward(info.memory_usage)
+                self.send_driver_upward(info.error)
+            else:
+                assert command == "request"
+                break
 
     def send_downward(self, values):
         try:

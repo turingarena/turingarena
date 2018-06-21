@@ -5,7 +5,8 @@ import subprocess
 from abc import abstractmethod
 from contextlib import contextmanager
 
-from turingarena_impl.driver.sandbox.processinfo import SandboxProcessInfo, ProcessStatus
+from turingarena_impl.driver.sandbox.processinfo import ProcessStatus
+from turingarena.processinfo import SandboxProcessInfo
 
 logger = logging.Logger(__name__)
 

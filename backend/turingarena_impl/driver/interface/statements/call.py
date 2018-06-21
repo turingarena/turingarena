@@ -66,15 +66,8 @@ class CallStatement(Statement):
             )
             return
 
-        yield from self.validate_parameters_resolved()
         yield from self.validate_parameters()
         yield from self.validate_return_value()
-
-    def validate_parameters_resolved(self):
-        for p in self.arguments:
-            if p.reference is not None:
-                continue
-            yield from p.validate_resolved()
 
     def validate_parameters(self):
         method = self.method
@@ -147,6 +140,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
 
         method = self.statement.method
 
+        context.handle_info_requests()
         command = context.receive_driver_downward()
         if not command == "call":
             raise InterfaceError(f"expected call to '{method.name}', got {command}")

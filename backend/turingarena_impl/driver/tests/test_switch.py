@@ -1,4 +1,4 @@
-from turingarena_impl.driver.interface.tests.test_utils import define_algorithm
+from turingarena_impl.driver.tests.test_utils import define_algorithm
 
 interface_text = """
     function f1();

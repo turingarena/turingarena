@@ -1,5 +1,5 @@
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.tests.test_utils import assert_interface_diagnostics
+from turingarena_impl.driver.tests.test_utils import assert_interface_diagnostics
 from .test_utils import assert_no_interface_errors
 
 

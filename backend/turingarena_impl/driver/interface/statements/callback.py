@@ -46,6 +46,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
         # FIXME: some redundancy with ReturnStatement
         if not self.has_return_value:
+            context.handle_info_requests()
             command = context.receive_driver_downward()
             if not command == "callback_return":
                 raise InterfaceError(f"expecting 'callback_return', got '{command}'")
@@ -109,6 +110,7 @@ class ReturnStatement(Statement, IntermediateNode):
 
     def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
+            context.handle_info_requests()
             command = context.receive_driver_downward()
             if not command == "callback_return":
                 raise InterfaceError(f"expecting 'callback_return', got '{command}'")
