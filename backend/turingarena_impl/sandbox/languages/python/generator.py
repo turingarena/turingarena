@@ -9,9 +9,10 @@ class PythonCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         return f"# {comment}"
 
+
 class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
-        yield 'import _source'
+        yield 'from _source import *'
 
     def callback_statement(self, callback_statement):
         yield from self.build_method_declaration(callback_statement.callback)
@@ -67,9 +68,9 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         arguments = ", ".join(value_arguments + callback_arguments)
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
-            yield f'{return_value} = _source.{method_name}({arguments})'
+            yield f'{return_value} = {method_name}({arguments})'
         else:
-            yield f'_source.{method_name}({arguments})'
+            yield f'{method_name}({arguments})'
 
     def write_statement(self, write_statement):
         args = ', '.join(self.expression(arg) for arg in write_statement.arguments)
