@@ -13,6 +13,7 @@ Assignments = List[Tuple[Reference, Any]]
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
+    "direction",
     "phase",
     "driver_connection",
     "sandbox_process_client",

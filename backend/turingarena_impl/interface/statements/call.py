@@ -110,9 +110,9 @@ class CallStatement(Statement):
 
     def expects_request(self, request):
         return (
-            request is not None
-            and isinstance(request, MethodCall)
-            and request.method_name == self.method_name
+                request is not None
+                and isinstance(request, MethodCall)
+                and request.method_name == self.method_name
         )
 
     def _get_intermediate_nodes(self):
@@ -136,57 +136,65 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
-            method = self.statement.method
+        should_run = (
+                context.direction is ReferenceDirection.UPWARD
+                and context.phase is ReferenceStatus.DECLARED
+                or context.direction is not ReferenceDirection.UPWARD
+                and context.phase is ReferenceStatus.RESOLVED
+        )
+        if not should_run:
+            return
 
-            command = context.receive_driver_downward()
-            if not command == "call":
-                raise InterfaceError(f"expected call to '{method.name}', got {command}")
+        method = self.statement.method
 
-            method_name = context.receive_driver_downward()
-            if not method_name == method.name:
-                raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
+        command = context.receive_driver_downward()
+        if not command == "call":
+            raise InterfaceError(f"expected call to '{method.name}', got {command}")
 
+        method_name = context.receive_driver_downward()
+        if not method_name == method.name:
+            raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
+
+        parameter_count = int(context.receive_driver_downward())
+        if parameter_count != len(method.parameters):
+            raise InterfaceError(
+                f"'{method.name}' expects {len(method.parameters)} arguments, "
+                f"got {parameter_count}"
+            )
+
+        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
+        for a in self.statement.arguments:
+            value = context.deserialize_request_data()
+            if a.reference is not None and a.reference not in references:
+                logging.debug(f"Resolved parameter: {a.reference} -> {value}")
+                yield a.reference, value
+                # TODO: else, check value is the one expected
+
+        has_return_value = bool(int(context.receive_driver_downward()))
+        expects_return_value = (self.statement.return_value is not None)
+        if not has_return_value == expects_return_value:
+            names = ["procedure", "function"]
+            raise InterfaceError(
+                f"'{method.name}' is a {names[expects_return_value]}, "
+                f"got call to {names[has_return_value]}"
+            )
+
+        callback_count = int(context.receive_driver_downward())
+        expected_callback_count = len(self.statement.callbacks)
+        if not callback_count == expected_callback_count:
+            raise InterfaceError(
+                f"'{method.name}' has a {expected_callback_count} callbacks, "
+                f"got {callback_count}"
+            )
+
+        for c in self.statement.callbacks:
             parameter_count = int(context.receive_driver_downward())
-            if parameter_count != len(method.parameters):
+            expected_parameter_count = len(c.parameters)
+            if not parameter_count == expected_parameter_count:
                 raise InterfaceError(
-                    f"'{method.name}' expects {len(method.parameters)} arguments, "
+                    f"'{c.name}' has {expected_parameter_count} parameters, "
                     f"got {parameter_count}"
                 )
-
-            references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-            for a in self.statement.arguments:
-                value = context.deserialize_request_data()
-                if a.reference is not None and a.reference not in references:
-                    logging.debug(f"Resolved parameter: {a.reference} -> {value}")
-                    yield a.reference, value
-                    # TODO: else, check value is the one expected
-
-            has_return_value = bool(int(context.receive_driver_downward()))
-            expects_return_value = (self.statement.return_value is not None)
-            if not has_return_value == expects_return_value:
-                names = ["procedure", "function"]
-                raise InterfaceError(
-                    f"'{method.name}' is a {names[expects_return_value]}, "
-                    f"got call to {names[has_return_value]}"
-                )
-
-            callback_count = int(context.receive_driver_downward())
-            expected_callback_count = len(self.statement.callbacks)
-            if not callback_count == expected_callback_count:
-                raise InterfaceError(
-                    f"'{method.name}' has a {expected_callback_count} callbacks, "
-                    f"got {callback_count}"
-                )
-
-            for c in self.statement.callbacks:
-                parameter_count = int(context.receive_driver_downward())
-                expected_parameter_count = len(c.parameters)
-                if not parameter_count == expected_parameter_count:
-                    raise InterfaceError(
-                        f"'{c.name}' has {expected_parameter_count} parameters, "
-                        f"got {parameter_count}"
-                    )
 
 
 class MethodReturnNode(StatementIntermediateNode):

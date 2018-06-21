@@ -85,6 +85,97 @@ def test_method_return_value():
             assert p.functions.f(1) == 2
 
 
+def test_multiple_call_function_no_args():
+    with define_algorithm(
+            interface_text="""
+                function f();
+
+                main {
+                    call a = f();
+                    call b = f();
+                    write a, b;
+                }
+            """,
+            language_name="c++",
+            source_text="int i = 0; int f() { return i++; }",
+    ) as algo:
+        with algo.run() as p:
+            for i in range(2):
+                assert p.functions.f() == i
+
+
+def test_multiple_call_function_args():
+    with define_algorithm(
+            interface_text="""
+                function f(x);
+
+                main {
+                    read x;
+                    call a = f(x);
+                    call b = f(x);
+                    write a, b;
+                }
+            """,
+            language_name="c++",
+            source_text="""
+                #include <cassert>
+                int i = 0;
+                int f(int x) {
+                    assert(x == 2);
+                    return i++;
+                }
+            """,
+    ) as algo:
+        with algo.run() as p:
+            for i in range(2):
+                assert p.functions.f(2) == i
+
+
+def test_multiple_call_procedure_no_args():
+    with define_algorithm(
+            interface_text="""
+                procedure p();
+
+                main {
+                    call p();
+                    call p();
+                    checkpoint;
+                }
+            """,
+            language_name="c++",
+            source_text="void p() {}",
+    ) as algo:
+        with algo.run() as p:
+            for i in range(2):
+                p.procedures.p()
+            p.checkpoint()
+
+
+
+def test_multiple_call_procedure_args():
+    with define_algorithm(
+            interface_text="""
+                procedure p(x);
+
+                main {
+                    read x;
+                    call p(x);
+                    call p(x);
+                    checkpoint;
+                }
+            """,
+            language_name="c++",
+            source_text="""
+                #include <cassert>
+                void p(int x) { assert(x == 1); }
+            """,
+    ) as algo:
+        with algo.run() as p:
+            for i in range(2):
+                p.procedures.p(1)
+            p.checkpoint()
+
+
 def test_multiple_function_return_value():
     with define_algorithm(
             interface_text="""

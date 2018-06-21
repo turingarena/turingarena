@@ -23,11 +23,13 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         else:
             assignments = self._run_children(context._replace(
                 phase=ReferenceStatus.RESOLVED,
+                direction=self._get_direction(),
             ))
             context = context.with_assigments(assignments)
 
             unexpected_assignments = self._run_children(context._replace(
                 phase=ReferenceStatus.DECLARED,
+                direction=self._get_direction(),
             ))
             assert not unexpected_assignments
 
@@ -46,6 +48,12 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
     def _get_declaration_directions(self):
         for n in self.children:
             yield from n.declaration_directions
+
+    def _get_direction(self):
+        if not self.declaration_directions:
+            return None
+        [direction] = self.declaration_directions
+        return direction
 
     def _get_reference_actions(self):
         for n in self.children:

@@ -53,6 +53,7 @@ class DriverProcessServer:
             context = NodeExecutionContext(
                 bindings={},
                 phase=None,
+                direction=None,
                 driver_connection=driver_connection,
                 sandbox_connection=sandbox_connection,
                 sandbox_process_client=sandbox_process_client,
