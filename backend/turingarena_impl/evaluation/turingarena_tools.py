@@ -1,7 +1,7 @@
 from contextlib import contextmanager, ExitStack
 
-from turingarena_impl.interface.driver import DriverServer
-from turingarena_impl.sandbox.server import SandboxServer
+from turingarena_impl.driver.interface.driver import DriverServer
+from turingarena_impl.driver.server import SandboxServer
 
 
 @contextmanager

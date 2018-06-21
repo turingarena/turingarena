@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena.sandbox.connection import SandboxProcessConnection, \
     SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
-from turingarena_impl.sandbox.processinfo import SandboxProcessInfo
+from turingarena_impl.driver.sandbox.processinfo import SandboxProcessInfo
 
 logger = logging.getLogger(__name__)
 
