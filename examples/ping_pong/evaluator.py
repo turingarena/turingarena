@@ -1,10 +1,8 @@
 from turingarena import *
 
-algorithm = submitted_algorithm()
-
 ponged = False
 try:
-    with algorithm.run() as p:
+    with run_algorithm(submission.source) as p:
         def pong():
             global ponged
             ponged = True
@@ -15,4 +13,4 @@ try:
 except AlgorithmError:
     pass
 
-evaluation_data(dict(goals=dict(ponged=ponged)))
+evaluation.data(dict(goals=dict(ponged=ponged)))

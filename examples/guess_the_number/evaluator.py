@@ -4,8 +4,6 @@ from turingarena import *
 
 N = 100
 
-algorithm = submitted_algorithm()
-
 
 def main():
     # simply random
@@ -27,7 +25,7 @@ def main():
 
 
 def compute_fixed(correct):
-    with algorithm.run() as process:
+    with run_algorithm(submission.source) as process:
 
         number_of_guess = 0
 
@@ -46,7 +44,7 @@ def compute_fixed(correct):
 
 
 def compute_moving():
-    with algorithm.run() as process:
+    with run_algorithm(submission.source) as process:
         number_of_guess = 0
         min_value, max_value = 1, N
 

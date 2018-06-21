@@ -54,14 +54,12 @@ def evaluate_test_case(submission, N):
         return is_valid_solution(x, y, sol)
 
 
-algorithm = submitted_algorithm()
-
 try:
     for i, n in enumerate([10] * 5 + [100, 1000]):
         correct = evaluate_test_case(algorithm, n)
         outcomes = ["wrong", "correct"]
         print(f'test case N = {n} {outcomes[correct]}')
-        evaluation_data(dict(goals={
+        evaluation.data(dict(goals={
             f"case {i} (N={n})": correct
         }))
 except AlgorithmError:

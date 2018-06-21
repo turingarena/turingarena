@@ -2,8 +2,6 @@ import random
 
 from turingarena import *
 
-algorithm = submitted_algorithm()
-
 
 def solve(V):
     S = V[-1]
@@ -28,7 +26,7 @@ V = [
 
 right = solve(V)
 
-with algorithm.run() as process:
+with run_algorithm(submission.source) as process:
     S = process.functions.find_best_sum(len(V), V)
 
 if right == S:

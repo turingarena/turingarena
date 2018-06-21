@@ -7,8 +7,6 @@ from turingarena import *
 N = 100  # number of nodes
 Q = 100  # number of queries
 
-algorithm = submitted_algorithm()
-
 # create random graph
 g = nx.fast_gnp_random_graph(N, 0.1)
 
@@ -22,7 +20,7 @@ print("running algorithm")
 
 try:
     all_correct = True
-    with algorithm.run() as p:
+    with run_algorithm(submission.source) as p:
         D = [g.degree(u) for u in g]
         A = [g.neighbors(u) for u in g]
         W = [[w for _, _, w in g.edges(u, data="weight")] for u in g]
@@ -48,6 +46,6 @@ try:
 except AlgorithmError:
     all_correct = False
 
-evaluation_data(dict(goals={
+evaluation.data(dict(goals={
     "correct": all_correct,
 }))

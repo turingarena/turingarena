@@ -11,8 +11,6 @@ def yx_to_pos(y, x):
     return y * 3 + x
 
 
-algorithm = submitted_algorithm()
-
 print("running game")
 
 with algorithm.run(global_variables=dict(

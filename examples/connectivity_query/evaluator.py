@@ -4,8 +4,6 @@ import networkx as nx
 
 from turingarena import *
 
-algorithm = submitted_algorithm()
-
 parts = (
     [nx.complete_graph(10) for _ in range(3)] +
     [nx.cycle_graph(10) for _ in range(3)]
@@ -24,7 +22,7 @@ cases = []
 fail = False
 
 try:
-    with algorithm.run() as p:
+    with run_algorithm(submission.source) as p:
         p.procedures.init(N, Q, D, adj)
 
         memory_usage = p.sandbox.get_info().memory_usage
@@ -36,7 +34,7 @@ try:
 
             connected = bool(p.functions.is_there_a_path(u, v))
 
-            evaluation_data(dict(goals={
+            evaluation.data(dict(goals={
                 f"case {t}:": nx.has_path(graph, u, v) == connected
             }))
             print(f"Nodes {u} {v} -> {connected}")

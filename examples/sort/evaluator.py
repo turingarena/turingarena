@@ -2,15 +2,13 @@ import random
 
 from turingarena import *
 
-algorithm = submitted_algorithm()
-
 all_passed = True
 for _ in range(10):
     n = 20
     a = random.choices(range(10 ** 4, 10 ** 5), k=n)
 
     try:
-        with algorithm.run() as process:
+        with run_algorithm(submission.source) as process:
             process.procedures.sort(n, a)
             b = [process.functions.get_element(i) for i in range(n)]
     except AlgorithmError as e:
@@ -22,4 +20,4 @@ for _ in range(10):
         print("WRONG!")
         all_passed = False
 
-evaluation_data(dict(goals=dict(correct=all_passed)))
+evaluation.data(dict(goals=dict(correct=all_passed)))
