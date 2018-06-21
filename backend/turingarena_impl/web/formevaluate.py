@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena_impl.api.git import clone_from_git
 from turingarena_impl.evaluation.python import PythonEvaluator
-from turingarena_impl.driver.languages.language import Language
+from turingarena_impl.driver.language import Language
 
 
 def form_evaluate(fields):

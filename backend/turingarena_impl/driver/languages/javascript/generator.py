@@ -1,4 +1,4 @@
-from turingarena_impl.driver.languages.generator import InterfaceCodeGen, SkeletonCodeGen
+from turingarena_impl.driver.generator import InterfaceCodeGen, SkeletonCodeGen
 
 
 class JavaScriptCodeGen(InterfaceCodeGen):

@@ -1,4 +1,4 @@
-from turingarena_impl.driver.languages.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
+from turingarena_impl.driver.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
 
 
 class PythonCodeGen(InterfaceCodeGen):

@@ -1,4 +1,4 @@
-from turingarena_impl.driver.languages.language import Language
+from turingarena_impl.driver.language import Language
 from .generator import JavaScriptSkeletonCodeGen, JavaScriptTemplateCodeGen
 from .source import JavascriptAlgorithmSource
 

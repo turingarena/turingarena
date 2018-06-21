@@ -9,7 +9,7 @@ from turingarena.sandbox.connection import SandboxProcessConnection, SANDBOX_PRO
     SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.metaserver import MetaServer
-from turingarena_impl.driver.languages.language import Language
+from turingarena_impl.driver.language import Language
 from turingarena_impl.driver.sandbox.process import CompilationFailedProcess
 from turingarena_impl.driver.source import AlgorithmSource, CompilationFailed
 

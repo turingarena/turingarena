@@ -8,7 +8,7 @@ from turingarena_impl.evaluation.environ import env_extension
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
-from turingarena_impl.driver.languages.language import Language
+from turingarena_impl.driver.language import Language
 
 
 @contextmanager

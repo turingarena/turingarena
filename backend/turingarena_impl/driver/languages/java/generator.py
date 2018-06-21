@@ -1,4 +1,4 @@
-from turingarena_impl.driver.languages.generator import CodeGen
+from turingarena_impl.driver.generator import CodeGen
 
 class JavaCodeGen(CodeGen):
     @classmethod

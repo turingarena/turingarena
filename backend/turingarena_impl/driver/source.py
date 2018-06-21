@@ -3,7 +3,7 @@ from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena_impl.loader import find_package_path
-from turingarena_impl.driver.languages.language import Language
+from turingarena_impl.driver.language import Language
 
 logger = logging.getLogger(__name__)
 

@@ -21,16 +21,15 @@ class Language(namedtuple("Language", [
 
     @staticmethod
     def languages():
-        mod_name = os.path.splitext(__name__)[0]
+        from . import languages as language_package
 
         languages = []
-        for mod in pkgutil.iter_modules(importlib.import_module(mod_name).__path__):
-            if mod.ispkg:
-                mod = importlib.import_module(f"{mod_name}.{mod.name}")
-                try:
-                    languages.append(getattr(mod, "language"))
-                except AttributeError:
-                    pass
+        for mod in pkgutil.iter_modules(language_package.__path__):
+            mod = importlib.import_module(f"{language_package.__name__}.{mod.name}")
+            try:
+                languages.append(getattr(mod, "language"))
+            except AttributeError:
+                pass
         return languages
 
     @classmethod
