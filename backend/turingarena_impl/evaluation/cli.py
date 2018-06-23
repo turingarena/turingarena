@@ -1,12 +1,12 @@
 import os
+import subprocess
 import sys
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
-import subprocess
-
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.evaluation.python import PythonEvaluator
+from turingarena_impl.evaluation.segi import segi_subprocess
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
 @contextmanager
@@ -41,7 +41,7 @@ def evaluate_cli(args):
         evaluate [options] <files> ...
 
     Options:
-        -e --evaluator=<id>  Evaluator [default: ./evaluator.py]
+        -e --evaluator=<id>  Evaluator [default: python3 -u evaluator.py]
         -r --raw  Output events in JSON Lines format.
     """
 
@@ -57,7 +57,15 @@ def evaluate_cli(args):
             output = jq.stdin
 
         files = stack.enter_context(parse_files(args["<files>"], ["source"]))
-        evaluation = PythonEvaluator(args["--evaluator"]).evaluate(files)
 
-        for event in evaluation:
-            print(event, file=output, flush=True)
+        with ExitStack() as stack:
+            env = stack.enter_context(run_metaservers())
+            evaluation = segi_subprocess(
+                files,
+                args["--evaluator"],
+                shell=True,
+                env=env,
+            )
+
+            for event in evaluation:
+                print(event, file=output, flush=True)
