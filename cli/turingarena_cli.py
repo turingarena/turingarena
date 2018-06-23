@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 
@@ -114,12 +115,13 @@ def turingarena_cli():
     else:
         tty_allocation = ["-T"]
 
-    subprocess.call(ssh_command + tty_allocation + [
+    cmd = ssh_command + tty_allocation + [
         "turingarena@localhost",
         "TURINGARENA_TREE_ID=" + tree_id,
         "TURINGARENA_CURRENT_DIR=" + current_dir,
         "/usr/local/bin/python", "-m", "turingarena_impl",
-    ] + sys.argv[1:])
+    ] + [shlex.quote(s) for s in sys.argv[1:]]
+    subprocess.call(cmd)
 
 
 if __name__ == '__main__':
