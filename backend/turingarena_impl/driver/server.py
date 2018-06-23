@@ -124,7 +124,6 @@ class SandboxProcessServer:
                 self.process = self.process_exit_stack.enter_context(
                     source.run(compilation_dir, connection)
                 )
-                self.process_exit_stack.callback(self.terminate_process)
             else:
                 self.process = CompilationFailedProcess()
 
