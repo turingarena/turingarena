@@ -3,8 +3,6 @@ import logging
 import os
 import sys
 
-from turingarena.algorithm import Algorithm
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,6 +33,8 @@ class MemoryLimitExceeded(AlgorithmError):
 def run_algorithm(source_path, interface_path=None):
     if interface_path is None:
         interface_path = os.path.abspath("interface.txt")
+
+    from turingarena.algorithm import Algorithm
     return Algorithm(
         source_path=source_path,
         language_name=None,

@@ -29,10 +29,10 @@ class ProblemSolutionItem(pytest.Item):
 
     def runtest(self):
         files = dict(source=self.parent.source_path)
-        evaluator_cmd = f"python -u {self.parent.evaluator_name}"
+        evaluator_cmd = f"python3 -u {self.parent.evaluator_path}"
 
         events = list(evaluate(files, evaluator_cmd=evaluator_cmd))
-        self.add_report_section("call", "evaluation", "\n".join(events))
+        self.add_report_section("call", "evaluation", "\n".join(map(str, events)))
 
         for assertion in self.load_assertion_in_source():
             mode = "exec"
@@ -65,9 +65,9 @@ class ProblemSolutionItem(pytest.Item):
 
 
 class ProblemSolutionTestFile(pytest.File):
-    def __init__(self, fspath, parent, evaluator_name, source_path):
+    def __init__(self, fspath, parent, evaluator_path, source_path):
         super().__init__(fspath=fspath, parent=parent)
-        self.evaluator_name = evaluator_name
+        self.evaluator_path = evaluator_path
         self.source_path = source_path
 
     def collect(self):
@@ -84,7 +84,7 @@ def pytest_collect_file(path, parent):
     return ProblemSolutionTestFile(
         fspath=path,
         parent=parent,
-        evaluator_name=f":{evaluator_path}",
+        evaluator_path=evaluator_path,
         source_path=path,
     )
 

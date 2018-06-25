@@ -1,7 +1,9 @@
-from collections.__init__ import namedtuple
+import logging
+import os
+from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 
-from turingarena import *
+from turingarena import InterfaceExit, TimeLimitExceeded
 from turingarena.driver.client import DriverProcessClient, SandboxClient
 from turingarena.driver.engine import DriverClientEngine
 from turingarena.driver.proxy import MethodProxy
