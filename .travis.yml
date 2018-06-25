@@ -14,31 +14,28 @@ git:
 
 jobs:
   include:
-    - script:
+    - if: branch = develop
+      script:
       - pip install --upgrade setuptools twine wheel
       - cd cli/
       - python setup.py bdist_wheel
       - twine upload dist/*
-    - script:
+    - if: branch = develop
+      script:
       - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - >
         docker build
-        -t turingarena/turingarena-base:$TRAVIS_BRANCH
+        -t turingarena/turingarena-base:latest
         -f Dockerfile.base
         .
-      - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
+      - docker push turingarena/turingarena-base:latest
       - >
         docker build
         --network none
-        --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
-        -t turingarena/turingarena:$TRAVIS_BRANCH
+        --build-arg BASE_IMAGE=turingarena/turingarena-base:latest
+        -t turingarena/turingarena:latest
         .
-      - docker push turingarena/turingarena:$TRAVIS_BRANCH
-      - >
-        docker run
-        --rm
-        turingarena/turingarena:$TRAVIS_BRANCH
-        test /usr/local/turingarena/turingarena
+      - docker push turingarena/turingarena:latest
 
 deploy:
   - provider: pages
