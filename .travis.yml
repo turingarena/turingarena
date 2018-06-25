@@ -14,13 +14,13 @@ git:
 
 jobs:
   include:
-    - if: branch = develop
+    - if: branch = develop AND type != pull_request
       script:
       - pip install --upgrade setuptools twine wheel
       - cd cli/
       - python setup.py bdist_wheel
       - twine upload dist/*
-    - if: branch = develop
+    - if: branch = develop AND type != pull_request
       script:
       - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - >
