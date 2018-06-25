@@ -1,0 +1,16 @@
+procedure start(n_moves);
+
+function play(i);
+
+procedure done(i, my_move, their_move);
+
+main {
+    read n_moves;
+    call start(n_moves);
+    for i to n_moves {
+        call my_move = play(i);
+        write my_move;
+        read their_move;
+        call done(i, my_move, their_move);
+    }
+}

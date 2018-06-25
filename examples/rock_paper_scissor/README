@@ -1,0 +1,5 @@
+Use the following command to evaluate:
+
+turingarena evaluate player1:players/random1.cpp player2:players/random2.cpp
+
+... and enjoy the match!
