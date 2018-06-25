@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from turingarena_impl.driver.interface.statements.statement import AbstractStatement
+from turingarena_impl.driver.visitors import StatementVisitor, ExpressionVisitor
 
 
 class CodeGen(ABC):
@@ -17,11 +17,8 @@ class CodeGen(ABC):
             return "    " + line
 
 
-class ExpressionCodeGen(CodeGen):
+class AbstractExpressionCodeGen(ExpressionVisitor, CodeGen):
     __slots__ = []
-
-    def expression(self, e):
-        return getattr(self, f"{e.expression_type}_expression")(e)
 
     def subscript_expression(self, e):
         return f"{self.expression(e.array)}[{self.expression(e.index)}]"
@@ -31,58 +28,6 @@ class ExpressionCodeGen(CodeGen):
 
     def int_literal_expression(self, e):
         return str(e.value)
-
-
-class StatementCodeGen(CodeGen):
-    __slots__ = []
-
-    def statement(self, statement):
-        method_name = f"{statement.statement_type}_statement"
-        yield from getattr(self, method_name)(statement)
-
-    @abstractmethod
-    def read_statement(self, read_statement):
-        pass
-
-    @abstractmethod
-    def write_statement(self, write_statement):
-        pass
-
-    @abstractmethod
-    def checkpoint_statement(self, checkpoint_statement):
-        pass
-
-    @abstractmethod
-    def break_statement(self, break_statement):
-        pass
-
-    @abstractmethod
-    def exit_statement(self, exit_statement):
-        pass
-
-    @abstractmethod
-    def return_statement(self, return_statement):
-        pass
-
-    @abstractmethod
-    def call_statement(self, call_statement):
-        pass
-
-    @abstractmethod
-    def if_statement(self, if_statement):
-        pass
-
-    @abstractmethod
-    def switch_statement(self, switch_statement):
-        pass
-
-    @abstractmethod
-    def for_statement(self, for_statement):
-        pass
-
-    @abstractmethod
-    def loop_statement(self, loop_statement):
-        pass
 
 
 class InterfaceCodeGen(CodeGen):
@@ -124,7 +69,7 @@ class InterfaceCodeGen(CodeGen):
         pass
 
 
-class StatementDescriptionCodeGen(StatementCodeGen, ExpressionCodeGen):
+class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
     def read_statement(self, read_statement):
         args = ", ".join(self.expression(a) for a in read_statement.arguments)
         yield f"read {args};"
@@ -179,7 +124,7 @@ class StatementDescriptionCodeGen(StatementCodeGen, ExpressionCodeGen):
         yield f"switch {self.expression(switch_statement.value)} " "{...}"
 
 
-class SkeletonCodeGen(InterfaceCodeGen, StatementCodeGen, ExpressionCodeGen):
+class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCodeGen):
     __slots__ = []
 
     @property
