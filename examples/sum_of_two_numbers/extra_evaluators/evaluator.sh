@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 for i in $(seq 10) ; do
 
     echo -n > $TURINGARENA_SANDBOX_DIR/language_name.pipe
@@ -44,7 +46,7 @@ for i in $(seq 10) ; do
 
 done
 
-if (( wrong==1 )) ; then
+if (( wrong == 1 )) ; then
     echo
     echo $EVALUATION_DATA_BEGIN
     jq -nc '{"goals": {"correct": false}}'
