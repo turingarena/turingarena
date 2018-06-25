@@ -46,7 +46,6 @@ class AlgorithmSection:
 
     @contextmanager
     def run(self, time_limit):
-        # FIXME: implement time limit
         self.info_before = self._engine.get_info()
         yield self
         self.info_after = self._engine.get_info()
