@@ -6,7 +6,7 @@ from turingarena_impl.driver.interface.callables import MethodPrototype
 from turingarena_impl.driver.interface.context import InterfaceContext
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.parser import parse_interface
-from turingarena_impl.loader import find_package_path
+from turingarena_impl.loader import find_package_file
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class InterfaceDefinition:
 
     @staticmethod
     def load(name):
-        with open(find_package_path(name, "interface.txt")) as f:
+        with open(find_package_file(name)) as f:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod

@@ -4,11 +4,11 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Generator, Sequence
 
 from turingarena.algorithm import Algorithm
-from turingarena_impl.evaluation.environ import env_extension
-from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
+from turingarena_impl.evaluation.environ import env_extension
+from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
 @contextmanager
@@ -20,18 +20,18 @@ def define_algorithm(interface_text: str, source_text: str, language_name: str) 
         stack.enter_context(env_extension(metaserver_env))
         tmp_dir = stack.enter_context(TemporaryDirectory())
 
-        source_file_name = os.path.join(tmp_dir, f"source{language.extension}")
-        interface_file_name = os.path.join(tmp_dir, "interface.txt")
+        source_path = os.path.join(tmp_dir, f"source{language.extension}")
+        interface_path = os.path.join(tmp_dir, "interface.txt")
 
-        with open(interface_file_name, "w") as f:
+        with open(interface_path, "w") as f:
             print(interface_text, file=f)
 
-        with open(source_file_name, "w") as f:
+        with open(source_path, "w") as f:
             print(source_text, file=f)
 
         yield Algorithm(
-            source_name=f":{source_file_name}",
-            interface_name=f":{interface_file_name}",
+            source_path=source_path,
+            interface_path=interface_path,
             language_name=language_name,
         )
 

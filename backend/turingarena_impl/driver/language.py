@@ -3,8 +3,6 @@ import os
 import pkgutil
 from collections import namedtuple
 
-from turingarena_impl.loader import split_module
-
 
 class UnknownFileExtension(Exception):
     pass
@@ -47,7 +45,6 @@ class Language(namedtuple("Language", [
         raise UnknownFileExtension
 
     @staticmethod
-    def from_source_name(source_name):
-        mod_name, rel_path = split_module(source_name)
-        base, ext = os.path.splitext(rel_path)
+    def from_source_path(source_path):
+        base, ext = os.path.splitext(source_path)
         return Language.from_extension(ext)

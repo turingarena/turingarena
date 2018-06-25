@@ -32,11 +32,13 @@ class MemoryLimitExceeded(AlgorithmError):
     pass
 
 
-def run_algorithm(source_path, interface_name=":interface.txt"):
+def run_algorithm(source_path, interface_path=None):
+    if interface_path is None:
+        interface_path = os.path.abspath("interface.txt")
     return Algorithm(
-        source_name=":" + source_path,
+        source_path=source_path,
         language_name=None,
-        interface_name=interface_name,
+        interface_path=interface_path,
     ).run()
 
 

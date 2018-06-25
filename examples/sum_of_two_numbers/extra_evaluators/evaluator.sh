@@ -3,8 +3,8 @@
 for i in $(seq 10) ; do
 
     echo -n > $TURINGARENA_SANDBOX_DIR/language_name.pipe
-    echo -n :$SUBMISSION_FILE_SOURCE > $TURINGARENA_SANDBOX_DIR/source_name.pipe
-    echo -n ":interface.txt" > $TURINGARENA_SANDBOX_DIR/interface_name.pipe
+    echo -n $SUBMISSION_FILE_SOURCE > $TURINGARENA_SANDBOX_DIR/source_path.pipe
+    echo -n $PWD/interface.txt > $TURINGARENA_SANDBOX_DIR/interface_path.pipe
     read sandbox_process_dir < $TURINGARENA_SANDBOX_DIR/sandbox_process_dir.pipe
 
     a=$((RANDOM%1000))

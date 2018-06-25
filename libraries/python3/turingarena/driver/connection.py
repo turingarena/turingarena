@@ -15,8 +15,8 @@ DRIVER_PROCESS_CHANNEL = PipeChannelDescriptor(
 SANDBOX_QUEUE = PipeSynchronousQueueDescriptor(
     request_pipes=dict(
         language_name=PipeDescriptor("language_name.pipe", ("w", "r")),
-        source_name=PipeDescriptor("source_name.pipe", ("w", "r")),
-        interface_name=PipeDescriptor("interface_name.pipe", ("w", "r")),
+        source_path=PipeDescriptor("source_path.pipe", ("w", "r")),
+        interface_path=PipeDescriptor("interface_path.pipe", ("w", "r")),
     ),
     response_pipes=dict(
         sandbox_process_dir=PipeDescriptor("sandbox_process_dir.pipe", ("r", "w")),

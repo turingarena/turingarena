@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class Algorithm(namedtuple("Algorithm", [
-    "source_name", "language_name", "interface_name",
+    "source_path", "language_name", "interface_path",
 ])):
     @contextmanager
     def run(self, time_limit=None):
@@ -19,9 +19,9 @@ class Algorithm(namedtuple("Algorithm", [
 
             sandbox_client = SandboxClient(sandbox_dir)
             sandbox_process_dir = stack.enter_context(sandbox_client.run(
-                source_name=self.source_name,
+                source_path=self.source_path,
                 language_name=self.language_name,
-                interface_name=self.interface_name,
+                interface_path=self.interface_path,
             ))
 
             driver_process_client = DriverProcessClient(sandbox_process_dir)

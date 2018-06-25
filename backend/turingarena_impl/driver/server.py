@@ -28,9 +28,9 @@ class SandboxServer(MetaServer):
         return SANDBOX_QUEUE
 
     @contextmanager
-    def run_child_server(self, child_server_dir, *, language_name, source_name, interface_name):
+    def run_child_server(self, child_server_dir, *, language_name, source_path, interface_path):
         logger.debug("Running sandbox process (server)...")
-        algorithm = Algorithm(language_name=language_name, source_name=source_name, interface_name=interface_name)
+        algorithm = Algorithm(language_name=language_name, source_path=source_path, interface_path=interface_path)
         server = SandboxProcessServer(
             algorithm=algorithm,
             sandbox_dir=child_server_dir,
@@ -48,9 +48,9 @@ class SandboxServer(MetaServer):
             language = Language.from_name(algorithm.language_name)
         else:
             language = None
-        interface = InterfaceDefinition.load(algorithm.interface_name)
+        interface = InterfaceDefinition.load(algorithm.interface_path)
         source = AlgorithmSource.load(
-            algorithm.source_name,
+            algorithm.source_path,
             interface=interface,
             language=language,
         )
@@ -77,7 +77,7 @@ class SandboxProcessServer:
         self.boundary.create_queue(SANDBOX_REQUEST_QUEUE)
         self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
 
-        self.interface = InterfaceDefinition.load(algorithm.interface_name)
+        self.interface = InterfaceDefinition.load(algorithm.interface_path)
 
         self.done = False
         self.process = None
