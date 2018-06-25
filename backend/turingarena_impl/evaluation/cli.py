@@ -5,8 +5,7 @@ from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.evaluation.segi import segi_subprocess
-from turingarena_impl.evaluation.turingarena_tools import run_metaservers
+from turingarena_impl.evaluation.evaluate import evaluate
 
 
 @contextmanager
@@ -58,14 +57,5 @@ def evaluate_cli(args):
 
         files = stack.enter_context(parse_files(args["<files>"], ["source"]))
 
-        with ExitStack() as stack:
-            env = stack.enter_context(run_metaservers())
-            evaluation = segi_subprocess(
-                files,
-                args["--evaluator"],
-                shell=True,
-                env=env,
-            )
-
-            for event in evaluation:
-                print(event, file=output, flush=True)
+        for event in evaluate(files=files, evaluator_cmd=args["--evaluator"]):
+            print(event, file=output, flush=True)

@@ -1,5 +1,4 @@
 import ast
-import json
 import os
 import re
 
@@ -7,7 +6,7 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.evaluation.python import PythonEvaluator
+from turingarena_impl.evaluation.evaluate import evaluate
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
@@ -29,10 +28,11 @@ class ProblemSolutionItem(pytest.Item):
         return re.findall(r"evaluation_assert\s+(.+)", source_text)
 
     def runtest(self):
-        evaluator = PythonEvaluator(self.parent.evaluator_name)
-        result = evaluator.evaluate(self.parent.source_path)
-        self.add_report_section("call", "evaluation_stdout", "\n".join(result.stdout))
-        self.add_report_section("call", "evaluation_result", json.dumps(result.data, indent=4))
+        files = dict(source=self.parent.source_path)
+        evaluator_cmd = f"python -u {self.parent.evaluator_name}"
+
+        events = list(evaluate(files, evaluator_cmd=evaluator_cmd))
+        self.add_report_section("call", "evaluation", "\n".join(events))
 
         for assertion in self.load_assertion_in_source():
             mode = "exec"
@@ -40,7 +40,7 @@ class ProblemSolutionItem(pytest.Item):
             rewrite_asserts(tree)
             co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
             try:
-                exec(co, dict(approx=approx), result._asdict())
+                exec(co, dict(approx=approx), dict(evaluation=events))
             except AssertionError as e:
                 raise EvaluationAssertionError(assertion) from e
             except Exception as e:
