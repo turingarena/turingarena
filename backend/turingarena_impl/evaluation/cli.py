@@ -50,7 +50,7 @@ def evaluate_cli(args):
             output = sys.stdout
         else:
             jq = stack.enter_context(subprocess.Popen(
-                ["jq", "-j", ".payload"],
+                ["jq", "-j", "--unbuffered", ".payload"],
                 stdin=subprocess.PIPE,
                 universal_newlines=True,
             ))
