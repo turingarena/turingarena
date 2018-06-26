@@ -1,8 +1,8 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="240px" height="80px" viewBox="-4.8 -1 6 2" xmlns="http://www.w3.org/2000/svg" version="1.1">
-    <clipPath transform="scale(.66, 1.08)" id="clip">
+<svg viewBox="-240 -100 380 200" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <clipPath transform="scale(.75, 1.05)" id="clip">
         <!-- negative unit circle -->
         <path d="
             M -10,-10
@@ -15,7 +15,7 @@
             A 1,1 0 0,0 -1,0
             A 1,1 0 0,0  1,0
             Z
-        " />
+        "/>
     </clipPath>
     <circle
         r="1"
@@ -23,14 +23,13 @@
         clip-path="url(#clip)"
         transform="
             translate(0 0)
-            scale(.6)
+            scale(100)
             skewX(-30)
             scale(1 1)
         "
     />
-    <text fill="#6f42c1" x="-1" dy=".5ex" style="
-        font: bold 1px 'Droid Sans Mono';
+    <text fill="#24292e" x="-120" dy=".7ex" style="
+        font: 200px 'Liberation Mono';
         text-anchor: end;
-        letter-spacing: -.03em;
-    ">turing</text>
+    ">t</text>
 </svg>
