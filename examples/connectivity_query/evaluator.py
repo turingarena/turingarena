@@ -25,7 +25,7 @@ try:
     with run_algorithm(submission.source) as p:
         p.procedures.init(N, Q, D, adj)
 
-        memory_usage = p.sandbox.get_info().memory_usage
+        #memory_usage = p.sandbox.get_info().memory_usage
 
         for t in range(Q):
             u = v = None
