@@ -1,75 +1,112 @@
-from turingarena_impl.driver.generator import CodeGen
+from turingarena_impl.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
 
-class JavaCodeGen(CodeGen):
-    @classmethod
-    def build_callable_declarator(cls, callable):
-        return_type = cls.build_type(callable.return_type)
-        parameters = ', '.join(cls.build_parameter(p) for p in callable.parameters)
+class JavaCodeGen(InterfaceCodeGen):
+
+    def build_parameter(self, parameter):
+        arrays = "[]" * parameter.dimensions
+        return f"int {parameter.name}{arrays}"
+
+    def build_signature(self, callable, callbacks):
+        return_type = "int" if callable.has_return_value else "void"
+        value_parameters = [self.build_parameter(p) for p in callable.parameters]
+        # TODO
+        #callback_parameters = [
+        #    self.build_signature(callback, [])
+        #    for callback in callbacks
+        #]
+        #parameters = ", ".join(value_parameters + callback_parameters)
+        parameters = ", ".join(value_parameters)
         return f"{return_type} {callable.name}({parameters})"
 
-    @classmethod
-    def build_parameter(cls, parameter):
-        value_type = cls.build_type(parameter.value_type)
-        return f'{value_type} {parameter.name}'
+    def build_method_signature(self, func):
+        return self.build_signature(func, func.callbacks)
 
-    @classmethod
-    def build_type(cls, value_type):
-        if value_type is None:
-            return "void"
-        builders = {
-            "scalar": lambda: {
-                int: "int",
-            }[value_type.base_type],
-            "array": lambda: f"{cls.build_type(value_type.item_type)}[]"
-        }
-        return builders[value_type.meta_type]()
-
-    def generate_footer(self):
-        yield "}"
+    def line_comment(self, comment):
+        return f"// {comment}"
 
 
-class JavaSkeletonCodeGen(JavaCodeGen):
-    def generate_header(self):
+
+class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
+    def generate_header(self, interface):
         yield 'import java.util.Scanner;'
         yield
         yield 'abstract class Skeleton {'
         yield self.indent('private static final Scanner in = new Scanner(System.in);')
 
+    def generate_variable_declaration(self, declared_variable):
+        yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name};'
+
+    #def generate_variable_allocation(self, allocated_variable):
+    #    var = allocated_variable.name
+    #    for index in allocated_variable.indexes:
+    #        var += f'[{index}]'
+    #    size = self.expression(allocated_variable.size)
+    #    yield f'{var} = new int{"[]" * allocated_variable.dimensions}[{size}];'
+
+    def generate_variable_allocation(self, variable, indexes, size):
+        indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
+        dimensions = "[]" * (variable.dimensions - len(indexes) - 1)
+        size = self.expression(size)
+        yield f"{variable.name}{indexes} = new int[{size}]{dimensions};"
+
     def generate_method_declaration(self, method_declaration):
-        yield f'abstract {self.build_callable_declarator(method_declaration)};'
+        yield self.indent(f'abstract {self.build_method_signature(method_declaration)};')
 
-    def callback_statement(self, statement):
-        callback = statement.callback
-        yield f'{self.build_callable_declarator(callback)}'' {'
-        yield from self.block_content(statement.callback.synthetic_body)
-        yield '}'
-        yield
-
-    def main_statement(self, statement):
+    def generate_main_block(self, interface):
         yield
         yield 'public static void main(String args[]) {'
         yield self.indent('Solution __solution = new Solution();')
-        yield from self.block_content(statement.body)
+        yield from self.block(interface.main_block)
         yield '}'
 
-    def generate_variable_allocation(self, allocated_variable):
-        var = allocated_variable.name
-        for index in allocated_variable.indexes:
-            var += f'[{index}]'
-        size = self.expression(allocated_variable.size)
-        yield f'{var} = new int{"[]" * allocated_variable.dimensions}[{size}];'
+    def generate_callback(self, callback):
+        # TODO
+        pass
 
-    def generate_variable_declaration(self, declared_variable):
-        yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name}'
+    def call_statement_body(self, call_statement):
 
-    def call_statement(self, statement):
-        function_name = statement.method_name
-        parameters = ', '.join(self.expression(p) for p in statement.parameters)
-        if statement.return_value is not None:
-            return_value = self.expression(statement.return_value)
-            yield f'{return_value} = __solution.{function_name}({parameters});'
+        method = call_statement.method
+
+        # TODO
+        #for callback in call_statement.callbacks:
+        #    yield from self.generate_callback(callback)
+
+        value_arguments = [self.expression(p) for p in call_statement.arguments]
+
+        # TODO
+        #callback_arguments = [
+        #    f"_callback_{callback_signature.name}"
+        #    for callback_signature in method.callbacks
+        #]
+
+        # TODO
+        #parameters = ", ".join(value_arguments + callback_arguments)
+        parameters = ", ".join(value_arguments)
+
+        if method.has_return_value:
+            return_value = f"{self.expression(call_statement.return_value)} = "
         else:
-            yield f'__solution.{function_name}({parameters});'
+            return_value = ""
+
+        yield f"{return_value}__solution.{method.name}({parameters});"
+
+    def call_statement(self, call_statement):
+        if call_statement.method.has_callbacks:
+            # TODO
+            pass
+            #yield "{"
+            #yield from self.indent_all(self.call_statement_body(call_statement))
+            #yield "}"
+        else:
+            yield from self.call_statement_body(call_statement)
+
+    # TODO
+    #def callback_statement(self, statement):
+    #    callback = statement.callback
+    #    yield f'{self.build_callable_declarator(callback)}'' {'
+    #    yield from self.block(statement.callback.synthetic_body)
+    #    yield '}'
+    #    yield
 
     def write_statement(self, statement):
         format_string = ' '.join('%d' for _ in statement.arguments) + r'\n'
@@ -83,22 +120,22 @@ class JavaSkeletonCodeGen(JavaCodeGen):
     def if_statement(self, statement):
         condition = self.expression(statement.condition)
         yield f'if ({condition})'' {'
-        yield from self.block_content(statement.then_body)
+        yield from self.block(statement.then_body)
         if statement.else_body is not None:
             yield '} else {'
-            yield from self.block_content(statement.else_body)
+            yield from self.block(statement.else_body)
         yield '}'
 
     def for_statement(self, statement):
         index_name = statement.index.variable.name
         size = self.expression(statement.index.range)
         yield f'for (int {index_name} = 0; {index_name} < {size}; {index_name}++)'' {'
-        yield from self.block_content(statement.body)
+        yield from self.block(statement.body)
         yield '}'
 
     def loop_statement(self, loop_statement):
         yield 'while (true) {'
-        yield from self.block_content(loop_statement.body)
+        yield from self.block(loop_statement.body)
         yield '}'
 
     def build_switch_cases(self, variable, labels):
@@ -108,10 +145,10 @@ class JavaSkeletonCodeGen(JavaCodeGen):
     def switch_statement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)})'' {'
-        yield from self.block_content(cases[0].body)
+        yield from self.block(cases[0].body)
         for case in cases[1:]:
             yield '}' f' else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) ' '{'
-            yield from self.block_content(case.body)
+            yield from self.block(case.body)
         yield '}'
 
     def generate_flush(self):
