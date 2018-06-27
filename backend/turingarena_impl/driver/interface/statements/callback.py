@@ -39,7 +39,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def body_node(self):
         return BlockNode.from_nodes(self._generate_inner_nodes())
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         context.send_driver_upward(1)
         context.send_driver_upward(self.context.callback_index)
         self.body_node.driver_run(context)
@@ -84,7 +84,7 @@ class CallbackCallNode(StatementIntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             for p in self.statement.parameters:
                 r = p.as_reference()
@@ -111,7 +111,7 @@ class ReturnStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
 
-    def _driver_run(self, context):
+    def _driver_run_assignments(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
             context.handle_info_requests()
             command = context.receive_driver_downward()
@@ -144,6 +144,6 @@ class ExitStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         # TODO
         pass

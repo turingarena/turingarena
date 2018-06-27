@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena_impl.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import SyntheticExpression
-from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, ExecutionResult
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.step import Step
 
@@ -97,12 +97,10 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
-        assignments = []
+        result = ExecutionResult([], None)
         for n in self.children:
-            inner_assigments = n.driver_run(context)
-            assignments.extend(inner_assigments)
-            context = context.with_assigments(inner_assigments)
-        return assignments
+            result = result.merge(n.driver_run(context.extend(result)))
+        return result
 
     def _get_reference_actions(self):
         for n in self.children:

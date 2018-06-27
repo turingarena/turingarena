@@ -7,6 +7,7 @@ from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
 from turingarena_impl.driver.interface.statements.statement import Statement
+from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ class SwitchStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
+        if self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED):
+            yield SwitchResolveNode(self)
         # TODO: resolution node
         yield self
 
@@ -97,6 +100,17 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
     @property
     def labels(self):
         return self.ast.labels
+
+
+class SwitchResolveNode(StatementIntermediateNode):
+    def _get_reference_actions(self):
+        yield ReferenceAction(self.statement.value.reference, ReferenceStatus.RESOLVED)
+
+    def _driver_run(self, context):
+        pass  # TODO
+
+    def _describe_node(self):
+        yield f"resolve {self.statement}"
 
 
 class SwitchInstruction(StatementIntermediateNode):

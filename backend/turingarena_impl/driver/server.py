@@ -96,6 +96,7 @@ class SandboxProcessServer:
                 phase=None,
                 direction=None,
                 process=self.process,
+                request_lookahead=None,
                 driver_connection=driver_connection,
                 sandbox_connection=sandbox_connection,
             )

@@ -65,7 +65,7 @@ class InterfaceDefinition:
 
     def run_driver(self, context: NodeExecutionContext):
         self.main_node.driver_run(context=context)
-        context.handle_info_requests()
-        command = context.receive_driver_downward()
+        request = context.next_request()
+        command = request.command
         if command != "exit":
             raise InterfaceError(f"expecting exit, got {command}")
