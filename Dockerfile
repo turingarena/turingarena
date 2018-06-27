@@ -11,8 +11,8 @@ RUN true \
     && echo 'turingarena:x:1000:1000::/run/turingarena:/bin/ash' >> /etc/passwd \
     && passwd -d turingarena \
     && ln -sf /usr/bin/python3 /usr/local/bin/python \
-    && ln -s /usr/lib/jvm/default-jvm/bin/javac /usr/local/bin/javac \
-    && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/local/bin/jcmd \
+    && ln -s /usr/lib/jvm/default-jvm/bin/javac /usr/bin/javac \
+    && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/bin/jcmd \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
     && echo '/usr/local/turingarena/examples' >> $TURINGARENA_PATH_FILE \

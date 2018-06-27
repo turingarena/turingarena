@@ -21,7 +21,7 @@ class Solution extends Skeleton {
         }
     }
 
-    void init(int _N, int _Q, int _D, int _A, int _W) {
+    void init(int _N, int _Q, int _D[], int _A[][], int _W[][]) {
         N = _N;
         D = _D;
         A = _A;
