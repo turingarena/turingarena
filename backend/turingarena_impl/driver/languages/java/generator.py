@@ -24,6 +24,9 @@ class JavaCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         return f"// {comment}"
 
+    def generate_footer(self, interface):
+        return "}"
+
 
 
 class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
@@ -103,7 +106,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     # TODO
     #def callback_statement(self, statement):
     #    callback = statement.callback
-    #    yield f'{self.build_callable_declarator(callback)}'' {'
+    #    yield f'{self.build_method_signature(callback)}'' {'
     #    yield from self.block(statement.callback.synthetic_body)
     #    yield '}'
     #    yield
@@ -167,15 +170,12 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield 'break;'
 
 
-class JavaTemplateCodeGen(JavaCodeGen):
-    def generate_header(self):
+class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
+    def generate_header(self, interface):
         yield 'class Solution extends Skeleton {'
 
     def generate_method_declaration(self, method_declaration):
         yield
-        yield f'{self.build_callable_declarator(method_declaration.function)}'' {'
-        yield self.indent('// TODO')
-        yield '}'
-
-    def generate_main_block(self):
-        yield from ()
+        yield self.indent(f"{self.build_method_signature(method_declaration)}" " {")
+        yield self.indent(self.indent('// TODO'))
+        yield self.indent('}')
