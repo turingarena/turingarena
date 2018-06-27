@@ -101,9 +101,6 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
     def labels(self):
         return self.ast.labels
 
-    def validate(self):
-        yield from self.body.validate()
-
 
 class SwitchResolveNode(StatementIntermediateNode):
     def _get_reference_actions(self):

@@ -4,7 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import StatementIntermediateNode
+from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, NextRequestNode
 from turingarena_impl.driver.interface.statements.callback import CallbackImplementation
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -109,6 +109,7 @@ class CallStatement(Statement):
         )
 
     def _get_intermediate_nodes(self):
+        yield NextRequestNode()
         yield MethodResolveArgumentsNode(self)
 
         if self.method.has_callbacks:
@@ -139,15 +140,11 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
 
         method = self.statement.method
 
-        request = context.request_lookahead
-        if request is None:
-            request = context.next_request()
-
-        command = request.command
+        command = context.request_lookahead.command
         if not command == "call":
             raise InterfaceError(f"expected call to '{method.name}', got {command}")
 
-        method_name = request.method_name
+        method_name = context.request_lookahead.method_name
         if not method_name == method.name:
             raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
 

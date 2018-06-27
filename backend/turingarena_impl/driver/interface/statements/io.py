@@ -4,7 +4,7 @@ from abc import abstractmethod
 from turingarena import InterfaceError
 from turingarena_impl.driver.interface.exceptions import CommunicationBroken
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, NextRequestNode
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
@@ -89,6 +89,7 @@ class CheckpointStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
+        yield NextRequestNode()
         yield self
 
     def _get_declaration_directions(self):
@@ -99,8 +100,7 @@ class CheckpointStatement(Statement, IntermediateNode):
 
     def _driver_run_simple(self, context):
         if context.phase is ReferenceStatus.DECLARED:
-            request = context.next_request()
-            command = request.command
+            command = context.request_lookahead.command
             if not command == "checkpoint":
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
             context.send_driver_upward(0)
