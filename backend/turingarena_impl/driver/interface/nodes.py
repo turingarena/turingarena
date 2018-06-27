@@ -53,6 +53,17 @@ class IntermediateNode:
     def _driver_run(self, context):
         pass
 
+    @property
+    def node_description(self):
+        return list(self._describe_node())
+
+    def _indent_all(self, lines):
+        for l in lines:
+            yield "  " + l
+
+    def _describe_node(self):
+        yield str(self)
+
 
 class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []

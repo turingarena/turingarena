@@ -72,14 +72,14 @@ class InterfaceCodeGen(CodeGen):
 class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
     def read_statement(self, read_statement):
         args = ", ".join(self.expression(a) for a in read_statement.arguments)
-        yield f"read {args};"
+        yield f"read {args}"
 
     def write_statement(self, write_statement):
         args = ", ".join(self.expression(a) for a in write_statement.arguments)
-        yield f"write {args};"
+        yield f"write {args}"
 
     def checkpoint_statement(self, checkpoint_statement):
-        yield f"checkpoint;"
+        yield f"checkpoint"
 
     def call_statement(self, call_statement):
         method = call_statement.method
@@ -93,18 +93,18 @@ class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
         if method.has_callbacks:
             callbacks = " callbacks {...}"
         else:
-            callbacks = ";"
+            callbacks = ""
 
         yield f"call {return_value}{method.name}({args}){callbacks}"
 
     def return_statement(self, return_statement):
-        yield f"return {self.expression(return_statement.value)};"
+        yield f"return {self.expression(return_statement.value)}"
 
     def exit_statement(self, exit_statement):
-        yield "exit;"
+        yield "exit"
 
     def break_statement(self, break_statement):
-        yield "break;"
+        yield "break"
 
     def for_statement(self, for_statement):
         index = for_statement.index

@@ -2,7 +2,7 @@ import logging
 import warnings
 
 from turingarena_impl.driver.interface.block import Block, BlockNode
-from turingarena_impl.driver.interface.context import ExpressionContext
+from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
@@ -72,8 +72,18 @@ class SwitchStatement(Statement, IntermediateNode):
                 labels.append(label)
             yield from case.validate()
 
+    def _describe_node(self):
+        yield f"switch {self.value} "
+        for c in self.cases:
+            yield from self._indent_all(self._describe_case(c))
 
-class CaseStatement(Statement):
+    def _describe_case(self, case):
+        labels = ", ".join(case.labels)
+        yield f"case {labels}"
+        yield from self._indent_all(case.body_node.node_description)
+
+
+class CaseStatement(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

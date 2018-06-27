@@ -58,3 +58,8 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
     def _get_reference_actions(self):
         for n in self.children:
             yield from n.reference_actions
+
+    def _describe_node(self):
+        yield f"step {self._get_direction().name.lower()} "
+        for n in self.children:
+            yield from self._indent_all(n.node_description)

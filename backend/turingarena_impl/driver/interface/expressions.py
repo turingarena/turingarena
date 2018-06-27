@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from bidict import frozenbidict
 
+from turingarena_impl.driver.generator import AbstractExpressionCodeGen
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.context import ExpressionContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
@@ -40,6 +41,9 @@ class Expression:
 
     def validate(self):
         return []
+
+    def __str__(self):
+        return AbstractExpressionCodeGen().expression(self)
 
 
 class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):

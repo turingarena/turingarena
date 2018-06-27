@@ -3,6 +3,7 @@ from typing import List
 
 from bidict import bidict
 
+from turingarena_impl.driver.generator import StatementDescriptionCodeGen
 from turingarena_impl.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.nodes import IntermediateNode
 from turingarena_impl.driver.interface.variables import ReferenceStatus
@@ -91,6 +92,9 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     @property
     def statement_type(self):
         return self.ast.statement_type
+
+    def __str__(self):
+        return "".join(StatementDescriptionCodeGen().statement(self))
 
 
 class SyntheticStatement(AbstractStatement):

@@ -190,6 +190,9 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                     f"got {parameter_count}"
                 )
 
+    def _describe_node(self):
+        yield f"resolve arguments ({self.statement})"
+
 
 class MethodReturnNode(StatementIntermediateNode):
     __slots__ = []
@@ -204,6 +207,9 @@ class MethodReturnNode(StatementIntermediateNode):
         if context.phase is ReferenceStatus.DECLARED:
             return_value = self.statement.return_value.evaluate(context.bindings)
             context.send_driver_upward(return_value)
+
+    def _describe_node(self):
+        yield f"return ({self.statement})"
 
 
 class MethodCallbacksNode(StatementIntermediateNode):
@@ -230,3 +236,12 @@ class MethodCallbacksNode(StatementIntermediateNode):
                 break
         context.send_driver_upward(0)  # no more callbacks
         return []
+
+    def _describe_node(self):
+        yield f"callbacks ({self.statement})"
+        for callback in self.statement.callbacks:
+            yield from self._indent_all(self._describe_callback(callback))
+
+    def _describe_callback(self, callback):
+        yield f"callback {callback.name}"
+        yield from self._indent_all(callback.body_node.node_description)

@@ -91,6 +91,9 @@ class CallbackCallNode(StatementIntermediateNode):
                 value = context.bindings[r]
                 context.send_driver_upward(value)
 
+    def _describe_node(self):
+        yield "callback_call"
+
 
 class ReturnStatement(Statement, IntermediateNode):
     __slots__ = []

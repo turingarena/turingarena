@@ -111,3 +111,8 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
     def _get_declaration_directions(self):
         for n in self.children:
             yield from n.declaration_directions
+
+    def _describe_node(self):
+        yield "block"
+        for n in self.children:
+            yield from self._indent_all(n.node_description)

@@ -103,3 +103,7 @@ class ForStatement(Statement, IntermediateNode):
                     )]
                     for assignments in assignments_by_iteration
                 ]
+
+    def _describe_node(self):
+        yield f"for {self.index.variable.name} to {self.index.range}"
+        yield from self._indent_all(self._body_node.node_description)
