@@ -22,6 +22,10 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             for inst in statement.intermediate_nodes:
                 inner_context = inner_context.with_reference_actions(inst.reference_actions)
 
+            inner_context = inner_context._replace(
+                has_request_lookahead=statement.has_request_lookahead,
+            )
+
             yield statement
 
     @property
@@ -58,6 +62,11 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     def _generate_flat_inner_nodes(self):
         for s in self.statements:
             yield from s.intermediate_nodes
+
+    def _get_has_request_lookahead(self):
+        if self.statements:
+            return self.statements[-1].has_request_lookahead
+        return self.context.has_request_lookahead
 
     def expects_request(self, request):
         for s in self.statements:

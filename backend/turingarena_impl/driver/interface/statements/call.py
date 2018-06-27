@@ -4,7 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, NextRequestNode
+from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.callback import CallbackImplementation
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -46,6 +46,9 @@ class CallStatement(Statement):
             self._find_callback_implementation(i, s)
             for i, s in enumerate(self.method.callbacks)
         ]
+
+    def _get_has_request_lookahead(self):
+        return False
 
     def _find_callback_implementation(self, index, callback):
         return next(
@@ -109,7 +112,9 @@ class CallStatement(Statement):
         )
 
     def _get_intermediate_nodes(self):
-        yield NextRequestNode()
+        if not self.context.has_request_lookahead:
+            yield RequestLookaheadNode()
+
         yield MethodResolveArgumentsNode(self)
 
         if self.method.has_callbacks:

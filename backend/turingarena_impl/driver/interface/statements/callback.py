@@ -4,7 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import CallbackPrototype
 from turingarena_impl.driver.interface.expressions import Expression, SyntheticExpression
-from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
@@ -34,6 +34,9 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def _generate_inner_nodes(self):
         yield CallbackCallNode(self)
         yield from self.body.flat_inner_nodes
+        if not self.has_return_value:
+            yield RequestLookaheadNode()
+        yield CallbackReturnNode(self)
 
     @property
     def body_node(self):
@@ -43,20 +46,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         context.send_driver_upward(1)
         context.send_driver_upward(self.context.callback_index)
         self.body_node.driver_run(context)
-
-        # FIXME: some redundancy with ReturnStatement
-        if not self.has_return_value:
-            context.handle_info_requests()
-            command = context.receive_driver_downward()
-            if not command == "callback_return":
-                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
-
-            has_return_value = bool(int(context.receive_driver_downward()))
-            if has_return_value:
-                raise InterfaceError(
-                    f"callback '{self.context.callback}' is a procedure, "
-                    f"but the provided implementation returned something"
-                )
 
     def _get_declaration_directions(self):
         return self.body_node.declaration_directions
@@ -95,6 +84,26 @@ class CallbackCallNode(StatementIntermediateNode):
         yield "callback_call"
 
 
+class CallbackReturnNode(StatementIntermediateNode):
+    def _driver_run_simple(self, context):
+        if context.phase is ReferenceStatus.DECLARED:
+            request = context.request_lookahead
+            command = request.command
+            if not command == "callback_return":
+                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+
+            if not self.statement.has_return_value:
+                has_return_value = bool(int(context.receive_driver_downward()))
+                if has_return_value:
+                    raise InterfaceError(
+                        f"callback '{self.context.callback}' is a procedure, "
+                        f"but the provided implementation returned something"
+                    )
+
+    def _describe_node(self):
+        yield "callback return"
+
+
 class ReturnStatement(Statement, IntermediateNode):
     __slots__ = []
 
@@ -103,6 +112,8 @@ class ReturnStatement(Statement, IntermediateNode):
         return Expression.compile(self.ast.value, self.context.expression(reference=True))
 
     def _get_intermediate_nodes(self):
+        if not self.context.has_request_lookahead:
+            yield RequestLookaheadNode()
         yield self
 
     def validate(self):
@@ -113,8 +124,8 @@ class ReturnStatement(Statement, IntermediateNode):
 
     def _driver_run_assignments(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
-            context.handle_info_requests()
-            command = context.receive_driver_downward()
+            request = context.request_lookahead
+            command = request.command
             if not command == "callback_return":
                 raise InterfaceError(f"expecting 'callback_return', got '{command}'")
             has_return_value = int(context.receive_driver_downward())

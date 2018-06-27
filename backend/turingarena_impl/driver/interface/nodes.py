@@ -94,7 +94,7 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
     __slots__ = []
 
 
-class NextRequestNode(IntermediateNode):
+class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
         # FIXME: copied from CallStatement
         should_run = (
@@ -106,3 +106,6 @@ class NextRequestNode(IntermediateNode):
         if not should_run:
             return ExecutionResult([], None)
         return ExecutionResult([], context.next_request())
+
+    def _describe_node(self):
+        yield "next request"

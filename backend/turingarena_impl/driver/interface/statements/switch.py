@@ -5,7 +5,7 @@ from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
+from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceAction
 
@@ -16,10 +16,18 @@ class SwitchStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        if self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED):
+        if self._should_resolve():
+            if not self.context.has_request_lookahead:
+                yield RequestLookaheadNode()
             yield SwitchResolveNode(self)
         # TODO: resolution node
         yield self
+
+    def _should_resolve(self):
+        return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
+
+    def _get_has_request_lookahead(self):
+        return self.context.has_request_lookahead or self._should_resolve()
 
     def _get_declaration_directions(self):
         for c in self.cases:
@@ -49,7 +57,10 @@ class SwitchStatement(Statement, IntermediateNode):
 
     def _get_cases(self):
         for case in self.ast.cases:
-            yield CaseStatement(ast=case, context=self.context)
+            # FIXME: .with_reference_actions(<resolve node>.reference_actions)
+            yield CaseStatement(ast=case, context=self.context._replace(
+                has_request_lookahead=self.has_request_lookahead,
+            ))
 
     @property
     def variable(self):

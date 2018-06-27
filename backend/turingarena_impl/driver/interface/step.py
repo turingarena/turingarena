@@ -56,6 +56,10 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
             yield from n.reference_actions
 
     def _describe_node(self):
-        yield f"step {self._get_direction().name.lower()} "
+        if self._get_direction() is None:
+            direction = "no direction"
+        else:
+            direction = self._get_direction().name.lower()
+        yield f"step {direction} "
         for n in self.children:
             yield from self._indent_all(n.node_description)
