@@ -6,20 +6,26 @@ class JavaCodeGen(InterfaceCodeGen):
         arrays = "[]" * parameter.dimensions
         return f"int {parameter.name}{arrays}"
 
+    def build_callbacks_interface_name(self, method):
+        return f'{method.name}_callbacks' 
+
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
         value_parameters = [self.build_parameter(p) for p in callable.parameters]
-        # TODO
-        #callback_parameters = [
-        #    self.build_signature(callback, [])
-        #    for callback in callbacks
-        #]
-        #parameters = ", ".join(value_parameters + callback_parameters)
+        if callbacks:
+            value_parameters.append(
+                    self.build_callbacks_interface_name(callable)+ " clbks")
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callable.name}({parameters})"
 
     def build_method_signature(self, func):
         return self.build_signature(func, func.callbacks)
+
+    def build_callback_signature(self, callback):
+        return_type = "int" if callback.has_return_value else "void"
+        value_parameters = [self.build_parameter(p) for p in callback.parameters]
+        parameters = ", ".join(value_parameters)
+        return f"{return_type} {callback.name}({parameters})"
 
     def line_comment(self, comment):
         return f"// {comment}"
@@ -39,51 +45,57 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_variable_declaration(self, declared_variable):
         yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name};'
 
-    #def generate_variable_allocation(self, allocated_variable):
-    #    var = allocated_variable.name
-    #    for index in allocated_variable.indexes:
-    #        var += f'[{index}]'
-    #    size = self.expression(allocated_variable.size)
-    #    yield f'{var} = new int{"[]" * allocated_variable.dimensions}[{size}];'
-
     def generate_variable_allocation(self, variable, indexes, size):
         indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
         dimensions = "[]" * (variable.dimensions - len(indexes) - 1)
         size = self.expression(size)
         yield f"{variable.name}{indexes} = new int[{size}]{dimensions};"
 
+    def generate_callbacks_declaration(self,callback):
+        return self.indent(f'{self.build_method_signature(callback)};')
+
     def generate_method_declaration(self, method_declaration):
+
+        if method_declaration.callbacks:
+            yield self.indent(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{')
+            for cbks in method_declaration.callbacks:
+                yield self.indent(self.generate_callbacks_declaration(cbks))
+            yield self.indent('}')
+
         yield self.indent(f'abstract {self.build_method_signature(method_declaration)};')
 
-    def generate_main_block(self, interface):
+    def generate_main(self,interface):
         yield
         yield 'public static void main(String args[]) {'
         yield self.indent('Solution __solution = new Solution();')
         yield from self.block(interface.main_block)
         yield '}'
 
+    def generate_main_block(self, interface):
+        yield from self.indent_all(self.generate_main(interface))
+
     def generate_callback(self, callback):
-        # TODO
+        yield  f'{self.build_callback_signature(callback)}' " {"
+        yield from self.block(callback.synthetic_body)
+        yield "}"
         pass
 
     def call_statement_body(self, call_statement):
 
         method = call_statement.method
 
-        # TODO
-        #for callback in call_statement.callbacks:
-        #    yield from self.generate_callback(callback)
+        # build anonimous inner class
+        cb_name = self.build_callbacks_interface_name(method)
+        yield cb_name + " __clbks = new " + cb_name + "() {" 
+        for callback in call_statement.callbacks:
+            yield from self.indent_all(self.generate_callback(callback))
+        yield "}"
 
         value_arguments = [self.expression(p) for p in call_statement.arguments]
+        if method.callbacks:
+            value_arguments.append(
+                    self.build_callbacks_interface_name(method)+ " __clbks")
 
-        # TODO
-        #callback_arguments = [
-        #    f"_callback_{callback_signature.name}"
-        #    for callback_signature in method.callbacks
-        #]
-
-        # TODO
-        #parameters = ", ".join(value_arguments + callback_arguments)
         parameters = ", ".join(value_arguments)
 
         if method.has_return_value:
@@ -94,22 +106,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield f"{return_value}__solution.{method.name}({parameters});"
 
     def call_statement(self, call_statement):
-        if call_statement.method.has_callbacks:
-            # TODO
-            pass
-            #yield "{"
-            #yield from self.indent_all(self.call_statement_body(call_statement))
-            #yield "}"
-        else:
-            yield from self.call_statement_body(call_statement)
-
-    # TODO
-    #def callback_statement(self, statement):
-    #    callback = statement.callback
-    #    yield f'{self.build_method_signature(callback)}'' {'
-    #    yield from self.block(statement.callback.synthetic_body)
-    #    yield '}'
-    #    yield
+        yield from self.call_statement_body(call_statement)
 
     def write_statement(self, statement):
         format_string = ' '.join('%d' for _ in statement.arguments) + r'\n'
