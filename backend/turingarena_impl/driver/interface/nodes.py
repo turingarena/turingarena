@@ -92,17 +92,3 @@ class IntermediateNode:
 
 class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []
-
-
-class NextRequestNode(IntermediateNode):
-    def _driver_run(self, context):
-        # FIXME: copied from CallStatement
-        should_run = (
-                context.direction is ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.DECLARED
-                or context.direction is not ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.RESOLVED
-        )
-        if not should_run:
-            return ExecutionResult([], None)
-        return ExecutionResult([], context.next_request())
