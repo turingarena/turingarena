@@ -14,7 +14,7 @@ class JavaCodeGen(InterfaceCodeGen):
         value_parameters = [self.build_parameter(p) for p in callable.parameters]
         if callbacks:
             value_parameters.append(
-                    self.build_callbacks_interface_name(callable)+ " clbks")
+                    self.build_callbacks_interface_name(callable)+ " callbacks")
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callable.name}({parameters})"
 
@@ -74,7 +74,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield from self.indent_all(self.generate_main(interface))
 
     def generate_callback(self, callback):
-        yield  f'{self.build_callback_signature(callback)}' " {"
+        yield  f'public {self.build_callback_signature(callback)}' " {"
         yield from self.block(callback.synthetic_body)
         yield "}"
         pass
@@ -84,16 +84,16 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         method = call_statement.method
 
         # build anonimous inner class
-        cb_name = self.build_callbacks_interface_name(method)
-        yield cb_name + " __clbks = new " + cb_name + "() {" 
-        for callback in call_statement.callbacks:
-            yield from self.indent_all(self.generate_callback(callback))
-        yield "}"
+        if call_statement.callbacks:
+            cb_name = self.build_callbacks_interface_name(method)
+            yield cb_name + " __clbks = new " + cb_name + "() {" 
+            for callback in call_statement.callbacks:
+                yield from self.indent_all(self.generate_callback(callback))
+            yield "};"
 
         value_arguments = [self.expression(p) for p in call_statement.arguments]
         if method.callbacks:
-            value_arguments.append(
-                    self.build_callbacks_interface_name(method)+ " __clbks")
+            value_arguments.append("__clbks")
 
         parameters = ", ".join(value_arguments)
 
@@ -171,12 +171,13 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
         yield 'class Solution extends Skeleton {'
 
     def generate_method_declaration(self, method_declaration):
-        yield
         if method_declaration.callbacks:
+            yield
             yield self.indent(self.line_comment(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{'))
             for cbks in method_declaration.callbacks:
                 yield self.indent(self.line_comment(self.generate_callbacks_declaration(cbks)))
             yield self.indent(self.line_comment('}'))
+
         yield
         yield self.indent(f"{self.build_method_signature(method_declaration)}" " {")
         yield self.indent(self.indent('// TODO'))
