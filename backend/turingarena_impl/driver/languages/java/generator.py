@@ -27,12 +27,14 @@ class JavaCodeGen(InterfaceCodeGen):
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callback.name}({parameters})"
 
-    def line_comment(self, comment):
-        return f"// {comment}"
-
     def generate_footer(self, interface):
         return "}"
 
+    def line_comment(self, comment):
+        return f"// {comment}"
+
+    def generate_callbacks_declaration(self,callback):
+        return self.indent(f'{self.build_method_signature(callback)};')
 
 
 class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
@@ -50,9 +52,6 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         dimensions = "[]" * (variable.dimensions - len(indexes) - 1)
         size = self.expression(size)
         yield f"{variable.name}{indexes} = new int[{size}]{dimensions};"
-
-    def generate_callbacks_declaration(self,callback):
-        return self.indent(f'{self.build_method_signature(callback)};')
 
     def generate_method_declaration(self, method_declaration):
 
@@ -172,6 +171,12 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
         yield 'class Solution extends Skeleton {'
 
     def generate_method_declaration(self, method_declaration):
+        yield
+        if method_declaration.callbacks:
+            yield self.indent(self.line_comment(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{'))
+            for cbks in method_declaration.callbacks:
+                yield self.indent(self.line_comment(self.generate_callbacks_declaration(cbks)))
+            yield self.indent(self.line_comment('}'))
         yield
         yield self.indent(f"{self.build_method_signature(method_declaration)}" " {")
         yield self.indent(self.indent('// TODO'))
