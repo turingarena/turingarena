@@ -68,6 +68,14 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             return self.statements[-1].has_request_lookahead
         return self.context.has_request_lookahead
 
+    def _get_first_requests(self):
+        for s in self.statements:
+            yield from s.first_requests
+            if None not in s.first_requests:
+                break
+        else:
+            yield None
+
     def expects_request(self, request):
         for s in self.statements:
             if s.expects_request(request):

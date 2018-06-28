@@ -3,6 +3,7 @@ import logging
 from turingarena import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
+from turingarena_impl.driver.interface.execution import CallRequestSignature
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.callback import CallbackImplementation
@@ -49,6 +50,9 @@ class CallStatement(Statement):
 
     def _get_has_request_lookahead(self):
         return False
+
+    def _get_first_requests(self):
+        yield CallRequestSignature("call", self.method_name)
 
     def _find_callback_implementation(self, index, callback):
         return next(
@@ -103,13 +107,6 @@ class CallStatement(Statement):
                 Diagnostic.Messages.METHOD_DOES_NOT_RETURN_VALUE, method.name,
                 parseinfo=self.ast.return_value.parseinfo,
             )
-
-    def expects_request(self, request):
-        return (
-                request is not None
-                and isinstance(request, MethodCall)
-                and request.method_name == self.method_name
-        )
 
     def _get_intermediate_nodes(self):
         if not self.context.has_request_lookahead:

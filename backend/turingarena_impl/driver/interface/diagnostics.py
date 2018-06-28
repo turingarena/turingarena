@@ -25,6 +25,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         UNREACHABLE_CODE = "unreachable code after break/exit"
         DUPLICATED_CASE_LABEL = "duplicated case label {}"
         UNEXPECTED_CALLBACK = "callback {} not allowed here"
+        SWITCH_LABEL_NOT_LITERAL = "switch labels must be integer literals"
 
     @staticmethod
     def build_message(msg, *args):

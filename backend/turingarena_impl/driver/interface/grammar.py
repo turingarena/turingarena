@@ -42,7 +42,7 @@ grammar_ebnf = r"""
 
     return_exp = @:expression '=';
     else_body = 'else' ~ @:block;
-    switch_case = 'case' ~ labels:','.{ int_literal }+ body:block;
+    switch_case = 'case' ~ labels:','.{ expression }+ body:block;
     
     expression = or_expression;
     or_expression = 

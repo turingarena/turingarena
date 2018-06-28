@@ -1,4 +1,3 @@
-import logging
 from abc import abstractmethod, ABCMeta
 from collections import namedtuple
 from functools import lru_cache
@@ -26,6 +25,13 @@ class ImperativeStructure(metaclass=ABCMeta):
     @abstractmethod
     def _get_has_request_lookahead(self):
         pass
+
+    @property
+    def first_requests(self):
+        return frozenset(self._get_first_requests())
+
+    def _get_first_requests(self):
+        yield None
 
     @abstractmethod
     def expects_request(self, request):
