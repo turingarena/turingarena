@@ -26,7 +26,7 @@ class AbstractStatement(ImperativeStructure):
 
     @property
     def variables_to_declare(self):
-        return list(self._get_variables_to_declare())
+        return frozenset(self._get_variables_to_declare())
 
     def _get_variables_to_declare(self):
         for inst in self.intermediate_nodes:
