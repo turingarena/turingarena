@@ -114,7 +114,7 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
-        result = ExecutionResult([], None)
+        result = ExecutionResult.initial()
         for n in self.children:
             result = result.merge(n.driver_run(context.extend(result)))
         return result

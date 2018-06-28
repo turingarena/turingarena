@@ -36,7 +36,7 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
             return result
 
     def _run_children(self, context):
-        result = ExecutionResult([], None)
+        result = ExecutionResult.initial()
         for n in self.children:
             result = result.merge(n.driver_run(context.extend(result)))
         return result

@@ -22,6 +22,7 @@ interface_text = """
                 }
             }
         }
+        checkpoint;
     }
 """
 
@@ -37,12 +38,13 @@ def test_loop():
     ) as algo:
         with algo.run() as p:
             print ("running process")
-            assert p.call.f1() == 1
+            assert p.functions.f1() == 1
             print("call f1() ok")
-            assert p.call.f2() == 2
+            assert p.functions.f2() == 2
             print("call f2() ok")
-            assert p.call.f1() == 1
+            assert p.functions.f1() == 1
             print("call f1() ok")
+            p.checkpoint()
 
 
 def test_unexpected_break():

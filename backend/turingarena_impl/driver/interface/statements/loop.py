@@ -2,14 +2,10 @@ import logging
 
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, ExecutionResult
 from turingarena_impl.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
-
-
-class LoopBreak(Exception):
-    pass
 
 
 class LoopStatement(Statement, IntermediateNode):
@@ -18,12 +14,11 @@ class LoopStatement(Statement, IntermediateNode):
     def _get_intermediate_nodes(self):
         yield self
 
-    def _driver_run_simple(self, context):
-        try:
-            while True:
-                self.body_node.driver_run(context)
-        except LoopBreak:
-            pass
+    def _driver_run(self, context):
+        while True:
+            result = self.body_node.driver_run(context)
+            if result.does_break:
+                return result
 
     def _get_declaration_directions(self):
         return self.body_node.declaration_directions
@@ -33,17 +28,25 @@ class LoopStatement(Statement, IntermediateNode):
 
     @property
     def body(self):
+        assert not self.context.has_request_lookahead
         return Block(ast=self.ast.body, context=self.context.with_loop())
 
     @property
     def body_node(self):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
+    def _get_has_request_lookahead(self):
+        return self.body.has_request_lookahead
+
     def expects_request(self, request):
         return self.body.expects_request(request)
 
     def validate(self):
         yield from self.body.validate()
+
+    def _describe_node(self):
+        yield "loop"
+        yield from self._indent_all(self.body_node.node_description)
 
 
 class BreakStatement(Statement, IntermediateNode):
@@ -53,7 +56,7 @@ class BreakStatement(Statement, IntermediateNode):
         yield self
 
     def _driver_run(self, context):
-        raise LoopBreak
+        return ExecutionResult.initial()._replace(does_break=True)
 
     def _get_reference_actions(self):
         return []

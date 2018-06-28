@@ -3,12 +3,20 @@ from collections import namedtuple
 from typing import List, Mapping, Any
 
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
-from turingarena_impl.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus, ReferenceDirection
+from turingarena_impl.driver.interface.variables import ReferenceAction, Reference
 
 Bindings = Mapping[Reference, Any]
 
 
-class ExecutionResult(namedtuple("ExecutionResult", ["assignments", "request_lookahead"])):
+class ExecutionResult(namedtuple("ExecutionResult", [
+    "assignments",
+    "request_lookahead",
+    "does_break",
+])):
+    @staticmethod
+    def initial():
+        return ExecutionResult([], None, does_break=False)
+
     def merge(self, other):
         request_lookahead = other.request_lookahead
         if request_lookahead is None:
@@ -16,6 +24,7 @@ class ExecutionResult(namedtuple("ExecutionResult", ["assignments", "request_loo
         return ExecutionResult(
             self.assignments + other.assignments,
             request_lookahead=request_lookahead,
+            does_break=other.does_break,
         )
 
 
@@ -51,10 +60,10 @@ class IntermediateNode:
         assert (assignments, simple, full).count(NotImplemented) == 2
 
         if assignments is not NotImplemented:
-            return ExecutionResult(list(assignments), None)
+            return ExecutionResult(list(assignments), None, does_break=False)
 
         if simple is not NotImplemented:
-            return ExecutionResult([], None)
+            return ExecutionResult.initial()
 
         if full is not NotImplemented:
             assert isinstance(full, ExecutionResult)
@@ -97,8 +106,10 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
 class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
         if not context.is_first_execution:
-            return ExecutionResult([], None)
-        return ExecutionResult([], context.next_request())
+            return ExecutionResult.initial()
+        return ExecutionResult.initial()._replace(
+            request_lookahead=context.next_request(),
+        )
 
     def _describe_node(self):
         yield "next request"
