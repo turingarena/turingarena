@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+
 import sys
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,11 @@ def run_algorithm(source_path, interface_path=None):
         language_name=None,
         interface_path=interface_path,
     ).run()
+
+
+def algorithm_assert(condition, *args, exc_type=AlgorithmError):
+    if not condition:
+        raise exc_type(*args)
 
 
 class Submission:
