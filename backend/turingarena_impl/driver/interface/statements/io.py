@@ -4,7 +4,7 @@ from abc import abstractmethod
 from turingarena import InterfaceError
 from turingarena_impl.driver.interface.exceptions import CommunicationBroken
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
@@ -53,7 +53,7 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.DOWNWARD
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             logging.debug(f"Bindings: {context.bindings}")
             context.send_downward([
@@ -78,7 +78,7 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
 
-    def _driver_run(self, context):
+    def _driver_run_assignments(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             for a, value in zip(self.arguments, values):
@@ -89,7 +89,12 @@ class CheckpointStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
+        if not self.context.has_request_lookahead:
+            yield RequestLookaheadNode()
         yield self
+
+    def _get_has_request_lookahead(self):
+        return False
 
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
@@ -97,10 +102,9 @@ class CheckpointStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         if context.phase is ReferenceStatus.DECLARED:
-            context.handle_info_requests()
-            command = context.receive_driver_downward()
+            command = context.request_lookahead.command
             if not command == "checkpoint":
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
             context.send_driver_upward(0)

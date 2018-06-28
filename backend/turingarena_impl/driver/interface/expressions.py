@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from bidict import frozenbidict
 
+from turingarena_impl.driver.generator import AbstractExpressionCodeGen
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.context import ExpressionContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
@@ -31,6 +32,10 @@ class Expression:
     def dimensions(self):
         return 0
 
+    @abstractmethod
+    def is_status(self, status):
+        pass
+
     @property
     def reference(self):
         return None
@@ -40,6 +45,9 @@ class Expression:
 
     def validate(self):
         return []
+
+    def __str__(self):
+        return AbstractExpressionCodeGen().expression(self)
 
 
 class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):
@@ -52,6 +60,9 @@ class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):
 
     def evaluate(self, bindings):
         return self.value
+
+    def is_status(self, status):
+        return True
 
 
 class IntLiteralExpression(LiteralExpression):
@@ -95,6 +106,9 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
         variable_mapping = self.context.statement_context.variable_mapping
         return variable_mapping.get(self.variable_name, None)
 
+    def is_status(self, status):
+        return self.reference in self.context.statement_context.get_references(status)
+
     def is_reference_to(self, variable):
         return self.variable == variable
 
@@ -134,6 +148,12 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
 
     def is_reference_to(self, variable):
         return False
+
+    def is_status(self, status):
+        return (
+                self.reference in self.context.statement_context.get_references(status)
+                or self.array.is_status(status)
+        )
 
     @property
     def expected_for_index(self):

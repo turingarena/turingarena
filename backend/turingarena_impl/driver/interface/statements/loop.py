@@ -18,7 +18,7 @@ class LoopStatement(Statement, IntermediateNode):
     def _get_intermediate_nodes(self):
         yield self
 
-    def _driver_run(self, context):
+    def _driver_run_simple(self, context):
         try:
             while True:
                 self.body_node.driver_run(context)

@@ -10,12 +10,16 @@ logger = logging.getLogger(__name__)
 
 Assignments = List[Tuple[Reference, Any]]
 
+RequestSignature = namedtuple("RequestSignature", ["command"])
+CallRequestSignature = namedtuple("CallRequestSignature", ["command", "method_name"])
+
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "direction",
     "phase",
     "process",
+    "request_lookahead",
     "driver_connection",
     "sandbox_connection",
 ])):
@@ -34,7 +38,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         logging.debug(f"receive_driver_downward -> {line}")
         return line
 
-    def handle_info_requests(self):
+    def next_request(self):
         while True:
             command = self.receive_driver_downward()
             if command == "wait":
@@ -46,6 +50,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             else:
                 assert command == "request"
                 break
+        command = self.receive_driver_downward()
+        if command == "call":
+            method_name = self.receive_driver_downward()
+            return CallRequestSignature(command, method_name)
+        else:
+            return RequestSignature(command)
 
     def send_downward(self, values):
         try:
@@ -88,8 +98,16 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         for line in lines:
             self.send_driver_upward(int(line))
 
-    def with_assigments(self, assignments: Assignments):
+    def with_assigments(self, assignments):
         return self._replace(bindings={
             **self.bindings,
             **dict(assignments),
         })
+
+    def extend(self, execution_result):
+        request_lookahead = execution_result.request_lookahead
+        if request_lookahead is None:
+            request_lookahead = self.request_lookahead
+        return self.with_assigments(execution_result.assignments)._replace(
+            request_lookahead=request_lookahead,
+        )

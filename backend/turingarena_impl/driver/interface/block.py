@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena_impl.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.expressions import SyntheticExpression
-from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.nodes import IntermediateNode, ExecutionResult
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.step import Step
 
@@ -21,6 +21,10 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 
             for inst in statement.intermediate_nodes:
                 inner_context = inner_context.with_reference_actions(inst.reference_actions)
+
+            inner_context = inner_context._replace(
+                has_request_lookahead=statement.has_request_lookahead,
+            )
 
             yield statement
 
@@ -58,6 +62,19 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     def _generate_flat_inner_nodes(self):
         for s in self.statements:
             yield from s.intermediate_nodes
+
+    def _get_has_request_lookahead(self):
+        if self.statements:
+            return self.statements[-1].has_request_lookahead
+        return self.context.has_request_lookahead
+
+    def _get_first_requests(self):
+        for s in self.statements:
+            yield from s.first_requests
+            if None not in s.first_requests:
+                break
+        else:
+            yield None
 
     def expects_request(self, request):
         for s in self.statements:
@@ -97,12 +114,10 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
-        assignments = []
+        result = ExecutionResult([], None)
         for n in self.children:
-            inner_assigments = n.driver_run(context)
-            assignments.extend(inner_assigments)
-            context = context.with_assigments(inner_assigments)
-        return assignments
+            result = result.merge(n.driver_run(context.extend(result)))
+        return result
 
     def _get_reference_actions(self):
         for n in self.children:
@@ -111,3 +126,8 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
     def _get_declaration_directions(self):
         for n in self.children:
             yield from n.declaration_directions
+
+    def _describe_node(self):
+        yield "block"
+        for n in self.children:
+            yield from self._indent_all(n.node_description)

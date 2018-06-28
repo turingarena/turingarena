@@ -1,12 +1,14 @@
 import logging
 import warnings
 
+from turingarena import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
-from turingarena_impl.driver.interface.context import ExpressionContext
+from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
+from turingarena_impl.driver.interface.expressions import Expression, IntLiteralExpression
+from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
+from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +17,18 @@ class SwitchStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
+        if self._should_resolve():
+            if not self.context.has_request_lookahead:
+                yield RequestLookaheadNode()
+            yield SwitchResolveNode(self)
         # TODO: resolution node
         yield self
+
+    def _should_resolve(self):
+        return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
+
+    def _get_has_request_lookahead(self):
+        return self.context.has_request_lookahead or self._should_resolve()
 
     def _get_declaration_directions(self):
         for c in self.cases:
@@ -33,6 +45,7 @@ class SwitchStatement(Statement, IntermediateNode):
             for label in case.labels:
                 if value == label.value:
                     return case.body_node.driver_run(context)
+        raise InterfaceError(f"no case matches in switch")
 
     def expects_request(self, request):
         for case in self.cases:
@@ -46,7 +59,14 @@ class SwitchStatement(Statement, IntermediateNode):
 
     def _get_cases(self):
         for case in self.ast.cases:
-            yield CaseStatement(ast=case, context=self.context)
+            # FIXME: .with_reference_actions(<resolve node>.reference_actions)
+            yield CaseStatement(ast=case, context=self.context._replace(
+                has_request_lookahead=self.has_request_lookahead,
+            ))
+
+    def _get_first_requests(self):
+        for c in self.cases:
+            yield from c.body.first_requests
 
     @property
     def variable(self):
@@ -72,8 +92,18 @@ class SwitchStatement(Statement, IntermediateNode):
                 labels.append(label)
             yield from case.validate()
 
+    def _describe_node(self):
+        yield f"switch {self.value} "
+        for c in self.cases:
+            yield from self._indent_all(self._describe_case(c))
 
-class CaseStatement(Statement):
+    def _describe_case(self, case):
+        labels = ", ".join(str(l.value) for l in case.labels)
+        yield f"case {labels}"
+        yield from self._indent_all(case.body_node.node_description)
+
+
+class CaseStatement(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -86,7 +116,41 @@ class CaseStatement(Statement):
 
     @property
     def labels(self):
-        return self.ast.labels
+        return [
+            Expression.compile(l, self.context.expression())
+            for l in self.ast.labels
+        ]
+
+    def validate(self):
+        for l in self.labels:
+            if not isinstance(l, IntLiteralExpression):
+                yield Diagnostic(
+                    Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION,
+                    parseinfo=self.ast.labels.parseinfo,
+                )
+        yield from self.body.validate()
+
+
+class SwitchResolveNode(StatementIntermediateNode):
+    def _get_reference_actions(self):
+        yield ReferenceAction(self.statement.value.reference, ReferenceStatus.RESOLVED)
+
+    def _find_matching_cases(self, request):
+        for c in self.statement.cases:
+            if request in c.body.first_requests:
+                yield c
+
+    def _driver_run_assignments(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            matching_cases = list(self._find_matching_cases(context.request_lookahead))
+
+            [case] = matching_cases
+            [label] = case.labels
+
+            yield self.statement.value.reference, label.value
+
+    def _describe_node(self):
+        yield f"resolve {self.statement}"
 
 
 class SwitchInstruction(StatementIntermediateNode):

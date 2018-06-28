@@ -68,3 +68,24 @@ def validate_interface_cli(args):
 
     if not errors:
         print("Interface file validation succeded")
+
+
+@docopt_cli
+def describe_interface_cli(args):
+    """Describe interface file
+
+    Usage:
+        describe [options]
+
+    Options:
+        -I --interface=<file>  Interface definition file [default: interface.txt].
+    """
+
+    with open(args["--interface"]) as f:
+        interface_text = f.read()
+
+    interface = InterfaceDefinition.compile(interface_text, validate=False)
+
+    errors = False
+    for line in interface.main_node.node_description:
+        print(line)
