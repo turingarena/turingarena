@@ -4,7 +4,7 @@ from typing import List, Tuple, Any
 
 from turingarena.driver.commands import deserialize_data, serialize_data
 from turingarena_impl.driver.interface.exceptions import CommunicationBroken
-from turingarena_impl.driver.interface.variables import Reference
+from turingarena_impl.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -110,4 +110,13 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             request_lookahead = self.request_lookahead
         return self.with_assigments(execution_result.assignments)._replace(
             request_lookahead=request_lookahead,
+        )
+
+    @property
+    def is_first_execution(self):
+        return (
+                self.direction is ReferenceDirection.UPWARD
+                and self.phase is ReferenceStatus.DECLARED
+                or self.direction is not ReferenceDirection.UPWARD
+                and self.phase is ReferenceStatus.RESOLVED
         )

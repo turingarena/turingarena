@@ -96,14 +96,7 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
 
 class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
-        # FIXME: copied from CallStatement
-        should_run = (
-                context.direction is ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.DECLARED
-                or context.direction is not ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.RESOLVED
-        )
-        if not should_run:
+        if not context.is_first_execution:
             return ExecutionResult([], None)
         return ExecutionResult([], context.next_request())
 

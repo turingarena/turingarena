@@ -36,7 +36,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         yield from self.body.flat_inner_nodes
         if not self.has_return_value:
             yield RequestLookaheadNode()
-        yield CallbackReturnNode(self)
+            yield CallbackReturnNode(callback=self, return_statement=None)
 
     @property
     def body_node(self):
@@ -84,27 +84,39 @@ class CallbackCallNode(StatementIntermediateNode):
         yield "callback_call"
 
 
-class CallbackReturnNode(StatementIntermediateNode):
-    def _driver_run_simple(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
-            request = context.request_lookahead
-            command = request.command
-            if not command == "callback_return":
-                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
+    "callback",
+    "return_statement",
+])):
+    def _driver_run_assignments(self, context):
+        if not context.is_first_execution:
+            return
+        request = context.request_lookahead
+        command = request.command
+        if not command == "callback_return":
+            raise InterfaceError(f"expecting 'callback_return', got '{command}'")
 
-            if not self.statement.has_return_value:
-                has_return_value = bool(int(context.receive_driver_downward()))
-                if has_return_value:
-                    raise InterfaceError(
-                        f"callback '{self.context.callback}' is a procedure, "
-                        f"but the provided implementation returned something"
-                    )
+        has_return_value = bool(int(context.receive_driver_downward()))
+        if self.return_statement is not None:
+            if not has_return_value:
+                raise InterfaceError(
+                    f"callback is a function, "
+                    f"but the provided implementation did not return anything"
+                )
+            value = int(context.receive_driver_downward())
+            yield self.return_statement.value.reference, value
+        else:
+            if has_return_value:
+                raise InterfaceError(
+                    f"callback is a procedure, "
+                    f"but the provided implementation returned something"
+                )
 
     def _describe_node(self):
-        yield "callback return"
+        yield f"callback return {self.return_statement or self.callback.name}"
 
 
-class ReturnStatement(Statement, IntermediateNode):
+class ReturnStatement(Statement):
     __slots__ = []
 
     @property
@@ -114,29 +126,13 @@ class ReturnStatement(Statement, IntermediateNode):
     def _get_intermediate_nodes(self):
         if not self.context.has_request_lookahead:
             yield RequestLookaheadNode()
-        yield self
+        yield CallbackReturnNode(callback=None, return_statement=self)
 
     def validate(self):
         yield from self.value.validate()
 
     def _get_reference_actions(self):
         yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
-
-    def _driver_run_assignments(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
-            request = context.request_lookahead
-            command = request.command
-            if not command == "callback_return":
-                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
-            has_return_value = int(context.receive_driver_downward())
-            if not has_return_value:
-                raise InterfaceError(
-                    f"callback '{self.context.callback}' is a function, "
-                    f"but the provided implementation did not return anything"
-                )
-            value = int(context.receive_driver_downward())
-
-            yield self.value.reference, value
 
 
 class ExitStatement(Statement, IntermediateNode):

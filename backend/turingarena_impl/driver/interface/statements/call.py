@@ -131,13 +131,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
     def _driver_run_assignments(self, context):
-        should_run = (
-                context.direction is ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.DECLARED
-                or context.direction is not ReferenceDirection.UPWARD
-                and context.phase is ReferenceStatus.RESOLVED
-        )
-        if not should_run:
+        if not context.is_first_execution:
             return
 
         method = self.statement.method
