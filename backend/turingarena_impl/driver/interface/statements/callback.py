@@ -124,8 +124,7 @@ class ReturnStatement(Statement):
         return Expression.compile(self.ast.value, self.context.expression(reference=True))
 
     def _get_intermediate_nodes(self):
-        if not self.context.has_request_lookahead:
-            yield RequestLookaheadNode()
+        yield RequestLookaheadNode()
         yield CallbackReturnNode(callback=None, return_statement=self)
 
     def validate(self):

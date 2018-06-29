@@ -18,17 +18,13 @@ class SwitchStatement(Statement, IntermediateNode):
 
     def _get_intermediate_nodes(self):
         if self._should_resolve():
-            if not self.context.has_request_lookahead:
-                yield RequestLookaheadNode()
+            yield RequestLookaheadNode()
             yield SwitchResolveNode(self)
         # TODO: resolution node
         yield self
 
     def _should_resolve(self):
         return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
-
-    def _get_has_request_lookahead(self):
-        return self.context.has_request_lookahead or self._should_resolve()
 
     def _get_declaration_directions(self):
         for c in self.cases:
@@ -54,9 +50,7 @@ class SwitchStatement(Statement, IntermediateNode):
     def _get_cases(self):
         for case in self.ast.cases:
             # FIXME: .with_reference_actions(<resolve node>.reference_actions)
-            yield CaseStatement(ast=case, context=self.context._replace(
-                has_request_lookahead=self.has_request_lookahead,
-            ))
+            yield CaseStatement(ast=case, context=self.context)
 
     def _get_first_requests(self):
         for c in self.cases:
@@ -157,12 +151,3 @@ class SwitchResolveNode(StatementIntermediateNode):
 
     def _describe_node(self):
         yield f"resolve {self.statement}"
-
-
-class SwitchInstruction(StatementIntermediateNode):
-    def on_request_lookahead(self, request):
-        if self.statement.value.is_assignable():
-            for case in self.statement.cases:
-                if len(case.labels) == 1 and case.expects_request(request):
-                    self.statement.value.assign(self.bindings, case.labels[0].value)
-                    return

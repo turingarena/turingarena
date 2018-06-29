@@ -25,7 +25,7 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
                 phase=ReferenceStatus.RESOLVED,
                 direction=self._get_direction(),
             ))
-            context = context.extend(result)
+            context = context.with_assigments(result.assignments)
 
             other_result = self._run_children(context._replace(
                 phase=ReferenceStatus.DECLARED,
@@ -36,7 +36,7 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
             return result
 
     def _run_children(self, context):
-        result = ExecutionResult.initial()
+        result = context.result()
         for n in self.children:
             result = result.merge(n.driver_run(context.extend(result)))
         return result

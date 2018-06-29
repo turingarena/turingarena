@@ -17,16 +17,6 @@ class ImperativeStructure(metaclass=ABCMeta):
     __slots__ = []
 
     @property
-    def has_request_lookahead(self):
-        has_request_lookahead = self._get_has_request_lookahead()
-        assert isinstance(has_request_lookahead, bool)
-        return has_request_lookahead
-
-    @abstractmethod
-    def _get_has_request_lookahead(self):
-        pass
-
-    @property
     def first_requests(self):
         return frozenset(self._get_first_requests())
 

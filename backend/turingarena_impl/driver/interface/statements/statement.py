@@ -56,9 +56,6 @@ class AbstractStatement(ImperativeStructure):
     def _get_comment(self):
         return None
 
-    def _get_has_request_lookahead(self):
-        return self.context.has_request_lookahead
-
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []

@@ -48,9 +48,6 @@ class CallStatement(Statement):
             for i, s in enumerate(self.method.callbacks)
         ]
 
-    def _get_has_request_lookahead(self):
-        return False
-
     def _get_first_requests(self):
         yield CallRequestSignature("call", self.method_name)
 
@@ -109,9 +106,7 @@ class CallStatement(Statement):
             )
 
     def _get_intermediate_nodes(self):
-        if not self.context.has_request_lookahead:
-            yield RequestLookaheadNode()
-
+        yield RequestLookaheadNode()
         yield MethodResolveArgumentsNode(self)
 
         if self.method.has_callbacks:
@@ -130,9 +125,9 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
-    def _driver_run_assignments(self, context):
+    def _driver_run(self, context):
         if not context.is_first_execution:
-            return
+            return context.result()
 
         method = self.statement.method
 
@@ -151,13 +146,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                 f"got {parameter_count}"
             )
 
-        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-        for a in self.statement.arguments:
-            value = context.deserialize_request_data()
-            if a.reference is not None and a.reference not in references:
-                logging.debug(f"Resolved parameter: {a.reference} -> {value}")
-                yield a.reference, value
-                # TODO: else, check value is the one expected
+        assignments = list(self._get_assignments(context))
 
         has_return_value = bool(int(context.receive_driver_downward()))
         expects_return_value = (self.statement.return_value is not None)
@@ -184,6 +173,20 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                     f"'{c.name}' has {expected_parameter_count} parameters, "
                     f"got {parameter_count}"
                 )
+
+        return context.result()._replace(
+            assignments=assignments,
+            request_lookahead=None,
+        )
+
+    def _get_assignments(self, context):
+        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
+        for a in self.statement.arguments:
+            value = context.deserialize_request_data()
+            if a.reference is not None and a.reference not in references:
+                logging.debug(f"Resolved parameter: {a.reference} -> {value}")
+                yield a.reference, value
+                # TODO: else, check value is the one expected
 
     def _describe_node(self):
         yield f"resolve arguments ({self.statement})"

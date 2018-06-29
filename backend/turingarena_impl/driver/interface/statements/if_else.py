@@ -2,8 +2,7 @@ import logging
 
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.expressions import Expression
-from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode, \
-    ExecutionResult
+from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus
 
@@ -19,16 +18,12 @@ class IfStatement(Statement, IntermediateNode):
 
     @property
     def then_body(self):
-        return Block(ast=self.ast.then_body, context=self.context._replace(
-            has_request_lookahead=self.has_request_lookahead,
-        ))
+        return Block(ast=self.ast.then_body, context=self.context)
 
     @property
     def else_body(self):
         if self.ast.else_body is not None:
-            return Block(ast=self.ast.else_body, context=self.context._replace(
-                has_request_lookahead=self.has_request_lookahead,
-            ))
+            return Block(ast=self.ast.else_body, context=self.context)
         else:
             return None
 
@@ -42,9 +37,6 @@ class IfStatement(Statement, IntermediateNode):
             return None
         return BlockNode.from_nodes(self.else_body.flat_inner_nodes)
 
-    def _get_has_request_lookahead(self):
-        return self.context.has_request_lookahead or self._needs_request_lookahead()
-
     def validate(self):
         yield from self.condition.validate()
         yield from self.then_body.validate()
@@ -56,8 +48,7 @@ class IfStatement(Statement, IntermediateNode):
 
     def _get_intermediate_nodes(self):
         if self._needs_request_lookahead():
-            if not self.context.has_request_lookahead:
-                yield RequestLookaheadNode()
+            yield RequestLookaheadNode()
             yield ResolveIfNode(self)
         yield self
 
@@ -80,7 +71,7 @@ class IfStatement(Statement, IntermediateNode):
         elif self.else_node is not None:
             return self.else_node.driver_run(context)
         else:
-            return ExecutionResult.initial()
+            return context.result()
 
     def _describe_node(self):
         yield f"if {self.condition}"
@@ -98,6 +89,11 @@ class ResolveIfNode(StatementIntermediateNode):
             if request in self.statement.else_body.first_requests:
                 yield 0
 
+    def _get_conditions_expecting_no_request(self):
+        yield from self._get_conditions_expecting(None)
+        if self.statement.else_body is None:
+            yield 0
+
     def _driver_run_assignments(self, context):
         if context.phase is not ReferenceStatus.RESOLVED:
             return
@@ -105,7 +101,7 @@ class ResolveIfNode(StatementIntermediateNode):
         matching_conditions = frozenset(self._get_conditions_expecting(context.request_lookahead))
         logger.debug(f"matching_conditions1: {matching_conditions}")
         if not matching_conditions:
-            matching_conditions = frozenset(self._get_conditions_expecting(None))
+            matching_conditions = frozenset(self._get_conditions_expecting_no_request())
             logger.debug(f"matching_conditions2: {matching_conditions}")
 
         [condition_value] = matching_conditions

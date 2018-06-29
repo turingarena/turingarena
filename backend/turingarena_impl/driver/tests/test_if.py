@@ -45,8 +45,8 @@ def test_if_calls():
                         write res;
                     }
                     
-                    call res = f2();
-                    write res;
+                    call res2 = f2();
+                    write res2;
                 }
             """,
             language_name="c++",
@@ -57,6 +57,6 @@ def test_if_calls():
     ) as algo:
         with algo.run() as p:
             assert p.functions.f1() == 1
-            assert p.functions.f2() == 1
+            assert p.functions.f2() == 2
         with algo.run() as p:
             assert p.functions.f2() == 2

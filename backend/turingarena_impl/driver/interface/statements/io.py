@@ -89,12 +89,8 @@ class CheckpointStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        if not self.context.has_request_lookahead:
-            yield RequestLookaheadNode()
+        yield RequestLookaheadNode()
         yield self
-
-    def _get_has_request_lookahead(self):
-        return False
 
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
@@ -102,7 +98,7 @@ class CheckpointStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             command = context.request_lookahead.command
             if not command == "checkpoint":
@@ -112,3 +108,4 @@ class CheckpointStatement(Statement, IntermediateNode):
             values = context.receive_upward()
             if values != (0,):
                 raise CommunicationBroken(f"expecting checkpoint, got {values}")
+        return context.result()._replace(request_lookahead=None)

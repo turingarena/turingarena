@@ -28,15 +28,11 @@ class LoopStatement(Statement, IntermediateNode):
 
     @property
     def body(self):
-        assert not self.context.has_request_lookahead
         return Block(ast=self.ast.body, context=self.context.with_loop())
 
     @property
     def body_node(self):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
-
-    def _get_has_request_lookahead(self):
-        return self.body.has_request_lookahead
 
     def expects_request(self, request):
         return self.body.expects_request(request)
@@ -56,7 +52,7 @@ class BreakStatement(Statement, IntermediateNode):
         yield self
 
     def _driver_run(self, context):
-        return ExecutionResult.initial()._replace(does_break=True)
+        return context.result()._replace(does_break=True)
 
     def _get_reference_actions(self):
         return []

@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 from typing import List, Mapping, Any
 
-from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.variables import ReferenceAction, Reference
 
 Bindings = Mapping[Reference, Any]
@@ -13,17 +12,10 @@ class ExecutionResult(namedtuple("ExecutionResult", [
     "request_lookahead",
     "does_break",
 ])):
-    @staticmethod
-    def initial():
-        return ExecutionResult([], None, does_break=False)
-
     def merge(self, other):
-        request_lookahead = other.request_lookahead
-        if request_lookahead is None:
-            request_lookahead = self.request_lookahead
         return ExecutionResult(
             self.assignments + other.assignments,
-            request_lookahead=request_lookahead,
+            request_lookahead=other.request_lookahead,
             does_break=other.does_break,
         )
 
@@ -50,7 +42,7 @@ class IntermediateNode:
     def _get_declaration_directions(self):
         return frozenset()
 
-    def driver_run(self, context: NodeExecutionContext) -> ExecutionResult:
+    def driver_run(self, context):
         logging.debug(f"driver_run: {type(self).__name__} phase: {context.phase}")
 
         assignments = self._driver_run_assignments(context)
@@ -60,10 +52,10 @@ class IntermediateNode:
         assert (assignments, simple, full).count(NotImplemented) == 2
 
         if assignments is not NotImplemented:
-            return ExecutionResult(list(assignments), None, does_break=False)
+            return context.result()._replace(assignments=list(assignments))
 
         if simple is not NotImplemented:
-            return ExecutionResult.initial()
+            return context.result()
 
         if full is not NotImplemented:
             assert isinstance(full, ExecutionResult)
@@ -106,8 +98,10 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
 class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
         if not context.is_first_execution:
-            return ExecutionResult.initial()
-        return ExecutionResult.initial()._replace(
+            return context.result()
+        if context.request_lookahead is not None:
+            return context.result()
+        return context.result()._replace(
             request_lookahead=context.next_request(),
         )
 

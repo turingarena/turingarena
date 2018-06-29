@@ -22,10 +22,6 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
             for inst in statement.intermediate_nodes:
                 inner_context = inner_context.with_reference_actions(inst.reference_actions)
 
-            inner_context = inner_context._replace(
-                has_request_lookahead=statement.has_request_lookahead,
-            )
-
             yield statement
 
     @property
@@ -62,11 +58,6 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     def _generate_flat_inner_nodes(self):
         for s in self.statements:
             yield from s.intermediate_nodes
-
-    def _get_has_request_lookahead(self):
-        if self.statements:
-            return self.statements[-1].has_request_lookahead
-        return self.context.has_request_lookahead
 
     def _get_first_requests(self):
         for s in self.statements:
@@ -114,7 +105,7 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
-        result = ExecutionResult.initial()
+        result = context.result()
         for n in self.children:
             result = result.merge(n.driver_run(context.extend(result)))
         return result
