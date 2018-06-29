@@ -67,13 +67,6 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
         else:
             yield None
 
-    def expects_request(self, request):
-        for s in self.statements:
-            if s.expects_request(request):
-                return True
-            if not s.expects_request(None):
-                break
-
 
 class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
     @staticmethod

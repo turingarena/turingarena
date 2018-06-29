@@ -22,7 +22,3 @@ class ImperativeStructure(metaclass=ABCMeta):
 
     def _get_first_requests(self):
         yield None
-
-    @abstractmethod
-    def expects_request(self, request):
-        pass

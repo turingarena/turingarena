@@ -3,6 +3,7 @@ from collections import namedtuple
 from turingarena import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import CallbackPrototype
+from turingarena_impl.driver.interface.execution import RequestSignature
 from turingarena_impl.driver.interface.expressions import Expression, SyntheticExpression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
@@ -144,8 +145,8 @@ class ExitStatement(Statement, IntermediateNode):
         # TODO: check that exit is used only in valid places
         return []
 
-    def expects_request(self, request):
-        return request is not None and request.request_type == "exit"
+    def _get_first_requests(self):
+        yield RequestSignature("exit")
 
     def _get_reference_actions(self):
         return []

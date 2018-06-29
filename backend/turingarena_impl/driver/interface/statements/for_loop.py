@@ -55,12 +55,6 @@ class ForStatement(Statement, IntermediateNode):
     def validate(self):
         yield from self.body.validate()
 
-    def expects_request(self, request):
-        return (
-                request is None
-                or self.body.expects_request(request)
-        )
-
     def _get_declaration_directions(self):
         return self._body_node.declaration_directions
 

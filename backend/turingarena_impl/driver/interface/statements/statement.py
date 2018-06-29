@@ -15,11 +15,6 @@ class AbstractStatement(ImperativeStructure):
     def validate(self):
         return []
 
-    def expects_request(self, request):
-        if request is None:
-            return True
-        return False
-
     @property
     def needs_flush(self):
         return False

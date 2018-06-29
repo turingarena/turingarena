@@ -2,7 +2,7 @@ import logging
 
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
-from turingarena_impl.driver.interface.nodes import IntermediateNode, ExecutionResult
+from turingarena_impl.driver.interface.nodes import IntermediateNode
 from turingarena_impl.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,9 @@ class LoopStatement(Statement, IntermediateNode):
     def body_node(self):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
-    def expects_request(self, request):
-        return self.body.expects_request(request)
+    def _get_first_requests(self):
+        yield from self.body.first_requests
+        yield None
 
     def validate(self):
         yield from self.body.validate()
