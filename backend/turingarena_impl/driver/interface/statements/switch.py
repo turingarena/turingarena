@@ -47,12 +47,6 @@ class SwitchStatement(Statement, IntermediateNode):
                     return case.body_node.driver_run(context)
         raise InterfaceError(f"no case matches in switch")
 
-    def expects_request(self, request):
-        for case in self.cases:
-            if case.expects_request(request):
-                return True
-        return False
-
     @property
     def cases(self):
         return list(self._get_cases())
