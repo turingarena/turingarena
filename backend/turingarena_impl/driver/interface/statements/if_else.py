@@ -70,8 +70,6 @@ class IfStatement(Statement, IntermediateNode):
             return self.then_node.driver_run(context)
         elif self.else_node is not None:
             return self.else_node.driver_run(context)
-        else:
-            return context.result()
 
     def _describe_node(self):
         yield f"if {self.condition}"
@@ -94,16 +92,17 @@ class ResolveIfNode(StatementIntermediateNode):
         if self.statement.else_body is None:
             yield 0
 
-    def _driver_run_assignments(self, context):
-        if context.phase is not ReferenceStatus.RESOLVED:
-            return
+    def _driver_run(self, context):
+        if context.phase is ReferenceStatus.RESOLVED:
+            return context.result()._replace(assignments=list(self._get_assignments(context)))
+
+    def _get_assignments(self, context):
         logger.debug(f"request_lookahead: {context.request_lookahead}")
         matching_conditions = frozenset(self._get_conditions_expecting(context.request_lookahead))
         logger.debug(f"matching_conditions1: {matching_conditions}")
         if not matching_conditions:
             matching_conditions = frozenset(self._get_conditions_expecting_no_request())
             logger.debug(f"matching_conditions2: {matching_conditions}")
-
         [condition_value] = matching_conditions
         yield self.statement.condition.reference, condition_value
 

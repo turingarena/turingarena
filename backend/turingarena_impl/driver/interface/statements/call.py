@@ -127,7 +127,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
 
     def _driver_run(self, context):
         if not context.is_first_execution:
-            return context.result()
+            return
 
         method = self.statement.method
 
@@ -201,7 +201,7 @@ class MethodReturnNode(StatementIntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             return_value = self.statement.return_value.evaluate(context.bindings)
             context.send_driver_upward(return_value)
@@ -223,7 +223,7 @@ class MethodCallbacksNode(StatementIntermediateNode):
     def _can_be_grouped(self):
         return False
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         while True:
             [has_callback] = context.receive_upward()
             if has_callback:

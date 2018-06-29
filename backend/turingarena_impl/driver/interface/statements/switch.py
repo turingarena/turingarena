@@ -140,14 +140,15 @@ class SwitchResolveNode(StatementIntermediateNode):
         else:
             return list(self._find_cases_expecting_no_request())
 
-    def _driver_run_assignments(self, context):
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
-            matching_cases = list(self._find_matching_cases(context.request_lookahead))
+            return context.result()._replace(assignments=list(self._get_assigments(context)))
 
-            [case] = matching_cases
-            [label] = case.labels
-
-            yield self.statement.value.reference, label.value
+    def _get_assigments(self, context):
+        matching_cases = list(self._find_matching_cases(context.request_lookahead))
+        [case] = matching_cases
+        [label] = case.labels
+        yield self.statement.value.reference, label.value
 
     def _describe_node(self):
         yield f"resolve {self.statement}"

@@ -53,7 +53,7 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.DOWNWARD
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             logging.debug(f"Bindings: {context.bindings}")
             context.send_downward([
@@ -78,11 +78,14 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
 
-    def _driver_run_assignments(self, context):
+    def _get_assignments(self, context):
+        values = context.receive_upward()
+        for a, value in zip(self.arguments, values):
+            yield a.reference, value
+
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.RESOLVED:
-            values = context.receive_upward()
-            for a, value in zip(self.arguments, values):
-                yield a.reference, value
+            return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
 class CheckpointStatement(Statement, IntermediateNode):

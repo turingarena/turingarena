@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from typing import List, Mapping, Any
 
-from turingarena_impl.driver.interface.variables import ReferenceAction, Reference
+from turingarena_impl.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
 
 Bindings = Mapping[Reference, Any]
 
@@ -45,32 +45,13 @@ class IntermediateNode:
     def driver_run(self, context):
         logging.debug(f"driver_run: {type(self).__name__} phase: {context.phase}")
 
-        assignments = self._driver_run_assignments(context)
-        simple = self._driver_run_simple(context)
-        full = self._driver_run(context)
-
-        assert (assignments, simple, full).count(NotImplemented) == 2
-
-        if assignments is not NotImplemented:
-            return context.result()._replace(assignments=list(assignments))
-
-        if simple is not NotImplemented:
-            return context.result()
-
-        if full is not NotImplemented:
-            assert isinstance(full, ExecutionResult)
-            return full
-
-        return assignments
-
-    def _driver_run_simple(self, context):
-        return NotImplemented
-
-    def _driver_run_assignments(self, context):
-        return NotImplemented
+        result = self._driver_run(context)
+        if result is None:
+            result = context.result()
+        return result
 
     def _driver_run(self, context):
-        return NotImplemented
+        return None
 
     @property
     def can_be_grouped(self):
@@ -98,9 +79,9 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
 class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
         if not context.is_first_execution:
-            return context.result()
+            return
         if context.request_lookahead is not None:
-            return context.result()
+            return
         return context.result()._replace(
             request_lookahead=context.next_request(),
         )

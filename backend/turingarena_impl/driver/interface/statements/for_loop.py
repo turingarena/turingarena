@@ -75,7 +75,7 @@ class ForStatement(Statement, IntermediateNode):
     def _body_node(self):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
-    def _driver_run_assignments(self, context):
+    def _driver_run(self, context):
         needed = not self.can_be_grouped or any(
             a.status is context.phase
             for a in self.reference_actions
@@ -84,15 +84,16 @@ class ForStatement(Statement, IntermediateNode):
             logger.debug(f"skipping for (phase: {context.phase})")
             return
 
-        for_range = self.index.range.evaluate(context.bindings)
+        return context.result()._replace(assignments=list(self._get_assignments(context)))
 
+    def _get_assignments(self, context):
+        for_range = self.index.range.evaluate(context.bindings)
         assignments_by_iteration = [
             self._body_node.driver_run(context.with_assigments(
                 [(self.index.variable.as_reference(), i)]
             )).assignments
             for i in range(for_range)
         ]
-
         for a in self.reference_actions:
             if a.status is ReferenceStatus.RESOLVED:
                 yield a.reference, [

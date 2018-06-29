@@ -43,7 +43,8 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def body_node(self):
         return BlockNode.from_nodes(self._generate_inner_nodes())
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
+        assert context.phase is None
         context.send_driver_upward(1)
         context.send_driver_upward(self.context.callback_index)
         self.body_node.driver_run(context)
@@ -74,7 +75,7 @@ class CallbackCallNode(StatementIntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         if context.phase is ReferenceStatus.DECLARED:
             for p in self.statement.parameters:
                 r = p.as_reference()
@@ -89,14 +90,18 @@ class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
     "callback",
     "return_statement",
 ])):
-    def _driver_run_assignments(self, context):
+    def _driver_run(self, context):
         if not context.is_first_execution:
             return
+
         request = context.request_lookahead
         command = request.command
         if not command == "callback_return":
             raise InterfaceError(f"expecting 'callback_return', got '{command}'")
 
+        return context.result()._replace(assignments=list(self._get_assignments(context)))
+
+    def _get_assignments(self, context):
         has_return_value = bool(int(context.receive_driver_downward()))
         if self.return_statement is not None:
             if not has_return_value:
@@ -151,6 +156,6 @@ class ExitStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
-    def _driver_run_simple(self, context):
+    def _driver_run(self, context):
         # TODO
         pass
