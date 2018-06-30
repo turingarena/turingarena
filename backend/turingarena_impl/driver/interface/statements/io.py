@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 from turingarena import InterfaceError
-from turingarena_impl.driver.interface.exceptions import CommunicationBroken
+from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
@@ -110,5 +110,5 @@ class CheckpointStatement(Statement, IntermediateNode):
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             if values != (0,):
-                raise CommunicationBroken(f"expecting checkpoint, got {values}")
+                raise CommunicationError(f"expecting checkpoint, got {values}")
         return context.result()._replace(request_lookahead=None)

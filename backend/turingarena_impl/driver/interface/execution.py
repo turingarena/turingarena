@@ -1,9 +1,10 @@
 import logging
 from collections import namedtuple
+from contextlib import contextmanager
 from typing import List, Tuple, Any
 
 from turingarena.driver.commands import deserialize_data, serialize_data
-from turingarena_impl.driver.interface.exceptions import CommunicationBroken
+from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.nodes import ExecutionResult
 from turingarena_impl.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
 
@@ -47,10 +48,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             command = self.receive_driver_downward()
             if command == "wait":
                 wait = int(self.receive_driver_downward())
-                info = self.process.get_status(wait=wait)
-                self.send_driver_upward(info.time_usage)
-                self.send_driver_upward(info.memory_usage)
-                self.send_driver_upward(info.error)
+                self.perform_wait(wait)
             else:
                 assert command == "request"
                 break
@@ -61,24 +59,33 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             return RequestSignature(command)
 
-    def send_downward(self, values):
+    def perform_wait(self, wait):
+        info = self.process.get_status(wait=wait)
+        self.send_driver_upward(info.time_usage)
+        self.send_driver_upward(info.memory_usage)
+        return info
+
+    @contextmanager
+    def _check_downward_pipe(self):
         try:
-            logger.debug(f"send_downward: {values}")
+            yield
+        except BrokenPipeError as e:
+            raise CommunicationError(f"downward pipe broken") from e
+
+    def send_downward(self, values):
+        logger.debug(f"send_downward: {values}")
+        with self._check_downward_pipe():
             print(*values, file=self.sandbox_connection.downward)
-        except BrokenPipeError:
-            raise CommunicationBroken
 
     def receive_upward(self):
-        try:
+        with self._check_downward_pipe():
             self.sandbox_connection.downward.flush()
-        except BrokenPipeError:
-            raise CommunicationBroken
 
         logger.debug(f"receive_upward...")
         line = self.sandbox_connection.upward.readline().strip()
         logger.debug(f"receive_upward -> {line}")
         if not line:
-            raise CommunicationBroken
+            raise CommunicationError("upward pipe closed")
 
         return tuple(map(int, line.split()))
 

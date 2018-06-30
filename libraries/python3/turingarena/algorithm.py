@@ -60,7 +60,7 @@ class AlgorithmSection:
 
 class AlgorithmProcess(AlgorithmSection):
     def __init__(self, connection):
-        super().__init__(engine=DriverClientEngine(connection))
+        super().__init__(engine=DriverClientEngine(self, connection))
 
         self.procedures = MethodProxy(self._engine, has_return_value=False)
         self.functions = MethodProxy(self._engine, has_return_value=True)

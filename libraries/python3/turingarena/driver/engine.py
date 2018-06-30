@@ -1,6 +1,7 @@
 import logging
 from collections import namedtuple
 
+from turingarena import AlgorithmRuntimeError
 from turingarena.driver.commands import serialize_data
 from turingarena.processinfo import SandboxProcessInfo
 
@@ -8,24 +9,26 @@ CallRequest = namedtuple("CallRequest", ["method_name", "arguments", "has_return
 
 
 class DriverClientEngine:
-    __slots__ = ["connection", "phase"]
+    __slots__ = ["process", "connection", "phase"]
 
-    def __init__(self, connection):
+    def __init__(self, process, connection):
+        self.process = process
         self.connection = connection
 
     def get_info(self):
         self.send_request("wait")
         self.send_request(0)  # do not kill it
 
+        return self.do_get_info()
+
+    def do_get_info(self):
         time_usage = float(self.get_response_line())
         memory_usage = int(self.get_response_line())
-        error = self.get_response_line()
-
         return SandboxProcessInfo(
             status=None,
             time_usage=time_usage,
             memory_usage=memory_usage,
-            error=error,
+            error=None,
         )
 
     def call(self, request):
@@ -54,7 +57,10 @@ class DriverClientEngine:
     def get_response_ok(self):
         logging.debug(f"waiting for response ok")
         any_error = self.get_response_value()
-        assert any_error == 0
+        if any_error:
+            info = self.do_get_info()
+            message = self.get_response_line()
+            raise AlgorithmRuntimeError(self.process, message, info)
 
     def accept_callbacks(self, callback_list):
         while True:

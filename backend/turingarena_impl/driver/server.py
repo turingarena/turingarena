@@ -5,10 +5,11 @@ from functools import lru_cache
 from tempfile import TemporaryDirectory
 
 from turingarena.algorithm import Algorithm
+from turingarena.driver.client import SandboxProcessClient
 from turingarena.driver.connection import DRIVER_PROCESS_CHANNEL, DriverProcessConnection, SANDBOX_QUEUE, \
     SANDBOX_PROCESS_CHANNEL, SANDBOX_REQUEST_QUEUE, SandboxProcessConnection
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
-from turingarena.driver.client import SandboxProcessClient
+from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
@@ -100,7 +101,14 @@ class SandboxProcessServer:
                 driver_connection=driver_connection,
                 sandbox_connection=sandbox_connection,
             )
-            self.interface.run_driver(context)
+
+            try:
+                self.interface.run_driver(context)
+            except CommunicationError as e:
+                context.send_driver_upward(1)  # error
+                info = context.perform_wait(wait=1)
+                message, = e.args
+                context.send_driver_upward(f"{message} ({info.error})")
 
         logger.debug("process terminated")
 

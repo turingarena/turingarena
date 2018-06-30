@@ -16,13 +16,17 @@ class InterfaceExit(BaseException):
 
 
 class AlgorithmError(Exception):
-    pass
+    def __init__(self, process, message, info):
+        self.process = process
+        self.message = message
+        self.info = info
 
 
 class AlgorithmRuntimeError(AlgorithmError):
     pass
 
 
+# FIXME: fill-in all arguments when raising the exceptions below
 class TimeLimitExceeded(AlgorithmError):
     pass
 
