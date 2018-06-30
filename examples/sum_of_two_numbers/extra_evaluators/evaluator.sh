@@ -7,8 +7,8 @@ for i in $(seq 10) ; do
     echo -n $PWD/interface.txt > $TURINGARENA_SANDBOX_DIR/interface_path.pipe
     read sandbox_process_dir < $TURINGARENA_SANDBOX_DIR/sandbox_process_dir.pipe
 
-    a=$((RANDOM%1000))
-    b=$((RANDOM%1000))
+    a=$((100+RANDOM%400))
+    b=$((100+RANDOM%400))
 
     {
         echo request
@@ -22,6 +22,8 @@ for i in $(seq 10) ; do
         echo 1 # 0=procedure, 1=function
         echo 0 # callbacks
 
+        read status
+        read has_callbacks
         read c
 
         echo wait
@@ -29,7 +31,6 @@ for i in $(seq 10) ; do
 
         read time_usage
         read memory_usage
-        read status
 
         echo request
         echo exit
