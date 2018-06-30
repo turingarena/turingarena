@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from turingarena.algorithm import Algorithm
 from turingarena.driver.client import SandboxProcessClient
 from turingarena.driver.connection import DRIVER_PROCESS_CHANNEL, DriverProcessConnection, SANDBOX_QUEUE, \
-    SANDBOX_PROCESS_CHANNEL, SANDBOX_REQUEST_QUEUE, SandboxProcessConnection
+    SANDBOX_PROCESS_CHANNEL, SandboxProcessConnection
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
@@ -75,7 +75,6 @@ class SandboxProcessServer:
 
         self.boundary = PipeBoundary(sandbox_dir)
         self.boundary.create_channel(SANDBOX_PROCESS_CHANNEL)
-        self.boundary.create_queue(SANDBOX_REQUEST_QUEUE)
         self.boundary.create_channel(DRIVER_PROCESS_CHANNEL)
 
         self.interface = InterfaceDefinition.load(algorithm.interface_path)
@@ -135,25 +134,3 @@ class SandboxProcessServer:
                 )
             else:
                 self.process = CompilationFailedProcess()
-
-    def handle_requests(self):
-        while not self.done:
-            logger.debug("handling requests...")
-            self.boundary.handle_request(
-                SANDBOX_REQUEST_QUEUE,
-                self.handle_request,
-            )
-
-    def handle_request(self, *, wait):
-        logger.debug(f"get_info(wait={wait})")
-
-        assert not self.done
-        assert wait in ("0", "1")
-
-        info = self.process.get_status(kill=bool(int(wait)))
-        logger.debug(f"Process info = {info}")
-
-        if wait == "1":
-            self.done = True
-
-        return info.to_payloads()

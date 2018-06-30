@@ -1,9 +1,8 @@
 import logging
 from contextlib import contextmanager
 
-from turingarena.processinfo import SandboxProcessInfo
 from turingarena.driver.connection import DriverProcessConnection, \
-    DRIVER_PROCESS_CHANNEL, SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SANDBOX_REQUEST_QUEUE, SandboxProcessConnection
+    DRIVER_PROCESS_CHANNEL, SANDBOX_PROCESS_CHANNEL, SANDBOX_QUEUE, SandboxProcessConnection
 from turingarena.pipeboundary import PipeBoundary, PipeBoundarySide
 
 logger = logging.getLogger(__name__)
@@ -46,15 +45,6 @@ class SandboxClient:
 class SandboxProcessClient:
     def __init__(self, directory):
         self.boundary = PipeBoundary(directory)
-
-    def get_info(self, *, wait=False):
-        response = self.boundary.send_request(
-            SANDBOX_REQUEST_QUEUE,
-            wait=str(int(bool(wait))),
-        )
-        info = SandboxProcessInfo.from_payloads(response)
-        logger.info(f"Process info: {info}")
-        return info
 
     @contextmanager
     def connect(self):
