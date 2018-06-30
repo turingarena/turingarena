@@ -108,9 +108,7 @@ class CallStatement(Statement):
     def _get_intermediate_nodes(self):
         yield RequestLookaheadNode()
         yield MethodResolveArgumentsNode(self)
-
-        if self.method.has_callbacks:
-            yield MethodCallbacksNode(self)
+        yield MethodCallbacksNode(self)
 
         if self.method.has_return_value:
             yield MethodReturnNode(self)
@@ -221,9 +219,16 @@ class MethodCallbacksNode(StatementIntermediateNode):
         return []
 
     def _can_be_grouped(self):
-        return False
+        return not self.statement.method.has_callbacks
 
     def _driver_run(self, context):
+        if self.statement.method.has_callbacks:
+            self._accept_callbacks(context)
+        if context.is_first_execution:
+            context.send_driver_upward_request_ok()
+            context.send_driver_upward(0)  # no more callbacks
+
+    def _accept_callbacks(self, context):
         while True:
             [has_callback] = context.receive_upward()
             if has_callback:
@@ -232,7 +237,6 @@ class MethodCallbacksNode(StatementIntermediateNode):
                 callback.driver_run(context)
             else:
                 break
-        context.send_driver_upward(0)  # no more callbacks
 
     def _describe_node(self):
         yield f"callbacks ({self.statement})"

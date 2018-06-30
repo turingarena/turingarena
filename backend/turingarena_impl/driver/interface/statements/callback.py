@@ -45,7 +45,8 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     def _driver_run(self, context):
         assert context.phase is None
-        context.send_driver_upward(1)
+        context.send_driver_upward_request_ok()
+        context.send_driver_upward(1)  # has callbacks
         context.send_driver_upward(self.context.callback_index)
         self.body_node.driver_run(context)
 

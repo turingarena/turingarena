@@ -33,8 +33,7 @@ class DriverClientEngine:
         for line in self.call_lines(request):
             self.send_request(line)
 
-        if request.callbacks:
-            self.accept_callbacks(request.callbacks)
+        self.accept_callbacks(request.callbacks)
 
         if request.has_return_value:
             logging.debug(f"Receiving return value...")
@@ -52,8 +51,14 @@ class DriverClientEngine:
     def get_response_value(self):
         return int(self.get_response_line())
 
+    def get_response_ok(self):
+        logging.debug(f"waiting for response ok")
+        any_error = self.get_response_value()
+        assert any_error == 0
+
     def accept_callbacks(self, callback_list):
         while True:
+            self.get_response_ok()
             if self.get_response_value():  # has callback
                 logging.debug(f"has callback")
                 index = self.get_response_value()
@@ -95,8 +100,7 @@ class DriverClientEngine:
     def send_checkpoint(self):
         self.send_request("request")
         self.send_request("checkpoint")
-        response = self.get_response_value()
-        assert response == 0
+        self.get_response_ok()
 
     def send_request(self, line):
         logging.debug(f"sending request line: {line}")

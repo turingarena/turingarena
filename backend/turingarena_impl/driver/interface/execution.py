@@ -26,6 +26,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 ])):
     __slots__ = []
 
+    def send_driver_upward_request_ok(self):
+        self.send_driver_upward(0)
+
     def send_driver_upward(self, item):
         logging.debug(f"send_driver_upward: {item}")
         if isinstance(item, bool):
@@ -113,7 +116,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     @property
     def is_first_execution(self):
         return (
-                self.direction is ReferenceDirection.UPWARD
+                self.phase is None
+                or self.direction is ReferenceDirection.UPWARD
                 and self.phase is ReferenceStatus.DECLARED
                 or self.direction is not ReferenceDirection.UPWARD
                 and self.phase is ReferenceStatus.RESOLVED

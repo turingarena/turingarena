@@ -106,7 +106,7 @@ class CheckpointStatement(Statement, IntermediateNode):
             command = context.request_lookahead.command
             if not command == "checkpoint":
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
-            context.send_driver_upward(0)
+            context.send_driver_upward_request_ok()
         if context.phase is ReferenceStatus.RESOLVED:
             values = context.receive_upward()
             if values != (0,):
