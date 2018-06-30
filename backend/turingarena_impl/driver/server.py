@@ -108,7 +108,7 @@ class SandboxProcessServer:
                 context.send_driver_upward(1)  # error
                 info = context.perform_wait(wait=1)
                 message, = e.args
-                context.send_driver_upward(f"{message} ({info.error})")
+                context.send_driver_upward(f"{message} (process {info.error})")
 
         logger.debug("process terminated")
 
@@ -150,7 +150,7 @@ class SandboxProcessServer:
         assert not self.done
         assert wait in ("0", "1")
 
-        info = self.process.get_status(wait=bool(int(wait)))
+        info = self.process.get_status(kill=bool(int(wait)))
         logger.debug(f"Process info = {info}")
 
         if wait == "1":

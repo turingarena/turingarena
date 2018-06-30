@@ -25,7 +25,6 @@ class DriverClientEngine:
         time_usage = float(self.get_response_line())
         memory_usage = int(self.get_response_line())
         return SandboxProcessInfo(
-            status=None,
             time_usage=time_usage,
             memory_usage=memory_usage,
             error=None,
