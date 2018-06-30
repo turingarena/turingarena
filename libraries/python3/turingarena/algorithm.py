@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 from contextlib import contextmanager, ExitStack
 
-from turingarena import InterfaceExit, TimeLimitExceeded
+from turingarena import InterfaceExit, TimeLimitExceeded, AlgorithmError
 from turingarena.driver.client import DriverProcessClient, SandboxClient
 from turingarena.driver.engine import DriverClientEngine
 from turingarena.driver.proxy import MethodProxy
@@ -74,3 +74,11 @@ class AlgorithmProcess(AlgorithmSection):
 
     def exit(self):
         self._engine.send_exit()
+
+    def fail(self, message, exc_type=AlgorithmError):
+        info = self._engine.get_info(kill=True)
+        raise exc_type(self, message, info)
+
+    def check(self, condition, message, exc_type=AlgorithmError):
+        if not condition:
+            self.fail(message, exc_type)

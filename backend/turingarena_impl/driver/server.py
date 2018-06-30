@@ -10,7 +10,7 @@ from turingarena.driver.connection import DRIVER_PROCESS_CHANNEL, DriverProcessC
     SANDBOX_PROCESS_CHANNEL, SandboxProcessConnection
 from turingarena.pipeboundary import PipeBoundarySide, PipeBoundary
 from turingarena_impl.driver.interface.exceptions import CommunicationError
-from turingarena_impl.driver.interface.execution import NodeExecutionContext
+from turingarena_impl.driver.interface.execution import NodeExecutionContext, ProcessKilled
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 from turingarena_impl.driver.sandbox.process import CompilationFailedProcess
@@ -108,6 +108,8 @@ class SandboxProcessServer:
                 info = context.perform_wait(wait=1)
                 message, = e.args
                 context.send_driver_upward(f"{message} (process {info.error})")
+            except ProcessKilled:
+                logger.debug("process killed")
 
         logger.debug("process terminated")
 

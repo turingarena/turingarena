@@ -47,11 +47,6 @@ def run_algorithm(source_path, interface_path=None):
     ).run()
 
 
-def algorithm_assert(condition, *args, exc_type=AlgorithmError):
-    if not condition:
-        raise exc_type(*args)
-
-
 class Submission:
     __slots__ = []
 

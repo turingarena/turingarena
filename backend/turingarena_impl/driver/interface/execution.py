@@ -19,6 +19,10 @@ RequestSignature = namedtuple("RequestSignature", ["command"])
 CallRequestSignature = namedtuple("CallRequestSignature", ["command", "method_name"])
 
 
+class ProcessKilled(Exception):
+    pass
+
+
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "direction",
@@ -50,8 +54,10 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         while True:
             command = self.receive_driver_downward()
             if command == "wait":
-                wait = int(self.receive_driver_downward())
-                self.perform_wait(wait)
+                kill = int(self.receive_driver_downward())
+                self.perform_wait(kill)
+                if kill:
+                    raise ProcessKilled
             else:
                 assert command == "request"
                 break

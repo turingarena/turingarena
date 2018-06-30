@@ -15,9 +15,9 @@ class DriverClientEngine:
         self.process = process
         self.connection = connection
 
-    def get_info(self):
+    def get_info(self, kill=False):
         self.send_request("wait")
-        self.send_request(0)  # do not kill it
+        self.send_request(int(kill))
 
         return self.do_get_info()
 
