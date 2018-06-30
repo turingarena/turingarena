@@ -7,7 +7,7 @@ from typing import List, Tuple, Any
 from turingarena.driver.commands import deserialize_data, serialize_data
 from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.nodes import ExecutionResult
-from turingarena_impl.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
+from turingarena_impl.driver.interface.variables import Reference
 
 UPWARD_TIMEOUT = 3.0
 
@@ -34,9 +34,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 ])):
     __slots__ = []
 
-    def send_driver_upward_request_ok(self):
-        self.send_driver_upward(0)
-
     def send_driver_upward(self, item):
         logging.debug(f"send_driver_upward: {item}")
         if isinstance(item, bool):
@@ -51,6 +48,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return line
 
     def next_request(self):
+        self.send_driver_upward(0)  # ok, no errors
         while True:
             command = self.receive_driver_downward()
             if command == "wait":
@@ -58,6 +56,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 self.perform_wait(kill)
                 if kill:
                     raise ProcessKilled
+                self.send_driver_upward(0)
             else:
                 assert command == "request"
                 break
@@ -143,16 +142,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def extend(self, execution_result):
         return self.with_assigments(execution_result.assignments)._replace(
             request_lookahead=execution_result.request_lookahead,
-        )
-
-    @property
-    def is_first_execution(self):
-        return (
-                self.phase is None
-                or self.direction is ReferenceDirection.UPWARD
-                and self.phase is ReferenceStatus.DECLARED
-                or self.direction is not ReferenceDirection.UPWARD
-                and self.phase is ReferenceStatus.RESOLVED
         )
 
     def result(self):

@@ -2,8 +2,8 @@ from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena_impl.driver.interface.execution import Assignments
-from turingarena_impl.driver.interface.nodes import IntermediateNode, Bindings, ExecutionResult
-from turingarena_impl.driver.interface.variables import ReferenceStatus
+from turingarena_impl.driver.interface.phase import ExecutionPhase
+from turingarena_impl.driver.interface.nodes import IntermediateNode, Bindings
 
 
 class StepExecutor:
@@ -21,29 +21,13 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         if context.phase is not None:
             return self._run_children(context)
         else:
-            resolve_context = context._replace(
-                phase=ReferenceStatus.RESOLVED,
-                direction=self._get_direction(),
-            )
-            resolved_result = self._run_children(resolve_context)
+            result = context.result()
+            for phase in ExecutionPhase:
+                result = result.merge(self._run_children(context.extend(result)._replace(
+                    phase=phase,
+                )))
 
-            context = context.with_assigments(resolved_result.assignments)
-
-            declared_context = context._replace(
-                phase=ReferenceStatus.DECLARED,
-                direction=self._get_direction(),
-            )
-            declared_result = self._run_children(declared_context)
-            assert not declared_result.assignments
-
-            # FIXME: the logic here is quite involved
-
-            if declared_context.is_first_execution:
-                return resolved_result._replace(
-                    request_lookahead=declared_result.request_lookahead,
-                )
-            else:
-                return resolved_result
+            return result
 
     def _run_children(self, context):
         result = context.result()

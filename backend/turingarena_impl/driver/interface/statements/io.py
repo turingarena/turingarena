@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from turingarena import InterfaceError
 from turingarena_impl.driver.interface.exceptions import CommunicationError
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
@@ -54,7 +55,7 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
         yield ReferenceDirection.DOWNWARD
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
+        if context.phase is ExecutionPhase.DOWNWARD:
             logging.debug(f"Bindings: {context.bindings}")
             context.send_downward([
                 a.evaluate(context.bindings)
@@ -84,7 +85,7 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
             yield a.reference, value
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
+        if context.phase is ExecutionPhase.UPWARD:
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
@@ -102,13 +103,12 @@ class CheckpointStatement(Statement, IntermediateNode):
         return []
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
-            command = context.request_lookahead.command
-            if not command == "checkpoint":
-                raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
-            context.send_driver_upward_request_ok()
-        if context.phase is ReferenceStatus.RESOLVED:
+        if context.phase is ExecutionPhase.UPWARD:
             values = context.receive_upward()
             if values != (0,):
                 raise CommunicationError(f"expecting checkpoint, got {values}")
-        return context.result()._replace(request_lookahead=None)
+        if context.phase is ExecutionPhase.REQUEST:
+            command = context.request_lookahead.command
+            if not command == "checkpoint":
+                raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
+            return context.result()._replace(request_lookahead=None)

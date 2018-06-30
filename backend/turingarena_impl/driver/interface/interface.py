@@ -66,9 +66,7 @@ class InterfaceDefinition:
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")
-        self.main_node.driver_run(context=context._replace(
-            request_lookahead=context.next_request(),
-        ))
+        self.main_node.driver_run(context=context)
         request = context.next_request()
         command = request.command
         if command != "exit":

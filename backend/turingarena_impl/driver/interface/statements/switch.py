@@ -5,6 +5,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression, IntLiteralExpression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, IntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
@@ -141,7 +142,7 @@ class SwitchResolveNode(StatementIntermediateNode):
             return list(self._find_cases_expecting_no_request())
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
+        if context.phase is ExecutionPhase.REQUEST:
             return context.result()._replace(assignments=list(self._get_assigments(context)))
 
     def _get_assigments(self, context):

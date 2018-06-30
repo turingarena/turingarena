@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 from typing import List, Mapping, Any
 
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.variables import ReferenceAction, Reference
 
 Bindings = Mapping[Reference, Any]
@@ -82,7 +83,7 @@ class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermedi
 
 class RequestLookaheadNode(IntermediateNode):
     def _driver_run(self, context):
-        if not context.is_first_execution:
+        if context.phase is not ExecutionPhase.REQUEST:
             return
         if context.request_lookahead is not None:
             return

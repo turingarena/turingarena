@@ -4,6 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.execution import CallRequestSignature
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.callback import CallbackImplementation
@@ -127,7 +128,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
     def _driver_run(self, context):
-        if not context.is_first_execution:
+        if context.phase is not ExecutionPhase.REQUEST:
             return
 
         method = self.statement.method
@@ -203,7 +204,7 @@ class MethodReturnNode(StatementIntermediateNode):
         yield ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
+        if context.phase is ExecutionPhase.REQUEST:
             return_value = self.statement.return_value.evaluate(context.bindings)
             context.send_driver_upward(return_value)
 
@@ -213,8 +214,7 @@ class MethodReturnNode(StatementIntermediateNode):
 
 class MethodCallCompletedNode(StatementIntermediateNode):
     def _driver_run(self, context):
-        if context.is_first_execution:
-            context.send_driver_upward_request_ok()
+        if context.phase is ExecutionPhase.REQUEST:
             context.send_driver_upward(0)  # no more callbacks
 
     def _describe_node(self):

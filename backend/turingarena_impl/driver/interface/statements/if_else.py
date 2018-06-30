@@ -1,6 +1,7 @@
 import logging
 
 from turingarena_impl.driver.interface.block import Block, BlockNode
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement
@@ -93,7 +94,7 @@ class ResolveIfNode(StatementIntermediateNode):
             yield 0
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.RESOLVED:
+        if context.phase is ExecutionPhase.REQUEST:
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
     def _get_assignments(self, context):

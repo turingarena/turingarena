@@ -4,6 +4,7 @@ from turingarena import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import CallbackPrototype
 from turingarena_impl.driver.interface.execution import RequestSignature
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression, SyntheticExpression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
@@ -45,7 +46,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     def _driver_run(self, context):
         assert context.phase is None
-        context.send_driver_upward_request_ok()
         context.send_driver_upward(1)  # has callbacks
         context.send_driver_upward(self.context.callback_index)
         self.body_node.driver_run(context)
@@ -77,7 +77,7 @@ class CallbackCallNode(StatementIntermediateNode):
         yield ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
-        if context.phase is ReferenceStatus.DECLARED:
+        if context.phase is ExecutionPhase.REQUEST:
             for p in self.statement.parameters:
                 r = p.as_reference()
                 value = context.bindings[r]
@@ -92,15 +92,13 @@ class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
     "return_statement",
 ])):
     def _driver_run(self, context):
-        if not context.is_first_execution:
-            return
+        if context.phase is ExecutionPhase.REQUEST:
+            request = context.request_lookahead
+            command = request.command
+            if not command == "callback_return":
+                raise InterfaceError(f"expecting 'callback_return', got '{command}'")
 
-        request = context.request_lookahead
-        command = request.command
-        if not command == "callback_return":
-            raise InterfaceError(f"expecting 'callback_return', got '{command}'")
-
-        return context.result()._replace(assignments=list(self._get_assignments(context)))
+            return context.result()._replace(assignments=list(self._get_assignments(context)))
 
     def _get_assignments(self, context):
         has_return_value = bool(int(context.receive_driver_downward()))

@@ -4,6 +4,7 @@ from collections import namedtuple
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import IntermediateNode
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import Variable, Allocation, ReferenceStatus, ReferenceAction
 
@@ -76,32 +77,38 @@ class ForStatement(Statement, IntermediateNode):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     def _driver_run(self, context):
-        needed = not self.can_be_grouped or any(
-            a.status is context.phase
+        needed = not self.can_be_grouped or context.phase is ExecutionPhase.REQUEST or any(
+            a.status.name() == context.phase.name()  # FIXME: using name()
             for a in self.reference_actions
         )
         if not needed:
             logger.debug(f"skipping for (phase: {context.phase})")
             return
 
-        return context.result()._replace(assignments=list(self._get_assignments(context)))
+        if context.phase is None:
+            assert context.request_lookahead is None
 
-    def _get_assignments(self, context):
         for_range = self.index.range.evaluate(context.bindings)
-        assignments_by_iteration = [
+
+        results_by_iteration = [
             self._body_node.driver_run(context.with_assigments(
                 [(self.index.variable.as_reference(), i)]
-            )).assignments
+            ))
             for i in range(for_range)
         ]
-        for a in self.reference_actions:
-            if a.status is ReferenceStatus.RESOLVED:
-                yield a.reference, [
-                    assignments[a.reference._replace(
-                        index_count=a.reference.index_count + 1,
-                    )]
-                    for assignments in assignments_by_iteration
-                ]
+
+        assignments = [
+            (a.reference, [
+                result.assignments[a.reference._replace(
+                    index_count=a.reference.index_count + 1,
+                )]
+                for result in results_by_iteration
+                if a.status is ReferenceStatus.RESOLVED
+            ])
+            for a in self.reference_actions
+        ]
+
+        return context.result()._replace(assignments=assignments)
 
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"

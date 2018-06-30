@@ -16,6 +16,7 @@ class DriverClientEngine:
         self.connection = connection
 
     def get_info(self, kill=False):
+        self.get_response_ok()
         self.send_request("wait")
         self.send_request(int(kill))
 
@@ -31,7 +32,7 @@ class DriverClientEngine:
         )
 
     def call(self, request):
-        self.send_request("request")
+        self._send_next_request()
         for line in self.call_lines(request):
             self.send_request(line)
 
@@ -63,7 +64,6 @@ class DriverClientEngine:
 
     def accept_callbacks(self, callback_list):
         while True:
-            self.get_response_ok()
             if self.get_response_value():  # has callback
                 logging.debug(f"has callback")
                 index = self.get_response_value()
@@ -90,7 +90,7 @@ class DriverClientEngine:
             yield c.__code__.co_argcount
 
     def send_callback_return(self, return_value):
-        self.send_request("request")
+        self._send_next_request()
         self.send_request("callback_return")
         if return_value is not None:
             self.send_request(1)
@@ -99,13 +99,16 @@ class DriverClientEngine:
             self.send_request(0)
 
     def send_exit(self):
-        self.send_request("request")
+        self._send_next_request()
         self.send_request("exit")
 
     def send_checkpoint(self):
-        self.send_request("request")
+        self._send_next_request()
         self.send_request("checkpoint")
+
+    def _send_next_request(self):
         self.get_response_ok()
+        self.send_request("request")
 
     def send_request(self, line):
         logging.debug(f"sending request line: {line}")

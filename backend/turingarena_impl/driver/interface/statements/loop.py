@@ -30,6 +30,9 @@ class LoopStatement(Statement, IntermediateNode):
     def _get_reference_actions(self):
         return []
 
+    def _can_be_grouped(self):
+        return False
+
     @property
     def body(self):
         return Block(ast=self.ast.body, context=self.context.with_loop())
