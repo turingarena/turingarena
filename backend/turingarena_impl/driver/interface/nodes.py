@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from typing import List, Mapping, Any
 
-from turingarena_impl.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
+from turingarena_impl.driver.interface.variables import ReferenceAction, Reference
 
 Bindings = Mapping[Reference, Any]
 
@@ -43,7 +43,11 @@ class IntermediateNode:
         return frozenset()
 
     def driver_run(self, context):
-        logging.debug(f"driver_run: {type(self).__name__} phase: {context.phase}")
+        logging.debug(
+            f"driver_run: {type(self).__name__} "
+            f"phase: {context.phase} "
+            f"request LA: {context.request_lookahead}"
+        )
 
         result = self._driver_run(context)
         if result is None:

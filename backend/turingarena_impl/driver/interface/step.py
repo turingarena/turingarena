@@ -21,19 +21,29 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         if context.phase is not None:
             return self._run_children(context)
         else:
-            result = self._run_children(context._replace(
+            resolve_context = context._replace(
                 phase=ReferenceStatus.RESOLVED,
                 direction=self._get_direction(),
-            ))
-            context = context.with_assigments(result.assignments)
+            )
+            resolved_result = self._run_children(resolve_context)
 
-            other_result = self._run_children(context._replace(
+            context = context.with_assigments(resolved_result.assignments)
+
+            declared_context = context._replace(
                 phase=ReferenceStatus.DECLARED,
                 direction=self._get_direction(),
-            ))
-            assert not other_result.assignments
+            )
+            declared_result = self._run_children(declared_context)
+            assert not declared_result.assignments
 
-            return result
+            # FIXME: the logic here is quite involved
+
+            if declared_context.is_first_execution:
+                return resolved_result._replace(
+                    request_lookahead=declared_result.request_lookahead,
+                )
+            else:
+                return resolved_result
 
     def _run_children(self, context):
         result = context.result()

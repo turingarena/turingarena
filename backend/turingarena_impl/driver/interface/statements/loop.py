@@ -17,6 +17,10 @@ class LoopStatement(Statement, IntermediateNode):
     def _driver_run(self, context):
         while True:
             result = self.body_node.driver_run(context)
+            logger.debug(f"request_lookahead: {result.request_lookahead}")
+            context = context._replace(
+                request_lookahead=result.request_lookahead,
+            )
             if result.does_break:
                 return result
 
