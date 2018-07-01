@@ -78,7 +78,7 @@ class ForStatement(Statement, IntermediateNode):
 
     def _driver_run(self, context):
         needed = not self.can_be_grouped or context.phase is ExecutionPhase.REQUEST or any(
-            a.status.name() == context.phase.name()  # FIXME: using name()
+            a.status.name == context.phase.name  # FIXME: using .name
             for a in self.reference_actions
         )
         if not needed:
