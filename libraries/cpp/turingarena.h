@@ -3,8 +3,29 @@
 
 #include <string>
 #include <fstream>
+#include <algorithm>
+#include <cstdlib>
+#include <unistd.h>
+#include <cctype>
 
 namespace turingarena {
+
+    std::string get_submission_parameter(const std::string& name)
+    {
+        std::string variable_name = std::string("SUBMISSION_FILE_") + name;        
+        std::transform(variable_name.begin(), variable_name.end(), variable_name.begin(), toupper);
+        const char *result = getenv(variable_name.c_str());
+        if (result == nullptr) {
+            throw std::runtime_error{"Invalid variable"};
+        }
+        return std::string(result);
+    }
+
+    std::string get_cwd() {
+        char buff[1024];
+        getcwd(buff, sizeof buff);
+        return std::string(buff);
+    }
 
     class Algorithm {
         std::string sandbox_dir;
@@ -45,14 +66,19 @@ namespace turingarena {
             driver_upward >> memory_usage;
         }
 
-    public:
-        Algorithm(const std::string& source_path, const std::string& interface_path)
+        void send_exit_request()
         {
-            sandbox_dir = getenv("TURINGARENA_SANDBOX_DIR");
+            driver_downward << "request\n";
+            driver_downward << "exit\n";
+        }
 
+    public:
+        Algorithm(const std::string& source_path, const std::string& interface_path) :
+            sandbox_dir{getenv("TURINGARENA_SANDBOX_DIR")}
+        {
             {
                 std::ofstream language_name_pipe{sandbox_dir + "/language_name.pipe"};
-                language_name_pipe << "c++";
+                language_name_pipe << "";
             }
 
             {
@@ -77,7 +103,7 @@ namespace turingarena {
 
         ~Algorithm()
         {
-            exit();
+            send_exit_request();
         }
 
         template <typename ...Args>
@@ -119,13 +145,6 @@ namespace turingarena {
 
             read_status();
             read_resource_usage();
-        }
-
-
-        int exit()
-        {
-            driver_downward << "request\n";
-            driver_downward << "exit\n";
         }
 
         int get_memory_usage() { return memory_usage; }

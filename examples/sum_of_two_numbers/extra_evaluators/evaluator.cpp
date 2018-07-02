@@ -1,20 +1,12 @@
 #include "turingarena.h"
 
-#include <cstdlib>
 #include <iostream>
-#include <unistd.h>
 #include <time.h>
-
-std::string cwd() {
-    char buff[1024];
-    getcwd(buff, sizeof buff);
-    return std::string(buff);
-}
 
 int main() {
     srand(time(nullptr));
-    std::string source{getenv("SUBMISSION_FILE_SOURCE")};
-    std::string interface{cwd() + "/interface.txt"};
+    std::string source{turingarena::get_submission_parameter("source")};
+    std::string interface{turingarena::get_cwd() + "/interface.txt"};
 
     std::cout << "Starting algo with source = " << source << " interface = " << interface << '\n';
     for (int i = 0; i < 10; i++) {
