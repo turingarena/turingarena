@@ -1,15 +1,11 @@
-import base64
-import json
 import logging
 import re
 import secrets
-import time
 from collections import namedtuple
 from http import HTTPStatus
 
-import boto3
-
 from turingarena_impl.api.common import ProxyError
+from turingarena_impl.api.dynamodb_submission import save_submission
 
 SUBMISSION_FIELDS_RE = re.compile(r"submission\[([a-z]+(_[a-z])*)\]")
 
@@ -30,35 +26,6 @@ def get_submission_files(params, used_params):
         if not isinstance(content, bytes):
             raise ProxyError(HTTPStatus.BAD_REQUEST, dict(message=f"Field '{p}' is not a file"))
         yield name, SubmissionFile(filename=filename, content=content)
-
-
-def save_submission(id, files):
-    submission_json = {
-        "files": {
-            name: {
-                "filename": file_data.filename,
-                "content": base64.b64encode(file_data.content).decode()
-            }
-            for name, file_data in files.items()
-        }
-    }
-
-    client = boto3.client("dynamodb")
-
-    client.put_item(
-        TableName='SubmissionsTable',
-        Item={
-            'id': {
-                'S': id,
-            },
-            'expires': {
-                'N': str(int(time.time() + 10 * 60)),
-            },
-            'data': {
-                'S': json.dumps(submission_json),
-            }
-        },
-    )
 
 
 def do_evaluate(params):
