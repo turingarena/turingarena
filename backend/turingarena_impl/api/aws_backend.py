@@ -1,15 +1,12 @@
 import logging
 import re
 import secrets
-from collections import namedtuple
 from http import HTTPStatus
 
 from turingarena_impl.api.common import ProxyError
-from turingarena_impl.api.dynamodb_submission import save_submission
+from turingarena_impl.api.dynamodb_submission import save_submission, SubmissionFile
 
 SUBMISSION_FIELDS_RE = re.compile(r"submission\[([a-z]+(_[a-z])*)\]")
-
-SubmissionFile = namedtuple("SubmissionFile", ["filename", "content"])
 
 
 def get_submission_files(params, used_params):

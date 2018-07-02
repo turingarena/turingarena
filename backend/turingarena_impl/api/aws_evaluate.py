@@ -11,6 +11,11 @@ def main():
 
     files = load_submission(submission_id)
 
+    for event in cloud_evaluate(evaluator_cmd, files):
+        print(event)
+
+
+def cloud_evaluate(evaluator_cmd, files):
     with TemporaryDirectory() as temp_dir:
         file_paths = {}
         for name, file in files.items():
@@ -22,7 +27,7 @@ def main():
             file_paths[name] = filename
 
         for event in evaluate(file_paths, evaluator_cmd=evaluator_cmd):
-            print(event)
+            yield event
 
 
 if __name__ == '__main__':
