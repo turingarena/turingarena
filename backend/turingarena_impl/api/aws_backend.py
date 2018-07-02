@@ -1,7 +1,13 @@
+import base64
+import datetime
+import json
 import logging
 import re
 import secrets
 from http import HTTPStatus
+
+import boto3
+import time
 
 from turingarena_impl.api.common import ProxyError
 
@@ -23,6 +29,30 @@ def get_submission_files(params, used_params):
         yield name, source
 
 
+def save_submission(id, files):
+    submission_json = {
+        name: base64.b64encode(value).decode()
+        for name, value in files.items()
+    }
+
+    client = boto3.client("dynamodb")
+
+    client.put_item(
+        TableName='SubmissionsTable',
+        Item={
+            'id': {
+                'S': id,
+            },
+            'expires': {
+                'N': str(int(time.time() + 10 * 60)),
+            },
+            'data': {
+                'S': json.dumps(submission_json),
+            }
+        },
+    )
+
+
 def do_evaluate(params):
     used_params = set()
 
@@ -35,6 +65,8 @@ def do_evaluate(params):
         raise ProxyError(HTTPStatus.BAD_REQUEST, dict(message=message))
 
     submission_id = secrets.token_hex(16)
+
+    save_submission(submission_id, submission)
 
     logging.info(f"submission fields: {list(submission.keys())}")
 
