@@ -5,16 +5,16 @@
 #include <fstream>
 
 namespace turingarena {
-    std::string sandbox_dir;
-    std::string sandbox_process_dir;
-    std::ofstream driver_downward;
-    std::ifstream driver_upward;
-
-    std::string status;
-    int memory_usage;
-    int time_usage;
 
     class Algorithm {
+        std::string sandbox_dir;
+        std::string sandbox_process_dir;
+        std::ofstream driver_downward;
+        std::ifstream driver_upward;
+
+        std::string status;
+        int memory_usage;
+        int time_usage;
 
         // base case
         void put_args() {}
