@@ -17,6 +17,7 @@ RUN true \
         socat \
     && pip3 install \
         bidict \
+        boto3 \
         coloredlogs \
         commonmark \
         docopt \

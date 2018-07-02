@@ -11,11 +11,11 @@ def main():
 
     files = load_submission(submission_id)
 
-    for event in cloud_evaluate(evaluator_cmd, files):
+    for event in cloud_evaluate(files, evaluator_cmd):
         print(event)
 
 
-def cloud_evaluate(evaluator_cmd, files):
+def cloud_evaluate(files, evaluator_cmd):
     with TemporaryDirectory() as temp_dir:
         file_paths = {}
         for name, file in files.items():
