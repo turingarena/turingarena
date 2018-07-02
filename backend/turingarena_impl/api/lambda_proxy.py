@@ -4,8 +4,8 @@ import json
 from http import HTTPStatus
 from io import BytesIO
 
+from turingarena_impl.api import aws_backend
 from turingarena_impl.api.common import ProxyError, execute_api
-from turingarena_impl.api.dummy_impl import endpoints
 
 
 def main(event, context):
@@ -13,7 +13,7 @@ def main(event, context):
     path = event["path"]
 
     status_code, body = execute_api(
-        endpoints,
+        aws_backend.endpoints,
         http_method,
         path,
         get_query=lambda: get_query(event),

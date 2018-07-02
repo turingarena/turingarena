@@ -3,8 +3,8 @@ import json
 from http import HTTPStatus
 from urllib.parse import parse_qsl
 
+from turingarena_impl.api import aws_backend
 from turingarena_impl.api.common import execute_api
-from turingarena_impl.api.dummy_impl import endpoints
 
 
 def get_fields(environ):
@@ -23,7 +23,7 @@ def application(environ, start_response):
     path = environ["PATH_INFO"]
 
     status_code, body = execute_api(
-        endpoints,
+        aws_backend.endpoints,
         request_method,
         path,
         get_query=lambda: get_query(environ),

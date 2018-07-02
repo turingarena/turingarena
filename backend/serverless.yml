@@ -29,3 +29,19 @@ custom:
       - 'multipart/form-data'
   pythonRequirements:
     fileName: lambda-requirements.txt
+
+resources:
+  Resources:
+    SubmissionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SubmissionsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
