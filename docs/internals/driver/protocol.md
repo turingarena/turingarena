@@ -6,15 +6,15 @@ This file describe the specification of the comunication protocol between the dr
 
 The drivers comunitate to the evaluator process the parameters with the use of enviroment variables. 
 The variables defined are the following:
-- TURINGARENA_SANDBOX_DIR the temporary directory where the driver runs
-- SUBMISSION_FILE_$name the path of the file $name ($name must be uppercase). For example, SUBMISSION_FILE_SOURCE is the source file. 
-- EVALUATION_DATA_BEGIN/EVALUATION_DATA_END variables that contains a unique token that must be printed before/after the evaluation data. 
+- `TURINGARENA_SANDBOX_DIR` the temporary directory where the driver runs
+- `SUBMISSION_FILE_$name` the path of the file $name ($name must be uppercase). For example, SUBMISSION_FILE_SOURCE is the source file. 
+- `EVALUATION_DATA_BEGIN`/`EVALUATION_DATA_END` variables that contains a unique token that must be printed before/after the evaluation data. 
 
 ## Starting the process 
 To start the process, you must comunicate to the driver some parameters in this exact order, to do so you must write in these pipes:
-- $TURINGARENA_SANDBOX_DIR/language_name.pipe the name of the language of the solution (if empty, the language is automatically determinated by the submitted file extension)
-- $TURINGARENA_SANDBOX_DIR/source_path.pipe the path of the submitted source file
-- $TURINGARENA_SANDBOX_DIR/interface_path.pipe the path of the interface.txt
+- `$TURINGARENA_SANDBOX_DIR/language_name.pipe` the name of the language of the solution (if empty, the language is automatically determinated by the submitted file extension)
+- `$TURINGARENA_SANDBOX_DIR/source_path.pipe` the path of the submitted source file
+- `$TURINGARENA_SANDBOX_DIR/interface_path.pipe` the path of the interface.txt
 
 Remember to close the pipes after writing to them, so the stream is flushed. 
 
@@ -23,22 +23,22 @@ You must read this variable from the pipe $TURINGARENA_SANDBOX_DIR/sandbox_proce
 
 In the sandbox_process_dir, you finnally have the two pipes that let's you send commands to the driver and recieve responses. 
 These pipes are:
-- $sandbox_process_dir/driver_downward.pipe that let's you send commands to the driver
-- $sandbox_process_dir/driver_upward.pipe that let's you recieve the response from the driver
+- `$sandbox_process_dir/driver_downward.pipe` that let's you send commands to the driver
+- `$sandbox_process_dir/driver_upward.pipe` that let's you recieve the response from the driver
 
 You can send the following requests to the driver:
-- CALL call a function
-- WAIT wait for a function to terminate and returns the resource usage data 
-- EXIT terminates the proces
+- `CALL` call a function
+- `WAIT` wait for a function to terminate and returns the resource usage data 
+- `EXIT` terminates the proces
 
-It's important to remember to call EXIT to terminate the program. 
+It's important to remember to call `EXIT` to terminate the program. 
 
 ### CALL request
 To do a call you must write to the downward pipes the following parameters, followed by a newline `\n`:
 - the string `request`
 - the string `call`
 - the name of the function to call
-- the numbers of parameters, as int
+- the numbers of parameters, as an integer
 - for each function argument, the argument in this way:
 	* if the argument is an integer, you write `0` and then on a new line the parameter value
 	* if the argument is an array, you write `1`, then you write the array length, then you write recursively every value of the array
@@ -55,7 +55,7 @@ The response consists of only integer parameters, in this order:
 - if the call has a return value, the return value
 
 #### Example
-Let's take for example the call sum(4, 5), this is the request that must be written on the downward_pipe
+Let's take for example the call `sum(4, 5)`, this is the request that must be written on the downward_pipe
 ```
 requet 
 call 
@@ -98,7 +98,7 @@ And this the response
 ```
 
 ### EXIT request
-This request serves to terminate a process.
+This request terminates the process correctely.
 
 You should allways send an EXIT request when you finished calling functions. After an EXIT request, you can't send other requests. 
 
