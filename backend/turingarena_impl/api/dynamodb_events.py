@@ -37,7 +37,9 @@ def load_event_page(evaluation_id, after):
     dynamodb = boto3.client("dynamodb")
 
     if after is None:
-        after = -1
+        after_index = -1
+    else:
+        after_index = after
 
     limit = 100
     response = dynamodb.query(
@@ -54,7 +56,7 @@ def load_event_page(evaluation_id, after):
                 'S': evaluation_id,
             },
             ':after': {
-                'N': str(after),
+                'N': str(after_index),
             },
         }
     )
@@ -67,6 +69,7 @@ def load_event_page(evaluation_id, after):
 
     last = False
     if data and data[-1] == "EOS":
+        data = data[:-1]
         last = True
 
     if after is None:
