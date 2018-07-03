@@ -63,6 +63,7 @@ jobs:
           turingarena/turingarena:$TRAVIS_BRANCH
           python -m turingarena_impl.api.hypersh_evaluate
         - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].Name)
+        - echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID
         - cd backend/
         - npm install
         - serverless deploy
