@@ -5,7 +5,7 @@ from http import HTTPStatus
 from urllib.request import urlopen
 
 from turingarena_impl.api.common import ProxyError
-from turingarena_impl.api.dynamodb_events import load_events
+from turingarena_impl.api.dynamodb_events import load_event_page
 from turingarena_impl.api.dynamodb_submission import save_submission, SubmissionFile
 
 
@@ -91,11 +91,11 @@ def do_evaluation_events(params):
 
     # FIXME: use some opaque string for cursors
 
-    after = int(params.get("after", "0"))
-    data = load_events(evaluation_id, after)
-    return dict(
-        data=data,
-    )
+    after = params.get("after", None)
+    if after is not None:
+        after = int(after)
+
+    return load_event_page(evaluation_id, after)
 
 
 endpoints = dict(
