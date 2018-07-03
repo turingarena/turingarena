@@ -64,8 +64,8 @@ namespace turingarena {
         put_arg(T arg)
         {
             driver_downward << "1\n"; // array
-            driver_downward << arg.size() << '\n';
-
+            driver_downward << arg.end() - arg.begin() << '\n';
+            
             for (const auto& e : arg) {
                 put_arg(e);
             }
@@ -125,7 +125,6 @@ namespace turingarena {
                 std::ofstream source_path_pipe{sandbox_dir + "/source_path.pipe"};
                 source_path_pipe << source_path;
             }
-
 
             {
                 std::ofstream interface_path_pipe{sandbox_dir + "/interface_path.pipe"};
