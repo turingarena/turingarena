@@ -48,3 +48,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    EvaluationEventsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: EvaluationEventsTable
+        AttributeDefinitions:
+          - AttributeName: evaluation_id
+            AttributeType: S
+          - AttributeName: index
+            AttributeType: N
+        KeySchema:
+          - AttributeName: evaluation_id
+            KeyType: HASH
+          - AttributeName: index
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          Enabled: true
+          AttributeName: expires
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

@@ -7,6 +7,7 @@ import traceback
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.api.aws_evaluate import cloud_evaluate
+from turingarena_impl.api.dynamodb_events import store_events
 from turingarena_impl.api.dynamodb_submission import load_submission
 
 
@@ -14,6 +15,7 @@ def do_evaluate():
     request_data = json.load(sys.stdin)
 
     submission_id = request_data["submission_id"]
+    evaluation_id = request_data["evaluation_id"]
     evaluator_cmd = request_data["evaluator_cmd"]
 
     for r in request_data["repositories"].values():
@@ -61,8 +63,10 @@ def do_evaluate():
             subprocess.run(cmd, check=True)
 
         submission = load_submission(submission_id)
-        for event in cloud_evaluate(submission, evaluator_cmd=evaluator_cmd):
-            print(event)
+
+        events = cloud_evaluate(submission, evaluator_cmd=evaluator_cmd)
+
+        store_events(evaluation_id, events)
 
 
 def main():

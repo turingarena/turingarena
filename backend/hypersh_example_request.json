@@ -1,5 +1,6 @@
 {
-  "submission_id": "5a3d40c90ac6ea0286857b1ede133738",
+  "submission_id": "bd0bd2913fdbf257ff6e11843e58e184",
+  "evaluation_id": "test_evaluation",
   "evaluator_cmd": "/usr/local/bin/python -u evaluator.py",
   "packs": [
     "d1a18623594c47621e9289767bc3ce997ce45756"
