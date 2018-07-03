@@ -62,7 +62,7 @@ jobs:
           --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
           turingarena/turingarena:$TRAVIS_BRANCH
           python -m turingarena_impl.api.hypersh_evaluate
-        - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].name)
+        - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].Name)
         - cd backend/
         - npm install
         - serverless deploy
