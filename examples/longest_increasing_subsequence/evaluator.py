@@ -4,8 +4,8 @@ import sys
 from turingarena import *
 
 
-def run(algorithm, a, time_limit=None):
-    with algorithm.run(time_limit=time_limit) as process:
+def run(algorithm, a):
+    with run_algorithm(algorithm) as process:
         process.procedures.compute(len(a) ,a)
         subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
     print(f"Time usage: {process.time_usage}", file=sys.stderr)
@@ -13,7 +13,7 @@ def run(algorithm, a, time_limit=None):
 
 
 def get_optimal_subsequence(a):
-    correct_algorithm = algorithm("longest_increasing_subsequence:solutions/correct.cpp")
+    correct_algorithm = "solutions/correct.cpp"
     return run(correct_algorithm, a)
 
 
@@ -23,7 +23,7 @@ def create_random_instance(n, digits=6):
 
 
 def main():
-    algorithm = submitted_algorithm()
+    algorithm = submission.source
     goals = {
         "exponential": True,
         "quadratic": True,
@@ -44,7 +44,7 @@ def main():
             a = create_random_instance(n)
             optimal_subsequence = get_optimal_subsequence(a)
             try:
-                subsequence = run(algorithm, a, time_limit=0.001)
+                subsequence = run(algorithm, a)
             except AlgorithmError as e:
                 print("Error:", e)
                 correct = False
