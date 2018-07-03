@@ -21,8 +21,8 @@ install:
     $TRAVIS_BUILD_DIR/hyper
     config
     --default-region=us-west-1
-    --accesskey=$HYPER_ACCESS_KEY
-    --secretkey=$HYPER_SECRET_KEY
+    --accesskey=$HYPERSH_ACCESS_KEY
+    --secretkey=$HYPERSH_SECRET_KEY
 
 stages:
   - base_build
@@ -52,11 +52,11 @@ jobs:
         - docker push turingarena/turingarena:$TRAVIS_BRANCH
         - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$TRAVIS_BRANCH
         - $TRAVIS_BUILD_DIR/hyper rmi $(hyper images -q --filter "dangling=true") || true
-        - export HYPER_FUNC_NAME=evaluate-$TRAVIS_BRANCH
-        - $TRAVIS_BUILD_DIR/hyper func rm $HYPER_FUNC_NAME
+        - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
+        - $TRAVIS_BUILD_DIR/hyper func rm $HYPERSH_FUNC_NAME
         - >
-          export HYPER_FUNC_ID=$(hyper func create
-            --name $HYPER_FUNC_NAME
+          export HYPERSH_FUNC_ID=$(hyper func create
+            --name $HYPERSH_FUNC_NAME
             --env AWS_DEFAULT_REGION=us-east-1
             --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
