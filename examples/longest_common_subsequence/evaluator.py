@@ -34,7 +34,7 @@ def is_valid_solution(x, y, sol):
     return True
 
 
-def evaluate_test_case(submission, N):
+def evaluate_test_case(N):
     x = [
         random.randint(0, 10)
         for _ in range(N)
@@ -45,7 +45,7 @@ def evaluate_test_case(submission, N):
     ]
     m = len(x)
     n = len(y)
-    with submission.run() as process:
+    with run_algorithm(submission.source) as process:
         l = process.functions.compute(m, x, n, y)
         sol = [
             process.functions.element(i)
@@ -56,7 +56,7 @@ def evaluate_test_case(submission, N):
 
 try:
     for i, n in enumerate([10] * 5 + [100, 1000]):
-        correct = evaluate_test_case(algorithm, n)
+        correct = evaluate_test_case(n)
         outcomes = ["wrong", "correct"]
         print(f'test case N = {n} {outcomes[correct]}')
         evaluation.data(dict(goals={
