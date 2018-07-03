@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <cctype>
 #include <iostream>
+#include <tuple>
+
 
 #include <cassert>
 
@@ -77,14 +79,17 @@ namespace turingarena {
         }
 
         // base case
-        void put_args() {}
+        template <int i, typename ...Args>
+        typename std::enable_if<i >= sizeof...(Args), void>::type
+        put_args(std::tuple<Args...> args) {}
 
-        // recursive function to send args
-        template <typename First, typename ...Others>
-        void put_args(First first, Others ...others)
+        // recursive template to send args
+        template <int i, typename ...Args>
+        typename std::enable_if<i < sizeof...(Args), void>::type
+        put_args(std::tuple<Args...> args)
         {
-            put_arg(first);
-            put_args(others...);
+            put_arg(std::get<i>(args));
+            put_args<i + 1>(args);
         }
 
         void read_status()
@@ -115,6 +120,29 @@ namespace turingarena {
         {
             driver_downward << "request\n";
             driver_downward << "exit\n";
+        }
+
+        template <typename ...Args, typename ...Callbacks>
+        int call(const std::string& name, bool has_return_value, std::tuple<Args...> args, std::tuple<Callbacks...> callbacks)
+        {
+            int result = 0;
+            
+            driver_downward << "request\n";
+            driver_downward << "call\n";
+            driver_downward << name << '\n';
+            driver_downward << sizeof...(Args) << '\n';
+            put_args<0>(args);
+
+            driver_downward << has_return_value << '\n';
+            driver_downward << sizeof...(Callbacks) << '\n';
+            driver_downward.flush();
+
+            read_status();
+
+            if (has_return_value)
+                driver_upward >> result;
+
+            return result;
         }
 
     public:
@@ -159,42 +187,13 @@ namespace turingarena {
         template <typename ...Args>
         int call_function(const std::string& function_name, Args ...args)
         {
-            int result;
-            
-            driver_downward << "request\n";
-            driver_downward << "call\n";
-            driver_downward << function_name << '\n';
-            driver_downward << sizeof...(Args) << '\n';
-            put_args(args...);
-
-            driver_downward << 1 << '\n'; // 1 = function
-            driver_downward << 0 << '\n'; // no callbacks
-            driver_downward.flush();
-
-            read_status();
-
-            driver_upward >> result;
-
-            //read_resource_usage();
-
-            return result;
+            return call(function_name, true, std::make_tuple(args...), std::make_tuple());
         }
 
         template <typename ...Args>
         void call_procedure(const std::string& procedure_name, Args ...args)
         {
-            driver_downward << "request\n";
-            driver_downward << "call\n";
-            driver_downward << procedure_name << '\n';
-            driver_downward << sizeof...(Args) << '\n';
-            put_args(args...);
-
-            driver_downward << "0\n"; // 0 = procedure
-            driver_downward << "0\n"; // no callbacks
-            driver_downward.flush();
-
-            read_status();
-            //read_resource_usage();
+            call(procedure_name, false, std::make_tuple(args...), std::make_tuple());
         }
 
         ResourceUsage get_resource_usage() 
