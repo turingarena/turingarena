@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-curl http://localhost:8000/evaluate \
+curl $1/evaluate \
     -F packs[]=d1a18623594c47621e9289767bc3ce997ce45756 \
     -F evaluator_cmd="/usr/local/bin/python -u evaluator.py" \
     -F submission[source]=@../examples/sum_of_two_numbers/solutions/correct.cpp \
