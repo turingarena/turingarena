@@ -51,7 +51,7 @@ functions:
       - http: ANY /{proxy+}
     environment:
       HYPERSH_REGION: us-west-1
-      HYPERSH_FUNC_NAME: ${env:HYPERSH_FUNC_NAME}
+      HYPERSH_FUNC_NAME: evaluate
       HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
 
 custom:
