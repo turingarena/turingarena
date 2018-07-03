@@ -1,0 +1,15 @@
+{
+  "submission_id": "5a3d40c90ac6ea0286857b1ede133738",
+  "evaluator_cmd": "/usr/local/bin/python -u evaluator.py",
+  "packs": [
+    "d1a18623594c47621e9289767bc3ce997ce45756"
+  ],
+  "repositories": {
+    "a": {
+      "type": "git_clone",
+      "url": "https://github.com/turingarena/turingarena.git",
+      "branch": null,
+      "depth": null
+    }
+  }
+}

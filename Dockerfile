@@ -2,6 +2,7 @@ ARG BASE_IMAGE=turingarena/turingarena-base
 FROM $BASE_IMAGE
 
 ENTRYPOINT []
+ENV GIT_DIR=/run/turingarena/db.git
 
 COPY . /usr/local/turingarena/
 
@@ -14,4 +15,6 @@ RUN true \
     && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/bin/jcmd \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
+    && mkdir /run/turingarena \
+    && git init --bare \
     && true
