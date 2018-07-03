@@ -14,7 +14,7 @@ git:
 
 install:
   - wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz
-  - tar xzf hyper-linux-x86_64.tar.gz -C /usr/local/bin
+  - tar xzf hyper-linux-x86_64.tar.gz -C $TRAVIS_BUILD_DIR
   - npm install -g serverless
 
 jobs:
@@ -41,12 +41,13 @@ jobs:
           -t turingarena/turingarena:$TRAVIS_BRANCH
           .
         - docker push turingarena/turingarena:$TRAVIS_BRANCH
-        - hyper pull turingarena/turingarena:$TRAVIS_BRANCH
-        - hyper rmi $(hyper images -q --filter "dangling=true")
-        - hyper func rm evaluate
+        - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$TRAVIS_BRANCH
+        - $TRAVIS_BUILD_DIR/hyper rmi $(hyper images -q --filter "dangling=true")
+        - $TRAVIS_BUILD_DIR/hyper func rm evaluate
+        - export HYPER_FUNC_NAME=evaluate-$TRAVIS_BRANCH
         - >
           export HYPER_FUNC_ID=$(hyper func create
-            --name evaluate
+            --name $HYPER_FUNC_NAME
             --env AWS_DEFAULT_REGION=us-east-1
             --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
