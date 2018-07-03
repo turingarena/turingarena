@@ -1,6 +1,9 @@
+import json
 import time
 
 import boto3
+
+from turingarena_impl.evaluation.events import EvaluationEvent
 
 
 def store_events(evaluation_id, events):
@@ -24,3 +27,32 @@ def store_events(evaluation_id, events):
                 },
             },
         )
+
+
+def load_events(evaluation_id, after):
+    dynamodb = boto3.client("dynamodb")
+
+    response = dynamodb.query(
+        TableName='EvaluationEventsTable',
+        Limit=100,
+        ConsistentRead=False,
+        KeyConditionExpression='#evaluation_id = :evaluation_id AND #index >= :after',
+        ExpressionAttributeNames={
+            '#evaluation_id': "evaluation_id",
+            "#index": "index",
+        },
+        ExpressionAttributeValues={
+            ':evaluation_id': {
+                'S': evaluation_id,
+            },
+            ':after': {
+                'N': str(after),
+            },
+        }
+    )
+
+    return [
+        json.loads(line)
+        for item in response['Items']
+        for line in item['data']['S'].splitlines()
+    ]
