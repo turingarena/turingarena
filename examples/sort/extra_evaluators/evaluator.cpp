@@ -11,7 +11,7 @@ int main() {
     for (int i = 0; i < A.size(); i++) {
         int e = algorithm.call_function("get_element", i);
         if (i != e) {
-            std::cout << "WRONG\n";
+            std::cout << "WRONG" << " " << i << " " << e << '\n';
             return 0;
         }
     }

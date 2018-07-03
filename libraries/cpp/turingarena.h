@@ -9,6 +9,8 @@
 #include <cctype>
 #include <iostream>
 
+#include <cassert>
+
 namespace turingarena {
 
     namespace {
@@ -39,6 +41,11 @@ namespace turingarena {
         }
     }
 
+    struct ResourceUsage {
+        float time_usage;
+        int memory_usage;
+    };
+
     class Algorithm {
         std::string sandbox_dir;
         std::string sandbox_process_dir;
@@ -46,8 +53,6 @@ namespace turingarena {
         std::ifstream driver_upward;
 
         std::string status;
-        int memory_usage;
-        int time_usage;
 
         // this is a specialization only for scalar types
         template <typename T>
@@ -88,16 +93,22 @@ namespace turingarena {
 
             driver_upward >> status;
             driver_upward >> has_callbacks;
+
+            assert (std::atoi(has_callbacks.c_str()) == 0);
         }
 
-        void read_resource_usage()
+        ResourceUsage wait()
         {
             driver_downward << "wait\n";
             driver_downward << "0\n";
             driver_downward.flush();
 
-            driver_upward >> time_usage;
-            driver_upward >> memory_usage;
+            ResourceUsage rusage;
+
+            driver_upward >> rusage.time_usage;
+            driver_upward >> rusage.memory_usage;
+
+            return rusage;
         }
 
         void send_exit_request()
@@ -164,7 +175,7 @@ namespace turingarena {
 
             driver_upward >> result;
 
-            read_resource_usage();
+            //read_resource_usage();
 
             return result;
         }
@@ -183,11 +194,13 @@ namespace turingarena {
             driver_downward.flush();
 
             read_status();
-            read_resource_usage();
+            //read_resource_usage();
         }
 
-        int get_memory_usage() { return memory_usage; }
-        int get_time_usage() { return time_usage; }
+        ResourceUsage get_resource_usage() 
+        {
+            return wait();
+        }
 
     };
 };
