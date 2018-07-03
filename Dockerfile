@@ -1,7 +1,6 @@
 ARG BASE_IMAGE=turingarena/turingarena-base
 FROM $BASE_IMAGE
 
-ENV TURINGARENA_PATH_FILE=/usr/lib/python3.6/site-packages/turingarena.pth
 ENTRYPOINT []
 
 COPY . /usr/local/turingarena/
@@ -15,5 +14,4 @@ RUN true \
     && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/bin/jcmd \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
-    && echo '/usr/local/turingarena/examples' >> $TURINGARENA_PATH_FILE \
     && true
