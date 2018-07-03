@@ -16,24 +16,27 @@ install:
   - wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz
   - tar xzf hyper-linux-x86_64.tar.gz -C $TRAVIS_BUILD_DIR
   - npm install -g serverless
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+stages:
+  - base_build
+  - build
+  - deploy
 
 jobs:
   include:
-    - if: branch = develop AND type != pull_request
-      script:
-        - pip install --upgrade setuptools twine wheel
-        - cd cli/
-        - python setup.py bdist_wheel
-        - twine upload dist/*
-    - if: type != pull_request
-      script:
-        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - if: type != pull_request AND commit_message =~ /update-base/
+      stage: base_build
         - >
           docker build
           -t turingarena/turingarena-base:$TRAVIS_BRANCH
           -f Dockerfile.base
           .
         - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
+    - if: type != pull_request
+      stage: build
+      script:
+        - docker pull turingarena/turingarena-base:$TRAVIS_BRANCH
         - >
           docker build
           --network none
@@ -62,6 +65,13 @@ jobs:
         - docker pull turingarena/turingarena:$TRAVIS_BRANCH
         - docker tag turingarena/turingarena:$TRAVIS_BRANCH turingarena/turingarena
         - docker push turingarena/turingarena
+    - if: branch = develop AND type != pull_request
+      stage: deploy
+      script:
+        - pip install --upgrade setuptools twine wheel
+        - cd cli/
+        - python setup.py bdist_wheel
+        - twine upload dist/*
 deploy:
   - provider: pages
     skip-cleanup: true
