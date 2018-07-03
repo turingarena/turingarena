@@ -77,18 +77,16 @@ class ForStatement(Statement, IntermediateNode):
         return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     def _driver_run(self, context):
-        needed = not self.can_be_grouped or context.phase is ExecutionPhase.REQUEST or any(
-            a.status.name == context.phase.name  # FIXME: using .name
-            for a in self.reference_actions
-        )
-        if not needed:
-            logger.debug(f"skipping for (phase: {context.phase})")
-            return
-
         if context.phase is None:
             assert context.request_lookahead is None
 
-        for_range = self.index.range.evaluate(context.bindings)
+        try:
+            for_range = self.index.range.evaluate(context.bindings)
+        except KeyError:
+            # we assume that if the range is not resolved, then the cycle should be skipped
+            # FIXME: determine this situation statically
+            logger.debug(f"skipping for (phase: {context.phase})")
+            return
 
         results_by_iteration = [
             self._body_node.driver_run(context.with_assigments(
