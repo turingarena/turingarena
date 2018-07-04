@@ -22,6 +22,9 @@ def main(event, context):
 
     return {
         "statusCode": status_code,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+        },
         "body": json.dumps(body, indent=4)
     }
 
