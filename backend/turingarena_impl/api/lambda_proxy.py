@@ -24,6 +24,7 @@ def main(event, context):
         "statusCode": status_code,
         "headers": {
             "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
         },
         "body": json.dumps(body, indent=4)
     }
