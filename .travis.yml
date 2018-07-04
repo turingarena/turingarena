@@ -51,7 +51,9 @@ jobs:
           .
         - docker push turingarena/turingarena:$TRAVIS_BRANCH
         - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$TRAVIS_BRANCH
-        - $TRAVIS_BUILD_DIR/hyper rmi $(hyper images -q --filter "dangling=true") || true
+        - HYPERSH_DANGLING_IMAGES=$($TRAVIS_BUILD_DIR/hyper images -q --filter "dangling=true")
+        - echo HYPERSH_DANGLING_IMAGES=$HYPERSH_DANGLING_IMAGES
+        - $TRAVIS_BUILD_DIR/hyper rmi $HYPERSH_DANGLING_IMAGES || true
         - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
         - $TRAVIS_BUILD_DIR/hyper func rm $HYPERSH_FUNC_NAME || true
         - >
