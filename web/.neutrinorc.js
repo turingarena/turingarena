@@ -5,8 +5,7 @@ module.exports = {
     '@neutrinojs/react',
     [
       '@neutrinojs/env', [
-        'TURINGARENA_EVALUATE_ENDPOINT',
-        'TURINGARENA_PROBLEM_URL',
+        'TURINGARENA_ENDPOINT',
       ]
     ],
     (neutrino) => neutrino.config.module
