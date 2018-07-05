@@ -54,17 +54,21 @@ class DriverClientEngine:
     def get_response_value(self):
         return int(self.get_response_line())
 
+    def raise_error(self):
+        info = self.do_get_info()
+        message = self.get_response_line()
+        raise AlgorithmRuntimeError(self.process, message, info)
+
     def get_response_ok(self):
         logging.debug(f"waiting for response ok")
         any_error = self.get_response_value()
         if any_error:
-            info = self.do_get_info()
-            message = self.get_response_line()
-            raise AlgorithmRuntimeError(self.process, message, info)
+            self.raise_error()
 
     def accept_callbacks(self, callback_list):
         while True:
-            if self.get_response_value():  # has callback
+            response = self.get_response_value()
+            if response == 1:  # has callback
                 logging.debug(f"has callback")
                 index = self.get_response_value()
                 callback = callback_list[index]
@@ -75,8 +79,10 @@ class DriverClientEngine:
                 return_value = callback(*args)
                 logging.debug(f"callback {index} ({args}) -> {return_value}")
                 self.send_callback_return(return_value)
-            else:  # no callbacks
+            elif response == 0:  # no callbacks
                 break
+            else:  # error
+                self.raise_error()
 
     def call_lines(self, request):
         yield "call"

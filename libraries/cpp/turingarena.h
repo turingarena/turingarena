@@ -139,13 +139,27 @@ namespace turingarena {
             driver_downward << return_value << std::endl;
         }
 
+        void throw_exeption()
+        {
+            float time_usage;
+            int memory_usage;
+            std::string error_message;
+            driver_upward >> time_usage;
+            driver_upward >> memory_usage;
+            std::getline(driver_upward, error_message);
+            std::getline(driver_upward, error_message);
+            std::cerr << "Error occurred\n";
+            std::cerr << "Time Usage: " << time_usage << std::endl;
+            std::cerr << "Memory Usage: " << memory_usage << std::endl;
+            throw std::runtime_error("Driver error: " + error_message);
+        }
+
         void get_response_ok()
         {
             int error;
             driver_upward >> error;
-            if (error) {
-                throw std::runtime_error("Something bad occurred!");
-            }
+            if (error) 
+                throw_exeption();
         }
 
         template <int i, typename Function, typename ...Args>
@@ -194,8 +208,11 @@ namespace turingarena {
                 int has_callbacks;
                 driver_upward >> has_callbacks;
 
-                if (!has_callbacks)
+                if (has_callbacks == 0)
                     break;
+                
+                if (has_callbacks == -1)
+                    throw_exeption();
 
                 int index;
                 driver_upward >> index;

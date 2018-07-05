@@ -104,7 +104,7 @@ class SandboxProcessServer:
             try:
                 self.interface.run_driver(context)
             except CommunicationError as e:
-                context.send_driver_upward(1)  # error
+                context.send_driver_upward(-1)  # error
                 info = context.perform_wait(wait=1)
                 message, = e.args
                 context.send_driver_upward(f"{message} (process {info.error})")

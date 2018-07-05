@@ -113,7 +113,6 @@ class PopenProcess(Process):
 class CompilationFailedProcess(Process):
     def get_status(self, kill=False):
         return SandboxProcessInfo(
-            status=ProcessStatus.TERMINATED_WITH_ERROR,
             memory_usage=0,
             time_usage=0.0,
             error=f"Compilation failed.",
