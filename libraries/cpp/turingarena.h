@@ -9,7 +9,7 @@
 #include <cctype>
 #include <iostream>
 #include <tuple>
-
+#include <functional>
 
 #include <cassert>
 
@@ -92,21 +92,11 @@ namespace turingarena {
             put_args<i + 1>(args);
         }
 
-        void read_status()
-        {
-            std::string has_callbacks;
-
-            driver_upward >> status;
-            driver_upward >> has_callbacks;
-
-            assert (std::atoi(has_callbacks.c_str()) == 0);
-        }
-
         ResourceUsage wait()
         {
-            driver_downward << "wait\n";
-            driver_downward << "0\n";
-            driver_downward.flush();
+            get_response_ok();
+
+            driver_downward << "wait\n0" << std::endl;
 
             ResourceUsage rusage;
 
@@ -119,14 +109,94 @@ namespace turingarena {
         void send_exit_request()
         {
             driver_downward << "request\n";
-            driver_downward << "exit\n";
+            driver_downward << "exit" << std::endl;
+        }
+
+        void send_callback_return(bool has_return_value, int return_value = 0) 
+        {
+            get_response_ok();
+
+            driver_downward << "request\n";
+            driver_downward << "callback_return\n";
+            driver_downward << has_return_value << '\n';
+            driver_downward << return_value << std::endl;
+        }
+
+        void get_response_ok()
+        {
+            int error;
+            driver_upward >> error;
+            if (error) {
+                throw std::runtime_error("Something bad occurred!");
+            }
+        }
+
+        template <int i, typename Ret, typename ...Params, typename ...Args>
+        typename std::enable_if<i == sizeof...(Params) && std::is_void<Ret>::value, void>::type
+        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        {
+            function(args...);
+            send_callback_return(false);
+        }
+
+        template <int i, typename Ret, typename ...Params, typename ...Args>
+        typename std::enable_if<i == sizeof...(Params) && !std::is_void<Ret>::value, void>::type
+        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        {
+            int res = function(args...);
+            send_callback_return(true, res);
+        }
+
+
+        template <int i, typename Ret, typename ...Params, typename ...Args>
+        typename std::enable_if<(i < sizeof...(Params)), void>::type
+        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        {
+            int arg;
+            driver_upward >> arg;
+            return call_n_args<i + 1>(function, args..., arg);
+        }
+
+        template <int i, typename ...Callbacks>
+        typename std::enable_if<i == sizeof...(Callbacks), void>::type
+        call_n_callback(std::tuple<Callbacks...> callbacks, int index)
+        {}
+
+        template <int i, typename ...Callbacks>
+        typename std::enable_if<(i < sizeof...(Callbacks)), void>::type
+        call_n_callback(std::tuple<Callbacks...> callbacks, int index)
+        {
+            if (index == i)
+                call_n_args<0>(std::get<i>(callbacks));
+            else 
+                call_n_callback<i + 1>(callbacks, index);
+        }
+
+        template <typename ...Callbacks>
+        void accept_callbacks(std::tuple<Callbacks...> callbacks)
+        {
+            while (true) {
+                int has_callbacks;
+                driver_upward >> has_callbacks;
+
+                if (!has_callbacks)
+                    break;
+
+                int index;
+                driver_upward >> index;
+
+                std::cerr << "GOT CALLBACK REQUEST: i = " << index << std::endl;
+
+                call_n_callback<0>(callbacks, index); 
+            }
         }
 
         template <typename ...Args, typename ...Callbacks>
         int call(const std::string& name, bool has_return_value, std::tuple<Args...> args, std::tuple<Callbacks...> callbacks)
         {
-            int result = 0;
             
+            get_response_ok();
+
             driver_downward << "request\n";
             driver_downward << "call\n";
             driver_downward << name << '\n';
@@ -135,10 +205,12 @@ namespace turingarena {
 
             driver_downward << has_return_value << '\n';
             driver_downward << sizeof...(Callbacks) << '\n';
+            driver_downward << 1 << '\n';
             driver_downward.flush();
 
-            read_status();
+            accept_callbacks(callbacks);
 
+            int result = 0;
             if (has_return_value)
                 driver_upward >> result;
 
@@ -182,6 +254,12 @@ namespace turingarena {
         ~Algorithm()
         {
             send_exit_request();
+        }
+
+        template <typename ...Args, typename ...Callbacks>
+        int call_function(const std::string& function_name, std::tuple<Callbacks...> callbacks, Args ...args)
+        {
+            return call(function_name, true, std::make_tuple(args...), callbacks);
         }
 
         template <typename ...Args>
