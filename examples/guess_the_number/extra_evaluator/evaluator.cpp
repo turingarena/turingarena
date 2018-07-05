@@ -23,7 +23,7 @@ int main()
 
     int ans;
     {
-        turingarena::Algorithm algorithm{turingarena::get_submission_parameter("source")};
+        turingarena::Algorithm algorithm{turingarena::submission["source"]};
         ans = algorithm.call_function("play", std::make_tuple(guess), correct);
     }
 

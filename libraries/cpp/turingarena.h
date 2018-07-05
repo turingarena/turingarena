@@ -41,6 +41,12 @@ namespace turingarena {
 
             std::cout << evaluation_data_begin << data << evaluation_data_end << std::endl;
         }
+
+        struct {
+            std::string operator[](const std::string& key) {
+                return get_submission_parameter(key);
+            }
+        } submission;
     }
 
     struct ResourceUsage {
