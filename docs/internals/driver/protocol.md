@@ -30,8 +30,20 @@ You can send the following requests to the driver:
 - `CALL` call a function
 - `WAIT` wait for a function to terminate and returns the resource usage data 
 - `EXIT` terminates the proces
+- `CALLBACK RETURN` tell the driver the return value of a callback
+- `CHECKPOINT` checkpoint request 
 
 It's important to remember to call `EXIT` to terminate the program. 
+
+
+### Reading error status 
+Before sending any request to the driver, is absolutely important to first read the error status. The error status is a single
+integer that you read from the upward pipe. If it's `0` it means no errors, if it's `1` it means that there was an error. 
+
+The syntax of the error messages is the following:
+- time usage of the process (int)
+- memory usage of the process (float)
+- error message (string)
 
 ### CALL request
 To do a call you must write to the downward pipes the following parameters, followed by a newline `\n`:
@@ -113,6 +125,36 @@ Obviously you don't get any response back.
 request
 exit
 ``` 
+
+### CALLBACK RETURN request
+This request tells the driver that a callback has returned and the eventual return value
+
+You must write to the `downward_pipe` the following lines:
+- the string `request`
+- the string `callback_return`
+- the integer `1` if the callback has a return value, `0` if not
+- it has return value, the return value
+
+#### Example
+```
+request
+callback_return
+1 # has return value = True
+42 # value
+```
+
+### CHECKPOINT REQUEST
+This request serves to syncronize to a `checkpoint` instruction in the solution.  
+
+Syntax:
+- the string `request`
+- the string `checkpoint`
+
+#### Example
+```
+request
+checkpoint
+```
 
 ## TODO
 - syntax of error messages is not documented
