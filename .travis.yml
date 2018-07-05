@@ -33,6 +33,7 @@ jobs:
   include:
     - if: env(UPDATE_BASE) IS present OR (type != pull_request AND commit_message =~ /update-base/)
       stage: base_build
+      script:
         - >
           docker build
           -t turingarena/turingarena-base:$TRAVIS_BRANCH
