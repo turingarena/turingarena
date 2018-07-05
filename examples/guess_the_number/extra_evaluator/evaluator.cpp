@@ -8,10 +8,10 @@ int main()
 {
     srand(time(nullptr));
 
-    int correct = rand() % 50;
+    int correct = rand() % 100;
     int number_of_guesses = 0;
 
-    std::function<int(int)> guess = [&number_of_guesses, correct](int n) {
+    auto guess = [&number_of_guesses, correct](int n) {
         number_of_guesses++;
         if (n == correct) 
             return 0; // ok

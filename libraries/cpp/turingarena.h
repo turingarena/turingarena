@@ -48,6 +48,16 @@ namespace turingarena {
         int memory_usage;
     };
 
+
+    template <typename T>
+    struct function_traits : public function_traits<decltype(&T::operator())> {};
+
+    template <typename ClassType, typename ReturnType, typename... Args>
+    struct function_traits<ReturnType(ClassType::*)(Args...) const> {
+        enum { arity = sizeof...(Args) };
+        typedef ReturnType result_type;
+    };
+
     class Algorithm {
         std::string sandbox_dir;
         std::string sandbox_process_dir;
@@ -96,7 +106,8 @@ namespace turingarena {
         {
             get_response_ok();
 
-            driver_downward << "wait\n0" << std::endl;
+            driver_downward << "wait\n;";
+            driver_downward << 0 << std::endl;
 
             ResourceUsage rusage;
 
@@ -106,18 +117,18 @@ namespace turingarena {
             return rusage;
         }
 
-        void send_exit_request()
-        {
-            driver_downward << "request\n";
-            driver_downward << "exit" << std::endl;
-        }
-
-        void send_callback_return(bool has_return_value, int return_value = 0) 
+        void send_request(const std::string& request)
         {
             get_response_ok();
 
             driver_downward << "request\n";
-            driver_downward << "callback_return\n";
+            driver_downward << request << std::endl;
+        }
+
+        void send_callback_return(bool has_return_value, int return_value = 0) 
+        {
+            send_request("callback_return");
+
             driver_downward << has_return_value << '\n';
             driver_downward << return_value << std::endl;
         }
@@ -131,30 +142,28 @@ namespace turingarena {
             }
         }
 
-        template <int i, typename Ret, typename ...Params, typename ...Args>
-        typename std::enable_if<i == sizeof...(Params) && std::is_void<Ret>::value, void>::type
-        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        template <int i, typename Function, typename ...Args>
+        typename std::enable_if<i == function_traits<Function>::arity && std::is_void<typename function_traits<Function>::result_type>::value, void>::type
+        call_n_args(Function function, Args ...args)
         {
             function(args...);
             send_callback_return(false);
         }
 
-        template <int i, typename Ret, typename ...Params, typename ...Args>
-        typename std::enable_if<i == sizeof...(Params) && !std::is_void<Ret>::value, void>::type
-        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        template <int i, typename Function, typename ...Args>
+        typename std::enable_if<i == function_traits<Function>::arity && !std::is_void<typename function_traits<Function>::result_type>::value, void>::type
+        call_n_args(Function function, Args ...args)
         {
-            int res = function(args...);
-            send_callback_return(true, res);
+            send_callback_return(true, function(args...));
         }
 
-
-        template <int i, typename Ret, typename ...Params, typename ...Args>
-        typename std::enable_if<(i < sizeof...(Params)), void>::type
-        call_n_args(std::function<Ret(Params...)> function, Args ...args)
+        template <int i, typename Function, typename ...Args>
+        typename std::enable_if<(i < function_traits<Function>::arity), void>::type
+        call_n_args(Function function, Args ...args)
         {
             int arg;
             driver_upward >> arg;
-            return call_n_args<i + 1>(function, args..., arg);
+            call_n_args<i + 1>(function, args..., arg);
         }
 
         template <int i, typename ...Callbacks>
@@ -168,7 +177,7 @@ namespace turingarena {
         {
             if (index == i)
                 call_n_args<0>(std::get<i>(callbacks));
-            else 
+            else
                 call_n_callback<i + 1>(callbacks, index);
         }
 
@@ -184,28 +193,41 @@ namespace turingarena {
 
                 int index;
                 driver_upward >> index;
-
-                std::cerr << "GOT CALLBACK REQUEST: i = " << index << std::endl;
-
                 call_n_callback<0>(callbacks, index); 
             }
+        }
+
+        template <typename Function>
+        void put_callback_n_args(Function function)
+        {
+            driver_downward << function_traits<Function>::arity << '\n';
+        }
+
+        template <int i, typename ...Callbacks>
+        typename std::enable_if<i == sizeof...(Callbacks), void>::type
+        put_callbacks_n_args(std::tuple<Callbacks...> callbacks)
+        {}
+
+        template <int i, typename ...Callbacks>
+        typename std::enable_if<i < sizeof...(Callbacks), void>::type
+        put_callbacks_n_args(std::tuple<Callbacks...> callbacks)
+        {
+            put_callback_n_args(std::get<i>(callbacks));
+            put_callbacks_n_args<i + 1>(callbacks);
         }
 
         template <typename ...Args, typename ...Callbacks>
         int call(const std::string& name, bool has_return_value, std::tuple<Args...> args, std::tuple<Callbacks...> callbacks)
         {
-            
-            get_response_ok();
+            send_request("call");
 
-            driver_downward << "request\n";
-            driver_downward << "call\n";
             driver_downward << name << '\n';
             driver_downward << sizeof...(Args) << '\n';
             put_args<0>(args);
 
             driver_downward << has_return_value << '\n';
             driver_downward << sizeof...(Callbacks) << '\n';
-            driver_downward << 1 << '\n';
+            put_callbacks_n_args<0>(callbacks);
             driver_downward.flush();
 
             accept_callbacks(callbacks);
@@ -251,9 +273,19 @@ namespace turingarena {
             driver_upward.open(sandbox_process_dir + "/driver_upward.pipe");
         }
 
+        void exit()
+        {
+            send_request("exit");
+        }
+
+        void checkpoint()
+        {
+            send_request("checkpoint");
+        }
+
         ~Algorithm()
         {
-            send_exit_request();
+            exit();
         }
 
         template <typename ...Args, typename ...Callbacks>
@@ -266,6 +298,12 @@ namespace turingarena {
         int call_function(const std::string& function_name, Args ...args)
         {
             return call(function_name, true, std::make_tuple(args...), std::make_tuple());
+        }
+
+        template <typename ...Args, typename ...Callbacks>
+        void call_procedure(const std::string& procedure_name, std::tuple<Callbacks...> callbacks, Args ...args)
+        {
+            call(procedure_name, false, std::make_tuple(args...),callbacks);
         }
 
         template <typename ...Args>
