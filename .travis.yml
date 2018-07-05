@@ -12,31 +12,76 @@ cache: yarn
 git:
   depth: 9999999 # needed for automatic versioning
 
+install:
+  - wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz
+  - tar xzf hyper-linux-x86_64.tar.gz -C $TRAVIS_BUILD_DIR
+  - npm install -g serverless
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - >
+    $TRAVIS_BUILD_DIR/hyper
+    config
+    --default-region=us-west-1
+    --accesskey=$HYPERSH_ACCESS_KEY
+    --secretkey=$HYPERSH_SECRET_KEY
+
+stages:
+  - base_build
+  - build
+  - deploy
+
 jobs:
   include:
-    - if: branch = develop AND type != pull_request
+    - if: type != pull_request AND commit_message =~ /update-base/
+      stage: base_build
+        - >
+          docker build
+          -t turingarena/turingarena-base:$TRAVIS_BRANCH
+          -f Dockerfile.base
+          .
+        - docker push turingarena/turingarena-base:$TRAVIS_BRANCH
+    - if: type != pull_request
+      stage: build
       script:
-      - pip install --upgrade setuptools twine wheel
-      - cd cli/
-      - python setup.py bdist_wheel
-      - twine upload dist/*
+        - docker pull turingarena/turingarena-base:$TRAVIS_BRANCH
+        - >
+          docker build
+          --network none
+          --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
+          -t turingarena/turingarena:$TRAVIS_BRANCH
+          .
+        - docker push turingarena/turingarena:$TRAVIS_BRANCH
+        - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$TRAVIS_BRANCH
+        - HYPERSH_DANGLING_IMAGES=$($TRAVIS_BUILD_DIR/hyper images -q --filter "dangling=true")
+        - echo HYPERSH_DANGLING_IMAGES=$HYPERSH_DANGLING_IMAGES
+        - $TRAVIS_BUILD_DIR/hyper rmi $HYPERSH_DANGLING_IMAGES || true
+        - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
+        - $TRAVIS_BUILD_DIR/hyper func rm $HYPERSH_FUNC_NAME || true
+        - >
+          $TRAVIS_BUILD_DIR/hyper func create
+          --name $HYPERSH_FUNC_NAME
+          --env AWS_DEFAULT_REGION=us-east-1
+          --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+          turingarena/turingarena:$TRAVIS_BRANCH
+          python -m turingarena_impl.api.hypersh_evaluate
+        - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID)
+        - echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID
+        - cd backend/
+        - npm install
+        - serverless deploy
     - if: branch = develop AND type != pull_request
+      stage: deploy
       script:
-      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-      - >
-        docker build
-        -t turingarena/turingarena-base:latest
-        -f Dockerfile.base
-        .
-      - docker push turingarena/turingarena-base:latest
-      - >
-        docker build
-        --network none
-        --build-arg BASE_IMAGE=turingarena/turingarena-base:latest
-        -t turingarena/turingarena:latest
-        .
-      - docker push turingarena/turingarena:latest
-
+        - docker pull turingarena/turingarena:$TRAVIS_BRANCH
+        - docker tag turingarena/turingarena:$TRAVIS_BRANCH turingarena/turingarena
+        - docker push turingarena/turingarena
+    - if: branch = develop AND type != pull_request
+      stage: deploy
+      script:
+        - pip install --upgrade setuptools twine wheel
+        - cd cli/
+        - python setup.py bdist_wheel
+        - twine upload dist/*
 deploy:
   - provider: pages
     skip-cleanup: true
