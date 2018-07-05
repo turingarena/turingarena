@@ -1,36 +1,91 @@
-from turingarena_impl.api.backend import EventConsumer
-from turingarena_impl.api.handler import EvaluationPage
+import json
+import time
+
+import boto3
+
+dynamodb = boto3.client("dynamodb")
 
 
-class DynamoDbEventsHandler:
-    def evaluation_events(self, evaluation_id: str, after: str) -> EvaluationPage:
-        """
-        Returns a page of evaluation events,
-        reading it from a DynamoDB table.
-        """
-        # TODO
+def store_event(evaluation_id, index, data):
+    dynamodb.put_item(
+        TableName='EvaluationEventsTable',
+        Item={
+            'evaluation_id': {
+                'S': evaluation_id,
+            },
+            'index': {
+                'N': str(index),
+            },
+            'data': {
+                'S': data,
+            },
+            'expires': {
+                'N': str(int(time.time() + 10 * 60)),
+            },
+        },
+    )
 
 
-class DynamoDbEventConsumer(EventConsumer):
-    """
-    An event consumer which stores events in a DynamoDB table.
+def store_events(evaluation_id, events):
+    i = -1
+    for i, e in enumerate(events):
+        store_event(evaluation_id, i, str(e) + "\n")
+    store_event(evaluation_id, i + 1, json.dumps("EOS") + "\n")
 
-    A buffer of events is kept.
-    The buffer is regularly flushed, i.e.,
-    all the events currently in the buffer, if any is present,
-    are stored as one or more DynamoDB Items and added to the table.
-    The buffer is flushed using a single API call to DynamoDB.
-    The buffer is considered full when, by adding more events to it,
-    a single API call is no longer sufficient to store all the events.
 
-    The buffer is flushed in three cases:
-    1. when the consumer is closed,
-    2. when the buffer is full,
-    3. periodically, say, every 100ms.
-    """
+def load_event_page(evaluation_id, after):
+    dynamodb = boto3.client("dynamodb")
 
-    def on_new_event(self, event):
-        pass  # TODO
+    if after is None:
+        after_index = -1
+    else:
+        after_index = after
 
-    def close(self):
-        pass  # TODO
+    limit = 100
+    response = dynamodb.query(
+        TableName='EvaluationEventsTable',
+        Limit=limit,
+        ConsistentRead=False,
+        KeyConditionExpression='#evaluation_id = :evaluation_id AND #index > :after',
+        ExpressionAttributeNames={
+            '#evaluation_id': "evaluation_id",
+            "#index": "index",
+        },
+        ExpressionAttributeValues={
+            ':evaluation_id': {
+                'S': evaluation_id,
+            },
+            ':after': {
+                'N': str(after_index),
+            },
+        }
+    )
+
+    data = [
+        json.loads(line)
+        for item in response['Items']
+        for line in item['data']['S'].splitlines()
+    ]
+
+    last = False
+    if data and data[-1] == "EOS":
+        data = data[:-1]
+        last = True
+
+    if after is None:
+        begin = None
+    else:
+        begin = str(after)
+
+    if last:
+        end = None
+    elif after is None:
+        end = str(len(data) - 1)
+    else:
+        end = str(after + len(data))
+
+    return dict(
+        data=data,
+        begin=begin,
+        end=end,
+    )

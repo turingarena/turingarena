@@ -1,12 +1,39 @@
 service: turingarena
 
-provider:
-  name: aws
-  runtime: python3.6
-
 plugins:
   #- serverless-python-requirements
   - serverless-apigw-binary
+
+provider:
+  name: aws
+  runtime: python3.6
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        Fn::GetAtt:
+          - SubmissionsTable
+          - Arn
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        Fn::GetAtt:
+          - EvaluationEventsTable
+          - Arn
 
 package:
   individually: true
@@ -22,6 +49,10 @@ functions:
     handler: turingarena_impl.api.lambda_proxy.main
     events:
       - http: ANY /{proxy+}
+    environment:
+      HYPERSH_REGION: us-west-1
+      HYPERSH_FUNC_NAME: ${env:HYPERSH_FUNC_NAME}
+      HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
 
 custom:
   apigwBinary:
@@ -29,3 +60,42 @@ custom:
       - 'multipart/form-data'
   pythonRequirements:
     fileName: lambda-requirements.txt
+
+resources:
+  Resources:
+    SubmissionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SubmissionsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TimeToLiveSpecification:
+          Enabled: true
+          AttributeName: expires
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    EvaluationEventsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: EvaluationEventsTable
+        AttributeDefinitions:
+          - AttributeName: evaluation_id
+            AttributeType: S
+          - AttributeName: index
+            AttributeType: N
+        KeySchema:
+          - AttributeName: evaluation_id
+            KeyType: HASH
+          - AttributeName: index
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          Enabled: true
+          AttributeName: expires
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

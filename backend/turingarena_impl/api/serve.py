@@ -1,3 +1,4 @@
+import logging
 from wsgiref.simple_server import make_server
 
 from turingarena_impl.api.wsgi_proxy import application
@@ -17,6 +18,8 @@ def serve_cli(args):
     """
     host = args["--host"]
     port = int(args["--port"])
+
+    logging.root.setLevel(logging.DEBUG)
     print(f"Serving on {host}:{port}...")
     with make_server(host, port, app=application) as httpd:
         httpd.serve_forever()
