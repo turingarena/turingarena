@@ -31,7 +31,7 @@ stages:
 
 jobs:
   include:
-    - if: type != pull_request AND commit_message =~ /update-base/
+    - if: env(UPDATE_BASE) IS present OR (type != pull_request AND commit_message =~ /update-base/)
       stage: base_build
         - >
           docker build
