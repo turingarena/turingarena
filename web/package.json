@@ -1,0 +1,8 @@
+{
+	"scripts": {
+		"install": "lerna exec -- npm install --no-save"
+	},
+	"devDependencies": {
+		"lerna": "^2.11.0"
+	}
+}

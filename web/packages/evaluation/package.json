@@ -1,0 +1,16 @@
+{
+  "name": "@turingarena/evaluation",
+  "version": "0.0.0",
+  "main": "build/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "neutrino build"
+  },
+  "dependencies": {
+    "mobx": "^5.0.3"
+  },
+  "devDependencies": {
+    "@neutrinojs/library": "^8.3.0",
+    "@turingarena/neutrino-preset-decorators": "^0.0.0"
+  }
+}

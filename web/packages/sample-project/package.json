@@ -1,0 +1,21 @@
+{
+  "name": "@turingarena/sample-project",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "neutrino build",
+    "start": "neutrino start"
+  },
+  "dependencies": {
+    "@turingarena/evaluation": "^0.0.0",
+    "mobx": "^5.0.3",
+    "prop-types": "^15.6.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-hot-loader": "^4.3.3"
+  },
+  "devDependencies": {
+    "@turingarena/neutrino-preset": "^0.0.0"
+  }
+}
