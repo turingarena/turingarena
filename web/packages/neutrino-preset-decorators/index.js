@@ -7,6 +7,7 @@ module.exports = {
       .use('babel')
       .tap(options => merge({
         plugins: [
+          require.resolve('babel-plugin-transform-async-generator-functions'),
           require.resolve('babel-plugin-transform-decorators-legacy'),
           require.resolve('babel-plugin-transform-class-properties'),
         ]

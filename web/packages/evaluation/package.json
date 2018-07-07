@@ -4,12 +4,14 @@
   "main": "build/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "neutrino build"
+    "build": "neutrino build",
+    "start": "neutrino start"
   },
-  "dependencies": {
+  "peerDependencies": {
     "mobx": "^5.0.3"
   },
   "devDependencies": {
+    "mobx": "^5.0.3",
     "@neutrinojs/library": "^8.3.0",
     "@turingarena/neutrino-preset-decorators": "^0.0.0"
   }

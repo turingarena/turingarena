@@ -2,29 +2,37 @@ import { observable, action, computed } from "mobx";
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-export class Evaluation {
-  @observable events = [];
-
-  constructor(id) {
-    this.id = id;
-    this.load();
+export class Client {
+  constructor(endpoint) {
+    this.endpoint = endpoint;
   }
 
-  async loadPage(after) {
+  async * evaluate(data) {
+    const response = await fetch(this.endpoint + "evaluate", {
+      method: 'POST',
+      body: data,
+    });
+    const { id } = await response.json();
+
+    yield *this.generateEvaluationEvents(id);
+  }
+
+  async loadEvaluationPage(id, after) {
     let afterOption;
     if(after) {
       afterOption = "&after=" + after;
     } else {
       afterOption = "";
     }
-    const response = await fetch(process.env.TURINGARENA_ENDPOINT +"evaluation_events?evaluation=" + this.id + afterOption);
+    const response = await fetch(this.endpoint +"evaluation_events?evaluation=" + id + afterOption);
     return await response.json();
   }
 
-  async load() {
-    let page = await this.loadPage();
-    this.events.push(...page.data);
-    
+  async * generateEvaluationEvents(id) {
+    let page = await this.loadEvaluationPage(id);
+
+    yield *page.data;
+
     const maxLimit = 10;
     const initialBackoff = 100;
     const maxBackoff = 3000;
@@ -45,8 +53,23 @@ export class Evaluation {
           break;
         }
       }
-      page = await this.loadPage(page.end);
-      this.events.push(...page.data);
+      page = await this.loadEvaluationPage(id, page.end);
+      yield *page.data;
+    }
+  }
+}
+
+export class Evaluation {
+  @observable events = [];
+
+  constructor(events) {
+    this.doLoad(events).next();
+  }
+
+  async * doLoad(events) {
+    // in a async * due to https://github.com/babel/babel/issues/4969
+    for await (let event of events) {
+      this.addEvent(event);
     }
   }
 
@@ -57,6 +80,6 @@ export class Evaluation {
 
   @action
   addEvent(e) {
-    this.events.unshift(e);
+    this.events.push(e);
   }
 }
