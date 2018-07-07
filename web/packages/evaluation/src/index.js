@@ -7,8 +7,17 @@ export class Client {
     this.endpoint = endpoint;
   }
 
+  async safeFetch(url, options) {
+    const response = await fetch(url, options);
+    if(!response.ok) {
+      const { message } = await response.json();
+      throw Error("API request failed: " + message);
+    }
+    return response;
+  }
+
   async * evaluate(data) {
-    const response = await fetch(this.endpoint + "evaluate", {
+    const response = await this.safeFetch(this.endpoint + "evaluate", {
       method: 'POST',
       body: data,
     });
@@ -24,7 +33,7 @@ export class Client {
     } else {
       afterOption = "";
     }
-    const response = await fetch(this.endpoint +"evaluation_events?evaluation=" + id + afterOption);
+    const response = await this.safeFetch(this.endpoint +"evaluation_events?evaluation=" + id + afterOption);
     return await response.json();
   }
 
