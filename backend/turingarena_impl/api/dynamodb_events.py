@@ -3,10 +3,10 @@ import time
 
 import boto3
 
-dynamodb = boto3.client("dynamodb")
-
 
 def store_event(evaluation_id, index, data):
+    dynamodb = boto3.client("dynamodb")
+
     dynamodb.put_item(
         TableName='EvaluationEventsTable',
         Item={

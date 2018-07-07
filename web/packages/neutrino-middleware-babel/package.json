@@ -1,0 +1,12 @@
+{
+  "name": "@turingarena/neutrino-middleware-babel",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@neutrinojs/compile-loader": "8.3.0",
+    "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.5"
+  }
+}
