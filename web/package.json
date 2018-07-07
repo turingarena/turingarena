@@ -1,5 +1,10 @@
 {
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
 	"devDependencies": {
-		"lerna": "^2.11.0"
+		"lerna": "^2.11.0",
+		"neutrino": "^8.3.0"
 	}
 }

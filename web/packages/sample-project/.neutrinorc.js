@@ -1,7 +1,7 @@
 module.exports = {
   use: [
     [
-      '@turingarena/neutrino-preset',
+      '@turingarena/neutrino-preset-pack',
     ],
   ]
 };

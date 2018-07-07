@@ -11,6 +11,6 @@ module.exports = {
           require.resolve('babel-plugin-transform-decorators-legacy'),
           require.resolve('babel-plugin-transform-class-properties'),
         ]
-      }, options))
+      }, options)),
   ]
 };

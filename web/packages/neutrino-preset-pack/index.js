@@ -6,6 +6,6 @@ module.exports = {
         'TURINGARENA_ENDPOINT',
       ]
     ],
-    require.resolve('@turingarena/neutrino-preset-decorators'),
+    require.resolve('@turingarena/neutrino-middleware-babel'),
   ]
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { observer } from 'mobx-react';
+import { observer } from "mobx-react";
 import { Client, Evaluation } from '@turingarena/evaluation';
 
 const client = new Client("https://api.turingarena.org/");

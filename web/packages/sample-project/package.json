@@ -9,14 +9,14 @@
   },
   "dependencies": {
     "@turingarena/evaluation": "^0.0.0",
+    "prop-types": "^15.6.2",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
-    "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3"
   },
   "devDependencies": {
-    "@turingarena/neutrino-preset": "^0.0.0"
+    "@turingarena/neutrino-preset-pack": "^0.0.0"
   }
 }
