@@ -59,7 +59,7 @@ export class Client {
           staleCount++;
         }
         if(staleCount >= maxLimit) {
-          break;
+          throw new Error("timeout when fetching events");
         }
       }
       page = await this.loadEvaluationPage(id, page.end);
@@ -70,6 +70,9 @@ export class Client {
 
 export class Evaluation {
   @observable events = [];
+  @observable resolved = false;
+  @observable rejected = false;
+  @observable error = null;
 
   constructor(events) {
     this.doLoad(events).next();
@@ -77,11 +80,21 @@ export class Evaluation {
 
   async * doLoad(events) {
     // in a async * due to https://github.com/babel/babel/issues/4969
-    for await (let event of events) {
-      this.addEvent(event);
+    try {
+      for await (let event of events) {
+        this.addEvent(event);
+      }
+      this.resolve();
+    } catch(e) {
+      this.reject(e);
     }
   }
 
+  @computed
+  get pending() {
+    return !this.resolved && !this.rejected;
+  }
+  
   @computed
   get textEvents() {
     return this.events.filter(e => e.type === "text");
@@ -90,5 +103,16 @@ export class Evaluation {
   @action
   addEvent(e) {
     this.events.push(e);
+  }
+
+  @action
+  resolve() {
+    this.resolved = true;
+  }
+
+  @action
+  reject(e) {
+    this.rejected = true;
+    this.error = e;
   }
 }
