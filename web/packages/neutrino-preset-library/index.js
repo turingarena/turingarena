@@ -6,3 +6,4 @@ module.exports = (neutrino, opts = {}) => neutrino
   .config.externals([nodeExternals({
     modulesFromFile: true,
   })])
+  // see https://github.com/mozilla-neutrino/neutrino-dev/issues/987  

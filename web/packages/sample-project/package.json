@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "neutrino build",
-    "start": "neutrino start"
+    "build": "neutrino build --use @turingarena/neutrino-preset-pack",
+    "start": "neutrino start --use @turingarena/neutrino-preset-pack"
   },
   "dependencies": {
     "@turingarena/evaluation": "^0.0.0",
