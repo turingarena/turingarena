@@ -8,7 +8,7 @@ from turingarena_impl.api.serve import serve_cli
 from turingarena_impl.cli import docopt_cli, init_logger
 from turingarena_impl.evaluation.cli import evaluate_cli
 from turingarena_impl.driver.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli, \
-    describe_interface_cli
+    describe_interface_cli, interface_metadata_cli
 from turingarena_impl.tests.cli import test_cli
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ def server_cli(args):
         "skeleton": generate_skeleton_cli,
         "validate": validate_interface_cli,
         "describe": describe_interface_cli,
+        "metadata": interface_metadata_cli,
         "serve": serve_cli,
         "test": test_cli,
     }

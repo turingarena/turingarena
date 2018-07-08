@@ -1,7 +1,11 @@
+import json
 import sys
+
+import yaml
 
 from turingarena_impl.cli import docopt_cli
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
+from turingarena_impl.driver.interface.metadata import generate_interface_metadata
 from turingarena_impl.driver.language import Language
 
 
@@ -89,3 +93,25 @@ def describe_interface_cli(args):
     errors = False
     for line in interface.main_node.node_description:
         print(line)
+
+
+@docopt_cli
+def interface_metadata_cli(args):
+    """Generate interface metadata
+
+    Usage:
+        metadata [options]
+
+    Options:
+        -I --interface=<file>  Interface definition file [default: interface.txt].
+    """
+
+    interface_filename = args["--interface"]
+    with open(interface_filename) as f:
+        interface_text = f.read()
+
+    interface = InterfaceDefinition.compile(interface_text, validate=False)
+
+    json.dump(dict(interface_definitions={
+        interface_filename: generate_interface_metadata(interface)
+    }), sys.stdout, indent=4)
