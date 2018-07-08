@@ -38,13 +38,17 @@ export class Client {
   }
 
   async * generateEvaluationEvents(id) {
+    const initialWait = 10000;
+    const maxLimit = 10;
+    const initialBackoff = 100;
+    const maxBackoff = 3000;
+
+    await sleep(initialWait);
+
     let page = await this.loadEvaluationPage(id);
 
     yield *page.data;
 
-    const maxLimit = 10;
-    const initialBackoff = 100;
-    const maxBackoff = 3000;
     let staleCount = 0;
     let backoff = initialBackoff;
     while(page.end) {
