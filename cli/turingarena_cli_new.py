@@ -34,6 +34,11 @@ def build_json_parameters(args):
         for repository in args.repository
     ] if args.repository else []
 
+    json_data["submitted_files"] = [
+        file
+        for file in args.file
+    ] if args.file else []
+
     return json.dumps(json_data)
 
 
@@ -122,22 +127,24 @@ def send_current_dir():
     return current_dir, tree_id
 
 
-
-
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
     parser.add_argument("command", help="the command", choices=["evaluate", "make"])
     parser.add_argument("tree", help="a git tree id", nargs="*")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--file", "-f", help="submission file", action="append")
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_arguments()
 
     try:
         send_ssh_command(args)
     except subprocess.CalledProcessError:
         print("Error connecting to turingarena daemon. Is it running ?")
-
-
 
 
 if __name__ == "__main__":
