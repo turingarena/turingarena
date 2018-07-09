@@ -42,6 +42,17 @@ def build_json_parameters(args):
     return json.dumps(json_data)
 
 
+def local_command(args):
+    cli = [
+        "python3",
+        "-m", "turingarena_impl",
+        "new_cli",
+        build_json_parameters(args),
+    ]
+
+    subprocess.call(cli)
+
+
 def send_ssh_command(args):
     if sys.stdout.isatty():
         tty_allocation = ["-t"]
@@ -108,7 +119,7 @@ def send_current_dir():
 
     subprocess.check_call(ssh_command + [
         "turingarena@localhost",
-        "git init --bare --quiet db.git",
+        "git init --bare --quiet /run/turingarena/db.git",
     ])
 
     subprocess.check_call([
@@ -134,6 +145,7 @@ def parse_arguments():
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
     parser.add_argument("--file", "-f", help="submission file", action="append")
+    parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)", action="store_true")
 
     return parser.parse_args()
 
@@ -141,10 +153,10 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    try:
+    if args.local:
+        local_command(args)
+    else:
         send_ssh_command(args)
-    except subprocess.CalledProcessError:
-        print("Error connecting to turingarena daemon. Is it running ?")
 
 
 if __name__ == "__main__":
