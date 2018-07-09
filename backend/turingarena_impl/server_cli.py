@@ -10,6 +10,7 @@ from turingarena_impl.evaluation.cli import evaluate_cli
 from turingarena_impl.driver.interface.cli import generate_template_cli, generate_skeleton_cli, validate_interface_cli, \
     describe_interface_cli
 from turingarena_impl.tests.cli import test_cli
+from turingarena_impl.new_cli import new_cli
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ def server_cli(args):
         "skeleton": generate_skeleton_cli,
         "validate": validate_interface_cli,
         "describe": describe_interface_cli,
+        "new_cli": new_cli,
         "serve": serve_cli,
         "test": test_cli,
     }
