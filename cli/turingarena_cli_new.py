@@ -40,10 +40,10 @@ def send_ssh_command(cli):
         tty_allocation = "-T"
 
     cli = ssh_cli + [
+        tty_allocation,
         "turingarena@localhost",
     ] + cli
 
-    print(cli)
     subprocess.call(cli)
 
 
