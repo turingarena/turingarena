@@ -4,7 +4,7 @@ import json
 import sys
 import os
 
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.evaluation.cli import parse_files
@@ -47,37 +47,62 @@ def receive_current_directory():
                 os.chdir(current_dir)
 
 
-def make_skeletons(outdir, interface, languages):
-    os.makedirs(os.path.join(outdir, "skeletons"), exist_ok=True)
-    for language in languages:
-        language = Language.from_name(language)
-        with open(f"{outdir}/skeletons/skeleton{language.extension}", "w") as out:
-            language.skeleton_generator().generate_to_file(interface, out)
+@contextmanager
+def generate(filename):
+    print(f"Generating {filename}")
+    with open(filename, "w") as file:
+        yield file
 
 
-def make_templates(outdir, interface, languages):
-    os.makedirs(os.path.join(outdir, "templates"), exist_ok=True)
-    for language in languages:
-        language = Language.from_name(language)
-        with open(f"{outdir}/templates/template{language.extension}", "w") as out:
-            language.template_generator().generate_to_file(interface, out)
+def make_skeletons(out_dir, interface, language):
+    with generate(f"{out_dir}/skeleton{language.extension}") as out:
+        language.skeleton_generator().generate_to_file(interface, out)
 
 
-def make_cmd(args):
-    out_dir = os.path.join(os.getcwd(), "__turingarena_make_output__")
+def make_templates(out_dir, interface, language):
+    with generate(f"{out_dir}/template{language.extension}") as out:
+        language.template_generator().generate_to_file(interface, out)
+
+
+def make_metadata(out_dir, interface):
+    pass
+
+
+def make(directory):
+    out_dir = os.path.join(directory, "__turingarena_make_output__")
     os.makedirs(out_dir, exist_ok=True)
 
-    logger.info(f"saving generate file in {out_dir}")
+    print(f"Entering directory {directory}")
 
-    interface_file = "interface.txt"
+    interface_file = os.path.join(directory, "interface.txt")
 
     with open(interface_file) as f:
         interface_text = f.read()
-    interface = InterfaceDefinition.compile(interface_text)
 
-    make_skeletons(outdir=out_dir, interface=interface, languages=["c++", "python"])
-    make_templates(outdir=out_dir, interface=interface, languages=["c++", "python"])
-    #make_metadata()
+    try:
+        interface = InterfaceDefinition.compile(interface_text)
+    except:
+        print(f"There is an error in {interface_file}")
+        return
+
+    for message in interface.validate():
+        print(f"Warning: {message}")
+
+    for language in Language.languages():
+        try:
+            language_dir = os.path.join(out_dir, language.name)
+            os.makedirs(language_dir, exist_ok=True)
+            make_skeletons(out_dir=language_dir, interface=interface, language=language)
+            make_templates(out_dir=language_dir, interface=interface, language=language)
+        except:
+            pass
+    make_metadata(out_dir=out_dir, interface=interface)
+
+
+def make_cmd(args):
+    for subdir, dir, files in os.walk(os.getcwd()):
+        if "interface.txt" in files:
+            make(subdir)
 
 
 def evaluate_cmd(json_args):
