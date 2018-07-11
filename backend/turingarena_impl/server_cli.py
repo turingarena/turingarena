@@ -35,10 +35,13 @@ def server_cli(args):
         "skeleton": generate_skeleton_cli,
         "validate": validate_interface_cli,
         "describe": describe_interface_cli,
-        "new_cli": new_cli,
         "serve": serve_cli,
         "test": test_cli,
     }
+
+    if args["<cmd>"] == "new_cli":
+        new_cli(args["<args>"])
+        return
 
     if args["--help-commands"]:
         print("Avaliable commands:")

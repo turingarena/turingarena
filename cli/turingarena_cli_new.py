@@ -136,7 +136,7 @@ def create_evaluate_parser(evaluate_parser):
 
 
 def create_make_parser(make_parser):
-    make_parser.add_argument("what", help="what to make", default="all", choices=["skeleton", "template", "metadata"])
+    make_parser.add_argument("what", help="what to make", default="all", choices=["all", "skeleton", "template", "metadata"])
     make_parser.add_argument("--language", "-l", help="wich language to generate", action="append")
 
 
