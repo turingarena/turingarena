@@ -44,7 +44,7 @@ def send_ssh_command(cli):
     ] + cli
 
     print(cli)
-    subprocess.call(ssh_cli)
+    subprocess.call(cli)
 
 
 def ssh_command(args):
@@ -107,7 +107,11 @@ def send_current_dir():
         **git_popen_args
     ).strip()
 
-    send_ssh_command(["git init --bare --quiet /run/turingarena/db.git"])
+    subprocess.check_call(ssh_cli + [
+        "turingarena@localhost",
+        "git init --bare --quiet db.git",
+    ])
+
 
     subprocess.check_call([
         "git", "push", "-q",
