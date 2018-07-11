@@ -11,6 +11,7 @@ from turingarena_impl.evaluation.cli import parse_files
 from turingarena_impl.evaluation.evaluate import evaluate
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
+from turingarena_impl.driver.interface.metadata import generate_interface_metadata
 
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,8 @@ def make_templates(out_dir, interface, language):
 
 
 def make_metadata(out_dir, interface):
-    pass
+    with generate(f"{out_dir}/metadata.json") as out:
+        json.dump(generate_interface_metadata(interface), out, indent=4)
 
 
 def make(directory):
