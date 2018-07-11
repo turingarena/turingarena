@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 
 import subprocess
@@ -9,37 +7,9 @@ import json
 import sys
 import os
 
-ssh_command = [
-    "ssh",
-    "-o", "BatchMode=yes",
-    "-o", "LogLevel=error",
-    "-o", "UserKnownHostsFile=/dev/null",
-    "-o", "StrictHostKeyChecking=no",
-    "-p", "20122",
-]
-
 
 def build_json_parameters(args):
-    json_data = {}
-
-    json_data["command"] = args.command
-
-    json_data["trees"] = [
-        tree
-        for tree in args.tree
-    ]
-
-    json_data["repositories"] = [
-        repository
-        for repository in args.repository
-    ] if args.repository else []
-
-    json_data["submitted_files"] = [
-        file
-        for file in args.file
-    ] if args.file else []
-
-    return json.dumps(json_data)
+    return json.dumps(vars(args))
 
 
 def local_command(args):
@@ -53,13 +23,30 @@ def local_command(args):
     subprocess.call(cli)
 
 
-def send_ssh_command(args):
+def send_ssh_command(cli):
     if sys.stdout.isatty():
-        tty_allocation = ["-t"]
+        tty_allocation = "-t"
     else:
-        tty_allocation = ["-T"]
+        tty_allocation = "-T"
 
-    cli = ssh_command + tty_allocation + ["turingarena@localhost"]
+    ssh_cli = [
+        "ssh",
+        "-o", "BatchMode=yes",
+        "-o", "LogLevel=error",
+        "-o", "UserKnownHostsFile=/dev/null",
+        "-o", "StrictHostKeyChecking=no",
+        "-p", "20122",
+        tty_allocation,
+        "turingarena@localhost",
+    ] + cli
+
+    print(ssh_cli)
+    subprocess.call(ssh_cli)
+
+
+def ssh_command(args):
+
+    cli = []
 
     if args.send_current_dir:
         current_dir, tree_id = send_current_dir()
@@ -75,7 +62,7 @@ def send_ssh_command(args):
         shlex.quote(build_json_parameters(args)),
     ]
 
-    subprocess.call(cli)
+    send_ssh_command(cli)
 
 
 def send_current_dir():
@@ -117,10 +104,7 @@ def send_current_dir():
         **git_popen_args
     ).strip()
 
-    subprocess.check_call(ssh_command + [
-        "turingarena@localhost",
-        "git init --bare --quiet /run/turingarena/db.git",
-    ])
+    send_ssh_command(["git init --bare --quiet /run/turingarena/db.git"])
 
     subprocess.check_call([
         "git", "push", "-q",
@@ -138,26 +122,43 @@ def send_current_dir():
     return current_dir, tree_id
 
 
+def create_evaluate_parser(evaluate_parser):
+    evaluate_parser.add_argument("--tree", "-t", help="a git tree id", action="append")
+    evaluate_parser.add_argument("file", help="submission file", nargs="+")
+    evaluate_parser.add_argument("--evaluator", "-e", help="command evaluator")
+    evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
+
+
+def create_make_parser(make_parser):
+    make_parser.add_argument("tree", help="a git tree id", nargs="*")
+    make_parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
-    parser.add_argument("command", help="the command", choices=["evaluate", "make"])
-    parser.add_argument("tree", help="a git tree id", nargs="*")
-    parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
-    parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
-    parser.add_argument("--file", "-f", help="submission file", action="append")
     parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)", action="store_true")
+    parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
+
+    subparsers = parser.add_subparsers(title="command", dest="command")
+    subparsers.required = True
+
+    make_parser = subparsers.add_parser("make", help="Generate all the necessary files for a problem")
+    create_make_parser(make_parser)
+
+    evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
+    create_evaluate_parser(evaluate_parser)
 
     return parser.parse_args()
 
 
-def main():
+def turingarena_cli():
     args = parse_arguments()
 
     if args.local:
         local_command(args)
     else:
-        send_ssh_command(args)
+        ssh_command(args)
 
 
 if __name__ == "__main__":
-    main()
+    turingarena_cli()

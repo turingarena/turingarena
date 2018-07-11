@@ -1,3 +1,4 @@
+import subprocess
 import json
 import sys
 
@@ -7,18 +8,31 @@ from turingarena_impl.evaluation.cli import parse_files
 from turingarena_impl.evaluation.evaluate import evaluate
 
 
-def make():
+def make_cmd():
     pass
 
 
 def evaluate_cmd(json_args):
     evaluator = "python3 -u evaluator.py"
 
+    if json_args["evaluator"]:
+        evaluator = json_args["evaluator"]
+
     with ExitStack() as stack:
-        files = stack.enter_context(parse_files(json_args["submitted_files"], ["source"]))
+        if json_args["raw"]:
+            output = sys.stdout
+        else:
+            jq = stack.enter_context(subprocess.Popen(
+                ["jq", "-j", "--unbuffered", ".payload"],
+                stdin=subprocess.PIPE,
+                universal_newlines=True,
+            ))
+            output = jq.stdin
+
+        files = stack.enter_context(parse_files(json_args["file"], ["source"]))
 
         for event in evaluate(files=files, evaluator_cmd=evaluator):
-            print(event, file=sys.stdout, flush=True)
+            print(event, file=output, flush=True)
 
 
 def new_cli(args):
@@ -28,5 +42,5 @@ def new_cli(args):
         evaluate_cmd(json_args)
 
     if json_args["command"] == "make":
-        make()
+        make_cmd()
 
