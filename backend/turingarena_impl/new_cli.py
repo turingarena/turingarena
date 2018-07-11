@@ -8,6 +8,18 @@ from turingarena_impl.evaluation.cli import parse_files
 from turingarena_impl.evaluation.evaluate import evaluate
 
 
+def git_fetch_repositories(repositories):
+    for repository in repositories:
+        # TODO: add a way to specify branch and depth
+        subprocess.call(["git", "fetch", "-recurse-submodules=yes", repository])
+
+
+def git_import_trees(tree_ids):
+    for id in tree_ids:
+        subprocess.call(["git", "read-tree", id])
+        subprocess.call(["git", "checkout", "--all"])
+
+
 def make_cmd(args):
     pass
 
@@ -36,11 +48,17 @@ def evaluate_cmd(json_args):
 
 
 def new_cli(args):
-    json_args = json.loads(args[0])
+    args = json.loads(args[0])
 
-    if json_args["command"] == "evaluate":
-        evaluate_cmd(json_args)
+    if args["repository"]:
+        git_fetch_repositories(args["repository"])
 
-    if json_args["command"] == "make":
-        make_cmd(json_args)
+    if args["tree"]:
+        git_import_trees(args["tree"])
+
+    if args["command"] == "evaluate":
+        evaluate_cmd(args)
+
+    if args["command"] == "make":
+        make_cmd(args)
 

@@ -130,15 +130,12 @@ def send_current_dir():
 
 
 def create_evaluate_parser(evaluate_parser):
-    evaluate_parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     evaluate_parser.add_argument("file", help="submission file", nargs="+")
     evaluate_parser.add_argument("--evaluator", "-e", help="command evaluator")
     evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
 
 
 def create_make_parser(make_parser):
-    make_parser.add_argument("tree", help="a git tree id", nargs="*")
-    make_parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
     make_parser.add_argument("what", help="what to make", default="all", choices=["skeleton", "template", "metadata"])
     make_parser.add_argument("--language", "-l", help="wich language to generate", action="append")
 
@@ -147,6 +144,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
     parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)", action="store_true")
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
+    parser.add_argument("--tree", "-t", help="a git tree id", nargs="*")
+    parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True
