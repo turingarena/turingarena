@@ -8,6 +8,16 @@ import sys
 import os
 
 
+ssh_cli = [
+        "ssh",
+        "-o", "BatchMode=yes",
+        "-o", "LogLevel=error",
+        "-o", "UserKnownHostsFile=/dev/null",
+        "-o", "StrictHostKeyChecking=no",
+        "-p", "20122",
+]
+
+
 def build_json_parameters(args):
     return json.dumps(vars(args))
 
@@ -29,18 +39,11 @@ def send_ssh_command(cli):
     else:
         tty_allocation = "-T"
 
-    ssh_cli = [
-        "ssh",
-        "-o", "BatchMode=yes",
-        "-o", "LogLevel=error",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", "StrictHostKeyChecking=no",
-        "-p", "20122",
-        tty_allocation,
+    cli = ssh_cli + [
         "turingarena@localhost",
     ] + cli
 
-    print(ssh_cli)
+    print(cli)
     subprocess.call(ssh_cli)
 
 
@@ -84,7 +87,7 @@ def send_current_dir():
     git_env = {
         "GIT_WORK_TREE": working_dir,
         "GIT_DIR": git_dir,
-        "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_command),
+        "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_cli),
         "GIT_AUTHOR_NAME": author_name,
         "GIT_AUTHOR_EMAIL": author_email,
         "GIT_COMMITTER_NAME": author_name,
@@ -132,6 +135,8 @@ def create_evaluate_parser(evaluate_parser):
 def create_make_parser(make_parser):
     make_parser.add_argument("tree", help="a git tree id", nargs="*")
     make_parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
+    make_parser.add_argument("what", help="what to make", default="all", choices=["skeleton", "template", "metadata"])
+    make_parser.add_argument("--language", "-l", help="wich language to generate", action="append")
 
 
 def parse_arguments():

@@ -27,7 +27,7 @@ def turingarena_daemon():
               "--name=turingarena",
               "--rm",
               "--read-only",
-              "--tmpfs=/run/turingarena:exec,mode=1777",
+              "--tmpfs=/run/turingarena:exec,mode=1777,uid=1000",
               "--tmpfs=/tmp:exec,mode=1777",
           ] + volumes + [
               "--publish=127.0.0.1:20122:22",

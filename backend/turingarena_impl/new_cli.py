@@ -8,7 +8,7 @@ from turingarena_impl.evaluation.cli import parse_files
 from turingarena_impl.evaluation.evaluate import evaluate
 
 
-def make_cmd():
+def make_cmd(args):
     pass
 
 
@@ -42,5 +42,5 @@ def new_cli(args):
         evaluate_cmd(json_args)
 
     if json_args["command"] == "make":
-        make_cmd()
+        make_cmd(json_args)
 

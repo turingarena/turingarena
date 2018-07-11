@@ -16,5 +16,4 @@ RUN true \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
     && mkdir /run/turingarena \
-    && git init --bare \
     && true
