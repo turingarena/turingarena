@@ -9,15 +9,14 @@ import sys
 import os
 
 from termcolor import colored
-from tempfile import TemporaryDirectory
 
 ssh_cli = [
-        "ssh",
-        "-o", "BatchMode=yes",
-        "-o", "LogLevel=error",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", "StrictHostKeyChecking=no",
-        "-p", "20122", "-q",
+    "ssh",
+    "-o", "BatchMode=yes",
+    "-o", "LogLevel=error",
+    "-o", "UserKnownHostsFile=/dev/null",
+    "-o", "StrictHostKeyChecking=no",
+    "-p", "20122", "-q",
 ]
 
 git_env = {}
@@ -37,6 +36,40 @@ def ok(string):
 
 def info(string):
     print(colored("  ->", "blue", attrs=["bold"]), string)
+
+
+def new_problem(name, language):
+    if not language:
+        language = "python"
+
+    evaluators = {
+        "python": "evaluator.py",
+        "c++": "evaluator.cpp",
+    }
+
+    if language not in evaluators:
+        error("Language {} not supported".format(language))
+        return
+
+    ok("Creating new problem {}".format(name))
+
+    info("Making directory {}/".format(name))
+    os.makedirs(name)
+    os.chdir(name)
+
+    info("Initializing empty git repository")
+    subprocess.call(["git", "init", "--quiet"])
+
+    info("Writing default interface.txt")
+    with open("interface.txt", "w") as f:
+        print("// put here your funciton and procedure definitions\n\n"
+              "main {\n // put here the main code\n}", file=f)
+
+    info("writing default {}".format(evaluators[language]))
+    with open(evaluators[language], "w") as f:
+        print("# Write here your evaluator code", file=f)
+
+    ok("Problem created in directory {}/".format(name))
 
 
 def build_json_parameters(args):
@@ -70,7 +103,6 @@ def send_ssh_command(cli):
 
 
 def ssh_command(args):
-
     cli = [
         "/usr/local/bin/python",
         "-m", "turingarena_impl",
@@ -192,13 +224,21 @@ def create_evaluate_parser(evaluate_parser):
 
 
 def create_make_parser(make_parser):
-    make_parser.add_argument("what", help="what to make", default="all", choices=["all", "skeleton", "template", "metadata"], nargs="?")
-    make_parser.add_argument("--language", "-l", help="which language to generate", action="append")
+    make_parser.add_argument("what", help="what to make", default="all",
+                             choices=["all", "skeleton", "template", "metadata"], nargs="?")
+    make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
+                             choices=["python", "c++"])
+
+
+def create_new_parser(new_parser):
+    new_parser.add_argument("name", help="problem name")
+    new_parser.add_argument("--language", "-l", help="language for the evaluator")
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
-    parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)", action="store_true")
+    parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)",
+                        action="store_true")
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
     parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
@@ -212,11 +252,18 @@ def parse_arguments():
     evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
     create_evaluate_parser(evaluate_parser)
 
+    new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
+    create_new_parser(new_parser)
+
     return parser.parse_args()
 
 
 def turingarena_cli():
     args = parse_arguments()
+
+    if args.command == "new":
+        new_problem(args.name, args.language)
+        return
 
     args.git_dir = setup_git_env()
 
