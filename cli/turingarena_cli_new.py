@@ -68,11 +68,14 @@ def ssh_command(args):
     send_ssh_command(cli)
 
 
-def send_current_dir():
-    working_dir = subprocess.check_output(
-        ["git", "rev-parse", "--show-toplevel"],
-        universal_newlines=True,
-    ).strip()
+def send_current_dir(local):
+    try:
+        working_dir = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            universal_newlines=True,
+        ).strip()
+    except:
+        working_dir = os.getcwd()
 
     current_dir = os.path.relpath(os.curdir, working_dir)
     print("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
@@ -96,37 +99,37 @@ def send_current_dir():
 
     git_popen_args = dict(env=git_env, universal_newlines=True)
 
-    subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
+    # subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
     subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
 
     tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
 
-    commit_message = "Turingarena payload."
-    commit_id = subprocess.check_output(
-        ["git", "commit-tree", tree_id, "-m", commit_message],
-        **git_popen_args
-    ).strip()
+    if not local:
+        commit_message = "Turingarena payload."
+        commit_id = subprocess.check_output(
+            ["git", "commit-tree", tree_id, "-m", commit_message],
+            **git_popen_args
+        ).strip()
 
-    subprocess.check_call(ssh_cli + [
-        "turingarena@localhost",
-        "git init --bare --quiet db.git",
-    ])
+        subprocess.check_call(ssh_cli + [
+            "turingarena@localhost",
+            "git init --bare --quiet db.git",
+        ])
 
+        subprocess.check_call([
+            "git", "push", "-q",
+            "turingarena@localhost:db.git",
+            "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
+        ], **git_popen_args)
 
-    subprocess.check_call([
-        "git", "push", "-q",
-        "turingarena@localhost:db.git",
-        "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
-    ], **git_popen_args)
+        # remove the remove branch (we only need the tree object)
+        subprocess.check_call([
+            "git", "push", "-q",
+            "turingarena@localhost:db.git",
+            ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
+        ], **git_popen_args)
 
-    # remove the remove branch (we only need the tree object)
-    subprocess.check_call([
-        "git", "push", "-q",
-        "turingarena@localhost:db.git",
-        ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
-    ], **git_popen_args)
-
-    return current_dir, tree_id
+    return current_dir, tree_id, git_dir
 
 
 def create_evaluate_parser(evaluate_parser):
@@ -137,14 +140,14 @@ def create_evaluate_parser(evaluate_parser):
 
 def create_make_parser(make_parser):
     make_parser.add_argument("what", help="what to make", default="all", choices=["all", "skeleton", "template", "metadata"], nargs="?")
-    make_parser.add_argument("--language", "-l", help="wich language to generate", action="append")
+    make_parser.add_argument("--language", "-l", help="which language to generate", action="append")
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
     parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)", action="store_true")
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
-    parser.add_argument("--tree", "-t", help="a git tree id", nargs="*")
+    parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
@@ -161,6 +164,8 @@ def parse_arguments():
 
 def turingarena_cli():
     args = parse_arguments()
+
+    args.current_dir, args.tree_id, args.git_dir = send_current_dir(local=args.local)
 
     if args.local:
         local_command(args)
