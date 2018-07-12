@@ -2,7 +2,7 @@ import os
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluate import Evaluator
 
 
 def main():
@@ -26,7 +26,7 @@ def cloud_evaluate(files, evaluator_cmd):
                 f.write(file.content)
             file_paths[name] = filename
 
-        for event in evaluate(file_paths, evaluator_cmd=evaluator_cmd):
+        for event in Evaluator.get_evaluator(evaluator_cmd).evaluate(file_paths):
             yield event
 
 
