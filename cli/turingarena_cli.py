@@ -34,7 +34,7 @@ def turingarena_daemon():
               "turingarena/turingarena",
               "socat",
               "TCP-LISTEN:22,fork",
-              """EXEC:"/usr/sbin/sshd -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
+              """EXEC:"/usr/sbin/sshd -q -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
     info(str(cli))
     os.execvp("docker", cli)

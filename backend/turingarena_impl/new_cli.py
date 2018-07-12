@@ -19,6 +19,7 @@ from turingarena_impl.driver.interface.metadata import generate_interface_metada
 logger = logging.getLogger(__name__)
 git_env = {}
 
+
 def error(string):
     print(colored("==> ERROR:", "red", attrs=["bold"]), string)
 
@@ -46,9 +47,16 @@ def setup_git_environment(local, git_dir):
         if not local:
             git_dir = "/run/turingarena/db.git"
         info(f"Using git repository at {git_dir}")
+        author_name = "TuringArena"
+        author_email = "contact@turingarena.org"
         git_env = {
             "GIT_DIR": git_dir,
             "GIT_WORK_TREE": git_temp_dir,
+            "GIT_AUTHOR_NAME": author_name,
+            "GIT_AUTHOR_EMAIL": author_email,
+            "GIT_COMMITTER_NAME": author_name,
+            "GIT_COMMITTER_EMAIL": author_email,
+
         }
         os.chdir(git_temp_dir)
         yield
@@ -77,17 +85,26 @@ def receive_current_directory(current_dir, tree_id):
         os.chdir(current_dir)
 
 
-def commit_work(directory):
-    ok(f"Committing generated directory {directory}")
-
+def add_directory(directory):
+    ok(f"Add directory {directory} to be committed")
     subprocess.call(["git", "add", "-A", directory], env=git_env)
+
+
+def commit_work():
+    ok("Committing work")
+
     tree_id = subprocess.check_output(["git", "write-tree"], env=git_env).strip().decode("ascii")
     info(f"Output written with tree-id {tree_id}")
-    return tree_id
+
+    commit_id = subprocess.check_output(["git", "commit-tree", tree_id, "-m", "Make output"], env=git_env).strip().decode("ascii")
+    info(f"Created commit with commit-id {commit_id}")
+
+    return tree_id, commit_id
+
 
 @contextmanager
 def generate(filename):
-    info(f"Generating {filename}... ")
+    info(f"Generating {os.path.relpath(filename, git_env['GIT_WORK_TREE'])}")
     with open(filename, "w") as file:
         try:
             yield file
@@ -114,13 +131,14 @@ def make(directory, what, languages):
     out_dir = os.path.join(directory, "__turingarena_make_output__")
     os.makedirs(out_dir, exist_ok=True)
 
-    ok(f"Entering directory {directory}")
+    ok(f"Entering directory {os.path.relpath(directory, git_env['GIT_WORK_TREE'])}")
 
     interface_file = os.path.join(directory, "interface.txt")
 
     with open(interface_file) as f:
         interface_text = f.read()
 
+    info("Compiling interface")
     try:
         interface = InterfaceDefinition.compile(interface_text)
     except:
@@ -128,7 +146,7 @@ def make(directory, what, languages):
         return
 
     for message in interface.validate():
-        warning(f"WARNING: {message}")
+        warning(f"{message}")
 
     for language in languages:
         language_dir = os.path.join(out_dir, language.name)
@@ -141,6 +159,8 @@ def make(directory, what, languages):
 
     if "metadata" in what:
         make_metadata(out_dir=out_dir, interface=interface)
+
+    add_directory(out_dir)
 
 
 def make_cmd(args):
@@ -161,12 +181,18 @@ def make_cmd(args):
     else:
         languages = Language.languages()
 
-    ok(f"Searching for problems in {os.getcwd()}")
-    for subdir, dir, files in os.walk(os.getcwd()):
+    base_dir = os.getcwd()
+    ok(f"Searching for problems in {os.path.relpath(base_dir, git_env['GIT_WORK_TREE'])}")
+    for subdir, dir, files in os.walk(base_dir):
         if "interface.txt" in files:
             make(directory=subdir, what=what, languages=languages)
 
-    commit_work(os.getcwd())
+    tree_id, commit_id = commit_work()
+    result = dict(tree_id=tree_id, commit_id=commit_id)
+    info(f"Writing result to file {args['result_file']}")
+    with open(args["result_file"], "w") as f:
+        print(json.dumps(result), file=f)
+
 
 def evaluate_cmd(json_args):
     evaluator = "python3 -u evaluator.py"
@@ -200,7 +226,8 @@ def new_cli(args):
 
     with setup_git_environment(local=args["local"], git_dir=args["git_dir"]):
 
-        receive_current_directory(args["current_dir"], args["tree_id"])
+        if args["send_current_dir"]:
+            receive_current_directory(args["current_dir"], args["tree_id"])
 
         if args["repository"]:
             git_fetch_repositories(args["repository"])
@@ -213,4 +240,7 @@ def new_cli(args):
 
         if args["command"] == "make":
             make_cmd(args)
+
+
+
 
