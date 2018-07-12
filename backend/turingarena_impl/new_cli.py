@@ -10,7 +10,7 @@ from termcolor import colored
 
 
 from turingarena_impl.evaluation.cli import parse_files
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluate import Evaluator
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 from turingarena_impl.driver.interface.metadata import generate_interface_metadata
@@ -195,7 +195,7 @@ def make_cmd(args):
 
 
 def evaluate_cmd(json_args):
-    evaluator = "python3 -u evaluator.py"
+    evaluator = "evaluator.py"
 
     if json_args["evaluator"]:
         evaluator = json_args["evaluator"]
@@ -216,8 +216,9 @@ def evaluate_cmd(json_args):
         for name, path in files.items():
             info(f"{name}: {path}")
 
-        ok(f"Running evaluator command {evaluator}")
-        for event in evaluate(files=files, evaluator_cmd=evaluator):
+        evaluator = Evaluator.get_evaluator(evaluator)
+        ok(f"Running evaluator {evaluator}")
+        for event in evaluator.evaluate(files=files):
             print(event, file=output, flush=True)
 
 

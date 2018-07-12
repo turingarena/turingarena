@@ -230,7 +230,8 @@ def turingarena_cli():
     else:
         ssh_command(args)
 
-    retrive_result(args.result_file)
+    if args.command == "make":
+        retrive_result(args.result_file)
 
 
 if __name__ == "__main__":

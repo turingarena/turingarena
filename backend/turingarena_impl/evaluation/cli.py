@@ -5,7 +5,7 @@ from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.cli import docopt_cli
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluate import Evaluator
 
 
 @contextmanager
@@ -57,5 +57,5 @@ def evaluate_cli(args):
 
         files = stack.enter_context(parse_files(args["<files>"], ["source"]))
 
-        for event in evaluate(files=files, evaluator_cmd=args["--evaluator"]):
+        for event in Evaluator.get_evaluator(args["--evaluator"]).evaluate(files=files):
             print(event, file=output, flush=True)
