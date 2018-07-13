@@ -40,7 +40,7 @@ def evaluate_cli(args):
         evaluate [options] <files> ...
 
     Options:
-        -e --evaluator=<id>  Evaluator [default: python3 -u evaluator.py]
+        -e --evaluator=<id>  Evaluator [default: evaluator.py]
         -r --raw  Output events in JSON Lines format.
     """
 
