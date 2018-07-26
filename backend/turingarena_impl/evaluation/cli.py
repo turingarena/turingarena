@@ -4,7 +4,7 @@ import sys
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.cli import docopt_cli
+from turingarena_impl.legacy_cli import docopt_cli
 from turingarena_impl.evaluation.evaluate import Evaluator
 
 

@@ -63,8 +63,7 @@ def build_json_parameters(args):
 def local_command(args):
     cli = [
         "python3",
-        "-m", "turingarena_impl",
-        "new_cli",
+        "-m", "turingarena_impl.server_cli",
         build_json_parameters(args),
     ]
 
@@ -89,8 +88,7 @@ def send_ssh_command(cli):
 def ssh_command(args):
     cli = [
         "/usr/local/bin/python",
-        "-m", "turingarena_impl",
-        "new_cli",
+        "-m", "turingarena_impl.server_cli",
         shlex.quote(build_json_parameters(args)),
     ]
 
@@ -226,6 +224,7 @@ def parse_arguments():
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
     parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
+    parser.add_argument("--log-level", help="log level", default="warning")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True

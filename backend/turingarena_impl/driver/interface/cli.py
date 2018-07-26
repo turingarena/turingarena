@@ -1,6 +1,6 @@
 import sys
 
-from turingarena_impl.cli import docopt_cli
+from turingarena_impl.legacy_cli import docopt_cli
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 

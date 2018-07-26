@@ -2,7 +2,7 @@ import logging
 from wsgiref.simple_server import make_server
 
 from turingarena_impl.api.wsgi_proxy import application
-from turingarena_impl.cli import docopt_cli
+from turingarena_impl.legacy_cli import docopt_cli
 
 
 @docopt_cli

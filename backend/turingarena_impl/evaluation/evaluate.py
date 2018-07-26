@@ -44,10 +44,16 @@ class Evaluator:
         except KeyError:
             return Evaluator(filename)
 
+    def __str__(self):
+        return "generic evaluator"
+
 
 class PythonEvaluator(Evaluator):
     def compile(self, tmp_dir):
         self.command = f"python3 -u {self.filename}"
+
+    def __str__(self):
+        return "python evaluator"
 
 
 class CppEvaluator(Evaluator):
@@ -63,3 +69,6 @@ class CppEvaluator(Evaluator):
         ]
 
         subprocess.call(cli)
+
+    def __str__(self):
+        return "C++ evaluator"
