@@ -2,10 +2,10 @@ import subprocess
 import argparse
 import os
 
-from common import *
+from turingarena_cli.common import *
 
 
-def turingarena_daemon():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev-dir", type=str, help="source code directory of TuringArena (for development)")
     parser.add_argument("--daemon", "-d", help="fork turingarena in background", action="store_true")
@@ -43,4 +43,4 @@ def turingarena_daemon():
 
 
 if __name__ == "__main__":
-    turingarena_daemon()
+    main()

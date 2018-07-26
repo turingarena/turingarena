@@ -8,7 +8,7 @@ import uuid
 import sys
 import os
 
-from common import *
+from turingarena_cli.common import *
 
 ssh_cli = [
     "ssh",
@@ -242,7 +242,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def turingarena_cli():
+def main():
     args = parse_arguments()
 
     if args.command == "new":
@@ -266,4 +266,4 @@ def turingarena_cli():
 
 
 if __name__ == "__main__":
-    turingarena_cli()
+    main()

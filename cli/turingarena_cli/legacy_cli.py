@@ -40,7 +40,7 @@ def turingarena_daemon():
     os.execvp("docker", cli)
 
 
-def turingarena_cli():
+def main():
     ssh_command = (
         [
             "ssh",
@@ -125,4 +125,4 @@ def turingarena_cli():
 
 
 if __name__ == '__main__':
-    turingarena_cli()
+    main()
