@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import subprocess
 import argparse
+import logging
 import shlex
 import json
 import uuid
@@ -9,6 +10,9 @@ import sys
 import os
 
 from turingarena_cli.common import *
+
+
+logger = logging.Logger("CLI")
 
 ssh_cli = [
     "ssh",
@@ -81,7 +85,7 @@ def send_ssh_command(cli):
         "turingarena@localhost",
     ] + cli
 
-    ok("Sending command to the server via ssh")
+    logger.info("Sending command to the server via ssh")
     subprocess.call(cli)
 
 
@@ -107,7 +111,7 @@ def setup_git_env():
         ).strip()
     except:
         working_dir = os.getcwd()
-        ok("Initializing git repository in {}".format(working_dir))
+        logger.info("Initializing git repository in {}".format(working_dir))
         subprocess.call(["git", "init"])
 
     author_name = "TuringArena"
@@ -124,7 +128,7 @@ def setup_git_env():
     }
 
     subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
-    info("Initialized git repository in {}".format(git_dir))
+    logger.info("Initialized git repository in {}".format(git_dir))
 
     return git_dir
 
@@ -134,7 +138,7 @@ def send_current_dir(local):
     working_dir = git_env["GIT_WORK_TREE"]
 
     current_dir = os.path.relpath(os.curdir, working_dir)
-    ok("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
+    logger.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
         working_dir=working_dir,
         current_dir=current_dir,
     ))
@@ -142,13 +146,13 @@ def send_current_dir(local):
     git_popen_args = dict(env=git_env, universal_newlines=True)
 
     subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
-    info("Added all files to git")
+    logger.info("Added all files to git")
 
     tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
-    info("Wrote tree with id {}".format(tree_id))
+    logger.info("Wrote tree with id {}".format(tree_id))
 
     if not local:
-        ok("Sending current directory to the server via git")
+        logger.info("Sending current directory to the server via git")
 
         commit_message = "Turingarena payload."
         commit_id = subprocess.check_output(
@@ -156,20 +160,20 @@ def send_current_dir(local):
             **git_popen_args
         ).strip()
 
-        info("Created commit {}".format(commit_id))
+        logger.info("Created commit {}".format(commit_id))
 
         subprocess.check_call(ssh_cli + [
             "turingarena@localhost",
             "git init --bare --quiet db.git",
         ])
-        info("Initialized git repository on the server")
+        logger.info("Initialized git repository on the server")
 
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
             "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
         ], **git_popen_args)
-        info("Pushed current commit")
+        logger.info("Pushed current commit")
 
         # remove the remove branch (we only need the tree object)
         subprocess.check_call([
@@ -182,20 +186,20 @@ def send_current_dir(local):
 
 
 def retrive_result(result_file):
-    ok("Retriving result")
+    logger.info("Retriving result")
     info("Reading {}".format(result_file))
     with open(result_file) as f:
         result = f.read().strip()
 
-    info("Got {}".format(result))
+    logger.info("Got {}".format(result))
     result = json.loads(result)
 
     tree_id = result["tree_id"]
     commid_it = result["commit_id"]
 
-    info("Importing tree id {}".format(tree_id))
+    logger.info("Importing tree id {}".format(tree_id))
     subprocess.call(["git", "read-tree", tree_id], env=git_env)
-    info("Checking out")
+    logger.info("Checking out")
     subprocess.call(["git", "checkout-index", "--all", "-q"], env=git_env)
 
 
@@ -229,8 +233,7 @@ def parse_arguments():
     parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
     parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
-    parser.add_argument("--log-level", help="log level", default="warning")
-    parser.add_argument("--quiet", "-q", help="suppress every diagnostic message", action="store_true")
+    parser.add_argument("--log-level", help="log level", default="WARNING")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True
@@ -253,8 +256,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    if args.quiet:
-        set_quiet()
+    logger.setLevel(args.log_level)
 
     if args.command == "new":
         new_problem(args.name, args.language)
