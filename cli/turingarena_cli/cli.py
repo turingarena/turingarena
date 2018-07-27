@@ -264,6 +264,9 @@ def main():
 
     args.git_dir = setup_git_env()
 
+    if args.command == "make" and args.what != "all":
+        args.print = True
+
     if args.repository is None:
         args.send_current_dir = True
 
