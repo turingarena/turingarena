@@ -3,7 +3,7 @@ from turingarena_impl.driver.generator import SkeletonCodeGen, InterfaceCodeGen,
 
 class PythonCodeGen(InterfaceCodeGen):
     def build_method_declaration(self, func):
-        arguments = ', '.join(p.name for p in func.parameters)
+        arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
         yield f'def {func.name}({arguments}):'
 
     def line_comment(self, comment):
