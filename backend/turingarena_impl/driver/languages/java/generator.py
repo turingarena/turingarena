@@ -1,5 +1,6 @@
 from turingarena_impl.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
 
+
 class JavaCodeGen(InterfaceCodeGen):
 
     def build_parameter(self, parameter):
@@ -35,6 +36,9 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def generate_callbacks_declaration(self,callback):
         return self.indent(f'{self.build_method_signature(callback)};')
+
+    def generate_constant_declaration(self, name, value):
+        yield f"private static final {name} = {value};"
 
 
 class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):

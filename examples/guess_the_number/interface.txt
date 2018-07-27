@@ -1,3 +1,7 @@
+const TOO_HIGH = 1;
+const TOO_LOW = -1;
+const CORRECT = 0;
+
 function play(n) callbacks {
     function guess(n);
 }

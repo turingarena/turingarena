@@ -63,6 +63,13 @@ class InterfaceDefinition:
             for method in self.ast.method_declarations
         ]
 
+    @property
+    def constants(self):
+        return {
+            c.name: c.value
+            for c in self.ast.constants_declarations
+        }
+
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")

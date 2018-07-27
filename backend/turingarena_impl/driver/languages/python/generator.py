@@ -6,6 +6,9 @@ class PythonCodeGen(InterfaceCodeGen):
         arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
         yield f'def {func.name}({arguments}):'
 
+    def generate_constant_declaration(self, name, value):
+        yield f"{name} = {value}"
+
     def line_comment(self, comment):
         return f"# {comment}"
 
@@ -13,6 +16,7 @@ class PythonCodeGen(InterfaceCodeGen):
 class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         yield 'from _source import *'
+        yield
 
     def callback_statement(self, callback_statement):
         yield from self.build_method_declaration(callback_statement.callback)

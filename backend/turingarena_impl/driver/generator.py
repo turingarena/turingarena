@@ -42,6 +42,7 @@ class InterfaceCodeGen(CodeGen):
 
     def generate(self, interface):
         yield from self.generate_header(interface)
+        yield from self.generate_constants_declarations(interface.constants)
         yield from self.generate_method_declarations(interface)
         yield from self.generate_main_block(interface)
         yield from self.generate_footer(interface)
@@ -56,8 +57,19 @@ class InterfaceCodeGen(CodeGen):
         for func in interface.methods:
             yield from self.generate_method_declaration(func)
 
+    def generate_constants_declarations(self, constants):
+        if constants:
+            yield self.line_comment("Constant declarations")
+            for name, value in constants.items():
+                yield from self.generate_constant_declaration(name, value)
+            yield
+
     @abstractmethod
     def generate_method_declaration(self, method_declaration):
+        pass
+
+    @abstractmethod
+    def generate_constant_declaration(self, name, value):
         pass
 
     @abstractmethod
