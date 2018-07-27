@@ -8,4 +8,5 @@ language = Language(
     source=CppAlgorithmSource,
     skeleton_generator=CppSkeletonCodeGen,
     template_generator=CppTemplateCodeGen,
+    supported_for_evaluator=True,
 )

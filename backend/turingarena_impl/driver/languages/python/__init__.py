@@ -8,4 +8,5 @@ language = Language(
     source=PythonAlgorithmSource,
     skeleton_generator=PythonSkeletonCodeGen,
     template_generator=PythonTemplateCodeGen,
+    supported_for_evaluator=True,
 )
