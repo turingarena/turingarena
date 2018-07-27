@@ -210,6 +210,7 @@ def create_make_parser(make_parser):
                              choices=["all", "skeleton", "template", "metadata"], nargs="?")
     make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
                              choices=["python", "c++"])
+    make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file", action="store_true")
 
 
 def create_new_parser(new_parser):
@@ -225,6 +226,7 @@ def parse_arguments():
     parser.add_argument("--tree", "-t", help="a git tree id", action="append")
     parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
     parser.add_argument("--log-level", help="log level", default="warning")
+    parser.add_argument("--quiet", "-q", help="suppress every diagnostic message", action="store_true")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True
@@ -244,11 +246,17 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
+    if args.quiet:
+        set_quiet()
+
     if args.command == "new":
         new_problem(args.name, args.language)
         return
 
     args.git_dir = setup_git_env()
+
+    if args.repository is None:
+        args.send_current_dir = True
 
     if args.send_current_dir:
         args.current_dir, args.tree_id = send_current_dir(local=args.local)
@@ -260,7 +268,7 @@ def main():
     else:
         ssh_command(args)
 
-    if args.command == "make":
+    if args.command == "make" and not args.print:
         retrive_result(args.result_file)
 
 

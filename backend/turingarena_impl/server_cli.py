@@ -23,13 +23,13 @@ git_env = {}
 def setup_git_environment(local, git_dir):
     global git_env
 
-    ok("Setting up git")
+    logger.info("Setting up git")
     with ExitStack() as stack:
         git_temp_dir = stack.enter_context(TemporaryDirectory())
-        info(f"Created temporary git working dir {git_temp_dir}")
+        logger.info(f"Created temporary git working dir {git_temp_dir}")
         if not local:
             git_dir = "/run/turingarena/db.git"
-        info(f"Using git repository at {git_dir}")
+        logger.info(f"Using git repository at {git_dir}")
         author_name = "TuringArena"
         author_email = "contact@turingarena.org"
         git_env = {
@@ -48,19 +48,19 @@ def setup_git_environment(local, git_dir):
 def git_fetch_repositories(repositories):
     for repository in repositories:
         # TODO: add a way to specify branch and depth
-        ok(f"Fetching git repository {repository}")
+        logger.info(f"Fetching git repository {repository}")
         subprocess.call(["git", "fetch", "--recurse-submodules=yes", repository], env=git_env)
 
 
 def git_import_trees(tree_ids):
     for tree_id in tree_ids:
-        ok(f"Importing git tree id {tree_id}")
+        logger.info(f"Importing git tree id {tree_id}")
         subprocess.call(["git", "read-tree", tree_id], env=git_env)
         subprocess.call(["git", "checkout-index", "--all"], env=git_env)
 
 
 def receive_current_directory(current_dir, tree_id):
-    ok("Retriving current directory from git")
+    logger.info("Retriving current directory from git")
 
     git_import_trees([tree_id])
 
@@ -69,50 +69,57 @@ def receive_current_directory(current_dir, tree_id):
 
 
 def add_directory(directory):
-    ok(f"Add directory {directory} to be committed")
+    logger.info(f"Add directory {directory} to be committed")
     subprocess.call(["git", "add", "-A", directory], env=git_env)
 
 
 def commit_work():
-    ok("Committing work")
+    logger.info("Committing work")
 
     tree_id = subprocess.check_output(["git", "write-tree"], env=git_env).strip().decode("ascii")
-    info(f"Output written with tree-id {tree_id}")
+    logger.info(f"Output written with tree-id {tree_id}")
 
     commit_id = subprocess.check_output(["git", "commit-tree", tree_id, "-m", "Make output"], env=git_env).strip().decode("ascii")
-    info(f"Created commit with commit-id {commit_id}")
+    logger.info(f"Created commit with commit-id {commit_id}")
 
     return tree_id, commit_id
 
 
 @contextmanager
-def generate(filename):
-    info(f"Generating {os.path.relpath(filename, git_env['GIT_WORK_TREE'])}")
-    with open(filename, "w") as file:
-        try:
-            yield file
-        except:
-            error(f"Exception during {filename} generation")
+def generate(dir, filename):
+    if dir is None:
+        ok(f"Printing {filename}")
+        yield sys.stdout
+    else:
+        file = os.path.join(dir, filename)
+        info(f"Generating {os.path.relpath(file, git_env['GIT_WORK_TREE'])}")
+        with open(file, "w") as f:
+            try:
+                yield f
+            except:
+                error(f"Exception during {filename} generation")
 
 
 def make_skeleton(out_dir, interface, language):
-    with generate(f"{out_dir}/skeleton{language.extension}") as out:
+    with generate(out_dir, f"skeleton{language.extension}") as out:
             language.skeleton_generator().generate_to_file(interface, out)
 
 
 def make_template(out_dir, interface, language):
-    with generate(f"{out_dir}/template{language.extension}") as out:
+    with generate(out_dir, f"template{language.extension}") as out:
         language.template_generator().generate_to_file(interface, out)
 
 
 def make_metadata(out_dir, interface):
-    with generate(f"{out_dir}/metadata.json") as out:
+    with generate(out_dir, f"metadata.json") as out:
         json.dump(generate_interface_metadata(interface), out, indent=4)
 
 
-def make(directory, what, languages):
-    out_dir = os.path.join(directory, "__turingarena_make_output__")
-    os.makedirs(out_dir, exist_ok=True)
+def make(directory, what, languages, print):
+    out_dir = None
+    if not print:
+        out_dir = os.path.join(directory, "__turingarena_make_output__")
+        os.makedirs(out_dir, exist_ok=True)
 
     ok(f"Entering directory {os.path.relpath(directory, git_env['GIT_WORK_TREE'])}")
 
@@ -121,7 +128,7 @@ def make(directory, what, languages):
     with open(interface_file) as f:
         interface_text = f.read()
 
-    info("Compiling interface")
+    logger.info("Compiling interface")
     try:
         interface = InterfaceDefinition.compile(interface_text)
     except:
@@ -132,8 +139,10 @@ def make(directory, what, languages):
         warning(f"{message}")
 
     for language in languages:
-        language_dir = os.path.join(out_dir, language.name)
-        os.makedirs(language_dir, exist_ok=True)
+        language_dir = None
+        if out_dir:
+            language_dir = os.path.join(out_dir, language.name)
+            os.makedirs(language_dir, exist_ok=True)
 
         if "skeleton" in what:
             make_skeleton(out_dir=language_dir, interface=interface, language=language)
@@ -143,7 +152,8 @@ def make(directory, what, languages):
     if "metadata" in what:
         make_metadata(out_dir=out_dir, interface=interface)
 
-    add_directory(out_dir)
+    if not print:
+        add_directory(out_dir)
 
 
 def make_cmd(args):
@@ -168,13 +178,14 @@ def make_cmd(args):
     ok(f"Searching for problems in {os.path.relpath(base_dir, git_env['GIT_WORK_TREE'])}")
     for subdir, dir, files in os.walk(base_dir):
         if "interface.txt" in files:
-            make(directory=subdir, what=what, languages=languages)
+            make(directory=subdir, what=what, languages=languages, print=args["print"])
 
-    tree_id, commit_id = commit_work()
-    result = dict(tree_id=tree_id, commit_id=commit_id)
-    info(f"Writing result to file {args['result_file']}")
-    with open(args["result_file"], "w") as f:
-        print(json.dumps(result), file=f)
+    if not args["print"]:
+        tree_id, commit_id = commit_work()
+        result = dict(tree_id=tree_id, commit_id=commit_id)
+        logger.info(f"Writing result to file {args['result_file']}")
+        with open(args["result_file"], "w") as f:
+            print(json.dumps(result), file=f)
 
 
 def evaluate_cmd(json_args):

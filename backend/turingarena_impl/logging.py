@@ -4,9 +4,10 @@ import os
 import coloredlogs
 from termcolor import colored
 
+logger = logging.getLogger()
+
 
 def init_logger(level_name=None):
-    logger = logging.getLogger()
     if level_name is None:
         level_name = os.environ.get("TURINGARENA_LOG_LEVEL", None)
     if level_name is None:
