@@ -115,6 +115,12 @@ def make_metadata(out_dir, interface):
         json.dump(generate_interface_metadata(interface), out, indent=4)
 
 
+def make_description(out_dir, interface):
+    with generate(out_dir, f"metadata.json") as out:
+        for line in interface.main_node.node_description:
+            print(line, file=out)
+
+
 def make(directory, what, languages, print):
     out_dir = None
     if not print:
@@ -148,6 +154,9 @@ def make(directory, what, languages, print):
             make_skeleton(out_dir=language_dir, interface=interface, language=language)
         if "template" in what:
             make_template(out_dir=language_dir, interface=interface, language=language)
+
+    if "description" in what:
+        make_description(out_dir=language_dir, interface=interface)
 
     if "metadata" in what:
         make_metadata(out_dir=out_dir, interface=interface)
