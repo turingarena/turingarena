@@ -216,6 +216,21 @@ def evaluate_cmd(json_args):
             print(event, file=output, flush=True)
 
 
+def info_languages():
+    print("Supported languages\n")
+    print("Name\tExtension")
+    print("----\t---------")
+    for language in Language.languages():
+        print(f"{language.name}\t{language.extension}")
+
+
+def info_cmd(args):
+    what = args["what"]
+
+    if what == "languages":
+        info_languages()
+
+
 def main(args):
     args = json.loads(args[0])
 
@@ -237,6 +252,9 @@ def main(args):
 
         if args["command"] == "make":
             make_cmd(args)
+
+        if args["command"] == "info":
+            info_cmd(args)
 
 
 if __name__ == "__main__":

@@ -218,6 +218,10 @@ def create_new_parser(new_parser):
     new_parser.add_argument("--language", "-l", help="language for the evaluator")
 
 
+def create_info_parser(info_parser):
+    info_parser.add_argument("what", choices=["languages"], help="list supported TuringArena arguments")
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
     parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)",
@@ -236,6 +240,9 @@ def parse_arguments():
 
     evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
     create_evaluate_parser(evaluate_parser)
+
+    info_parser = subparsers.add_parser("info", help="get some info about TuringArena")
+    create_info_parser(info_parser)
 
     new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
     create_new_parser(new_parser)
@@ -257,6 +264,9 @@ def main():
 
     if args.repository is None:
         args.send_current_dir = True
+
+    if args.command not in ["evaluate", "make"]:
+        args.send_current_dir = False
 
     if args.send_current_dir:
         args.current_dir, args.tree_id = send_current_dir(local=args.local)
