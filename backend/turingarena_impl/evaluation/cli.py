@@ -32,6 +32,7 @@ def parse_file(file, temp_dir, default_fields):
     return name, path
 
 
+# TODO: this method is deprecated, and will be removed in the future
 @docopt_cli
 def evaluate_cli(args):
     """Evaluates a submission.

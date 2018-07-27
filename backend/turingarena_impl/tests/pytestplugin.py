@@ -6,7 +6,7 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluate import Evaluator
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
@@ -29,9 +29,9 @@ class ProblemSolutionItem(pytest.Item):
 
     def runtest(self):
         files = dict(source=self.parent.source_path)
-        evaluator_cmd = f"python3 -u {self.parent.evaluator_path}"
+        evaluator = Evaluator.get_evaluator(self.parent.evaluator_path)
 
-        events = list(evaluate(files, evaluator_cmd=evaluator_cmd))
+        events = list(evaluator.evaluate(files))
         self.add_report_section("call", "evaluation", "\n".join(map(str, events)))
 
         for assertion in self.load_assertion_in_source():

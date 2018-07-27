@@ -1,19 +1,17 @@
 from __future__ import print_function
 
-from termcolor import colored
-
 
 def error(string):
-    print(colored("==> ERROR:", "red", attrs=["bold"]), string)
+    print(f"\033[1;31m==> ERROR:\033[0m {string}")
 
 
 def warning(string):
-    print(colored("==> WARNING:", "yellow", attrs=["bold"]), string)
+    print(f"\033[1;33m==> WARNING:\033[0m {string}")
 
 
 def ok(string):
-    print(colored("==>", "green", attrs=["bold"]), string)
+    print(f"\033[1;32m==>\033[0m {string}")
 
 
 def info(string):
-    print(colored("  ->", "blue", attrs=["bold"]), string)
+    print(f"\033[1;34m  ->\033[0m {string}")

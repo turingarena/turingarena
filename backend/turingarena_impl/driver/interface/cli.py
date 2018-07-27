@@ -1,3 +1,5 @@
+# TODO: this file is deprecated, and should be removed in the future
+
 import sys
 
 from turingarena_impl.legacy_cli import docopt_cli

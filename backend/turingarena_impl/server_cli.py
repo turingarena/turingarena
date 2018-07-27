@@ -127,7 +127,7 @@ def make(directory, what, languages, print):
         out_dir = os.path.join(directory, "__turingarena_make_output__")
         os.makedirs(out_dir, exist_ok=True)
 
-    ok(f"Entering directory {os.path.relpath(directory, git_env['GIT_WORK_TREE'])}")
+    logger.info(f"Entering directory {os.path.relpath(directory, git_env['GIT_WORK_TREE'])}")
 
     interface_file = os.path.join(directory, "interface.txt")
 
@@ -184,7 +184,7 @@ def make_cmd(args):
         languages = Language.languages()
 
     base_dir = os.getcwd()
-    ok(f"Searching for problems in {os.path.relpath(base_dir, git_env['GIT_WORK_TREE'])}")
+    logger.info(f"Searching for problems in {os.path.relpath(base_dir, git_env['GIT_WORK_TREE'])}")
     for subdir, dir, files in os.walk(base_dir):
         if "interface.txt" in files:
             make(directory=subdir, what=what, languages=languages, print=args["print"])
