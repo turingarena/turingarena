@@ -1,4 +1,4 @@
-from turingarena_impl.driver.interface.tests.test_utils import define_algorithm
+from turingarena_impl.driver.tests.test_utils import define_algorithm
 
 
 interface_text = """
@@ -20,4 +20,4 @@ def test_sandbox_smoke():
             """,
     ) as algo:
         with algo.run() as p:
-            assert p.call.test() == 3
+            assert p.functions.test() == 3

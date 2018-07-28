@@ -23,7 +23,10 @@ class CallStatement(Statement):
 
     @property
     def method(self):
-        return self.context.global_context.methods_by_name[self.method_name]
+        try:
+            return self.context.global_context.methods_by_name[self.method_name]
+        except KeyError:
+            return None
 
     @property
     def arguments(self):
@@ -110,11 +113,11 @@ class CallStatement(Statement):
         yield RequestLookaheadNode()
         yield MethodResolveArgumentsNode(self)
 
-        if self.method.has_callbacks:
+        if self.method and self.method.has_callbacks:
             yield MethodCallbacksNode(self)
 
         yield MethodCallCompletedNode(self)
-        if self.method.has_return_value:
+        if self.return_value:
             yield MethodReturnNode(self)
 
 

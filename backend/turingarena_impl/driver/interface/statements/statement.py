@@ -51,6 +51,10 @@ class AbstractStatement(ImperativeStructure):
     def _get_comment(self):
         return None
 
+    @property
+    def does_break(self):
+        return False
+
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []

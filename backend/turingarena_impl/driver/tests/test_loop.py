@@ -57,20 +57,24 @@ def test_unexpected_break():
 
 def test_unreachable_code():
     assert_interface_error("""
+        function p();
         main {
             loop {
-                write 1;
+                call a = p();
+                write a;
                 break;
-                write 2;
+                call b = p();
+                write b;
             }
         }
     """, Diagnostic.Messages.UNREACHABLE_CODE)
 
 
-def test_infinite_loop():
-    assert_interface_error("""
-        main {
-            loop {
-            }
-        }        
-    """, Diagnostic.Messages.INFINITE_LOOP)
+# TODO: is a good idea to report infinite loop as error ?
+# def test_infinite_loop():
+#     assert_interface_error("""
+#         main {
+#             loop {
+#             }
+#         }
+#     """, Diagnostic.Messages.INFINITE_LOOP)

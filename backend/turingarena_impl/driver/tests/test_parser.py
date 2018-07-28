@@ -1,6 +1,9 @@
 from .test_utils import assert_no_interface_errors
 
 interface = '''
+    const X = 10;
+    const Y = 42;
+
     function sum(a, b);
     
     procedure init(a, b[], c[][], d[][][]);
@@ -20,7 +23,7 @@ interface = '''
         call c = sum(a, b);
         write c;
         
-        read c;
+        read m;
         for i to 10 {
             read d[i];
             for j to 20 {
@@ -31,7 +34,7 @@ interface = '''
             }
         }
         
-        call init(c, d, e, f);
+        call init(m, d, e, f);
         
         read g; 
         call h = accept_callbacks(g) callbacks {

@@ -30,15 +30,14 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
         return list(self._generate_statements())
 
     def validate(self):
-        from turingarena_impl.driver.interface.statements.loop import BreakStatement
-        from turingarena_impl.driver.interface.statements.callback import ExitStatement
-
-        for i, statement in enumerate(self.statements):
+        exited = False
+        for statement in self.statements:
+            if exited:
+                yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
+                break
             yield from statement.validate()
-            if isinstance(statement, BreakStatement) or isinstance(statement, ExitStatement):
-                if i < len(self.statements) - 1:
-                    yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
-                    break
+            if statement.does_break:
+                exited = True
 
     @property
     @memoize
