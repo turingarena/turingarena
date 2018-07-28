@@ -67,10 +67,14 @@ class ForStatement(Statement, IntermediateNode):
 
     def _can_be_grouped(self):
         # no local references
-        return all(
+        r = all(
             a.reference.index_count > 0
             for a in self._body_node.reference_actions
+        ) and all (
+            child.can_be_grouped
+            for child in self._body_node.children
         )
+        return r
 
     @property
     def _body_node(self):

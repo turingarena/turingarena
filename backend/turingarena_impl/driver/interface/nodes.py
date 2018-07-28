@@ -69,7 +69,8 @@ class IntermediateNode:
     def node_description(self):
         return list(self._describe_node())
 
-    def _indent_all(self, lines):
+    @staticmethod
+    def _indent_all(lines):
         for l in lines:
             yield "  " + l
 

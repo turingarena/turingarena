@@ -135,11 +135,11 @@ def make(directory, what, languages, print):
         interface_text = f.read()
 
     logger.info("Compiling interface")
-    try:
-        interface = InterfaceDefinition.compile(interface_text)
-    except:
-        error(f"There is an error in {interface_file}")
-        return
+    # try:
+    interface = InterfaceDefinition.compile(interface_text)
+    # except :
+    #    error(f"There is an error in {interface_file}")
+    #    return
 
     for message in interface.validate():
         warning(f"{message}")
