@@ -9,12 +9,12 @@
 #define OPPONENT 2
 
 // initialize random number generator
-// __attribute__((constructor)) void init() {
-    //srand(time(nullptr));
-// }
+__attribute__((constructor)) void init() {
+    srand(42);
+}
 
 // find a random empty cell and place here
-int play_move(int **grid, void place_at(int y, int x)) {
+void play_move(int **grid, void place_at(int y, int x)) {
     int x, y;
     do {
         y = rand() % ROWS;
@@ -22,7 +22,6 @@ int play_move(int **grid, void place_at(int y, int x)) {
     } while (grid[y][x] != EMPTY);
 
     place_at(y, x);
-    return 42;
 }
 
 void terminate() {}
