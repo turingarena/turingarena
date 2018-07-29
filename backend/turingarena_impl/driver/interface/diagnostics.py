@@ -24,6 +24,7 @@ class Diagnostic(namedtuple("Diagnostic", [
         DUPLICATED_CASE_LABEL = "duplicated case label {}"
         UNEXPECTED_CALLBACK = "callback {} not allowed here"
         SWITCH_LABEL_NOT_LITERAL = "switch labels must be integer literals"
+        VARIABLE_NOT_WRITTEN = "missing write {}; statement"
 
     @staticmethod
     def build_message(msg, *args):

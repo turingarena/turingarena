@@ -85,7 +85,6 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
             yield a.reference, value
 
     def _driver_run(self, context):
-        logger.debug("DRIVER RUN")
         if context.phase is ExecutionPhase.UPWARD:
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 

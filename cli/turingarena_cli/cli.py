@@ -3,11 +3,16 @@ from __future__ import print_function
 import subprocess
 import argparse
 import logging
-import shlex
 import json
 import uuid
 import sys
 import os
+
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
+
 
 from turingarena_cli.common import *
 
@@ -93,7 +98,7 @@ def ssh_command(args):
     cli = [
         "/usr/local/bin/python",
         "-m", "turingarena_impl.server_cli",
-        shlex.quote(build_json_parameters(args)),
+        quote(build_json_parameters(args)),
     ]
 
     send_ssh_command(cli)

@@ -23,7 +23,7 @@ class CppCodeGen(InterfaceCodeGen):
         return f"// {comment}"
 
     def generate_constant_declaration(self, name, value):
-        yield f"#define {name} {value};"
+        yield f"#define {name} {value}"
 
 
 class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
