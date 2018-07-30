@@ -14,6 +14,7 @@ def init_sandbox():
         "mmap", "munmap", "mremap", "brk",
         "execve",
         "arch_prctl", "uname", "set_tid_address",
+        "time",
     ]:
         filter.add_rule(ALLOW, syscall)
     for syscall in [

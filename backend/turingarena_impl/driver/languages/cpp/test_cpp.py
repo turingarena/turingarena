@@ -93,6 +93,15 @@ def test_vector_succeeds():
     """)
 
 
+def test_time_call():
+    should_succeed("""
+        #include "time.h"
+        int test() {
+            return time(nullptr);
+        }
+    """)
+
+
 def test_time_limit():
     should_raise("""
         int test() { for(;;) {} }
