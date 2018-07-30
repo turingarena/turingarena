@@ -47,6 +47,53 @@ def test_loop():
             p.checkpoint()
 
 
+def test_loop_and_if_functions():
+    with define_algorithm(
+        interface_text="""
+        function f();
+        
+        main {
+            loop {
+                read c;
+                if c {
+                    call r = f();
+                    write r;
+                } else {
+                    break;
+                }
+            }
+        }
+        """,
+        language_name="c++",
+        source_text="int f() { return 42; }",
+    ) as algo:
+        with algo.run() as p:
+            assert p.functions.f() == 42
+
+
+def test_loop_and_if_procedures():
+    with define_algorithm(
+        interface_text="""
+            procedure p();
+    
+            main {
+                loop {
+                    read c;
+                    if c {
+                        call p();
+                    } else {
+                        break;
+                    }
+                }
+            }
+            """,
+        language_name="c++",
+        source_text="int p() { return 42; }",
+    ) as algo:
+        with algo.run() as p:
+            p.procedures.p()
+
+
 def test_unexpected_break():
     assert_interface_error("""
         main {
