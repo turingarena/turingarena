@@ -60,33 +60,28 @@ def play_round(player, symbol, grid):
     player.procedures.play_move(new_grid, callbacks=[place])   
 
 
-def run_match():
-    with run_algorithm(submission.player1) as p1, run_algorithm(submission.player2) as p2:
-        players = (p1, p2)
-        symbols = ('X', 'O')
+def run_match(players):
+    symbols = ('X', 'O')
 
-        grid = [[' ' for _ in range(3)] for _ in range(3)]
+    grid = [[' ' for _ in range(3)] for _ in range(3)]
 
-        winner = None
-        while not winner:
-            for player, symbol in enumerate(symbols):
-                print(f"Turn of player{player + 1} ({symbol})")
-                play_round(players[player], symbol, grid)
-                print_grid(grid)
-                print()
-                winner = find_winner(grid)
-                if winner: 
-                    break
+    winner = None
+    while not winner:
+        for player, symbol in enumerate(symbols):
+            print(f"Turn of player{player + 1} ({symbol})")
+            play_round(players[player], symbol, grid)
+            print_grid(grid)
+            print()
+            winner = find_winner(grid)
+            if winner: 
+                break
 
-        for player in players:
-            player.procedures.terminate()
-
-        if winner == 'D':
-            print(f"Game is draw")
-            return 0
-        else:
-            print(f"Player {symbols.index(winner) + 1} ({winner}) won!")
-            return symbols.index(winner) + 1
+    if winner == 'D':
+        print(f"Game is draw\n")
+        return 0
+    else:
+        print(f"Player {symbols.index(winner) + 1} ({winner}) won!\n")
+        return symbols.index(winner) + 1
 
 try:
     with open(submission.ngames) as f:
@@ -100,11 +95,19 @@ results = {
     "draws": 0,
 }
 
-for i in range(ngames):
-    result = run_match()
-    if result == 0:
-        results["draws"] += 1
-    else:
-        results[f"player{result}"] += 1
+with run_algorithm(submission.player1) as p1, run_algorithm(submission.player2) as p2:
+    players = (p1, p2)
+    for i in range(ngames):
+        s = f"Starting game {i + 1}"
+        print(s)
+        print("-" * len(s))
+        result = run_match(players)
+        if result == 0:
+            results["draws"] += 1
+        else:
+            results[f"player{result}"] += 1
+
+    for player in players:
+        player.procedures.terminate()
 
 evaluation.data(dict(results=results))
