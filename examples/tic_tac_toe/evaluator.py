@@ -2,8 +2,6 @@ from turingarena import submission, run_algorithm, evaluation, AlgorithmRuntimeE
 
 import random
 
-NUMBER_OF_MATCH = 100
-
 EMPTY = 0
 PLAYER = 1
 OPPONENT = 2
@@ -72,9 +70,10 @@ def run_match():
         winner = None
         while not winner:
             for player, symbol in enumerate(symbols):
-                print(f"Turn of player {player}({symbol})")
+                print(f"Turn of player{player + 1} ({symbol})")
                 play_round(players[player], symbol, grid)
                 print_grid(grid)
+                print()
                 winner = find_winner(grid)
                 if winner: 
                     break
@@ -84,13 +83,28 @@ def run_match():
 
         if winner == 'D':
             print(f"Game is draw")
+            return 0
         else:
-            print(f"Player {symbols.index(winner)} ({winner}) won!")
+            print(f"Player {symbols.index(winner) + 1} ({winner}) won!")
+            return symbols.index(winner) + 1
 
-        evaluation.data(dict(result=winner))
+try:
+    with open(submission.ngames) as f:
+        ngames = int(f.read())
+except KeyError:
+    ngames = 1
 
-        return winner
-    
+results = {
+    "player1": 0, 
+    "player2": 0,
+    "draws": 0,
+}
 
-run_match()
-exit()
+for i in range(ngames):
+    result = run_match()
+    if result == 0:
+        results["draws"] += 1
+    else:
+        results[f"player{result}"] += 1
+
+evaluation.data(dict(results=results))

@@ -10,7 +10,7 @@
 
 // initialize random number generator
 __attribute__((constructor)) void init() {
-    srand(42);
+    srand(time(nullptr));
 }
 
 // find a random empty cell and place here
