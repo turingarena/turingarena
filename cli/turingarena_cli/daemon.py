@@ -9,6 +9,18 @@ image = "turingarena/turingarena:latest"
 name = "turingarena"
 
 
+def check_docker():
+    cli = ["docker", "ps"]
+    try:
+        subprocess.check_output(cli)
+    except FileNotFoundError:
+        error("Docker executable not found. Make sure that docker is installed and present in your $PATH")
+        exit(1)
+    except subprocess.CalledProcessError:
+        error("Docker is installed, but the daemon is not running. Try 'systemctl start docker' if you are on Linux")
+        exit(1)
+
+
 def update_turingarena():
     ok("Updating turingarena docker image")
     subprocess.call([
@@ -49,6 +61,7 @@ def parse_cli():
 def main():
     args = parse_cli()
     check_root()
+    check_docker()
 
     if args.update:
         update_turingarena()
