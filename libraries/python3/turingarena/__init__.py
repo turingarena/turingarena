@@ -60,7 +60,8 @@ submission = Submission()
 class Evaluation:
     __slots__ = []
 
-    def data(self, *data):
+    @staticmethod
+    def data(*data):
         print()
         print(os.environ["EVALUATION_DATA_BEGIN"])
         for d in data:
@@ -70,3 +71,8 @@ class Evaluation:
 
 
 evaluation = Evaluation()
+
+try:
+    temporary_directory = os.environ["TEMPORARY_DIRECTORY"]
+except KeyError:
+    pass
