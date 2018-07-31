@@ -8,6 +8,11 @@ from turingarena_cli.common import *
 image = "turingarena/turingarena:latest"
 name = "turingarena"
 
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 
 def check_docker():
     cli = ["docker", "ps"]
@@ -95,12 +100,9 @@ def main():
               """EXEC:"/usr/sbin/sshd -q -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
     info("Running: {}".format(" ".join(cli)))
-    try:
-        if args.daemon:
-            process = subprocess.Popen(cli, cwd="/")
-            ok("Turingarena is running in background with pid {pid}. Use `kill {pid}` to terminate".format(pid=process.pid))
-        else:
-            ok("Executing turingarena in foreground. Use CTRL-C to kill it")
-            os.execvp("docker", cli)
-    except FileNotFoundError:
-        error("docker executable doesn't exist. Is docker installed ?")
+    if args.daemon:
+        process = subprocess.Popen(cli, cwd="/")
+        ok("Turingarena is running in background with pid {pid}. Use `kill {pid}` to terminate".format(pid=process.pid))
+    else:
+        ok("Executing turingarena in foreground. Use CTRL-C to kill it")
+        os.execvp("docker", cli)
