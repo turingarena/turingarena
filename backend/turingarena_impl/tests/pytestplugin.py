@@ -6,7 +6,7 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.evaluation.evaluate import Evaluator
+from turingarena_impl.evaluation.evaluator import Evaluator
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 

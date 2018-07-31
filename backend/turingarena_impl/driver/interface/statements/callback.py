@@ -38,10 +38,10 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
             ])
         ]
         if self.has_return_value:
-            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "__ret", "")
+            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "_result", "")
             fake_ast_body += [
                 namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
-                namedtuple("read", ["statement_type", "value"])("return", return_var),
+                namedtuple("ret", ["statement_type", "value"])("return", return_var),
             ]
         return namedtuple("body", ["statements"])(fake_ast_body)
 

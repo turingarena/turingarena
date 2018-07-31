@@ -1,11 +1,42 @@
 import os
 import subprocess
 import sys
-from contextlib import contextmanager, ExitStack
+import logging
+
+from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.legacy_cli import docopt_cli
-from turingarena_impl.evaluation.evaluate import Evaluator
+from turingarena_impl.evaluation.evaluator import Evaluator
+
+logger = logging.Logger(__name__)
+
+
+def evaluate_cmd(args):
+    evaluator = "evaluator.py"
+
+    if args["evaluator"]:
+        evaluator = args["evaluator"]
+
+    with ExitStack() as stack:
+        if args["raw"]:
+            output = sys.stdout
+        else:
+            jq = stack.enter_context(subprocess.Popen(
+                ["jq", "-j", "--unbuffered", ".payload"],
+                stdin=subprocess.PIPE,
+                universal_newlines=True,
+            ))
+            output = jq.stdin
+
+        logger.info(f"Parsing submitted files")
+        files = stack.enter_context(parse_files(args["file"], ["source"]))
+        for name, path in files.items():
+            logger.info(f"{name}: {path}")
+
+        evaluator = Evaluator.get_evaluator(evaluator)
+        logger.info(f"Running evaluator: {evaluator}")
+        for event in evaluator.evaluate(files=files):
+            print(event, file=output, flush=True)
 
 
 @contextmanager
@@ -30,33 +61,3 @@ def parse_file(file, temp_dir, default_fields):
         name = next(default_fields)
         path = file
     return name, path
-
-
-# TODO: this method is deprecated, and will be removed in the future
-@docopt_cli
-def evaluate_cli(args):
-    """Evaluates a submission.
-
-    Usage:
-        evaluate [options] <files> ...
-
-    Options:
-        -e --evaluator=<id>  Evaluator [default: evaluator.py]
-        -r --raw  Output events in JSON Lines format.
-    """
-
-    with ExitStack() as stack:
-        if args["--raw"]:
-            output = sys.stdout
-        else:
-            jq = stack.enter_context(subprocess.Popen(
-                ["jq", "-j", "--unbuffered", ".payload"],
-                stdin=subprocess.PIPE,
-                universal_newlines=True,
-            ))
-            output = jq.stdin
-
-        files = stack.enter_context(parse_files(args["<files>"], ["source"]))
-
-        for event in Evaluator.get_evaluator(args["--evaluator"]).evaluate(files=files):
-            print(event, file=output, flush=True)

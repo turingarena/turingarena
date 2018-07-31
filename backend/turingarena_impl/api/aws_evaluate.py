@@ -2,7 +2,7 @@ import os
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.evaluation.evaluate import Evaluator
+from turingarena_impl.evaluation.evaluator import Evaluator
 
 
 def main():

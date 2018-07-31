@@ -1,4 +1,4 @@
-from turingarena_impl.legacy_cli import server_cli
+from turingarena_impl.server_cli import main
 
 if __name__ == '__main__':
-    server_cli()
+    main()

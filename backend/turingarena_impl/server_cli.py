@@ -7,8 +7,7 @@ import os
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_impl.evaluation.cli import parse_files
-from turingarena_impl.evaluation.evaluate import Evaluator
+from turingarena_impl.evaluation.cli import evaluate_cmd
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 from turingarena_impl.driver.interface.metadata import generate_interface_metadata
@@ -88,7 +87,6 @@ def commit_work():
 @contextmanager
 def generate(dir, filename):
     if dir is None:
-        ok(f"Printing {filename}")
         yield sys.stdout
     else:
         file = os.path.join(dir, filename)
@@ -180,8 +178,10 @@ def make_cmd(args):
                 languages.append(Language.from_name(language))
             except ValueError:
                 error(f"Language {language} not supported")
-    else:
+    elif what == "all":
         languages = Language.languages()
+    else:
+        languages = [Language.from_name("c++")]
 
     base_dir = os.getcwd()
     logger.info(f"Searching for problems in {os.path.relpath(base_dir, git_env['GIT_WORK_TREE'])}")
@@ -195,34 +195,6 @@ def make_cmd(args):
         logger.info(f"Writing result to file {args['result_file']}")
         with open(args["result_file"], "w") as f:
             print(json.dumps(result), file=f)
-
-
-def evaluate_cmd(json_args):
-    evaluator = "evaluator.py"
-
-    if json_args["evaluator"]:
-        evaluator = json_args["evaluator"]
-
-    with ExitStack() as stack:
-        if json_args["raw"]:
-            output = sys.stdout
-        else:
-            jq = stack.enter_context(subprocess.Popen(
-                ["jq", "-j", "--unbuffered", ".payload"],
-                stdin=subprocess.PIPE,
-                universal_newlines=True,
-            ))
-            output = jq.stdin
-
-        ok(f"Parsing submitted files")
-        files = stack.enter_context(parse_files(json_args["file"], ["source"]))
-        for name, path in files.items():
-            info(f"{name}: {path}")
-
-        evaluator = Evaluator.get_evaluator(evaluator)
-        ok(f"Running evaluator: {evaluator}")
-        for event in evaluator.evaluate(files=files):
-            print(event, file=output, flush=True)
 
 
 def info_languages():
@@ -240,8 +212,8 @@ def info_cmd(args):
         info_languages()
 
 
-def main(args):
-    args = json.loads(args[0])
+def main():
+    args = json.loads(sys.argv[1])
 
     init_logger(args["log_level"])
 
@@ -267,4 +239,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
