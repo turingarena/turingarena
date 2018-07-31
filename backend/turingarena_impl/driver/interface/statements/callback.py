@@ -20,15 +20,30 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     @property
     def body(self):
-        # TODO: generate block if body is None ('default' is specified)
         inner_context = self.context.local_context.with_reference_actions(
             ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
             for p in self.parameters
         )
         return Block(
-            ast=self.ast.body,
+            ast=self.ast.body if self.ast.body else self.default_body,
             context=inner_context,
         )
+
+    @property
+    def default_body(self):
+        fake_ast_body = [
+            namedtuple("write", ["statement_type", "arguments"])("write", [
+                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name, "")
+                for p in self.parameters
+            ])
+        ]
+        if self.has_return_value:
+            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "__ret", "")
+            fake_ast_body += [
+                namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
+                namedtuple("read", ["statement_type", "value"])("return", return_var),
+            ]
+        return namedtuple("body", ["statements"])(fake_ast_body)
 
     def validate(self):
         yield from self.prototype.validate()

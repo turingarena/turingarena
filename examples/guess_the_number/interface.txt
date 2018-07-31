@@ -9,13 +9,7 @@ function play(n) callbacks {
 main {
     read n;
 
-    call ans = play(n) callbacks {
-        function guess(n) {
-            write n;
-            read ans;
-            return ans;
-        }
-    }
+    call ans = play(n);
 
     write ans;
 }

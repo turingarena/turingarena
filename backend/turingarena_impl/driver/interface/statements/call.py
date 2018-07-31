@@ -56,14 +56,21 @@ class CallStatement(Statement):
         yield CallRequestSignature("call", self.method_name)
 
     def _find_callback_implementation(self, index, callback):
-        return next(
-            CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
-                local_context=self.context,
-                callback_index=index,
-            ))
-            for implementation in self.ast.callbacks
-            if implementation.declarator.name == callback.name
-        )
+        try:
+            return next(
+                CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
+                    local_context=self.context,
+                    callback_index=index,
+                ))
+                for implementation in self.ast.callbacks
+                if implementation.declarator.name == callback.name
+            )
+        except StopIteration:
+            return CallbackImplementation(ast=callback.ast, context=StaticCallbackBlockContext(
+                    local_context=self.context,
+                    callback_index=index,
+                )
+            )
 
     def validate(self):
         if self.method_name not in self.context.global_context.methods_by_name:

@@ -79,5 +79,3 @@ class CallbackPrototype(CallablePrototype):
                     Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
                     parseinfo=parameter.ast.parseinfo,
                 )
-
-

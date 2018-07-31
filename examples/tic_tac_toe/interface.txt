@@ -22,11 +22,7 @@ main {
                 }
             }
 
-            call play_move(grid) callbacks {
-                procedure place_at(y, x) {
-                    write y, x;
-                }
-            }
+            call play_move(grid);
         } else {
             call terminate();
             break;
