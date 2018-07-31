@@ -8,6 +8,7 @@ from turingarena_cli.common import *
 image = "turingarena/turingarena:latest"
 name = "turingarena"
 
+# in python 2.x, FileNotFoundError doesn't exists
 try:
     FileNotFoundError
 except NameError:
@@ -19,26 +20,20 @@ def check_docker():
     try:
         subprocess.check_output(cli)
     except FileNotFoundError:
-        error("Docker executable not found. Make sure that docker is installed and present in your $PATH")
-        exit(1)
+        die("Docker executable not found. Make sure that docker is installed and present in your $PATH")
     except subprocess.CalledProcessError:
-        error("Docker is installed, but the daemon is not running. Try 'systemctl start docker' if you are on Linux")
-        exit(1)
+        die("Docker is installed, but the daemon is not running. Try 'systemctl start docker' if you are on Linux")
 
 
 def update_turingarena():
     ok("Updating turingarena docker image")
-    subprocess.call([
-        "docker",
-        "pull",
-        image,
-    ])
+    cli = ["docker", "pull", image]
+    subprocess.call(cli)
 
 
 def check_root():
     if os.getuid() != 0:
-        error("You must be root to execute turingarenad!")
-        exit(1)
+        die("You must be root to execute turingarenad! Try `sudo turingarenad`")
 
 
 def already_running():
@@ -50,7 +45,7 @@ def already_running():
 def kill_daemon():
     ok("Killing turingarena daemon")
     cli = ["docker", "kill", name]
-    subprocess.call(cli)
+    subprocess.check_output(cli)
 
 
 def parse_cli():
@@ -63,25 +58,11 @@ def parse_cli():
     return parser.parse_args()
 
 
-def main():
-    args = parse_cli()
-    check_root()
-    check_docker()
-
-    if args.update:
-        update_turingarena()
-
-    if already_running():
-        if args.restart:
-            kill_daemon()
-        else:
-            error("Daemon already running, to restart it use --restart option!")
-            exit(1)
-
+def run_daemon(fork=False, dev_dir=None):
     ok("Executing Turingarena daemon")
     volumes = []
-    if args.dev_dir:
-        dev_dir = os.path.abspath(args.dev_dir)
+    if dev_dir:
+        dev_dir = os.path.abspath(dev_dir)
         info("Developement mode: mounting {} into the container".format(dev_dir))
         volumes.append("--mount=type=bind,src={},dst=/usr/local/turingarena/,readonly".format(dev_dir))
     cli = [
@@ -100,9 +81,27 @@ def main():
               """EXEC:"/usr/sbin/sshd -q -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
     info("Running: {}".format(" ".join(cli)))
-    if args.daemon:
+    if fork:
         process = subprocess.Popen(cli, cwd="/")
         ok("Turingarena is running in background with pid {pid}. Use `kill {pid}` to terminate".format(pid=process.pid))
     else:
         ok("Executing turingarena in foreground. Use CTRL-C to kill it")
         os.execvp("docker", cli)
+
+
+def main():
+    args = parse_cli()
+    check_root()
+    check_docker()
+
+    if args.update:
+        update_turingarena()
+
+    if already_running():
+        if args.restart:
+            kill_daemon()
+        else:
+            die("Daemon already running, to restart it use --restart option!")
+
+    run_daemon(fork=args.daemon, dev_dir=args.dev_dir)
+
