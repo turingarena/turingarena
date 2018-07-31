@@ -8,6 +8,7 @@ import uuid
 import sys
 import os
 
+# in python2.7, quote is in pipes and not in shlex
 try:
     from shlex import quote
 except ImportError:
@@ -28,7 +29,17 @@ ssh_cli = [
     "-p", "20122", "-q",
 ]
 
+ssh_user = "turingarena@localhost"
+
 git_env = {}
+
+
+def check_daemon():
+    cli = ssh_cli + [ssh_user, "echo", "OK!"]
+    try:
+        subprocess.check_output(cli)
+    except subprocess.CalledProcessError:
+        die("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
 
 def new_problem(name, language):
@@ -228,7 +239,7 @@ def create_new_parser(new_parser):
 
 
 def create_info_parser(info_parser):
-    info_parser.add_argument("what", choices=["languages"], help="list supported TuringArena arguments")
+    info_parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
 
 
 def parse_arguments():
@@ -267,6 +278,9 @@ def main():
         new_problem(args.name, args.language)
         return
 
+    if not args.local:
+        check_daemon()
+
     args.git_dir = setup_git_env()
 
     if args.command == "make" and args.what != "all":
@@ -291,6 +305,3 @@ def main():
     if args.command == "make" and not args.print:
         retrive_result(args.result_file)
 
-
-if __name__ == "__main__":
-    main()
