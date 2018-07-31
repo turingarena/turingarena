@@ -55,7 +55,7 @@ def new_problem(name, language):
 
     info("Writing default interface.txt")
     with open("interface.txt", "w") as f:
-        print("// put here your funciton and procedure definitions\n\n"
+        print("// put here your function and procedure definitions\n\n"
               "main {\n // put here the main code\n}", file=f)
 
     info("writing default {}".format(evaluators[language]))
