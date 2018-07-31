@@ -42,16 +42,8 @@ def server_cli(args):
     init_logger(args["--log-level"])
 
     from turingarena_impl.api.serve import serve_cli
-    from turingarena_impl.evaluation.cli import evaluate_cli
-    from turingarena_impl.driver.interface.cli import generate_template_cli, generate_skeleton_cli, \
-        validate_interface_cli, describe_interface_cli
 
     commands = {
-        "evaluate": evaluate_cli,
-        "template": generate_template_cli,
-        "skeleton": generate_skeleton_cli,
-        "validate": validate_interface_cli,
-        "describe": describe_interface_cli,
         "serve": serve_cli,
         "test": test_cli,
     }
