@@ -229,7 +229,7 @@ def create_make_parser(make_parser):
     make_parser.add_argument("what", help="what to make", default="all",
                              choices=["all", "skeleton", "template", "metadata", "description"])
     make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
-                             choices=["python", "c++", "java"])
+                             choices=["python", "c++", "java", "go"])
     make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file", action="store_true")
 
 
