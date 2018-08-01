@@ -1,23 +1,19 @@
 import logging
+import argparse
+
 from wsgiref.simple_server import make_server
 
 from turingarena_impl.api.wsgi_proxy import application
-from turingarena_impl.legacy_cli import docopt_cli
 
 
-@docopt_cli
-def serve_cli(args):
-    """
-    Usage:
-        serve [options]
+def serve_cli():
+    parser = argparse.ArgumentParser("Serve cli")
+    parser.add_argument("--host", "-h", help="Address where to listen", default="0.0.0.0")
+    parser.add_argument("--port", "-p", help="Port where to listen", default="8000", type=int)
+    args = parser.parse_args()
 
-    Options:
-        --host=<host>  Address where to listen. [default: 0.0.0.0]
-        -p --port=<port>  Port where to listen. [default: 8000]
-
-    """
-    host = args["--host"]
-    port = int(args["--port"])
+    host = args.host
+    port = args.port
 
     logging.root.setLevel(logging.DEBUG)
     print(f"Serving on {host}:{port}...")
