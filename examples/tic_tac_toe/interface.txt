@@ -16,8 +16,8 @@ main {
     loop {
         read another_move;
         if another_move {
-            for y to 3 {
-                for x to 3 {
+            for y to ROWS {
+                for x to COLS {
                     read grid[y][x];
                 }
             }

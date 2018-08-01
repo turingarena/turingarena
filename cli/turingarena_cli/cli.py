@@ -83,7 +83,7 @@ def build_json_parameters(args):
 def local_command(args):
     cli = [
         "python3",
-        "-m", "turingarena_impl.server_cli",
+        "-m", "turingarena_impl",
         build_json_parameters(args),
     ]
 
@@ -108,7 +108,7 @@ def send_ssh_command(cli):
 def ssh_command(args):
     cli = [
         "/usr/local/bin/python",
-        "-m", "turingarena_impl.server_cli",
+        "-m", "turingarena_impl",
         quote(build_json_parameters(args)),
     ]
 
@@ -221,7 +221,7 @@ def retrive_result(result_file):
 
 def create_evaluate_parser(evaluate_parser):
     evaluate_parser.add_argument("file", help="submission file", nargs="+")
-    evaluate_parser.add_argument("--evaluator", "-e", help="command evaluator")
+    evaluate_parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
     evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
 
 

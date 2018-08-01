@@ -1,26 +1,18 @@
 import os
 import subprocess
 import sys
-import logging
-
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.evaluation.evaluator import Evaluator
+from turingarena_impl.logging import ok, info
 
-logger = logging.Logger(__name__)
 
-
-def evaluate_cmd(args):
-    evaluator = "evaluator.py"
-
-    if args["evaluator"]:
-        evaluator = args["evaluator"]
-
+def evaluate_cmd(files, evaluator="evaluator.py", raw=True):
     with ExitStack() as stack:
-        if args["raw"]:
-            output = sys.stdout
-        else:
+        output = sys.stdout
+
+        if not raw:
             jq = stack.enter_context(subprocess.Popen(
                 ["jq", "-j", "--unbuffered", ".payload"],
                 stdin=subprocess.PIPE,
@@ -28,13 +20,13 @@ def evaluate_cmd(args):
             ))
             output = jq.stdin
 
-        logger.info(f"Parsing submitted files")
-        files = stack.enter_context(parse_files(args["file"], ["source"]))
+        files = stack.enter_context(parse_files(files, ["source"]))
+        ok("Submitted files")
         for name, path in files.items():
-            logger.info(f"{name}: {path}")
+            info(f"{name}: {path}")
 
         evaluator = Evaluator.get_evaluator(evaluator)
-        logger.info(f"Running evaluator: {evaluator}")
+        ok(f"Running evaluator: {evaluator}")
         for event in evaluator.evaluate(files=files):
             print(event, file=output, flush=True)
 
