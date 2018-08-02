@@ -272,7 +272,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    logger.setLevel(args.log_level)
+    logger.setLevel(args.log_level.upper())
 
     if args.command == "new":
         new_problem(args.name, args.language)
