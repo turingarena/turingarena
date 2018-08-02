@@ -8,7 +8,7 @@ def die(message, exit_status=1):
 
 def error(message):
     print("\033[1;31m==> ERROR:\033[0m {}".format(message))
-                                                  
+
 
 def warning(message):
     print("\033[1;33m==> WARNING:\033[0m {}".format(message))

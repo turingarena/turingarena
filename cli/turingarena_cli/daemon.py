@@ -4,7 +4,6 @@ import os
 
 from turingarena_cli.common import *
 
-
 image = "turingarena/turingarena:latest"
 name = "turingarena"
 
@@ -104,4 +103,3 @@ def main():
             die("Daemon already running, to restart it use --restart option!")
 
     run_daemon(fork=args.daemon, dev_dir=args.dev_dir)
-

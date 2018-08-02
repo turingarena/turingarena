@@ -8,15 +8,15 @@ import uuid
 import sys
 import os
 
+from turingarena_cli.new import new_problem
+
 # in python2.7, quote is in pipes and not in shlex
 try:
     from shlex import quote
 except ImportError:
     from pipes import quote
 
-
 from turingarena_cli.common import *
-
 
 logger = logging.Logger("CLI")
 
@@ -28,9 +28,7 @@ ssh_cli = [
     "-o", "StrictHostKeyChecking=no",
     "-p", "20122", "-q",
 ]
-
 ssh_user = "turingarena@localhost"
-
 git_env = {}
 
 
@@ -40,40 +38,6 @@ def check_daemon():
         subprocess.check_output(cli)
     except subprocess.CalledProcessError:
         die("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
-
-
-def new_problem(name, language):
-    if not language:
-        language = "python"
-
-    evaluators = {
-        "python": "evaluator.py",
-        "c++": "evaluator.cpp",
-    }
-
-    if language not in evaluators:
-        error("Language {} not supported".format(language))
-        return
-
-    ok("Creating new problem {}".format(name))
-
-    info("Making directory {}/".format(name))
-    os.makedirs(name)
-    os.chdir(name)
-
-    info("Initializing empty git repository")
-    subprocess.call(["git", "init", "--quiet"])
-
-    info("Writing default interface.txt")
-    with open("interface.txt", "w") as f:
-        print("// put here your function and procedure definitions\n\n"
-              "main {\n // put here the main code\n}", file=f)
-
-    info("writing default {}".format(evaluators[language]))
-    with open(evaluators[language], "w") as f:
-        print("# Write here your evaluator code", file=f)
-
-    ok("Problem created in directory {}/".format(name))
 
 
 def build_json_parameters(args):
@@ -230,12 +194,12 @@ def create_make_parser(make_parser):
                              choices=["all", "skeleton", "template", "metadata", "description"])
     make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
                              choices=["python", "c++", "java", "go"])
-    make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file", action="store_true")
+    make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
+                             action="store_true")
 
 
 def create_new_parser(new_parser):
     new_parser.add_argument("name", help="problem name")
-    new_parser.add_argument("--language", "-l", help="language for the evaluator")
 
 
 def create_info_parser(info_parser):
@@ -275,7 +239,7 @@ def main():
     logger.setLevel(args.log_level.upper())
 
     if args.command == "new":
-        new_problem(args.name, args.language)
+        new_problem(args.name)
         return
 
     if not args.local:
@@ -304,4 +268,3 @@ def main():
 
     if args.command == "make" and not args.print:
         retrive_result(args.result_file)
-
