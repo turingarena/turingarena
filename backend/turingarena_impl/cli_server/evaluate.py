@@ -8,11 +8,11 @@ from turingarena_impl.evaluation.evaluator import Evaluator
 from turingarena_impl.logging import ok, info
 
 
-def evaluate_cmd(files, evaluator="evaluator.py", raw=True):
+def evaluate_cmd(args):
     with ExitStack() as stack:
         output = sys.stdout
 
-        if not raw:
+        if not args.raw:
             jq = stack.enter_context(subprocess.Popen(
                 ["jq", "-j", "--unbuffered", ".payload"],
                 stdin=subprocess.PIPE,
@@ -20,12 +20,12 @@ def evaluate_cmd(files, evaluator="evaluator.py", raw=True):
             ))
             output = jq.stdin
 
-        files = stack.enter_context(parse_files(files, ["source"]))
+        files = stack.enter_context(parse_files(args.file, ["source"]))
         ok("Submitted files")
         for name, path in files.items():
             info(f"{name}: {path}")
 
-        evaluator = Evaluator.get_evaluator(evaluator)
+        evaluator = Evaluator.get_evaluator(args.evaluator)
         ok(f"Running evaluator: {evaluator}")
         for event in evaluator.evaluate(files=files):
             print(event, file=output, flush=True)

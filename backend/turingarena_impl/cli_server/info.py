@@ -9,6 +9,6 @@ def info_languages():
         print(f"{language.name}\t{language.extension}\t\t{'yes' if language.supported_for_evaluator else 'no'}")
 
 
-def info_cmd(what):
-    if what == "languages":
+def info_cmd(args):
+    if args.what == "languages":
         info_languages()

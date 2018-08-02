@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 @contextmanager
-def generate(dir, filename):
-    if dir is None:
+def generate(directory, filename):
+    if directory is None:
         yield sys.stdout
     else:
-        file = os.path.join(dir, filename)
+        file = os.path.join(directory, filename)
         info(f"Generating {file}")
         with open(file, "w") as f:
             try:
@@ -64,11 +64,8 @@ def make(directory, what, languages, file_output=False):
         interface_text = f.read()
 
     logger.info("Compiling interface")
-    # try:
+
     interface = InterfaceDefinition.compile(interface_text)
-    # except :
-    #    error(f"There is an error in {interface_file}")
-    #    return
 
     for message in interface.validate():
         warning(f"{message}")
@@ -85,7 +82,7 @@ def make(directory, what, languages, file_output=False):
             make_template(out_dir=language_dir, interface=interface, language=language)
 
     if "description" in what:
-        make_description(out_dir=language_dir, interface=interface)
+        make_description(out_dir=out_dir, interface=interface)
 
     if "metadata" in what:
         make_metadata(out_dir=out_dir, interface=interface)
@@ -95,7 +92,7 @@ def make(directory, what, languages, file_output=False):
 
 
 def make_cmd(args):
-    what = args["what"]
+    what = args.what
 
     if what == "all":
         what = ["skeleton", "template", "metadata"]
@@ -103,8 +100,8 @@ def make_cmd(args):
         what = [what]
 
     languages = []
-    if args["language"]:
-        for language in args["language"]:
+    if args.language:
+        for language in args.language:
             try:
                 languages.append(Language.from_name(language))
             except ValueError:
@@ -118,11 +115,11 @@ def make_cmd(args):
     logger.info(f"Searching for problems in {base_dir}")
     for subdir, dir, files in os.walk(base_dir):
         if "interface.txt" in files:
-            make(directory=subdir, what=what, languages=languages, file_output=not args["print"])
+            make(directory=subdir, what=what, languages=languages, file_output=not args.print)
 
-    if not args["print"]:
+    if not args.print:
         tree_id, commit_id = commit_work()
         result = dict(tree_id=tree_id, commit_id=commit_id)
-        logger.info(f"Writing result to file {args['result_file']}")
+        logger.info(f"Writing result to file {args.result_file}")
         with open(args["result_file"], "w") as f:
             print(json.dumps(result), file=f)
