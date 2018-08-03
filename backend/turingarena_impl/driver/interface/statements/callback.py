@@ -182,3 +182,7 @@ class ExitStatement(Statement, IntermediateNode):
             if command != "exit":
                 raise InterfaceError(f"Expecting exit, got {command}")
             raise ProcessKilled
+
+    @property
+    def does_break(self):
+        return True

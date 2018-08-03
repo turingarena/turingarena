@@ -6,6 +6,7 @@ from turingarena_impl.driver.interface.callables import MethodPrototype
 from turingarena_impl.driver.interface.context import InterfaceContext
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.parser import parse_interface
+from turingarena_impl.driver.interface.variables import Reference, Variable
 from turingarena_impl.loader import find_package_file
 
 logger = logging.getLogger(__name__)
@@ -70,10 +71,17 @@ class InterfaceDefinition:
             for c in self.ast.constants_declarations
         }
 
+    @property
+    def constants_references(self):
+        return {
+            Reference(variable=Variable(name=c.name, dimensions=0), index_count=0): int(c.value)
+            for c in self.ast.constants_declarations
+        }
+
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")
-        self.main_node.driver_run(context=context)
+        self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
         command = request.command
         if command != "exit":
