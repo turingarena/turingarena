@@ -45,13 +45,12 @@ def build_json_parameters(args):
 
 
 def local_command(args):
-    cli = [
-        "python3",
-        "-m", "turingarena_impl",
-        build_json_parameters(args),
-    ]
+    try:
+        from turingarena_impl.__main__ import main
 
-    subprocess.call(cli)
+        main(build_json_parameters(args))
+    except ImportError:
+        die("Local installation of TuringArena not found")
 
 
 def send_ssh_command(cli):
@@ -175,7 +174,7 @@ def retrive_result(result_file):
     result = json.loads(result)
 
     tree_id = result["tree_id"]
-    commid_it = result["commit_id"]
+    commit_it = result["commit_id"]
 
     logger.info("Importing tree id {}".format(tree_id))
     subprocess.call(["git", "read-tree", tree_id], env=git_env)

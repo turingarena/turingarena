@@ -1,6 +1,5 @@
 import logging
 import json
-import sys
 
 from collections import namedtuple
 
@@ -20,8 +19,8 @@ def json_to_object(json_data):
     return json.loads(json_data, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
 
 
-def main():
-    args = json_to_object(sys.argv[1])
+def main(json_args):
+    args = json_to_object(json_args)
 
     init_logger(args.log_level)
 
