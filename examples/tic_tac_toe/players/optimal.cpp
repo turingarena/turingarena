@@ -207,6 +207,3 @@ void play_move(int **grid, void place_at(int y, int x)) {
 
     place_at(move / 3, move % 3);
 }
-
-
-void terminate() {}

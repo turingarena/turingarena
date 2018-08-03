@@ -107,7 +107,4 @@ with run_algorithm(submission.player1) as p1, run_algorithm(submission.player2) 
         else:
             results[f"player{result}"] += 1
 
-    for player in players:
-        player.procedures.terminate()
-
 evaluation.data(dict(results=results))

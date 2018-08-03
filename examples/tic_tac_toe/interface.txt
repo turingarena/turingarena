@@ -6,26 +6,24 @@ const EMPTY = 0;
 const PLAYER = 1;
 const OPPONENT = 2;
 
-procedure play_move(grid[][]) callbacks {
+procedure play_move(grid[][]) 
+callbacks {
     procedure place_at(y, x);
 }
-
-procedure terminate();
 
 main {
     loop {
         read another_move;
         if another_move {
-            for y to ROWS {
-                for x to COLS {
+            for y to 3 {
+                for x to 3 {
                     read grid[y][x];
                 }
             }
 
             call play_move(grid);
         } else {
-            call terminate();
-            break;
+            exit;
         }
     }
 }
