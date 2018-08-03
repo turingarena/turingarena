@@ -189,9 +189,10 @@ def create_evaluate_parser(evaluate_parser):
     evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
 
 
-def create_make_parser(make_parser):
-    make_parser.add_argument("what", help="what to make", default="all",
-                             choices=["all", "skeleton", "template", "metadata", "description"])
+def create_make_parser(make_parser, alias=False):
+    if not alias:
+        make_parser.add_argument("what", help="what to make", default="all",
+                                 choices=["all", "skeleton", "template", "metadata", "description"])
     make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
                              choices=["python", "c++", "java", "go"])
     make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
@@ -234,6 +235,12 @@ def parse_arguments():
     new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
     create_new_parser(new_parser)
 
+    skeleton_parser = subparsers.add_parser("skeleton", help="generate skeleton")
+    create_make_parser(skeleton_parser, alias=True)
+
+    template_parser = subparsers.add_parser("template", help="generate template")
+    create_make_parser(template_parser, alias=True)
+
     test_parser = subparsers.add_parser("test", help="execute tests")
     create_test_parser(test_parser)
 
@@ -253,6 +260,10 @@ def main():
         check_daemon()
 
     args.git_dir = setup_git_env()
+
+    if args.command in ["skeleton", "template"]:
+        args.what = args.command
+        args.command = "make"
 
     if args.command == "make" and args.what != "all":
         args.print = True
