@@ -7,6 +7,10 @@ The interface file is composed by two sections:
 
 They must occur in the above order.
 
+## Syntax highlight 
+
+To help you develop interface.txt files, you can install the `turingarena` extension for the Visual Studio Core editor marketplace. This extension provides syntax highlight for the `interface.txt` language. 
+
 ## Comments
 
 In the whole interface you can insert comment with the C++ syntax: 
