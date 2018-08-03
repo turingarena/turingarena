@@ -18,7 +18,7 @@ except ImportError:
 
 from turingarena_cli.common import *
 
-logger = logging.Logger("CLI")
+logger = logging.getLogger(__name__)
 
 ssh_cli = [
     "ssh",
@@ -30,6 +30,16 @@ ssh_cli = [
 ]
 ssh_user = "turingarena@localhost"
 git_env = {}
+
+
+def init_logger(level):
+    logger.setLevel(level.upper())
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('\033[0;32m%(asctime)s \033[0;34m%(levelname)s\t%(name)s:\033[0m %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 
 def check_daemon():
@@ -65,6 +75,7 @@ def send_ssh_command(cli):
     ] + cli
 
     logger.info("Sending command to the server via ssh")
+    logger.debug(cli)
     subprocess.call(cli)
 
 
@@ -249,7 +260,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    logger.setLevel(args.log_level.upper())
+    init_logger(args.log_level)
 
     if args.command == "new":
         new_problem(args.name)
