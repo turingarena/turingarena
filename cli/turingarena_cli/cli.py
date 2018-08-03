@@ -206,6 +206,10 @@ def create_info_parser(info_parser):
     info_parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
 
 
+def create_test_parser(test_parser):
+    test_parser.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Turingarena CLI")
     parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)",
@@ -230,6 +234,9 @@ def parse_arguments():
     new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
     create_new_parser(new_parser)
 
+    test_parser = subparsers.add_parser("test", help="execute tests")
+    create_test_parser(test_parser)
+
     return parser.parse_args()
 
 
@@ -253,7 +260,7 @@ def main():
     if args.repository is None:
         args.send_current_dir = True
 
-    if args.command not in ["evaluate", "make"]:
+    if args.command not in ["evaluate", "make", "test"]:
         args.send_current_dir = False
 
     if args.send_current_dir:

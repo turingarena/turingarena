@@ -9,6 +9,7 @@ from turingarena_impl.cli_server.git_manager import setup_git_environment, git_f
     receive_current_directory
 from turingarena_impl.cli_server.info import info_cmd
 from turingarena_impl.cli_server.make import make_cmd
+from turingarena_impl.cli_server.test import test_cmd
 from turingarena_impl.logging import init_logger
 
 
@@ -39,4 +40,5 @@ def main():
             "evaluate": evaluate_cmd,
             "make": make_cmd,
             "info": info_cmd,
+            "test": test_cmd,
         }[args.command](args)
