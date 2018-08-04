@@ -9,6 +9,8 @@ from pytest import approx
 from turingarena_impl.evaluation.evaluator import Evaluator
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 from turingarena_impl.evaluation.events import EvaluationEventType
+from turingarena_impl.driver.language import Language
+
 
 class EvaluationAssertionError(Exception):
     pass
@@ -86,8 +88,13 @@ def pytest_collect_file(path, parent):
     solutions_dir, source_filename = os.path.split(path)
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
     evaluator_path = os.path.join(problem_dir, "evaluator.py")
+    filename, extension = os.path.splitext(source_filename)
 
-    if solutions_dirname != "solutions": return
+    if solutions_dirname != "solutions":
+        return
+
+    if extension not in list(l.extension for l in Language.languages()):
+        return
 
     return ProblemSolutionTestFile(
         fspath=path,
