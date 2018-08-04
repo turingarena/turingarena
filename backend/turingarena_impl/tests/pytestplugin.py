@@ -8,7 +8,7 @@ from pytest import approx
 
 from turingarena_impl.evaluation.evaluator import Evaluator
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
-
+from turingarena_impl.evaluation.events import EvaluationEventType
 
 class EvaluationAssertionError(Exception):
     pass
@@ -34,13 +34,21 @@ class ProblemSolutionItem(pytest.Item):
         events = list(evaluator.evaluate(files))
         self.add_report_section("call", "evaluation", "\n".join(map(str, events)))
 
+        data = dict()
+        for event in events:
+            if event.type == EvaluationEventType.DATA:
+                data = {
+                    **data,
+                    **event.payload,
+                }
+
         for assertion in self.load_assertion_in_source():
             mode = "exec"
             tree = ast.parse(f"assert {assertion}\n", mode=mode)
             rewrite_asserts(tree)
             co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
             try:
-                exec(co, dict(approx=approx), dict(evaluation=events))
+                exec(co, dict(approx=approx), dict(data=data))
             except AssertionError as e:
                 raise EvaluationAssertionError(assertion) from e
             except Exception as e:
