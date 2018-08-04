@@ -25,9 +25,10 @@ def check_docker():
 
 
 def update_turingarena():
-    ok("Updating turingarena docker image")
+    ok("Upgrading turingarena docker image")
     cli = ["docker", "pull", image]
     subprocess.call(cli)
+    ok("Remember to also update turingarena CLI with `pip install -U turingarena-cli`")
 
 
 def check_root():
@@ -51,7 +52,7 @@ def parse_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev-dir", type=str, help="source code directory of TuringArena (for development)")
     parser.add_argument("--daemon", "-d", help="fork turingarena in background", action="store_true")
-    parser.add_argument("--update", "-u", help="update turingarena docker image", action="store_true")
+    parser.add_argument("--upgrade", "-u", help="upgrade turingarena docker image", action="store_true")
     parser.add_argument("--restart", "-r", help="kill daemon if already running", action="store_true")
 
     return parser.parse_args()
@@ -93,7 +94,7 @@ def main():
     check_root()
     check_docker()
 
-    if args.update:
+    if args.upgrade:
         update_turingarena()
 
     if already_running():
