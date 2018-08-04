@@ -51,14 +51,14 @@ def kill_daemon():
 def parse_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev-dir", type=str, help="source code directory of TuringArena (for development)")
-    parser.add_argument("--daemon", "-d", help="fork turingarena in background", action="store_true")
     parser.add_argument("--upgrade", "-u", help="upgrade turingarena docker image", action="store_true")
     parser.add_argument("--restart", "-r", help="kill daemon if already running", action="store_true")
+    parser.add_argument("--kill", "-k", help="kill running turingarena daemon", action="store_true")
 
     return parser.parse_args()
 
 
-def run_daemon(fork=False, dev_dir=None):
+def run_daemon(dev_dir=None):
     ok("Executing Turingarena daemon")
     volumes = []
     if dev_dir:
@@ -81,12 +81,8 @@ def run_daemon(fork=False, dev_dir=None):
               """EXEC:"/usr/sbin/sshd -q -i -e -o PermitEmptyPasswords=yes -o Protocol=2",nofork""",
           ]
     info("Running: {}".format(" ".join(cli)))
-    if fork:
-        process = subprocess.Popen(cli, cwd="/")
-        ok("Turingarena is running in background with pid {pid}. Use `kill {pid}` to terminate".format(pid=process.pid))
-    else:
-        ok("Executing turingarena in foreground. Use CTRL-C to kill it")
-        os.execvp("docker", cli)
+    subprocess.Popen(cli, cwd="/")
+    ok("Turingarena is running in background, use `turingarenad --kill` to terminate it")
 
 
 def main():
@@ -94,8 +90,13 @@ def main():
     check_root()
     check_docker()
 
+    if args.kill:
+        return kill_daemon()
+
     if args.upgrade:
         update_turingarena()
+        if not args.restart:
+            return
 
     if already_running():
         if args.restart:
@@ -103,4 +104,4 @@ def main():
         else:
             die("Daemon already running, to restart it use --restart option!")
 
-    run_daemon(fork=args.daemon, dev_dir=args.dev_dir)
+    run_daemon(dev_dir=args.dev_dir)
