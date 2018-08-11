@@ -114,7 +114,7 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
         for l in self.labels:
             if not isinstance(l, IntLiteralExpression):
                 yield Diagnostic(
-                    Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION,
+                    Diagnostic.Messages.SWITCH_LABEL_NOT_LITERAL,
                     parseinfo=self.ast.labels.parseinfo,
                 )
         yield from self.body.validate()

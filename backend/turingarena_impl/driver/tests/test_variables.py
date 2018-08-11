@@ -10,6 +10,18 @@ def test_variable_not_declared():
     """, Diagnostic.Messages.VARIABLE_NOT_DECLARED, "a")
 
 
+def test_variable_not_declared_for():
+    assert_interface_error("""
+        procedure p(t[]);
+        main {
+            for i to a {
+                read b[i];
+            }
+            call p(b);
+        }
+    """, Diagnostic.Messages.VARIABLE_NOT_DECLARED, "a")
+
+
 def test_variable_reused():
     assert_interface_error("""
         main {
