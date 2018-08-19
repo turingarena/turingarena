@@ -15,6 +15,7 @@ RUN true \
         openjdk8 \
         openssh \
         socat \
+        make \
     && pip3 install \
         bidict \
         boto3 \
@@ -29,4 +30,9 @@ RUN true \
         pytest \
         tatsu \
         networkx \
+    && wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
+    && tar -xvf glpk-4.65.tar.gz \
+    && cd glpk-4.65 \
+    && ./configure  \
+    && make install \
     && true
