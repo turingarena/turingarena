@@ -30,7 +30,7 @@ RUN true \
         pytest \
         tatsu \
         networkx \
-    && wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
+    && wget https://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
     && tar -xvf glpk-4.65.tar.gz \
     && cd glpk-4.65 \
     && ./configure --prefix=/usr \
