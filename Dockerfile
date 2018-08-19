@@ -15,7 +15,7 @@ RUN true \
     && ln -s /usr/lib/jvm/default-jvm/bin/jcmd /usr/bin/jcmd \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
-    && mkdir /usr/local/include/\
+    && mkdir -f /usr/local/include/\
     && cp /usr/local/turingarena/libraries/cpp/turingarena.h /usr/local/include/ \
     && mkdir /run/turingarena \
     && true
