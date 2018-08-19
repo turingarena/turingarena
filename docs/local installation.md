@@ -28,13 +28,13 @@ sudo pip3 install pip3 install bidict boto3 coloredlogs commonmark docopt pyyaml
 
 ### Installing TuringArena
 
-First at all, you need to clone this repository, if you didn't already done it:
+First at all, you need to clone this repository, if you haven't already:
 ```bash
 git clone https://github.com/turingarena/turingarena
 cd turingarena/
 ```
 
-Then, we need to install 4 components.
+Then, we need to install 3 components.
 
 First, the cli interface:
 ```bash 
@@ -43,7 +43,7 @@ sudo python3 setup.py install
 cd ../
 ```
 
-Then, the backend:
+Then, the TuringArena library:
 ```bash
 cd libraries/python/
 sudo python3 setup.py install 
