@@ -55,7 +55,8 @@ class CallablePrototype(AbstractSyntaxNodeWrapper):
         return bool(self.callbacks)
 
     def validate(self):
-        return []
+        for callback in self.callbacks:
+            yield from callback.validate()
 
 
 class MethodPrototype(CallablePrototype):
@@ -73,10 +74,8 @@ class CallbackPrototype(CallablePrototype):
                 parseinfo=callback.ast.parseinfo,
             )
         for parameter in self.parameter_declarations:
-            if parameter.variable.value_type.dimensions:
+            if parameter.variable.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
                     parseinfo=parameter.ast.parseinfo,
                 )
-
-

@@ -3,7 +3,7 @@ import resource
 
 def set_memory_and_time_limits(
         memory_limit=256 * 1024 * 1024,
-        time_limit=1,
+        time_limit=10,
 ):
     resource.setrlimit(
         resource.RLIMIT_CORE,

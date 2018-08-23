@@ -29,13 +29,13 @@ def test_call_missing_arguments():
     """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 2, 1)
 
 
-def   test_call_argument_wrong_type():
+def test_call_argument_wrong_type():
     assert_interface_error("""
         procedure f(a[]);
         main {
             call f(0);
         }
-    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "scalar[]", "scalar")
+    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "1", "0")
 
 
 def test_call_missing_return_expression():

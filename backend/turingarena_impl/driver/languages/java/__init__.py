@@ -8,4 +8,5 @@ language = Language(
     source=JavaAlgorithmSource,
     skeleton_generator=JavaSkeletonCodeGen,
     template_generator=JavaTemplateCodeGen,
+    supported_for_evaluator=False,
 )

@@ -1,6 +1,7 @@
 import errno
 import sys
 import types
+import random
 
 from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ
 

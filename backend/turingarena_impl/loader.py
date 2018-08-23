@@ -5,7 +5,7 @@ import sys
 
 def find_package_file(file_path, lookup_paths=None):
     if lookup_paths is None:
-        lookup_paths = sys.path
+        lookup_paths = sys.path + [os.getcwd()]
     for path in find_package_files(file_path, lookup_paths):
         return path
     raise FileNotFoundError(f"package file not found: {file_path}")

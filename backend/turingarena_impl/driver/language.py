@@ -14,6 +14,7 @@ class Language(namedtuple("Language", [
     "source",
     "skeleton_generator",
     "template_generator",
+    "supported_for_evaluator",
 ])):
     __slots__ = []
 

@@ -4,7 +4,6 @@ from collections import namedtuple
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import IntermediateNode
-from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import Variable, Allocation, ReferenceStatus, ReferenceAction
 
@@ -18,7 +17,7 @@ class ForStatement(Statement, IntermediateNode):
 
     @property
     def index(self):
-        index_context = self.context.expression(declaring=True)
+        index_context = self.context.expression(declaring=False)
         return ForIndex(
             variable=Variable(name=self.ast.index, dimensions=0),
             range=Expression.compile(self.ast.range, index_context),
@@ -54,6 +53,7 @@ class ForStatement(Statement, IntermediateNode):
         yield from self.body.first_requests
 
     def validate(self):
+        yield from self.index.range.validate()
         yield from self.body.validate()
 
     def _get_declaration_directions(self):
@@ -67,10 +67,14 @@ class ForStatement(Statement, IntermediateNode):
 
     def _can_be_grouped(self):
         # no local references
-        return all(
+        r = all(
             a.reference.index_count > 0
             for a in self._body_node.reference_actions
+        ) and all(
+            child.can_be_grouped
+            for child in self._body_node.children
         )
+        return r
 
     @property
     def _body_node(self):

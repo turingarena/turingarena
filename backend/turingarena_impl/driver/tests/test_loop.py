@@ -1,35 +1,33 @@
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from .test_utils import assert_interface_error, define_algorithm
 
-interface_text = """
-    function f1();
-    function f2();
 
-    main {
-        loop {
-            read a;
-            switch a {
-                case 1 {
-                    call b = f1();
-                    write b;
-                }
-                case 2 {
-                    call b = f2();
-                    write b;
-                } 
-                case 3 {
-                    break;
+def test_loop_switch_functions():
+    with define_algorithm(
+        interface_text="""
+        function f1();
+        function f2();
+    
+        main {
+            loop {
+                read a;
+                switch a {
+                    case 1 {
+                        call b = f1();
+                        write b;
+                    }
+                    case 2 {
+                        call b = f2();
+                        write b;
+                    } 
+                    case 3 {
+                        break;
+                    }
                 }
             }
+            checkpoint;
         }
-        checkpoint;
-    }
-"""
-
-
-def test_loop():
-    with define_algorithm(
-        interface_text=interface_text,
+        """,
         language_name="c++",
         source_text="""
             int f1() {return 1;}
@@ -37,14 +35,94 @@ def test_loop():
         """,
     ) as algo:
         with algo.run() as p:
-            print ("running process")
             assert p.functions.f1() == 1
-            print("call f1() ok")
             assert p.functions.f2() == 2
-            print("call f2() ok")
             assert p.functions.f1() == 1
-            print("call f1() ok")
             p.checkpoint()
+
+
+def test_loop_switch_procedures():
+    with define_algorithm(
+            interface_text="""
+        procedure p1();
+        procedure p2();
+
+        main {
+            loop {
+                read a;
+                switch a {
+                    case 1 {
+                        call p1();
+                    }
+                    case 2 {
+                        call p2();
+                    } 
+                    case 3 {
+                        break;
+                    }
+                }
+            }
+            checkpoint;
+        }
+        """,
+            language_name="c++",
+            source_text="""
+            int p1() {}
+            int p2() {}
+        """,
+    ) as algo:
+        with algo.run() as p:
+            p.procedures.p1()
+            p.procedures.p2()
+            p.procedures.p1()
+            p.checkpoint()
+
+
+def test_loop_and_if_functions():
+    with define_algorithm(
+        interface_text="""
+        function f();
+        
+        main {
+            loop {
+                read c;
+                if c {
+                    call r = f();
+                    write r;
+                } else {
+                    break;
+                }
+            }
+        }
+        """,
+        language_name="c++",
+        source_text="int f() { return 42; }",
+    ) as algo:
+        with algo.run() as p:
+            assert p.functions.f() == 42
+
+
+def test_loop_and_if_procedures():
+    with define_algorithm(
+        interface_text="""
+            procedure p();
+    
+            main {
+                loop {
+                    read c;
+                    if c {
+                        call p();
+                    } else {
+                        break;
+                    }
+                }
+            }
+            """,
+        language_name="c++",
+        source_text="void p() {}",
+    ) as algo:
+        with algo.run() as p:
+            p.procedures.p()
 
 
 def test_unexpected_break():
@@ -57,20 +135,23 @@ def test_unexpected_break():
 
 def test_unreachable_code():
     assert_interface_error("""
+        function p();
         main {
             loop {
-                write 1;
+                call a = p();
+                write a;
                 break;
-                write 2;
+                call b = p();
+                write b;
             }
         }
     """, Diagnostic.Messages.UNREACHABLE_CODE)
 
 
-def test_infinite_loop():
-    assert_interface_error("""
-        main {
-            loop {
-            }
-        }        
-    """, Diagnostic.Messages.INFINITE_LOOP)
+# def test_infinite_loop():
+#     assert_interface_error("""
+#         main {
+#             loop {
+#             }
+#         }
+#     """, Diagnostic.Messages.INFINITE_LOOP)

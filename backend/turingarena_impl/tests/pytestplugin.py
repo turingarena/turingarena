@@ -6,8 +6,10 @@ import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
 
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluator import Evaluator
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
+from turingarena_impl.evaluation.events import EvaluationEventType
+from turingarena_impl.driver.language import Language
 
 
 class EvaluationAssertionError(Exception):
@@ -29,10 +31,18 @@ class ProblemSolutionItem(pytest.Item):
 
     def runtest(self):
         files = dict(source=self.parent.source_path)
-        evaluator_cmd = f"python3 -u {self.parent.evaluator_path}"
+        evaluator = Evaluator.get_evaluator(self.parent.evaluator_path)
 
-        events = list(evaluate(files, evaluator_cmd=evaluator_cmd))
+        events = list(evaluator.evaluate(files))
         self.add_report_section("call", "evaluation", "\n".join(map(str, events)))
+
+        data = dict()
+        for event in events:
+            if event.type == EvaluationEventType.DATA:
+                data = {
+                    **data,
+                    **event.payload,
+                }
 
         for assertion in self.load_assertion_in_source():
             mode = "exec"
@@ -40,7 +50,7 @@ class ProblemSolutionItem(pytest.Item):
             rewrite_asserts(tree)
             co = compile(tree, filename="<evaluation_assert>", mode=mode, dont_inherit=True)
             try:
-                exec(co, dict(approx=approx), dict(evaluation=events))
+                exec(co, dict(approx=approx), dict(data=data))
             except AssertionError as e:
                 raise EvaluationAssertionError(assertion) from e
             except Exception as e:
@@ -78,8 +88,13 @@ def pytest_collect_file(path, parent):
     solutions_dir, source_filename = os.path.split(path)
     problem_dir, solutions_dirname = os.path.split(solutions_dir)
     evaluator_path = os.path.join(problem_dir, "evaluator.py")
+    filename, extension = os.path.splitext(source_filename)
 
-    if solutions_dirname != "solutions": return
+    if solutions_dirname != "solutions":
+        return
+
+    if extension not in list(l.extension for l in Language.languages()):
+        return
 
     return ProblemSolutionTestFile(
         fspath=path,

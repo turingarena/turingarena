@@ -126,6 +126,12 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
                 self.variable_name,
                 parseinfo=self.ast.parseinfo,
             )
+        if self.context.declaring and self._is_declared():
+            yield Diagnostic(
+                Diagnostic.Messages.VARIABLE_REUSED,
+                self.variable_name,
+                parseinfo=self.ast.parseinfo,
+            )
 
     def _is_declared(self):
         return self._get_referenced_variable() is not None

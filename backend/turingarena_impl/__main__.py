@@ -1,4 +1,6 @@
-from turingarena_impl.server_cli import server_cli
+import sys
+
+from turingarena_impl.cli_server.main import main
 
 if __name__ == '__main__':
-    server_cli()
+    main(sys.argv[1])

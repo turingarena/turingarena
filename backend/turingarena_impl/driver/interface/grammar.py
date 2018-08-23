@@ -6,7 +6,10 @@ grammar_ebnf = r"""
     identifier = /[a-zA-Z_][0-9a-zA-Z_]*/;
     int_literal = /0|-?[1-9][0-9]*/;
 
-    interface = method_declarations:{ callable_declaration }* ~ 'main' main_block:block $;
+    interface = 
+        constants_declarations:{ constant_declaration }* ~ 
+        method_declarations:{ callable_declaration }* ~ 
+        'main' main_block:block $;
     
     callable_declarator =
         type:('function' | 'procedure')
@@ -15,6 +18,8 @@ grammar_ebnf = r"""
         '(' parameters:','.{ parameter_declaration }* ')'
         ;
     parameter_declaration = name:identifier indexes:{'[' ']'}*;
+
+    constant_declaration = 'const' ~ name:identifier '=' value:int_literal ';';
 
     callable_declaration = declarator:callable_declarator callbacks:callback_declarations ;
 

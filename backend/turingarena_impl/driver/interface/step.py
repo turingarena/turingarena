@@ -4,7 +4,7 @@ from collections import namedtuple
 from turingarena_impl.driver.interface.execution import Assignments
 from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.nodes import IntermediateNode, Bindings
-
+from turingarena_impl.driver.interface.variables import ReferenceDirection
 
 class StepExecutor:
     @abstractmethod
@@ -23,6 +23,8 @@ class Step(IntermediateNode, namedtuple("Step", ["children"])):
         else:
             result = context.result()
             for phase in ExecutionPhase:
+                if phase == ExecutionPhase.UPWARD and self._get_direction() != ReferenceDirection.UPWARD:
+                    continue
                 result = result.merge(self._run_children(context.extend(result)._replace(
                     phase=phase,
                 )))

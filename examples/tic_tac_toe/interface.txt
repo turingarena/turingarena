@@ -1,51 +1,29 @@
-var int[][] position_mapping;
+const ROWS = 3;
+const COLS = 3;
 
-function start_new_game();
-function play_first_round() -> int;
-function play_a_round(int enemy_y, int enemy_x) -> int;
+// tic-tac-toe grid values
+const EMPTY = 0;
+const PLAYER = 1;
+const OPPONENT = 2;
 
-init {
-    alloc position_mapping : 3;
-    for ( i : 3 ) {
-        alloc position_mapping[i] : 3;
-    }
-    for ( i : 3 ) {
-        for ( j : 3 ) {
-            read position_mapping[i][j];
-        }
-    }
+procedure play_move(grid[][]) 
+callbacks {
+    procedure place_at(y, x);
 }
 
 main {
-    var int number_of_match;
-    read number_of_match;
+    loop {
+        read another_move;
+        if another_move {
+            for y to ROWS {
+                for x to COLS {
+                    read grid[y][x];
+                }
+            }
 
-    for ( i : number_of_match ) {
-        var int result;
-        call play_first_round() -> result;
-        write result;
-//
-//        var int first_turn_for_player, result, continue_match;
-//
-//        call start_new_game();
-//
-//        read first_turn_for_player;
-//        if ( first_turn_for_player ) {
-//            call play_first_round() -> result;
-//            write result;
-//            flush;
-//        }
-//
-//        read continue_match;
-//        for ( i : 4 ) {
-//            if ( continue_match ) {
-//                var int pc_y, pc_x;
-//                read pc_y, pc_x;
-//                call play_a_round(pc_y, pc_x) ->  result;
-//                write result;
-//                flush;
-//                read continue_match;
-//            }
-//        }
+            call play_move(grid);
+        } else {
+            exit;
+        }
     }
 }

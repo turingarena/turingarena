@@ -40,6 +40,7 @@ def test_io_blocked():
             with algo.run() as p:
                 p.procedures.p()
                 p.checkpoint()
+        print(exc_info.value.message)
         assert "stopped sending data" in exc_info.value.message
 
 

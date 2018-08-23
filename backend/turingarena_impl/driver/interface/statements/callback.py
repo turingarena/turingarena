@@ -1,3 +1,5 @@
+import logging
+
 from collections import namedtuple
 
 from turingarena import InterfaceError
@@ -9,6 +11,9 @@ from turingarena_impl.driver.interface.expressions import Expression, SyntheticE
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
+from turingarena_impl.driver.interface.execution import ProcessKilled
+
+logger = logging.getLogger(__name__)
 
 
 class CallbackImplementation(IntermediateNode, CallbackPrototype):
@@ -20,15 +25,30 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     @property
     def body(self):
-        # TODO: generate block if body is None ('default' is specified)
         inner_context = self.context.local_context.with_reference_actions(
             ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
             for p in self.parameters
         )
         return Block(
-            ast=self.ast.body,
+            ast=self.ast.body if self.ast.body else self.default_body,
             context=inner_context,
         )
+
+    @property
+    def default_body(self):
+        fake_ast_body = [
+            namedtuple("write", ["statement_type", "arguments"])("write", [
+                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name, "")
+                for p in self.parameters
+            ])
+        ]
+        if self.has_return_value:
+            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "_result", "")
+            fake_ast_body += [
+                namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
+                namedtuple("ret", ["statement_type", "value"])("return", return_var),
+            ]
+        return namedtuple("body", ["statements"])(fake_ast_body)
 
     def validate(self):
         yield from self.prototype.validate()
@@ -143,6 +163,7 @@ class ExitStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
+        yield RequestLookaheadNode()
         yield self
 
     def validate(self):
@@ -156,5 +177,12 @@ class ExitStatement(Statement, IntermediateNode):
         return []
 
     def _driver_run(self, context):
-        # TODO
-        pass
+        if context.phase is ExecutionPhase.REQUEST:
+            command = context.request_lookahead.command
+            if command != "exit":
+                raise InterfaceError(f"Expecting exit, got {command}")
+            raise ProcessKilled
+
+    @property
+    def does_break(self):
+        return True

@@ -22,6 +22,9 @@ class CppCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         return f"// {comment}"
 
+    def generate_constant_declaration(self, name, value):
+        yield f"#define {name} {value}"
+
 
 class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):

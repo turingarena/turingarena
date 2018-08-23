@@ -3,6 +3,7 @@ from turingarena_impl.driver.interface.interface import InterfaceDefinition
 
 def generate_interface_metadata(interface: InterfaceDefinition):
     return dict(
+        constants=interface.constants,
         methods=[
             dict(
                 name=method.name,

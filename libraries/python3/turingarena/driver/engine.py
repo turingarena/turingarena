@@ -47,7 +47,8 @@ class DriverClientEngine:
     def get_response_line(self):
         self.connection.downward.flush()
         line = self.connection.upward.readline().strip()
-        assert line
+        if not line:
+            raise AlgorithmRuntimeError(message="process stopped sending data", info=None, process=self.process)
         logging.debug(f"Read response line: {line}")
         return line
 
