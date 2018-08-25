@@ -5,6 +5,7 @@ import subprocess
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 
+from turingarena_impl.common.git import BASE_GIT_ENV
 
 logger = logging.getLogger(__name__)
 git_env = {}
@@ -21,16 +22,10 @@ def setup_git_environment(local, git_dir):
         if not local:
             git_dir = "/run/turingarena/db.git"
         logger.info(f"Using git repository at {git_dir}")
-        author_name = "TuringArena"
-        author_email = "contact@turingarena.org"
         git_env = {
+            **BASE_GIT_ENV,
             "GIT_DIR": git_dir,
             "GIT_WORK_TREE": git_temp_dir,
-            "GIT_AUTHOR_NAME": author_name,
-            "GIT_AUTHOR_EMAIL": author_email,
-            "GIT_COMMITTER_NAME": author_name,
-            "GIT_COMMITTER_EMAIL": author_email,
-
         }
         os.chdir(git_temp_dir)
         yield
