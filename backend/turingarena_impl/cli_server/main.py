@@ -1,11 +1,12 @@
 import json
 import logging
+import os
 import sys
 from collections import namedtuple
+from tempfile import TemporaryDirectory
 
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
-from turingarena_impl.cli_server.git_manager import setup_git_environment, git_fetch_repositories, git_import_trees, \
-    receive_current_directory
+from turingarena_impl.cli_server.git_manager import GitManager
 from turingarena_impl.cli_server.info import info_cmd
 from turingarena_impl.cli_server.make import make_cmd
 from turingarena_impl.cli_server.test import test_cmd
@@ -22,16 +23,27 @@ def main():
 def do_main(args):
     init_logger(args.log_level, args.isatty)
 
-    with setup_git_environment(local=args.local, git_dir=args.git_dir):
+    if args.local:
+        git = GitManager(args.git_dir)
+    else:
+        git = GitManager("/run/turingarena/db.git")
+    logger.info(f"Using git repository at {git.git_dir}")
 
-        if args.send_current_dir:
-            receive_current_directory(args.current_dir, args.tree_id)
+    with TemporaryDirectory() as temp_dir:
+        logger.info(f"Created temporary git working dir {temp_dir}")
 
         if args.repository:
-            git_fetch_repositories(args.repository)
+            git.git_fetch_repositories(args.repository)
 
         if args.tree:
-            git_import_trees(args.tree)
+            git.git_import_trees(args.tree, temp_dir)
+
+        if args.send_current_dir:
+            git.git_import_trees([args.tree_id], temp_dir)
+
+        os.chdir(temp_dir)
+        if args.send_current_dir:
+            os.chdir(args.current_dir)
 
         {
             "evaluate": evaluate_cmd,

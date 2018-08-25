@@ -4,7 +4,6 @@ import os
 import sys
 from contextlib import contextmanager
 
-from turingarena_impl.cli_server.git_manager import add_directory, commit_work
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.interface.metadata import generate_interface_metadata
 from turingarena_impl.driver.language import Language
@@ -84,9 +83,6 @@ def make(directory, what, languages, file_output=False):
     if "metadata" in what:
         make_metadata(out_dir=out_dir, interface=interface)
 
-    if not print:
-        add_directory(out_dir)
-
 
 def make_cmd(args):
     what = args.what
@@ -113,10 +109,3 @@ def make_cmd(args):
     for subdir, dir, files in os.walk(base_dir):
         if "interface.txt" in files:
             make(directory=subdir, what=what, languages=languages, file_output=not args.print)
-
-    if not args.print:
-        tree_id, commit_id = commit_work()
-        result = dict(tree_id=tree_id, commit_id=commit_id)
-        logger.info(f"Writing result to file {args.result_file}")
-        with open(args["result_file"], "w") as f:
-            print(json.dumps(result), file=f)

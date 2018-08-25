@@ -2,7 +2,6 @@ ARG BASE_IMAGE=turingarena/turingarena-base
 FROM $BASE_IMAGE
 
 ENTRYPOINT []
-ENV GIT_DIR=/run/turingarena/db.git
 
 COPY . /usr/local/turingarena/
 
