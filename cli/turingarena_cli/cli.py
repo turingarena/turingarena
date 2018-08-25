@@ -193,7 +193,8 @@ def retrieve_result(result_file):
     subprocess.call(["git", "checkout-index", "--all", "-q"], env=git_env)
 
 
-def create_evaluate_parser(evaluate_parser):
+def create_evaluate_parser(subparsers):
+    evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
     evaluate_parser.add_argument("file", help="submission file", nargs="+")
     evaluate_parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
     evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
@@ -209,11 +210,13 @@ def create_make_parser(make_parser, alias=False):
                              action="store_true")
 
 
-def create_new_parser(new_parser):
+def create_new_parser(subparsers):
+    new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
     new_parser.add_argument("name", help="problem name")
 
 
-def create_info_parser(info_parser):
+def create_info_parser(subparsers):
+    info_parser = subparsers.add_parser("info", help="get some info about TuringArena")
     info_parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
 
 
@@ -236,14 +239,9 @@ def parse_arguments():
     make_parser = subparsers.add_parser("make", help="Generate all the necessary files for a problem")
     create_make_parser(make_parser)
 
-    evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
-    create_evaluate_parser(evaluate_parser)
-
-    info_parser = subparsers.add_parser("info", help="get some info about TuringArena")
-    create_info_parser(info_parser)
-
-    new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
-    create_new_parser(new_parser)
+    create_evaluate_parser(subparsers)
+    create_info_parser(subparsers)
+    create_new_parser(subparsers)
 
     skeleton_parser = subparsers.add_parser("skeleton", help="generate skeleton")
     create_make_parser(skeleton_parser, alias=True)
