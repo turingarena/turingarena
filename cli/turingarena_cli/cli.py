@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import uuid
+from argparse import ArgumentParser
 
 from turingarena_cli.new import new_problem
 
@@ -121,6 +122,32 @@ def setup_git_env():
     return git_dir
 
 
+PACK_COMMAND_PARSER = ArgumentParser(add_help=False)
+
+PACK_COMMAND_PARSER.add_argument(
+    "--send-current-dir", "-s",
+    action="store_true",
+    help="send the current directory",
+)
+PACK_COMMAND_PARSER.add_argument(
+    "--tree", "-t",
+    action="append",
+    help="a git tree id",
+)
+PACK_COMMAND_PARSER.add_argument(
+    "--repository", "-r",
+    action="append",
+    help="source of a git repository",
+)
+
+DAEMON_COMMAND_PARSER = ArgumentParser(add_help=False)
+DAEMON_COMMAND_PARSER.add_argument(
+    "--local", "-l",
+    action="store_true",
+    help="execute turingarena locally (do not connect to docker)",
+)
+
+
 def send_current_dir(local):
     global git_env
     working_dir = git_env["GIT_WORK_TREE"]
@@ -223,12 +250,10 @@ def create_test_parser(test_parser):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Turingarena CLI")
-    parser.add_argument("--local", "-l", help="execute turingarena locally (do not connect to docker)",
-                        action="store_true")
-    parser.add_argument("--send-current-dir", "-s", help="send the current directory", action="store_true")
-    parser.add_argument("--tree", "-t", help="a git tree id", action="append")
-    parser.add_argument("--repository", "-r", help="source of a git repository", action="append")
+    parser = argparse.ArgumentParser(
+        description="Turingarena CLI",
+        parents=[PACK_COMMAND_PARSER, DAEMON_COMMAND_PARSER],
+    )
     parser.add_argument("--log-level", help="log level", default="WARNING")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
