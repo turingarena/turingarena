@@ -29,17 +29,27 @@ def do_main(args):
         git = GitManager("/run/turingarena/db.git")
     logger.info(f"Using git repository at {git.git_dir}")
 
+    git.init()
+
     with TemporaryDirectory() as temp_dir:
         logger.info(f"Created temporary git working dir {temp_dir}")
 
         if args.repository:
-            git.git_fetch_repositories(args.repository)
+            for r in args.repository:
+                git.fetch_repository({
+                    "type": "git_clone",
+                    "url": r,
+                    "branch": None,
+                    "depth": None,
+                })
 
-        if args.tree:
-            git.git_import_trees(args.tree, temp_dir)
-
+        trees = []
         if args.send_current_dir:
-            git.git_import_trees([args.tree_id], temp_dir)
+            trees += [args.tree_id]
+        if args.tree:
+            trees += args.tree
+
+        git.checkout_trees(trees, temp_dir)
 
         os.chdir(temp_dir)
         if args.send_current_dir:

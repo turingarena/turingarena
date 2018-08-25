@@ -1,7 +1,5 @@
 import json
-import logging
 import os
-import subprocess
 import sys
 import traceback
 from tempfile import TemporaryDirectory
@@ -9,6 +7,7 @@ from tempfile import TemporaryDirectory
 from turingarena_impl.api.aws_evaluate import cloud_evaluate
 from turingarena_impl.api.dynamodb_events import store_events
 from turingarena_impl.api.dynamodb_submission import load_submission
+from turingarena_impl.cli_server.git_manager import GitManager
 
 
 def do_evaluate():
@@ -18,54 +17,18 @@ def do_evaluate():
     evaluation_id = request_data["evaluation_id"]
     evaluator_cmd = request_data["evaluator_cmd"]
 
+    git = GitManager("/run/turingarena/db.git")
+    git.init()
+
     for r in request_data["repositories"].values():
-        assert r["type"] == "git_clone"
-        url = r["url"]
-        branch = r["branch"]
-        depth = r["depth"]
-
-        if depth is not None:
-            depth_options = [f"--depth={depth}"]
-        else:
-            depth_options = []
-
-        if branch is not None:
-            branch_options = [branch]
-        else:
-            branch_options = []
-
-        cmd = [
-            "git",
-            "fetch",
-            "--recurse-submodules=yes",
-            *depth_options,
-            url,
-            *branch_options,
-        ]
-        logging.info(f"running {cmd}")
-        subprocess.run(cmd, check=True)
+        git.fetch_repository(r)
 
     with TemporaryDirectory() as temp_dir:
+        git.checkout_trees(request_data["packs"], temp_dir)
+
         os.chdir(temp_dir)
-        for p in request_data["packs"]:
-            cmd = [
-                "git",
-                "read-tree",
-                p,
-            ]
-            subprocess.run(cmd, check=True)
-            cmd = [
-                "git",
-                f"--work-tree={temp_dir}",
-                "checkout-index",
-                "--all",
-            ]
-            subprocess.run(cmd, check=True)
-
         submission = load_submission(submission_id)
-
         events = cloud_evaluate(submission, evaluator_cmd=evaluator_cmd)
-
         store_events(evaluation_id, events)
 
 

@@ -21,11 +21,39 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "GIT_COMMITTER_EMAIL": "contact@turingarena.org",
         }
 
-    def git_fetch_repositories(self, repositories):
-        for repository in repositories:
-            # TODO: add a way to specify branch and depth
-            logger.info(f"Fetching git repository {repository}")
-            subprocess.call(["git", "fetch", "--recurse-submodules=yes", repository], env=self._base_env)
+    def init(self):
+        subprocess.run([
+            "git", "init", "--bare"
+        ], env=self._base_env, check=True)
+
+    def fetch_repository(self, repository):
+        logger.info(f"Fetching git repository {repository}")
+
+        assert repository["type"] == "git_clone"
+        url = repository["url"]
+        branch = repository["branch"]
+        depth = repository["depth"]
+
+        if depth is not None:
+            depth_options = [f"--depth={depth}"]
+        else:
+            depth_options = []
+
+        if branch is not None:
+            branch_options = [branch]
+        else:
+            branch_options = []
+
+        cmd = [
+            "git",
+            "fetch",
+            "--recurse-submodules=yes",
+            *depth_options,
+            url,
+            *branch_options,
+        ]
+        logging.debug(f"running {cmd}")
+        subprocess.run(cmd, env=self._base_env, check=True)
 
     @contextmanager
     def _temp_index(self):
@@ -35,12 +63,20 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
                 "GIT_INDEX_FILE": os.path.join(temp_dir, "index"),
             }
 
-    def git_import_trees(self, tree_ids, dest):
-        for tree_id in tree_ids:
+    def checkout_trees(self, ids, dest):
+        for id in ids:
             with self._temp_index() as env:
-                logger.info(f"Importing git tree id {tree_id}")
-                subprocess.call(["git", "read-tree", tree_id], env=env)
-                subprocess.call(["git", f"--work-tree={dest}", "checkout-index", "--all"], env=env)
+                subprocess.run([
+                    "git",
+                    "read-tree",
+                    id,
+                ], env=env, check=True)
+                subprocess.run([
+                    "git",
+                    f"--work-tree={dest}",
+                    "checkout-index",
+                    "--all",
+                ], env=env, check=True)
 
     def add_directory(self, directory):
         logger.info(f"Add directory {directory} to be committed")
