@@ -7,7 +7,7 @@ from termcolor import colored
 logger = logging.getLogger()
 
 
-def init_logger(level_name=None):
+def init_logger(level_name=None, isatty=False):
     if level_name is None:
         level_name = os.environ.get("TURINGARENA_LOG_LEVEL", None)
     if level_name is None:
@@ -19,6 +19,7 @@ def init_logger(level_name=None):
         level=level,
         fmt="%(asctime)s %(levelname)8s [%(process)5d] %(name)s: %(message)s",
         milliseconds=True,
+        isatty=isatty,
     )
 
 

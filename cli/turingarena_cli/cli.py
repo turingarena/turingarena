@@ -56,14 +56,14 @@ def build_json_parameters(args):
 
 def local_command(args):
     try:
-        from turingarena_impl.__main__ import main
+        from turingarena_impl.__main__ import do_main
 
-        main(build_json_parameters(args))
+        do_main(build_json_parameters(args))
     except ImportError:
         die("Local installation of TuringArena not found")
 
 
-def send_ssh_command(cli):
+def send_ssh_command(cli, args):
     if sys.stdout.isatty():
         tty_allocation = "-t"
     else:
@@ -76,17 +76,20 @@ def send_ssh_command(cli):
 
     logger.info("Sending command to the server via ssh")
     logger.debug(cli)
-    subprocess.call(cli)
+
+    p = subprocess.Popen(cli, stdin=subprocess.PIPE)
+    p.stdin.write(build_json_parameters(args).encode())
+    p.stdin.close()
+    p.wait()
 
 
 def ssh_command(args):
     cli = [
         "/usr/local/bin/python",
         "-m", "turingarena_impl",
-        quote(build_json_parameters(args)),
     ]
 
-    send_ssh_command(cli)
+    send_ssh_command(cli, args)
 
 
 def setup_git_env():
@@ -266,6 +269,8 @@ def main():
 
     if not args.local:
         check_daemon()
+
+    args.isatty = sys.stderr.isatty()
 
     args.git_dir = setup_git_env()
 

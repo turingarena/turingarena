@@ -1,6 +1,6 @@
-import logging
 import json
-
+import logging
+import sys
 from collections import namedtuple
 
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
@@ -11,18 +11,16 @@ from turingarena_impl.cli_server.make import make_cmd
 from turingarena_impl.cli_server.test import test_cmd
 from turingarena_impl.logging import init_logger
 
-
 logger = logging.getLogger(__name__)
 
 
-def json_to_object(json_data):
-    return json.loads(json_data, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+def main():
+    args = json.load(sys.stdin, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+    do_main(args)
 
 
-def main(json_args):
-    args = json_to_object(json_args)
-
-    init_logger(args.log_level)
+def do_main(args):
+    init_logger(args.log_level, args.isatty)
 
     with setup_git_environment(local=args.local, git_dir=args.git_dir):
 
