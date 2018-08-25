@@ -1,12 +1,12 @@
 from __future__ import print_function
 
-import subprocess
 import argparse
-import logging
 import json
-import uuid
-import sys
+import logging
 import os
+import subprocess
+import sys
+import uuid
 
 from turingarena_cli.new import new_problem
 
@@ -175,8 +175,8 @@ def send_current_dir(local):
     return current_dir, tree_id
 
 
-def retrive_result(result_file):
-    logger.info("Retriving result")
+def retrieve_result(result_file):
+    logger.info("Retrieving result")
     info("Reading {}".format(result_file))
     with open(result_file) as f:
         result = f.read().strip()
@@ -295,4 +295,4 @@ def main():
         ssh_command(args)
 
     if args.command == "make" and not args.print:
-        retrive_result(args.result_file)
+        retrieve_result(args.result_file)
