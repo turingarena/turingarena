@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 ssh_cli = [
     "ssh",
+    "-T",
     "-o", "BatchMode=yes",
     "-o", "LogLevel=error",
     "-o", "UserKnownHostsFile=/dev/null",
@@ -64,13 +65,7 @@ def local_command(args):
 
 
 def send_ssh_command(cli, args):
-    if sys.stdout.isatty():
-        tty_allocation = "-t"
-    else:
-        tty_allocation = "-T"
-
     cli = ssh_cli + [
-        tty_allocation,
         "turingarena@localhost",
     ] + cli
 
