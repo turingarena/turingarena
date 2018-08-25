@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import sys
@@ -5,7 +6,6 @@ from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.evaluation.evaluator import Evaluator
-from turingarena_impl.logging import ok, info
 
 
 def evaluate_cmd(args):
@@ -21,12 +21,12 @@ def evaluate_cmd(args):
             output = jq.stdin
 
         files = stack.enter_context(parse_files(args.file, ["source"]))
-        ok("Submitted files")
+        logging.info("Submitted files")
         for name, path in files.items():
-            info(f"{name}: {path}")
+            logging.info(f"{name}: {path}")
 
         evaluator = Evaluator.get_evaluator(args.evaluator)
-        ok(f"Running evaluator: {evaluator}")
+        logging.info(f"Running evaluator: {evaluator}")
         for event in evaluator.evaluate(files=files):
             print(event, file=output, flush=True)
 

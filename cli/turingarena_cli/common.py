@@ -1,22 +1,11 @@
-from __future__ import print_function
+import logging
 
 
-def die(message, exit_status=1):
-    error(message)
-    exit(exit_status)
+def init_logger(level):
+    logging.root.setLevel(level.upper())
 
-
-def error(message):
-    print("\033[1;31m==> ERROR:\033[0m {}".format(message))
-
-
-def warning(message):
-    print("\033[1;33m==> WARNING:\033[0m {}".format(message))
-
-
-def ok(message):
-    print("\033[1;32m==>\033[0m {}".format(message))
-
-
-def info(message):
-    print("\033[1;34m  ->\033[0m {}".format(message))
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('\033[0;32m%(asctime)s \033[0;34m%(levelname)s\t%(name)s:\033[0m %(message)s')
+    ch.setFormatter(formatter)
+    logging.root.addHandler(ch)

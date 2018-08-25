@@ -5,10 +5,12 @@ import json
 import logging
 import os
 import subprocess
-import sys
 import uuid
 from argparse import ArgumentParser
 
+import sys
+
+from turingarena_cli.common import init_logger
 from turingarena_cli.new import new_problem
 
 # in python2.7, quote is in pipes and not in shlex
@@ -16,10 +18,6 @@ try:
     from shlex import quote
 except ImportError:
     from pipes import quote
-
-from turingarena_cli.common import *
-
-logger = logging.getLogger(__name__)
 
 ssh_cli = [
     "ssh",
@@ -34,22 +32,12 @@ ssh_user = "turingarena@localhost"
 git_env = {}
 
 
-def init_logger(level):
-    logger.setLevel(level.upper())
-
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('\033[0;32m%(asctime)s \033[0;34m%(levelname)s\t%(name)s:\033[0m %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
-
 def check_daemon():
     cli = ssh_cli + [ssh_user, "echo", "OK!"]
     try:
         subprocess.check_output(cli)
     except subprocess.CalledProcessError:
-        die("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
+        sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
 
 def build_json_parameters(args):
@@ -57,12 +45,8 @@ def build_json_parameters(args):
 
 
 def local_command(args):
-    try:
-        from turingarena_impl.__main__ import do_main
-
-        do_main(build_json_parameters(args))
-    except ImportError:
-        die("Local installation of TuringArena not found")
+    from turingarena_impl.cli_server.main import do_main
+    do_main(args)
 
 
 def send_ssh_command(cli, args):
@@ -70,8 +54,8 @@ def send_ssh_command(cli, args):
         "turingarena@localhost",
     ] + cli
 
-    logger.info("Sending command to the server via ssh")
-    logger.debug(cli)
+    logging.info("Sending command to the server via ssh")
+    logging.debug(cli)
 
     p = subprocess.Popen(cli, stdin=subprocess.PIPE)
     p.stdin.write(build_json_parameters(args).encode())
@@ -100,7 +84,7 @@ def setup_git_env():
         ).strip()
     except:
         working_dir = os.getcwd()
-        logger.info("Initializing git repository in {}".format(working_dir))
+        logging.info("Initializing git repository in {}".format(working_dir))
         subprocess.call(["git", "init"])
 
     author_name = "TuringArena"
@@ -117,7 +101,7 @@ def setup_git_env():
     }
 
     subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
-    logger.info("Initialized git repository in {}".format(git_dir))
+    logging.info("Initialized git repository in {}".format(git_dir))
 
     return git_dir
 
@@ -153,7 +137,7 @@ def send_current_dir(local):
     working_dir = git_env["GIT_WORK_TREE"]
 
     current_dir = os.path.relpath(os.curdir, working_dir)
-    logger.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
+    logging.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
         working_dir=working_dir,
         current_dir=current_dir,
     ))
@@ -161,13 +145,13 @@ def send_current_dir(local):
     git_popen_args = dict(env=git_env, universal_newlines=True)
 
     subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
-    logger.info("Added all files to git")
+    logging.info("Added all files to git")
 
     tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
-    logger.info("Wrote tree with id {}".format(tree_id))
+    logging.info("Wrote tree with id {}".format(tree_id))
 
     if not local:
-        logger.info("Sending current directory to the server via git")
+        logging.info("Sending current directory to the server via git")
 
         commit_message = "Turingarena payload."
         commit_id = subprocess.check_output(
@@ -175,20 +159,20 @@ def send_current_dir(local):
             **git_popen_args
         ).strip()
 
-        logger.info("Created commit {}".format(commit_id))
+        logging.info("Created commit {}".format(commit_id))
 
         subprocess.check_call(ssh_cli + [
             "turingarena@localhost",
             "git init --bare --quiet db.git",
         ])
-        logger.info("Initialized git repository on the server")
+        logging.info("Initialized git repository on the server")
 
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
             "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
         ], **git_popen_args)
-        logger.info("Pushed current commit")
+        logging.info("Pushed current commit")
 
         # remove the remove branch (we only need the tree object)
         subprocess.check_call([
@@ -201,20 +185,20 @@ def send_current_dir(local):
 
 
 def retrieve_result(result_file):
-    logger.info("Retrieving result")
-    info("Reading {}".format(result_file))
+    logging.info("Retrieving result")
+    logging.info("Reading {}".format(result_file))
     with open(result_file) as f:
         result = f.read().strip()
 
-    logger.info("Got {}".format(result))
+    logging.info("Got {}".format(result))
     result = json.loads(result)
 
     tree_id = result["tree_id"]
     commit_it = result["commit_id"]
 
-    logger.info("Importing tree id {}".format(tree_id))
+    logging.info("Importing tree id {}".format(tree_id))
     subprocess.call(["git", "read-tree", tree_id], env=git_env)
-    logger.info("Checking out")
+    logging.info("Checking out")
     subprocess.call(["git", "checkout-index", "--all", "-q"], env=git_env)
 
 

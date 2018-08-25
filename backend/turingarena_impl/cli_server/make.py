@@ -1,16 +1,13 @@
 import json
+import logging
 import os
 import sys
-import logging
-
 from contextlib import contextmanager
 
 from turingarena_impl.cli_server.git_manager import add_directory, commit_work
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.interface.metadata import generate_interface_metadata
 from turingarena_impl.driver.language import Language
-from turingarena_impl.logging import info, error, warning
-
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +18,17 @@ def generate(directory, filename):
         yield sys.stdout
     else:
         file = os.path.join(directory, filename)
-        info(f"Generating {file}")
+        logger.info(f"Generating {file}")
         with open(file, "w") as f:
             try:
                 yield f
             except:
-                error(f"Exception during {filename} generation")
+                logging.exception(f"Exception during {filename} generation")
 
 
 def make_skeleton(out_dir, interface, language):
     with generate(out_dir, f"skeleton{language.extension}") as out:
-            language.skeleton_generator().generate_to_file(interface, out)
+        language.skeleton_generator().generate_to_file(interface, out)
 
 
 def make_template(out_dir, interface, language):
@@ -68,7 +65,7 @@ def make(directory, what, languages, file_output=False):
     interface = InterfaceDefinition.compile(interface_text)
 
     for message in interface.validate():
-        warning(f"{message}")
+        logger.warning(f"{message}")
 
     for language in languages:
         language_dir = None
@@ -105,7 +102,7 @@ def make_cmd(args):
             try:
                 languages.append(Language.from_name(language))
             except ValueError:
-                error(f"Language {language} not supported")
+                logging.error(f"Language {language} not supported")
     elif what == "all":
         languages = Language.languages()
     else:

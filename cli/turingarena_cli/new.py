@@ -1,6 +1,7 @@
+import logging
 import os
 
-from turingarena_cli.common import ok, info, die
+import sys
 
 evaluator_template = """\
 from turingarena import run_algorithm, submission, evaluation
@@ -50,24 +51,24 @@ main {
 
 
 def new_problem(name):
-    ok("Creating new problem {}".format(name))
-    info("Making directory {}/".format(name))
+    logging.info("Creating new problem {}".format(name))
+    logging.info("Making directory {}/".format(name))
 
     try:
         os.makedirs(name)
     except FileExistsError:
-        die("Directory {}/ already exists in this directory!".format(name))
+        sys.exit("Directory {}/ already exists in this directory!".format(name))
     os.chdir(name)
 
-    info("Writing default interface.txt")
+    logging.info("Writing default interface.txt")
     with open("interface.txt", "w") as f:
         print(interface_template, file=f)
 
-    info("writing default evaluator.py")
+    logging.info("writing default evaluator.py")
     with open("evaluator.py", "w") as f:
         print(evaluator_template, file=f)
 
-    info("making directory solutions/")
+    logging.info("making directory solutions/")
     os.makedirs("solutions/")
-    ok("Problem {name} created in directory {name}/".format(name=name))
-    ok("Start editing your default interface.txt and evaluator.py files!")
+    logging.info("Problem {name} created in directory {name}/".format(name=name))
+    logging.info("Start editing your default interface.txt and evaluator.py files!")
