@@ -90,7 +90,7 @@ def run_daemon(dev_dir=None):
 def main():
     args = parse_cli()
 
-    init_logger(args.log_level)
+    init_logger()
     check_root()
     check_docker()
 
