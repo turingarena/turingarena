@@ -39,15 +39,19 @@ class Evaluator:
 
     @staticmethod
     def get_evaluator(filename):
-        extension = os.path.splitext(filename)[1]
+        evaluator_class = Evaluator
 
-        try:
-            return {
-                ".py": PythonEvaluator,
-                ".cpp": CppEvaluator,
-            }[extension](filename)
-        except KeyError:
-            return Evaluator(filename)
+        if os.path.exists(filename):
+            extension = os.path.splitext(filename)[1]
+            try:
+                evaluator_class = {
+                    ".py": PythonEvaluator,
+                    ".cpp": CppEvaluator,
+                }[extension]
+            except KeyError:
+                pass
+
+        return evaluator_class(filename)
 
     def __str__(self):
         return "generic evaluator"
