@@ -1,15 +1,15 @@
 import pickle
 import sys
 
-from turingarena_common.commands import EvaluateCommand
+from turingarena_common.commands import EvaluateCommandParameters
 
 
-def run_evaluate_command(command: EvaluateCommand):
+def run_evaluate_command(command: EvaluateCommandParameters):
     print("EVALUATE COMMAND", file=sys.stderr)
 
 
 COMMANDS_MAP = {
-    EvaluateCommand: run_evaluate_command,
+    EvaluateCommandParameters: run_evaluate_command,
 }
 
 

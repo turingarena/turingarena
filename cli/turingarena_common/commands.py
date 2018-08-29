@@ -16,7 +16,7 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
     "current_directory",
 ])
 
-EvaluateCommand = namedtuple("EvaluateCommand", [
+EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
     "working_directory",
     "evaluator",
 ])

@@ -1,7 +1,8 @@
 import logging
 import os
-
 import sys
+
+from turingarena_cli.command import Command
 
 evaluator_template = """\
 from turingarena import run_algorithm, submission, evaluation
@@ -50,25 +51,28 @@ main {
 """
 
 
-def new_problem(name):
-    logging.info("Creating new problem {}".format(name))
-    logging.info("Making directory {}/".format(name))
+class NewCommand(Command):
+    def run(self):
+        name = self.args.name
 
-    try:
-        os.makedirs(name)
-    except FileExistsError:
-        sys.exit("Directory {}/ already exists in this directory!".format(name))
-    os.chdir(name)
+        logging.info("Creating new problem {}".format(name))
+        logging.info("Making directory {}/".format(name))
 
-    logging.info("Writing default interface.txt")
-    with open("interface.txt", "w") as f:
-        print(interface_template, file=f)
+        try:
+            os.makedirs(name)
+        except FileExistsError:
+            sys.exit("Directory {}/ already exists in this directory!".format(name))
+        os.chdir(name)
 
-    logging.info("writing default evaluator.py")
-    with open("evaluator.py", "w") as f:
-        print(evaluator_template, file=f)
+        logging.info("Writing default interface.txt")
+        with open("interface.txt", "w") as f:
+            print(interface_template, file=f)
 
-    logging.info("making directory solutions/")
-    os.makedirs("solutions/")
-    logging.info("Problem {name} created in directory {name}/".format(name=name))
-    logging.info("Start editing your default interface.txt and evaluator.py files!")
+        logging.info("writing default evaluator.py")
+        with open("evaluator.py", "w") as f:
+            print(evaluator_template, file=f)
+
+        logging.info("making directory solutions/")
+        os.makedirs("solutions/")
+        logging.info("Problem {name} created in directory {name}/".format(name=name))
+        logging.info("Start editing your default interface.txt and evaluator.py files!")

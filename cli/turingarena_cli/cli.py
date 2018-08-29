@@ -9,13 +9,15 @@ import pickle
 import subprocess
 import sys
 import uuid
+from abc import abstractmethod
 from argparse import ArgumentParser
 from functools import lru_cache
 
+from turingarena_cli.command import Command
 from turingarena_cli.common import init_logger
-from turingarena_cli.new import new_problem
 # in python2.7, quote is in pipes and not in shlex
-from turingarena_common.commands import EvaluateCommand, WorkingDirectory, Pack
+from turingarena_cli.new import NewCommand
+from turingarena_common.commands import EvaluateCommandParameters, WorkingDirectory, Pack
 from turingarena_common.git_common import GIT_BASE_ENV
 
 try:
@@ -60,10 +62,7 @@ DAEMON_COMMAND_PARSER.add_argument(
 )
 
 
-class DaemonCommand:
-    def __init__(self, args):
-        self.args = args
-
+class AbstractDaemonCommand(Command):
     def check_daemon(self):
         cli = SSH_BASE_CLI + [SSH_USER, "echo", "OK!"]
         try:
@@ -72,7 +71,7 @@ class DaemonCommand:
             sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
     def local_command(self):
-        module = importlib.import_module(self.args.module_name)
+        module = importlib.import_module(self.module_name)
         module.do_main(self.parameters)
 
     def send_ssh_command(self, cli):
@@ -89,11 +88,20 @@ class DaemonCommand:
         p.wait()
 
     @property
+    def module_name(self):
+        return self._get_module_name()
+
+    @property
     def parameters(self):
-        if hasattr(self.args, 'command_builder'):
-            return self.args.command_builder(self.args)
-        else:
-            return self.args
+        return self._get_parameters()
+
+    @abstractmethod
+    def _get_module_name(self):
+        pass
+
+    @abstractmethod
+    def _get_parameters(self):
+        pass
 
     @property
     @lru_cache(None)
@@ -131,7 +139,7 @@ class DaemonCommand:
     def ssh_command(self):
         cli = [
             "/usr/local/bin/python",
-            "-m", self.args.module_name,
+            "-m", self.module_name,
         ]
 
         self.send_ssh_command(cli)
@@ -200,6 +208,63 @@ class DaemonCommand:
         logging.info("Checking out")
         subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
 
+    def run(self):
+        if not self.args.local:
+            self.check_daemon()
+
+        self.args.isatty = sys.stderr.isatty()
+        self.args.git_dir = self.git_dir
+
+        if self.args.repository is None:
+            self.args.send_current_dir = True
+
+        if self.args.command not in ["evaluate", "make", "test"]:
+            self.args.send_current_dir = False
+
+        if self.args.send_current_dir:
+            self.args.current_dir, self.args.tree_id = self.send_current_dir()
+
+        self.args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
+
+        if self.args.local:
+            self.local_command()
+        else:
+            self.ssh_command()
+
+        if self.args.command == "make" and not self.args.print:
+            self.retrieve_result(self.args.result_file)
+
+
+class DaemonCommand(AbstractDaemonCommand):
+    def _get_module_name(self):
+        return "turingarena_impl.cli_server.runner"
+
+
+class EvaluateCommand(DaemonCommand):
+    def _get_parameters(self):
+        return EvaluateCommandParameters(
+            working_directory=build_working_directory(self.args),
+            evaluator=self.args.evaluator,
+        )
+
+
+class LegacyDaemonCommand(AbstractDaemonCommand):
+    def _get_module_name(self):
+        return "turingarena_impl.cli_server.main"
+
+    def _get_parameters(self):
+        return self.args
+
+    def run(self):
+        if self.args.command in ["skeleton", "template"]:
+            self.args.what = self.args.command
+            self.args.command = "make"
+
+        if self.args.command == "make" and self.args.what != "all":
+            self.args.print = True
+
+        return super().run()
+
 
 def build_working_directory(args):
     return WorkingDirectory(
@@ -211,51 +276,42 @@ def build_working_directory(args):
     )
 
 
-def evaluate_command_builder(args):
-    return EvaluateCommand(
-        working_directory=build_working_directory(args),
-        evaluator=args.evaluator,
-    )
-
-
 def create_evaluate_parser(subparsers):
     parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
     parser.add_argument("file", help="submission file", nargs="+")
     parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
     parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
 
-    parser.set_defaults(
-        command_builder=evaluate_command_builder,
-        module_name="turingarena_impl.cli_server.runner",
-    )
+    parser.set_defaults(Command=EvaluateCommand)
 
 
-def create_make_parser(make_parser, alias=False):
+def create_make_parser(parser, alias=False):
     if not alias:
-        make_parser.add_argument("what", help="what to make", default="all",
-                                 choices=["all", "skeleton", "template", "metadata", "description"])
-    make_parser.add_argument("--language", "-l", help="which language to generate", action="append",
-                             choices=["python", "c++", "java", "go"])
-    make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
-                             action="store_true")
-    make_parser.set_defaults(module_name="turingarena_impl.cli_server.main")
+        parser.add_argument("what", help="what to make", default="all",
+                            choices=["all", "skeleton", "template", "metadata", "description"])
+    parser.add_argument("--language", "-l", help="which language to generate", action="append",
+                        choices=["python", "c++", "java", "go"])
+    parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
+                        action="store_true")
+    parser.set_defaults(Command=LegacyDaemonCommand)
 
 
 def create_new_parser(subparsers):
     parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
     parser.add_argument("name", help="problem name")
+    parser.set_defaults(Command=NewCommand)
 
 
 def create_info_parser(subparsers):
     parser = subparsers.add_parser("info", help="get some info about TuringArena")
     parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
-    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
+    parser.set_defaults(Command=LegacyDaemonCommand)
 
 
 def create_test_parser(subparsers):
     parser = subparsers.add_parser("test", help="execute tests")
     parser.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
-    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
+    parser.set_defaults(Command=LegacyDaemonCommand)
 
 
 def parse_arguments():
@@ -288,41 +344,5 @@ def main():
 
     init_logger(args.log_level)
 
-    if args.command == "new":
-        new_problem(args.name)
-        return
-
-    cmd = DaemonCommand(args)
-
-    if not args.local:
-        cmd.check_daemon()
-
-    args.isatty = sys.stderr.isatty()
-
-    args.git_dir = cmd.git_dir
-
-    if args.command in ["skeleton", "template"]:
-        args.what = args.command
-        args.command = "make"
-
-    if args.command == "make" and args.what != "all":
-        args.print = True
-
-    if args.repository is None:
-        args.send_current_dir = True
-
-    if args.command not in ["evaluate", "make", "test"]:
-        args.send_current_dir = False
-
-    if args.send_current_dir:
-        args.current_dir, args.tree_id = cmd.send_current_dir()
-
-    args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
-
-    if args.local:
-        cmd.local_command()
-    else:
-        cmd.ssh_command()
-
-    if args.command == "make" and not args.print:
-        cmd.retrieve_result(args.result_file)
+    command = args.Command(args)
+    command.run()
