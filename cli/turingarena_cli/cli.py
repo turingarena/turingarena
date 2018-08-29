@@ -14,6 +14,8 @@ from turingarena_cli.common import init_logger
 from turingarena_cli.new import new_problem
 
 # in python2.7, quote is in pipes and not in shlex
+from turingarena_common.git_common import GIT_BASE_ENV
+
 try:
     from shlex import quote
 except ImportError:
@@ -87,18 +89,12 @@ def setup_git_env():
         logging.info("Initializing git repository in {}".format(working_dir))
         subprocess.call(["git", "init"])
 
-    author_name = "TuringArena"
-    author_email = "contact@turingarena.org"
-
     git_env = {
         "GIT_WORK_TREE": working_dir,
         "GIT_DIR": git_dir,
         "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_cli),
-        "GIT_AUTHOR_NAME": author_name,
-        "GIT_AUTHOR_EMAIL": author_email,
-        "GIT_COMMITTER_NAME": author_name,
-        "GIT_COMMITTER_EMAIL": author_email,
     }
+    git_env.update(GIT_BASE_ENV)
 
     subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
     logging.info("Initialized git repository in {}".format(git_dir))

@@ -6,6 +6,8 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
+from turingarena_common.git_common import GIT_BASE_ENV
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,10 +17,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
     def _base_env(self):
         return {
             "GIT_DIR": self.git_dir,
-            "GIT_AUTHOR_NAME": "TuringArena",
-            "GIT_AUTHOR_EMAIL": "contact@turingarena.org",
-            "GIT_COMMITTER_NAME": "TuringArena",
-            "GIT_COMMITTER_EMAIL": "contact@turingarena.org",
+            **GIT_BASE_ENV,
         }
 
     def init(self):
