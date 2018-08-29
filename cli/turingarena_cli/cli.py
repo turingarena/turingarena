@@ -198,10 +198,11 @@ def retrieve_result(result_file):
 
 
 def create_evaluate_parser(subparsers):
-    evaluate_parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
-    evaluate_parser.add_argument("file", help="submission file", nargs="+")
-    evaluate_parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
-    evaluate_parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
+    parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
+    parser.add_argument("file", help="submission file", nargs="+")
+    parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
+    parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
+    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
 
 
 def create_make_parser(make_parser, alias=False):
