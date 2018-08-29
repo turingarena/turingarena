@@ -1,18 +1,17 @@
 from __future__ import print_function
 
 import argparse
+import importlib
 import json
 import logging
 import os
 import subprocess
+import sys
 import uuid
 from argparse import ArgumentParser
 
-import sys
-
 from turingarena_cli.common import init_logger
 from turingarena_cli.new import new_problem
-
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_common.git_common import GIT_BASE_ENV
 
@@ -47,8 +46,8 @@ def build_json_parameters(args):
 
 
 def local_command(args):
-    from turingarena_impl.cli_server.main import do_main
-    do_main(args)
+    module = importlib.import_module(args.module_name)
+    module.do_main(args)
 
 
 def send_ssh_command(cli, args):
@@ -68,7 +67,7 @@ def send_ssh_command(cli, args):
 def ssh_command(args):
     cli = [
         "/usr/local/bin/python",
-        "-m", "turingarena_impl",
+        "-m", args.module_name,
     ]
 
     send_ssh_command(cli, args)
@@ -213,20 +212,24 @@ def create_make_parser(make_parser, alias=False):
                              choices=["python", "c++", "java", "go"])
     make_parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
                              action="store_true")
+    make_parser.set_defaults(module_name="turingarena_impl.cli_server.main")
 
 
 def create_new_parser(subparsers):
-    new_parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
-    new_parser.add_argument("name", help="problem name")
+    parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
+    parser.add_argument("name", help="problem name")
 
 
 def create_info_parser(subparsers):
-    info_parser = subparsers.add_parser("info", help="get some info about TuringArena")
-    info_parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
+    parser = subparsers.add_parser("info", help="get some info about TuringArena")
+    parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
+    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
 
 
-def create_test_parser(test_parser):
-    test_parser.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
+def create_test_parser(subparsers):
+    parser = subparsers.add_parser("test", help="execute tests")
+    parser.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
+    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
 
 
 def parse_arguments():
@@ -239,21 +242,17 @@ def parse_arguments():
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True
 
-    make_parser = subparsers.add_parser("make", help="Generate all the necessary files for a problem")
-    create_make_parser(make_parser)
-
     create_evaluate_parser(subparsers)
     create_info_parser(subparsers)
     create_new_parser(subparsers)
+    create_test_parser(subparsers)
 
+    make_parser = subparsers.add_parser("make", help="Generate all the necessary files for a problem")
+    create_make_parser(make_parser)
     skeleton_parser = subparsers.add_parser("skeleton", help="generate skeleton")
     create_make_parser(skeleton_parser, alias=True)
-
     template_parser = subparsers.add_parser("template", help="generate template")
     create_make_parser(template_parser, alias=True)
-
-    test_parser = subparsers.add_parser("test", help="execute tests")
-    create_test_parser(test_parser)
 
     return parser.parse_args()
 

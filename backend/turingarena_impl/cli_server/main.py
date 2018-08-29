@@ -61,3 +61,7 @@ def do_main(args):
             "info": info_cmd,
             "test": test_cmd,
         }[args.command](args)
+
+
+if __name__ == '__main__':
+    main()
