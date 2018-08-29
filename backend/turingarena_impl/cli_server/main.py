@@ -5,6 +5,8 @@ import sys
 from collections import namedtuple
 from tempfile import TemporaryDirectory
 
+import pickle
+
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.cli_server.git_manager import GitManager
 from turingarena_impl.cli_server.info import info_cmd
@@ -16,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    args = json.load(sys.stdin, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
-    do_main(args)
+    parameters = pickle.load(sys.stdin.buffer)
+    do_main(parameters)
 
 
 def do_main(args):

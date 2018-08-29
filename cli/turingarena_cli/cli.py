@@ -5,6 +5,7 @@ import importlib
 import json
 import logging
 import os
+import pickle
 import subprocess
 import sys
 import uuid
@@ -13,6 +14,7 @@ from argparse import ArgumentParser
 from turingarena_cli.common import init_logger
 from turingarena_cli.new import new_problem
 # in python2.7, quote is in pipes and not in shlex
+from turingarena_common.commands import EvaluateCommand, WorkingDirectory, Pack
 from turingarena_common.git_common import GIT_BASE_ENV
 
 try:
@@ -41,13 +43,9 @@ def check_daemon():
         sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
 
-def build_json_parameters(args):
-    return json.dumps(vars(args))
-
-
 def local_command(args):
     module = importlib.import_module(args.module_name)
-    module.do_main(args)
+    module.do_main(get_parameters(args))
 
 
 def send_ssh_command(cli, args):
@@ -59,9 +57,16 @@ def send_ssh_command(cli, args):
     logging.debug(cli)
 
     p = subprocess.Popen(cli, stdin=subprocess.PIPE)
-    p.stdin.write(build_json_parameters(args).encode())
+    pickle.dump(get_parameters(args), p.stdin)
     p.stdin.close()
     p.wait()
+
+
+def get_parameters(args):
+    if hasattr(args, 'command_builder'):
+        return args.command_builder(args)
+    else:
+        return args
 
 
 def ssh_command(args):
@@ -197,12 +202,33 @@ def retrieve_result(result_file):
     subprocess.call(["git", "checkout-index", "--all", "-q"], env=git_env)
 
 
+def build_working_directory(args):
+    return WorkingDirectory(
+        pack=Pack(
+            parts=[args.tree_id],
+            repositories=[],
+        ),
+        current_directory=args.current_dir,
+    )
+
+
+def evaluate_command_builder(args):
+    return EvaluateCommand(
+        working_directory=build_working_directory(args),
+        evaluator=args.evaluator,
+    )
+
+
 def create_evaluate_parser(subparsers):
     parser = subparsers.add_parser("evaluate", help="Evaluate a submission")
     parser.add_argument("file", help="submission file", nargs="+")
     parser.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
     parser.add_argument("--raw", "-r", help="use raw output", action="store_true")
-    parser.set_defaults(module_name="turingarena_impl.cli_server.main")
+
+    parser.set_defaults(
+        command_builder=evaluate_command_builder,
+        module_name="turingarena_impl.cli_server.runner",
+    )
 
 
 def create_make_parser(make_parser, alias=False):
