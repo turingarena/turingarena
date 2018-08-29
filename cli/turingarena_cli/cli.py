@@ -10,6 +10,7 @@ import subprocess
 import sys
 import uuid
 from argparse import ArgumentParser
+from functools import lru_cache
 
 from turingarena_cli.common import init_logger
 from turingarena_cli.new import new_problem
@@ -22,7 +23,7 @@ try:
 except ImportError:
     from pipes import quote
 
-ssh_cli = [
+SSH_BASE_CLI = [
     "ssh",
     "-T",
     "-o", "BatchMode=yes",
@@ -31,80 +32,7 @@ ssh_cli = [
     "-o", "StrictHostKeyChecking=no",
     "-p", "20122", "-q",
 ]
-ssh_user = "turingarena@localhost"
-git_env = {}
-
-
-def check_daemon():
-    cli = ssh_cli + [ssh_user, "echo", "OK!"]
-    try:
-        subprocess.check_output(cli)
-    except subprocess.CalledProcessError:
-        sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
-
-
-def local_command(args):
-    module = importlib.import_module(args.module_name)
-    module.do_main(get_parameters(args))
-
-
-def send_ssh_command(cli, args):
-    cli = ssh_cli + [
-        "turingarena@localhost",
-    ] + cli
-
-    logging.info("Sending command to the server via ssh")
-    logging.debug(cli)
-
-    p = subprocess.Popen(cli, stdin=subprocess.PIPE)
-    pickle.dump(get_parameters(args), p.stdin)
-    p.stdin.close()
-    p.wait()
-
-
-def get_parameters(args):
-    if hasattr(args, 'command_builder'):
-        return args.command_builder(args)
-    else:
-        return args
-
-
-def ssh_command(args):
-    cli = [
-        "/usr/local/bin/python",
-        "-m", args.module_name,
-    ]
-
-    send_ssh_command(cli, args)
-
-
-def setup_git_env():
-    global git_env
-
-    git_dir = os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
-
-    try:
-        working_dir = subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            universal_newlines=True,
-        ).strip()
-    except:
-        working_dir = os.getcwd()
-        logging.info("Initializing git repository in {}".format(working_dir))
-        subprocess.call(["git", "init"])
-
-    git_env = {
-        "GIT_WORK_TREE": working_dir,
-        "GIT_DIR": git_dir,
-        "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in ssh_cli),
-    }
-    git_env.update(GIT_BASE_ENV)
-
-    subprocess.check_call(["git", "init", "--quiet", "--bare", git_dir])
-    logging.info("Initialized git repository in {}".format(git_dir))
-
-    return git_dir
-
+SSH_USER = "turingarena@localhost"
 
 PACK_COMMAND_PARSER = ArgumentParser(add_help=False)
 
@@ -132,48 +60,122 @@ DAEMON_COMMAND_PARSER.add_argument(
 )
 
 
-def send_current_dir(local):
-    global git_env
-    working_dir = git_env["GIT_WORK_TREE"]
+class DaemonCommand:
+    def __init__(self, args):
+        self.args = args
 
-    current_dir = os.path.relpath(os.curdir, working_dir)
-    logging.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
-        working_dir=working_dir,
-        current_dir=current_dir,
-    ))
+    def check_daemon(self):
+        cli = SSH_BASE_CLI + [SSH_USER, "echo", "OK!"]
+        try:
+            subprocess.check_output(cli)
+        except subprocess.CalledProcessError:
+            sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
-    git_popen_args = dict(env=git_env, universal_newlines=True)
+    def local_command(self):
+        module = importlib.import_module(self.args.module_name)
+        module.do_main(self.parameters)
 
-    subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
-    logging.info("Added all files to git")
+    def send_ssh_command(self, cli):
+        cli = SSH_BASE_CLI + [
+            "turingarena@localhost",
+        ] + cli
 
-    tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
-    logging.info("Wrote tree with id {}".format(tree_id))
+        logging.info("Sending command to the server via ssh")
+        logging.debug(cli)
 
-    if not local:
+        p = subprocess.Popen(cli, stdin=subprocess.PIPE)
+        pickle.dump(self.parameters, p.stdin)
+        p.stdin.close()
+        p.wait()
+
+    @property
+    def parameters(self):
+        if hasattr(self.args, 'command_builder'):
+            return self.args.command_builder(self.args)
+        else:
+            return self.args
+
+    @property
+    @lru_cache(None)
+    def git_work_dir(self):
+        try:
+            return subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                universal_newlines=True,
+            ).strip()
+        except:
+            working_dir = os.getcwd()
+            logging.info("Initializing git repository in {}".format(working_dir))
+            subprocess.call(["git", "init"])
+            return working_dir
+
+    @property
+    @lru_cache(None)
+    def git_dir(self):
+        return os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
+
+    @property
+    def git_env(self):
+        git_env = {
+            "GIT_WORK_TREE": self.git_work_dir,
+            "GIT_DIR": self.git_dir,
+            "GIT_SSH_COMMAND": " ".join("'" + c + "'" for c in SSH_BASE_CLI),
+        }
+        git_env.update(GIT_BASE_ENV)
+        return git_env
+
+    def git_init(self):
+        subprocess.check_call(["git", "init", "--quiet", "--bare", self.git_dir])
+        logging.info("Initialized git repository in {}".format(self.git_dir))
+
+    def ssh_command(self):
+        cli = [
+            "/usr/local/bin/python",
+            "-m", self.args.module_name,
+        ]
+
+        self.send_ssh_command(cli)
+
+    def send_current_dir(self):
+        current_dir = os.path.relpath(os.curdir, self.git_work_dir)
+        logging.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
+            working_dir=self.git_work_dir,
+            current_dir=current_dir,
+        ))
+
+        git_popen_args = dict(env=self.git_env, universal_newlines=True)
+
+        subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
+        logging.info("Added all files to git")
+
+        tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
+        logging.info("Wrote tree with id {}".format(tree_id))
+
+        if not self.args.local:
+            self.do_send_current_dir(tree_id)
+
+        return current_dir, tree_id
+
+    def do_send_current_dir(self, tree_id):
+        git_popen_args = dict(env=self.git_env, universal_newlines=True)
         logging.info("Sending current directory to the server via git")
-
         commit_message = "Turingarena payload."
         commit_id = subprocess.check_output(
             ["git", "commit-tree", tree_id, "-m", commit_message],
             **git_popen_args
         ).strip()
-
         logging.info("Created commit {}".format(commit_id))
-
-        subprocess.check_call(ssh_cli + [
+        subprocess.check_call(SSH_BASE_CLI + [
             "turingarena@localhost",
             "git init --bare --quiet db.git",
         ])
         logging.info("Initialized git repository on the server")
-
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
             "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
         ], **git_popen_args)
         logging.info("Pushed current commit")
-
         # remove the remove branch (we only need the tree object)
         subprocess.check_call([
             "git", "push", "-q",
@@ -181,25 +183,22 @@ def send_current_dir(local):
             ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
         ], **git_popen_args)
 
-    return current_dir, tree_id
+    def retrieve_result(self, result_file):
+        logging.info("Retrieving result")
+        logging.info("Reading {}".format(result_file))
+        with open(result_file) as f:
+            result = f.read().strip()
 
+        logging.info("Got {}".format(result))
+        result = json.loads(result)
 
-def retrieve_result(result_file):
-    logging.info("Retrieving result")
-    logging.info("Reading {}".format(result_file))
-    with open(result_file) as f:
-        result = f.read().strip()
+        tree_id = result["tree_id"]
+        commit_it = result["commit_id"]
 
-    logging.info("Got {}".format(result))
-    result = json.loads(result)
-
-    tree_id = result["tree_id"]
-    commit_it = result["commit_id"]
-
-    logging.info("Importing tree id {}".format(tree_id))
-    subprocess.call(["git", "read-tree", tree_id], env=git_env)
-    logging.info("Checking out")
-    subprocess.call(["git", "checkout-index", "--all", "-q"], env=git_env)
+        logging.info("Importing tree id {}".format(tree_id))
+        subprocess.call(["git", "read-tree", tree_id], env=self.git_env)
+        logging.info("Checking out")
+        subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
 
 
 def build_working_directory(args):
@@ -293,12 +292,14 @@ def main():
         new_problem(args.name)
         return
 
+    cmd = DaemonCommand(args)
+
     if not args.local:
-        check_daemon()
+        cmd.check_daemon()
 
     args.isatty = sys.stderr.isatty()
 
-    args.git_dir = setup_git_env()
+    args.git_dir = cmd.git_dir
 
     if args.command in ["skeleton", "template"]:
         args.what = args.command
@@ -314,14 +315,14 @@ def main():
         args.send_current_dir = False
 
     if args.send_current_dir:
-        args.current_dir, args.tree_id = send_current_dir(local=args.local)
+        args.current_dir, args.tree_id = cmd.send_current_dir()
 
     args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
 
     if args.local:
-        local_command(args)
+        cmd.local_command()
     else:
-        ssh_command(args)
+        cmd.ssh_command()
 
     if args.command == "make" and not args.print:
-        retrieve_result(args.result_file)
+        cmd.retrieve_result(args.result_file)
