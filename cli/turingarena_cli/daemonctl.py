@@ -11,13 +11,15 @@ from turingarena_cli.command import Command
 class DaemonControlCommand(Command):
     PARSER = ArgumentParser(add_help=False, parents=[BASE_PARSER])
     PARSER.add_argument(
-        "--container-name",
-        help="name of the container to run",
-    )
-    PARSER.add_argument(
         "--sudo",
         action="store_true",
         help="use sudo to run docker",
+    )
+
+    START_STOP_PARSER = ArgumentParser(add_help=False, parents=[PARSER])
+    START_STOP_PARSER.add_argument(
+        "--container-name",
+        help="name of the container to run",
     )
 
     @property
@@ -37,7 +39,7 @@ class DaemonStartCommand(DaemonControlCommand):
     PARSER = ArgumentParser(
         description="Start the daemon",
         add_help=False,
-        parents=[DaemonControlCommand.PARSER],
+        parents=[DaemonControlCommand.START_STOP_PARSER],
     )
     PARSER.add_argument(
         "--dev-dir",
@@ -99,7 +101,7 @@ class DaemonStopCommand(DaemonControlCommand):
     PARSER = ArgumentParser(
         description="Stop the daemon",
         add_help=False,
-        parents=[DaemonControlCommand.PARSER],
+        parents=[DaemonControlCommand.START_STOP_PARSER],
     )
 
     def run(self):
@@ -110,6 +112,26 @@ class DaemonStopCommand(DaemonControlCommand):
         cli += ["docker", "kill", self.container_name]
         p = subprocess.Popen(cli)
         p.wait()
+
+
+class DaemonUpgradeCommand(DaemonControlCommand):
+    PARSER = ArgumentParser(
+        description="Install/upgrade the turingarena daemon image",
+        add_help=False,
+        parents=[DaemonControlCommand.PARSER],
+    )
+
+    def run(self):
+        logging.info("Installing/upgrading turingarena daemon")
+        cli = []
+        if self.use_sudo:
+            cli += ["sudo"]
+        cli += ["docker", "pull", self.image]
+        print(" ".join(cli))
+        p = subprocess.Popen(cli)
+        p.wait()
+        if p.returncode == 0:
+            print("Done. Remember to also update turingarena CLI with `pip install -U turingarena-cli`")
 
 
 DAEMON_CONTROL_PARSER = ArgumentParser(
@@ -129,3 +151,9 @@ subparsers.add_parser(
     parents=[DaemonStopCommand.PARSER],
     help=DaemonStopCommand.PARSER.description,
 ).set_defaults(Command=DaemonStopCommand)
+subparsers.add_parser(
+    "upgrade",
+    aliases=["install"],
+    parents=[DaemonUpgradeCommand.PARSER],
+    help=DaemonUpgradeCommand.PARSER.description,
+).set_defaults(Command=DaemonUpgradeCommand)

@@ -51,10 +51,13 @@ sudo docker pull turingarena/turingarena
 
 To start the server, run:
 ```bash
-sudo turingarenad
+turingarena daemon start --sudo --detach
 ```
 
-You can terminate the server by pressing `Ctrl-C`.
+To start the server, run:
+```bash
+turingarena daemon stop --sudo
+```
 
 At the moment, to work on a challenge, the code must be placed in a (local) Git repository.
 
