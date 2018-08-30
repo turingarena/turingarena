@@ -3,7 +3,12 @@ from collections import namedtuple
 DaemonCommandParameters = namedtuple("DaemonCommandParameters", [
     "log_level",
     "stderr_isatty",
+    "local_execution",
     "command",
+])
+
+LocalExecutionParameters = namedtuple("LocalExecutionParameters", [
+    "git_dir",
 ])
 
 Pack = namedtuple("Pack", [

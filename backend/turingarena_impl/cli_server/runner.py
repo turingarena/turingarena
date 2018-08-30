@@ -2,7 +2,7 @@ import logging
 import pickle
 import sys
 
-from turingarena_common.commands import EvaluateCommandParameters, DaemonCommandParameters
+from turingarena_common.commands import EvaluateCommandParameters, DaemonCommandParameters, LocalExecutionParameters
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.logging import init_logger
 
@@ -11,17 +11,23 @@ COMMANDS_MAP = {
 }
 
 
-def run_command(command_parameters):
+def run_command(command_parameters, local_execution):
     for t, runner in COMMANDS_MAP.items():
         if isinstance(command_parameters, t):
-            return runner(command_parameters)
+            return runner(command_parameters, local_execution)
     raise TypeError(type(command_parameters))
 
 
 def do_main(parameters: DaemonCommandParameters):
     init_logger(parameters.log_level, parameters.stderr_isatty)
+    local_execution = parameters.local_execution
+    if local_execution is None:
+        local_execution = LocalExecutionParameters(
+            git_dir="/run/turingarena/db.git",
+        )
+
     logging.debug(f"Running command {parameters}")
-    return run_command(parameters.command)
+    return run_command(parameters.command, local_execution)
 
 
 def main():

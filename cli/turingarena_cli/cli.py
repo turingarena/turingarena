@@ -20,7 +20,7 @@ from turingarena_cli.common import init_logger
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.new import NewCommand
 from turingarena_common.commands import EvaluateCommandParameters, WorkingDirectory, Pack, GitCloneRepository, \
-    DaemonCommandParameters
+    DaemonCommandParameters, LocalExecutionParameters
 from turingarena_common.git_common import GIT_BASE_ENV
 
 try:
@@ -106,6 +106,11 @@ class AbstractDaemonCommand(Command):
     def _get_parameters(self):
         pass
 
+    @property
+    @lru_cache(None)
+    def git_dir(self):
+        return os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
+
     def ssh_command(self):
         cli = [
             "/usr/local/bin/python",
@@ -127,9 +132,17 @@ class AbstractDaemonCommand(Command):
 
 class DaemonCommand(AbstractDaemonCommand):
     def _get_parameters(self):
+        if self.args.local:
+            local_execution = LocalExecutionParameters(
+                git_dir=self.git_dir,
+            )
+        else:
+            local_execution = None
+
         return DaemonCommandParameters(
             log_level=self.args.log_level,
             stderr_isatty=sys.stderr.isatty(),
+            local_execution=local_execution,
             command=self.command_parameters,
         )
 
@@ -161,11 +174,6 @@ class PackBasedCommand(AbstractDaemonCommand):
             subprocess.call(["git", "init"])
         logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
         return work_dir
-
-    @property
-    @lru_cache(None)
-    def git_dir(self):
-        return os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
 
     @property
     def git_env(self):

@@ -5,14 +5,17 @@ import sys
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import EvaluateCommandParameters
+from turingarena_common.commands import LocalExecutionParameters, EvaluateCommandParameters
 from turingarena_impl.cli_server.pack import enter_working_directory
 from turingarena_impl.evaluation.evaluator import Evaluator
 
 
-def evaluate_cmd(parameters: EvaluateCommandParameters):
+def evaluate_cmd(parameters: EvaluateCommandParameters, local_execution: LocalExecutionParameters):
     with ExitStack() as stack:
-        stack.enter_context(enter_working_directory(parameters.working_directory))
+        stack.enter_context(enter_working_directory(
+            parameters.working_directory,
+            local_execution=local_execution,
+        ))
 
         output = sys.stdout
 

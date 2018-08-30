@@ -8,8 +8,8 @@ from turingarena_impl.cli_server.git_manager import GitManager
 
 
 @contextmanager
-def enter_working_directory(working_directory: WorkingDirectory):
-    git = GitManager("/run/turingarena/db.git")
+def enter_working_directory(working_directory: WorkingDirectory, *, local_execution):
+    git = GitManager(local_execution.git_dir)
     git.init()
 
     with TemporaryDirectory() as temp_dir:
