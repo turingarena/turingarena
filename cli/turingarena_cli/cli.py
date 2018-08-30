@@ -3,6 +3,8 @@ from __future__ import print_function
 import argparse
 import os
 
+from future.moves import sys
+
 from turingarena_cli.common import init_logger
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.evaluate import create_evaluate_parser
@@ -17,8 +19,14 @@ try:
 except ImportError:
     from pipes import quote
 
+# PYTHON_ARGCOMPLETE_OK
+try:
+    import argcomplete
+except ImportError:
+    pass
 
-def parse_arguments():
+
+def create_parser():
     parser = argparse.ArgumentParser(
         description="Turingarena CLI",
         parents=[PACK_COMMAND_PARSER, REMOTE_COMMAND_PARSER],
@@ -41,11 +49,16 @@ def parse_arguments():
     template_parser = subparsers.add_parser("template", help="generate template")
     create_make_parser(template_parser, alias=True)
 
-    return parser.parse_args()
+    return parser
 
 
 def main():
-    args = parse_arguments()
+    parser = create_parser()
+    try:
+        argcomplete.autocomplete(parser)
+    except NameError:
+        pass
+    args = parser.parse_args()
 
     init_logger(args.log_level)
 
