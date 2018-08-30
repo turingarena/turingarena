@@ -1,25 +1,47 @@
+from abc import abstractmethod
+from argparse import ArgumentParser
+
 from turingarena_cli.pack import PackBasedCommand
 from turingarena_cli.remote import RemoteCommand
 from turingarena_common.commands import FileCommandParameters, FileCatCommandParameters
 
 
-class FileCatCommand(RemoteCommand, PackBasedCommand):
+class FileCommand(RemoteCommand, PackBasedCommand):
+    @abstractmethod
+    def _get_file_command_parameters(self):
+        pass
+
     def _get_command_parameters(self):
         return FileCommandParameters(
             working_directory=self.working_directory,
-            command=FileCatCommandParameters(
-                path=self.args.path,
-            ),
+            command=self._get_file_command_parameters(),
         )
 
+    PARSER = ArgumentParser(
+        description="Get generated files",
+        parents=[RemoteCommand.PARSER, PackBasedCommand.PARSER],
+        add_help=False,
+    )
 
-def create_file_parser(subparsers):
-    parser = subparsers.add_parser("file", help="Get TuringArena generated files")
-    subparsers2 = parser.add_subparsers(dest="subcommand")
-    create_file_cat_parser(subparsers2)
+
+class FileCatCommand(FileCommand):
+    def _get_file_command_parameters(self):
+        return FileCatCommandParameters(
+            path=self.args.path,
+        )
+
+    PARSER = ArgumentParser(
+        description="Print the content of a file to stdout",
+        add_help=False,
+    )
+    PARSER.add_argument("path", help="Path to the file to print")
 
 
-def create_file_cat_parser(subparsers):
-    parser = subparsers.add_parser("cat", help="Print the content of a file to stdout")
-    parser.add_argument("path", help="Path to the file to print")
-    parser.set_defaults(Command=FileCatCommand)
+FileCatCommand.PARSER.set_defaults(Command=FileCatCommand)
+
+subparsers = FileCommand.PARSER.add_subparsers(dest="subcommand")
+subparsers.add_parser(
+    "cat",
+    parents=[FileCatCommand.PARSER],
+    help=FileCatCommand.PARSER.description,
+)

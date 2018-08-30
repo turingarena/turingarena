@@ -146,20 +146,20 @@ class PackBasedCommand(AbstractRemoteCommand):
         )
 
 
-PACK_COMMAND_PARSER = ArgumentParser(add_help=False)
+    PARSER = ArgumentParser(add_help=False)
 
-PACK_COMMAND_PARSER.add_argument(
-    "--send-current-dir", "-s",
-    action="store_true",
-    help="send the current directory",
-)
-PACK_COMMAND_PARSER.add_argument(
-    "--tree", "-t",
-    action="append",
-    help="a git tree id",
-)
-PACK_COMMAND_PARSER.add_argument(
-    "--repository", "-r",
-    action="append",
-    help="source of a git repository",
-)
+    PARSER.add_argument(
+        "--send-current-dir", "-s",
+        action="store_true",
+        help="send the current directory",
+    )
+    PARSER.add_argument(
+        "--tree", "-t",
+        action="append",
+        help="a git tree id",
+    )
+    PARSER.add_argument(
+        "--repository", "-r",
+        action="append",
+        help="source of a git repository",
+    )

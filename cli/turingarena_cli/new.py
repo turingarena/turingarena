@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from argparse import ArgumentParser
 
 from turingarena_cli.command import Command
 
@@ -77,8 +78,11 @@ class NewCommand(Command):
         logging.info("Problem {name} created in directory {name}/".format(name=name))
         logging.info("Start editing your default interface.txt and evaluator.py files!")
 
+    PARSER = ArgumentParser(
+        description="Create a new Turingarena problem",
+        add_help=False,
+    )
+    PARSER.add_argument("name", help="problem name")
 
-def create_new_parser(subparsers):
-    parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
-    parser.add_argument("name", help="problem name")
-    parser.set_defaults(Command=NewCommand)
+
+NewCommand.PARSER.set_defaults(Command=NewCommand)

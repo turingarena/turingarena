@@ -1,7 +1,9 @@
 import os
 import uuid
+from argparse import ArgumentParser
 
 from turingarena_cli.pack import PackBasedCommand
+from turingarena_cli.remote import RemoteCommand
 
 
 class LegacyDaemonCommand(PackBasedCommand):
@@ -43,25 +45,53 @@ class LegacyDaemonCommand(PackBasedCommand):
         if self.args.command == "make" and not self.args.print:
             self.retrieve_result(self.args.result_file)
 
-
-def create_info_parser(subparsers):
-    parser = subparsers.add_parser("info", help="get some info about TuringArena")
-    parser.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
-    parser.set_defaults(Command=LegacyDaemonCommand)
-
-
-def create_make_parser(parser, alias=False):
-    if not alias:
-        parser.add_argument("what", help="what to make", default="all",
-                            choices=["all", "skeleton", "template", "metadata", "description"])
-    parser.add_argument("--language", "-l", help="which language to generate", action="append",
-                        choices=["python", "c++", "java", "go"])
-    parser.add_argument("--print", "-p", help="Print output to stdout instead of writing it to a file",
-                        action="store_true")
-    parser.set_defaults(Command=LegacyDaemonCommand)
+    PARSER = ArgumentParser(
+        add_help=False,
+        parents=[PackBasedCommand.PARSER, RemoteCommand.PARSER]
+    )
 
 
-def create_test_parser(subparsers):
-    parser = subparsers.add_parser("test", help="execute tests")
-    parser.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
-    parser.set_defaults(Command=LegacyDaemonCommand)
+INFO_PARSER = ArgumentParser(
+    description="Get some info about TuringArena",
+    add_help=False,
+    parents=[LegacyDaemonCommand.PARSER],
+)
+INFO_PARSER.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
+INFO_PARSER.set_defaults(Command=LegacyDaemonCommand)
+
+TEST_PARSER = ArgumentParser(
+    description="Run tests",
+    add_help=False,
+    parents=[LegacyDaemonCommand.PARSER],
+)
+TEST_PARSER.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
+TEST_PARSER.set_defaults(Command=LegacyDaemonCommand)
+
+BASE_MAKE_PARSER = ArgumentParser(
+    add_help=False,
+    parents=[LegacyDaemonCommand.PARSER],
+)
+BASE_MAKE_PARSER.add_argument(
+    "--language",
+    action="append",
+    choices=["python", "c++", "java", "go"],
+    help="which language to generate",
+)
+BASE_MAKE_PARSER.add_argument(
+    "--print", "-p",
+    action="store_true",
+    help="print output to stdout instead of writing it to a file",
+)
+BASE_MAKE_PARSER.set_defaults(Command=LegacyDaemonCommand)
+
+MAKE_PARSER = ArgumentParser(
+    description="Generate all the necessary files for a problem",
+    add_help=False,
+    parents=[BASE_MAKE_PARSER],
+)
+MAKE_PARSER.add_argument(
+    "what",
+    choices=["all", "skeleton", "template", "metadata", "description"],
+    default="all",
+    help="what to make",
+)

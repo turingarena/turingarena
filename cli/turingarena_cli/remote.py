@@ -116,10 +116,9 @@ class RemoteCommand(AbstractRemoteCommand):
     def _get_module_name(self):
         return "turingarena_impl.cli_server.runner"
 
-
-REMOTE_COMMAND_PARSER = ArgumentParser(add_help=False)
-REMOTE_COMMAND_PARSER.add_argument(
-    "--local", "-l",
-    action="store_true",
-    help="execute turingarena locally (do not connect to docker)",
-)
+    PARSER = ArgumentParser(add_help=False)
+    PARSER.add_argument(
+        "--local", "-l",
+        action="store_true",
+        help="execute turingarena locally (do not connect to docker)",
+    )

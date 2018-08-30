@@ -5,11 +5,9 @@ import os
 
 from turingarena_cli.common import init_logger
 from turingarena_cli.evaluate import create_evaluate_parser
-from turingarena_cli.files import create_file_parser
-from turingarena_cli.legacy import create_info_parser, create_make_parser, create_test_parser
-from turingarena_cli.new import create_new_parser
-from turingarena_cli.pack import PACK_COMMAND_PARSER
-from turingarena_cli.remote import REMOTE_COMMAND_PARSER
+from turingarena_cli.files import FileCommand
+from turingarena_cli.legacy import INFO_PARSER, TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
+from turingarena_cli.new import NewCommand
 
 # in python2.7, quote is in pipes and not in shlex
 try:
@@ -25,27 +23,23 @@ except ImportError:
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(
-        description="Turingarena CLI",
-        parents=[PACK_COMMAND_PARSER, REMOTE_COMMAND_PARSER],
-    )
+    parser = argparse.ArgumentParser(description="Turingarena CLI")
+
     parser.add_argument("--log-level", help="log level", default="WARNING")
 
     subparsers = parser.add_subparsers(title="command", dest="command")
     subparsers.required = True
 
     create_evaluate_parser(subparsers)
-    create_info_parser(subparsers)
-    create_new_parser(subparsers)
-    create_test_parser(subparsers)
-    create_file_parser(subparsers)
 
-    make_parser = subparsers.add_parser("make", help="Generate all the necessary files for a problem")
-    create_make_parser(make_parser)
-    skeleton_parser = subparsers.add_parser("skeleton", help="generate skeleton")
-    create_make_parser(skeleton_parser, alias=True)
-    template_parser = subparsers.add_parser("template", help="generate template")
-    create_make_parser(template_parser, alias=True)
+    subparsers.add_parser("info", parents=[INFO_PARSER], help=INFO_PARSER.description)
+    subparsers.add_parser("test", parents=[TEST_PARSER], help=TEST_PARSER.description)
+    subparsers.add_parser("new", parents=[NewCommand.PARSER], help=NewCommand.PARSER.description)
+    subparsers.add_parser("file", parents=[FileCommand.PARSER], help=FileCommand.PARSER.description)
+    subparsers.add_parser("make", parents=[MAKE_PARSER], help=BASE_MAKE_PARSER.description)
+
+    subparsers.add_parser("skeleton", parents=[BASE_MAKE_PARSER], help="generate skeleton")
+    subparsers.add_parser("template", parents=[BASE_MAKE_PARSER], help="generate template")
 
     return parser
 
