@@ -11,13 +11,16 @@ import sys
 import uuid
 from abc import abstractmethod
 from argparse import ArgumentParser
+from contextlib import contextmanager
 from functools import lru_cache
+from tempfile import TemporaryDirectory
 
 from turingarena_cli.command import Command
 from turingarena_cli.common import init_logger
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.new import NewCommand
-from turingarena_common.commands import EvaluateCommandParameters, WorkingDirectory, Pack
+from turingarena_common.commands import EvaluateCommandParameters, WorkingDirectory, Pack, GitCloneRepository, \
+    DaemonCommandParameters
 from turingarena_common.git_common import GIT_BASE_ENV
 
 try:
@@ -103,19 +106,61 @@ class AbstractDaemonCommand(Command):
     def _get_parameters(self):
         pass
 
+    def ssh_command(self):
+        cli = [
+            "/usr/local/bin/python",
+            "-m", self.module_name,
+        ]
+
+        self.send_ssh_command(cli)
+
+    def run(self):
+        if not self.args.local:
+            self.check_daemon()
+
+        self.args.isatty = sys.stderr.isatty()
+        if self.args.local:
+            self.local_command()
+        else:
+            self.ssh_command()
+
+
+class DaemonCommand(AbstractDaemonCommand):
+    def _get_parameters(self):
+        return DaemonCommandParameters(
+            log_level=self.args.log_level,
+            stderr_isatty=sys.stderr.isatty(),
+            command=self.command_parameters,
+        )
+
+    @property
+    @lru_cache(None)
+    def command_parameters(self):
+        return self._get_command_parameters()
+
+    @abstractmethod
+    def _get_command_parameters(self):
+        pass
+
+    def _get_module_name(self):
+        return "turingarena_impl.cli_server.runner"
+
+
+class PackBasedCommand(AbstractDaemonCommand):
     @property
     @lru_cache(None)
     def git_work_dir(self):
         try:
-            return subprocess.check_output(
+            work_dir = subprocess.check_output(
                 ["git", "rev-parse", "--show-toplevel"],
                 universal_newlines=True,
             ).strip()
         except:
-            working_dir = os.getcwd()
-            logging.info("Initializing git repository in {}".format(working_dir))
+            work_dir = self.cwd
+            logging.info("Initializing git repository in {}".format(work_dir))
             subprocess.call(["git", "init"])
-            return working_dir
+        logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
+        return work_dir
 
     @property
     @lru_cache(None)
@@ -136,60 +181,69 @@ class AbstractDaemonCommand(Command):
         subprocess.check_call(["git", "init", "--quiet", "--bare", self.git_dir])
         logging.info("Initialized git repository in {}".format(self.git_dir))
 
-    def ssh_command(self):
-        cli = [
-            "/usr/local/bin/python",
-            "-m", self.module_name,
-        ]
+    @contextmanager
+    def _temp_git_index(self):
+        with TemporaryDirectory() as temp_dir:
+            env = {}
+            env.update(self.git_env)
+            env.update({
+                "GIT_INDEX_FILE": os.path.join(temp_dir, "index")
+            })
+            yield env
 
-        self.send_ssh_command(cli)
+    @property
+    @lru_cache(None)
+    def local_tree_id(self):
+        logging.info("Packing local tree")
+        with self._temp_git_index() as env:
+            subprocess.check_call(["git", "add", "-A", "."], env=env)
+            logging.info("Added all files to git")
 
-    def send_current_dir(self):
-        current_dir = os.path.relpath(os.curdir, self.git_work_dir)
-        logging.info("Sending work dir: {working_dir} (current dir: {current_dir})...".format(
-            working_dir=self.git_work_dir,
-            current_dir=current_dir,
-        ))
+            tree_id = subprocess.check_output(
+                ["git", "write-tree"],
+                env=env,
+                universal_newlines=True,
+            ).strip()
+            logging.info("Wrote tree with id {}".format(tree_id))
+            return tree_id
 
-        git_popen_args = dict(env=self.git_env, universal_newlines=True)
+    @property
+    @lru_cache(None)
+    def relative_current_dir(self):
+        current_dir = os.path.relpath(self.cwd, self.git_work_dir)
+        logging.info("Relative current dir: {current_dir}".format(current_dir=current_dir))
+        return current_dir
 
-        subprocess.check_call(["git", "add", "-A", "."], **git_popen_args)
-        logging.info("Added all files to git")
-
-        tree_id = subprocess.check_output(["git", "write-tree"], **git_popen_args).strip()
-        logging.info("Wrote tree with id {}".format(tree_id))
-
-        if not self.args.local:
-            self.do_send_current_dir(tree_id)
-
-        return current_dir, tree_id
-
-    def do_send_current_dir(self, tree_id):
-        git_popen_args = dict(env=self.git_env, universal_newlines=True)
+    def push_local_tree(self, tree_id):
         logging.info("Sending current directory to the server via git")
         commit_message = "Turingarena payload."
+
         commit_id = subprocess.check_output(
             ["git", "commit-tree", tree_id, "-m", commit_message],
-            **git_popen_args
+            env=self.git_env,
+            universal_newlines=True,
         ).strip()
         logging.info("Created commit {}".format(commit_id))
+
         subprocess.check_call(SSH_BASE_CLI + [
             "turingarena@localhost",
             "git init --bare --quiet db.git",
         ])
         logging.info("Initialized git repository on the server")
+
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
             "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
-        ], **git_popen_args)
+        ], env=self.git_env)
         logging.info("Pushed current commit")
+
         # remove the remove branch (we only need the tree object)
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
             ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
-        ], **git_popen_args)
+        ], env=self.git_env)
 
     def retrieve_result(self, result_file):
         logging.info("Retrieving result")
@@ -208,47 +262,39 @@ class AbstractDaemonCommand(Command):
         logging.info("Checking out")
         subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
 
-    def run(self):
-        if not self.args.local:
-            self.check_daemon()
-
-        self.args.isatty = sys.stderr.isatty()
-        self.args.git_dir = self.git_dir
-
-        if self.args.repository is None:
-            self.args.send_current_dir = True
-
-        if self.args.command not in ["evaluate", "make", "test"]:
-            self.args.send_current_dir = False
-
+    @property
+    def working_directory(self):
+        parts = []
         if self.args.send_current_dir:
-            self.args.current_dir, self.args.tree_id = self.send_current_dir()
+            parts += [self.local_tree_id]
 
-        self.args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
-
-        if self.args.local:
-            self.local_command()
-        else:
-            self.ssh_command()
-
-        if self.args.command == "make" and not self.args.print:
-            self.retrieve_result(self.args.result_file)
-
-
-class DaemonCommand(AbstractDaemonCommand):
-    def _get_module_name(self):
-        return "turingarena_impl.cli_server.runner"
-
-
-class EvaluateCommand(DaemonCommand):
-    def _get_parameters(self):
-        return EvaluateCommandParameters(
-            working_directory=build_working_directory(self.args),
-            evaluator=self.args.evaluator,
+        return WorkingDirectory(
+            pack=Pack(
+                parts=parts,
+                repositories=[
+                    GitCloneRepository(
+                        url=url,
+                        branch=None,
+                        depth=None,
+                    )
+                    for url in self.args.repository or []
+                ],
+            ),
+            current_directory=self.relative_current_dir,
         )
 
 
-class LegacyDaemonCommand(AbstractDaemonCommand):
+class EvaluateCommand(DaemonCommand, PackBasedCommand):
+    def _get_command_parameters(self):
+        return EvaluateCommandParameters(
+            working_directory=self.working_directory,
+            evaluator=self.args.evaluator,
+            file=self.args.file,
+            raw_output=self.args.raw,
+        )
+
+
+class LegacyDaemonCommand(PackBasedCommand):
     def _get_module_name(self):
         return "turingarena_impl.cli_server.main"
 
@@ -263,17 +309,29 @@ class LegacyDaemonCommand(AbstractDaemonCommand):
         if self.args.command == "make" and self.args.what != "all":
             self.args.print = True
 
-        return super().run()
+        self.args.git_dir = self.git_dir
 
+        if self.args.repository is None:
+            self.args.send_current_dir = True
 
-def build_working_directory(args):
-    return WorkingDirectory(
-        pack=Pack(
-            parts=[args.tree_id],
-            repositories=[],
-        ),
-        current_directory=args.current_dir,
-    )
+        if self.args.command not in ["evaluate", "make", "test"]:
+            self.args.send_current_dir = False
+
+        if self.args.send_current_dir:
+            if not self.args.local:
+                self.push_local_tree(self.local_tree_id)
+            self.args.tree_id = self.local_tree_id
+            self.args.current_dir = self.relative_current_dir
+        else:
+            self.args.tree_id = None
+            self.args.current_dir = None
+
+        self.args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
+
+        super().run()
+
+        if self.args.command == "make" and not self.args.print:
+            self.retrieve_result(self.args.result_file)
 
 
 def create_evaluate_parser(subparsers):
@@ -344,5 +402,5 @@ def main():
 
     init_logger(args.log_level)
 
-    command = args.Command(args)
+    command = args.Command(args=args, cwd=os.curdir)
     command.run()

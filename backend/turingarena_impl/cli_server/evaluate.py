@@ -5,14 +5,18 @@ import sys
 from contextlib import ExitStack, contextmanager
 from tempfile import TemporaryDirectory
 
+from turingarena_common.commands import EvaluateCommandParameters
+from turingarena_impl.cli_server.pack import enter_working_directory
 from turingarena_impl.evaluation.evaluator import Evaluator
 
 
-def evaluate_cmd(args):
+def evaluate_cmd(parameters: EvaluateCommandParameters):
     with ExitStack() as stack:
+        stack.enter_context(enter_working_directory(parameters.working_directory))
+
         output = sys.stdout
 
-        if not args.raw:
+        if not parameters.raw_output:
             jq = stack.enter_context(subprocess.Popen(
                 ["jq", "-j", "--unbuffered", ".payload"],
                 stdin=subprocess.PIPE,
@@ -20,12 +24,12 @@ def evaluate_cmd(args):
             ))
             output = jq.stdin
 
-        files = stack.enter_context(parse_files(args.file, ["source"]))
+        files = stack.enter_context(parse_files(parameters.file, ["source"]))
         logging.info("Submitted files")
         for name, path in files.items():
             logging.info(f"{name}: {path}")
 
-        evaluator = Evaluator.get_evaluator(args.evaluator)
+        evaluator = Evaluator.get_evaluator(parameters.evaluator)
         logging.info(f"Running evaluator: {evaluator}")
         for event in evaluator.evaluate(files=files):
             print(event, file=output, flush=True)

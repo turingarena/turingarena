@@ -1,5 +1,11 @@
 from collections import namedtuple
 
+DaemonCommandParameters = namedtuple("DaemonCommandParameters", [
+    "log_level",
+    "stderr_isatty",
+    "command",
+])
+
 Pack = namedtuple("Pack", [
     "parts",
     "repositories",
@@ -18,5 +24,7 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
 
 EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
     "working_directory",
+    "file",
     "evaluator",
+    "raw_output",
 ])
