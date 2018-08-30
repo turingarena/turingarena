@@ -1,9 +1,8 @@
 import logging
 import os
 import subprocess
+import sys
 from argparse import ArgumentParser
-
-from future.moves import sys
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
