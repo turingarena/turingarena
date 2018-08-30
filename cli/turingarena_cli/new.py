@@ -76,3 +76,9 @@ class NewCommand(Command):
         os.makedirs("solutions/")
         logging.info("Problem {name} created in directory {name}/".format(name=name))
         logging.info("Start editing your default interface.txt and evaluator.py files!")
+
+
+def create_new_parser(subparsers):
+    parser = subparsers.add_parser("new", help="Create a new Turingarena problem")
+    parser.add_argument("name", help="problem name")
+    parser.set_defaults(Command=NewCommand)

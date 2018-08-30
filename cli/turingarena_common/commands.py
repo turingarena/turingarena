@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-DaemonCommandParameters = namedtuple("DaemonCommandParameters", [
+RemoteCommandParameters = namedtuple("RemoteCommandParameters", [
     "log_level",
     "stderr_isatty",
     "local_execution",
@@ -32,4 +32,13 @@ EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
     "file",
     "evaluator",
     "raw_output",
+])
+
+FileCommandParameters = namedtuple("FileCommandParameters", [
+    "working_directory",
+    "command",
+])
+
+FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
+    "path",
 ])

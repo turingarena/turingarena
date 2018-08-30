@@ -2,12 +2,15 @@ import logging
 import pickle
 import sys
 
-from turingarena_common.commands import EvaluateCommandParameters, DaemonCommandParameters, LocalExecutionParameters
+from turingarena_common.commands import EvaluateCommandParameters, RemoteCommandParameters, LocalExecutionParameters, \
+    FileCommandParameters
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
+from turingarena_impl.cli_server.files import file_cmd
 from turingarena_impl.logging import init_logger
 
 COMMANDS_MAP = {
     EvaluateCommandParameters: evaluate_cmd,
+    FileCommandParameters: file_cmd,
 }
 
 
@@ -18,7 +21,7 @@ def run_command(command_parameters, local_execution):
     raise TypeError(type(command_parameters))
 
 
-def do_main(parameters: DaemonCommandParameters):
+def do_main(parameters: RemoteCommandParameters):
     init_logger(parameters.log_level, parameters.stderr_isatty)
     local_execution = parameters.local_execution
     if local_execution is None:
