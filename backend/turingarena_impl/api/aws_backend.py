@@ -66,9 +66,7 @@ def do_evaluate(params):
     func_id = os.environ["HYPERSH_FUNC_ID"]
 
     data = json.dumps(request_data).encode()
-    # FIXME: use https to avoid exposing the func_id.
-    # https://forum.hyper.sh/t/ssl-error-in-hyper-func-api-endpoints-via-https/873
-    url = f"http://{region}.hyperfunc.io/call/{func_name}/{func_id}"
+    url = f"https://{region}.hyperfunc.io/call/{func_name}/{func_id}"
     with urlopen(url, data=data) as f:
         f.read()
 
