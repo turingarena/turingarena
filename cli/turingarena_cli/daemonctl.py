@@ -3,14 +3,13 @@ import os
 import subprocess
 from argparse import ArgumentParser
 
+from future.moves import sys
+
 from turingarena_cli.command import Command
 
 
 class DaemonControlCommand(Command):
-    PARSER = ArgumentParser(
-        description="Control the execution of the TuringArena daemon",
-        add_help=False,
-    )
+    PARSER = ArgumentParser(add_help=False)
     PARSER.add_argument(
         "--container-name",
         help="name of the container to run",
@@ -38,6 +37,7 @@ class DaemonStartCommand(DaemonControlCommand):
     PARSER = ArgumentParser(
         description="Start the daemon",
         add_help=False,
+        parents=[DaemonControlCommand.PARSER],
     )
     PARSER.add_argument(
         "--dev-dir",
@@ -87,20 +87,19 @@ class DaemonStartCommand(DaemonControlCommand):
 
         cli_line = " ".join(cli)
         logging.info("Running: {}".format(cli_line))
-        print(cli_line)
+        print(cli_line, file=sys.stderr)
         p = subprocess.Popen(cli, cwd="/")
         p.wait()
         if self.detach and p.returncode == 0:
-            logging.info("Turingarena is running in background, use `turingarenad --kill` to terminate it")
-
-
-DaemonStartCommand.PARSER.set_defaults(Command=DaemonStartCommand)
+            print("Turingarena is running in background, use `turingarena daemon stop` to terminate it",
+                  file=sys.stderr)
 
 
 class DaemonStopCommand(DaemonControlCommand):
     PARSER = ArgumentParser(
         description="Stop the daemon",
         add_help=False,
+        parents=[DaemonControlCommand.PARSER],
     )
 
     def run(self):
@@ -113,17 +112,21 @@ class DaemonStopCommand(DaemonControlCommand):
         p.wait()
 
 
-DaemonStopCommand.PARSER.set_defaults(Command=DaemonStopCommand)
+DAEMON_CONTROL_PARSER = ArgumentParser(
+    add_help=False,
+    parents=[DaemonControlCommand.PARSER],
+    description="Control the execution of the TuringArena daemon",
+)
 
-subparsers = DaemonControlCommand.PARSER.add_subparsers(metavar="COMMAND")
+subparsers = DAEMON_CONTROL_PARSER.add_subparsers(metavar="COMMAND")
 subparsers.required = True
 subparsers.add_parser(
     "start",
     parents=[DaemonStartCommand.PARSER],
     help=DaemonStartCommand.PARSER.description,
-)
+).set_defaults(Command=DaemonStartCommand)
 subparsers.add_parser(
     "stop",
     parents=[DaemonStopCommand.PARSER],
     help=DaemonStopCommand.PARSER.description,
-)
+).set_defaults(Command=DaemonStopCommand)
