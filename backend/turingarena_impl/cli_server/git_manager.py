@@ -22,7 +22,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
 
     def init(self):
         subprocess.run([
-            "git", "init", "--bare"
+            "git", "init", "--bare", "--quiet"
         ], env=self._base_env, check=True)
 
     def fetch_repository(self, repository):
