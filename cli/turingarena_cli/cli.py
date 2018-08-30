@@ -3,10 +3,7 @@ from __future__ import print_function
 import argparse
 import os
 
-from future.moves import sys
-
 from turingarena_cli.common import init_logger
-# in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.evaluate import create_evaluate_parser
 from turingarena_cli.files import create_file_parser
 from turingarena_cli.legacy import create_info_parser, create_make_parser, create_test_parser
@@ -14,6 +11,7 @@ from turingarena_cli.new import create_new_parser
 from turingarena_cli.pack import PACK_COMMAND_PARSER
 from turingarena_cli.remote import REMOTE_COMMAND_PARSER
 
+# in python2.7, quote is in pipes and not in shlex
 try:
     from shlex import quote
 except ImportError:
