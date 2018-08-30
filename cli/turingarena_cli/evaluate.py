@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.pack import PackBasedCommand
 from turingarena_cli.remote import RemoteCommand
 from turingarena_common.commands import EvaluateCommandParameters

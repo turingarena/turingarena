@@ -8,6 +8,7 @@ from abc import abstractmethod
 from argparse import ArgumentParser
 from functools import lru_cache
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
 from turingarena_common.commands import LocalExecutionParameters, RemoteCommandParameters
 
@@ -116,7 +117,7 @@ class RemoteCommand(AbstractRemoteCommand):
     def _get_module_name(self):
         return "turingarena_impl.cli_server.runner"
 
-    PARSER = ArgumentParser(add_help=False)
+    PARSER = ArgumentParser(add_help=False, parents=[BASE_PARSER])
     PARSER.add_argument(
         "--local", "-l",
         action="store_true",

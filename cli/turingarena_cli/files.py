@@ -2,7 +2,6 @@ from abc import abstractmethod
 from argparse import ArgumentParser
 
 from turingarena_cli.pack import PackBasedCommand
-from turingarena_cli.remote import RemoteCommand
 from turingarena_common.commands import FileCommandParameters, FileCatCommandParameters
 
 
@@ -32,17 +31,18 @@ class FileCatCommand(FileCommand):
 
     PARSER = ArgumentParser(
         description="Print the content of a file to stdout",
+        parents=[FileCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("path", help="Path to the file to print")
 
 
-FileCatCommand.PARSER.set_defaults(Command=FileCatCommand)
+FILE_PARSER = ArgumentParser(add_help=False)
 
-subparsers = FileCommand.PARSER.add_subparsers(title="subcommand", dest="subcommand")
+subparsers = FILE_PARSER.add_subparsers(title="subcommand", dest="subcommand")
 subparsers.required = True
 subparsers.add_parser(
     "cat",
     parents=[FileCatCommand.PARSER],
     help=FileCatCommand.PARSER.description,
-)
+).set_defaults(Command=FileCatCommand)

@@ -5,11 +5,12 @@ from argparse import ArgumentParser
 
 from future.moves import sys
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
 
 
 class DaemonControlCommand(Command):
-    PARSER = ArgumentParser(add_help=False)
+    PARSER = ArgumentParser(add_help=False, parents=[BASE_PARSER])
     PARSER.add_argument(
         "--container-name",
         help="name of the container to run",
@@ -114,11 +115,10 @@ class DaemonStopCommand(DaemonControlCommand):
 
 DAEMON_CONTROL_PARSER = ArgumentParser(
     add_help=False,
-    parents=[DaemonControlCommand.PARSER],
     description="Control the execution of the TuringArena daemon",
 )
 
-subparsers = DAEMON_CONTROL_PARSER.add_subparsers(metavar="COMMAND")
+subparsers = DAEMON_CONTROL_PARSER.add_subparsers(dest="subcommand", metavar="COMMAND")
 subparsers.required = True
 subparsers.add_parser(
     "start",

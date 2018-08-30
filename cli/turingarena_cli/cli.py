@@ -1,13 +1,13 @@
 from __future__ import print_function
 
-import argparse
 import os
 from argparse import ArgumentParser
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.common import init_logger
 from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import EvaluateCommand
-from turingarena_cli.files import FileCommand
+from turingarena_cli.files import FILE_PARSER
 from turingarena_cli.legacy import INFO_PARSER, TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
 
@@ -23,69 +23,54 @@ try:
 except ImportError:
     pass
 
-BASE_PARSER = argparse.ArgumentParser(
-    description="Turingarena CLI",
-    add_help=False,
-)
-LOG_LEVELS = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", ]
-
-BASE_PARSER.add_argument(
-    "--log-level",
-    help="log level ({})".format(",".join(LOG_LEVELS)),
-    type=str.upper,
-    metavar="LEVEL",
-    choices=LOG_LEVELS,
-    default="WARNING",
-)
-
-PARSER = ArgumentParser(parents=[BASE_PARSER])
+PARSER = ArgumentParser()
 
 subparsers = PARSER.add_subparsers(dest="command", metavar="COMMAND")
 subparsers.required = True
 
 subparsers.add_parser(
     "evaluate",
-    parents=[BASE_PARSER, EvaluateCommand.PARSER],
+    parents=[EvaluateCommand.PARSER],
     help=EvaluateCommand.PARSER.description,
 )
 subparsers.add_parser(
     "info",
-    parents=[BASE_PARSER, INFO_PARSER],
+    parents=[INFO_PARSER],
     help=INFO_PARSER.description,
 )
 subparsers.add_parser(
     "test",
-    parents=[BASE_PARSER, TEST_PARSER],
+    parents=[TEST_PARSER],
     help=TEST_PARSER.description,
 )
 subparsers.add_parser(
     "new",
-    parents=[BASE_PARSER, NewCommand.PARSER],
+    parents=[NewCommand.PARSER],
     help=NewCommand.PARSER.description,
 )
 subparsers.add_parser(
     "file",
-    parents=[BASE_PARSER, FileCommand.PARSER],
-    help=FileCommand.PARSER.description,
+    parents=[FILE_PARSER],
+    help=FILE_PARSER.description,
 )
 subparsers.add_parser(
     "make",
-    parents=[BASE_PARSER, MAKE_PARSER],
+    parents=[MAKE_PARSER],
     help=MAKE_PARSER.description,
 )
 subparsers.add_parser(
     "skeleton",
-    parents=[BASE_PARSER, BASE_MAKE_PARSER],
+    parents=[BASE_MAKE_PARSER],
     help="generate skeleton",
 )
 subparsers.add_parser(
     "template",
-    parents=[BASE_PARSER, BASE_MAKE_PARSER],
+    parents=[BASE_MAKE_PARSER],
     help="generate template",
 )
 subparsers.add_parser(
     "daemon",
-    parents=[BASE_PARSER, DAEMON_CONTROL_PARSER],
+    parents=[DAEMON_CONTROL_PARSER],
     help=DAEMON_CONTROL_PARSER.description,
 )
 
