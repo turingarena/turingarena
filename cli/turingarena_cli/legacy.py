@@ -31,8 +31,8 @@ class LegacyDaemonCommand(PackBasedCommand):
 
         if self.args.send_current_dir:
             if not self.args.local:
-                self.push_local_tree(self.local_tree_id)
-            self.args.tree_id = self.local_tree_id
+                self.push_local_tree(self.working_dir_tree_id)
+            self.args.tree_id = self.working_dir_tree_id
             self.args.current_dir = self.relative_current_dir
         else:
             self.args.tree_id = None
@@ -47,7 +47,7 @@ class LegacyDaemonCommand(PackBasedCommand):
 
     PARSER = ArgumentParser(
         add_help=False,
-        parents=[PackBasedCommand.PARSER, RemoteCommand.PARSER]
+        parents=[PackBasedCommand.PARSER]
     )
 
 

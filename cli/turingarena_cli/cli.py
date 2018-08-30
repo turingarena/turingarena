@@ -4,7 +4,7 @@ import argparse
 import os
 
 from turingarena_cli.common import init_logger
-from turingarena_cli.evaluate import create_evaluate_parser
+from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.legacy import INFO_PARSER, TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
@@ -21,36 +21,28 @@ try:
 except ImportError:
     pass
 
+PARSER = argparse.ArgumentParser(description="Turingarena CLI")
+PARSER.add_argument("--log-level", help="log level", default="WARNING")
 
-def create_parser():
-    parser = argparse.ArgumentParser(description="Turingarena CLI")
+subparsers = PARSER.add_subparsers(title="command", dest="command")
+subparsers.required = True
 
-    parser.add_argument("--log-level", help="log level", default="WARNING")
-
-    subparsers = parser.add_subparsers(title="command", dest="command")
-    subparsers.required = True
-
-    create_evaluate_parser(subparsers)
-
-    subparsers.add_parser("info", parents=[INFO_PARSER], help=INFO_PARSER.description)
-    subparsers.add_parser("test", parents=[TEST_PARSER], help=TEST_PARSER.description)
-    subparsers.add_parser("new", parents=[NewCommand.PARSER], help=NewCommand.PARSER.description)
-    subparsers.add_parser("file", parents=[FileCommand.PARSER], help=FileCommand.PARSER.description)
-    subparsers.add_parser("make", parents=[MAKE_PARSER], help=BASE_MAKE_PARSER.description)
-
-    subparsers.add_parser("skeleton", parents=[BASE_MAKE_PARSER], help="generate skeleton")
-    subparsers.add_parser("template", parents=[BASE_MAKE_PARSER], help="generate template")
-
-    return parser
+subparsers.add_parser("evaluate", parents=[EvaluateCommand.PARSER], help=EvaluateCommand.PARSER.description)
+subparsers.add_parser("info", parents=[INFO_PARSER], help=INFO_PARSER.description)
+subparsers.add_parser("test", parents=[TEST_PARSER], help=TEST_PARSER.description)
+subparsers.add_parser("new", parents=[NewCommand.PARSER], help=NewCommand.PARSER.description)
+subparsers.add_parser("file", parents=[FileCommand.PARSER], help=FileCommand.PARSER.description)
+subparsers.add_parser("make", parents=[MAKE_PARSER], help=MAKE_PARSER.description)
+subparsers.add_parser("skeleton", parents=[BASE_MAKE_PARSER], help="generate skeleton")
+subparsers.add_parser("template", parents=[BASE_MAKE_PARSER], help="generate template")
 
 
 def main():
-    parser = create_parser()
     try:
-        argcomplete.autocomplete(parser)
+        argcomplete.autocomplete(PARSER)
     except NameError:
         pass
-    args = parser.parse_args()
+    args = PARSER.parse_args()
 
     init_logger(args.log_level)
 

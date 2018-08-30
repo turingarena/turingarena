@@ -6,7 +6,7 @@ from turingarena_cli.remote import RemoteCommand
 from turingarena_common.commands import FileCommandParameters, FileCatCommandParameters
 
 
-class FileCommand(RemoteCommand, PackBasedCommand):
+class FileCommand(PackBasedCommand):
     @abstractmethod
     def _get_file_command_parameters(self):
         pass
@@ -19,7 +19,7 @@ class FileCommand(RemoteCommand, PackBasedCommand):
 
     PARSER = ArgumentParser(
         description="Get generated files",
-        parents=[RemoteCommand.PARSER, PackBasedCommand.PARSER],
+        parents=[PackBasedCommand.PARSER],
         add_help=False,
     )
 
@@ -39,7 +39,8 @@ class FileCatCommand(FileCommand):
 
 FileCatCommand.PARSER.set_defaults(Command=FileCatCommand)
 
-subparsers = FileCommand.PARSER.add_subparsers(dest="subcommand")
+subparsers = FileCommand.PARSER.add_subparsers(title="subcommand", dest="subcommand")
+subparsers.required = True
 subparsers.add_parser(
     "cat",
     parents=[FileCatCommand.PARSER],
