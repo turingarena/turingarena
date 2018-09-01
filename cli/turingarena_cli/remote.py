@@ -13,12 +13,6 @@ from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
 from turingarena_common.commands import LocalExecutionParameters, RemoteCommandParameters
 
-# in python2.7, quote is in pipes and not in shlex
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
-
 SSH_BASE_CLI = [
     "ssh",
     "-T",
@@ -50,7 +44,7 @@ class RemoteCommand(Command):
         self.check_daemon()
         cli = SSH_BASE_CLI + [
             "turingarena@localhost",
-        ] + [quote(c) for c in self._get_remote_cli()]
+        ] + self._get_remote_cli()
 
         logging.info("Sending command to the server via ssh")
         logging.debug(cli)

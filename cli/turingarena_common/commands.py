@@ -29,7 +29,7 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
 
 EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
     "working_directory",
-    "submission",
+    "file",
     "evaluator",
     "raw_output",
 ])
@@ -41,9 +41,4 @@ FileCommandParameters = namedtuple("FileCommandParameters", [
 
 FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
     "path",
-])
-
-SubmissionFileParameters = namedtuple("SubmissionFileParameters", [
-    "filename",
-    "content",
 ])

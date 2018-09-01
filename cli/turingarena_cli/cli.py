@@ -9,7 +9,13 @@ from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FILE_PARSER
 from turingarena_cli.legacy import INFO_PARSER, TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
+# in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.remote import RemoteExecCommand
+
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
 
 # PYTHON_ARGCOMPLETE_OK
 try:
