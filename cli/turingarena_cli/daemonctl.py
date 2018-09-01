@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import subprocess
@@ -6,6 +7,7 @@ from argparse import ArgumentParser
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
+from turingarena_cli.remote import RemoteCommand
 
 
 class DaemonControlCommand(Command):

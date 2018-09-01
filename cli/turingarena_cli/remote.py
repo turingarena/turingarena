@@ -1,3 +1,4 @@
+import argparse
 import importlib
 import logging
 import os
@@ -24,7 +25,7 @@ SSH_BASE_CLI = [
 SSH_USER = "turingarena@localhost"
 
 
-class AbstractRemoteCommand(Command):
+class RemoteCommand(Command):
     def check_daemon(self):
         cli = SSH_BASE_CLI + [SSH_USER, "echo", "OK!"]
         try:
@@ -32,22 +33,39 @@ class AbstractRemoteCommand(Command):
         except subprocess.CalledProcessError:
             sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
 
-    def local_command(self):
-        module = importlib.import_module(self.module_name)
-        module.do_main(self.parameters)
+    @abstractmethod
+    def _get_remote_cli(self):
+        pass
 
-    def send_ssh_command(self, cli):
+    def _on_send_stdin(self, stdin):
+        pass
+
+    def run(self):
+        self.check_daemon()
         cli = SSH_BASE_CLI + [
             "turingarena@localhost",
-        ] + cli
+        ] + self._get_remote_cli()
 
         logging.info("Sending command to the server via ssh")
         logging.debug(cli)
 
         p = subprocess.Popen(cli, stdin=subprocess.PIPE)
-        pickle.dump(self.parameters, p.stdin)
+        self._on_send_stdin(p.stdin)
         p.stdin.close()
         p.wait()
+
+    PARSER = ArgumentParser(add_help=False, parents=[BASE_PARSER])
+    PARSER.add_argument(
+        "--local", "-l",
+        action="store_true",
+        help="execute turingarena locally (do not connect to docker)",
+    )
+
+
+class AbstractRemotePythonCommand(RemoteCommand):
+    def _run_locally(self):
+        module = importlib.import_module(self.module_name)
+        module.do_main(self.parameters)
 
     @property
     def module_name(self):
@@ -65,31 +83,29 @@ class AbstractRemoteCommand(Command):
     def _get_parameters(self):
         pass
 
+    def _get_remote_cli(self):
+        return [
+            "/usr/local/bin/python",
+            "-m", self.module_name,
+        ]
+
+    def _on_send_stdin(self, stdin):
+        pickle.dump(self.parameters, stdin)
+
     @property
     @lru_cache(None)
     def git_dir(self):
         return os.path.join(os.path.expanduser("~"), ".turingarena", "db.git")
 
-    def ssh_command(self):
-        cli = [
-            "/usr/local/bin/python",
-            "-m", self.module_name,
-        ]
-
-        self.send_ssh_command(cli)
-
     def run(self):
-        if not self.args.local:
-            self.check_daemon()
-
         self.args.isatty = sys.stderr.isatty()
         if self.args.local:
-            self.local_command()
+            self._run_locally()
         else:
-            self.ssh_command()
+            super().run()
 
 
-class RemoteCommand(AbstractRemoteCommand):
+class RemotePythonCommand(AbstractRemotePythonCommand):
     def _get_parameters(self):
         if self.args.local:
             local_execution = LocalExecutionParameters(
@@ -117,9 +133,14 @@ class RemoteCommand(AbstractRemoteCommand):
     def _get_module_name(self):
         return "turingarena_impl.cli_server.runner"
 
-    PARSER = ArgumentParser(add_help=False, parents=[BASE_PARSER])
-    PARSER.add_argument(
-        "--local", "-l",
-        action="store_true",
-        help="execute turingarena locally (do not connect to docker)",
+
+class RemoteExecCommand(RemoteCommand):
+    PARSER = ArgumentParser(
+        description="Execute an arbitrary command on the daemon (for testing)",
+        add_help=False,
+        parents=[RemoteCommand.PARSER],
     )
+    PARSER.add_argument("cli", nargs=argparse.REMAINDER)
+
+    def _get_remote_cli(self):
+        return self.args.cli

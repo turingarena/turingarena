@@ -2,10 +2,11 @@ from abc import abstractmethod
 from argparse import ArgumentParser
 
 from turingarena_cli.pack import PackBasedCommand
+from turingarena_cli.remote import RemotePythonCommand
 from turingarena_common.commands import FileCommandParameters, FileCatCommandParameters
 
 
-class FileCommand(PackBasedCommand):
+class FileCommand(PackBasedCommand, RemotePythonCommand):
     @abstractmethod
     def _get_file_command_parameters(self):
         pass

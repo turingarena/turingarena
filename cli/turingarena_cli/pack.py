@@ -7,13 +7,13 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena_cli.remote import AbstractRemoteCommand, RemoteCommand
+from turingarena_cli.remote import AbstractRemotePythonCommand, RemotePythonCommand
 from turingarena_cli.ssh import SSH_BASE_CLI
 from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
 from turingarena_common.git_common import GIT_BASE_ENV
 
 
-class PackBasedCommand(AbstractRemoteCommand):
+class PackBasedCommand(AbstractRemotePythonCommand):
     @property
     @lru_cache(None)
     def git_work_dir(self):
@@ -193,7 +193,7 @@ class PackBasedCommand(AbstractRemoteCommand):
 
     PARSER = ArgumentParser(
         add_help=False,
-        parents=[RemoteCommand.PARSER],
+        parents=[RemotePythonCommand.PARSER],
     )
 
     PARSER.add_argument(

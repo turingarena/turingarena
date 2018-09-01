@@ -3,7 +3,7 @@ import uuid
 from argparse import ArgumentParser
 
 from turingarena_cli.pack import PackBasedCommand
-from turingarena_cli.remote import RemoteCommand
+from turingarena_cli.remote import RemotePythonCommand
 
 
 class LegacyDaemonCommand(PackBasedCommand):
