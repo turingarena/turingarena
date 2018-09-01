@@ -22,7 +22,6 @@ RUN true \
         coloredlogs \
         commonmark \
         docopt \
-        pbr \
         pyyaml \
         pytest-sugar \
         pytest-xdist \
