@@ -25,9 +25,7 @@ def do_main(parameters: RemoteCommandParameters):
     init_logger(parameters.log_level, parameters.stderr_isatty)
     local_execution = parameters.local_execution
     if local_execution is None:
-        local_execution = LocalExecutionParameters(
-            git_dir="/run/turingarena/db.git",
-        )
+        local_execution = LocalExecutionParameters.DEFAULT
 
     logging.debug(f"Running command {parameters}")
     return run_command(parameters.command, local_execution)

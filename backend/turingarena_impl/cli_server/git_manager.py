@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
+from turingarena_common.commands import GitCloneRepository
 from turingarena_common.git_common import GIT_BASE_ENV
 
 logger = logging.getLogger(__name__)
@@ -25,21 +26,16 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "git", "init", "--bare", "--quiet"
         ], env=self._base_env, check=True)
 
-    def fetch_repository(self, repository):
+    def fetch_repository(self, repository: GitCloneRepository):
         logger.info(f"Fetching git repository {repository}")
 
-        assert repository["type"] == "git_clone"
-        url = repository["url"]
-        branch = repository["branch"]
-        depth = repository["depth"]
-
-        if depth is not None:
-            depth_options = [f"--depth={depth}"]
+        if repository.depth is not None:
+            depth_options = [f"--depth={repository.depth}"]
         else:
             depth_options = []
 
-        if branch is not None:
-            branch_options = [branch]
+        if repository.branch is not None:
+            branch_options = [repository.branch]
         else:
             branch_options = []
 
@@ -48,7 +44,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "fetch",
             "--recurse-submodules=yes",
             *depth_options,
-            url,
+            repository.url,
             *branch_options,
         ]
         logging.debug(f"running {cmd}")

@@ -1,9 +1,10 @@
 import base64
 import json
 import time
-from collections.__init__ import namedtuple
 
 import boto3
+
+from turingarena_common.submission import SubmissionFile
 
 
 def save_submission(id, files):
@@ -55,6 +56,3 @@ def load_submission(submission_id):
         for name, file_data in data["files"].items()
     }
     return files
-
-
-SubmissionFile = namedtuple("SubmissionFile", ["filename", "content"])

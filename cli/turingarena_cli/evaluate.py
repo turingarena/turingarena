@@ -4,7 +4,8 @@ from functools import lru_cache
 
 from turingarena_cli.pack import PackBasedCommand
 from turingarena_cli.remote import RemotePythonCommand
-from turingarena_common.commands import EvaluateCommandParameters, SubmissionFileParameters
+from turingarena_common.commands import EvaluateCommandParameters
+from turingarena_common.submission import SubmissionFile
 
 
 class EvaluateCommand(PackBasedCommand, RemotePythonCommand):
@@ -56,7 +57,7 @@ class EvaluateCommand(PackBasedCommand, RemotePythonCommand):
             path = argument
             name = next(default_fields)
             filename, content = self._load_file(path)
-        return name, SubmissionFileParameters(
+        return name, SubmissionFile(
             filename=filename,
             content=content,
         )

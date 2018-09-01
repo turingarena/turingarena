@@ -1,35 +1,22 @@
-import json
-import os
+import pickle
 import sys
 import traceback
-from tempfile import TemporaryDirectory
 
-from turingarena_impl.api.aws_evaluate import cloud_evaluate
 from turingarena_impl.api.dynamodb_events import store_events
 from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.cli_server.git_manager import GitManager
+from turingarena_impl.evaluation.evaluate import evaluate
 
 
 def do_evaluate():
-    request_data = json.load(sys.stdin)
+    request = pickle.load(sys.stdin.buffer)
 
-    submission_id = request_data["submission_id"]
-    evaluation_id = request_data["evaluation_id"]
-    evaluator_cmd = request_data["evaluator_cmd"]
+    events = evaluate(
+        working_directory=request.working_directory,
+        evaluator_cmd=request.evaluator,
+        submission=load_submission(request.submission_id),
+    )
 
-    git = GitManager("/run/turingarena/db.git")
-    git.init()
-
-    for r in request_data["repositories"].values():
-        git.fetch_repository(r)
-
-    with TemporaryDirectory() as temp_dir:
-        git.checkout_trees(request_data["packs"], temp_dir)
-
-        os.chdir(temp_dir)
-        submission = load_submission(submission_id)
-        events = cloud_evaluate(submission, evaluator_cmd=evaluator_cmd)
-        store_events(evaluation_id, events)
+    store_events(request.evaluation_id, events)
 
 
 def main():

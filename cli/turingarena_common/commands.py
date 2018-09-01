@@ -11,6 +11,10 @@ LocalExecutionParameters = namedtuple("LocalExecutionParameters", [
     "git_dir",
 ])
 
+LocalExecutionParameters.DEFAULT = LocalExecutionParameters(
+    git_dir="/run/turingarena/db.git",
+)
+
 Pack = namedtuple("Pack", [
     "parts",
     "repositories",
@@ -41,9 +45,4 @@ FileCommandParameters = namedtuple("FileCommandParameters", [
 
 FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
     "path",
-])
-
-SubmissionFileParameters = namedtuple("SubmissionFileParameters", [
-    "filename",
-    "content",
 ])
