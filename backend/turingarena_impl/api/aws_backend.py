@@ -5,10 +5,10 @@ from http import HTTPStatus
 from urllib.request import urlopen
 
 from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
+from turingarena_common.submission import SubmissionFile
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
 from turingarena_impl.api.dynamodb_submission import save_submission
-from turingarena_common.submission import SubmissionFile
 from turingarena_impl.api.request import CloudEvaluateRequest
 
 
@@ -69,7 +69,7 @@ def do_evaluate(params):
     request = CloudEvaluateRequest(
         submission_id=submission_id,
         evaluation_id=submission_id,
-        evaluator_cmd=params["evaluator_cmd"].value,
+        evaluator=params["evaluator_cmd"].value,
         working_directory=working_directory,
     )
 
