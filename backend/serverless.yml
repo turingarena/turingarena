@@ -47,6 +47,8 @@ functions:
         - "**"
       include:
         - "turingarena_impl/**"
+        - "turingarena_common/**"
+        - "turingarena_cli/**"
     handler: turingarena_impl.api.lambda_proxy.main
     events:
       - http: ANY /{proxy+}
