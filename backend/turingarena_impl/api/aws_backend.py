@@ -79,7 +79,7 @@ def do_evaluate(params):
     func_name = os.environ["HYPERSH_FUNC_NAME"]
     func_id = os.environ["HYPERSH_FUNC_ID"]
 
-    data = pickle.dumps(request).encode()
+    data = pickle.dumps(request)
     url = f"https://{region}.hyperfunc.io/call/{func_name}/{func_id}"
     with urlopen(url, data=data) as f:
         f.read()
