@@ -102,3 +102,14 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    FilesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: turingarena-files-bucket
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins: ["*"]
+        LifecycleConfiguration:
+          Rules:
+            - ExpirationInDays: 1

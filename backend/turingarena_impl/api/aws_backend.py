@@ -57,11 +57,11 @@ def do_evaluate(params):
 
     working_directory = WorkingDirectory(
         pack=Pack(
-            parts=params.getlist("packs[]"),
-            repositories=[
+            parts=tuple(sorted(params.getlist("packs[]"))),
+            repositories=tuple([
                 get_repository(name, params)
                 for name in get_children_field("repositories", params)
-            ]
+            ])
         ),
         current_directory=".",
     )

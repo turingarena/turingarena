@@ -167,21 +167,26 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         parts = self.args.tree or []
         parts.extend(self.local_parts)
 
-        return parts
+        return tuple(sorted(parts))
+
+    @property
+    @lru_cache(None)
+    def repositories(self):
+        return tuple(
+            GitCloneRepository(
+                url=url,
+                branch=None,
+                depth=None,
+            )
+            for url in self.args.repository or []
+        )
 
     @property
     def working_directory(self):
         return WorkingDirectory(
             pack=Pack(
                 parts=self.parts,
-                repositories=[
-                    GitCloneRepository(
-                        url=url,
-                        branch=None,
-                        depth=None,
-                    )
-                    for url in self.args.repository or []
-                ],
+                repositories=self.repositories,
             ),
             current_directory=self.relative_current_dir,
         )

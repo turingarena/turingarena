@@ -4,8 +4,13 @@ import traceback
 
 from turingarena_impl.api.dynamodb_events import store_events
 from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.api.request import CloudEvaluateRequest
+from turingarena_impl.api.request import CloudEvaluateRequest, CloudGenerateFilesRequest
+from turingarena_impl.api.s3_files import generate_cloud_files
 from turingarena_impl.evaluation.evaluate import evaluate
+
+
+def handle_generate_files(request: CloudGenerateFilesRequest):
+    generate_cloud_files(request.working_directory)
 
 
 def handle_evaluate(request: CloudEvaluateRequest):
@@ -30,7 +35,8 @@ def execute_request():
 
 
 REQUEST_MAP = {
-    CloudEvaluateRequest: handle_evaluate
+    CloudEvaluateRequest: handle_evaluate,
+    CloudGenerateFilesRequest: handle_generate_files,
 }
 
 
