@@ -133,5 +133,5 @@ def do_generate_file(params):
 endpoints = dict(
     evaluate=dict(POST=do_evaluate),
     evaluation_events=dict(GET=do_evaluation_events),
-    generate_file=dict(GET=do_generate_file),
+    generate_file=dict(POST=do_generate_file),
 )
