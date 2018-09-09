@@ -9,7 +9,7 @@ from turingarena_common.submission import SubmissionFile
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
 from turingarena_impl.api.dynamodb_submission import save_submission
-from turingarena_impl.api.request import CloudEvaluateRequest
+from turingarena_impl.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
 
 
 def get_children_field(base, params):
@@ -55,16 +55,7 @@ def do_evaluate(params):
 
     save_submission(submission_id, submission)
 
-    working_directory = WorkingDirectory(
-        pack=Pack(
-            parts=tuple(sorted(params.getlist("packs[]"))),
-            repositories=tuple([
-                get_repository(name, params)
-                for name in get_children_field("repositories", params)
-            ])
-        ),
-        current_directory=".",
-    )
+    working_directory = get_working_directory(params)
 
     request = CloudEvaluateRequest(
         submission_id=submission_id,
@@ -75,18 +66,35 @@ def do_evaluate(params):
 
     # check_no_unused_params(params, used_params)
 
+    send_request_to_hypersh(request)
+
+    return dict(
+        id=submission_id,
+    )
+
+
+def send_request_to_hypersh(request):
     region = os.environ["HYPERSH_REGION"]
     func_name = os.environ["HYPERSH_FUNC_NAME"]
     func_id = os.environ["HYPERSH_FUNC_ID"]
-
     data = pickle.dumps(request)
     url = f"https://{region}.hyperfunc.io/call/{func_name}/{func_id}"
     with urlopen(url, data=data) as f:
         f.read()
 
-    return dict(
-        id=submission_id,
+
+def get_working_directory(params):
+    working_directory = WorkingDirectory(
+        pack=Pack(
+            parts=tuple(sorted(params.getlist("packs[]"))),
+            repositories=tuple([
+                get_repository(name, params)
+                for name in get_children_field("repositories", params)
+            ])
+        ),
+        current_directory=".",
     )
+    return working_directory
 
 
 def check_no_unused_params(params, used_params):
@@ -112,7 +120,18 @@ def do_evaluation_events(params):
     return load_event_page(evaluation_id, after)
 
 
+def do_generate_file(params):
+    working_directory = get_working_directory(params)
+
+    request = CloudGenerateFileRequest(
+        working_directory=working_directory,
+    )
+
+    send_request_to_hypersh(request)
+
+
 endpoints = dict(
     evaluate=dict(POST=do_evaluate),
     evaluation_events=dict(GET=do_evaluation_events),
+    generate_file=dict(GET=do_generate_file),
 )

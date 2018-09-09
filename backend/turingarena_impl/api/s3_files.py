@@ -1,3 +1,4 @@
+import json
 import os
 from io import StringIO
 
@@ -13,16 +14,23 @@ def generate_cloud_files(working_directory: WorkingDirectory):
 
     pack_id = "_".join(working_directory.pack.parts)
 
+    file_content = {}
     with create_working_directory(working_directory) as work_dir:
         generated = PackGeneratedDirectory(work_dir)
         for t, generator in generated.targets:
             file = StringIO()
             generator(file)
             file.seek(0)
+            file_content[os.path.normpath(t)] = file.read()
+        file_key = os.path.normpath(os.path.join(
+            pack_id,
+            working_directory.current_directory,
+            "data.json",
+        ))
 
-            s3.Bucket("turingarena-files-bucket").put_object(
-                ACL="public-read",
-                Body=file.read().encode(),
-                Key=f"{pack_id}/{os.path.normpath(t)}",
-                StorageClass="REDUCED_REDUNDANCY",
-            )
+    s3.Bucket("turingarena-files-bucket").put_object(
+        ACL="public-read",
+        Body=json.dumps(file_content),
+        Key=file_key,
+        StorageClass="REDUCED_REDUNDANCY",
+    )
