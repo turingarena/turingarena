@@ -109,7 +109,11 @@ resources:
         BucketName: turingarena-files-bucket
         CorsConfiguration:
           CorsRules:
-            - AllowedOrigins: ["*"]
+            -
+              AllowedOrigins: ["*"]
+              AllowedMethods: ["GET"]
         LifecycleConfiguration:
           Rules:
-            - ExpirationInDays: 1
+            -
+              ExpirationInDays: 1
+              Status: Enabled
