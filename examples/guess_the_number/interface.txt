@@ -8,8 +8,6 @@ function play(n) callbacks {
 
 main {
     read n;
-
     call ans = play(n);
-
     write ans;
 }
