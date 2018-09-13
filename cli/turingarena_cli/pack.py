@@ -187,6 +187,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         )
 
     def run(self):
+        self.git_init()
         for p in self.local_parts:
             self.push_local_tree(p)
         return super().run()
