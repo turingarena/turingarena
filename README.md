@@ -1,5 +1,7 @@
 # TuringArena
 
+[![Join the chat at https://gitter.im/turingarena/turingarena](https://badges.gitter.im/turingarena/turingarena.svg)](https://gitter.im/turingarena/turingarena?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 *Create algorithmic challenges!*
 
 [TuringArena](http://turingarena.org "TuringArena") is a toolkit and platform which allows to:
