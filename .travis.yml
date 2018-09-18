@@ -8,9 +8,10 @@ before_script:
   - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
   - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
-  - export DOCKER_IMAGE=turingarena/turingarena:v$BASE_VERSION$DEV_RELEASE_SEGMENT
-  - export SERVERLESS_STAGE=branch-$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
-  - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
+  - export BRANCH_SEGMENT=$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
+  - export DOCKER_IMAGE=turingarena/turingarena:$BRANCH_SEGMENT
+  - export SERVERLESS_STAGE=branch-$BRANCH_SEGMENT
+  - export HYPERSH_FUNC_NAME=evaluate-$BRANCH_SEGMENT
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 stages:
