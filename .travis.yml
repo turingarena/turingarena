@@ -53,7 +53,7 @@ jobs:
           .
         - docker push $DOCKER_IMAGE
         - docker build -t deploy deploy/
-        - HYPER_FUNC_ID=$(docker run --rm --env-file env deploy)
+        - HYPERSH_FUNC_ID=$(docker run --rm --env-file env deploy sh hypersh-deploy.sh)
         - cd backend/
         - npm install
         - serverless deploy --stage $SERVERLESS_STAGE
