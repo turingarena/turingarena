@@ -19,7 +19,10 @@ true \
         $DOCKER_IMAGE \
         python -m turingarena_impl.api.hypersh_evaluate \
     && export HYPERSH_FUNC_ID=$(hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID) \
-    && echo $HYPERSH_FUNC_ID \
+    && echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID >&2 \
+    && cd /src/backend/ \
+    && npm install \
+    && serverless deploy --stage $SERVERLESS_STAGE \
     && true
 
 exit $?

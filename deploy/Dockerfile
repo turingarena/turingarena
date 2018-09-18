@@ -1,3 +1,6 @@
+ARG TURINGARENA_IMAGE=turingarena/turingarena
+FROM $TURINGARENA_IMAGE as src
+
 FROM alpine:3.7
 
 RUN true \
@@ -12,4 +15,7 @@ RUN true \
     && npm install -g serverless \
     && true
 
-COPY hypersh-deploy.sh hypersh-deploy.sh
+COPY --from=src /usr/local/turingarena/ /src/
+COPY deploy.sh deploy.sh
+
+CMD sh deploy.sh

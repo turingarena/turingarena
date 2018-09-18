@@ -44,19 +44,11 @@ jobs:
         - docker push $DOCKER_TAGGED_BASE_IMAGE
     - stage: build
       script:
-        - env > env
-        - >
-          docker build
-          --network none
-          --build-arg BASE_IMAGE=$DOCKER_BASE_IMAGE
-          -t $DOCKER_IMAGE
-          .
+        - env > .env
+        - docker build --network none --build-arg BASE_IMAGE=$DOCKER_BASE_IMAGE -t $DOCKER_IMAGE .
         - docker push $DOCKER_IMAGE
-        - docker build -t deploy deploy/
-        - HYPERSH_FUNC_ID=$(docker run --rm --env-file env deploy sh hypersh-deploy.sh)
-        - cd backend/
-        - npm install
-        - serverless deploy --stage $SERVERLESS_STAGE
+        - docker build --build-arg TURINGARENA_IMAGE=$DOCKER_IMAGE -t deploy deploy/
+        - docker run --rm --env-file .env deploy
     - stage: deploy
       script:
         - pip install --upgrade setuptools twine wheel
