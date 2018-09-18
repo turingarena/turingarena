@@ -1,14 +1,17 @@
 import json
+import os
 import time
 
 import boto3
+
+DYNAMODB_EVALUATION_EVENTS_TABLE = os.environ['DYNAMODB_EVALUATION_EVENTS_TABLE']
 
 
 def store_event(evaluation_id, index, data):
     dynamodb = boto3.client("dynamodb")
 
     dynamodb.put_item(
-        TableName='EvaluationEventsTable',
+        TableName=DYNAMODB_EVALUATION_EVENTS_TABLE,
         Item={
             'evaluation_id': {
                 'S': evaluation_id,
@@ -43,7 +46,7 @@ def load_event_page(evaluation_id, after):
 
     limit = 100
     response = dynamodb.query(
-        TableName='EvaluationEventsTable',
+        TableName=DYNAMODB_EVALUATION_EVENTS_TABLE,
         Limit=limit,
         ConsistentRead=False,
         KeyConditionExpression='#evaluation_id = :evaluation_id AND #index > :after',

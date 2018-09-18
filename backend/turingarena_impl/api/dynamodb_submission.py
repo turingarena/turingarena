@@ -1,10 +1,14 @@
 import base64
 import json
+import os
 import time
 
 import boto3
 
 from turingarena_common.submission import SubmissionFile
+
+
+DYNAMODB_SUBMISSIONS_TABLE = os.environ['DYNAMODB_SUBMISSIONS_TABLE']
 
 
 def save_submission(id, files):
@@ -20,7 +24,7 @@ def save_submission(id, files):
 
     dynamodb = boto3.client("dynamodb")
     dynamodb.put_item(
-        TableName='SubmissionsTable',
+        TableName=DYNAMODB_SUBMISSIONS_TABLE,
         Item={
             'id': {
                 'S': id,
@@ -38,7 +42,7 @@ def save_submission(id, files):
 def load_submission(submission_id):
     dynamodb = boto3.client("dynamodb")
     response = dynamodb.get_item(
-        TableName='SubmissionsTable',
+        TableName=DYNAMODB_SUBMISSIONS_TABLE,
         Key={
             'id': {
                 'S': submission_id,
