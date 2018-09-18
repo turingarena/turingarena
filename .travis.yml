@@ -4,6 +4,7 @@ before_script:
   - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
   - export DOCKER_IMAGE=turingarena/turingarena:v$BASE_VERSION$DEV_RELEASE_SEGMENT
+  - export SERVERLESS_STAGE=branch-$BRANCH_SEGMENT
 
 sudo: required
 
@@ -67,7 +68,7 @@ jobs:
         - echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID
         - cd backend/
         - npm install
-        - serverless deploy
+        - serverless deploy --stage $SERVERLESS_STAGE
     - stage: deploy
       script:
         - pip install --upgrade setuptools twine wheel
