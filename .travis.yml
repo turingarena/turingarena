@@ -68,12 +68,6 @@ jobs:
         - cd backend/
         - npm install
         - serverless deploy
-    - if: branch = develop AND type != pull_request
-      stage: deploy
-      script:
-        - docker pull $DOCKER_IMAGE
-        - docker tag $DOCKER_IMAGE turingarena/turingarena
-        - docker push turingarena/turingarena
     - stage: deploy
       script:
         - pip install --upgrade setuptools twine wheel
