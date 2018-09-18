@@ -21,3 +21,5 @@ true \
     && export HYPERSH_FUNC_ID=$(hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID) \
     && echo $HYPERSH_FUNC_ID \
     && true
+
+exit $?

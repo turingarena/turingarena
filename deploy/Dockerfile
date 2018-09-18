@@ -2,6 +2,7 @@ FROM alpine:3.7
 
 RUN true \
     && apk add --no-cache \
+        jq \
         nodejs \
     && wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz \
     && tar -z -f hyper-linux-x86_64.tar.gz -x hyper -C /usr/local/bin \
