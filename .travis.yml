@@ -5,6 +5,7 @@ before_script:
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
   - export DOCKER_IMAGE=turingarena/turingarena:v$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export SERVERLESS_STAGE=branch-$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
+  - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
 
 sudo: required
 
@@ -50,22 +51,18 @@ jobs:
           -t $DOCKER_IMAGE
           .
         - docker push $DOCKER_IMAGE
-        - $TRAVIS_BUILD_DIR/hyper pull $DOCKER_IMAGE
-        - HYPERSH_DANGLING_IMAGES=$($TRAVIS_BUILD_DIR/hyper images -q --filter "dangling=true")
-        - echo HYPERSH_DANGLING_IMAGES=$HYPERSH_DANGLING_IMAGES
-        - $TRAVIS_BUILD_DIR/hyper rmi $HYPERSH_DANGLING_IMAGES || true
-        - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
-        - $TRAVIS_BUILD_DIR/hyper func rm $HYPERSH_FUNC_NAME || true
+        - docker build -t deploy deploy/
         - >
-          $TRAVIS_BUILD_DIR/hyper func create
-          --name $HYPERSH_FUNC_NAME
-          --env AWS_DEFAULT_REGION=us-east-1
-          --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-          --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-          $DOCKER_IMAGE
-          python -m turingarena_impl.api.hypersh_evaluate
-        - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID)
-        - echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID
+          HYPER_FUNC_ID=$(
+            docker run --rm
+            -e HYPERSH_ACCESS_KEY=$HYPERSH_ACCESS_KEY
+            -e HYPERSH_SECRET_KEY=$HYPERSH_SECRET_KEY
+            -e DOCKER_IMAGE=$DOCKER_IMAGE
+            -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            -e HYPERSH_FUNC_NAME=$HYPERSH_FUNC_NAME
+            deploy
+          )
         - cd backend/
         - npm install
         - serverless deploy --stage $SERVERLESS_STAGE
