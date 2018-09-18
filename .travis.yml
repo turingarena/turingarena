@@ -6,6 +6,7 @@ before_script:
   - export DOCKER_IMAGE=turingarena/turingarena:v$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export SERVERLESS_STAGE=branch-$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
   - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 sudo: required
 
@@ -28,6 +29,7 @@ jobs:
     - if: type == api AND commit_message =~ /update-base/
       stage: base_build
       script:
+        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         - docker build -t $DOCKER_TAGGED_BASE_IMAGE -f Dockerfile.base .
         - docker push $DOCKER_TAGGED_BASE_IMAGE
     - stage: build
