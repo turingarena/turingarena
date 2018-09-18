@@ -3,7 +3,7 @@ before_script:
   - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
   - export DATE_SEGMENT=$(date -u -Idate | tr -d -)
   - export BRANCH_SEGMENT=$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]')
-  - export LOCAL_VERSION_SEGMENT=+$TRAVIS_BRANCH.$DATE_SEGMENT.sha$TRAVIS_COMMIT
+  - export LOCAL_VERSION_SEGMENT=+$BRANCH_SEGMENT.$DATE_SEGMENT.sha$TRAVIS_COMMIT
   - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT$LOCAL_VERSION_SEGMENT
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
   - export DOCKER_IMAGE=turingarena/turingarena:$BASE_VERSION$DEV_RELEASE_SEGMENT
@@ -81,6 +81,6 @@ jobs:
       script:
         - pip install --upgrade setuptools twine wheel
         - cd cli/
-        - echo "VERSION=$CLI_VERSION" > turingarena_common/build_version.py
+        - echo "VERSION='$CLI_VERSION'" > turingarena_common/build_version.py
         - python setup.py egg_info bdist_wheel
         - twine upload dist/*
