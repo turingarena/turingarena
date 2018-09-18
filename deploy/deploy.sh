@@ -25,7 +25,7 @@ true \
     && serverless deploy --stage $SERVERLESS_STAGE \
     && cd /src/cli/ \
     && echo "VERSION='$CLI_VERSION'" > turingarena_common/build_version.py \
-    && python setup.py egg_info bdist_wheel \
+    && python3 setup.py egg_info bdist_wheel \
     && twine upload dist/* \
     && true
 
