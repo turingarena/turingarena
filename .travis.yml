@@ -1,12 +1,9 @@
 before_script:
   - export BASE_VERSION=0.0.2
   - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
-  - export DATE_SEGMENT=$(date -u -Idate | tr -d -)
-  - export BRANCH_SEGMENT=$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]')
-  - export LOCAL_VERSION_SEGMENT=+$BRANCH_SEGMENT.$DATE_SEGMENT.sha$TRAVIS_COMMIT
-  - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT$LOCAL_VERSION_SEGMENT
+  - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
-  - export DOCKER_IMAGE=turingarena/turingarena:$BASE_VERSION$DEV_RELEASE_SEGMENT
+  - export DOCKER_IMAGE=turingarena/turingarena:v$BASE_VERSION$DEV_RELEASE_SEGMENT
 
 sudo: required
 
