@@ -1,3 +1,13 @@
+before_script:
+  - export BASE_VERSION=0.0.2
+  - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
+  - export DATE_SEGMENT=$(date -u -Idate | tr -d -)
+  - export BRANCH_SEGMENT=$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]')
+  - export LOCAL_VERSION_SEGMENT=+$TRAVIS_BRANCH.$DATE_SEGMENT.sha$TRAVIS_COMMIT
+  - export DOCKER_TAG=$BASE_VERSION$DEV_RELEASE_SEGMENT
+  - export SETUPTOOLS_TAG=$DEV_RELEASE_SEGMENT$LOCAL_VERSION_SEGMENT
+  - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT$LOCAL_VERSION_SEGMENT
+
 sudo: required
 
 language: python
@@ -8,9 +18,6 @@ services:
   - docker
 
 cache: yarn
-
-git:
-  depth: 9999999 # needed for automatic versioning
 
 install:
   - wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz
@@ -48,10 +55,10 @@ jobs:
           docker build
           --network none
           --build-arg BASE_IMAGE=turingarena/turingarena-base:$TRAVIS_BRANCH
-          -t turingarena/turingarena:$TRAVIS_BRANCH
+          -t turingarena/turingarena:$DOCKER_TAG
           .
-        - docker push turingarena/turingarena:$TRAVIS_BRANCH
-        - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$TRAVIS_BRANCH
+        - docker push turingarena/turingarena:$DOCKER_TAG
+        - $TRAVIS_BUILD_DIR/hyper pull turingarena/turingarena:$DOCKER_TAG
         - HYPERSH_DANGLING_IMAGES=$($TRAVIS_BUILD_DIR/hyper images -q --filter "dangling=true")
         - echo HYPERSH_DANGLING_IMAGES=$HYPERSH_DANGLING_IMAGES
         - $TRAVIS_BUILD_DIR/hyper rmi $HYPERSH_DANGLING_IMAGES || true
@@ -63,7 +70,7 @@ jobs:
           --env AWS_DEFAULT_REGION=us-east-1
           --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
           --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-          turingarena/turingarena:$TRAVIS_BRANCH
+          turingarena/turingarena:$DOCKER_TAG
           python -m turingarena_impl.api.hypersh_evaluate
         - export HYPERSH_FUNC_ID=$($TRAVIS_BUILD_DIR/hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID)
         - echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID
@@ -73,15 +80,15 @@ jobs:
     - if: branch = develop AND type != pull_request
       stage: deploy
       script:
-        - docker pull turingarena/turingarena:$TRAVIS_BRANCH
-        - docker tag turingarena/turingarena:$TRAVIS_BRANCH turingarena/turingarena
+        - docker pull turingarena/turingarena:$DOCKER_TAG
+        - docker tag turingarena/turingarena:$DOCKER_TAG turingarena/turingarena
         - docker push turingarena/turingarena
-    - if: branch = develop AND type != pull_request
-      stage: deploy
+    - stage: deploy
       script:
         - pip install --upgrade setuptools twine wheel
         - cd cli/
-        - python setup.py bdist_wheel
+        - echo "VERSION=$CLI_VERSION" > turingarena_common/build_version.py
+        - python setup.py egg_info -b $SETUPTOOLS_TAG bdist_wheel
         - twine upload dist/*
 deploy:
   - provider: pages
