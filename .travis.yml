@@ -1,3 +1,8 @@
+sudo: required
+language: bash
+services:
+  - docker
+
 before_script:
   - export BASE_VERSION=0.0.2
   - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
@@ -7,17 +12,6 @@ before_script:
   - export SERVERLESS_STAGE=branch-$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
   - export HYPERSH_FUNC_NAME=evaluate-$TRAVIS_BRANCH
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-
-sudo: required
-
-language: python
-python:
-  - "3.6"
-
-services:
-  - docker
-
-cache: yarn
 
 stages:
   - base_build
