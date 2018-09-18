@@ -44,6 +44,7 @@ jobs:
         - docker push $DOCKER_TAGGED_BASE_IMAGE
     - stage: build
       script:
+        - env > env
         - >
           docker build
           --network none
@@ -52,17 +53,7 @@ jobs:
           .
         - docker push $DOCKER_IMAGE
         - docker build -t deploy deploy/
-        - >
-          HYPER_FUNC_ID=$(
-            docker run --rm
-            -e HYPERSH_ACCESS_KEY=$HYPERSH_ACCESS_KEY
-            -e HYPERSH_SECRET_KEY=$HYPERSH_SECRET_KEY
-            -e DOCKER_IMAGE=$DOCKER_IMAGE
-            -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-            -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            -e HYPERSH_FUNC_NAME=$HYPERSH_FUNC_NAME
-            deploy
-          )
+        - HYPER_FUNC_ID=$(docker run --rm --env-file env deploy)
         - cd backend/
         - npm install
         - serverless deploy --stage $SERVERLESS_STAGE
