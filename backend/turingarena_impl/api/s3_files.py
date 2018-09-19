@@ -8,6 +8,8 @@ from turingarena_common.commands import WorkingDirectory
 from turingarena_impl.cli_server.pack import create_working_directory
 from turingarena_impl.file.generated import PackGeneratedDirectory
 
+S3_FILES_BUCKET = os.environ["S3_FILES_BUCKET"]
+
 
 def generate_cloud_files(working_directory: WorkingDirectory):
     s3 = boto3.resource("s3")
@@ -28,7 +30,7 @@ def generate_cloud_files(working_directory: WorkingDirectory):
             "data.json",
         ))
 
-    s3.Bucket("turingarena-files-bucket").put_object(
+    s3.Bucket(S3_FILES_BUCKET).put_object(
         ACL="public-read",
         Body=json.dumps(file_content),
         Key=file_key,

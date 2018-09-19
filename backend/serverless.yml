@@ -58,6 +58,7 @@ functions:
       HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
       DYNAMODB_EVALUATION_EVENTS_TABLE: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
       DYNAMODB_SUBMISSIONS_TABLE: turingarena-${opt:stage, 'dev'}-SubmissionsTable
+      S3_FILES_BUCKET: turingarena-${opt:stage}-files
 
 custom:
   apigwBinary:
@@ -71,7 +72,7 @@ resources:
     SubmissionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: turingarena-${opt:stage, 'dev'}-SubmissionsTable
+        TableName: turingarena-${opt:stage}-SubmissionsTable
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -87,7 +88,7 @@ resources:
     EvaluationEventsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
+        TableName: turingarena-${opt:stage}-EvaluationEventsTable
         AttributeDefinitions:
           - AttributeName: evaluation_id
             AttributeType: S
@@ -108,7 +109,7 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         AccessControl: PublicRead
-        BucketName: turingarena-files-bucket
+        BucketName: turingarena-${opt:stage}-files
         CorsConfiguration:
           CorsRules:
             -
