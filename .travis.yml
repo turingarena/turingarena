@@ -24,7 +24,6 @@ jobs:
     - if: type == api AND commit_message =~ /update-base/
       stage: base_build
       script:
-        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         - docker build -t $DOCKER_TAGGED_BASE_IMAGE -f Dockerfile.base .
         - docker push $DOCKER_TAGGED_BASE_IMAGE
     - stage: build
