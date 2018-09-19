@@ -17,7 +17,7 @@ true \
         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
         $DOCKER_IMAGE \
-        python -m turingarena_impl.api.hypersh_evaluate \
+        python -m turingarena_impl.api.hypersh_api \
     && export HYPERSH_FUNC_ID=$(hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID) \
     && echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID >&2 \
     && cd /src/backend/ \
