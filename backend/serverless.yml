@@ -56,6 +56,8 @@ functions:
       HYPERSH_REGION: us-west-1
       HYPERSH_FUNC_NAME: ${env:HYPERSH_FUNC_NAME}
       HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
+      DYNAMODB_EVALUATION_EVENTS_TABLE: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
+      DYNAMODB_SUBMISSIONS_TABLE: turingarena-${opt:stage, 'dev'}-SubmissionsTable
 
 custom:
   apigwBinary:
@@ -69,7 +71,7 @@ resources:
     SubmissionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: SubmissionsTable
+        TableName: turingarena-${opt:stage, 'dev'}-SubmissionsTable
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -85,7 +87,7 @@ resources:
     EvaluationEventsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: EvaluationEventsTable
+        TableName: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
         AttributeDefinitions:
           - AttributeName: evaluation_id
             AttributeType: S
