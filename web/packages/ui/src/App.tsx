@@ -1,10 +1,9 @@
-import React from 'react';
+import * as React from 'react';
 import './App.css';
-import { observable, action } from "mobx";
+import { observable, action, computed } from "mobx";
 import { observer } from "mobx-react";
-import { Client, Evaluation } from '@turingarena/evaluation';
+import { Client } from '@turingarena/client';
 
-import brace from 'brace';
 import AceEditor from 'react-ace';
 
 import 'brace/mode/java';
@@ -13,28 +12,69 @@ import 'brace/theme/github';
 
 const client = new Client("https://api.turingarena.org/");
 
-@observer
-class EvaluationView extends React.Component {
-  render() {
-    const evaluation = this.props.evaluation;
-    return (
-      <React.Fragment>
-        {evaluation.pending && <p>evaluating...</p>}
-        {evaluation.resolved && <p>Evaluation complete!</p>}
-        {evaluation.rejected && <p>An error occurred: {evaluation.error.message}</p>}
-        <pre>
-          {evaluation.textEvents.map(e => e.payload).join("")}
-        </pre>
-      </React.Fragment>
-    );
+const EvaluationView = observer(({ evaluation }) => (
+  <React.Fragment>
+    {evaluation.pending && <p>evaluating...</p>}
+    {evaluation.resolved && <p>Evaluation complete!</p>}
+    {evaluation.rejected && <p>An error occurred: {evaluation.error.message}</p>}
+    <pre>
+      {evaluation.textEvents.map(e => e.payload).join("")}
+    </pre>
+  </React.Fragment>
+))
+
+const currentEvaluation = observable.box();
+
+export class Evaluation {
+  @observable events = [];
+  @observable resolved = false;
+  @observable rejected = false;
+  @observable error = null;
+
+  constructor(events) {
+    this.doLoad(events);
+  }
+
+  async doLoad(events) {
+    try {
+      for await (let event of events) {
+        this.addEvent(event);
+      }
+      this.resolve();
+    } catch (e) {
+      this.reject(e);
+    }
+  }
+
+  @computed
+  get pending() {
+    return !this.resolved && !this.rejected;
+  }
+
+  @computed
+  get textEvents() {
+    return this.events.filter(e => e.type === "text");
+  }
+
+  @action
+  addEvent(e) {
+    this.events.push(e);
+  }
+
+  @action
+  resolve() {
+    this.resolved = true;
+  }
+
+  @action
+  reject(e) {
+    this.rejected = true;
+    this.error = e;
   }
 }
 
-const currentEvaluation = observable.box();
-const source = observable.box("");
-
 @observer
-export default class App extends React.Component {
+export default class App extends React.Component<any> {
   editor = React.createRef();
 
   @action

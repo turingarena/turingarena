@@ -1,0 +1,10 @@
+{
+  "name": "@turingarena/neutrino-middleware-typescript",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "awesome-typescript-loader": "^4",
+    "typescript": "^3.0.3"
+  }
+}
