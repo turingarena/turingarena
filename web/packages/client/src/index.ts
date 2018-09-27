@@ -10,6 +10,13 @@ interface EvaluationEvent {
   payload: any,
 }
 
+interface BackoffConfig {
+  initialBackoff: number;
+  backoffFactor: number;
+  maxBackoff: number;
+  maxLimit: number;
+}
+
 export class Client {
   private readonly endpoint: string;
 
@@ -47,11 +54,34 @@ export class Client {
     return await response.json();
   }
 
+  private async backoff(action: () => Promise<[boolean, any]>, config: BackoffConfig) {
+    let staleCount = 0;
+    let backoff = config.initialBackoff;
+
+    while (true) {
+      const [done, result] = await action();
+      if (done) return result;
+
+      await sleep(backoff);
+      backoff *= config.backoffFactor;
+      if (backoff > config.maxBackoff) {
+        backoff = config.maxBackoff;
+        staleCount++;
+      }
+      if (staleCount >= config.maxLimit) {
+        throw new Error("backoff timeout");
+      }
+    }
+  }
+
   private async * generateEvaluationEvents(id): AsyncIterable<EvaluationEvent> {
     const initialWait = 10000;
-    const maxLimit = 10;
-    const initialBackoff = 100;
-    const maxBackoff = 3000;
+    const backoffConfig: BackoffConfig = {
+      maxLimit: 10,
+      initialBackoff: 100,
+      backoffFactor: 2,
+      maxBackoff: 3000,
+    };
 
     await sleep(initialWait);
 
@@ -59,24 +89,11 @@ export class Client {
 
     yield* page.data;
 
-    let staleCount = 0;
-    let backoff = initialBackoff;
     while (page.end) {
-      if (page.data.length > 0) {
-        backoff = initialBackoff;
-        staleCount = 0;
-      } else {
-        await sleep(backoff);
-        backoff = backoff * 2;
-        if (backoff > maxBackoff) {
-          backoff = maxBackoff;
-          staleCount++;
-        }
-        if (staleCount >= maxLimit) {
-          throw new Error("timeout when fetching events");
-        }
-      }
-      page = await this.loadEvaluationPage(id, page.end);
+      page = await this.backoff(async () => {
+        const myPage = await this.loadEvaluationPage(id, page.end);
+        return [myPage.end !== myPage.start, myPage];
+      }, backoffConfig);
       yield* page.data;
     }
   }
