@@ -10,7 +10,10 @@ import 'brace/mode/java';
 import 'brace/mode/c_cpp';
 import 'brace/theme/github';
 
-const client = new Client("https://api.turingarena.org/");
+const client: Client = new Client(
+  "https://xsoaeqbfce.execute-api.us-east-1.amazonaws.com/branch-cloud-files/",
+  "http://turingarena-branch-cloud-files-files.s3-website-us-east-1.amazonaws.com/",
+);
 
 const EvaluationView = observer(({ evaluation }) => (
   <React.Fragment>
@@ -95,10 +98,19 @@ export default class App extends React.Component<any> {
     this.editor.current.editor.setValue("int sum(int a, int b) {\n\treturn 0;\n}")
   }
 
+  generate() {
+    client.getFiles([
+      "d1a18623594c47621e9289767bc3ce997ce45756"
+    ], [
+      "https://github.com/turingarena/turingarena.git"
+    ]);
+  }
+
   render() {
     return (
       <React.Fragment>
         <p>Write a function <code>sum</code> which accepts two integers and returns their sum.</p>
+        <button onClick={() => this.generate()}>Generate</button>
         <form onSubmit={(e) => this.onSubmit(e)}>
           {/*<input type="file" name="submission[source]" />*/}
           <input type="submit" />

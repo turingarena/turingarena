@@ -19,9 +19,11 @@ interface BackoffConfig {
 
 export class Client {
   private readonly endpoint: string;
+  private readonly filesEndpoint: string;
 
-  constructor(endpoint) {
+  constructor(endpoint, filesEndpoint) {
     this.endpoint = endpoint;
+    this.filesEndpoint = filesEndpoint;
   }
 
   async * evaluate(data) {
@@ -32,6 +34,44 @@ export class Client {
     const { id } = await response.json();
 
     yield* this.generateEvaluationEvents(id);
+  }
+
+  async getFiles(layers, repositories) {
+    const ans = await this.doGetFiles(layers);
+    if (ans === undefined) {
+      await this.generateFiles(layers, repositories);
+      return await this.backoff(async () => {
+        const data = await this.doGetFiles(layers);
+        return [data !== undefined, data];
+      }, {
+        initialBackoff: 1000,
+        backoffFactor: 2,
+        maxBackoff: 5,
+        maxLimit: 2,
+      })
+    }
+  }
+
+  private async doGetFiles(layers) {
+    const response = await fetch(this.filesEndpoint + layers.join("_") + ".json")
+    if (response.ok) return await response.json();
+    return undefined;
+  }
+
+  private async generateFiles(layers: string[], repositories) {
+    const data = new FormData();
+
+    // TODO: define types for WorkingDirectory
+    layers.map(l => data.append("packs[]", l));
+    repositories.map((r, i) => {
+      data.append(`repositories[${i}][type]`, "git_clone");
+      data.append(`repositories[${i}][url]`, r);
+    });
+
+    await this.safeFetch(this.endpoint + "generate_file", {
+      method: 'POST',
+      body: data,
+    });
   }
 
   private async safeFetch(url, options = {}) {
