@@ -7,7 +7,6 @@
     "start": "neutrino start --use @turingarena/neutrino-preset"
   },
   "dependencies": {
-    "@salte-io/salte-auth": "^2.11.5",
     "@turingarena/client": "^0.0.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",

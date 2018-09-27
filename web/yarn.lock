@@ -224,10 +224,6 @@
     webpack-sources "1.0.1"
     worker-loader "^1.1.1"
 
-"@salte-io/salte-auth@^2.11.5":
-  version "2.11.5"
-  resolved "https://registry.yarnpkg.com/@salte-io/salte-auth/-/salte-auth-2.11.5.tgz#d3a634db7c7e45049b44a4f75a24d793211e6303"
-
 "@types/node@*":
   version "10.10.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.1.tgz#d5c96ca246a418404914d180b7fdd625ad18eca6"
