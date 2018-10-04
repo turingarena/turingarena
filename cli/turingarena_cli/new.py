@@ -4,6 +4,7 @@ import sys
 from argparse import ArgumentParser
 
 from turingarena_cli.command import Command
+from turingarena_cli.base import BASE_PARSER
 
 evaluator_template = """\
 from turingarena import run_algorithm, submission, evaluation
@@ -75,12 +76,13 @@ class NewCommand(Command):
 
         logging.info("making directory solutions/")
         os.makedirs("solutions/")
-        logging.info("Problem {name} created in directory {name}/".format(name=name))
-        logging.info("Start editing your default interface.txt and evaluator.py files!")
+        print("Problem {name} created in directory {name}/".format(name=name))
+        print("Start editing your default interface.txt and evaluator.py files!")
 
     PARSER = ArgumentParser(
         description="Create a new Turingarena problem",
         add_help=False,
+        parents=[BASE_PARSER]
     )
     PARSER.add_argument("name", help="problem name")
 
