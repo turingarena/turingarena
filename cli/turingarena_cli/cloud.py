@@ -74,28 +74,32 @@ class CloudEvaluation:
     def evaluation_events(self):
         if self.id is None:
             self.start_evaluation()
-        backoff = 100
-        while self.after is not None:
-            for event in self._get_evaluation_event():
-                if len(event) > 0:
-                    backoff = 100
-                    yield event
-            time.sleep(backoff / 1000)
-            backoff *= 1.5
+        page = []
+        while page is not None:
+            for event in page:
+                yield event
+            page = self._next_evaluation_page()
 
 
-    def _get_evaluation_event(self):
+    def _next_evaluation_page(self):
         url = TURINGARENA_ENDPOINT + "evaluation_events?evaluation={}&after={}".format(self.id, self.after)
+        backoff = 200
 
-        response = requests.get(url)
+        while self.after is not None:
+            response = requests.get(url)
 
-        if response.status_code == 200:
-            response_json = response.json()
-            logging.debug(response_json)
-            self.after = response_json["end"]
-            return response_json["data"]
-        else:
-            raise CloudServerError(f"Error in getting evaluation event: {response.text}")
+            if response.status_code == 200:
+                response_json = response.json()
+                logging.debug(response_json)
+                self.after = response_json["end"]
+
+                if len(response_json["data"]) > 0:
+                    return response_json["data"]
+                time.sleep(backoff / 1000)
+                backoff *= 1.7
+            else:
+                raise CloudServerError(f"Error in getting evaluation event: {response.text}")
+        return None
 
 
 class CloudCommand(Command):
