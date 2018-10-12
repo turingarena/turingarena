@@ -8,7 +8,7 @@ from turingarena_impl.api.wsgi_proxy import application
 
 def serve_cli():
     parser = argparse.ArgumentParser("Serve cli")
-    parser.add_argument("--host", "-h", help="Address where to listen", default="0.0.0.0")
+    parser.add_argument("--host", "-H", help="Address where to listen", default="0.0.0.0")
     parser.add_argument("--port", "-p", help="Port where to listen", default="8000", type=int)
     args = parser.parse_args()
 

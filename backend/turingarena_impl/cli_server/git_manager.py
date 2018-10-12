@@ -43,6 +43,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "git",
             "fetch",
             "--recurse-submodules=yes",
+            "--quiet",
             *depth_options,
             repository.url,
             *branch_options,

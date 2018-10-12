@@ -42,16 +42,20 @@ def do_evaluate(params):
 
     save_submission(submission_id, submission)
 
+    current_directory = params.getfirst(f"directory")
+    if current_directory is None:
+        current_directory = "."
+
     working_directory = WorkingDirectory(
         pack=Pack(
-            commit_oid=params.getlist("commit_oid"),
+            commit_oid=params.getfirst("commit_oid"),
             repository=GitRepository(
                 url=params.getfirst(f"repository[url]"),
                 branch=params.getfirst(f"repository[branch]"),
                 depth=params.getfirst(f"repository[depth]"),
             )
         ),
-        current_directory=".",
+        current_directory=current_directory,
     )
 
     request = CloudEvaluateRequest(
