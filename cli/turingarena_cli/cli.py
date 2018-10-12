@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 from argparse import ArgumentParser
 
+from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
 from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import EvaluateCommand
@@ -78,7 +79,11 @@ subparsers.add_parser(
     parents=[RemoteExecCommand.PARSER],
     help=RemoteExecCommand.PARSER.description,
 ).set_defaults(Command=RemoteExecCommand)
-
+subparsers.add_parser(
+    "cloud",
+    parents=[CloudCommand.PARSER],
+    help=CloudCommand.PARSER.description,
+)
 
 def main():
     try:
