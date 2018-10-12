@@ -1,3 +1,5 @@
+from __future__ import print_function, division
+
 import logging
 from argparse import ArgumentParser
 
@@ -30,7 +32,7 @@ class CloudEvaluation:
         files_dict = {}
         for file in files:
             name, path = self._parse_file(file, default_fields)
-            files_dict[f"submission[{name}]"] = open(path)
+            files_dict["submission[{}]".format(name)] = open(path)
         return files_dict
 
 
@@ -68,7 +70,7 @@ class CloudEvaluation:
         if response.status_code == 200:
             self.id = response.json()["id"]
         else:
-            raise CloudServerError(f"Error in cloud evaluation: {response.text}")
+            raise CloudServerError("Error in cloud evaluation: {}".format(response.text))
 
 
     def evaluation_events(self):
@@ -98,7 +100,7 @@ class CloudEvaluation:
                 time.sleep(backoff / 1000)
                 backoff *= 1.7
             else:
-                raise CloudServerError(f"Error in getting evaluation event: {response.text}")
+                raise CloudServerError("Error in getting evaluation event: {}".format(response.text))
         return None
 
 

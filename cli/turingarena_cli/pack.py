@@ -130,7 +130,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         result = json.loads(result)
 
         tree_id = result["tree_id"]
-        commit_it = result["commit_id"]
+        # commit_it = result["commit_id"]
 
         logging.info("Importing tree id {}".format(tree_id))
         subprocess.call(["git", "read-tree", tree_id], env=self.git_env)
@@ -190,7 +190,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         self.git_init()
         for p in self.local_parts:
             self.push_local_tree(p)
-        return super().run()
+        return super(PackBasedCommand, self).run()
 
     PARSER = ArgumentParser(
         add_help=False,

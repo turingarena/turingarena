@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 from argparse import ArgumentParser
 
@@ -10,9 +8,9 @@ from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FILE_PARSER
 from turingarena_cli.legacy import INFO_PARSER, TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
-# in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.remote import RemoteExecCommand
 
+# in python2.7, quote is in pipes and not in shlex
 try:
     from shlex import quote
 except ImportError:
@@ -22,7 +20,7 @@ except ImportError:
 try:
     import argcomplete
 except ImportError:
-    pass
+    argcomplete = None
 
 PARSER = ArgumentParser()
 
@@ -86,10 +84,9 @@ subparsers.add_parser(
 )
 
 def main():
-    try:
+    if argcomplete is not None:
         argcomplete.autocomplete(PARSER)
-    except NameError:
-        pass
+
     args = PARSER.parse_args()
 
     init_logger(args.log_level)

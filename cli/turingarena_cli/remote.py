@@ -32,12 +32,13 @@ SSH_USER = "turingarena@localhost"
 
 
 class RemoteCommand(Command):
-    def check_daemon(self):
+    @staticmethod
+    def check_daemon():
         cli = SSH_BASE_CLI + [SSH_USER, "echo", "OK!"]
         try:
             subprocess.check_output(cli)
         except subprocess.CalledProcessError:
-            sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
+            sys.exit("turingarena daemon is not running! Run it with `turingarena daemon start`")
 
     @abstractmethod
     def _get_remote_cli(self):
@@ -108,7 +109,7 @@ class AbstractRemotePythonCommand(RemoteCommand):
         if self.args.local:
             self._run_locally()
         else:
-            super().run()
+            super(AbstractRemotePythonCommand, self).run()
 
 
 class RemotePythonCommand(AbstractRemotePythonCommand):

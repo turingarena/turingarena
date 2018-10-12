@@ -3,7 +3,6 @@ import uuid
 from argparse import ArgumentParser
 
 from turingarena_cli.pack import PackBasedCommand
-from turingarena_cli.remote import RemotePythonCommand
 
 
 class LegacyDaemonCommand(PackBasedCommand):
@@ -40,7 +39,7 @@ class LegacyDaemonCommand(PackBasedCommand):
 
         self.args.result_file = os.path.join("/tmp", "turingarena_{}_result.json".format(str(uuid.uuid4())))
 
-        super().run()
+        super(LegacyDaemonCommand, self).run()
 
         if self.args.command == "make" and not self.args.print:
             self.retrieve_result(self.args.result_file)

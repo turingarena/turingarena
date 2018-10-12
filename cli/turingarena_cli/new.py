@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import logging
 import os
 import sys
@@ -66,6 +68,8 @@ class NewCommand(Command):
             sys.exit("Directory {}/ already exists in this directory!".format(name))
         os.chdir(name)
 
+        # TODO: if directory is not a git repository, initialize empty repository
+
         logging.info("Writing default interface.txt")
         with open("interface.txt", "w") as f:
             print(interface_template, file=f)
@@ -76,7 +80,7 @@ class NewCommand(Command):
 
         logging.info("making directory solutions/")
         os.makedirs("solutions/")
-        print("Problem {name} created in directory {name}/".format(name=name))
+        print("Problem {name} created in directory {name}".format(name=name))
         print("Start editing your default interface.txt and evaluator.py files!")
 
     PARSER = ArgumentParser(

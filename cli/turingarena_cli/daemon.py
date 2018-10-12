@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import argparse
 import os
@@ -88,7 +87,7 @@ def run_daemon(dev_dir=None):
 
 
 def main():
-    print("`turingarenad` is deprecated. Use `turingarena daemon` instead.")
+    print("WARNING: `turingarenad` is deprecated. Use `turingarena daemon` instead.")
 
     args = parse_cli()
 
