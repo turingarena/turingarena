@@ -4,7 +4,7 @@ import secrets
 from http import HTTPStatus
 from urllib.request import urlopen
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
+from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
 from turingarena_common.submission import SubmissionFile
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
@@ -38,7 +38,7 @@ def get_repository(name, params):
     repo_type = params.getfirst(f"repositories[{name}][type]")
 
     if repo_type == "git_clone":
-        return GitCloneRepository(
+        return GitRepository(
             url=params.getfirst(f"repositories[{name}][url]"),
             branch=params.getfirst(f"repositories[{name}][branch]"),
             depth=params.getfirst(f"repositories[{name}][depth]"),

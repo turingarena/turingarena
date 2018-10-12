@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena_cli.remote import AbstractRemotePythonCommand, RemotePythonCommand
 from turingarena_cli.ssh import SSH_BASE_CLI
-from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
+from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
 from turingarena_common.git_common import GIT_BASE_ENV
 
 
@@ -57,24 +57,41 @@ class PackBasedCommand(AbstractRemotePythonCommand):
             yield env
 
     @lru_cache(None)
-    def local_tree_id(self, path):
+    def local_commit_oid(self, path):
         logging.info("Packing local tree")
         with self._temp_git_index(work_dir=path) as env:
             subprocess.check_call(["git", "add", "-A", "."], env=env)
             logging.info("Added all files to git")
 
-            tree_id = subprocess.check_output(
+            tree_oid = subprocess.check_output(
                 ["git", "write-tree"],
                 env=env,
                 universal_newlines=True,
             ).strip()
-            logging.info("Wrote tree with id {}".format(tree_id))
-            return tree_id
+            logging.info("Wrote tree with id {}".format(tree_oid))
+
+            commit_message = "Turingarena local directory: {path}.".format(path=path)
+
+            commit_oid = subprocess.check_output(
+                ["git", "commit-tree", tree_oid, "-m", commit_message],
+                env=self.git_env,
+                universal_newlines=True,
+            ).strip()
+            logging.info("Created commit {}".format(commit_oid))
+
+            return commit_oid
 
     @property
     @lru_cache(None)
-    def working_dir_tree_id(self):
-        return self.local_tree_id(self.git_work_dir)
+    def working_dir(self):
+        if self.args.working_dir is not None:
+            return self.args.working_dir
+        return self.git_work_dir
+
+    @property
+    @lru_cache(None)
+    def working_dir_commit_oid(self):
+        return self.local_commit_oid(self.working_dir)
 
     @property
     @lru_cache(None)
@@ -82,23 +99,12 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         if self.args.current_dir is not None:
             return self.args.current_dir
 
-        if self.send_working_dir:
-            current_dir = os.path.relpath(self.cwd, self.git_work_dir)
-            logging.info("Relative current dir: {current_dir}".format(current_dir=current_dir))
-            return current_dir
-        else:
-            return "."
+        current_dir = os.path.relpath(self.cwd, self.git_work_dir)
+        logging.info("Relative current dir: {current_dir}".format(current_dir=current_dir))
+        return current_dir
 
-    def push_local_tree(self, tree_id):
-        logging.info("Pushing tree {tree_id}...".format(tree_id=tree_id))
-        commit_message = "Turingarena payload."
-
-        commit_id = subprocess.check_output(
-            ["git", "commit-tree", tree_id, "-m", commit_message],
-            env=self.git_env,
-            universal_newlines=True,
-        ).strip()
-        logging.info("Created commit {}".format(commit_id))
+    def push_local_commit(self, commit_oid):
+        logging.info("Pushing commit {commit_oid}...".format(commit_oid=commit_oid))
 
         subprocess.check_call(SSH_BASE_CLI + [
             "turingarena@localhost",
@@ -109,7 +115,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
-            "{commit_id}:refs/heads/sha-{commit_id}".format(commit_id=commit_id),
+            "{commit_oid}:refs/heads/sha-{commit_oid}".format(commit_oid=commit_oid),
         ], env=self.git_env)
         logging.info("Pushed current commit")
 
@@ -117,7 +123,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
-            ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
+            ":refs/heads/sha-{commit_oid}".format(commit_oid=commit_oid),
         ], env=self.git_env)
 
     def retrieve_result(self, result_file):
@@ -130,66 +136,26 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         result = json.loads(result)
 
         tree_id = result["tree_id"]
-        commit_it = result["commit_id"]
 
         logging.info("Importing tree id {}".format(tree_id))
         subprocess.call(["git", "read-tree", tree_id], env=self.git_env)
         logging.info("Checking out")
         subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
 
-    @property
-    def send_working_dir(self):
-        if self.args.send_working_dir == "always":
-            return True
-        if self.args.send_working_dir == "auto":
-            return self.args.local_dir is None and self.args.tree is None
-        if self.args.send_working_dir == "never":
-            return False
-        raise AssertionError
-
-    @property
-    @lru_cache(None)
-    def local_parts(self):
-        parts = []
-
-        local_dirs = self.args.local_dir or []
-        for d in local_dirs:
-            parts.append(self.local_tree_id(d))
-
-        if self.send_working_dir:
-            parts += [self.working_dir_tree_id]
-
-        return parts
-
-    @property
-    @lru_cache(None)
-    def parts(self):
-        parts = self.args.tree or []
-        parts.extend(self.local_parts)
-
-        return parts
 
     @property
     def working_directory(self):
         return WorkingDirectory(
             pack=Pack(
-                parts=self.parts,
-                repositories=[
-                    GitCloneRepository(
-                        url=url,
-                        branch=None,
-                        depth=None,
-                    )
-                    for url in self.args.repository or []
-                ],
+                commit_oid=self.working_dir_commit_oid,
+                repository=None,
             ),
             current_directory=self.relative_current_dir,
         )
 
     def run(self):
         self.git_init()
-        for p in self.local_parts:
-            self.push_local_tree(p)
+        self.push_local_commit(self.working_dir_commit_oid)
         return super().run()
 
     PARSER = ArgumentParser(
@@ -198,27 +164,9 @@ class PackBasedCommand(AbstractRemotePythonCommand):
     )
 
     PARSER.add_argument(
-        "--send-working-dir",
-        choices=["never", "always", "auto"],
-        default="auto",
-        help="specifies whether to send the current working dir to the problem pack",
-    )
-    PARSER.add_argument(
-        "--local-dir",
+        "--working-dir",
         action="append",
-        help="add a local directory to the problem pack",
     )
-    PARSER.add_argument(
-        "--tree",
-        action="append",
-        help="add a git tree to the problem pack",
-    )
-    PARSER.add_argument(
-        "--repository",
-        action="append",
-        help="source of a git repository",
-    )
-
     PARSER.add_argument(
         "--current-dir",
         help="",

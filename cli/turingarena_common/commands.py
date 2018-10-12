@@ -16,11 +16,11 @@ LocalExecutionParameters.DEFAULT = LocalExecutionParameters(
 )
 
 Pack = namedtuple("Pack", [
-    "parts",
-    "repositories",
+    "repository",
+    "commit_oid",
 ])
 
-GitCloneRepository = namedtuple("GitCloneRepository", [
+GitRepository = namedtuple("GitRepository", [
     "url",
     "branch",
     "depth",

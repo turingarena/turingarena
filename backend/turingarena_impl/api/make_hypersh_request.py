@@ -1,7 +1,7 @@
 import pickle
 import sys
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
+from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
 from turingarena_impl.api.request import CloudEvaluateRequest
 
 pickle.dump(CloudEvaluateRequest(
@@ -9,7 +9,7 @@ pickle.dump(CloudEvaluateRequest(
         pack=Pack(
             parts=["d1a18623594c47621e9289767bc3ce997ce45756"],
             repositories=[
-                GitCloneRepository(
+                GitRepository(
                     url="https://github.com/turingarena/turingarena.git",
                     branch=None,
                     depth=None,
