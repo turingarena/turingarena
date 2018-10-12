@@ -34,19 +34,6 @@ def get_submission_files(params, used_params):
         yield n, SubmissionFile(filename=filename, content=content)
 
 
-def get_repository(name, params):
-    repo_type = params.getfirst(f"repositories[{name}][type]")
-
-    if repo_type == "git_clone":
-        return GitRepository(
-            url=params.getfirst(f"repositories[{name}][url]"),
-            branch=params.getfirst(f"repositories[{name}][branch]"),
-            depth=params.getfirst(f"repositories[{name}][depth]"),
-        )
-
-    raise ValueError(f"invalid repository type: {repo_type}")
-
-
 def do_evaluate(params):
     used_params = set()
 
@@ -57,11 +44,12 @@ def do_evaluate(params):
 
     working_directory = WorkingDirectory(
         pack=Pack(
-            parts=params.getlist("packs[]"),
-            repositories=[
-                get_repository(name, params)
-                for name in get_children_field("repositories", params)
-            ]
+            commit_oid=params.getlist("commit_oid"),
+            repository=GitRepository(
+                url=params.getfirst(f"repository[url]"),
+                branch=params.getfirst(f"repository[branch]"),
+                depth=params.getfirst(f"repository[depth]"),
+            )
         ),
         current_directory=".",
     )
