@@ -8,6 +8,7 @@ before_script:
   - export DEV_RELEASE_SEGMENT=.dev$TRAVIS_BUILD_NUMBER
   - export CLI_VERSION=$BASE_VERSION$DEV_RELEASE_SEGMENT
   - export DOCKER_TAGGED_BASE_IMAGE=turingarena/turingarena-base:travis-$TRAVIS_BUILD_NUMBER
+  - export DOCKER_DEPLOY_TAGGED_BASE_IMAGE=turingarena/turingarena-deploy:travis-$TRAVIS_BUILD_NUMBER
   - export BRANCH_SEGMENT=$(echo $TRAVIS_BRANCH | tr -d -c '[:alpha:]-')
   - export DOCKER_IMAGE=turingarena/turingarena:$BRANCH_SEGMENT
   - export SERVERLESS_STAGE=branch-$BRANCH_SEGMENT
@@ -26,10 +27,15 @@ jobs:
       script:
         - docker build -t $DOCKER_TAGGED_BASE_IMAGE -f Dockerfile.base .
         - docker push $DOCKER_TAGGED_BASE_IMAGE
+    - if: type == api AND commit_message =~ /update-deploy-base/
+      stage: base_build
+      script:
+        - docker build -t $DOCKER_DEPLOY_TAGGED_BASE_IMAGE -f Dockerfile.base deploy/
+        - docker push $DOCKER_DEPLOY_TAGGED_BASE_IMAGE
     - stage: build
       script:
         - env > .env
         - docker build --network none --build-arg BASE_IMAGE=$DOCKER_BASE_IMAGE -t $DOCKER_IMAGE .
         - docker push $DOCKER_IMAGE
-        - docker build --build-arg TURINGARENA_IMAGE=$DOCKER_IMAGE -t deploy deploy/
+        - docker build --build-arg TURINGARENA_IMAGE=$DOCKER_IMAGE --build-arg DEPLOY_BASE_IMAGE=$DEPLOY_BASE_IMAGE -t deploy deploy/
         - docker run --rm --env-file .env deploy
