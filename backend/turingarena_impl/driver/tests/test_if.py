@@ -19,7 +19,7 @@ def test_if_else_calls():
                     }
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 int f1() {return 1;}
                 int f2() {return 2;}
@@ -49,7 +49,7 @@ def test_if_calls():
                     write res2;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 int f1() {return 1;}
                 int f2() {return 2;}

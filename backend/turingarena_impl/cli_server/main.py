@@ -1,8 +1,6 @@
-import json
 import logging
 import os
 import sys
-from collections import namedtuple
 from tempfile import TemporaryDirectory
 
 import pickle

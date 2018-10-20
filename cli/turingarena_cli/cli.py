@@ -7,11 +7,13 @@ from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FILE_PARSER
 from turingarena_cli.info import InfoCommand
-from turingarena_cli.legacy import TEST_PARSER, BASE_MAKE_PARSER, MAKE_PARSER
+from turingarena_cli.legacy import BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
 
 # in python2.7, quote is in pipes and not in shlex
+from turingarena_cli.test import TestCommand
+
 try:
     from shlex import quote
 except ImportError:
@@ -40,8 +42,8 @@ subparsers.add_parser(
 )
 subparsers.add_parser(
     "test",
-    parents=[TEST_PARSER],
-    help=TEST_PARSER.description,
+    parents=[TestCommand.PARSER],
+    help=TestCommand.PARSER.description,
 )
 subparsers.add_parser(
     "new",
@@ -83,6 +85,7 @@ subparsers.add_parser(
     parents=[CloudCommand.PARSER],
     help=CloudCommand.PARSER.description,
 )
+
 
 def main():
     if argcomplete is not None:

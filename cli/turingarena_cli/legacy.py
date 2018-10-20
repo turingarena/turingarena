@@ -50,14 +50,6 @@ class LegacyDaemonCommand(PackBasedCommand):
     )
 
 
-TEST_PARSER = ArgumentParser(
-    description="Run tests",
-    add_help=False,
-    parents=[LegacyDaemonCommand.PARSER],
-)
-TEST_PARSER.add_argument("pytest_arguments", nargs="*", help="additional arguments to pass to pytest")
-TEST_PARSER.set_defaults(Command=LegacyDaemonCommand)
-
 BASE_MAKE_PARSER = ArgumentParser(
     add_help=False,
     parents=[LegacyDaemonCommand.PARSER],
