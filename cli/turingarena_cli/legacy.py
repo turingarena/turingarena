@@ -50,14 +50,6 @@ class LegacyDaemonCommand(PackBasedCommand):
     )
 
 
-INFO_PARSER = ArgumentParser(
-    description="Get some info about TuringArena",
-    add_help=False,
-    parents=[LegacyDaemonCommand.PARSER],
-)
-INFO_PARSER.add_argument("what", choices=["languages"], help="what you want to know about turingarena")
-INFO_PARSER.set_defaults(Command=LegacyDaemonCommand)
-
 TEST_PARSER = ArgumentParser(
     description="Run tests",
     add_help=False,

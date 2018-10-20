@@ -46,3 +46,7 @@ FileCommandParameters = namedtuple("FileCommandParameters", [
 FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
     "path",
 ])
+
+InfoCommandParameters = namedtuple("InfoCommandParameters", [
+    "what",
+])
