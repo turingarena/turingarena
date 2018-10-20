@@ -16,33 +16,61 @@ logger = logging.getLogger(__name__)
 class CppAlgorithmSource(AlgorithmSource):
     __slots__ = []
 
-    def compile(self, compilation_dir):
-        with open(os.path.join(compilation_dir, "skeleton.cpp"), "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+    def _compile_source(self, compilation_dir):
+        cli = [
+            "g++", "-c", "-O2", "-std=c++17", "-Wall",
+            "-o", self._source_object_path(compilation_dir),
+            self.source_path
+        ]
 
+        logger.debug("Compiling source: " + " ".join(cli))
+        subprocess.run(cli, universal_newlines=True, check=True)
+
+    def _compile_skeleton(self, compilation_dir):
+        cli = [
+            "g++", "-c", "-O2", "-std=c++17",
+            "-o", self._skeleton_object_path(compilation_dir),
+            self._skeleton_path(compilation_dir),
+        ]
+
+        logger.debug("Compiling skeleton: " + " ".join(cli))
+        subprocess.run(cli, universal_newlines=True, check=True)
+
+    def _link_executable(self, compilation_dir):
         cli = [
             "g++",
-            "-std=c++14",
-            "-Wno-unused-result",
-            "-g", "-O2", "-static",
+            "-static",
             "-o", self.executable_path(compilation_dir),
-            os.path.join(compilation_dir, "skeleton.cpp"),
-            self.source_path,
+            self._skeleton_object_path(compilation_dir),
+            self._source_object_path(compilation_dir)
         ]
-        logger.debug(f"Running {' '.join(cli)}")
+
+        logger.debug("Linking executable: " + " ".join(cli))
+        subprocess.run(cli, universal_newlines=True, check=True)
+
+    def compile(self, compilation_dir):
+        with open(self._skeleton_path(compilation_dir), "w") as f:
+            self.language.skeleton_generator().generate_to_file(self.interface, f)
+
         try:
-            subprocess.run(
-                cli,
-                universal_newlines=True,
-                check=True,
-            )
+            self._compile_source(compilation_dir)
+            self._compile_skeleton(compilation_dir)
+            self._link_executable(compilation_dir)
         except CalledProcessError as e:
-            if e.returncode == 1:
-                raise CompilationFailed
-            raise
+            raise CompilationFailed
 
     def executable_path(self, compilation_dir):
         return os.path.join(compilation_dir, "algorithm")
+
+    def _skeleton_path(self, compilation_dir):
+        return os.path.join(compilation_dir, "skeleton.cpp")
+
+    def _skeleton_object_path(self, compilation_dir):
+        return os.path.join(compilation_dir, "skeleton.o")
+
+    def _source_object_path(self, compilation_dir):
+        return os.path.join(compilation_dir, "source.o")
+
 
     @contextmanager
     def run(self, compilation_dir, connection):
