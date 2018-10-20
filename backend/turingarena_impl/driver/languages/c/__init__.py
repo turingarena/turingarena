@@ -9,5 +9,5 @@ language = Language(
     source=CAlgorithmSource,
     skeleton_generator=CSkeletonCodeGen,
     template_generator=CTemplateCodeGen,
-    supported_for_evaluator=True,
+    supported_for_evaluator=False,
 )

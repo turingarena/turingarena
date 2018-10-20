@@ -65,7 +65,7 @@ BASE_MAKE_PARSER = ArgumentParser(
 BASE_MAKE_PARSER.add_argument(
     "--language",
     action="append",
-    choices=["python", "c++", "java", "go"],
+    choices=["Python", "C++", "C", "Java", "Go", "Bash"],
     help="which language to generate",
 )
 BASE_MAKE_PARSER.add_argument(

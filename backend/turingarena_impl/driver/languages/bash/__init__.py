@@ -3,7 +3,7 @@ from .generator import BashSkeletonCodeGen, BashTemplateCodeGen
 from .source import BashAlgorithmSource
 
 language = Language(
-    name="bash",
+    name="Bash",
     extension=".sh",
     source=BashAlgorithmSource,
     skeleton_generator=BashSkeletonCodeGen,

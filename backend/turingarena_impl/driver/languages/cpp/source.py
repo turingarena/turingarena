@@ -38,8 +38,7 @@ class CppAlgorithmSource(AlgorithmSource):
 
     def _link_executable(self, compilation_dir):
         cli = [
-            "g++",
-            "-static",
+            "g++", "-static",
             "-o", self.executable_path(compilation_dir),
             self._skeleton_object_path(compilation_dir),
             self._source_object_path(compilation_dir)
@@ -56,21 +55,24 @@ class CppAlgorithmSource(AlgorithmSource):
             self._compile_source(compilation_dir)
             self._compile_skeleton(compilation_dir)
             self._link_executable(compilation_dir)
-        except CalledProcessError as e:
+        except CalledProcessError:
             raise CompilationFailed
 
-    def executable_path(self, compilation_dir):
+    @staticmethod
+    def executable_path(compilation_dir):
         return os.path.join(compilation_dir, "algorithm")
 
-    def _skeleton_path(self, compilation_dir):
+    @staticmethod
+    def _skeleton_path(compilation_dir):
         return os.path.join(compilation_dir, "skeleton.cpp")
 
-    def _skeleton_object_path(self, compilation_dir):
+    @staticmethod
+    def _skeleton_object_path(compilation_dir):
         return os.path.join(compilation_dir, "skeleton.o")
 
-    def _source_object_path(self, compilation_dir):
+    @staticmethod
+    def _source_object_path(compilation_dir):
         return os.path.join(compilation_dir, "source.o")
-
 
     @contextmanager
     def run(self, compilation_dir, connection):

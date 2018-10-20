@@ -102,7 +102,7 @@ def make_cmd(args):
     elif what == "all":
         languages = Language.languages()
     else:
-        languages = [Language.from_name("c++")]
+        languages = [Language.from_name("C++")]
 
     base_dir = os.getcwd()
     logger.info(f"Searching for problems in {base_dir}")
