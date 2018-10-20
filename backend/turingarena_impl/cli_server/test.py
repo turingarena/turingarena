@@ -12,7 +12,8 @@ def test_cmd(parameters, local_execution):
             local_execution=local_execution,
         ))
 
-        os.chdir(work_dir)
+        os.chdir(os.path.join(work_dir, parameters.working_directory.current_directory))
+
         cli = ["-p", "no:cacheprovider", "-n", "8"]
         if parameters.pytest_arguments:
             cli += parameters.pytest_arguments

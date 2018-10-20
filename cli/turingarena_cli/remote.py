@@ -11,6 +11,7 @@ from functools import lru_cache
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
+from turingarena_cli.ssh import SSH_BASE_CLI, SSH_USER
 from turingarena_common.commands import LocalExecutionParameters, RemoteCommandParameters
 
 # in python2.7, quote is in pipes and not in shlex
@@ -18,17 +19,6 @@ try:
     from shlex import quote
 except ImportError:
     from pipes import quote
-
-SSH_BASE_CLI = [
-    "ssh",
-    "-T",
-    "-o", "BatchMode=yes",
-    "-o", "LogLevel=error",
-    "-o", "UserKnownHostsFile=/dev/null",
-    "-o", "StrictHostKeyChecking=no",
-    "-p", "20122", "-q",
-]
-SSH_USER = "turingarena@localhost"
 
 
 class RemoteCommand(Command):
