@@ -5,11 +5,8 @@ from tempfile import TemporaryDirectory
 
 import pickle
 
-from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.cli_server.git_manager import GitManager
-from turingarena_impl.cli_server.info import info_cmd
 from turingarena_impl.cli_server.make import make_cmd
-from turingarena_impl.cli_server.test import test_cmd
 from turingarena_impl.logging import init_logger
 
 logger = logging.getLogger(__name__)
@@ -55,12 +52,7 @@ def do_main(args):
         if args.send_current_dir:
             os.chdir(args.current_dir)
 
-        {
-            "evaluate": evaluate_cmd,
-            "make": make_cmd,
-            "info": info_cmd,
-            "test": test_cmd,
-        }[args.command](args)
+        make_cmd(args)
 
 
 if __name__ == '__main__':

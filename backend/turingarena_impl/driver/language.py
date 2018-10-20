@@ -34,7 +34,7 @@ class Language(namedtuple("Language", [
     @classmethod
     def from_name(cls, name):
         for language in cls.languages():
-            if language.name == name:
+            if language.name.lower() == name.lower():
                 return language
         raise ValueError(f"language {name} not supported by TuringArena")
 

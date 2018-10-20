@@ -5,7 +5,7 @@ from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
 from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import EvaluateCommand
-from turingarena_cli.files import FILE_PARSER
+from turingarena_cli.files import FileCommand
 from turingarena_cli.info import InfoCommand
 from turingarena_cli.legacy import BASE_MAKE_PARSER, MAKE_PARSER
 from turingarena_cli.new import NewCommand
@@ -52,8 +52,8 @@ subparsers.add_parser(
 )
 subparsers.add_parser(
     "file",
-    parents=[FILE_PARSER],
-    help=FILE_PARSER.description,
+    parents=[FileCommand.PARSER],
+    help=FileCommand.PARSER.description,
 )
 subparsers.add_parser(
     "make",
