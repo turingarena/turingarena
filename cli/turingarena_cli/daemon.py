@@ -5,7 +5,7 @@ import os
 import sys
 from turingarena_cli.common import *
 
-image = "turingarena/turingarena:latest"
+image = "turingarena/turingarena:develop"
 name = "turingarena"
 
 # in python 2.x, FileNotFoundError doesn't exists

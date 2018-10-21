@@ -30,7 +30,7 @@ class DaemonControlCommand(Command):
 
     @property
     def image(self):
-        return "turingarena/turingarena:latest"
+        return "turingarena/turingarena:develop"
 
     @property
     def container_name(self):
