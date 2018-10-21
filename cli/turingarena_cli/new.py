@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import logging
 import os
+import subprocess
 import sys
 from argparse import ArgumentParser
 
@@ -68,7 +69,10 @@ class NewCommand(Command):
             sys.exit("Directory {}/ already exists in this directory!".format(name))
         os.chdir(name)
 
-        # TODO: if directory is not a git repository, initialize empty repository
+        try:
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            subprocess.call(["git", "init"])
 
         logging.info("Writing default interface.txt")
         with open("interface.txt", "w") as f:
