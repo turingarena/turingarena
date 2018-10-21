@@ -5,7 +5,7 @@ true \
     && echo "VERSION='$CLI_VERSION'" > turingarena_common/build_version.py \
     && python3 setup.py egg_info bdist_wheel \
     && twine upload dist/* \
-    && cd /
+    && cd / \
     && hyper \
         config \
         --default-region=us-west-1 \
