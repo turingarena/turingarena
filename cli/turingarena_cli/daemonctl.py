@@ -159,3 +159,4 @@ subparsers.add_parser(
     parents=[DaemonUpgradeCommand.PARSER],
     help=DaemonUpgradeCommand.PARSER.description,
 ).set_defaults(Command=DaemonUpgradeCommand)
+
