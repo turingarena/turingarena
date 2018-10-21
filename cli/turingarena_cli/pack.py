@@ -23,9 +23,10 @@ class PackBasedCommand(AbstractRemotePythonCommand):
                 universal_newlines=True,
             ).strip()
         except:
-            work_dir = self.cwd
-            logging.info("Initializing git repository in {}".format(work_dir))
-            subprocess.call(["git", "init"])
+            print("ERROR: the current directory is not a git repository!")
+            print("A problem must be placed in a git repository.")
+            print("HINT: to initialized a git repository use the command 'git init'")
+            exit(1)
         logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
         return work_dir
 
