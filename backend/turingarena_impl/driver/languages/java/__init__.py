@@ -3,7 +3,7 @@ from .generator import JavaSkeletonCodeGen, JavaTemplateCodeGen
 from .source import JavaAlgorithmSource
 
 language = Language(
-    name="java",
+    name="Java",
     extension=".java",
     source=JavaAlgorithmSource,
     skeleton_generator=JavaSkeletonCodeGen,

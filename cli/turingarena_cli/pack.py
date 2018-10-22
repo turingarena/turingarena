@@ -23,9 +23,10 @@ class PackBasedCommand(AbstractRemotePythonCommand):
                 universal_newlines=True,
             ).strip()
         except:
-            work_dir = self.cwd
-            logging.info("Initializing git repository in {}".format(work_dir))
-            subprocess.call(["git", "init"])
+            print("ERROR: the current directory is not a git repository!")
+            print("A problem must be placed in a git repository.")
+            print("HINT: to initialized a git repository use the command 'git init'")
+            exit(1)
         logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
         return work_dir
 
@@ -120,23 +121,6 @@ class PackBasedCommand(AbstractRemotePythonCommand):
             ":refs/heads/sha-{commit_id}".format(commit_id=commit_id),
         ], env=self.git_env)
 
-    def retrieve_result(self, result_file):
-        logging.info("Retrieving result")
-        logging.info("Reading {}".format(result_file))
-        with open(result_file) as f:
-            result = f.read().strip()
-
-        logging.info("Got {}".format(result))
-        result = json.loads(result)
-
-        tree_id = result["tree_id"]
-        commit_it = result["commit_id"]
-
-        logging.info("Importing tree id {}".format(tree_id))
-        subprocess.call(["git", "read-tree", tree_id], env=self.git_env)
-        logging.info("Checking out")
-        subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
-
     @property
     def send_working_dir(self):
         if self.args.send_working_dir == "always":
@@ -190,7 +174,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         self.git_init()
         for p in self.local_parts:
             self.push_local_tree(p)
-        return super().run()
+        return super(PackBasedCommand, self).run()
 
     PARSER = ArgumentParser(
         add_help=False,

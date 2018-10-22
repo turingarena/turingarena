@@ -30,13 +30,13 @@ def test_callback_no_arguments():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     void test(void c()) {
                         c();
                         c();
                     }
                 """,
-                'python': """if True:                    
+                'Python': """if True:                    
                     def test(c):
                         c()
                         c()
@@ -70,13 +70,13 @@ def test_callback_with_arguments():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     void test(void c(int a, int b)) {
                         c(1, 2);
                         c(3, 4);
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def test(c):
                         c(1, 2)
                         c(3, 4)
@@ -112,14 +112,14 @@ def test_callback_return_value():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     #include <cassert>
                     void test(int c(int a)) {
                         assert(c(1) == 2);
                         assert(c(3) == 4);
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def test(c):
                         assert c(1) == 2
                         assert c(3) == 4
@@ -147,12 +147,12 @@ def test_interface_no_callbacks():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     int test() {
                         return 1;
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def test():
                         return 1
                 """,
@@ -176,14 +176,14 @@ def test_interface_one_callback():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     int test(void cb()) {
                         cb();
                         cb();
                         return 1;
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def test(cb):
                         cb()
                         cb()
@@ -218,7 +218,7 @@ def test_interface_multiple_callbacks():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     int test(void cb1(), void cb2()) {
                         cb1();
                         cb2();
@@ -227,7 +227,7 @@ def test_interface_multiple_callbacks():
                         return 1;
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def test(cb1, cb2):
                         cb1()
                         cb2()

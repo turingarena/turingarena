@@ -3,7 +3,7 @@ from .generator import CppSkeletonCodeGen, CppTemplateCodeGen
 from .source import CppAlgorithmSource
 
 language = Language(
-    name="c++",
+    name="C++",
     extension=".cpp",
     source=CppAlgorithmSource,
     skeleton_generator=CppSkeletonCodeGen,

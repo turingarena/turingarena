@@ -38,9 +38,7 @@ class FileCatCommand(FileCommand):
     PARSER.add_argument("path", help="Path to the file to print")
 
 
-FILE_PARSER = ArgumentParser(add_help=False)
-
-subparsers = FILE_PARSER.add_subparsers(title="subcommand", dest="subcommand")
+subparsers = FileCommand.PARSER.add_subparsers(title="subcommand", dest="subcommand")
 subparsers.required = True
 subparsers.add_parser(
     "cat",

@@ -1,5 +1,8 @@
+from __future__ import print_function
+
 import logging
 import os
+import subprocess
 import sys
 from argparse import ArgumentParser
 
@@ -66,6 +69,11 @@ class NewCommand(Command):
             sys.exit("Directory {}/ already exists in this directory!".format(name))
         os.chdir(name)
 
+        try:
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            subprocess.call(["git", "init"])
+
         logging.info("Writing default interface.txt")
         with open("interface.txt", "w") as f:
             print(interface_template, file=f)
@@ -76,7 +84,7 @@ class NewCommand(Command):
 
         logging.info("making directory solutions/")
         os.makedirs("solutions/")
-        print("Problem {name} created in directory {name}/".format(name=name))
+        print("Problem {name} created in directory {name}".format(name=name))
         print("Start editing your default interface.txt and evaluator.py files!")
 
     PARSER = ArgumentParser(

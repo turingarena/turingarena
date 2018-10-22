@@ -22,7 +22,7 @@ def test_simple_for():
                 }
             }
         """,
-        language_name="c++",
+        language_name="C++",
         source_text="""
             int *A;
             int f(int n, int a[]) { A = a; return 42; }
@@ -61,7 +61,7 @@ def test_double_for():
                 }
             }
         """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
             int **A;
             int f(int n, int m, int **a) { A = a; return 42; }

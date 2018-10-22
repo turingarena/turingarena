@@ -31,7 +31,7 @@ class ProblemSolutionItem(pytest.Item):
 
     def runtest(self):
         files = dict(source=self.parent.source_path)
-        evaluator = Evaluator.get_evaluator(self.parent.evaluator_path)
+        evaluator = Evaluator.get_evaluator(self.parent.evaluator_path, os.getcwd())
 
         events = list(evaluator.evaluate(files))
         self.add_report_section("call", "evaluation", "\n".join(map(str, events)))

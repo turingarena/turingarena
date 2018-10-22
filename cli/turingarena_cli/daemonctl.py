@@ -1,4 +1,5 @@
-import argparse
+from __future__ import print_function
+
 import logging
 import os
 import subprocess
@@ -7,7 +8,6 @@ from argparse import ArgumentParser
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_cli.remote import RemoteCommand
 
 
 class DaemonControlCommand(Command):
@@ -30,7 +30,7 @@ class DaemonControlCommand(Command):
 
     @property
     def image(self):
-        return "turingarena/turingarena:latest"
+        return "turingarena/turingarena:develop"
 
     @property
     def container_name(self):
@@ -159,3 +159,4 @@ subparsers.add_parser(
     parents=[DaemonUpgradeCommand.PARSER],
     help=DaemonUpgradeCommand.PARSER.description,
 ).set_defaults(Command=DaemonUpgradeCommand)
+

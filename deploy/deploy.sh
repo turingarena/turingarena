@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 true \
+    && cd /src/cli/ \
+    && echo "VERSION='$CLI_VERSION'" > turingarena_common/build_version.py \
+    && python3 setup.py egg_info bdist_wheel \
+    && twine upload dist/* \
+    && cd / \
     && hyper \
         config \
         --default-region=us-west-1 \
@@ -26,10 +31,6 @@ true \
     && cd /src/backend/ \
     && npm install \
     && serverless deploy --stage $SERVERLESS_STAGE \
-    && cd /src/cli/ \
-    && echo "VERSION='$CLI_VERSION'" > turingarena_common/build_version.py \
-    && python3 setup.py egg_info bdist_wheel \
-    && twine upload dist/* \
     && true
 
 exit $?
