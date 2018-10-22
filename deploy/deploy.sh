@@ -9,8 +9,8 @@ true \
     && hyper pull $DOCKER_IMAGE \
     && HYPERSH_DANGLING_IMAGES=$(hyper images -q --filter "dangling=true") \
     && echo HYPERSH_DANGLING_IMAGES=$HYPERSH_DANGLING_IMAGES >&2 \
-    && hyper rmi $HYPERSH_DANGLING_IMAGES || true \
-    && hyper func rm $HYPERSH_FUNC_NAME || true \
+    && ( hyper rmi $HYPERSH_DANGLING_IMAGES || true ) \
+    && ( hyper func rm $HYPERSH_FUNC_NAME || true ) \
     && hyper func create \
         --name $HYPERSH_FUNC_NAME \
         --env AWS_DEFAULT_REGION=us-east-1 \
