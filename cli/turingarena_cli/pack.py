@@ -127,22 +127,6 @@ class PackBasedCommand(AbstractRemotePythonCommand):
             ":refs/heads/sha-{oid}".format(oid=oid),
         ], env=self.git_env)
 
-    def retrieve_result(self, result_file):
-        logging.info("Retrieving result")
-        logging.info("Reading {}".format(result_file))
-        with open(result_file) as f:
-            result = f.read().strip()
-
-        logging.info("Got {}".format(result))
-        result = json.loads(result)
-
-        tree_id = result["tree_id"]
-
-        logging.info("Importing tree id {}".format(tree_id))
-        subprocess.call(["git", "read-tree", tree_id], env=self.git_env)
-        logging.info("Checking out")
-        subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
-
     @property
     def working_directory(self):
         return WorkingDirectory(
