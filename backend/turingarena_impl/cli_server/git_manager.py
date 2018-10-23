@@ -72,23 +72,3 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
                 "checkout-index",
                 "--all",
             ], env=env, check=True)
-
-    def add_directory(self, directory):
-        logger.info(f"Add directory {directory} to be committed")
-        subprocess.call(["git", "add", "-A", directory], env=self._base_env)
-
-    def commit_work(self, src):
-        logger.info("Committing work")
-
-        with self._temp_index() as env:
-            tree_id = subprocess.check_output([
-                "git", f"--work-tree={src}", "write-tree"
-            ], env=env).strip().decode("ascii")
-            logger.info(f"Output written with tree-id {tree_id}")
-
-            commit_id = subprocess.check_output([
-                "git", "commit-tree", tree_id, "-m", "Make output"
-            ], env=env).strip().decode("ascii")
-            logger.info(f"Created commit with commit-id {commit_id}")
-
-            return tree_id, commit_id
