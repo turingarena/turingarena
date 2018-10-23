@@ -23,9 +23,10 @@ class PackBasedCommand(AbstractRemotePythonCommand):
                 universal_newlines=True,
             ).strip()
         except:
-            work_dir = self.cwd
-            logging.info("Initializing git repository in {}".format(work_dir))
-            subprocess.call(["git", "init"])
+            print("ERROR: the current directory is not a git repository!")
+            print("A problem must be placed in a git repository.")
+            print("HINT: to initialized a git repository use the command 'git init'")
+            exit(1)
         logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
         return work_dir
 
@@ -142,7 +143,6 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         logging.info("Checking out")
         subprocess.call(["git", "checkout-index", "--all", "-q"], env=self.git_env)
 
-
     @property
     def working_directory(self):
         return WorkingDirectory(
@@ -156,7 +156,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
     def run(self):
         self.git_init()
         self.push_local_commit(self.working_dir_commit_oid)
-        return super().run()
+        return super(PackBasedCommand, self).run()
 
     PARSER = ArgumentParser(
         add_help=False,

@@ -13,7 +13,7 @@ def test_time_limit_section():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     void p(int a) {
                         for(int i = 0; i < 1000000; i++);
                     }

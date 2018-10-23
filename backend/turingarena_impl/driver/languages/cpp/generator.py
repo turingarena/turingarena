@@ -22,9 +22,6 @@ class CppCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         return f"// {comment}"
 
-    def generate_constant_declaration(self, name, value):
-        yield f"#define {name} {value}"
-
 
 class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
@@ -62,6 +59,9 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
         yield from self.block(callback.synthetic_body)
         yield "};"
+
+    def generate_constant_declaration(self, name, value):
+        yield f"static const int {name} = {value};"
 
     def call_statement_body(self, call_statement):
         method = call_statement.method
@@ -151,6 +151,9 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
+    def generate_constant_declaration(self, name, value):
+        yield f"const int {name} = {value};"
+
     def generate_method_declaration(self, method_declaration):
         yield
         yield f"{self.build_method_signature(method_declaration)}" " {"

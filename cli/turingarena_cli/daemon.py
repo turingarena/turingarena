@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import argparse
 import os
@@ -6,7 +5,7 @@ import os
 import sys
 from turingarena_cli.common import *
 
-image = "turingarena/turingarena:latest"
+image = "turingarena/turingarena:develop"
 name = "turingarena"
 
 # in python 2.x, FileNotFoundError doesn't exists
@@ -88,7 +87,7 @@ def run_daemon(dev_dir=None):
 
 
 def main():
-    print("`turingarenad` is deprecated. Use `turingarena daemon` instead.")
+    print("WARNING: `turingarenad` is deprecated. Use `turingarena daemon` instead.")
 
     args = parse_cli()
 
