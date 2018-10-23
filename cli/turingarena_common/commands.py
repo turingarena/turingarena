@@ -17,7 +17,7 @@ LocalExecutionParameters.DEFAULT = LocalExecutionParameters(
 
 Pack = namedtuple("Pack", [
     "repository",
-    "commit_oid",
+    "oid",
 ])
 
 GitRepository = namedtuple("GitRepository", [

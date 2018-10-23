@@ -48,7 +48,7 @@ def do_evaluate(params):
 
     working_directory = WorkingDirectory(
         pack=Pack(
-            commit_oid=params.getfirst("commit_oid"),
+            oid=params.getfirst("oid"),
             repository=GitRepository(
                 url=params.getfirst(f"repository[url]"),
                 branch=params.getfirst(f"repository[branch]"),

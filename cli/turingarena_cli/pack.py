@@ -58,7 +58,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
             yield env
 
     @lru_cache(None)
-    def local_commit_oid(self, path):
+    def local_oid(self, path):
         logging.info("Packing local tree")
         with self._temp_git_index(work_dir=path) as env:
             subprocess.check_call(["git", "add", "-A", "."], env=env)
@@ -73,14 +73,14 @@ class PackBasedCommand(AbstractRemotePythonCommand):
 
             commit_message = "Turingarena local directory: {path}.".format(path=path)
 
-            commit_oid = subprocess.check_output(
+            oid = subprocess.check_output(
                 ["git", "commit-tree", tree_oid, "-m", commit_message],
                 env=self.git_env,
                 universal_newlines=True,
             ).strip()
-            logging.info("Created commit {}".format(commit_oid))
+            logging.info("Created commit {}".format(oid))
 
-            return commit_oid
+            return oid
 
     @property
     @lru_cache(None)
@@ -91,8 +91,8 @@ class PackBasedCommand(AbstractRemotePythonCommand):
 
     @property
     @lru_cache(None)
-    def working_dir_commit_oid(self):
-        return self.local_commit_oid(self.working_dir)
+    def working_dir_oid(self):
+        return self.local_oid(self.working_dir)
 
     @property
     @lru_cache(None)
@@ -104,8 +104,8 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         logging.info("Relative current dir: {current_dir}".format(current_dir=current_dir))
         return current_dir
 
-    def push_local_commit(self, commit_oid):
-        logging.info("Pushing commit {commit_oid}...".format(commit_oid=commit_oid))
+    def push_local_commit(self, oid):
+        logging.info("Pushing commit {oid}...".format(oid=oid))
 
         subprocess.check_call(SSH_BASE_CLI + [
             "turingarena@localhost",
@@ -116,7 +116,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
-            "{commit_oid}:refs/heads/sha-{commit_oid}".format(commit_oid=commit_oid),
+            "{oid}:refs/heads/sha-{oid}".format(oid=oid),
         ], env=self.git_env)
         logging.info("Pushed current commit")
 
@@ -124,7 +124,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         subprocess.check_call([
             "git", "push", "-q",
             "turingarena@localhost:db.git",
-            ":refs/heads/sha-{commit_oid}".format(commit_oid=commit_oid),
+            ":refs/heads/sha-{oid}".format(oid=oid),
         ], env=self.git_env)
 
     def retrieve_result(self, result_file):
@@ -147,7 +147,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
     def working_directory(self):
         return WorkingDirectory(
             pack=Pack(
-                commit_oid=self.working_dir_commit_oid,
+                oid=self.working_dir_oid,
                 repository=None,
             ),
             current_directory=self.relative_current_dir,
@@ -155,7 +155,7 @@ class PackBasedCommand(AbstractRemotePythonCommand):
 
     def run(self):
         self.git_init()
-        self.push_local_commit(self.working_dir_commit_oid)
+        self.push_local_commit(self.working_dir_oid)
         return super(PackBasedCommand, self).run()
 
     PARSER = ArgumentParser(

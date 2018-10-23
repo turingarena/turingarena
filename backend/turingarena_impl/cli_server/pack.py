@@ -30,6 +30,6 @@ def create_working_directory(working_directory: WorkingDirectory, *, local_execu
 
         if working_directory.pack.repository is not None:
             git.fetch_repository(working_directory.pack.repository)
-        git.checkout_commit(working_directory.pack.commit_oid, temp_dir)
+        git.checkout_commit(working_directory.pack.oid, temp_dir)
 
         yield temp_dir

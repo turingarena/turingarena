@@ -59,14 +59,14 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
                 "GIT_INDEX_FILE": os.path.join(temp_dir, "index"),
             }
 
-    def checkout_commit(self, commit_oid, dest):
+    def checkout_commit(self, oid, dest):
         with self._temp_index() as env:
             subprocess.run([
                 "git",
                 f"--work-tree={dest}",
                 "checkout",
                 "--quiet",
-                commit_oid,
+                oid,
             ], env=env, check=True)
 
     def add_directory(self, directory):
