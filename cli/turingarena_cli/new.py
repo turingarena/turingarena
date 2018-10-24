@@ -1,9 +1,13 @@
+from __future__ import print_function
+
 import logging
 import os
+import subprocess
 import sys
 from argparse import ArgumentParser
 
 from turingarena_cli.command import Command
+from turingarena_cli.base import BASE_PARSER
 
 evaluator_template = """\
 from turingarena import run_algorithm, submission, evaluation
@@ -65,6 +69,11 @@ class NewCommand(Command):
             sys.exit("Directory {}/ already exists in this directory!".format(name))
         os.chdir(name)
 
+        try:
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            subprocess.call(["git", "init"])
+
         logging.info("Writing default interface.txt")
         with open("interface.txt", "w") as f:
             print(interface_template, file=f)
@@ -75,12 +84,13 @@ class NewCommand(Command):
 
         logging.info("making directory solutions/")
         os.makedirs("solutions/")
-        logging.info("Problem {name} created in directory {name}/".format(name=name))
-        logging.info("Start editing your default interface.txt and evaluator.py files!")
+        print("Problem {name} created in directory {name}".format(name=name))
+        print("Start editing your default interface.txt and evaluator.py files!")
 
     PARSER = ArgumentParser(
         description="Create a new Turingarena problem",
         add_help=False,
+        parents=[BASE_PARSER]
     )
     PARSER.add_argument("name", help="problem name")
 

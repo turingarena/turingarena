@@ -28,7 +28,7 @@ def test_loop_switch_functions():
             checkpoint;
         }
         """,
-        language_name="c++",
+        language_name="C++",
         source_text="""
             int f1() {return 1;}
             int f2() {return 2;}
@@ -65,7 +65,7 @@ def test_loop_switch_procedures():
             checkpoint;
         }
         """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
             int p1() {}
             int p2() {}
@@ -95,7 +95,7 @@ def test_loop_and_if_functions():
             }
         }
         """,
-        language_name="c++",
+        language_name="C++",
         source_text="int f() { return 42; }",
     ) as algo:
         with algo.run() as p:
@@ -118,7 +118,7 @@ def test_loop_and_if_procedures():
                 }
             }
             """,
-        language_name="c++",
+        language_name="C++",
         source_text="void p() {}",
     ) as algo:
         with algo.run() as p:

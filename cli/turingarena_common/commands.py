@@ -46,3 +46,18 @@ FileCommandParameters = namedtuple("FileCommandParameters", [
 FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
     "path",
 ])
+
+InfoCommandParameters = namedtuple("InfoCommandParameters", [
+    "what",
+])
+
+TestCommandParameters = namedtuple("TestCommandParameters", [
+    "pytest_arguments",
+    "working_directory",
+])
+
+MakeCommandParameters = namedtuple("MakeCommandParameters", [
+    "what",
+    "language",
+    "working_directory",
+])

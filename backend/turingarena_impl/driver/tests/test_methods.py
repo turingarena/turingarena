@@ -12,11 +12,11 @@ def test_method_no_arguments():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     void f() {
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def f():
                         pass
                 """
@@ -38,13 +38,13 @@ def test_method_with_arguments():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     #include <cassert>
                     void f(int a, int b) {
                         assert(a == 1 && b == 2);
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def f(a,b):
                         assert a == 1 and b == 2
                 """,
@@ -66,14 +66,14 @@ def test_method_return_value():
                 }
             """,
             sources={
-                'c++': """
+                'C++': """
                     #include <cassert>
                     int f(int a) {
                         assert(a == 1);
                         return 2;
                     }
                 """,
-                'python': """if True:
+                'Python': """if True:
                     def f(a):
                         assert a == 1
                         return 2
@@ -96,7 +96,7 @@ def test_multiple_call_function_no_args():
                     write a, b;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="int i = 0; int f() { return i++; }",
     ) as algo:
         with algo.run() as p:
@@ -116,7 +116,7 @@ def test_multiple_call_function_args():
                     write a, b;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 #include <cassert>
                 int i = 0;
@@ -142,7 +142,7 @@ def test_multiple_call_procedure_no_args():
                     checkpoint;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="void p() {}",
     ) as algo:
         with algo.run() as p:
@@ -164,7 +164,7 @@ def test_multiple_call_procedure_args():
                     checkpoint;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 #include <cassert>
                 void p(int x) { assert(x == 1); }
@@ -189,7 +189,7 @@ def test_multiple_function_return_value():
                 }
             }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
             int sum(int a, int b) {return a + b;}
         """,

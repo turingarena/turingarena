@@ -13,7 +13,7 @@ interface_text = """
 def test_sandbox_smoke():
     with define_algorithm(
             interface_text=interface_text,
-            language_name="python",
+            language_name="Python",
             source_text="""if True:
                 def test():
                     return 3

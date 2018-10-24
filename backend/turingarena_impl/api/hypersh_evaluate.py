@@ -2,12 +2,12 @@ import pickle
 import sys
 import traceback
 
-from turingarena_impl.api.dynamodb_events import store_events
-from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.evaluation.evaluate import evaluate
-
 
 def do_evaluate():
+    from turingarena_impl.api.dynamodb_events import store_events
+    from turingarena_impl.api.dynamodb_submission import load_submission
+    from turingarena_impl.evaluation.evaluate import evaluate
+
     request = pickle.load(sys.stdin.buffer)
 
     events = evaluate(

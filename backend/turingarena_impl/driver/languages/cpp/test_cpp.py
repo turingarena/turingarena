@@ -17,7 +17,7 @@ protocol_text = """
 def cpp_algorithm(source):
     return define_algorithm(
         interface_text=protocol_text,
-        language_name="c++",
+        language_name="C++",
         source_text=source,
     )
 
@@ -155,7 +155,7 @@ def test_get_time_memory_usage():
                     write o2;
                 }
             """,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 int test(int i) {
                     char x[1024 * 1024];

@@ -11,6 +11,7 @@ from functools import lru_cache
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
+from turingarena_cli.ssh import SSH_BASE_CLI, SSH_USER
 from turingarena_common.commands import LocalExecutionParameters, RemoteCommandParameters
 
 # in python2.7, quote is in pipes and not in shlex
@@ -19,25 +20,15 @@ try:
 except ImportError:
     from pipes import quote
 
-SSH_BASE_CLI = [
-    "ssh",
-    "-T",
-    "-o", "BatchMode=yes",
-    "-o", "LogLevel=error",
-    "-o", "UserKnownHostsFile=/dev/null",
-    "-o", "StrictHostKeyChecking=no",
-    "-p", "20122", "-q",
-]
-SSH_USER = "turingarena@localhost"
-
 
 class RemoteCommand(Command):
-    def check_daemon(self):
+    @staticmethod
+    def check_daemon():
         cli = SSH_BASE_CLI + [SSH_USER, "echo", "OK!"]
         try:
             subprocess.check_output(cli)
         except subprocess.CalledProcessError:
-            sys.exit("turingarenad is not running! Run it with `sudo turingarenad --daemon`")
+            sys.exit("turingarena daemon is not running! Run it with `turingarena daemon start`")
 
     @abstractmethod
     def _get_remote_cli(self):
@@ -108,7 +99,7 @@ class AbstractRemotePythonCommand(RemoteCommand):
         if self.args.local:
             self._run_locally()
         else:
-            super().run()
+            super(AbstractRemotePythonCommand, self).run()
 
 
 class RemotePythonCommand(AbstractRemotePythonCommand):

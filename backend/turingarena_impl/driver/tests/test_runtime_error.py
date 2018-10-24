@@ -15,7 +15,7 @@ INTERFACE_TEXT = """
 def test_time_limit_error():
     with define_algorithm(
             interface_text=INTERFACE_TEXT,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 void p() { for(;;); }
             """,
@@ -30,7 +30,7 @@ def test_time_limit_error():
 def test_io_blocked():
     with define_algorithm(
             interface_text=INTERFACE_TEXT,
-            language_name="c++",
+            language_name="C++",
             source_text="""
                 #include <cstdio>
                 void p() { for(;;) scanf(" "); }
@@ -47,7 +47,7 @@ def test_io_blocked():
 def test_io_garbage():
     with define_algorithm(
             interface_text=INTERFACE_TEXT,
-            language_name="c++",
+            language_name="C++",
             source_text=r"""
                 #include <cstdio>
                 void p() { for(;;) printf("garbage\n"); }
