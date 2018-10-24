@@ -11,7 +11,7 @@ import 'brace/mode/java';
 import 'brace/mode/c_cpp';
 import 'brace/theme/github';
 
-const client = new Client("https://api.turingarena.org/");
+const client = new Client(process.env.TURINGARENA_ENDPOINT || "https://api.turingarena.org/");
 
 @observer
 class EvaluationView extends React.Component {
@@ -42,10 +42,8 @@ export default class App extends React.Component {
     e.preventDefault();
     const data = new FormData();
 
-    data.append("packs[]", "d1a18623594c47621e9289767bc3ce997ce45756") // examples/sum_of_two_numbers
-    data.append("evaluator_cmd", "/usr/local/bin/python -u evaluator.py")
-    data.append("repositories[main][type]", "git_clone")
-    data.append("repositories[main][url]", "https://github.com/turingarena/turingarena.git")
+    data.append("oid", "d1a18623594c47621e9289767bc3ce997ce45756") // examples/sum_of_two_numbers
+    data.append("repository[url]", "https://github.com/turingarena/turingarena.git")
     data.append("submission[source]", new File([this.editor.current.editor.getValue()], "source.cpp"))
 
     currentEvaluation.set(new Evaluation(client.evaluate(data)));
