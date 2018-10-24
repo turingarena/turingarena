@@ -9,7 +9,6 @@ from turingarena_common.submission import SubmissionFile
 
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
-from turingarena_impl.api.dynamodb_submission import save_submission
 from turingarena_impl.api.request import CloudEvaluateRequest
 
 
