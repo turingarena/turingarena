@@ -27,7 +27,7 @@ export class Client {
   }
 
   async * evaluate(data) {
-    const response = await this.safeFetch(this.endpoint + "evaluate", {
+    const response = await this.safeFetch(this.endpoint + "/evaluate", {
       method: 'POST',
       body: data,
     });
@@ -90,7 +90,7 @@ export class Client {
     } else {
       afterOption = "";
     }
-    const response = await this.safeFetch(this.endpoint + "evaluation_events?evaluation=" + id + afterOption);
+    const response = await this.safeFetch(this.endpoint + "/evaluation_events?evaluation=" + id + afterOption);
     return await response.json();
   }
 
@@ -104,7 +104,7 @@ export class Client {
 
       await sleep(backoff);
       backoff *= config.backoffFactor;
-      if (backoff > config.maxBackoff) {
+      if (backoff >= config.maxBackoff) {
         backoff = config.maxBackoff;
         staleCount++;
       }
@@ -132,7 +132,7 @@ export class Client {
     while (page.end) {
       page = await this.backoff(async () => {
         const myPage = await this.loadEvaluationPage(id, page.end);
-        return [myPage.end !== myPage.start, myPage];
+        return [myPage.end !== myPage.begin, myPage];
       }, backoffConfig);
       yield* page.data;
     }

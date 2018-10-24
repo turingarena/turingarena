@@ -11,7 +11,7 @@ import 'brace/mode/c_cpp';
 import 'brace/theme/github';
 
 const client: Client = new Client(
-  "https://xsoaeqbfce.execute-api.us-east-1.amazonaws.com/branch-cloud-files/",
+  process.env.TURINGARENA_ENDPOINT || "https://api.turingarena.org",
   "http://turingarena-branch-cloud-files-files.s3-website-us-east-1.amazonaws.com/",
 );
 
