@@ -24,7 +24,7 @@ def main():
         do_evaluate()
     except Exception:
         # print the most useful stuff first (HyperSH crops the rest)
-        print(traceback.format_exc()[-50:])
+        print(traceback.format_exc()[-256:])
         raise
 
 
