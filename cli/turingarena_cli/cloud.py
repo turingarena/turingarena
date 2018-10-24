@@ -1,12 +1,11 @@
 from __future__ import print_function, division
 
 import logging
+import sys
 import time
 from argparse import ArgumentParser
-from io import BytesIO
 
 import requests
-import sys
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
 from turingarena_cli.evaluate import SubmissionCommand
@@ -64,7 +63,7 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
 
     def _build_files(self):
         return {
-            "submission[{}]".format(name): (f.filename, BytesIO(f.content))
+            "submission[{}]".format(name): (f.filename, f.content)
             for name, f in self.submission.items()
         }
 
