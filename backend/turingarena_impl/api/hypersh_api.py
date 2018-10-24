@@ -2,25 +2,19 @@ import pickle
 import sys
 import traceback
 
-from turingarena_impl.api.dynamodb_events import store_events
-from turingarena_impl.api.dynamodb_submission import load_submission
-from turingarena_impl.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
-from turingarena_impl.api.s3_files import generate_cloud_files
-from turingarena_impl.evaluation.evaluate import evaluate
 
-
-def handle_generate_file(request: CloudGenerateFileRequest):
+def handle_generate_file(request):
+    from turingarena_impl.api.s3_files import generate_cloud_files
     generate_cloud_files(request.working_directory)
 
 
-def handle_evaluate(request: CloudEvaluateRequest):
-    events = evaluate(
-        working_directory=request.working_directory,
-        evaluator_cmd=request.evaluator,
-        submission=load_submission(request.submission_id),
-    )
+def handle_evaluate(request):
+    from turingarena_impl.api.dynamodb_events import store_events
+    from turingarena_impl.evaluation.evaluate import evaluate
 
-    store_events(request.evaluation_id, events)
+    request = pickle.load(sys.stdin.buffer)
+
+    store_events(request.evaluation_id, evaluate(request.evaluate_request))
 
 
 def handle(request):

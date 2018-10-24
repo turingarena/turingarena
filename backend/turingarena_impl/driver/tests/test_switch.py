@@ -29,7 +29,7 @@ interface_text = """
 def test_switch():
     with define_algorithm(
         interface_text=interface_text,
-        language_name="c++",
+        language_name="C++",
         source_text="""
             int f1() {return 1;}
             int f2() {return 2;}

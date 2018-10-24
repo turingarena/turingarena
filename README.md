@@ -56,7 +56,7 @@ To start the server, run:
 turingarena daemon start --sudo --detach
 ```
 
-To start the server, run:
+To stop the server, run:
 ```bash
 turingarena daemon stop --sudo
 ```

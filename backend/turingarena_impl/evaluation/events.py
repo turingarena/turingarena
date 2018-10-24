@@ -9,6 +9,10 @@ class EvaluationEventType(Enum):
 
 
 class EvaluationEvent(namedtuple("EvaluationEvent", ["type", "payload"])):
+    @staticmethod
+    def from_json(json):
+        return EvaluationEvent(type=EvaluationEventType(json["type"]), payload=json["payload"])
+
     def json_line(self):
         return json.dumps(self.as_json_data())
 

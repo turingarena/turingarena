@@ -3,7 +3,7 @@ from .generator import PythonSkeletonCodeGen, PythonTemplateCodeGen
 from .source import PythonAlgorithmSource
 
 language = Language(
-    name="python",
+    name="Python",
     extension=".py",
     source=PythonAlgorithmSource,
     skeleton_generator=PythonSkeletonCodeGen,

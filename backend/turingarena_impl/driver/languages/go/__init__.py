@@ -4,7 +4,7 @@ from .generator import GoSkeletonCodeGen, GoTemplateCodeGen
 from .source import GoAlgorithmSource
 
 language = Language(
-    name="go",
+    name="Go",
     extension=".go",
     source=GoAlgorithmSource,
     skeleton_generator=GoSkeletonCodeGen,

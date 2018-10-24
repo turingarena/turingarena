@@ -16,11 +16,11 @@ LocalExecutionParameters.DEFAULT = LocalExecutionParameters(
 )
 
 Pack = namedtuple("Pack", [
-    "parts",
-    "repositories",
+    "repository",
+    "oid",
 ])
 
-GitCloneRepository = namedtuple("GitCloneRepository", [
+GitRepository = namedtuple("GitRepository", [
     "url",
     "branch",
     "depth",
@@ -31,10 +31,14 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
     "current_directory",
 ])
 
-EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
-    "working_directory",
+EvaluateRequest = namedtuple("EvaluateRequest", [
     "submission",
+    "working_directory",
     "evaluator",
+])
+
+EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
+    "evaluate_request",
     "raw_output",
 ])
 
@@ -45,4 +49,19 @@ FileCommandParameters = namedtuple("FileCommandParameters", [
 
 FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
     "path",
+])
+
+InfoCommandParameters = namedtuple("InfoCommandParameters", [
+    "what",
+])
+
+TestCommandParameters = namedtuple("TestCommandParameters", [
+    "pytest_arguments",
+    "working_directory",
+])
+
+MakeCommandParameters = namedtuple("MakeCommandParameters", [
+    "what",
+    "language",
+    "working_directory",
 ])

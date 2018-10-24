@@ -4,11 +4,11 @@ import secrets
 from http import HTTPStatus
 from urllib.request import urlopen
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitCloneRepository
+from turingarena_common.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
 from turingarena_common.submission import SubmissionFile
+
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
-from turingarena_impl.api.dynamodb_submission import save_submission
 from turingarena_impl.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
 
 
@@ -34,34 +34,21 @@ def get_submission_files(params, used_params):
         yield n, SubmissionFile(filename=filename, content=content)
 
 
-def get_repository(name, params):
-    repo_type = params.getfirst(f"repositories[{name}][type]")
-
-    if repo_type == "git_clone":
-        return GitCloneRepository(
-            url=params.getfirst(f"repositories[{name}][url]"),
-            branch=params.getfirst(f"repositories[{name}][branch]"),
-            depth=params.getfirst(f"repositories[{name}][depth]"),
-        )
-
-    raise ValueError(f"invalid repository type: {repo_type}")
-
-
 def do_evaluate(params):
     used_params = set()
 
+    evaluation_id = secrets.token_hex(16)
     submission = dict(get_submission_files(params, used_params))
-    submission_id = secrets.token_hex(16)
-
-    save_submission(submission_id, submission)
 
     working_directory = get_working_directory(params)
 
     request = CloudEvaluateRequest(
-        submission_id=submission_id,
-        evaluation_id=submission_id,
-        evaluator=params["evaluator_cmd"].value,
-        working_directory=working_directory,
+        evaluation_id=evaluation_id,
+        evaluate_request=EvaluateRequest(
+            submission=submission,
+            working_directory=working_directory,
+            evaluator=params["evaluator_cmd"].value,
+        )
     )
 
     # check_no_unused_params(params, used_params)
@@ -69,7 +56,7 @@ def do_evaluate(params):
     send_request_to_hypersh(request)
 
     return dict(
-        id=submission_id,
+        id=evaluation_id,
     )
 
 
@@ -77,25 +64,30 @@ def send_request_to_hypersh(request):
     region = os.environ["HYPERSH_REGION"]
     func_name = os.environ["HYPERSH_FUNC_NAME"]
     func_id = os.environ["HYPERSH_FUNC_ID"]
+
     data = pickle.dumps(request)
     url = f"https://{region}.hyperfunc.io/call/{func_name}/{func_id}"
     with urlopen(url, data=data) as f:
         f.read()
 
-
 def get_working_directory(params):
+    current_directory = params.getfirst(f"directory")
+    if current_directory is None:
+        current_directory = "."
+
     working_directory = WorkingDirectory(
         pack=Pack(
-            parts=tuple(sorted(params.getlist("packs[]"))),
-            repositories=tuple([
-                get_repository(name, params)
-                for name in get_children_field("repositories", params)
-            ])
+            oid=params.getfirst("oid"),
+            repository=GitRepository(
+                url=params.getfirst(f"repository[url]"),
+                branch=params.getfirst(f"repository[branch]"),
+                depth=params.getfirst(f"repository[depth]"),
+            )
         ),
-        current_directory=".",
+        current_directory=current_directory,
     )
-    return working_directory
 
+    return working_directory
 
 def check_no_unused_params(params, used_params):
     unused_params = set(params) - used_params

@@ -20,19 +20,6 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         Fn::GetAtt:
-          - SubmissionsTable
-          - Arn
-    - Effect: Allow
-      Action:
-        - dynamodb:DescribeTable
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        Fn::GetAtt:
           - EvaluationEventsTable
           - Arn
 
@@ -57,8 +44,6 @@ functions:
       HYPERSH_FUNC_NAME: ${env:HYPERSH_FUNC_NAME}
       HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
       DYNAMODB_EVALUATION_EVENTS_TABLE: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
-      DYNAMODB_SUBMISSIONS_TABLE: turingarena-${opt:stage, 'dev'}-SubmissionsTable
-      S3_FILES_BUCKET: turingarena-${opt:stage}-files
 
 custom:
   apigwBinary:
@@ -69,26 +54,10 @@ custom:
 
 resources:
   Resources:
-    SubmissionsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: turingarena-${opt:stage}-SubmissionsTable
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        TimeToLiveSpecification:
-          Enabled: true
-          AttributeName: expires
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
     EvaluationEventsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: turingarena-${opt:stage}-EvaluationEventsTable
+        TableName: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
         AttributeDefinitions:
           - AttributeName: evaluation_id
             AttributeType: S

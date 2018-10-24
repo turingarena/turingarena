@@ -1,3 +1,5 @@
+WARNING: this document contains old ideas which are not currently implemented in TuringArena.
+
 # TuringArena packs
 
 A TuringArena **pack** is a collection of software components, which can be:
