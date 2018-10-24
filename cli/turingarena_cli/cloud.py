@@ -12,7 +12,7 @@ from turingarena_cli.evaluate import SubmissionCommand
 
 from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
 
-TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org/"
+TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org"
 
 
 class CloudServerError(Exception):
