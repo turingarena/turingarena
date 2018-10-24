@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import GitCloneRepository
+from turingarena_common.commands import GitRepository
 from turingarena_common.git_common import GIT_BASE_ENV
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "git", "init", "--bare", "--quiet"
         ], env=self._base_env, check=True)
 
-    def fetch_repository(self, repository: GitCloneRepository):
+    def fetch_repository(self, repository: GitRepository):
         logger.info(f"Fetching git repository {repository}")
 
         if repository.depth is not None:
@@ -43,6 +43,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "git",
             "fetch",
             "--recurse-submodules=yes",
+            "--quiet",
             *depth_options,
             repository.url,
             *branch_options,
@@ -58,37 +59,16 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
                 "GIT_INDEX_FILE": os.path.join(temp_dir, "index"),
             }
 
-    def checkout_trees(self, ids, dest):
-        for id in ids:
-            with self._temp_index() as env:
-                subprocess.run([
-                    "git",
-                    "read-tree",
-                    id,
-                ], env=env, check=True)
-                subprocess.run([
-                    "git",
-                    f"--work-tree={dest}",
-                    "checkout-index",
-                    "--all",
-                ], env=env, check=True)
-
-    def add_directory(self, directory):
-        logger.info(f"Add directory {directory} to be committed")
-        subprocess.call(["git", "add", "-A", directory], env=self._base_env)
-
-    def commit_work(self, src):
-        logger.info("Committing work")
-
+    def checkout_commit(self, oid, dest):
         with self._temp_index() as env:
-            tree_id = subprocess.check_output([
-                "git", f"--work-tree={src}", "write-tree"
-            ], env=env).strip().decode("ascii")
-            logger.info(f"Output written with tree-id {tree_id}")
-
-            commit_id = subprocess.check_output([
-                "git", "commit-tree", tree_id, "-m", "Make output"
-            ], env=env).strip().decode("ascii")
-            logger.info(f"Created commit with commit-id {commit_id}")
-
-            return tree_id, commit_id
+            subprocess.run([
+                "git",
+                "read-tree",
+                oid,
+            ], env=env, check=True)
+            subprocess.run([
+                "git",
+                f"--work-tree={dest}",
+                "checkout-index",
+                "--all",
+            ], env=env, check=True)

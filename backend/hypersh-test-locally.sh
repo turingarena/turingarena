@@ -7,5 +7,6 @@ python -m turingarena_impl.api.make_hypersh_request $1 | sudo docker run \
     --env AWS_DEFAULT_REGION=$(aws configure get region) \
     --env AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id) \
     --env AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key) \
+    --env DYNAMODB_EVALUATION_EVENTS_TABLE=turingarena-branch-develop-EvaluationEventsTable \
     turingarena/turingarena \
     python -m turingarena_impl.api.hypersh_evaluate

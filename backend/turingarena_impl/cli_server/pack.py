@@ -3,7 +3,7 @@ import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import WorkingDirectory, GitCloneRepository
+from turingarena_common.commands import WorkingDirectory
 from turingarena_impl.cli_server.git_manager import GitManager
 
 
@@ -28,11 +28,8 @@ def create_working_directory(working_directory: WorkingDirectory, *, local_execu
     with TemporaryDirectory() as temp_dir:
         logging.info(f"Unpacking working directory in {temp_dir}")
 
-        for r in working_directory.pack.repositories:
-            if isinstance(r, GitCloneRepository):
-                git.fetch_repository(r)
-            else:
-                raise TypeError(type(r))
+        if working_directory.pack.repository is not None:
+            git.fetch_repository(working_directory.pack.repository)
+        git.checkout_commit(working_directory.pack.oid, temp_dir)
 
-        git.checkout_trees(working_directory.pack.parts, temp_dir)
         yield temp_dir

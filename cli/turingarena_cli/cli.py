@@ -4,13 +4,12 @@ from argparse import ArgumentParser
 from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
 from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
-from turingarena_cli.evaluate import EvaluateCommand
+from turingarena_cli.evaluate import RemoteEvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.info import InfoCommand
 from turingarena_cli.make import LegacyMakeCommand, LegacyTemplateCommand, LegacySkeletonCommand
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
-
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.test import TestCommand
 
@@ -32,8 +31,8 @@ subparsers.required = True
 
 subparsers.add_parser(
     "evaluate",
-    parents=[EvaluateCommand.PARSER],
-    help=EvaluateCommand.PARSER.description,
+    parents=[RemoteEvaluateCommand.PARSER],
+    help=RemoteEvaluateCommand.PARSER.description,
 )
 subparsers.add_parser(
     "info",

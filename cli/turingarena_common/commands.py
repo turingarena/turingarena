@@ -16,11 +16,11 @@ LocalExecutionParameters.DEFAULT = LocalExecutionParameters(
 )
 
 Pack = namedtuple("Pack", [
-    "parts",
-    "repositories",
+    "repository",
+    "oid",
 ])
 
-GitCloneRepository = namedtuple("GitCloneRepository", [
+GitRepository = namedtuple("GitRepository", [
     "url",
     "branch",
     "depth",
@@ -31,10 +31,14 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
     "current_directory",
 ])
 
-EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
-    "working_directory",
+EvaluateRequest = namedtuple("EvaluateRequest", [
     "submission",
+    "working_directory",
     "evaluator",
+])
+
+EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
+    "evaluate_request",
     "raw_output",
 ])
 
