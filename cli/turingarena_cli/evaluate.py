@@ -5,7 +5,7 @@ from functools import lru_cache
 from turingarena_cli.command import Command
 from turingarena_cli.pack import PackBasedCommand
 from turingarena_cli.remote import RemotePythonCommand
-from turingarena_common.commands import EvaluateCommandParameters
+from turingarena_common.commands import EvaluateCommandParameters, EvaluateRequest
 from turingarena_common.submission import SubmissionFile
 
 
@@ -52,12 +52,19 @@ class SubmissionCommand(Command):
         )
 
 
-class EvaluateCommand(PackBasedCommand, RemotePythonCommand, SubmissionCommand):
-    def _get_command_parameters(self):
-        return EvaluateCommandParameters(
+class EvaluateCommand(PackBasedCommand, SubmissionCommand):
+    def _get_evaluate_request(self):
+        return EvaluateRequest(
             working_directory=self.working_directory,
             evaluator=self.args.evaluator,
             submission=self.submission,
+        )
+
+
+class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
+    def _get_command_parameters(self):
+        return EvaluateCommandParameters(
+            evaluate_request=self._get_evaluate_request(),
             raw_output=self.args.raw,
         )
 
@@ -70,4 +77,4 @@ class EvaluateCommand(PackBasedCommand, RemotePythonCommand, SubmissionCommand):
     PARSER.add_argument("--raw", "-r", help="use raw output", action="store_true")
 
 
-EvaluateCommand.PARSER.set_defaults(Command=EvaluateCommand)
+RemoteEvaluateCommand.PARSER.set_defaults(Command=RemoteEvaluateCommand)

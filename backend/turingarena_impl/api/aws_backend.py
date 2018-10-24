@@ -4,8 +4,9 @@ import secrets
 from http import HTTPStatus
 from urllib.request import urlopen
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
+from turingarena_common.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
 from turingarena_common.submission import SubmissionFile
+
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
 from turingarena_impl.api.dynamodb_submission import save_submission
@@ -37,10 +38,8 @@ def get_submission_files(params, used_params):
 def do_evaluate(params):
     used_params = set()
 
+    evaluation_id = secrets.token_hex(16)
     submission = dict(get_submission_files(params, used_params))
-    submission_id = secrets.token_hex(16)
-
-    save_submission(submission_id, submission)
 
     current_directory = params.getfirst(f"directory")
     if current_directory is None:
@@ -59,10 +58,12 @@ def do_evaluate(params):
     )
 
     request = CloudEvaluateRequest(
-        submission_id=submission_id,
-        evaluation_id=submission_id,
-        evaluator=params["evaluator_cmd"].value,
-        working_directory=working_directory,
+        evaluation_id=evaluation_id,
+        evaluate_request=EvaluateRequest(
+            submission=submission,
+            working_directory=working_directory,
+            evaluator=params["evaluator_cmd"].value,
+        )
     )
 
     # check_no_unused_params(params, used_params)
@@ -77,7 +78,7 @@ def do_evaluate(params):
         f.read()
 
     return dict(
-        id=submission_id,
+        id=evaluation_id,
     )
 
 
