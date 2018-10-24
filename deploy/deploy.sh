@@ -30,6 +30,10 @@ true \
     && cd /src/backend/ \
     && npm install \
     && serverless deploy --stage $SERVERLESS_STAGE \
+    && cd /src/web/ \
+    && lerna bootstrap \
+    && lerna run build \
+    && surge --project packages/ui/build/ --domain $SURGE_DOMAIN \
     && true
 
 exit $?

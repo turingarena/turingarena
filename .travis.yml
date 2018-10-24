@@ -13,6 +13,7 @@ before_script:
   - export DOCKER_IMAGE=turingarena/turingarena:$BRANCH_SEGMENT
   - export SERVERLESS_STAGE=branch-$BRANCH_SEGMENT
   - export HYPERSH_FUNC_NAME=evaluate-$BRANCH_SEGMENT
+  - export SURGE_DOMAIN=turingarena-$BRANCH_SEGMENT.surge.sh
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 stages:
