@@ -10,7 +10,7 @@ from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
 from turingarena_cli.evaluate import SubmissionCommand
 
-from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
+from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 
 TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org"
 
