@@ -7,8 +7,8 @@ RUN true \
         python3-pip \
         curl \
         gnupg \
-    && curl -sL https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz \
-        | tar -zx hyper -C /usr/local/bin \
+    && curl -L https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz -o - \
+        | tar -zx -C /usr/local/bin \
     && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && apt-get install -y \
         gcc \
