@@ -1,18 +1,28 @@
-FROM alpine:3.7
+FROM ubuntu
 
 RUN true \
-    && apk add --no-cache \
+    && apt-get update \
+    && apt-get install -y \
         jq \
+        python3-pip \
+        curl \
+        gnupg \
+    && curl -sL https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz \
+        | tar -zx hyper -C /usr/local/bin \
+    && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+    && apt-get install -y \
+        gcc \
+        g++ \
+        make \
         nodejs \
-        python3 \
-    && wget https://hyper-install.s3.amazonaws.com/hyper-linux-x86_64.tar.gz \
-    && tar -z -f hyper-linux-x86_64.tar.gz -x hyper -C /usr/local/bin \
-    && rm hyper-linux-x86_64.tar.gz \
-    && mkdir /lib64 \
-    && ln -s /lib/ld-musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 \
-    && npm install -g serverless lerna neutrino yarn surge \
+    && npm install -g \
+        lerna \
+        neutrino \
+        serverless \
+        surge \
+        yarn \
     && pip3 install \
         setuptools \
-        twine==1.11.0 \
+        twine \
         wheel \
     && true
