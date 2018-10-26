@@ -15,22 +15,6 @@ from turingarena_common.git_common import GIT_BASE_ENV
 
 class PackBasedCommand(AbstractRemotePythonCommand):
     @property
-    @lru_cache(None)
-    def git_work_dir(self):
-        try:
-            work_dir = subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"],
-                universal_newlines=True,
-            ).strip()
-        except:
-            print("ERROR: the current directory is not a git repository!")
-            print("A problem must be placed in a git repository.")
-            print("HINT: to initialized a git repository use the command 'git init'")
-            exit(1)
-        logging.info("Work dir: {work_dir}".format(work_dir=work_dir))
-        return work_dir
-
-    @property
     def git_env(self):
         git_env = {
             "GIT_DIR": self.git_dir,
@@ -83,11 +67,8 @@ class PackBasedCommand(AbstractRemotePythonCommand):
             return oid
 
     @property
-    @lru_cache(None)
     def working_dir(self):
-        if self.args.working_dir is not None:
-            return self.args.working_dir
-        return self.git_work_dir
+        return self.args.working_dir if self.args.working_dir else "."
 
     @property
     @lru_cache(None)
@@ -95,14 +76,8 @@ class PackBasedCommand(AbstractRemotePythonCommand):
         return self.local_oid(self.working_dir)
 
     @property
-    @lru_cache(None)
     def relative_current_dir(self):
-        if self.args.current_dir is not None:
-            return self.args.current_dir
-
-        current_dir = os.path.relpath(self.cwd, self.git_work_dir)
-        logging.info("Relative current dir: {current_dir}".format(current_dir=current_dir))
-        return current_dir
+        return self.args.current_dir if self.args.current_dir else "."
 
     def push_local_commit(self, oid):
         logging.info("Pushing commit {oid}...".format(oid=oid))
