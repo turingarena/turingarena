@@ -74,7 +74,7 @@ class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
         parents=[PackBasedCommand.PARSER, SubmissionCommand.PARSER]
     )
     PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
-    PARSER.add_argument("--raw", "-r", help="use raw output", action="store_true")
+    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
 
 
 RemoteEvaluateCommand.PARSER.set_defaults(Command=RemoteEvaluateCommand)
