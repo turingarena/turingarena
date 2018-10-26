@@ -1,7 +1,7 @@
-import json
 import logging
 import os
 import subprocess
+
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from functools import lru_cache
@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 from turingarena_cli.remote import AbstractRemotePythonCommand, RemotePythonCommand
 from turingarena_cli.ssh import SSH_BASE_CLI
-from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
+from turingarena_common.commands import WorkingDirectory, Pack
 from turingarena_common.git_common import GIT_BASE_ENV
 
 
