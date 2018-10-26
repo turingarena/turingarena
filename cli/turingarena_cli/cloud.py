@@ -36,8 +36,9 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
     )
     PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="/usr/local/bin/python -u evaluator.py")
     PARSER.add_argument("--repository", "-r", help="repository")
-    PARSER.add_argument("--oid", "-i", help="commit/tree OID")
+    PARSER.add_argument("--oid", "-i", help="commit/tree OID", default="FETCH_HEAD")
     PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--directory", "-d", help="specify a subdirectory inside the repository", default=".")
 
     @property
     def endpoint(self):
@@ -59,6 +60,7 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
             "evaluator_cmd": self.args.evaluator,
             "oid": self.args.oid,
             "repository[url]": self.args.repository,
+            "directory": self.args.directory,
         }
 
     def _build_files(self):
