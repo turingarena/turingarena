@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 class InterfaceContext(namedtuple("InterfaceContext", [
     "methods",
+    "constants",
 ])):
     @property
     def methods_by_name(self):

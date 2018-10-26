@@ -18,8 +18,7 @@ class InterfaceBody(Block):
 
 class InterfaceDefinition:
     def __init__(self, source_text):
-        ast = parse_interface(source_text)
-        self.ast = ast
+        self.ast = parse_interface(source_text)
 
     def diagnostics(self):
         return list(self.validate())
@@ -46,7 +45,7 @@ class InterfaceDefinition:
     def main_block(self):
         return Block(
             ast=self.ast.main_block,
-            context=InterfaceContext(methods=self.methods).main_block_context()
+            context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context()
         )
 
     @property
