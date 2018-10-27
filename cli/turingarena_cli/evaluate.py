@@ -65,7 +65,7 @@ class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
     def _get_command_parameters(self):
         return EvaluateCommandParameters(
             evaluate_request=self._get_evaluate_request(),
-            raw_output=self.args.raw,
+            raw_output=self.args.raw_output,
         )
 
     PARSER = ArgumentParser(
