@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+from abc import abstractmethod
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
@@ -14,11 +15,18 @@ class Evaluator:
         self.command = filename
         self.cwd = cwd
 
+    def _compile(self, tmp_dir):
+        pass
+
+    @abstractmethod
+    def _get_command(self, tmp_dir):
+        pass
+
     def evaluate(self, files):
         with ExitStack() as stack:
             env = stack.enter_context(run_metaservers())
             tmp_dir = stack.enter_context(TemporaryDirectory())
-            self.compile(tmp_dir)
+            self._compile(tmp_dir)
 
             env = {
                 **env,
@@ -27,17 +35,13 @@ class Evaluator:
 
             evaluation = segi_subprocess(
                 files,
-                self.command,
-                shell=True,
+                self._get_command(tmp_dir),
                 env=env,
                 cwd=self.cwd,
             )
 
             for event in evaluation:
                 yield event
-
-    def compile(self, tmp_dir):
-        pass
 
     @staticmethod
     def get_evaluator(filename, cwd):
@@ -63,16 +67,22 @@ class Evaluator:
 
 
 class PythonEvaluator(Evaluator):
-    def compile(self, tmp_dir):
-        self.command = f"python3 -u {self.filename}"
+    def _get_command(self, tmp_dir):
+        return [
+            "python3",
+            "-u",
+            "evaluator.py",
+        ]
 
     def __str__(self):
         return "python evaluator"
 
 
 class CppEvaluator(Evaluator):
-    def compile(self, tmp_dir):
-        self.command = os.path.join(tmp_dir, "evaluator")
+    def _get_command(self, tmp_dir):
+        return [os.path.join(tmp_dir, "evaluator")]
+
+    def _compile(self, tmp_dir):
         cli = [
             "g++",
             "-std=c++14",
@@ -82,7 +92,7 @@ class CppEvaluator(Evaluator):
             self.filename,
         ]
 
-        subprocess.call(cli)
+        subprocess.run(cli)
 
     def __str__(self):
         return "C++ evaluator"
