@@ -25,7 +25,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def write_statement(self, write_statement):
         for arg in write_statement.arguments:
-            yield f"echo -n ${self.expression(arg)}"
+            yield f"echo -n $(({self.expression(arg)}))"
         yield "echo"
 
     def if_statement(self, if_statement):
@@ -40,7 +40,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def for_statement(self, for_statement):
         index = for_statement.index.variable.name
         size = self.expression(for_statement.index.range)
-        yield f"for {index} in $(seq 0 $(({size} - 1))); do"
+        yield f"for (({index}=0; index<{size}; i++)); do"
         yield self.block(for_statement.body)
         yield "done"
 
@@ -59,7 +59,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         yield from ()
 
     def call_statement(self, call_statement):
-        arguments = " ".join("$" + self.expression(p) for p in call_statement.arguments)
+        arguments = " ".join(f"$(({self.expression(p)}))" for p in call_statement.arguments)
         yield f"{call_statement.method_name} {arguments}"
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
