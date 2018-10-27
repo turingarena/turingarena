@@ -270,6 +270,7 @@ namespace turingarena {
         Algorithm(const Algorithm&) = delete;
         Algorithm& operator=(const Algorithm&) = delete;  
 
+        // FIXME: resolve source_path and interface_path to absolute paths
         Algorithm(const std::string& source_path) : 
             Algorithm(source_path, get_cwd() + "/interface.txt") {}
 
