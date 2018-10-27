@@ -18,11 +18,11 @@ def evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecutionPa
                 f.write(submission_file.content)
             files[name] = path
 
-        yield from evaluate_files(evaluate_request.working_directory, evaluate_request.evaluator, files, local_execution)
+        yield from evaluate_files(evaluate_request.working_directory, files, local_execution)
 
 
-def evaluate_files(working_directory, evaluator_cmd, files, local_execution=LocalExecutionParameters.DEFAULT):
+def evaluate_files(working_directory, files, local_execution=LocalExecutionParameters.DEFAULT):
     with create_working_directory(working_directory, local_execution=local_execution) as work_dir:
         cwd = os.path.join(work_dir, working_directory.current_directory)
-        evaluator = Evaluator.get_evaluator(evaluator_cmd, cwd=cwd)
+        evaluator = Evaluator.get_evaluator(cwd)
         yield from evaluator.evaluate(files=files)

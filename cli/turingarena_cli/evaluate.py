@@ -56,7 +56,6 @@ class EvaluateCommand(PackBasedCommand, SubmissionCommand):
     def _get_evaluate_request(self):
         return EvaluateRequest(
             working_directory=self.working_directory,
-            evaluator=self.args.evaluator,
             submission=self.submission,
         )
 
@@ -73,7 +72,6 @@ class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
         description="Evaluate a submission",
         parents=[PackBasedCommand.PARSER, SubmissionCommand.PARSER]
     )
-    PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
     PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
 
 
