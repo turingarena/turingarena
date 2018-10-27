@@ -45,7 +45,7 @@ class AlgorithmSection:
         self._engine = engine
 
     @contextmanager
-    def run(self, time_limit):
+    def _run(self, time_limit):
         self.info_before = self._engine.get_info()
         yield self
         self.info_after = self._engine.get_info()
@@ -67,7 +67,7 @@ class AlgorithmProcess(AlgorithmSection):
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection(self._engine)
-        return section_info.run(time_limit=time_limit)
+        return section_info._run(time_limit=time_limit)
 
     def checkpoint(self):
         self._engine.send_checkpoint()
@@ -82,7 +82,7 @@ class AlgorithmProcess(AlgorithmSection):
     @contextmanager
     def run(self, time_limit):
         self._engine.get_response_ok() # ready
-        with super().run(time_limit=time_limit) as section:
+        with self._run(time_limit=time_limit) as section:
             yield section
 
     def check(self, condition, message, exc_type=AlgorithmError):

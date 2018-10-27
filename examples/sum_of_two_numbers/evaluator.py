@@ -8,15 +8,18 @@ for _ in range(10):
     a, b = random.choices(value_range, k=2)
 
     try:
+        print(f"{a} + {b} -->", end="")
         with run_algorithm(submission.source) as process:
             c = process.functions.sum(a, b)
+        print(f" {c}", end="")
         if c == a + b:
-            print(f"{a} + {b} --> {c} (correct)")
+            print(" correct", end="")
         else:
-            print(f"{a} + {b} --> {c} (wrong!)")
+            print("  WRONG!", end="")
             all_passed = False
+        print(f" ({int(process.time_usage * 1000000)} us)")
     except AlgorithmError as e:
-        print(f"{a} + {b} --> {e}")
+        print(f" {e}")
         all_passed = False
 
 evaluation.data(dict(goals=dict(correct=all_passed)))

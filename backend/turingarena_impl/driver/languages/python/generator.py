@@ -15,6 +15,7 @@ class PythonCodeGen(InterfaceCodeGen):
 
 class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
+        yield 'import os as _os'
         yield 'from _source import *'
         yield
 
@@ -31,7 +32,8 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         yield 'print(0)'
 
     def exit_statement(self, exit_statement):
-        yield 'raise SystemExit'
+        yield from self.generate_flush()
+        yield '_os._exit(0)'
 
     def break_statement(self, break_statement):
         yield 'break'

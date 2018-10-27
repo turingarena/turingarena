@@ -57,6 +57,10 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
                     SyntheticExpression("int_literal", value=0),
                 ])
 
+        if self.context.main_block:
+            yield SyntheticStatement("exit", "terminate", arguments=[])
+
+
     @property
     @memoize
     def flat_inner_nodes(self):
