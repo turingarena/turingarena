@@ -19,6 +19,7 @@ class InterfaceContext(namedtuple("InterfaceContext", [
             global_context=self,
             reference_actions=(),
             index_variables=(),
+            main_block=True,
             in_loop=False,
         )
 
@@ -27,6 +28,7 @@ class StatementContext(namedtuple("StatementContext", [
     "global_context",
     "reference_actions",
     "index_variables",
+    "main_block",
     "in_loop",
 ])):
     def with_reference_actions(self, actions):

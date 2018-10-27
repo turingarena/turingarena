@@ -80,6 +80,12 @@ class InterfaceDefinition:
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")
+
+        ready_msg = context.receive_upward()
+        assert ready_msg == (0,)
+
+        context.send_driver_upward(0) # ready
+
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
         command = request.command

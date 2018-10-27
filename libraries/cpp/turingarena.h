@@ -40,6 +40,7 @@ namespace turingarena {
             static const char *evaluation_data_begin = getenv("EVALUATION_DATA_BEGIN");
             static const char *evaluation_data_end = getenv("EVALUATION_DATA_END");
 
+            std::cout << std::endl;
             std::cout << evaluation_data_begin << std::endl;
             std::cout << data << std::endl;
             std::cout << evaluation_data_end << std::endl;
@@ -297,6 +298,8 @@ namespace turingarena {
 
             driver_downward.open(sandbox_process_dir + "/driver_downward.pipe");
             driver_upward.open(sandbox_process_dir + "/driver_upward.pipe");
+
+            get_response_ok();
         }
 
         void exit()

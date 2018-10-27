@@ -79,6 +79,12 @@ class AlgorithmProcess(AlgorithmSection):
         info = self._engine.get_info(kill=True)
         raise exc_type(self, message, info)
 
+    @contextmanager
+    def run(self, time_limit):
+        self._engine.get_response_ok() # ready
+        with super().run(time_limit=time_limit) as section:
+            yield section
+
     def check(self, condition, message, exc_type=AlgorithmError):
         if not condition:
             self.fail(message, exc_type)

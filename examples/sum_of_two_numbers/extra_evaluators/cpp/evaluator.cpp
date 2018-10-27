@@ -28,7 +28,7 @@ int main() {
     }
 
     if (all_passed)
-        turingarena::evaluation_data("{'goals': {'correct': true}}");
-    else 
-        turingarena::evaluation_data("{'goals': {'correct': false}}");
+        turingarena::evaluation_data("{\"goals\": {\"correct\": true}}");
+    else
+        turingarena::evaluation_data("{\"goals\": {\"correct\": false}}");
 }
