@@ -55,6 +55,9 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def return_statement(self, return_statement):
         yield f"_return_val={self.expression(return_statement.value)}"
 
+    def exit_statement(self, exit_statement):
+        yield 'exit'
+
     def generate_flush(self):
         yield from ()
 
