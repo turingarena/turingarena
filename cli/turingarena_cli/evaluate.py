@@ -52,7 +52,7 @@ class SubmissionCommand(Command):
         )
 
 
-class EvaluateCommand(PackBasedCommand, SubmissionCommand):
+class EvaluateCommand(SubmissionCommand):
     def _get_evaluate_request(self):
         return EvaluateRequest(
             working_directory=self.working_directory,
@@ -69,7 +69,7 @@ class EvaluateCommand(PackBasedCommand, SubmissionCommand):
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
 
-class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
+class RemoteEvaluateCommand(EvaluateCommand, PackBasedCommand, RemotePythonCommand):
     def _get_command_parameters(self):
         return EvaluateCommandParameters(
             evaluate_request=self._get_evaluate_request(),
