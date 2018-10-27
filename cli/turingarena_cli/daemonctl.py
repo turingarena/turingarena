@@ -29,10 +29,6 @@ class DaemonControlCommand(Command):
         return bool(self.args.sudo)
 
     @property
-    def image(self):
-        return "turingarena/turingarena:develop"
-
-    @property
     def container_name(self):
         return self.args.container_name or "turingarena"
 
@@ -48,6 +44,11 @@ class DaemonStartCommand(DaemonControlCommand):
         help="source code directory of TuringArena (for development)",
     )
     PARSER.add_argument(
+        "--image",
+        help="Docker image to use",
+        default="turingarena/turingarena:develop",
+    )
+    PARSER.add_argument(
         "--detach",
         action="store_true",
         help="Detach from daemon",
@@ -56,6 +57,10 @@ class DaemonStartCommand(DaemonControlCommand):
     @property
     def detach(self):
         return bool(self.args.detach)
+
+    @property
+    def image(self):
+        return self.args.image
 
     def run(self):
         volumes = []

@@ -4,6 +4,7 @@ import os
 import random
 
 import sys
+import toml
 
 logger = logging.getLogger(__name__)
 
@@ -78,5 +79,11 @@ try:
 except KeyError:
     pass
 
+
+try:
+    with open("turingarena.toml") as f:
+        data = toml.load(f)
+except FileNotFoundError:
+    data = None
 
 random.seed(os.environ.get("TURINGARENA_SEED", None))
