@@ -1,4 +1,5 @@
 import os
+import random
 import subprocess
 from abc import abstractmethod
 from collections import namedtuple
@@ -17,15 +18,19 @@ class Evaluator(namedtuple("Evaluator", ["cwd"])):
     def _get_command(self, tmp_dir):
         pass
 
-    def evaluate(self, files):
+    def evaluate(self, files, seed=None):
         with ExitStack() as stack:
             env = stack.enter_context(run_metaservers())
             tmp_dir = stack.enter_context(TemporaryDirectory())
             self._compile(tmp_dir)
 
+            if seed is None:
+                seed = random.randrange(2**31)
+
             env = {
                 **env,
                 "TEMPORARY_DIRECTORY": tmp_dir,
+                "TURINGARENA_SEED": str(seed),
             }
 
             evaluation = segi_subprocess(

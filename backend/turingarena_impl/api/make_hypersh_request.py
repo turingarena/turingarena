@@ -28,5 +28,6 @@ pickle.dump(CloudEvaluateRequest(
             ),
             current_directory="examples/sum_of_two_numbers",
         ),
+        seed=None,
     ),
 ), sys.stdout.buffer)

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import random
 
 import sys
 
@@ -76,3 +77,6 @@ try:
     temporary_directory = os.environ["TEMPORARY_DIRECTORY"]
 except KeyError:
     pass
+
+
+random.seed(os.environ.get("TURINGARENA_SEED", None))

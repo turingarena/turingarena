@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 import requests
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_cli.evaluate import SubmissionCommand
+from turingarena_cli.evaluate import SubmissionCommand, EvaluateCommand
 
 from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 
@@ -28,15 +28,14 @@ class CloudCommand(Command):
     PARSER.add_argument("--endpoint", help="cloud API endpoint")
 
 
-class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
+class CloudEvaluateCommand(CloudCommand, EvaluateCommand):
     PARSER = ArgumentParser(
         description="Evaluate a submission in the cloud",
-        parents=[CloudCommand.PARSER, SubmissionCommand.PARSER],
+        parents=[CloudCommand.PARSER, EvaluateCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("--repository", "-r", help="repository")
     PARSER.add_argument("--oid", "-i", help="commit/tree OID", default="FETCH_HEAD")
-    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
     PARSER.add_argument("--directory", "-d", help="specify a subdirectory inside the repository", default=".")
 
     @property
@@ -46,6 +45,8 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
         return TURINGARENA_DEFAULT_ENDPOINT
 
     def run(self):
+        if self.args.seed is not None:
+            print("WARNING: --seed option not yet supported in cloud", file=sys.stderr)
         print("Evaluating... may take a couple of seconds", file=sys.stderr)
         for event in self._evaluation_events():
             if self.args.raw_output:

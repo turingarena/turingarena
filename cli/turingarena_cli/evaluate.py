@@ -57,7 +57,16 @@ class EvaluateCommand(PackBasedCommand, SubmissionCommand):
         return EvaluateRequest(
             working_directory=self.working_directory,
             submission=self.submission,
+            seed=self.args.seed,
         )
+
+    PARSER = ArgumentParser(
+        add_help=False,
+        description="Evaluate a submission",
+        parents=[SubmissionCommand.PARSER]
+    )
+    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--seed", help="set random seed", type=int)
 
 
 class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
@@ -69,10 +78,9 @@ class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
 
     PARSER = ArgumentParser(
         add_help=False,
-        description="Evaluate a submission",
-        parents=[PackBasedCommand.PARSER, SubmissionCommand.PARSER]
+        parents=[PackBasedCommand.PARSER, EvaluateCommand.PARSER]
     )
-    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+
 
 
 RemoteEvaluateCommand.PARSER.set_defaults(Command=RemoteEvaluateCommand)

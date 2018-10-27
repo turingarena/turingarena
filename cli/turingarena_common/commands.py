@@ -34,6 +34,7 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
 EvaluateRequest = namedtuple("EvaluateRequest", [
     "submission",
     "working_directory",
+    "seed",
 ])
 
 EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
