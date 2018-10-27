@@ -34,12 +34,15 @@ namespace turingarena {
             return std::string(buff);
         }
 
+        // FIXME: should accept a collection of JSON strings / JSON-serializable objects
         inline void evaluation_data(const std::string& data)
         {
             static const char *evaluation_data_begin = getenv("EVALUATION_DATA_BEGIN");
             static const char *evaluation_data_end = getenv("EVALUATION_DATA_END");
 
-            std::cout << evaluation_data_begin << data << evaluation_data_end << std::endl;
+            std::cout << evaluation_data_begin << std::endl;
+            std::cout << data << std::endl;
+            std::cout << evaluation_data_end << std::endl;
         }
 
         struct {
