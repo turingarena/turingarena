@@ -5,6 +5,8 @@ import subprocess
 from abc import abstractmethod
 from contextlib import contextmanager
 
+import time
+
 from turingarena.processinfo import SandboxProcessInfo
 
 logger = logging.Logger(__name__)
@@ -59,6 +61,21 @@ class PopenProcess(Process):
             return False, f"interrupted by signal {signal_number} - {signal_explaination}"
         assert False, "This should not be reached"
 
+    def _wait_for_interruptible(self):
+        timeout = 0.5
+        trials = 10
+        for trial in range(trials):
+            with open(f"/proc/{self.os_process.pid}/stat") as f:
+                stat = f.read()
+            status = stat.split()[2]
+            logging.debug(f"Process status: {status}")
+            if status in ("S", "Z"):
+                break
+            time.sleep(timeout / trials)
+        else:
+            logging.warning(f"Process did not reach interruptible state in {timeout} s")
+
+
     def get_status(self, kill=False) -> SandboxProcessInfo:
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
@@ -81,6 +98,8 @@ class PopenProcess(Process):
         # if the process is already terminated, return the cached info
         if self.termination_info:
             return self.termination_info
+
+        self._wait_for_interruptible()
 
         # first send SIGSTOP to stop the process
         self.os_process.send_signal(signal.SIGSTOP)
