@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import subprocess
 from collections import namedtuple
 from contextlib import contextmanager
@@ -10,6 +11,9 @@ from turingarena_common.commands import GitRepository
 from turingarena_common.git_common import GIT_BASE_ENV
 
 logger = logging.getLogger(__name__)
+
+
+GITHUB_REPO_PATTERN = re.compile("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 class GitManager(namedtuple("GitManager", ["git_dir"])):
@@ -29,6 +33,11 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
     def fetch_repository(self, repository: GitRepository):
         logger.info(f"Fetching git repository {repository}")
 
+        if GITHUB_REPO_PATTERN.match(repository.url):
+            url = f"https://github.com/{repository.url}"
+        else:
+            url = repository.url
+
         if repository.depth is not None:
             depth_options = [f"--depth={repository.depth}"]
         else:
@@ -45,7 +54,7 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
             "--recurse-submodules=yes",
             "--quiet",
             *depth_options,
-            repository.url,
+            url,
             *branch_options,
         ]
         logging.debug(f"running {cmd}")
