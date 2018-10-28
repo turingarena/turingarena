@@ -157,9 +157,6 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield 'System.out.flush();'
 
-    def checkpoint_statement(self, checkpoint_statement):
-        yield 'System.out.println(0);'
-
     def exit_statement(self, exit_statement):
         yield 'System.exit(0);'
 

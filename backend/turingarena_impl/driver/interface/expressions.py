@@ -4,7 +4,6 @@ from collections import namedtuple
 
 from bidict import frozenbidict
 
-from turingarena_impl.driver.generator import AbstractExpressionCodeGen
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.context import ExpressionContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
@@ -47,6 +46,7 @@ class Expression:
         return []
 
     def __str__(self):
+        from turingarena_impl.driver.generator import AbstractExpressionCodeGen
         return AbstractExpressionCodeGen().expression(self)
 
 

@@ -134,9 +134,6 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             yield from self.block(case.body)
         yield "}"
 
-    def checkpoint_statement(self, statement):
-        yield 'fmt.Printf("0\n")'
-
     def exit_statement(self, statement):
         yield "os.Exit(0)"
 

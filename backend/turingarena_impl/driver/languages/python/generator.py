@@ -28,9 +28,6 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         yield 'def main():'
         yield from self.block(statement.body)
 
-    def checkpoint_statement(self, checkpoint_statement):
-        yield 'print(0)'
-
     def exit_statement(self, exit_statement):
         yield from self.generate_flush()
         yield '_os._exit(0)'

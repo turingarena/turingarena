@@ -134,9 +134,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.block(case.body)
         yield "}"
 
-    def checkpoint_statement(self, statement):
-        yield r"""printf("%d\n", 0);"""
-
     def exit_statement(self, statement):
         yield "exit(0);"
 
