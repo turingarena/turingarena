@@ -19,6 +19,8 @@ from turingarena_impl.metaserver import MetaServer
 
 logger = logging.getLogger(__name__)
 
+PROCESS_TIMEOUT = 3.0
+
 
 class SandboxException(Exception):
     pass
@@ -91,6 +93,9 @@ class SandboxProcessServer:
             pipes = stack.enter_context(self.boundary.open_channel(DRIVER_PROCESS_CHANNEL, PipeBoundarySide.SERVER))
             driver_connection = DriverProcessConnection(**pipes)
 
+            timer = threading.Timer(PROCESS_TIMEOUT, self._on_timeout)
+            timer.start()
+
             context = NodeExecutionContext(
                 bindings={},
                 phase=None,
@@ -105,13 +110,19 @@ class SandboxProcessServer:
                 self.interface.run_driver(context)
             except CommunicationError as e:
                 context.send_driver_upward(-1)  # error
-                info = context.perform_wait(kill=1)
+                info = context.perform_wait(kill_reason="communication error")
                 message, = e.args
                 context.send_driver_upward(f"{message} (process {info.error})")
             except ProcessKilled:
                 logger.debug("process killed")
+            finally:
+                timer.cancel()
 
         logger.debug("process terminated")
+
+    def _on_timeout(self):
+        logging.warning(f"process communication timeout expired")
+        self.process.get_status(kill_reason="timeout expired")
 
     def start_process_and_connect(self):
         thread = threading.Thread(target=self._do_start_process)
