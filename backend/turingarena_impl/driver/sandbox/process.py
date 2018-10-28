@@ -2,10 +2,9 @@ import logging
 import os
 import signal
 import subprocess
+import time
 from abc import abstractmethod
 from contextlib import contextmanager
-
-import time
 
 from turingarena.processinfo import SandboxProcessInfo
 
@@ -19,13 +18,15 @@ class Process:
 
 
 class PopenProcess(Process):
-    @staticmethod
-    @contextmanager
-    def run(*args, **kwargs):
-        yield PopenProcess(*args, **kwargs)
-
-    def __init__(self, *args, **kwargs):
-        self.os_process = subprocess.Popen(*args, **kwargs)
+    def __init__(self, connection, *args, **kwargs):
+        self.os_process = subprocess.Popen(
+            *args,
+            **kwargs,
+            universal_newlines=True,
+            stdin=connection.downward,
+            stdout=connection.upward,
+            bufsize=1,
+        )
         self.termination_info = None
 
     @staticmethod
@@ -50,7 +51,6 @@ class PopenProcess(Process):
             signal_number = os.WTERMSIG(status_code)
             signal_name = signal.Signals(signal_number).name
             signal_message = {
-                signal.SIGXCPU: "CPU time limit exceeded",
                 signal.SIGSEGV: "Segmentation fault",
                 signal.SIGSYS: "Bad system call",
             }.get(signal_number, None)
@@ -74,7 +74,6 @@ class PopenProcess(Process):
             time.sleep(timeout / trials)
         else:
             logging.warning(f"Process did not reach interruptible state in {timeout} s")
-
 
     def get_status(self, kill=False) -> SandboxProcessInfo:
         """

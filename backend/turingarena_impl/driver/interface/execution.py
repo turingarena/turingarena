@@ -67,8 +67,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             return RequestSignature(command)
 
-    def perform_wait(self, wait):
-        info = self.process.get_status(kill=wait)
+    def perform_wait(self, kill):
+        info = self.process.get_status(kill=kill)
         self.send_driver_upward(info.time_usage)
         self.send_driver_upward(info.memory_usage)
         return info

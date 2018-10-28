@@ -105,7 +105,7 @@ class SandboxProcessServer:
                 self.interface.run_driver(context)
             except CommunicationError as e:
                 context.send_driver_upward(-1)  # error
-                info = context.perform_wait(wait=1)
+                info = context.perform_wait(kill=1)
                 message, = e.args
                 context.send_driver_upward(f"{message} (process {info.error})")
             except ProcessKilled:
@@ -127,12 +127,13 @@ class SandboxProcessServer:
     def _do_start_process(self):
         logger.debug("starting process...")
 
-        with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
-            source, compilation_dir = self.meta_server.compile_algorithm(self.algorithm)
-            connection = SandboxProcessConnection(**pipes)
-            if compilation_dir:
-                self.process = self.process_exit_stack.enter_context(
-                    source.run(compilation_dir, connection)
-                )
-            else:
-                self.process = CompilationFailedProcess()
+        try:
+            with self.boundary.open_channel(SANDBOX_PROCESS_CHANNEL, PipeBoundarySide.SERVER) as pipes:
+                source, compilation_dir = self.meta_server.compile_algorithm(self.algorithm)
+                connection = SandboxProcessConnection(**pipes)
+                if compilation_dir:
+                    self.process = source.create_process(compilation_dir, connection)
+                else:
+                    self.process = CompilationFailedProcess()
+        except:
+            logger.exception("exception while starting process")

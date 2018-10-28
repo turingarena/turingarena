@@ -102,12 +102,6 @@ def test_time_call():
     """)
 
 
-def test_time_limit():
-    should_raise("""
-        int test() { for(;;) {} }
-    """, signal.SIGXCPU)
-
-
 def test_memory_limit_static():
     should_raise("""
         const int size = 1 * 1024 * 1024 * 1024;

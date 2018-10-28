@@ -30,7 +30,7 @@ class Algorithm(namedtuple("Algorithm", [
 
             with driver_process_client.connect() as connection:
                 algorithm_process = AlgorithmProcess(connection)
-                with algorithm_process.run(time_limit):
+                with algorithm_process.run(time_limit=time_limit):
                     try:
                         yield algorithm_process
                     except InterfaceExit:
@@ -45,13 +45,17 @@ class AlgorithmSection:
         self._engine = engine
 
     @contextmanager
-    def _run(self, time_limit):
+    def _run(self, *, time_limit):
         self.info_before = self._engine.get_info()
         yield self
         self.info_after = self._engine.get_info()
 
         if time_limit is not None and self.time_usage > time_limit:
-            raise TimeLimitExceeded(self.time_usage, time_limit)
+            raise TimeLimitExceeded(
+                self,
+                f"Time limit exceeded: {self.time_usage} {time_limit}",
+                self.info_after,
+            )
 
     @property
     def time_usage(self):
@@ -80,9 +84,9 @@ class AlgorithmProcess(AlgorithmSection):
         raise exc_type(self, message, info)
 
     @contextmanager
-    def run(self, time_limit):
+    def run(self, **kwargs):
         self._engine.get_response_ok() # ready
-        with self._run(time_limit=time_limit) as section:
+        with self._run(**kwargs) as section:
             yield section
 
     def check(self, condition, message, exc_type=AlgorithmError):
