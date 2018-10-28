@@ -46,9 +46,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 
     def _generate_synthetic_statements(self):
         if self.context.main_block:
-            yield SyntheticStatement("write", "ready", arguments=[
-                SyntheticExpression("int_literal", value=0),
-            ])
+            yield SyntheticStatement("checkpoint", "ready", arguments=[])
 
         for s in self.statements:
             yield s
