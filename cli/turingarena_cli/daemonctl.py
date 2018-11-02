@@ -23,6 +23,11 @@ class DaemonControlCommand(Command):
         "--container-name",
         help="name of the container to run",
     )
+    START_STOP_PARSER.add_argument(
+        "--image",
+        help="Docker image to use",
+        default="turingarena/turingarena:develop",
+    )
 
     @property
     def use_sudo(self):
@@ -46,11 +51,6 @@ class DaemonStartCommand(DaemonControlCommand):
     PARSER.add_argument(
         "--dev-dir",
         help="source code directory of TuringArena (for development)",
-    )
-    PARSER.add_argument(
-        "--image",
-        help="Docker image to use",
-        default="turingarena/turingarena:develop",
     )
     PARSER.add_argument(
         "--detach",
