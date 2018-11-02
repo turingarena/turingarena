@@ -32,6 +32,10 @@ class DaemonControlCommand(Command):
     def container_name(self):
         return self.args.container_name or "turingarena"
 
+    @property
+    def image(self):
+        return self.args.image
+
 
 class DaemonStartCommand(DaemonControlCommand):
     PARSER = ArgumentParser(
@@ -57,10 +61,6 @@ class DaemonStartCommand(DaemonControlCommand):
     @property
     def detach(self):
         return bool(self.args.detach)
-
-    @property
-    def image(self):
-        return self.args.image
 
     def run(self):
         volumes = []
