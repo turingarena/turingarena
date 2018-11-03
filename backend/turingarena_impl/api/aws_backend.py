@@ -134,7 +134,7 @@ def do_generate_file(params):
 
 def do_get_file(params):
     try:
-        file_id = params["file"]
+        file_id = params.getfirst("file")
     except KeyError:
         raise ProxyError(HTTPStatus.BAD_REQUEST, dict(message=f"Missing parameter 'file'"))
 
