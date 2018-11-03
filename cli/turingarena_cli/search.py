@@ -31,10 +31,11 @@ class SearchCommand(Command):
 
         sys.stdout.write("\b" * 12)
 
-        print("%d%s result%s found:" % (
+        print("%d%s result%s found%s" % (
             res["total_count"],
             "+" if res["incomplete_results"] else "",
-            "s" if res["total_count"] != 1 else ""))
+            "s" if res["total_count"] != 1 else "",
+            ":" if res["total_count"] > 0 else "."))
 
         for item in res["items"]:
             print("- %s" % item["full_name"])
