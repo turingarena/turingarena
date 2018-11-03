@@ -12,6 +12,7 @@ from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.test import TestCommand
+from turingarena_cli.search import SearchCommand
 
 try:
     from shlex import quote
@@ -84,6 +85,11 @@ subparsers.add_parser(
     parents=[CloudCommand.PARSER],
     help=CloudCommand.PARSER.description,
 )
+subparsers.add_parser(
+    "search",
+    parents=[SearchCommand.PARSER],
+    help=SearchCommand.PARSER.description,
+).set_defaults(Command=SearchCommand)
 
 
 def main():
