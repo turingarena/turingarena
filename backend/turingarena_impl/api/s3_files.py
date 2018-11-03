@@ -38,9 +38,7 @@ def generate_cloud_files(working_directory: WorkingDirectory):
         Key=file_key,
         StorageClass="REDUCED_REDUNDANCY",
     )
-    url = s3.generate_presigned_url('get_object', Params=dict(
-        Bucket=S3_FILES_BUCKET,
-        Key=file_key,
-    ))
 
-    return url
+    # TODO: use s3.generate_presigned_url ?
+
+    return f"https://{S3_FILES_BUCKET}.s3.amazonaws.com/{file_key}"
