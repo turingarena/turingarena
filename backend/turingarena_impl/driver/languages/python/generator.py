@@ -118,4 +118,7 @@ class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
     def generate_method_declaration(self, method_declaration):
         yield
         yield from self.build_method_declaration(method_declaration)
-        yield self.indent('pass')
+        if method_declaration.has_return_value:
+            yield self.indent("return 42")
+        else:
+            yield self.indent('pass')
