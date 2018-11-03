@@ -1,4 +1,5 @@
 import logging
+import threading
 from collections import namedtuple
 from contextlib import contextmanager
 from typing import List, Tuple, Any
@@ -9,6 +10,9 @@ from turingarena_impl.driver.interface.nodes import ExecutionResult
 from turingarena_impl.driver.interface.variables import Reference
 
 logger = logging.getLogger(__name__)
+
+UPWARD_TIMEOUT = 3.0
+
 
 Assignments = List[Tuple[Reference, Any]]
 
@@ -74,6 +78,10 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         self.send_driver_upward(info.memory_usage)
         return info
 
+    def _on_timeout(self):
+        logging.warning(f"process communication timeout expired")
+        self.process.get_status(kill=1)
+
     @contextmanager
     def _check_downward_pipe(self):
         try:
@@ -90,12 +98,20 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         with self._check_downward_pipe():
             self.sandbox_connection.downward.flush()
 
+
+        timer = threading.Timer(UPWARD_TIMEOUT, self._on_timeout)
+        timer.start()
+
         logger.debug(f"receive_upward...")
         line = self.sandbox_connection.upward.readline().strip()
         logger.debug(f"receive_upward -> {line}")
 
+        if not timer.is_alive():
+            raise CommunicationError(f"process stopped sending data (timeout: {UPWARD_TIMEOUT}s)")
+        timer.cancel()
+
         if not line:
-            raise CommunicationError(f"process stopped sending data")
+            raise CommunicationError(f"upward pipe closed")
 
         try:
             return tuple(map(int, line.split()))
