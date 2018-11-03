@@ -38,4 +38,4 @@ class SearchCommand(Command):
             ":" if res["total_count"] > 0 else "."))
 
         for item in res["items"]:
-            print("- %s" % item["full_name"])
+            print("- {full_name:<30} {description}".format(**item))
