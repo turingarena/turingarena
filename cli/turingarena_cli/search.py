@@ -18,7 +18,7 @@ class SearchCommand(Command):
         add_help=False,
     )
 
-    PARSER.add_argument("query", nargs="+")
+    PARSER.add_argument("query", nargs="*")
 
     def run(self):
         sys.stdout.write("Searching...")
