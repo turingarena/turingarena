@@ -6,5 +6,6 @@ CloudEvaluateRequest = namedtuple("CloudEvaluateRequest", [
 ])
 
 CloudGenerateFileRequest = namedtuple("CloudGenerateFileRequest", [
+    "file_id",
     "working_directory",
 ])

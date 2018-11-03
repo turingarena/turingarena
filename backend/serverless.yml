@@ -43,7 +43,7 @@ functions:
       HYPERSH_REGION: us-west-1
       HYPERSH_FUNC_NAME: ${env:HYPERSH_FUNC_NAME}
       HYPERSH_FUNC_ID: ${env:HYPERSH_FUNC_ID}
-      DYNAMODB_EVALUATION_EVENTS_TABLE: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
+      DYNAMODB_TABLE: turingarena-${opt:stage, 'dev'}-table
 
 custom:
   apigwBinary:
@@ -57,14 +57,14 @@ resources:
     EvaluationEventsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: turingarena-${opt:stage, 'dev'}-EvaluationEventsTable
+        TableName: turingarena-${opt:stage, 'dev'}-table
         AttributeDefinitions:
-          - AttributeName: evaluation_id
+          - AttributeName: id
             AttributeType: S
           - AttributeName: index
             AttributeType: N
         KeySchema:
-          - AttributeName: evaluation_id
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: index
             KeyType: RANGE

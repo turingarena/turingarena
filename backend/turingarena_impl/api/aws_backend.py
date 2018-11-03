@@ -9,6 +9,7 @@ from turingarena_common.submission import SubmissionFile
 
 from turingarena_impl.api.common import ProxyError
 from turingarena_impl.api.dynamodb_events import load_event_page
+from turingarena_impl.api.dynamodb_files import fetch_file
 from turingarena_impl.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
 
 
@@ -70,6 +71,7 @@ def send_request_to_hypersh(request):
     with urlopen(url, data=data) as f:
         f.read()
 
+
 def get_working_directory(params):
     current_directory = params.getfirst(f"directory")
     if current_directory is None:
@@ -88,6 +90,7 @@ def get_working_directory(params):
     )
 
     return working_directory
+
 
 def check_no_unused_params(params, used_params):
     unused_params = set(params) - used_params
@@ -115,15 +118,32 @@ def do_evaluation_events(params):
 def do_generate_file(params):
     working_directory = get_working_directory(params)
 
+    file_id = secrets.token_hex(16)
+
     request = CloudGenerateFileRequest(
+        file_id=file_id,
         working_directory=working_directory,
     )
 
     send_request_to_hypersh(request)
+
+    return dict(
+        id=file_id,
+    )
+
+
+def do_get_file(params):
+    try:
+        file_id = params["file"]
+    except KeyError:
+        raise ProxyError(HTTPStatus.BAD_REQUEST, dict(message=f"Missing parameter 'file'"))
+
+    return fetch_file(file_id)
 
 
 endpoints = dict(
     evaluate=dict(POST=do_evaluate),
     evaluation_events=dict(GET=do_evaluation_events),
     generate_file=dict(POST=do_generate_file),
+    get_file=dict(POST=do_get_file),
 )
