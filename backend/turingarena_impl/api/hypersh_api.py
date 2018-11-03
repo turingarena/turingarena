@@ -28,8 +28,11 @@ def main():
     try:
         execute_request()
     except Exception:
-        # print the most useful stuff first (HyperSH crops the rest)
-        print(traceback.format_exc()[-50:])
+        # print the most useful stuff to stderr (HyperSH crops the rest in logs)
+        print(traceback.format_exc()[-50:], file=sys.stderr)
+        # print the full stack trace to stdout (for use with 'hyper func get <call-id>')
+        traceback.print_exc(file=sys.stdout)
+
         raise
 
 
