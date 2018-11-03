@@ -16,11 +16,24 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["working_dire
     def targets(self):
         return list(self._generate_targets())
 
+    def _create_text_generator(self, path):
+        def generate(outfile):
+            with open(path) as f:
+                outfile.write(f.read())
+
+        return generate
+
     def _generate_targets(self):
         for dirpath, dirnames, filenames in os.walk(self.working_directory):
             relpath = os.path.relpath(dirpath, self.working_directory)
             if INTERFACE_TXT in filenames:
                 yield from self._generate_interface_targets(dirpath, relpath)
+            if "statement.md" in filenames:
+                path = os.path.join(dirpath, "statement.md")
+                yield (os.path.join(relpath, "statement.md"), self._create_text_generator(path))
+            elif "README.md" in filenames:
+                path = os.path.join(dirpath, "README.md")
+                yield (os.path.join(relpath, "statement.md"), self._create_text_generator(path))
 
     def _generate_interface_targets(self, abspath, relpath):
         for lang in Language.languages():
