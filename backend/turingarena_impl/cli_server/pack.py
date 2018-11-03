@@ -3,7 +3,7 @@ import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import WorkingDirectory
+from turingarena_common.commands import WorkingDirectory, LocalExecutionParameters
 from turingarena_impl.cli_server.git_manager import GitManager
 
 
@@ -21,7 +21,7 @@ def enter_working_directory(working_directory: WorkingDirectory, *, local_execut
 
 
 @contextmanager
-def create_working_directory(working_directory: WorkingDirectory, *, local_execution):
+def create_working_directory(working_directory: WorkingDirectory, *, local_execution=LocalExecutionParameters.DEFAULT):
     git = GitManager(local_execution.git_dir)
     git.init()
 

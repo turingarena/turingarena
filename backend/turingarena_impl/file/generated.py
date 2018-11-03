@@ -2,15 +2,13 @@ import os
 from collections import namedtuple
 from functools import lru_cache
 
-from future.moves import sys
-
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 
 INTERFACE_TXT = "interface.txt"
 
 
-class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["working_directory"])):
+class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"])):
     @property
     @lru_cache(None)
     def targets(self):
@@ -24,8 +22,8 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["working_dire
         return generate
 
     def _generate_targets(self):
-        for dirpath, dirnames, filenames in os.walk(self.working_directory):
-            relpath = os.path.relpath(dirpath, self.working_directory)
+        for dirpath, dirnames, filenames in os.walk(self.work_dir):
+            relpath = os.path.relpath(dirpath, self.work_dir)
             if INTERFACE_TXT in filenames:
                 yield from self._generate_interface_targets(dirpath, relpath)
             if "statement.md" in filenames:
@@ -55,8 +53,8 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["working_dire
 
         return generator
 
-    def cat_file(self, path):
+    def cat_file(self, path, *, file):
         for p, generator in self.targets:
             if p == path:
-                return generator(sys.stdout)
+                return generator(file)
         raise FileNotFoundError(path)

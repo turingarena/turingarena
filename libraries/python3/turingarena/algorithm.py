@@ -68,6 +68,7 @@ class AlgorithmProcess(AlgorithmSection):
 
         self.procedures = MethodProxy(self._engine, has_return_value=False)
         self.functions = MethodProxy(self._engine, has_return_value=True)
+        self.terminated = False
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection(self._engine)
@@ -80,14 +81,20 @@ class AlgorithmProcess(AlgorithmSection):
         self._engine.send_exit()
 
     def fail(self, message, exc_type=AlgorithmError):
-        info = self._engine.get_info(kill=True)
+        if self.terminated:
+            info = None
+        else:
+            info = self._engine.get_info(kill=True)
+        
         raise exc_type(self, message, info)
 
     @contextmanager
     def run(self, **kwargs):
+        assert not self.terminated
         self._engine.get_response_ok() # ready
         with self._run(**kwargs) as section:
             yield section
+        self.terminated = True
 
     def check(self, condition, message, exc_type=AlgorithmError):
         if not condition:
