@@ -155,4 +155,6 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
         yield
         yield f"{self.build_method_signature(method_declaration)}" " {"
         yield self.indent("// TODO")
+        if method_declaration.has_return_value:
+            yield self.indent("return 42;")
         yield "}"
