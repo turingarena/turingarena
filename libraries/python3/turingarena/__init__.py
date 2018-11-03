@@ -1,8 +1,10 @@
 import json
 import logging
 import os
+import random
 
 import sys
+import toml
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,8 @@ class MemoryLimitExceeded(AlgorithmError):
 def run_algorithm(source_path, interface_path=None):
     if interface_path is None:
         interface_path = os.path.abspath("interface.txt")
+
+    source_path = os.path.abspath(source_path)
 
     from turingarena.algorithm import Algorithm
     return Algorithm(
@@ -76,3 +80,12 @@ try:
     temporary_directory = os.environ["TEMPORARY_DIRECTORY"]
 except KeyError:
     pass
+
+
+try:
+    with open("turingarena.toml") as f:
+        data = toml.load(f)
+except FileNotFoundError:
+    data = None
+
+random.seed(os.environ.get("TURINGARENA_SEED", None))

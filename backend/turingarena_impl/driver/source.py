@@ -32,7 +32,7 @@ class AlgorithmSource(namedtuple("AlgorithmSource", [
         pass
 
     @abstractmethod
-    def run(self, compilation_dir, connection):
+    def create_process(self, compilation_dir, connection):
         pass
 
 

@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import secrets
 import selectors
@@ -7,7 +6,7 @@ import subprocess
 import time
 from contextlib import ExitStack, contextmanager
 
-from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
+from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 
 
 def submission_environ(submission_fields):

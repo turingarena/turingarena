@@ -11,6 +11,8 @@ for i in $(seq 10) ; do
     b=$((100+RANDOM%400))
 
     {
+        read status # ready
+
         echo request
         echo call
         echo sum

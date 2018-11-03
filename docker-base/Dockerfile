@@ -30,6 +30,7 @@ RUN true \
         seccomplite \
         pytest \
         tatsu \
+        toml \
         networkx \
     && wget https://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
     && tar -xvf glpk-4.65.tar.gz \

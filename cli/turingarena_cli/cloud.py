@@ -8,11 +8,11 @@ from argparse import ArgumentParser
 import requests
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_cli.evaluate import SubmissionCommand
+from turingarena_cli.evaluate import SubmissionCommand, EvaluateCommand
 
-from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
+from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 
-TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org/"
+TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org"
 
 
 class CloudServerError(Exception):
@@ -28,16 +28,15 @@ class CloudCommand(Command):
     PARSER.add_argument("--endpoint", help="cloud API endpoint")
 
 
-class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
+class CloudEvaluateCommand(CloudCommand, EvaluateCommand):
     PARSER = ArgumentParser(
         description="Evaluate a submission in the cloud",
-        parents=[CloudCommand.PARSER, SubmissionCommand.PARSER],
+        parents=[CloudCommand.PARSER, EvaluateCommand.PARSER],
         add_help=False,
     )
-    PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="/usr/local/bin/python -u evaluator.py")
     PARSER.add_argument("--repository", "-r", help="repository")
-    PARSER.add_argument("--oid", "-i", help="commit/tree OID")
-    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--oid", "-i", help="commit/tree OID", default="FETCH_HEAD")
+    PARSER.add_argument("--directory", "-d", help="specify a subdirectory inside the repository", default=".")
 
     @property
     def endpoint(self):
@@ -46,6 +45,8 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
         return TURINGARENA_DEFAULT_ENDPOINT
 
     def run(self):
+        if self.args.seed is not None:
+            print("WARNING: --seed option not yet supported in cloud", file=sys.stderr)
         print("Evaluating... may take a couple of seconds", file=sys.stderr)
         for event in self._evaluation_events():
             if self.args.raw_output:
@@ -56,9 +57,9 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
 
     def _build_parameters(self):
         return {
-            "evaluator_cmd": self.args.evaluator,
             "oid": self.args.oid,
             "repository[url]": self.args.repository,
+            "directory": self.args.directory,
         }
 
     def _build_files(self):

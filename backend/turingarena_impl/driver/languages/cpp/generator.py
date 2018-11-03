@@ -134,9 +134,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.block(case.body)
         yield "}"
 
-    def checkpoint_statement(self, statement):
-        yield r"""printf("%d\n", 0);"""
-
     def exit_statement(self, statement):
         yield "exit(0);"
 
@@ -158,4 +155,6 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
         yield
         yield f"{self.build_method_signature(method_declaration)}" " {"
         yield self.indent("// TODO")
+        if method_declaration.has_return_value:
+            yield self.indent("return 42;")
         yield "}"

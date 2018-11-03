@@ -47,7 +47,7 @@ def do_evaluate(params):
         evaluate_request=EvaluateRequest(
             submission=submission,
             working_directory=working_directory,
-            evaluator=params["evaluator_cmd"].value,
+            seed=None,
         )
     )
 

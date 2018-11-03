@@ -12,7 +12,7 @@ INTERFACE_TEXT = """
 """
 
 
-def test_time_limit_error():
+def test_timeout():
     with define_algorithm(
             interface_text=INTERFACE_TEXT,
             language_name="C++",
@@ -24,7 +24,8 @@ def test_time_limit_error():
             with algo.run() as p:
                 p.procedures.p()
                 p.checkpoint()
-        assert "SIGXCPU" in exc_info.value.message
+        assert "stopped sending data" in exc_info.value.message
+        assert "timeout expired" in exc_info.value.message
 
 
 def test_io_blocked():
@@ -42,6 +43,7 @@ def test_io_blocked():
                 p.checkpoint()
         print(exc_info.value.message)
         assert "stopped sending data" in exc_info.value.message
+        assert "timeout expired" in exc_info.value.message
 
 
 def test_io_garbage():

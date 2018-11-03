@@ -17,6 +17,11 @@ class DaemonControlCommand(Command):
         action="store_true",
         help="use sudo to run docker",
     )
+    PARSER.add_argument(
+        "--image",
+        help="Docker image to use",
+        default="turingarena/turingarena:develop",
+    )
 
     START_STOP_PARSER = ArgumentParser(add_help=False, parents=[PARSER])
     START_STOP_PARSER.add_argument(
@@ -29,12 +34,12 @@ class DaemonControlCommand(Command):
         return bool(self.args.sudo)
 
     @property
-    def image(self):
-        return "turingarena/turingarena:develop"
-
-    @property
     def container_name(self):
         return self.args.container_name or "turingarena"
+
+    @property
+    def image(self):
+        return self.args.image
 
 
 class DaemonStartCommand(DaemonControlCommand):

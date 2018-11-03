@@ -1,6 +1,8 @@
-import logging
 import os
+import random
 import subprocess
+from abc import abstractmethod
+from collections import namedtuple
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
@@ -8,27 +10,32 @@ from turingarena_impl.evaluation.segi import segi_subprocess
 from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
-class Evaluator:
-    def __init__(self, filename, cwd):
-        self.filename = filename
-        self.command = filename
-        self.cwd = cwd
+class Evaluator(namedtuple("Evaluator", ["cwd"])):
+    def _compile(self, tmp_dir):
+        pass
 
-    def evaluate(self, files):
+    @abstractmethod
+    def _get_command(self, tmp_dir):
+        pass
+
+    def evaluate(self, files, seed=None):
         with ExitStack() as stack:
             env = stack.enter_context(run_metaservers())
             tmp_dir = stack.enter_context(TemporaryDirectory())
-            self.compile(tmp_dir)
+            self._compile(tmp_dir)
+
+            if seed is None:
+                seed = random.randrange(2**31)
 
             env = {
                 **env,
                 "TEMPORARY_DIRECTORY": tmp_dir,
+                "TURINGARENA_SEED": str(seed),
             }
 
             evaluation = segi_subprocess(
                 files,
-                self.command,
-                shell=True,
+                self._get_command(tmp_dir),
                 env=env,
                 cwd=self.cwd,
             )
@@ -36,53 +43,54 @@ class Evaluator:
             for event in evaluation:
                 yield event
 
-    def compile(self, tmp_dir):
-        pass
-
     @staticmethod
-    def get_evaluator(filename, cwd):
-        evaluator_class = Evaluator
+    def get_evaluator(cwd):
+        lookup = {
+            "evaluator.py": PythonEvaluator,
+            "evaluator.cpp": CppEvaluator,
+            "evaluator.sh": BashEvaluator,
+        }
 
-        path = os.path.join(cwd, filename)
-        logging.debug(f"Evaluator {filename} in work dir {cwd}")
-        if os.path.exists(path):
-            extension = os.path.splitext(path)[1]
-            logging.debug(f"Evaluator {filename} has extension {extension}")
+        assert os.path.isdir(cwd)
+
+        for name in os.listdir(cwd):
             try:
-                evaluator_class = {
-                    ".py": PythonEvaluator,
-                    ".cpp": CppEvaluator,
-                }[extension]
+                evaluator_class = lookup[name]
+                break
             except KeyError:
                 pass
+        else:
+            raise ValueError(f"no evaluator found in directory: {cwd}")
 
-        return evaluator_class(filename, cwd=cwd)
-
-    def __str__(self):
-        return "generic evaluator"
+        return evaluator_class(cwd)
 
 
 class PythonEvaluator(Evaluator):
-    def compile(self, tmp_dir):
-        self.command = f"python3 -u {self.filename}"
-
-    def __str__(self):
-        return "python evaluator"
+    def _get_command(self, tmp_dir):
+        return [
+            "python3",
+            "-u",
+            "evaluator.py",
+        ]
 
 
 class CppEvaluator(Evaluator):
-    def compile(self, tmp_dir):
-        self.command = os.path.join(tmp_dir, "evaluator")
+    def _get_command(self, tmp_dir):
+        return [os.path.join(tmp_dir, "evaluator")]
+
+    def _compile(self, tmp_dir):
         cli = [
             "g++",
             "-std=c++14",
             "-Wall",
             "-o",
-            self.command,
-            self.filename,
+            os.path.join(tmp_dir, "evaluator"),
+            "evaluator.cpp",
         ]
 
-        subprocess.call(cli)
+        subprocess.run(cli, cwd=self.cwd)
 
-    def __str__(self):
-        return "C++ evaluator"
+
+class BashEvaluator(Evaluator):
+    def _get_command(self, tmp_dir):
+        return ["bash", "evaluator.sh"]

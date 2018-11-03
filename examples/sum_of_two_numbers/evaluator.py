@@ -1,6 +1,6 @@
 import random
 
-from turingarena import *
+import turingarena as ta
 
 all_passed = True
 for _ in range(10):
@@ -8,15 +8,18 @@ for _ in range(10):
     a, b = random.choices(value_range, k=2)
 
     try:
-        with run_algorithm(submission.source) as process:
+        print(f"{a} + {b} -->", end="")
+        with ta.run_algorithm(ta.submission.source) as process:
             c = process.functions.sum(a, b)
+        print(f" {c}", end="")
         if c == a + b:
-            print(f"{a} + {b} --> {c} (correct)")
+            print(" correct", end="")
         else:
-            print(f"{a} + {b} --> {c} (wrong!)")
+            print("  WRONG!", end="")
             all_passed = False
-    except AlgorithmError as e:
-        print(f"{a} + {b} --> {e}")
+        print(f" ({int(process.time_usage * 1000000)} us)")
+    except ta.AlgorithmError as e:
+        print(f" {e}")
         all_passed = False
 
-evaluation.data(dict(goals=dict(correct=all_passed)))
+ta.evaluation.data(dict(goals=dict(correct=all_passed)))

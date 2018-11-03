@@ -69,11 +69,6 @@ class NewCommand(Command):
             sys.exit("Directory {}/ already exists in this directory!".format(name))
         os.chdir(name)
 
-        try:
-            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            subprocess.call(["git", "init"])
-
         logging.info("Writing default interface.txt")
         with open("interface.txt", "w") as f:
             print(interface_template, file=f)

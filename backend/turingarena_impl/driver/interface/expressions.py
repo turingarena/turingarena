@@ -4,7 +4,6 @@ from collections import namedtuple
 
 from bidict import frozenbidict
 
-from turingarena_impl.driver.generator import AbstractExpressionCodeGen
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.context import ExpressionContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
@@ -47,6 +46,7 @@ class Expression:
         return []
 
     def __str__(self):
+        from turingarena_impl.driver.generator import AbstractExpressionCodeGen
         return AbstractExpressionCodeGen().expression(self)
 
 
@@ -134,7 +134,10 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
             )
 
     def _is_declared(self):
-        return self._get_referenced_variable() is not None
+        return (
+                self._get_referenced_variable() is not None
+                or self.variable_name in self.context.statement_context.global_context.constants
+        )
 
 
 class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
