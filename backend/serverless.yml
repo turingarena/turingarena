@@ -49,6 +49,7 @@ custom:
   apigwBinary:
     types:
       - 'multipart/form-data'
+      - 'application/x-www-form-urlencoded'
   pythonRequirements:
     fileName: lambda-requirements.txt
 
