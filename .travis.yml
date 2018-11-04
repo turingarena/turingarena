@@ -61,4 +61,6 @@ jobs:
             -t deploy
             deploy/
             -f deploy/main.dockerfile
-        - docker run --rm --env-file deploy/list.env deploy
+        - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/deploy-cloud.sh
+        - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip.sh
+        - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/deploy-web.sh
