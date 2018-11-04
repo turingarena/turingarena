@@ -15,8 +15,8 @@ RUN true \
         openjdk8 \
         openssh \
         socat \
-	libxml2-dev \
-	libxslt-dev \
+        libxml2-dev \
+        libxslt-dev \
         make \
     && pip3 install \
         bidict \
