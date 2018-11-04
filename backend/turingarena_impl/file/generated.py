@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
+from turingarena_impl.text.parser import TextParser
 
 INTERFACE_TXT = "interface.txt"
 
@@ -36,19 +37,23 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"]))
     def _generate_interface_targets(self, abspath, relpath):
         for lang in Language.languages():
             interface_path = os.path.join(abspath, INTERFACE_TXT)
+            statement_path = os.path.join(abspath, "README.md")
             yield (
                 os.path.join(relpath, f"skeleton{lang.extension}"),
-                self._create_interface_code_generator(interface_path, lang.skeleton_generator()),
+                self._create_interface_code_generator(interface_path, None, lang.skeleton_generator()),
             )
             yield (
                 os.path.join(relpath, f"template{lang.extension}"),
-                self._create_interface_code_generator(interface_path, lang.template_generator()),
+                self._create_interface_code_generator(interface_path, statement_path, lang.template_generator()),
             )
 
-    def _create_interface_code_generator(self, interface_path, code_generator):
+    def _create_interface_code_generator(self, interface_path, statement_path, code_generator):
         def generator(outfile):
+            descriptions = TextParser(statement_path).descriptions if statement_path is not None else {}
+
             with open(interface_path) as f:
-                interface = InterfaceDefinition.compile(f.read())
+                interface = InterfaceDefinition.compile(f.read(), descriptions=descriptions)
+
             code_generator.generate_to_file(interface, outfile)
 
         return generator

@@ -153,6 +153,9 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
 
     def generate_method_declaration(self, method_declaration):
         yield
+        if method_declaration.description is not None:
+            for line in method_declaration.description.split("\n"):
+                yield self.line_comment(line)
         yield f"{self.build_method_signature(method_declaration)}" " {"
         yield self.indent("// TODO")
         if method_declaration.has_return_value:

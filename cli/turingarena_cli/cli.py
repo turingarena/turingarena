@@ -7,7 +7,6 @@ from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import RemoteEvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.info import InfoCommand
-from turingarena_cli.make import LegacyMakeCommand, LegacyTemplateCommand, LegacySkeletonCommand
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
 # in python2.7, quote is in pipes and not in shlex
@@ -54,21 +53,6 @@ subparsers.add_parser(
     "file",
     parents=[FileCommand.PARSER],
     help=FileCommand.PARSER.description,
-)
-subparsers.add_parser(
-    "make",
-    parents=[LegacyMakeCommand.PARSER],
-    help=LegacyMakeCommand.PARSER.description,
-)
-subparsers.add_parser(
-    "skeleton",
-    parents=[LegacySkeletonCommand.PARSER],
-    help="generate skeleton",
-)
-subparsers.add_parser(
-    "template",
-    parents=[LegacyTemplateCommand.PARSER],
-    help="generate template",
 )
 subparsers.add_parser(
     "daemon",
