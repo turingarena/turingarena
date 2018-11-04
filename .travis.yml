@@ -46,7 +46,7 @@ jobs:
         - docker push $DOCKER_IMAGE
         - >
             docker build
-            --build-arg BASE_IMAGE=$BASE_IMAGE
+            --build-arg BASE_IMAGE=$DEPLOY_BASE_IMAGE
             -t deploy
             .
             -f deploy/main.dockerfile
