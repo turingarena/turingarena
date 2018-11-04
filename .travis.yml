@@ -56,8 +56,7 @@ jobs:
       script:
         - >
             docker build
-            --build-arg TURINGARENA_IMAGE=$DOCKER_IMAGE
-            --build-arg DEPLOY_BASE_IMAGE=$DEPLOY_BASE_IMAGE
+            --build-arg BASE_IMAGE=BASE_IMAGE
             -t deploy
             .
             -f deploy/main.dockerfile
