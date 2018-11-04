@@ -2,4 +2,7 @@
 
 from setuptools import setup
 
-setup(install_requires=['requests'])
+with open("requirements.txt") as f:
+    install_requires = f.read()
+
+setup(install_requires=install_requires)
