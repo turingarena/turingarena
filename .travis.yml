@@ -16,15 +16,9 @@ before_script:
   - export SURGE_DOMAIN=turingarena-$BRANCH_SEGMENT.surge.sh
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
-stages:
-  - base_build
-  - build
-  - deploy
-
 jobs:
   include:
     - if: type == api AND commit_message =~ /update-base/
-      stage: base_build
       script:
         - >
           docker build
@@ -33,7 +27,6 @@ jobs:
           -f docker/base.dockerfile
         - docker push $DOCKER_TAGGED_BASE_IMAGE
     - if: type == api AND commit_message =~ /update-deploy-base/
-      stage: base_build
       script:
         - >
           docker build
@@ -41,7 +34,7 @@ jobs:
           .
           -f deploy/base.docekrfile
         - docker push $DOCKER_DEPLOY_TAGGED_BASE_IMAGE
-    - stage: build
+    - if: type == push
       script:
         - >
             docker build
@@ -51,9 +44,6 @@ jobs:
             .
             -f docker/main.dockerfile
         - docker push $DOCKER_IMAGE
-    - if: type == push
-      stage: deploy
-      script:
         - >
             docker build
             --build-arg BASE_IMAGE=BASE_IMAGE
