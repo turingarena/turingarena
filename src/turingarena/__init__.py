@@ -43,8 +43,8 @@ def run_algorithm(source_path, interface_path=None):
 
     source_path = os.path.abspath(source_path)
 
-    from turingarena.algorithm import Algorithm
-    return Algorithm(
+    from turingarena.algorithm import Program
+    return Program(
         source_path=source_path,
         language_name=None,
         interface_path=interface_path,

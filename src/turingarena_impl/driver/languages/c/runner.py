@@ -1,17 +1,17 @@
 import logging
 import subprocess
 
-from turingarena_impl.driver.languages.cpp import CppAlgorithmSource
+from turingarena_impl.driver.languages.cpp.runner import CppProgramRunner
 
 logger = logging.getLogger(__name__)
 
 
-class CAlgorithmSource(CppAlgorithmSource):
-    def _compile_source(self, compilation_dir):
+class CProgramRunner(CppProgramRunner):
+    def _compile_source(self):
         cli = [
             "gcc", "-c", "-O2", "-std=c11", "-Wall",
-            "-o", self._source_object_path(compilation_dir),
-            self.source_path
+            "-o", self._source_object_path,
+            self.program.source_path
         ]
 
         logger.debug("Compiling source: " + " ".join(cli))

@@ -3,21 +3,17 @@ from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 from typing import Dict, Generator, Sequence
 
-from turingarena.algorithm import Algorithm
+from turingarena.algorithm import Program
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
-from turingarena_impl.evaluation.environ import env_extension
-from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
 @contextmanager
-def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Algorithm:
+def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Program:
     language = Language.from_name(language_name)
 
     with ExitStack() as stack:
-        metaserver_env = stack.enter_context(run_metaservers())
-        stack.enter_context(env_extension(metaserver_env))
         tmp_dir = stack.enter_context(TemporaryDirectory())
 
         source_path = os.path.join(tmp_dir, f"source{language.extension}")
@@ -29,14 +25,13 @@ def define_algorithm(interface_text: str, source_text: str, language_name: str) 
         with open(source_path, "w") as f:
             print(source_text, file=f)
 
-        yield Algorithm(
+        yield Program(
             source_path=source_path,
             interface_path=interface_path,
-            language_name=language_name,
         )
 
 
-def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[Algorithm, None, None]:
+def define_algorithms(interface_text: str, sources: Dict[str, str]) -> Generator[Program, None, None]:
     for language_name, source_text in sources.items():
         with define_algorithm(
                 source_text=source_text,

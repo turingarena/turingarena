@@ -11,7 +11,7 @@ class UnknownFileExtension(Exception):
 class Language(namedtuple("Language", [
     "name",
     "extension",
-    "source",
+    "ProgramRunner",
     "skeleton_generator",
     "template_generator",
     "supported_for_evaluator",

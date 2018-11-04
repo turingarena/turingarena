@@ -1,37 +1,44 @@
+import io
 import logging
 import os
 import signal
 import subprocess
 import time
-from abc import abstractmethod
 
 from turingarena.processinfo import SandboxProcessInfo
+from turingarena_impl.driver.sandbox.connection import SandboxProcessConnection, ProcessManager
 
 logger = logging.Logger(__name__)
 
 
-class Process:
-    @abstractmethod
-    def get_status(self, kill_reason=None) -> SandboxProcessInfo:
-        pass
+def create_popen_process_connection(*args, **kwargs):
+    p = subprocess.Popen(
+        *args,
+        **kwargs,
+        universal_newlines=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        bufsize=1,
+    )
+    return SandboxProcessConnection(
+        downward=p.stdin,
+        upward=p.stdout,
+        manager=PopenProcessManager(p),
+    )
 
 
-class PopenProcess(Process):
-    def __init__(self, connection, *args, **kwargs):
-        self.os_process = subprocess.Popen(
-            *args,
-            **kwargs,
-            universal_newlines=True,
-            stdin=connection.downward,
-            stdout=connection.upward,
-            bufsize=1,
-        )
+class PopenProcessManager(ProcessManager):
+    def __init__(self, os_process):
+        self.os_process = os_process
         self.termination_info = None
+
+    def get_connection(self):
+        return
 
     @staticmethod
     def _get_process_termination_message(status_code: int):
         """
-        Process the status code of a process and return a tuple (status, error) where status is the process status
+        ProcessManager the status code of a process and return a tuple (status, error) where status is the process status
         and error is the eventual error message in case the process fails either with non zero return code or with a
         signal (for example is waited for exceeding time/memory limits or for trying to perform a blacklisted syscall).
 
@@ -67,12 +74,12 @@ class PopenProcess(Process):
             with open(f"/proc/{self.os_process.pid}/stat") as f:
                 stat = f.read()
             status = stat.split()[2]
-            logging.debug(f"Process status: {status}")
+            logging.debug(f"ProcessManager status: {status}")
             if status in ("S", "Z"):
                 break
             time.sleep(timeout / trials)
         else:
-            logging.debug(f"Process did not reach interruptible state in {timeout} s")
+            logging.debug(f"ProcessManager did not reach interruptible state in {timeout} s")
 
     def get_status(self, kill_reason=None) -> SandboxProcessInfo:
         """
@@ -134,12 +141,3 @@ class PopenProcess(Process):
             self.termination_info = info
 
         return info
-
-
-class CompilationFailedProcess(Process):
-    def get_status(self, kill=False):
-        return SandboxProcessInfo(
-            memory_usage=0,
-            time_usage=0.0,
-            error=f"Compilation failed.",
-        )

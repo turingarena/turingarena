@@ -1,12 +1,12 @@
 from turingarena_impl.driver.language import Language
-from turingarena_impl.driver.languages.c.generator import CSkeletonCodeGen, CTemplateCodeGen
-from turingarena_impl.driver.languages.c.source import CAlgorithmSource
 
+from .generator import CSkeletonCodeGen, CTemplateCodeGen
+from .runner import CProgramRunner
 
 language = Language(
     name="C",
     extension=".c",
-    source=CAlgorithmSource,
+    ProgramRunner=CProgramRunner,
     skeleton_generator=CSkeletonCodeGen,
     template_generator=CTemplateCodeGen,
     supported_for_evaluator=False,

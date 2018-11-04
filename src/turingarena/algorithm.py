@@ -1,44 +1,48 @@
 import logging
-import os
+import subprocess
 from collections import namedtuple
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager
 
 from turingarena import InterfaceExit, TimeLimitExceeded, AlgorithmError
-from turingarena.driver.client import DriverProcessClient, SandboxClient
+from turingarena.driver.connection import DriverProcessConnection
 from turingarena.driver.engine import DriverClientEngine
 from turingarena.driver.proxy import MethodProxy
 
 logger = logging.getLogger(__name__)
 
 
-class Algorithm(namedtuple("Algorithm", [
-    "source_path", "language_name", "interface_path",
+class Program(namedtuple("Program", [
+    "source_path", "interface_path",
 ])):
     @contextmanager
     def run(self, time_limit=None):
-        with ExitStack() as stack:
-            sandbox_dir = os.environ["TURINGARENA_SANDBOX_DIR"]
+        with subprocess.Popen(
+                [
+                    "python3",
+                    "-m",
+                    "turingarena_impl.driver.server",
+                    self.source_path,
+                    self.interface_path,
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+        ) as p:
+            connection = DriverProcessConnection(
+                downward=p.stdin,
+                upward=p.stdout,
+            )
 
-            sandbox_client = SandboxClient(sandbox_dir)
-            sandbox_process_dir = stack.enter_context(sandbox_client.run(
-                source_path=self.source_path,
-                language_name=self.language_name,
-                interface_path=self.interface_path,
-            ))
-
-            driver_process_client = DriverProcessClient(sandbox_process_dir)
-
-            with driver_process_client.connect() as connection:
-                algorithm_process = AlgorithmProcess(connection)
-                with algorithm_process.run(time_limit=time_limit):
-                    try:
-                        yield algorithm_process
-                    except InterfaceExit:
-                        pass
-                algorithm_process.exit()
+            process = Process(connection)
+            with process.run(time_limit=time_limit):
+                try:
+                    yield process
+                except InterfaceExit:
+                    pass
+            process.exit()
 
 
-class AlgorithmSection:
+class ProcessSection:
     def __init__(self, engine):
         self.info_before = None
         self.info_after = None
@@ -62,7 +66,7 @@ class AlgorithmSection:
         return self.info_after.time_usage - self.info_before.time_usage
 
 
-class AlgorithmProcess(AlgorithmSection):
+class Process(ProcessSection):
     def __init__(self, connection):
         super().__init__(engine=DriverClientEngine(self, connection))
 
@@ -71,7 +75,7 @@ class AlgorithmProcess(AlgorithmSection):
         self.terminated = False
 
     def section(self, *, time_limit=None):
-        section_info = AlgorithmSection(self._engine)
+        section_info = ProcessSection(self._engine)
         return section_info._run(time_limit=time_limit)
 
     def checkpoint(self):
@@ -85,13 +89,13 @@ class AlgorithmProcess(AlgorithmSection):
             info = None
         else:
             info = self._engine.get_info(kill=True)
-        
+
         raise exc_type(self, message, info)
 
     @contextmanager
     def run(self, **kwargs):
         assert not self.terminated
-        self._engine.get_response_ok() # ready
+        self._engine.get_response_ok()  # ready
         with self._run(**kwargs) as section:
             yield section
         self.terminated = True
