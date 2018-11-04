@@ -108,7 +108,7 @@ def join_text_parts(parts):
 
 def parse_data_events(parts, data_end):
     """
-    Process a stream of parts,
+    ProcessManager a stream of parts,
     *after* '\n' $EVALUATION_DATA_BEGIN '\n',
     and until $EVALUATION_DATA_END '\n' is encountered.
     Generates the data event payloads parsed.

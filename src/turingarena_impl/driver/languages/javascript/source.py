@@ -22,6 +22,6 @@ class JavascriptAlgorithmSource(AlgorithmSource):
 
         return PopenProcess(
             connection,
-            ["node", sandbox_path, self.source_path, self.skeleton_path(compilation_dir)],
+            ["node", sandbox_path, self.program.source_path, self.skeleton_path(compilation_dir)],
             preexec_fn=set_rlimits,
         )

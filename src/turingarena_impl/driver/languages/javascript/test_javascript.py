@@ -1,7 +1,7 @@
 import pytest
 
 from turingarena import AlgorithmRuntimeError
-from turingarena.algorithm import Algorithm
+from turingarena.algorithm import Program
 from turingarena_impl.driver.tests.test_utils import define_algorithm
 from turingarena_impl.driver.languages import javascript
 
@@ -55,7 +55,7 @@ def test_loop():
 
 
 def test_multiple_reads():
-    with Algorithm.load(
+    with Program.load(
             interface_text="""
                 function f(a, b);
                 main {

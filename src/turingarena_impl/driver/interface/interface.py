@@ -7,7 +7,6 @@ from turingarena_impl.driver.interface.context import InterfaceContext
 from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.parser import parse_interface
 from turingarena_impl.driver.interface.variables import Reference, Variable
-from turingarena_impl.loader import find_package_file
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,8 @@ class InterfaceDefinition:
         yield from self.main_block.validate()
 
     @staticmethod
-    def load(name):
-        with open(find_package_file(name)) as f:
+    def load(path):
+        with open(path) as f:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
@@ -85,7 +84,7 @@ class InterfaceDefinition:
         ready_msg = context.receive_upward()
         assert ready_msg == (0,)
 
-        context.send_driver_upward(0) # ready
+        context.send_driver_upward(0)  # ready
 
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
