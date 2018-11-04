@@ -17,8 +17,9 @@ class InterfaceBody(Block):
 
 
 class InterfaceDefinition:
-    def __init__(self, source_text):
+    def __init__(self, source_text, descriptions):
         self.ast = parse_interface(source_text)
+        self.descriptions = descriptions
 
     def diagnostics(self):
         return list(self.validate())
@@ -34,8 +35,8 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, validate=True):
-        interface = InterfaceDefinition(source_text)
+    def compile(source_text, validate=True, descriptions={}):
+        interface = InterfaceDefinition(source_text, descriptions)
         if validate:
             for msg in interface.validate():
                 logger.warning(f"interface contains an error: {msg}")
@@ -59,7 +60,7 @@ class InterfaceDefinition:
     @property
     def methods(self):
         return [
-            MethodPrototype(ast=method, context=None)
+            MethodPrototype(ast=method, context=None, description=self.descriptions.get(method.declarator.name))
             for method in self.ast.method_declarations
         ]
 

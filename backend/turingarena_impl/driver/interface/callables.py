@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
@@ -18,7 +19,7 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
         )
 
 
-class CallablePrototype(AbstractSyntaxNodeWrapper):
+class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "description"])):
     __slots__ = []
 
     @property
@@ -46,7 +47,7 @@ class CallablePrototype(AbstractSyntaxNodeWrapper):
     @property
     def callbacks(self):
         return [
-            CallbackPrototype(callback, self.context)
+            CallbackPrototype(callback, self.context, description=None)
             for callback in self.ast.callbacks
         ]
 
