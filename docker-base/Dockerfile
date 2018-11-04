@@ -21,6 +21,7 @@ RUN true \
         boto3 \
         coloredlogs \
         commonmark \
+        lxml \
         docopt \
         pbr \
         pyyaml \
