@@ -61,7 +61,7 @@ class CallStatement(Statement):
                 CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
                     local_context=self.context,
                     callback_index=index,
-                ))
+                ), description=None)
                 for implementation in self.ast.callbacks
                 if implementation.declarator.name == callback.name
             )
@@ -69,7 +69,7 @@ class CallStatement(Statement):
             return CallbackImplementation(ast=callback.ast, context=StaticCallbackBlockContext(
                     local_context=self.context,
                     callback_index=index,
-                )
+                ), description=None
             )
 
     def validate(self):
