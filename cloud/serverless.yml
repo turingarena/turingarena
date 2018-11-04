@@ -33,9 +33,7 @@ functions:
       exclude:
         - "**"
       include:
-        - "turingarena_impl/**"
-        - "turingarena_common/**"
-        - "turingarena_cli/**"
+        - "../src/**"
     handler: turingarena_impl.api.lambda_proxy.main
     events:
       - http: ANY /{proxy+}
