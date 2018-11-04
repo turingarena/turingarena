@@ -114,7 +114,8 @@ class PackBasedCommand(AbstractRemotePythonCommand):
 
     def run(self):
         self.git_init()
-        self.push_local_commit(self.working_dir_oid)
+        if not self.args.local:
+            self.push_local_commit(self.working_dir_oid)
         return super(PackBasedCommand, self).run()
 
     PARSER = ArgumentParser(
