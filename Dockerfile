@@ -15,6 +15,6 @@ RUN true \
     && cd /usr/local/turingarena/backend/ && python setup.py develop \
     && cd /usr/local/turingarena/libraries/python3/ && python setup.py develop \
     && mkdir -p /usr/local/include/ \
-    && cp /usr/local/turingarena/libraries/cpp/turingarena.h /usr/local/include/ \
+    && ln -s /usr/local/turingarena/libraries/cpp/turingarena.h /usr/local/include/ \
     && mkdir /run/turingarena \
     && true

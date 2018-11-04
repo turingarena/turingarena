@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 
+import os
 import logging
 import sys
 import time
@@ -8,15 +9,25 @@ from argparse import ArgumentParser
 import requests
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_cli.evaluate import SubmissionCommand
+from turingarena_cli.evaluate import SubmissionCommand, EvaluateCommand
 
-from turingarena_impl.evaluation.events import EvaluationEvent, EvaluationEventType
+from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 
-TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org/"
+TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org"
 
 
 class CloudServerError(Exception):
     pass
+
+
+def exponential_backoff(function, initial_backoff=0.1, backoff_factor=2):
+    backoff = initial_backoff
+    while True:
+        res = function()
+        if res is not None:
+            return res
+
+        backoff *= backoff_factor
 
 
 class CloudCommand(Command):
@@ -26,18 +37,9 @@ class CloudCommand(Command):
         add_help=False,
     )
     PARSER.add_argument("--endpoint", help="cloud API endpoint")
-
-
-class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
-    PARSER = ArgumentParser(
-        description="Evaluate a submission in the cloud",
-        parents=[CloudCommand.PARSER, SubmissionCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="/usr/local/bin/python -u evaluator.py")
     PARSER.add_argument("--repository", "-r", help="repository")
-    PARSER.add_argument("--oid", "-i", help="commit/tree OID")
-    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--oid", "-i", help="commit/tree OID", default="FETCH_HEAD")
+    PARSER.add_argument("--directory", "-d", help="specify a subdirectory inside the repository", default=".")
 
     @property
     def endpoint(self):
@@ -45,7 +47,79 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
             return self.args.endpoint
         return TURINGARENA_DEFAULT_ENDPOINT
 
+    def _build_parameters(self):
+        return {
+            "oid": self.args.oid,
+            "repository[url]": self.args.repository,
+            "directory": self.args.directory,
+        }
+
+
+class CloudPullCommand(CloudCommand):
+    PARSER = ArgumentParser(
+        description="Pull TuringArena problem files",
+        parents=[CloudCommand.PARSER],
+        add_help=False,
+    )
+    PARSER.add_argument("directory", help="directory where to save downloaded files")
+
+    def _generate_files_request(self):
+        url = self.endpoint + "/generate_file"
+        response = requests.post(url, data=self._build_parameters(), files=dict(t=None))
+        if response.status_code != 200:
+            raise CloudServerError("Error calling /generate_file")
+        return response.json()["id"]
+
+    def _get_file_request(self, file_id):
+        url = self.endpoint + "/get_file"
+        data = dict(file=file_id)
+        response = requests.post(url, data=data, files=dict(t=None))
+        if response.status_code != 200:
+            print(response.text)
+            raise CloudServerError("Error calling /get_files id={}".format(file_id))
+        return response.json()["url"]
+
+    def _get_json_file(self, url):
+        response = requests.get(url)
+        return response.json()
+
+    def _extract_files(self, json_file):
+        for path, content in json_file.items():
+            print("Extracting {}".format(os.path.join(self.args.directory, path)), file=sys.stderr)
+            directory, filename = os.path.split(path)
+            assert not os.path.isabs(directory)
+            output_path = os.path.join(self.args.directory, directory)
+            os.makedirs(output_path, exist_ok=True)
+            with open(os.path.join(self.args.directory, directory, filename), "w") as f:
+                print(content, file=f)
+
+    def _check_dir(self):
+        try:
+            os.mkdir(self.args.directory)
+        except FileExistsError:
+            print("The directory {} already exists!".format(self.args.directory))
+            exit(1)
+
     def run(self):
+        self._check_dir()
+
+        print("We are generating your files in the Cloud. Please wait a couple of seconds...")
+        file_id = self._generate_files_request()
+        url = exponential_backoff(lambda: self._get_file_request(file_id))
+        json_file = self._get_json_file(url)
+        self._extract_files(json_file)
+
+
+class CloudEvaluateCommand(CloudCommand, EvaluateCommand):
+    PARSER = ArgumentParser(
+        description="Evaluate a submission in the cloud",
+        parents=[CloudCommand.PARSER, EvaluateCommand.PARSER],
+        add_help=False,
+    )
+
+    def run(self):
+        if self.args.seed is not None:
+            print("WARNING: --seed option not yet supported in cloud", file=sys.stderr)
         print("Evaluating... may take a couple of seconds", file=sys.stderr)
         for event in self._evaluation_events():
             if self.args.raw_output:
@@ -53,13 +127,6 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
             else:
                 if event.type is EvaluationEventType.TEXT:
                     print(event.payload, end="")
-
-    def _build_parameters(self):
-        return {
-            "evaluator_cmd": self.args.evaluator,
-            "oid": self.args.oid,
-            "repository[url]": self.args.repository,
-        }
 
     def _build_files(self):
         return {
@@ -98,6 +165,7 @@ class CloudEvaluateCommand(CloudCommand, SubmissionCommand):
         if after is not None:
             url += "&after={}".format(after)
 
+        # TODO: use backoff function
         initial_backoff = 0.1
         backoff_factor = 2
 
@@ -126,3 +194,9 @@ subparsers.add_parser(
     parents=[CloudEvaluateCommand.PARSER],
     help=CloudEvaluateCommand.PARSER.description,
 ).set_defaults(Command=CloudEvaluateCommand)
+subparsers.add_parser(
+    "pull",
+    parents=[CloudPullCommand.PARSER],
+    help=CloudPullCommand.PARSER.description,
+).set_defaults(Command=CloudPullCommand)
+

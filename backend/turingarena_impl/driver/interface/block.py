@@ -15,7 +15,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _generate_statements(self):
-        inner_context = self.context
+        inner_context = self.context._replace(main_block=False)
         for s in self.ast.statements:
             statement = Statement.compile(s, inner_context)
 
@@ -27,7 +27,7 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     @property
     @memoize
     def statements(self):
-        return list(self._generate_statements())
+        return tuple(self._generate_statements())
 
     def validate(self):
         exited = False
@@ -42,6 +42,12 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     @property
     @memoize
     def synthetic_statements(self):
+        return tuple(self._generate_synthetic_statements())
+
+    def _generate_synthetic_statements(self):
+        if self.context.main_block:
+            yield SyntheticStatement("checkpoint", "ready", arguments=[])
+
         for s in self.statements:
             yield s
             if s.statement_type == "call" and s.method.has_callbacks:
@@ -49,10 +55,14 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
                     SyntheticExpression("int_literal", value=0),
                 ])
 
+        if self.context.main_block:
+            yield SyntheticStatement("exit", "terminate", arguments=[])
+
+
     @property
     @memoize
     def flat_inner_nodes(self):
-        return list(self._generate_flat_inner_nodes())
+        return tuple(self._generate_flat_inner_nodes())
 
     def _generate_flat_inner_nodes(self):
         for s in self.statements:

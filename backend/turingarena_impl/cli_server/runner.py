@@ -3,11 +3,10 @@ import pickle
 import sys
 
 from turingarena_common.commands import EvaluateCommandParameters, RemoteCommandParameters, LocalExecutionParameters, \
-    FileCommandParameters, InfoCommandParameters, TestCommandParameters, MakeCommandParameters
+    FileCommandParameters, InfoCommandParameters, TestCommandParameters
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.cli_server.files import file_cmd
 from turingarena_impl.cli_server.info import info_cmd
-from turingarena_impl.cli_server.make import make_cmd
 from turingarena_impl.cli_server.test import test_cmd
 from turingarena_impl.logging import init_logger
 
@@ -16,7 +15,6 @@ COMMANDS_MAP = {
     FileCommandParameters: file_cmd,
     InfoCommandParameters: info_cmd,
     TestCommandParameters: test_cmd,
-    MakeCommandParameters: make_cmd,
 }
 
 

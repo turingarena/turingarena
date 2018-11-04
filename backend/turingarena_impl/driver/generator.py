@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from turingarena_impl.driver.interface.expressions import SyntheticExpression
+from turingarena_impl.driver.interface.statements.statement import SyntheticStatement
 from turingarena_impl.driver.visitors import StatementVisitor, ExpressionVisitor
 
 
@@ -190,6 +192,11 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
     @abstractmethod
     def generate_flush(self):
         pass
+
+    def checkpoint_statement(self, checkpoint_statement):
+        return self.write_statement(SyntheticStatement("write", None, arguments=[
+            SyntheticExpression("int_literal", value=0),
+        ]))
 
 
 class TemplateCodeGen(InterfaceCodeGen):

@@ -15,6 +15,7 @@ class PythonCodeGen(InterfaceCodeGen):
 
 class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
+        yield 'import os as _os'
         yield 'from _source import *'
         yield
 
@@ -27,11 +28,9 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         yield 'def main():'
         yield from self.block(statement.body)
 
-    def checkpoint_statement(self, checkpoint_statement):
-        yield 'print(0)'
-
     def exit_statement(self, exit_statement):
-        yield 'raise SystemExit'
+        yield from self.generate_flush()
+        yield '_os._exit(0)'
 
     def break_statement(self, break_statement):
         yield 'break'
@@ -119,4 +118,7 @@ class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
     def generate_method_declaration(self, method_declaration):
         yield
         yield from self.build_method_declaration(method_declaration)
-        yield self.indent('pass')
+        if method_declaration.has_return_value:
+            yield self.indent("return 42")
+        else:
+            yield self.indent('pass')

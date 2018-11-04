@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 class InterfaceContext(namedtuple("InterfaceContext", [
     "methods",
+    "constants",
 ])):
     @property
     def methods_by_name(self):
@@ -18,6 +19,7 @@ class InterfaceContext(namedtuple("InterfaceContext", [
             global_context=self,
             reference_actions=(),
             index_variables=(),
+            main_block=True,
             in_loop=False,
         )
 
@@ -26,6 +28,7 @@ class StatementContext(namedtuple("StatementContext", [
     "global_context",
     "reference_actions",
     "index_variables",
+    "main_block",
     "in_loop",
 ])):
     def with_reference_actions(self, actions):

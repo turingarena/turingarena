@@ -30,7 +30,7 @@ class Algorithm(namedtuple("Algorithm", [
 
             with driver_process_client.connect() as connection:
                 algorithm_process = AlgorithmProcess(connection)
-                with algorithm_process.run(time_limit):
+                with algorithm_process.run(time_limit=time_limit):
                     try:
                         yield algorithm_process
                     except InterfaceExit:
@@ -45,13 +45,17 @@ class AlgorithmSection:
         self._engine = engine
 
     @contextmanager
-    def run(self, time_limit):
+    def _run(self, *, time_limit):
         self.info_before = self._engine.get_info()
         yield self
         self.info_after = self._engine.get_info()
 
         if time_limit is not None and self.time_usage > time_limit:
-            raise TimeLimitExceeded(self.time_usage, time_limit)
+            raise TimeLimitExceeded(
+                self,
+                f"Time limit exceeded: {self.time_usage} {time_limit}",
+                self.info_after,
+            )
 
     @property
     def time_usage(self):
@@ -64,10 +68,11 @@ class AlgorithmProcess(AlgorithmSection):
 
         self.procedures = MethodProxy(self._engine, has_return_value=False)
         self.functions = MethodProxy(self._engine, has_return_value=True)
+        self.terminated = False
 
     def section(self, *, time_limit=None):
         section_info = AlgorithmSection(self._engine)
-        return section_info.run(time_limit=time_limit)
+        return section_info._run(time_limit=time_limit)
 
     def checkpoint(self):
         self._engine.send_checkpoint()
@@ -76,8 +81,20 @@ class AlgorithmProcess(AlgorithmSection):
         self._engine.send_exit()
 
     def fail(self, message, exc_type=AlgorithmError):
-        info = self._engine.get_info(kill=True)
+        if self.terminated:
+            info = None
+        else:
+            info = self._engine.get_info(kill=True)
+        
         raise exc_type(self, message, info)
+
+    @contextmanager
+    def run(self, **kwargs):
+        assert not self.terminated
+        self._engine.get_response_ok() # ready
+        with self._run(**kwargs) as section:
+            yield section
+        self.terminated = True
 
     def check(self, condition, message, exc_type=AlgorithmError):
         if not condition:

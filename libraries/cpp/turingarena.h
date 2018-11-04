@@ -34,12 +34,16 @@ namespace turingarena {
             return std::string(buff);
         }
 
+        // FIXME: should accept a collection of JSON strings / JSON-serializable objects
         inline void evaluation_data(const std::string& data)
         {
             static const char *evaluation_data_begin = getenv("EVALUATION_DATA_BEGIN");
             static const char *evaluation_data_end = getenv("EVALUATION_DATA_END");
 
-            std::cout << evaluation_data_begin << data << evaluation_data_end << std::endl;
+            std::cout << std::endl;
+            std::cout << evaluation_data_begin << std::endl;
+            std::cout << data << std::endl;
+            std::cout << evaluation_data_end << std::endl;
         }
 
         struct {
@@ -266,6 +270,7 @@ namespace turingarena {
         Algorithm(const Algorithm&) = delete;
         Algorithm& operator=(const Algorithm&) = delete;  
 
+        // FIXME: resolve source_path and interface_path to absolute paths
         Algorithm(const std::string& source_path) : 
             Algorithm(source_path, get_cwd() + "/interface.txt") {}
 
@@ -294,6 +299,8 @@ namespace turingarena {
 
             driver_downward.open(sandbox_process_dir + "/driver_downward.pipe");
             driver_upward.open(sandbox_process_dir + "/driver_upward.pipe");
+
+            get_response_ok();
         }
 
         void exit()

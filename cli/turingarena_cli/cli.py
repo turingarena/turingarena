@@ -7,11 +7,11 @@ from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import RemoteEvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.info import InfoCommand
-from turingarena_cli.make import LegacyMakeCommand, LegacyTemplateCommand, LegacySkeletonCommand
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.test import TestCommand
+from turingarena_cli.search import SearchCommand
 
 try:
     from shlex import quote
@@ -55,21 +55,6 @@ subparsers.add_parser(
     help=FileCommand.PARSER.description,
 )
 subparsers.add_parser(
-    "make",
-    parents=[LegacyMakeCommand.PARSER],
-    help=LegacyMakeCommand.PARSER.description,
-)
-subparsers.add_parser(
-    "skeleton",
-    parents=[LegacySkeletonCommand.PARSER],
-    help="generate skeleton",
-)
-subparsers.add_parser(
-    "template",
-    parents=[LegacyTemplateCommand.PARSER],
-    help="generate template",
-)
-subparsers.add_parser(
     "daemon",
     parents=[DAEMON_CONTROL_PARSER],
     help=DAEMON_CONTROL_PARSER.description,
@@ -84,6 +69,11 @@ subparsers.add_parser(
     parents=[CloudCommand.PARSER],
     help=CloudCommand.PARSER.description,
 )
+subparsers.add_parser(
+    "search",
+    parents=[SearchCommand.PARSER],
+    help=SearchCommand.PARSER.description,
+).set_defaults(Command=SearchCommand)
 
 
 def main():

@@ -15,12 +15,15 @@ RUN true \
         openjdk8 \
         openssh \
         socat \
+	libxml2-dev \
+	libxslt-dev \
         make \
     && pip3 install \
         bidict \
         boto3 \
         coloredlogs \
         commonmark \
+        lxml \
         docopt \
         pbr \
         pyyaml \
@@ -30,6 +33,7 @@ RUN true \
         seccomplite \
         pytest \
         tatsu \
+        toml \
         networkx \
     && wget https://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
     && tar -xvf glpk-4.65.tar.gz \

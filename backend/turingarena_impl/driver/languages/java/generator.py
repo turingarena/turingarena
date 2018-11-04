@@ -157,9 +157,6 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield 'System.out.flush();'
 
-    def checkpoint_statement(self, checkpoint_statement):
-        yield 'System.out.println(0);'
-
     def exit_statement(self, exit_statement):
         yield 'System.exit(0);'
 
@@ -185,4 +182,6 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
         yield
         yield self.indent(f"{self.build_method_signature(method_declaration)}" " {")
         yield self.indent(self.indent('// TODO'))
+        if method_declaration.has_return_value:
+            yield self.indent(self.indent("return 42;"))
         yield self.indent('}')

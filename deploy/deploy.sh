@@ -21,10 +21,10 @@ true \
         --env AWS_DEFAULT_REGION=us-east-1 \
         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-        --env DYNAMODB_EVALUATION_EVENTS_TABLE=turingarena-$SERVERLESS_STAGE-EvaluationEventsTable \
+        --env DYNAMODB_TABLE=turingarena-$SERVERLESS_STAGE-table \
         --env S3_FILES_BUCKET=turingarena-$SERVERLESS_STAGE-files \
         $DOCKER_IMAGE \
-        python -m turingarena_impl.api.hypersh_evaluate \
+        python -m turingarena_impl.api.hypersh_api \
     && export HYPERSH_FUNC_ID=$(hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID) \
     && echo HYPERSH_FUNC_ID=$HYPERSH_FUNC_ID >&2 \
     && cd /src/backend/ \

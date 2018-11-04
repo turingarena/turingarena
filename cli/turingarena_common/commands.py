@@ -34,7 +34,7 @@ WorkingDirectory = namedtuple("WorkingDirectory", [
 EvaluateRequest = namedtuple("EvaluateRequest", [
     "submission",
     "working_directory",
-    "evaluator",
+    "seed",
 ])
 
 EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
@@ -57,11 +57,5 @@ InfoCommandParameters = namedtuple("InfoCommandParameters", [
 
 TestCommandParameters = namedtuple("TestCommandParameters", [
     "pytest_arguments",
-    "working_directory",
-])
-
-MakeCommandParameters = namedtuple("MakeCommandParameters", [
-    "what",
-    "language",
     "working_directory",
 ])

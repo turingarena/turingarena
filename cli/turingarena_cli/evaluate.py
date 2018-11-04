@@ -52,29 +52,35 @@ class SubmissionCommand(Command):
         )
 
 
-class EvaluateCommand(PackBasedCommand, SubmissionCommand):
+class EvaluateCommand(SubmissionCommand):
     def _get_evaluate_request(self):
         return EvaluateRequest(
             working_directory=self.working_directory,
-            evaluator=self.args.evaluator,
             submission=self.submission,
-        )
-
-
-class RemoteEvaluateCommand(EvaluateCommand, RemotePythonCommand):
-    def _get_command_parameters(self):
-        return EvaluateCommandParameters(
-            evaluate_request=self._get_evaluate_request(),
-            raw_output=self.args.raw,
+            seed=self.args.seed,
         )
 
     PARSER = ArgumentParser(
         add_help=False,
         description="Evaluate a submission",
-        parents=[PackBasedCommand.PARSER, SubmissionCommand.PARSER]
+        parents=[SubmissionCommand.PARSER]
     )
-    PARSER.add_argument("--evaluator", "-e", help="evaluator program", default="evaluator.py")
-    PARSER.add_argument("--raw", "-r", help="use raw output", action="store_true")
+    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--seed", help="set random seed", type=int)
+
+
+class RemoteEvaluateCommand(EvaluateCommand, PackBasedCommand, RemotePythonCommand):
+    def _get_command_parameters(self):
+        return EvaluateCommandParameters(
+            evaluate_request=self._get_evaluate_request(),
+            raw_output=self.args.raw_output,
+        )
+
+    PARSER = ArgumentParser(
+        add_help=False,
+        parents=[PackBasedCommand.PARSER, EvaluateCommand.PARSER]
+    )
+
 
 
 RemoteEvaluateCommand.PARSER.set_defaults(Command=RemoteEvaluateCommand)

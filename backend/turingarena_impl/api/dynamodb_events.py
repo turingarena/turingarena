@@ -4,16 +4,16 @@ import time
 
 import boto3
 
-DYNAMODB_EVALUATION_EVENTS_TABLE = os.environ['DYNAMODB_EVALUATION_EVENTS_TABLE']
+DYNAMODB_TABLE = os.environ['DYNAMODB_TABLE']
 
 
 def store_event(evaluation_id, index, data):
     dynamodb = boto3.client("dynamodb")
 
     dynamodb.put_item(
-        TableName=DYNAMODB_EVALUATION_EVENTS_TABLE,
+        TableName=DYNAMODB_TABLE,
         Item={
-            'evaluation_id': {
+            'id': {
                 'S': evaluation_id,
             },
             'index': {
@@ -46,16 +46,16 @@ def load_event_page(evaluation_id, after):
 
     limit = 100
     response = dynamodb.query(
-        TableName=DYNAMODB_EVALUATION_EVENTS_TABLE,
+        TableName=DYNAMODB_TABLE,
         Limit=limit,
         ConsistentRead=False,
-        KeyConditionExpression='#evaluation_id = :evaluation_id AND #index > :after',
+        KeyConditionExpression='#id = :id AND #index > :after',
         ExpressionAttributeNames={
-            '#evaluation_id': "evaluation_id",
+            '#id': "id",
             "#index": "index",
         },
         ExpressionAttributeValues={
-            ':evaluation_id': {
+            ':id': {
                 'S': evaluation_id,
             },
             ':after': {

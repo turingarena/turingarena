@@ -17,9 +17,9 @@ class InterfaceBody(Block):
 
 
 class InterfaceDefinition:
-    def __init__(self, source_text):
-        ast = parse_interface(source_text)
-        self.ast = ast
+    def __init__(self, source_text, descriptions):
+        self.ast = parse_interface(source_text)
+        self.descriptions = descriptions
 
     def diagnostics(self):
         return list(self.validate())
@@ -35,8 +35,8 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, validate=True):
-        interface = InterfaceDefinition(source_text)
+    def compile(source_text, validate=True, descriptions={}):
+        interface = InterfaceDefinition(source_text, descriptions)
         if validate:
             for msg in interface.validate():
                 logger.warning(f"interface contains an error: {msg}")
@@ -46,7 +46,7 @@ class InterfaceDefinition:
     def main_block(self):
         return Block(
             ast=self.ast.main_block,
-            context=InterfaceContext(methods=self.methods).main_block_context()
+            context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context()
         )
 
     @property
@@ -60,7 +60,7 @@ class InterfaceDefinition:
     @property
     def methods(self):
         return [
-            MethodPrototype(ast=method, context=None)
+            MethodPrototype(ast=method, context=None, description=self.descriptions.get(method.declarator.name))
             for method in self.ast.method_declarations
         ]
 
@@ -81,6 +81,12 @@ class InterfaceDefinition:
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")
+
+        ready_msg = context.receive_upward()
+        assert ready_msg == (0,)
+
+        context.send_driver_upward(0) # ready
+
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
         command = request.command

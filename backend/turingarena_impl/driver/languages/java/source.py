@@ -2,13 +2,12 @@ import logging
 import os
 import shutil
 import subprocess
-from contextlib import contextmanager
 from subprocess import CalledProcessError
 
 import pkg_resources
 
 from turingarena_impl.driver.sandbox.process import PopenProcess
-from turingarena_impl.driver.sandbox.rlimits import set_memory_and_time_limits
+from turingarena_impl.driver.sandbox.rlimits import set_rlimits
 from turingarena_impl.driver.source import AlgorithmSource, CompilationFailed
 
 logger = logging.getLogger(__name__)
@@ -46,8 +45,7 @@ class JavaAlgorithmSource(AlgorithmSource):
     def skeleton_path(self, compilation_dir):
         return os.path.join(compilation_dir, "Skeleton.java")
 
-    @contextmanager
-    def run(self, compilation_dir, connection):
+    def create_process(self, compilation_dir, connection):
         security_policy_path = pkg_resources.resource_filename(__name__, "security.policy")
 
         cli = [
@@ -58,15 +56,11 @@ class JavaAlgorithmSource(AlgorithmSource):
             "Skeleton",
         ]
 
-        with PopenProcess.run(
-                cli,
-                universal_newlines=True,
-                preexec_fn=lambda: set_memory_and_time_limits(memory_limit=None, time_limit=2),
-                stdin=connection.downward,
-                stdout=connection.upward,
-                bufsize=1,
-        ) as process:
-            yield process
+        return PopenProcess(
+            connection,
+            cli,
+            preexec_fn=set_rlimits,
+        )
 
     def get_memory_usage(self, process):
         # FIXME: unused
