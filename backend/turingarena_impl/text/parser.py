@@ -1,14 +1,24 @@
 import sys
+from io import StringIO
 
 import commonmark
 import lxml.etree as etree
 
-from io import StringIO
+from turingarena_impl.text.visitor import TextVisitor
+
+
+class DescriptionVisitor(TextVisitor):
+    def visit_description(self, el):
+        yield el.attrib['for'], "".join(el.itertext())
+
+    def generic_visit(self, el):
+        for c in el:
+            yield from self.visit(c)
 
 
 class TextParser:
     def __init__(self, filename):
-        self.root = self._parse_file(filename)
+        self.root = self._parse_file(filename).getroot()
 
     @staticmethod
     def _parse_markdown(markdown_text):
@@ -26,13 +36,13 @@ class TextParser:
         html_text = self._parse_markdown(markdown_text)
         return self._parse_html(html_text)
 
-    def _do_get_description(self):
-
-
     @property
     def descriptions(self):
-        return self._do_get_gescriptions()
+        return dict(DescriptionVisitor().visit(self.root))
 
 
 if __name__ == '__main__':
-    print(TextParser(sys.argv[1]).root)
+    parser = TextParser(sys.argv[1])
+    print(dir(parser.root))
+
+    print(parser.descriptions)
