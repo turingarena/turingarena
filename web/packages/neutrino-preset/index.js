@@ -6,6 +6,6 @@ module.exports = {
         'TURINGARENA_ENDPOINT',
       ]
     ],
-    require.resolve('@turingarena/neutrino-middleware-babel'),
+    require.resolve('@turingarena/neutrino-middleware-typescript'),
   ]
 };

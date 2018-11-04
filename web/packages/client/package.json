@@ -1,5 +1,5 @@
 {
-  "name": "@turingarena/evaluation",
+  "name": "@turingarena/client",
   "version": "0.0.0",
   "main": "build/index.js",
   "license": "MIT",
@@ -7,14 +7,9 @@
     "build": "neutrino build",
     "start": "neutrino start"
   },
-  "peerDependencies": {
-    "mobx": "^5.x",
-    "mobx-react": "^5.x"
-  },
   "devDependencies": {
     "@neutrinojs/library": "^8.3.0",
-    "@turingarena/neutrino-preset-library": "^0.0.0",
-    "mobx": "^5.0.3",
-    "mobx-react": "^5.2.3"
+    "neutrino-preset-typescript": "^2.0.0",
+    "typescript": "^3.0.3"
   }
 }

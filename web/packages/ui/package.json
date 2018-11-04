@@ -1,23 +1,22 @@
 {
   "name": "@turingarena/sample-project",
   "version": "0.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "neutrino build --use @turingarena/neutrino-preset-pack",
-    "start": "neutrino start --use @turingarena/neutrino-preset-pack"
+    "build": "neutrino build --use @turingarena/neutrino-preset",
+    "start": "neutrino start --use @turingarena/neutrino-preset"
   },
   "dependencies": {
-    "@turingarena/evaluation": "^0.0.0",
+    "@turingarena/client": "^0.0.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
-    "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-ace": "^6.1.4",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3"
   },
   "devDependencies": {
-    "@turingarena/neutrino-preset-pack": "^0.0.0"
+    "@turingarena/neutrino-preset": "^0.0.0",
+    "@types/react-dom": "^16.0.7"
   }
 }
