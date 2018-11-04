@@ -3,7 +3,7 @@ import pickle
 import sys
 
 from turingarena_common.commands import EvaluateCommandParameters, RemoteCommandParameters, LocalExecutionParameters, \
-    FileCommandParameters, InfoCommandParameters, TestCommandParameters, MakeCommandParameters
+    FileCommandParameters, InfoCommandParameters, TestCommandParameters
 from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.cli_server.files import file_cmd
 from turingarena_impl.cli_server.info import info_cmd
