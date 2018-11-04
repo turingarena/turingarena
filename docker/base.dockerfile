@@ -32,6 +32,7 @@ RUN true \
         psutil \
         seccomplite \
         pytest \
+        requests \
         tatsu \
         toml \
         networkx \
