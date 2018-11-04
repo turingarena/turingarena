@@ -2,7 +2,6 @@ import logging
 import os
 
 import coloredlogs
-from termcolor import colored
 
 logger = logging.getLogger()
 

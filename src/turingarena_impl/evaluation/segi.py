@@ -33,7 +33,10 @@ def process_stdout_pipe(cmd, env, **popen_kwargs):
             **popen_kwargs,
             stdin=subprocess.DEVNULL,
             stdout=write_pipe_fd,
-            env=env,
+            env={
+                **os.environ,
+                **env,
+            },
         ))
         os.close(write_pipe_fd)
         write_pipe_fd = None
