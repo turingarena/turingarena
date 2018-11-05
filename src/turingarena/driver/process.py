@@ -60,11 +60,6 @@ class Process(ProcessSection):
         raise exc_type(self, message)
 
     @contextmanager
-    def _send_request(self):
-        yield
-        self._wait_ready()
-
-    @contextmanager
     def run(self, **kwargs):
         self._wait_ready()
         assert self._latest_resource_usage is not None
@@ -84,29 +79,28 @@ class Process(ProcessSection):
         self._latest_resource_usage = resource_usage
 
     def _do_call(self, request):
-        with self._send_request():
-            for line in self._call_lines(request):
-                self._send_request_line(line)
+        for line in self._call_lines(request):
+            self._send_request_line(line)
 
-            self._accept_callbacks(request.callbacks)
+        self._accept_callbacks(request.callbacks)
 
-            if request.has_return_value:
-                logging.debug(f"Receiving return value...")
-                return self._get_response_value()
-            else:
-                return None
+        if request.has_return_value:
+            self._wait_ready()
+            logging.debug(f"Receiving return value...")
+            return self._get_response_value()
+        else:
+            return None
 
     def exit(self):
-        with self._send_request():
-            self._send_request_line("exit")
+        self._send_request_line("exit")
 
     def stop(self):
-        with self._send_request():
-            self._send_request_line("stop")
+        self._send_request_line("stop")
+        self._wait_ready()
 
     def checkpoint(self):
-        with self._send_request():
-            self._send_request_line("checkpoint")
+        self._send_request_line("checkpoint")
+        self._wait_ready()
 
     def _accept_callbacks(self, callback_list):
         while True:
@@ -128,16 +122,16 @@ class Process(ProcessSection):
                 self._raise_error()
 
     def _on_callback_return(self, return_value):
-        with self._send_request():
-            self._send_request_line("callback_return")
-            if return_value is not None:
-                self._send_request_line(1)
-                self._send_request_line(int(return_value))
-            else:
-                self._send_request_line(0)
+        self._send_request_line("callback_return")
+        if return_value is not None:
+            self._send_request_line(1)
+            self._send_request_line(int(return_value))
+        else:
+            self._send_request_line(0)
 
     def _get_response_line(self):
         self._connection.downward.flush()
+        logging.debug(f"receiving upward from driver...")
         line = self._connection.upward.readline().strip()
         assert line, "no line received from driver"
         logging.debug(f"Read response line: {line}")

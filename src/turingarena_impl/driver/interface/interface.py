@@ -83,6 +83,7 @@ class InterfaceDefinition:
 
         ready_msg = context.receive_upward()
         assert ready_msg == (0,)
+        context.report_ready()
 
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()

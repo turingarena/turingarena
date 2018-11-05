@@ -111,4 +111,5 @@ class CheckpointStatement(Statement, IntermediateNode):
             command = context.request_lookahead.command
             if not command == "checkpoint":
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
-            return context.result()._replace(request_lookahead=None)
+            context.report_ready()
+            return context.result().with_request_processed()

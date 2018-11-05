@@ -46,11 +46,11 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         logging.debug(f"receive_driver_downward -> {line}")
         return line
 
-    def next_request(self):
+    def report_ready(self):
         self.perform_wait()
-
         self.send_driver_state(DriverState.READY)
 
+    def next_request(self):
         command = self.receive_driver_downward()
         if command == "stop":
             raise DriverStop
@@ -98,7 +98,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         timer.join()
 
         if not line:
-            raise CommunicationError(f"upward pipe closed")
+            raise CommunicationError(f"stopped sending data")
 
         try:
             return tuple(map(int, line.split()))

@@ -1,12 +1,13 @@
 import logging
 
+from turingarena.driver.commands import DriverState
 from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.execution import CallRequestSignature
-from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression
 from turingarena_impl.driver.interface.nodes import StatementIntermediateNode, RequestLookaheadNode
+from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.statements.callback import CallbackImplementation
 from turingarena_impl.driver.interface.statements.statement import Statement
 from turingarena_impl.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -186,9 +187,8 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                     f"got {parameter_count}"
                 )
 
-        return context.result()._replace(
+        return context.result().with_request_processed()._replace(
             assignments=assignments,
-            request_lookahead=None,
         )
 
     def _get_assignments(self, context):
@@ -216,6 +216,7 @@ class MethodReturnNode(StatementIntermediateNode):
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
             return_value = self.statement.return_value.evaluate(context.bindings)
+            context.report_ready()
             context.send_driver_upward(return_value)
 
     def _describe_node(self):

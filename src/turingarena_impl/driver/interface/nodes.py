@@ -20,6 +20,9 @@ class ExecutionResult(namedtuple("ExecutionResult", [
             does_break=other.does_break,
         )
 
+    def with_request_processed(self):
+        return self._replace(request_lookahead=None)
+
 
 class IntermediateNode:
     __slots__ = []
