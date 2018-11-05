@@ -1,12 +1,12 @@
 import os
+import sys
 from argparse import ArgumentParser
 from functools import lru_cache
 
 from turingarena_cli.command import Command
-from turingarena_cli.pack import PackBasedCommand
-from turingarena_cli.remote import RemotePythonCommand
-from turingarena_common.commands import EvaluateCommandParameters, EvaluateRequest
+from turingarena_common.evaluation_events import EvaluationEventType
 from turingarena_common.submission import SubmissionFile
+from turingarena_impl.evaluation.evaluator import Evaluator
 
 
 class SubmissionCommand(Command):
@@ -19,6 +19,13 @@ class SubmissionCommand(Command):
     def default_fields(self):
         return ["source"]
 
+    def _should_load_submission_files(self):
+        """
+        Override and return True to load file content in memory,
+        to use with remote services.
+        """
+        return False
+
     @property
     @lru_cache(None)
     def submission(self):
@@ -29,58 +36,53 @@ class SubmissionCommand(Command):
         )
 
     def _load_file(self, path):
+        if not self._should_load_submission_files():
+            return path
+
         filename = os.path.basename(path)
         with open(path, "rb") as f:
             content = f.read()
-        return filename, content
+        return SubmissionFile(filename=filename, content=content)
 
     def _parse_file(self, argument, default_fields):
         if ":" in argument:
             name, path = argument.split(":", 1)
-            filename, content = self._load_file(path)
-        elif "=" in argument:
+            return name, self._load_file(path)
+
+        if self._should_load_submission_files() and "=" in argument:
             name, text_content = argument.split("=", 1)
-            content = text_content.encode()
-            filename = name + ".txt"
-        else:
-            path = argument
-            name = next(default_fields)
-            filename, content = self._load_file(path)
-        return name, SubmissionFile(
-            filename=filename,
-            content=content,
-        )
+            return name, SubmissionFile(
+                filename=name + ".txt",
+                content=text_content.encode(),
+            )
+
+        name = next(default_fields)
+        path = argument
+        return name, self._load_file(path)
 
 
 class EvaluateCommand(SubmissionCommand):
-    def _get_evaluate_request(self):
-        return EvaluateRequest(
-            working_directory=self.working_directory,
-            submission=self.submission,
-            seed=self.args.seed,
-        )
-
     PARSER = ArgumentParser(
         add_help=False,
         description="Evaluate a submission",
         parents=[SubmissionCommand.PARSER]
     )
-    PARSER.add_argument("--raw-output", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--events", help="show evaluation events as JSON Lines", action="store_true")
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
-
-class RemoteEvaluateCommand(EvaluateCommand, PackBasedCommand, RemotePythonCommand):
-    def _get_command_parameters(self):
-        return EvaluateCommandParameters(
-            evaluate_request=self._get_evaluate_request(),
-            raw_output=self.args.raw_output,
+    def _do_evaluate(self):
+        return Evaluator(".").evaluate(
+            files=self.submission,
+            seed=self.args.seed,
         )
 
-    PARSER = ArgumentParser(
-        add_help=False,
-        parents=[PackBasedCommand.PARSER, EvaluateCommand.PARSER]
-    )
+    def run(self):
+        for event in self._do_evaluate():
+            if self.args.events:
+                print(event)
+            else:
+                if event.type is EvaluationEventType.TEXT:
+                    sys.stdout.write(event.payload)
 
 
-
-RemoteEvaluateCommand.PARSER.set_defaults(Command=RemoteEvaluateCommand)
+EvaluateCommand.PARSER.set_defaults(Command=EvaluateCommand)

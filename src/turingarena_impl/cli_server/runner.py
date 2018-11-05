@@ -2,14 +2,12 @@ import logging
 import pickle
 import sys
 
-from turingarena_common.commands import EvaluateCommandParameters, RemoteCommandParameters, LocalExecutionParameters, \
+from turingarena_common.commands import RemoteCommandParameters, LocalExecutionParameters, \
     FileCommandParameters
-from turingarena_impl.cli_server.evaluate import evaluate_cmd
 from turingarena_impl.cli_server.files import file_cmd
 from turingarena_impl.logging import init_logger
 
 COMMANDS_MAP = {
-    EvaluateCommandParameters: evaluate_cmd,
     FileCommandParameters: file_cmd,
 }
 

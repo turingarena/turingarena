@@ -37,11 +37,6 @@ EvaluateRequest = namedtuple("EvaluateRequest", [
     "seed",
 ])
 
-EvaluateCommandParameters = namedtuple("EvaluateCommandParameters", [
-    "evaluate_request",
-    "raw_output",
-])
-
 FileCommandParameters = namedtuple("FileCommandParameters", [
     "working_directory",
     "command",

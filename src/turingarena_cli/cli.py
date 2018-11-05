@@ -1,10 +1,11 @@
 import os
 from argparse import ArgumentParser
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
 from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
-from turingarena_cli.evaluate import RemoteEvaluateCommand
+from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
@@ -29,8 +30,8 @@ subparsers.required = True
 
 subparsers.add_parser(
     "evaluate",
-    parents=[RemoteEvaluateCommand.PARSER],
-    help=RemoteEvaluateCommand.PARSER.description,
+    parents=[EvaluateCommand.PARSER, BASE_PARSER],
+    help=EvaluateCommand.PARSER.description,
 )
 subparsers.add_parser(
     "new",
