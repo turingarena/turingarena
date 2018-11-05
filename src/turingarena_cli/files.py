@@ -1,22 +1,12 @@
-from abc import abstractmethod
+import sys
 from argparse import ArgumentParser
 
+from turingarena_cli.command import Command
 from turingarena_cli.pack import PackBasedCommand
-from turingarena_cli.remote import RemotePythonCommand
-from turingarena_common.commands import FileCommandParameters, FileCatCommandParameters
+from turingarena_impl.file.generated import PackGeneratedDirectory
 
 
-class FileCommand(PackBasedCommand, RemotePythonCommand):
-    @abstractmethod
-    def _get_file_command_parameters(self):
-        pass
-
-    def _get_command_parameters(self):
-        return FileCommandParameters(
-            working_directory=self.working_directory,
-            command=self._get_file_command_parameters(),
-        )
-
+class FileCommand(Command):
     PARSER = ArgumentParser(
         description="Get generated files",
         parents=[PackBasedCommand.PARSER],
@@ -25,17 +15,15 @@ class FileCommand(PackBasedCommand, RemotePythonCommand):
 
 
 class FileCatCommand(FileCommand):
-    def _get_file_command_parameters(self):
-        return FileCatCommandParameters(
-            path=self.args.path,
-        )
-
     PARSER = ArgumentParser(
         description="Print the content of a file to stdout",
         parents=[FileCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("path", help="Path to the file to print")
+
+    def run(self):
+        PackGeneratedDirectory(".").cat_file(self.args.path, file=sys.stdout)
 
 
 subparsers = FileCommand.PARSER.add_subparsers(title="subcommand", dest="subcommand")

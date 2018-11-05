@@ -58,6 +58,6 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"]))
 
     def cat_file(self, path, *, file):
         for p, generator in self.targets:
-            if p == path:
+            if os.path.normpath(p) == os.path.normpath(path):
                 return generator(file)
         raise FileNotFoundError(path)
