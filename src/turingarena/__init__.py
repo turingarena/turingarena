@@ -1,18 +1,12 @@
 import json
-import logging
 import os
 import random
 import sys
 
-from turingarena.driver.exceptions import *
-from turingarena.driver.program import Program
+from turingarena.driver.client.exceptions import *
+from turingarena.driver.client.program import Program
 from turingarena.goals import Goals
 from turingarena.metadata import load_metadata
-from turingarena_impl.logging import init_logger
-
-logger = logging.getLogger(__name__)
-
-init_logger()
 
 
 def run_algorithm(source_path, interface_path=None):

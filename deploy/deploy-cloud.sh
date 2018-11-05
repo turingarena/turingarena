@@ -23,7 +23,7 @@ hyper func create \
     --env DYNAMODB_TABLE=turingarena-$SERVERLESS_STAGE-table \
     --env S3_FILES_BUCKET=turingarena-$SERVERLESS_STAGE-files \
     $DOCKER_IMAGE \
-    python -m turingarena_impl.api.hypersh_api
+    python -m turingarena.api.hypersh_api
 
 export HYPERSH_FUNC_ID=$(hyper func inspect $HYPERSH_FUNC_NAME | jq -r .[0].UUID)
 
@@ -33,7 +33,7 @@ cd /src/cloud/
 
 npm install
 
-ln -s /src/src/turingarena_impl
+ln -s /src/src/turingarena
 ln -s /src/src/turingarena_cli
 ln -s /src/src/turingarena_common
 

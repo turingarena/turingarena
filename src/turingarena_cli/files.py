@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_impl.file.generated import PackGeneratedDirectory
+from turingarena.file.generated import PackGeneratedDirectory
 
 
 class FileCommand(Command):

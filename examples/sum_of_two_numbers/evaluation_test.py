@@ -1,6 +1,6 @@
 import turingarena
-from turingarena_impl.evaluation.evaluator import Evaluator
-from turingarena_impl.evaluation.util import evaluation_text, evaluation_goals
+from turingarena.evaluation.evaluator import Evaluator
+from turingarena.evaluation.util import evaluation_text, evaluation_goals
 
 
 def test_correct_solution():

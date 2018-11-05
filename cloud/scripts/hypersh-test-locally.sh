@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-python -m turingarena_impl.api.make_hypersh_request $1 | sudo docker run \
+python -m turingarena.api.make_hypersh_request $1 | sudo docker run \
     --rm \
     -i \
     --mount=type=bind,src=$(dirname $(realpath $0))/..,dst=/usr/local/turingarena/,readonly \
@@ -9,4 +9,4 @@ python -m turingarena_impl.api.make_hypersh_request $1 | sudo docker run \
     --env AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key) \
     --env DYNAMODB_TABLE=turingarena-branch-develop-table \
     turingarena/turingarena \
-    python -m turingarena_impl.api.hypersh_api
+    python -m turingarena.api.hypersh_api

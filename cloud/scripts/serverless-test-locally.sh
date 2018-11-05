@@ -2,4 +2,4 @@
 
 HYPERSH_REGION=us-west-1 \
 DYNAMODB_TABLE=turingarena-branch-develop-table \
-python -m turingarena_impl.api.serve
+python -m turingarena.api.serve

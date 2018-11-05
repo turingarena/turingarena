@@ -6,7 +6,7 @@ from functools import lru_cache
 from turingarena_cli.command import Command
 from turingarena_common.evaluation_events import EvaluationEventType
 from turingarena_common.submission import SubmissionFile
-from turingarena_impl.evaluation.evaluator import Evaluator
+from turingarena.evaluation.evaluator import Evaluator
 
 
 class SubmissionCommand(Command):
