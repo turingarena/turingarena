@@ -2,7 +2,6 @@ import random
 
 import turingarena as ta
 
-all_passed = True
 for _ in range(10):
     value_range = range(10 ** 3, 5 * 10 ** 3)
     a, b = random.choices(value_range, k=2)
@@ -16,10 +15,10 @@ for _ in range(10):
             print(" correct", end="")
         else:
             print("  WRONG!", end="")
-            all_passed = False
+            ta.goals["correct"] = False
         print(f" ({int(process.time_usage * 1000000)} us)")
     except ta.AlgorithmError as e:
         print(f" {e}")
-        all_passed = False
+        ta.goals["correct"] = False
 
-ta.evaluation.data(dict(goals=dict(correct=all_passed)))
+ta.goals.setdefault("correct", True)

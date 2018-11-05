@@ -6,6 +6,7 @@ import sys
 
 from turingarena.driver.exceptions import *
 from turingarena.driver.program import Program
+from turingarena.goals import Goals
 from turingarena.metadata import load_metadata
 from turingarena_impl.logging import init_logger
 
@@ -67,7 +68,12 @@ class Parameters:
     def __getattr__(self, item):
         return self[item]
 
+
 parameters = Parameters()
 
+_scoring_metadata = load_metadata().get("scoring", {})
+_declared_goals = _scoring_metadata.get("goals", [])
+
+goals = Goals(on_assign_goal=evaluation.data)
 
 random.seed(os.environ.get("TURINGARENA_SEED", None))
