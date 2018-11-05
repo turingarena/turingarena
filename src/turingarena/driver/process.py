@@ -21,7 +21,6 @@ class ProcessSection:
             raise TimeLimitExceeded(
                 self,
                 f"Time limit exceeded: {self.time_usage} {time_limit}",
-                self.info_after,
             )
 
     @property
@@ -55,7 +54,7 @@ class Process(ProcessSection):
         self._engine.stop()
 
     def fail(self, message, exc_type=AlgorithmError):
-        raise exc_type(self, message, None)
+        raise exc_type(self, message)
 
     @contextmanager
     def run(self, **kwargs):

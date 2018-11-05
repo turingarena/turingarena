@@ -7,10 +7,9 @@ class InterfaceError(Exception):
 
 
 class AlgorithmError(Exception):
-    def __init__(self, process, message, info):
+    def __init__(self, process, message):
         self.process = process
         self.message = message
-        self.info = info
 
 
 class AlgorithmRuntimeError(AlgorithmError):

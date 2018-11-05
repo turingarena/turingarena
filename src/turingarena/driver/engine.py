@@ -72,7 +72,7 @@ class DriverClientEngine:
 
     def _raise_error(self):
         message = self._get_response_line()
-        raise AlgorithmRuntimeError(self.process, message, info)
+        raise AlgorithmRuntimeError(self.process, message)
 
     def _wait_ready(self):
         logging.debug(f"waiting for response ok")
