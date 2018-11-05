@@ -1,19 +1,10 @@
-from turingarena.driver.engine import CallRequest
+from functools import partial
 
 
 class MethodProxy:
-    def __init__(self, engine, has_return_value):
-        self._engine = engine
+    def __init__(self, process, has_return_value):
+        self._process = process
         self._has_return_value = has_return_value
 
     def __getattr__(self, item):
-        def method(*args, callbacks=()):
-            request = CallRequest(
-                method_name=item,
-                arguments=args,
-                has_return_value=self._has_return_value,
-                callbacks=callbacks,
-            )
-            return self._engine.call(request)
-
-        return method
+        return partial(self._process.call, item, has_return_value=self._has_return_value)

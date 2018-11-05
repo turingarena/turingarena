@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from turingarena.driver.engine import DriverClientEngine
+from turingarena.driver.engine import DriverClientEngine, CallRequest
 from turingarena.driver.exceptions import AlgorithmError, TimeLimitExceeded
 from turingarena.driver.proxy import MethodProxy
 
@@ -33,12 +33,24 @@ class Process(ProcessSection):
     def __init__(self, connection):
         super().__init__(engine=DriverClientEngine(self, connection))
 
-        self.procedures = MethodProxy(self._engine, has_return_value=False)
-        self.functions = MethodProxy(self._engine, has_return_value=True)
+        self.procedures = MethodProxy(self, has_return_value=False)
+        self.functions = MethodProxy(self, has_return_value=True)
 
     def section(self, *, time_limit=None):
         section_info = ProcessSection(self._engine)
         return section_info._run(time_limit=time_limit)
+
+    def call(self, method_name, *args, has_return_value, callbacks=None):
+        if callbacks is None:
+            callbacks = {}
+
+        request = CallRequest(
+            method_name=method_name,
+            arguments=args,
+            has_return_value=has_return_value,
+            callbacks=callbacks,
+        )
+        return self._engine.call(request)
 
     def check(self, condition, message, exc_type=AlgorithmError):
         if not condition:
