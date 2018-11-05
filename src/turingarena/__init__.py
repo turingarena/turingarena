@@ -19,7 +19,6 @@ def run_algorithm(source_path, interface_path=None):
 
     return Program(
         source_path=source_path,
-        language_name=None,
         interface_path=interface_path,
     ).run()
 

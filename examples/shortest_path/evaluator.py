@@ -1,7 +1,6 @@
 import networkx as nx
 
 from turingarena import *
-from turingarena.driver.exceptions import AlgorithmError
 
 N = 100  # number of nodes
 Q = 100  # number of queries

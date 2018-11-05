@@ -1,5 +1,4 @@
 from turingarena import *
-from turingarena.driver.exceptions import AlgorithmError
 
 all_passed = True
 for _ in range(10):

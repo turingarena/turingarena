@@ -1,5 +1,4 @@
 from turingarena import *
-from turingarena.driver.exceptions import AlgorithmError
 
 ponged = False
 try:

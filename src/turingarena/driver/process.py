@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
-from turingarena.driver.exceptions import AlgorithmError, TimeLimitExceeded
 from turingarena.driver.engine import DriverClientEngine
+from turingarena.driver.exceptions import AlgorithmError, TimeLimitExceeded
 from turingarena.driver.proxy import MethodProxy
 
 

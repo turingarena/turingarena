@@ -1,5 +1,4 @@
 from turingarena import *
-from turingarena.driver.exceptions import AlgorithmError
 
 
 def run(algorithm, a):
