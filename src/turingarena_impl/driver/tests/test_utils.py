@@ -10,7 +10,7 @@ from turingarena_impl.driver.language import Language
 
 
 @contextmanager
-def define_algorithm(interface_text: str, source_text: str, language_name: str) -> Program:
+def define_algorithm(interface_text: str, source_text: str, language_name: str = "C++") -> Program:
     language = Language.from_name(language_name)
 
     with ExitStack() as stack:

@@ -1,10 +1,11 @@
 import logging
+import math
 from collections.__init__ import namedtuple
 from contextlib import contextmanager
 
-from turingarena import AlgorithmRuntimeError
+from turingarena import AlgorithmRuntimeError, AlgorithmLogicError
 from turingarena.driver.commands import DriverState, serialize_data
-from turingarena.driver.exceptions import AlgorithmError, TimeLimitExceeded
+from turingarena.driver.exceptions import TimeLimitExceeded
 from turingarena.driver.processinfo import SandboxProcessInfo
 from turingarena.driver.proxy import MethodProxy
 
@@ -16,11 +17,13 @@ class ProcessSection:
         yield self
         self.info_after = process._latest_resource_usage
 
-        if time_limit is not None and self.time_usage > time_limit:
-            raise TimeLimitExceeded(
-                self,
-                f"Time limit exceeded: {self.time_usage} > {time_limit}",
-            )
+        if time_limit is None:
+            time_limit = math.inf
+        process.check(
+            self.time_usage <= time_limit,
+            f"time usage: {self.time_usage:.6f}s > {time_limit:.6f}s",
+            exc_type=TimeLimitExceeded,
+        )
 
     @property
     def time_usage(self):
@@ -52,12 +55,12 @@ class Process(ProcessSection):
         )
         return self._do_call(request)
 
-    def check(self, condition, message, exc_type=AlgorithmError):
+    def check(self, condition, message, exc_type=AlgorithmLogicError):
         if not condition:
             self.fail(message, exc_type)
 
-    def fail(self, message, exc_type=AlgorithmError):
-        raise exc_type(self, message)
+    def fail(self, message, exc_type=AlgorithmLogicError):
+        raise exc_type(message, process=self)
 
     @contextmanager
     def run(self, **kwargs):
@@ -142,7 +145,7 @@ class Process(ProcessSection):
 
     def _raise_error(self):
         message = self._get_response_line()
-        raise AlgorithmRuntimeError(self, message)
+        self.fail(message, exc_type=AlgorithmRuntimeError)
 
     def _wait_ready(self):
         logging.debug(f"waiting for response ok")

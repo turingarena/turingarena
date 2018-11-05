@@ -7,12 +7,16 @@ class InterfaceError(Exception):
 
 
 class AlgorithmError(Exception):
-    def __init__(self, process, message):
+    def __init__(self, message, *, process):
         self.process = process
         self.message = message
 
 
 class AlgorithmRuntimeError(AlgorithmError):
+    pass
+
+
+class AlgorithmLogicError(AlgorithmError):
     pass
 
 
