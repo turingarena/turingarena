@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.commands import serialize_data
+from turingarena.driver.commands import serialize_data, DriverState
 from turingarena.driver.exceptions import AlgorithmRuntimeError
 from turingarena.driver.processinfo import SandboxProcessInfo
 
@@ -9,16 +9,25 @@ CallRequest = namedtuple("CallRequest", ["method_name", "arguments", "has_return
 
 
 class DriverClientEngine:
-    __slots__ = ["process", "connection"]
-
     def __init__(self, process, connection):
         self.process = process
         self.connection = connection
 
-    def get_info(self, kill=False):
+        self._latest_resource_usage = None
+
+    def _on_resource_usage(self):
+        time_usage = float(self._get_response_line())
+        memory_usage = int(self._get_response_line())
+
+        self._latest_resource_usage = SandboxProcessInfo(
+            time_usage=time_usage,
+            memory_usage=memory_usage,
+            error=None,
+        )
+
+    def get_info(self):
         self._wait_ready()
         self._send_request_line("wait")
-        self._send_request_line(int(kill))
 
         return self._do_get_info()
 
@@ -57,15 +66,6 @@ class DriverClientEngine:
         self._send_next_request()
         self._send_request_line("checkpoint")
 
-    def _do_get_info(self):
-        time_usage = float(self._get_response_line())
-        memory_usage = int(self._get_response_line())
-        return SandboxProcessInfo(
-            time_usage=time_usage,
-            memory_usage=memory_usage,
-            error=None,
-        )
-
     def _get_response_line(self):
         self.connection.downward.flush()
         line = self.connection.upward.readline().strip()
@@ -77,15 +77,19 @@ class DriverClientEngine:
         return int(self._get_response_line())
 
     def _raise_error(self):
-        info = self._do_get_info()
         message = self._get_response_line()
         raise AlgorithmRuntimeError(self.process, message, info)
 
     def _wait_ready(self):
         logging.debug(f"waiting for response ok")
-        any_error = self._get_response_value()
-        if any_error:
-            self._raise_error()
+        while True:
+            state = DriverState(self._get_response_value())
+            if state is DriverState.READY:
+                break
+            if state is DriverState.RESOURCE_USAGE:
+                self._on_resource_usage()
+            if state is DriverState.ERROR:
+                self._raise_error()
 
     def _accept_callbacks(self, callback_list):
         while True:

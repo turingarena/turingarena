@@ -4,7 +4,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 from typing import List, Tuple, Any
 
-from turingarena.driver.commands import deserialize_data, serialize_data
+from turingarena.driver.commands import deserialize_data, serialize_data, DriverState
 from turingarena_impl.driver.interface.exceptions import CommunicationError, DriverStop
 from turingarena_impl.driver.interface.nodes import ExecutionResult
 from turingarena_impl.driver.interface.variables import Reference
@@ -29,6 +29,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "sandbox_connection",
 ])):
     __slots__ = []
+
+    def send_driver_state(self, state):
+        self.send_driver_upward(state.value)
 
     def send_driver_upward(self, item):
         logging.debug(f"send_driver_upward: {item}")

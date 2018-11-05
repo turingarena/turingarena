@@ -6,6 +6,12 @@ from enum import IntEnum
 logger = logging.getLogger(__name__)
 
 
+class DriverState(IntEnum):
+    READY = 0
+    RESOURCE_USAGE = 1
+    ERROR = -1
+
+
 class MetaType(IntEnum):
     SCALAR = 0
     ARRAY = 1

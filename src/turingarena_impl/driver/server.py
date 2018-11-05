@@ -4,6 +4,7 @@ from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena import Program
+from turingarena.driver.commands import DriverState
 from turingarena.driver.connection import DriverProcessConnection
 from turingarena_cli.common import init_logger
 from turingarena_impl.driver.interface.exceptions import CommunicationError, DriverStop
@@ -61,12 +62,11 @@ def run_server(driver_connection, source_path, interface_path):
             request = context.next_request()
             assert False, f"driver was not explicitly stopped, got {request}"
         except CommunicationError as e:
-            context.send_driver_upward(-1)  # error
-            info = context.perform_wait(kill_reason="communication error")
+            context.send_driver_state(DriverState.ERROR)  # error
             message, = e.args
             context.send_driver_upward(f"{message} (process {info.error})")
         except DriverStop:
-            context.send_driver_upward(0)  # ok, no errors
+            context.send_driver_state(DriverState.READY)  # ok, no errors
 
 
 if __name__ == '__main__':
