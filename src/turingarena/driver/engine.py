@@ -25,12 +25,6 @@ class DriverClientEngine:
             error=None,
         )
 
-    def get_info(self):
-        self._wait_ready()
-        self._send_request_line("wait")
-
-        return self._do_get_info()
-
     def call(self, request):
         self._send_next_request()
         for line in self._call_lines(request):
