@@ -2,7 +2,6 @@ import os
 from tempfile import TemporaryDirectory
 
 from turingarena_common.commands import LocalExecutionParameters, EvaluateRequest
-
 from turingarena_impl.cli_server.pack import create_working_directory
 from turingarena_impl.evaluation.evaluator import Evaluator
 
@@ -20,5 +19,4 @@ def evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecutionPa
 
         with create_working_directory(evaluate_request.working_directory, local_execution=local_execution) as work_dir:
             cwd = os.path.join(work_dir, evaluate_request.working_directory.current_directory)
-            evaluator = Evaluator.get_evaluator(cwd)
-            yield from evaluator.evaluate(files=files, seed=evaluate_request.seed)
+            yield from Evaluator(cwd).evaluate(files=files, seed=evaluate_request.seed)

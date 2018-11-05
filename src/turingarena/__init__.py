@@ -4,9 +4,9 @@ import os
 import random
 import sys
 
-import toml
 from turingarena.driver.exceptions import *
 from turingarena.driver.program import Program
+from turingarena.metadata import load_metadata
 from turingarena_impl.logging import init_logger
 
 logger = logging.getLogger(__name__)
@@ -56,10 +56,18 @@ try:
 except KeyError:
     pass
 
-try:
-    with open("turingarena.toml") as f:
-        data = toml.load(f)
-except FileNotFoundError:
-    data = None
+metadata = load_metadata()
+_parameters_dict = metadata.get("parameters", {})
+
+
+class Parameters:
+    def __getitem__(self, item):
+        return _parameters_dict[item]
+
+    def __getattr__(self, item):
+        return self[item]
+
+parameters = Parameters()
+
 
 random.seed(os.environ.get("TURINGARENA_SEED", None))
