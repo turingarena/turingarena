@@ -3,7 +3,7 @@ import sys
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.algorithm import Program
+from turingarena import Program
 from turingarena.driver.connection import DriverProcessConnection
 from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.execution import NodeExecutionContext, ProcessExplicitlyKilled

@@ -2,7 +2,7 @@ import io
 from abc import abstractmethod
 from collections.__init__ import namedtuple
 
-from turingarena.processinfo import SandboxProcessInfo
+from turingarena.driver.processinfo import SandboxProcessInfo
 
 SandboxProcessConnection = namedtuple("SandboxProcessConnection", [
     "downward",

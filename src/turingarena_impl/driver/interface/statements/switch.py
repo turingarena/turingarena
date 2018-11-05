@@ -1,7 +1,7 @@
 import logging
 import warnings
 
-from turingarena import InterfaceError
+from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena_impl.driver.interface.diagnostics import Diagnostic

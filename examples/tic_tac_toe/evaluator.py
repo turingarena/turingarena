@@ -1,4 +1,5 @@
-from turingarena import submission, run_algorithm, evaluation, AlgorithmRuntimeError
+from turingarena import submission, run_algorithm, evaluation
+from turingarena.driver.exceptions import AlgorithmRuntimeError
 
 import random
 

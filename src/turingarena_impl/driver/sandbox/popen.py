@@ -4,7 +4,7 @@ import signal
 import subprocess
 import time
 
-from turingarena.processinfo import SandboxProcessInfo
+from turingarena.driver.processinfo import SandboxProcessInfo
 from turingarena_impl.driver.sandbox.connection import SandboxProcessConnection, ProcessManager
 
 

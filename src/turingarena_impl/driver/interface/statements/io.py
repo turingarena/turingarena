@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
 
-from turingarena import InterfaceError
+from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.exceptions import CommunicationError
 from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression

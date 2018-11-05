@@ -1,6 +1,6 @@
 import pytest
 
-from turingarena import AlgorithmRuntimeError
+from turingarena.driver.exceptions import AlgorithmRuntimeError
 from turingarena_impl.driver.tests.test_utils import define_algorithm
 
 INTERFACE_TEXT = """

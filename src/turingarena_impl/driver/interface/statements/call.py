@@ -1,6 +1,6 @@
 import logging
 
-from turingarena import InterfaceError
+from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.context import StaticCallbackBlockContext
 from turingarena_impl.driver.interface.diagnostics import Diagnostic
 from turingarena_impl.driver.interface.execution import CallRequestSignature

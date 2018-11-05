@@ -1,8 +1,7 @@
-import random
-
 import networkx as nx
 
 from turingarena import *
+from turingarena.driver.exceptions import AlgorithmError
 
 parts = (
     [nx.complete_graph(10) for _ in range(3)] +

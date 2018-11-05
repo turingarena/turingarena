@@ -1,9 +1,8 @@
 import pytest
-
-from turingarena import AlgorithmRuntimeError
-from turingarena.algorithm import Program
-from turingarena_impl.driver.tests.test_utils import define_algorithm
+from turingarena.driver.exceptions import AlgorithmRuntimeError
+from turingarena.driver.program import Program
 from turingarena_impl.driver.languages import javascript
+from turingarena_impl.driver.tests.test_utils import define_algorithm
 
 pytestmark = pytest.mark.skip("Javascript support needs to be rediscussed")
 

@@ -1,6 +1,7 @@
 import random
 
 import turingarena as ta
+import turingarena.driver.exceptions
 
 all_passed = True
 for _ in range(10):
@@ -18,7 +19,7 @@ for _ in range(10):
             print("  WRONG!", end="")
             all_passed = False
         print(f" ({int(process.time_usage * 1000000)} us)")
-    except ta.AlgorithmError as e:
+    except turingarena.driver.exceptions.AlgorithmError as e:
         print(f" {e}")
         all_passed = False
 

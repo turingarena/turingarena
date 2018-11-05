@@ -1,6 +1,5 @@
-import random
-
 from turingarena import *
+from turingarena.driver.exceptions import AlgorithmError
 
 
 def LCS_length(x, y):

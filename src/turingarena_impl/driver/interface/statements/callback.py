@@ -2,7 +2,7 @@ import logging
 
 from collections import namedtuple
 
-from turingarena import InterfaceError
+from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import CallbackPrototype
 from turingarena_impl.driver.interface.execution import RequestSignature

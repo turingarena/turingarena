@@ -2,39 +2,13 @@ import json
 import logging
 import os
 import random
-
 import sys
+
 import toml
+from turingarena.driver.exceptions import *
+from turingarena.driver.program import Program
 
 logger = logging.getLogger(__name__)
-
-
-class InterfaceError(Exception):
-    pass
-
-
-class InterfaceExit(BaseException):
-    pass
-
-
-class AlgorithmError(Exception):
-    def __init__(self, process, message, info):
-        self.process = process
-        self.message = message
-        self.info = info
-
-
-class AlgorithmRuntimeError(AlgorithmError):
-    pass
-
-
-# FIXME: fill-in all arguments when raising the exceptions below
-class TimeLimitExceeded(AlgorithmError):
-    pass
-
-
-class MemoryLimitExceeded(AlgorithmError):
-    pass
 
 
 def run_algorithm(source_path, interface_path=None):
@@ -43,7 +17,6 @@ def run_algorithm(source_path, interface_path=None):
 
     source_path = os.path.abspath(source_path)
 
-    from turingarena.algorithm import Program
     return Program(
         source_path=source_path,
         language_name=None,
@@ -80,7 +53,6 @@ try:
     temporary_directory = os.environ["TEMPORARY_DIRECTORY"]
 except KeyError:
     pass
-
 
 try:
     with open("turingarena.toml") as f:

@@ -1,6 +1,6 @@
 import logging
 
-from turingarena import InterfaceError
+from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import MethodPrototype
 from turingarena_impl.driver.interface.context import InterfaceContext
