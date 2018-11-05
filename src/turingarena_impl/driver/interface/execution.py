@@ -41,24 +41,18 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
-        logging.debug(f"receive_driver_downward...", stack_info=True)
+        logging.debug(f"receive_driver_downward...")
         line = self.driver_connection.downward.readline().strip()
         logging.debug(f"receive_driver_downward -> {line}")
         return line
 
     def next_request(self):
-        self.send_driver_upward(0)  # ok, no errors
+        self.perform_wait()
+
+        self.send_driver_state(DriverState.READY)
         while True:
             command = self.receive_driver_downward()
-            if command == "wait":
-                kill = int(self.receive_driver_downward())
-                if kill:
-                    kill_reason = "explicitly requested"
-                else:
-                    kill_reason = None
-                self.perform_wait(kill_reason)
-                self.send_driver_upward(0)
-            elif command == "stop":
+            if command == "stop":
                 raise DriverStop
             else:
                 assert command == "request"
@@ -70,8 +64,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             return RequestSignature(command)
 
-    def perform_wait(self, kill_reason):
-        info = self.process.get_status(kill_reason=kill_reason)
+    def perform_wait(self):
+        info = self.process.get_status()
+        self.send_driver_state(DriverState.RESOURCE_USAGE)
         self.send_driver_upward(info.time_usage)
         self.send_driver_upward(info.memory_usage)
         return info

@@ -11,10 +11,10 @@ from turingarena.driver.proxy import MethodProxy
 
 class ProcessSection:
     @contextmanager
-    def _run(self, *, time_limit):
-        # self.info_before = self._engine.get_info()
+    def _run(self, process, *, time_limit):
+        self.info_before = process._latest_resource_usage
         yield self
-        # self.info_after = self._engine.get_info()
+        self.info_after = process._latest_resource_usage
 
         if time_limit is not None and self.time_usage > time_limit:
             raise TimeLimitExceeded(
@@ -24,8 +24,7 @@ class ProcessSection:
 
     @property
     def time_usage(self):
-        # return self.info_after.time_usage - self.info_before.time_usage
-        return 0
+        return self.info_after.time_usage - self.info_before.time_usage
 
 
 class Process(ProcessSection):
@@ -35,9 +34,11 @@ class Process(ProcessSection):
         self.procedures = MethodProxy(self, has_return_value=False)
         self.functions = MethodProxy(self, has_return_value=True)
 
-    def section(self, *, time_limit=None):
-        section_info = ProcessSection()
-        return section_info._run(time_limit=time_limit)
+        self._latest_resource_usage = None
+
+    def section(self, **kwargs):
+        section = ProcessSection()
+        return section._run(self, **kwargs)
 
     def call(self, method_name, *args, has_return_value, callbacks=None):
         if callbacks is None:
@@ -60,18 +61,22 @@ class Process(ProcessSection):
 
     @contextmanager
     def run(self, **kwargs):
-        with self._run(**kwargs) as section:
+        self._wait_ready()
+        assert self._latest_resource_usage is not None
+        with self._run(self, **kwargs) as section:
             yield section
 
     def _on_resource_usage(self):
         time_usage = float(self._get_response_line())
         memory_usage = int(self._get_response_line())
 
-        self._latest_resource_usage = SandboxProcessInfo(
+        resource_usage = SandboxProcessInfo(
             time_usage=time_usage,
             memory_usage=memory_usage,
             error=None,
         )
+        logging.debug(f"got resource usage: {resource_usage}")
+        self._latest_resource_usage = resource_usage
 
     def _do_call(self, request):
         self._send_next_request()
@@ -82,16 +87,19 @@ class Process(ProcessSection):
 
         if request.has_return_value:
             logging.debug(f"Receiving return value...")
-            return self._get_response_value()
+            return_value = self._get_response_value()
         else:
-            return None
+            return_value = None
+
+        self._wait_ready()
+
+        return return_value
 
     def exit(self):
         self._send_next_request()
         self._send_request_line("exit")
 
     def stop(self):
-        self._wait_ready()
         self._send_request_line("stop")
         self._wait_ready()
 
@@ -126,6 +134,7 @@ class Process(ProcessSection):
             self._send_request_line(int(return_value))
         else:
             self._send_request_line(0)
+        self._wait_ready()
 
     def _get_response_line(self):
         self._connection.downward.flush()
@@ -164,7 +173,6 @@ class Process(ProcessSection):
             yield c.__code__.co_argcount
 
     def _send_next_request(self):
-        self._wait_ready()
         self._send_request_line("request")
 
     def _send_request_line(self, line):
