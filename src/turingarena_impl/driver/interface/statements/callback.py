@@ -11,7 +11,7 @@ from turingarena_impl.driver.interface.expressions import Expression, SyntheticE
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
-from turingarena_impl.driver.interface.execution import ProcessKilled
+from turingarena_impl.driver.interface.execution import ProcessExplicitlyKilled
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ class ExitStatement(Statement, IntermediateNode):
             command = context.request_lookahead.command
             if command != "exit":
                 raise InterfaceError(f"Expecting exit, got {command}")
-            raise ProcessKilled
+            raise ProcessExplicitlyKilled
 
     @property
     def does_break(self):

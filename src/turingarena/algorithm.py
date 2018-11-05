@@ -1,7 +1,9 @@
 import logging
+import os
 import subprocess
+import threading
 from collections import namedtuple
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 
 from turingarena import InterfaceExit, TimeLimitExceeded, AlgorithmError
 from turingarena.driver.connection import DriverProcessConnection
@@ -14,8 +16,42 @@ logger = logging.getLogger(__name__)
 class Program(namedtuple("Program", [
     "source_path", "interface_path",
 ])):
+    def _open_pipes(self, stack: ExitStack):
+        return [
+            stack.enter_context(open(fd, mode))
+            for fd, mode in zip(os.pipe(), ("r", "w"))
+        ]
+
     @contextmanager
-    def run(self, time_limit=None):
+    def _run_server_in_thread(self):
+        with ExitStack() as stack:
+            client_upward, server_upward = self._open_pipes(stack)
+            server_downward, client_downward = self._open_pipes(stack)
+
+            def server_thread():
+                from turingarena_impl.driver.server import run_server
+
+                run_server(DriverProcessConnection(
+                    upward=server_upward,
+                    downward=server_downward,
+                ), self.source_path, self.interface_path)
+
+                logging.debug("driver server terminated")
+                server_upward.flush()
+
+            thread = threading.Thread(target=server_thread)
+
+            thread.start()
+
+            yield DriverProcessConnection(
+                upward=client_upward,
+                downward=client_downward,
+            )
+
+            stack.callback(thread.join)
+
+    @contextmanager
+    def _run_server_in_process(self):
         with subprocess.Popen(
                 [
                     "python3",
@@ -28,18 +64,21 @@ class Program(namedtuple("Program", [
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
         ) as p:
-            connection = DriverProcessConnection(
+            yield DriverProcessConnection(
                 downward=p.stdin,
                 upward=p.stdout,
             )
 
-            process = Process(connection)
+    @contextmanager
+    def run(self, time_limit=None):
+        with ExitStack() as stack:
+            driver_connection = stack.enter_context(self._run_server_in_process())
+            process = Process(driver_connection)
             with process.run(time_limit=time_limit):
                 try:
                     yield process
                 except InterfaceExit:
                     pass
-            process.exit()
 
 
 class ProcessSection:

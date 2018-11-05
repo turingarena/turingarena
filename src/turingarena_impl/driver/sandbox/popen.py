@@ -1,4 +1,3 @@
-import io
 import logging
 import os
 import signal
@@ -7,8 +6,6 @@ import time
 
 from turingarena.processinfo import SandboxProcessInfo
 from turingarena_impl.driver.sandbox.connection import SandboxProcessConnection, ProcessManager
-
-logger = logging.Logger(__name__)
 
 
 def create_popen_process_connection(*args, **kwargs):
@@ -81,7 +78,7 @@ class PopenProcessManager(ProcessManager):
         else:
             logging.debug(f"ProcessManager did not reach interruptible state in {timeout} s")
 
-    def get_status(self, kill_reason=None) -> SandboxProcessInfo:
+    def _do_get_status(self, kill_reason):
         """
         Get information about a running process, such as status (RUNNING, TERMINATED),
         maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
@@ -101,7 +98,7 @@ class PopenProcessManager(ProcessManager):
         """
 
         # if the process is already terminated, return the cached info
-        if self.termination_info:
+        if self.termination_info is not None:
             return self.termination_info
 
         self._wait_for_interruptible()
@@ -129,8 +126,8 @@ class PopenProcessManager(ProcessManager):
         )
 
         if running:
-            if kill_reason:
-                logger.debug(f"killing process")
+            if kill_reason is not None:
+                logging.debug(f"killing process")
                 self.os_process.send_signal(signal.SIGKILL)
                 os.wait4(self.os_process.pid, 0)
                 self.termination_info = info

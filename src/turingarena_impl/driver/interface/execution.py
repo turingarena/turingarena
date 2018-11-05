@@ -13,14 +13,13 @@ logger = logging.getLogger(__name__)
 
 UPWARD_TIMEOUT = 3.0
 
-
 Assignments = List[Tuple[Reference, Any]]
 
 RequestSignature = namedtuple("RequestSignature", ["command"])
 CallRequestSignature = namedtuple("CallRequestSignature", ["command", "method_name"])
 
 
-class ProcessKilled(Exception):
+class ProcessExplicitlyKilled(Exception):
     pass
 
 
@@ -60,7 +59,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                     kill_reason = None
                 self.perform_wait(kill_reason)
                 if kill:
-                    raise ProcessKilled
+                    raise ProcessExplicitlyKilled
                 self.send_driver_upward(0)
             else:
                 assert command == "request"
@@ -79,8 +78,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return info
 
     def _on_timeout(self):
-        logging.warning(f"process communication timeout expired")
-        self.process.get_status(kill=1)
+        logging.info(f"process communication timeout expired")
+        self.process.get_status(kill_reason="timeout expired")
 
     @contextmanager
     def _check_downward_pipe(self):
@@ -98,13 +97,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         with self._check_downward_pipe():
             self.sandbox_connection.downward.flush()
 
-
         timer = threading.Timer(UPWARD_TIMEOUT, self._on_timeout)
         timer.start()
 
-        logger.debug(f"receive_upward...")
+        logger.debug(f"receive upward from process...")
         line = self.sandbox_connection.upward.readline().strip()
-        logger.debug(f"receive_upward -> {line}")
+        logger.debug(f"receive upward from process -> {line!r}")
 
         if not timer.is_alive():
             raise CommunicationError(f"process stopped sending data (timeout: {UPWARD_TIMEOUT}s)")
