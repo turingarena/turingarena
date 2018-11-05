@@ -48,7 +48,7 @@ class Evaluator(namedtuple("Evaluator", ["path"])):
 
         return runner_class(self.path, path, evaluator_parameters)
 
-    def evaluate(self, files, seed=None):
+    def evaluate(self, files, seed=None, reset_env=False):
         runner = self._get_runner()
 
         with ExitStack() as stack:
@@ -67,6 +67,7 @@ class Evaluator(namedtuple("Evaluator", ["path"])):
                 files,
                 command,
                 env=env,
+                reset_env=reset_env,
                 cwd=self.path,
             )
 
