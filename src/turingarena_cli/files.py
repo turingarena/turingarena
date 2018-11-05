@@ -1,15 +1,14 @@
 import sys
 from argparse import ArgumentParser
 
+from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.command import Command
-from turingarena_cli.pack import PackBasedCommand
 from turingarena_impl.file.generated import PackGeneratedDirectory
 
 
 class FileCommand(Command):
     PARSER = ArgumentParser(
         description="Get generated files",
-        parents=[PackBasedCommand.PARSER],
         add_help=False,
     )
 
@@ -30,6 +29,6 @@ subparsers = FileCommand.PARSER.add_subparsers(title="subcommand", dest="subcomm
 subparsers.required = True
 subparsers.add_parser(
     "cat",
-    parents=[FileCatCommand.PARSER],
+    parents=[FileCatCommand.PARSER, BASE_PARSER],
     help=FileCatCommand.PARSER.description,
 ).set_defaults(Command=FileCatCommand)

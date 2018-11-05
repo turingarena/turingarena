@@ -4,11 +4,9 @@ from argparse import ArgumentParser
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
-from turingarena_cli.daemonctl import DAEMON_CONTROL_PARSER
 from turingarena_cli.evaluate import EvaluateCommand
 from turingarena_cli.files import FileCommand
 from turingarena_cli.new import NewCommand
-from turingarena_cli.remote import RemoteExecCommand
 # in python2.7, quote is in pipes and not in shlex
 from turingarena_cli.search import SearchCommand
 
@@ -40,19 +38,9 @@ subparsers.add_parser(
 )
 subparsers.add_parser(
     "file",
-    parents=[FileCommand.PARSER],
+    parents=[FileCommand.PARSER, BASE_PARSER],
     help=FileCommand.PARSER.description,
 )
-subparsers.add_parser(
-    "daemon",
-    parents=[DAEMON_CONTROL_PARSER],
-    help=DAEMON_CONTROL_PARSER.description,
-)
-subparsers.add_parser(
-    "exec",
-    parents=[RemoteExecCommand.PARSER],
-    help=RemoteExecCommand.PARSER.description,
-).set_defaults(Command=RemoteExecCommand)
 subparsers.add_parser(
     "cloud",
     parents=[CloudCommand.PARSER],

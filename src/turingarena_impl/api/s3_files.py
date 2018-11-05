@@ -5,8 +5,7 @@ from io import StringIO
 
 import boto3
 from turingarena_common.commands import WorkingDirectory
-
-from turingarena_impl.cli_server.pack import create_working_directory
+from turingarena_impl.api.git_manager import create_working_directory
 from turingarena_impl.file.generated import PackGeneratedDirectory
 
 S3_FILES_BUCKET = os.environ["S3_FILES_BUCKET"]

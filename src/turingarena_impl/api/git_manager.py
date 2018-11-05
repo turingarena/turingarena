@@ -7,11 +7,10 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import GitRepository
+from turingarena_common.commands import GitRepository, WorkingDirectory
 from turingarena_common.git_common import GIT_BASE_ENV
 
 logger = logging.getLogger(__name__)
-
 
 GITHUB_REPO_PATTERN = re.compile("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
@@ -81,3 +80,18 @@ class GitManager(namedtuple("GitManager", ["git_dir"])):
                 "checkout-index",
                 "--all",
             ], env=env, check=True)
+
+
+@contextmanager
+def create_working_directory(working_directory: WorkingDirectory):
+    git = GitManager("/run/turingarena/db.git")
+    git.init()
+
+    with TemporaryDirectory() as temp_dir:
+        logging.info(f"Unpacking working directory in {temp_dir}")
+
+        if working_directory.pack.repository is not None:
+            git.fetch_repository(working_directory.pack.repository)
+        git.checkout_commit(working_directory.pack.oid, temp_dir)
+
+        yield temp_dir

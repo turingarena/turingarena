@@ -1,12 +1,12 @@
 import os
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import LocalExecutionParameters, EvaluateRequest
-from turingarena_impl.cli_server.pack import create_working_directory
+from turingarena_common.commands import EvaluateRequest
+from turingarena_impl.api.git_manager import create_working_directory
 from turingarena_impl.evaluation.evaluator import Evaluator
 
 
-def cloud_evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecutionParameters.DEFAULT, reset_env=False):
+def cloud_evaluate(evaluate_request: EvaluateRequest, reset_env=False):
     with TemporaryDirectory() as temp_dir:
         files = {}
         for name, submission_file in evaluate_request.submission.items():
@@ -17,6 +17,6 @@ def cloud_evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecu
                 f.write(submission_file.content)
             files[name] = path
 
-        with create_working_directory(evaluate_request.working_directory, local_execution=local_execution) as work_dir:
+        with create_working_directory(evaluate_request.working_directory) as work_dir:
             cwd = os.path.join(work_dir, evaluate_request.working_directory.current_directory)
             yield from Evaluator(cwd).evaluate(files=files, seed=evaluate_request.seed, reset_env=reset_env)
