@@ -34,7 +34,9 @@ class Program(namedtuple("Program", [
                 ), self.source_path, self.interface_path)
 
                 logging.debug("driver server terminated")
-                server_upward.flush()
+
+                server_upward.close()
+                server_downward.close()
 
             thread = threading.Thread(target=server_thread)
 
@@ -69,7 +71,7 @@ class Program(namedtuple("Program", [
     @contextmanager
     def run(self, time_limit=None):
         with ExitStack() as stack:
-            driver_connection = stack.enter_context(self._run_server_in_process())
+            driver_connection = stack.enter_context(self._run_server_in_thread())
 
             process = Process(driver_connection)
             with process.run(time_limit=time_limit):
@@ -77,3 +79,4 @@ class Program(namedtuple("Program", [
                     yield process
                 except InterfaceExit:
                     pass
+                process.exit()
