@@ -5,8 +5,9 @@ from tempfile import TemporaryDirectory
 
 from turingarena import Program
 from turingarena.driver.connection import DriverProcessConnection
-from turingarena_impl.driver.interface.exceptions import CommunicationError
-from turingarena_impl.driver.interface.execution import NodeExecutionContext, ProcessExplicitlyKilled
+from turingarena_cli.common import init_logger
+from turingarena_impl.driver.interface.exceptions import CommunicationError, DriverStop
+from turingarena_impl.driver.interface.execution import NodeExecutionContext
 from turingarena_impl.driver.interface.interface import InterfaceDefinition
 from turingarena_impl.driver.language import Language
 
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 def main():
     _, source_path, interface_path = sys.argv
+
+    init_logger()
 
     run_server(DriverProcessConnection(
         downward=sys.stdin,
@@ -55,13 +58,15 @@ def run_server(driver_connection, source_path, interface_path):
 
         try:
             interface.run_driver(context)
+            request = context.next_request()
+            assert False, f"driver was not explicitly stopped, got {request}"
         except CommunicationError as e:
             context.send_driver_upward(-1)  # error
             info = context.perform_wait(kill_reason="communication error")
             message, = e.args
             context.send_driver_upward(f"{message} (process {info.error})")
-        except ProcessExplicitlyKilled:
-            logger.debug("process killed")
+        except DriverStop:
+            context.send_driver_upward(0)  # ok, no errors
 
 
 if __name__ == '__main__':

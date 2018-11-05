@@ -35,7 +35,6 @@ class Process(ProcessSection):
 
         self.procedures = MethodProxy(self._engine, has_return_value=False)
         self.functions = MethodProxy(self._engine, has_return_value=True)
-        self.is_alive = False
 
     def section(self, *, time_limit=None):
         section_info = ProcessSection(self._engine)
@@ -46,26 +45,18 @@ class Process(ProcessSection):
             self.fail(message, exc_type)
 
     def checkpoint(self):
-        assert self.is_alive
         self._engine.checkpoint()
 
     def exit(self):
-        assert self.is_alive
         self._engine.exit()
 
-    def fail(self, message, exc_type=AlgorithmError):
-        if self.is_alive:
-            info = self._engine.get_info(kill=True)
-        else:
-            info = None
+    def stop(self):
+        self._engine.stop()
 
-        raise exc_type(self, message, info)
+    def fail(self, message, exc_type=AlgorithmError):
+        raise exc_type(self, message, None)
 
     @contextmanager
     def run(self, **kwargs):
-        assert not self.is_alive
-        self.is_alive = True
-        self._engine.start()  # ready
         with self._run(**kwargs) as section:
             yield section
-        self.is_alive = False

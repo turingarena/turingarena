@@ -7,8 +7,11 @@ import sys
 import toml
 from turingarena.driver.exceptions import *
 from turingarena.driver.program import Program
+from turingarena_impl.logging import init_logger
 
 logger = logging.getLogger(__name__)
+
+init_logger()
 
 
 def run_algorithm(source_path, interface_path=None):

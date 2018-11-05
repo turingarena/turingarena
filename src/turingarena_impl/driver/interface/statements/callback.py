@@ -5,13 +5,13 @@ from collections import namedtuple
 from turingarena.driver.exceptions import InterfaceError
 from turingarena_impl.driver.interface.block import Block, BlockNode
 from turingarena_impl.driver.interface.callables import CallbackPrototype
+from turingarena_impl.driver.interface.exceptions import InterfaceExitReached
 from turingarena_impl.driver.interface.execution import RequestSignature
 from turingarena_impl.driver.interface.phase import ExecutionPhase
 from turingarena_impl.driver.interface.expressions import Expression, SyntheticExpression
 from turingarena_impl.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
 from turingarena_impl.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena_impl.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
-from turingarena_impl.driver.interface.execution import ProcessExplicitlyKilled
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ class ExitStatement(Statement, IntermediateNode):
             command = context.request_lookahead.command
             if command != "exit":
                 raise InterfaceError(f"Expecting exit, got {command}")
-            raise ProcessExplicitlyKilled
+            raise InterfaceExitReached
 
     @property
     def does_break(self):

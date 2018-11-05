@@ -79,4 +79,4 @@ class Program(namedtuple("Program", [
                     yield process
                 except InterfaceExit:
                     pass
-                process.exit()
+            process.stop()

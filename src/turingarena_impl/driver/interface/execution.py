@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from typing import List, Tuple, Any
 
 from turingarena.driver.commands import deserialize_data, serialize_data
-from turingarena_impl.driver.interface.exceptions import CommunicationError
+from turingarena_impl.driver.interface.exceptions import CommunicationError, DriverStop
 from turingarena_impl.driver.interface.nodes import ExecutionResult
 from turingarena_impl.driver.interface.variables import Reference
 
@@ -17,10 +17,6 @@ Assignments = List[Tuple[Reference, Any]]
 
 RequestSignature = namedtuple("RequestSignature", ["command"])
 CallRequestSignature = namedtuple("CallRequestSignature", ["command", "method_name"])
-
-
-class ProcessExplicitlyKilled(Exception):
-    pass
 
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
@@ -42,7 +38,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
-        logging.debug(f"receive_driver_downward...")
+        logging.debug(f"receive_driver_downward...", stack_info=True)
         line = self.driver_connection.downward.readline().strip()
         logging.debug(f"receive_driver_downward -> {line}")
         return line
@@ -58,9 +54,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 else:
                     kill_reason = None
                 self.perform_wait(kill_reason)
-                if kill:
-                    raise ProcessExplicitlyKilled
                 self.send_driver_upward(0)
+            elif command == "stop":
+                raise DriverStop
             else:
                 assert command == "request"
                 break

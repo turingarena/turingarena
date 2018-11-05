@@ -84,8 +84,6 @@ class InterfaceDefinition:
         ready_msg = context.receive_upward()
         assert ready_msg == (0,)
 
-        context.send_driver_upward(0)  # ready
-
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
         command = request.command

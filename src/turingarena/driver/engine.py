@@ -15,9 +15,6 @@ class DriverClientEngine:
         self.process = process
         self.connection = connection
 
-    def start(self):
-        self._wait_ready()
-
     def get_info(self, kill=False):
         self._wait_ready()
         self._send_request_line("wait")
@@ -50,6 +47,11 @@ class DriverClientEngine:
     def exit(self):
         self._send_next_request()
         self._send_request_line("exit")
+
+    def stop(self):
+        self._wait_ready()
+        self._send_request_line("stop")
+        self._wait_ready()
 
     def checkpoint(self):
         self._send_next_request()

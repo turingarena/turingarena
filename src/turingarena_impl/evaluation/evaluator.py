@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import subprocess
@@ -28,6 +29,7 @@ class Evaluator(namedtuple("Evaluator", ["cwd"])):
             env = {
                 "TEMPORARY_DIRECTORY": tmp_dir,
                 "TURINGARENA_SEED": str(seed),
+                "TURINGARENA_LOG_LEVEL": logging.getLevelName(logging.root.getEffectiveLevel()),
             }
 
             evaluation = segi_subprocess(
