@@ -50,14 +50,10 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         self.perform_wait()
 
         self.send_driver_state(DriverState.READY)
-        while True:
-            command = self.receive_driver_downward()
-            if command == "stop":
-                raise DriverStop
-            else:
-                assert command == "request"
-                break
+
         command = self.receive_driver_downward()
+        if command == "stop":
+            raise DriverStop
         if command == "call":
             method_name = self.receive_driver_downward()
             return CallRequestSignature(command, method_name)

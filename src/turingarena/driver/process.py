@@ -11,7 +11,7 @@ from turingarena.driver.proxy import MethodProxy
 
 class ProcessSection:
     @contextmanager
-    def _run(self, process, *, time_limit):
+    def _run(self, process, *, time_limit=None):
         self.info_before = process._latest_resource_usage
         yield self
         self.info_after = process._latest_resource_usage
@@ -19,7 +19,7 @@ class ProcessSection:
         if time_limit is not None and self.time_usage > time_limit:
             raise TimeLimitExceeded(
                 self,
-                f"Time limit exceeded: {self.time_usage} {time_limit}",
+                f"Time limit exceeded: {self.time_usage} > {time_limit}",
             )
 
     @property
@@ -60,6 +60,11 @@ class Process(ProcessSection):
         raise exc_type(self, message)
 
     @contextmanager
+    def _send_request(self):
+        yield
+        self._wait_ready()
+
+    @contextmanager
     def run(self, **kwargs):
         self._wait_ready()
         assert self._latest_resource_usage is not None
@@ -79,33 +84,29 @@ class Process(ProcessSection):
         self._latest_resource_usage = resource_usage
 
     def _do_call(self, request):
-        self._send_next_request()
-        for line in self._call_lines(request):
-            self._send_request_line(line)
+        with self._send_request():
+            for line in self._call_lines(request):
+                self._send_request_line(line)
 
-        self._accept_callbacks(request.callbacks)
+            self._accept_callbacks(request.callbacks)
 
-        if request.has_return_value:
-            logging.debug(f"Receiving return value...")
-            return_value = self._get_response_value()
-        else:
-            return_value = None
-
-        self._wait_ready()
-
-        return return_value
+            if request.has_return_value:
+                logging.debug(f"Receiving return value...")
+                return self._get_response_value()
+            else:
+                return None
 
     def exit(self):
-        self._send_next_request()
-        self._send_request_line("exit")
+        with self._send_request():
+            self._send_request_line("exit")
 
     def stop(self):
-        self._send_request_line("stop")
-        self._wait_ready()
+        with self._send_request():
+            self._send_request_line("stop")
 
     def checkpoint(self):
-        self._send_next_request()
-        self._send_request_line("checkpoint")
+        with self._send_request():
+            self._send_request_line("checkpoint")
 
     def _accept_callbacks(self, callback_list):
         while True:
@@ -127,14 +128,13 @@ class Process(ProcessSection):
                 self._raise_error()
 
     def _on_callback_return(self, return_value):
-        self._send_next_request()
-        self._send_request_line("callback_return")
-        if return_value is not None:
-            self._send_request_line(1)
-            self._send_request_line(int(return_value))
-        else:
-            self._send_request_line(0)
-        self._wait_ready()
+        with self._send_request():
+            self._send_request_line("callback_return")
+            if return_value is not None:
+                self._send_request_line(1)
+                self._send_request_line(int(return_value))
+            else:
+                self._send_request_line(0)
 
     def _get_response_line(self):
         self._connection.downward.flush()
@@ -171,9 +171,6 @@ class Process(ProcessSection):
         yield len(request.callbacks)
         for c in request.callbacks:
             yield c.__code__.co_argcount
-
-    def _send_next_request(self):
-        self._send_request_line("request")
 
     def _send_request_line(self, line):
         logging.debug(f"sending request downward to driver: {line}")
