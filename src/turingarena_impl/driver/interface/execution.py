@@ -94,9 +94,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         line = self.sandbox_connection.upward.readline().strip()
         logger.debug(f"receive upward from process -> {line!r}")
 
-        if not timer.is_alive():
-            raise CommunicationError(f"process stopped sending data (timeout: {UPWARD_TIMEOUT}s)")
         timer.cancel()
+        timer.join()
 
         if not line:
             raise CommunicationError(f"upward pipe closed")
