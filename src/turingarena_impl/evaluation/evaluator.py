@@ -7,7 +7,6 @@ from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
 from turingarena_impl.evaluation.segi import segi_subprocess
-from turingarena_impl.evaluation.turingarena_tools import run_metaservers
 
 
 class Evaluator(namedtuple("Evaluator", ["cwd"])):
@@ -20,15 +19,13 @@ class Evaluator(namedtuple("Evaluator", ["cwd"])):
 
     def evaluate(self, files, seed=None):
         with ExitStack() as stack:
-            env = stack.enter_context(run_metaservers())
             tmp_dir = stack.enter_context(TemporaryDirectory())
             self._compile(tmp_dir)
 
             if seed is None:
-                seed = random.randrange(2**31)
+                seed = random.randrange(2 ** 31)
 
             env = {
-                **env,
                 "TEMPORARY_DIRECTORY": tmp_dir,
                 "TURINGARENA_SEED": str(seed),
             }

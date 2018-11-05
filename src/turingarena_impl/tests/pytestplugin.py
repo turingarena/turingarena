@@ -5,11 +5,9 @@ import re
 import pytest
 from _pytest.assertion.rewrite import rewrite_asserts
 from pytest import approx
-
-from turingarena_impl.evaluation.evaluator import Evaluator
-from turingarena_impl.evaluation.turingarena_tools import run_metaservers
-from turingarena_impl.evaluation.events import EvaluationEventType
 from turingarena_impl.driver.language import Language
+from turingarena_impl.evaluation.evaluator import Evaluator
+from turingarena_impl.evaluation.events import EvaluationEventType
 
 
 class EvaluationAssertionError(Exception):
@@ -102,9 +100,3 @@ def pytest_collect_file(path, parent):
         evaluator_path=evaluator_path,
         source_path=path,
     )
-
-
-@pytest.fixture(scope="session", autouse=True)
-def turingarena_metaservers():
-    with run_metaservers():
-        yield
