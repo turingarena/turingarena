@@ -10,7 +10,6 @@ from turingarena_cli.info import InfoCommand
 from turingarena_cli.new import NewCommand
 from turingarena_cli.remote import RemoteExecCommand
 # in python2.7, quote is in pipes and not in shlex
-from turingarena_cli.test import TestCommand
 from turingarena_cli.search import SearchCommand
 
 try:
@@ -38,11 +37,6 @@ subparsers.add_parser(
     "info",
     parents=[InfoCommand.PARSER],
     help=InfoCommand.PARSER.description,
-)
-subparsers.add_parser(
-    "test",
-    parents=[TestCommand.PARSER],
-    help=TestCommand.PARSER.description,
 )
 subparsers.add_parser(
     "new",

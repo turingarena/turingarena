@@ -6,7 +6,7 @@ from turingarena_impl.cli_server.pack import create_working_directory
 from turingarena_impl.evaluation.evaluator import Evaluator
 
 
-def evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecutionParameters.DEFAULT, reset_env=False):
+def cloud_evaluate(evaluate_request: EvaluateRequest, local_execution=LocalExecutionParameters.DEFAULT, reset_env=False):
     with TemporaryDirectory() as temp_dir:
         files = {}
         for name, submission_file in evaluate_request.submission.items():

@@ -54,8 +54,3 @@ FileCatCommandParameters = namedtuple("FileCatCommandParameters", [
 InfoCommandParameters = namedtuple("InfoCommandParameters", [
     "what",
 ])
-
-TestCommandParameters = namedtuple("TestCommandParameters", [
-    "pytest_arguments",
-    "working_directory",
-])

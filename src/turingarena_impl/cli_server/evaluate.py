@@ -4,7 +4,7 @@ from contextlib import ExitStack
 
 from turingarena_common.commands import LocalExecutionParameters, EvaluateCommandParameters
 
-from turingarena_impl.evaluation.evaluate import evaluate
+from turingarena_impl.evaluation.evaluate import cloud_evaluate
 
 
 def evaluate_cmd(parameters: EvaluateCommandParameters, local_execution: LocalExecutionParameters):
@@ -19,7 +19,7 @@ def evaluate_cmd(parameters: EvaluateCommandParameters, local_execution: LocalEx
             ))
             output = jq.stdin
 
-        for event in evaluate(
+        for event in cloud_evaluate(
                 parameters.evaluate_request,
                 local_execution=local_execution,
         ):
