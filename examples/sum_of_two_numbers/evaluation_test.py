@@ -8,22 +8,23 @@ def test_correct_solution():
         assert p.functions.sum(3, 5) == 8
 
 
-def test_evaluation():
-    evaluation_events = list(
-        Evaluator(".").evaluate({"source": "solutions/correct.cpp"})
+def evaluate(path):
+    return list(
+        Evaluator(".").evaluate({"source": path})
     )
+
+
+def test_evaluation():
+    evaluation_events = evaluate("solutions/correct.cpp")
     for line in evaluation_text(evaluation_events).splitlines():
-        if not line:
-            continue
         assert "correct" in line
     goals = evaluation_goals(evaluation_events)
     assert goals["correct"]
 
 
 def test_evaluation_wrong():
-    for line in evaluation_text(
-            Evaluator(".").evaluate({"source": "solutions/always_wrong.py"})
-    ).splitlines():
-        if not line:
-            continue
+    evaluation_events = evaluate("solutions/always_wrong.py")
+    for line in evaluation_text(evaluation_events).splitlines():
         assert "WRONG" in line
+    goals = evaluation_goals(evaluation_events)
+    assert not goals["correct"]

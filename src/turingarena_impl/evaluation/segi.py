@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import secrets
 import selectors
@@ -71,20 +72,23 @@ def process_segi_output(fd, data_begin, data_end):
 
 
 def generate_events(parts, data_begin, data_end):
-    pending_newlines = []
+    newline_event = EvaluationEvent(EvaluationEventType.TEXT, "\n")
+    pending_newline = False
     for part in parts:
-        if pending_newlines and part == data_begin:
+        if pending_newline and part == data_begin:
             assert next(parts) == b"\n"
             yield from parse_data_events(parts, data_end)
+            pending_newline = False
         else:
-            yield from pending_newlines
-            pending_newlines = []
-            event = EvaluationEvent(EvaluationEventType.TEXT, part.decode())
+            if pending_newline:
+                yield newline_event
+            pending_newline = False
             if part == b"\n":
-                pending_newlines = [event]
+                pending_newline = True
             else:
-                yield event
-    yield from pending_newlines
+                yield EvaluationEvent(EvaluationEventType.TEXT, part.decode())
+    if pending_newline:
+        yield newline_event
 
 
 def collect_joinable_parts(parts):
@@ -183,6 +187,6 @@ def test_get_lines():
             echo E
         done
         echo last text
-    """]) as fd:
+    """], {}) as fd:
         for event in process_segi_output(fd, b"B", b"E"):
             print(event)
