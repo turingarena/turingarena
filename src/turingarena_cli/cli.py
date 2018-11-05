@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
 
+from turingarena_cli.version import VERSION
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
@@ -22,6 +23,7 @@ except ImportError:
     argcomplete = None
 
 PARSER = ArgumentParser()
+PARSER.add_argument("--version", action="version", version=VERSION)
 
 subparsers = PARSER.add_subparsers(dest="command", metavar="COMMAND")
 subparsers.required = True

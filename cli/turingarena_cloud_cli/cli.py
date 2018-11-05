@@ -2,6 +2,7 @@ import os
 
 from argparse import ArgumentParser
 
+from .version import VERSION
 from .common import init_logger
 from .search import SearchCommand
 from .submit import SubmitCommand
@@ -15,6 +16,7 @@ except ImportError:
     argcomplete = None
 
 PARSER = ArgumentParser()
+PARSER.add_argument("--version", action="version", version=VERSION)
 
 subparsers = PARSER.add_subparsers(dest="command", metavar="COMMAND")
 subparsers.required = True
@@ -52,7 +54,3 @@ def main():
 
     command = args.Command(args=args, cwd=os.curdir)
     command.run()
-
-
-if __name__ == '__main__':
-    main()
