@@ -70,13 +70,12 @@ class GetCommand(CloudCommand):
         response = requests.get(url)
         if response.status_code != 200:
             raise CloudServerError("Cannot get file {}".format(url))
-        with open(self._problem._json_files_path, "w") as f:
-            print(response.text, file=f)
+        return response.text
 
     def _download_problem_data(self):
         request_id = self._generate_files_request()
         url = self._get_file_request(request_id)
-        self._download_json_file(url)
+        return self._download_json_file(url)
 
     def _create_directories(self):
         try:
@@ -84,16 +83,12 @@ class GetCommand(CloudCommand):
         except FileExistsError:
             print("Cannot create problem directory {}: file exists!".format(self._problem_directory), file=sys.stderr)
             exit(1)
-        os.mkdir(self._problem._internal_directory)
-
-    def _write_problem_parameters(self):
-        with open(os.path.join(self._problem._internal_directory, "problem.json"), "w") as f:
-            print(json.dumps(self._parameters), file=f)
 
     def run(self):
         self.check_repository_exists()
         self._create_directories()
-        self._write_problem_parameters()
+        json_problem = json.dumps(self._parameters)
         with print_message("We are getting the problem from the Cloud..."):
-            self._download_problem_data()
+            json_files = self._download_problem_data()
+        self._problem.from_json(json_problem, json_files)
         self._extract_all_files()

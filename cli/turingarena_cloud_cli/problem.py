@@ -8,6 +8,13 @@ class Problem:
     def __init__(self, problem_directory):
         self._problem_directory = problem_directory
 
+    def from_json(self, problem_json, files_json):
+        os.mkdir(self._internal_directory)
+        with open(self._json_problem_path, "w") as f:
+            f.write(problem_json)
+        with open(self._json_files_path, "w") as f:
+            f.write(files_json)
+
     @property
     def _internal_directory(self):
         return os.path.join(self._problem_directory, ".turingarena")
