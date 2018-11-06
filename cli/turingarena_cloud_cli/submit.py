@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 from argparse import ArgumentParser
@@ -19,6 +20,9 @@ class SubmitCommand(CloudCommand):
     PARSER.add_argument("file", help="file to submit")
 
     def run(self):
+        if not self.repository_exists:
+            print("Error: repository {} does not exists!".format(self.args.repository), file=sys.stderr)
+            exit(1)
         print("Evaluating... may take a couple of seconds", file=sys.stderr)
         for event in self._evaluation_events():
             if self.args.raw_output:
@@ -33,7 +37,7 @@ class SubmitCommand(CloudCommand):
         with open(filename) as f:
             content = f.read()
         return {
-            "submission[source]": (filename, content)
+            "submission[source]": (os.path.basename(filename), content)
         }
 
     def _evaluation_events(self):
