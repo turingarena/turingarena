@@ -3,8 +3,8 @@ from __future__ import print_function
 import os
 from argparse import ArgumentParser
 
-from turingarena_cli.command import Command
-from turingarena_cli.base import BASE_PARSER
+from turingarena.cli.command import Command
+from turingarena.cli.base import BASE_PARSER
 
 evaluator_template = """\
 import turingarena as ta

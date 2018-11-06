@@ -7,9 +7,9 @@ import time
 from argparse import ArgumentParser
 
 import requests
-from turingarena_cli.base import BASE_PARSER
-from turingarena_cli.command import Command
-from turingarena_cli.evaluate import SubmissionCommand, EvaluateCommand
+from turingarena.cli.base import BASE_PARSER
+from turingarena.cli.command import Command
+from turingarena.cli.evaluate import SubmissionCommand, EvaluateCommand
 
 from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
 

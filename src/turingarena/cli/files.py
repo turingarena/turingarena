@@ -1,8 +1,8 @@
 import sys
 from argparse import ArgumentParser
 
-from turingarena_cli.base import BASE_PARSER
-from turingarena_cli.command import Command
+from turingarena.cli.base import BASE_PARSER
+from turingarena.cli.command import Command
 from turingarena.file.generated import PackGeneratedDirectory
 
 

@@ -5,8 +5,8 @@ import sys
 from argparse import ArgumentParser
 
 import requests
-from turingarena_cli.base import BASE_PARSER
-from turingarena_cli.command import Command
+from turingarena.cli.base import BASE_PARSER
+from turingarena.cli.command import Command
 
 GITHUB_SEARCH_ENDPOINT = "https://api.github.com/search/repositories"
 

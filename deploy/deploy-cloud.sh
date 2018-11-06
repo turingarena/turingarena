@@ -34,7 +34,6 @@ cd /src/cloud/
 npm install
 
 ln -s /src/src/turingarena
-ln -s /src/src/turingarena_cli
 ln -s /src/src/turingarena_common
 
 serverless deploy --stage $SERVERLESS_STAGE
