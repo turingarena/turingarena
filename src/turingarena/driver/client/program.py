@@ -5,8 +5,8 @@ import threading
 from collections import namedtuple
 from contextlib import ExitStack, contextmanager
 
-from turingarena.driver.client.exceptions import InterfaceExit
 from turingarena.driver.client.connection import DriverProcessConnection
+from turingarena.driver.client.exceptions import InterfaceExit
 from turingarena.driver.client.process import Process
 
 
@@ -69,12 +69,12 @@ class Program(namedtuple("Program", [
             )
 
     @contextmanager
-    def run(self, time_limit=None):
+    def run(self, **kwargs):
         with ExitStack() as stack:
             driver_connection = stack.enter_context(self._run_server_in_thread())
 
             process = Process(driver_connection)
-            with process.run(time_limit=time_limit):
+            with process._run(**kwargs):
                 try:
                     yield process
                 except InterfaceExit:

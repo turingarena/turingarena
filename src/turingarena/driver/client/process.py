@@ -3,7 +3,7 @@ import math
 from collections.__init__ import namedtuple
 from contextlib import contextmanager
 
-from turingarena import AlgorithmRuntimeError, AlgorithmLogicError
+from turingarena import AlgorithmRuntimeError, AlgorithmLogicError, MemoryLimitExceeded
 from turingarena.driver.client.commands import DriverState, serialize_data
 from turingarena.driver.client.exceptions import TimeLimitExceeded
 from turingarena.driver.client.processinfo import SandboxProcessInfo
@@ -37,9 +37,11 @@ class Process:
         self._running_sections = set()
 
     @contextmanager
-    def section(self, time_limit=None):
+    def section(self, time_limit=None, memory_limit=None):
         if time_limit is None:
             time_limit = math.inf
+        if memory_limit is None:
+            memory_limit = math.inf
 
         section = ProcessSection()
 
@@ -58,6 +60,12 @@ class Process:
             section.time_usage <= time_limit,
             f"time usage: {section.time_usage:.6f}s > {time_limit:.6f}s",
             exc_type=TimeLimitExceeded,
+        )
+
+        self.check(
+            section.peak_memory_usage <= memory_limit,
+            f"peak memory usage: {section.peak_memory_usage / 1024} kB > {memory_limit / 1024} kB",
+            exc_type=MemoryLimitExceeded,
         )
 
     def call(self, method_name, *args, has_return_value, callbacks=None):
@@ -80,7 +88,7 @@ class Process:
         raise exc_type(message, process=self)
 
     @contextmanager
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         self._wait_ready()
         assert self._latest_resource_usage is not None
         with self.section(**kwargs) as main_section:
@@ -98,6 +106,13 @@ class Process:
     @property
     def time_usage(self):
         return self._main_section.time_usage
+
+    def limit_memory(self, memory_limit):
+        self.check(
+            self.current_memory_usage <= memory_limit,
+            f"current memory usage: {self.current_memory_usage / 1024} kB > {memory_limit / 1024} kB",
+            exc_type=MemoryLimitExceeded,
+        )
 
     def _on_resource_usage(self):
         time_usage = float(self._get_response_line())
