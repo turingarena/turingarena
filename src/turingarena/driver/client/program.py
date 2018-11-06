@@ -71,7 +71,7 @@ class Program(namedtuple("Program", [
     @contextmanager
     def run(self, time_limit=None):
         with ExitStack() as stack:
-            driver_connection = stack.enter_context(self._run_server_in_thread())
+            driver_connection = stack.enter_context(self._run_server_in_process())
 
             process = Process(driver_connection)
             with process.run(time_limit=time_limit):

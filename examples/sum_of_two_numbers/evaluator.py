@@ -16,7 +16,13 @@ for _ in range(10):
         else:
             print("  WRONG!", end="")
             ta.goals["correct"] = False
-        print(f" ({int(process.time_usage * 1000000)} us)")
+        print(
+            f" ("
+            f"time: {int(process.time_usage * 1000000)} us, "
+            f"memory: {process.current_memory_usage}, "
+            f"peak: {process.peak_memory_usage})"
+            f")"
+        )
     except ta.AlgorithmError as e:
         print(f" {e}")
         ta.goals["correct"] = False

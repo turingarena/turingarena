@@ -26,8 +26,9 @@ class FailedProcessManager(ProcessManager):
 
     def _do_get_status(self, kill_reason):
         return SandboxProcessInfo(
-            memory_usage=0,
             time_usage=0.0,
+            current_memory_usage=0,
+            peak_memory_usage=0,
             error=self.reason,
         )
 

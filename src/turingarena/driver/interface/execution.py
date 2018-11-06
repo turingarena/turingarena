@@ -47,7 +47,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return line
 
     def report_ready(self):
-        self.perform_wait()
+        self.send_resource_usage_upward()
         self.send_driver_state(DriverState.READY)
 
     def next_request(self):
@@ -60,16 +60,20 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             return RequestSignature(command)
 
-    def perform_wait(self):
+    def send_resource_usage_upward(self):
         info = self.process.get_status()
         self.send_driver_state(DriverState.RESOURCE_USAGE)
         self.send_driver_upward(info.time_usage)
-        self.send_driver_upward(info.memory_usage)
+        self.send_driver_upward(info.peak_memory_usage)
+        self.send_driver_upward(info.current_memory_usage)
         return info
 
     def _on_timeout(self):
-        logging.info(f"process communication timeout expired")
-        self.process.get_status(kill_reason="timeout expired")
+        try:
+            logging.info(f"process communication timeout expired")
+            self.process.get_status(kill_reason="timeout expired")
+        except:
+            logging.exception(f"exception while killing for timeout")
 
     @contextmanager
     def _check_downward_pipe(self):

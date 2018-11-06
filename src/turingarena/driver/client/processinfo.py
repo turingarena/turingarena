@@ -1,7 +1,8 @@
 from collections import namedtuple
 
 SandboxProcessInfo = namedtuple("SandboxProcessInfo", [
-    "memory_usage",
     "time_usage",
+    "peak_memory_usage",
+    "current_memory_usage",
     "error",
 ])

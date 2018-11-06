@@ -64,19 +64,48 @@ class PopenProcessManager(ProcessManager):
             return f"interrupted by signal {signal_number} - {signal_explaination}"
         assert False, "This should not be reached"
 
+    def _read_proc_stat(self):
+        with open(f"/proc/{self.os_process.pid}/stat") as f:
+            line = f.read()
+
+        pid, line = line.split(maxsplit=1)
+
+        # safely strip cmd fields:
+        # see https://gitlab.com/procps-ng/procps/blob/b3b7a35050e29317fa66be4535aeaf83acbdc946/proc/readproc.c#L606
+        lookup = ") "
+        lookup_index = line.rindex(lookup) + len(lookup)
+        cmd = line[:lookup_index]
+
+        line = line[lookup_index:]
+        return [pid, cmd, *line.split()]
+
     def _wait_for_interruptible(self):
         timeout = 0.5
         trials = 10
         for trial in range(trials):
-            with open(f"/proc/{self.os_process.pid}/stat") as f:
-                stat = f.read()
-            status = stat.split()[2]
-            logging.debug(f"ProcessManager status: {status}")
+            status = self._read_proc_stat()[2]
+            logging.error(f"ProcessManager status: {status}")
             if status in ("S", "Z"):
                 break
             time.sleep(timeout / trials)
         else:
             logging.debug(f"ProcessManager did not reach interruptible state in {timeout} s")
+
+    def _read_stat_resource_usage(self):
+        fields = self._read_proc_stat()
+        # see man 5 proc
+        rss = int(fields[23]) * os.sysconf("SC_PAGE_SIZE")
+
+        return rss
+
+    def _reset_maxrss(self):
+        os.system(f"echo 5 > /proc/{self.os_process.pid}/clear_refs")
+
+        # fd = os.open(f"/proc/{self.os_process.pid}/clear_refs", os.O_WRONLY)
+        # try:
+        #    os.write(fd, b"5")
+        # finally:
+        #    os.close(fd)
 
     def _do_get_status(self, kill_reason):
         """
@@ -119,8 +148,16 @@ class PopenProcessManager(ProcessManager):
         else:
             error = termination_message
 
+        maxrss = rusage.ru_maxrss * 1024
+
+        if running:
+            rss = self._read_stat_resource_usage()
+        else:
+            rss = 0
+
         info = SandboxProcessInfo(
-            memory_usage=rusage.ru_maxrss * 1024,
+            peak_memory_usage=maxrss,
+            current_memory_usage=rss,
             time_usage=rusage.ru_utime,
             error=error,
         )

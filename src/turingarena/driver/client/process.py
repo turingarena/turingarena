@@ -11,26 +11,20 @@ from turingarena.driver.client.proxy import MethodProxy
 
 
 class ProcessSection:
-    @contextmanager
-    def _run(self, process, *, time_limit=None):
-        self.info_before = process._latest_resource_usage
-        yield self
-        self.info_after = process._latest_resource_usage
-
-        if time_limit is None:
-            time_limit = math.inf
-        process.check(
-            self.time_usage <= time_limit,
-            f"time usage: {self.time_usage:.6f}s > {time_limit:.6f}s",
-            exc_type=TimeLimitExceeded,
-        )
+    def __init__(self):
+        self._time_usage = None
+        self._peak_memory_usage = 0
 
     @property
     def time_usage(self):
-        return self.info_after.time_usage - self.info_before.time_usage
+        return self._time_usage
+
+    @property
+    def peak_memory_usage(self):
+        return self._peak_memory_usage
 
 
-class Process(ProcessSection):
+class Process:
     def __init__(self, connection):
         self._connection = connection
 
@@ -39,9 +33,32 @@ class Process(ProcessSection):
 
         self._latest_resource_usage = None
 
-    def section(self, **kwargs):
+        self._main_section = ProcessSection()
+        self._running_sections = set()
+
+    @contextmanager
+    def section(self, time_limit=None):
+        if time_limit is None:
+            time_limit = math.inf
+
         section = ProcessSection()
-        return section._run(self, **kwargs)
+
+        self._running_sections.add(section)
+
+        time_usage_before = self._latest_resource_usage.time_usage
+        try:
+            yield section
+        finally:
+            self._running_sections.remove(section)
+        time_usage_after = self._latest_resource_usage.time_usage
+
+        section._time_usage = time_usage_after - time_usage_before
+
+        self.check(
+            section.time_usage <= time_limit,
+            f"time usage: {section.time_usage:.6f}s > {time_limit:.6f}s",
+            exc_type=TimeLimitExceeded,
+        )
 
     def call(self, method_name, *args, has_return_value, callbacks=None):
         if callbacks is None:
@@ -66,20 +83,43 @@ class Process(ProcessSection):
     def run(self, **kwargs):
         self._wait_ready()
         assert self._latest_resource_usage is not None
-        with self._run(self, **kwargs) as section:
-            yield section
+        with self.section(**kwargs) as main_section:
+            self._main_section = main_section
+            yield self
+
+    @property
+    def current_memory_usage(self):
+        return self._latest_resource_usage.current_memory_usage
+
+    @property
+    def peak_memory_usage(self):
+        return self._main_section.peak_memory_usage
+
+    @property
+    def time_usage(self):
+        return self._main_section.time_usage
 
     def _on_resource_usage(self):
         time_usage = float(self._get_response_line())
-        memory_usage = int(self._get_response_line())
+        peak_memory_usage = int(self._get_response_line())
+        current_memory_usage = int(self._get_response_line())
 
         resource_usage = SandboxProcessInfo(
             time_usage=time_usage,
-            memory_usage=memory_usage,
+            peak_memory_usage=peak_memory_usage,
+            current_memory_usage=current_memory_usage,
             error=None,
         )
+
         logging.debug(f"got resource usage: {resource_usage}")
+
         self._latest_resource_usage = resource_usage
+
+        for section in self._running_sections:
+            section._peak_memory_usage = max(
+                section._peak_memory_usage,
+                resource_usage.peak_memory_usage
+            )
 
     def _do_call(self, request):
         for line in self._call_lines(request):
