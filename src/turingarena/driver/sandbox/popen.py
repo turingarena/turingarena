@@ -84,7 +84,7 @@ class PopenProcessManager(ProcessManager):
         trials = 10
         for trial in range(trials):
             status = self._read_proc_stat()[2]
-            logging.error(f"ProcessManager status: {status}")
+            logging.debug(f"ProcessManager status: {status}")
             if status in ("S", "Z"):
                 break
             time.sleep(timeout / trials)
@@ -99,13 +99,11 @@ class PopenProcessManager(ProcessManager):
         return rss
 
     def _reset_maxrss(self):
-        os.system(f"echo 5 > /proc/{self.os_process.pid}/clear_refs")
-
-        # fd = os.open(f"/proc/{self.os_process.pid}/clear_refs", os.O_WRONLY)
-        # try:
-        #    os.write(fd, b"5")
-        # finally:
-        #    os.close(fd)
+        fd = os.open(f"/proc/{self.os_process.pid}/clear_refs", os.O_WRONLY)
+        try:
+            os.write(fd, b"5")
+        finally:
+            os.close(fd)
 
     def _do_get_status(self, kill_reason):
         """
@@ -138,6 +136,8 @@ class PopenProcessManager(ProcessManager):
         # then, use wait to get rusage struct (see man getrusage(2))
         _, exit_status, rusage = os.wait4(self.os_process.pid, os.WUNTRACED)
 
+        maxrss = rusage.ru_maxrss * 1024
+
         termination_message = self._get_process_termination_message(exit_status)
         running = termination_message is None
 
@@ -148,9 +148,8 @@ class PopenProcessManager(ProcessManager):
         else:
             error = termination_message
 
-        maxrss = rusage.ru_maxrss * 1024
-
         if running:
+            self._reset_maxrss()
             rss = self._read_stat_resource_usage()
         else:
             rss = 0
