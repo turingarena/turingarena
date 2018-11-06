@@ -1,7 +1,11 @@
 import os
 from argparse import ArgumentParser
 
-from turingarena_cli.version import VERSION
+try:
+    from turingarena_cli.version import VERSION
+except ImportError:
+    VERSION = "UNKNOWN"
+
 from turingarena_cli.base import BASE_PARSER
 from turingarena_cli.cloud import CloudCommand
 from turingarena_cli.common import init_logger
