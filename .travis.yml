@@ -53,5 +53,5 @@ jobs:
         - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/deploy-cloud.sh
         - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-dev.sh
         - if [ "$TRAVIS_BRANCH" == 'cli-stable' ] ;
-          then docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-cli.sh
+          then docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-cli.sh ;
           fi
