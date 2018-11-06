@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 import requests
 
+from .common import print_message
 from .base import BASE_PARSER
 from .command import Command
 
@@ -18,12 +19,9 @@ class SearchCommand(Command):
     PARSER.add_argument("query", nargs="*")
 
     def run(self):
-        print("Searching...", end="", flush=True)
-
-        response = requests.get("{}?q=topic:turingarena+{}".format(GITHUB_SEARCH_ENDPOINT, "+".join(self.args.query)))
-        response_json = response.json()
-
-        print("\b" * 12, end="", flush=True)
+        with print_message("Searching..."):
+            response = requests.get("{}?q=topic:turingarena+{}".format(GITHUB_SEARCH_ENDPOINT, "+".join(self.args.query)))
+            response_json = response.json()
 
         print("{}{} result{} found{}".format(
             response_json["total_count"],

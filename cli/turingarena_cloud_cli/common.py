@@ -1,4 +1,12 @@
 import logging
+from contextlib import contextmanager
+
+
+@contextmanager
+def print_message(message):
+    print(message, flush=True, end="")
+    yield
+    print(" \b\b" * len(message), flush=True, end="")
 
 
 def init_logger(level="info"):
