@@ -34,7 +34,6 @@ functions:
         - "**"
       include:
         - "turingarena/**"
-        - "turingarena_common/**"
     handler: turingarena.api.lambda_proxy.main
     events:
       - http: ANY /{proxy+}
