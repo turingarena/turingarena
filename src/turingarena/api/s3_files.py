@@ -4,7 +4,7 @@ import secrets
 from io import StringIO
 
 import boto3
-from turingarena_common.commands import WorkingDirectory
+from turingarena.api.commands import WorkingDirectory
 from turingarena.api.git_manager import create_working_directory
 from turingarena.file.generated import PackGeneratedDirectory
 

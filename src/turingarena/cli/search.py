@@ -1,10 +1,8 @@
-from __future__ import print_function, division
-
-import logging
 import sys
 from argparse import ArgumentParser
 
 import requests
+
 from turingarena.cli.base import BASE_PARSER
 from turingarena.cli.command import Command
 
@@ -25,9 +23,9 @@ class SearchCommand(Command):
         sys.stdout.flush()
 
         res = requests.get(GITHUB_SEARCH_ENDPOINT
-                              + "?q="
-                              + "topic:turingarena+"
-                              + "+".join(self.args.query)).json()
+                           + "?q="
+                           + "topic:turingarena+"
+                           + "+".join(self.args.query)).json()
 
         sys.stdout.write("\b" * 12)
 

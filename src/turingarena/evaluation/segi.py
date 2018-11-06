@@ -7,7 +7,7 @@ import subprocess
 import time
 from contextlib import ExitStack, contextmanager
 
-from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
+from turingarena.evaluation.events import EvaluationEvent, EvaluationEventType
 
 
 def submission_environ(submission_fields):

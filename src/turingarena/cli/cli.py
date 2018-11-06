@@ -1,24 +1,14 @@
 import os
 from argparse import ArgumentParser
 
-try:
-    from turingarena.cli.version import VERSION
-except ImportError:
-    VERSION = "UNKNOWN"
-
 from turingarena.cli.base import BASE_PARSER
 from turingarena.cli.cloud import CloudCommand
 from turingarena.cli.common import init_logger
 from turingarena.cli.evaluate import EvaluateCommand
 from turingarena.cli.files import FileCommand
 from turingarena.cli.new import NewCommand
-# in python2.7, quote is in pipes and not in shlex
 from turingarena.cli.search import SearchCommand
-
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
+from turingarena.version import VERSION
 
 # PYTHON_ARGCOMPLETE_OK
 try:

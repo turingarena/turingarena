@@ -1,17 +1,15 @@
-from __future__ import print_function, division
-
-import os
 import logging
+import os
 import sys
 import time
 from argparse import ArgumentParser
 
 import requests
+
 from turingarena.cli.base import BASE_PARSER
 from turingarena.cli.command import Command
-from turingarena.cli.evaluate import SubmissionCommand, EvaluateCommand
-
-from turingarena_common.evaluation_events import EvaluationEvent, EvaluationEventType
+from turingarena.cli.evaluate import EvaluateCommand
+from turingarena.evaluation.events import EvaluationEvent, EvaluationEventType
 
 TURINGARENA_DEFAULT_ENDPOINT = "https://api.turingarena.org"
 
@@ -199,4 +197,3 @@ subparsers.add_parser(
     parents=[CloudPullCommand.PARSER],
     help=CloudPullCommand.PARSER.description,
 ).set_defaults(Command=CloudPullCommand)
-

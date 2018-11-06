@@ -4,8 +4,8 @@ import secrets
 from http import HTTPStatus
 from urllib.request import urlopen
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
-from turingarena_common.submission import SubmissionFile
+from turingarena.api.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
+from turingarena.evaluation.submission import SubmissionFile
 
 from turingarena.api.common import ProxyError
 from turingarena.api.dynamodb_events import load_event_page

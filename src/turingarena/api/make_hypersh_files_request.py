@@ -1,7 +1,7 @@
 import pickle
 import sys
 
-from turingarena_common.commands import WorkingDirectory, Pack, GitRepository
+from turingarena.api.commands import WorkingDirectory, Pack, GitRepository
 from turingarena.api.request import CloudGenerateFileRequest
 
 pickle.dump(CloudGenerateFileRequest(

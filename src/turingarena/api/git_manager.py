@@ -7,10 +7,19 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import GitRepository, WorkingDirectory
-from turingarena_common.git_common import GIT_BASE_ENV
+from turingarena.api.commands import GitRepository, WorkingDirectory
 
 logger = logging.getLogger(__name__)
+
+GIT_AUTHOR_NAME = "TuringArena"
+GIT_AUTHOR_EMAIL = "contact@turingarena.org"
+
+GIT_BASE_ENV = {
+    "GIT_AUTHOR_NAME": GIT_AUTHOR_NAME,
+    "GIT_AUTHOR_EMAIL": GIT_AUTHOR_EMAIL,
+    "GIT_COMMITTER_NAME": GIT_AUTHOR_NAME,
+    "GIT_COMMITTER_EMAIL": GIT_AUTHOR_EMAIL,
+}
 
 GITHUB_REPO_PATTERN = re.compile("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 

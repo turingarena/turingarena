@@ -1,4 +1,4 @@
-from turingarena_common.evaluation_events import EvaluationEventType
+from turingarena.evaluation.events import EvaluationEventType
 
 
 def evaluation_text(evaluation_events):

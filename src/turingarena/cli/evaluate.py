@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from functools import lru_cache
 
 from turingarena.cli.command import Command
-from turingarena_common.evaluation_events import EvaluationEventType
-from turingarena_common.submission import SubmissionFile
+from turingarena.evaluation.events import EvaluationEventType
+from turingarena.evaluation.submission import SubmissionFile
 from turingarena.evaluation.evaluator import Evaluator
 
 

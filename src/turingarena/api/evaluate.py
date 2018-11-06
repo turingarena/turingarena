@@ -1,7 +1,7 @@
 import os
 from tempfile import TemporaryDirectory
 
-from turingarena_common.commands import EvaluateRequest
+from turingarena.api.commands import EvaluateRequest
 from turingarena.api.git_manager import create_working_directory
 from turingarena.evaluation.evaluator import Evaluator
 
