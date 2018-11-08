@@ -48,13 +48,19 @@ class UserDatabase(Database):
 
     def get_by_username(self, username: str) -> Optional[User]:
         with self.cursor as cursor:
-            cursor.execute("SELECT id, first_name, last_name, username, email, privilege FROM _user WHERE username = %s", (username,))
+            cursor.execute(
+                "SELECT id, first_name, last_name, username, email, privilege FROM _user WHERE username = %s",
+                (username,)
+            )
             result = cursor.fetchone()
         return User(*result) if result else None
 
     def get_by_id(self, id: int) -> Optional[User]:
         with self.cursor as cursor:
-            cursor.execute("SELECT id, first_name, last_name, username, email, privilege FROM _user WHERE id = %s", (id,))
+            cursor.execute(
+                "SELECT id, first_name, last_name, username, email, privilege FROM _user WHERE id = %s",
+                (id,)
+            )
             result = cursor.fetchone()
         return User(*result) if result else None
 
@@ -127,6 +133,15 @@ class SubmissionDatabase(Database):
             """, (problem_id, user_id, filename, path))
             if cursor.rowcount == 1:
                 return cursor.fetchone()[0]
+            return None
+
+    def get_by_id(self, submission_id):
+        with self.cursor as cursor:
+            cursor.execute(
+                "SELECT * FROM submission WHERE id = %s", (submission_id,)
+            )
+            if cursor.rowcount == 1:
+                return Submission(*cursor.fetchone())
             return None
 
 

@@ -9,6 +9,7 @@ from flask import Blueprint, render_template, abort, redirect, url_for, request,
 from turingarena.file.generated import PackGeneratedDirectory
 
 from turingarena_web.database import ProblemDatabase, UserDatabase, SubmissionDatabase, UserPrivilege
+from turingarena_web.evaluate import evaluate
 from turingarena_web.submission import submitted_file_path
 from turingarena_web.user import get_current_user
 
@@ -102,9 +103,8 @@ def problem_view(name):
             filename=submitted_file.filename,
             path=path,
         )
-        from .evaluate import evaluate
-
-        threading.Thread(target=evaluate).start()
+        submission = submission_db.get_by_id(submission_id)
+        threading.Thread(target=evaluate, args=(problem, submission)).start()
 
         assert submission_id is not None
         return redirect(url_for("submission.submission_view", id=submission_id))

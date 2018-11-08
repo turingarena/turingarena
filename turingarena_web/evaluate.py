@@ -1,12 +1,12 @@
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.submission import SubmissionFile
 
-from turingarena_web.database import Submission, Problem, EvaluationEventDatabase
+from turingarena_web.database import Problem, EvaluationEventDatabase
 
 ee_database = EvaluationEventDatabase()
 
 
-def evaluate(problem: Problem, submission: Submission):
+def evaluate(problem: Problem, submission):
     evaluator = Evaluator(problem.path)
     with open(submission.path) as f:
         content = f.read()
