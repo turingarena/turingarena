@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <div id="statement">
+        <h3>Statement</h3>
+        {{ statement | safe }}
+    </div>
+    <hr>
+    <div id="submission">
+        <h3>Submit your solution</h3>
+        <a href={{ url_for("problem.files", name=name) }}>Download problem files</a>
+        <form method="post">
+            <label>File to submit<input type="file" name="source"></label>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <hr>
+    <div id="submissions">
+        <h3>Your previous submissions</h3>
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Goals</th>
+                <th>Download</th>
+            </tr>
+            {% for submission in submissions %}
+                <tr>
+                    <td>submission.date</td>
+                    <td>submission.goals</td>
+                    <td><a href="/submissions/{{ submission.id }}/{{ submission.filename }}">{{ submission.filename }}</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

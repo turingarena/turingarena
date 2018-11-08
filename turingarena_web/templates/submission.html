@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }} submission</title>
+</head>
+<body>
+    <h1>Submission to problem {{ title }}</h1>
+    <div id="evaluation_output">
+        <h3>Evaluation output</h3>
+        <code>{{ evaluation_output }}</code>
+    </div>
+    <hr>
+    <div id="goals">
+        <h3>Your goals</h3>
+        <table>
+            {% for goal in goals %}
+                <tr>
+                    <td>{{ goal.name }}</td>
+                    <td>{% if goal.acquired %} 👌 {% else %} ☹️ {% endif %}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

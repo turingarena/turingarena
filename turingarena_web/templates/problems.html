@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+    <title>TuringArena problems available</title>
+</head>
+<body>
+    <h1>TuringArena problems available</h1>
+    <div id="problems">
+        <h2>Problems available</h2>
+        <ul>
+            {% for problem in problems %}
+                <li><a href="/problem/{{ problem.name }}">{{ problem.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
