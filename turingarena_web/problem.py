@@ -104,7 +104,7 @@ def problem_view(name):
             path=path,
         )
         submission = submission_db.get_by_id(submission_id)
-        threading.Thread(target=evaluate, args=(problem, submission)).start()
+        threading.Thread(target=evaluate, args=(problem, submission, current_app._get_current_object())).start()
 
         assert submission_id is not None
         return redirect(url_for("submission.submission_view", id=submission_id))

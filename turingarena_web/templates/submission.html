@@ -8,7 +8,11 @@
     <h1>Submission to problem {{ title }}</h1>
     <div id="evaluation_output">
         <h3>Evaluation output</h3>
-        <code>{{ evaluation_output }}</code>
+        <pre>
+            {% for event in events -%}
+                {{ event.data | safe }}
+            {% endfor %}
+        </pre>
     </div>
     <hr>
     <div id="goals">

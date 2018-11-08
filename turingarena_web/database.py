@@ -23,7 +23,8 @@ class Database:
         connection = psycopg2.connect(
             dbname=current_app.config["DB_NAME"],
             user=current_app.config["DB_USER"],
-            password=current_app.config["DB_PASS"]
+            password=current_app.config["DB_PASS"],
+            host=current_app.config["DB_HOST"],
         )
         yield connection
         connection.commit()
@@ -153,7 +154,7 @@ class EvaluationEventDatabase(Database):
 
     def get_all(self, submission_id: int) -> List[EvaluationEvent]:
         with self.cursor as cursor:
-            cursor.execute("SELECT * FROM evaluation_event WHERE submission_id = %s", (submission_id,))
+            cursor.execute("SELECT * FROM evaluation_event WHERE submission_id = %s ORDER BY serial", (submission_id,))
             return [
                 EvaluationEvent(*row)
                 for row in cursor

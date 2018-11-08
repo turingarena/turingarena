@@ -20,7 +20,7 @@ CREATE TABLE problem(
   name     VARCHAR(100)    UNIQUE NOT NULL CHECK (LENGTH(name) > 0),
   title    VARCHAR(100)           NOT NULL CHECK (LENGTH(title) > 0),
   location VARCHAR(100)           NOT NULL CHECK (LENGTH(location) > 0),
-  path     VARCHAR(100)           NOT NULL CHECK (LENGTH(path) > 0)
+  path     VARCHAR(200)           NOT NULL CHECK (LENGTH(path) > 0)
 );
 
 CREATE TABLE submission(

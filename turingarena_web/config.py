@@ -8,11 +8,12 @@ SECRET_KEY = "ciao"
 
 # database credentials
 DB_NAME = "turingarena"
-DB_USER = "ale"
-DB_PASS = "ale96"
+DB_USER = "turingarena"
+DB_PASS = "turingarena"
+DB_HOST = "localhost"
 
 # where to put problem files
-PROBLEM_DIR_PATH = "/home/ale/turingarena_web/problem/{name}"
+PROBLEM_DIR_PATH = "/home/ale/tweb/problem/{name}"
 
 # where to save submission for problems
-SUBMITTED_FILE_PATH = "/home/ale/turingarena_web/submission/{username}/{problem_name}/{timestamp}_{filename}"
+SUBMITTED_FILE_PATH = "/home/ale/tweb/submission/{username}/{problem_name}/{timestamp}_{filename}"
