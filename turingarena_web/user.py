@@ -1,11 +1,18 @@
 import re
+from typing import Optional
 
 from flask import Blueprint, request, render_template, session, redirect, url_for
 
-from turingarena_web.database import UserDatabase
+from turingarena_web.database import UserDatabase, User
 
 user = Blueprint("user", __name__)
 user_db = UserDatabase()
+
+
+def get_current_user() -> Optional[User]:
+    if "username" not in session:
+        return None
+    return user_db.get_by_username(session["username"])
 
 
 @user.route("/")
@@ -38,7 +45,7 @@ def login():
 def logout():
     if "username" in session:
         del session["username"]
-    redirect(url_for("/"))
+    return redirect(url_for("root.home"))
 
 
 @user.route("/register", methods=("GET", "POST"))

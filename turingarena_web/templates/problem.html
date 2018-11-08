@@ -13,7 +13,7 @@
     <div id="submission">
         <h3>Submit your solution</h3>
         <a href={{ url_for("problem.files", name=name) }}>Download problem files</a>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <label>File to submit<input type="file" name="source"></label>
             <button type="submit">Submit</button>
         </form>

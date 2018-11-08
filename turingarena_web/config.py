@@ -12,4 +12,7 @@ DB_USER = "ale"
 DB_PASS = "ale96"
 
 # where to put problem files
-PROBLEMS_DIR = "/home/ale/turingarena_web/problems"
+PROBLEM_DIR_PATH = "/home/ale/turingarena_web/problem/{name}"
+
+# where to save submission for problems
+SUBMITTED_FILE_PATH = "/home/ale/turingarena_web/submission/{username}/{problem_name}/{timestamp}_{filename}"

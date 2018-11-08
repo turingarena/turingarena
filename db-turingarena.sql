@@ -16,19 +16,20 @@ CREATE TABLE _user(
 );
 
 CREATE TABLE problem(
-    id              SERIAL          PRIMARY KEY, 
-    name            VARCHAR(100)    UNIQUE NOT NULL CHECK (LENGTH(name) > 0),
-    title           VARCHAR(100)    NOT NULL CHECK (LENGTH(title) > 0),
-    location        VARCHAR(100)    NOT NULL CHECK (LENGTH(location) > 0)
+  id       SERIAL          PRIMARY KEY,
+  name     VARCHAR(100)    UNIQUE NOT NULL CHECK (LENGTH(name) > 0),
+  title    VARCHAR(100)           NOT NULL CHECK (LENGTH(title) > 0),
+  location VARCHAR(100)           NOT NULL CHECK (LENGTH(location) > 0),
+  path     VARCHAR(100)           NOT NULL CHECK (LENGTH(path) > 0)
 );
 
 CREATE TABLE submission(
-    id              SERIAL          PRIMARY KEY,
-    problem_id      INTEGER         NOT NULL REFERENCES problem(id),
-    user_id         INTEGER         NOT NULL REFERENCES _user(id),
-    time            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    filename        VARCHAR(100)    NOT NULL CHECK (LENGTH(filename) > 0),
-    content         TEXT            NOT NULL
+  id         SERIAL          PRIMARY KEY,
+  problem_id INTEGER      NOT NULL REFERENCES problem(id),
+  user_id    INTEGER      NOT NULL REFERENCES _user(id),
+  timestamp  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  filename   VARCHAR(100) NOT NULL CHECK (LENGTH(filename) > 0),
+  path       VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE goal(
