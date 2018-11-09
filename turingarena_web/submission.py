@@ -14,11 +14,11 @@ def submitted_file_path(*, problem_name, username, timestamp, filename):
     )
 
 
-@submission.route('/<id>')
-def submission_view(id):
+@submission.route('/<submission_id>')
+def submission_view(submission_id):
     events = [
         event
-        for event in ee_database.get_all(id)
+        for event in ee_database.get_all(submission_id)
         if event.data != "\n"
     ]
     return render_template('submission.html', events=events)
