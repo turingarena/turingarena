@@ -5,7 +5,7 @@ from datetime import datetime
 from commonmark import commonmark
 from flask import Blueprint, render_template, abort, redirect, url_for, request, current_app, send_from_directory
 
-from turingarena_web.database import ProblemDatabase, UserDatabase, SubmissionDatabase, UserPrivilege
+from turingarena_web.database import ProblemDatabase, UserDatabase, SubmissionDatabase
 from turingarena_web.evaluate import evaluate
 from turingarena_web.submission import submitted_file_path
 from turingarena_web.user import get_current_user
@@ -14,12 +14,6 @@ problem_bp = Blueprint("problem", __name__)
 problem_db = ProblemDatabase()
 submission_db = SubmissionDatabase()
 user_db = UserDatabase()
-
-
-@problem_bp.route("/")
-def problems_view():
-    problems = problem_db.get_all()
-    return render_template("problems.html", problems=problems)
 
 
 @problem_bp.route("/<name>", methods=("GET", "POST"))
@@ -54,7 +48,7 @@ def problem_view(name):
         threading.Thread(target=evaluate, args=(problem, submission, current_app._get_current_object())).start()
 
         assert submission_id is not None
-        return redirect(url_for("submission.submission_view", id=submission_id))
+        return redirect(url_for("submission.submission_view", submission_id=submission_id))
 
     statement_file = os.path.join(problem.path, ".generated", "statement.md")
     statement = ""

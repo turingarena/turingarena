@@ -2,12 +2,15 @@ import os
 
 from flask import Blueprint, render_template, send_from_directory, current_app
 
+from turingarena_web.admin import problem_db
+
 root = Blueprint('root', __name__)
 
 
-@root.route('/')
-def home():
-    return render_template('home.html')
+@root.route("/")
+def problems_view():
+    problems = problem_db.get_all()
+    return render_template("problems.html", problems=problems)
 
 
 @root.route('/favicon.ico')

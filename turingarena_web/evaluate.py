@@ -13,4 +13,4 @@ def evaluate(problem: Problem, submission, app):
         )
 
         for event in evaluator.evaluate(files=submission_files):
-            ee_database.insert(submission_id=submission.id, type=event.type.value.upper(), data=str(event.payload))
+            ee_database.insert(submission_id=submission.id, e_type=event.type.value.upper(), data=str(event.payload))

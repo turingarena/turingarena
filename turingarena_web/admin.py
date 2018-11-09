@@ -12,6 +12,7 @@ admin_bp = Blueprint("admin", __name__)
 
 problem_db = ProblemDatabase()
 
+
 def git_clone(url, directory):
     logging.debug(f"git clone {url} -> {directory}")
     subprocess.call(["git", "clone", url, directory])
