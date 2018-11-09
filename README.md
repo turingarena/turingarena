@@ -27,41 +27,31 @@ Here is how to use TuringArena on your local machine to develop and test challen
 
 TuringArena is currently supported *only on Linux*.
 To use TuringArena on a local machine, the following tools are needed:
+- `python3.6` or newer
+- `pip`
+- `gcc and g++` for compiling C/C++ submissions
+- `libseccomp-dev` used for the submission sandbox
+- `jq` used to format json output
 
-- **Python** and **pip**
-([how to install](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)),
-used to install and run the CLI client
-- **Docker CE** 
-([how to install](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce)),
-used to run the CLI server
-- **Git** ([how to install](https://git-scm.com/download/linux)),
-used internally to send data to and from the CLI server.
+To install all of these dependencies on Ubuntu 18.04:
+```bash
+sudo apt install python3.6 python3-pip build-essential jq libseccomp-dev 
+```
 
 ### Install / Upgrade
 
-Install / upgrade the CLI client:
+To install / upgrade the latest version of TuringArena from pip:
 ```bash
-sudo pip3 install -U turingarena-cli
+sudo pip3 install -U turingarena-dev
 ```
 
-Install / upgrade the server (Docker image):
+If you want to install TuringArena from this repository (for development)
 ```bash
-sudo docker pull turingarena/turingarena
+cd src/
+python3 setup.py develop
 ```
 
 ### Usage
-
-To start the server, run:
-```bash
-turingarena daemon start --sudo --detach
-```
-
-To stop the server, run:
-```bash
-turingarena daemon stop --sudo
-```
-
-At the moment, to work on a challenge, the code must be placed in a (local) Git repository.
 
 To evaluate a solution, `cd` in the directory of the problem and run:
 ```bash
