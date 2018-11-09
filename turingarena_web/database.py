@@ -56,11 +56,11 @@ class UserDatabase(Database):
             result = cursor.fetchone()
         return User(*result) if result else None
 
-    def get_by_id(self, id: int) -> Optional[User]:
+    def get_by_id(self, user_id: int) -> Optional[User]:
         with self.cursor as cursor:
             cursor.execute(
                 "SELECT id, first_name, last_name, username, email, privilege FROM _user WHERE id = %s",
-                (id,)
+                (user_id,)
             )
             result = cursor.fetchone()
         return User(*result) if result else None
@@ -147,10 +147,10 @@ class SubmissionDatabase(Database):
 
 
 class EvaluationEventDatabase(Database):
-    def insert(self, *, submission_id, type, data):
+    def insert(self, *, submission_id, e_type, data):
         with self.cursor as cursor:
             cursor.execute("INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s)",
-                           (submission_id, type, data))
+                           (submission_id, e_type, data))
 
     def get_all(self, submission_id: int) -> List[EvaluationEvent]:
         with self.cursor as cursor:

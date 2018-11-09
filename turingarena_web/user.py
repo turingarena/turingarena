@@ -19,7 +19,7 @@ def get_current_user() -> Optional[User]:
 def user_():
     if "username" in session:
         return redirect(url_for("user.user_view", username=session["username"]))
-    return redirect("user.login")
+    return redirect(url_for("user.login"))
 
 
 @user.route("/<username>")

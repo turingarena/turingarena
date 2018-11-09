@@ -45,6 +45,7 @@ def install_problem(name, problem_url, title=None):
 
     problem_db.insert(name=name, title=title, location=problem_url, path=problem_dir(name))
 
+
 @admin_bp.route("/problems", methods=("GET", "POST"))
 def install():
     if request.method == "GET":

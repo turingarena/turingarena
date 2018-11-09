@@ -1,10 +1,6 @@
-<!doctype html>
-<html>
-<head>
-    <title>TuringArena problems available</title>
-</head>
-<body>
-    <h1>TuringArena problems available</h1>
+{% extends "base.html" %}
+{% set title = "TuringArena problems available" %}
+{% block body %}
     <div id="problems">
         <h2>Problems available</h2>
         <ul>
@@ -13,5 +9,4 @@
             {% endfor %}
         </ul>
     </div>
-</body>
-</html>
+{% endblock %}

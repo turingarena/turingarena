@@ -1,9 +1,6 @@
-<!doctype html>
-<html>
-<head>
-    <title>TuringArena registration page</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% set title = "TuringArena registration page" %}
+{% block body %}
     <h1>TuringArena registration page</h1>
     <h3>Request here your credential to submit to TuringArena</h3>
     <form method="post">
@@ -15,5 +12,4 @@
         <label>Repeat password: <input type="password" name="password2"></label><br>
         <button type="submit">Login</button>
     </form>
-</body>
-</html>
+{% endblock %}

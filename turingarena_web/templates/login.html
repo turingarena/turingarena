@@ -1,13 +1,11 @@
-<!doctype html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="{{ url_for("static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
+{% extends "base.html" %}
+{% set title = "TuringArena sign in" %}
+{% block head %}
     <link href="{{ url_for("static", filename="css/login.css") }}" rel="stylesheet">
-    <title>TuringArena login page</title>
-</head>
-<body class="text-center">
+{% endblock %}
+{% block header %}{% endblock %}
+{% block body %}
+<div class="text-center">
     <form class="form-signin" method="post">
         <img class="mb-4" src="{{ url_for("static", filename="img/turingarena_logo.svg") }}" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
@@ -20,8 +18,8 @@
                 <input type="checkbox" value="remember-me"> Remember me
             </label>
         </div>
+        <p>{{ message }}</p>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
     </form>
-    <div>{{ message }}</div>
-</body>
-</html>
+</div>
+{% endblock %}

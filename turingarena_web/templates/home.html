@@ -1,24 +1,4 @@
-<!doctype html>
-<html>
-<head>
-    <title>TuringArena web interface</title>
-</head>
-<body>
-    <h1>TuringArena web interface</h1>
-    <div id="user_info">
-        {% if user is none %}
-            <a href="/user/login">LogIn</a>
-        {% else %}
-            {{ user }}
-        {% endif %}
-    </div>
-    <div id="problems">
-        <h2>Problems available</h2>
-        <ul>
-            {% for problem in problems %}
-                <a href="/problem/{{ problem.name }}">{{ problem.title }}</a>
-            {% endfor %}
-        </ul>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block body %}
+    <p>Welcome to TuringArena!</p>
+{% endblock %}
