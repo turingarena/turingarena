@@ -6,7 +6,8 @@ from functools import lru_cache
 from tempfile import TemporaryDirectory
 
 from turingarena import load_metadata
-from turingarena.evaluation.runner import evaluator_runner_by_extension, EvaluatorParameters
+from turingarena.evaluation.runner import EvaluatorParameters
+from turingarena.evaluation.runners import evaluator_runner_by_extension
 from turingarena.evaluation.segi import segi_subprocess
 
 

@@ -1,6 +1,5 @@
 import json
 import os
-import random
 import sys
 
 from turingarena.driver.client.exceptions import *
@@ -69,5 +68,3 @@ _scoring_metadata = load_metadata().get("scoring", {})
 _declared_goals = _scoring_metadata.get("goals", [])
 
 goals = Goals(on_assign_goal=evaluation.data, declared_goals=_declared_goals)
-
-random.seed(os.environ.get("TURINGARENA_SEED", None))
