@@ -5,8 +5,8 @@ from functools import lru_cache
 
 from turingarena.cli.command import Command
 from turingarena.evaluation.events import EvaluationEventType
-from turingarena.evaluation.submission import SubmissionFile
 from turingarena.evaluation.evaluator import Evaluator
+from turingarena.evaluation.submission import SubmissionFile
 
 
 class SubmissionCommand(Command):
@@ -71,8 +71,8 @@ class EvaluateCommand(SubmissionCommand):
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
     def _do_evaluate(self):
-        return Evaluator(".").evaluate(
-            files=self.submission,
+        return Evaluator().evaluate(
+            self.submission,
             seed=self.args.seed,
         )
 

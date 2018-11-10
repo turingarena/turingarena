@@ -18,5 +18,12 @@ def cloud_evaluate(evaluate_request: EvaluateRequest, reset_env=False):
             files[name] = path
 
         with create_working_directory(evaluate_request.working_directory) as work_dir:
-            cwd = os.path.join(work_dir, evaluate_request.working_directory.current_directory)
-            yield from Evaluator(cwd).evaluate(files=files, seed=evaluate_request.seed, reset_env=reset_env)
+            evaluator_dir = os.path.join(
+                work_dir,
+                evaluate_request.working_directory.current_directory,
+            )
+
+            yield from Evaluator(evaluator_dir, reset_env=reset_env).evaluate(
+                files,
+                seed=evaluate_request.seed,
+            )

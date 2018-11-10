@@ -9,9 +9,7 @@ def test_correct_solution():
 
 
 def evaluate(path):
-    return list(
-        Evaluator(".").evaluate({"source": path})
-    )
+    return list(Evaluator().evaluate({"source": path}))
 
 
 def test_evaluation():
