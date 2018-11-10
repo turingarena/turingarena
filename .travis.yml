@@ -32,7 +32,7 @@ jobs:
           docker build
           -t $DOCKER_DEPLOY_TAGGED_BASE_IMAGE
           .
-          -f deploy/base.docekrfile
+          -f deploy/base.dockerfile
         - docker push $DOCKER_DEPLOY_TAGGED_BASE_IMAGE
     - if: type == push
       script:
@@ -51,7 +51,9 @@ jobs:
             .
             -f deploy/main.dockerfile
         - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/deploy-cloud.sh
-        - docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-dev.sh
+        - if [ "$TRAVIS_BRANCH" == 'dev-stable' ] ;
+          then docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-dev.sh ;
+          fi
         - if [ "$TRAVIS_BRANCH" == 'cli-stable' ] ;
           then docker run --rm --env-file deploy/list.env deploy sh /src/deploy/publish-pip-cli.sh ;
           fi

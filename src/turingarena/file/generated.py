@@ -32,6 +32,7 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"]))
                     text_path = os.path.join(dirpath, file)
                     descriptions = TextParser(text_path).descriptions
                     yield (os.path.join(relpath, TEXT_FILENAMES[0]), self._create_text_generator(text_path))
+                    break
             if INTERFACE_TXT in filenames:
                 yield from self._generate_interface_targets(dirpath, relpath, descriptions)
 
