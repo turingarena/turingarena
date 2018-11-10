@@ -226,6 +226,7 @@ class MethodReturnNode(StatementIntermediateNode):
 class MethodCallCompletedNode(StatementIntermediateNode):
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
+            context.report_ready()
             context.send_driver_upward(0)  # no more callbacks
 
     def _describe_node(self):

@@ -162,6 +162,7 @@ class Process:
 
     def _accept_callbacks(self, callback_list):
         while True:
+            self._wait_ready()
             response = self._get_response_value()
             if response == 1:  # has callback
                 logging.debug(f"has callback")

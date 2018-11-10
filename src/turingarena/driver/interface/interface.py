@@ -6,6 +6,7 @@ from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.parser import parse_interface
+from turingarena.driver.interface.statements.io import CheckpointNode
 from turingarena.driver.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
