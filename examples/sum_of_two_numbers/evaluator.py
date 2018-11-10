@@ -1,6 +1,7 @@
 import random
 
 import turingarena as ta
+import turingarena.evallib.algorithm
 
 for _ in range(10):
     value_range = range(10 ** 3, 5 * 10 ** 3)
@@ -8,7 +9,7 @@ for _ in range(10):
 
     try:
         print(f"{a} + {b} -->", end="")
-        with ta.run_algorithm(ta.submission.source) as process:
+        with turingarena.evallib.algorithm.run_algorithm(ta.submission.source) as process:
             c = process.functions.sum(a, b)
         print(f" {c}", end="")
         if c == a + b:

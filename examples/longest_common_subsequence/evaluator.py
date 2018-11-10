@@ -1,4 +1,5 @@
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 
 def LCS_length(x, y):
@@ -57,8 +58,5 @@ try:
         correct = evaluate_test_case(n)
         outcomes = ["wrong", "correct"]
         print(f'test case N = {n} {outcomes[correct]}')
-        evaluation.data(dict(goals={
-            f"case {i} (N={n})": correct
-        }))
 except AlgorithmError:
     pass

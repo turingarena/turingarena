@@ -1,6 +1,7 @@
 import random
 
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 
 def solve(V):

@@ -3,7 +3,7 @@ from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
 from typing import Dict, Generator, Sequence
 
-from turingarena import Program
+from turingarena.driver.client.program import Program
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.interface import InterfaceDefinition
 from turingarena.driver.language import Language

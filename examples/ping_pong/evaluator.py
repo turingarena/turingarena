@@ -1,4 +1,5 @@
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 ponged = False
 try:
@@ -12,5 +13,3 @@ try:
         p.procedures.ping(callbacks=[pong])
 except AlgorithmError:
     pass
-
-evaluation.data(dict(goals=dict(ponged=ponged)))

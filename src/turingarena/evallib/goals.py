@@ -2,14 +2,19 @@ import logging
 import re
 from typing import MutableMapping
 
+from turingarena.evallib.evaluation import output_data
+from turingarena.evallib.metadata import load_metadata
+
 
 class Goals(MutableMapping):
     PATTERN = re.compile("[a-z][a-z0-9_]*")
 
-    def __init__(self, on_assign_goal, declared_goals):
+    def __init__(self):
         self._assigned_goals = {}
-        self._on_assign_goal = on_assign_goal
-        self._declared_goals = declared_goals
+
+    @property
+    def _declared_goals(self):
+        return load_metadata().get("scoring", {}).get("goals", [])
 
     def __getitem__(self, item):
         return self._assigned_goals[item]
@@ -19,7 +24,7 @@ class Goals(MutableMapping):
         assert self.PATTERN.match(key)
         assert value in (True, False)
         if key not in self._declared_goals:
-            logging.warning(f"goal '{key}' is not declared in turingarena.toml!\n" 
+            logging.warning(f"goal '{key}' is not declared in turingarena.toml!\n"
                             "This goal will not be registered by the web interface!")
         try:
             assert self._assigned_goals[key] == value, (
@@ -27,7 +32,7 @@ class Goals(MutableMapping):
             )
         except KeyError:
             self._assigned_goals[key] = value
-            self._on_assign_goal(dict(type="goal_result", goal=key, result=value))
+            output_data(dict(type="goal_result", goal=key, result=value))
 
     def __delitem__(self, key):
         raise NotImplementedError

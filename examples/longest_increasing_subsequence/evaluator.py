@@ -1,9 +1,12 @@
+import random
+
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 
 def run(algorithm, a):
     with run_algorithm(algorithm) as process:
-        process.procedures.compute(len(a) ,a)
+        process.procedures.compute(len(a), a)
         subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
     print(f"Time usage: {process.time_usage}", file=sys.stderr)
     return subsequence
@@ -49,15 +52,14 @@ def main():
                 print("Subsequence:", subsequence)
                 print("Optimal subsequence:", optimal_subsequence)
                 correct = (
-                    is_subsequence(subsequence, a) and
-                    is_increasing(subsequence) and
-                    len(subsequence) == len(optimal_subsequence)
+                        is_subsequence(subsequence, a) and
+                        is_increasing(subsequence) and
+                        len(subsequence) == len(optimal_subsequence)
                 )
                 print("Correct:", correct)
             if not correct:
                 for g in gs:
                     goals[g] = False
-    evaluation.data(dict(goals=goals))
 
 
 def optimal_subsequence_exponential(a):

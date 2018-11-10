@@ -1,4 +1,5 @@
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 n_moves = 10
 

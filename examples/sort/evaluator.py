@@ -1,4 +1,7 @@
+import random
+
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 all_passed = True
 for _ in range(10):
@@ -17,5 +20,3 @@ for _ in range(10):
     else:
         print("WRONG!")
         all_passed = False
-
-evaluation.data(dict(goals=dict(correct=all_passed)))

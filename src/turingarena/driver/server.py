@@ -3,10 +3,10 @@ import sys
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena import Program
 from turingarena.cli.common import init_logger
 from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
+from turingarena.driver.client.program import Program
 from turingarena.driver.interface.exceptions import CommunicationError, DriverStop
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.interface import InterfaceDefinition

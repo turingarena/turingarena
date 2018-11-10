@@ -1,10 +1,13 @@
+import random
+
 import networkx as nx
 
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 parts = (
-    [nx.complete_graph(10) for _ in range(3)] +
-    [nx.cycle_graph(10) for _ in range(3)]
+        [nx.complete_graph(10) for _ in range(3)] +
+        [nx.cycle_graph(10) for _ in range(3)]
 )
 
 graph = nx.disjoint_union_all(parts)
@@ -23,7 +26,7 @@ try:
     with run_algorithm(submission.source) as p:
         p.procedures.init(N, Q, D, adj)
 
-        #memory_usage = p.sandbox.get_info().memory_usage
+        # memory_usage = p.sandbox.get_info().memory_usage
 
         for t in range(Q):
             u = v = None
@@ -32,9 +35,6 @@ try:
 
             connected = bool(p.functions.is_there_a_path(u, v))
 
-            evaluation.data(dict(goals={
-                f"case {t}:": nx.has_path(graph, u, v) == connected
-            }))
             print(f"Nodes {u} {v} -> {connected}")
 except AlgorithmError:
     fail = True

@@ -1,6 +1,9 @@
+import random
+
 import networkx as nx
 
 from turingarena import *
+from turingarena.evallib.algorithm import run_algorithm
 
 N = 100  # number of nodes
 Q = 100  # number of queries
@@ -43,7 +46,3 @@ try:
             all_correct &= res == r
 except AlgorithmError:
     all_correct = False
-
-evaluation.data(dict(goals={
-    "correct": all_correct,
-}))

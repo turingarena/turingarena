@@ -1,11 +1,11 @@
 import logging
 import math
-from collections.__init__ import namedtuple
+from collections import namedtuple
 from contextlib import contextmanager
 
-from turingarena import AlgorithmRuntimeError, AlgorithmLogicError, MemoryLimitExceeded
 from turingarena.driver.client.commands import DriverState, serialize_data
-from turingarena.driver.client.exceptions import TimeLimitExceeded
+from turingarena.driver.client.exceptions import AlgorithmRuntimeError, AlgorithmLogicError, MemoryLimitExceeded, \
+    TimeLimitExceeded
 from turingarena.driver.client.processinfo import SandboxProcessInfo
 from turingarena.driver.client.proxy import MethodProxy
 

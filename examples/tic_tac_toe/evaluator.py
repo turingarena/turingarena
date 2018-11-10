@@ -1,7 +1,5 @@
-from turingarena import submission, run_algorithm, evaluation
-from turingarena.driver.client.exceptions import AlgorithmRuntimeError
-
-import random
+from turingarena import submission
+from turingarena.evallib.algorithm import run_algorithm
 
 EMPTY = 0
 PLAYER = 1
@@ -19,14 +17,14 @@ def print_grid(grid):
 def find_winner(grid):
     result = None
     grid = grid[0] + grid[1] + grid[2]
-    if grid[0]==grid[1] and grid[1]==grid[2] and grid[0]!=' ': result = grid[0]
-    if grid[3]==grid[4] and grid[4]==grid[5] and grid[3]!=' ': result = grid[3]
-    if grid[6]==grid[7] and grid[7]==grid[8] and grid[6]!=' ': result = grid[6]
-    if grid[0]==grid[3] and grid[3]==grid[6] and grid[0]!=' ': result = grid[0]
-    if grid[1]==grid[4] and grid[4]==grid[7] and grid[1]!=' ': result = grid[1]
-    if grid[2]==grid[5] and grid[5]==grid[8] and grid[2]!=' ': result = grid[2]
-    if grid[0]==grid[4] and grid[4]==grid[8] and grid[4]!=' ': result = grid[4]
-    if grid[6]==grid[4] and grid[4]==grid[2] and grid[4]!=' ': result = grid[4]
+    if grid[0] == grid[1] and grid[1] == grid[2] and grid[0] != ' ': result = grid[0]
+    if grid[3] == grid[4] and grid[4] == grid[5] and grid[3] != ' ': result = grid[3]
+    if grid[6] == grid[7] and grid[7] == grid[8] and grid[6] != ' ': result = grid[6]
+    if grid[0] == grid[3] and grid[3] == grid[6] and grid[0] != ' ': result = grid[0]
+    if grid[1] == grid[4] and grid[4] == grid[7] and grid[1] != ' ': result = grid[1]
+    if grid[2] == grid[5] and grid[5] == grid[8] and grid[2] != ' ': result = grid[2]
+    if grid[0] == grid[4] and grid[4] == grid[8] and grid[4] != ' ': result = grid[4]
+    if grid[6] == grid[4] and grid[4] == grid[2] and grid[4] != ' ': result = grid[4]
 
     # check if draw
     if result is None:
@@ -51,14 +49,15 @@ def play_round(player, symbol, grid):
                 new_grid[y][x] = OPPONENT
 
     placed = False
+
     def place(y, x):
         nonlocal placed
         if placed:
             raise RuntimeError("Invalid action: place called multiple times in the same round!")
-        placed = True 
-        grid[y][x] = symbol    
+        placed = True
+        grid[y][x] = symbol
 
-    player.procedures.play_move(new_grid, callbacks=[place])   
+    player.procedures.play_move(new_grid, callbacks=[place])
 
 
 def run_match(players):
@@ -74,7 +73,7 @@ def run_match(players):
             print_grid(grid)
             print()
             winner = find_winner(grid)
-            if winner: 
+            if winner:
                 break
 
     if winner == 'D':
@@ -84,6 +83,7 @@ def run_match(players):
         print(f"Player {symbols.index(winner) + 1} ({winner}) won!\n")
         return symbols.index(winner) + 1
 
+
 try:
     with open(submission.ngames) as f:
         ngames = int(f.read())
@@ -91,7 +91,7 @@ except KeyError:
     ngames = 1
 
 results = {
-    "player1": 0, 
+    "player1": 0,
     "player2": 0,
     "draws": 0,
 }
@@ -107,5 +107,3 @@ with run_algorithm(submission.player1) as p1, run_algorithm(submission.player2) 
             results["draws"] += 1
         else:
             results[f"player{result}"] += 1
-
-evaluation.data(dict(results=results))
