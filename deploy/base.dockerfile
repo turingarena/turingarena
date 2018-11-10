@@ -17,7 +17,7 @@ RUN true \
         neutrino \
         yarn \
         surge \
-    && pip3 install \
+    && pip3 install -U \
         setuptools \
         twine==1.11.0 \
         wheel \
