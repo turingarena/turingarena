@@ -5,6 +5,7 @@ from turingarena.driver.interface.block import Block, BlockNode
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
+from turingarena.driver.interface.nodes import RequestLookaheadNode
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.statements.io import CheckpointNode
 from turingarena.driver.interface.variables import Reference, Variable
@@ -51,7 +52,11 @@ class InterfaceDefinition:
 
     @property
     def main_node(self):
-        return BlockNode.from_nodes(self.main_block.flat_inner_nodes)
+        return BlockNode.from_nodes([
+            RequestLookaheadNode(),
+            CheckpointNode(),
+            *self.main_block.flat_inner_nodes,
+        ])
 
     @property
     def source_text(self):
@@ -81,10 +86,6 @@ class InterfaceDefinition:
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_node.node_description)
         logger.debug(f"Description: {description}")
-
-        ready_msg = context.receive_upward()
-        assert ready_msg == (0,)
-        context.report_ready()
 
         self.main_node.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()

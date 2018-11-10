@@ -89,7 +89,7 @@ class Process:
 
     @contextmanager
     def _run(self, **kwargs):
-        self._wait_ready()
+        self.checkpoint()
         assert self._latest_resource_usage is not None
         with self.section(**kwargs) as main_section:
             self._main_section = main_section
