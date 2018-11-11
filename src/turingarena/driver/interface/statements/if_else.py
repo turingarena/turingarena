@@ -44,11 +44,11 @@ class IfStatement(Statement, IntermediateNode):
         if self.else_body is not None:
             yield from self.else_body.validate()
 
-    def _needs_request_lookahead(self):
+    def _should_resolve(self):
         return not self.condition.is_status(ReferenceStatus.RESOLVED)
 
     def _get_intermediate_nodes(self):
-        if self._needs_request_lookahead():
+        if self._should_resolve():
             yield ResolveIfNode(self)
         yield self
 
