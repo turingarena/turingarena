@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from functools import partial
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
@@ -16,8 +17,17 @@ class AbstractBlock(SequenceNode):
         return tuple(self._generate_flat_inner_nodes())
 
     @abstractmethod
-    def _generate_flat_inner_nodes(self):
+    def _get_flat_children_builders(self):
         pass
+
+    def _generate_flat_inner_nodes(self):
+        inner_context = self.context._replace(main_block=False)
+        for b in self._get_flat_children_builders():
+            node = b(inner_context)
+            if not node.is_relevant:
+                continue
+            yield node
+            inner_context = inner_context.with_reference_actions(node.reference_actions)
 
     def validate(self):
         exited = False
@@ -71,13 +81,8 @@ class AbstractBlock(SequenceNode):
 class Block(AbstractBlock, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
-    def _generate_flat_inner_nodes(self):
-        inner_context = self.context._replace(main_block=False)
-        for s in self.ast.statements:
+    def _get_flat_children_builders(self):
+        for ast in self.ast.statements:
             from turingarena.driver.interface.statements.statements import statement_classes
-            for cls in statement_classes[s.statement_type]:
-                node = cls(s, inner_context)
-                if not node.is_relevant:
-                    continue
-                yield node
-                inner_context = inner_context.with_reference_actions(node.reference_actions)
+            for cls in statement_classes[ast.statement_type]:
+                yield partial(cls, ast)
