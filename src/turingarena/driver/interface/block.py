@@ -17,17 +17,8 @@ class AbstractBlock(SequenceNode):
         return tuple(self._generate_flat_inner_nodes())
 
     @abstractmethod
-    def _get_flat_children_builders(self):
-        pass
-
     def _generate_flat_inner_nodes(self):
-        inner_context = self.context._replace(main_block=False)
-        for b in self._get_flat_children_builders():
-            node = b(inner_context)
-            if not node.is_relevant:
-                continue
-            yield node
-            inner_context = inner_context.with_reference_actions(node.reference_actions)
+        pass
 
     def validate(self):
         exited = False
@@ -78,7 +69,24 @@ class AbstractBlock(SequenceNode):
             yield from self._indent_all(n.node_description)
 
 
-class Block(AbstractBlock, AbstractSyntaxNodeWrapper):
+class AbstractContextBlock(AbstractBlock):
+    __slots__ = []
+
+    def _generate_flat_inner_nodes(self):
+        inner_context = self.context._replace(main_block=False)
+        for b in self._get_flat_children_builders():
+            node = b(inner_context)
+            if not node.is_relevant:
+                continue
+            yield node
+            inner_context = inner_context.with_reference_actions(node.reference_actions)
+
+    @abstractmethod
+    def _get_flat_children_builders(self):
+        pass
+
+
+class Block(AbstractContextBlock, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     def _get_flat_children_builders(self):
