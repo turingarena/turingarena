@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 class LoopStatement(Statement, IntermediateNode):
     __slots__ = []
 
-    def _get_intermediate_nodes(self):
-        yield self
-
     def _driver_run(self, context):
         while True:
             result = self.body_node.driver_run(context)
@@ -55,9 +52,6 @@ class LoopStatement(Statement, IntermediateNode):
 
 class BreakStatement(Statement, IntermediateNode):
     __slots__ = []
-
-    def _get_intermediate_nodes(self):
-        yield self
 
     def _driver_run(self, context):
         return context.result()._replace(does_break=True)

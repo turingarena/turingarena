@@ -14,17 +14,30 @@ from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAct
 logger = logging.getLogger(__name__)
 
 
-class SwitchStatement(Statement, IntermediateNode):
+class SwitchStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
-    def _get_intermediate_nodes(self):
-        if self._should_resolve():
-            yield SwitchResolveNode(self)
-        # TODO: resolution node
-        yield self
+    @property
+    def cases(self):
+        return list(self._get_cases())
 
-    def _should_resolve(self):
-        return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
+    def _get_cases(self):
+        for case in self.ast.cases:
+            # FIXME: .with_reference_actions(<resolve node>.reference_actions)
+            yield CaseStatement(ast=case, context=self.context)
+
+    @property
+    def variable(self):
+        warnings.warn("use value", DeprecationWarning)
+        return self.value
+
+    @property
+    def value(self):
+        return Expression.compile(self.ast.value, self.context.expression())
+
+
+class SwitchStatement(SwitchStatementNode, Statement):
+    __slots__ = []
 
     def _get_declaration_directions(self):
         for c in self.cases:
@@ -43,28 +56,6 @@ class SwitchStatement(Statement, IntermediateNode):
                     return case.body_node.driver_run(context)
         raise InterfaceError(f"no case matches in switch")
 
-    @property
-    def cases(self):
-        return list(self._get_cases())
-
-    def _get_cases(self):
-        for case in self.ast.cases:
-            # FIXME: .with_reference_actions(<resolve node>.reference_actions)
-            yield CaseStatement(ast=case, context=self.context)
-
-    def _get_first_requests(self):
-        for c in self.cases:
-            yield from c.body.first_requests
-
-    @property
-    def variable(self):
-        warnings.warn("use value", DeprecationWarning)
-        return self.value
-
-    @property
-    def value(self):
-        return Expression.compile(self.ast.value, self.context.expression())
-
     def validate(self):
         yield from self.value.validate()
 
@@ -79,6 +70,10 @@ class SwitchStatement(Statement, IntermediateNode):
                     yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=self.ast.parseinfo)
                 labels.append(label)
             yield from case.validate()
+
+    def _get_first_requests(self):
+        for c in self.cases:
+            yield from c.body.first_requests
 
     def _describe_node(self):
         yield f"switch {self.value} "
@@ -119,18 +114,21 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
         yield from self.body.validate()
 
 
-class SwitchResolveNode(IntermediateNode):
+class SwitchResolveNode(SwitchStatementNode):
+    def _is_relevant(self):
+        return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
+
     def _get_reference_actions(self):
-        yield ReferenceAction(self.statement.value.reference, ReferenceStatus.RESOLVED)
+        yield ReferenceAction(self.value.reference, ReferenceStatus.RESOLVED)
 
     def _find_cases_expecting(self, request):
-        for c in self.statement.cases:
-            if request in c.body.first_requests:
+        for c in self.cases:
+            if request in c.body_node.first_requests:
                 yield c
 
     def _find_cases_expecting_no_request(self):
-        for c in self.statement.cases:
-            if None in c.body.first_requests:
+        for c in self.cases:
+            if None in c.body_node.first_requests:
                 yield c
 
     def _find_matching_cases(self, request):
@@ -148,10 +146,10 @@ class SwitchResolveNode(IntermediateNode):
         matching_cases = list(self._find_matching_cases(context.request_lookahead))
         [case] = matching_cases
         [label] = case.labels
-        yield self.statement.value.reference, label.value
+        yield self.value.reference, label.value
 
     def _needs_request_lookahead(self):
         return True
 
     def _describe_node(self):
-        yield f"resolve {self.statement}"
+        yield f"resolve {self}"
