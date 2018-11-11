@@ -18,6 +18,9 @@ DB_USER = "turingarena"
 DB_PASS = "turingarena"
 DB_HOST = "localhost"
 
+# allowed languages
+ALLOWED_LANGUAGES = ["python"]
+
 # where to put problem files
 PROBLEM_DIR_PATH = "/home/ale/tweb/problem/{name}"
 

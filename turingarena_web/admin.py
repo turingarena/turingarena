@@ -3,16 +3,17 @@ import os
 import subprocess
 
 from flask import Blueprint, current_app, request, render_template, abort, redirect, url_for
-from turingarena.metadata import load_metadata
+from turingarena.evallib.metadata import load_metadata
 from turingarena.file.generated import PackGeneratedDirectory
 
-from turingarena_web.database import database
+from turingarena_web.database import database, UserPrivilege
 from turingarena_web.user import get_current_user
 
 admin_bp = Blueprint("admin", __name__)
 
 
 def clone_from_git(url, directory):
+    os.mkdir(directory)
     logging.debug(f"git clone {url} -> {directory}")
     subprocess.call(["git", "clone", url, directory])
 
@@ -21,11 +22,13 @@ def generate_problem_files(problem_dir, name):
     files_dir = os.path.join(problem_dir, ".generated")
     os.mkdir(files_dir)
 
-    pd = PackGeneratedDirectory(problem_dir)
+    pd = PackGeneratedDirectory(problem_dir, allowed_languages=current_app.config.get("ALLOWED_LANGUAGES", None))
 
-    for filename, generator in pd.targets:
-        os.makedirs(os.path.split(filename)[0], exist_ok=True)
-        with open(os.path.join(files_dir, filename), "w") as file:
+    for path, generator in pd.targets:
+        directory = os.path.join(files_dir, os.path.split(path)[0])
+        filename = os.path.split(path)[1]
+        os.makedirs(directory, exist_ok=True)
+        with open(os.path.join(directory, filename), "w") as file:
             generator(file)
 
     files_zip = os.path.join(problem_dir, f"{name}.zip")
@@ -50,6 +53,11 @@ def install_problem(name, problem_url, title=None):
     goals = scoring_metadata.get("goals", [])
 
     database.insert_problem(name=name, title=title, location=problem_url, path=problem_dir, goals=goals)
+
+
+@admin_bp.route("/")
+def home():
+    return redirect(url_for("admin.installx"))
 
 
 @admin_bp.route("/problems", methods=("GET", "POST"))

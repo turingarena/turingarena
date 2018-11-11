@@ -1,3 +1,5 @@
+import sys
+
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType
 
@@ -11,7 +13,7 @@ def evaluate(problem: Problem, submission, app):
             source=submission.path
         )
 
-        for event in evaluator.evaluate(files=submission_files):
+        for event in evaluator.evaluate(files=submission_files, redirect_stderr=True):
             if event.type == EvaluationEventType.DATA:
                 data = event.payload
                 if "type" in data and data["type"] == "goal_result":
