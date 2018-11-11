@@ -157,10 +157,10 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
         yield
 
     def block_content(self, block):
-        for i, statement in enumerate(block.synthetic_statements):
+        for i, node in enumerate(block.flat_inner_nodes):
             if i > 0:
                 yield
-            yield from self.generate_statement(statement)
+            yield from self.generate_statement(node)
 
     def generate_statement(self, statement):
         if statement.comment is not None:

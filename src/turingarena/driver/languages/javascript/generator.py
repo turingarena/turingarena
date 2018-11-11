@@ -24,7 +24,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"function {build_callable_declarator(callback)}" + "{"
-        yield from self.block(callback.synthetic_body)
+        yield from self.block(callback.body)
         yield "}"
         yield
 

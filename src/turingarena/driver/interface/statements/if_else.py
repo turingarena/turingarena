@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -29,16 +29,6 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         else:
             return None
 
-    @property
-    def then_node(self):
-        return BlockNode.from_nodes(self.then_body.flat_inner_nodes)
-
-    @property
-    def else_node(self):
-        if self.else_body is None:
-            return None
-        return BlockNode.from_nodes(self.else_body.flat_inner_nodes)
-
     def validate(self):
         yield from self.condition.validate()
         yield from self.then_body.validate()
@@ -48,9 +38,9 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
 class IfStatement(AbstractIfNode, Statement):
     def _get_declaration_directions(self):
-        yield from self.then_node.declaration_directions
-        if self.else_node is not None:
-            yield from self.else_node.declaration_directions
+        yield from self.then_body.declaration_directions
+        if self.else_body is not None:
+            yield from self.else_body.declaration_directions
 
     def _get_first_requests(self):
         yield from self.then_body.first_requests
@@ -62,16 +52,16 @@ class IfStatement(AbstractIfNode, Statement):
     def _driver_run(self, context):
         condition_value = self.condition.evaluate(context.bindings)
         if condition_value:
-            return self.then_node.driver_run(context)
-        elif self.else_node is not None:
-            return self.else_node.driver_run(context)
+            return self.then_body.driver_run(context)
+        elif self.else_body is not None:
+            return self.else_body.driver_run(context)
 
     def _describe_node(self):
         yield f"if {self.condition}"
-        yield from self._indent_all(self.then_node.node_description)
-        if self.else_node is not None:
+        yield from self._indent_all(self.then_body.node_description)
+        if self.else_body is not None:
             yield "else"
-            yield from self._indent_all(self.else_node.node_description)
+            yield from self._indent_all(self.else_body.node_description)
 
 
 class ResolveIfNode(AbstractIfNode):
@@ -79,10 +69,10 @@ class ResolveIfNode(AbstractIfNode):
         return not self.condition.is_status(ReferenceStatus.RESOLVED)
 
     def _get_conditions_expecting(self, request):
-        if request in self.then_node.first_requests:
+        if request in self.then_body.first_requests:
             yield 1
         if self.else_body is not None:
-            if request in self.else_node.first_requests:
+            if request in self.else_body.first_requests:
                 yield 0
 
     def _get_conditions_expecting_no_request(self):

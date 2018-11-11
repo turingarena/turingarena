@@ -57,7 +57,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
-        yield from self.block(callback.synthetic_body)
+        yield from self.block(callback.body)
         yield "};"
 
     def generate_constant_declaration(self, name, value):

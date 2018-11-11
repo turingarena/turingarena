@@ -21,7 +21,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
     def callback_statement(self, callback_statement):
         yield from self.build_method_declaration(callback_statement.callback)
-        yield from self.block(callback_statement.callback.synthetic_body)
+        yield from self.block(callback_statement.callback.body)
 
     def main_statement(self, statement):
         yield
@@ -55,7 +55,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_callback(self, callback):
         params = ", ".join(parameter.name for parameter in callback.parameters)
         yield f"def _callback_{callback.name}({params}):"
-        yield from self.block(callback.synthetic_body)
+        yield from self.block(callback.body)
 
     def call_statement(self, call_statement):
         method_name = call_statement.method_name

@@ -79,7 +79,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
 
     def generate_callback(self, callback):
         yield  f'public {self.build_callback_signature(callback)}' " {"
-        yield from self.block(callback.synthetic_body)
+        yield from self.block(callback.body)
         yield "}"
         pass
 

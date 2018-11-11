@@ -2,7 +2,7 @@ import logging
 import warnings
 
 from turingarena.driver.client.exceptions import InterfaceError
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
@@ -41,19 +41,19 @@ class SwitchStatement(SwitchStatementNode, Statement):
 
     def _get_declaration_directions(self):
         for c in self.cases:
-            yield from c.body_node.declaration_directions
+            yield from c.body.declaration_directions
 
     def _get_reference_actions(self):
         for c in self.cases:
-            yield from c.body_node.reference_actions
+            yield from c.body.reference_actions
 
     def _driver_run(self, context):
         value = self.value.evaluate(context.bindings)
 
-        for case in self.cases:
-            for label in case.labels:
+        for c in self.cases:
+            for label in c.labels:
                 if value == label.value:
-                    return case.body_node.driver_run(context)
+                    return c.body.driver_run(context)
         raise InterfaceError(f"no case matches in switch")
 
     def validate(self):
@@ -83,7 +83,7 @@ class SwitchStatement(SwitchStatementNode, Statement):
     def _describe_case(self, case):
         labels = ", ".join(str(l.value) for l in case.labels)
         yield f"case {labels}"
-        yield from self._indent_all(case.body_node.node_description)
+        yield from self._indent_all(case.body.node_description)
 
 
 class CaseStatement(AbstractSyntaxNodeWrapper):
@@ -92,10 +92,6 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
     @property
     def body(self):
         return Block(ast=self.ast.body, context=self.context)
-
-    @property
-    def body_node(self):
-        return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     @property
     def labels(self):
@@ -123,12 +119,12 @@ class SwitchResolveNode(SwitchStatementNode):
 
     def _find_cases_expecting(self, request):
         for c in self.cases:
-            if request in c.body_node.first_requests:
+            if request in c.body.first_requests:
                 yield c
 
     def _find_cases_expecting_no_request(self):
         for c in self.cases:
-            if None in c.body_node.first_requests:
+            if None in c.body.first_requests:
                 yield c
 
     def _find_matching_cases(self, request):

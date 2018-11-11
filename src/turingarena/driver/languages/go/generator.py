@@ -62,7 +62,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"_callback_{callback.name} := func({params}) {return_value}" " {"
-        yield from self.block(callback.synthetic_body)
+        yield from self.block(callback.body)
         yield "}"
 
     def call_statement_body(self, call_statement):

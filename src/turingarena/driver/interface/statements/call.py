@@ -70,8 +70,7 @@ class CallStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             return CallbackImplementation(ast=callback.ast, context=StaticCallbackBlockContext(
                 local_context=self.context,
                 callback_index=index,
-            ), description=None
-                                          )
+            ), description=None)
 
 
 class CallStatement(Statement, CallStatementNode):
@@ -198,7 +197,7 @@ class MethodResolveArgumentsNode(CallStatementNode):
                 # TODO: else, check value is the one expected
 
     def _describe_node(self):
-        yield f"resolve arguments ({self})"
+        yield f"resolve arguments"
 
 
 class MethodReturnNode(CallStatementNode):
@@ -220,7 +219,7 @@ class MethodReturnNode(CallStatementNode):
             context.send_driver_upward(return_value)
 
     def _describe_node(self):
-        yield f"return ({self})"
+        yield f"return"
 
 
 class MethodCallCompletedNode(CallStatementNode):
@@ -260,7 +259,7 @@ class MethodCallbacksNode(CallStatementNode):
 
     def _get_declaration_directions(self):
         for callback in self.callbacks:
-            yield from callback.body_node.declaration_directions
+            yield from callback.body.declaration_directions
 
     def _can_be_grouped(self):
         return False
@@ -276,10 +275,10 @@ class MethodCallbacksNode(CallStatementNode):
                 break
 
     def _describe_node(self):
-        yield f"callbacks ({self})"
+        yield f"callbacks"
         for callback in self.callbacks:
             yield from self._indent_all(self._describe_callback(callback))
 
     def _describe_callback(self, callback):
         yield f"callback {callback.name}"
-        yield from self._indent_all(callback.body_node.node_description)
+        yield from self._indent_all(callback.body.node_description)

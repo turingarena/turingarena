@@ -3,7 +3,7 @@ from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena.driver.client.exceptions import InterfaceError
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block, AbstractBlock
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.exceptions import InterfaceExitReached
 from turingarena.driver.interface.execution import RequestSignature
@@ -16,6 +16,28 @@ from turingarena.driver.interface.variables import ReferenceAction, ReferenceSta
 logger = logging.getLogger(__name__)
 
 
+class CallbackBody(AbstractBlock):
+    def __init__(self, implementation):
+        self.implementation = implementation
+
+    def _generate_flat_inner_nodes(self):
+        yield CallbackCallNode(self.implementation)
+
+        callback_index = self.implementation.context.callback_index
+        yield SyntheticStatement("write", "requesting a callback", arguments=[
+            SyntheticExpression("int_literal", value=1),
+        ])
+        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
+        yield SyntheticStatement("write", comment, arguments=[
+            SyntheticExpression("int_literal", value=callback_index),
+        ])
+
+        yield from self.implementation.raw_body.flat_inner_nodes
+
+        if not self.implementation.has_return_value:
+            yield CallbackEndNode(callback=self.implementation)
+
+
 class CallbackImplementation(IntermediateNode, CallbackPrototype):
     __slots__ = []
 
@@ -24,7 +46,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         return SyntheticCallbackBody(self)
 
     @property
-    def body(self):
+    def raw_body(self):
         inner_context = self.context.local_context.with_reference_actions(
             ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
             for p in self.parameters
@@ -33,6 +55,10 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
             ast=self.ast.body if self.ast.body else self.default_body,
             context=inner_context,
         )
+
+    @property
+    def body(self):
+        return CallbackBody(self)
 
     @property
     def default_body(self):
@@ -55,25 +81,15 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def validate(self):
         yield from self.prototype.validate()
 
-    def _generate_inner_nodes(self):
-        yield CallbackCallNode(self)
-        yield from self.body.flat_inner_nodes
-        if not self.has_return_value:
-            yield CallbackEndNode(callback=self)
-
-    @property
-    def body_node(self):
-        return BlockNode.from_nodes(self._generate_inner_nodes())
-
     def _driver_run(self, context):
         assert context.phase is None
         context.report_ready()
         context.send_driver_upward(1)  # has callbacks
         context.send_driver_upward(self.context.callback_index)
-        self.body_node.driver_run(context)
+        self.body.driver_run(context)
 
     def _get_declaration_directions(self):
-        return self.body_node.declaration_directions
+        return self.body.declaration_directions
 
 
 class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["implementation"])):
@@ -93,9 +109,13 @@ class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["implementation
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback_implementation",
 ])):
+    def _get_variables_to_declare(self):
+        # parameters are already declared
+        return []
+
     def _get_reference_actions(self):
         for p in self.callback_implementation.parameters:
-            yield ReferenceAction(reference=p.reference, status=ReferenceStatus.DECLARED)
+            yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
 
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
@@ -172,7 +192,7 @@ class ReturnStatement(AbstractCallbackReturnNode, Statement):
         yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
 
     def _describe_node(self):
-        yield f"callback return {self}"
+        yield f"callback return"
 
 
 class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", ["callback"])):
@@ -180,7 +200,7 @@ class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", 
         return False
 
     def _describe_node(self):
-        yield f"callback end {self.callback}"
+        yield f"callback end"
 
 
 class ExitStatement(Statement, IntermediateNode):

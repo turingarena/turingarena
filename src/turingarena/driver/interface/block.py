@@ -1,20 +1,17 @@
 import logging
-from collections import namedtuple
+from abc import abstractmethod
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import SyntheticExpression
 from turingarena.driver.interface.seq import SequenceNode
-from turingarena.driver.interface.statements.io import InitialCheckpointNode
 from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement
 from turingarena.driver.interface.step import Step
 
 logger = logging.getLogger(__name__)
 
 
-class Block(AbstractSyntaxNodeWrapper):
-    __slots__ = []
-
+class AbstractBlock(SequenceNode):
     @property
     @memoize
     def statements(self):
@@ -30,19 +27,9 @@ class Block(AbstractSyntaxNodeWrapper):
     def flat_inner_nodes(self):
         return tuple(self._generate_flat_inner_nodes())
 
+    @abstractmethod
     def _generate_flat_inner_nodes(self):
-        if self.context.main_block:
-            yield InitialCheckpointNode()
-
-        inner_context = self.context._replace(main_block=False)
-        for s in self.ast.statements:
-            from turingarena.driver.interface.statements.statements import statement_classes
-            for cls in statement_classes[s.statement_type]:
-                node = cls(s, inner_context)
-                if not node.is_relevant:
-                    continue
-                yield node
-                inner_context = inner_context.with_reference_actions(node.reference_actions)
+        pass
 
     def validate(self):
         exited = False
@@ -70,13 +57,15 @@ class Block(AbstractSyntaxNodeWrapper):
         if self.context.main_block:
             yield SyntheticStatement("exit", "terminate", arguments=[])
 
+    @property
+    @memoize
+    def children(self):
+        return tuple(self._generate_children())
 
-class BlockNode(SequenceNode, namedtuple("BlockNode", ["children"])):
-    @staticmethod
-    def _group_nodes_by_direction(nodes):
+    def _generate_children(self):
         group = []
-        for node in nodes:
-            if node.can_be_grouped and len(BlockNode.group_directions(group + [node])) <= 1:
+        for node in self.flat_inner_nodes:
+            if node.can_be_grouped and len(self.group_directions(group + [node])) <= 1:
                 group.append(node)
                 continue
 
@@ -92,13 +81,8 @@ class BlockNode(SequenceNode, namedtuple("BlockNode", ["children"])):
         if group:
             yield Step(tuple(group))
 
-    @staticmethod
-    def group_directions(group):
+    def group_directions(self, group):
         return {d for n in group for d in n.declaration_directions}
-
-    @staticmethod
-    def from_nodes(nodes):
-        return BlockNode(tuple(BlockNode._group_nodes_by_direction(nodes)))
 
     def _driver_run(self, context):
         result = context.result()
@@ -110,3 +94,18 @@ class BlockNode(SequenceNode, namedtuple("BlockNode", ["children"])):
         yield "block"
         for n in self.children:
             yield from self._indent_all(n.node_description)
+
+
+class Block(AbstractBlock, AbstractSyntaxNodeWrapper):
+    __slots__ = []
+
+    def _generate_flat_inner_nodes(self):
+        inner_context = self.context._replace(main_block=False)
+        for s in self.ast.statements:
+            from turingarena.driver.interface.statements.statements import statement_classes
+            for cls in statement_classes[s.statement_type]:
+                node = cls(s, inner_context)
+                if not node.is_relevant:
+                    continue
+                yield node
+                inner_context = inner_context.with_reference_actions(node.reference_actions)

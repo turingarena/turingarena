@@ -123,6 +123,9 @@ class InitialCheckpointNode(AbstractCheckpointNode):
     def _get_comment(self):
         return "initial checkpoint"
 
+    def _describe_node(self):
+        yield "initial checkpoint"
+
 
 class CheckpointStatement(AbstractSyntaxNodeWrapper, AbstractCheckpointNode):
     __slots__ = []

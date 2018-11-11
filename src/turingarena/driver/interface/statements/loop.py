@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
@@ -13,7 +13,7 @@ class LoopStatement(Statement, IntermediateNode):
 
     def _driver_run(self, context):
         while True:
-            result = self.body_node.driver_run(context)
+            result = self.body.driver_run(context)
             logger.debug(f"request_lookahead: {result.request_lookahead}")
             context = context._replace(
                 request_lookahead=result.request_lookahead,
@@ -22,7 +22,7 @@ class LoopStatement(Statement, IntermediateNode):
                 return result
 
     def _get_declaration_directions(self):
-        return self.body_node.declaration_directions
+        return self.body.declaration_directions
 
     def _get_reference_actions(self):
         return []
@@ -34,10 +34,6 @@ class LoopStatement(Statement, IntermediateNode):
     def body(self):
         return Block(ast=self.ast.body, context=self.context.with_loop())
 
-    @property
-    def body_node(self):
-        return BlockNode.from_nodes(self.body.flat_inner_nodes)
-
     def _get_first_requests(self):
         yield from self.body.first_requests
         yield None
@@ -47,7 +43,7 @@ class LoopStatement(Statement, IntermediateNode):
 
     def _describe_node(self):
         yield "loop"
-        yield from self._indent_all(self.body_node.node_description)
+        yield from self._indent_all(self.body.node_description)
 
 
 class BreakStatement(Statement, IntermediateNode):

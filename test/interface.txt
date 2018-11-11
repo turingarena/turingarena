@@ -1,14 +1,17 @@
-                function f1();
-                function f2();
+            function f(n, a[]);
+            function g(i);
 
-                main {
-                    read condition;
-
-                    if condition {
-                        call res = f1();
-                        write res;
-                    } else {
-                        call res = f2();
-                        write res;
-                    }
+            main {
+                read n;
+                for i to n {
+                    read a[i];
                 }
+
+                call r = f(n, a);
+                write r;
+
+                for i to n {
+                    call s = g(i);
+                    write s;
+                }
+            }

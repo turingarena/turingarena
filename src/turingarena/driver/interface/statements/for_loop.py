@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
@@ -34,7 +34,7 @@ class ForStatement(Statement, IntermediateNode):
         )
 
     def _get_allocations(self):
-        for a in self._body_node.reference_actions:
+        for a in self.body.reference_actions:
             if a.reference.variable.dimensions == 0:
                 continue
             if a.status == ReferenceStatus.DECLARED:
@@ -57,10 +57,10 @@ class ForStatement(Statement, IntermediateNode):
         yield from self.body.validate()
 
     def _get_declaration_directions(self):
-        return self._body_node.declaration_directions
+        return self.body.declaration_directions
 
     def _get_reference_actions(self):
-        for a in self._body_node.reference_actions:
+        for a in self.body.reference_actions:
             r = a.reference
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
@@ -69,16 +69,12 @@ class ForStatement(Statement, IntermediateNode):
         # no local references
         r = all(
             a.reference.index_count > 0
-            for a in self._body_node.reference_actions
+            for a in self.body.reference_actions
         ) and all(
             child.can_be_grouped
-            for child in self._body_node.children
+            for child in self.body.children
         )
         return r
-
-    @property
-    def _body_node(self):
-        return BlockNode.from_nodes(self.body.flat_inner_nodes)
 
     def _driver_run(self, context):
         if context.phase is None:
@@ -93,7 +89,7 @@ class ForStatement(Statement, IntermediateNode):
             return
 
         results_by_iteration = [
-            self._body_node.driver_run(context.with_assigments(
+            self.body.driver_run(context.with_assigments(
                 [(self.index.variable.as_reference(), i)]
             ))
             for i in range(for_range)
@@ -114,4 +110,4 @@ class ForStatement(Statement, IntermediateNode):
 
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"
-        yield from self._indent_all(self._body_node.node_description)
+        yield from self._indent_all(self.body.node_description)

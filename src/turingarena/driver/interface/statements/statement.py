@@ -5,6 +5,10 @@ from turingarena.driver.interface.nodes import IntermediateNode
 class AbstractStatement(IntermediateNode):
     __slots__ = []
 
+    def _describe_node(self):
+        if self.comment is not None:
+            yield f"{self.statement_type} {self.comment}"
+
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []
@@ -16,6 +20,9 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     def __str__(self):
         from turingarena.driver.generator import StatementDescriptionCodeGen
         return "".join(StatementDescriptionCodeGen().statement(self))
+
+    def _describe_node(self):
+        yield str(self)
 
 
 class SyntheticStatement(AbstractStatement):
