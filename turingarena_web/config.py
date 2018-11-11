@@ -6,6 +6,12 @@ DEBUG = True
 # secret key - set a random value in production
 SECRET_KEY = "ciao"
 
+# set log level
+LOG_LEVEL = "DEBUG"
+
+# allow users to create an account
+ALLOW_REGISTRATION = True
+
 # database credentials
 DB_NAME = "turingarena"
 DB_USER = "turingarena"

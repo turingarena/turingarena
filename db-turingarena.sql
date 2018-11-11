@@ -45,12 +45,12 @@ CREATE TABLE acquired_goal(
     PRIMARY KEY(goal_id, submission_id)
 );
 
-CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA');
+CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'END');
 
 CREATE TABLE evaluation_event(
     submission_id   INTEGER         REFERENCES submission(id),
     serial          SERIAL,
     type            event_type_e    NOT NULL,
-    data            TEXT            NOT NULL,
+    data            TEXT,
     PRIMARY KEY(submission_id, serial)
 );

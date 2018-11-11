@@ -1,22 +1,36 @@
 {% extends "base.html" %}
+{% block head %}
+    {% if not end %}
+        {# TODO: dymaically get evaluation events via some JavaScript code #}
+        <meta http-equiv="refresh" content="1">
+    {% endif %}
+{% endblock %}
 {% block body %}
     <div id="evaluation_output">
         <h3>Evaluation output</h3>
         <pre>
-            {% for event in events -%}
+            {%- for event in events -%}
                 {{ event.data | safe }}
-            {% endfor %}
+            {%- endfor -%}
         </pre>
     </div>
     <hr>
     <div id="goals">
         <h3>Your goals</h3>
-        <table>
-            {% for goal in goals %}
-                <tr>
-                    <td>{{ goal.name }}</td>
-                    <td>{% if goal.acquired %} 👌 {% else %} ☹️ {% endif %}</td>
-                </tr>
+        <table class="table">
+            <tr>
+                <th>Goal</th>
+                <th>Result</th>
+            </tr>
+            {% for name, value in goals.items() %}
+                {% if value %}
+                    <tr class="table-success">
+                {% else %}
+                    <tr class="table-danger">
+                {% endif %}
+                        <td>{{ name }}</td>
+                        <td>{% if value %} 👌 {% else %} 🙁 {% endif %}</td>
+                    </tr>
             {% endfor %}
         </table>
     </div>

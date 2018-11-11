@@ -1,18 +1,17 @@
 import re
 from typing import Optional
 
-from flask import Blueprint, request, render_template, session, redirect, url_for
+from flask import Blueprint, request, render_template, session, redirect, url_for, current_app, abort
 
-from turingarena_web.database import UserDatabase, User
+from turingarena_web.database import database, User
 
 user = Blueprint("user", __name__)
-user_db = UserDatabase()
 
 
 def get_current_user() -> Optional[User]:
     if "username" not in session:
         return None
-    return user_db.get_by_username(session["username"])
+    return database.get_user_by_username(session["username"])
 
 
 @user.route("/")
@@ -24,7 +23,7 @@ def user_():
 
 @user.route("/<username>")
 def user_view(username):
-    return render_template("user.html", user=user_db.get_by_username(username))
+    return render_template("user.html", user=database.get_user_by_username(username))
 
 
 @user.route("/login", methods=("GET", "POST"))
@@ -34,7 +33,7 @@ def login():
     username = request.form["username"]
     password = request.form["password"]
 
-    if user_db.authenticate(username, password):
+    if database.user_authenticate(username, password):
         session["username"] = username
         return redirect(url_for("user.user_view", username=username))
     else:
@@ -50,6 +49,8 @@ def logout():
 
 @user.route("/register", methods=("GET", "POST"))
 def register():
+    if "ALLOW_REGISTRATION" not in current_app.config or not current_app.config["ALLOW_REGISTRATION"]:
+        return abort(403)
     if request.method == "GET":
         return render_template("register.html")
 
@@ -71,7 +72,7 @@ def register():
 
     assert len(password) > 4 and password == password2
 
-    assert user_db.insert(
+    assert database.insert_user(
         username=username,
         first_name=first_name,
         last_name=last_name,
@@ -81,5 +82,5 @@ def register():
 
     session["username"] = username
 
-    return redirect(url_for("user"))
+    return redirect(url_for("user_view"))
 
