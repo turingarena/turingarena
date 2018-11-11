@@ -4,7 +4,7 @@ from abc import abstractmethod
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import IntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -93,7 +93,6 @@ class CheckpointStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
         yield CheckpointNode()
 
 
@@ -103,6 +102,9 @@ class CheckpointNode(IntermediateNode):
 
     def _get_reference_actions(self):
         return []
+
+    def _needs_request_lookahead(self):
+        return True
 
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.UPWARD:

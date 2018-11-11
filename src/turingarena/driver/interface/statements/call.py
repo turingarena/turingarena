@@ -1,12 +1,11 @@
 import logging
 
-from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.execution import CallRequestSignature
 from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import StatementIntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import StatementIntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.statement import Statement
@@ -68,10 +67,10 @@ class CallStatement(Statement):
             )
         except StopIteration:
             return CallbackImplementation(ast=callback.ast, context=StaticCallbackBlockContext(
-                    local_context=self.context,
-                    callback_index=index,
-                ), description=None
-            )
+                local_context=self.context,
+                callback_index=index,
+            ), description=None
+                                          )
 
     def validate(self):
         if self.method_name not in self.context.global_context.methods_by_name:
@@ -118,7 +117,6 @@ class CallStatement(Statement):
             )
 
     def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
         yield MethodResolveArgumentsNode(self)
 
         if self.method and self.method.has_callbacks:
@@ -131,6 +129,9 @@ class CallStatement(Statement):
 
 class MethodResolveArgumentsNode(StatementIntermediateNode):
     __slots__ = []
+
+    def _needs_request_lookahead(self):
+        return True
 
     def _get_reference_actions(self):
         references = self.statement.context.get_references(ReferenceStatus.RESOLVED)

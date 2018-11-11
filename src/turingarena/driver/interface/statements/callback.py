@@ -1,5 +1,4 @@
 import logging
-
 from collections import namedtuple
 
 from turingarena.driver.client.exceptions import InterfaceError
@@ -7,9 +6,9 @@ from turingarena.driver.interface.block import Block, BlockNode
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.exceptions import InterfaceExitReached
 from turingarena.driver.interface.execution import RequestSignature
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.expressions import Expression, SyntheticExpression
-from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode
+from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
@@ -38,12 +37,14 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def default_body(self):
         fake_ast_body = [
             namedtuple("write", ["statement_type", "arguments"])("write", [
-                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name, "")
+                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name,
+                                                                                          "")
                 for p in self.parameters
             ])
         ]
         if self.has_return_value:
-            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "_result", "")
+            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])(
+                "reference_subscript", "_result", "")
             fake_ast_body += [
                 namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
                 namedtuple("ret", ["statement_type", "value"])("return", return_var),
@@ -57,7 +58,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         yield CallbackCallNode(self)
         yield from self.body.flat_inner_nodes
         if not self.has_return_value:
-            yield RequestLookaheadNode()
             yield CallbackReturnNode(callback=self, return_statement=None)
 
     @property
@@ -112,6 +112,9 @@ class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
     "callback",
     "return_statement",
 ])):
+    def _needs_request_lookahead(self):
+        return True
+
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
             request = context.request_lookahead
@@ -150,7 +153,6 @@ class ReturnStatement(Statement):
         return Expression.compile(self.ast.value, self.context.expression(reference=True))
 
     def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
         yield CallbackReturnNode(callback=None, return_statement=self)
 
     def validate(self):
@@ -164,8 +166,10 @@ class ExitStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
         yield self
+
+    def _needs_request_lookahead(self):
+        return True
 
     def validate(self):
         # TODO: check that exit is used only in valid places

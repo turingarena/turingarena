@@ -5,7 +5,6 @@ from turingarena.driver.interface.block import Block, BlockNode
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
-from turingarena.driver.interface.nodes import RequestLookaheadNode
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.statements.io import CheckpointNode
 from turingarena.driver.interface.variables import Reference, Variable
@@ -53,7 +52,6 @@ class InterfaceDefinition:
     @property
     def main_node(self):
         return BlockNode.from_nodes([
-            RequestLookaheadNode(),
             CheckpointNode(),
             *self.main_block.flat_inner_nodes,
         ])

@@ -1,9 +1,9 @@
 import logging
 
 from turingarena.driver.interface.block import Block, BlockNode
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode
+from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus
 
@@ -49,7 +49,6 @@ class IfStatement(Statement, IntermediateNode):
 
     def _get_intermediate_nodes(self):
         if self._needs_request_lookahead():
-            yield RequestLookaheadNode()
             yield ResolveIfNode(self)
         yield self
 
@@ -106,6 +105,9 @@ class ResolveIfNode(StatementIntermediateNode):
             logger.debug(f"matching_conditions2: {matching_conditions}")
         [condition_value] = matching_conditions
         yield self.statement.condition.reference, condition_value
+
+    def _needs_request_lookahead(self):
+        return True
 
     def _describe_node(self):
         yield "resolve if"

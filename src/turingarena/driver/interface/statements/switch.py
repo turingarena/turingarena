@@ -5,9 +5,9 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block, BlockNode
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
-from turingarena.driver.interface.nodes import StatementIntermediateNode, IntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
+from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
 
@@ -19,7 +19,6 @@ class SwitchStatement(Statement, IntermediateNode):
 
     def _get_intermediate_nodes(self):
         if self._should_resolve():
-            yield RequestLookaheadNode()
             yield SwitchResolveNode(self)
         # TODO: resolution node
         yield self
@@ -150,6 +149,9 @@ class SwitchResolveNode(StatementIntermediateNode):
         [case] = matching_cases
         [label] = case.labels
         yield self.statement.value.reference, label.value
+
+    def _needs_request_lookahead(self):
+        return True
 
     def _describe_node(self):
         yield f"resolve {self.statement}"

@@ -14,6 +14,9 @@ class ExecutionResult(namedtuple("ExecutionResult", [
     "does_break",
 ])):
     def merge(self, other):
+        if other is None:
+            return self
+
         return ExecutionResult(
             self.assignments + other.assignments,
             request_lookahead=other.request_lookahead,
@@ -53,10 +56,21 @@ class IntermediateNode:
             f"request LA: {context.request_lookahead}"
         )
 
-        result = self._driver_run(context)
-        if result is None:
-            result = context.result()
-        return result
+        should_lookahead_request = (
+                context.request_lookahead is None
+                and self.needs_request_lookahead
+                and context.phase is ExecutionPhase.REQUEST
+        )
+
+        result = context.result()
+        if should_lookahead_request:
+            lookahead = context.next_request()
+            result = result._replace(
+                request_lookahead=lookahead,
+            )
+            context = context.extend(result)
+
+        return result.merge(self._driver_run(context))
 
     def _driver_run(self, context):
         return None
@@ -67,6 +81,13 @@ class IntermediateNode:
 
     def _can_be_grouped(self):
         return True
+
+    @property
+    def needs_request_lookahead(self):
+        return self._needs_request_lookahead()
+
+    def _needs_request_lookahead(self):
+        return False
 
     @property
     def node_description(self):
@@ -83,17 +104,3 @@ class IntermediateNode:
 
 class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
     __slots__ = []
-
-
-class RequestLookaheadNode(IntermediateNode):
-    def _driver_run(self, context):
-        if context.phase is not ExecutionPhase.REQUEST:
-            return
-        if context.request_lookahead is not None:
-            return
-        return context.result()._replace(
-            request_lookahead=context.next_request(),
-        )
-
-    def _describe_node(self):
-        yield "next request"
