@@ -1,20 +1,21 @@
 import logging
 
 from turingarena.driver.client.exceptions import InterfaceError
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.execution import CallRequestSignature
-from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import StatementIntermediateNode
+from turingarena.driver.interface.expressions import Expression, SyntheticExpression
+from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
-from turingarena.driver.interface.statements.statement import Statement
+from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
 
-class CallStatement(Statement):
+class CallStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -72,6 +73,8 @@ class CallStatement(Statement):
             ), description=None
                                           )
 
+
+class CallStatement(Statement, CallStatementNode):
     def validate(self):
         if self.method_name not in self.context.global_context.methods_by_name:
             yield Diagnostic(
@@ -116,26 +119,19 @@ class CallStatement(Statement):
                 parseinfo=self.ast.return_value.parseinfo,
             )
 
-    def _get_intermediate_nodes(self):
-        yield MethodResolveArgumentsNode(self)
-
-        if self.method and self.method.has_callbacks:
-            yield MethodCallbacksNode(self)
-
-        yield MethodCallCompletedNode(self)
-        if self.return_value:
-            yield MethodReturnNode(self)
+    def _driver_run(self, context):
+        pass
 
 
-class MethodResolveArgumentsNode(StatementIntermediateNode):
+class MethodResolveArgumentsNode(CallStatementNode):
     __slots__ = []
 
     def _needs_request_lookahead(self):
         return True
 
     def _get_reference_actions(self):
-        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-        for p in self.statement.arguments:
+        references = self.context.get_references(ReferenceStatus.RESOLVED)
+        for p in self.arguments:
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
@@ -143,7 +139,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
         if context.phase is not ExecutionPhase.REQUEST:
             return
 
-        method = self.statement.method
+        method = self.method
 
         command = context.request_lookahead.command
         if not command == "call":
@@ -163,7 +159,7 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
         assignments = list(self._get_assignments(context))
 
         has_return_value = bool(int(context.receive_driver_downward()))
-        expects_return_value = (self.statement.return_value is not None)
+        expects_return_value = (self.return_value is not None)
         if not has_return_value == expects_return_value:
             names = ["procedure", "function"]
             raise InterfaceError(
@@ -172,14 +168,14 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
             )
 
         callback_count = int(context.receive_driver_downward())
-        expected_callback_count = len(self.statement.callbacks)
+        expected_callback_count = len(self.callbacks)
         if not callback_count == expected_callback_count:
             raise InterfaceError(
                 f"'{method.name}' has a {expected_callback_count} callbacks, "
                 f"got {callback_count}"
             )
 
-        for c in self.statement.callbacks:
+        for c in self.callbacks:
             parameter_count = int(context.receive_driver_downward())
             expected_parameter_count = len(c.parameters)
             if not parameter_count == expected_parameter_count:
@@ -193,8 +189,8 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
         )
 
     def _get_assignments(self, context):
-        references = self.statement.context.get_references(ReferenceStatus.RESOLVED)
-        for a in self.statement.arguments:
+        references = self.context.get_references(ReferenceStatus.RESOLVED)
+        for a in self.arguments:
             value = context.deserialize_request_data()
             if a.reference is not None and a.reference not in references:
                 logging.debug(f"Resolved parameter: {a.reference} -> {value}")
@@ -202,29 +198,32 @@ class MethodResolveArgumentsNode(StatementIntermediateNode):
                 # TODO: else, check value is the one expected
 
     def _describe_node(self):
-        yield f"resolve arguments ({self.statement})"
+        yield f"resolve arguments ({self})"
 
 
-class MethodReturnNode(StatementIntermediateNode):
+class MethodReturnNode(CallStatementNode):
     __slots__ = []
 
+    def _is_relevant(self):
+        return self.return_value is not None
+
     def _get_reference_actions(self):
-        yield ReferenceAction(self.statement.return_value.reference, ReferenceStatus.DECLARED)
+        yield ReferenceAction(self.return_value.reference, ReferenceStatus.DECLARED)
 
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
-            return_value = self.statement.return_value.evaluate(context.bindings)
+            return_value = self.return_value.evaluate(context.bindings)
             context.report_ready()
             context.send_driver_upward(return_value)
 
     def _describe_node(self):
-        yield f"return ({self.statement})"
+        yield f"return ({self})"
 
 
-class MethodCallCompletedNode(StatementIntermediateNode):
+class MethodCallCompletedNode(CallStatementNode):
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
             context.report_ready()
@@ -234,11 +233,33 @@ class MethodCallCompletedNode(StatementIntermediateNode):
         yield f"call completed"
 
 
-class MethodCallbacksNode(StatementIntermediateNode):
+class MethodCallbacksStopNode(CallStatementNode, AbstractStatement):
+    def _driver_run(self, context):
+        pass
+
+    def _is_relevant(self):
+        return self.method and self.method.callbacks
+
+    def _get_comment(self):
+        return "no more callbacks"
+
+    @property
+    def statement_type(self):
+        return "write"
+
+    @property
+    def arguments(self):
+        return [SyntheticExpression("int_literal", value=0)]
+
+
+class MethodCallbacksNode(CallStatementNode):
     __slots__ = []
 
+    def _is_relevant(self):
+        return self.method and self.method.has_callbacks
+
     def _get_declaration_directions(self):
-        for callback in self.statement.callbacks:
+        for callback in self.callbacks:
             yield from callback.body_node.declaration_directions
 
     def _can_be_grouped(self):
@@ -249,14 +270,14 @@ class MethodCallbacksNode(StatementIntermediateNode):
             [has_callback] = context.receive_upward()
             if has_callback:
                 [callback_index] = context.receive_upward()
-                callback = self.statement.callbacks[callback_index]
+                callback = self.callbacks[callback_index]
                 callback.driver_run(context)
             else:
                 break
 
     def _describe_node(self):
-        yield f"callbacks ({self.statement})"
-        for callback in self.statement.callbacks:
+        yield f"callbacks ({self})"
+        for callback in self.callbacks:
             yield from self._indent_all(self._describe_callback(callback))
 
     def _describe_callback(self, callback):

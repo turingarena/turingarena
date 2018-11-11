@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta
 from collections import namedtuple
 from functools import lru_cache
 
@@ -15,10 +15,3 @@ class AbstractSyntaxNodeWrapper(namedtuple("AbstractSyntaxNodeWrapper", ["ast", 
 
 class ImperativeStructure(metaclass=ABCMeta):
     __slots__ = []
-
-    @property
-    def first_requests(self):
-        return frozenset(self._get_first_requests())
-
-    def _get_first_requests(self):
-        yield None

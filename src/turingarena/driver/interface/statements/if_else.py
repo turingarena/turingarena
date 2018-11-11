@@ -1,8 +1,9 @@
 import logging
 
 from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode
+from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus
@@ -10,7 +11,7 @@ from turingarena.driver.interface.variables import ReferenceStatus
 logger = logging.getLogger(__name__)
 
 
-class IfStatement(Statement, IntermediateNode):
+class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -44,14 +45,8 @@ class IfStatement(Statement, IntermediateNode):
         if self.else_body is not None:
             yield from self.else_body.validate()
 
-    def _should_resolve(self):
-        return not self.condition.is_status(ReferenceStatus.RESOLVED)
 
-    def _get_intermediate_nodes(self):
-        if self._should_resolve():
-            yield ResolveIfNode(self)
-        yield self
-
+class IfStatement(AbstractIfNode, Statement):
     def _get_declaration_directions(self):
         yield from self.then_node.declaration_directions
         if self.else_node is not None:
@@ -79,17 +74,20 @@ class IfStatement(Statement, IntermediateNode):
             yield from self._indent_all(self.else_node.node_description)
 
 
-class ResolveIfNode(StatementIntermediateNode):
+class ResolveIfNode(AbstractIfNode):
+    def _is_relevant(self):
+        return not self.condition.is_status(ReferenceStatus.RESOLVED)
+
     def _get_conditions_expecting(self, request):
-        if request in self.statement.then_body.first_requests:
+        if request in self.then_node.first_requests:
             yield 1
-        if self.statement.else_body is not None:
-            if request in self.statement.else_body.first_requests:
+        if self.else_body is not None:
+            if request in self.else_node.first_requests:
                 yield 0
 
     def _get_conditions_expecting_no_request(self):
         yield from self._get_conditions_expecting(None)
-        if self.statement.else_body is None:
+        if self.else_body is None:
             yield 0
 
     def _driver_run(self, context):
@@ -104,7 +102,7 @@ class ResolveIfNode(StatementIntermediateNode):
             matching_conditions = frozenset(self._get_conditions_expecting_no_request())
             logger.debug(f"matching_conditions2: {matching_conditions}")
         [condition_value] = matching_conditions
-        yield self.statement.condition.reference, condition_value
+        yield self.condition.reference, condition_value
 
     def _needs_request_lookahead(self):
         return True

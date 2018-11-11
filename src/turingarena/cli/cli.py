@@ -59,3 +59,7 @@ def main():
 
     command = args.Command(args=args, cwd=os.curdir)
     command.run()
+
+
+if __name__ == '__main__':
+    main()

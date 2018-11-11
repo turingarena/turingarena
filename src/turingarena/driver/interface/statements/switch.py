@@ -6,7 +6,7 @@ from turingarena.driver.interface.block import Block, BlockNode
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
-from turingarena.driver.interface.nodes import StatementIntermediateNode, IntermediateNode
+from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
@@ -119,7 +119,7 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
         yield from self.body.validate()
 
 
-class SwitchResolveNode(StatementIntermediateNode):
+class SwitchResolveNode(IntermediateNode):
     def _get_reference_actions(self):
         yield ReferenceAction(self.statement.value.reference, ReferenceStatus.RESOLVED)
 

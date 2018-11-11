@@ -1,0 +1,14 @@
+                function f1();
+                function f2();
+
+                main {
+                    read condition;
+
+                    if condition {
+                        call res = f1();
+                        write res;
+                    } else {
+                        call res = f2();
+                        write res;
+                    }
+                }

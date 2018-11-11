@@ -3,7 +3,7 @@ from collections import namedtuple
 from typing import List, Mapping, Any
 
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.variables import ReferenceAction, Reference
+from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
 
 Bindings = Mapping[Reference, Any]
 
@@ -30,6 +30,48 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 class IntermediateNode:
     __slots__ = []
 
+    def validate(self):
+        return []
+
+    @property
+    def needs_flush(self):
+        return False
+
+    @property
+    def variables_to_declare(self):
+        return frozenset(self._get_variables_to_declare())
+
+    def _get_variables_to_declare(self):
+        for a in self.reference_actions:
+            if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
+                yield a.reference.variable
+
+    @property
+    def variables_to_allocate(self):
+        return list(self._get_allocations())
+
+    def _get_allocations(self):
+        return []
+
+    @property
+    def comment(self):
+        return self._get_comment()
+
+    def _get_comment(self):
+        return None
+
+    @property
+    def does_break(self):
+        return False
+
+    @property
+    def is_relevant(self):
+        "Whether this node should be kept in the parent block"
+        return self._is_relevant()
+
+    def _is_relevant(self):
+        return True
+
     @property
     def reference_actions(self) -> List[ReferenceAction]:
         """
@@ -49,13 +91,14 @@ class IntermediateNode:
     def _get_declaration_directions(self):
         return frozenset()
 
-    def driver_run(self, context):
-        logging.debug(
-            f"driver_run: {type(self).__name__} "
-            f"phase: {context.phase} "
-            f"request LA: {context.request_lookahead}"
-        )
+    @property
+    def first_requests(self):
+        return frozenset(self._get_first_requests())
 
+    def _get_first_requests(self):
+        yield None
+
+    def driver_run(self, context):
         should_lookahead_request = (
                 context.request_lookahead is None
                 and self.needs_request_lookahead
@@ -69,6 +112,12 @@ class IntermediateNode:
                 request_lookahead=lookahead,
             )
             context = context.extend(result)
+
+        logging.debug(
+            f"driver_run: {type(self).__name__} "
+            f"phase: {context.phase} "
+            f"request LA: {context.request_lookahead}"
+        )
 
         return result.merge(self._driver_run(context))
 
@@ -100,7 +149,3 @@ class IntermediateNode:
 
     def _describe_node(self):
         yield str(self)
-
-
-class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
-    __slots__ = []

@@ -6,7 +6,7 @@ from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.statements.io import CheckpointNode
+from turingarena.driver.interface.statements.io import AbstractCheckpointNode
 from turingarena.driver.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
@@ -51,10 +51,7 @@ class InterfaceDefinition:
 
     @property
     def main_node(self):
-        return BlockNode.from_nodes([
-            CheckpointNode(),
-            *self.main_block.flat_inner_nodes,
-        ])
+        return BlockNode.from_nodes(self.main_block.flat_inner_nodes)
 
     @property
     def source_text(self):

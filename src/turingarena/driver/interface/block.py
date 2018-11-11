@@ -4,8 +4,9 @@ from collections import namedtuple
 from turingarena.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import SyntheticExpression
-from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.statements.statement import SyntheticStatement
+from turingarena.driver.interface.seq import SequenceNode
+from turingarena.driver.interface.statements.io import InitialCheckpointNode
+from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement
 from turingarena.driver.interface.step import Step
 
 logger = logging.getLogger(__name__)
@@ -14,21 +15,34 @@ logger = logging.getLogger(__name__)
 class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
-    def _generate_statements(self):
-        inner_context = self.context._replace(main_block=False)
-        for s in self.ast.statements:
-            from turingarena.driver.interface.statements.statements import compile_statement
-            statement = compile_statement(s, inner_context)
-
-            for inst in statement.intermediate_nodes:
-                inner_context = inner_context.with_reference_actions(inst.reference_actions)
-
-            yield statement
-
     @property
     @memoize
     def statements(self):
         return tuple(self._generate_statements())
+
+    def _generate_statements(self):
+        for node in self.flat_inner_nodes:
+            if isinstance(node, Statement):
+                yield node
+
+    @property
+    @memoize
+    def flat_inner_nodes(self):
+        return tuple(self._generate_flat_inner_nodes())
+
+    def _generate_flat_inner_nodes(self):
+        if self.context.main_block:
+            yield InitialCheckpointNode()
+
+        inner_context = self.context._replace(main_block=False)
+        for s in self.ast.statements:
+            from turingarena.driver.interface.statements.statements import statement_classes
+            for cls in statement_classes[s.statement_type]:
+                node = cls(s, inner_context)
+                if not node.is_relevant:
+                    continue
+                yield node
+                inner_context = inner_context.with_reference_actions(node.reference_actions)
 
     def validate(self):
         exited = False
@@ -43,12 +57,9 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     @property
     @memoize
     def synthetic_statements(self):
-        return tuple(self._generate_synthetic_statements())
+        return self.flat_inner_nodes
 
     def _generate_synthetic_statements(self):
-        if self.context.main_block:
-            yield SyntheticStatement("checkpoint", "ready", arguments=[])
-
         for s in self.statements:
             yield s
             if s.statement_type == "call" and s.method.has_callbacks:
@@ -59,25 +70,8 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
         if self.context.main_block:
             yield SyntheticStatement("exit", "terminate", arguments=[])
 
-    @property
-    @memoize
-    def flat_inner_nodes(self):
-        return tuple(self._generate_flat_inner_nodes())
 
-    def _generate_flat_inner_nodes(self):
-        for s in self.statements:
-            yield from s.intermediate_nodes
-
-    def _get_first_requests(self):
-        for s in self.statements:
-            yield from s.first_requests
-            if None not in s.first_requests:
-                break
-        else:
-            yield None
-
-
-class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
+class BlockNode(SequenceNode, namedtuple("BlockNode", ["children"])):
     @staticmethod
     def _group_nodes_by_direction(nodes):
         group = []
@@ -111,14 +105,6 @@ class BlockNode(IntermediateNode, namedtuple("BlockNode", ["children"])):
         for n in self.children:
             result = result.merge(n.driver_run(context.extend(result)))
         return result
-
-    def _get_reference_actions(self):
-        for n in self.children:
-            yield from n.reference_actions
-
-    def _get_declaration_directions(self):
-        for n in self.children:
-            yield from n.declaration_directions
 
     def _describe_node(self):
         yield "block"
