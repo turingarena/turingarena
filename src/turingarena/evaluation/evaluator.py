@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import subprocess
 from contextlib import ExitStack
 from functools import lru_cache
 from tempfile import TemporaryDirectory
@@ -61,7 +62,7 @@ class Evaluator:
             **self.parameter_overrides,
         })
 
-    def evaluate(self, files, seed=None):
+    def evaluate(self, files, seed=None, redirect_stderr=False):
         with ExitStack() as stack:
             if seed is None:
                 seed = random.randrange(2 ** 31)
@@ -74,12 +75,18 @@ class Evaluator:
 
             command = stack.enter_context(self.runner.perform_run())
 
+            popen_args = {}
+
+            if redirect_stderr:
+                popen_args["stderr"] = subprocess.STDOUT
+
             evaluation = segi_subprocess(
                 files,
                 command,
                 env=env,
                 reset_env=self.reset_env,
                 cwd=self.evaluator_dir,
+                **popen_args,
             )
 
             yield from evaluation
