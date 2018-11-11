@@ -63,7 +63,7 @@ class IntermediateNode:
 
     @property
     def can_be_grouped(self):
-        return self._can_be_grouped() and len(self.declaration_directions) <= 1
+        return self._can_be_grouped()
 
     def _can_be_grouped(self):
         return True
