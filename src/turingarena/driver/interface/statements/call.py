@@ -24,10 +24,7 @@ class CallStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
     @property
     def method(self):
-        try:
-            return self.context.global_context.methods_by_name[self.method_name]
-        except KeyError:
-            return None
+        return self.context.global_context.methods_by_name.get(self.method_name)
 
     @property
     def arguments(self):
