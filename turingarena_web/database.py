@@ -104,10 +104,10 @@ class Database:
                     cursor.execute("INSERT INTO goal(problem_id, name) VALUES (%s, %s)", (problem_id, goal))
             return True
 
-    def delete_problem(self, problem: Problem):
+    def delete_problem(self, problem_id: int):
         with self.cursor as cursor:
-            cursor.execute("DELETE FROM problem WHERE id = %s", (problem.id,))
-            cursor.execute("DELETE FROM goal WHERE problem_id = %s", (problem.id,))
+            cursor.execute("DELETE FROM problem WHERE id = %s", (problem_id,))
+            cursor.execute("DELETE FROM goal WHERE problem_id = %s", (problem_id,))
 
     def get_submissions_by_user(self, user: User) -> List[Submission]:
         with self.cursor as cursor:

@@ -1,15 +1,46 @@
 {% extends "base.html" %}
 {% set title = "TuringArena registration page" %}
 {% block body %}
-    <h1>TuringArena registration page</h1>
-    <h3>Request here your credential to submit to TuringArena</h3>
-    <form method="post">
-        <label>Username: <input type="text" name="username"></label><br>
-        <label>First name: <input type="text" name="first_name"></label><br>
-        <label>Last name: <input type="text" name="last_name"></label><br>
-        <label>Email: <input type="text" name="email"></label><br>
-        <label>Password: <input type="password" name="password"></label><br>
-        <label>Repeat password: <input type="password" name="password2"></label><br>
-        <button type="submit">Login</button>
-    </form>
+    <div class="container">
+        <h3 class="text-center">Sign up to TuringArena</h3>
+        <form method="post">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="first_name">First name</label>
+                    <input id="first_name" class="form-control" type="text" name="first_name" placeholder="First name"
+                           pattern="[A-Z][A-Za-z' ]*" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="last_name">Last name</label>
+                    <input id="last_name" class="form-control" type="text" name="last_name" placeholder="Last name"
+                           pattern="[A-Z][A-Za-z' ]*" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="username">Username</label>
+                    <input id="username" class="form-control" type="text" name="username" placeholder="username"
+                           pattern="[A-Za-z0-9_]+" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="email">Email</label>
+                    <input id="email" class="form-control" type="email" name="email" placeholder="user@example.com"
+                           required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="password">Password</label>
+                    <input id="password" class="form-control" type="password" name="password" placeholder="password"
+                           minlength="8" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="password2">Repeat password</label>
+                    <input id="password2" class="form-control" type="password" name="password2"
+                           placeholder="repeat password" minlength="8" required>
+                </div>
+            </div>
+            <button class="btn btn-primary float-right" type="submit">Sign Up</button>
+        </form>
+    </div>
 {% endblock %}

@@ -28,16 +28,21 @@ def user_view(username):
 
 @user.route("/login", methods=("GET", "POST"))
 def login():
+    reg_ok = current_app.config.get("REGISTRATION_ALLOWED", True)
+    redirect_url = request.args.get("redirect", None)
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("login.html", registrarion_allowed=reg_ok, redirect=redirect_url)
     username = request.form["username"]
     password = request.form["password"]
 
     if database.user_authenticate(username, password):
         session["username"] = username
-        return redirect(url_for("user.user_view", username=username))
+        if redirect_url is None:
+            redirect_url = url_for("user.user_view", username=username)
+        return redirect(redirect_url)
     else:
-        return render_template("login.html", message="Wrong username or password")
+        return render_template("login.html", redirect=redirect_url, message="Wrong username or password",
+                               registrarion_allowed=reg_ok)
 
 
 @user.route("/logout")
@@ -83,4 +88,3 @@ def register():
     session["username"] = username
 
     return redirect(url_for("user_view"))
-

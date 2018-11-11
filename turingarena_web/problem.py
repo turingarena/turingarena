@@ -56,6 +56,8 @@ def problem_view(name):
     if problem is None:
         return abort(404)
 
+    subs = []
+
     if current_user is not None:
         subs = database.get_submissions_by_user_and_problem(user_id=current_user.id, problem_id=problem.id)
 

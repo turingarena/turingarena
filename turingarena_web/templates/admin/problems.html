@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% set title = "TuringArena problems install" %}
+{% block body %}
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Remove</th>
+        </tr>
+        {% for problem in problems %}
+            <tr>
+                <td>{{ problem.name }}</td>
+                <td>{{ problem.title }}</td>
+                <td><a href="{{ url_for("admin.problem_delete", problem_id=problem.id) }}">Delete</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <div>
+        <h2>Add a problem</h2>
+        <form method="post" class="form-inline form-groups">
+            <div class="input-group" style="width: 100%">
+                <div class="input-group-prepend">
+                    <label for="problem-url" class="input-group-text">Problem URL</label>
+                </div>
+                <input id="problem-url" class="form-control" type="url" name="url"
+                       placeholder="https://github.com/<user>/<repo>" required>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+

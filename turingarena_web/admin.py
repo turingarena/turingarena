@@ -5,6 +5,7 @@ import subprocess
 from flask import Blueprint, current_app, request, render_template, abort, redirect, url_for
 from turingarena.evallib.metadata import load_metadata
 from turingarena.file.generated import PackGeneratedDirectory
+from turingarena_web.common import render_template_ex, is_admin
 
 from turingarena_web.database import database, UserPrivilege
 from turingarena_web.user import get_current_user
@@ -57,27 +58,34 @@ def install_problem(name, problem_url, title=None):
 
 @admin_bp.route("/")
 def home():
-    return redirect(url_for("admin.installx"))
+    return render_template("admin/admin.html", user=get_current_user())
 
 
-@admin_bp.route("/problems", methods=("GET", "POST"))
-def install():
-    if request.method == "GET":
-        return render_template("admin/problem_install.html")
-    if get_current_user() is None or get_current_user().privilege != UserPrivilege.ADMIN.value:
-        return abort(401)
-    if request.method == "GET":
-        return render_template("admin/problem_install.html")
-    url = request.form["url"]
-    if "://" not in url:
-        url = "https://github.com/" + url
-    name = os.path.basename(url)
+@admin_bp.route("/problems", methods=("GET", "POST", "DELETE"))
+def problems():
+    if not is_admin():
+        return abort(403)
+    if request.method == "POST":
+        url = request.form["url"]
+        if "://" not in url:
+            url = "https://github.com/" + url
+        name = os.path.basename(url)
 
-    install_problem(name, url)
-    return redirect(url_for("problem.problem_view", name=name))
+        install_problem(name, url)
+        return redirect(url_for("admin.problems"))
+    return render_template_ex("admin/problems.html", problems=database.get_all_problems())
+
+
+@admin_bp.route("/delete_problem/<int:problem_id>")
+def problem_delete(problem_id):
+    if not is_admin():
+        return abort(403)
+    database.delete_problem(problem_id)
+    return redirect(url_for("admin.problems"))
 
 
 @admin_bp.route("/users")
 def users():
-    return render_template("admin/users.html")
+    return render_template_ex("admin/users.html", user=get_current_user())
+
 
