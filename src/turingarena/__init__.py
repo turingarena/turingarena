@@ -1,4 +1,4 @@
-import turingarena.evallib.algorithm
+from turingarena.evallib.algorithm import run_algorithm
 import turingarena.evallib.evaluation
 import turingarena.evallib.goals
 import turingarena.evallib.metadata
