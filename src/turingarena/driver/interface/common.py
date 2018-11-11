@@ -1,4 +1,3 @@
-from abc import ABCMeta
 from collections import namedtuple
 from functools import lru_cache
 
@@ -11,7 +10,3 @@ class AbstractSyntaxNodeWrapper(namedtuple("AbstractSyntaxNodeWrapper", ["ast", 
 
     def __eq__(self, other):
         return self is other
-
-
-class ImperativeStructure(metaclass=ABCMeta):
-    __slots__ = []

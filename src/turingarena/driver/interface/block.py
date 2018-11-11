@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import SyntheticExpression
 from turingarena.driver.interface.seq import SequenceNode
@@ -12,7 +12,7 @@ from turingarena.driver.interface.step import Step
 logger = logging.getLogger(__name__)
 
 
-class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
+class Block(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property

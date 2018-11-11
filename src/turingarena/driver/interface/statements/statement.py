@@ -1,8 +1,8 @@
-from turingarena.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.nodes import IntermediateNode
 
 
-class AbstractStatement(ImperativeStructure, IntermediateNode):
+class AbstractStatement(IntermediateNode):
     __slots__ = []
 
 
