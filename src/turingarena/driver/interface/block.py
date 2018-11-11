@@ -3,25 +3,13 @@ from abc import abstractmethod
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.expressions import SyntheticExpression
 from turingarena.driver.interface.seq import SequenceNode
-from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement
 from turingarena.driver.interface.step import Step
 
 logger = logging.getLogger(__name__)
 
 
 class AbstractBlock(SequenceNode):
-    @property
-    @memoize
-    def statements(self):
-        return tuple(self._generate_statements())
-
-    def _generate_statements(self):
-        for node in self.flat_inner_nodes:
-            if isinstance(node, Statement):
-                yield node
-
     @property
     @memoize
     def flat_inner_nodes(self):
@@ -33,29 +21,13 @@ class AbstractBlock(SequenceNode):
 
     def validate(self):
         exited = False
-        for statement in self.statements:
+        for node in self.children:
             if exited:
                 yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
                 break
-            yield from statement.validate()
-            if statement.does_break:
+            yield from node.validate()
+            if node.does_break:
                 exited = True
-
-    @property
-    @memoize
-    def synthetic_statements(self):
-        return self.flat_inner_nodes
-
-    def _generate_synthetic_statements(self):
-        for s in self.statements:
-            yield s
-            if s.statement_type == "call" and s.method.has_callbacks:
-                yield SyntheticStatement("write", "no more callbacks", arguments=[
-                    SyntheticExpression("int_literal", value=0),
-                ])
-
-        if self.context.main_block:
-            yield SyntheticStatement("exit", "terminate", arguments=[])
 
     @property
     @memoize
@@ -65,7 +37,7 @@ class AbstractBlock(SequenceNode):
     def _generate_children(self):
         group = []
         for node in self.flat_inner_nodes:
-            if node.can_be_grouped and len(self.group_directions(group + [node])) <= 1:
+            if node.can_be_grouped and len(self._group_directions(group + [node])) <= 1:
                 group.append(node)
                 continue
 
@@ -81,7 +53,7 @@ class AbstractBlock(SequenceNode):
         if group:
             yield Step(tuple(group))
 
-    def group_directions(self, group):
+    def _group_directions(self, group):
         return {d for n in group for d in n.declaration_directions}
 
     def _driver_run(self, context):

@@ -42,10 +42,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     __slots__ = []
 
     @property
-    def synthetic_body(self):
-        return SyntheticCallbackBody(self)
-
-    @property
     def raw_body(self):
         inner_context = self.context.local_context.with_reference_actions(
             ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
@@ -90,20 +86,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
     def _get_declaration_directions(self):
         return self.body.declaration_directions
-
-
-class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["implementation"])):
-    @property
-    def synthetic_statements(self):
-        callback_index = self.implementation.context.callback_index
-        yield SyntheticStatement("write", "requesting a callback", arguments=[
-            SyntheticExpression("int_literal", value=1),
-        ])
-        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
-        yield SyntheticStatement("write", comment, arguments=[
-            SyntheticExpression("int_literal", value=callback_index),
-        ])
-        yield from self.implementation.body.synthetic_statements
 
 
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [

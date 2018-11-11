@@ -7,15 +7,26 @@ from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.statements.io import InitialCheckpointNode
+from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.driver.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
+
+
+class InterfaceExitNode(AbstractStatement):
+    @property
+    def statement_type(self):
+        return "exit"
+
+    def _get_comment(self):
+        return "terminate"
 
 
 class InterfaceBody(Block):
     def _generate_flat_inner_nodes(self):
         yield InitialCheckpointNode()
         yield from super()._generate_flat_inner_nodes()
+        yield InterfaceExitNode()
 
 
 class InterfaceDefinition:
