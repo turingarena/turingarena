@@ -4,8 +4,8 @@ from collections import namedtuple
 from turingarena.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import SyntheticExpression
-from turingarena.driver.interface.nodes import IntermediateNode, ExecutionResult
-from turingarena.driver.interface.statements.statement import Statement, SyntheticStatement
+from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.statements.statement import SyntheticStatement
 from turingarena.driver.interface.step import Step
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,8 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
     def _generate_statements(self):
         inner_context = self.context._replace(main_block=False)
         for s in self.ast.statements:
-            statement = Statement.compile(s, inner_context)
+            from turingarena.driver.interface.statements.statements import compile_statement
+            statement = compile_statement(s, inner_context)
 
             for inst in statement.intermediate_nodes:
                 inner_context = inner_context.with_reference_actions(inst.reference_actions)
@@ -57,7 +58,6 @@ class Block(ImperativeStructure, AbstractSyntaxNodeWrapper):
 
         if self.context.main_block:
             yield SyntheticStatement("exit", "terminate", arguments=[])
-
 
     @property
     @memoize

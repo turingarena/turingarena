@@ -1,8 +1,6 @@
 from abc import abstractmethod
 from typing import List
 
-from bidict import bidict
-
 from turingarena.driver.interface.common import ImperativeStructure, AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.variables import ReferenceStatus
@@ -57,35 +55,6 @@ class AbstractStatement(ImperativeStructure):
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     __slots__ = []
-
-    @staticmethod
-    def get_statement_classes():
-        from .call import CallStatement
-        from turingarena.driver.interface.statements.callback import ReturnStatement
-        from .loop import LoopStatement, BreakStatement
-        from .for_loop import ForStatement
-        from .if_else import IfStatement
-        from turingarena.driver.interface.statements.callback import ExitStatement
-        from .switch import SwitchStatement
-        from .io import CheckpointStatement, ReadStatement, WriteStatement
-
-        return bidict({
-            "checkpoint": CheckpointStatement,
-            "read": ReadStatement,
-            "write": WriteStatement,
-            "call": CallStatement,
-            "return": ReturnStatement,
-            "exit": ExitStatement,
-            "for": ForStatement,
-            "if": IfStatement,
-            "loop": LoopStatement,
-            "break": BreakStatement,
-            "switch": SwitchStatement,
-        })
-
-    @staticmethod
-    def compile(ast, context):
-        return Statement.get_statement_classes()[ast.statement_type](ast=ast, context=context)
 
     @property
     def statement_type(self):
