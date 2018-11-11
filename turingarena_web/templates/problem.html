@@ -24,6 +24,9 @@
                 <a class="btn btn-primary" role="button" href={{ url_for("problem.files", name=name) }}>Download problem
                     files</a>
                 <button class="btn btn-success" type="submit">Submit</button>
+                {% if error is not none %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endif %}
                 <script>
                     document.getElementById("source_upload").onchange = function (e) {
                         document.getElementById("source_label").innerText = e.target.files[0].name;
