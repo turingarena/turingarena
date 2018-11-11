@@ -83,30 +83,7 @@ class CallStatement(Statement, CallStatementNode):
             )
             return
 
-        yield from self.validate_parameters()
-        yield from self.validate_return_value()
-
-    def validate_parameters(self):
         method = self.method
-        if len(self.arguments) != len(method.parameters):
-            yield Diagnostic(
-                Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
-                method.name, len(method.parameters), len(self.arguments),
-                parseinfo=self.ast.parseinfo,
-            )
-        for parameter, expression in zip(method.parameters, self.arguments):
-            yield from expression.validate()
-            if expression.dimensions != parameter.dimensions:
-                yield Diagnostic(
-                    Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter.name, method.name, parameter.dimensions, expression.dimensions,
-                    parseinfo=expression.ast.parseinfo,
-                )
-
-    def validate_return_value(self):
-        method = self.method
-        if self.return_value is not None:
-            yield from self.return_value.validate()
         if method.has_return_value and self.return_value is None:
             yield Diagnostic(
                 Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, method.name,
@@ -133,6 +110,26 @@ class MethodResolveArgumentsNode(CallStatementNode):
         for p in self.arguments:
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
+
+    def validate(self):
+        method = self.method
+        if method is None:
+            return
+
+        if len(self.arguments) != len(method.parameters):
+            yield Diagnostic(
+                Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
+                method.name, len(method.parameters), len(self.arguments),
+                parseinfo=self.ast.parseinfo,
+            )
+        for parameter, expression in zip(method.parameters, self.arguments):
+            yield from expression.validate()
+            if expression.dimensions != parameter.dimensions:
+                yield Diagnostic(
+                    Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
+                    parameter.name, method.name, parameter.dimensions, expression.dimensions,
+                    parseinfo=expression.ast.parseinfo,
+                )
 
     def _driver_run(self, context):
         if context.phase is not ExecutionPhase.REQUEST:
@@ -205,6 +202,14 @@ class MethodReturnNode(CallStatementNode):
 
     def _is_relevant(self):
         return self.return_value is not None
+
+    def validate(self):
+        method = self.method
+        if method is None:
+            return
+
+        if self.return_value is not None:
+            yield from self.return_value.validate()
 
     def _get_reference_actions(self):
         yield ReferenceAction(self.return_value.reference, ReferenceStatus.DECLARED)
