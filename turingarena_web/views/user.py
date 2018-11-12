@@ -1,8 +1,9 @@
 import re
 
-from flask import Blueprint, request, render_template, session, redirect, url_for, current_app, abort
+from flask import Blueprint, request, render_template, session, redirect, url_for, abort
 
 from turingarena_web.user import User
+from turingarena_web.config import config
 
 user = Blueprint("user", __name__)
 
@@ -27,7 +28,7 @@ def user_view(username):
 
 @user.route("/login", methods=("GET", "POST"))
 def login():
-    reg_ok = current_app.config.get("REGISTRATION_ALLOWED", True)
+    reg_ok = config.get("allow_registration", False)
     redirect_url = request.args.get("redirect", None)
     if request.method == "GET":
         return render_template("login.html", registrarion_allowed=reg_ok, redirect=redirect_url)
@@ -54,7 +55,7 @@ def logout():
 
 @user.route("/register", methods=("GET", "POST"))
 def register():
-    if "ALLOW_REGISTRATION" not in current_app.config or not current_app.config["ALLOW_REGISTRATION"]:
+    if not config.get("allow_registration", False):
         return abort(403)
     if request.method == "GET":
         return render_template("register.html")
