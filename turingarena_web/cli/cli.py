@@ -1,7 +1,6 @@
 import argparse
 import os
 
-import argcomplete
 from turingarena_web.cli.command import add_subparser
 from turingarena_web.cli.contest import ContestCommand
 from turingarena_web.cli.problem import ProblemCommand

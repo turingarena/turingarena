@@ -102,7 +102,7 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         goals = scoring_metadata.get("goals", [])
 
         for goal in goals:
-            print(Goal.insert(problem, goal))
+            Goal.insert(problem, goal)
 
         return problem
 
