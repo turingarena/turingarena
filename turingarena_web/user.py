@@ -48,4 +48,4 @@ class User(namedtuple("User", ["id", "first_name", "last_name", "username", "ema
         database.query(query, privilege.value, self.id)
 
     def auth(self, password):
-        return bcrypt.checkpw(self.password.encode("utf-8"), password.encode("utf-8"))
+        return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
