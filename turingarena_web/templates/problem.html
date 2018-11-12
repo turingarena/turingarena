@@ -50,7 +50,7 @@
                     {% set total_goals = submission.goals|length %}
                     {% if correct_goals == total_goals %}
                         <tr class="table-success">
-                            {% elif submission["goals"] == 0 %}
+                            {% elif correct_goals == 0 %}
                         <tr class="table-danger">
                             {% else %}
                         <tr class="table-warning">

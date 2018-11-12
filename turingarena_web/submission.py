@@ -32,7 +32,7 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
 class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "timestamp", "filename"])):
     @staticmethod
     def from_user_and_problem(user, problem):
-        query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s"
+        query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s ORDER BY timestamp DESC"
         return database.query_all(query, user.id, problem.id, convert=Submission)
 
     @staticmethod
