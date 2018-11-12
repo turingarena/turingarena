@@ -1,48 +1,69 @@
+import logging
 import os
+import subprocess
 
-from commonmark import commonmark
-from flask import Blueprint, render_template, abort, request, send_from_directory
-
+from turingarena.evallib.metadata import load_metadata
+from turingarena.file.generated import PackGeneratedDirectory
 from turingarena_web.database import database
-from turingarena_web.evaluate import evaluate
-from turingarena_web.user import get_current_user
-
-problem_bp = Blueprint("problem", __name__)
+from turingarena_web.config import config
 
 
-@problem_bp.route("/<name>", methods=("GET", "POST"))
-def problem_view(name):
-    current_user = get_current_user()
-    if request.method == "POST" and current_user is None:
-        return abort(401)
+def clone_from_git(url, directory):
+    os.mkdir(directory)
+    logging.debug(f"git clone {url} -> {directory}")
+    subprocess.call(["git", "clone", url, directory])
 
+
+def generate_problem_files(problem_dir, name):
+    files_dir = os.path.join(problem_dir, ".generated")
+    os.mkdir(files_dir)
+
+    pd = PackGeneratedDirectory(problem_dir, allowed_languages=config.get("ALLOWED_LANGUAGES", None))
+
+    for path, generator in pd.targets:
+        directory = os.path.join(files_dir, os.path.split(path)[0])
+        filename = os.path.split(path)[1]
+        os.makedirs(directory, exist_ok=True)
+        with open(os.path.join(directory, filename), "w") as file:
+            generator(file)
+
+    files_zip = os.path.join(problem_dir, f"{name}.zip")
+    os.chdir(files_dir)
+    subprocess.call(["zip", "-r", files_zip, "."])
+
+
+def install_problem(location, name=None, title=None):
+    if title is None:
+        title = name
+    if name is None:
+        name = os.path.basename(location)
+
+    problem_dir = config["PROBLEM_DIR_PATH"].format(name=name)
+
+    if os.path.exists(problem_dir):
+        subprocess.call(["rm", "-rf", problem_dir])
+
+    clone_from_git(location, problem_dir)
+    generate_problem_files(problem_dir, name)
+
+    metadata = load_metadata(problem_dir)
+    scoring_metadata = metadata.get("scoring", {})
+    goals = scoring_metadata.get("goals", [])
+
+    database.insert_problem(name=name, title=title, location=location, path=problem_dir, goals=goals)
+
+
+def update_problem(name):
+    problem = database.get_problem_by_name(name=name)
+
+    # TODO: need to update goals?
+
+    os.chdir(problem.path)
+    subprocess.call(["git", "pull"])
+
+
+def delete_problem(name):
     problem = database.get_problem_by_name(name)
+    subprocess.call(["rm", "-rf", problem.path])
+    database.delete_problem(problem.id)
 
-    error = None
-    if request.method == "POST":
-        try:
-            return evaluate(current_user, problem)
-        except RuntimeError as e:
-            error = str(e)
-
-    statement_file = os.path.join(problem.path, ".generated", "statement.md")
-    statement = ""
-    if os.path.exists(statement_file):
-        with open(statement_file) as f:
-            statement = commonmark(f.read())
-
-    if problem is None:
-        return abort(404)
-
-    subs = []
-
-    if current_user is not None:
-        subs = database.get_submissions_by_user_and_problem(user_id=current_user.id, problem_id=problem.id)
-
-    return render_template("problem.html", error=error, name=name, title=problem.title, statement=statement, user=current_user, submissions=subs)
-
-
-@problem_bp.route("/files/<name>.zip")
-def files(name):
-    problem = database.get_problem_by_name(name)
-    return send_from_directory(directory=problem.path, filename=f"{name}.zip")

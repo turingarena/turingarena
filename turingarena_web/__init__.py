@@ -3,11 +3,12 @@ import sys
 
 from flask import Flask
 
-from .user import user
-from .root import root_bp
-from .problem import problem_bp
-from .submission import submission
-from .admin import admin_bp
+from turingarena_web.views.user import user
+from turingarena_web.views.root import root_bp
+from turingarena_web.views.problem import problem_bp
+from turingarena_web.views.submission import submission
+from turingarena_web.views.admin import admin_bp
+from .config import config
 
 
 def init_logger(app, level):
@@ -24,10 +25,7 @@ def init_logger(app, level):
 
 def create_app():
     app = Flask(__name__)
-    if app.debug:
-        app.config.from_pyfile("config.py")
-    else:
-        app.config.from_pyfile("/etc/turingarnea.conf")
+    app.config.from_mapping(config)
     app.register_blueprint(root_bp, url_prefix="/")
     app.register_blueprint(user, url_prefix="/user")
     app.register_blueprint(problem_bp, url_prefix="/problem")

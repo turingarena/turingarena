@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, current_app, send_file, abort
 
 from turingarena_web.database import database
-from turingarena_web.user import get_current_user
+from turingarena_web.views.user import get_current_user
 
 submission = Blueprint('submission', __name__)
 

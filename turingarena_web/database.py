@@ -6,7 +6,8 @@ from typing import ContextManager, Optional, List
 
 import bcrypt
 import psycopg2.extensions
-from flask import current_app
+
+from turingarena_web.config import config
 
 UserPrivilege = Enum("UserPrivilege", dict(STANDARD="STANDARD", ADMIN="ADMIN", TUTOR="TUTOR"))
 User = namedtuple("User", ["id", "first_name", "last_name", "username", "email", "privilege"])
@@ -22,10 +23,10 @@ class Database:
     @lru_cache(None)
     def _connection(self) -> psycopg2.extensions.connection:
         connection = psycopg2.connect(
-            dbname=current_app.config["DB_NAME"],
-            user=current_app.config["DB_USER"],
-            password=current_app.config["DB_PASS"],
-            host=current_app.config["DB_HOST"],
+            dbname=config["database"]["name"],
+            user=config["database"]["user"],
+            password=config["database"]["pass"],
+            host=config["database"]["host"],
         )
         return connection
 
@@ -35,6 +36,22 @@ class Database:
         with self._connection:
             with self._connection.cursor() as cursor:
                 yield cursor
+
+    def query_all(self, *args):
+        with self.cursor as cursor:
+            cursor.execute(*args)
+            for result in cursor:
+                yield result
+
+    def query_one(self, *args):
+        with self.cursor as cursor:
+            cursor.execute(*args)
+            assert cursor.rowcount == 1
+            return cursor.fetchone()
+
+    def query(self, *args):
+        with self.cursor as cursor:
+            cursor.execute(*args)
 
     def user_authenticate(self, username, password) -> bool:
         with self.cursor as cursor:
@@ -61,6 +78,14 @@ class Database:
             )
             result = cursor.fetchone()
         return User(*result) if result else None
+
+    def get_users(self):
+        with self.cursor as cursor:
+            cursor.execute("SELECT id, first_name, last_name, username, email, privilege FROM _user")
+            return [
+                User(*r)
+                for r in cursor
+            ]
 
     def insert_user(self, *, first_name, last_name, username, email, password) -> bool:
         with self.cursor as cursor:

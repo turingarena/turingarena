@@ -2,13 +2,13 @@ import os
 import threading
 from datetime import datetime
 
-from flask import request, current_app, redirect, url_for, render_template
+from flask import request, current_app, redirect, url_for
 from turingarena.driver.language import Language
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType
 
 from turingarena_web.database import Problem, database
-from turingarena_web.submission import submitted_file_path
+from turingarena_web.views.submission import submitted_file_path
 
 
 def available_languages():
