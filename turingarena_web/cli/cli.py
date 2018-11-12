@@ -1,12 +1,18 @@
 import argparse
 import os
 
+# PYTHON_ARGCOMPLETE_OK
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = None
+
 from turingarena_web.cli.command import add_subparser
 from turingarena_web.cli.contest import ContestCommand
 from turingarena_web.cli.problem import ProblemCommand
 from turingarena_web.cli.user import UserCommand
 
-VERSION = "v0.0.1" # TODO: load version from file
+VERSION = "v0.0.1"  # TODO: load version from file
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--version", action="version", version=VERSION)
@@ -27,4 +33,3 @@ def main():
 
     command = args.Command(args=args, cwd=os.curdir)
     command.run()
-
