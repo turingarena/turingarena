@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% set title = problem.title %}
 {% block body %}
     <div id="statement">
-        {{ statement | safe }}
+        {{ problem.statement | safe }}
     </div>
     <div>
     </div>
@@ -21,7 +22,7 @@
                         <label id="source_label" for="source_upload" class="custom-file-label">Choose</label>
                     </div>
                 </div>
-                <a class="btn btn-primary" role="button" href={{ url_for("problem.files", name=name) }}>Download problem
+                <a class="btn btn-primary" role="button" href={{ url_for("problem.files", name=problem.name) }}>Download problem
                     files</a>
                 <button class="btn btn-success" type="submit">Submit</button>
                 {% if error is not none %}
@@ -45,15 +46,17 @@
                     <th>Download</th>
                 </tr>
                 {% for submission in submissions %}
-                    {% if submission["goals"] == submission["n_goals"] %}
+                    {% set correct_goals = submission.goals.values()|sum %}
+                    {% set total_goals = submission.goals|length %}
+                    {% if correct_goals == total_goals %}
                         <tr class="table-success">
                             {% elif submission["goals"] == 0 %}
                         <tr class="table-danger">
                             {% else %}
                         <tr class="table-warning">
                     {% endif %}
-                <td>{{ submission["timestamp"].strftime("%H:%M %d/%m/%Y") }}</td>
-                <td>{{ submission["goals"] }} / {{ submission["n_goals"] }}</td>
+                <td>{{ submission.timestamp.strftime("%H:%M %d/%m/%Y") }}</td>
+                <td>{{ correct_goals }} / {{ total_goals }}</td>
                 <td><a href="{{ url_for("submission.submission_view", submission_id=submission["id"]) }}">Info</a></td>
                 <td>
                     <a href="{{ url_for("submission.download", submission_id=submission["id"], filename=submission["filename"]) }}">{{ submission.filename }}</a>

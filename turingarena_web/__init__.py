@@ -6,8 +6,9 @@ from flask import Flask
 from turingarena_web.views.user import user
 from turingarena_web.views.root import root_bp
 from turingarena_web.views.problem import problem_bp
-from turingarena_web.views.submission import submission
+from turingarena_web.views.submission import submission_bp
 from turingarena_web.views.admin import admin_bp
+from turingarena_web.views.contest import contest_bp
 from .config import config
 
 
@@ -29,8 +30,9 @@ def create_app():
     app.register_blueprint(root_bp, url_prefix="/")
     app.register_blueprint(user, url_prefix="/user")
     app.register_blueprint(problem_bp, url_prefix="/problem")
-    app.register_blueprint(submission, url_prefix="/submission")
+    app.register_blueprint(submission_bp, url_prefix="/submission")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(contest_bp, url_prefix="/contest")
 
     init_logger(app, app.config.get("LOG_LEVEL", "INFO"))
     return app

@@ -22,13 +22,13 @@
                 <th>Goal</th>
                 <th>Result</th>
             </tr>
-            {% for name, value in goals.items() %}
+            {% for goal, value in goals.items() %}
                 {% if value %}
                     <tr class="table-success">
                 {% else %}
                     <tr class="table-danger">
                 {% endif %}
-                        <td>{{ name }}</td>
+                        <td>{{ goal.name }}</td>
                         <td>{% if value %} 👌 {% else %} 🙁 {% endif %}</td>
                     </tr>
             {% endfor %}

@@ -1,32 +1,17 @@
 from collections import namedtuple
 
-from turingarena_web.database import database, User, Problem
+from turingarena_web.database import database
+from turingarena_web.problem import Problem
 
 
-class Contest(namedtuple("Contest", ["id", "name"])):
+class Contest(namedtuple("Contest", ["id", "name", "public"])):
     @property
     def users(self):
-        query = """
-            SELECT u.id, u.first_name, u.last_name, u.username, u.email, u.privilege
-            FROM _user u JOIN user_contest uc ON u.id = uc.user_id
-            WHERE uc.contest_id = %s
-        """
-        return [
-            User(*result)
-            for result in database.query_all(query, (self.id,))
-        ]
+        return User.from_contest(self)
 
     @property
     def problems(self):
-        query = """
-            SELECT p.id, p.name, p.title, p.location, p.path
-            FROM problem p JOIN problem_contest pc ON p.id = pc.problem_id
-            WHERE pc.contest_id = %s 
-        """
-        return [
-            Problem(*result)
-            for result in database.query_all(query, (self.id,))
-        ]
+        return Problem.from_contest(self)
 
     def add_user(self, username):
         query = """
@@ -35,14 +20,18 @@ class Contest(namedtuple("Contest", ["id", "name"])):
                 %s
             )
         """
-        database.query(query, (username, self.id))
+        database.query(query, username, self.id)
 
     def remove_user(self, username):
         query = """
             DELETE FROM user_contest 
             WHERE contest_id = %s AND user_id = (SELECT id FROM _user WHERE username = %s)
         """
-        database.query(query, (self.id, username))
+        database.query(query, self.id, username)
+
+    def contains_user(self, user):
+        query = "SELECT 1 FROM user_contest WHERE contest_id = %s AND user_id = %s"
+        return database.query_exists(query, self.id, user.id)
 
     def add_problem(self, problem_name):
         query = """
@@ -51,47 +40,53 @@ class Contest(namedtuple("Contest", ["id", "name"])):
                 %s
             )
         """
-        database.query(query, (problem_name, self.id))
+        database.query(query, problem_name, self.id)
 
     def remove_problem(self, problem_name):
         query = """
             DELETE FROM problem_contest 
             WHERE contest_id = %s AND problem_id = (SELECT id FROM problem WHERE name = %s)
         """
-        database.query(query, (self.id, problem_name))
+        database.query(query, self.id, problem_name)
+
+    def contains_problem(self, problem: Problem):
+        query = "SELECT 1 FROM problem_contest WHERE contest_id = %s AND problem_id = %s"
+        return database.query_exists(query, self.id, problem.id)
 
     @staticmethod
-    def user_contests(username):
+    def of_user(user):
         query = """
-            SELECT c.id, c.name 
-            FROM contest c JOIN user_contest uc ON c.id = uc.contest_id JOIN _user u ON uc.user_id = u.id 
-            WHERE u.username = %s
+            SELECT c.*
+            FROM contest c JOIN user_contest uc ON c.id = uc.contest_id
+            WHERE uc.user_id = %s
         """
-        return [
-            Contest(*result)
-            for result in database.query_all(query, (username,))
-        ]
+        return database.query_all(query, user.id, convert=Contest)
 
     @staticmethod
-    def from_name(contest_name) -> "Contest":
-        query = "SELECT id, name FROM contest WHERE name = %s"
-        return Contest(*database.query_one(query, (contest_name,)))
+    def from_name(contest_name):
+        query = "SELECT * FROM contest WHERE name = %s"
+        return database.query_one(query, contest_name, convert=Contest)
 
     @staticmethod
     def contests():
-        query = "SELECT id, name FROM contest"
-        return [
-            Contest(*result)
-            for result in database.query_all(query)
-        ]
+        query = "SELECT * FROM contest"
+        return database.query_all(query, convert=Contest)
 
     @staticmethod
     def new_contest(contest_name):
         query = "INSERT INTO contest(name) VALUES (%s)"
-        database.query(query, (contest_name,))
+        database.query(query, contest_name)
 
     @staticmethod
     def delete_contest(contest_name):
         query = "DELETE FROM contest WHERE name = %s"
-        database.query(query, (contest_name,))
+        database.query(query, contest_name)
 
+    @staticmethod
+    def exists_with_user_and_problem(user, problem):
+        query = """
+            SELECT 1 
+            FROM contest c JOIN user_contest uc ON c.id = uc.contest_id JOIN problem_contest pc ON c.id = pc.contest_id
+            WHERE uc.user_id = %s AND pc.problem_id = %s
+        """
+        return database.query_exists(query, user.id, problem.id)

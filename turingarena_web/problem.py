@@ -1,69 +1,135 @@
 import logging
 import os
 import subprocess
+from collections import namedtuple
 
+from commonmark import commonmark
 from turingarena.evallib.metadata import load_metadata
 from turingarena.file.generated import PackGeneratedDirectory
-from turingarena_web.database import database
+
 from turingarena_web.config import config
+from turingarena_web.database import database
 
 
-def clone_from_git(url, directory):
-    os.mkdir(directory)
-    logging.debug(f"git clone {url} -> {directory}")
-    subprocess.call(["git", "clone", url, directory])
+class Goal(namedtuple("Goal", ["id", "problem_id", "name"])):
+    @property
+    def problem(self):
+        return Problem.from_id(self.problem_id)
+
+    @staticmethod
+    def from_submission(submission):
+        query = "SELECT g.* FROM goal g JOIN acquired_goal ag ON g.id = ag.goal_id WHERE ag.submission_id = %s"
+        return database.query_all(query, submission.id, convert=Goal)
+
+    @staticmethod
+    def insert(problem, name):
+        query = "INSERT INTO goal(problem_id, name) VALUES (%s, %s) RETURNING *"
+        return database.query_one(query, problem.id, name, convert=Goal)
+
+    def acquire(self, submission):
+        query = "INSERT INTO acquired_goal(submission_id, goal_id) VALUES (%s, %s)"
+        database.query(query, submission.id, self.id)
+
+    @staticmethod
+    def from_problem_and_name(problem, name):
+        query = "SELECT * FROM goal WHERE problem_id = %s AND name = %s"
+        return database.query_one(query, problem.id, name, convert=Goal)
 
 
-def generate_problem_files(problem_dir, name):
-    files_dir = os.path.join(problem_dir, ".generated")
-    os.mkdir(files_dir)
+class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
+    @property
+    def statement(self):
+        path = os.path.join(self.path, ".generated", "statement.md")
+        with open(path) as f:
+            return commonmark(f.read())
 
-    pd = PackGeneratedDirectory(problem_dir, allowed_languages=config.get("ALLOWED_LANGUAGES", None))
+    @property
+    def files_zip(self):
+        return os.path.join(self.path, f"{self.name}.zip")
 
-    for path, generator in pd.targets:
-        directory = os.path.join(files_dir, os.path.split(path)[0])
-        filename = os.path.split(path)[1]
-        os.makedirs(directory, exist_ok=True)
-        with open(os.path.join(directory, filename), "w") as file:
-            generator(file)
+    @property
+    def metadata(self):
+        return load_metadata(self.path)
 
-    files_zip = os.path.join(problem_dir, f"{name}.zip")
-    os.chdir(files_dir)
-    subprocess.call(["zip", "-r", files_zip, "."])
+    @property
+    def path(self):
+        return config["problem_dir_path"].format(name=self.name)
 
+    @property
+    def goals(self):
+        query = "SELECT * FROM goal WHERE problem_id = %s"
+        return database.query_all(query, self.id, convert=Goal)
 
-def install_problem(location, name=None, title=None):
-    if title is None:
-        title = name
-    if name is None:
-        name = os.path.basename(location)
+    def goal(self, name):
+        return Goal.from_problem_and_name(self, name)
 
-    problem_dir = config["PROBLEM_DIR_PATH"].format(name=name)
+    @staticmethod
+    def problems():
+        query = "SELECT * FROM problem"
+        return database.query_all(query, convert=Problem)
 
-    if os.path.exists(problem_dir):
-        subprocess.call(["rm", "-rf", problem_dir])
+    @staticmethod
+    def from_name(name):
+        query = "SELECT * FROM problem WHERE name = %s"
+        return database.query_one(query, name, convert=Problem)
 
-    clone_from_git(location, problem_dir)
-    generate_problem_files(problem_dir, name)
+    @staticmethod
+    def from_id(problem_id):
+        query = "SELECT * FROM problem WHERE id = %s"
+        return database.query_one(query, problem_id, convert=Problem)
 
-    metadata = load_metadata(problem_dir)
-    scoring_metadata = metadata.get("scoring", {})
-    goals = scoring_metadata.get("goals", [])
+    @staticmethod
+    def from_contest(contest):
+        query = """
+            SELECT p.id, p.name, p.title, p.location
+            FROM problem p JOIN problem_contest pc ON p.id = pc.problem_id
+            WHERE pc.contest_id = %s 
+        """
+        return database.query_all(query, contest.id, convert=Problem)
 
-    database.insert_problem(name=name, title=title, location=location, path=problem_dir, goals=goals)
+    @staticmethod
+    def install(location, name=None, title=None):
+        if name is None:
+            name = os.path.basename(location)
+        if title is None:
+            title = name
 
+        query = "INSERT INTO problem(name, title, location) VALUES (%s, %s, %s) RETURNING *"
+        problem = Problem(*database.query_one(query, name, title, location))
+        problem._git_clone()
+        problem._generate_files()
+        scoring_metadata = problem.metadata.get("scoring", {})
+        goals = scoring_metadata.get("goals", [])
 
-def update_problem(name):
-    problem = database.get_problem_by_name(name=name)
+        for goal in goals:
+            print(Goal.insert(problem, goal))
 
-    # TODO: need to update goals?
+        return problem
 
-    os.chdir(problem.path)
-    subprocess.call(["git", "pull"])
+    def delete(self):
+        subprocess.call(["rm", "-rf", self.path])
+        database.query("DELETE FROM problem WHERE id = %s", self.id)
 
+    def update(self):
+        os.chdir(self.path)
+        subprocess.call(["git", "pull"])
+        self._generate_files()
 
-def delete_problem(name):
-    problem = database.get_problem_by_name(name)
-    subprocess.call(["rm", "-rf", problem.path])
-    database.delete_problem(problem.id)
+    def _git_clone(self):
+        os.mkdir(self.path)
+        logging.debug(f"git clone {self.location} -> {self.path}")
+        subprocess.call(["git", "clone", self.location, self.path])
 
+    def _generate_files(self):
+        files_dir = os.path.join(self.path, ".generated")
+        pd = PackGeneratedDirectory(self.path, allowed_languages=config.get("allowed_languages", None))
+
+        for path, generator in pd.targets:
+            directory = os.path.join(files_dir, os.path.split(path)[0])
+            filename = os.path.split(path)[1]
+            os.makedirs(directory, exist_ok=True)
+            with open(os.path.join(directory, filename), "w") as file:
+                generator(file)
+
+        os.chdir(files_dir)
+        subprocess.call(["zip", "-r", self.files_zip, "."])

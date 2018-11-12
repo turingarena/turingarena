@@ -1,11 +1,11 @@
+import sys
 from abc import ABC
 from argparse import ArgumentParser
 
 from tabulate import tabulate
-from turingarena_web.problem import install_problem, update_problem, delete_problem
+from turingarena_web.problem import Problem
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
-from turingarena_web.database import database
 
 
 class ProblemCommand(Command, ABC):
@@ -29,7 +29,7 @@ class InstallProblemCommand(ProblemCommand):
     PARSER.add_argument("--title", help="alternative title for the problem")
 
     def run(self):
-        install_problem(
+        Problem.install(
             location=self.args.location,
             name=self.args.name,
             title=self.args.title,
@@ -46,7 +46,8 @@ class UpdateProblemCommand(ProblemCommand):
     PARSER.add_argument("name", help="name of the problem")
 
     def run(self):
-        update_problem(name=self.args.name)
+        problem = Problem.from_name(name=self.args.name)
+        problem.update()
 
 
 class DeleteProblemCommand(ProblemCommand):
@@ -60,11 +61,15 @@ class DeleteProblemCommand(ProblemCommand):
     PARSER.add_argument("--yes", "-y", help="do not ask for confirmation", action="store_true")
 
     def run(self):
+        problem = Problem.from_name(name=self.args.name)
+        if problem is None:
+            print(f"No problem named {self.args.name} found!", file=sys.stderr)
+            exit(1)
         if not self.args.yes:
             confirm = input(f"Do you really want to delete the problem {self.args.name}? (y/n) ")
             if confirm != "y":
                 exit(0)
-        delete_problem(name=self.args.name)
+        problem.delete()
 
 
 class ListProblemCommand(ProblemCommand):
@@ -76,8 +81,7 @@ class ListProblemCommand(ProblemCommand):
     )
 
     def run(self):
-        problems = database.get_all_problems()
-        print(tabulate(problems, headers=["Id", "Name", "Title", "Location", "Path"]))
+        print(tabulate(Problem.problems(), headers=["Id", "Name", "Title", "Location"]))
 
 
 subparsers = ProblemCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")

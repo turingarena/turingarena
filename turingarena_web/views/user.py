@@ -1,17 +1,16 @@
 import re
-from typing import Optional
 
 from flask import Blueprint, request, render_template, session, redirect, url_for, current_app, abort
 
-from turingarena_web.database import database, User
+from turingarena_web.user import User
 
 user = Blueprint("user", __name__)
 
 
-def get_current_user() -> Optional[User]:
+def get_current_user():
     if "username" not in session:
         return None
-    return database.get_user_by_username(session["username"])
+    return User.from_username(session["username"])
 
 
 @user.route("/")
@@ -23,7 +22,7 @@ def user_():
 
 @user.route("/<username>")
 def user_view(username):
-    return render_template("user.html", user=database.get_user_by_username(username))
+    return render_template("user.html", user=User.from_username(username))
 
 
 @user.route("/login", methods=("GET", "POST"))
@@ -35,7 +34,8 @@ def login():
     username = request.form["username"]
     password = request.form["password"]
 
-    if database.user_authenticate(username, password):
+    user = User.from_username(username)
+    if user.auth(password):
         session["username"] = username
         if redirect_url is None:
             redirect_url = url_for("user.user_view", username=username)
@@ -77,7 +77,7 @@ def register():
 
     assert len(password) > 4 and password == password2
 
-    assert database.insert_user(
+    assert User.insert(
         username=username,
         first_name=first_name,
         last_name=last_name,

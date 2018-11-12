@@ -1,10 +1,11 @@
+import sys
 from abc import ABC
 from argparse import ArgumentParser
 from tabulate import tabulate
 
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
-from turingarena_web.database import database
+from turingarena_web.user import User, UserPrivilege
 
 
 class UserCommand(Command, ABC):
@@ -32,6 +33,9 @@ class AddUserCommand(UserCommand):
 
     def run(self):
         print(f"Creating user {self.args.username}")
+        if User.from_username(self.args.username) is not None:
+            print(f"A user with username '{self.args.username}' already exists!", file=sys.stderr)
+            exit(1)
         if self.args.first_name is None:
             self.args.first_name = input("First name: ")
         if self.args.last_name is None:
@@ -44,7 +48,7 @@ class AddUserCommand(UserCommand):
             confirm = input("Is the data inserted correct? (y/n)")
             if confirm != "y":
                 exit(0)
-        database.insert_user(
+        User.insert(
             username=self.args.username,
             first_name=self.args.first_name,
             last_name=self.args.last_name,
@@ -60,19 +64,20 @@ class SetUserPrivilegeCommand(UserCommand):
         parents=[UserCommand.PARSER],
         add_help=False,
     )
-    PARSER.add_argument("user", help="user for changing privilege to")
+    PARSER.add_argument("username", help="user for changing privilege to")
     PARSER.add_argument("privilege", help="privilege level for user", choices=["STANDARD", "TUTOR", "ADMIN"])
     PARSER.add_argument("--yes", "-y", help="do not ask for confirmation", action="store_true")
 
     def run(self):
+        user = User.from_username(self.args.username)
+        if user is None:
+            print(f"No user with username '{self.args.username}' exists!", file=sys.stderr)
+            exit(1)
         if not self.args.yes:
-            confirm = input(f"Setting privilege of user {self.args.user} to {self.args.privilege}. Confirm? (y/n) ")
+            confirm = input(f"Setting privilege of user {self.args.username} to {self.args.privilege}. Confirm? (y/n) ")
             if confirm != "y":
                 exit(0)
-        database.set_user_privilete(
-            user=self.args.user,
-            privilege=self.args.privilege,
-        )
+        user.set_privilege(UserPrivilege(self.args.privilege))
 
 
 class DeleteUserCommand(UserCommand):
@@ -86,24 +91,15 @@ class DeleteUserCommand(UserCommand):
     PARSER.add_argument("--yes", "-y", help="do not ask for confirmation", action="store_true")
 
     def run(self):
+        user = User.from_username(self.args.username)
+        if user is None:
+            print(f"No user with username '{self.args.username}' exists!", file=sys.stderr)
+            exit(1)
         if not self.args.yes:
             confirm = input(f"Really delete user {self.args.username}? (y/n) ")
             if confirm != "y":
                 exit(0)
-        database.delete_user(username=self.args.username)
-
-
-class ImportUserCommand(UserCommand):
-    NAME = "import"
-    PARSER = ArgumentParser(
-        description="import users from a CMS-like yaml file",
-        parents=[UserCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("filename")
-
-    def run(self):
-        raise NotImplementedError("this command will be implemented in a future release")
+        user.delete()
 
 
 class ListUserCommand(UserCommand):
@@ -115,13 +111,12 @@ class ListUserCommand(UserCommand):
     )
 
     def run(self):
-        users = database.get_users()
-        print(tabulate(users, headers=["Id", "First name", "Last name", "Username", "Email", "Privilege"]))
+        print(tabulate(User.users(), headers=["Id", "First name", "Last name", "Username", "Email", "Password", "Privilege"]))
 
 
 subparsers = UserCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 subparsers.required = True
 add_subparser(subparsers, AddUserCommand)
 add_subparser(subparsers, DeleteUserCommand)
-add_subparser(subparsers, ImportUserCommand)
 add_subparser(subparsers, ListUserCommand)
+add_subparser(subparsers, SetUserPrivilegeCommand)

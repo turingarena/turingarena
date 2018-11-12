@@ -17,38 +17,36 @@ CREATE TABLE _user (
 
 CREATE TABLE problem (
   id       SERIAL PRIMARY KEY,
-  name     VARCHAR(100) UNIQUE NOT NULL CHECK (LENGTH(name) > 0),
+  name     VARCHAR(100) UNIQUE NOT NULL CHECK (name SIMILAR TO '[a-zA-Z0-9_]+'),
   title    VARCHAR(100)        NOT NULL CHECK (LENGTH(title) > 0),
-  location VARCHAR(100)        NOT NULL CHECK (LENGTH(location) > 0),
-  path     VARCHAR(200)        NOT NULL CHECK (LENGTH(path) > 0)
+  location VARCHAR(100)        NOT NULL CHECK (LENGTH(location) > 0)
 );
 
 CREATE TABLE submission (
   id         SERIAL PRIMARY KEY,
-  problem_id INTEGER      NOT NULL REFERENCES problem (id),
-  user_id    INTEGER      NOT NULL REFERENCES _user (id),
+  problem_id INTEGER      NOT NULL REFERENCES problem (id) ON DELETE CASCADE,
+  user_id    INTEGER      NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   timestamp  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  filename   VARCHAR(100) NOT NULL CHECK (LENGTH(filename) > 0),
-  path       VARCHAR(100) NOT NULL
+  filename   VARCHAR(100) NOT NULL CHECK (LENGTH(filename) > 0)
 );
 
 CREATE TABLE goal (
   id         SERIAL PRIMARY KEY,
-  problem_id INTEGER REFERENCES problem (id),
+  problem_id INTEGER REFERENCES problem (id) ON DELETE CASCADE,
   name       VARCHAR(100) NOT NULL CHECK (LENGTH(name) > 0),
   UNIQUE (problem_id, name)
 );
 
 CREATE TABLE acquired_goal (
-  goal_id       INTEGER REFERENCES goal (id),
-  submission_id INTEGER REFERENCES submission (id),
+  goal_id       INTEGER REFERENCES goal (id) ON DELETE CASCADE,
+  submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,
   PRIMARY KEY (goal_id, submission_id)
 );
 
 CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'END');
 
 CREATE TABLE evaluation_event (
-  submission_id INTEGER REFERENCES submission (id),
+  submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,
   serial        SERIAL,
   type          event_type_e NOT NULL,
   data          TEXT,
@@ -58,12 +56,12 @@ CREATE TABLE evaluation_event (
 CREATE TABLE contest (
   id     SERIAL PRIMARY KEY,
   name   VARCHAR(100) NOT NULL UNIQUE,
-  public BOOLEAN
+  public BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE user_contest (
-  contest_id INTEGER REFERENCES contest (id) ON DELETE CASCADE ,
-  user_id    INTEGER REFERENCES _user (id) ON DELETE CASCADE ,
+  contest_id INTEGER REFERENCES contest (id) ON DELETE CASCADE,
+  user_id    INTEGER REFERENCES _user (id) ON DELETE CASCADE,
   PRIMARY KEY (contest_id, user_id)
 );
 

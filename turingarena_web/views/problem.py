@@ -1,10 +1,9 @@
-import os
+from flask import Blueprint, render_template, abort, request, send_file
+from turingarena_web.contest import Contest
 
-from commonmark import commonmark
-from flask import Blueprint, render_template, abort, request, send_from_directory
-
-from turingarena_web.database import database
 from turingarena_web.evaluate import evaluate
+from turingarena_web.problem import Problem
+from turingarena_web.submission import Submission
 from turingarena_web.views.user import get_current_user
 
 problem_bp = Blueprint("problem", __name__)
@@ -16,7 +15,12 @@ def problem_view(name):
     if request.method == "POST" and current_user is None:
         return abort(401)
 
-    problem = database.get_problem_by_name(name)
+    problem = Problem.from_name(name)
+    if problem is None:
+        return abort(404)
+
+    if not Contest.exists_with_user_and_problem(current_user, problem):
+        return abort(403)
 
     error = None
     if request.method == "POST":
@@ -25,24 +29,15 @@ def problem_view(name):
         except RuntimeError as e:
             error = str(e)
 
-    statement_file = os.path.join(problem.path, ".generated", "statement.md")
-    statement = ""
-    if os.path.exists(statement_file):
-        with open(statement_file) as f:
-            statement = commonmark(f.read())
-
-    if problem is None:
-        return abort(404)
-
     subs = []
 
     if current_user is not None:
-        subs = database.get_submissions_by_user_and_problem(user_id=current_user.id, problem_id=problem.id)
+        subs = Submission.from_user_and_problem(current_user, problem)
 
-    return render_template("problem.html", error=error, name=name, title=problem.title, statement=statement, user=current_user, submissions=subs)
+    return render_template("problem.html", error=error, problem=problem, user=current_user, submissions=subs)
 
 
 @problem_bp.route("/files/<name>.zip")
 def files(name):
-    problem = database.get_problem_by_name(name)
-    return send_from_directory(directory=problem.path, filename=f"{name}.zip")
+    problem = Problem.from_name(name)
+    return send_file(problem.files_zip)
