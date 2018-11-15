@@ -7,6 +7,7 @@ try:
 except ImportError:
     argcomplete = None
 
+from turingarena_web import init_logger
 from turingarena_web.cli.command import add_subparser
 from turingarena_web.cli.contest import ContestCommand
 from turingarena_web.cli.problem import ProblemCommand
@@ -29,7 +30,7 @@ def main():
 
     args = PARSER.parse_args()
 
-    # TODO: init_logger(args.log_level)
+    init_logger(args.log_level, isatty=True)
 
     command = args.Command(args=args, cwd=os.curdir)
     command.run()

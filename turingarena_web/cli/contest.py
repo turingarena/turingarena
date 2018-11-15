@@ -28,10 +28,10 @@ class NewContestCommand(ContestCommand):
         parents=[ContestCommand.PARSER],
         add_help=False
     )
-    PARSER.add_argument("name", help="name of the new contest")
+    PARSER.add_argument("contest", help="name of the new contest")
 
     def run(self):
-        Contest.new_contest(self.args.name)
+        Contest.new_contest(self.args.contest)
 
 
 class DeleteContestCommand(ContestCommand):
@@ -41,10 +41,24 @@ class DeleteContestCommand(ContestCommand):
         parents=[ContestCommand.PARSER],
         add_help=False
     )
-    PARSER.add_argument("name", help="name of the contest to delete")
+    PARSER.add_argument("contest", help="name of the contest to delete")
 
     def run(self):
-        Contest.delete_contest(self.args.name)
+        Contest.delete_contest(self.args.contest)
+
+
+class ScoreBoardContestCommand(ContestCommand):
+    NAME = "scoreboard"
+    PARSER = ArgumentParser(
+        description="get scoreboard of contest",
+        parents=[ContestCommand.PARSER],
+        add_help=False,
+    )
+    PARSER.add_argument("contest", help="name of the contest")
+
+    def run(self):
+        contest = Contest.from_name(self.args.contest)
+        print(tabulate(contest.scoreboard, headers=("Username", "Solved problems", "Goals")))
 
 
 class AddContestCommand(ContestCommand, ABC):
@@ -255,3 +269,4 @@ add_subparser(subparsers, DeleteContestCommand)
 add_subparser(subparsers, ListContestCommand)
 add_subparser(subparsers, AddContestCommand)
 add_subparser(subparsers, RemoveContestCommand)
+add_subparser(subparsers, ScoreBoardContestCommand)

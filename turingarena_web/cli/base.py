@@ -4,7 +4,7 @@ LOG_LEVELS = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 LOG_LEVELS = [l.lower() for l in LOG_LEVELS]
 
 BASE_PARSER = argparse.ArgumentParser(
-    description="Turingarena CLI",
+    description="Turingarena Web control CLI",
     add_help=False,
 )
 BASE_PARSER.add_argument(

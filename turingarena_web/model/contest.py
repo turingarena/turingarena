@@ -60,6 +60,32 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
         query = "SELECT 1 FROM problem_contest WHERE contest_id = %s AND problem_id = %s"
         return database.query_exists(query, self.id, problem.id)
 
+    def user_score(self, user):
+        problem_solved = 0
+        total_goals = 0
+        solved_goals = 0
+        for problem in self.problems:
+            n_goals = problem.n_goals
+            correct_goals = problem.max_goals_of_user_in_contest(user, self)
+            if correct_goals == n_goals and n_goals != 0:
+                problem_solved += 1
+            total_goals += n_goals
+            solved_goals += correct_goals
+        return problem_solved, solved_goals, total_goals
+
+    @property
+    def scoreboard(self):
+        n_problems = len(list(self.problems))
+        board = []
+        for user in self.users:
+            solved, goals, total = self.user_score(user)
+            board.append((user.username, solved, goals, total))
+        board.sort(key=lambda x: x[1])
+        return [
+            (username, f"{s}/{n_problems}", f"{g}/{t}")
+            for username, s, g, t in board
+        ]
+
     @staticmethod
     def of_user(user):
         query = """

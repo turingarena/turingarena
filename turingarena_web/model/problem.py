@@ -126,6 +126,10 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         scoring_metadata = problem.metadata.get("scoring", {})
         goals = scoring_metadata.get("goals", [])
 
+        if len(goals) == 0:
+            logging.warning(f"The problem {name} doesn't define any goal! "
+                            "Make sure that at least one goal is defined in turingarena.toml for scoring purposes!")
+
         for goal in goals:
             Goal.insert(problem, goal)
 

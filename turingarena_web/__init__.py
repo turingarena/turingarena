@@ -1,6 +1,3 @@
-import logging
-import sys
-
 from flask import Flask
 
 from turingarena_web.controller.user import user_bp
@@ -8,19 +5,8 @@ from turingarena_web.controller.root import root_bp
 from turingarena_web.controller.problem import problem_bp
 from turingarena_web.controller.submission import submission_bp
 from turingarena_web.controller.contest import contest_bp
-from .config import config
-
-
-def init_logger(app, level):
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(level)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s: %(message)s"
-    ))
-    logging.getLogger().addHandler(handler)
-    logging.getLogger().setLevel(level)
-    app.logger.handlers = []
-    app.logger.propagate = True
+from turingarena_web.config import config
+from turingarena_web.logging import init_logger
 
 
 def create_app():
@@ -32,9 +18,6 @@ def create_app():
     app.register_blueprint(submission_bp, url_prefix="/submission")
     app.register_blueprint(contest_bp, url_prefix="/contest")
 
-    init_logger(app, app.config.get("LOG_LEVEL", "INFO"))
+    init_logger()
+
     return app
-
-
-if __name__ == "__main__":
-    create_app().run()

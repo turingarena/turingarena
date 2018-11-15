@@ -1,4 +1,3 @@
-import logging
 import os
 import toml
 
@@ -22,7 +21,6 @@ def find_config_path():
 
 def load_config():
     path = find_config_path()
-    logging.debug(f"loading config file {path}")
     with open(path) as f:
         return toml.load(f)
 
