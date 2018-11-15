@@ -32,29 +32,40 @@ class AddUserCommand(UserCommand):
     PARSER.add_argument("--yes", "-y", help="do not ask for confirmation", action="store_true")
 
     def run(self):
-        print(f"Creating user {self.args.username}")
+        print(f"Creating user with username: {self.args.username}")
         if User.from_username(self.args.username) is not None:
             print(f"A user with username '{self.args.username}' already exists!", file=sys.stderr)
             exit(1)
         if self.args.first_name is None:
             self.args.first_name = input("First name: ")
+        else:
+            print(f"First name: {self.args.first_name}")
         if self.args.last_name is None:
             self.args.last_name = input("Last name: ")
+        else:
+            print(f"Last name: {self.args.last_name}")
         if self.args.email is None:
             self.args.email = input("Email: ")
+        else:
+            print(f"Email: {self.args.email}")
         if self.args.password is None:
             self.args.password = input("Password (min 8 char): ")
+        else:
+            print(f"Password: {self.args.password}")
         if not self.args.yes:
             confirm = input("Is the data inserted correct? (y/n)")
             if confirm != "y":
                 exit(0)
-        User.insert(
+        if User.insert(
             username=self.args.username,
             first_name=self.args.first_name,
             last_name=self.args.last_name,
             email=self.args.email,
             password=self.args.password,
-        )
+        ) is None:
+            print("There was an error inserting the user into the system")
+        else:
+            print(f"The user {self.args.username} was correctly inserted in the system")
 
 
 class SetUserPrivilegeCommand(UserCommand):

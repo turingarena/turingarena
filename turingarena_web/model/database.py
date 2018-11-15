@@ -11,10 +11,10 @@ class Database:
     @lru_cache(None)
     def _connection(self) -> psycopg2.extensions.connection:
         connection = psycopg2.connect(
-            dbname=config["database"]["name"],
-            user=config["database"]["user"],
-            password=config["database"]["pass"],
-            host=config["database"]["host"],
+            dbname=config.database["name"],
+            user=config.database["user"],
+            password=config.database["pass"],
+            host=config.database["host"],
         )
         return connection
 

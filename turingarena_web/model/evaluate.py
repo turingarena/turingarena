@@ -19,13 +19,6 @@ def available_languages():
     return Language.languages()
 
 
-def available_extensions():
-    return [
-        lang.extension
-        for lang in available_languages()
-    ]
-
-
 def evaluate_thread(problem, submission):
     evaluator = Evaluator(problem.path)
     submission_files = dict(
@@ -48,15 +41,16 @@ def evaluate_thread(problem, submission):
     submission.set_status(SubmissionStatus.EVALUATED)
 
 
-def evaluate(current_user, problem):
+def evaluate(current_user, problem, contest):
     submitted_file = request.files["source"]
 
     ext = os.path.splitext(submitted_file.filename)[1]
 
-    if ext not in available_extensions():
+    allowed_extensions = [Language.from_name(lang).extension for lang in contest.allowed_languages]
+    if ext not in allowed_extensions:
         raise RuntimeError(f"Unsupported file extension {ext}: please select another file!")
 
-    submission = Submission.new(current_user, problem, submitted_file.filename)
+    submission = Submission.new(current_user, problem, contest, submitted_file.filename)
 
     os.makedirs(os.path.split(submission.path)[0], exist_ok=True)
     submitted_file.save(submission.path)

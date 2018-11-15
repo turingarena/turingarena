@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 {% set title = user.username %}
 {% block body %}
-    <div class="container">
-        First name: {{ user.first_name }}<br>
-        Last name: {{ user.last_name }}<br>
-        Email: {{ user.email }}<br>
-        Privilege: {{ user.privilege }}<br>
+    <p>First name: {{ user.first_name }}</p>
+    <p>Last name: {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    {% if user.privilege != "STANDARD" %}
+        <p>Privilege: {{ user.privilege }}</p>
+    {% endif %}
+    <div>
+        <p>Your contests:</p>
+        <ul>
+            {% for contest in contests %}
+                <li>{{ contest.name }}</li>
+            {% endfor %}
+        </ul>
     </div>
 {% endblock %}

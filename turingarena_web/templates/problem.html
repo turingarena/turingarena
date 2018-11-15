@@ -2,7 +2,7 @@
 {% set title = problem.title %}
 {% block body %}
     <div id="statement">
-        {{ problem.statement | safe }}
+        {{ problem.statement(contest) | safe }}
     </div>
     <div>
     </div>

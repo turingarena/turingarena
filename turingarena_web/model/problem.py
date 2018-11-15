@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 from collections import namedtuple
 
@@ -37,15 +38,16 @@ class Goal(namedtuple("Goal", ["id", "problem_id", "name"])):
 
 
 class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
-    @property
-    def statement(self):
-        path = os.path.join(self.path, ".generated", "statement.md")
+    def statement(self, contest):
+        path = os.path.join(self.files_dir(contest), ".generated", "statement.md")
         with open(path) as f:
             return commonmark(f.read())
 
-    @property
-    def files_zip(self):
-        return os.path.join(self.path, f"{self.name}.zip")
+    def zip_path(self, contest):
+        return os.path.join(self.files_dir(contest), f"{self.name}.zip")
+
+    def files_dir(self, contest):
+        return os.path.join(self.path, "files", contest.name)
 
     @property
     def metadata(self):
@@ -53,15 +55,36 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
 
     @property
     def path(self):
-        return config["problem_dir_path"].format(name=self.name)
+        return config.problem_dir_path.format(name=self.name)
 
     @property
     def goals(self):
         query = "SELECT * FROM goal WHERE problem_id = %s"
         return database.query_all(query, self.id, convert=Goal)
 
+    @property
+    def n_goals(self):
+        query = "SELECT COUNT(*) FROM goal WHERE problem_id = %s"
+        return database.query_one(query, self.id, convert=int)
+
+    @property
+    def contests(self):
+        from turingarena_web.model.contest import Contest
+        return Contest.with_problem(self)
+
     def goal(self, name):
         return Goal.from_problem_and_name(self, name)
+
+    def max_goals_of_user_in_contest(self, user, contest):
+        query = """
+            SELECT MAX(n_goals) FROM (
+                SELECT COUNT(*) AS n_goals, s.id 
+                FROM acquired_goal ac JOIN submission s ON ac.submission_id = s.id 
+                GROUP BY s.id
+                HAVING s.contest_id = %s AND s.user_id = %s and s.problem_id = %s
+            ) AS goals_of_submission
+        """
+        return database.query_one(query, contest.id, user.id, self.id, convert=lambda x: 0 if x is None else int(x))
 
     @staticmethod
     def problems():
@@ -87,6 +110,9 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         """
         return database.query_all(query, contest.id, convert=Problem)
 
+    def delete_files(self, contest):
+        shutil.rmtree(self.files_dir(contest), ignore_errors=True)
+
     @staticmethod
     def install(location, name=None, title=None):
         if name is None:
@@ -97,7 +123,6 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         query = "INSERT INTO problem(name, title, location) VALUES (%s, %s, %s) RETURNING *"
         problem = Problem(*database.query_one(query, name, title, location))
         problem._git_clone()
-        problem._generate_files()
         scoring_metadata = problem.metadata.get("scoring", {})
         goals = scoring_metadata.get("goals", [])
 
@@ -113,16 +138,20 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
     def update(self):
         os.chdir(self.path)
         subprocess.call(["git", "pull"])
-        self._generate_files()
+        for contest in self.contests:
+            self.update_files(contest)
 
     def _git_clone(self):
         os.mkdir(self.path)
         logging.debug(f"git clone {self.location} -> {self.path}")
         subprocess.call(["git", "clone", self.location, self.path])
 
-    def _generate_files(self):
-        files_dir = os.path.join(self.path, ".generated")
-        pd = PackGeneratedDirectory(self.path, allowed_languages=config.get("allowed_languages", None))
+    def update_files(self, contest):
+        logging.info(f"Generating file for contest {contest}")
+        self.delete_files(contest)
+        files_dir = os.path.join(self.files_dir(contest), ".generated")
+        os.makedirs(files_dir)
+        pd = PackGeneratedDirectory(self.path, allowed_languages=contest.allowed_languages)
 
         for path, generator in pd.targets:
             directory = os.path.join(files_dir, os.path.split(path)[0])
@@ -132,4 +161,4 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
                 generator(file)
 
         os.chdir(files_dir)
-        subprocess.call(["zip", "-r", self.files_zip, "."])
+        subprocess.call(["zip", "-r", self.zip_path(contest), "."])

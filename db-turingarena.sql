@@ -22,11 +22,19 @@ CREATE TABLE problem (
   location VARCHAR(100)        NOT NULL CHECK (LENGTH(location) > 0)
 );
 
+CREATE TABLE contest (
+  id                SERIAL PRIMARY KEY,
+  name              VARCHAR(100)      NOT NULL UNIQUE,
+  public            BOOLEAN           NOT NULL DEFAULT FALSE,
+  allowed_languages VARCHAR(20) ARRAY NOT NULL
+);
+
 CREATE TYPE submission_status_e AS ENUM ('RECEIVED', 'EVALUATING', 'EVALUATED');
 
 CREATE TABLE submission (
   id         SERIAL PRIMARY KEY,
   problem_id INTEGER             NOT NULL REFERENCES problem (id) ON DELETE CASCADE,
+  contest_id INTEGER             NOT NULL REFERENCES contest (id) ON DELETE CASCADE,
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   timestamp  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
   filename   VARCHAR(100)        NOT NULL CHECK (LENGTH(filename) > 0),
@@ -54,13 +62,6 @@ CREATE TABLE evaluation_event (
   type          event_type_e NOT NULL,
   data          TEXT,
   PRIMARY KEY (submission_id, serial)
-);
-
-CREATE TABLE contest (
-  id                SERIAL PRIMARY KEY,
-  name              VARCHAR(100)      NOT NULL UNIQUE,
-  public            BOOLEAN           NOT NULL DEFAULT FALSE,
-  allowed_languages VARCHAR(20) ARRAY NOT NULL
 );
 
 CREATE TABLE user_contest (

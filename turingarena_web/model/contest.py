@@ -34,21 +34,27 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
         query = "SELECT 1 FROM user_contest WHERE contest_id = %s AND user_id = %s"
         return database.query_exists(query, self.id, user.id)
 
-    def add_problem(self, problem_name):
+    def add_problem(self, problem):
         query = """
-            INSERT INTO problem_contest(problem_id, contest_id) VALUES (
-                (SELECT id FROM problem WHERE name = %s),
-                %s
-            )
+            INSERT INTO problem_contest(problem_id, contest_id) VALUES (%s, %s)
         """
-        database.query(query, problem_name, self.id)
+        database.query(query, problem.id, self.id)
+        problem.update_files(self)
 
-    def remove_problem(self, problem_name):
+    def add_language(self, language):
+        query = "UPDATE contest SET allowed_languages = array_append(allowed_languages, %s) WHERE id = %s"
+        database.query(query, language, self.id)
+
+    def remove_language(self, language):
+        query = "UPDATE contest SET allowed_languages = array_remove(allowed_languages, %s) WHERE id = %s"
+        database.query(query, language, self.id)
+
+    def remove_problem(self, problem):
         query = """
-            DELETE FROM problem_contest 
-            WHERE contest_id = %s AND problem_id = (SELECT id FROM problem WHERE name = %s)
+            DELETE FROM problem_contest WHERE contest_id = %s AND problem_id = %s
         """
-        database.query(query, self.id, problem_name)
+        database.query(query, self.id, problem.id)
+        problem.delete_files(self)
 
     def contains_problem(self, problem: Problem):
         query = "SELECT 1 FROM problem_contest WHERE contest_id = %s AND problem_id = %s"
@@ -67,6 +73,11 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
     def from_name(contest_name):
         query = "SELECT * FROM contest WHERE name = %s"
         return database.query_one(query, contest_name, convert=Contest)
+
+    @staticmethod
+    def from_id(contest_id):
+        query = "SELECT * FROM contest WHERE id = %s"
+        return database.query_one(query, contest_id, convert=Contest)
 
     @staticmethod
     def contests():
@@ -91,3 +102,8 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
             WHERE uc.user_id = %s AND pc.problem_id = %s
         """
         return database.query_exists(query, user.id, problem.id)
+
+    @staticmethod
+    def with_problem(problem):
+        query = "SELECT c.* FROM contest c JOIN problem_contest pc ON c.id = pc.contest_id WHERE pc.problem_id = %s"
+        return database.query_all(query, problem.id, convert=Contest)

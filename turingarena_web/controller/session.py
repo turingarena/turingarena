@@ -22,7 +22,7 @@ def get_current_contest():
     contest_id = session.get("current_contest")
     if contest_id is None:
         return None
-    return Contest.from_name(contest_id)
+    return Contest.from_id(contest_id)
 
 
 def set_current_contest(contest):

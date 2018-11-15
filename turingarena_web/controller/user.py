@@ -2,7 +2,8 @@ import re
 
 from flask import Blueprint, request, render_template, redirect, url_for, abort
 
-from turingarena_web.model.user import User
+from turingarena_web.model.contest import Contest
+from turingarena_web.model.user import User, UserPrivilege
 from turingarena_web.config import config
 from turingarena_web.controller import session
 
@@ -11,14 +12,21 @@ user_bp = Blueprint("user", __name__)
 
 @user_bp.route("/")
 def user_():
-    if "username" in session:
-        return redirect(url_for("user.user_view", username=session["username"]))
+    user = session.get_current_user()
+    if user is not None:
+        return redirect(url_for("user.user_view", username=user.username))
     return redirect(url_for("user.login"))
 
 
 @user_bp.route("/<username>")
 def user_view(username):
-    return render_template("user.html", user=User.from_username(username))
+    user = User.from_username(username)
+
+    if user.privilege == UserPrivilege.STANDARD and user != session.get_current_user():
+        return abort(403)
+
+    contests = Contest.of_user(user)
+    return render_template("user.html", user=user, contests=contests)
 
 
 @user_bp.route("/login", methods=("GET", "POST"))

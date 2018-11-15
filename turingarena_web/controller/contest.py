@@ -22,4 +22,5 @@ def contest(contest_name=None):
     if not contest.public and not contest.contains_user(user):
         return abort(403)
 
+    session.set_current_contest(contest)
     return render_template_ex("contest.html", contest=contest)

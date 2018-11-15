@@ -4,6 +4,7 @@ from enum import Enum
 from turingarena.evaluation.events import EvaluationEventType
 
 from turingarena_web.config import config
+from turingarena_web.model.contest import Contest
 from turingarena_web.model.database import database
 from turingarena_web.model.user import User
 from turingarena_web.model.problem import Problem, Goal
@@ -30,11 +31,11 @@ class SubmissionStatus(Enum):
     EVALUATED = "EVALUATED"
 
 
-class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "timestamp", "filename", "status_"])):
+class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "user_id", "timestamp", "filename", "status_"])):
     @staticmethod
-    def from_user_and_problem(user, problem):
-        query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s ORDER BY timestamp DESC"
-        return database.query_all(query, user.id, problem.id, convert=Submission)
+    def from_user_and_problem_and_contest(user, problem, contest):
+        query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s AND contest_id = %s ORDER BY timestamp DESC"
+        return database.query_all(query, user.id, problem.id, contest.id, convert=Submission)
 
     @staticmethod
     def from_id(submission_id):
@@ -42,9 +43,9 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "times
         return database.query_one(query, submission_id, convert=Submission)
 
     @staticmethod
-    def new(user, problem, filename):
-        query = "INSERT INTO submission(problem_id, user_id, filename) VALUES (%s, %s, %s) RETURNING *"
-        return database.query_one(query, problem.id, user.id, filename, convert=Submission)
+    def new(user, problem, contest, filename):
+        query = "INSERT INTO submission(problem_id, contest_id, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
+        return database.query_one(query, problem.id, contest.id, user.id, filename, convert=Submission)
 
     @property
     def status(self):
@@ -55,16 +56,21 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "times
         return Problem.from_id(self.problem_id)
 
     @property
+    def contest(self):
+        return Contest.from_id(self.contest_id)
+
+    @property
     def user(self):
         return User.from_id(self.user_id)
 
     @property
     def path(self):
-        return config["submitted_file_path"].format(
+        return config.submitted_file_path.format(
             problem_name=self.problem.name,
             username=self.user.username,
             timestamp=str(self.timestamp).replace(' ', '_'),
-            filename=self.filename
+            filename=self.filename,
+            contest_name=self.contest.name
         )
 
     @property

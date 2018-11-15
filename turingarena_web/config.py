@@ -1,6 +1,5 @@
 import logging
 import os
-
 import toml
 
 DEFAULT_CONFIG_PATHS = [
@@ -28,4 +27,15 @@ def load_config():
         return toml.load(f)
 
 
-config = load_config()
+class Config:
+    def __init__(self):
+        self.__dict__ = load_config()
+
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
+    def get(self, key, default=None):
+        return self.__dict__.get(key, default)
+
+
+config = Config()

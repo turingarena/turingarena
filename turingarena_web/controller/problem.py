@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, abort, request, send_file
-from turingarena_web.model.contest import Contest
+
+from turingarena_web.controller import session
 
 from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.problem import Problem
@@ -19,25 +20,29 @@ def problem_view(name):
     if problem is None:
         return abort(404)
 
-    if not Contest.exists_with_user_and_problem(current_user, problem):
+    contest = session.get_current_contest()
+    if contest is None or not contest.contains_user(current_user):
         return abort(403)
 
     error = None
     if request.method == "POST":
         try:
-            return evaluate(current_user, problem)
+            return evaluate(current_user, problem, contest)
         except RuntimeError as e:
             error = str(e)
 
     subs = []
 
     if current_user is not None:
-        subs = Submission.from_user_and_problem(current_user, problem)
+        subs = Submission.from_user_and_problem_and_contest(current_user, problem, contest)
 
-    return render_template("problem.html", error=error, problem=problem, user=current_user, submissions=subs)
+    return render_template("problem.html", error=error, problem=problem, contest=contest, user=current_user, submissions=subs)
 
 
 @problem_bp.route("/files/<name>.zip")
 def files(name):
     problem = Problem.from_name(name)
-    return send_file(problem.files_zip)
+    contest = session.get_current_contest()
+    if problem is None or contest is None:
+        return abort(404)
+    return send_file(problem.zip_path(contest))
