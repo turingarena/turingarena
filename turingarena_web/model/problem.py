@@ -8,7 +8,7 @@ from turingarena.evallib.metadata import load_metadata
 from turingarena.file.generated import PackGeneratedDirectory
 
 from turingarena_web.config import config
-from turingarena_web.database import database
+from turingarena_web.model.database import database
 
 
 class Goal(namedtuple("Goal", ["id", "problem_id", "name"])):

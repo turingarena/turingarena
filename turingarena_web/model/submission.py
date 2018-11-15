@@ -1,22 +1,18 @@
 from collections import namedtuple
 from enum import Enum
 
+from turingarena.evaluation.events import EvaluationEventType
+
 from turingarena_web.config import config
-from turingarena_web.database import database
-from turingarena_web.user import User
-from turingarena_web.problem import Problem, Goal
-
-
-class EvaluationEventType(Enum):
-    TEXT = "TEXT"
-    DATA = "DATA"
-    END = "END"
+from turingarena_web.model.database import database
+from turingarena_web.model.user import User
+from turingarena_web.model.problem import Problem, Goal
 
 
 class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", "type_", "data"])):
     @property
     def type(self):
-        return EvaluationEventType(self.type_)
+        return EvaluationEventType(self.type_.lower())
 
     @staticmethod
     def from_submission(submission):
@@ -26,10 +22,15 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
     @staticmethod
     def insert(submission, event_type, payload):
         query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
-        return database.query_one(query, submission.id, event_type, payload, convert=EvaluationEvent)
+        return database.query_one(query, submission.id, event_type.upper(), payload, convert=EvaluationEvent)
 
 
-class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "timestamp", "filename"])):
+class SubmissionStatus(Enum):
+    EVALUATING = "EVALUATING"
+    EVALUATED = "EVALUATED"
+
+
+class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "timestamp", "filename", "status_"])):
     @staticmethod
     def from_user_and_problem(user, problem):
         query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s ORDER BY timestamp DESC"
@@ -44,6 +45,10 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "times
     def new(user, problem, filename):
         query = "INSERT INTO submission(problem_id, user_id, filename) VALUES (%s, %s, %s) RETURNING *"
         return database.query_one(query, problem.id, user.id, filename, convert=Submission)
+
+    @property
+    def status(self):
+        return SubmissionStatus(self.status_)
 
     @property
     def problem(self):
@@ -79,4 +84,8 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "user_id", "times
         return EvaluationEvent.from_submission(self)
 
     def event(self, event_type, payload):
-        return EvaluationEvent.insert(self, event_type, payload)
+        return EvaluationEvent.insert(self, event_type.value, payload)
+
+    def set_status(self, status):
+        query = "UPDATE submission SET status = %s WHERE id = %s"
+        database.query(query, status.value, self.id)

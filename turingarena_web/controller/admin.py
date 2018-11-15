@@ -1,8 +1,8 @@
 from flask import Blueprint, request, render_template, abort, redirect, url_for
-from turingarena_web.problem import Problem
-from turingarena_web.views.common import render_template_ex, is_admin
+from turingarena_web.model.problem import Problem
+from turingarena_web.controller.common import render_template_ex, is_admin
 
-from turingarena_web.views.user import get_current_user
+from turingarena_web.controller.session import get_current_user
 
 admin_bp = Blueprint("admin", __name__)
 

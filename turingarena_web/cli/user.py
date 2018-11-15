@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
-from turingarena_web.user import User, UserPrivilege
+from turingarena_web.model.user import User, UserPrivilege
 
 
 class UserCommand(Command, ABC):

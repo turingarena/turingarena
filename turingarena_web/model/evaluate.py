@@ -7,7 +7,7 @@ from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType
 
 from turingarena_web.config import config
-from turingarena_web.submission import Submission
+from turingarena_web.model.submission import Submission, SubmissionStatus
 
 
 def available_languages():
@@ -32,18 +32,20 @@ def evaluate_thread(problem, submission):
         source=submission.path
     )
 
+    submission.set_status(SubmissionStatus.EVALUATING)
     for event in evaluator.evaluate(files=submission_files, redirect_stderr=True, log_level="WARNING"):
         if event.type == EvaluationEventType.DATA:
             data = event.payload
-            if "type" in data and data["type"] == "goal_result":
+            if data.get("type") == "goal_result":
                 goal = problem.goal(data["goal"])
                 result = data["result"]
                 if result:
                     goal.acquire(submission)
+                continue  # process next event
 
-        submission.event(event_type=event.type.value.upper(), payload=str(event.payload))
+        submission.event(event_type=event.type, payload=str(event.payload))
 
-    submission.event(event_type="END", payload=None)
+    submission.set_status(SubmissionStatus.EVALUATED)
 
 
 def evaluate(current_user, problem):

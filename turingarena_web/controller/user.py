@@ -1,32 +1,27 @@
 import re
 
-from flask import Blueprint, request, render_template, session, redirect, url_for, abort
+from flask import Blueprint, request, render_template, redirect, url_for, abort
 
-from turingarena_web.user import User
+from turingarena_web.model.user import User
 from turingarena_web.config import config
+from turingarena_web.controller import session
 
-user = Blueprint("user", __name__)
-
-
-def get_current_user():
-    if "username" not in session:
-        return None
-    return User.from_username(session["username"])
+user_bp = Blueprint("user", __name__)
 
 
-@user.route("/")
+@user_bp.route("/")
 def user_():
     if "username" in session:
         return redirect(url_for("user.user_view", username=session["username"]))
     return redirect(url_for("user.login"))
 
 
-@user.route("/<username>")
+@user_bp.route("/<username>")
 def user_view(username):
     return render_template("user.html", user=User.from_username(username))
 
 
-@user.route("/login", methods=("GET", "POST"))
+@user_bp.route("/login", methods=("GET", "POST"))
 def login():
     reg_ok = config.get("allow_registration", False)
     redirect_url = request.args.get("redirect", None)
@@ -37,7 +32,7 @@ def login():
 
     user = User.from_username(username)
     if user.auth(password):
-        session["username"] = username
+        session.set_current_user(user)
         if redirect_url is None:
             redirect_url = url_for("user.user_view", username=username)
         return redirect(redirect_url)
@@ -46,14 +41,13 @@ def login():
                                registrarion_allowed=reg_ok)
 
 
-@user.route("/logout")
+@user_bp.route("/logout")
 def logout():
-    if "username" in session:
-        del session["username"]
+    session.set_current_user(None)
     return redirect(url_for("root.home"))
 
 
-@user.route("/register", methods=("GET", "POST"))
+@user_bp.route("/register", methods=("GET", "POST"))
 def register():
     if not config.get("allow_registration", False):
         return abort(403)
@@ -78,7 +72,7 @@ def register():
 
     assert len(password) > 4 and password == password2
 
-    assert User.insert(
+    user = User.insert(
         username=username,
         first_name=first_name,
         last_name=last_name,
@@ -86,6 +80,6 @@ def register():
         password=password,
     )
 
-    session["username"] = username
+    session.set_current_user(user)
 
     return redirect(url_for("user_view"))

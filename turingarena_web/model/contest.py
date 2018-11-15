@@ -1,10 +1,11 @@
 from collections import namedtuple
 
-from turingarena_web.database import database
-from turingarena_web.problem import Problem
+from turingarena_web.model.database import database
+from turingarena_web.model.problem import Problem
+from turingarena_web.model.user import User
 
 
-class Contest(namedtuple("Contest", ["id", "name", "public"])):
+class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"])):
     @property
     def users(self):
         return User.from_contest(self)
@@ -73,9 +74,9 @@ class Contest(namedtuple("Contest", ["id", "name", "public"])):
         return database.query_all(query, convert=Contest)
 
     @staticmethod
-    def new_contest(contest_name):
-        query = "INSERT INTO contest(name) VALUES (%s)"
-        database.query(query, contest_name)
+    def new_contest(contest_name, public=False, allowed__languages=[]):
+        query = "INSERT INTO contest(name, public, allowed_languages) VALUES (%s, %s, %s)"
+        database.query(query, contest_name, public, allowed__languages)
 
     @staticmethod
     def delete_contest(contest_name):

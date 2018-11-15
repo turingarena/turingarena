@@ -3,7 +3,7 @@ from abc import ABC
 from argparse import ArgumentParser
 
 from tabulate import tabulate
-from turingarena_web.problem import Problem
+from turingarena_web.model.problem import Problem
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
 

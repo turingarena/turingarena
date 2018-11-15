@@ -2,7 +2,7 @@ from collections import namedtuple
 from enum import Enum
 
 import bcrypt
-from turingarena_web.database import database
+from turingarena_web.model.database import database
 
 
 class UserPrivilege(Enum):
@@ -33,10 +33,10 @@ class User(namedtuple("User", ["id", "first_name", "last_name", "username", "ema
         return database.query_all(query, convert=User)
 
     @staticmethod
-    def insert(*, first_name, last_name, username, email, password):
-        query = "INSERT INTO _user(first_name, last_name, username, email, password) VALUES (%s, %s, %s, %s, %s)"
+    def insert(first_name, last_name, username, email, password):
+        query = "INSERT INTO _user(first_name, last_name, username, email, password) VALUES (%s, %s, %s, %s, %s) RETURNING *"
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
-        database.query(query, first_name, last_name, username, email, hashed_password)
+        return database.query_all(query, first_name, last_name, username, email, hashed_password, convert=User)
 
     @property
     def privilege(self):

@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, abort, request, send_file
-from turingarena_web.contest import Contest
+from turingarena_web.model.contest import Contest
 
-from turingarena_web.evaluate import evaluate
-from turingarena_web.problem import Problem
-from turingarena_web.submission import Submission
-from turingarena_web.views.user import get_current_user
+from turingarena_web.model.evaluate import evaluate
+from turingarena_web.model.problem import Problem
+from turingarena_web.model.submission import Submission
+from turingarena_web.controller.session import get_current_user
 
 problem_bp = Blueprint("problem", __name__)
 

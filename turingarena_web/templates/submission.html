@@ -10,7 +10,7 @@
         <h3>Evaluation output</h3>
         <pre>
             {%- for event in events -%}
-                {{ event.data | safe }}
+                {{ event | safe }}
             {%- endfor -%}
         </pre>
     </div>

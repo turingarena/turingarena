@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from tabulate import tabulate
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
-from turingarena_web.contest import Contest
+from turingarena_web.model.contest import Contest
 
 
 class ContestCommand(Command, ABC):
@@ -52,7 +52,7 @@ class ListContestCommand (ContestCommand):
 
     def run(self):
         contests = Contest.contests()
-        print(tabulate(contests, headers=["Id", "Name"]))
+        print(tabulate(contests, headers=["Id", "Name", "Public", "Allowed languages"]))
 
 
 class UserContestCommand(ContestCommand, ABC):
