@@ -1,6 +1,21 @@
 from turingarena.driver.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
 
 
+SKELETON_REAL_MAIN = r"""
+if __name__ == '__main__':
+    import sys
+    import runpy
+    
+    if len(sys.argv) != 2:
+        print("Usage: {} <solution>".format(sys.argv[0]))
+    
+    class Wrapper: pass 
+    solution = Wrapper()
+    solution.__dict__ = runpy.run_path(sys.argv[1])
+    main(solution)
+"""
+
+
 class PythonCodeGen(InterfaceCodeGen):
     def build_method_declaration(self, func):
         arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
@@ -16,17 +31,20 @@ class PythonCodeGen(InterfaceCodeGen):
 class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         yield 'import os as _os'
-        yield 'from _source import *'
         yield
+
+    def generate_footer(self, interface):
+        yield
+        yield SKELETON_REAL_MAIN
 
     def callback_statement(self, callback_statement):
         yield from self.build_method_declaration(callback_statement.callback)
         yield from self.block(callback_statement.callback.synthetic_body)
 
-    def main_statement(self, statement):
+    def generate_main_block(self, interface):
         yield
-        yield 'def main():'
-        yield from self.block(statement.body)
+        yield 'def main(_solution):'
+        yield from self.block(interface.main_block)
 
     def exit_statement(self, exit_statement):
         yield from self.generate_flush()
@@ -71,9 +89,9 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         arguments = ", ".join(value_arguments + callback_arguments)
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
-            yield f'{return_value} = {method_name}({arguments})'
+            yield f'{return_value} = _solution.{method_name}({arguments})'
         else:
-            yield f'{method_name}({arguments})'
+            yield f'_solution{method_name}({arguments})'
 
     def write_statement(self, write_statement):
         args = ', '.join(self.expression(arg) for arg in write_statement.arguments)

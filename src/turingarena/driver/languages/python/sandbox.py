@@ -41,6 +41,8 @@ def main():
     exec(source_string, source.__dict__)
     exec(skeleton_string, skeleton.__dict__)
 
+    skeleton.main(source)
+
 
 if __name__ == "__main__":
     main()
