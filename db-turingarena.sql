@@ -75,3 +75,10 @@ CREATE TABLE problem_contest (
   contest_id INTEGER REFERENCES contest (id) ON DELETE CASCADE,
   PRIMARY KEY (contest_id, problem_id)
 );
+
+CREATE TABLE session (
+  cookie     CHAR(64) PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES _user (id),
+  contest_id INTEGER REFERENCES contest (id),
+  timestamp  TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
