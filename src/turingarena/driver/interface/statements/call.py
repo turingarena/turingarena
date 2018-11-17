@@ -9,6 +9,7 @@ from turingarena.driver.interface.expressions import Expression, IntLiteralExpre
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
+from turingarena.driver.interface.statements.io import WriteStatementSynthetic
 from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
@@ -240,6 +241,11 @@ class MethodCallbacksStopNode(CallStatementNode, AbstractStatement):
 
     def _is_relevant(self):
         return self.method and self.method.callbacks
+
+    def as_write_statement(self):
+        return WriteStatementSynthetic(comment="no more callbacks", arguments=[
+            IntLiteralExpressionSynthetic(value=0),
+        ])
 
     def _get_comment(self):
         return "no more callbacks"

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from turingarena.driver.interface.expressions import IntLiteralExpressionSynthetic
-from turingarena.driver.interface.statements.statement import SyntheticStatement, AbstractStatement
+from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.util.visitor import Visitor
 
 
@@ -203,15 +202,11 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def generate_flush(self):
         pass
 
-    def visit_CheckpointStatement(self, checkpoint_statement):
-        # FIXME: should never call a visit_? method directly
-        return self.visit_WriteStatement(SyntheticStatement("write", None, arguments=[
-            IntLiteralExpressionSynthetic(value=0),
-        ]))
+    def visit_CheckpointStatement(self, s):
+        return self.visit(s.as_write_statement())
 
     def visit_MethodCallbacksStopNode(self, s):
-        # FIXME: should never call a visit_? method directly
-        return self.visit_CheckpointStatement(s)
+        return self.visit(s.as_write_statement())
 
 
 class TemplateCodeGen(InterfaceCodeGen):

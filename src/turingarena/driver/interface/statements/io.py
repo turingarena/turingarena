@@ -5,7 +5,7 @@ from collections import namedtuple
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.exceptions import CommunicationError
-from turingarena.driver.interface.expressions import Expression
+from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import AbstractStatement
@@ -102,10 +102,6 @@ class WriteStatementAst(WriteStatement, ReadWriteStatementAst):
 class CheckpointStatement(AbstractStatement, IntermediateNode):
     __slots__ = []
 
-    @property
-    def statement_type(self):
-        return "checkpoint"
-
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
@@ -126,6 +122,11 @@ class CheckpointStatement(AbstractStatement, IntermediateNode):
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
             context.report_ready()
             return context.result().with_request_processed()
+
+    def as_write_statement(self):
+        return WriteStatementSynthetic(comment=None, arguments=[
+            IntLiteralExpressionSynthetic(value=0),
+        ])
 
 
 class InitialCheckpointStatement(CheckpointStatement):
