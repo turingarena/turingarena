@@ -45,7 +45,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def visit_LoopStatement(self, loop_statement):
         yield "while true; do"
-        yield self.block(loop_statement.body())
+        yield self.block(loop_statement.body)
         yield "done"
 
     def visit_BreakStatement(self, break_statement):
