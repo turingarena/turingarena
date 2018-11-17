@@ -112,8 +112,8 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield
-        yield f"function {self.build_callable_declarator(method_declaration.function)}" + "{"
+        yield f"function {self.build_callable_declarator(m.function)}" + "{"
         yield self.indent("// TODO")
         yield "}"

@@ -64,7 +64,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         yield f"{name}{indexes} = [None] * {size}"
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield from ()
 
     def visit_VariableDeclaration(self, d):
@@ -134,10 +134,10 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
 
 class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield
-        yield from self.build_method_declaration(method_declaration)
-        if method_declaration.has_return_value:
+        yield from self.build_method_declaration(m)
+        if m.has_return_value:
             yield self.indent("return 42")
         else:
             yield self.indent('pass')

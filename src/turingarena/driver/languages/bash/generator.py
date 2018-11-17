@@ -74,7 +74,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         # FIXME: not implemented
         pass
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield from ()
 
     def visit_VariableDeclaration(self, d):
@@ -82,9 +82,9 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
 
 class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
-    def generate_method_declaration(self, method_declaration):
-        arguments = [p.name for p in method_declaration.parameters]
-        yield f"function {method_declaration.name} " "{"
+    def visit_MethodPrototype(self, m):
+        arguments = [p.name for p in m.parameters]
+        yield f"function {m.name} " "{"
         for i, arg in enumerate(arguments):
             yield self.indent(f"{arg}=${i+1}")
         yield self.indent(self.line_comment("TODO"))

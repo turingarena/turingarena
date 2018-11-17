@@ -58,15 +58,15 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         yield f"{name}{indexes} = new int[{size}]{dimensions};"
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
 
-        if method_declaration.callbacks:
-            yield self.indent(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{')
-            for cbks in method_declaration.callbacks:
+        if m.callbacks:
+            yield self.indent(f'interface {self.build_callbacks_interface_name(m)} ''{')
+            for cbks in m.callbacks:
                 yield self.indent(self.generate_callbacks_declaration(cbks))
             yield self.indent('}')
 
-        yield self.indent(f'abstract {self.build_method_signature(method_declaration)};')
+        yield self.indent(f'abstract {self.build_method_signature(m)};')
 
     def generate_main(self, interface):
         yield
@@ -82,7 +82,6 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield f'public {self.build_callback_signature(callback)}' " {"
         yield from self.block(callback.body)
         yield "}"
-        pass
 
     def call_statement_body(self, call_statement):
 
@@ -172,18 +171,18 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
     def generate_header(self, interface):
         yield 'class Solution extends Skeleton {'
 
-    def generate_method_declaration(self, method_declaration):
-        if method_declaration.callbacks:
+    def visit_MethodPrototype(self, m):
+        if m.callbacks:
             yield
             yield self.indent(
-                self.line_comment(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{'))
-            for cbks in method_declaration.callbacks:
+                self.line_comment(f'interface {self.build_callbacks_interface_name(m)} ''{'))
+            for cbks in m.callbacks:
                 yield self.indent(self.line_comment(self.generate_callbacks_declaration(cbks)))
             yield self.indent(self.line_comment('}'))
 
         yield
-        yield self.indent(f"{self.build_method_signature(method_declaration)}" " {")
+        yield self.indent(f"{self.build_method_signature(m)}" " {")
         yield self.indent(self.indent('// TODO'))
-        if method_declaration.has_return_value:
+        if m.has_return_value:
             yield self.indent(self.indent("return 42;"))
         yield self.indent('}')

@@ -37,7 +37,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         yield f"var {d.variable.name} {'[]' * d.variable.dimensions + 'int'}"
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         return []
 
     def generate_constant_declaration(self, name, value):
@@ -152,8 +152,8 @@ class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
     def generate_constant_declaration(self, name, value):
         yield f"const {name} = {value}"
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield
-        yield f"{self.build_method_signature(method_declaration)}" " {"
+        yield f"{self.build_method_signature(m)}" " {"
         yield self.indent("// TODO")
         yield "}"

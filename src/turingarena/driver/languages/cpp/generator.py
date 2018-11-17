@@ -41,8 +41,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         yield f"{name}{indexes} = new int{dimensions}[{size}];"
 
-    def generate_method_declaration(self, method_declaration):
-        yield f"{self.build_method_signature(method_declaration)};"
+    def visit_MethodPrototype(self, m):
+        yield f"{self.build_method_signature(m)};"
 
     def generate_main_block(self, interface):
         yield
@@ -152,13 +152,13 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
     def generate_constant_declaration(self, name, value):
         yield f"const int {name} = {value};"
 
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         yield
-        if method_declaration.description is not None:
-            for line in method_declaration.description.split("\n"):
+        if m.description is not None:
+            for line in m.description.split("\n"):
                 yield self.line_comment(line)
-        yield f"{self.build_method_signature(method_declaration)}" " {"
+        yield f"{self.build_method_signature(m)}" " {"
         yield self.indent("// TODO")
-        if method_declaration.has_return_value:
+        if m.has_return_value:
             yield self.indent("return 42;")
         yield "}"

@@ -58,7 +58,7 @@ class InterfaceCodeGen(CodeGen):
 
     def generate_method_declarations(self, interface):
         for func in interface.methods:
-            yield from self.generate_method_declaration(func)
+            yield from self.visit_MethodPrototype(func)
 
     def generate_constants_declarations(self, constants):
         if constants:
@@ -68,7 +68,7 @@ class InterfaceCodeGen(CodeGen):
             yield
 
     @abstractmethod
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         pass
 
     @abstractmethod
