@@ -72,7 +72,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield
         yield 'public static void main(String args[]) {'
         yield self.indent('Solution __solution = new Solution();')
-        yield from self.block(interface.main_block)
+        yield from self.indent_all(self.visit(interface.main_block))
         yield '}'
 
     def generate_main_block(self, interface):
@@ -80,7 +80,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
 
     def generate_callback(self, callback):
         yield f'public {self.build_callback_signature(callback)}' " {"
-        yield from self.block(callback.body)
+        yield from self.indent_all(self.visit(callback.body))
         yield "}"
 
     def call_statement_body(self, call_statement):
@@ -123,22 +123,22 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f'if ({condition})'' {'
-        yield from self.block(statement.then_body)
+        yield from self.indent_all(self.visit(statement.then_body))
         if statement.else_body is not None:
             yield '} else {'
-            yield from self.block(statement.else_body)
+            yield from self.indent_all(self.visit(statement.else_body))
         yield '}'
 
     def visit_ForStatement(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
         yield f'for (int {index_name} = 0; {index_name} < {size}; {index_name}++)'' {'
-        yield from self.block(statement.body)
+        yield from self.indent_all(self.visit(statement.body))
         yield '}'
 
     def visit_LoopStatement(self, loop_statement):
         yield 'while (true) {'
-        yield from self.block(loop_statement.body)
+        yield from self.indent_all(self.visit(loop_statement.body))
         yield '}'
 
     def build_switch_cases(self, variable, labels):
@@ -148,10 +148,10 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)})'' {'
-        yield from self.block(cases[0].body)
+        yield from self.indent_all(self.visit(cases[0].body))
         for case in cases[1:]:
             yield '}' f' else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) ' '{'
-            yield from self.block(case.body)
+            yield from self.indent_all(self.visit(case.body))
         yield '}'
 
     def generate_flush(self):

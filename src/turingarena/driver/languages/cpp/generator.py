@@ -47,7 +47,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_main_block(self, interface):
         yield
         yield "int main() {"
-        yield from self.block(interface.main_block)
+        yield from self.indent_all(self.visit(interface.main_block))
         yield "}"
 
     def generate_callback(self, callback):
@@ -58,7 +58,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
-        yield from self.block(callback.body)
+        yield from self.indent_all(self.visit(callback.body))
         yield "};"
 
     def generate_constant_declaration(self, name, value):
@@ -104,22 +104,22 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
-        yield from self.block(statement.then_body)
+        yield from self.indent_all(self.visit(statement.then_body))
         if statement.else_body:
             yield "} else {"
-            yield from self.block(statement.else_body)
+            yield from self.indent_all(self.visit(statement.else_body))
         yield "}"
 
     def visit_ForStatement(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from self.block(s.body)
+        yield from self.indent_all(self.visit(s.body))
         yield "}"
 
     def visit_LoopStatement(self, statement):
         yield "while (true) {"
-        yield from self.block(statement.body)
+        yield from self.indent_all(self.visit(statement.body))
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -129,10 +129,10 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, statement):
         cases = [case for case in statement.cases]
         yield f"if ({self.build_switch_condition(statement.variable, cases[0].labels)}) " "{"
-        yield from self.block(cases[0].body)
+        yield from self.indent_all(self.visit(cases[0].body))
         for case in cases[1:]:
             yield "}" f" else if ({self.build_switch_condition(statement.variable, case.labels)}) " "{"
-            yield from self.block(case.body)
+            yield from self.indent_all(self.visit(case.body))
         yield "}"
 
     def visit_ExitStatement(self, statement):

@@ -211,10 +211,6 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def generate_main_block(self, interface):
         yield from self.visit(interface.main_block)
 
-    def block(self, block):
-        yield
-        yield from self.indent_all(self.visit(block))
-
     def generate_statement(self, statement):
         if statement.comment is not None:
             yield self.line_comment(statement.comment)

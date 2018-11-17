@@ -15,7 +15,7 @@ class JavaScriptCodeGen(InterfaceCodeGen):
 class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def generate(self):
         yield "async function init() {}"
-        yield from self.block(self.interface.body)
+        yield from self.indent_all(self.visit(self.interface.body))
 
     def var_statement(self, statement):
         names = ", ".join(v.name for v in statement.variables)
@@ -24,7 +24,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def callback_statement(self, statement):
         callback = statement.callback
         yield f"function {build_callable_declarator(callback)}" + "{"
-        yield from self.block(callback.body)
+        yield from self.indent_all(self.visit(callback.body))
         yield "}"
         yield
 
@@ -32,7 +32,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
         yield
         yield "async function main() {"
         yield self.indent("__load_source__(); // load user source file")
-        yield from self.block(statement.body)
+        yield from self.indent_all(self.visit(statement.body))
         yield "}"
 
     def any_statement(self, statement):
@@ -73,22 +73,22 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
-        yield from self.block(statement.then_body)
+        yield from self.indent_all(self.visit(statement.then_body))
         if statement.else_body is not None:
             yield "} else {"
-            yield from self.block(statement.else_body)
+            yield from self.indent_all(self.visit(statement.else_body))
         yield "}"
 
     def visit_ForStatement(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
         yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from self.block(statement.body)
+        yield from self.indent_all(self.visit(statement.body))
         yield "}"
 
     def visit_LoopStatement(self, loop_statement):
         yield "while (true) {"
-        yield from self.block(loop_statement.body)
+        yield from self.indent_all(self.visit(loop_statement.body))
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -101,13 +101,13 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
-        yield from self.block(cases[0].body)
+        yield from self.indent_all(self.visit(cases[0].body))
         for case in cases[1:]:
             yield "}" f" else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) " "{"
-            yield from self.block(case.body)
+            yield from self.indent_all(self.visit(case.body))
         if switch_statement.default:
             yield "} else {"
-            yield from self.block(switch_statement.default)
+            yield from self.indent_all(self.visit(switch_statement.default))
         yield "}"
 
 
