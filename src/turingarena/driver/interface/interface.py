@@ -1,20 +1,32 @@
 import logging
 
 from turingarena.driver.client.exceptions import InterfaceError
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
-from turingarena.driver.interface.nodes import RequestLookaheadNode
 from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.statements.io import CheckpointNode
+from turingarena.driver.interface.statements.io import InitialCheckpointNode
+from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.driver.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
 
 
+class InterfaceExitNode(AbstractStatement):
+    @property
+    def statement_type(self):
+        return "exit"
+
+    def _get_comment(self):
+        return "terminate"
+
+
 class InterfaceBody(Block):
-    pass
+    def _generate_flat_inner_nodes(self):
+        yield InitialCheckpointNode()
+        yield from super()._generate_flat_inner_nodes()
+        yield InterfaceExitNode()
 
 
 class InterfaceDefinition:
@@ -45,18 +57,10 @@ class InterfaceDefinition:
 
     @property
     def main_block(self):
-        return Block(
+        return InterfaceBody(
             ast=self.ast.main_block,
             context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context()
         )
-
-    @property
-    def main_node(self):
-        return BlockNode.from_nodes([
-            RequestLookaheadNode(),
-            CheckpointNode(),
-            *self.main_block.flat_inner_nodes,
-        ])
 
     @property
     def source_text(self):
@@ -84,10 +88,10 @@ class InterfaceDefinition:
         }
 
     def run_driver(self, context: NodeExecutionContext):
-        description = "\n".join(self.main_node.node_description)
+        description = "\n".join(self.main_block.node_description)
         logger.debug(f"Description: {description}")
 
-        self.main_node.driver_run(context=context.with_assigments(self.constants_references))
+        self.main_block.driver_run(context=context.with_assigments(self.constants_references))
         request = context.next_request()
         command = request.command
         if command != "exit":

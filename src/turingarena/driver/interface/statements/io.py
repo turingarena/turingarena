@@ -2,11 +2,12 @@ import logging
 from abc import abstractmethod
 
 from turingarena.driver.client.exceptions import InterfaceError
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression
-from turingarena.driver.interface.nodes import IntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.statement import Statement
+from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
@@ -89,20 +90,21 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
-class CheckpointStatement(Statement, IntermediateNode):
+class AbstractCheckpointNode(AbstractStatement, IntermediateNode):
     __slots__ = []
 
-    def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
-        yield CheckpointNode()
+    @property
+    def statement_type(self):
+        return "checkpoint"
 
-
-class CheckpointNode(IntermediateNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
     def _get_reference_actions(self):
         return []
+
+    def _needs_request_lookahead(self):
+        return True
 
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.UPWARD:
@@ -115,3 +117,15 @@ class CheckpointNode(IntermediateNode):
                 raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
             context.report_ready()
             return context.result().with_request_processed()
+
+
+class InitialCheckpointNode(AbstractCheckpointNode):
+    def _get_comment(self):
+        return "initial checkpoint"
+
+    def _describe_node(self):
+        yield "initial checkpoint"
+
+
+class CheckpointStatement(AbstractSyntaxNodeWrapper, AbstractCheckpointNode):
+    __slots__ = []

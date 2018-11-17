@@ -3,7 +3,7 @@ from collections import namedtuple
 from typing import List, Mapping, Any
 
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.variables import ReferenceAction, Reference
+from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
 
 Bindings = Mapping[Reference, Any]
 
@@ -14,6 +14,9 @@ class ExecutionResult(namedtuple("ExecutionResult", [
     "does_break",
 ])):
     def merge(self, other):
+        if other is None:
+            return self
+
         return ExecutionResult(
             self.assignments + other.assignments,
             request_lookahead=other.request_lookahead,
@@ -26,6 +29,48 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
 class IntermediateNode:
     __slots__ = []
+
+    def validate(self):
+        return []
+
+    @property
+    def needs_flush(self):
+        return False
+
+    @property
+    def variables_to_declare(self):
+        return frozenset(self._get_variables_to_declare())
+
+    def _get_variables_to_declare(self):
+        for a in self.reference_actions:
+            if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
+                yield a.reference.variable
+
+    @property
+    def variables_to_allocate(self):
+        return list(self._get_allocations())
+
+    def _get_allocations(self):
+        return []
+
+    @property
+    def comment(self):
+        return self._get_comment()
+
+    def _get_comment(self):
+        return None
+
+    @property
+    def does_break(self):
+        return False
+
+    @property
+    def is_relevant(self):
+        "Whether this node should be kept in the parent block"
+        return self._is_relevant()
+
+    def _is_relevant(self):
+        return True
 
     @property
     def reference_actions(self) -> List[ReferenceAction]:
@@ -46,27 +91,52 @@ class IntermediateNode:
     def _get_declaration_directions(self):
         return frozenset()
 
+    @property
+    def first_requests(self):
+        return frozenset(self._get_first_requests())
+
+    def _get_first_requests(self):
+        yield None
+
     def driver_run(self, context):
+        should_lookahead_request = (
+                context.request_lookahead is None
+                and self.needs_request_lookahead
+                and context.phase is ExecutionPhase.REQUEST
+        )
+
+        result = context.result()
+        if should_lookahead_request:
+            lookahead = context.next_request()
+            result = result._replace(
+                request_lookahead=lookahead,
+            )
+            context = context.extend(result)
+
         logging.debug(
             f"driver_run: {type(self).__name__} "
             f"phase: {context.phase} "
             f"request LA: {context.request_lookahead}"
         )
 
-        result = self._driver_run(context)
-        if result is None:
-            result = context.result()
-        return result
+        return result.merge(self._driver_run(context))
 
     def _driver_run(self, context):
         return None
 
     @property
     def can_be_grouped(self):
-        return self._can_be_grouped() and len(self.declaration_directions) <= 1
+        return self._can_be_grouped()
 
     def _can_be_grouped(self):
         return True
+
+    @property
+    def needs_request_lookahead(self):
+        return self._needs_request_lookahead()
+
+    def _needs_request_lookahead(self):
+        return False
 
     @property
     def node_description(self):
@@ -79,21 +149,3 @@ class IntermediateNode:
 
     def _describe_node(self):
         yield str(self)
-
-
-class StatementIntermediateNode(IntermediateNode, namedtuple("StatementIntermediateNode", ["statement"])):
-    __slots__ = []
-
-
-class RequestLookaheadNode(IntermediateNode):
-    def _driver_run(self, context):
-        if context.phase is not ExecutionPhase.REQUEST:
-            return
-        if context.request_lookahead is not None:
-            return
-        return context.result()._replace(
-            request_lookahead=context.next_request(),
-        )
-
-    def _describe_node(self):
-        yield "next request"

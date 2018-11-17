@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from turingarena.driver.interface.expressions import SyntheticExpression
-from turingarena.driver.interface.statements.statement import SyntheticStatement
+from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement, AbstractStatement
 from turingarena.driver.visitors import StatementVisitor, ExpressionVisitor
 
 
@@ -157,17 +157,19 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
         yield
 
     def block_content(self, block):
-        for i, statement in enumerate(block.synthetic_statements):
+        for i, node in enumerate(block.flat_inner_nodes):
             if i > 0:
                 yield
-            if statement.comment is not None:
-                yield self.line_comment(statement.comment)
-            else:
-                for comment in self.statement_comment_generator.statement(statement):
-                    yield self.line_comment(comment)
-            yield from self.generate_statement(statement)
+            yield from self.generate_statement(node)
 
     def generate_statement(self, statement):
+        if statement.comment is not None:
+            yield self.line_comment(statement.comment)
+        else:
+            if isinstance(statement, Statement):
+                for comment in self.statement_comment_generator.statement(statement):
+                    yield self.line_comment(comment)
+
         for var in statement.variables_to_declare:
             yield from self.generate_variable_declaration(var)
 
@@ -179,7 +181,8 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
         if statement.needs_flush:
             yield from self.generate_flush()
 
-        yield from self.statement(statement)
+        if isinstance(statement, AbstractStatement):
+            yield from self.statement(statement)
 
     @abstractmethod
     def generate_variable_allocation(self, variables, indexes, size):

@@ -63,6 +63,7 @@ def run_server(driver_connection, source_path, interface_path):
             request = context.next_request()
             assert False, f"driver was not explicitly stopped, got {request}"
         except CommunicationError as e:
+            logging.debug(f"communication error", exc_info=True)
             context.send_driver_state(DriverState.ERROR)  # error
             info = connection.manager.get_status(kill_reason="communication error")
             message, = e.args

@@ -1,30 +1,48 @@
 import logging
-
+from abc import abstractmethod
 from collections import namedtuple
 
 from turingarena.driver.client.exceptions import InterfaceError
-from turingarena.driver.interface.block import Block, BlockNode
+from turingarena.driver.interface.block import Block, AbstractBlock
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.exceptions import InterfaceExitReached
 from turingarena.driver.interface.execution import RequestSignature
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.expressions import Expression, SyntheticExpression
-from turingarena.driver.interface.nodes import IntermediateNode, StatementIntermediateNode, RequestLookaheadNode
+from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement, SyntheticStatement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
 
+class CallbackBody(AbstractBlock):
+    def __init__(self, implementation):
+        self.implementation = implementation
+
+    def _generate_flat_inner_nodes(self):
+        yield CallbackCallNode(self.implementation)
+
+        callback_index = self.implementation.context.callback_index
+        yield SyntheticStatement("write", "requesting a callback", arguments=[
+            SyntheticExpression("int_literal", value=1),
+        ])
+        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
+        yield SyntheticStatement("write", comment, arguments=[
+            SyntheticExpression("int_literal", value=callback_index),
+        ])
+
+        yield from self.implementation.raw_body.flat_inner_nodes
+
+        if not self.implementation.has_return_value:
+            yield CallbackEndNode(callback=self.implementation)
+
+
 class CallbackImplementation(IntermediateNode, CallbackPrototype):
     __slots__ = []
 
     @property
-    def synthetic_body(self):
-        return SyntheticCallbackBody(self)
-
-    @property
-    def body(self):
+    def raw_body(self):
         inner_context = self.context.local_context.with_reference_actions(
             ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
             for p in self.parameters
@@ -35,15 +53,21 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         )
 
     @property
+    def body(self):
+        return CallbackBody(self)
+
+    @property
     def default_body(self):
         fake_ast_body = [
             namedtuple("write", ["statement_type", "arguments"])("write", [
-                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name, "")
+                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name,
+                                                                                          "")
                 for p in self.parameters
             ])
         ]
         if self.has_return_value:
-            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", "_result", "")
+            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])(
+                "reference_subscript", "_result", "")
             fake_ast_body += [
                 namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
                 namedtuple("ret", ["statement_type", "value"])("return", return_var),
@@ -53,53 +77,34 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def validate(self):
         yield from self.prototype.validate()
 
-    def _generate_inner_nodes(self):
-        yield CallbackCallNode(self)
-        yield from self.body.flat_inner_nodes
-        if not self.has_return_value:
-            yield RequestLookaheadNode()
-            yield CallbackReturnNode(callback=self, return_statement=None)
-
-    @property
-    def body_node(self):
-        return BlockNode.from_nodes(self._generate_inner_nodes())
-
     def _driver_run(self, context):
         assert context.phase is None
         context.report_ready()
         context.send_driver_upward(1)  # has callbacks
         context.send_driver_upward(self.context.callback_index)
-        self.body_node.driver_run(context)
+        self.body.driver_run(context)
 
     def _get_declaration_directions(self):
-        return self.body_node.declaration_directions
+        return self.body.declaration_directions
 
 
-class SyntheticCallbackBody(namedtuple("SyntheticCallbackBody", ["implementation"])):
-    @property
-    def synthetic_statements(self):
-        callback_index = self.implementation.context.callback_index
-        yield SyntheticStatement("write", "requesting a callback", arguments=[
-            SyntheticExpression("int_literal", value=1),
-        ])
-        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
-        yield SyntheticStatement("write", comment, arguments=[
-            SyntheticExpression("int_literal", value=callback_index),
-        ])
-        yield from self.implementation.body.synthetic_statements
+class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
+    "callback_implementation",
+])):
+    def _get_variables_to_declare(self):
+        # parameters are already declared
+        return []
 
-
-class CallbackCallNode(StatementIntermediateNode):
     def _get_reference_actions(self):
-        for p in self.statement.parameters:
-            yield ReferenceAction(reference=p.reference, status=ReferenceStatus.DECLARED)
+        for p in self.callback_implementation.parameters:
+            yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
 
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
-            for p in self.statement.parameters:
+            for p in self.callback_implementation.parameters:
                 r = p.as_reference()
                 value = context.bindings[r]
                 context.send_driver_upward(value)
@@ -108,10 +113,10 @@ class CallbackCallNode(StatementIntermediateNode):
         yield "callback_call"
 
 
-class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
-    "callback",
-    "return_statement",
-])):
+class AbstractCallbackReturnNode(IntermediateNode):
+    def _needs_request_lookahead(self):
+        return True
+
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
             request = context.request_lookahead
@@ -119,39 +124,48 @@ class CallbackReturnNode(IntermediateNode, namedtuple("CallbackReturnNode", [
             if not command == "callback_return":
                 raise InterfaceError(f"expecting 'callback_return', got '{command}'")
 
-            return context.result()._replace(assignments=list(self._get_assignments(context)))
+            return context.result()._replace(
+                assignments=list(self._get_assignments(context))
+            )
+
+    @abstractmethod
+    def _has_return_value(self):
+        pass
 
     def _get_assignments(self, context):
         has_return_value = bool(int(context.receive_driver_downward()))
-        if self.return_statement is not None:
-            if not has_return_value:
-                raise InterfaceError(
-                    f"callback is a function, "
-                    f"but the provided implementation did not return anything"
-                )
-            value = int(context.receive_driver_downward())
-            yield self.return_statement.value.reference, value
-        else:
-            if has_return_value:
-                raise InterfaceError(
-                    f"callback is a procedure, "
-                    f"but the provided implementation returned something"
-                )
 
-    def _describe_node(self):
-        yield f"callback return {self.return_statement or self.callback.name}"
+        if not has_return_value and self._has_return_value():
+            raise InterfaceError(
+                f"callback is a function, "
+                f"but the provided implementation did not return anything"
+            )
+
+        if has_return_value and not self._has_return_value():
+            raise InterfaceError(
+                f"callback is a procedure, "
+                f"but the provided implementation returned something"
+            )
+
+        yield from self._do_get_assignments(context)
+
+    def _do_get_assignments(self, context):
+        return []
 
 
-class ReturnStatement(Statement):
+class ReturnStatement(AbstractCallbackReturnNode, Statement):
     __slots__ = []
+
+    def _has_return_value(self):
+        return True
+
+    def _do_get_assignments(self, context):
+        value = int(context.receive_driver_downward())
+        yield self.value.reference, value
 
     @property
     def value(self):
         return Expression.compile(self.ast.value, self.context.expression(reference=True))
-
-    def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
-        yield CallbackReturnNode(callback=None, return_statement=self)
 
     def validate(self):
         yield from self.value.validate()
@@ -159,13 +173,26 @@ class ReturnStatement(Statement):
     def _get_reference_actions(self):
         yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
 
+    def _describe_node(self):
+        yield f"callback return"
+
+
+class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", ["callback"])):
+    def _has_return_value(self):
+        return False
+
+    def _describe_node(self):
+        yield f"callback end"
+
 
 class ExitStatement(Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):
-        yield RequestLookaheadNode()
         yield self
+
+    def _needs_request_lookahead(self):
+        return True
 
     def validate(self):
         # TODO: check that exit is used only in valid places

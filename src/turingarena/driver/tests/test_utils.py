@@ -52,4 +52,4 @@ def assert_interface_error(text: str, error: str, *args: str):
 
 def assert_interface_diagnostics(interface_text: str, messages: Sequence[str]):
     interface = InterfaceDefinition.compile(interface_text)
-    assert [m.message for m in interface.diagnostics()] == messages
+    assert messages == [m.message for m in interface.diagnostics()]
