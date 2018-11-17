@@ -12,10 +12,6 @@ from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDir
 logger = logging.getLogger(__name__)
 
 
-class ReadStatement(IntermediateNode):
-    __slots__ = []
-
-
 class OutputStatement(IntermediateNode):
     __slots__ = []
 
@@ -42,7 +38,7 @@ class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
         return True
 
 
-class ReadStatement(ReadStatement, ReadWriteStatementAst):
+class ReadStatement(ReadWriteStatementAst, IntermediateNode):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -53,10 +49,6 @@ class ReadStatement(ReadStatement, ReadWriteStatementAst):
 
     def _get_intermediate_nodes(self):
         yield self
-
-    @property
-    def needs_flush(self):
-        return True
 
     def _get_reference_actions(self):
         for exp in self.arguments:

@@ -1,11 +1,13 @@
                 procedure test() callbacks {
-                    procedure c(a, b);
+                    function c(a);
                 }
-
                 main {
                     call test() callbacks {
-                        procedure c(a, b) {
-                            write a, b;
+                        function c(a) {
+                            write a;
+                            read b;
+                            return b;
                         }
                     }
+                    checkpoint;
                 }

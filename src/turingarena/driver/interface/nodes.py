@@ -34,10 +34,6 @@ class IntermediateNode:
         return []
 
     @property
-    def needs_flush(self):
-        return False
-
-    @property
     def variable_declarations(self):
         return frozenset(self._get_variable_declarations())
 

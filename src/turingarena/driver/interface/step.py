@@ -16,7 +16,7 @@ class Step(SequenceNode, namedtuple("Step", ["children"])):
         else:
             result = context.result()
             for phase in ExecutionPhase:
-                if phase == ExecutionPhase.UPWARD and self._get_direction() != ReferenceDirection.UPWARD:
+                if phase == ExecutionPhase.UPWARD and self.direction != ReferenceDirection.UPWARD:
                     continue
                 result = result.merge(self._run_children(context.extend(result)._replace(
                     phase=phase,
@@ -30,17 +30,18 @@ class Step(SequenceNode, namedtuple("Step", ["children"])):
             result = result.merge(n.driver_run(context.extend(result)))
         return result
 
-    def _get_direction(self):
+    @property
+    def direction(self):
         if not self.declaration_directions:
             return None
         [direction] = self.declaration_directions
         return direction
 
     def _describe_node(self):
-        if self._get_direction() is None:
+        if self.direction is None:
             direction = "no direction"
         else:
-            direction = self._get_direction().name.lower()
+            direction = self.direction.name.lower()
         yield f"step {direction} "
         for n in self.children:
             yield from self._indent_all(n.node_description)

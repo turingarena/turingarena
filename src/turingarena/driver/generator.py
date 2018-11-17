@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
 
@@ -201,6 +202,12 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         # ignore any other node
         return []
 
+    def visit_Step(self, s):
+        if s.direction is ReferenceDirection.DOWNWARD:
+            # insert an (upward) flush before receiving data downward
+            yield from self.generate_flush()
+        yield from self.visit_SequenceNode(s)
+
     def generate_main_block(self, interface):
         yield from self.visit(interface.main_block)
 
@@ -221,9 +228,6 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
 
         for a in statement.variable_allocations:
             yield from self.visit(a)
-
-        if statement.needs_flush:
-            yield from self.generate_flush()
 
         yield from self.visit(statement)
 
