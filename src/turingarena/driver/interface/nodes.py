@@ -41,7 +41,12 @@ class IntermediateNode:
     def variables_to_declare(self):
         return frozenset(self._get_variables_to_declare())
 
+    def _should_declare_variables(self):
+        return False
+
     def _get_variables_to_declare(self):
+        if not self._should_declare_variables():
+            return
         for a in self.reference_actions:
             if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
                 yield a.reference.variable

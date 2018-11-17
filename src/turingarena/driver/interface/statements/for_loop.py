@@ -52,6 +52,9 @@ class ForStatement(Statement, IntermediateNode):
         yield None
         yield from self.body.first_requests
 
+    def _should_declare_variables(self):
+        return True
+
     def validate(self):
         yield from self.index.range.validate()
         yield from self.body.validate()

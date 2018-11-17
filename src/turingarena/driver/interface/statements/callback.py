@@ -11,7 +11,7 @@ from turingarena.driver.interface.expressions import Expression, IntLiteralExpre
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.io import OutputStatement
-from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
+from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 logger = logging.getLogger(__name__)
@@ -107,10 +107,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback_implementation",
 ])):
-    def _get_variables_to_declare(self):
-        # parameters are already declared
-        return []
-
     def _get_reference_actions(self):
         for p in self.callback_implementation.parameters:
             yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
@@ -201,7 +197,7 @@ class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", 
         yield f"callback end"
 
 
-class ExitStatement(AbstractStatement):
+class ExitStatement(IntermediateNode):
     __slots__ = []
 
 

@@ -7,17 +7,16 @@ from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
 
-class ReadStatement(AbstractStatement, IntermediateNode):
+class ReadStatement(IntermediateNode):
     __slots__ = []
 
 
-class OutputStatement(AbstractStatement, IntermediateNode):
+class OutputStatement(IntermediateNode):
     __slots__ = []
 
 
@@ -38,6 +37,9 @@ class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
     @abstractmethod
     def _get_arguments_context(self):
         pass
+
+    def _should_declare_variables(self):
+        return True
 
 
 class ReadStatement(ReadStatement, ReadWriteStatementAst):

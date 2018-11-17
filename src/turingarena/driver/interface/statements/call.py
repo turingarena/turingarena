@@ -209,6 +209,9 @@ class MethodReturnNode(CallStatementNode):
         if self.return_value is not None:
             yield from self.return_value.validate()
 
+    def _should_declare_variables(self):
+        return True
+
     def _get_reference_actions(self):
         yield ReferenceAction(self.return_value.reference, ReferenceStatus.DECLARED)
 

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.util.visitor import Visitor
 
 
@@ -146,27 +145,60 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
 class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
 
-    def visit_AbstractStatement(self, s):
-        # fail if we encounter any unhandled AbstractStatement
-        raise NotImplementedError
+    @abstractmethod
+    def visit_ReadStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_OutputStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_CallStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_IfStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_ForStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_LoopStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_SwitchStatement(self, s):
+        pass
+
+    @abstractmethod
+    def visit_ExitStatement(self, statement):
+        pass
+
+    @abstractmethod
+    def visit_ReturnStatement(self, statement):
+        pass
+
+    @abstractmethod
+    def visit_BreakStatement(self, statement):
+        pass
 
     def visit_IntermediateNode(self, s):
         # ignore any other node
         return []
 
+    def visit_SequenceNode(self, node):
+        for child in node.children:
+            yield from self.generate_statement(child)
+
     def generate_main_block(self, interface):
-        yield from self.block_content(interface.main_block)
+        yield from self.visit(interface.main_block)
 
     def block(self, block):
         yield
-        yield from self.indent_all(self.block_content(block))
-        yield
-
-    def block_content(self, block):
-        for i, node in enumerate(block.flat_inner_nodes):
-            if i > 0:
-                yield
-            yield from self.generate_statement(node)
+        yield from self.indent_all(self.visit(block))
 
     def generate_statement(self, statement):
         if statement.comment is not None:
@@ -187,8 +219,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         if statement.needs_flush:
             yield from self.generate_flush()
 
-        if isinstance(statement, AbstractStatement):
-            yield from self.visit(statement)
+        yield from self.visit(statement)
 
     @abstractmethod
     def generate_variable_allocation(self, variables, indexes, size):
