@@ -44,27 +44,3 @@ class StatementVisitor:
 
     def loop_statement(self, loop_statement):
         return NotImplemented
-
-
-class ExpressionVisitor:
-    __slots__ = []
-
-    def expression(self, e):
-        ans = getattr(self, f"{e.expression_type}_expression")(e)
-        if ans is NotImplemented:
-            ans = self.any_expression(e)
-        if ans is NotImplemented:
-            raise NotImplementedError
-        return ans
-
-    def any_expression(self, e):
-        return NotImplemented
-
-    def subscript_expression(self, e):
-        return NotImplemented
-
-    def reference_expression(self, e):
-        return NotImplemented
-
-    def int_literal_expression(self, e):
-        return NotImplemented

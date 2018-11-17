@@ -5,7 +5,7 @@ from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.execution import CallRequestSignature
-from turingarena.driver.interface.expressions import Expression, SyntheticExpression
+from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
@@ -250,7 +250,7 @@ class MethodCallbacksStopNode(CallStatementNode, AbstractStatement):
 
     @property
     def arguments(self):
-        return [SyntheticExpression("int_literal", value=0)]
+        return [IntLiteralExpressionSynthetic(value=0)]
 
 
 class MethodCallbacksNode(CallStatementNode):

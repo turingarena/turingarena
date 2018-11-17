@@ -19,10 +19,6 @@ class Expression:
     def compile(ast, context: ExpressionContext):
         return expression_classes[ast.expression_type](ast, context)
 
-    @property
-    def expression_type(self):
-        return self.ast.expression_type
-
     @abstractmethod
     def evaluate(self, bindings):
         pass
@@ -50,7 +46,7 @@ class Expression:
         return AbstractExpressionCodeGen().expression(self)
 
 
-class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):
+class LiteralExpression(Expression):
     __slots__ = []
 
     @property
@@ -68,17 +64,24 @@ class LiteralExpression(Expression, AbstractSyntaxNodeWrapper):
 class IntLiteralExpression(LiteralExpression):
     __slots__ = []
 
+
+class IntLiteralExpressionAst(IntLiteralExpression, AbstractSyntaxNodeWrapper):
+    __slots__ = []
+
     @property
     def value(self):
         return int(self.ast.int_literal)
 
 
-class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
+class IntLiteralExpressionSynthetic(
+    namedtuple("IntLiteralExpressionSynthetic", ["value"]),
+    IntLiteralExpression,
+):
     __slots__ = []
 
-    @property
-    def expression_type(self):
-        return "reference"
+
+class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
+    __slots__ = []
 
     @property
     def variable_name(self):
@@ -148,10 +151,6 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
     __slots__ = []
 
     @property
-    def expression_type(self):
-        return "subscript"
-
-    @property
     def dimensions(self):
         return self.array.dimensions - 1
 
@@ -219,14 +218,6 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
             ]
 
 
-class SyntheticExpression:
-    __slots__ = ["expression_type", "__dict__"]
-
-    def __init__(self, expression_type, **kwargs):
-        self.expression_type = expression_type
-        self.__dict__ = kwargs
-
-
 def compile_subscript(ast, index_asts, context):
     if index_asts:
         array = compile_subscript(ast, index_asts[:-1], context._replace(
@@ -248,7 +239,7 @@ def compile_reference_expression(ast, context):
 
 
 expression_classes = frozenbidict({
-    "int_literal": IntLiteralExpression,
+    "int_literal": IntLiteralExpressionAst,
     "reference_subscript": compile_reference_expression,
     "nested": lambda ast, context: Expression.compile(ast.expression, context),
 })

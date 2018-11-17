@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
-from turingarena.driver.interface.expressions import SyntheticExpression
+from turingarena.driver.interface.expressions import IntLiteralExpressionSynthetic
 from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement, AbstractStatement
-from turingarena.driver.visitors import StatementVisitor, ExpressionVisitor
+from turingarena.driver.visitors import StatementVisitor
+from turingarena.util.visitor import Visitor
 
 
-class CodeGen(ABC):
+class CodeGen(ABC, Visitor):
     __slots__ = []
 
     def indent_all(self, lines):
@@ -19,16 +20,19 @@ class CodeGen(ABC):
             return "    " + line
 
 
-class AbstractExpressionCodeGen(ExpressionVisitor, CodeGen):
+class AbstractExpressionCodeGen(CodeGen):
     __slots__ = []
 
-    def subscript_expression(self, e):
-        return f"{self.expression(e.array)}[{self.expression(e.index)}]"
+    def expression(self, e):
+        return self.visit(e)
 
-    def reference_expression(self, e):
+    def visit_SubscriptExpression(self, e):
+        return f"{self.visit(e.array)}[{self.visit(e.index)}]"
+
+    def visit_VariableReferenceExpression(self, e):
         return e.variable_name
 
-    def int_literal_expression(self, e):
+    def visit_IntLiteralExpression(self, e):
         return str(e.value)
 
 
@@ -198,7 +202,7 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
 
     def checkpoint_statement(self, checkpoint_statement):
         return self.write_statement(SyntheticStatement("write", None, arguments=[
-            SyntheticExpression("int_literal", value=0),
+            IntLiteralExpressionSynthetic(value=0),
         ]))
 
 

@@ -7,7 +7,7 @@ from turingarena.driver.interface.block import Block, AbstractBlock
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.exceptions import InterfaceExitReached
 from turingarena.driver.interface.execution import RequestSignature
-from turingarena.driver.interface.expressions import Expression, SyntheticExpression
+from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement, SyntheticStatement
@@ -25,11 +25,11 @@ class CallbackBody(AbstractBlock):
 
         callback_index = self.implementation.context.callback_index
         yield SyntheticStatement("write", "requesting a callback", arguments=[
-            SyntheticExpression("int_literal", value=1),
+            IntLiteralExpressionSynthetic(value=1),
         ])
         comment = f"index of this callback: {callback_index} = {self.implementation.name}"
         yield SyntheticStatement("write", comment, arguments=[
-            SyntheticExpression("int_literal", value=callback_index),
+            IntLiteralExpressionSynthetic(value=callback_index),
         ])
 
         yield from self.implementation.raw_body.flat_inner_nodes
