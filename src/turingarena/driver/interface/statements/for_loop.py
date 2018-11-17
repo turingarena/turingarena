@@ -39,9 +39,8 @@ class ForStatement(Statement, IntermediateNode):
                 continue
             if a.status == ReferenceStatus.DECLARED:
                 yield Allocation(
-                    reference=a.reference._replace(
-                        index_count=a.reference.index_count - 1,
-                    ),
+                    variable=a.reference.variable,
+                    indexes=self.context.index_variables[-a.reference.index_count+1:],
                     size=self.index.range,
                 )
 

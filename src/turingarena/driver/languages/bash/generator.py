@@ -17,7 +17,6 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         yield "source solution.sh"
         yield
 
-
     def visit_ReadStatement(self, read_statement):
         for i in range(len(read_statement.arguments) - 1):
             yield f"read -d ' ' {self.visit(read_statement.arguments[i])}"
@@ -71,7 +70,8 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         pass
 
-    def generate_variable_allocation(self, variables, indexes, size):
+    def visit_Allocation(self, allocation):
+        # FIXME: not implemented
         pass
 
     def generate_method_declaration(self, method_declaration):

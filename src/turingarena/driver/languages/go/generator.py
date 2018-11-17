@@ -43,11 +43,12 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def generate_constant_declaration(self, name, value):
         return []
 
-    def generate_variable_allocation(self, variable, indexes, size):
-        idx = "".join(f"[{idx.variable.name}]" for idx in indexes)
-        dimensions = "[]" * (variable.dimensions - len(indexes))
-        size = self.visit(size)
-        yield f"{variable.name}{idx} = make({dimensions}int, {size})"
+    def visit_Allocation(self, allocation):
+        name = allocation.variable.name
+        idx = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
+        dimensions = "[]" * (allocation.variable.dimensions - len(allocation.indexes))
+        size = self.visit(allocation.size)
+        yield f"{name}{idx} = make({dimensions}int, {size})"
 
     def generate_main_block(self, interface):
         yield "func main() {"

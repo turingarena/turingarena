@@ -59,10 +59,11 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield f'print(end="", flush=True)'
 
-    def generate_variable_allocation(self, variable, indexes, size):
-        indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
-        size = self.visit(size)
-        yield f"{variable.name}{indexes} = [None] * {size}"
+    def visit_Allocation(self, allocation):
+        name = allocation.variable.name
+        indexes = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
+        size = self.visit(allocation.size)
+        yield f"{name}{indexes} = [None] * {size}"
 
     def generate_method_declaration(self, method_declaration):
         yield from ()

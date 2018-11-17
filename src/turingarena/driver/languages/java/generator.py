@@ -8,14 +8,14 @@ class JavaCodeGen(InterfaceCodeGen):
         return f"int {parameter.name}{arrays}"
 
     def build_callbacks_interface_name(self, method):
-        return f'{method.name}_callbacks' 
+        return f'{method.name}_callbacks'
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
         value_parameters = [self.build_parameter(p) for p in callable.parameters]
         if callbacks:
             value_parameters.append(
-                    self.build_callbacks_interface_name(callable)+ " callbacks")
+                self.build_callbacks_interface_name(callable) + " callbacks")
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callable.name}({parameters})"
 
@@ -34,7 +34,7 @@ class JavaCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         return f"// {comment}"
 
-    def generate_callbacks_declaration(self,callback):
+    def generate_callbacks_declaration(self, callback):
         return self.indent(f'{self.build_method_signature(callback)};')
 
     def generate_constant_declaration(self, name, value):
@@ -51,11 +51,12 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_variable_declaration(self, declared_variable):
         yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name};'
 
-    def generate_variable_allocation(self, variable, indexes, size):
-        indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
-        dimensions = "[]" * (variable.dimensions - len(indexes) - 1)
-        size = self.visit(size)
-        yield f"{variable.name}{indexes} = new int[{size}]{dimensions};"
+    def visit_Allocation(self, allocation):
+        name = allocation.variable.name
+        indexes = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
+        dimensions = "[]" * (allocation.variable.dimensions - len(indexes) - 1)
+        size = self.visit(allocation.size)
+        yield f"{name}{indexes} = new int[{size}]{dimensions};"
 
     def generate_method_declaration(self, method_declaration):
 
@@ -67,7 +68,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
 
         yield self.indent(f'abstract {self.build_method_signature(method_declaration)};')
 
-    def generate_main(self,interface):
+    def generate_main(self, interface):
         yield
         yield 'public static void main(String args[]) {'
         yield self.indent('Solution __solution = new Solution();')
@@ -78,7 +79,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield from self.indent_all(self.generate_main(interface))
 
     def generate_callback(self, callback):
-        yield  f'public {self.build_callback_signature(callback)}' " {"
+        yield f'public {self.build_callback_signature(callback)}' " {"
         yield from self.block(callback.body)
         yield "}"
         pass
@@ -90,7 +91,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         # build anonimous inner class
         if call_statement.callbacks:
             cb_name = self.build_callbacks_interface_name(method)
-            yield cb_name + " __clbks = new " + cb_name + "() {" 
+            yield cb_name + " __clbks = new " + cb_name + "() {"
             for callback in call_statement.callbacks:
                 yield from self.indent_all(self.generate_callback(callback))
             yield "};"
@@ -174,7 +175,8 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
     def generate_method_declaration(self, method_declaration):
         if method_declaration.callbacks:
             yield
-            yield self.indent(self.line_comment(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{'))
+            yield self.indent(
+                self.line_comment(f'interface {self.build_callbacks_interface_name(method_declaration)} ''{'))
             for cbks in method_declaration.callbacks:
                 yield self.indent(self.line_comment(self.generate_callbacks_declaration(cbks)))
             yield self.indent(self.line_comment('}'))

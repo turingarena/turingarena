@@ -52,7 +52,7 @@ class IntermediateNode:
                 yield a.reference.variable
 
     @property
-    def variables_to_allocate(self):
+    def allocations(self):
         return list(self._get_allocations())
 
     def _get_allocations(self):

@@ -34,11 +34,12 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         pointers = "*" * declared_variable.dimensions
         yield f"static int {pointers}{declared_variable.name};"
 
-    def generate_variable_allocation(self, variable, indexes, size):
-        indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
-        dimensions = "*" * (variable.dimensions - len(indexes) - 1)
-        size = self.visit(size)
-        yield f"{variable.name}{indexes} = new int{dimensions}[{size}];"
+    def visit_Allocation(self, allocation):
+        name = allocation.variable.name
+        indexes = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
+        dimensions = "*" * (allocation.variable.dimensions - len(indexes) - 1)
+        size = self.visit(allocation.size)
+        yield f"{name}{indexes} = new int{dimensions}[{size}];"
 
     def generate_method_declaration(self, method_declaration):
         yield f"{self.build_method_signature(method_declaration)};"
