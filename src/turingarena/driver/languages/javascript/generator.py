@@ -42,36 +42,36 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             "exit": lambda: ["exit(0);"],
             "continue": lambda: ["continue;"],
             "break": lambda: ["break;"],
-            "return": lambda: [f"return {self.expression(statement.value)};"],
+            "return": lambda: [f"return {self.visit(statement.value)};"],
             "function": lambda: [],
         }
         return generators[statement.statement_type]()
 
-    def call_statement(self, statement):
+    def visit_CallStatement(self, statement):
         method_name = statement.method.name
-        parameters = ", ".join(self.expression(p) for p in statement.parameters)
+        parameters = ", ".join(self.visit(p) for p in statement.parameters)
         if statement.return_value is not None:
-            return_value = self.expression(statement.return_value)
+            return_value = self.visit(statement.return_value)
             yield f"{return_value} = {method_name}({parameters});"
         else:
             yield f"{method_name}({parameters});"
 
     def alloc_statement(self, statement):
         for argument in statement.arguments:
-            arg = self.expression(argument)
-            size = self.expression(statement.size)
+            arg = self.visit(argument)
+            size = self.visit(statement.size)
             yield f"{arg} = Array({size});"
 
-    def write_statement(self, statement):
-        args = ", ".join(self.expression(v) for v in statement.arguments)
+    def visit_WriteStatement(self, statement):
+        args = ", ".join(self.visit(v) for v in statement.arguments)
         yield f"print({args});"
 
-    def read_statement(self, statement):
-        args = ", ".join(self.expression(arg) for arg in statement.arguments)
+    def visit_ReadStatement(self, statement):
+        args = ", ".join(self.visit(arg) for arg in statement.arguments)
         yield f"[{args}] = await readIntegers();"
 
-    def if_statement(self, statement):
-        condition = self.expression(statement.condition)
+    def visit_IfStatement(self, statement):
+        condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
         yield from self.block(statement.then_body)
         if statement.else_body is not None:
@@ -79,26 +79,26 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             yield from self.block(statement.else_body)
         yield "}"
 
-    def for_statement(self, statement):
+    def visit_ForStatement(self, statement):
         index_name = statement.index.variable.name
-        size = self.expression(statement.index.range)
+        size = self.visit(statement.index.range)
         yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
         yield from self.block(statement.body)
         yield "}"
 
-    def loop_statement(self, loop_statement):
+    def visit_LoopStatement(self, loop_statement):
         yield "while (true) {"
         yield from self.block(loop_statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
-        variable = self.expression(variable)
-        result = f"{variable} == {self.expression(labels[0])}"
+        variable = self.visit(variable)
+        result = f"{variable} == {self.visit(labels[0])}"
         for label in labels[1:]:
-            result += f" || {variable} == {self.expression(label)}"
+            result += f" || {variable} == {self.visit(label)}"
         return result
 
-    def switch_statement(self, switch_statement):
+    def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
         yield from self.block(cases[0].body)

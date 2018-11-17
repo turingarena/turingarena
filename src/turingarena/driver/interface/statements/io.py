@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from collections import namedtuple
 
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
@@ -7,13 +8,21 @@ from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
+from turingarena.driver.interface.statements.statement import AbstractStatement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
 
-class ReadWriteStatement(Statement):
+class ReadStatement(AbstractStatement, IntermediateNode):
+    __slots__ = []
+
+
+class WriteStatement(AbstractStatement, IntermediateNode):
+    __slots__ = []
+
+
+class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -32,7 +41,7 @@ class ReadWriteStatement(Statement):
         pass
 
 
-class ReadStatement(ReadWriteStatement, IntermediateNode):
+class ReadStatementAst(ReadStatement, ReadWriteStatementAst):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -64,7 +73,7 @@ class ReadStatement(ReadWriteStatement, IntermediateNode):
             ])
 
 
-class WriteStatement(ReadWriteStatement, IntermediateNode):
+class WriteStatementAst(WriteStatement, ReadWriteStatementAst):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -90,7 +99,7 @@ class WriteStatement(ReadWriteStatement, IntermediateNode):
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
-class AbstractCheckpointNode(AbstractStatement, IntermediateNode):
+class CheckpointStatement(AbstractStatement, IntermediateNode):
     __slots__ = []
 
     @property
@@ -119,7 +128,7 @@ class AbstractCheckpointNode(AbstractStatement, IntermediateNode):
             return context.result().with_request_processed()
 
 
-class InitialCheckpointNode(AbstractCheckpointNode):
+class InitialCheckpointStatement(CheckpointStatement):
     def _get_comment(self):
         return "initial checkpoint"
 
@@ -127,5 +136,16 @@ class InitialCheckpointNode(AbstractCheckpointNode):
         yield "initial checkpoint"
 
 
-class CheckpointStatement(AbstractSyntaxNodeWrapper, AbstractCheckpointNode):
+class CheckpointStatementAst(AbstractSyntaxNodeWrapper, CheckpointStatement):
+    __slots__ = []
+
+
+ReadWriteStatementSynthetic = namedtuple("ReadWriteStatementSynthetic", ["arguments", "comment"])
+
+
+class ReadStatementSynthetic(ReadWriteStatementSynthetic, ReadStatement):
+    __slots__ = []
+
+
+class WriteStatementSynthetic(ReadWriteStatementSynthetic, WriteStatement):
     __slots__ = []

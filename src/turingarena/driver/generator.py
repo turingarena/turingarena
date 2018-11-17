@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from turingarena.driver.interface.expressions import IntLiteralExpressionSynthetic
 from turingarena.driver.interface.statements.statement import SyntheticStatement, AbstractStatement
-from turingarena.driver.visitors import StatementVisitor
 from turingarena.util.visitor import Visitor
 
 
@@ -92,22 +91,22 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
         pass
 
     def visit_ReadStatement(self, s):
-        args = ", ".join(self.expression(a) for a in s.arguments)
-        yield f"read {args}"
+        args = ", ".join(self.visit(a) for a in s.arguments)
+        return f"read {args}"
 
     def visit_WriteStatement(self, s):
-        args = ", ".join(self.expression(a) for a in s.arguments)
-        yield f"write {args}"
+        args = ", ".join(self.visit(a) for a in s.arguments)
+        return f"write {args}"
 
     def visit_CheckpointStatement(self, s):
-        yield f"checkpoint"
+        return f"checkpoint"
 
     def visit_CallStatement(self, s):
         method = s.method
 
-        args = ", ".join(self.expression(p) for p in s.arguments)
+        args = ", ".join(self.visit(p) for p in s.arguments)
         if method.has_return_value:
-            return_value = f"{self.expression(s.return_value)} = "
+            return_value = f"{self.visit(s.return_value)} = "
         else:
             return_value = ""
 
@@ -116,37 +115,45 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
         else:
             callbacks = ""
 
-        yield f"call {return_value}{method.name}({args}){callbacks}"
+        return f"call {return_value}{method.name}({args}){callbacks}"
 
     def visit_ReturnStatement(self, s):
-        yield f"return {self.expression(s.value)}"
+        return f"return {self.visit(s.value)}"
 
     def visit_ExitStatement(self, s):
-        yield "exit"
+        return "exit"
 
     def visit_BreakStatement(self, s):
-        yield "break"
+        return "break"
 
     def visit_ForStatement(self, s):
         index = s.index
-        yield f"for {index.variable.name} to {self.expression(index.range)} " "{...}"
+        return f"for {index.variable.name} to {self.visit(index.range)} " "{...}"
 
     def visit_LoopStatement(self, s):
-        yield "loop {...}"
+        return "loop {...}"
 
     def visit_IfStatement(self, s):
         if s.else_body is not None:
             body = "{...} else {...}"
         else:
             body = "{...}"
-        yield f"if {self.expression(s.condition)} {body}"
+        return f"if {self.visit(s.condition)} {body}"
 
     def visit_SwitchStatement(self, s):
-        yield f"switch {self.expression(s.value)} " "{...}"
+        return f"switch {self.visit(s.value)} " "{...}"
 
 
-class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCodeGen):
+class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
+
+    def visit_AbstractStatement(self, s):
+        # fail if we encounter any unhandled AbstractStatement
+        raise NotImplementedError
+
+    def visit_IntermediateNode(self, s):
+        # ignore any other node
+        return []
 
     def generate_main_block(self, interface):
         yield from self.block_content(interface.main_block)
@@ -182,7 +189,7 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
             yield from self.generate_flush()
 
         if isinstance(statement, AbstractStatement):
-            yield from self.statement(statement)
+            yield from self.visit(statement)
 
     @abstractmethod
     def generate_variable_allocation(self, variables, indexes, size):
@@ -196,10 +203,15 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
     def generate_flush(self):
         pass
 
-    def checkpoint_statement(self, checkpoint_statement):
-        return self.write_statement(SyntheticStatement("write", None, arguments=[
+    def visit_CheckpointStatement(self, checkpoint_statement):
+        # FIXME: should never call a visit_? method directly
+        return self.visit_WriteStatement(SyntheticStatement("write", None, arguments=[
             IntLiteralExpressionSynthetic(value=0),
         ]))
+
+    def visit_MethodCallbacksStopNode(self, s):
+        # FIXME: should never call a visit_? method directly
+        return self.visit_CheckpointStatement(s)
 
 
 class TemplateCodeGen(InterfaceCodeGen):

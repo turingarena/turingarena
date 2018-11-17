@@ -7,7 +7,7 @@ class AbstractStatement(IntermediateNode):
 
     def _describe_node(self):
         if self.comment is not None:
-            yield f"{self.statement_type} {self.comment}"
+            yield f"{self.__class__.__name__} {self.comment}"
 
 
 class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):

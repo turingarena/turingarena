@@ -37,7 +37,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_variable_allocation(self, variable, indexes, size):
         indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
         dimensions = "*" * (variable.dimensions - len(indexes) - 1)
-        size = self.expression(size)
+        size = self.visit(size)
         yield f"{variable.name}{indexes} = new int{dimensions}[{size}];"
 
     def generate_method_declaration(self, method_declaration):
@@ -69,20 +69,20 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)
 
-        value_arguments = [self.expression(p) for p in call_statement.arguments]
+        value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
             f"_callback_{callback_signature.name}"
             for callback_signature in method.callbacks
         ]
         parameters = ", ".join(value_arguments + callback_arguments)
         if method.has_return_value:
-            return_value = f"{self.expression(call_statement.return_value)} = "
+            return_value = f"{self.visit(call_statement.return_value)} = "
         else:
             return_value = ""
 
         yield f"{return_value}{method.name}({parameters});"
 
-    def call_statement(self, call_statement):
+    def visit_CallStatement(self, call_statement):
         if call_statement.method.has_callbacks:
             yield "{"
             yield from self.indent_all(self.call_statement_body(call_statement))
@@ -90,18 +90,18 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         else:
             yield from self.call_statement_body(call_statement)
 
-    def write_statement(self, write_statement):
+    def visit_WriteStatement(self, write_statement):
         format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
-        args = ", ".join(self.expression(v) for v in write_statement.arguments)
+        args = ", ".join(self.visit(v) for v in write_statement.arguments)
         yield f"""printf("{format_string}", {args});"""
 
-    def read_statement(self, statement):
+    def visit_ReadStatement(self, statement):
         format_string = "".join("%d" for _ in statement.arguments)
-        scanf_args = ", ".join("&" + self.expression(v) for v in statement.arguments)
+        scanf_args = ", ".join("&" + self.visit(v) for v in statement.arguments)
         yield f"""scanf("{format_string}", {scanf_args});"""
 
-    def if_statement(self, statement):
-        condition = self.expression(statement.condition)
+    def visit_IfStatement(self, statement):
+        condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
         yield from self.block(statement.then_body)
         if statement.else_body:
@@ -109,23 +109,23 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.block(statement.else_body)
         yield "}"
 
-    def for_statement(self, s):
+    def visit_ForStatement(self, s):
         index_name = s.index.variable.name
-        size = self.expression(s.index.range)
+        size = self.visit(s.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
         yield from self.block(s.body)
         yield "}"
 
-    def loop_statement(self, statement):
+    def visit_LoopStatement(self, statement):
         yield "while (true) {"
         yield from self.block(statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
-        variable = self.expression(variable)
+        variable = self.visit(variable)
         return " || ".join(f"{variable} == {label}" for label in labels)
 
-    def switch_statement(self, statement):
+    def visit_SwitchStatement(self, statement):
         cases = [case for case in statement.cases]
         yield f"if ({self.build_switch_condition(statement.variable, cases[0].labels)}) " "{"
         yield from self.block(cases[0].body)
@@ -134,13 +134,13 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.block(case.body)
         yield "}"
 
-    def exit_statement(self, statement):
+    def visit_ExitStatement(self, statement):
         yield "exit(0);"
 
-    def return_statement(self, statement):
-        yield f"return {self.expression(statement.value)};"
+    def visit_ReturnStatement(self, statement):
+        yield f"return {self.visit(statement.value)};"
 
-    def break_statement(self, statement):
+    def visit_BreakStatement(self, statement):
         yield "break;"
 
     def generate_flush(self):

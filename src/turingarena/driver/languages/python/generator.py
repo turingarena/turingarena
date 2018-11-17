@@ -46,22 +46,22 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         yield 'def main(_solution):'
         yield from self.block(interface.main_block)
 
-    def exit_statement(self, exit_statement):
+    def visit_ExitStatement(self, exit_statement):
         yield from self.generate_flush()
         yield '_os._exit(0)'
 
-    def break_statement(self, break_statement):
+    def visit_BreakStatement(self, break_statement):
         yield 'break'
 
-    def return_statement(self, return_statement):
-        yield f'return {self.expression(return_statement.value)}'
+    def visit_ReturnStatement(self, return_statement):
+        yield f'return {self.visit(return_statement.value)}'
 
     def generate_flush(self):
         yield f'print(end="", flush=True)'
 
     def generate_variable_allocation(self, variable, indexes, size):
         indexes = "".join(f"[{idx.variable.name}]" for idx in indexes)
-        size = self.expression(size)
+        size = self.visit(size)
         yield f"{variable.name}{indexes} = [None] * {size}"
 
     def generate_method_declaration(self, method_declaration):
@@ -75,13 +75,13 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         yield f"def _callback_{callback.name}({params}):"
         yield from self.block(callback.body)
 
-    def call_statement(self, call_statement):
+    def visit_CallStatement(self, call_statement):
         method_name = call_statement.method_name
 
         for callback in call_statement.callbacks:
             yield from self.generate_callback(callback)
 
-        value_arguments = [self.expression(p) for p in call_statement.arguments]
+        value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
             f"_callback_{callback.name}"
             for callback in call_statement.callbacks
@@ -89,42 +89,42 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         arguments = ", ".join(value_arguments + callback_arguments)
         call_expr = f"_solution.{method_name}({arguments})"
         if call_statement.return_value is not None:
-            return_value = self.expression(call_statement.return_value)
+            return_value = self.visit(call_statement.return_value)
             yield f'{return_value} = {call_expr}'
         else:
             yield f'{call_expr}'
 
-    def write_statement(self, write_statement):
-        args = ', '.join(self.expression(arg) for arg in write_statement.arguments)
+    def visit_WriteStatement(self, write_statement):
+        args = ', '.join(self.visit(arg) for arg in write_statement.arguments)
         yield f'print({args})'
 
-    def read_statement(self, read_statement):
-        arguments = ", ".join(self.expression(arg) for arg in read_statement.arguments)
+    def visit_ReadStatement(self, read_statement):
+        arguments = ", ".join(self.visit(arg) for arg in read_statement.arguments)
         yield f'[{arguments}] = map(int, input().split())'
 
-    def if_statement(self, if_statement):
-        condition = self.expression(if_statement.condition)
+    def visit_IfStatement(self, if_statement):
+        condition = self.visit(if_statement.condition)
         yield f'if {condition}:'
         yield from self.block(if_statement.then_body)
         if if_statement.else_body:
             yield 'else:'
             yield from self.block(if_statement.else_body)
 
-    def for_statement(self, for_statement):
+    def visit_ForStatement(self, for_statement):
         index_name = for_statement.index.variable.name
-        size = self.expression(for_statement.index.range)
+        size = self.visit(for_statement.index.range)
         yield f'for {index_name} in range({size}):'
         yield from self.block(for_statement.body)
 
-    def loop_statement(self, loop_statement):
+    def visit_LoopStatement(self, loop_statement):
         yield 'while True:'
         yield from self.block(loop_statement.body)
 
     def build_switch_cases(self, variable, labels):
-        variable = self.expression(variable)
+        variable = self.visit(variable)
         return ' or '.join(f'{variable} == {label}' for label in labels)
 
-    def switch_statement(self, switch_statement):
+    def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if {self.build_switch_cases(switch_statement.variable, cases[0].labels)}:'
         yield from self.block(cases[0].body)

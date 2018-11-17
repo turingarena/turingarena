@@ -1,25 +1,22 @@
-from turingarena.driver.interface.statements.call import MethodResolveArgumentsNode, MethodCallbacksNode, \
+from turingarena.driver.interface.statements.callback import ExitStatementAst
+from .call import MethodResolveArgumentsNode, MethodCallbacksNode, \
     MethodCallCompletedNode, MethodReturnNode, CallStatement, MethodCallbacksStopNode
-from turingarena.driver.interface.statements.callback import ReturnStatement
-from turingarena.driver.interface.statements.if_else import ResolveIfNode
-from turingarena.driver.interface.statements.io import CheckpointStatement
-from turingarena.driver.interface.statements.switch import SwitchResolveNode
-from .callback import ExitStatement
+from .callback import ReturnStatement
 from .for_loop import ForStatement
-from .if_else import IfStatement
-from .io import ReadStatement, WriteStatement
+from .if_else import ResolveIfNode, IfStatement
+from .io import CheckpointStatementAst, ReadStatementAst, WriteStatementAst
 from .loop import LoopStatement, BreakStatement
-from .switch import SwitchStatement
+from .switch import SwitchResolveNode, SwitchStatement
 
 statement_classes = {
     "checkpoint": [
-        CheckpointStatement,
+        CheckpointStatementAst,
     ],
     "read": [
-        ReadStatement,
+        ReadStatementAst,
     ],
     "write": [
-        WriteStatement,
+        WriteStatementAst,
     ],
     "call": [
         MethodResolveArgumentsNode,
@@ -33,7 +30,7 @@ statement_classes = {
         ReturnStatement,
     ],
     "exit": [
-        ExitStatement,
+        ExitStatementAst,
     ],
     "for": [
         ForStatement,

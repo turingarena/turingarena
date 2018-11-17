@@ -18,18 +18,18 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         yield
 
 
-    def read_statement(self, read_statement):
+    def visit_ReadStatement(self, read_statement):
         for i in range(len(read_statement.arguments) - 1):
-            yield f"read -d ' ' {self.expression(read_statement.arguments[i])}"
-        yield f"read {self.expression(read_statement.arguments[i + 1])}"
+            yield f"read -d ' ' {self.visit(read_statement.arguments[i])}"
+        yield f"read {self.visit(read_statement.arguments[i + 1])}"
 
-    def write_statement(self, write_statement):
+    def visit_WriteStatement(self, write_statement):
         for arg in write_statement.arguments:
-            yield f"echo -n $(({self.expression(arg)}))"
+            yield f"echo -n $(({self.visit(arg)}))"
         yield "echo"
 
-    def if_statement(self, if_statement):
-        condition = self.expression(if_statement.condition)
+    def visit_IfStatement(self, if_statement):
+        condition = self.visit(if_statement.condition)
         yield f"if (({condition})); then"
         yield from self.block(if_statement.then_body)
         if if_statement.else_body:
@@ -37,38 +37,38 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
             yield from self.block(if_statement.else_body)
         yield "fi"
 
-    def for_statement(self, for_statement):
+    def visit_ForStatement(self, for_statement):
         index = for_statement.index.variable.name
-        size = self.expression(for_statement.index.range)
+        size = self.visit(for_statement.index.range)
         yield f"for (({index}=0; index<{size}; i++)); do"
         yield self.block(for_statement.body)
         yield "done"
 
-    def loop_statement(self, loop_statement):
+    def visit_LoopStatement(self, loop_statement):
         yield "while true; do"
         yield self.block(loop_statement.body())
         yield "done"
 
-    def break_statement(self, break_statement):
+    def visit_BreakStatement(self, break_statement):
         yield "break"
 
-    def return_statement(self, return_statement):
-        yield f"_return_val={self.expression(return_statement.value)}"
+    def visit_ReturnStatement(self, return_statement):
+        yield f"_return_val={self.visit(return_statement.value)}"
 
-    def exit_statement(self, exit_statement):
+    def visit_ExitStatement(self, exit_statement):
         yield 'exit'
 
     def generate_flush(self):
         yield from ()
 
-    def call_statement(self, call_statement):
-        arguments = " ".join(f"$(({self.expression(p)}))" for p in call_statement.arguments)
+    def visit_CallStatement(self, call_statement):
+        arguments = " ".join(f"$(({self.visit(p)}))" for p in call_statement.arguments)
         yield f"{call_statement.method_name} {arguments}"
         if call_statement.return_value is not None:
-            return_value = self.expression(call_statement.return_value)
+            return_value = self.visit(call_statement.return_value)
             yield f"{return_value}=$return_val"
 
-    def switch_statement(self, switch_statement):
+    def visit_SwitchStatement(self, switch_statement):
         pass
 
     def generate_variable_allocation(self, variables, indexes, size):

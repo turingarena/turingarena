@@ -244,14 +244,6 @@ class MethodCallbacksStopNode(CallStatementNode, AbstractStatement):
     def _get_comment(self):
         return "no more callbacks"
 
-    @property
-    def statement_type(self):
-        return "write"
-
-    @property
-    def arguments(self):
-        return [IntLiteralExpressionSynthetic(value=0)]
-
 
 class MethodCallbacksNode(CallStatementNode):
     __slots__ = []

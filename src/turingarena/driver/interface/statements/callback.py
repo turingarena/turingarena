@@ -10,7 +10,8 @@ from turingarena.driver.interface.execution import RequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.statement import Statement, SyntheticStatement
+from turingarena.driver.interface.statements.io import WriteStatementSynthetic
+from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 logger = logging.getLogger(__name__)
@@ -24,11 +25,11 @@ class CallbackBody(AbstractBlock):
         yield CallbackCallNode(self.implementation)
 
         callback_index = self.implementation.context.callback_index
-        yield SyntheticStatement("write", "requesting a callback", arguments=[
+        yield WriteStatementSynthetic(comment="requesting a callback", arguments=[
             IntLiteralExpressionSynthetic(value=1),
         ])
         comment = f"index of this callback: {callback_index} = {self.implementation.name}"
-        yield SyntheticStatement("write", comment, arguments=[
+        yield WriteStatementSynthetic(comment=comment, arguments=[
             IntLiteralExpressionSynthetic(value=callback_index),
         ])
 
@@ -185,7 +186,11 @@ class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", 
         yield f"callback end"
 
 
-class ExitStatement(Statement, IntermediateNode):
+class ExitStatement(AbstractStatement):
+    __slots__ = []
+
+
+class ExitStatementAst(ExitStatement, Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):

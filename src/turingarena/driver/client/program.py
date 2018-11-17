@@ -26,21 +26,18 @@ class Program(namedtuple("Program", [
             server_downward, client_downward = self._open_pipes(stack)
 
             def server_thread():
-                from turingarena.driver.server import run_server
-
                 try:
+                    from turingarena.driver.server import run_server
                     run_server(DriverProcessConnection(
                         upward=server_upward,
                         downward=server_downward,
                     ), self.source_path, self.interface_path)
+                    logging.debug("driver server terminated")
                 except Exception as e:
-                    logging.info(f"Server terminated with exception: {str(e)}")
-                    pass
-
-                logging.debug("driver server terminated")
-
-                server_upward.close()
-                server_downward.close()
+                    logging.exception(f"server terminated with exception")
+                finally:
+                    server_upward.close()
+                    server_downward.close()
 
             thread = threading.Thread(target=server_thread)
 
