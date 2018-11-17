@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import subprocess
 from contextlib import ExitStack
 from functools import lru_cache
 from tempfile import TemporaryDirectory
@@ -61,18 +62,26 @@ class Evaluator:
             **self.parameter_overrides,
         })
 
-    def evaluate(self, files, seed=None):
+    def evaluate(self, files, seed=None, redirect_stderr=False, log_level=None):
         with ExitStack() as stack:
             if seed is None:
                 seed = random.randrange(2 ** 31)
 
+            if log_level is None:
+                log_level = logging.getLevelName(logging.root.getEffectiveLevel())
+
             env = {
                 "TEMPORARY_DIRECTORY": stack.enter_context(TemporaryDirectory()),
                 "TURINGARENA_SEED": str(seed),
-                "TURINGARENA_LOG_LEVEL": logging.getLevelName(logging.root.getEffectiveLevel()),
+                "TURINGARENA_LOG_LEVEL": log_level,
             }
 
             command = stack.enter_context(self.runner.perform_run())
+
+            popen_args = {}
+
+            if redirect_stderr:
+                popen_args["stderr"] = subprocess.STDOUT
 
             evaluation = segi_subprocess(
                 files,
@@ -80,6 +89,7 @@ class Evaluator:
                 env=env,
                 reset_env=self.reset_env,
                 cwd=self.evaluator_dir,
+                **popen_args,
             )
 
             yield from evaluation

@@ -1,5 +1,4 @@
 import os
-from collections import namedtuple
 from functools import lru_cache
 
 from turingarena.driver.interface.interface import InterfaceDefinition
@@ -10,7 +9,18 @@ INTERFACE_TXT = "interface.txt"
 TEXT_FILENAMES = ["statement.md", "README.md"]
 
 
-class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"])):
+class PackGeneratedDirectory:
+
+    def __init__(self, work_dir, allowed_languages=None):
+        self.work_dir = work_dir
+        if allowed_languages is None:
+            self.languages = Language.languages()
+        else:
+            self.languages = [
+                Language.from_name(name)
+                for name in allowed_languages
+            ]
+
     @property
     @lru_cache(None)
     def targets(self):
@@ -37,14 +47,14 @@ class PackGeneratedDirectory(namedtuple("PackGeneratedDirectory", ["work_dir"]))
                 yield from self._generate_interface_targets(dirpath, relpath, descriptions)
 
     def _generate_interface_targets(self, abspath, relpath, descriptions):
-        for lang in Language.languages():
+        for lang in self.languages:
             interface_path = os.path.join(abspath, INTERFACE_TXT)
             yield (
-                os.path.join(relpath, f"skeleton{lang.extension}"),
+                os.path.join(relpath, lang.name, f"skeleton{lang.extension}"),
                 self._create_interface_code_generator(interface_path, descriptions, lang.skeleton_generator()),
             )
             yield (
-                os.path.join(relpath, f"template{lang.extension}"),
+                os.path.join(relpath, lang.name, f"template{lang.extension}"),
                 self._create_interface_code_generator(interface_path, descriptions, lang.template_generator()),
             )
 

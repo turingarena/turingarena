@@ -28,10 +28,14 @@ class Program(namedtuple("Program", [
             def server_thread():
                 from turingarena.driver.server import run_server
 
-                run_server(DriverProcessConnection(
-                    upward=server_upward,
-                    downward=server_downward,
-                ), self.source_path, self.interface_path)
+                try:
+                    run_server(DriverProcessConnection(
+                        upward=server_upward,
+                        downward=server_downward,
+                    ), self.source_path, self.interface_path)
+                except Exception as e:
+                    logging.info(f"Server terminated with exception: {str(e)}")
+                    pass
 
                 logging.debug("driver server terminated")
 

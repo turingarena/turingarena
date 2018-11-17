@@ -43,7 +43,7 @@ class CppProgramRunner(ProgramRunner):
 
     def _compile_skeleton(self):
         cli = [
-            "g++", "-c", "-O2", "-std=c++17",
+            "g++", "-c", "-O2", "-std=c++17", "-Wno-unused-result",
             "-o", self._skeleton_object_path,
             self._skeleton_path,
         ]
