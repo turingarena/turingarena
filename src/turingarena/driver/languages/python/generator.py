@@ -87,11 +87,12 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
             for callback in call_statement.callbacks
         ]
         arguments = ", ".join(value_arguments + callback_arguments)
+        call_expr = f"_solution.{method_name}({arguments})"
         if call_statement.return_value is not None:
             return_value = self.expression(call_statement.return_value)
-            yield f'{return_value} = _solution.{method_name}({arguments})'
+            yield f'{return_value} = {call_expr}'
         else:
-            yield f'_solution{method_name}({arguments})'
+            yield f'{call_expr}'
 
     def write_statement(self, write_statement):
         args = ', '.join(self.expression(arg) for arg in write_statement.arguments)
