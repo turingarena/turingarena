@@ -1,7 +1,5 @@
 import errno
 import sys
-import types
-import random
 
 from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ
 
@@ -33,9 +31,10 @@ def main():
 
     init_sandbox()
 
-    # create skeleton module
-    skeleton = sys.modules["skeleton"] = types.ModuleType("skeleton")
-    source = sys.modules["_source"] = types.ModuleType("_source")
+    class Wrapper: pass
+
+    skeleton = Wrapper()
+    source = Wrapper()
 
     # run skeleton and source
     exec(source_string, source.__dict__)
