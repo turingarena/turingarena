@@ -9,8 +9,8 @@ from turingarena.driver.interface.expressions import Expression, IntLiteralExpre
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
-from turingarena.driver.interface.statements.io import WriteStatementSynthetic
-from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
+from turingarena.driver.interface.statements.io import OutputStatement
+from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
@@ -235,17 +235,16 @@ class MethodCallCompletedNode(CallStatementNode):
         yield f"call completed"
 
 
-class MethodCallbacksStopNode(CallStatementNode, AbstractStatement):
+class MethodCallbacksStopNode(CallStatementNode, OutputStatement):
     def _driver_run(self, context):
         pass
 
     def _is_relevant(self):
         return self.method and self.method.callbacks
 
-    def as_write_statement(self):
-        return WriteStatementSynthetic(comment="no more callbacks", arguments=[
-            IntLiteralExpressionSynthetic(value=0),
-        ])
+    @property
+    def arguments(self):
+        return [IntLiteralExpressionSynthetic(0)]
 
     def _get_comment(self):
         return "no more callbacks"

@@ -111,7 +111,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_CallStatement(self, call_statement):
         yield from self.call_statement_body(call_statement)
 
-    def visit_WriteStatement(self, statement):
+    def visit_OutputStatement(self, statement):
         format_string = ' '.join('%d' for _ in statement.arguments) + r'\n'
         args = ', '.join(self.visit(v) for v in statement.arguments)
         yield f'System.out.printf("{format_string}", {args});'

@@ -94,7 +94,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         else:
             yield f'{call_expr}'
 
-    def visit_WriteStatement(self, write_statement):
+    def visit_OutputStatement(self, write_statement):
         args = ', '.join(self.visit(arg) for arg in write_statement.arguments)
         yield f'print({args})'
 

@@ -4,7 +4,7 @@ from .call import MethodResolveArgumentsNode, MethodCallbacksNode, \
 from .callback import ReturnStatement
 from .for_loop import ForStatement
 from .if_else import ResolveIfNode, IfStatement
-from .io import CheckpointStatementAst, ReadStatementAst, WriteStatementAst
+from .io import CheckpointStatementAst, ReadStatement, WriteStatement
 from .loop import LoopStatement, BreakStatement
 from .switch import SwitchResolveNode, SwitchStatement
 
@@ -13,10 +13,10 @@ statement_classes = {
         CheckpointStatementAst,
     ],
     "read": [
-        ReadStatementAst,
+        ReadStatement,
     ],
     "write": [
-        WriteStatementAst,
+        WriteStatement,
     ],
     "call": [
         MethodResolveArgumentsNode,

@@ -62,7 +62,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             size = self.visit(statement.size)
             yield f"{arg} = Array({size});"
 
-    def visit_WriteStatement(self, statement):
+    def visit_OutputStatement(self, statement):
         args = ", ".join(self.visit(v) for v in statement.arguments)
         yield f"print({args});"
 

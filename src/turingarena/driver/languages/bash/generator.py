@@ -23,7 +23,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
             yield f"read -d ' ' {self.visit(read_statement.arguments[i])}"
         yield f"read {self.visit(read_statement.arguments[i + 1])}"
 
-    def visit_WriteStatement(self, write_statement):
+    def visit_OutputStatement(self, write_statement):
         for arg in write_statement.arguments:
             yield f"echo -n $(({self.visit(arg)}))"
         yield "echo"

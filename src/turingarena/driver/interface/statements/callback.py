@@ -10,11 +10,33 @@ from turingarena.driver.interface.execution import RequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.io import WriteStatementSynthetic
+from turingarena.driver.interface.statements.io import OutputStatement
 from turingarena.driver.interface.statements.statement import Statement, AbstractStatement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 logger = logging.getLogger(__name__)
+
+
+class CallbackRequestOutputStatement(OutputStatement):
+    @property
+    def arguments(self):
+        return [IntLiteralExpressionSynthetic(value=1)]
+
+    def _get_comment(self):
+        return "requesting a callback"
+
+
+class CallbackIndexOutputStatement(namedtuple("CallbackWriteIndexNode", ["implementation"]), OutputStatement):
+    @property
+    def callback_index(self):
+        return self.implementation.context.callback_index
+
+    @property
+    def arguments(self):
+        return [IntLiteralExpressionSynthetic(value=self.callback_index)]
+
+    def _get_comment(self):
+        return f"index of this callback: {self.callback_index} = {self.implementation.name}"
 
 
 class CallbackBody(AbstractBlock):
@@ -23,15 +45,8 @@ class CallbackBody(AbstractBlock):
 
     def _generate_flat_inner_nodes(self):
         yield CallbackCallNode(self.implementation)
-
-        callback_index = self.implementation.context.callback_index
-        yield WriteStatementSynthetic(comment="requesting a callback", arguments=[
-            IntLiteralExpressionSynthetic(value=1),
-        ])
-        comment = f"index of this callback: {callback_index} = {self.implementation.name}"
-        yield WriteStatementSynthetic(comment=comment, arguments=[
-            IntLiteralExpressionSynthetic(value=callback_index),
-        ])
+        yield CallbackRequestOutputStatement()
+        yield CallbackIndexOutputStatement(self.implementation)
 
         yield from self.implementation.raw_body.flat_inner_nodes
 

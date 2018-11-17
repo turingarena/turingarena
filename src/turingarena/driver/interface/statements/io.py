@@ -1,6 +1,5 @@
 import logging
 from abc import abstractmethod
-from collections import namedtuple
 
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
@@ -18,7 +17,7 @@ class ReadStatement(AbstractStatement, IntermediateNode):
     __slots__ = []
 
 
-class WriteStatement(AbstractStatement, IntermediateNode):
+class OutputStatement(AbstractStatement, IntermediateNode):
     __slots__ = []
 
 
@@ -41,7 +40,7 @@ class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
         pass
 
 
-class ReadStatementAst(ReadStatement, ReadWriteStatementAst):
+class ReadStatement(ReadStatement, ReadWriteStatementAst):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -73,7 +72,7 @@ class ReadStatementAst(ReadStatement, ReadWriteStatementAst):
             ])
 
 
-class WriteStatementAst(WriteStatement, ReadWriteStatementAst):
+class WriteStatement(OutputStatement, ReadWriteStatementAst):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -99,7 +98,7 @@ class WriteStatementAst(WriteStatement, ReadWriteStatementAst):
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
-class CheckpointStatement(AbstractStatement, IntermediateNode):
+class CheckpointStatement(OutputStatement, IntermediateNode):
     __slots__ = []
 
     def _get_declaration_directions(self):
@@ -123,10 +122,9 @@ class CheckpointStatement(AbstractStatement, IntermediateNode):
             context.report_ready()
             return context.result().with_request_processed()
 
-    def as_write_statement(self):
-        return WriteStatementSynthetic(comment=None, arguments=[
-            IntLiteralExpressionSynthetic(value=0),
-        ])
+    @property
+    def arguments(self):
+        return [IntLiteralExpressionSynthetic(0)]
 
 
 class InitialCheckpointStatement(CheckpointStatement):
@@ -138,15 +136,4 @@ class InitialCheckpointStatement(CheckpointStatement):
 
 
 class CheckpointStatementAst(AbstractSyntaxNodeWrapper, CheckpointStatement):
-    __slots__ = []
-
-
-ReadWriteStatementSynthetic = namedtuple("ReadWriteStatementSynthetic", ["arguments", "comment"])
-
-
-class ReadStatementSynthetic(ReadWriteStatementSynthetic, ReadStatement):
-    __slots__ = []
-
-
-class WriteStatementSynthetic(ReadWriteStatementSynthetic, WriteStatement):
     __slots__ = []

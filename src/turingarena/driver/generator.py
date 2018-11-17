@@ -93,7 +93,7 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
         args = ", ".join(self.visit(a) for a in s.arguments)
         return f"read {args}"
 
-    def visit_WriteStatement(self, s):
+    def visit_OutputStatement(self, s):
         args = ", ".join(self.visit(a) for a in s.arguments)
         return f"write {args}"
 
@@ -201,12 +201,6 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     @abstractmethod
     def generate_flush(self):
         pass
-
-    def visit_CheckpointStatement(self, s):
-        return self.visit(s.as_write_statement())
-
-    def visit_MethodCallbacksStopNode(self, s):
-        return self.visit(s.as_write_statement())
 
 
 class TemplateCodeGen(InterfaceCodeGen):

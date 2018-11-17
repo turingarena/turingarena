@@ -90,7 +90,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         else:
             yield from self.call_statement_body(call_statement)
 
-    def visit_WriteStatement(self, write_statement):
+    def visit_OutputStatement(self, write_statement):
         format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
         args = ", ".join(self.visit(v) for v in write_statement.arguments)
         yield f"""printf("{format_string}", {args});"""
