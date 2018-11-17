@@ -1,6 +1,5 @@
 from turingarena.driver.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
 
-
 SKELETON_REAL_MAIN = r"""
 if __name__ == '__main__':
     import sys
@@ -59,16 +58,16 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield f'print(end="", flush=True)'
 
-    def visit_Allocation(self, allocation):
-        name = allocation.variable.name
-        indexes = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
-        size = self.visit(allocation.size)
+    def visit_VariableAllocation(self, a):
+        name = a.variable.name
+        indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        size = self.visit(a.size)
         yield f"{name}{indexes} = [None] * {size}"
 
     def generate_method_declaration(self, method_declaration):
         yield from ()
 
-    def generate_variable_declaration(self, declared_variable):
+    def visit_VariableDeclaration(self, d):
         yield from ()
 
     def generate_callback(self, callback):

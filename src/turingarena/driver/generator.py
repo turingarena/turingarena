@@ -185,17 +185,21 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_BreakStatement(self, statement):
         pass
 
-    def visit_IntermediateNode(self, s):
-        # ignore any other node
-        return []
-
     def visit_SequenceNode(self, node):
         for child in node.children:
             yield from self.generate_statement(child)
 
     @abstractmethod
-    def visit_Allocation(self, allocation):
+    def visit_VariableDeclaration(self, d):
         pass
+
+    @abstractmethod
+    def visit_VariableAllocation(self, a):
+        pass
+
+    def visit_IntermediateNode(self, s):
+        # ignore any other node
+        return []
 
     def generate_main_block(self, interface):
         yield from self.visit(interface.main_block)
@@ -212,20 +216,16 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
             if comment is not None:
                 yield self.line_comment(comment)
 
-        for var in statement.variables_to_declare:
-            yield from self.generate_variable_declaration(var)
+        for d in statement.variable_declarations:
+            yield from self.visit(d)
 
-        for allocation in statement.allocations:
-            yield from self.visit(allocation)
+        for a in statement.variable_allocations:
+            yield from self.visit(a)
 
         if statement.needs_flush:
             yield from self.generate_flush()
 
         yield from self.visit(statement)
-
-    @abstractmethod
-    def generate_variable_declaration(self, declared_variable):
-        pass
 
     @abstractmethod
     def generate_flush(self):

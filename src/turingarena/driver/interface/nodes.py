@@ -3,7 +3,7 @@ from collections import namedtuple
 from typing import List, Mapping, Any
 
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
+from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus, VariableDeclaration
 
 Bindings = Mapping[Reference, Any]
 
@@ -38,21 +38,21 @@ class IntermediateNode:
         return False
 
     @property
-    def variables_to_declare(self):
-        return frozenset(self._get_variables_to_declare())
+    def variable_declarations(self):
+        return frozenset(self._get_variable_declarations())
 
     def _should_declare_variables(self):
         return False
 
-    def _get_variables_to_declare(self):
+    def _get_variable_declarations(self):
         if not self._should_declare_variables():
             return
         for a in self.reference_actions:
             if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
-                yield a.reference.variable
+                yield VariableDeclaration(a.reference.variable)
 
     @property
-    def allocations(self):
+    def variable_allocations(self):
         return list(self._get_allocations())
 
     def _get_allocations(self):

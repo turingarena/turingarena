@@ -70,14 +70,14 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         pass
 
-    def visit_Allocation(self, allocation):
+    def visit_VariableAllocation(self, a):
         # FIXME: not implemented
         pass
 
     def generate_method_declaration(self, method_declaration):
         yield from ()
 
-    def generate_variable_declaration(self, declared_variable):
+    def visit_VariableDeclaration(self, d):
         yield from ()
 
 

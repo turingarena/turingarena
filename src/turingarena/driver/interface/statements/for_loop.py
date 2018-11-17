@@ -5,7 +5,7 @@ from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import Variable, Allocation, ReferenceStatus, ReferenceAction
+from turingarena.driver.interface.variables import Variable, VariableAllocation, ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class ForStatement(Statement, IntermediateNode):
             if a.reference.variable.dimensions == 0:
                 continue
             if a.status == ReferenceStatus.DECLARED:
-                yield Allocation(
+                yield VariableAllocation(
                     variable=a.reference.variable,
                     indexes=self.context.index_variables[-a.reference.index_count+1:],
                     size=self.index.range,

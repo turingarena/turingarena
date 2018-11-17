@@ -48,14 +48,14 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield 'abstract class Skeleton {'
         yield self.indent('private static final Scanner in = new Scanner(System.in);')
 
-    def generate_variable_declaration(self, declared_variable):
-        yield f'int{"[]" * declared_variable.dimensions} {declared_variable.name};'
+    def visit_VariableDeclaration(self, d):
+        yield f'int{"[]" * d.variable.dimensions} {d.variable.name};'
 
-    def visit_Allocation(self, allocation):
-        name = allocation.variable.name
-        indexes = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
-        dimensions = "[]" * (allocation.variable.dimensions - len(indexes) - 1)
-        size = self.visit(allocation.size)
+    def visit_VariableAllocation(self, a):
+        name = a.variable.name
+        indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        dimensions = "[]" * (a.variable.dimensions - len(indexes) - 1)
+        size = self.visit(a.size)
         yield f"{name}{indexes} = new int[{size}]{dimensions};"
 
     def generate_method_declaration(self, method_declaration):

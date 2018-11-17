@@ -15,4 +15,5 @@ ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
 ReferenceAction = namedtuple("ReferenceAction", ["reference", "status"])
 
-Allocation = namedtuple("Allocation", ["variable", "indexes", "size"])
+VariableDeclaration = namedtuple("VariableDeclaration", ["variable"])
+VariableAllocation = namedtuple("VariableAllocation", ["variable", "indexes", "size"])

@@ -34,8 +34,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         yield 'import "os"'
         yield
 
-    def generate_variable_declaration(self, declared_variable):
-        yield f"var {declared_variable.name} {'[]' * declared_variable.dimensions + 'int'}"
+    def visit_VariableDeclaration(self, d):
+        yield f"var {d.variable.name} {'[]' * d.variable.dimensions + 'int'}"
 
     def generate_method_declaration(self, method_declaration):
         return []
@@ -43,11 +43,11 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def generate_constant_declaration(self, name, value):
         return []
 
-    def visit_Allocation(self, allocation):
-        name = allocation.variable.name
-        idx = "".join(f"[{idx.variable.name}]" for idx in allocation.indexes)
-        dimensions = "[]" * (allocation.variable.dimensions - len(allocation.indexes))
-        size = self.visit(allocation.size)
+    def visit_VariableAllocation(self, a):
+        name = a.variable.name
+        idx = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        dimensions = "[]" * (a.variable.dimensions - len(a.indexes))
+        size = self.visit(a.size)
         yield f"{name}{idx} = make({dimensions}int, {size})"
 
     def generate_main_block(self, interface):
