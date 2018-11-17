@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from turingarena.driver.interface.expressions import IntLiteralExpressionSynthetic
-from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement, AbstractStatement
+from turingarena.driver.interface.statements.statement import SyntheticStatement, AbstractStatement
 from turingarena.driver.visitors import StatementVisitor
 from turingarena.util.visitor import Visitor
 
@@ -87,24 +87,27 @@ class InterfaceCodeGen(CodeGen):
         pass
 
 
-class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
-    def read_statement(self, read_statement):
-        args = ", ".join(self.expression(a) for a in read_statement.arguments)
+class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
+    def visit_IntermediateNode(self, n):
+        pass
+
+    def visit_ReadStatement(self, s):
+        args = ", ".join(self.expression(a) for a in s.arguments)
         yield f"read {args}"
 
-    def write_statement(self, write_statement):
-        args = ", ".join(self.expression(a) for a in write_statement.arguments)
+    def visit_WriteStatement(self, s):
+        args = ", ".join(self.expression(a) for a in s.arguments)
         yield f"write {args}"
 
-    def checkpoint_statement(self, checkpoint_statement):
+    def visit_CheckpointStatement(self, s):
         yield f"checkpoint"
 
-    def call_statement(self, call_statement):
-        method = call_statement.method
+    def visit_CallStatement(self, s):
+        method = s.method
 
-        args = ", ".join(self.expression(p) for p in call_statement.arguments)
+        args = ", ".join(self.expression(p) for p in s.arguments)
         if method.has_return_value:
-            return_value = f"{self.expression(call_statement.return_value)} = "
+            return_value = f"{self.expression(s.return_value)} = "
         else:
             return_value = ""
 
@@ -115,42 +118,35 @@ class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
 
         yield f"call {return_value}{method.name}({args}){callbacks}"
 
-    def return_statement(self, return_statement):
-        yield f"return {self.expression(return_statement.value)}"
+    def visit_ReturnStatement(self, s):
+        yield f"return {self.expression(s.value)}"
 
-    def exit_statement(self, exit_statement):
+    def visit_ExitStatement(self, s):
         yield "exit"
 
-    def break_statement(self, break_statement):
+    def visit_BreakStatement(self, s):
         yield "break"
 
-    def for_statement(self, for_statement):
-        index = for_statement.index
+    def visit_ForStatement(self, s):
+        index = s.index
         yield f"for {index.variable.name} to {self.expression(index.range)} " "{...}"
 
-    def loop_statement(self, loop_statement):
+    def visit_LoopStatement(self, s):
         yield "loop {...}"
 
-    def if_statement(self, if_statement):
-        if if_statement.else_body is not None:
+    def visit_IfStatement(self, s):
+        if s.else_body is not None:
             body = "{...} else {...}"
         else:
             body = "{...}"
-        yield f"if {self.expression(if_statement.condition)} {body}"
+        yield f"if {self.expression(s.condition)} {body}"
 
-    def switch_statement(self, switch_statement):
-        yield f"switch {self.expression(switch_statement.value)} " "{...}"
+    def visit_SwitchStatement(self, s):
+        yield f"switch {self.expression(s.value)} " "{...}"
 
 
 class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCodeGen):
     __slots__ = []
-
-    @property
-    def statement_comment_generator(self):
-        return self._statement_comment_generator()
-
-    def _statement_comment_generator(self):
-        return StatementDescriptionCodeGen()
 
     def generate_main_block(self, interface):
         yield from self.block_content(interface.main_block)
@@ -170,9 +166,9 @@ class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCode
         if statement.comment is not None:
             yield self.line_comment(statement.comment)
         else:
-            if isinstance(statement, Statement):
-                for comment in self.statement_comment_generator.statement(statement):
-                    yield self.line_comment(comment)
+            comment = StatementDescriptionCodeGen().visit(statement)
+            if comment is not None:
+                yield self.line_comment(comment)
 
         for var in statement.variables_to_declare:
             yield from self.generate_variable_declaration(var)

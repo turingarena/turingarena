@@ -17,10 +17,6 @@ class Statement(AbstractStatement, AbstractSyntaxNodeWrapper):
     def statement_type(self):
         return self.ast.statement_type
 
-    def __str__(self):
-        from turingarena.driver.generator import StatementDescriptionCodeGen
-        return "".join(StatementDescriptionCodeGen().statement(self))
-
     def _describe_node(self):
         yield str(self)
 
