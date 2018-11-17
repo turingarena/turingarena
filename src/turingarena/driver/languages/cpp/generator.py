@@ -47,7 +47,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def generate_main_block(self, interface):
         yield
         yield "int main() {"
-        yield from self.indent_all(self.visit(interface.main_block))
+        with self.indent():
+            yield from self.visit(interface.main_block)
         yield "}"
 
     def generate_callback(self, callback):
@@ -58,7 +59,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
-        yield from self.indent_all(self.visit(callback.body))
+        with self.indent():
+            yield from self.visit(callback.body)
         yield "};"
 
     def generate_constant_declaration(self, name, value):
@@ -86,7 +88,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_CallStatement(self, call_statement):
         if call_statement.method.has_callbacks:
             yield "{"
-            yield from self.indent_all(self.call_statement_body(call_statement))
+            with self.indent():
+                yield from self.call_statement_body(call_statement)
             yield "}"
         else:
             yield from self.call_statement_body(call_statement)
@@ -104,22 +107,26 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
-        yield from self.indent_all(self.visit(statement.then_body))
+        with self.indent():
+            yield from self.visit(statement.then_body)
         if statement.else_body:
             yield "} else {"
-            yield from self.indent_all(self.visit(statement.else_body))
+            with self.indent():
+                yield from self.visit(statement.else_body)
         yield "}"
 
     def visit_ForStatement(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
         yield f"for (int {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
-        yield from self.indent_all(self.visit(s.body))
+        with self.indent():
+            yield from self.visit(s.body)
         yield "}"
 
     def visit_LoopStatement(self, statement):
         yield "while (true) {"
-        yield from self.indent_all(self.visit(statement.body))
+        with self.indent():
+            yield from self.visit(statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -129,10 +136,12 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, statement):
         cases = [case for case in statement.cases]
         yield f"if ({self.build_switch_condition(statement.variable, cases[0].labels)}) " "{"
-        yield from self.indent_all(self.visit(cases[0].body))
+        with self.indent():
+            yield from self.visit(cases[0].body)
         for case in cases[1:]:
             yield "}" f" else if ({self.build_switch_condition(statement.variable, case.labels)}) " "{"
-            yield from self.indent_all(self.visit(case.body))
+            with self.indent():
+                yield from self.visit(case.body)
         yield "}"
 
     def visit_ExitStatement(self, statement):
@@ -158,7 +167,8 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
             for line in m.description.split("\n"):
                 yield self.line_comment(line)
         yield f"{self.build_method_signature(m)}" " {"
-        yield self.indent("// TODO")
-        if m.has_return_value:
-            yield self.indent("return 42;")
+        with self.indent():
+            yield "// TODO"
+            if m.has_return_value:
+                yield "return 42;"
         yield "}"

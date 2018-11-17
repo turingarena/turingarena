@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
@@ -6,16 +7,6 @@ from turingarena.util.visitor import Visitor
 
 class CodeGen(ABC, Visitor):
     __slots__ = []
-
-    def indent_all(self, lines):
-        for line in lines:
-            yield self.indent(line)
-
-    def indent(self, line):
-        if line is None:
-            return None
-        else:
-            return "    " + line
 
 
 class AbstractExpressionCodeGen(CodeGen):
@@ -35,14 +26,23 @@ class AbstractExpressionCodeGen(CodeGen):
 
 
 class InterfaceCodeGen(CodeGen):
-    __slots__ = []
+    __slots__ = ["indentation"]
+
+    def __init__(self):
+        self.indentation = 0
+
+    @contextmanager
+    def indent(self):
+        self.indentation += 1
+        yield
+        self.indentation -= 1
 
     def generate_to_file(self, interface, file):
         for line in self.generate(interface):
             if line is None:
                 print("", file=file)
             else:
-                print(line, file=file)
+                print("    " * self.indentation + line, file=file)
 
     def generate(self, interface):
         yield from self.generate_header(interface)

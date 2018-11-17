@@ -38,12 +38,14 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
     def callback_statement(self, callback_statement):
         yield from self.build_method_declaration(callback_statement.callback)
-        yield from self.indent_all(self.visit(callback_statement.callback.body))
+        with self.indent():
+            yield from self.visit(callback_statement.callback.body)
 
     def generate_main_block(self, interface):
         yield
         yield 'def main(_solution):'
-        yield from self.indent_all(self.visit(interface.main_block))
+        with self.indent():
+            yield from self.visit(interface.main_block)
 
     def visit_ExitStatement(self, exit_statement):
         yield from self.generate_flush()
@@ -73,7 +75,8 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_callback(self, callback):
         params = ", ".join(parameter.name for parameter in callback.parameters)
         yield f"def _callback_{callback.name}({params}):"
-        yield from self.indent_all(self.visit(callback.body))
+        with self.indent():
+            yield from self.visit(callback.body)
 
     def visit_CallStatement(self, call_statement):
         method_name = call_statement.method_name
@@ -105,20 +108,24 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, if_statement):
         condition = self.visit(if_statement.condition)
         yield f'if {condition}:'
-        yield from self.indent_all(self.visit(if_statement.then_body))
+        with self.indent():
+            yield from self.visit(if_statement.then_body)
         if if_statement.else_body:
             yield 'else:'
-            yield from self.indent_all(self.visit(if_statement.else_body))
+            with self.indent():
+                yield from self.visit(if_statement.else_body)
 
     def visit_ForStatement(self, for_statement):
         index_name = for_statement.index.variable.name
         size = self.visit(for_statement.index.range)
         yield f'for {index_name} in range({size}):'
-        yield from self.indent_all(self.visit(for_statement.body))
+        with self.indent():
+            yield from self.visit(for_statement.body)
 
     def visit_LoopStatement(self, loop_statement):
         yield 'while True:'
-        yield from self.indent_all(self.visit(loop_statement.body))
+        with self.indent():
+            yield from self.visit(loop_statement.body)
 
     def build_switch_cases(self, variable, labels):
         variable = self.visit(variable)
@@ -127,17 +134,20 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if {self.build_switch_cases(switch_statement.variable, cases[0].labels)}:'
-        yield from self.indent_all(self.visit(cases[0].body))
+        with self.indent():
+            yield from self.visit(cases[0].body)
         for case in cases[1:]:
             yield f'elif {self.build_switch_cases(switch_statement.variable, case.labels)}:'
-            yield from self.indent_all(self.visit(case.body))
+            with self.indent():
+                yield from self.visit(case.body)
 
 
 class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
     def visit_MethodPrototype(self, m):
         yield
         yield from self.build_method_declaration(m)
-        if m.has_return_value:
-            yield self.indent("return 42")
-        else:
-            yield self.indent('pass')
+        with self.indent():
+            if m.has_return_value:
+                yield "return 42"
+            else:
+                yield 'pass'

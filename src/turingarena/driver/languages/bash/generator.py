@@ -30,22 +30,26 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, if_statement):
         condition = self.visit(if_statement.condition)
         yield f"if (({condition})); then"
-        yield from self.indent_all(self.visit(if_statement.then_body))
+        with self.indent():
+            yield from self.visit(if_statement.then_body)
         if if_statement.else_body:
             yield "else"
-            yield from self.indent_all(self.visit(if_statement.else_body))
+            with self.indent():
+                yield from self.visit(if_statement.else_body)
         yield "fi"
 
     def visit_ForStatement(self, for_statement):
         index = for_statement.index.variable.name
         size = self.visit(for_statement.index.range)
         yield f"for (({index}=0; index<{size}; i++)); do"
-        yield self.indent_all(self.visit(for_statement.body))
+        with self.indent():
+            yield from self.visit(for_statement.body)
         yield "done"
 
     def visit_LoopStatement(self, loop_statement):
         yield "while true; do"
-        yield self.indent_all(self.visit(loop_statement.body))
+        with self.indent():
+            yield from self.visit(loop_statement.body)
         yield "done"
 
     def visit_BreakStatement(self, break_statement):
@@ -85,7 +89,8 @@ class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
     def visit_MethodPrototype(self, m):
         arguments = [p.name for p in m.parameters]
         yield f"function {m.name} " "{"
-        for i, arg in enumerate(arguments):
-            yield self.indent(f"{arg}=${i+1}")
-        yield self.indent(self.line_comment("TODO"))
+        with self.indent():
+            for i, arg in enumerate(arguments):
+                yield f"{arg}=${i+1}"
+            yield self.line_comment("TODO")
         yield "}"

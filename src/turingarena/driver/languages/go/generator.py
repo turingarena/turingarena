@@ -52,7 +52,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
 
     def generate_main_block(self, interface):
         yield "func main() {"
-        yield from self.indent_all(self.visit(interface.main_block))
+        with self.indent():
+            yield from self.visit(interface.main_block)
         yield "}"
 
     def generate_callback(self, callback):
@@ -63,7 +64,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             return_value = ""
 
         yield f"_callback_{callback.name} := func({params}) {return_value}" " {"
-        yield from self.indent_all(self.visit(callback.body))
+        with self.indent():
+            yield from self.visit(callback.body)
         yield "}"
 
     def call_statement_body(self, call_statement):
@@ -88,7 +90,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_CallStatement(self, call_statement):
         if call_statement.method.has_callbacks:
             yield "{"
-            yield from self.indent_all(self.call_statement_body(call_statement))
+            with self.indent():
+                yield from self.call_statement_body(call_statement)
             yield "}"
         else:
             yield from self.call_statement_body(call_statement)
@@ -106,22 +109,26 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f"if {condition}" " {"
-        yield from self.indent_all(self.visit(statement.then_body))
+        with self.indent():
+            yield from self.visit(statement.then_body)
         if statement.else_body:
             yield "} else {"
-            yield from self.indent_all(self.visit(statement.else_body))
+            with self.indent():
+                yield from self.visit(statement.else_body)
         yield "}"
 
     def visit_ForStatement(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
         yield f"for {index_name} := 0; {index_name} < {size}; {index_name}++" " {"
-        yield from self.indent_all(self.visit(s.body))
+        with self.indent():
+            yield from self.visit(s.body)
         yield "}"
 
     def visit_LoopStatement(self, statement):
         yield "for {"
-        yield from self.indent_all(self.visit(statement.body))
+        with self.indent():
+            yield from self.visit(statement.body)
         yield "}"
 
     def build_switch_condition(self, variable, labels):
@@ -132,7 +139,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         yield "switch {"
         for case in statement.cases:
             yield f"case {self.build_switch_condition(statement.variable, case.labels)}:"
-            yield from self.indent_all(self.visit(case.body))
+            with self.indent():
+                yield from self.visit(case.body)
         yield "}"
 
     def visit_ExitStatement(self, statement):
@@ -155,5 +163,6 @@ class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
     def visit_MethodPrototype(self, m):
         yield
         yield f"{self.build_method_signature(m)}" " {"
-        yield self.indent("// TODO")
+        with self.indent():
+            yield "// TODO"
         yield "}"

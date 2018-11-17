@@ -35,7 +35,7 @@ class JavaCodeGen(InterfaceCodeGen):
         return f"// {comment}"
 
     def generate_callbacks_declaration(self, callback):
-        return self.indent(f'{self.build_method_signature(callback)};')
+        return f'{self.build_method_signature(callback)};'
 
     def generate_constant_declaration(self, name, value):
         yield f"private static final {name} = {value};"
@@ -46,7 +46,8 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield 'import java.util.Scanner;'
         yield
         yield 'abstract class Skeleton {'
-        yield self.indent('private static final Scanner in = new Scanner(System.in);')
+        with self.indent():
+            yield 'private static final Scanner in = new Scanner(System.in);'
 
     def visit_VariableDeclaration(self, d):
         yield f'int{"[]" * d.variable.dimensions} {d.variable.name};'
@@ -59,28 +60,31 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield f"{name}{indexes} = new int[{size}]{dimensions};"
 
     def visit_MethodPrototype(self, m):
+        with self.indent():
+            if m.callbacks:
+                yield f'interface {self.build_callbacks_interface_name(m)} ''{'
+                for cbks in m.callbacks:
+                    yield self.generate_callbacks_declaration(cbks)
+                yield '}'
 
-        if m.callbacks:
-            yield self.indent(f'interface {self.build_callbacks_interface_name(m)} ''{')
-            for cbks in m.callbacks:
-                yield self.indent(self.generate_callbacks_declaration(cbks))
-            yield self.indent('}')
-
-        yield self.indent(f'abstract {self.build_method_signature(m)};')
+        yield f'abstract {self.build_method_signature(m)};'
 
     def generate_main(self, interface):
         yield
         yield 'public static void main(String args[]) {'
-        yield self.indent('Solution __solution = new Solution();')
-        yield from self.indent_all(self.visit(interface.main_block))
+        with self.indent():
+            yield 'Solution __solution = new Solution();'
+            yield from self.visit(interface.main_block)
         yield '}'
 
     def generate_main_block(self, interface):
-        yield from self.indent_all(self.generate_main(interface))
+        with self.indent():
+            yield from self.generate_main(interface)
 
     def generate_callback(self, callback):
         yield f'public {self.build_callback_signature(callback)}' " {"
-        yield from self.indent_all(self.visit(callback.body))
+        with self.indent():
+            yield from self.visit(callback.body)
         yield "}"
 
     def call_statement_body(self, call_statement):
@@ -91,8 +95,9 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         if call_statement.callbacks:
             cb_name = self.build_callbacks_interface_name(method)
             yield cb_name + " __clbks = new " + cb_name + "() {"
-            for callback in call_statement.callbacks:
-                yield from self.indent_all(self.generate_callback(callback))
+            with self.indent():
+                for callback in call_statement.callbacks:
+                    yield from self.generate_callback(callback)
             yield "};"
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
@@ -123,22 +128,26 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_IfStatement(self, statement):
         condition = self.visit(statement.condition)
         yield f'if ({condition})'' {'
-        yield from self.indent_all(self.visit(statement.then_body))
+        with self.indent():
+            yield from self.visit(statement.then_body)
         if statement.else_body is not None:
             yield '} else {'
-            yield from self.indent_all(self.visit(statement.else_body))
+            with self.indent():
+                yield from self.visit(statement.else_body)
         yield '}'
 
     def visit_ForStatement(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
         yield f'for (int {index_name} = 0; {index_name} < {size}; {index_name}++)'' {'
-        yield from self.indent_all(self.visit(statement.body))
+        with self.indent():
+            yield from self.visit(statement.body)
         yield '}'
 
     def visit_LoopStatement(self, loop_statement):
         yield 'while (true) {'
-        yield from self.indent_all(self.visit(loop_statement.body))
+        with self.indent():
+            yield from self.visit(loop_statement.body)
         yield '}'
 
     def build_switch_cases(self, variable, labels):
@@ -148,10 +157,12 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_SwitchStatement(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)})'' {'
-        yield from self.indent_all(self.visit(cases[0].body))
+        with self.indent():
+            yield from self.visit(cases[0].body)
         for case in cases[1:]:
             yield '}' f' else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) ' '{'
-            yield from self.indent_all(self.visit(case.body))
+            with self.indent():
+                yield from self.visit(case.body)
         yield '}'
 
     def generate_flush(self):
@@ -172,17 +183,18 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
         yield 'class Solution extends Skeleton {'
 
     def visit_MethodPrototype(self, m):
-        if m.callbacks:
-            yield
-            yield self.indent(
-                self.line_comment(f'interface {self.build_callbacks_interface_name(m)} ''{'))
-            for cbks in m.callbacks:
-                yield self.indent(self.line_comment(self.generate_callbacks_declaration(cbks)))
-            yield self.indent(self.line_comment('}'))
+        with self.indent():
+            if m.callbacks:
+                yield
+                yield self.line_comment(f'interface {self.build_callbacks_interface_name(m)} ''{')
+                for cbks in m.callbacks:
+                    yield self.line_comment(self.generate_callbacks_declaration(cbks))
+                yield self.line_comment('}')
 
-        yield
-        yield self.indent(f"{self.build_method_signature(m)}" " {")
-        yield self.indent(self.indent('// TODO'))
-        if m.has_return_value:
-            yield self.indent(self.indent("return 42;"))
-        yield self.indent('}')
+            yield
+            yield f"{self.build_method_signature(m)}" " {"
+            with self.indent():
+                yield '// TODO'
+                if m.has_return_value:
+                    yield "return 42;"
+            yield '}'
