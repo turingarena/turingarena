@@ -1,7 +1,8 @@
+import functools
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.block import Block, AbstractBlock
+from turingarena.driver.interface.block import Block, AbstractContextBlock
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -12,7 +13,7 @@ from turingarena.driver.interface.variables import ReferenceAction, ReferenceSta
 logger = logging.getLogger(__name__)
 
 
-class PrintCallbackRequest(Print):
+class PrintCallbackRequest(Print, namedtuple("PrintCallbackRequest", ["context"])):
     @property
     def arguments(self):
         return [IntLiteralSynthetic(value=1)]
@@ -21,7 +22,7 @@ class PrintCallbackRequest(Print):
         return "requesting a callback"
 
 
-class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation"]), Print):
+class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation", "context"]), Print):
     @property
     def callback_index(self):
         return self.implementation.context.callback_index
@@ -34,38 +35,33 @@ class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation"]
         return f"index of this callback: {self.callback_index} = {self.implementation.name}"
 
 
-class CallbackBody(AbstractBlock):
-    def __init__(self, implementation):
+class CallbackBody(AbstractContextBlock):
+    def __init__(self, ast, context, implementation):
+        self.ast = ast
+        self.context = context
         self.implementation = implementation
 
-    def _generate_flat_inner_nodes(self):
-        yield CallbackCallNode(self.implementation)
-        yield PrintCallbackRequest()
-        yield PrintCallbackIndex(self.implementation)
+    def _get_flat_children_builders(self):
+        yield functools.partial(CallbackCallNode, self.implementation)
+        yield PrintCallbackRequest
+        yield functools.partial(PrintCallbackIndex, self.implementation)
 
-        yield from self.implementation.raw_body.flat_inner_nodes
+        yield from Block(self.ast, self.context)._get_flat_children_builders()
 
         if not self.implementation.has_return_value:
-            yield CallbackEnd(callback=self.implementation)
+            yield functools.partial(CallbackEnd, self.implementation)
 
 
 class CallbackImplementation(IntermediateNode, CallbackPrototype):
     __slots__ = []
 
     @property
-    def raw_body(self):
-        inner_context = self.context.local_context.with_reference_actions(
-            ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
-            for p in self.parameters
-        )
-        return Block(
-            ast=self.ast.body if self.ast.body else self.default_body,
-            context=inner_context,
-        )
-
-    @property
     def body(self):
-        return CallbackBody(self)
+        return CallbackBody(
+            ast=self.ast.body if self.ast.body else self.default_body,
+            context=self.context.local_context,
+            implementation=self,
+        )
 
     @property
     def default_body(self):
@@ -91,6 +87,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
 
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback_implementation",
+    "context",
 ])):
     def _get_reference_actions(self):
         for p in self.callback_implementation.parameters:
@@ -117,7 +114,7 @@ class Return(IntermediateNode, Statement):
         yield f"callback return"
 
 
-class CallbackEnd(IntermediateNode, namedtuple("CallbackEnd", ["callback"])):
+class CallbackEnd(IntermediateNode, namedtuple("CallbackEnd", ["callback", "context"])):
     def _describe_node(self):
         yield f"callback end"
 
@@ -134,7 +131,4 @@ class ExitStatement(Exit, Statement, IntermediateNode):
 
     def validate(self):
         # TODO: check that exit is used only in valid places
-        return []
-
-    def _get_reference_actions(self):
         return []

@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 from functools import partial
 
+from turingarena.driver.interface.analysis.references import ReferenceActionAnalyzer
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.seq import SequenceNode
 from turingarena.driver.interface.step import Step

@@ -4,6 +4,7 @@ from collections import namedtuple
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import Variable, VariableAllocation, ReferenceStatus, ReferenceAction
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
-class For(Statement, IntermediateNode):
+class For(Statement, ControlStructure, IntermediateNode):
     __slots__ = []
 
     @property

@@ -1,25 +1,30 @@
 import logging
 import warnings
 
+from turingarena.driver.interface.analysis.expressions import ExpressionAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
-from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
+from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
 
-class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class SwitchNode(IntermediateNode, ControlStructure, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
     def cases(self):
         return tuple(self._get_cases())
+
+    def _get_bodies(self):
+        for case in self.ast.cases:
+            yield case.body
 
     def _get_cases(self):
         for case in self.ast.cases:
@@ -95,7 +100,7 @@ class Case(AbstractSyntaxNodeWrapper):
 
 class SwitchResolve(SwitchNode):
     def _is_already_resolved(self):
-        return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.value)
+        return ExpressionAnalyzer(self.context).is_resolved(self.value)
 
     def _is_relevant(self):
         return not self._is_already_resolved()

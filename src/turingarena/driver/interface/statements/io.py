@@ -1,13 +1,10 @@
 import logging
 from abc import abstractmethod
 
-from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
+from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +70,6 @@ class Write(Print, ReadWriteStatement):
 
 class Checkpoint(Print, IntermediateNode):
     __slots__ = []
-
-    def _get_reference_actions(self):
-        return []
 
     @property
     def arguments(self):

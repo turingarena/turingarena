@@ -1,13 +1,13 @@
 import logging
 
+from turingarena.driver.interface.analysis.expressions import ExpressionAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
-from turingarena.driver.interface.variables import ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,12 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             yield from self.else_body.validate()
 
 
-class If(AbstractIfNode, Statement):
+class If(AbstractIfNode, ControlStructure, Statement):
+    def _get_bodies(self):
+        yield self.then_body
+        if self.else_body is not None:
+            yield self.else_body
+
     def _describe_node(self):
         yield f"if {self.condition}"
         yield from self._indent_all(self.then_body.node_description)
@@ -56,7 +61,7 @@ class If(AbstractIfNode, Statement):
 
 class ResolveIf(AbstractIfNode):
     def _is_already_resolved(self):
-        return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.condition)
+        return ExpressionAnalyzer(self.context).is_resolved(self.condition)
 
     def _is_relevant(self):
         return not self._is_already_resolved()

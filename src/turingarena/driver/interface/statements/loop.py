@@ -3,16 +3,17 @@ import logging
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.nodes import IntermediateNode
+from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
 
-class Loop(Statement, IntermediateNode):
+class Loop(Statement, ControlStructure, IntermediateNode):
     __slots__ = []
 
-    def _get_reference_actions(self):
-        return []
+    def _get_bodies(self):
+        yield self.body
 
     @property
     def body(self):
@@ -28,9 +29,6 @@ class Loop(Statement, IntermediateNode):
 
 class Break(Statement, IntermediateNode):
     __slots__ = []
-
-    def _get_reference_actions(self):
-        return []
 
     def validate(self):
         if not self.context.in_loop:
