@@ -47,10 +47,6 @@ class For(Statement, IntermediateNode):
     def _get_intermediate_nodes(self):
         yield self
 
-    def _get_first_requests(self):
-        yield None
-        yield from self.body.first_requests
-
     def _should_declare_variables(self):
         return True
 

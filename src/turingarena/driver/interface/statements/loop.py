@@ -24,10 +24,6 @@ class Loop(Statement, IntermediateNode):
     def body(self):
         return Block(ast=self.ast.body, context=self.context.with_loop())
 
-    def _get_first_requests(self):
-        yield from self.body.first_requests
-        yield None
-
     def validate(self):
         yield from self.body.validate()
 

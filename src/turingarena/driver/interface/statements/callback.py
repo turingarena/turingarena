@@ -143,9 +143,6 @@ class ExitStatement(Exit, Statement, IntermediateNode):
         # TODO: check that exit is used only in valid places
         return []
 
-    def _get_first_requests(self):
-        yield RequestSignature("exit")
-
     def _get_reference_actions(self):
         return []
 

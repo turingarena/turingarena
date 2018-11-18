@@ -93,13 +93,6 @@ class IntermediateNode:
         return frozenset()
 
     @property
-    def first_requests(self):
-        return frozenset(self._get_first_requests())
-
-    def _get_first_requests(self):
-        yield None
-
-    @property
     def can_be_grouped(self):
         return self._can_be_grouped()
 

@@ -7,8 +7,8 @@ from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
+from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
@@ -62,10 +62,6 @@ class Switch(SwitchNode, Statement):
                 labels.append(label)
             yield from case.validate()
 
-    def _get_first_requests(self):
-        for c in self.cases:
-            yield from c.body.first_requests
-
     def _describe_node(self):
         yield f"switch {self.value} "
         for c in self.cases:
@@ -111,16 +107,6 @@ class SwitchResolve(SwitchNode):
     def _get_reference_actions(self):
         yield ReferenceAction(self.value.reference, ReferenceStatus.RESOLVED)
 
-    def _find_cases_expecting(self, request):
-        for c in self.cases:
-            if request in c.body.first_requests:
-                yield c
-
-    def _find_cases_expecting_no_request(self):
-        for c in self.cases:
-            if None in c.body.first_requests:
-                yield c
-
     def get_matching_cases(self, request):
         return list(self._find_matching_cases(request))
 
@@ -129,7 +115,12 @@ class SwitchResolve(SwitchNode):
         if matching_cases_requests:
             return matching_cases_requests
         else:
-            return list(self._find_cases_expecting_no_request())
+            return list(self._find_cases_expecting(None))
+
+    def _find_cases_expecting(self, request):
+        for c in self.cases:
+            if request in StatementAnalyzer().first_requests(c.body):
+                yield c
 
     def _describe_node(self):
         yield f"resolve {self}"

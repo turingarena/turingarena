@@ -6,6 +6,7 @@ from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
+from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
 from turingarena.driver.interface.variables import ReferenceStatus
 
 logger = logging.getLogger(__name__)
@@ -42,13 +43,6 @@ class If(AbstractIfNode, Statement):
         if self.else_body is not None:
             yield from self.else_body.declaration_directions
 
-    def _get_first_requests(self):
-        yield from self.then_body.first_requests
-        if self.else_body is not None:
-            yield from self.else_body.first_requests
-        else:
-            yield None
-
     def _describe_node(self):
         yield f"if {self.condition}"
         yield from self._indent_all(self.then_body.node_description)
@@ -65,10 +59,10 @@ class ResolveIf(AbstractIfNode):
         return not self._is_already_resolved()
 
     def _get_conditions_expecting(self, request):
-        if request in self.then_body.first_requests:
+        if request in StatementAnalyzer().first_requests(self.then_body):
             yield 1
         if self.else_body is not None:
-            if request in self.else_body.first_requests:
+            if request in StatementAnalyzer().first_requests(self.else_body):
                 yield 0
 
     def _get_conditions_expecting_no_request(self):

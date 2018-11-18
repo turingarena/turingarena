@@ -3,7 +3,6 @@ import logging
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.requests import CallRequestSignature
 from turingarena.driver.interface.expranalysis import ExpressionDimensionAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -49,9 +48,6 @@ class CallNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             self._find_callback_implementation(i, s)
             for i, s in enumerate(self.method.callbacks)
         ]
-
-    def _get_first_requests(self):
-        yield CallRequestSignature("call", self.method_name)
 
     def _find_callback_implementation(self, index, callback):
         try:

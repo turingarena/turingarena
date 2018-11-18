@@ -3,14 +3,14 @@ import functools
 
 def visitormethod(f):
     @functools.wraps(f)
-    def visitor_method(self, node):
+    def visitor_method(self, node, *args, **kwargs):
         for cls in node.__class__.__mro__:
             try:
                 method = getattr(self, f"{f.__name__}_{cls.__name__}")
             except AttributeError:
                 continue
 
-            ans = method(node)
+            ans = method(node, *args, **kwargs)
             if ans is not NotImplemented:
                 return ans
 
