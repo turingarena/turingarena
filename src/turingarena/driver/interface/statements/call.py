@@ -9,14 +9,14 @@ from turingarena.driver.interface.expressions import Expression, IntLiteralExpre
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
-from turingarena.driver.interface.statements.io import OutputStatement
+from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
 
 logger = logging.getLogger(__name__)
 
 
-class CallStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class CallNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -71,7 +71,7 @@ class CallStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             ), description=None)
 
 
-class CallStatement(Statement, CallStatementNode):
+class Call(Statement, CallNode):
     def validate(self):
         if self.method_name not in self.context.global_context.methods_by_name:
             yield Diagnostic(
@@ -97,7 +97,7 @@ class CallStatement(Statement, CallStatementNode):
         pass
 
 
-class MethodResolveArgumentsNode(CallStatementNode):
+class MethodResolveArgumentsNode(CallNode):
     __slots__ = []
 
     def _needs_request_lookahead(self):
@@ -195,7 +195,7 @@ class MethodResolveArgumentsNode(CallStatementNode):
         yield f"resolve arguments"
 
 
-class MethodReturnNode(CallStatementNode):
+class MethodReturnNode(CallNode):
     __slots__ = []
 
     def _is_relevant(self):
@@ -228,7 +228,7 @@ class MethodReturnNode(CallStatementNode):
         yield f"return"
 
 
-class MethodCallCompletedNode(CallStatementNode):
+class MethodCallCompletedNode(CallNode):
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
             context.report_ready()
@@ -238,7 +238,7 @@ class MethodCallCompletedNode(CallStatementNode):
         yield f"call completed"
 
 
-class MethodCallbacksStopNode(CallStatementNode, OutputStatement):
+class PrintNoCallbacks(CallNode, Print):
     def _driver_run(self, context):
         pass
 
@@ -253,7 +253,7 @@ class MethodCallbacksStopNode(CallStatementNode, OutputStatement):
         return "no more callbacks"
 
 
-class MethodCallbacksNode(CallStatementNode):
+class MethodCallbacksNode(CallNode):
     __slots__ = []
 
     def _is_relevant(self):

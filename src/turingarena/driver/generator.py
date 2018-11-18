@@ -86,18 +86,18 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
     def visit_IntermediateNode(self, n):
         pass
 
-    def visit_ReadStatement(self, s):
+    def visit_Read(self, s):
         args = ", ".join(self.visit(a) for a in s.arguments)
         return f"read {args}"
 
-    def visit_OutputStatement(self, s):
+    def visit_Print(self, s):
         args = ", ".join(self.visit(a) for a in s.arguments)
         return f"write {args}"
 
-    def visit_CheckpointStatement(self, s):
+    def visit_Checkpoint(self, s):
         return f"checkpoint"
 
-    def visit_CallStatement(self, s):
+    def visit_Call(self, s):
         method = s.method
 
         args = ", ".join(self.visit(p) for p in s.arguments)
@@ -113,30 +113,30 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
 
         return f"call {return_value}{method.name}({args}){callbacks}"
 
-    def visit_ReturnStatement(self, s):
+    def visit_Return(self, s):
         return f"return {self.visit(s.value)}"
 
-    def visit_ExitStatement(self, s):
+    def visit_Exit(self, s):
         return "exit"
 
-    def visit_BreakStatement(self, s):
+    def visit_Break(self, s):
         return "break"
 
-    def visit_ForStatement(self, s):
+    def visit_For(self, s):
         index = s.index
         return f"for {index.variable.name} to {self.visit(index.range)} " "{...}"
 
-    def visit_LoopStatement(self, s):
+    def visit_Loop(self, s):
         return "loop {...}"
 
-    def visit_IfStatement(self, s):
+    def visit_If(self, s):
         if s.else_body is not None:
             body = "{...} else {...}"
         else:
             body = "{...}"
         return f"if {self.visit(s.condition)} {body}"
 
-    def visit_SwitchStatement(self, s):
+    def visit_Switch(self, s):
         return f"switch {self.visit(s.value)} " "{...}"
 
 
@@ -144,43 +144,43 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
 
     @abstractmethod
-    def visit_ReadStatement(self, s):
+    def visit_Read(self, s):
         pass
 
     @abstractmethod
-    def visit_OutputStatement(self, s):
+    def visit_Print(self, s):
         pass
 
     @abstractmethod
-    def visit_CallStatement(self, s):
+    def visit_Call(self, s):
         pass
 
     @abstractmethod
-    def visit_IfStatement(self, s):
+    def visit_If(self, s):
         pass
 
     @abstractmethod
-    def visit_ForStatement(self, s):
+    def visit_For(self, s):
         pass
 
     @abstractmethod
-    def visit_LoopStatement(self, s):
+    def visit_Loop(self, s):
         pass
 
     @abstractmethod
-    def visit_SwitchStatement(self, s):
+    def visit_Switch(self, s):
         pass
 
     @abstractmethod
-    def visit_ExitStatement(self, statement):
+    def visit_Exit(self, statement):
         pass
 
     @abstractmethod
-    def visit_ReturnStatement(self, statement):
+    def visit_Return(self, statement):
         pass
 
     @abstractmethod
-    def visit_BreakStatement(self, statement):
+    def visit_Break(self, statement):
         pass
 
     def visit_SequenceNode(self, node):

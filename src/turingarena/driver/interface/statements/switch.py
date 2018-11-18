@@ -14,7 +14,7 @@ from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAct
 logger = logging.getLogger(__name__)
 
 
-class SwitchStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -24,7 +24,7 @@ class SwitchStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     def _get_cases(self):
         for case in self.ast.cases:
             # FIXME: .with_reference_actions(<resolve node>.reference_actions)
-            yield CaseStatement(ast=case, context=self.context)
+            yield Case(ast=case, context=self.context)
 
     @property
     def variable(self):
@@ -36,7 +36,7 @@ class SwitchStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         return Expression.compile(self.ast.value, self.context.expression())
 
 
-class SwitchStatement(SwitchStatementNode, Statement):
+class Switch(SwitchNode, Statement):
     __slots__ = []
 
     def _get_declaration_directions(self):
@@ -86,7 +86,7 @@ class SwitchStatement(SwitchStatementNode, Statement):
         yield from self._indent_all(case.body.node_description)
 
 
-class CaseStatement(AbstractSyntaxNodeWrapper):
+class Case(AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -110,7 +110,7 @@ class CaseStatement(AbstractSyntaxNodeWrapper):
         yield from self.body.validate()
 
 
-class SwitchResolveNode(SwitchStatementNode):
+class SwitchResolveNode(SwitchNode):
     def _is_relevant(self):
         return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
 

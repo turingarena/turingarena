@@ -10,14 +10,14 @@ from turingarena.driver.interface.execution import RequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.statements.io import OutputStatement
+from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
 
 logger = logging.getLogger(__name__)
 
 
-class CallbackRequestOutputStatement(OutputStatement):
+class PrintCallbackRequest(Print):
     @property
     def arguments(self):
         return [IntLiteralExpressionSynthetic(value=1)]
@@ -26,7 +26,7 @@ class CallbackRequestOutputStatement(OutputStatement):
         return "requesting a callback"
 
 
-class CallbackIndexOutputStatement(namedtuple("CallbackWriteIndexNode", ["implementation"]), OutputStatement):
+class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation"]), Print):
     @property
     def callback_index(self):
         return self.implementation.context.callback_index
@@ -45,8 +45,8 @@ class CallbackBody(AbstractBlock):
 
     def _generate_flat_inner_nodes(self):
         yield CallbackCallNode(self.implementation)
-        yield CallbackRequestOutputStatement()
-        yield CallbackIndexOutputStatement(self.implementation)
+        yield PrintCallbackRequest()
+        yield PrintCallbackIndex(self.implementation)
 
         yield from self.implementation.raw_body.flat_inner_nodes
 
@@ -165,7 +165,7 @@ class AbstractCallbackReturnNode(IntermediateNode):
         return []
 
 
-class ReturnStatement(AbstractCallbackReturnNode, Statement):
+class Return(AbstractCallbackReturnNode, Statement):
     __slots__ = []
 
     def _has_return_value(self):
@@ -197,11 +197,11 @@ class CallbackEndNode(AbstractCallbackReturnNode, namedtuple("CallbackEndNode", 
         yield f"callback end"
 
 
-class ExitStatement(IntermediateNode):
+class Exit(IntermediateNode):
     __slots__ = []
 
 
-class ExitStatementAst(ExitStatement, Statement, IntermediateNode):
+class ExitStatement(Exit, Statement, IntermediateNode):
     __slots__ = []
 
     def _get_intermediate_nodes(self):

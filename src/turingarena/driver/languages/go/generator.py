@@ -87,7 +87,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
 
         yield f"{return_value}{method.name}({parameters});"
 
-    def visit_CallStatement(self, call_statement):
+    def visit_Call(self, call_statement):
         if call_statement.method.has_callbacks:
             yield "{"
             with self.indent():
@@ -96,17 +96,17 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         else:
             yield from self.call_statement_body(call_statement)
 
-    def visit_OutputStatement(self, write_statement):
+    def visit_Print(self, write_statement):
         format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
         args = ", ".join(self.visit(v) for v in write_statement.arguments)
         yield f'fmt.Printf("{format_string}", {args})'
 
-    def visit_ReadStatement(self, statement):
+    def visit_Read(self, statement):
         format_string = "".join("%d" for _ in statement.arguments)
         scanf_args = ", ".join("&" + self.visit(v) for v in statement.arguments)
         yield f'fmt.Scanf("{format_string}", {scanf_args});'
 
-    def visit_IfStatement(self, statement):
+    def visit_If(self, statement):
         condition = self.visit(statement.condition)
         yield f"if {condition}" " {"
         with self.indent():
@@ -117,7 +117,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
                 yield from self.visit(statement.else_body)
         yield "}"
 
-    def visit_ForStatement(self, s):
+    def visit_For(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
         yield f"for {index_name} := 0; {index_name} < {size}; {index_name}++" " {"
@@ -125,7 +125,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             yield from self.visit(s.body)
         yield "}"
 
-    def visit_LoopStatement(self, statement):
+    def visit_Loop(self, statement):
         yield "for {"
         with self.indent():
             yield from self.visit(statement.body)
@@ -135,7 +135,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         variable = self.visit(variable)
         return " || ".join(f"{variable} == {label}" for label in labels)
 
-    def visit_SwitchStatement(self, statement):
+    def visit_Switch(self, statement):
         yield "switch {"
         for case in statement.cases:
             yield f"case {self.build_switch_condition(statement.variable, case.labels)}:"
@@ -143,13 +143,13 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
                 yield from self.visit(case.body)
         yield "}"
 
-    def visit_ExitStatement(self, statement):
+    def visit_Exit(self, statement):
         yield "os.Exit(0)"
 
-    def visit_ReturnStatement(self, statement):
+    def visit_Return(self, statement):
         yield f"return {self.visit(statement.value)};"
 
-    def visit_BreakStatement(self, statement):
+    def visit_Break(self, statement):
         yield "break"
 
     def generate_flush(self):

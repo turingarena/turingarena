@@ -49,7 +49,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
         }
         return generators[statement.statement_type]()
 
-    def visit_CallStatement(self, statement):
+    def visit_Call(self, statement):
         method_name = statement.method.name
         parameters = ", ".join(self.visit(p) for p in statement.parameters)
         if statement.return_value is not None:
@@ -64,15 +64,15 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             size = self.visit(statement.size)
             yield f"{arg} = Array({size});"
 
-    def visit_OutputStatement(self, statement):
+    def visit_Print(self, statement):
         args = ", ".join(self.visit(v) for v in statement.arguments)
         yield f"print({args});"
 
-    def visit_ReadStatement(self, statement):
+    def visit_Read(self, statement):
         args = ", ".join(self.visit(arg) for arg in statement.arguments)
         yield f"[{args}] = await readIntegers();"
 
-    def visit_IfStatement(self, statement):
+    def visit_If(self, statement):
         condition = self.visit(statement.condition)
         yield f"if ({condition})" " {"
         with self.indent():
@@ -83,7 +83,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
                 yield from self.visit(statement.else_body)
         yield "}"
 
-    def visit_ForStatement(self, statement):
+    def visit_For(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
         yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
@@ -91,7 +91,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             yield from self.visit(statement.body)
         yield "}"
 
-    def visit_LoopStatement(self, loop_statement):
+    def visit_Loop(self, loop_statement):
         yield "while (true) {"
         with self.indent():
             yield from self.visit(loop_statement.body)
@@ -104,7 +104,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
             result += f" || {variable} == {self.visit(label)}"
         return result
 
-    def visit_SwitchStatement(self, switch_statement):
+    def visit_Switch(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f"if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)}) " "{"
         with self.indent():

@@ -12,11 +12,11 @@ from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDir
 logger = logging.getLogger(__name__)
 
 
-class OutputStatement(IntermediateNode):
+class Print(IntermediateNode):
     __slots__ = []
 
 
-class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
+class ReadWriteStatement(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -38,7 +38,7 @@ class ReadWriteStatementAst(IntermediateNode, AbstractSyntaxNodeWrapper):
         return True
 
 
-class ReadStatement(ReadWriteStatementAst, IntermediateNode):
+class Read(ReadWriteStatement, IntermediateNode):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -66,7 +66,7 @@ class ReadStatement(ReadWriteStatementAst, IntermediateNode):
             ])
 
 
-class WriteStatement(OutputStatement, ReadWriteStatementAst):
+class Write(Print, ReadWriteStatement):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -92,7 +92,7 @@ class WriteStatement(OutputStatement, ReadWriteStatementAst):
             return context.result()._replace(assignments=list(self._get_assignments(context)))
 
 
-class CheckpointStatement(OutputStatement, IntermediateNode):
+class Checkpoint(Print, IntermediateNode):
     __slots__ = []
 
     def _get_declaration_directions(self):
@@ -121,7 +121,7 @@ class CheckpointStatement(OutputStatement, IntermediateNode):
         return [IntLiteralExpressionSynthetic(0)]
 
 
-class InitialCheckpointStatement(CheckpointStatement):
+class InitialCheckpoint(Checkpoint):
     def _get_comment(self):
         return "initial checkpoint"
 
@@ -129,5 +129,5 @@ class InitialCheckpointStatement(CheckpointStatement):
         yield "initial checkpoint"
 
 
-class CheckpointStatementAst(AbstractSyntaxNodeWrapper, CheckpointStatement):
+class CheckpointStatement(AbstractSyntaxNodeWrapper, Checkpoint):
     __slots__ = []

@@ -1,52 +1,52 @@
-from turingarena.driver.interface.statements.callback import ExitStatementAst
+from turingarena.driver.interface.statements.callback import ExitStatement
 from .call import MethodResolveArgumentsNode, MethodCallbacksNode, \
-    MethodCallCompletedNode, MethodReturnNode, CallStatement, MethodCallbacksStopNode
-from .callback import ReturnStatement
-from .for_loop import ForStatement
-from .if_else import ResolveIfNode, IfStatement
-from .io import CheckpointStatementAst, ReadStatement, WriteStatement
-from .loop import LoopStatement, BreakStatement
-from .switch import SwitchResolveNode, SwitchStatement
+    MethodCallCompletedNode, MethodReturnNode, Call, PrintNoCallbacks
+from .callback import Return
+from .for_loop import For
+from .if_else import ResolveIfNode, If
+from .io import CheckpointStatement, Read, Write
+from .loop import Loop, Break
+from .switch import SwitchResolveNode, Switch
 
 statement_classes = {
     "checkpoint": [
-        CheckpointStatementAst,
+        CheckpointStatement,
     ],
     "read": [
-        ReadStatement,
+        Read,
     ],
     "write": [
-        WriteStatement,
+        Write,
     ],
     "call": [
         MethodResolveArgumentsNode,
         MethodCallbacksNode,
         MethodCallCompletedNode,
         MethodReturnNode,
-        CallStatement,
-        MethodCallbacksStopNode,
+        Call,
+        PrintNoCallbacks,
     ],
     "return": [
-        ReturnStatement,
+        Return,
     ],
     "exit": [
-        ExitStatementAst,
+        ExitStatement,
     ],
     "for": [
-        ForStatement,
+        For,
     ],
     "if": [
         ResolveIfNode,
-        IfStatement,
+        If,
     ],
     "loop": [
-        LoopStatement,
+        Loop,
     ],
     "break": [
-        BreakStatement,
+        Break,
     ],
     "switch": [
         SwitchResolveNode,
-        SwitchStatement,
+        Switch,
     ],
 }

@@ -6,21 +6,21 @@ from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.statements.callback import ExitStatement
-from turingarena.driver.interface.statements.io import InitialCheckpointStatement
+from turingarena.driver.interface.statements.callback import Exit
+from turingarena.driver.interface.statements.io import InitialCheckpoint
 from turingarena.driver.interface.variables import Reference, Variable
 
 logger = logging.getLogger(__name__)
 
 
-class InterfaceExitNode(ExitStatement):
+class InterfaceExitNode(Exit):
     def _get_comment(self):
         return "terminate"
 
 
 class InterfaceBody(Block):
     def _generate_flat_inner_nodes(self):
-        yield InitialCheckpointStatement()
+        yield InitialCheckpoint()
         yield from super()._generate_flat_inner_nodes()
         yield InterfaceExitNode()
 

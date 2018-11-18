@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
-class ForStatement(Statement, IntermediateNode):
+class For(Statement, IntermediateNode):
     __slots__ = []
 
     @property

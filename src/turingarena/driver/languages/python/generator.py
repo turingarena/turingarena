@@ -47,14 +47,14 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         with self.indent():
             yield from self.visit(interface.main_block)
 
-    def visit_ExitStatement(self, exit_statement):
+    def visit_Exit(self, exit_statement):
         yield from self.generate_flush()
         yield '_os._exit(0)'
 
-    def visit_BreakStatement(self, break_statement):
+    def visit_Break(self, break_statement):
         yield 'break'
 
-    def visit_ReturnStatement(self, return_statement):
+    def visit_Return(self, return_statement):
         yield f'return {self.visit(return_statement.value)}'
 
     def generate_flush(self):
@@ -78,7 +78,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         with self.indent():
             yield from self.visit(callback.body)
 
-    def visit_CallStatement(self, call_statement):
+    def visit_Call(self, call_statement):
         method_name = call_statement.method_name
 
         for callback in call_statement.callbacks:
@@ -97,15 +97,15 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         else:
             yield f'{call_expr}'
 
-    def visit_OutputStatement(self, write_statement):
+    def visit_Print(self, write_statement):
         args = ', '.join(self.visit(arg) for arg in write_statement.arguments)
         yield f'print({args})'
 
-    def visit_ReadStatement(self, read_statement):
+    def visit_Read(self, read_statement):
         arguments = ", ".join(self.visit(arg) for arg in read_statement.arguments)
         yield f'[{arguments}] = map(int, input().split())'
 
-    def visit_IfStatement(self, if_statement):
+    def visit_If(self, if_statement):
         condition = self.visit(if_statement.condition)
         yield f'if {condition}:'
         with self.indent():
@@ -115,14 +115,14 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
             with self.indent():
                 yield from self.visit(if_statement.else_body)
 
-    def visit_ForStatement(self, for_statement):
+    def visit_For(self, for_statement):
         index_name = for_statement.index.variable.name
         size = self.visit(for_statement.index.range)
         yield f'for {index_name} in range({size}):'
         with self.indent():
             yield from self.visit(for_statement.body)
 
-    def visit_LoopStatement(self, loop_statement):
+    def visit_Loop(self, loop_statement):
         yield 'while True:'
         with self.indent():
             yield from self.visit(loop_statement.body)
@@ -131,7 +131,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         variable = self.visit(variable)
         return ' or '.join(f'{variable} == {label}' for label in labels)
 
-    def visit_SwitchStatement(self, switch_statement):
+    def visit_Switch(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if {self.build_switch_cases(switch_statement.variable, cases[0].labels)}:'
         with self.indent():

@@ -8,7 +8,7 @@ from turingarena.driver.interface.statements.statement import Statement
 logger = logging.getLogger(__name__)
 
 
-class LoopStatement(Statement, IntermediateNode):
+class Loop(Statement, IntermediateNode):
     __slots__ = []
 
     def _driver_run(self, context):
@@ -46,7 +46,7 @@ class LoopStatement(Statement, IntermediateNode):
         yield from self._indent_all(self.body.node_description)
 
 
-class BreakStatement(Statement, IntermediateNode):
+class Break(Statement, IntermediateNode):
     __slots__ = []
 
     def _driver_run(self, context):

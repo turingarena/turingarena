@@ -36,7 +36,7 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             yield from self.else_body.validate()
 
 
-class IfStatement(AbstractIfNode, Statement):
+class If(AbstractIfNode, Statement):
     def _get_declaration_directions(self):
         yield from self.then_body.declaration_directions
         if self.else_body is not None:

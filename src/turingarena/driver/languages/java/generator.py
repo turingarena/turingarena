@@ -113,19 +113,19 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
 
         yield f"{return_value}__solution.{method.name}({parameters});"
 
-    def visit_CallStatement(self, call_statement):
+    def visit_Call(self, call_statement):
         yield from self.call_statement_body(call_statement)
 
-    def visit_OutputStatement(self, statement):
+    def visit_Print(self, statement):
         format_string = ' '.join('%d' for _ in statement.arguments) + r'\n'
         args = ', '.join(self.visit(v) for v in statement.arguments)
         yield f'System.out.printf("{format_string}", {args});'
 
-    def visit_ReadStatement(self, statement):
+    def visit_Read(self, statement):
         for arg in statement.arguments:
             yield f'{self.visit(arg)} = in.nextInt();'
 
-    def visit_IfStatement(self, statement):
+    def visit_If(self, statement):
         condition = self.visit(statement.condition)
         yield f'if ({condition})'' {'
         with self.indent():
@@ -136,7 +136,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
                 yield from self.visit(statement.else_body)
         yield '}'
 
-    def visit_ForStatement(self, statement):
+    def visit_For(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
         yield f'for (int {index_name} = 0; {index_name} < {size}; {index_name}++)'' {'
@@ -144,7 +144,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
             yield from self.visit(statement.body)
         yield '}'
 
-    def visit_LoopStatement(self, loop_statement):
+    def visit_Loop(self, loop_statement):
         yield 'while (true) {'
         with self.indent():
             yield from self.visit(loop_statement.body)
@@ -154,7 +154,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         variable = self.visit(variable)
         return ' || '.join(f'{variable} == {label}' for label in labels)
 
-    def visit_SwitchStatement(self, switch_statement):
+    def visit_Switch(self, switch_statement):
         cases = [case for case in switch_statement.cases]
         yield f'if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)})'' {'
         with self.indent():
@@ -168,13 +168,13 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield 'System.out.flush();'
 
-    def visit_ExitStatement(self, exit_statement):
+    def visit_Exit(self, exit_statement):
         yield 'System.exit(0);'
 
-    def visit_ReturnStatement(self, return_statement):
+    def visit_Return(self, return_statement):
         yield f'return {self.visit(return_statement.value)};'
 
-    def visit_BreakStatement(self, break_statement):
+    def visit_Break(self, break_statement):
         yield 'break;'
 
 
