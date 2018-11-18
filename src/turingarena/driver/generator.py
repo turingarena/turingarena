@@ -12,9 +12,6 @@ class CodeGen(ABC, Visitor):
 class AbstractExpressionCodeGen(CodeGen):
     __slots__ = []
 
-    def expression(self, e):
-        return self.visit(e)
-
     def visit_SubscriptExpression(self, e):
         return f"{self.visit(e.array)}[{self.visit(e.index)}]"
 

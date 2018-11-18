@@ -41,10 +41,6 @@ class Expression:
     def validate(self):
         return []
 
-    def __str__(self):
-        from turingarena.driver.generator import AbstractExpressionCodeGen
-        return AbstractExpressionCodeGen().expression(self)
-
 
 class LiteralExpression(Expression):
     __slots__ = []

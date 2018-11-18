@@ -129,17 +129,16 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.visit(statement.body)
         yield "}"
 
-    def build_switch_condition(self, variable, labels):
-        variable = self.visit(variable)
-        return " || ".join(f"{variable} == {label}" for label in labels)
-
     def visit_SwitchStatement(self, statement):
-        cases = [case for case in statement.cases]
-        yield f"if ({self.build_switch_condition(statement.variable, cases[0].labels)}) " "{"
-        with self.indent():
-            yield from self.visit(cases[0].body)
-        for case in cases[1:]:
-            yield "}" f" else if ({self.build_switch_condition(statement.variable, case.labels)}) " "{"
+        for i, case in enumerate(statement.cases):
+            condition = " || ".join(
+                f"{self.visit(statement.variable)} == {self.visit(label)}"
+                for label in case.labels
+            )
+            if i == 0:
+                yield f"if ({condition}) {{"
+            else:
+                yield f"}} else if ({condition}) {{"
             with self.indent():
                 yield from self.visit(case.body)
         yield "}"

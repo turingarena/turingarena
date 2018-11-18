@@ -19,7 +19,7 @@ class SwitchStatementNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
     @property
     def cases(self):
-        return list(self._get_cases())
+        return tuple(self._get_cases())
 
     def _get_cases(self):
         for case in self.ast.cases:
