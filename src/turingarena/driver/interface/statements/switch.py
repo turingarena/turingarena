@@ -37,12 +37,12 @@ class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         return Expression.compile(self.ast.value, self.context.expression())
 
 
-class Switch(SwitchNode, ControlStructure, Statement):
+class Switch(ControlStructure, SwitchNode, Statement):
     __slots__ = []
 
     def _get_bodies(self):
-        for case in self.ast.cases:
-            yield case.body
+        for c in self.cases:
+            yield c.body
 
     def _get_reference_actions(self):
         for c in self.cases:

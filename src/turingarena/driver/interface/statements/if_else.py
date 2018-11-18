@@ -45,7 +45,7 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             yield from self.else_body.validate()
 
 
-class If(AbstractIfNode, ControlStructure, Statement):
+class If(ControlStructure, AbstractIfNode, Statement):
     def _get_bodies(self):
         yield self.then_body
         if self.else_body is not None:
