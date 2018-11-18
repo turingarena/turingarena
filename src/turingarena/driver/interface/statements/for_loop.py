@@ -24,6 +24,9 @@ class For(Statement, ControlStructure, IntermediateNode):
             range=Expression.compile(self.ast.range, index_context),
         )
 
+    def _get_bodies(self):
+        yield self.body
+
     @property
     def body(self):
         return Block(

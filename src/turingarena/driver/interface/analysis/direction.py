@@ -28,19 +28,9 @@ class DeclarationDirectionAnalyzer:
         for child in n.children:
             yield from self.declaration_directions(child)
 
-    def _get_directions_For(self, n):
-        return self.declaration_directions(n.body)
-
-    def _get_directions_Loop(self, n):
-        return self.declaration_directions(n.body)
-
-    def _get_directions_If(self, n):
-        for b in n.branches:
+    def _get_directions_ControlStructure(self, n):
+        for b in n.bodies:
             yield from self.declaration_directions(b)
-
-    def _get_directions_Switch(self, n):
-        for c in n.cases:
-            yield from self.declaration_directions(c.body)
 
     def _get_directions_MethodCallbacksNode(self, n):
         for callback in n.callbacks:

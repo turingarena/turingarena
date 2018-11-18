@@ -15,16 +15,12 @@ from turingarena.driver.interface.variables import ReferenceAction, ReferenceSta
 logger = logging.getLogger(__name__)
 
 
-class SwitchNode(IntermediateNode, ControlStructure, AbstractSyntaxNodeWrapper):
+class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
     def cases(self):
         return tuple(self._get_cases())
-
-    def _get_bodies(self):
-        for case in self.ast.cases:
-            yield case.body
 
     def _get_cases(self):
         for case in self.ast.cases:
@@ -41,8 +37,12 @@ class SwitchNode(IntermediateNode, ControlStructure, AbstractSyntaxNodeWrapper):
         return Expression.compile(self.ast.value, self.context.expression())
 
 
-class Switch(SwitchNode, Statement):
+class Switch(SwitchNode, ControlStructure, Statement):
     __slots__ = []
+
+    def _get_bodies(self):
+        for case in self.ast.cases:
+            yield case.body
 
     def _get_reference_actions(self):
         for c in self.cases:
