@@ -1,9 +1,12 @@
-class Visitor:
+import functools
 
-    def visit(self, node):
+
+def visitormethod(f):
+    @functools.wraps(f)
+    def visitor_method(self, node):
         for cls in node.__class__.__mro__:
             try:
-                method = getattr(self, f"visit_{cls.__name__}")
+                method = getattr(self, f"{f.__name__}_{cls.__name__}")
             except AttributeError:
                 continue
 
@@ -12,3 +15,12 @@ class Visitor:
                 return ans
 
         raise NotImplementedError(str(node.__class__))
+
+    return visitor_method
+
+
+class Visitor:
+
+    @visitormethod
+    def visit(self, node):
+        pass
