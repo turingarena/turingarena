@@ -58,7 +58,7 @@ def run_server(driver_connection, source_path, interface_path):
         )
 
         try:
-            interface.run_driver(context)
+            context.execute(interface)
             context.report_ready()
             request = context.next_request()
             assert False, f"driver was not explicitly stopped, got {request}"

@@ -4,19 +4,25 @@ from collections import namedtuple
 from contextlib import contextmanager
 from typing import List, Tuple, Any
 
+from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
-from turingarena.driver.interface.exceptions import CommunicationError, DriverStop
+from turingarena.driver.interface.exceptions import CommunicationError, DriverStop, InterfaceExitReached
 from turingarena.driver.interface.nodes import ExecutionResult
-from turingarena.driver.interface.variables import Reference
+from turingarena.driver.interface.phase import ExecutionPhase
+from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
+from turingarena.driver.interface.statements.call import MethodResolveArgumentsNode
+from turingarena.driver.interface.statements.callback import CallbackEnd, Return, Exit
+from turingarena.driver.interface.statements.if_else import ResolveIf
+from turingarena.driver.interface.statements.io import Checkpoint
+from turingarena.driver.interface.statements.switch import SwitchResolve
+from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
+from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
 
 UPWARD_TIMEOUT = 3.0
 
 Assignments = List[Tuple[Reference, Any]]
-
-RequestSignature = namedtuple("RequestSignature", ["command"])
-CallRequestSignature = namedtuple("CallRequestSignature", ["command", "method_name"])
 
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
@@ -146,3 +152,333 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             request_lookahead=self.request_lookahead,
             does_break=False,
         )
+
+    @visitormethod
+    def evaluate(self, e):
+        pass
+
+    def evaluate_IntLiteral(self, e):
+        return e.value
+
+    def evaluate_VariableReference(self, e):
+        return self.bindings[e.reference]
+
+    def evaluate_Subscript(self, e):
+        if e.reference in self.bindings:
+            return self.bindings[e.reference]
+        else:
+            return self.evaluate(e.array)[self.evaluate(e.index)]
+
+    def _needs_request_lookahead(self, n):
+        types = [
+            Checkpoint,
+            SwitchResolve,
+            ResolveIf,
+            CallbackEnd,
+            Return,
+            MethodResolveArgumentsNode,
+            Exit,
+        ]
+
+        return any(isinstance(n, t) for t in types)
+
+    def execute(self, n):
+        context = self
+
+        logging.debug(
+            f"EXECUTE: {type(n).__name__} "
+            f"phase: {self.phase} "
+            f"request LA: {self.request_lookahead}"
+        )
+
+        should_lookahead_request = (
+                context.request_lookahead is None
+                and self._needs_request_lookahead(n)
+                and context.phase is ExecutionPhase.REQUEST
+        )
+
+        result = context.result()
+        if should_lookahead_request:
+            lookahead = context.next_request()
+            result = result._replace(
+                request_lookahead=lookahead,
+            )
+            context = context.extend(result)
+
+        return context._on_execute(n)
+
+    @visitormethod
+    def _on_execute(self, n):
+        pass
+
+    def _on_execute_InterfaceDefinition(self, n):
+        description = "\n".join(n.main_block.node_description)
+        logger.debug(f"Description: {description}")
+
+        self.with_assigments({
+            c.variable.as_reference(): self.evaluate(c.value)
+            for c in n.constants
+        }).execute(n.main_block)
+
+    def _on_execute_AbstractBlock(self, n):
+        return self._execute_sequence(n.children)
+
+    def _on_execute_Step(self, n):
+        assert n.children
+
+        if self.phase is not None:
+            return self._execute_sequence(n.children)
+        else:
+            result = self.result()
+            for phase in ExecutionPhase:
+                if phase == ExecutionPhase.UPWARD and n.direction != ReferenceDirection.UPWARD:
+                    continue
+
+                result = result.merge(self.extend(result)._replace(
+                    phase=phase,
+                )._execute_sequence(n.children))
+
+            return result
+
+    def _execute_sequence(self, nodes):
+        result = self.result()
+        for n in nodes:
+            result = result.merge(self.extend(result).execute(n))
+        return result
+
+    def _on_execute_Read(self, n):
+        if self.phase is ExecutionPhase.DOWNWARD:
+            logging.debug(f"Bindings: {self.bindings}")
+            self.send_downward([
+                self.evaluate(a)
+                for a in n.arguments
+            ])
+
+    def _on_execute_Write(self, n):
+        if self.phase is ExecutionPhase.UPWARD:
+            values = self.receive_upward()
+            assignments = [
+                (a.reference, value)
+                for a, value in zip(n.arguments, values)
+            ]
+
+            return self.result()._replace(assignments=assignments)
+
+    def _on_execute_Checkpoint(self, n):
+        if self.phase is ExecutionPhase.UPWARD:
+            values = self.receive_upward()
+            if values != (0,):
+                raise CommunicationError(f"expecting checkpoint, got {values}")
+        if self.phase is ExecutionPhase.REQUEST:
+            command = self.request_lookahead.command
+            if not command == "checkpoint":
+                raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
+            self.report_ready()
+            return self.result().with_request_processed()
+
+    def _on_execute_Switch(self, n):
+        value = self.evaluate(n.value)
+
+        for c in n.cases:
+            for label in c.labels:
+                if value == label.value:
+                    return self.execute(c.body)
+
+        raise InterfaceError(f"no case matches in switch")
+
+    def _on_execute_SwitchResolve(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            matching_cases = n.get_matching_cases(self.request_lookahead)
+            [case] = matching_cases
+            [label] = case.labels
+            assignments = [(n.value.reference, label.value)]
+
+            return self.result()._replace(assignments=assignments)
+
+    def _on_execute_CallbackImplementation(self, n):
+        assert self.phase is None
+        self.report_ready()
+        self.send_driver_upward(1)  # has callbacks
+        self.send_driver_upward(n.context.callback_index)
+        self.execute(n.body)
+
+    def _on_execute_CallbackCallNode(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            for p in n.callback_implementation.parameters:
+                r = p.as_reference()
+                value = self.bindings[r]
+                self.send_driver_upward(value)
+
+    def _on_execute_Return(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            has_return_value = self._expect_callback_return()
+
+            if not has_return_value:
+                raise InterfaceError(
+                    f"callback is a function, "
+                    f"but the provided implementation did not return anything"
+                )
+
+            value = int(self.receive_driver_downward())
+            return self.result()._replace(assignments=[(n.value.reference, value)])
+
+    def _on_execute_CallbackEnd(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            has_return_value = self._expect_callback_return()
+            if has_return_value:
+                raise InterfaceError(
+                    f"callback is a procedure, "
+                    f"but the provided implementation returned something"
+                )
+
+    def _on_execute_For(self, n):
+        if self.phase is None:
+            assert self.request_lookahead is None
+
+        try:
+            for_range = self.evaluate(n.index.range)
+        except KeyError:
+            # we assume that if the range is not resolved, then the cycle should be skipped
+            # FIXME: determine this situation statically
+            logger.debug(f"skipping for (phase: {self.phase})")
+            return
+
+        results_by_iteration = [
+            self.with_assigments(
+                [(n.index.variable.as_reference(), i)]
+            ).execute(n.body)
+            for i in range(for_range)
+        ]
+
+        assignments = [
+            (a.reference, [
+                result.assignments[a.reference._replace(
+                    index_count=a.reference.index_count + 1,
+                )]
+                for result in results_by_iteration
+                if a.status is ReferenceStatus.RESOLVED
+            ])
+            for a in n.reference_actions
+        ]
+
+        return self.result()._replace(assignments=assignments)
+
+    def _expect_callback_return(self):
+        request = self.request_lookahead
+        command = request.command
+        if not command == "callback_return":
+            raise InterfaceError(f"expecting 'callback_return', got '{command}'")
+        has_return_value = bool(int(self.receive_driver_downward()))
+        return has_return_value
+
+    def _on_execute_Exit(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            command = self.request_lookahead.command
+            if command != "exit":
+                raise InterfaceError(f"Expecting exit, got {command}")
+            raise InterfaceExitReached
+
+    def _on_execute_Loop(self, n):
+        context = self
+        while True:
+            result = context.execute(n.body)
+            logger.debug(f"request_lookahead: {result.request_lookahead}")
+            context = context._replace(
+                request_lookahead=result.request_lookahead,
+            )
+            if result.does_break:
+                return result
+
+    def _on_execute_Break(self, n):
+        return self.result()._replace(does_break=True)
+
+    def _on_execute_If(self, n):
+        condition_value = self.evaluate(n.condition)
+        if condition_value:
+            return self.execute(n.then_body)
+        elif n.else_body is not None:
+            return self.execute(n.else_body)
+
+    def _on_execute_ResolveIf(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            [condition_value] = n.get_conditions(self.request_lookahead)
+            return self.result()._replace(
+                assignments=[(n.condition.reference, condition_value)]
+            )
+
+    def _on_execute_MethodResolveArgumentsNode(self, n):
+        if self.phase is not ExecutionPhase.REQUEST:
+            return
+
+        method = n.method
+
+        command = self.request_lookahead.command
+        if not command == "call":
+            raise InterfaceError(f"expected call to '{method.name}', got {command}")
+
+        method_name = self.request_lookahead.method_name
+        if not method_name == method.name:
+            raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
+
+        parameter_count = int(self.receive_driver_downward())
+        if parameter_count != len(method.parameters):
+            raise InterfaceError(
+                f"'{method.name}' expects {len(method.parameters)} arguments, "
+                f"got {parameter_count}"
+            )
+
+        assignments = list(n._get_assignments(self))
+
+        has_return_value = bool(int(self.receive_driver_downward()))
+        expects_return_value = (n.return_value is not None)
+        if not has_return_value == expects_return_value:
+            names = ["procedure", "function"]
+            raise InterfaceError(
+                f"'{method.name}' is a {names[expects_return_value]}, "
+                f"got call to {names[has_return_value]}"
+            )
+
+        callback_count = int(self.receive_driver_downward())
+        expected_callback_count = len(n.callbacks)
+        if not callback_count == expected_callback_count:
+            raise InterfaceError(
+                f"'{method.name}' has a {expected_callback_count} callbacks, "
+                f"got {callback_count}"
+            )
+
+        for c in n.callbacks:
+            parameter_count = int(self.receive_driver_downward())
+            expected_parameter_count = len(c.parameters)
+            if not parameter_count == expected_parameter_count:
+                raise InterfaceError(
+                    f"'{c.name}' has {expected_parameter_count} parameters, "
+                    f"got {parameter_count}"
+                )
+
+        return self.result().with_request_processed()._replace(
+            assignments=assignments,
+        )
+
+    def _on_execute_MethodReturnNode(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            return_value = self.evaluate(n.return_value)
+            self.report_ready()
+            self.send_driver_upward(return_value)
+
+    def _on_execute_MethodCallCompletedNode(self, n):
+        if self.phase is ExecutionPhase.REQUEST:
+            self.report_ready()
+            self.send_driver_upward(0)  # no more callbacks
+
+    def _on_execute_MethodCallbacksNode(self, n):
+        while True:
+            [has_callback] = self.receive_upward()
+            if has_callback:
+                [callback_index] = self.receive_upward()
+                callback = n.callbacks[callback_index]
+                self.execute(callback)
+            else:
+                break
+
+    def _on_execute_IntermediateNode(self, n):
+        pass

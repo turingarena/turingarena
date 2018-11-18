@@ -14,7 +14,8 @@ def visitormethod(f):
             if ans is not NotImplemented:
                 return ans
 
-        raise NotImplementedError(str(node.__class__))
+        options = ", ".join(cls.__name__ for cls in node.__class__.__mro__)
+        raise NotImplementedError(f"{f.__name__} for [{options}]")
 
     return visitor_method
 

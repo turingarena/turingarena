@@ -3,10 +3,10 @@ from .call import MethodResolveArgumentsNode, MethodCallbacksNode, \
     MethodCallCompletedNode, MethodReturnNode, Call, PrintNoCallbacks
 from .callback import Return
 from .for_loop import For
-from .if_else import ResolveIfNode, If
+from .if_else import ResolveIf, If
 from .io import CheckpointStatement, Read, Write
 from .loop import Loop, Break
-from .switch import SwitchResolveNode, Switch
+from .switch import SwitchResolve, Switch
 
 statement_classes = {
     "checkpoint": [
@@ -36,7 +36,7 @@ statement_classes = {
         For,
     ],
     "if": [
-        ResolveIfNode,
+        ResolveIf,
         If,
     ],
     "loop": [
@@ -46,7 +46,7 @@ statement_classes = {
         Break,
     ],
     "switch": [
-        SwitchResolveNode,
+        SwitchResolve,
         Switch,
     ],
 }

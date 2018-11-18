@@ -11,16 +11,6 @@ logger = logging.getLogger(__name__)
 class Loop(Statement, IntermediateNode):
     __slots__ = []
 
-    def _driver_run(self, context):
-        while True:
-            result = self.body.driver_run(context)
-            logger.debug(f"request_lookahead: {result.request_lookahead}")
-            context = context._replace(
-                request_lookahead=result.request_lookahead,
-            )
-            if result.does_break:
-                return result
-
     def _get_declaration_directions(self):
         return self.body.declaration_directions
 
@@ -48,9 +38,6 @@ class Loop(Statement, IntermediateNode):
 
 class Break(Statement, IntermediateNode):
     __slots__ = []
-
-    def _driver_run(self, context):
-        return context.result()._replace(does_break=True)
 
     def _get_reference_actions(self):
         return []

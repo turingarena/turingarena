@@ -1,12 +1,9 @@
 import logging
 
-from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import InterfaceContext
-from turingarena.driver.interface.evalexpression import evaluate_expression
-from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.statements.callback import Exit
@@ -89,17 +86,3 @@ class InterfaceDefinition:
             ConstantDeclaration(ast, InterfaceContext(methods=[], constants=[]).initial_context)
             for ast in self.ast.constants_declarations
         )
-
-    def run_driver(self, context: NodeExecutionContext):
-        description = "\n".join(self.main_block.node_description)
-        logger.debug(f"Description: {description}")
-
-        self.main_block.driver_run(context=context.with_assigments({
-            c.variable.as_reference(): evaluate_expression(c.value, context.bindings)
-            for c in self.constants
-        }))
-
-        request = context.next_request()
-        command = request.command
-        if command != "exit":
-            raise InterfaceError(f"expecting exit, got {command}")

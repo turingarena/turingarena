@@ -5,27 +5,6 @@ from turingarena.driver.interface.expressions import ExpressionVisitor
 from turingarena.driver.interface.variables import Reference, Variable
 
 
-class ExpressionEvaluator(ExpressionVisitor):
-    def __init__(self, bindings):
-        self.bindings = bindings
-
-    def visit_IntLiteral(self, e):
-        return e.value
-
-    def visit_VariableReference(self, e):
-        return self.bindings[e.reference]
-
-    def visit_Subscript(self, e):
-        if e.reference in self.bindings:
-            return self.bindings[e.reference]
-        else:
-            return self.visit(e.array)[self.visit(e.index)]
-
-
-def evaluate_expression(e, bindings):
-    return ExpressionEvaluator(bindings).visit(e)
-
-
 class ExpressionStatusAnalyzer(ExpressionVisitor):
     def __init__(self, context, status):
         self.context = context

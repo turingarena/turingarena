@@ -99,45 +99,12 @@ class IntermediateNode:
     def _get_first_requests(self):
         yield None
 
-    def driver_run(self, context):
-        should_lookahead_request = (
-                context.request_lookahead is None
-                and self.needs_request_lookahead
-                and context.phase is ExecutionPhase.REQUEST
-        )
-
-        result = context.result()
-        if should_lookahead_request:
-            lookahead = context.next_request()
-            result = result._replace(
-                request_lookahead=lookahead,
-            )
-            context = context.extend(result)
-
-        logging.debug(
-            f"driver_run: {type(self).__name__} "
-            f"phase: {context.phase} "
-            f"request LA: {context.request_lookahead}"
-        )
-
-        return result.merge(self._driver_run(context))
-
-    def _driver_run(self, context):
-        return None
-
     @property
     def can_be_grouped(self):
         return self._can_be_grouped()
 
     def _can_be_grouped(self):
         return True
-
-    @property
-    def needs_request_lookahead(self):
-        return self._needs_request_lookahead()
-
-    def _needs_request_lookahead(self):
-        return False
 
     @property
     def node_description(self):

@@ -1,11 +1,10 @@
 import logging
 import warnings
 
-from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionStatusAnalyzer
+from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -47,15 +46,6 @@ class Switch(SwitchNode, Statement):
     def _get_reference_actions(self):
         for c in self.cases:
             yield from c.body.reference_actions
-
-    def _driver_run(self, context):
-        value = evaluate_expression(self.value, context.bindings)
-
-        for c in self.cases:
-            for label in c.labels:
-                if value == label.value:
-                    return c.body.driver_run(context)
-        raise InterfaceError(f"no case matches in switch")
 
     def validate(self):
         yield from self.value.validate()
@@ -111,7 +101,7 @@ class Case(AbstractSyntaxNodeWrapper):
         yield from self.body.validate()
 
 
-class SwitchResolveNode(SwitchNode):
+class SwitchResolve(SwitchNode):
     def _is_already_resolved(self):
         return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.value)
 
@@ -131,25 +121,15 @@ class SwitchResolveNode(SwitchNode):
             if None in c.body.first_requests:
                 yield c
 
+    def get_matching_cases(self, request):
+        return list(self._find_matching_cases(request))
+
     def _find_matching_cases(self, request):
         matching_cases_requests = list(self._find_cases_expecting(request))
         if matching_cases_requests:
             return matching_cases_requests
         else:
             return list(self._find_cases_expecting_no_request())
-
-    def _driver_run(self, context):
-        if context.phase is ExecutionPhase.REQUEST:
-            return context.result()._replace(assignments=list(self._get_assigments(context)))
-
-    def _get_assigments(self, context):
-        matching_cases = list(self._find_matching_cases(context.request_lookahead))
-        [case] = matching_cases
-        [label] = case.labels
-        yield self.value.reference, label.value
-
-    def _needs_request_lookahead(self):
-        return True
 
     def _describe_node(self):
         yield f"resolve {self}"

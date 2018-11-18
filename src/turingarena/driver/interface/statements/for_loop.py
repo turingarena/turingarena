@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 
 from turingarena.driver.interface.block import Block
-from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
@@ -41,7 +40,7 @@ class For(Statement, IntermediateNode):
             if a.status == ReferenceStatus.DECLARED:
                 yield VariableAllocation(
                     variable=a.reference.variable,
-                    indexes=self.context.index_variables[-a.reference.index_count+1:],
+                    indexes=self.context.index_variables[-a.reference.index_count + 1:],
                     size=self.index.range,
                 )
 
@@ -78,38 +77,6 @@ class For(Statement, IntermediateNode):
             for child in self.body.children
         )
         return r
-
-    def _driver_run(self, context):
-        if context.phase is None:
-            assert context.request_lookahead is None
-
-        try:
-            for_range = evaluate_expression(self.index.range, context.bindings)
-        except KeyError:
-            # we assume that if the range is not resolved, then the cycle should be skipped
-            # FIXME: determine this situation statically
-            logger.debug(f"skipping for (phase: {context.phase})")
-            return
-
-        results_by_iteration = [
-            self.body.driver_run(context.with_assigments(
-                [(self.index.variable.as_reference(), i)]
-            ))
-            for i in range(for_range)
-        ]
-
-        assignments = [
-            (a.reference, [
-                result.assignments[a.reference._replace(
-                    index_count=a.reference.index_count + 1,
-                )]
-                for result in results_by_iteration
-                if a.status is ReferenceStatus.RESOLVED
-            ])
-            for a in self.reference_actions
-        ]
-
-        return context.result()._replace(assignments=assignments)
 
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"

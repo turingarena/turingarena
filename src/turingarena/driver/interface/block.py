@@ -57,12 +57,6 @@ class AbstractBlock(SequenceNode):
     def _group_directions(self, group):
         return {d for n in group for d in n.declaration_directions}
 
-    def _driver_run(self, context):
-        result = context.result()
-        for n in self.children:
-            result = result.merge(n.driver_run(context.extend(result)))
-        return result
-
     def _describe_node(self):
         yield "block"
         for n in self.children:

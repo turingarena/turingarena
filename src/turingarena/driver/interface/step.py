@@ -8,28 +8,6 @@ from turingarena.driver.interface.variables import ReferenceDirection
 class Step(SequenceNode, namedtuple("Step", ["children"])):
     __slots__ = []
 
-    def _driver_run(self, context):
-        assert self.children
-
-        if context.phase is not None:
-            return self._run_children(context)
-        else:
-            result = context.result()
-            for phase in ExecutionPhase:
-                if phase == ExecutionPhase.UPWARD and self.direction != ReferenceDirection.UPWARD:
-                    continue
-                result = result.merge(self._run_children(context.extend(result)._replace(
-                    phase=phase,
-                )))
-
-            return result
-
-    def _run_children(self, context):
-        result = context.result()
-        for n in self.children:
-            result = result.merge(n.driver_run(context.extend(result)))
-        return result
-
     @property
     def direction(self):
         if not self.declaration_directions:

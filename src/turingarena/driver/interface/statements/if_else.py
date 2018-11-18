@@ -2,10 +2,9 @@ import logging
 
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionStatusAnalyzer
+from turingarena.driver.interface.expranalysis import ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
 from turingarena.driver.interface.variables import ReferenceStatus
 
@@ -50,13 +49,6 @@ class If(AbstractIfNode, Statement):
         else:
             yield None
 
-    def _driver_run(self, context):
-        condition_value = evaluate_expression(self.condition, context.bindings)
-        if condition_value:
-            return self.then_body.driver_run(context)
-        elif self.else_body is not None:
-            return self.else_body.driver_run(context)
-
     def _describe_node(self):
         yield f"if {self.condition}"
         yield from self._indent_all(self.then_body.node_description)
@@ -65,7 +57,7 @@ class If(AbstractIfNode, Statement):
             yield from self._indent_all(self.else_body.node_description)
 
 
-class ResolveIfNode(AbstractIfNode):
+class ResolveIf(AbstractIfNode):
     def _is_already_resolved(self):
         return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.condition)
 
@@ -84,22 +76,14 @@ class ResolveIfNode(AbstractIfNode):
         if self.else_body is None:
             yield 0
 
-    def _driver_run(self, context):
-        if context.phase is ExecutionPhase.REQUEST:
-            return context.result()._replace(assignments=list(self._get_assignments(context)))
-
-    def _get_assignments(self, context):
-        logger.debug(f"request_lookahead: {context.request_lookahead}")
-        matching_conditions = frozenset(self._get_conditions_expecting(context.request_lookahead))
+    def get_conditions(self, request):
+        logger.debug(f"request_lookahead: {request}")
+        matching_conditions = frozenset(self._get_conditions_expecting(request))
         logger.debug(f"matching_conditions1: {matching_conditions}")
         if not matching_conditions:
             matching_conditions = frozenset(self._get_conditions_expecting_no_request())
             logger.debug(f"matching_conditions2: {matching_conditions}")
-        [condition_value] = matching_conditions
-        yield self.condition.reference, condition_value
-
-    def _needs_request_lookahead(self):
-        return True
+        return matching_conditions
 
     def _describe_node(self):
         yield "resolve if"

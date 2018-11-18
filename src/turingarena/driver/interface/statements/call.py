@@ -1,14 +1,12 @@
 import logging
 
-from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionDimensionAnalyzer
-from turingarena.driver.interface.execution import CallRequestSignature
+from turingarena.driver.interface.requests import CallRequestSignature
+from turingarena.driver.interface.expranalysis import ExpressionDimensionAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
@@ -94,15 +92,9 @@ class Call(Statement, CallNode):
                 parseinfo=self.ast.return_value.parseinfo,
             )
 
-    def _driver_run(self, context):
-        pass
-
 
 class MethodResolveArgumentsNode(CallNode):
     __slots__ = []
-
-    def _needs_request_lookahead(self):
-        return True
 
     def _get_reference_actions(self):
         references = self.context.get_references(ReferenceStatus.RESOLVED)
@@ -130,59 +122,6 @@ class MethodResolveArgumentsNode(CallNode):
                     parameter.name, method.name, parameter.dimensions, dimensions,
                     parseinfo=expression.ast.parseinfo,
                 )
-
-    def _driver_run(self, context):
-        if context.phase is not ExecutionPhase.REQUEST:
-            return
-
-        method = self.method
-
-        command = context.request_lookahead.command
-        if not command == "call":
-            raise InterfaceError(f"expected call to '{method.name}', got {command}")
-
-        method_name = context.request_lookahead.method_name
-        if not method_name == method.name:
-            raise InterfaceError(f"expected call to '{method.name}', got call to '{method_name}'")
-
-        parameter_count = int(context.receive_driver_downward())
-        if parameter_count != len(method.parameters):
-            raise InterfaceError(
-                f"'{method.name}' expects {len(method.parameters)} arguments, "
-                f"got {parameter_count}"
-            )
-
-        assignments = list(self._get_assignments(context))
-
-        has_return_value = bool(int(context.receive_driver_downward()))
-        expects_return_value = (self.return_value is not None)
-        if not has_return_value == expects_return_value:
-            names = ["procedure", "function"]
-            raise InterfaceError(
-                f"'{method.name}' is a {names[expects_return_value]}, "
-                f"got call to {names[has_return_value]}"
-            )
-
-        callback_count = int(context.receive_driver_downward())
-        expected_callback_count = len(self.callbacks)
-        if not callback_count == expected_callback_count:
-            raise InterfaceError(
-                f"'{method.name}' has a {expected_callback_count} callbacks, "
-                f"got {callback_count}"
-            )
-
-        for c in self.callbacks:
-            parameter_count = int(context.receive_driver_downward())
-            expected_parameter_count = len(c.parameters)
-            if not parameter_count == expected_parameter_count:
-                raise InterfaceError(
-                    f"'{c.name}' has {expected_parameter_count} parameters, "
-                    f"got {parameter_count}"
-                )
-
-        return context.result().with_request_processed()._replace(
-            assignments=assignments,
-        )
 
     def _get_assignments(self, context):
         references = self.context.get_references(ReferenceStatus.RESOLVED)
@@ -220,30 +159,16 @@ class MethodReturnNode(CallNode):
     def _get_declaration_directions(self):
         yield ReferenceDirection.UPWARD
 
-    def _driver_run(self, context):
-        if context.phase is ExecutionPhase.REQUEST:
-            return_value = evaluate_expression(self.return_value, context.bindings)
-            context.report_ready()
-            context.send_driver_upward(return_value)
-
     def _describe_node(self):
         yield f"return"
 
 
 class MethodCallCompletedNode(CallNode):
-    def _driver_run(self, context):
-        if context.phase is ExecutionPhase.REQUEST:
-            context.report_ready()
-            context.send_driver_upward(0)  # no more callbacks
-
     def _describe_node(self):
         yield f"call completed"
 
 
 class PrintNoCallbacks(CallNode, Print):
-    def _driver_run(self, context):
-        pass
-
     def _is_relevant(self):
         return self.method and self.method.callbacks
 
@@ -267,16 +192,6 @@ class MethodCallbacksNode(CallNode):
 
     def _can_be_grouped(self):
         return False
-
-    def _driver_run(self, context):
-        while True:
-            [has_callback] = context.receive_upward()
-            if has_callback:
-                [callback_index] = context.receive_upward()
-                callback = self.callbacks[callback_index]
-                callback.driver_run(context)
-            else:
-                break
 
     def _describe_node(self):
         yield f"callbacks"
