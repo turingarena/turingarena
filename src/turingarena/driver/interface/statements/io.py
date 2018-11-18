@@ -5,7 +5,7 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.exceptions import CommunicationError
-from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
+from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.variables import ReferenceStatus, ReferenceDirection, ReferenceAction
@@ -118,7 +118,7 @@ class Checkpoint(Print, IntermediateNode):
 
     @property
     def arguments(self):
-        return [IntLiteralExpressionSynthetic(0)]
+        return [IntLiteralSynthetic(0)]
 
 
 class InitialCheckpoint(Checkpoint):

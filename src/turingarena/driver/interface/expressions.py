@@ -31,7 +31,7 @@ class Expression:
         return []
 
 
-class LiteralExpression(Expression):
+class Literal(Expression):
     __slots__ = []
 
     @property
@@ -40,11 +40,11 @@ class LiteralExpression(Expression):
         pass
 
 
-class IntLiteralExpression(LiteralExpression):
+class IntLiteral(Literal):
     __slots__ = []
 
 
-class IntLiteralExpressionAst(IntLiteralExpression, AbstractSyntaxNodeWrapper):
+class IntLiteralAst(IntLiteral, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -52,14 +52,14 @@ class IntLiteralExpressionAst(IntLiteralExpression, AbstractSyntaxNodeWrapper):
         return int(self.ast.int_literal)
 
 
-class IntLiteralExpressionSynthetic(
-    namedtuple("IntLiteralExpressionSynthetic", ["value"]),
-    IntLiteralExpression,
+class IntLiteralSynthetic(
+    namedtuple("IntLiteralSynthetic", ["value"]),
+    IntLiteral,
 ):
     __slots__ = []
 
 
-class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
+class VariableReference(Expression, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -113,7 +113,7 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
         return self._get_referenced_variable() is not None
 
 
-class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
+class Subscript(Expression, namedtuple("Subscript", [
     "array",
     "index",
     "context",
@@ -185,9 +185,9 @@ def compile_subscript(ast, index_asts, context):
             reference=False,
             index_count=0,
         ))
-        return SubscriptExpression(array, index, context)
+        return Subscript(array, index, context)
     else:
-        return VariableReferenceExpression(ast, context)
+        return VariableReference(ast, context)
 
 
 def compile_reference_expression(ast, context):
@@ -195,7 +195,7 @@ def compile_reference_expression(ast, context):
 
 
 expression_classes = frozenbidict({
-    "int_literal": IntLiteralExpressionAst,
+    "int_literal": IntLiteralAst,
     "reference_subscript": compile_reference_expression,
     "nested": lambda ast, context: Expression.compile(ast.expression, context),
 })
@@ -205,14 +205,14 @@ class ExpressionVisitor(Visitor):
     def visit_Expression(self, e):
         raise NotImplementedError
 
-    def visit_LiteralExpression(self, e):
+    def visit_Literal(self, e):
         return NotImplemented
 
-    def visit_IntLiteralExpression(self, e):
+    def visit_IntLiteral(self, e):
         return NotImplemented
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return NotImplemented
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         return NotImplemented

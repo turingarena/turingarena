@@ -9,13 +9,13 @@ class ExpressionEvaluator(ExpressionVisitor):
     def __init__(self, bindings):
         self.bindings = bindings
 
-    def visit_IntLiteralExpression(self, e):
+    def visit_IntLiteral(self, e):
         return e.value
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return self.bindings[e.reference]
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         if e.reference in self.bindings:
             return self.bindings[e.reference]
         else:
@@ -31,13 +31,13 @@ class ExpressionStatusAnalyzer(ExpressionVisitor):
         self.context = context
         self.status = status
 
-    def visit_LiteralExpression(self, e):
+    def visit_Literal(self, e):
         return True
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return e.reference in self.context.get_references(self.status)
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         return (
                 e.reference in self.context.get_references(self.status)
                 or self.visit(e.array)
@@ -45,13 +45,13 @@ class ExpressionStatusAnalyzer(ExpressionVisitor):
 
 
 class ExpressionDimensionAnalyzer(ExpressionVisitor):
-    def visit_LiteralExpression(self, e):
+    def visit_Literal(self, e):
         return 0
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return e.variable.dimensions
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         return self.visit(e.array) - 1
 
 
@@ -59,13 +59,13 @@ class ExpressionReferenceExtractor(
     ExpressionVisitor,
     namedtuple("ExpressionReferenceExtractor", ["dimensions"])
 ):
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return Reference(
             variable=Variable(name=e.variable_name, dimensions=self.dimensions),
             index_count=0,
         )
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         array = self.visit(e.array)
         if array is None:
             return None
@@ -89,7 +89,7 @@ class ReferenceExpressionValidator(
         # TODO: new diagnostic classes
         yield "invalid declaration expression"
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         if e.variable in self.context.variable_mapping:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_REUSED,
@@ -99,7 +99,7 @@ class ReferenceExpressionValidator(
         if e.variable.dimensions != self.dimensions:
             yield "wrong number of subscripts"
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         if self.dimensions >= len(self.context.index_variables):
             yield Diagnostic(
                 Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
@@ -122,7 +122,7 @@ class ExpressionDirectReferenceAnalyzer(ExpressionVisitor):
     def __init__(self, target_variable):
         self.target_variable = target_variable
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return e.variable == self.target_variable
 
     def visit_Expression(self, e):

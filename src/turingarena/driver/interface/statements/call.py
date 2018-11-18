@@ -6,7 +6,7 @@ from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionDimensionAnalyzer
 from turingarena.driver.interface.execution import CallRequestSignature
-from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
+from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.callback import CallbackImplementation
@@ -249,7 +249,7 @@ class PrintNoCallbacks(CallNode, Print):
 
     @property
     def arguments(self):
-        return [IntLiteralExpressionSynthetic(0)]
+        return [IntLiteralSynthetic(0)]
 
     def _get_comment(self):
         return "no more callbacks"

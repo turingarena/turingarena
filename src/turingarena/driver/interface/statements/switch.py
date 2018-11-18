@@ -6,7 +6,7 @@ from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionStatusAnalyzer
-from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
+from turingarena.driver.interface.expressions import Expression, IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.statement import Statement
@@ -103,7 +103,7 @@ class Case(AbstractSyntaxNodeWrapper):
 
     def validate(self):
         for l in self.labels:
-            if not isinstance(l, IntLiteralExpression):
+            if not isinstance(l, IntLiteral):
                 yield Diagnostic(
                     Diagnostic.Messages.SWITCH_LABEL_NOT_LITERAL,
                     parseinfo=self.ast.labels.parseinfo,

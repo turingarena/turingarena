@@ -12,13 +12,13 @@ class CodeGen(ABC, Visitor):
 class AbstractExpressionCodeGen(CodeGen):
     __slots__ = []
 
-    def visit_SubscriptExpression(self, e):
+    def visit_Subscript(self, e):
         return f"{self.visit(e.array)}[{self.visit(e.index)}]"
 
-    def visit_VariableReferenceExpression(self, e):
+    def visit_VariableReference(self, e):
         return e.variable_name
 
-    def visit_IntLiteralExpression(self, e):
+    def visit_IntLiteral(self, e):
         return str(e.value)
 
 

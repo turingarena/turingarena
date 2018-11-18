@@ -7,7 +7,7 @@ from turingarena.driver.interface.block import Block, AbstractBlock
 from turingarena.driver.interface.callables import CallbackPrototype
 from turingarena.driver.interface.exceptions import InterfaceExitReached
 from turingarena.driver.interface.execution import RequestSignature
-from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
+from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.statements.io import Print
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class PrintCallbackRequest(Print):
     @property
     def arguments(self):
-        return [IntLiteralExpressionSynthetic(value=1)]
+        return [IntLiteralSynthetic(value=1)]
 
     def _get_comment(self):
         return "requesting a callback"
@@ -33,7 +33,7 @@ class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation"]
 
     @property
     def arguments(self):
-        return [IntLiteralExpressionSynthetic(value=self.callback_index)]
+        return [IntLiteralSynthetic(value=self.callback_index)]
 
     def _get_comment(self):
         return f"index of this callback: {self.callback_index} = {self.implementation.name}"
