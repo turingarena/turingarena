@@ -41,7 +41,3 @@ class Break(Statement, IntermediateNode):
     def validate(self):
         if not self.context.in_loop:
             yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=self.ast.parseinfo)
-
-    @property
-    def does_break(self):
-        return True

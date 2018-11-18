@@ -21,14 +21,9 @@ class AbstractBlock(SequenceNode):
         pass
 
     def validate(self):
-        exited = False
         for node in self.children:
-            if exited:
-                yield Diagnostic(Diagnostic.Messages.UNREACHABLE_CODE, parseinfo=self.ast.parseinfo)
-                break
+            # TODO: analysis of unreachable code
             yield from node.validate()
-            if node.does_break:
-                exited = True
 
     @property
     @memoize

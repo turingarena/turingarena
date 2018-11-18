@@ -1,8 +1,6 @@
-import logging
 from collections import namedtuple
 from typing import List, Mapping, Any
 
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus, VariableDeclaration
 
 Bindings = Mapping[Reference, Any]
@@ -60,10 +58,6 @@ class IntermediateNode:
 
     def _get_comment(self):
         return None
-
-    @property
-    def does_break(self):
-        return False
 
     @property
     def is_relevant(self):

@@ -52,3 +52,7 @@ class StatementAnalyzer(namedtuple("StatementAnalyzer", [])):
 
     def _get_first_requests_IntermediateNode(self, n):
         yield None
+
+
+class ContextStatementAnalyzer(namedtuple("ContextStatementAnalyzer", ["context"])):
+    pass

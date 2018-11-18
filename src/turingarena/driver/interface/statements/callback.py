@@ -145,7 +145,3 @@ class ExitStatement(Exit, Statement, IntermediateNode):
 
     def _get_reference_actions(self):
         return []
-
-    @property
-    def does_break(self):
-        return True
