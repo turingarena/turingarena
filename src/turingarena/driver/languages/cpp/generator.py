@@ -63,8 +63,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.visit(callback.body)
         yield "};"
 
-    def generate_constant_declaration(self, name, value):
-        yield f"static const int {name} = {value};"
+    def visit_ConstantDeclaration(self, m):
+        yield f"static const int {m.variable.name} = {self.visit(m.value)};"
 
     def call_statement_body(self, call_statement):
         method = call_statement.method
@@ -157,8 +157,8 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
-    def generate_constant_declaration(self, name, value):
-        yield f"const int {name} = {value};"
+    def visit_ConstantDeclaration(self, m):
+        yield f"const int {m.variable.name} = {self.visit(m.value)};"
 
     def visit_MethodPrototype(self, m):
         yield

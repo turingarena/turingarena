@@ -20,8 +20,8 @@ class PythonCodeGen(InterfaceCodeGen):
         arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
         yield f'def {func.name}({arguments}):'
 
-    def generate_constant_declaration(self, name, value):
-        yield f"{name} = {value}"
+    def visit_ConstantDeclaration(self, m):
+        yield f"{m.variable.name} = {self.visit(m.value)}"
 
     def line_comment(self, comment):
         return f"# {comment}"

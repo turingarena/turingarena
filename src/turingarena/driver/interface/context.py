@@ -14,7 +14,18 @@ class InterfaceContext(namedtuple("InterfaceContext", [
     def methods_by_name(self):
         return {m.name: m for m in self.methods}
 
+    @property
     def main_block_context(self):
+        return self.initial_context.with_reference_actions(
+            ReferenceAction(reference=c.variable.as_reference(), status=ReferenceStatus.DECLARED)
+            for c in self.constants
+        ).with_reference_actions(
+            ReferenceAction(reference=c.variable.as_reference(), status=ReferenceStatus.RESOLVED)
+            for c in self.constants
+        )
+
+    @property
+    def initial_context(self):
         return StatementContext(
             global_context=self,
             reference_actions=(),

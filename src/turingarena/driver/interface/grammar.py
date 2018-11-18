@@ -19,7 +19,7 @@ grammar_ebnf = r"""
         ;
     parameter_declaration = name:identifier indexes:{'[' ']'}*;
 
-    constant_declaration = 'const' ~ name:identifier '=' value:int_literal ';';
+    constant_declaration = 'const' ~ name:identifier '=' value:expression ';';
 
     callable_declaration = declarator:callable_declarator callbacks:callback_declarations ;
 

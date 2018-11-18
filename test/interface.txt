@@ -1,13 +1,8 @@
-                procedure test() callbacks {
-                    function c(a);
-                }
+                const c = 2;
+                procedure p();
                 main {
-                    call test() callbacks {
-                        function c(a) {
-                            write a;
-                            read b;
-                            return b;
-                        }
+                    for i to c {
+                        call p();
+                        checkpoint;
                     }
-                    checkpoint;
                 }

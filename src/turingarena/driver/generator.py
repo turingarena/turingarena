@@ -43,7 +43,7 @@ class InterfaceCodeGen(CodeGen):
 
     def generate(self, interface):
         yield from self.generate_header(interface)
-        yield from self.generate_constants_declarations(interface.constants)
+        yield from self.generate_constants_declarations(interface)
         yield from self.generate_method_declarations(interface)
         yield from self.generate_main_block(interface)
         yield from self.generate_footer(interface)
@@ -58,19 +58,16 @@ class InterfaceCodeGen(CodeGen):
         for func in interface.methods:
             yield from self.visit_MethodPrototype(func)
 
-    def generate_constants_declarations(self, constants):
-        if constants:
-            yield self.line_comment("Constant declarations")
-            for name, value in constants.items():
-                yield from self.generate_constant_declaration(name, value)
-            yield
+    def generate_constants_declarations(self, interface):
+        for c in interface.constants:
+            yield from self.visit(c)
 
     @abstractmethod
     def visit_MethodPrototype(self, m):
         pass
 
     @abstractmethod
-    def generate_constant_declaration(self, name, value):
+    def visit_ConstantDeclaration(self, m):
         pass
 
     @abstractmethod

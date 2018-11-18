@@ -3,12 +3,14 @@ import logging
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.callables import MethodPrototype
+from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.execution import NodeExecutionContext
+from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.statements.callback import Exit
 from turingarena.driver.interface.statements.io import InitialCheckpoint
-from turingarena.driver.interface.variables import Reference, Variable
+from turingarena.driver.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,16 @@ class InterfaceBody(Block):
         yield InitialCheckpoint()
         yield from super()._generate_flat_inner_nodes()
         yield InterfaceExitNode()
+
+
+class ConstantDeclaration(AbstractSyntaxNodeWrapper):
+    @property
+    def variable(self):
+        return Variable(name=self.ast.name, dimensions=0)
+
+    @property
+    def value(self):
+        return Expression.compile(self.ast.value, self.context.expression())
 
 
 class InterfaceDefinition:
@@ -55,7 +67,7 @@ class InterfaceDefinition:
     def main_block(self):
         return InterfaceBody(
             ast=self.ast.main_block,
-            context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context()
+            context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context
         )
 
     @property
@@ -71,23 +83,21 @@ class InterfaceDefinition:
 
     @property
     def constants(self):
-        return {
-            c.name: c.value
-            for c in self.ast.constants_declarations
-        }
-
-    @property
-    def constants_references(self):
-        return {
-            Reference(variable=Variable(name=c.name, dimensions=0), index_count=0): int(c.value)
-            for c in self.ast.constants_declarations
-        }
+        # FIXME: using a dummy context here
+        return tuple(
+            ConstantDeclaration(ast, InterfaceContext(methods=[], constants=[]).initial_context)
+            for ast in self.ast.constants_declarations
+        )
 
     def run_driver(self, context: NodeExecutionContext):
         description = "\n".join(self.main_block.node_description)
         logger.debug(f"Description: {description}")
 
-        self.main_block.driver_run(context=context.with_assigments(self.constants_references))
+        self.main_block.driver_run(context=context.with_assigments({
+            c.variable.as_reference(): c.value.evaluate(context.bindings)
+            for c in self.constants
+        }))
+
         request = context.next_request()
         command = request.command
         if command != "exit":

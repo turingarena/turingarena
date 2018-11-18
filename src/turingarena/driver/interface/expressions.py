@@ -133,10 +133,7 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
             )
 
     def _is_declared(self):
-        return (
-                self._get_referenced_variable() is not None
-                or self.variable_name in self.context.statement_context.global_context.constants
-        )
+        return self._get_referenced_variable() is not None
 
 
 class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [

@@ -37,8 +37,8 @@ class JavaCodeGen(InterfaceCodeGen):
     def generate_callbacks_declaration(self, callback):
         return f'{self.build_method_signature(callback)};'
 
-    def generate_constant_declaration(self, name, value):
-        yield f"private static final {name} = {value};"
+    def visit_ConstantDeclaration(self, m):
+        yield f"private static final {m.variable.name} = {self.visit(m.value)};"
 
 
 class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):

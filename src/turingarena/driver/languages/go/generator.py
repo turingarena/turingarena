@@ -40,7 +40,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_MethodPrototype(self, m):
         return []
 
-    def generate_constant_declaration(self, name, value):
+    def visit_ConstantDeclaration(self, m):
         return []
 
     def visit_VariableAllocation(self, a):
@@ -157,8 +157,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
 
 
 class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
-    def generate_constant_declaration(self, name, value):
-        yield f"const {name} = {value}"
+    def visit_ConstantDeclaration(self, m):
+        yield f"const {m.variable.name} = {self.visit(m.value)}"
 
     def visit_MethodPrototype(self, m):
         yield
