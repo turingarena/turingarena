@@ -5,7 +5,7 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.evalexpression import evaluate_expression
+from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -112,8 +112,11 @@ class Case(AbstractSyntaxNodeWrapper):
 
 
 class SwitchResolveNode(SwitchNode):
+    def _is_already_resolved(self):
+        return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.value)
+
     def _is_relevant(self):
-        return self.value.reference is not None and not self.value.is_status(ReferenceStatus.RESOLVED)
+        return not self._is_already_resolved()
 
     def _get_reference_actions(self):
         yield ReferenceAction(self.value.reference, ReferenceStatus.RESOLVED)

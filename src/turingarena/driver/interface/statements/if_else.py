@@ -2,7 +2,7 @@ import logging
 
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.evalexpression import evaluate_expression
+from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionStatusAnalyzer
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -66,8 +66,11 @@ class If(AbstractIfNode, Statement):
 
 
 class ResolveIfNode(AbstractIfNode):
+    def _is_already_resolved(self):
+        return ExpressionStatusAnalyzer(self.context, ReferenceStatus.RESOLVED).visit(self.condition)
+
     def _is_relevant(self):
-        return not self.condition.is_status(ReferenceStatus.RESOLVED)
+        return not self._is_already_resolved()
 
     def _get_conditions_expecting(self, request):
         if request in self.then_body.first_requests:

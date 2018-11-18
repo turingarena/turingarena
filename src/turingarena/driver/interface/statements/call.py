@@ -4,7 +4,7 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.evalexpression import evaluate_expression
+from turingarena.driver.interface.evalexpression import evaluate_expression, ExpressionDimensionAnalyzer
 from turingarena.driver.interface.execution import CallRequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -123,10 +123,11 @@ class MethodResolveArgumentsNode(CallNode):
             )
         for parameter, expression in zip(method.parameters, self.arguments):
             yield from expression.validate()
-            if expression.dimensions != parameter.dimensions:
+            dimensions = ExpressionDimensionAnalyzer().visit(expression)
+            if dimensions != parameter.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter.name, method.name, parameter.dimensions, expression.dimensions,
+                    parameter.name, method.name, parameter.dimensions, dimensions,
                     parseinfo=expression.ast.parseinfo,
                 )
 
