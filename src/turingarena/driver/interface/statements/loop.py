@@ -11,14 +11,8 @@ logger = logging.getLogger(__name__)
 class Loop(Statement, IntermediateNode):
     __slots__ = []
 
-    def _get_declaration_directions(self):
-        return self.body.declaration_directions
-
     def _get_reference_actions(self):
         return []
-
-    def _can_be_grouped(self):
-        return False
 
     @property
     def body(self):

@@ -3,7 +3,6 @@ from abc import abstractmethod
 from functools import partial
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
-from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.seq import SequenceNode
 from turingarena.driver.interface.step import Step
 
@@ -31,9 +30,12 @@ class AbstractBlock(SequenceNode):
         return tuple(self._generate_children())
 
     def _generate_children(self):
+        from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
         group = []
         for node in self.flat_inner_nodes:
-            if node.can_be_grouped and len(self._group_directions(group + [node])) <= 1:
+            can_be_grouped = StatementAnalyzer().can_be_grouped(node)
+
+            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
                 group.append(node)
                 continue
 
@@ -41,7 +43,7 @@ class AbstractBlock(SequenceNode):
                 yield Step(tuple(group))
                 group.clear()
 
-            if not node.can_be_grouped:
+            if not can_be_grouped:
                 yield node
             else:
                 group.append(node)
@@ -50,7 +52,8 @@ class AbstractBlock(SequenceNode):
             yield Step(tuple(group))
 
     def _group_directions(self, group):
-        return {d for n in group for d in n.declaration_directions}
+        from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
+        return {d for n in group for d in StatementAnalyzer().declaration_directions(n)}
 
     def _describe_node(self):
         yield "block"

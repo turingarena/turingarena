@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
+from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -197,7 +198,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         return []
 
     def visit_Step(self, s):
-        if s.direction is ReferenceDirection.DOWNWARD:
+        if StatementAnalyzer().step_direction(s) is ReferenceDirection.DOWNWARD:
             # insert an (upward) flush before receiving data downward
             yield from self.generate_flush()
         yield from self.visit_SequenceNode(s)

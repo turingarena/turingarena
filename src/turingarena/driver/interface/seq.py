@@ -7,10 +7,6 @@ class SequenceNode(IntermediateNode):
         for n in self.children:
             yield from n.reference_actions
 
-    def _get_declaration_directions(self):
-        for n in self.children:
-            yield from n.declaration_directions
-
     def validate(self):
         for n in self.children:
             yield from n.validate()

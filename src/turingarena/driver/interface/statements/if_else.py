@@ -20,6 +20,14 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         return Expression.compile(self.ast.condition, self.context.expression())
 
     @property
+    def branches(self):
+        return tuple(
+            b
+            for b in (self.then_body, self.else_body)
+            if b is not None
+        )
+
+    @property
     def then_body(self):
         return Block(ast=self.ast.then_body, context=self.context)
 
@@ -38,11 +46,6 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
 
 class If(AbstractIfNode, Statement):
-    def _get_declaration_directions(self):
-        yield from self.then_body.declaration_directions
-        if self.else_body is not None:
-            yield from self.else_body.declaration_directions
-
     def _describe_node(self):
         yield f"if {self.condition}"
         yield from self._indent_all(self.then_body.node_description)

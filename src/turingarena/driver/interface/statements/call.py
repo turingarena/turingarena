@@ -152,9 +152,6 @@ class MethodReturnNode(CallNode):
     def _get_reference_actions(self):
         yield ReferenceAction(self.return_value.reference, ReferenceStatus.DECLARED)
 
-    def _get_declaration_directions(self):
-        yield ReferenceDirection.UPWARD
-
     def _describe_node(self):
         yield f"return"
 
@@ -181,13 +178,6 @@ class MethodCallbacksNode(CallNode):
 
     def _is_relevant(self):
         return self.method and self.method.has_callbacks
-
-    def _get_declaration_directions(self):
-        for callback in self.callbacks:
-            yield from callback.body.declaration_directions
-
-    def _can_be_grouped(self):
-        return False
 
     def _describe_node(self):
         yield f"callbacks"

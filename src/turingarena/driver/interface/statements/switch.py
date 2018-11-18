@@ -39,10 +39,6 @@ class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 class Switch(SwitchNode, Statement):
     __slots__ = []
 
-    def _get_declaration_directions(self):
-        for c in self.cases:
-            yield from c.body.declaration_directions
-
     def _get_reference_actions(self):
         for c in self.cases:
             yield from c.body.reference_actions

@@ -54,25 +54,11 @@ class For(Statement, IntermediateNode):
         yield from self.index.range.validate()
         yield from self.body.validate()
 
-    def _get_declaration_directions(self):
-        return self.body.declaration_directions
-
     def _get_reference_actions(self):
         for a in self.body.reference_actions:
             r = a.reference
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
-
-    def _can_be_grouped(self):
-        # no local references
-        r = all(
-            a.reference.index_count > 0
-            for a in self.body.reference_actions
-        ) and all(
-            child.can_be_grouped
-            for child in self.body.children
-        )
-        return r
 
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"

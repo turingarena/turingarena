@@ -15,6 +15,7 @@ from turingarena.driver.interface.statements.callback import CallbackEnd, Return
 from turingarena.driver.interface.statements.if_else import ResolveIf
 from turingarena.driver.interface.statements.io import Checkpoint
 from turingarena.driver.interface.statements.switch import SwitchResolve
+from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
 from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
 from turingarena.util.visitor import visitormethod
 
@@ -231,7 +232,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         else:
             result = self.result()
             for phase in ExecutionPhase:
-                if phase == ExecutionPhase.UPWARD and n.direction != ReferenceDirection.UPWARD:
+                direction = StatementAnalyzer().step_direction(n)
+
+                if phase == ExecutionPhase.UPWARD and direction != ReferenceDirection.UPWARD:
                     continue
 
                 result = result.merge(self.extend(result)._replace(

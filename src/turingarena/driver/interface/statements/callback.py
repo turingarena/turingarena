@@ -3,12 +3,11 @@ from collections import namedtuple
 
 from turingarena.driver.interface.block import Block, AbstractBlock
 from turingarena.driver.interface.callables import CallbackPrototype
-from turingarena.driver.interface.requests import RequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, ReferenceDirection
+from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -89,9 +88,6 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
     def validate(self):
         yield from self.prototype.validate()
 
-    def _get_declaration_directions(self):
-        return self.body.declaration_directions
-
 
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback_implementation",
@@ -99,9 +95,6 @@ class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     def _get_reference_actions(self):
         for p in self.callback_implementation.parameters:
             yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
-
-    def _get_declaration_directions(self):
-        yield ReferenceDirection.UPWARD
 
     def _describe_node(self):
         yield "callback_call"

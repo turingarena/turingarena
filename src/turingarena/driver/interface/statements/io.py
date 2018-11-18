@@ -54,9 +54,6 @@ class Read(ReadWriteStatement, IntermediateNode):
         for exp in self.arguments:
             yield ReferenceAction(exp.reference, ReferenceStatus.DECLARED)
 
-    def _get_declaration_directions(self):
-        yield ReferenceDirection.DOWNWARD
-
 
 class Write(Print, ReadWriteStatement):
     __slots__ = []
@@ -76,9 +73,6 @@ class Write(Print, ReadWriteStatement):
 
 class Checkpoint(Print, IntermediateNode):
     __slots__ = []
-
-    def _get_declaration_directions(self):
-        yield ReferenceDirection.UPWARD
 
     def _get_reference_actions(self):
         return []

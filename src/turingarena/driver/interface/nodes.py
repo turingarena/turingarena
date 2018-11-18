@@ -80,20 +80,6 @@ class IntermediateNode:
         return []
 
     @property
-    def declaration_directions(self):
-        return frozenset(self._get_declaration_directions())
-
-    def _get_declaration_directions(self):
-        return frozenset()
-
-    @property
-    def can_be_grouped(self):
-        return self._can_be_grouped()
-
-    def _can_be_grouped(self):
-        return True
-
-    @property
     def node_description(self):
         return list(self._describe_node())
 
