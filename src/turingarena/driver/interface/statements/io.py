@@ -73,7 +73,6 @@ class Write(Print, ReadWriteStatement):
     def _get_arguments_context(self):
         return self.context.expression(
             reference=True,
-            declaring=False,
         )
 
     def _get_intermediate_nodes(self):
