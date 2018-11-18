@@ -5,6 +5,7 @@ from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import InterfaceContext
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.execution import NodeExecutionContext
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.parser import parse_interface
@@ -94,7 +95,7 @@ class InterfaceDefinition:
         logger.debug(f"Description: {description}")
 
         self.main_block.driver_run(context=context.with_assigments({
-            c.variable.as_reference(): c.value.evaluate(context.bindings)
+            c.variable.as_reference(): evaluate_expression(c.value, context.bindings)
             for c in self.constants
         }))
 

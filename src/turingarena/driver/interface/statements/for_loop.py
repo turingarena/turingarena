@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 
 from turingarena.driver.interface.block import Block
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.statement import Statement
@@ -83,7 +84,7 @@ class For(Statement, IntermediateNode):
             assert context.request_lookahead is None
 
         try:
-            for_range = self.index.range.evaluate(context.bindings)
+            for_range = evaluate_expression(self.index.range, context.bindings)
         except KeyError:
             # we assume that if the range is not resolved, then the cycle should be skipped
             # FIXME: determine this situation statically

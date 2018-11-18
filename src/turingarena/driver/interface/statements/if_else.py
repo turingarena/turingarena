@@ -2,6 +2,7 @@ import logging
 
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -50,7 +51,7 @@ class If(AbstractIfNode, Statement):
             yield None
 
     def _driver_run(self, context):
-        condition_value = self.condition.evaluate(context.bindings)
+        condition_value = evaluate_expression(self.condition, context.bindings)
         if condition_value:
             return self.then_body.driver_run(context)
         elif self.else_body is not None:

@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.exceptions import CommunicationError
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -61,7 +62,7 @@ class Read(ReadWriteStatement, IntermediateNode):
         if context.phase is ExecutionPhase.DOWNWARD:
             logging.debug(f"Bindings: {context.bindings}")
             context.send_downward([
-                a.evaluate(context.bindings)
+                evaluate_expression(a, context.bindings)
                 for a in self.arguments
             ])
 

@@ -4,6 +4,7 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.execution import CallRequestSignature
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpressionSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
@@ -220,7 +221,7 @@ class MethodReturnNode(CallNode):
 
     def _driver_run(self, context):
         if context.phase is ExecutionPhase.REQUEST:
-            return_value = self.return_value.evaluate(context.bindings)
+            return_value = evaluate_expression(self.return_value, context.bindings)
             context.report_ready()
             context.send_driver_upward(return_value)
 

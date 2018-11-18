@@ -8,6 +8,7 @@ from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import ExpressionContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.variables import Variable
+from turingarena.util.visitor import Visitor
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,6 @@ class Expression:
     @staticmethod
     def compile(ast, context: ExpressionContext):
         return expression_classes[ast.expression_type](ast, context)
-
-    @abstractmethod
-    def evaluate(self, bindings):
-        pass
 
     @property
     def dimensions(self):
@@ -49,9 +46,6 @@ class LiteralExpression(Expression):
     @abstractmethod
     def value(self):
         pass
-
-    def evaluate(self, bindings):
-        return self.value
 
     def is_status(self, status):
         return True
@@ -114,9 +108,6 @@ class VariableReferenceExpression(Expression, AbstractSyntaxNodeWrapper):
     @property
     def reference(self):
         return self.variable.as_reference()
-
-    def evaluate(self, bindings):
-        return bindings[self.reference]
 
     def validate(self):
         if not self.context.declaring and not self._is_declared():
@@ -202,14 +193,6 @@ class SubscriptExpression(Expression, namedtuple("SubscriptExpression", [
             index_count=array.index_count + 1,
         )
 
-    def evaluate(self, bindings):
-        if self.reference in bindings:
-            return bindings[self.reference]
-        else:
-            return self.array.evaluate(bindings)[
-                self.index.evaluate(bindings)
-            ]
-
 
 def compile_subscript(ast, index_asts, context):
     if index_asts:
@@ -236,3 +219,20 @@ expression_classes = frozenbidict({
     "reference_subscript": compile_reference_expression,
     "nested": lambda ast, context: Expression.compile(ast.expression, context),
 })
+
+
+class ExpressionVisitor(Visitor):
+    def visit_Expression(self, e):
+        raise NotImplementedError
+
+    def visit_LiteralExpression(self, e):
+        return NotImplemented
+
+    def visit_IntLiteralExpression(self, e):
+        return NotImplemented
+
+    def visit_VariableReferenceExpression(self, e):
+        return NotImplemented
+
+    def visit_SubscriptExpression(self, e):
+        return NotImplemented

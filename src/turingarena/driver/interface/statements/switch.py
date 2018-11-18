@@ -5,6 +5,7 @@ from turingarena.driver.client.exceptions import InterfaceError
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.evalexpression import evaluate_expression
 from turingarena.driver.interface.expressions import Expression, IntLiteralExpression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -48,7 +49,7 @@ class Switch(SwitchNode, Statement):
             yield from c.body.reference_actions
 
     def _driver_run(self, context):
-        value = self.value.evaluate(context.bindings)
+        value = evaluate_expression(self.value, context.bindings)
 
         for c in self.cases:
             for label in c.labels:
