@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, abort, render_template, redirect, url_for
 from turingarena_web.model.contest import Contest
 from turingarena_web.controller.common import render_template_ex
 from turingarena_web.controller import session
@@ -35,4 +35,20 @@ def scoreboard(contest_name):
     contest = Contest.from_name(contest_name)
 
     return render_template("scoreboard.html", contest=contest)
+
+
+@contest_bp.route("/<string:contest_name>/subscribe")
+def subscribe(contest_name):
+    contest = Contest.from_name(contest_name)
+    user = session.get_current_user()
+
+    if contest is None:
+        return abort(404)
+
+    if user is None or not contest.public:
+        return abort(403)
+
+    contest.add_user(user)
+
+    return redirect(url_for("contest.contest", contest_name=contest_name))
 

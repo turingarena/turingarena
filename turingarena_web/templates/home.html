@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% set title = "Contests available" %}
 {% block body %}
-    <div id="problems">
+    <div>
+        <p>Your contests</p>
         <table class="table table-hover">
             <thead>
             <tr>
@@ -12,6 +13,24 @@
             {% for contest in contests %}
                 <tr onclick="window.location = '{{ url_for("contest.contest", contest_name=contest.name) }}'">
                     <td>{{ contest.name }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <p>Available contests</p>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Contest</th>
+            </tr>
+            </thead>
+            <tbody style="cursor: pointer">
+            {% for contest in available_contests %}
+                <tr>
+                    <td>{{ contest.name }}</td>
+                    <td><a href="{{ url_for("contest.subscribe", contest_name=contest.name) }}">Subscribe</a></td>
                 </tr>
             {% endfor %}
             </tbody>

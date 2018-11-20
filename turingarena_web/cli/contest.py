@@ -29,9 +29,10 @@ class NewContestCommand(ContestCommand):
         add_help=False
     )
     PARSER.add_argument("contest", help="name of the new contest")
+    PARSER.add_argument("--public", "-p", help="make contest public", action="store_true")
 
     def run(self):
-        Contest.new_contest(self.args.contest)
+        Contest.new_contest(self.args.contest, public=self.args.public)
 
 
 class DeleteContestCommand(ContestCommand):
@@ -103,8 +104,9 @@ class AddUserContestCommand(AddContestCommand):
     PARSER.add_argument("contest", help="name of the contest")
 
     def run(self):
+        user = User.from_name(self.args.user)
         contest = Contest.from_name(self.args.contest)
-        contest.add_user(self.args.user)
+        contest.add_user(user)
 
 
 class RemoveUserContestCommand(RemoveContestCommand):
@@ -118,8 +120,9 @@ class RemoveUserContestCommand(RemoveContestCommand):
     PARSER.add_argument("contest", help="name of the contest")
 
     def run(self):
+        user = User.from_name(self.args.user)
         contest = Contest.from_name(self.args.contest)
-        contest.remove_user(self.args.user)
+        contest.remove_user(user)
 
 
 class ListUserContestCommand(ListContestCommand):

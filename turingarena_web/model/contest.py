@@ -14,21 +14,13 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
     def problems(self):
         return Problem.from_contest(self)
 
-    def add_user(self, username):
-        query = """
-            INSERT INTO user_contest(user_id, contest_id) VALUES (
-                (SELECT id FROM _user WHERE username = %s),
-                %s
-            )
-        """
-        database.query(query, username, self.id)
+    def add_user(self, user):
+        query = "INSERT INTO user_contest(user_id, contest_id) VALUES (%s, %s)"
+        database.query(query, user.id, self.id)
 
     def remove_user(self, username):
-        query = """
-            DELETE FROM user_contest 
-            WHERE contest_id = %s AND user_id = (SELECT id FROM _user WHERE username = %s)
-        """
-        database.query(query, self.id, username)
+        query = "DELETE FROM user_contest WHERE contest_id = %s AND user_id = %s"
+        database.query(query, self.id, user.id)
 
     def contains_user(self, user):
         query = "SELECT 1 FROM user_contest WHERE contest_id = %s AND user_id = %s"

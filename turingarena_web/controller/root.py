@@ -13,8 +13,14 @@ def home():
     user = get_current_user()
     if user is None:
         return redirect(url_for("user.login"))
-    contests = Contest.of_user(user)
-    return render_template("home.html", contests=contests, user=user)
+    contests = list(Contest.of_user(user))
+
+    available_contests = [
+        contest
+        for contest in Contest.contests()
+        if contest.public and contest not in contests
+    ]
+    return render_template("home.html", contests=contests, available_contests=available_contests, user=user)
 
 
 @root_bp.route('/favicon.ico')

@@ -90,4 +90,4 @@ def register():
 
     session.set_current_user(user)
 
-    return redirect(url_for("user_view"))
+    return redirect(url_for("user.user_view"))
