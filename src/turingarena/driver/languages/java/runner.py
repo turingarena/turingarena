@@ -8,7 +8,6 @@ from subprocess import CalledProcessError
 import pkg_resources
 from turingarena.driver.sandbox.connection import create_failed_connection
 from turingarena.driver.sandbox.popen import create_popen_process_connection
-from turingarena.driver.sandbox.rlimits import set_rlimits
 from turingarena.driver.sandbox.runner import ProgramRunner
 
 logger = logging.getLogger(__name__)
@@ -57,7 +56,7 @@ class JavaProgramRunner(ProgramRunner):
 
             yield create_popen_process_connection(
                 cli,
-                preexec_fn=set_rlimits,
+                # preexec_fn=set_rlimits(),
             )
 
     def get_memory_usage(self, process):
