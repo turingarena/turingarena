@@ -15,6 +15,10 @@ ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
 
 
+ReferenceDeclaration = namedtuple("ReferenceAction", ["variable"])
+ReferenceResolution = namedtuple("ReferenceAction", ["variable"])
+
+
 class ReferenceAction(namedtuple("ReferenceAction", ["reference", "status"])):
     def __init__(self, *args, **kwargs):
         super().__init__()
