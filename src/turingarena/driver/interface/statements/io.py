@@ -49,7 +49,7 @@ class Read(ReadWriteStatement, IntermediateNode):
 
     def _get_reference_actions(self):
         for exp in self.arguments:
-            yield ReferenceAction(exp.reference, ReferenceStatus.DECLARED)
+            yield ReferenceAction(self.context.declared_reference(exp), ReferenceStatus.DECLARED)
 
 
 class Write(Print, ReadWriteStatement):

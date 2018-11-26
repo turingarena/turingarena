@@ -149,7 +149,7 @@ class MethodReturnNode(CallNode):
         return True
 
     def _get_reference_actions(self):
-        yield ReferenceAction(self.return_value.reference, ReferenceStatus.DECLARED)
+        yield ReferenceAction(self.context.declared_reference(self.return_value), ReferenceStatus.DECLARED)
 
     def _describe_node(self):
         yield f"return"

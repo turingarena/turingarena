@@ -22,7 +22,7 @@ class Expression:
 
     @property
     def reference(self):
-        return None
+        return self.context.statement_context.reference(self)
 
     def is_reference_to(self, variable):
         return False
@@ -91,10 +91,6 @@ class VariableReference(Expression, AbstractSyntaxNodeWrapper):
     def is_reference_to(self, variable):
         return self.variable == variable
 
-    @property
-    def reference(self):
-        return self.variable.as_reference()
-
     def validate(self):
         if not self.context.declaring and not self._is_declared():
             yield Diagnostic(
@@ -161,17 +157,6 @@ class Subscript(Expression, namedtuple("Subscript", [
         if expected_index is None:
             return None
         return self.index.is_reference_to(expected_index.variable)
-
-    @property
-    def reference(self):
-        array = self.array.reference
-        if array is None:
-            return None
-        if not self.context.declaring and not self._is_reference_index():
-            return None
-        return array._replace(
-            index_count=array.index_count + 1,
-        )
 
 
 def compile_subscript(ast, index_asts, context):

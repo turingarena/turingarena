@@ -162,7 +162,9 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return e.value
 
     def evaluate_VariableReference(self, e):
-        return self.bindings[e.reference]
+        if e.reference in self.bindings:
+            return self.bindings[e.reference]
+        return self.bindings[e.variable.as_reference()]
 
     def evaluate_Subscript(self, e):
         if e.reference in self.bindings:
