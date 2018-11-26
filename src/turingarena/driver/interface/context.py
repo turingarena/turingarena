@@ -1,5 +1,6 @@
 import logging
 from collections import namedtuple
+from functools import partial
 from typing import Optional
 
 from turingarena.driver.interface.diagnostics import Diagnostic
@@ -28,9 +29,12 @@ class InterfaceContext(namedtuple("InterfaceContext", [
     @property
     def main_block_context(self):
         return self.initial_context.with_reference_actions(
-            t(reference=c.variable.as_reference())
+            a(c.variable.as_reference())
             for c in self.constants
-            for t in (ReferenceDeclaration, ReferenceResolution)
+            for a in [
+                partial(ReferenceDeclaration, dimensions=0),
+                ReferenceResolution,
+            ]
         )
 
     @property
@@ -325,7 +329,7 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_reference_actions_Read(self, n):
         for exp in n.arguments:
-            yield ReferenceDeclaration(self.declared_reference(exp))
+            yield self.reference_declaration(exp)
 
     def _get_reference_actions_Write(self, n):
         for exp in n.arguments:
@@ -340,7 +344,7 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_reference_actions_CallbackStart(self, n):
         for p in n.callback_implementation.parameters:
-            yield ReferenceDeclaration(p.as_reference())
+            yield ReferenceDeclaration(p.as_reference(), dimensions=0)
 
     def _get_reference_actions_Return(self, n):
         yield ReferenceResolution(self.reference(n.value))
@@ -358,7 +362,7 @@ class StatementContext(namedtuple("StatementContext", [
                 yield ReferenceResolution(p.reference)
 
     def _get_reference_actions_CallReturn(self, n):
-        yield ReferenceDeclaration(self.declared_reference(n.return_value))
+        yield self.reference_declaration(n.return_value)
 
     def _get_reference_actions_SequenceNode(self, n):
         for child in n.children:
@@ -528,24 +532,30 @@ class StatementContext(namedtuple("StatementContext", [
     def reference_Expression(self, e):
         return None
 
-    def declared_reference(self, e, dimensions=0) -> Optional[Reference]:
-        return self._declared_reference(e, dimensions)
+    def reference_declaration(self, e, dimensions=0) -> Optional[Reference]:
+        return self._reference_declaration(e, dimensions)
 
     @visitormethod
-    def _declared_reference(self, e, dimensions):
+    def _reference_declaration(self, e, dimensions):
         pass
 
-    def _declared_reference_VariableReference(self, e, dimensions):
-        return Variable(name=e.variable_name, dimensions=dimensions).as_reference()
+    def _reference_declaration_VariableReference(self, e, dimensions):
+        return ReferenceDeclaration(
+            reference=Variable(name=e.variable_name, dimensions=dimensions).as_reference(),
+            dimensions=dimensions,
+        )
 
-    def _declared_reference_Subscript(self, e, dimensions):
-        array_reference = self.declared_reference(e.array, dimensions + 1)
-        if array_reference is not None:
-            return array_reference._replace(
-                index_count=array_reference.index_count + 1,
+    def _reference_declaration_Subscript(self, e, dimensions):
+        array_declaration = self.reference_declaration(e.array, dimensions + 1)
+        if array_declaration is not None:
+            return ReferenceDeclaration(
+                reference=array_declaration.reference._replace(
+                    index_count=array_declaration.reference.index_count + 1,
+                ),
+                dimensions=dimensions,
             )
 
-    def _declared_reference_Expression(self, e):
+    def _reference_declaration_Expression(self, e):
         return None
 
     @visitormethod

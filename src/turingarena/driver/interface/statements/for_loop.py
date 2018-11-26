@@ -32,7 +32,7 @@ class For(Statement, ControlStructure, IntermediateNode):
         return Block(
             ast=self.ast.body,
             context=self.context.with_index_variable(self.index).with_reference_actions([
-                ReferenceDeclaration(self.index.variable.as_reference()),
+                ReferenceDeclaration(self.index.variable.as_reference(), dimensions=0),
                 ReferenceResolution(self.index.variable.as_reference()),
             ]),
         )

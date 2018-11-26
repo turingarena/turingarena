@@ -13,7 +13,7 @@ Reference = namedtuple("Reference", ["variable", "index_count"])
 
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
 
-ReferenceDeclaration = namedtuple("ReferenceDeclaration", ["reference"])
+ReferenceDeclaration = namedtuple("ReferenceDeclaration", ["reference", "dimensions"])
 ReferenceResolution = namedtuple("ReferenceResolution", ["reference"])
 
 VariableDeclaration = namedtuple("VariableDeclaration", ["variable"])
