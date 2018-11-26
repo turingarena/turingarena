@@ -214,11 +214,14 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         if comment is not None:
             yield self.line_comment(comment)
 
-        for d in INITIAL_CONTEXT.variable_declarations(statement):
-            yield from self.visit(d)
+        if hasattr(statement, "context"):
+            # FIXME: drop context from nodes
 
-        for a in INITIAL_CONTEXT.variable_allocations(statement):
-            yield from self.visit(a)
+            for d in statement.context.variable_declarations(statement):
+                yield from self.visit(d)
+
+            for a in statement.context.variable_allocations(statement):
+                yield from self.visit(a)
 
         yield from self.visit(statement)
 

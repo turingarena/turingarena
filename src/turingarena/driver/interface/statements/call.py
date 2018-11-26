@@ -87,9 +87,6 @@ class MethodResolveArgumentsNode(CallNode):
 class MethodReturnNode(CallNode):
     __slots__ = []
 
-    def _should_declare_variables(self):
-        return True
-
     def _describe_node(self):
         yield f"return"
 

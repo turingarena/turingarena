@@ -8,7 +8,6 @@ from turingarena.driver.interface.expressions import Expression, IntLiteralSynth
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 

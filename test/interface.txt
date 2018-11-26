@@ -1,8 +1,21 @@
-                const c = 2;
-                procedure p();
-                main {
-                    for i to c {
-                        call p();
-                        checkpoint;
+            function f(n, m, a[][]);
+            function g(i, j);
+
+            main {
+                read n, m;
+                for i to n {
+                    for j to m {
+                        read a[i][j];
                     }
                 }
+
+                call r = f(n, m, a);
+                write r;
+
+                for i to n {
+                    for j to m {
+                        call s = g(i, j);
+                        write s;
+                    }
+                }
+            }

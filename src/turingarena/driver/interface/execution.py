@@ -362,7 +362,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 for result in results_by_iteration
                 if a.status is ReferenceStatus.RESOLVED
             ])
-            for a in n.reference_actions
+            for a in n.context.reference_actions(n)
         ]
 
         return self.result()._replace(assignments=assignments)

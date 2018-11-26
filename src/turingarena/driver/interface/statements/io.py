@@ -27,9 +27,6 @@ class ReadWriteStatement(IntermediateNode, AbstractSyntaxNodeWrapper):
     def _get_arguments_context(self):
         pass
 
-    def _should_declare_variables(self):
-        return True
-
 
 class Read(ReadWriteStatement, IntermediateNode):
     __slots__ = []

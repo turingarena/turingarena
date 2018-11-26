@@ -4,12 +4,14 @@ from typing import Optional
 
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import IntLiteral
+from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.statements.call import MethodCallbacksNode, MethodReturnNode
 from turingarena.driver.interface.statements.callback import CallbackCallNode
+from turingarena.driver.interface.statements.for_loop import For
 from turingarena.driver.interface.statements.io import Read, Checkpoint
 from turingarena.driver.interface.statements.loop import Loop
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, Variable, Reference, \
-    VariableDeclaration, ReferenceDirection
+    VariableDeclaration, ReferenceDirection, VariableAllocation
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
@@ -120,7 +122,7 @@ class StatementContext(namedtuple("StatementContext", [
                 if label in labels:
                     yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=n.ast.parseinfo)
                 labels.append(label)
-            yield from case.validate()
+            yield from self.validate(case)
 
     def validate_Case(self, n):
         for l in n.labels:
@@ -235,18 +237,17 @@ class StatementContext(namedtuple("StatementContext", [
         return frozenset(self._get_variable_declarations(n))
 
     def _get_variable_declarations(self, n):
-        if not self._should_declare_variables(n):
+        types = [
+            Read,
+            MethodReturnNode,
+            For,
+        ]
+
+        if not any(isinstance(n, t) for t in types):
             return
         for a in self.reference_actions(n):
             if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
-                yield VariableDeclaration(self.reference(a).variable)
-
-    @visitormethod
-    def _should_declare_variables(self, n):
-        pass
-
-    def _should_declare_variables_IntermediateNode(self, n):
-        return False
+                yield VariableDeclaration(a.reference.variable)
 
     def variable_allocations(self, n):
         return list(self._get_allocations(n))
@@ -254,6 +255,17 @@ class StatementContext(namedtuple("StatementContext", [
     @visitormethod
     def _get_allocations(self, n):
         pass
+
+    def _get_allocations_For(self, n):
+        for a in self.reference_actions(n.body):
+            if a.reference.variable.dimensions == 0:
+                continue
+            if a.status == ReferenceStatus.DECLARED:
+                yield VariableAllocation(
+                    variable=a.reference.variable,
+                    indexes=self.index_variables[-a.reference.index_count + 1:],
+                    size=n.index.range,
+                )
 
     def _get_allocations_IntermediateNode(self, n):
         return []
@@ -333,7 +345,7 @@ class StatementContext(namedtuple("StatementContext", [
     def _get_reference_actions_SwitchResolve(self, n):
         yield ReferenceAction(self.reference(n.value), ReferenceStatus.RESOLVED)
 
-    def _get_reference_actions_CallbackCall(self, n):
+    def _get_reference_actions_CallbackCallNode(self, n):
         for p in n.callback_implementation.parameters:
             yield ReferenceAction(p.as_reference(), ReferenceStatus.DECLARED)
 
@@ -357,7 +369,11 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_reference_actions_SequenceNode(self, n):
         for child in n.children:
-            yield from self.reference_actions(child)
+            if hasattr(child, 'context'):
+                # FIXME: should strip context from nodes
+                yield from child.context.reference_actions(child)
+            else:
+                yield from self.reference_actions(child)
 
     def _get_reference_actions_IntermediateNode(self, n):
         return []
