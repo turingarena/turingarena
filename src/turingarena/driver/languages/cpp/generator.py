@@ -31,13 +31,13 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         yield
 
     def visit_VariableDeclaration(self, d):
-        pointers = "*" * d.variable.dimensions
+        pointers = "*" * d.dimensions
         yield f"static int {pointers}{d.variable.name};"
 
     def visit_VariableAllocation(self, a):
         name = a.variable.name
         indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
-        dimensions = "*" * (a.variable.dimensions - len(indexes) - 1)
+        dimensions = "*" * a.dimensions
         size = self.visit(a.size)
         yield f"{name}{indexes} = new int{dimensions}[{size}];"
 

@@ -35,7 +35,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         yield
 
     def visit_VariableDeclaration(self, d):
-        yield f"var {d.variable.name} {'[]' * d.variable.dimensions + 'int'}"
+        yield f"var {d.variable.name} {'[]' * d.dimensions + 'int'}"
 
     def visit_MethodPrototype(self, m):
         return []
@@ -46,7 +46,8 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_VariableAllocation(self, a):
         name = a.variable.name
         idx = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
-        dimensions = "[]" * (a.variable.dimensions - len(a.indexes))
+        # FIXME: is this + 1 needed?
+        dimensions = "[]" * (a.dimensions + 1)
         size = self.visit(a.size)
         yield f"{name}{idx} = make({dimensions}int, {size})"
 

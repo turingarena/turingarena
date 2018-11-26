@@ -249,7 +249,7 @@ class StatementContext(namedtuple("StatementContext", [
             return
         for a in self.reference_actions(n):
             if a.reference.index_count == 0 and isinstance(a, ReferenceDeclaration):
-                yield VariableDeclaration(a.reference.variable)
+                yield VariableDeclaration(a.reference.variable, a.dimensions)
 
     def variable_allocations(self, n):
         return list(self._get_allocations(n))
@@ -260,14 +260,16 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_allocations_For(self, n):
         for a in self.reference_actions(n.body):
-            if a.reference.variable.dimensions == 0:
+            if not isinstance(a, ReferenceDeclaration):
                 continue
-            if isinstance(a, ReferenceDeclaration):
-                yield VariableAllocation(
-                    variable=a.reference.variable,
-                    indexes=self.index_variables[-a.reference.index_count + 1:],
-                    size=n.index.range,
-                )
+            if a.dimensions == 0:
+                continue
+            yield VariableAllocation(
+                variable=a.reference.variable,
+                indexes=self.index_variables[-a.reference.index_count + 1:],
+                size=n.index.range,
+                dimensions=a.dimensions - a.reference.index_count - 1,
+            )
 
     def _get_allocations_IntermediateNode(self, n):
         return []
@@ -548,11 +550,10 @@ class StatementContext(namedtuple("StatementContext", [
     def _reference_declaration_Subscript(self, e, dimensions):
         array_declaration = self.reference_declaration(e.array, dimensions + 1)
         if array_declaration is not None:
-            return ReferenceDeclaration(
+            return array_declaration._replace(
                 reference=array_declaration.reference._replace(
                     index_count=array_declaration.reference.index_count + 1,
                 ),
-                dimensions=dimensions,
             )
 
     def _reference_declaration_Expression(self, e):

@@ -50,12 +50,12 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
             yield 'private static final Scanner in = new Scanner(System.in);'
 
     def visit_VariableDeclaration(self, d):
-        yield f'int{"[]" * d.variable.dimensions} {d.variable.name};'
+        yield f'int{"[]" * d.dimensions} {d.variable.name};'
 
     def visit_VariableAllocation(self, a):
         name = a.variable.name
         indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
-        dimensions = "[]" * (a.variable.dimensions - len(indexes) - 1)
+        dimensions = "[]" * a.dimensions
         size = self.visit(a.size)
         yield f"{name}{indexes} = new int[{size}]{dimensions};"
 
