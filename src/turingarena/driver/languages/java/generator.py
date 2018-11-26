@@ -156,11 +156,11 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
 
     def visit_Switch(self, switch_statement):
         cases = [case for case in switch_statement.cases]
-        yield f'if ({self.build_switch_condition(switch_statement.variable, cases[0].labels)})'' {'
+        yield f'if ({self.build_switch_condition(switch_statement.value, cases[0].labels)})'' {'
         with self.indent():
             yield from self.visit(cases[0].body)
         for case in cases[1:]:
-            yield '}' f' else if ({self.build_switch_condition(switch_statement.variable, case.labels)}) ' '{'
+            yield '}' f' else if ({self.build_switch_condition(switch_statement.value, case.labels)}) ' '{'
             with self.indent():
                 yield from self.visit(case.body)
         yield '}'

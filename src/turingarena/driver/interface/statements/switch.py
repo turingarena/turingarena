@@ -24,11 +24,6 @@ class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
             yield Case(ast=case, context=self.context)
 
     @property
-    def variable(self):
-        warnings.warn("use value", DeprecationWarning)
-        return self.value
-
-    @property
     def value(self):
         return Expression.compile(self.ast.value, self.context.expression())
 
