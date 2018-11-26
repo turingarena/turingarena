@@ -1,12 +1,12 @@
 from turingarena.driver.interface.statements.callback import ExitStatement
-from .call import MethodResolveArgumentsNode, MethodCallbacksNode, \
-    MethodCallCompletedNode, MethodReturnNode, Call, PrintNoCallbacks
+from .call import CallArgumentsResolve, AcceptCallbacks, \
+    CallCompleted, CallReturn, Call, PrintNoCallbacks
 from .callback import Return
 from .for_loop import For
-from .if_else import ResolveIf, If
+from .if_else import IfConditionResolve, If
 from .io import CheckpointStatement, Read, Write
 from .loop import Loop, Break
-from .switch import SwitchResolve, Switch
+from .switch import SwitchValueResolve, Switch
 
 statement_classes = {
     "checkpoint": [
@@ -19,10 +19,10 @@ statement_classes = {
         Write,
     ],
     "call": [
-        MethodResolveArgumentsNode,
-        MethodCallbacksNode,
-        MethodCallCompletedNode,
-        MethodReturnNode,
+        CallArgumentsResolve,
+        AcceptCallbacks,
+        CallCompleted,
+        CallReturn,
         Call,
         PrintNoCallbacks,
     ],
@@ -36,7 +36,7 @@ statement_classes = {
         For,
     ],
     "if": [
-        ResolveIf,
+        IfConditionResolve,
         If,
     ],
     "loop": [
@@ -46,7 +46,7 @@ statement_classes = {
         Break,
     ],
     "switch": [
-        SwitchResolve,
+        SwitchValueResolve,
         Switch,
     ],
 }

@@ -35,7 +35,7 @@ class CallbackBody(AbstractContextBlock):
         self.implementation = implementation
 
     def _get_flat_children_builders(self):
-        yield functools.partial(CallbackCallNode, self.implementation)
+        yield functools.partial(CallbackStart, self.implementation)
         yield PrintCallbackRequest
         yield functools.partial(PrintCallbackIndex, self.implementation)
 
@@ -75,7 +75,7 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
         return namedtuple("body", ["statements"])(fake_ast_body)
 
 
-class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
+class CallbackStart(IntermediateNode, namedtuple("CallbackStart", [
     "callback_implementation",
     "context",
 ])):

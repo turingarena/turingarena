@@ -13,7 +13,7 @@ from turingarena.driver.interface.variables import Variable
 logger = logging.getLogger(__name__)
 
 
-class InterfaceExitNode(Exit):
+class MainExit(Exit):
     pass
 
 
@@ -21,7 +21,7 @@ class InterfaceBody(Block):
     def _generate_flat_inner_nodes(self):
         yield InitialCheckpoint()
         yield from super()._generate_flat_inner_nodes()
-        yield InterfaceExitNode()
+        yield MainExit()
 
 
 class ConstantDeclaration(AbstractSyntaxNodeWrapper):

@@ -68,7 +68,7 @@ class Call(Statement, CallNode):
     pass
 
 
-class MethodResolveArgumentsNode(CallNode):
+class CallArgumentsResolve(CallNode):
     __slots__ = []
 
     def _get_assignments(self, context):
@@ -84,14 +84,14 @@ class MethodResolveArgumentsNode(CallNode):
         yield f"resolve arguments"
 
 
-class MethodReturnNode(CallNode):
+class CallReturn(CallNode):
     __slots__ = []
 
     def _describe_node(self):
         yield f"return"
 
 
-class MethodCallCompletedNode(CallNode):
+class CallCompleted(CallNode):
     def _describe_node(self):
         yield f"call completed"
 
@@ -102,7 +102,7 @@ class PrintNoCallbacks(CallNode, Print):
         return [IntLiteralSynthetic(0)]
 
 
-class MethodCallbacksNode(CallNode):
+class AcceptCallbacks(CallNode):
     __slots__ = []
 
     def _describe_node(self):

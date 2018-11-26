@@ -10,11 +10,11 @@ from turingarena.driver.interface.exceptions import CommunicationError, DriverSt
 from turingarena.driver.interface.nodes import ExecutionResult
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.statements.call import MethodResolveArgumentsNode
+from turingarena.driver.interface.statements.call import CallArgumentsResolve
 from turingarena.driver.interface.statements.callback import CallbackEnd, Return, Exit
-from turingarena.driver.interface.statements.if_else import ResolveIf
+from turingarena.driver.interface.statements.if_else import IfConditionResolve
 from turingarena.driver.interface.statements.io import Checkpoint
-from turingarena.driver.interface.statements.switch import SwitchResolve
+from turingarena.driver.interface.statements.switch import SwitchValueResolve
 from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
 from turingarena.util.visitor import visitormethod
 
@@ -174,11 +174,11 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _needs_request_lookahead(self, n):
         types = [
             Checkpoint,
-            SwitchResolve,
-            ResolveIf,
+            SwitchValueResolve,
+            IfConditionResolve,
             CallbackEnd,
             Return,
-            MethodResolveArgumentsNode,
+            CallArgumentsResolve,
             Exit,
         ]
 
@@ -290,7 +290,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
         raise InterfaceError(f"no case matches in switch")
 
-    def _on_execute_SwitchResolve(self, n):
+    def _on_execute_SwitchValueResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             matching_cases = n.get_matching_cases(self.request_lookahead)
             [case] = matching_cases
@@ -306,7 +306,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         self.send_driver_upward(n.context.callback_index)
         self.execute(n.body)
 
-    def _on_execute_CallbackCallNode(self, n):
+    def _on_execute_CallbackStart(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             for p in n.callback_implementation.parameters:
                 r = p.as_reference()
@@ -403,14 +403,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         elif n.else_body is not None:
             return self.execute(n.else_body)
 
-    def _on_execute_ResolveIf(self, n):
+    def _on_execute_IfConditionResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             [condition_value] = n.get_conditions(self.request_lookahead)
             return self.result()._replace(
                 assignments=[(n.condition.reference, condition_value)]
             )
 
-    def _on_execute_MethodResolveArgumentsNode(self, n):
+    def _on_execute_CallArgumentsResolve(self, n):
         if self.phase is not ExecutionPhase.REQUEST:
             return
 
@@ -463,18 +463,18 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             assignments=assignments,
         )
 
-    def _on_execute_MethodReturnNode(self, n):
+    def _on_execute_CallReturn(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             return_value = self.evaluate(n.return_value)
             self.report_ready()
             self.send_driver_upward(return_value)
 
-    def _on_execute_MethodCallCompletedNode(self, n):
+    def _on_execute_CallCompleted(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             self.report_ready()
             self.send_driver_upward(0)  # no more callbacks
 
-    def _on_execute_MethodCallbacksNode(self, n):
+    def _on_execute_AcceptCallbacks(self, n):
         while True:
             [has_callback] = self.receive_upward()
             if has_callback:

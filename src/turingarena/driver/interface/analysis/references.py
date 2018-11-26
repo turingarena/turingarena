@@ -36,10 +36,10 @@ class ReferenceActionAnalyzer(namedtuple("ReferenceActionAnalyzer", ["context"])
         for b in n.bodies:
             yield from self.reference_actions(b)
 
-    def _get_actions_SwitchResolve(self, n):
+    def _get_actions_SwitchValueResolve(self, n):
         yield ReferenceAction(self.reference(n.value), ReferenceStatus.RESOLVED)
 
-    def _get_actions_CallbackCallNode(self, n):
+    def _get_actions_CallbackStart(self, n):
         for p in n.callback_implementation.parameters:
             yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
 
@@ -52,14 +52,14 @@ class ReferenceActionAnalyzer(namedtuple("ReferenceActionAnalyzer", ["context"])
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
-    def _get_actions_MethodResolveArgumentsNode(self, n):
+    def _get_actions_CallArgumentsResolve(self, n):
         resolved_references = self.context.get_references(ReferenceStatus.RESOLVED)
         for p in n.arguments:
             reference = self.reference(p)
             if reference is not None and reference not in resolved_references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
-    def _get_actions_MethodReturnNode(self, n):
+    def _get_actions_CallReturn(self, n):
         yield ReferenceAction(self.declared_reference(n.return_value), ReferenceStatus.DECLARED)
 
     def _get_actions_SequenceNode(self, n):

@@ -13,7 +13,7 @@ class Print(IntermediateNode):
     __slots__ = []
 
 
-class ReadWriteStatement(IntermediateNode, AbstractSyntaxNodeWrapper):
+class IONode(IntermediateNode, AbstractSyntaxNodeWrapper):
     __slots__ = []
 
     @property
@@ -28,7 +28,7 @@ class ReadWriteStatement(IntermediateNode, AbstractSyntaxNodeWrapper):
         pass
 
 
-class Read(ReadWriteStatement, IntermediateNode):
+class Read(IONode, IntermediateNode):
     __slots__ = []
 
     def _get_arguments_context(self):
@@ -38,7 +38,7 @@ class Read(ReadWriteStatement, IntermediateNode):
         )
 
 
-class Write(Print, ReadWriteStatement):
+class Write(Print, IONode):
     __slots__ = []
 
     def _get_arguments_context(self):

@@ -66,7 +66,7 @@ class Case(AbstractSyntaxNodeWrapper):
         ]
 
 
-class SwitchResolve(SwitchNode):
+class SwitchValueResolve(SwitchNode):
     def get_matching_cases(self, request):
         return list(self._find_matching_cases(request))
 

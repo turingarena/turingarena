@@ -51,7 +51,7 @@ class If(ControlStructure, AbstractIfNode, Statement):
             yield from self._indent_all(self.else_body.node_description)
 
 
-class ResolveIf(AbstractIfNode):
+class IfConditionResolve(AbstractIfNode):
     def _get_conditions_expecting(self, request):
         if request in self.context.first_requests(self.then_body):
             yield 1

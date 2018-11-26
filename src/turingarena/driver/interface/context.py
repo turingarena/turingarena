@@ -5,8 +5,8 @@ from typing import Optional
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.statements.call import MethodCallbacksNode, MethodReturnNode
-from turingarena.driver.interface.statements.callback import CallbackCallNode
+from turingarena.driver.interface.statements.call import AcceptCallbacks, CallReturn
+from turingarena.driver.interface.statements.callback import CallbackStart
 from turingarena.driver.interface.statements.for_loop import For
 from turingarena.driver.interface.statements.io import Read, Checkpoint
 from turingarena.driver.interface.statements.loop import Loop
@@ -106,7 +106,7 @@ class StatementContext(namedtuple("StatementContext", [
             yield from self.validate(method)
         yield from self.validate(n.main_block)
 
-    def validate_ReadWriteStatement(self, n):
+    def validate_IONode(self, n):
         for exp in n.arguments:
             yield from self.validate(exp)
 
@@ -198,7 +198,7 @@ class StatementContext(namedtuple("StatementContext", [
                 parseinfo=n.ast.return_value.parseinfo,
             )
 
-    def validate_MethodResolveArgumentsNode(self, n):
+    def validate_CallArgumentsResolve(self, n):
         method = n.method
         if method is None:
             return
@@ -219,7 +219,7 @@ class StatementContext(namedtuple("StatementContext", [
                     parseinfo=expression.ast.parseinfo,
                 )
 
-    def validate_MethodReturnNode(self, n):
+    def validate_CallReturn(self, n):
         method = n.method
         if method is None:
             return
@@ -239,7 +239,7 @@ class StatementContext(namedtuple("StatementContext", [
     def _get_variable_declarations(self, n):
         types = [
             Read,
-            MethodReturnNode,
+            CallReturn,
             For,
         ]
 
@@ -277,7 +277,7 @@ class StatementContext(namedtuple("StatementContext", [
     def _get_comment(self, n):
         pass
 
-    def _get_comment_InterfaceExitNode(self, n):
+    def _get_comment_MainExit(self, n):
         return "terminate"
 
     def _get_comment_PrintCallbackRequest(self, n):
@@ -300,19 +300,19 @@ class StatementContext(namedtuple("StatementContext", [
     def _is_relevant(self, n):
         pass
 
-    def _is_relevant_SwitchResolve(self, n):
+    def _is_relevant_SwitchValueResolve(self, n):
         return not self.is_resolved(n.value)
 
-    def _is_relevant_ResolveIf(self, n):
+    def _is_relevant_IfConditionResolve(self, n):
         return not self.is_resolved(n.condition)
 
-    def _is_relevant_MethodReturnNode(self, n):
+    def _is_relevant_CallReturn(self, n):
         return n.return_value is not None
 
     def _is_relevant_PrintNoCallbacks(self, n):
         return n.method and n.method.callbacks
 
-    def _is_relevant_MethodCallbacksNode(self, n):
+    def _is_relevant_AcceptCallbacks(self, n):
         return n.method and n.method.has_callbacks
 
     def _is_relevant_IntermediateNode(self, n):
@@ -342,10 +342,10 @@ class StatementContext(namedtuple("StatementContext", [
         for c in n.cases:
             yield from self.reference_actions(c.body)
 
-    def _get_reference_actions_SwitchResolve(self, n):
+    def _get_reference_actions_SwitchValueResolve(self, n):
         yield ReferenceAction(self.reference(n.value), ReferenceStatus.RESOLVED)
 
-    def _get_reference_actions_CallbackCallNode(self, n):
+    def _get_reference_actions_CallbackStart(self, n):
         for p in n.callback_implementation.parameters:
             yield ReferenceAction(p.as_reference(), ReferenceStatus.DECLARED)
 
@@ -358,13 +358,13 @@ class StatementContext(namedtuple("StatementContext", [
             if r.index_count > 0:
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
-    def _get_reference_actions_MethodResolveArgumentsNode(self, n):
+    def _get_reference_actions_CallArgumentsResolve(self, n):
         references = self.get_references(ReferenceStatus.RESOLVED)
         for p in n.arguments:
             if p.reference is not None and p.reference not in references:
                 yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
 
-    def _get_reference_actions_MethodReturnNode(self, n):
+    def _get_reference_actions_CallReturn(self, n):
         yield ReferenceAction(self.declared_reference(n.return_value), ReferenceStatus.DECLARED)
 
     def _get_reference_actions_SequenceNode(self, n):
@@ -394,7 +394,7 @@ class StatementContext(namedtuple("StatementContext", [
 
     NON_GROUPABLE = [
         Loop,
-        MethodCallbacksNode,
+        AcceptCallbacks,
     ]
 
     def can_be_grouped_IntermediateNode(self, n):
@@ -412,8 +412,8 @@ class StatementContext(namedtuple("StatementContext", [
         ],
         ReferenceDirection.UPWARD: [
             Checkpoint,
-            CallbackCallNode,
-            MethodReturnNode,
+            CallbackStart,
+            CallReturn,
         ],
     }
 
@@ -429,7 +429,7 @@ class StatementContext(namedtuple("StatementContext", [
         for b in n.bodies:
             yield from self.declaration_directions(b)
 
-    def _get_directions_MethodCallbacksNode(self, n):
+    def _get_directions_AcceptCallbacks(self, n):
         for callback in n.callbacks:
             yield from self.declaration_directions(callback.body)
 
