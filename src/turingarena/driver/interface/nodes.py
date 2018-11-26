@@ -1,7 +1,7 @@
 from collections import namedtuple
-from typing import List, Mapping, Any
+from typing import Mapping, Any
 
-from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus, VariableDeclaration
+from turingarena.driver.interface.variables import Reference
 
 Bindings = Mapping[Reference, Any]
 
@@ -27,57 +27,6 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
 class IntermediateNode:
     __slots__ = []
-
-    def validate(self):
-        return []
-
-    @property
-    def variable_declarations(self):
-        return frozenset(self._get_variable_declarations())
-
-    def _should_declare_variables(self):
-        return False
-
-    def _get_variable_declarations(self):
-        if not self._should_declare_variables():
-            return
-        for a in self.reference_actions:
-            if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
-                yield VariableDeclaration(a.reference.variable)
-
-    @property
-    def variable_allocations(self):
-        return list(self._get_allocations())
-
-    def _get_allocations(self):
-        return []
-
-    @property
-    def comment(self):
-        return self._get_comment()
-
-    def _get_comment(self):
-        return None
-
-    @property
-    def is_relevant(self):
-        "Whether this node should be kept in the parent block"
-        return self._is_relevant()
-
-    def _is_relevant(self):
-        return True
-
-    @property
-    def reference_actions(self) -> List[ReferenceAction]:
-        """
-        List of references involved in this instruction.
-        """
-        actions = list(self._get_reference_actions())
-        assert all(isinstance(a, ReferenceAction) for a in actions)
-        return actions
-
-    def _get_reference_actions(self):
-        return []
 
     @property
     def node_description(self):

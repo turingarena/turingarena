@@ -5,7 +5,6 @@ from collections import namedtuple
 from bidict import frozenbidict
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.context import ExpressionContext
 from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.variables import Variable
 from turingarena.util.visitor import Visitor
@@ -17,7 +16,7 @@ class Expression:
     __slots__ = []
 
     @staticmethod
-    def compile(ast, context: ExpressionContext):
+    def compile(ast, context):
         return expression_classes[ast.expression_type](ast, context)
 
     @property

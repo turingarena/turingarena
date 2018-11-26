@@ -3,13 +3,10 @@ import warnings
 
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.expressions import Expression, IntLiteral
+from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
-from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -43,25 +40,6 @@ class Switch(ControlStructure, SwitchNode, Statement):
         for c in self.cases:
             yield c.body
 
-    def _get_reference_actions(self):
-        for c in self.cases:
-            yield from c.body.reference_actions
-
-    def validate(self):
-        yield from self.value.validate()
-
-        cases = [case for case in self.cases]
-        if len(cases) == 0:
-            yield Diagnostic(Diagnostic.Messages.EMPTY_SWITCH_BODY, parseinfo=self.ast.parseinfo)
-
-        labels = []
-        for case in cases:
-            for label in case.labels:
-                if label in labels:
-                    yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=self.ast.parseinfo)
-                labels.append(label)
-            yield from case.validate()
-
     def _describe_node(self):
         yield f"switch {self.value} "
         for c in self.cases:
@@ -87,26 +65,8 @@ class Case(AbstractSyntaxNodeWrapper):
             for l in self.ast.labels
         ]
 
-    def validate(self):
-        for l in self.labels:
-            if not isinstance(l, IntLiteral):
-                yield Diagnostic(
-                    Diagnostic.Messages.SWITCH_LABEL_NOT_LITERAL,
-                    parseinfo=self.ast.labels.parseinfo,
-                )
-        yield from self.body.validate()
-
 
 class SwitchResolve(SwitchNode):
-    def _is_already_resolved(self):
-        return self.context.is_resolved(self.value)
-
-    def _is_relevant(self):
-        return not self._is_already_resolved()
-
-    def _get_reference_actions(self):
-        yield ReferenceAction(self.value.reference, ReferenceStatus.RESOLVED)
-
     def get_matching_cases(self, request):
         return list(self._find_matching_cases(request))
 
@@ -119,7 +79,7 @@ class SwitchResolve(SwitchNode):
 
     def _find_cases_expecting(self, request):
         for c in self.cases:
-            if request in StatementAnalyzer().first_requests(c.body):
+            if request in self.context.first_requests(c.body):
                 yield c
 
     def _describe_node(self):

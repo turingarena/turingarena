@@ -23,10 +23,6 @@ class ReadWriteStatement(IntermediateNode, AbstractSyntaxNodeWrapper):
             for arg in self.ast.arguments
         ]
 
-    def validate(self):
-        for exp in self.arguments:
-            yield from exp.validate()
-
     @abstractmethod
     def _get_arguments_context(self):
         pass
@@ -44,13 +40,6 @@ class Read(ReadWriteStatement, IntermediateNode):
             declaring=True,
         )
 
-    def _get_intermediate_nodes(self):
-        yield self
-
-    def _get_reference_actions(self):
-        for exp in self.arguments:
-            yield ReferenceAction(self.context.declared_reference(exp), ReferenceStatus.DECLARED)
-
 
 class Write(Print, ReadWriteStatement):
     __slots__ = []
@@ -59,13 +48,6 @@ class Write(Print, ReadWriteStatement):
         return self.context.expression(
             reference=True,
         )
-
-    def _get_intermediate_nodes(self):
-        yield self
-
-    def _get_reference_actions(self):
-        for exp in self.arguments:
-            yield ReferenceAction(exp.reference, ReferenceStatus.RESOLVED)
 
 
 class Checkpoint(Print, IntermediateNode):
@@ -77,9 +59,6 @@ class Checkpoint(Print, IntermediateNode):
 
 
 class InitialCheckpoint(Checkpoint):
-    def _get_comment(self):
-        return "initial checkpoint"
-
     def _describe_node(self):
         yield "initial checkpoint"
 

@@ -54,16 +54,6 @@ class For(Statement, ControlStructure, IntermediateNode):
     def _should_declare_variables(self):
         return True
 
-    def validate(self):
-        yield from self.index.range.validate()
-        yield from self.body.validate()
-
-    def _get_reference_actions(self):
-        for a in self.body.reference_actions:
-            r = a.reference
-            if r.index_count > 0:
-                yield a._replace(reference=r._replace(index_count=r.index_count - 1))
-
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"
         yield from self._indent_all(self.body.node_description)

@@ -55,10 +55,6 @@ class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "desc
     def has_callbacks(self):
         return bool(self.callbacks)
 
-    def validate(self):
-        for callback in self.callbacks:
-            yield from callback.validate()
-
 
 class MethodPrototype(CallablePrototype):
     __slots__ = []
@@ -66,17 +62,3 @@ class MethodPrototype(CallablePrototype):
 
 class CallbackPrototype(CallablePrototype):
     __slots__ = []
-
-    def validate(self):
-        for callback in self.callbacks:
-            yield Diagnostic(
-                Diagnostic.Messages.UNEXPECTED_CALLBACK,
-                callback.name,
-                parseinfo=callback.ast.parseinfo,
-            )
-        for parameter in self.parameter_declarations:
-            if parameter.variable.dimensions:
-                yield Diagnostic(
-                    Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS,
-                    parseinfo=parameter.ast.parseinfo,
-                )

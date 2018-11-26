@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
-from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
+from turingarena.driver.interface.context import INITIAL_CONTEXT
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -198,7 +198,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         return []
 
     def visit_Step(self, s):
-        if StatementAnalyzer().step_direction(s) is ReferenceDirection.DOWNWARD:
+        if s.direction is ReferenceDirection.DOWNWARD:
             # insert an (upward) flush before receiving data downward
             yield from self.generate_flush()
         yield from self.visit_SequenceNode(s)
@@ -207,17 +207,17 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         yield from self.visit(interface.main_block)
 
     def generate_statement(self, statement):
-        if statement.comment is not None:
-            yield self.line_comment(statement.comment)
-        else:
+        # FIXME: drop this reference to INITIAL_CONTEXT
+        comment = INITIAL_CONTEXT.comment(statement)
+        if comment is not None:
             comment = StatementDescriptionCodeGen().visit(statement)
-            if comment is not None:
-                yield self.line_comment(comment)
+        if comment is not None:
+            yield self.line_comment(comment)
 
-        for d in statement.variable_declarations:
+        for d in INITIAL_CONTEXT.variable_declarations(statement):
             yield from self.visit(d)
 
-        for a in statement.variable_allocations:
+        for a in INITIAL_CONTEXT.variable_allocations(statement):
             yield from self.visit(a)
 
         yield from self.visit(statement)

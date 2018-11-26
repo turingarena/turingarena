@@ -6,7 +6,6 @@ from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.stmtanalysis import StatementAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +36,6 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         else:
             return None
 
-    def validate(self):
-        yield from self.condition.validate()
-        yield from self.then_body.validate()
-        if self.else_body is not None:
-            yield from self.else_body.validate()
-
 
 class If(ControlStructure, AbstractIfNode, Statement):
     def _get_bodies(self):
@@ -59,17 +52,11 @@ class If(ControlStructure, AbstractIfNode, Statement):
 
 
 class ResolveIf(AbstractIfNode):
-    def _is_already_resolved(self):
-        return self.context.is_resolved(self.condition)
-
-    def _is_relevant(self):
-        return not self._is_already_resolved()
-
     def _get_conditions_expecting(self, request):
-        if request in StatementAnalyzer().first_requests(self.then_body):
+        if request in self.context.first_requests(self.then_body):
             yield 1
         if self.else_body is not None:
-            if request in StatementAnalyzer().first_requests(self.else_body):
+            if request in self.context.first_requests(self.else_body):
                 yield 0
 
     def _get_conditions_expecting_no_request(self):

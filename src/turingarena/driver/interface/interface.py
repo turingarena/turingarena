@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class InterfaceExitNode(Exit):
-    def _get_comment(self):
-        return "terminate"
+    pass
 
 
 class InterfaceBody(Block):
@@ -41,12 +40,8 @@ class InterfaceDefinition:
         self.descriptions = descriptions
 
     def diagnostics(self):
-        return list(self.validate())
-
-    def validate(self):
-        for method in self.methods:
-            yield from method.validate()
-        yield from self.main_block.validate()
+        # FIXME: should not reference the main_block to get a context
+        return list(self.main_block.context.validate(self))
 
     @staticmethod
     def load(path):
@@ -57,7 +52,7 @@ class InterfaceDefinition:
     def compile(source_text, validate=True, descriptions={}):
         interface = InterfaceDefinition(source_text, descriptions)
         if validate:
-            for msg in interface.validate():
+            for msg in interface.diagnostics():
                 logger.warning(f"interface contains an error: {msg}")
         return interface
 

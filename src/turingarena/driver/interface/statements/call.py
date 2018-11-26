@@ -1,14 +1,13 @@
 import logging
+from collections.__init__ import namedtuple
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.context import StaticCallbackBlockContext
-from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
+from turingarena.driver.interface.variables import ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -66,57 +65,11 @@ class CallNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
 
 class Call(Statement, CallNode):
-    def validate(self):
-        if self.method_name not in self.context.global_context.methods_by_name:
-            yield Diagnostic(
-                Diagnostic.Messages.METHOD_NOT_DECLARED,
-                self.method_name,
-                parseinfo=self.ast.parseinfo,
-            )
-            return
-
-        method = self.method
-        if method.has_return_value and self.return_value is None:
-            yield Diagnostic(
-                Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, method.name,
-                parseinfo=self.ast.parseinfo,
-            )
-        if not method.has_return_value and self.return_value is not None:
-            yield Diagnostic(
-                Diagnostic.Messages.METHOD_DOES_NOT_RETURN_VALUE, method.name,
-                parseinfo=self.ast.return_value.parseinfo,
-            )
+    pass
 
 
 class MethodResolveArgumentsNode(CallNode):
     __slots__ = []
-
-    def _get_reference_actions(self):
-        references = self.context.get_references(ReferenceStatus.RESOLVED)
-        for p in self.arguments:
-            if p.reference is not None and p.reference not in references:
-                yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
-
-    def validate(self):
-        method = self.method
-        if method is None:
-            return
-
-        if len(self.arguments) != len(method.parameters):
-            yield Diagnostic(
-                Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
-                method.name, len(method.parameters), len(self.arguments),
-                parseinfo=self.ast.parseinfo,
-            )
-        for parameter, expression in zip(method.parameters, self.arguments):
-            yield from expression.validate()
-            dimensions = self.context.dimensions(expression)
-            if dimensions != parameter.dimensions:
-                yield Diagnostic(
-                    Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter.name, method.name, parameter.dimensions, dimensions,
-                    parseinfo=expression.ast.parseinfo,
-                )
 
     def _get_assignments(self, context):
         references = self.context.get_references(ReferenceStatus.RESOLVED)
@@ -134,22 +87,8 @@ class MethodResolveArgumentsNode(CallNode):
 class MethodReturnNode(CallNode):
     __slots__ = []
 
-    def _is_relevant(self):
-        return self.return_value is not None
-
-    def validate(self):
-        method = self.method
-        if method is None:
-            return
-
-        if self.return_value is not None:
-            yield from self.return_value.validate()
-
     def _should_declare_variables(self):
         return True
-
-    def _get_reference_actions(self):
-        yield ReferenceAction(self.context.declared_reference(self.return_value), ReferenceStatus.DECLARED)
 
     def _describe_node(self):
         yield f"return"
@@ -161,22 +100,13 @@ class MethodCallCompletedNode(CallNode):
 
 
 class PrintNoCallbacks(CallNode, Print):
-    def _is_relevant(self):
-        return self.method and self.method.callbacks
-
     @property
     def arguments(self):
         return [IntLiteralSynthetic(0)]
 
-    def _get_comment(self):
-        return "no more callbacks"
-
 
 class MethodCallbacksNode(CallNode):
     __slots__ = []
-
-    def _is_relevant(self):
-        return self.method and self.method.has_callbacks
 
     def _describe_node(self):
         yield f"callbacks"
@@ -186,3 +116,10 @@ class MethodCallbacksNode(CallNode):
     def _describe_callback(self, callback):
         yield f"callback {callback.name}"
         yield from self._indent_all(callback.body.node_description)
+
+
+class StaticCallbackBlockContext(namedtuple("StaticCallbackBlockContext", [
+    "local_context",
+    "callback_index",
+])):
+    pass

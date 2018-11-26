@@ -13,7 +13,14 @@ Reference = namedtuple("Reference", ["variable", "index_count"])
 
 ReferenceStatus = Enum("ReferenceStatus", names=["DECLARED", "RESOLVED"])
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
-ReferenceAction = namedtuple("ReferenceAction", ["reference", "status"])
+
+
+class ReferenceAction(namedtuple("ReferenceAction", ["reference", "status"])):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+        assert self.reference is not None
+
 
 VariableDeclaration = namedtuple("VariableDeclaration", ["variable"])
 VariableAllocation = namedtuple("VariableAllocation", ["variable", "indexes", "size"])

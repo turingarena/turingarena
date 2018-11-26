@@ -19,9 +19,6 @@ class Loop(Statement, ControlStructure, IntermediateNode):
     def body(self):
         return Block(ast=self.ast.body, context=self.context.with_loop())
 
-    def validate(self):
-        yield from self.body.validate()
-
     def _describe_node(self):
         yield "loop"
         yield from self._indent_all(self.body.node_description)
@@ -29,7 +26,3 @@ class Loop(Statement, ControlStructure, IntermediateNode):
 
 class Break(Statement, IntermediateNode):
     __slots__ = []
-
-    def validate(self):
-        if not self.context.in_loop:
-            yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=self.ast.parseinfo)

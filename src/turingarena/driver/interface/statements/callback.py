@@ -18,9 +18,6 @@ class PrintCallbackRequest(Print, namedtuple("PrintCallbackRequest", ["context"]
     def arguments(self):
         return [IntLiteralSynthetic(value=1)]
 
-    def _get_comment(self):
-        return "requesting a callback"
-
 
 class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation", "context"]), Print):
     @property
@@ -30,9 +27,6 @@ class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation",
     @property
     def arguments(self):
         return [IntLiteralSynthetic(value=self.callback_index)]
-
-    def _get_comment(self):
-        return f"index of this callback: {self.callback_index} = {self.implementation.name}"
 
 
 class CallbackBody(AbstractContextBlock):
@@ -81,18 +75,11 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
             ]
         return namedtuple("body", ["statements"])(fake_ast_body)
 
-    def validate(self):
-        yield from self.prototype.validate()
-
 
 class CallbackCallNode(IntermediateNode, namedtuple("CallbackCallNode", [
     "callback_implementation",
     "context",
 ])):
-    def _get_reference_actions(self):
-        for p in self.callback_implementation.parameters:
-            yield ReferenceAction(reference=p.as_reference(), status=ReferenceStatus.DECLARED)
-
     def _describe_node(self):
         yield "callback_call"
 
@@ -103,12 +90,6 @@ class Return(IntermediateNode, Statement):
     @property
     def value(self):
         return Expression.compile(self.ast.value, self.context.expression(reference=True))
-
-    def validate(self):
-        yield from self.value.validate()
-
-    def _get_reference_actions(self):
-        yield ReferenceAction(reference=self.value.reference, status=ReferenceStatus.RESOLVED)
 
     def _describe_node(self):
         yield f"callback return"
@@ -128,7 +109,3 @@ class ExitStatement(Exit, Statement, IntermediateNode):
 
     def _get_intermediate_nodes(self):
         yield self
-
-    def validate(self):
-        # TODO: check that exit is used only in valid places
-        return []

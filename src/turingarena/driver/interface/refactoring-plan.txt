@@ -1,0 +1,5 @@
+* Split ReferenceAction into ReferenceDeclaration and ReferenceResolution
+* Add dimensions to ReferenceDeclaration and VariableDeclaration
+* Drop dimensions from variables
+
+* Make Step direction part of the node
