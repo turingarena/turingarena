@@ -1,6 +1,5 @@
 import logging
 
-from turingarena.driver.interface.analysis.expressions import ExpressionAnalyzer
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import StaticCallbackBlockContext
 from turingarena.driver.interface.diagnostics import Diagnostic
@@ -111,7 +110,7 @@ class MethodResolveArgumentsNode(CallNode):
             )
         for parameter, expression in zip(method.parameters, self.arguments):
             yield from expression.validate()
-            dimensions = ExpressionAnalyzer(self.context).dimensions(expression)
+            dimensions = self.context.dimensions(expression)
             if dimensions != parameter.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,

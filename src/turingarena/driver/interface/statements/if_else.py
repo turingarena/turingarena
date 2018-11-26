@@ -1,6 +1,5 @@
 import logging
 
-from turingarena.driver.interface.analysis.expressions import ExpressionAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression
@@ -61,7 +60,7 @@ class If(ControlStructure, AbstractIfNode, Statement):
 
 class ResolveIf(AbstractIfNode):
     def _is_already_resolved(self):
-        return ExpressionAnalyzer(self.context).is_resolved(self.condition)
+        return self.context.is_resolved(self.condition)
 
     def _is_relevant(self):
         return not self._is_already_resolved()

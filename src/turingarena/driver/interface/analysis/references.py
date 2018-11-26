@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.analysis.expressions import ExpressionAnalyzer
 from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, VariableAllocation
 from turingarena.util.visitor import visitormethod
 
@@ -14,12 +13,12 @@ class ReferenceActionAnalyzer(namedtuple("ReferenceActionAnalyzer", ["context"])
         return actions
 
     def reference(self, e):
-        r = ExpressionAnalyzer(self.context).reference(e)
+        r = self.context.reference(e)
         logging.debug(f"Reference: (bindings: {self.context.variable_mapping}) {e.__class__.__name__} -> {r}")
         return r
 
     def declared_reference(self, e):
-        return ExpressionAnalyzer(self.context).declared_reference(e)
+        return self.context.declared_reference(e)
 
     @visitormethod
     def _get_actions(self, n):
