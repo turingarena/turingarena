@@ -67,10 +67,6 @@ class VariableReference(Expression, AbstractSyntaxNodeWrapper):
         return self.ast.variable_name
 
     @property
-    def dimensions(self):
-        return self.variable.dimensions
-
-    @property
     def variable(self):
         declared = Variable(
             name=self.variable_name,
@@ -115,10 +111,6 @@ class Subscript(Expression, namedtuple("Subscript", [
     "context",
 ])):
     __slots__ = []
-
-    @property
-    def dimensions(self):
-        return self.array.dimensions - 1
 
     def is_reference_to(self, variable):
         return False
