@@ -15,7 +15,7 @@ from turingarena.driver.interface.statements.callback import CallbackEnd, Return
 from turingarena.driver.interface.statements.if_else import IfConditionResolve
 from turingarena.driver.interface.statements.io import Checkpoint
 from turingarena.driver.interface.statements.switch import SwitchValueResolve
-from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceStatus
+from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
@@ -360,7 +360,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                     index_count=a.reference.index_count + 1,
                 )]
                 for result in results_by_iteration
-                if a.status is ReferenceStatus.RESOLVED
+                if isinstance(a, ReferenceResolution)
             ])
             for a in n.context.reference_actions(n)
         ]

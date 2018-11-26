@@ -4,7 +4,6 @@ from abc import abstractmethod
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.variables import ReferenceStatus, ReferenceAction
 
 logger = logging.getLogger(__name__)
 

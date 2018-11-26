@@ -6,7 +6,7 @@ from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import Variable, VariableAllocation, ReferenceStatus, ReferenceAction
+from turingarena.driver.interface.variables import Variable, ReferenceDeclaration, ReferenceResolution
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ class For(Statement, ControlStructure, IntermediateNode):
         return Block(
             ast=self.ast.body,
             context=self.context.with_index_variable(self.index).with_reference_actions([
-                ReferenceAction(self.index.variable.as_reference(), ReferenceStatus.DECLARED),
-                ReferenceAction(self.index.variable.as_reference(), ReferenceStatus.RESOLVED),
+                ReferenceDeclaration(self.index.variable.as_reference()),
+                ReferenceResolution(self.index.variable.as_reference()),
             ]),
         )
 

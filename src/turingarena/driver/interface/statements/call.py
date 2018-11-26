@@ -7,7 +7,6 @@ from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.statements.statement import Statement
-from turingarena.driver.interface.variables import ReferenceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +71,7 @@ class CallArgumentsResolve(CallNode):
     __slots__ = []
 
     def _get_assignments(self, context):
-        references = self.context.get_references(ReferenceStatus.RESOLVED)
+        references = self.context.get_resolved_references()
         for a in self.arguments:
             value = context.deserialize_request_data()
             if a.reference is not None and a.reference not in references:

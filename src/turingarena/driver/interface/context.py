@@ -10,8 +10,8 @@ from turingarena.driver.interface.statements.callback import CallbackStart
 from turingarena.driver.interface.statements.for_loop import For
 from turingarena.driver.interface.statements.io import Read, Checkpoint
 from turingarena.driver.interface.statements.loop import Loop
-from turingarena.driver.interface.variables import ReferenceAction, ReferenceStatus, Variable, Reference, \
-    VariableDeclaration, ReferenceDirection, VariableAllocation
+from turingarena.driver.interface.variables import Variable, Reference, \
+    VariableDeclaration, ReferenceDirection, VariableAllocation, ReferenceDeclaration, ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
@@ -28,11 +28,9 @@ class InterfaceContext(namedtuple("InterfaceContext", [
     @property
     def main_block_context(self):
         return self.initial_context.with_reference_actions(
-            ReferenceAction(reference=c.variable.as_reference(), status=ReferenceStatus.DECLARED)
+            t(reference=c.variable.as_reference())
             for c in self.constants
-        ).with_reference_actions(
-            ReferenceAction(reference=c.variable.as_reference(), status=ReferenceStatus.RESOLVED)
-            for c in self.constants
+            for t in (ReferenceDeclaration, ReferenceResolution)
         )
 
     @property
@@ -50,7 +48,6 @@ class StatementContext(namedtuple("StatementContext", [
     def with_reference_actions(self, actions):
         actions = tuple(actions)
         assert all(
-            isinstance(a, ReferenceAction) and
             a.reference is not None
             for a in actions
         )
@@ -58,18 +55,19 @@ class StatementContext(namedtuple("StatementContext", [
             prev_reference_actions=self.prev_reference_actions + actions
         )
 
-    def get_references(self, status):
+    def get_resolved_references(self):
         return {
             a.reference
             for a in self.prev_reference_actions
-            if a.status is status
+            if isinstance(a, ReferenceResolution)
         }
 
     @property
     def declared_variables(self):
         return {
-            r.variable
-            for r in self.get_references(ReferenceStatus.DECLARED)
+            a.reference.variable
+            for a in self.prev_reference_actions
+            if isinstance(a, ReferenceDeclaration)
         }
 
     @property
@@ -246,7 +244,7 @@ class StatementContext(namedtuple("StatementContext", [
         if not any(isinstance(n, t) for t in types):
             return
         for a in self.reference_actions(n):
-            if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
+            if a.reference.index_count == 0 and isinstance(a, ReferenceDeclaration):
                 yield VariableDeclaration(a.reference.variable)
 
     def variable_allocations(self, n):
@@ -260,7 +258,7 @@ class StatementContext(namedtuple("StatementContext", [
         for a in self.reference_actions(n.body):
             if a.reference.variable.dimensions == 0:
                 continue
-            if a.status == ReferenceStatus.DECLARED:
+            if isinstance(a, ReferenceDeclaration):
                 yield VariableAllocation(
                     variable=a.reference.variable,
                     indexes=self.index_variables[-a.reference.index_count + 1:],
@@ -319,12 +317,7 @@ class StatementContext(namedtuple("StatementContext", [
         return True
 
     def reference_actions(self, n):
-        """
-        List of references involved in this instruction.
-        """
-        actions = list(self._get_reference_actions(n))
-        assert all(isinstance(a, ReferenceAction) for a in actions)
-        return actions
+        return list(self._get_reference_actions(n))
 
     @visitormethod
     def _get_reference_actions(self, n):
@@ -332,25 +325,25 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_reference_actions_Read(self, n):
         for exp in n.arguments:
-            yield ReferenceAction(self.declared_reference(exp), ReferenceStatus.DECLARED)
+            yield ReferenceDeclaration(self.declared_reference(exp))
 
     def _get_reference_actions_Write(self, n):
         for exp in n.arguments:
-            yield ReferenceAction(self.reference(exp), ReferenceStatus.RESOLVED)
+            yield ReferenceResolution(self.reference(exp))
 
     def _get_reference_actions_Switch(self, n):
         for c in n.cases:
             yield from self.reference_actions(c.body)
 
     def _get_reference_actions_SwitchValueResolve(self, n):
-        yield ReferenceAction(self.reference(n.value), ReferenceStatus.RESOLVED)
+        yield ReferenceResolution(self.reference(n.value))
 
     def _get_reference_actions_CallbackStart(self, n):
         for p in n.callback_implementation.parameters:
-            yield ReferenceAction(p.as_reference(), ReferenceStatus.DECLARED)
+            yield ReferenceDeclaration(p.as_reference())
 
     def _get_reference_actions_Return(self, n):
-        yield ReferenceAction(self.reference(n.value), ReferenceStatus.RESOLVED)
+        yield ReferenceResolution(self.reference(n.value))
 
     def _get_reference_actions_For(self, n):
         for a in self.reference_actions(n.body):
@@ -359,13 +352,13 @@ class StatementContext(namedtuple("StatementContext", [
                 yield a._replace(reference=r._replace(index_count=r.index_count - 1))
 
     def _get_reference_actions_CallArgumentsResolve(self, n):
-        references = self.get_references(ReferenceStatus.RESOLVED)
+        references = self.get_resolved_references()
         for p in n.arguments:
             if p.reference is not None and p.reference not in references:
-                yield ReferenceAction(p.reference, ReferenceStatus.RESOLVED)
+                yield ReferenceResolution(p.reference)
 
     def _get_reference_actions_CallReturn(self, n):
-        yield ReferenceAction(self.declared_reference(n.return_value), ReferenceStatus.DECLARED)
+        yield ReferenceDeclaration(self.declared_reference(n.return_value))
 
     def _get_reference_actions_SequenceNode(self, n):
         for child in n.children:
@@ -559,15 +552,18 @@ class StatementContext(namedtuple("StatementContext", [
     def is_resolved(self, e) -> bool:
         pass
 
+    def is_resolved_Reference(self, r):
+        return r in self.get_resolved_references()
+
     def is_resolved_Literal(self, e):
         return True
 
     def is_resolved_VariableReference(self, e):
-        return self.reference(e) in self.get_references(ReferenceStatus.RESOLVED)
+        return self.is_resolved(self.reference(e))
 
     def is_resolved_Subscript(self, e):
         return (
-                self.reference(e) in self.get_references(ReferenceStatus.RESOLVED)
+                self.is_resolved(self.reference(e))
                 or self.is_resolved(e.array)
         )
 
