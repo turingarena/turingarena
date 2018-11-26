@@ -215,7 +215,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_InterfaceDefinition(self, n):
         description = "\n".join(n.main_block.node_description)
-        logger.debug(f"Description: {description}")
+        # logger.debug(f"Description: {description}")
 
         self.with_assigments({
             c.variable.as_reference(): self.evaluate(c.value)

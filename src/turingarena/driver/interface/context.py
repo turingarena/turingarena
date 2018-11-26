@@ -4,7 +4,7 @@ from functools import partial
 from typing import Optional
 
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.expressions import IntLiteral
+from turingarena.driver.interface.expressions import IntLiteral, VariableReference
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.statements.call import AcceptCallbacks, CallReturn
 from turingarena.driver.interface.statements.callback import CallbackStart
@@ -108,7 +108,11 @@ class StatementContext(namedtuple("StatementContext", [
             yield from self.validate(method)
         yield from self.validate(n.main_block)
 
-    def validate_IONode(self, n):
+    def validate_Read(self, n):
+        for exp in n.arguments:
+            yield from self.validate_reference_declaration(exp)
+
+    def validate_Write(self, n):
         for exp in n.arguments:
             yield from self.validate(exp)
 
@@ -139,7 +143,7 @@ class StatementContext(namedtuple("StatementContext", [
         yield from self.validate(n.prototype)
 
     def validate_Return(self, n):
-        yield from self.validate(n.value)
+        yield from self.validate_reference_declaration(n.value)
 
     def validate_SequenceNode(self, n):
         for child in n.children:
@@ -212,7 +216,7 @@ class StatementContext(namedtuple("StatementContext", [
                 parseinfo=n.ast.parseinfo,
             )
         for parameter, expression in zip(method.parameters, n.arguments):
-            yield from expression.validate()
+            yield from self.validate(expression)
             dimensions = n.context.dimensions(expression)
             if dimensions != parameter.dimensions:
                 yield Diagnostic(
@@ -232,8 +236,62 @@ class StatementContext(namedtuple("StatementContext", [
     def validate_IntermediateNode(self, n):
         return ()
 
-    def validate_Expression(self, e):
-        yield from e.validate()
+    def validate_VariableReference(self, e):
+        if not e.variable_name in self.variable_mapping:
+            yield Diagnostic(
+                Diagnostic.Messages.VARIABLE_NOT_DECLARED,
+                e.variable_name,
+                parseinfo=e.ast.parseinfo,
+            )
+
+    def validate_Subscript(self, e):
+        yield from self.validate(e.array)
+        yield from self.validate(e.index)
+
+    def validate_IntLiteral(self, e):
+        return ()
+
+    def validate_reference_declaration(self, e, index_count=0):
+        return self._validate_reference_declaration(e, index_count)
+
+    @visitormethod
+    def _validate_reference_declaration(self, e, index_count):
+        pass
+
+    def _validate_reference_declaration_VariableReference(self, e, index_count):
+        if e.variable_name in self.variable_mapping:
+            yield Diagnostic(
+                Diagnostic.Messages.VARIABLE_REUSED,
+                e.variable_name,
+                parseinfo=e.ast.parseinfo,
+            )
+
+    def _validate_reference_declaration_Subscript(self, e, index_count):
+        yield from self.validate_reference_declaration(e.array, index_count + 1)
+        yield from self.validate(e.index)
+
+        reversed_indexes = self.index_variables[::-1]
+        try:
+            expected_index = reversed_indexes[index_count]
+        except IndexError:
+            expected_index = None
+
+        if expected_index is None:
+            yield Diagnostic(
+                Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
+                parseinfo=e.index.ast.parseinfo,
+            )
+            return
+
+        if not isinstance(e.index, VariableReference) or e.index.variable_name != expected_index.variable.name:
+            yield Diagnostic(
+                Diagnostic.Messages.WRONG_ARRAY_INDEX,
+                expected_index.variable.name,
+                parseinfo=e.index.ast.parseinfo,
+            )
+
+    def _validate_reference_declaration_IntLiteral(self, e, index_count):
+        yield "unexpected literal"  # TODO: make a Diagnostic
 
     def variable_declarations(self, n):
         return frozenset(self._get_variable_declarations(n))
@@ -268,7 +326,7 @@ class StatementContext(namedtuple("StatementContext", [
                 variable=a.reference.variable,
                 indexes=self.index_variables[-a.reference.index_count + 1:],
                 size=n.index.range,
-                dimensions=a.dimensions - a.reference.index_count - 1,
+                dimensions=a.dimensions - a.reference.index_count,
             )
 
     def _get_allocations_IntermediateNode(self, n):

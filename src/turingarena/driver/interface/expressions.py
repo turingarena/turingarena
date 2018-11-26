@@ -5,7 +5,6 @@ from collections import namedtuple
 from bidict import frozenbidict
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.variables import Variable
 from turingarena.util.visitor import Visitor
 
@@ -22,12 +21,6 @@ class Expression:
     @property
     def reference(self):
         return self.context.statement_context.reference(self)
-
-    def is_reference_to(self, variable):
-        return False
-
-    def validate(self):
-        return []
 
 
 class Literal(Expression):
@@ -110,44 +103,6 @@ class Subscript(Expression, namedtuple("Subscript", [
     "context",
 ])):
     __slots__ = []
-
-    def is_reference_to(self, variable):
-        return False
-
-    @property
-    def expected_for_index(self):
-        reversed_indexes = self.context.statement_context.index_variables[::-1]
-        try:
-            return reversed_indexes[self.context.index_count]
-        except IndexError:
-            return None
-
-    def validate(self):
-        yield from self.array.validate()
-        yield from self.index.validate()
-
-        if self.context.reference:
-            yield from self._validate_reference_index()
-
-    def _validate_reference_index(self):
-        if self.expected_for_index is None:
-            yield Diagnostic(
-                Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX,
-                parseinfo=self.index.ast.parseinfo,
-            )
-            return
-        if not self._is_reference_index():
-            yield Diagnostic(
-                Diagnostic.Messages.WRONG_ARRAY_INDEX,
-                self.expected_for_index.variable.name,
-                parseinfo=self.index.ast.parseinfo,
-            )
-
-    def _is_reference_index(self):
-        expected_index = self.expected_for_index
-        if expected_index is None:
-            return None
-        return self.index.is_reference_to(expected_index.variable)
 
 
 def compile_subscript(ast, index_asts, context):
