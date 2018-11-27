@@ -5,8 +5,6 @@ from collections import namedtuple
 from bidict import frozenbidict
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.variables import Variable
-from turingarena.util.visitor import Visitor
 
 logger = logging.getLogger(__name__)
 
@@ -54,43 +52,6 @@ class VariableReference(Expression, AbstractSyntaxNodeWrapper):
     def variable_name(self):
         return self.ast.variable_name
 
-    @property
-    def variable(self):
-        declared = Variable(
-            name=self.variable_name,
-        )
-        if self.context.declaring:
-            return declared
-        else:
-            referenced = self._get_referenced_variable()
-            if referenced is None:  # quirk
-                return declared
-            return referenced
-
-    def _get_referenced_variable(self):
-        variable_mapping = self.context.statement_context.variable_mapping
-        return variable_mapping.get(self.variable_name, None)
-
-    def is_reference_to(self, variable):
-        return self.variable == variable
-
-    def validate(self):
-        if not self.context.declaring and not self._is_declared():
-            yield Diagnostic(
-                Diagnostic.Messages.VARIABLE_NOT_DECLARED,
-                self.variable_name,
-                parseinfo=self.ast.parseinfo,
-            )
-        if self.context.declaring and self._is_declared():
-            yield Diagnostic(
-                Diagnostic.Messages.VARIABLE_REUSED,
-                self.variable_name,
-                parseinfo=self.ast.parseinfo,
-            )
-
-    def _is_declared(self):
-        return self._get_referenced_variable() is not None
-
 
 class Subscript(Expression, namedtuple("Subscript", [
     "array",
@@ -118,20 +79,3 @@ expression_classes = frozenbidict({
     "reference_subscript": compile_reference_expression,
     "nested": lambda ast, context: Expression.compile(ast.expression),
 })
-
-
-class ExpressionVisitor(Visitor):
-    def visit_Expression(self, e):
-        raise NotImplementedError
-
-    def visit_Literal(self, e):
-        return NotImplemented
-
-    def visit_IntLiteral(self, e):
-        return NotImplemented
-
-    def visit_VariableReference(self, e):
-        return NotImplemented
-
-    def visit_Subscript(self, e):
-        return NotImplemented
