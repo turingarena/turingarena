@@ -4,12 +4,12 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen
 class JavaScriptCodeGen(InterfaceCodeGen):
     @classmethod
     def build_callable_declarator(cls, callable):
-        arguments = ", ".join(cls.build_parameter(p) for p in callable.parameters)
+        arguments = ", ".join(cls.visit(p) for p in callable.parameter_declarations)
         return f"{callable.name}({arguments})"
 
     @classmethod
-    def build_parameter(cls, parameter):
-        return f"{parameter.name}"
+    def visit_ParameterDeclaration(cls, d):
+        return f"{d.parameter.name}"
 
 
 class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):

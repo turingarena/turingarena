@@ -3,16 +3,16 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 class JavaCodeGen(InterfaceCodeGen):
 
-    def build_parameter(self, parameter):
-        arrays = "[]" * parameter.dimensions
-        return f"int {parameter.name}{arrays}"
+    def visit_ParameterDeclaration(self, d):
+        arrays = "[]" * d.dimensions
+        return f"int {d.variable.name}{arrays}"
 
     def build_callbacks_interface_name(self, method):
         return f'{method.name}_callbacks'
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.build_parameter(p) for p in callable.parameters]
+        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
         if callbacks:
             value_parameters.append(
                 self.build_callbacks_interface_name(callable) + " callbacks")
@@ -24,7 +24,7 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def build_callback_signature(self, callback):
         return_type = "int" if callback.has_return_value else "void"
-        value_parameters = [self.build_parameter(p) for p in callback.parameters]
+        value_parameters = [self.visit(p) for p in callback.parameter_declarations]
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callback.name}({parameters})"
 

@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
@@ -18,32 +17,17 @@ class IONode(IntermediateNode, AbstractSyntaxNodeWrapper):
     @property
     def arguments(self):
         return [
-            Expression.compile(arg, self._get_arguments_context())
+            Expression.compile(arg)
             for arg in self.ast.arguments
         ]
-
-    @abstractmethod
-    def _get_arguments_context(self):
-        pass
 
 
 class Read(IONode, IntermediateNode):
     __slots__ = []
 
-    def _get_arguments_context(self):
-        return self.context.expression(
-            reference=True,
-            declaring=True,
-        )
-
 
 class Write(Print, IONode):
     __slots__ = []
-
-    def _get_arguments_context(self):
-        return self.context.expression(
-            reference=True,
-        )
 
 
 class Checkpoint(Print, IntermediateNode):

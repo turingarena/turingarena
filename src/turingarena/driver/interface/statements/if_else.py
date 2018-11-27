@@ -15,7 +15,7 @@ class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
     @property
     def condition(self):
-        return Expression.compile(self.ast.condition, self.context.expression())
+        return Expression.compile(self.ast.condition)
 
     @property
     def branches(self):

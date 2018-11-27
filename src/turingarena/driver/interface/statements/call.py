@@ -25,17 +25,14 @@ class CallNode(IntermediateNode, AbstractSyntaxNodeWrapper):
     @property
     def arguments(self):
         return [
-            Expression.compile(p, self.context.expression())
+            Expression.compile(p)
             for p in self.ast.arguments
         ]
 
     @property
     def return_value(self):
         if self.ast.return_value:
-            return Expression.compile(self.ast.return_value, self.context.expression(
-                reference=True,
-                declaring=True,
-            ))
+            return Expression.compile(self.ast.return_value)
         else:
             return None
 
@@ -69,15 +66,6 @@ class Call(Statement, CallNode):
 
 class CallArgumentsResolve(CallNode):
     __slots__ = []
-
-    def _get_assignments(self, context):
-        references = self.context.get_resolved_references()
-        for a in self.arguments:
-            value = context.deserialize_request_data()
-            if a.reference is not None and a.reference not in references:
-                logging.debug(f"Resolved parameter: {a.reference} -> {value}")
-                yield a.reference, value
-                # TODO: else, check value is the one expected
 
     def _describe_node(self):
         yield f"resolve arguments"

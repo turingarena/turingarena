@@ -2,7 +2,7 @@ from collections import namedtuple
 from enum import Enum
 
 
-class Variable(namedtuple("Variable", ["name", "dimensions"])):
+class Variable(namedtuple("Variable", ["name"])):
     __slots__ = []
 
     def as_reference(self):

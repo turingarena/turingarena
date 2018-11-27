@@ -2,13 +2,13 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 
 class GoCodeGen(InterfaceCodeGen):
-    def build_parameter(self, parameter):
-        indirections = "[]" * parameter.dimensions
-        return f"{parameter.name} {indirections}int"
+    def visit_ParameterDeclaration(self, d):
+        indirections = "[]" * d.dimensions
+        return f"{d.variable.name} {indirections}int"
 
     def build_signature(self, callable, callbacks, param=False):
         return_type = " int" if callable.has_return_value else ""
-        value_parameters = [self.build_parameter(p) for p in callable.parameters]
+        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
         callback_parameters = [
             self.build_signature(callback, [], param=True)
             for callback in callbacks

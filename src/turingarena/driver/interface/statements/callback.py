@@ -88,7 +88,7 @@ class Return(IntermediateNode, Statement):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, self.context.expression(reference=True))
+        return Expression.compile(self.ast.value)
 
     def _describe_node(self):
         yield f"callback return"

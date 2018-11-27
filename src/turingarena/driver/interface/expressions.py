@@ -15,12 +15,8 @@ class Expression:
     __slots__ = []
 
     @staticmethod
-    def compile(ast, context):
-        return expression_classes[ast.expression_type](ast, context)
-
-    @property
-    def reference(self):
-        return self.context.statement_context.reference(self)
+    def compile(ast):
+        return expression_classes[ast.expression_type](ast, context=None)
 
 
 class Literal(Expression):
@@ -62,7 +58,6 @@ class VariableReference(Expression, AbstractSyntaxNodeWrapper):
     def variable(self):
         declared = Variable(
             name=self.variable_name,
-            dimensions=self.context.index_count,
         )
         if self.context.declaring:
             return declared
@@ -105,30 +100,23 @@ class Subscript(Expression, namedtuple("Subscript", [
     __slots__ = []
 
 
-def compile_subscript(ast, index_asts, context):
+def compile_subscript(ast, index_asts):
     if index_asts:
-        array = compile_subscript(ast, index_asts[:-1], context._replace(
-            index_count=context.index_count + 1,
-        ))
-        index = Expression.compile(index_asts[-1], context._replace(
-            declaring=False,
-            resolved=True,
-            reference=False,
-            index_count=0,
-        ))
-        return Subscript(array, index, context)
+        array = compile_subscript(ast, index_asts[:-1])
+        index = Expression.compile(index_asts[-1])
+        return Subscript(array, index, None)
     else:
-        return VariableReference(ast, context)
+        return VariableReference(ast, None)
 
 
 def compile_reference_expression(ast, context):
-    return compile_subscript(ast, ast.indices, context)
+    return compile_subscript(ast, ast.indices)
 
 
 expression_classes = frozenbidict({
     "int_literal": IntLiteralAst,
     "reference_subscript": compile_reference_expression,
-    "nested": lambda ast, context: Expression.compile(ast.expression, context),
+    "nested": lambda ast, context: Expression.compile(ast.expression),
 })
 
 

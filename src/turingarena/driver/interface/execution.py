@@ -6,6 +6,7 @@ from typing import List, Tuple, Any
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
+from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.exceptions import CommunicationError, DriverStop, InterfaceExitReached
 from turingarena.driver.interface.nodes import ExecutionResult
 from turingarena.driver.interface.phase import ExecutionPhase
@@ -33,7 +34,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "request_lookahead",
     "driver_connection",
     "sandbox_connection",
-])):
+]), TreeAnalyzer):
     __slots__ = []
 
     def send_driver_state(self, state):
@@ -161,14 +162,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return e.value
 
     def evaluate_VariableReference(self, e):
-        if e.reference in self.bindings:
-            return self.bindings[e.reference]
-        return self.bindings[e.variable.as_reference()]
+        return self.bindings[self.reference(e)]
 
     def evaluate_Subscript(self, e):
-        if e.reference in self.bindings:
-            return self.bindings[e.reference]
-        else:
+        try:
+            return self.bindings[self.reference(e)]
+        except KeyError:
             return self.evaluate(e.array)[self.evaluate(e.index)]
 
     def _needs_request_lookahead(self, n):
@@ -262,7 +261,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is ExecutionPhase.UPWARD:
             values = self.receive_upward()
             assignments = [
-                (a.reference, value)
+                (n.context.reference(a), value)
                 for a, value in zip(n.arguments, values)
             ]
 
@@ -295,7 +294,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             matching_cases = n.get_matching_cases(self.request_lookahead)
             [case] = matching_cases
             [label] = case.labels
-            assignments = [(n.value.reference, label.value)]
+            assignments = [(n.context.reference(n.value), label.value)]
 
             return self.result()._replace(assignments=assignments)
 
@@ -324,7 +323,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 )
 
             value = int(self.receive_driver_downward())
-            return self.result()._replace(assignments=[(n.value.reference, value)])
+            return self.result()._replace(assignments=[(self.reference(n.value), value)])
 
     def _on_execute_CallbackEnd(self, n):
         if self.phase is ExecutionPhase.REQUEST:
@@ -362,7 +361,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 for result in results_by_iteration
                 if isinstance(a, ReferenceResolution)
             ])
-            for a in n.context.reference_actions(n)
+            for a in self.reference_actions(n)
         ]
 
         return self.result()._replace(assignments=assignments)
@@ -407,7 +406,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is ExecutionPhase.REQUEST:
             [condition_value] = n.get_conditions(self.request_lookahead)
             return self.result()._replace(
-                assignments=[(n.condition.reference, condition_value)]
+                assignments=[(self.reference(n.condition), condition_value)]
             )
 
     def _on_execute_CallArgumentsResolve(self, n):
@@ -431,7 +430,10 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 f"got {parameter_count}"
             )
 
-        assignments = list(n._get_assignments(self))
+        assignments = [
+            (self.reference(a), self.deserialize_request_data())
+            for a in n.arguments
+        ]
 
         has_return_value = bool(int(self.receive_driver_downward()))
         expects_return_value = (n.return_value is not None)

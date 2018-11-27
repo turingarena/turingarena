@@ -1,21 +1,9 @@
-            function f(n, m, a[][]);
-            function g(i, j);
-
-            main {
-                read n, m;
-                for i to n {
-                    for j to m {
-                        read a[i][j];
-                    }
+                procedure test() callbacks {
+                    procedure c();
                 }
 
-                call r = f(n, m, a);
-                write r;
-
-                for i to n {
-                    for j to m {
-                        call s = g(i, j);
-                        write s;
+                main {
+                    call test() callbacks {
+                        procedure c() {}
                     }
                 }
-            }

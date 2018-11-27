@@ -27,11 +27,11 @@ class InterfaceBody(Block):
 class ConstantDeclaration(AbstractSyntaxNodeWrapper):
     @property
     def variable(self):
-        return Variable(name=self.ast.name, dimensions=0)
+        return Variable(name=self.ast.name)
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, self.context.expression())
+        return Expression.compile(self.ast.value)
 
 
 class InterfaceDefinition:

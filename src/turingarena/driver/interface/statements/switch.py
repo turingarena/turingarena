@@ -25,7 +25,7 @@ class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
 
     @property
     def value(self):
-        return Expression.compile(self.ast.value, self.context.expression())
+        return Expression.compile(self.ast.value)
 
 
 class Switch(ControlStructure, SwitchNode, Statement):
@@ -56,7 +56,7 @@ class Case(AbstractSyntaxNodeWrapper):
     @property
     def labels(self):
         return [
-            Expression.compile(l, self.context.expression())
+            Expression.compile(l)
             for l in self.ast.labels
         ]
 

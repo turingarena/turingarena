@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
@@ -15,8 +14,11 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
     def variable(self):
         return Variable(
             name=self.ast.name,
-            dimensions=len(self.ast.indexes),
         )
+
+    @property
+    def dimensions(self):
+        return len(self.ast.indexes)
 
 
 class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "description"])):

@@ -2,13 +2,13 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 
 class CppCodeGen(InterfaceCodeGen):
-    def build_parameter(self, parameter):
-        indirections = "*" * parameter.dimensions
-        return f"int {indirections}{parameter.name}"
+    def visit_ParameterDeclaration(self, d):
+        indirections = "*" * d.dimensions
+        return f"int {indirections}{d.variable.name}"
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.build_parameter(p) for p in callable.parameters]
+        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
         callback_parameters = [
             self.build_signature(callback, [])
             for callback in callbacks
@@ -132,7 +132,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def visit_Switch(self, statement):
         for i, case in enumerate(statement.cases):
             condition = " || ".join(
-                f"{self.visit(statement.variable)} == {self.visit(label)}"
+                f"{self.visit(statement.value)} == {self.visit(label)}"
                 for label in case.labels
             )
             if i == 0:

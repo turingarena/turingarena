@@ -18,10 +18,9 @@ class For(Statement, ControlStructure, IntermediateNode):
 
     @property
     def index(self):
-        index_context = self.context.expression()
         return ForIndex(
-            variable=Variable(name=self.ast.index, dimensions=0),
-            range=Expression.compile(self.ast.range, index_context),
+            variable=Variable(name=self.ast.index),
+            range=Expression.compile(self.ast.range),
         )
 
     def _get_bodies(self):
