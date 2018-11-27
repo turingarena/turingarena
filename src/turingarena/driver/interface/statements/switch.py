@@ -62,20 +62,5 @@ class Case(AbstractSyntaxNodeWrapper):
 
 
 class SwitchValueResolve(SwitchNode):
-    def get_matching_cases(self, request):
-        return list(self._find_matching_cases(request))
-
-    def _find_matching_cases(self, request):
-        matching_cases_requests = list(self._find_cases_expecting(request))
-        if matching_cases_requests:
-            return matching_cases_requests
-        else:
-            return list(self._find_cases_expecting(None))
-
-    def _find_cases_expecting(self, request):
-        for c in self.cases:
-            if request in self.context.first_requests(c.body):
-                yield c
-
     def _describe_node(self):
         yield f"resolve {self}"

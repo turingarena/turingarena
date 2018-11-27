@@ -52,26 +52,5 @@ class If(ControlStructure, AbstractIfNode, Statement):
 
 
 class IfConditionResolve(AbstractIfNode):
-    def _get_conditions_expecting(self, request):
-        if request in self.context.first_requests(self.then_body):
-            yield 1
-        if self.else_body is not None:
-            if request in self.context.first_requests(self.else_body):
-                yield 0
-
-    def _get_conditions_expecting_no_request(self):
-        yield from self._get_conditions_expecting(None)
-        if self.else_body is None:
-            yield 0
-
-    def get_conditions(self, request):
-        logger.debug(f"request_lookahead: {request}")
-        matching_conditions = frozenset(self._get_conditions_expecting(request))
-        logger.debug(f"matching_conditions1: {matching_conditions}")
-        if not matching_conditions:
-            matching_conditions = frozenset(self._get_conditions_expecting_no_request())
-            logger.debug(f"matching_conditions2: {matching_conditions}")
-        return matching_conditions
-
     def _describe_node(self):
         yield "resolve if"

@@ -261,7 +261,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is ExecutionPhase.UPWARD:
             values = self.receive_upward()
             assignments = [
-                (n.context.reference(a), value)
+                (self.reference(a), value)
                 for a, value in zip(n.arguments, values)
             ]
 
@@ -291,12 +291,24 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_SwitchValueResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            matching_cases = n.get_matching_cases(self.request_lookahead)
+            matching_cases = self._find_matching_cases(n, self.request_lookahead)
             [case] = matching_cases
             [label] = case.labels
-            assignments = [(n.context.reference(n.value), label.value)]
+            assignments = [(self.reference(n.value), label.value)]
 
             return self.result()._replace(assignments=assignments)
+
+    def _find_matching_cases(self, n, request):
+        matching_cases_requests = list(self._find_cases_expecting(n, request))
+        if matching_cases_requests:
+            return matching_cases_requests
+        else:
+            return list(self._find_cases_expecting(n, None))
+
+    def _find_cases_expecting(self, n, request):
+        for c in n.cases:
+            if request in self.first_requests(c.body):
+                yield c
 
     def _on_execute_CallbackImplementation(self, n):
         assert self.phase is None
@@ -404,10 +416,28 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_IfConditionResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            [condition_value] = n.get_conditions(self.request_lookahead)
+            [condition_value] = self._find_conditions(n, self.request_lookahead)
             return self.result()._replace(
                 assignments=[(self.reference(n.condition), condition_value)]
             )
+
+    def _find_conditions(self, n, request):
+        matching_conditions = frozenset(self._find_conditions_expecting(n, request))
+        if not matching_conditions:
+            matching_conditions = frozenset(self._find_conditions_expecting_no_request(n))
+        return matching_conditions
+
+    def _find_conditions_expecting(self, n, request):
+        if request in self.first_requests(n.then_body):
+            yield 1
+        if n.else_body is not None:
+            if request in self.first_requests(n.else_body):
+                yield 0
+
+    def _find_conditions_expecting_no_request(self, n):
+        yield from self._find_conditions_expecting(n, None)
+        if n.else_body is None:
+            yield 0
 
     def _on_execute_CallArgumentsResolve(self, n):
         if self.phase is not ExecutionPhase.REQUEST:
