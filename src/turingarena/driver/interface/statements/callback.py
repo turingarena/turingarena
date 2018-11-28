@@ -83,7 +83,7 @@ class CallbackStart(IntermediateNode, namedtuple("CallbackStart", [
         yield "callback_call"
 
 
-class Return(IntermediateNode, Statement):
+class Return(namedtuple("Return", ["ast"]), IntermediateNode):
     __slots__ = []
 
     @property
@@ -103,5 +103,5 @@ class Exit(IntermediateNode):
     __slots__ = []
 
 
-class ExitStatement(Exit, Statement, IntermediateNode):
+class ExitStatement(namedtuple("Exit", ["ast"]), Exit, IntermediateNode):
     __slots__ = []

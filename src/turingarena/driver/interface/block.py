@@ -94,4 +94,8 @@ class Block(AbstractContextBlock, AbstractSyntaxNodeWrapper):
         for ast in self.ast.statements:
             from turingarena.driver.interface.statements.statements import statement_classes
             for cls in statement_classes[ast.statement_type]:
-                yield partial(cls, ast)
+                if issubclass(cls, AbstractSyntaxNodeWrapper):
+                    # still needs context (TODO: remove this distinction)
+                    yield partial(cls, ast)
+                else:
+                    yield lambda context: cls(ast)

@@ -1,7 +1,7 @@
 import logging
+from collections import namedtuple
 
 from turingarena.driver.interface.block import Block
-from turingarena.driver.interface.diagnostics import Diagnostic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
@@ -24,5 +24,5 @@ class Loop(Statement, ControlStructure, IntermediateNode):
         yield from self._indent_all(self.body.node_description)
 
 
-class Break(Statement, IntermediateNode):
+class Break(namedtuple("Break", ["ast"]), IntermediateNode):
     __slots__ = []

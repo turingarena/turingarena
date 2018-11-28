@@ -1,6 +1,6 @@
 import logging
+from collections import namedtuple
 
-from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 
@@ -11,7 +11,7 @@ class Print(IntermediateNode):
     __slots__ = []
 
 
-class IONode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class IONode(IntermediateNode):
     __slots__ = []
 
     @property
@@ -22,11 +22,11 @@ class IONode(IntermediateNode, AbstractSyntaxNodeWrapper):
         ]
 
 
-class Read(IONode, IntermediateNode):
+class Read(namedtuple("Read", ["ast"]), IONode):
     __slots__ = []
 
 
-class Write(Print, IONode):
+class Write(namedtuple("Write", ["ast"]), Print, IONode):
     __slots__ = []
 
 
@@ -43,5 +43,5 @@ class InitialCheckpoint(Checkpoint):
         yield "initial checkpoint"
 
 
-class CheckpointStatement(AbstractSyntaxNodeWrapper, Checkpoint):
+class CheckpointStatement(namedtuple("CheckpointStatement", ["ast"]), Checkpoint):
     __slots__ = []
