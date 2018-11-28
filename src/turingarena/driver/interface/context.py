@@ -3,11 +3,8 @@ from collections import namedtuple
 from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.statements.call import CallReturn
-from turingarena.driver.interface.statements.for_loop import For
-from turingarena.driver.interface.statements.io import Read
 from turingarena.driver.interface.validate import Validator
-from turingarena.driver.interface.variables import VariableDeclaration, VariableAllocation, ReferenceDeclaration, \
+from turingarena.driver.interface.variables import VariableAllocation, ReferenceDeclaration, \
     ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
@@ -86,15 +83,14 @@ class StatementContext(namedtuple("StatementContext", [
         pass
 
     def _get_allocations_For(self, n):
-        for a in self.reference_actions(n.body):
+        for a in self.reference_actions(n):
             if not isinstance(a, ReferenceDeclaration):
                 continue
-            if a.dimensions == 0:
-                continue
+            assert a.dimensions > 0
             yield VariableAllocation(
-                variable=a.reference.variable,
+                reference=a.reference,
+                dimensions=a.dimensions - 1,
                 size=n.index.range,
-                dimensions=a.dimensions - len(a.reference.indexes),
             )
 
     def _get_allocations_IntermediateNode(self, n):
@@ -165,7 +161,6 @@ class StatementContext(namedtuple("StatementContext", [
                 self.is_resolved(self.reference(e))
                 or self.is_resolved(e.array)
         )
-
 
 
 INITIAL_CONTEXT = StatementContext(

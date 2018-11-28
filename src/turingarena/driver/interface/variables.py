@@ -17,4 +17,4 @@ ReferenceDeclaration = namedtuple("ReferenceDeclaration", ["reference", "dimensi
 ReferenceResolution = namedtuple("ReferenceResolution", ["reference"])
 
 VariableDeclaration = namedtuple("VariableDeclaration", ["variable", "dimensions"])
-VariableAllocation = namedtuple("VariableAllocation", ["variable", "size", "dimensions"])
+VariableAllocation = namedtuple("VariableAllocation", ["reference", "dimensions", "size"])

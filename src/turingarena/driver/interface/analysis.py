@@ -57,7 +57,11 @@ class TreeAnalyzer:
         for a in self.reference_actions(n.body):
             r = a.reference
             if r.indexes:
-                yield a._replace(reference=r._replace(indexes=r.indexes[:-1]))
+                reference = r._replace(indexes=r.indexes[:-1])
+                if isinstance(a, ReferenceDeclaration):
+                    yield a._replace(reference=reference, dimensions=a.dimensions + 1)
+                if isinstance(a, ReferenceResolution):
+                    yield a._replace(reference=reference)
 
     def _get_reference_actions_CallArgumentsResolve(self, n):
         for p in n.arguments:
@@ -218,10 +222,11 @@ class TreeAnalyzer:
     def _reference_declaration_Subscript(self, e, dimensions):
         array_declaration = self.reference_declaration(e.array, dimensions + 1)
         if array_declaration is not None:
-            return array_declaration._replace(
+            return ReferenceDeclaration(
                 reference=array_declaration.reference._replace(
                     indexes=array_declaration.reference.indexes + (self.variable(e.index),),
                 ),
+                dimensions=array_declaration.dimensions - 1,
             )
 
     def _reference_declaration_Expression(self, e):
