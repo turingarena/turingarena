@@ -27,15 +27,3 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
 class IntermediateNode:
     __slots__ = []
-
-    @property
-    def node_description(self):
-        return list(self._describe_node())
-
-    @staticmethod
-    def _indent_all(lines):
-        for l in lines:
-            yield "  " + l
-
-    def _describe_node(self):
-        yield str(self)

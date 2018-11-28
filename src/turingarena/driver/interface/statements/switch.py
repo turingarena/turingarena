@@ -18,17 +18,6 @@ class Switch(ControlStructure, SwitchNode):
         for c in self.cases:
             yield c.body
 
-    def _describe_node(self):
-        yield f"switch {self.value} "
-        for c in self.cases:
-            yield from self._indent_all(self._describe_case(c))
-
-    def _describe_case(self, case):
-        labels = ", ".join(str(l.value) for l in case.labels)
-        yield f"case {labels}"
-        yield from self._indent_all(case.body.node_description)
-
-
 class Case(namedtuple("Case", ["labels", "body"])):
     __slots__ = []
 

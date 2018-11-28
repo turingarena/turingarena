@@ -23,7 +23,7 @@ class AbstractExpressionCodeGen(CodeGen):
         return str(e.value)
 
 
-class InterfaceCodeGen(CodeGen):
+class LinesGenerator:
     __slots__ = ["indentation"]
 
     def __init__(self):
@@ -35,12 +35,23 @@ class InterfaceCodeGen(CodeGen):
         yield
         self.indentation -= 1
 
-    def generate_to_file(self, interface, file):
-        for line in self.generate(interface):
+    def dump_to_file(self, generator, file):
+        for line in generator:
             if line is None:
                 print("", file=file)
             else:
                 print("    " * self.indentation + line, file=file)
+
+    @abstractmethod
+    def _on_generate(self, *args, **kwargs):
+        pass
+
+
+class InterfaceCodeGen(CodeGen, LinesGenerator):
+    __slots__ = []
+
+    def generate_to_file(self, interface, file):
+        self.dump_to_file(self.generate(interface), file=file)
 
     def generate(self, interface):
         yield from self.generate_header(interface)
@@ -214,7 +225,6 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
             comment = StatementDescriptionCodeGen().visit(statement)
         if comment is not None:
             yield self.line_comment(comment)
-
 
         for d in analyzer.variable_declarations(statement):
             yield from self.visit(d)

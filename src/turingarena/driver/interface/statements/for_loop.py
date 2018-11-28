@@ -14,7 +14,3 @@ class For(namedtuple("For", ["index", "body"]), ControlStructure, IntermediateNo
 
     def _get_bodies(self):
         yield self.body
-
-    def _describe_node(self):
-        yield f"for {self.index.variable.name} to {self.index.range}"
-        yield from self._indent_all(self.body.node_description)

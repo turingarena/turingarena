@@ -13,10 +13,6 @@ class Loop(namedtuple("Loop", ["body"]), ControlStructure, IntermediateNode):
     def _get_bodies(self):
         yield self.body
 
-    def _describe_node(self):
-        yield "loop"
-        yield from self._indent_all(self.body.node_description)
-
 
 class Break(namedtuple("Break", []), IntermediateNode):
     __slots__ = []

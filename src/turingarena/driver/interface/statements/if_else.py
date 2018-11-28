@@ -20,19 +20,14 @@ class IfNode(namedtuple("IfNode", ["condition", "then_body", "else_body"]), Inte
 
 
 class If(ControlStructure, IfNode):
+    __slots__ = []
+
     def _get_bodies(self):
         yield self.then_body
         if self.else_body is not None:
             yield self.else_body
 
-    def _describe_node(self):
-        yield f"if {self.condition}"
-        yield from self._indent_all(self.then_body.node_description)
-        if self.else_body is not None:
-            yield "else"
-            yield from self._indent_all(self.else_body.node_description)
-
 
 class IfConditionResolve(IfNode):
-    def _describe_node(self):
-        yield "resolve if"
+    __slots__ = []
+
