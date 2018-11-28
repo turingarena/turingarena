@@ -78,19 +78,6 @@ class StatementContext(namedtuple("StatementContext", [
     def with_loop(self):
         return self._replace(in_loop=True)
 
-    def expression(self, **kwargs):
-        options = dict(
-            index_count=0,
-            declaring=False,
-            reference=False,
-            resolved=False,
-        )
-        options.update(kwargs)
-        return ExpressionContext(
-            statement_context=self,
-            **options,
-        )
-
     def variable_declarations(self, n):
         return frozenset(self._get_variable_declarations(n))
 

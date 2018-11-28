@@ -36,9 +36,6 @@ class For(Statement, ControlStructure, IntermediateNode):
             ]),
         )
 
-    def _get_intermediate_nodes(self):
-        yield self
-
     def _describe_node(self):
         yield f"for {self.index.variable.name} to {self.index.range}"
         yield from self._indent_all(self.body.node_description)

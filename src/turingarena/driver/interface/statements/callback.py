@@ -105,6 +105,3 @@ class Exit(IntermediateNode):
 
 class ExitStatement(Exit, Statement, IntermediateNode):
     __slots__ = []
-
-    def _get_intermediate_nodes(self):
-        yield self
