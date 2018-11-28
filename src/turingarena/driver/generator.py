@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.context import INITIAL_CONTEXT
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -191,7 +190,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         pass
 
     @abstractmethod
-    def visit_VariableAllocation(self, a):
+    def visit_ReferenceAllocation(self, a):
         pass
 
     def visit_IntermediateNode(self, s):
@@ -210,21 +209,18 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def generate_statement(self, statement):
         analyzer = TreeAnalyzer()
 
-        # FIXME: drop this reference to INITIAL_CONTEXT
         comment = analyzer.comment(statement)
         if comment is not None:
             comment = StatementDescriptionCodeGen().visit(statement)
         if comment is not None:
             yield self.line_comment(comment)
 
-        if hasattr(statement, "context"):
-            # FIXME: drop context from nodes
 
-            for d in statement.context.variable_declarations(statement):
-                yield from self.visit(d)
+        for d in analyzer.variable_declarations(statement):
+            yield from self.visit(d)
 
-            for a in statement.context.variable_allocations(statement):
-                yield from self.visit(a)
+        for a in analyzer.reference_allocations(statement):
+            yield from self.visit(a)
 
         yield from self.visit(statement)
 

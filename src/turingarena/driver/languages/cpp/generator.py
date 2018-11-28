@@ -34,7 +34,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         pointers = "*" * d.dimensions
         yield f"static int {pointers}{d.variable.name};"
 
-    def visit_VariableAllocation(self, a):
+    def visit_ReferenceAllocation(self, a):
         name = a.reference.variable.name
         indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
         dimensions = "*" * a.dimensions

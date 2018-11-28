@@ -60,7 +60,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def generate_flush(self):
         yield f'print(end="", flush=True)'
 
-    def visit_VariableAllocation(self, a):
+    def visit_ReferenceAllocation(self, a):
         name = a.reference.variable.name
         indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
         size = self.visit(a.size)

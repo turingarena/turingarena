@@ -74,7 +74,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_Switch(self, switch_statement):
         pass
 
-    def visit_VariableAllocation(self, a):
+    def visit_ReferenceAllocation(self, a):
         # FIXME: not implemented
         pass
 

@@ -8,7 +8,7 @@ from turingarena.driver.interface.statements.for_loop import For
 from turingarena.driver.interface.statements.io import Read, Checkpoint
 from turingarena.driver.interface.statements.loop import Loop
 from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, Variable, Reference, \
-    ReferenceDirection, VariableDeclaration
+    ReferenceDirection, VariableDeclaration, ReferenceAllocation
 from turingarena.util.visitor import visitormethod
 
 
@@ -269,3 +269,25 @@ class TreeAnalyzer:
         for a in self.reference_actions(n):
             if isinstance(a, ReferenceDeclaration) and not a.reference.indexes:
                 yield VariableDeclaration(a.reference.variable, a.dimensions)
+
+    def reference_allocations(self, n):
+        return list(self._get_allocations(n))
+
+    @visitormethod
+    def _get_allocations(self, n):
+        pass
+
+    def _get_allocations_For(self, n):
+        for a in self.reference_actions(n):
+            if not isinstance(a, ReferenceDeclaration):
+                continue
+            assert a.dimensions > 0
+            yield ReferenceAllocation(
+                reference=a.reference,
+                dimensions=a.dimensions - 1,
+                size=n.index.range,
+            )
+
+    def _get_allocations_IntermediateNode(self, n):
+        return []
+

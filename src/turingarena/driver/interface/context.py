@@ -4,7 +4,7 @@ from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.validate import Validator
-from turingarena.driver.interface.variables import VariableAllocation, ReferenceDeclaration, \
+from turingarena.driver.interface.variables import ReferenceAllocation, ReferenceDeclaration, \
     ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
@@ -74,27 +74,6 @@ class StatementContext(namedtuple("StatementContext", [
 
     def with_loop(self):
         return self._replace(in_loop=True)
-
-    def variable_allocations(self, n):
-        return list(self._get_allocations(n))
-
-    @visitormethod
-    def _get_allocations(self, n):
-        pass
-
-    def _get_allocations_For(self, n):
-        for a in self.reference_actions(n):
-            if not isinstance(a, ReferenceDeclaration):
-                continue
-            assert a.dimensions > 0
-            yield VariableAllocation(
-                reference=a.reference,
-                dimensions=a.dimensions - 1,
-                size=n.index.range,
-            )
-
-    def _get_allocations_IntermediateNode(self, n):
-        return []
 
     def is_relevant(self, n):
         "Whether this node should be kept in the parent block"

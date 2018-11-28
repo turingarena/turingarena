@@ -43,7 +43,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_ConstantDeclaration(self, m):
         return []
 
-    def visit_VariableAllocation(self, a):
+    def visit_ReferenceAllocation(self, a):
         name = a.reference.variable.name
         idx = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
         # FIXME: is this + 1 needed?
