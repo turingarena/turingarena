@@ -2,13 +2,17 @@ import logging
 from collections import namedtuple
 from functools import partial
 
+from future.moves import itertools
+
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import ExpressionCompiler
 from turingarena.driver.interface.statements.call import StaticCallbackBlockContext
 from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.for_loop import ForIndex
+from turingarena.driver.interface.statements.statements import statement_classes
 from turingarena.driver.interface.statements.switch import Case
+from turingarena.driver.interface.step import Step
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, \
     ReferenceResolution, Variable
@@ -184,13 +188,10 @@ class StatementContext(namedtuple("StatementContext", [
         index = ForIndex(variable=Variable(name=ast.index), range=self.expression(ast.range), )
         return cls(
             index=index,
-            body=Block(
-                ast=ast.body,
-                context=self.with_index_variable(index).with_reference_actions([
-                    ReferenceDeclaration(index.variable.as_reference(), dimensions=0),
-                    ReferenceResolution(index.variable.as_reference()),
-                ]),
-            )
+            body=self.with_index_variable(index).with_reference_actions([
+                ReferenceDeclaration(index.variable.as_reference(), dimensions=0),
+                ReferenceResolution(index.variable.as_reference()),
+            ]).block(ast.body)
         )
 
     def compile_SwitchNode(self, cls, ast):
@@ -199,7 +200,7 @@ class StatementContext(namedtuple("StatementContext", [
             cases=[
                 Case(
                     labels=[self.expression(l) for l in case_ast.labels],
-                    body=Block(ast=case_ast.body, context=self),
+                    body=self.block(case_ast.body),
                 )
                 for case_ast in ast.cases
             ],
@@ -208,13 +209,13 @@ class StatementContext(namedtuple("StatementContext", [
     def compile_IfNode(self, cls, ast):
         return cls(
             condition=self.expression(ast.condition),
-            then_body=Block(ast=ast.then_body, context=self),
-            else_body=Block(ast=ast.else_body, context=self) if ast.else_body is not None else None,
+            then_body=self.block(ast.then_body),
+            else_body=self.block(ast.else_body) if ast.else_body is not None else None,
         )
 
     def compile_Loop(self, cls, ast):
         return cls(
-            body=Block(ast=ast.body, context=self.with_loop())
+            body=self.with_loop().block(ast.body)
         )
 
     def compile_CallNode(self, cls, ast):
@@ -242,4 +243,61 @@ class StatementContext(namedtuple("StatementContext", [
             arguments=[self.expression(a) for a in ast.arguments],
             return_value=self.expression(ast.return_value) if ast.return_value is not None else None,
             callbacks=callbacks,
+        )
+
+    def group_children(self, children):
+        group = []
+        for node in children:
+            can_be_grouped = self.can_be_grouped(node)
+
+            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
+                group.append(node)
+                continue
+
+            if group:
+                yield self._make_step(group)
+                group.clear()
+
+            if not can_be_grouped:
+                yield node
+            else:
+                group.append(node)
+
+        if group:
+            yield self._make_step(group)
+
+    def _make_step(self, group):
+        return Step(tuple(group), self._group_direction(group))
+
+    def _group_direction(self, group):
+        directions = self._group_directions(group)
+        if not directions:
+            return None
+        [direction] = directions
+        return direction
+
+    def _group_directions(self, group):
+        return {d for n in group for d in self.declaration_directions(n)}
+
+    def _compile_block_flat(self, asts):
+        inner_context = self._replace(main_block=False)
+        for ast in asts:
+            for cls in statement_classes[ast.statement_type]:
+                node = inner_context.compile(cls, ast)
+                if not inner_context.is_relevant(node):
+                    continue
+                yield node
+            inner_context = inner_context.with_reference_actions(inner_context.reference_actions(node))
+
+    def block(self, ast, prepend_nodes=(), append_nodes=()):
+        return Block(
+            children=tuple(
+                self.group_children(
+                    itertools.chain(
+                        prepend_nodes,
+                        self._compile_block_flat(ast.statements),
+                        append_nodes,
+                    )
+                )
+            )
         )

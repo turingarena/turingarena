@@ -3,7 +3,6 @@ from collections import namedtuple
 
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
-from turingarena.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,8 @@
 import logging
 from abc import abstractmethod
+from collections import namedtuple
 
-from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
+from turingarena.driver.interface.common import memoize
 from turingarena.driver.interface.seq import SequenceNode
 from turingarena.driver.interface.step import Step
 
@@ -86,7 +87,7 @@ class AbstractContextBlock(AbstractBlock):
         pass
 
 
-class Block(AbstractSyntaxNodeWrapper, AbstractContextBlock):
+class Block(namedtuple("Block", ["children"]), SequenceNode):
     __slots__ = []
 
     def _get_flat_children_builders(self):

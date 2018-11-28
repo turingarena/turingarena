@@ -187,7 +187,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         context = self
 
         logging.debug(
-            f"EXECUTE: {type(n).__name__} "
+            f"EXECUTE: {n} "
             f"phase: {self.phase} "
             f"request LA: {self.request_lookahead}"
         )
@@ -221,7 +221,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             for c in n.constants
         }).execute(n.main_block)
 
-    def _on_execute_AbstractBlock(self, n):
+    def _on_execute_Block(self, n):
         return self._execute_sequence(n.children)
 
     def _on_execute_Step(self, n):

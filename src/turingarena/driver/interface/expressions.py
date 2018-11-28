@@ -12,7 +12,7 @@ class ExpressionCompiler:
         return getattr(self, f"_compile_{ast.expression_type}")(ast)
 
     def _compile_int_literal(self, ast):
-        return IntLiteralAst(ast)
+        return IntLiteralAst(value=int(ast.int_literal))
 
     def _compile_reference_subscript(self, ast):
         return self._compile_subscript(ast, ast.indices)
@@ -23,7 +23,7 @@ class ExpressionCompiler:
             index = Expression.compile(index_asts[-1])
             return Subscript(array, index)
         else:
-            return VariableReference(ast)
+            return VariableReference(ast.variable_name)
 
 
 class Expression:
@@ -47,12 +47,8 @@ class IntLiteral(Literal):
     __slots__ = []
 
 
-class IntLiteralAst(namedtuple("IntLiteralAst", ["ast"]), IntLiteral):
+class IntLiteralAst(namedtuple("IntLiteralAst", ["value"]), IntLiteral):
     __slots__ = []
-
-    @property
-    def value(self):
-        return int(self.ast.int_literal)
 
 
 class IntLiteralSynthetic(
@@ -62,12 +58,8 @@ class IntLiteralSynthetic(
     __slots__ = []
 
 
-class VariableReference(namedtuple("VariableReference", ["ast"]), Expression):
+class VariableReference(namedtuple("VariableReference", ["variable_name"]), Expression):
     __slots__ = []
-
-    @property
-    def variable_name(self):
-        return self.ast.variable_name
 
 
 class Subscript(Expression, namedtuple("Subscript", [

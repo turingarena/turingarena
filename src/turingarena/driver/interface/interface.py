@@ -1,6 +1,5 @@
 import logging
 
-from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.callables import MethodPrototype
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import InterfaceContext
@@ -15,13 +14,6 @@ logger = logging.getLogger(__name__)
 
 class MainExit(Exit):
     pass
-
-
-class InterfaceBody(Block):
-    def _generate_flat_inner_nodes(self):
-        yield InitialCheckpoint()
-        yield from super()._generate_flat_inner_nodes()
-        yield MainExit()
 
 
 class ConstantDeclaration(AbstractSyntaxNodeWrapper):
@@ -58,12 +50,15 @@ class InterfaceDefinition:
 
     @property
     def main_block(self):
-        return InterfaceBody(
-            ast=self.ast.main_block,
-            context=InterfaceContext(methods=self.methods, constants=self.constants).main_block_context
+        return InterfaceContext(
+            methods=self.methods,
+            constants=self.constants,
+        ).main_block_context.block(
+            self.ast.main_block,
+            prepend_nodes=[InitialCheckpoint()],
+            append_nodes=[MainExit()],
         )
 
-    @property
     def source_text(self):
         return self.ast.parseinfo.buffer.text
 
