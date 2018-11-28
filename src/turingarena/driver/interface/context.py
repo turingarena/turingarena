@@ -78,22 +78,6 @@ class StatementContext(namedtuple("StatementContext", [
     def with_loop(self):
         return self._replace(in_loop=True)
 
-    def variable_declarations(self, n):
-        return frozenset(self._get_variable_declarations(n))
-
-    def _get_variable_declarations(self, n):
-        types = [
-            Read,
-            CallReturn,
-            For,
-        ]
-
-        if not any(isinstance(n, t) for t in types):
-            return
-        for a in self.reference_actions(n):
-            if a.reference.index_count == 0 and isinstance(a, ReferenceDeclaration):
-                yield VariableDeclaration(a.reference.variable, a.dimensions)
-
     def variable_allocations(self, n):
         return list(self._get_allocations(n))
 
@@ -116,28 +100,6 @@ class StatementContext(namedtuple("StatementContext", [
 
     def _get_allocations_IntermediateNode(self, n):
         return []
-
-    def comment(self, n):
-        return self._get_comment(n)
-
-    @visitormethod
-    def _get_comment(self, n):
-        pass
-
-    def _get_comment_MainExit(self, n):
-        return "terminate"
-
-    def _get_comment_PrintCallbackRequest(self, n):
-        return "requesting a callback"
-
-    def _get_comment_PrintCallbackIndex(self, n):
-        return f"index of this callback: {n.callback_index} = {n.implementation.name}"
-
-    def _get_comment_PrintNoCallbacks(self, n):
-        return "no more callbacks"
-
-    def _get_comment_IntermediateNode(self, n):
-        return None
 
     def is_relevant(self, n):
         "Whether this node should be kept in the parent block"
@@ -173,7 +135,11 @@ class StatementContext(namedtuple("StatementContext", [
         return 0
 
     def dimensions_VariableReference(self, e):
-        return self.reference_declaration_mapping[e.variable_name].dimensions
+        try:
+            reference_declaration = self.reference_declaration_mapping[e.variable_name]
+        except KeyError:
+            return 0
+        return reference_declaration.dimensions
 
     def dimensions_Subscript(self, e):
         array_dimensions = self.dimensions(e.array)
@@ -200,6 +166,7 @@ class StatementContext(namedtuple("StatementContext", [
                 self.is_resolved(self.reference(e))
                 or self.is_resolved(e.array)
         )
+
 
 
 INITIAL_CONTEXT = StatementContext(

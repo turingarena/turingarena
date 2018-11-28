@@ -4,10 +4,11 @@ from typing import Optional
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.statements.call import AcceptCallbacks, CallReturn
 from turingarena.driver.interface.statements.callback import CallbackStart
+from turingarena.driver.interface.statements.for_loop import For
 from turingarena.driver.interface.statements.io import Read, Checkpoint
 from turingarena.driver.interface.statements.loop import Loop
 from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, Variable, Reference, \
-    ReferenceDirection
+    ReferenceDirection, VariableDeclaration
 from turingarena.util.visitor import visitormethod
 
 
@@ -74,11 +75,7 @@ class TreeAnalyzer:
 
     def _get_reference_actions_SequenceNode(self, n):
         for child in n.children:
-            if hasattr(child, 'context'):
-                # FIXME: should strip context from nodes
-                yield from child.context.reference_actions(child)
-            else:
-                yield from self.reference_actions(child)
+            yield from self.reference_actions(child)
 
     def _get_reference_actions_IntermediateNode(self, n):
         return []
@@ -231,3 +228,41 @@ class TreeAnalyzer:
 
     def _reference_declaration_Expression(self, e):
         return None
+
+    def comment(self, n):
+        return self._get_comment(n)
+
+    @visitormethod
+    def _get_comment(self, n):
+        pass
+
+    def _get_comment_MainExit(self, n):
+        return "terminate"
+
+    def _get_comment_PrintCallbackRequest(self, n):
+        return "requesting a callback"
+
+    def _get_comment_PrintCallbackIndex(self, n):
+        return f"index of this callback: {n.callback_index} = {n.implementation.name}"
+
+    def _get_comment_PrintNoCallbacks(self, n):
+        return "no more callbacks"
+
+    def _get_comment_IntermediateNode(self, n):
+        return None
+
+    def variable_declarations(self, n):
+        return frozenset(self._get_variable_declarations(n))
+
+    def _get_variable_declarations(self, n):
+        types = [
+            Read,
+            CallReturn,
+            For,
+        ]
+
+        if not any(isinstance(n, t) for t in types):
+            return
+        for a in self.reference_actions(n):
+            if a.reference.index_count == 0 and isinstance(a, ReferenceDeclaration):
+                yield VariableDeclaration(a.reference.variable, a.dimensions)

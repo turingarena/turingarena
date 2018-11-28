@@ -122,7 +122,7 @@ class Validator:
             )
         for parameter_declaration, expression in zip(method.parameter_declarations, n.arguments):
             yield from self.validate(expression)
-            dimensions = n.context.dimensions(expression)
+            dimensions = self.dimensions(expression)
             if dimensions != parameter_declaration.dimensions:
                 yield Diagnostic(
                     Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,

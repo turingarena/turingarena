@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
+from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.context import INITIAL_CONTEXT
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
@@ -207,8 +208,10 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         yield from self.visit(interface.main_block)
 
     def generate_statement(self, statement):
+        analyzer = TreeAnalyzer()
+
         # FIXME: drop this reference to INITIAL_CONTEXT
-        comment = INITIAL_CONTEXT.comment(statement)
+        comment = analyzer.comment(statement)
         if comment is not None:
             comment = StatementDescriptionCodeGen().visit(statement)
         if comment is not None:
