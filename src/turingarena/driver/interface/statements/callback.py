@@ -41,11 +41,11 @@ class CallbackBody(AbstractContextBlock):
 
         yield from Block(self.ast, self.context)._get_flat_children_builders()
 
-        if not self.implementation.has_return_value:
+        if not self.implementation.prototype.has_return_value:
             yield functools.partial(CallbackEnd, self.implementation)
 
 
-class CallbackImplementation(IntermediateNode, CallbackPrototype):
+class CallbackImplementation(namedtuple("CallbackImplementation", ["ast", "context", "prototype"])):
     __slots__ = []
 
     @property
@@ -62,10 +62,10 @@ class CallbackImplementation(IntermediateNode, CallbackPrototype):
             namedtuple("write", ["statement_type", "arguments"])("write", [
                 namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name,
                                                                                           "")
-                for p in self.parameters
+                for p in self.prototype.parameters
             ])
         ]
-        if self.has_return_value:
+        if self.prototype.has_return_value:
             return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])(
                 "reference_subscript", "_result", "")
             fake_ast_body += [

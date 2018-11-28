@@ -70,7 +70,7 @@ class InterfaceDefinition:
     @property
     def methods(self):
         return [
-            MethodPrototype(ast=method, context=None, description=self.descriptions.get(method.declarator.name))
+            MethodPrototype(ast=method, description=self.descriptions.get(method.declarator.name))
             for method in self.ast.method_declarations
         ]
 

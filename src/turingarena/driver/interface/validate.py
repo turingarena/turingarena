@@ -80,7 +80,7 @@ class Validator:
         yield from self.validate(n.body)
 
     def validate_Break(self, n):
-        if not n.context.in_loop:
+        if not self.in_loop:
             yield Diagnostic(Diagnostic.Messages.UNEXPECTED_BREAK, parseinfo=n.ast.parseinfo)
 
     def validate_If(self, n):

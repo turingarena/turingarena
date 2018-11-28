@@ -57,14 +57,14 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             yield from self.visit(interface.main_block)
         yield "}"
 
-    def generate_callback(self, callback):
-        params = ", ".join(f"{parameter.name}" for parameter in callback.parameters) + " int"
-        if callback.has_return_value:
+    def visit_CallbackImplementation(self, callback):
+        params = ", ".join(f"{parameter.name}" for parameter in callback.prototype.parameters) + " int"
+        if callback.prototype.has_return_value:
             return_value = "int"
         else:
             return_value = ""
 
-        yield f"_callback_{callback.name} := func({params}) {return_value}" " {"
+        yield f"_callback_{callback.prototype.name} := func({params}) {return_value}" " {"
         with self.indent():
             yield from self.visit(callback.body)
         yield "}"
@@ -73,7 +73,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         method = call_statement.method
 
         for callback in call_statement.callbacks:
-            yield from self.generate_callback(callback)
+            yield from self.visit_CallbackImplementation(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [

@@ -44,20 +44,24 @@ class CallNode(IntermediateNode, AbstractSyntaxNodeWrapper):
         ]
 
     def _find_callback_implementation(self, index, callback):
-        try:
-            return next(
-                CallbackImplementation(ast=implementation, context=StaticCallbackBlockContext(
-                    local_context=self.context,
-                    callback_index=index,
-                ), description=None)
-                for implementation in self.ast.callbacks
-                if implementation.declarator.name == callback.name
-            )
-        except StopIteration:
-            return CallbackImplementation(ast=callback.ast, context=StaticCallbackBlockContext(
+        asts = [
+            ast
+            for ast in self.ast.callbacks
+            if ast.declarator.name == callback.name
+        ]
+        if asts:
+            [ast] = asts
+        else:
+            ast = None
+
+        return CallbackImplementation(
+            ast=ast,
+            prototype=callback,
+            context=StaticCallbackBlockContext(
                 local_context=self.context,
                 callback_index=index,
-            ), description=None)
+            ),
+        )
 
 
 class Call(Statement, CallNode):
@@ -98,7 +102,7 @@ class AcceptCallbacks(CallNode):
             yield from self._indent_all(self._describe_callback(callback))
 
     def _describe_callback(self, callback):
-        yield f"callback {callback.name}"
+        yield f"callback {callback.prototype.name}"
         yield from self._indent_all(callback.body.node_description)
 
 

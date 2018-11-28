@@ -1,13 +1,12 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
 
-class ParameterDeclaration(AbstractSyntaxNodeWrapper):
+class ParameterDeclaration(namedtuple("ParameterDeclaration", ["ast"])):
     __slots__ = []
 
     @property
@@ -21,7 +20,7 @@ class ParameterDeclaration(AbstractSyntaxNodeWrapper):
         return len(self.ast.indexes)
 
 
-class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "description"])):
+class CallablePrototype(namedtuple("CallablePrototype", ["ast", "description"])):
     __slots__ = []
 
     @property
@@ -31,7 +30,7 @@ class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "desc
     @property
     def parameter_declarations(self):
         return [
-            ParameterDeclaration(ast=p, context=self.context)
+            ParameterDeclaration(ast=p)
             for p in self.ast.declarator.parameters
         ]
 
@@ -49,7 +48,7 @@ class CallablePrototype(namedtuple("CallablePrototype", ["ast", "context", "desc
     @property
     def callbacks(self):
         return [
-            CallbackPrototype(callback, self.context, description=None)
+            CallbackPrototype(callback, description=None)
             for callback in self.ast.callbacks
         ]
 

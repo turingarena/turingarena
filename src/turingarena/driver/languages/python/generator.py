@@ -72,9 +72,9 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         yield from ()
 
-    def generate_callback(self, callback):
-        params = ", ".join(parameter.name for parameter in callback.parameters)
-        yield f"def _callback_{callback.name}({params}):"
+    def visit_CallbackImplementation(self, callback):
+        params = ", ".join(parameter.name for parameter in callback.prototype.parameters)
+        yield f"def _callback_{callback.prototype.name}({params}):"
         with self.indent():
             yield from self.visit(callback.body)
 
@@ -82,11 +82,11 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         method_name = call_statement.method_name
 
         for callback in call_statement.callbacks:
-            yield from self.generate_callback(callback)
+            yield from self.visit_CallbackImplementation(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
-            f"_callback_{callback.name}"
+            f"_callback_{callback.prototype.name}"
             for callback in call_statement.callbacks
         ]
         arguments = ", ".join(value_arguments + callback_arguments)

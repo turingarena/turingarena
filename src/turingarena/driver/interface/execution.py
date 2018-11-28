@@ -319,7 +319,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_CallbackStart(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            for p in n.callback_implementation.parameters:
+            for p in n.callback_implementation.prototype.parameters:
                 r = p.as_reference()
                 value = self.bindings[r]
                 self.send_driver_upward(value)
@@ -484,7 +484,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
         for c in n.callbacks:
             parameter_count = int(self.receive_driver_downward())
-            expected_parameter_count = len(c.parameters)
+            expected_parameter_count = len(c.prototype.parameters)
             if not parameter_count == expected_parameter_count:
                 raise InterfaceError(
                     f"'{c.name}' has {expected_parameter_count} parameters, "

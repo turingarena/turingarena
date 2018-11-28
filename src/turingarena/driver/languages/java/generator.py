@@ -81,8 +81,8 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         with self.indent():
             yield from self.generate_main(interface)
 
-    def generate_callback(self, callback):
-        yield f'public {self.build_callback_signature(callback)}' " {"
+    def visit_CallbackImplementation(self, callback):
+        yield f'public {self.build_callback_signature(callback.prototype)}' " {"
         with self.indent():
             yield from self.visit(callback.body)
         yield "}"
@@ -97,7 +97,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
             yield cb_name + " __clbks = new " + cb_name + "() {"
             with self.indent():
                 for callback in call_statement.callbacks:
-                    yield from self.generate_callback(callback)
+                    yield from self.visit_CallbackImplementation(callback)
             yield "};"
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]

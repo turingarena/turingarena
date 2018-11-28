@@ -51,14 +51,14 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             yield from self.visit(interface.main_block)
         yield "}"
 
-    def generate_callback(self, callback):
-        params = ", ".join(f"int {parameter.name}" for parameter in callback.parameters)
-        if callback.has_return_value:
+    def visit_CallbackImplementation(self, callback):
+        params = ", ".join(f"int {parameter.name}" for parameter in callback.prototype.parameters)
+        if callback.prototype.has_return_value:
             return_value = " -> int"
         else:
             return_value = ""
 
-        yield f"auto _callback_{callback.name} = []({params}){return_value}" " {"
+        yield f"auto _callback_{callback.prototype.name} = []({params}){return_value}" " {"
         with self.indent():
             yield from self.visit(callback.body)
         yield "};"
@@ -70,7 +70,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         method = call_statement.method
 
         for callback in call_statement.callbacks:
-            yield from self.generate_callback(callback)
+            yield from self.visit_CallbackImplementation(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
