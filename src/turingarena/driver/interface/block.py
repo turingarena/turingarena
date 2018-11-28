@@ -25,11 +25,12 @@ class AbstractBlock(SequenceNode):
         return tuple(self._generate_children())
 
     def _generate_children(self):
+        # FIXME: make import global
+        from turingarena.driver.interface.analysis import TreeAnalyzer
+        analyzer = TreeAnalyzer()
         group = []
         for node in self.flat_inner_nodes:
-            # FIXME: should not need INITIAL_CONTEXT
-            from turingarena.driver.interface.context import INITIAL_CONTEXT
-            can_be_grouped = INITIAL_CONTEXT.can_be_grouped(node)
+            can_be_grouped = analyzer.can_be_grouped(node)
 
             if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
                 group.append(node)
@@ -58,9 +59,10 @@ class AbstractBlock(SequenceNode):
         return direction
 
     def _group_directions(self, group):
-        # FIXME: should not need INITIAL_CONTEXT
-        from turingarena.driver.interface.context import INITIAL_CONTEXT
-        return {d for n in group for d in INITIAL_CONTEXT.declaration_directions(n)}
+        # FIXME: make import global
+        from turingarena.driver.interface.analysis import TreeAnalyzer
+        analyzer = TreeAnalyzer()
+        return {d for n in group for d in analyzer.declaration_directions(n)}
 
     def _describe_node(self):
         yield "block"

@@ -4,7 +4,7 @@ from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.validate import Validator
-from turingarena.driver.interface.variables import ReferenceAllocation, ReferenceDeclaration, \
+from turingarena.driver.interface.variables import ReferenceDeclaration, \
     ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
@@ -32,7 +32,13 @@ class InterfaceContext(namedtuple("InterfaceContext", [
 
     @property
     def initial_context(self):
-        return INITIAL_CONTEXT._replace(global_context=self)
+        return StatementContext(
+            global_context=self,
+            prev_reference_actions=(),
+            index_variables=(),
+            main_block=True,
+            in_loop=False,
+        )
 
 
 class StatementContext(namedtuple("StatementContext", [
@@ -140,12 +146,3 @@ class StatementContext(namedtuple("StatementContext", [
                 self.is_resolved(self.reference(e))
                 or self.is_resolved(e.array)
         )
-
-
-INITIAL_CONTEXT = StatementContext(
-    global_context=None,
-    prev_reference_actions=(),
-    index_variables=(),
-    main_block=True,
-    in_loop=False,
-)
