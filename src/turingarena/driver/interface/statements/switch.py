@@ -11,7 +11,7 @@ from turingarena.driver.interface.statements.statement import Statement
 logger = logging.getLogger(__name__)
 
 
-class SwitchNode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class SwitchNode(AbstractSyntaxNodeWrapper, IntermediateNode):
     __slots__ = []
 
     @property

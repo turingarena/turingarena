@@ -1,16 +1,16 @@
-from turingarena.driver.interface.statements.callback import ExitStatement
+from turingarena.driver.interface.statements.callback import Exit
 from .call import CallArgumentsResolve, AcceptCallbacks, \
     CallCompleted, CallReturn, Call, PrintNoCallbacks
 from .callback import Return
 from .for_loop import For
 from .if_else import IfConditionResolve, If
-from .io import CheckpointStatement, Read, Write
+from .io import Checkpoint, Read, Write
 from .loop import Loop, Break
 from .switch import SwitchValueResolve, Switch
 
 statement_classes = {
     "checkpoint": [
-        CheckpointStatement,
+        Checkpoint,
     ],
     "read": [
         Read,
@@ -30,7 +30,7 @@ statement_classes = {
         Return,
     ],
     "exit": [
-        ExitStatement,
+        Exit,
     ],
     "for": [
         For,

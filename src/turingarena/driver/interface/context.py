@@ -3,10 +3,13 @@ from collections import namedtuple
 from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
+from turingarena.driver.interface.block import Block
+from turingarena.driver.interface.expressions import ExpressionCompiler
+from turingarena.driver.interface.statements.for_loop import ForIndex
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, \
-    ReferenceResolution
-from turingarena.util.visitor import visitormethod
+    ReferenceResolution, Variable
+from turingarena.util.visitor import visitormethod, classvisitormethod
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +50,7 @@ class StatementContext(namedtuple("StatementContext", [
     "index_variables",
     "main_block",
     "in_loop",
-]), Validator, TreeAnalyzer):
+]), Validator, TreeAnalyzer, ExpressionCompiler):
     def with_reference_actions(self, actions):
         actions = tuple(actions)
         assert all(

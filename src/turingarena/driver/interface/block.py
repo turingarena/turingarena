@@ -1,6 +1,5 @@
 import logging
 from abc import abstractmethod
-from functools import partial
 
 from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper, memoize
 from turingarena.driver.interface.seq import SequenceNode
@@ -87,15 +86,11 @@ class AbstractContextBlock(AbstractBlock):
         pass
 
 
-class Block(AbstractContextBlock, AbstractSyntaxNodeWrapper):
+class Block(AbstractSyntaxNodeWrapper, AbstractContextBlock):
     __slots__ = []
 
     def _get_flat_children_builders(self):
         for ast in self.ast.statements:
             from turingarena.driver.interface.statements.statements import statement_classes
             for cls in statement_classes[ast.statement_type]:
-                if issubclass(cls, AbstractSyntaxNodeWrapper):
-                    # still needs context (TODO: remove this distinction)
-                    yield partial(cls, ast)
-                else:
-                    yield lambda context: cls(ast)
+                yield lambda context: context.compile(cls, ast)

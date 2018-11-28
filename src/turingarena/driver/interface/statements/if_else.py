@@ -10,7 +10,7 @@ from turingarena.driver.interface.statements.statement import Statement
 logger = logging.getLogger(__name__)
 
 
-class AbstractIfNode(IntermediateNode, AbstractSyntaxNodeWrapper):
+class AbstractIfNode(AbstractSyntaxNodeWrapper, IntermediateNode):
     __slots__ = []
 
     @property

@@ -8,18 +8,18 @@ logger = logging.getLogger(__name__)
 class ExpressionCompiler:
     __slots__ = []
 
-    def compile(self, ast):
-        return getattr(self, f"compile_{ast.expression_type}")(ast)
+    def expression(self, ast):
+        return getattr(self, f"_compile_{ast.expression_type}")(ast)
 
-    def compile_int_literal(self, ast):
+    def _compile_int_literal(self, ast):
         return IntLiteralAst(ast)
 
-    def compile_reference_subscript(self, ast):
-        return self.compile_subscript(ast, ast.indices)
+    def _compile_reference_subscript(self, ast):
+        return self._compile_subscript(ast, ast.indices)
 
-    def compile_subscript(self, ast, index_asts):
+    def _compile_subscript(self, ast, index_asts):
         if index_asts:
-            array = self.compile_subscript(ast, index_asts[:-1])
+            array = self._compile_subscript(ast, index_asts[:-1])
             index = Expression.compile(index_asts[-1])
             return Subscript(array, index)
         else:
@@ -31,7 +31,7 @@ class Expression:
 
     @staticmethod
     def compile(ast):
-        return ExpressionCompiler().compile(ast)
+        return ExpressionCompiler().expression(ast)
 
 
 class Literal(Expression):

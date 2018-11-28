@@ -49,7 +49,7 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, validate=True, descriptions={}):
+    def compile(source_text, validate=False, descriptions={}):
         interface = InterfaceDefinition(source_text, descriptions)
         if validate:
             for msg in interface.diagnostics():

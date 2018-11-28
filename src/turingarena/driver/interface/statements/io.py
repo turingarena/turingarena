@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
+from turingarena.driver.interface.expressions import IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 
 logger = logging.getLogger(__name__)
@@ -14,23 +14,16 @@ class Print(IntermediateNode):
 class IONode(IntermediateNode):
     __slots__ = []
 
-    @property
-    def arguments(self):
-        return [
-            Expression.compile(arg)
-            for arg in self.ast.arguments
-        ]
 
-
-class Read(namedtuple("Read", ["ast"]), IONode):
+class Read(namedtuple("Read", ["arguments"]), IONode):
     __slots__ = []
 
 
-class Write(namedtuple("Write", ["ast"]), Print, IONode):
+class Write(namedtuple("Write", ["arguments"]), Print, IONode):
     __slots__ = []
 
 
-class Checkpoint(Print, IntermediateNode):
+class Checkpoint(namedtuple("Checkpoint", []), Print, IntermediateNode):
     __slots__ = []
 
     @property
@@ -41,7 +34,3 @@ class Checkpoint(Print, IntermediateNode):
 class InitialCheckpoint(Checkpoint):
     def _describe_node(self):
         yield "initial checkpoint"
-
-
-class CheckpointStatement(namedtuple("CheckpointStatement", ["ast"]), Checkpoint):
-    __slots__ = []

@@ -3,11 +3,9 @@ import logging
 from collections import namedtuple
 
 from turingarena.driver.interface.block import Block, AbstractContextBlock
-from turingarena.driver.interface.callables import CallbackPrototype
-from turingarena.driver.interface.expressions import Expression, IntLiteralSynthetic
+from turingarena.driver.interface.expressions import IntLiteralSynthetic
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
-from turingarena.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
@@ -83,12 +81,8 @@ class CallbackStart(IntermediateNode, namedtuple("CallbackStart", [
         yield "callback_call"
 
 
-class Return(namedtuple("Return", ["ast"]), IntermediateNode):
+class Return(namedtuple("Return", ["value"]), IntermediateNode):
     __slots__ = []
-
-    @property
-    def value(self):
-        return Expression.compile(self.ast.value)
 
     def _describe_node(self):
         yield f"callback return"
@@ -99,9 +93,5 @@ class CallbackEnd(IntermediateNode, namedtuple("CallbackEnd", ["callback", "cont
         yield f"callback end"
 
 
-class Exit(IntermediateNode):
-    __slots__ = []
-
-
-class ExitStatement(namedtuple("Exit", ["ast"]), Exit, IntermediateNode):
+class Exit(namedtuple("Exit", []), IntermediateNode):
     __slots__ = []

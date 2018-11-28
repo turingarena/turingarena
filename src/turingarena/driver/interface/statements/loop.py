@@ -24,5 +24,5 @@ class Loop(Statement, ControlStructure, IntermediateNode):
         yield from self._indent_all(self.body.node_description)
 
 
-class Break(namedtuple("Break", ["ast"]), IntermediateNode):
+class Break(namedtuple("Break", []), IntermediateNode):
     __slots__ = []
