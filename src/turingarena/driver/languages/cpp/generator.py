@@ -36,7 +36,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
 
     def visit_VariableAllocation(self, a):
         name = a.variable.name
-        indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        indexes = "".join(f"[{idx.variable.name}]" for idx in a.reference.indexes)
         dimensions = "*" * a.dimensions
         size = self.visit(a.size)
         yield f"{name}{indexes} = new int{dimensions}[{size}];"

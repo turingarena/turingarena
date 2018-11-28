@@ -62,7 +62,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
     def visit_VariableAllocation(self, a):
         name = a.variable.name
-        indexes = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        indexes = "".join(f"[{idx.variable.name}]" for idx in a.reference.indexes)
         size = self.visit(a.size)
         yield f"{name}{indexes} = [None] * {size}"
 

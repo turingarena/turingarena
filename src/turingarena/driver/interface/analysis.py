@@ -13,11 +13,6 @@ from turingarena.util.visitor import visitormethod
 
 
 class TreeAnalyzer:
-    NON_GROUPABLE = [
-        Loop,
-        AcceptCallbacks,
-    ]
-
     DIRECTION_MAP = {
         ReferenceDirection.DOWNWARD: [
             Read,
@@ -61,8 +56,8 @@ class TreeAnalyzer:
     def _get_reference_actions_For(self, n):
         for a in self.reference_actions(n.body):
             r = a.reference
-            if r.index_count > 0:
-                yield a._replace(reference=r._replace(index_count=r.index_count - 1))
+            if r.indexes:
+                yield a._replace(reference=r._replace(indexes=r.indexes[:-1]))
 
     def _get_reference_actions_CallArgumentsResolve(self, n):
         for p in n.arguments:
@@ -87,7 +82,7 @@ class TreeAnalyzer:
     def can_be_grouped_For(self, n):
         # no local references
         return all(
-            a.reference.index_count > 0
+            a.reference.indexes
             for a in self.reference_actions(n.body)
         ) and all(
             self.can_be_grouped(child)
@@ -95,7 +90,10 @@ class TreeAnalyzer:
         )
 
     def can_be_grouped_IntermediateNode(self, n):
-        for t in self.NON_GROUPABLE:
+        for t in [
+            Loop,
+            AcceptCallbacks,
+        ]:
             if isinstance(n, t):
                 return False
         return True
@@ -198,7 +196,7 @@ class TreeAnalyzer:
         array_reference = self.reference(e.array)
         if array_reference is not None:
             return array_reference._replace(
-                index_count=array_reference.index_count + 1,
+                indexes=array_reference.indexes + (self.variable(e.index),),
             )
 
     def reference_Expression(self, e):
@@ -222,7 +220,7 @@ class TreeAnalyzer:
         if array_declaration is not None:
             return array_declaration._replace(
                 reference=array_declaration.reference._replace(
-                    index_count=array_declaration.reference.index_count + 1,
+                    indexes=array_declaration.reference.indexes + (self.variable(e.index),),
                 ),
             )
 
@@ -264,5 +262,5 @@ class TreeAnalyzer:
         if not any(isinstance(n, t) for t in types):
             return
         for a in self.reference_actions(n):
-            if a.reference.index_count == 0 and isinstance(a, ReferenceDeclaration):
+            if isinstance(a, ReferenceDeclaration) and not a.reference.indexes:
                 yield VariableDeclaration(a.reference.variable, a.dimensions)

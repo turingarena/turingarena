@@ -93,9 +93,8 @@ class StatementContext(namedtuple("StatementContext", [
                 continue
             yield VariableAllocation(
                 variable=a.reference.variable,
-                indexes=self.index_variables[-a.reference.index_count + 1:],
                 size=n.index.range,
-                dimensions=a.dimensions - a.reference.index_count,
+                dimensions=a.dimensions - len(a.reference.indexes),
             )
 
     def _get_allocations_IntermediateNode(self, n):

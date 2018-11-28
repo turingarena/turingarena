@@ -45,7 +45,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
 
     def visit_VariableAllocation(self, a):
         name = a.variable.name
-        idx = "".join(f"[{idx.variable.name}]" for idx in a.indexes)
+        idx = "".join(f"[{idx.variable.name}]" for idx in a.reference.indexes)
         # FIXME: is this + 1 needed?
         dimensions = "[]" * (a.dimensions + 1)
         size = self.visit(a.size)

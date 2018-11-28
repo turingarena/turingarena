@@ -368,12 +368,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         assignments = [
             (a.reference, [
                 result.assignments[a.reference._replace(
-                    index_count=a.reference.index_count + 1,
+                    indexes=a.reference.indexes + (self.variable(n.index),),
                 )]
                 for result in results_by_iteration
-                if isinstance(a, ReferenceResolution)
             ])
             for a in self.reference_actions(n)
+            if isinstance(a, ReferenceResolution)
         ]
 
         return self.result()._replace(assignments=assignments)

@@ -6,10 +6,10 @@ class Variable(namedtuple("Variable", ["name"])):
     __slots__ = []
 
     def as_reference(self):
-        return Reference(self, index_count=0)
+        return Reference(self, indexes=())
 
 
-Reference = namedtuple("Reference", ["variable", "index_count"])
+Reference = namedtuple("Reference", ["variable", "indexes"])
 
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
 
@@ -17,4 +17,4 @@ ReferenceDeclaration = namedtuple("ReferenceDeclaration", ["reference", "dimensi
 ReferenceResolution = namedtuple("ReferenceResolution", ["reference"])
 
 VariableDeclaration = namedtuple("VariableDeclaration", ["variable", "dimensions"])
-VariableAllocation = namedtuple("VariableAllocation", ["variable", "indexes", "size", "dimensions"])
+VariableAllocation = namedtuple("VariableAllocation", ["variable", "size", "dimensions"])
