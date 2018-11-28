@@ -1,23 +1,17 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
-from turingarena.driver.interface.statements.statement import Statement
 
 logger = logging.getLogger(__name__)
 
 
-class Loop(Statement, ControlStructure, IntermediateNode):
+class Loop(namedtuple("Loop", ["body"]), ControlStructure, IntermediateNode):
     __slots__ = []
 
     def _get_bodies(self):
         yield self.body
-
-    @property
-    def body(self):
-        return Block(ast=self.ast.body, context=self.context.with_loop())
 
     def _describe_node(self):
         yield "loop"

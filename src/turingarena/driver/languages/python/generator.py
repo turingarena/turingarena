@@ -79,7 +79,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
             yield from self.visit(callback.body)
 
     def visit_Call(self, call_statement):
-        method_name = call_statement.method_name
+        method_name = call_statement.method.name
 
         for callback in call_statement.callbacks:
             yield from self.visit_CallbackImplementation(callback)

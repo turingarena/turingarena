@@ -66,7 +66,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def visit_Call(self, call_statement):
         arguments = " ".join(f"$(({self.visit(p)}))" for p in call_statement.arguments)
-        yield f"{call_statement.method_name} {arguments}"
+        yield f"{call_statement.method.name} {arguments}"
         if call_statement.return_value is not None:
             return_value = self.visit(call_statement.return_value)
             yield f"{return_value}=$return_val"

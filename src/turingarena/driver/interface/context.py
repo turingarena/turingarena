@@ -5,7 +5,10 @@ from functools import partial
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import ExpressionCompiler
+from turingarena.driver.interface.statements.call import StaticCallbackBlockContext
+from turingarena.driver.interface.statements.callback import CallbackImplementation
 from turingarena.driver.interface.statements.for_loop import ForIndex
+from turingarena.driver.interface.statements.switch import Case
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, \
     ReferenceResolution, Variable
@@ -148,4 +151,95 @@ class StatementContext(namedtuple("StatementContext", [
         return (
                 self.is_resolved(self.reference(e))
                 or self.is_resolved(e.array)
+        )
+
+    def group_nodes(self, nodes):
+        pass
+
+    @classvisitormethod
+    def compile(self, cls, ast):
+        pass
+
+    def compile_AbstractSyntaxNodeWrapper(self, cls, ast):
+        return cls(ast, self)
+
+    def compile_IONode(self, cls, ast):
+        return cls(arguments=[
+            self.expression(a) for a in ast.arguments
+        ])
+
+    def compile_Checkpoint(self, cls, ast):
+        return cls()
+
+    def compile_Exit(self, cls, ast):
+        return cls()
+
+    def compile_Break(self, cls, ast):
+        return cls()
+
+    def compile_Return(self, cls, ast):
+        return cls(value=self.expression(ast.value))
+
+    def compile_For(self, cls, ast):
+        index = ForIndex(variable=Variable(name=ast.index), range=self.expression(ast.range), )
+        return cls(
+            index=index,
+            body=Block(
+                ast=ast.body,
+                context=self.with_index_variable(index).with_reference_actions([
+                    ReferenceDeclaration(index.variable.as_reference(), dimensions=0),
+                    ReferenceResolution(index.variable.as_reference()),
+                ]),
+            )
+        )
+
+    def compile_SwitchNode(self, cls, ast):
+        return cls(
+            value=self.expression(ast.value),
+            cases=[
+                Case(
+                    labels=[self.expression(l) for l in case_ast.labels],
+                    body=Block(ast=case_ast.body, context=self),
+                )
+                for case_ast in ast.cases
+            ],
+        )
+
+    def compile_IfNode(self, cls, ast):
+        return cls(
+            condition=self.expression(ast.condition),
+            then_body=Block(ast=ast.then_body, context=self),
+            else_body=Block(ast=ast.else_body, context=self) if ast.else_body is not None else None,
+        )
+
+    def compile_Loop(self, cls, ast):
+        return cls(
+            body=Block(ast=ast.body, context=self.with_loop())
+        )
+
+    def compile_CallNode(self, cls, ast):
+        method = self.global_context.methods_by_name.get(ast.name)
+
+        callback_ast_by_name = {
+            ast.declarator.name: ast
+            for ast in ast.callbacks
+        }
+
+        callbacks = [
+            CallbackImplementation(
+                ast=callback_ast_by_name.get(prototype.name),
+                prototype=prototype,
+                context=StaticCallbackBlockContext(
+                    local_context=self,
+                    callback_index=index,
+                ),
+            )
+            for index, prototype in enumerate(method.callbacks)
+        ]
+
+        return cls(
+            method=method,
+            arguments=[self.expression(a) for a in ast.arguments],
+            return_value=self.expression(ast.return_value) if ast.return_value is not None else None,
+            callbacks=callbacks,
         )

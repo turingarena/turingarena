@@ -1,8 +1,6 @@
 import logging
+from collections import namedtuple
 
-from turingarena.driver.interface.block import Block
-from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
-from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.control import ControlStructure
 from turingarena.driver.interface.statements.statement import Statement
@@ -10,12 +8,8 @@ from turingarena.driver.interface.statements.statement import Statement
 logger = logging.getLogger(__name__)
 
 
-class AbstractIfNode(AbstractSyntaxNodeWrapper, IntermediateNode):
+class IfNode(namedtuple("IfNode", ["condition", "then_body", "else_body"]), IntermediateNode):
     __slots__ = []
-
-    @property
-    def condition(self):
-        return Expression.compile(self.ast.condition)
 
     @property
     def branches(self):
@@ -25,19 +19,8 @@ class AbstractIfNode(AbstractSyntaxNodeWrapper, IntermediateNode):
             if b is not None
         )
 
-    @property
-    def then_body(self):
-        return Block(ast=self.ast.then_body, context=self.context)
 
-    @property
-    def else_body(self):
-        if self.ast.else_body is not None:
-            return Block(ast=self.ast.else_body, context=self.context)
-        else:
-            return None
-
-
-class If(ControlStructure, AbstractIfNode, Statement):
+class If(ControlStructure, IfNode):
     def _get_bodies(self):
         yield self.then_body
         if self.else_body is not None:
@@ -51,6 +34,6 @@ class If(ControlStructure, AbstractIfNode, Statement):
             yield from self._indent_all(self.else_body.node_description)
 
 
-class IfConditionResolve(AbstractIfNode):
+class IfConditionResolve(IfNode):
     def _describe_node(self):
         yield "resolve if"

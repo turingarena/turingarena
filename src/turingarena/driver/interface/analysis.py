@@ -142,7 +142,7 @@ class TreeAnalyzer:
         yield RequestSignature("exit")
 
     def _get_first_requests_Call(self, n):
-        yield CallRequestSignature("call", n.method_name)
+        yield CallRequestSignature("call", n.method.name)
 
     def _get_first_requests_SequenceNode(self, n):
         for child in n.children:
