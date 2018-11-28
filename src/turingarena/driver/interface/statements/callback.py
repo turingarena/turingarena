@@ -3,27 +3,27 @@ import logging
 from collections import namedtuple
 
 from turingarena.driver.interface.block import Block, AbstractContextBlock
-from turingarena.driver.interface.expressions import IntLiteralSynthetic
+from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
 
 logger = logging.getLogger(__name__)
 
 
-class PrintCallbackRequest(Print, namedtuple("PrintCallbackRequest", ["context"])):
-    @property
-    def arguments(self):
-        return [IntLiteralSynthetic(value=1)]
-
-
-class PrintCallbackIndex(namedtuple("CallbackWriteIndexNode", ["implementation", "context"]), Print):
-    @property
-    def callback_index(self):
-        return self.implementation.context.callback_index
+class PrintCallbackRequest(namedtuple("PrintCallbackRequest", []), Print):
+    __slots__ = []
 
     @property
     def arguments(self):
-        return [IntLiteralSynthetic(value=self.callback_index)]
+        return [IntLiteral(value=1)]
+
+
+class PrintCallbackIndex(namedtuple("PrintCallbackIndex", ["index", "prototype"]), Print):
+    __slots__ = []
+
+    @property
+    def arguments(self):
+        return [IntLiteral(value=self.index)]
 
 
 class CallbackBody(AbstractContextBlock):
@@ -43,16 +43,12 @@ class CallbackBody(AbstractContextBlock):
             yield functools.partial(CallbackEnd, self.implementation)
 
 
-class CallbackImplementation(namedtuple("CallbackImplementation", ["ast", "context", "prototype"])):
+class CallbackImplementation(namedtuple("CallbackImplementation", [
+    "index",
+    "prototype",
+    "body",
+])):
     __slots__ = []
-
-    @property
-    def body(self):
-        return CallbackBody(
-            ast=self.ast.body if self.ast.body else self.default_body,
-            context=self.context.local_context,
-            implementation=self,
-        )
 
     @property
     def default_body(self):
@@ -73,10 +69,9 @@ class CallbackImplementation(namedtuple("CallbackImplementation", ["ast", "conte
         return namedtuple("body", ["statements"])(fake_ast_body)
 
 
-class CallbackStart(IntermediateNode, namedtuple("CallbackStart", [
-    "callback_implementation",
-    "context",
-])):
+class CallbackStart(namedtuple("CallbackStart", [
+    "prototype",
+]), IntermediateNode):
     def _describe_node(self):
         yield "callback_call"
 
@@ -88,7 +83,7 @@ class Return(namedtuple("Return", ["value"]), IntermediateNode):
         yield f"callback return"
 
 
-class CallbackEnd(IntermediateNode, namedtuple("CallbackEnd", ["callback", "context"])):
+class CallbackEnd(namedtuple("CallbackEnd", []), IntermediateNode):
     def _describe_node(self):
         yield f"callback end"
 

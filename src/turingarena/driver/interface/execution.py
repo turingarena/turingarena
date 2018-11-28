@@ -314,12 +314,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         assert self.phase is None
         self.report_ready()
         self.send_driver_upward(1)  # has callbacks
-        self.send_driver_upward(n.context.callback_index)
+        self.send_driver_upward(n.index)
         self.execute(n.body)
 
     def _on_execute_CallbackStart(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            for p in n.callback_implementation.prototype.parameters:
+            for p in n.prototype.parameters:
                 r = p.as_reference()
                 value = self.bindings[r]
                 self.send_driver_upward(value)

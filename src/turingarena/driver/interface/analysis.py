@@ -47,7 +47,7 @@ class TreeAnalyzer:
         yield ReferenceResolution(self.reference(n.value))
 
     def _get_reference_actions_CallbackStart(self, n):
-        for p in n.callback_implementation.prototype.parameters:
+        for p in n.prototype.parameters:
             yield ReferenceDeclaration(p.as_reference(), dimensions=0)
 
     def _get_reference_actions_Return(self, n):
@@ -246,7 +246,7 @@ class TreeAnalyzer:
         return "requesting a callback"
 
     def _get_comment_PrintCallbackIndex(self, n):
-        return f"index of this callback: {n.callback_index} = {n.implementation.prototype.name}"
+        return f"index of this callback: {n.index} = {n.prototype.name}"
 
     def _get_comment_PrintNoCallbacks(self, n):
         return "no more callbacks"

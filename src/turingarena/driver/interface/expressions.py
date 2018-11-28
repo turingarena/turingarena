@@ -12,7 +12,7 @@ class ExpressionCompiler:
         return getattr(self, f"_compile_{ast.expression_type}")(ast)
 
     def _compile_int_literal(self, ast):
-        return IntLiteralAst(value=int(ast.int_literal))
+        return IntLiteral(value=int(ast.int_literal))
 
     def _compile_reference_subscript(self, ast):
         return self._compile_subscript(ast, ast.indices)
@@ -43,18 +43,7 @@ class Literal(Expression):
         pass
 
 
-class IntLiteral(Literal):
-    __slots__ = []
-
-
-class IntLiteralAst(namedtuple("IntLiteralAst", ["value"]), IntLiteral):
-    __slots__ = []
-
-
-class IntLiteralSynthetic(
-    namedtuple("IntLiteralSynthetic", ["value"]),
-    IntLiteral,
-):
+class IntLiteral(namedtuple("IntLiteral", ["value"]), Literal):
     __slots__ = []
 
 

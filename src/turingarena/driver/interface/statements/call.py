@@ -1,7 +1,7 @@
 import logging
 from collections.__init__ import namedtuple
 
-from turingarena.driver.interface.expressions import IntLiteralSynthetic
+from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
 
@@ -43,7 +43,7 @@ class CallCompleted(CallNode):
 class PrintNoCallbacks(CallNode, Print):
     @property
     def arguments(self):
-        return [IntLiteralSynthetic(0)]
+        return [IntLiteral(0)]
 
 
 class AcceptCallbacks(CallNode):
@@ -57,10 +57,3 @@ class AcceptCallbacks(CallNode):
     def _describe_callback(self, callback):
         yield f"callback {callback.prototype.name}"
         yield from self._indent_all(callback.body.node_description)
-
-
-class StaticCallbackBlockContext(namedtuple("StaticCallbackBlockContext", [
-    "local_context",
-    "callback_index",
-])):
-    pass

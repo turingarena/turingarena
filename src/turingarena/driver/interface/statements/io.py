@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.expressions import IntLiteralSynthetic
+from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class Checkpoint(namedtuple("Checkpoint", []), Print, IntermediateNode):
 
     @property
     def arguments(self):
-        return [IntLiteralSynthetic(0)]
+        return [IntLiteral(0)]
 
 
 class InitialCheckpoint(Checkpoint):

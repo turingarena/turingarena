@@ -2,13 +2,13 @@ import logging
 from collections import namedtuple
 from functools import partial
 
-from future.moves import itertools
+import itertools
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.block import Block
 from turingarena.driver.interface.expressions import ExpressionCompiler
-from turingarena.driver.interface.statements.call import StaticCallbackBlockContext
-from turingarena.driver.interface.statements.callback import CallbackImplementation
+from turingarena.driver.interface.statements.callback import CallbackImplementation, CallbackStart, \
+    PrintCallbackRequest, PrintCallbackIndex, CallbackEnd
 from turingarena.driver.interface.statements.for_loop import ForIndex
 from turingarena.driver.interface.statements.statements import statement_classes
 from turingarena.driver.interface.statements.switch import Case
@@ -221,19 +221,16 @@ class StatementContext(namedtuple("StatementContext", [
     def compile_CallNode(self, cls, ast):
         method = self.global_context.methods_by_name.get(ast.name)
 
-        callback_ast_by_name = {
-            ast.declarator.name: ast
+        body_by_name = {
+            ast.declarator.name: ast.body
             for ast in ast.callbacks
         }
 
         callbacks = [
-            CallbackImplementation(
-                ast=callback_ast_by_name.get(prototype.name),
+            self.callback_implementation(
                 prototype=prototype,
-                context=StaticCallbackBlockContext(
-                    local_context=self,
-                    callback_index=index,
-                ),
+                index=index,
+                ast=body_by_name.get(prototype.name),
             )
             for index, prototype in enumerate(method.callbacks)
         ]
@@ -243,6 +240,28 @@ class StatementContext(namedtuple("StatementContext", [
             arguments=[self.expression(a) for a in ast.arguments],
             return_value=self.expression(ast.return_value) if ast.return_value is not None else None,
             callbacks=callbacks,
+        )
+
+    def callback_implementation(self, prototype, index, ast):
+        prepend_nodes = [
+            CallbackStart(prototype),
+            PrintCallbackRequest(),
+            PrintCallbackIndex(index=index, prototype=prototype),
+        ]
+
+        if prototype.has_return_value:
+            append_nodes = []
+        else:
+            append_nodes = [CallbackEnd()]
+
+        return CallbackImplementation(
+            index=index,
+            prototype=prototype,
+            body=self.block(
+                ast,
+                prepend_nodes=prepend_nodes,
+                append_nodes=append_nodes,
+            )
         )
 
     def group_children(self, children):
