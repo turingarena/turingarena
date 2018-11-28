@@ -1,27 +1,17 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
-from turingarena.driver.interface.statements.io import Print
 
 logger = logging.getLogger(__name__)
 
 
-class PrintCallbackRequest(namedtuple("PrintCallbackRequest", []), Print):
+class PrintCallbackRequest(namedtuple("PrintCallbackRequest", []), IntermediateNode):
     __slots__ = []
 
-    @property
-    def arguments(self):
-        return [IntLiteral(value=1)]
 
-
-class PrintCallbackIndex(namedtuple("PrintCallbackIndex", ["index", "prototype"]), Print):
+class PrintCallbackIndex(namedtuple("PrintCallbackIndex", ["index", "prototype"]), IntermediateNode):
     __slots__ = []
-
-    @property
-    def arguments(self):
-        return [IntLiteral(value=self.index)]
 
 
 class CallbackImplementation(namedtuple("CallbackImplementation", [

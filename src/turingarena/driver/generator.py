@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
+from turingarena.driver.interface.expressions import IntLiteral
+from turingarena.driver.interface.statements.io import Print
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -152,6 +154,16 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
 class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
 
+    def visit_Write(self, s):
+        return self.visit(
+            Print(s.arguments)
+        )
+
+    def visit_Checkpoint(self, s):
+        return self.visit(
+            Print([IntLiteral(0)])
+        )
+
     @abstractmethod
     def visit_Read(self, s):
         pass
@@ -213,6 +225,21 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
             # insert an (upward) flush before receiving data downward
             yield from self.generate_flush()
         yield from self.visit_SequenceNode(s)
+
+    def visit_PrintNoCallbacks(self, s):
+        return self.visit(
+            Print([IntLiteral(0)])
+        )
+
+    def visit_PrintCallbackRequest(self, s):
+        return self.visit(
+            Print([IntLiteral(1)])
+        )
+
+    def visit_PrintCallbackIndex(self, s):
+        return self.visit(
+            Print([IntLiteral(s.index)])
+        )
 
     def generate_main_block(self, interface):
         yield from self.visit(interface.main_block)

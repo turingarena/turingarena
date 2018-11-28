@@ -40,10 +40,8 @@ class CallCompleted(CallNode):
         yield f"call completed"
 
 
-class PrintNoCallbacks(CallNode, Print):
-    @property
-    def arguments(self):
-        return [IntLiteral(0)]
+class PrintNoCallbacks(CallNode):
+    __slots__ = []
 
 
 class AcceptCallbacks(CallNode):
