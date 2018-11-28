@@ -20,7 +20,7 @@ class ExpressionCompiler:
     def _compile_subscript(self, ast, index_asts):
         if index_asts:
             array = self._compile_subscript(ast, index_asts[:-1])
-            index = Expression.compile(index_asts[-1])
+            index = self.expression(index_asts[-1])
             return Subscript(array, index)
         else:
             return VariableReference(ast.variable_name)

@@ -1,15 +1,18 @@
+import itertools
 import logging
 from collections import namedtuple
 from functools import partial
 
-import itertools
-
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.block import Block
+from turingarena.driver.interface.callables import ParameterDeclaration, CallbackPrototype
+from turingarena.driver.interface.constants import ConstantDeclaration
 from turingarena.driver.interface.expressions import ExpressionCompiler
 from turingarena.driver.interface.statements.callback import CallbackImplementation, CallbackStart, \
     PrintCallbackRequest, PrintCallbackIndex, CallbackEnd
+from turingarena.driver.interface.statements.control import MainExit
 from turingarena.driver.interface.statements.for_loop import ForIndex
+from turingarena.driver.interface.statements.io import InitialCheckpoint
 from turingarena.driver.interface.statements.statements import statement_classes
 from turingarena.driver.interface.statements.switch import Case
 from turingarena.driver.interface.step import Step
@@ -24,10 +27,53 @@ logger = logging.getLogger(__name__)
 class InterfaceContext(namedtuple("InterfaceContext", [
     "methods",
     "constants",
-])):
+]), TreeAnalyzer, ExpressionCompiler):
+    def with_constant(self, declaration):
+        return self._replace(
+            constants=self.constants + (declaration,),
+        )
+
+    def with_method(self, method):
+        return self._replace(
+            methods=self.methods + (method,),
+        )
+
     @property
     def methods_by_name(self):
         return {m.name: m for m in self.methods}
+
+    def constant_declaration(self, ast):
+        return ConstantDeclaration(
+            variable=Variable(name=ast.name),
+            value=self.expression(ast.value),
+        )
+
+    def prototype(self, cls, ast):
+        return cls(
+            name=ast.declarator.name,
+            parameter_declarations=[
+                self.parameter_declaration(p)
+                for p in ast.declarator.parameters
+            ],
+            has_return_value=(ast.declarator.type == 'function'),
+            callbacks=[
+                self.prototype(CallbackPrototype, c)
+                for c in ast.callbacks
+            ],
+        )
+
+    def parameter_declaration(self, ast):
+        return ParameterDeclaration(
+            variable=Variable(name=ast.name),
+            dimensions=len(ast.indexes),
+        )
+
+    def main_block(self, ast):
+        return self.main_block_context.block(
+            ast,
+            prepend_nodes=[InitialCheckpoint()],
+            append_nodes=[MainExit()],
+        )
 
     @property
     def main_block_context(self):

@@ -1,36 +1,18 @@
 import logging
+from collections import namedtuple
 
 from turingarena.driver.interface.callables import MethodPrototype
-from turingarena.driver.interface.common import AbstractSyntaxNodeWrapper
 from turingarena.driver.interface.context import InterfaceContext
-from turingarena.driver.interface.expressions import Expression
 from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.statements.callback import Exit
-from turingarena.driver.interface.statements.io import InitialCheckpoint
-from turingarena.driver.interface.variables import Variable
 
 logger = logging.getLogger(__name__)
 
 
-class MainExit(Exit):
-    pass
-
-
-class ConstantDeclaration(AbstractSyntaxNodeWrapper):
-    @property
-    def variable(self):
-        return Variable(name=self.ast.name)
-
-    @property
-    def value(self):
-        return Expression.compile(self.ast.value)
-
-
-class InterfaceDefinition:
-    def __init__(self, source_text, descriptions):
-        self.ast = parse_interface(source_text)
-        self.descriptions = descriptions
-
+class InterfaceDefinition(namedtuple("InterfaceDefinition", [
+    "constants",
+    "methods",
+    "main_block",
+])):
     def diagnostics(self):
         # FIXME: should not reference the main_block to get a context
         return list(self.main_block.context.validate(self))
@@ -41,38 +23,28 @@ class InterfaceDefinition:
             return InterfaceDefinition.compile(f.read())
 
     @staticmethod
-    def compile(source_text, validate=False, descriptions={}):
-        interface = InterfaceDefinition(source_text, descriptions)
+    def compile(source_text, validate=False, descriptions=None):
+        if descriptions is None:
+            descriptions = {}
+
+        ast = parse_interface(source_text)
+        context = InterfaceContext(constants=(), methods=())
+        for c in ast.constants_declarations:
+            context = context.with_constant(
+                context.constant_declaration(c)
+            )
+
+        for m in ast.method_declarations:
+            context = context.with_method(
+                context.prototype(MethodPrototype, m)
+            )
+
+        interface = InterfaceDefinition(
+            constants=context.constants,
+            methods=context.methods,
+            main_block=context.main_block(ast.main_block),
+        )
         if validate:
             for msg in interface.diagnostics():
                 logger.warning(f"interface contains an error: {msg}")
         return interface
-
-    @property
-    def main_block(self):
-        return InterfaceContext(
-            methods=self.methods,
-            constants=self.constants,
-        ).main_block_context.block(
-            self.ast.main_block,
-            prepend_nodes=[InitialCheckpoint()],
-            append_nodes=[MainExit()],
-        )
-
-    def source_text(self):
-        return self.ast.parseinfo.buffer.text
-
-    @property
-    def methods(self):
-        return [
-            MethodPrototype(ast=method, description=self.descriptions.get(method.declarator.name))
-            for method in self.ast.method_declarations
-        ]
-
-    @property
-    def constants(self):
-        # FIXME: using a dummy context here
-        return tuple(
-            ConstantDeclaration(ast, InterfaceContext(methods=[], constants=[]).initial_context)
-            for ast in self.ast.constants_declarations
-        )

@@ -1,8 +1,6 @@
-import functools
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.block import Block, AbstractContextBlock
 from turingarena.driver.interface.expressions import IntLiteral
 from turingarena.driver.interface.nodes import IntermediateNode
 from turingarena.driver.interface.statements.io import Print
@@ -24,23 +22,6 @@ class PrintCallbackIndex(namedtuple("PrintCallbackIndex", ["index", "prototype"]
     @property
     def arguments(self):
         return [IntLiteral(value=self.index)]
-
-
-class CallbackBody(AbstractContextBlock):
-    def __init__(self, ast, context, implementation):
-        self.ast = ast
-        self.context = context
-        self.implementation = implementation
-
-    def _get_flat_children_builders(self):
-        yield functools.partial(CallbackStart, self.implementation)
-        yield PrintCallbackRequest
-        yield functools.partial(PrintCallbackIndex, self.implementation)
-
-        yield from Block(self.ast, self.context)._get_flat_children_builders()
-
-        if not self.implementation.prototype.has_return_value:
-            yield functools.partial(CallbackEnd, self.implementation)
 
 
 class CallbackImplementation(namedtuple("CallbackImplementation", [

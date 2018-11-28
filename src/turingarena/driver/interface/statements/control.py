@@ -1,5 +1,7 @@
 from abc import abstractmethod
 
+from turingarena.driver.interface.statements.callback import Exit
+
 
 class ControlStructure:
     @property
@@ -9,3 +11,7 @@ class ControlStructure:
     @abstractmethod
     def _get_bodies(self):
         pass
+
+
+class MainExit(Exit):
+    pass

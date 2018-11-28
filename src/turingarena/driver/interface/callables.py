@@ -1,55 +1,26 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.variables import Variable
-
 logger = logging.getLogger(__name__)
 
 
-class ParameterDeclaration(namedtuple("ParameterDeclaration", ["ast"])):
+class ParameterDeclaration(namedtuple("ParameterDeclaration", ["variable", "dimensions"])):
     __slots__ = []
 
-    @property
-    def variable(self):
-        return Variable(
-            name=self.ast.name,
-        )
 
-    @property
-    def dimensions(self):
-        return len(self.ast.indexes)
-
-
-class CallablePrototype(namedtuple("CallablePrototype", ["ast", "description"])):
+class CallablePrototype(namedtuple("CallablePrototype", [
+    "name",
+    "parameter_declarations",
+    "has_return_value",
+    "callbacks",
+])):
     __slots__ = []
-
-    @property
-    def name(self):
-        return self.ast.declarator.name
-
-    @property
-    def parameter_declarations(self):
-        return [
-            ParameterDeclaration(ast=p)
-            for p in self.ast.declarator.parameters
-        ]
 
     @property
     def parameters(self):
         return [
             p.variable
             for p in self.parameter_declarations
-        ]
-
-    @property
-    def has_return_value(self):
-        return self.ast.declarator.type == 'function'
-
-    @property
-    def callbacks(self):
-        return [
-            CallbackPrototype(callback, description=None)
-            for callback in self.ast.callbacks
         ]
 
     @property
