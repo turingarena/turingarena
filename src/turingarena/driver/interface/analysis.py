@@ -2,11 +2,7 @@ import logging
 from typing import Optional
 
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.statements.call import AcceptCallbacks, CallReturn
-from turingarena.driver.interface.statements.callback import CallbackStart
-from turingarena.driver.interface.statements.for_loop import For
-from turingarena.driver.interface.statements.io import Read, Checkpoint
-from turingarena.driver.interface.statements.loop import Loop
+from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop
 from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, Variable, Reference, \
     ReferenceDirection, VariableDeclaration, ReferenceAllocation
 from turingarena.util.visitor import visitormethod
@@ -76,7 +72,7 @@ class TreeAnalyzer:
         for child in n.children:
             yield from self.reference_actions(child)
 
-    def _get_reference_actions_IntermediateNode(self, n):
+    def _get_reference_actions_object(self, n):
         return []
 
     @visitormethod
@@ -93,7 +89,7 @@ class TreeAnalyzer:
             for child in n.body.children
         )
 
-    def can_be_grouped_IntermediateNode(self, n):
+    def can_be_grouped_object(self, n):
         for t in [
             Loop,
             AcceptCallbacks,
@@ -124,7 +120,7 @@ class TreeAnalyzer:
     def _get_directions_CallbackImplementation(self, n):
         return self.declaration_directions(n.body)
 
-    def _get_directions_IntermediateNode(self, n):
+    def _get_directions_object(self, n):
         for d, ts in self.DIRECTION_MAP.items():
             for t in ts:
                 if isinstance(n, t):
@@ -174,7 +170,7 @@ class TreeAnalyzer:
         else:
             yield None
 
-    def _get_first_requests_IntermediateNode(self, n):
+    def _get_first_requests_object(self, n):
         yield None
 
     @visitormethod
@@ -251,7 +247,7 @@ class TreeAnalyzer:
     def _get_comment_PrintNoCallbacks(self, n):
         return "no more callbacks"
 
-    def _get_comment_IntermediateNode(self, n):
+    def _get_comment_object(self, n):
         return None
 
     def variable_declarations(self, n):
@@ -288,6 +284,6 @@ class TreeAnalyzer:
                 size=n.index.range,
             )
 
-    def _get_allocations_IntermediateNode(self, n):
+    def _get_allocations_object(self, n):
         return []
 

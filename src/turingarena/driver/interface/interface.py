@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 
-from turingarena.driver.interface.callables import MethodPrototype
+from turingarena.driver.interface.nodes import MethodPrototype
 from turingarena.driver.interface.context import InterfaceContext
 from turingarena.driver.interface.parser import parse_interface
 

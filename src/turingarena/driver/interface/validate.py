@@ -1,5 +1,5 @@
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.expressions import IntLiteral, VariableReference
+from turingarena.driver.interface.nodes import IntLiteral, VariableReference
 from turingarena.util.visitor import visitormethod
 
 
@@ -141,7 +141,7 @@ class Validator:
         if n.return_value is not None:
             yield from self.validate_reference_declaration(n.return_value)
 
-    def validate_IntermediateNode(self, n):
+    def validate_object(self, n):
         return ()
 
     def validate_VariableReference(self, e):

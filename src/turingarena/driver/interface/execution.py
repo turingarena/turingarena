@@ -1,21 +1,17 @@
 import logging
 import threading
-from collections import namedtuple
+from collections.__init__ import namedtuple
 from contextlib import contextmanager
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Mapping
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.exceptions import CommunicationError, DriverStop, InterfaceExitReached
-from turingarena.driver.interface.nodes import ExecutionResult
+from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
+    IfConditionResolve, Checkpoint, SwitchValueResolve
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.statements.call import CallArgumentsResolve
-from turingarena.driver.interface.statements.callback import CallbackEnd, Return, Exit
-from turingarena.driver.interface.statements.if_else import IfConditionResolve
-from turingarena.driver.interface.statements.io import Checkpoint
-from turingarena.driver.interface.statements.switch import SwitchValueResolve
 from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
@@ -513,5 +509,27 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             else:
                 break
 
-    def _on_execute_IntermediateNode(self, n):
+    def _on_execute_object(self, n):
         pass
+
+
+class ExecutionResult(namedtuple("ExecutionResult", [
+    "assignments",
+    "request_lookahead",
+    "does_break",
+])):
+    def merge(self, other):
+        if other is None:
+            return self
+
+        return ExecutionResult(
+            self.assignments + other.assignments,
+            request_lookahead=other.request_lookahead,
+            does_break=other.does_break,
+        )
+
+    def with_request_processed(self):
+        return self._replace(request_lookahead=None)
+
+
+Bindings = Mapping[Reference, Any]

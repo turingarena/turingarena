@@ -4,18 +4,10 @@ from collections import namedtuple
 from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.block import Block
-from turingarena.driver.interface.callables import ParameterDeclaration, CallbackPrototype
-from turingarena.driver.interface.constants import ConstantDeclaration
 from turingarena.driver.interface.expressions import ExpressionCompiler
-from turingarena.driver.interface.statements.callback import CallbackImplementation, CallbackStart, \
-    PrintCallbackRequest, PrintCallbackIndex, CallbackEnd
-from turingarena.driver.interface.statements.control import MainExit
-from turingarena.driver.interface.statements.for_loop import ForIndex
-from turingarena.driver.interface.statements.io import InitialCheckpoint
-from turingarena.driver.interface.statements.statements import statement_classes
-from turingarena.driver.interface.statements.switch import Case
-from turingarena.driver.interface.step import Step
+from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
+    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
+    CallbackPrototype, ConstantDeclaration, Block
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, \
     ReferenceResolution, Variable
@@ -160,7 +152,7 @@ class StatementContext(namedtuple("StatementContext", [
     def _is_relevant_AcceptCallbacks(self, n):
         return n.method and n.method.has_callbacks
 
-    def _is_relevant_IntermediateNode(self, n):
+    def _is_relevant_object(self, n):
         return True
 
     @visitormethod
@@ -210,6 +202,9 @@ class StatementContext(namedtuple("StatementContext", [
     def compile(self, cls, ast):
         pass
 
+    def compile_object(self, cls, ast):
+        return cls()
+
     def compile_AbstractSyntaxNodeWrapper(self, cls, ast):
         return cls(ast, self)
 
@@ -217,15 +212,6 @@ class StatementContext(namedtuple("StatementContext", [
         return cls(arguments=[
             self.expression(a) for a in ast.arguments
         ])
-
-    def compile_Checkpoint(self, cls, ast):
-        return cls()
-
-    def compile_Exit(self, cls, ast):
-        return cls()
-
-    def compile_Break(self, cls, ast):
-        return cls()
 
     def compile_Return(self, cls, ast):
         return cls(value=self.expression(ast.value))

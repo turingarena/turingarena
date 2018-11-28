@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.expressions import IntLiteral
-from turingarena.driver.interface.statements.io import Print
+from turingarena.driver.interface.nodes import Print, IntLiteral
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -94,7 +93,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
 
 
 class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
-    def visit_IntermediateNode(self, n):
+    def visit_object(self, n):
         pass
 
     def visit_Read(self, s):
@@ -216,7 +215,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_ReferenceAllocation(self, a):
         pass
 
-    def visit_IntermediateNode(self, s):
+    def visit_object(self, s):
         # ignore any other node
         return []
 
