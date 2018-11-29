@@ -1,6 +1,6 @@
 import logging
 
-from turingarena.driver.interface.nodes import IntLiteral, VariableReference, Subscript
+from turingarena.driver.interface.nodes import IntLiteral, Variable, Subscript
 
 logger = logging.getLogger(__name__)
 
@@ -23,4 +23,4 @@ class ExpressionCompiler:
             index = self.expression(index_asts[-1])
             return Subscript(array, index)
         else:
-            return VariableReference(ast.variable_name)
+            return Variable(ast.variable_name)

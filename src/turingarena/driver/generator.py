@@ -17,8 +17,8 @@ class AbstractExpressionCodeGen(CodeGen):
     def visit_Subscript(self, e):
         return f"{self.visit(e.array)}[{self.visit(e.index)}]"
 
-    def visit_VariableReference(self, e):
-        return e.variable_name
+    def visit_Variable(self, e):
+        return e.name
 
     def visit_IntLiteral(self, e):
         return str(e.value)

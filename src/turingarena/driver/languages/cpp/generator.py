@@ -35,11 +35,10 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         yield f"static int {pointers}{d.variable.name};"
 
     def visit_ReferenceAllocation(self, a):
-        name = a.reference.variable.name
-        indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
+        reference = self.visit(a.reference)
         dimensions = "*" * a.dimensions
         size = self.visit(a.size)
-        yield f"{name}{indexes} = new int{dimensions}[{size}];"
+        yield f"{reference} = new int{dimensions}[{size}];"
 
     def visit_MethodPrototype(self, m):
         yield f"{self.build_method_signature(m)};"

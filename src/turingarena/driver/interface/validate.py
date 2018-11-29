@@ -1,5 +1,5 @@
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.nodes import IntLiteral, VariableReference
+from turingarena.driver.interface.nodes import IntLiteral, Variable
 from turingarena.util.visitor import visitormethod
 
 
@@ -144,11 +144,11 @@ class Validator:
     def validate_object(self, n):
         return ()
 
-    def validate_VariableReference(self, e):
-        if not e.variable_name in self.reference_declaration_mapping:
+    def validate_Variable(self, e):
+        if not e.name in self.reference_declaration_mapping:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_NOT_DECLARED,
-                e.variable_name,
+                e.name,
                 parseinfo=e.ast.parseinfo,
             )
 
@@ -166,11 +166,11 @@ class Validator:
     def validate_reference_declaration(self, e, index_count=0):
         return self._validate_reference_declaration(e, index_count)
 
-    def _validate_reference_declaration_VariableReference(self, e, index_count):
-        if e.variable_name in self.reference_declaration_mapping:
+    def _validate_reference_declaration_Variable(self, e, index_count):
+        if e.name in self.reference_declaration_mapping:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_REUSED,
-                e.variable_name,
+                e.name,
                 parseinfo=e.ast.parseinfo,
             )
 
@@ -191,7 +191,7 @@ class Validator:
             )
             return
 
-        if not isinstance(e.index, VariableReference) or e.index.variable_name != expected_index.variable.name:
+        if not isinstance(e.index, Variable) or e.index.name != expected_index.variable.name:
             yield Diagnostic(
                 Diagnostic.Messages.WRONG_ARRAY_INDEX,
                 expected_index.variable.name,

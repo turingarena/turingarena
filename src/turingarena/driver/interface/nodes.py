@@ -227,14 +227,14 @@ class IntLiteral(namedtuple("IntLiteral", ["value"]), Literal):
     __slots__ = []
 
 
-class VariableReference(namedtuple("VariableReference", ["variable_name"]), Expression):
+class Variable(namedtuple("Variable", ["name"]), Expression):
     __slots__ = []
 
 
-class Subscript(Expression, namedtuple("Subscript", [
+class Subscript(namedtuple("Subscript", [
     "array",
     "index",
-])):
+]), Expression):
     __slots__ = []
 
 

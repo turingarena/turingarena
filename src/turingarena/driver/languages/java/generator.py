@@ -53,11 +53,10 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         yield f'int{"[]" * d.dimensions} {d.variable.name};'
 
     def visit_ReferenceAllocation(self, a):
-        name = a.reference.variable.name
-        indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
+        reference = self.visit(a.reference)
         dimensions = "[]" * a.dimensions
         size = self.visit(a.size)
-        yield f"{name}{indexes} = new int[{size}]{dimensions};"
+        yield f"{reference} = new int[{size}]{dimensions};"
 
     def visit_MethodPrototype(self, m):
         with self.indent():

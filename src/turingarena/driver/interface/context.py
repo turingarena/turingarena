@@ -7,10 +7,9 @@ from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.expressions import ExpressionCompiler
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block
+    CallbackPrototype, ConstantDeclaration, Block, Variable
 from turingarena.driver.interface.validate import Validator
-from turingarena.driver.interface.variables import ReferenceDeclaration, \
-    ReferenceResolution, Variable
+from turingarena.driver.interface.variables import ReferenceDeclaration, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
 
 logger = logging.getLogger(__name__)
@@ -70,7 +69,7 @@ class InterfaceContext(namedtuple("InterfaceContext", [
     @property
     def main_block_context(self):
         return self.initial_context.with_reference_actions(
-            a(c.variable.as_reference())
+            a(c.variable)
             for c in self.constants
             for a in [
                 partial(ReferenceDeclaration, dimensions=0),
@@ -162,9 +161,9 @@ class StatementContext(namedtuple("StatementContext", [
     def dimensions_Literal(self, e):
         return 0
 
-    def dimensions_VariableReference(self, e):
+    def dimensions_Variable(self, e):
         try:
-            reference_declaration = self.reference_declaration_mapping[e.variable_name]
+            reference_declaration = self.reference_declaration_mapping[e.name]
         except KeyError:
             return 0
         return reference_declaration.dimensions
@@ -180,18 +179,15 @@ class StatementContext(namedtuple("StatementContext", [
     def is_resolved(self, e) -> bool:
         pass
 
-    def is_resolved_Reference(self, r):
-        return r in self.get_resolved_references()
-
     def is_resolved_Literal(self, e):
         return True
 
-    def is_resolved_VariableReference(self, e):
-        return self.is_resolved(self.reference(e))
+    def is_resolved_Variable(self, e):
+        return e in self.get_resolved_references()
 
     def is_resolved_Subscript(self, e):
         return (
-                self.is_resolved(self.reference(e))
+                e in self.get_resolved_references()
                 or self.is_resolved(e.array)
         )
 
@@ -217,12 +213,16 @@ class StatementContext(namedtuple("StatementContext", [
         return cls(value=self.expression(ast.value))
 
     def compile_For(self, cls, ast):
-        index = ForIndex(variable=Variable(name=ast.index), range=self.expression(ast.range), )
+        index = ForIndex(
+            variable=Variable(name=ast.index),
+            range=self.expression(ast.range),
+        )
+
         return cls(
             index=index,
             body=self.with_index_variable(index).with_reference_actions([
-                ReferenceDeclaration(index.variable.as_reference(), dimensions=0),
-                ReferenceResolution(index.variable.as_reference()),
+                ReferenceDeclaration(index.variable, dimensions=0),
+                ReferenceResolution(index.variable),
             ]).block(ast.body)
         )
 

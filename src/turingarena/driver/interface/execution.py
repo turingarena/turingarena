@@ -2,7 +2,6 @@ import logging
 import threading
 from collections.__init__ import namedtuple
 from contextlib import contextmanager
-from typing import List, Tuple, Any, Mapping
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
@@ -12,14 +11,12 @@ from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallAr
     IfConditionResolve, Checkpoint, SwitchValueResolve
 from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.variables import Reference, ReferenceDirection, ReferenceResolution
+from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
 
 UPWARD_TIMEOUT = 3.0
-
-Assignments = List[Tuple[Reference, Any]]
 
 
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
@@ -157,12 +154,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def evaluate_IntLiteral(self, e):
         return e.value
 
-    def evaluate_VariableReference(self, e):
-        return self.bindings[self.reference(e)]
+    def evaluate_Variable(self, e):
+        return self.bindings[e]
 
     def evaluate_Subscript(self, e):
         try:
-            return self.bindings[self.reference(e)]
+            return self.bindings[e]
         except KeyError:
             return self.evaluate(e.array)[self.evaluate(e.index)]
 
@@ -210,7 +207,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_InterfaceDefinition(self, n):
         self.with_assigments({
-            c.variable.as_reference(): self.evaluate(c.value)
+            c.variable: self.evaluate(c.value)
             for c in n.constants
         }).execute(n.main_block)
 
@@ -254,7 +251,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is ExecutionPhase.UPWARD:
             values = self.receive_upward()
             assignments = [
-                (self.reference(a), value)
+                (a, value)
                 for a, value in zip(n.arguments, values)
             ]
 
@@ -287,7 +284,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             matching_cases = self._find_matching_cases(n, self.request_lookahead)
             [case] = matching_cases
             [label] = case.labels
-            assignments = [(self.reference(n.value), label.value)]
+            assignments = [(n.value, label.value)]
 
             return self.result()._replace(assignments=assignments)
 
@@ -313,8 +310,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute_CallbackStart(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             for p in n.prototype.parameters:
-                r = p.as_reference()
-                value = self.bindings[r]
+                value = self.bindings[p]
                 self.send_driver_upward(value)
 
     def _on_execute_Return(self, n):
@@ -328,7 +324,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 )
 
             value = int(self.receive_driver_downward())
-            return self.result()._replace(assignments=[(self.reference(n.value), value)])
+            return self.result()._replace(assignments=[(n.value, value)])
 
     def _on_execute_CallbackEnd(self, n):
         if self.phase is ExecutionPhase.REQUEST:
@@ -353,7 +349,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
         results_by_iteration = [
             self.with_assigments(
-                [(n.index.variable.as_reference(), i)]
+                [(n.index.variable, i)]
             ).execute(n.body)
             for i in range(for_range)
         ]
@@ -411,7 +407,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is ExecutionPhase.REQUEST:
             [condition_value] = self._find_conditions(n, self.request_lookahead)
             return self.result()._replace(
-                assignments=[(self.reference(n.condition), condition_value)]
+                assignments=[(n.condition, condition_value)]
             )
 
     def _find_conditions(self, n, request):
@@ -454,7 +450,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             )
 
         assignments = [
-            (self.reference(a), self.deserialize_request_data())
+            (a, self.deserialize_request_data())
             for a in n.arguments
         ]
 
@@ -530,6 +526,3 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
     def with_request_processed(self):
         return self._replace(request_lookahead=None)
-
-
-Bindings = Mapping[Reference, Any]

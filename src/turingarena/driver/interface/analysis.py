@@ -1,9 +1,9 @@
 import logging
-from typing import Optional
 
+from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop, \
+    Variable, Subscript
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop
-from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, Variable, Reference, \
+from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, \
     ReferenceDirection, VariableDeclaration, ReferenceAllocation
 from turingarena.util.visitor import visitormethod
 
@@ -33,27 +33,27 @@ class TreeAnalyzer:
 
     def _get_reference_actions_Write(self, n):
         for exp in n.arguments:
-            yield ReferenceResolution(self.reference(exp))
+            yield ReferenceResolution(exp)
 
     def _get_reference_actions_Switch(self, n):
         for c in n.cases:
             yield from self.reference_actions(c.body)
 
     def _get_reference_actions_SwitchValueResolve(self, n):
-        yield ReferenceResolution(self.reference(n.value))
+        yield ReferenceResolution(n.value)
 
     def _get_reference_actions_CallbackStart(self, n):
         for p in n.prototype.parameters:
-            yield ReferenceDeclaration(p.as_reference(), dimensions=0)
+            yield ReferenceDeclaration(p, dimensions=0)
 
     def _get_reference_actions_Return(self, n):
-        yield ReferenceResolution(self.reference(n.value))
+        yield ReferenceResolution(n.value)
 
     def _get_reference_actions_For(self, n):
         for a in self.reference_actions(n.body):
             r = a.reference
-            if r.indexes:
-                reference = r._replace(indexes=r.indexes[:-1])
+            if isinstance(r, Subscript):
+                reference = r.array
                 if isinstance(a, ReferenceDeclaration):
                     yield a._replace(reference=reference, dimensions=a.dimensions + 1)
                 if isinstance(a, ReferenceResolution):
@@ -61,9 +61,8 @@ class TreeAnalyzer:
 
     def _get_reference_actions_CallArgumentsResolve(self, n):
         for p in n.arguments:
-            reference = self.reference(p)
-            if reference is not None:
-                yield ReferenceResolution(reference)
+            if self.is_reference(p):
+                yield ReferenceResolution(p)
 
     def _get_reference_actions_CallReturn(self, n):
         yield self.reference_declaration(n.return_value)
@@ -82,7 +81,7 @@ class TreeAnalyzer:
     def can_be_grouped_For(self, n):
         # no local references
         return all(
-            a.reference.indexes
+            isinstance(a.reference, Subscript)
             for a in self.reference_actions(n.body)
         ) and all(
             self.can_be_grouped(child)
@@ -174,44 +173,29 @@ class TreeAnalyzer:
         yield None
 
     @visitormethod
-    def variable(self, e) -> Optional[Variable]:
+    def is_reference(self, e):
         pass
 
-    def variable_VariableReference(self, e):
-        return Variable(name=e.variable_name)
+    def is_reference_Variable(self, e):
+        return True
 
-    def variable_Expression(self, e):
-        return None
-
-    @visitormethod
-    def reference(self, e) -> Optional[Reference]:
-        pass
-
-    def reference_VariableReference(self, e):
-        variable = self.variable(e)
-        if variable is not None:
-            return variable.as_reference()
-
-    def reference_Subscript(self, e):
-        array_reference = self.reference(e.array)
-        if array_reference is not None:
-            return array_reference._replace(
-                indexes=array_reference.indexes + (self.variable(e.index),),
-            )
+    def is_reference_Subscript(self, e):
+        # FIXME: we should check that the index is the one expected (should we?)
+        return self.is_reference(e.array) and isinstance(e.index, Variable)
 
     def reference_Expression(self, e):
-        return None
+        return False
 
     @visitormethod
     def _reference_declaration(self, e, dimensions):
         pass
 
-    def reference_declaration(self, e, dimensions=0) -> Optional[Reference]:
+    def reference_declaration(self, e, dimensions=0):
         return self._reference_declaration(e, dimensions)
 
-    def _reference_declaration_VariableReference(self, e, dimensions):
+    def _reference_declaration_Variable(self, e, dimensions):
         return ReferenceDeclaration(
-            reference=Variable(name=e.variable_name).as_reference(),
+            reference=Variable(name=e.name),
             dimensions=dimensions,
         )
 
@@ -219,8 +203,9 @@ class TreeAnalyzer:
         array_declaration = self.reference_declaration(e.array, dimensions + 1)
         if array_declaration is not None:
             return ReferenceDeclaration(
-                reference=array_declaration.reference._replace(
-                    indexes=array_declaration.reference.indexes + (self.variable(e.index),),
+                reference=Subscript(
+                    array=array_declaration.reference,
+                    index=e.index,
                 ),
                 dimensions=array_declaration.dimensions - 1,
             )
@@ -263,8 +248,8 @@ class TreeAnalyzer:
         if not any(isinstance(n, t) for t in types):
             return
         for a in self.reference_actions(n):
-            if isinstance(a, ReferenceDeclaration) and not a.reference.indexes:
-                yield VariableDeclaration(a.reference.variable, a.dimensions)
+            if isinstance(a, ReferenceDeclaration) and isinstance(a.reference, Variable):
+                yield VariableDeclaration(a.reference, a.dimensions)
 
     def reference_allocations(self, n):
         return list(self._get_allocations(n))
@@ -286,4 +271,3 @@ class TreeAnalyzer:
 
     def _get_allocations_object(self, n):
         return []
-

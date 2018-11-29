@@ -44,12 +44,11 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         return []
 
     def visit_ReferenceAllocation(self, a):
-        name = a.reference.variable.name
-        idx = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
+        reference = self.visit(a.reference)
         # FIXME: is this + 1 needed?
         dimensions = "[]" * (a.dimensions + 1)
         size = self.visit(a.size)
-        yield f"{name}{idx} = make({dimensions}int, {size})"
+        yield f"{reference} = make({dimensions}int, {size})"
 
     def generate_main_block(self, interface):
         yield "func main() {"
