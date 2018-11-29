@@ -366,7 +366,7 @@ class Compiler(namedtuple("Compiler", [
     def group_children(self, children):
         group = []
         for node in children:
-            can_be_grouped = self.can_be_grouped(node)
+            can_be_grouped = self.can_be_grouped(node) and len(self._group_directions([node])) <= 1
 
             if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
                 group.append(node)

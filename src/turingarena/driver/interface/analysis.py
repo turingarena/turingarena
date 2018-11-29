@@ -177,9 +177,6 @@ class TreeAnalyzer:
         # FIXME: we should check that the index is the one expected (should we?)
         return self.is_reference(e.array) and isinstance(e.index, Variable)
 
-    def reference_Expression(self, e):
-        return False
-
     @visitormethod
     def _reference_declaration(self, e, dimensions):
         pass
