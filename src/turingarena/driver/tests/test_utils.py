@@ -4,8 +4,8 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Generator, Sequence
 
 from turingarena.driver.client.program import Program
+from turingarena.driver.interface.compile import Compiler
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.interface import Interface
 from turingarena.driver.language import Language
 
 
@@ -51,5 +51,6 @@ def assert_interface_error(text: str, error: str, *args: str):
 
 
 def assert_interface_diagnostics(interface_text: str, messages: Sequence[str]):
-    interface = Interface.compile(interface_text)
-    assert messages == [m.message for m in interface.diagnostics()]
+    compiler = Compiler.create()
+    compiler.compile(interface_text)
+    assert messages == [m.message for m in compiler.diagnostics]

@@ -5,9 +5,11 @@ from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.expressions import ExpressionCompiler
+from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable
+    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype
+from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
@@ -15,18 +17,89 @@ from turingarena.util.visitor import visitormethod, classvisitormethod
 logger = logging.getLogger(__name__)
 
 
-class InterfaceContext(namedtuple("InterfaceContext", [
-    "methods",
+def compile(source_text, validate=False):
+    compiler = Compiler.create()
+    interface = compiler.compile(source_text)
+
+    if validate:
+        for msg in compiler.diagnostics:
+            logger.warning(f"interface contains an error: {msg}")
+
+    return interface
+
+
+def load_interface(path):
+    with open(path) as f:
+        return compile(f.read())
+
+
+class Compiler(namedtuple("Compiler", [
     "constants",
-]), TreeAnalyzer, ExpressionCompiler):
-    def with_constant(self, declaration):
-        return self._replace(
-            constants=self.constants + (declaration,),
+    "methods",
+    "prev_reference_actions",
+    "index_variables",
+    "in_loop",
+    "diagnostics",
+]), Validator, TreeAnalyzer, ExpressionCompiler):
+    @classmethod
+    def create(cls):
+        return cls(
+            constants=None,
+            methods=None,
+            prev_reference_actions=None,
+            index_variables=None,
+            in_loop=None,
+            diagnostics=[],
         )
 
+    def compile(self, source_text, descriptions=None):
+        if descriptions is None:
+            descriptions = {}
+
+        ast = parse_interface(source_text)
+        return self.interface(ast)
+
+    def with_constant(self, declaration):
+        return self._replace(constants=self.constants + (declaration,))
+
     def with_method(self, method):
-        return self._replace(
-            methods=self.methods + (method,),
+        return self._replace(methods=self.methods + (method,))
+
+    def interface(self, ast):
+        compiler = self._replace(
+            constants=(),
+            methods=(),
+        )
+
+        for c in ast.constants_declarations:
+            compiler = compiler.with_constant(
+                compiler.constant_declaration(c)
+            )
+
+        for m in ast.method_declarations:
+            compiler = compiler.with_method(
+                compiler.prototype(MethodPrototype, m)
+            )
+
+        return Interface(
+            constants=compiler.constants,
+            methods=compiler.methods,
+            main_block=compiler._replace(
+                prev_reference_actions=(),
+                index_variables=(),
+                in_loop=None,
+            ).with_reference_actions(
+                a(c.variable)
+                for c in compiler.constants
+                for a in [
+                    partial(ReferenceDeclaration, dimensions=0),
+                    ReferenceResolution,
+                ]
+            ).block(
+                ast.main_block,
+                prepend_nodes=[InitialCheckpoint()],
+                append_nodes=[MainExit()],
+            ),
         )
 
     @property
@@ -59,42 +132,6 @@ class InterfaceContext(namedtuple("InterfaceContext", [
             dimensions=len(ast.indexes),
         )
 
-    def main_block(self, ast):
-        return self.main_block_context.block(
-            ast,
-            prepend_nodes=[InitialCheckpoint()],
-            append_nodes=[MainExit()],
-        )
-
-    @property
-    def main_block_context(self):
-        return self.initial_context.with_reference_actions(
-            a(c.variable)
-            for c in self.constants
-            for a in [
-                partial(ReferenceDeclaration, dimensions=0),
-                ReferenceResolution,
-            ]
-        )
-
-    @property
-    def initial_context(self):
-        return StatementContext(
-            global_context=self,
-            prev_reference_actions=(),
-            index_variables=(),
-            main_block=True,
-            in_loop=False,
-        )
-
-
-class StatementContext(namedtuple("StatementContext", [
-    "global_context",
-    "prev_reference_actions",
-    "index_variables",
-    "main_block",
-    "in_loop",
-]), Validator, TreeAnalyzer, ExpressionCompiler):
     def with_reference_actions(self, actions):
         actions = tuple(actions)
         assert all(
@@ -194,22 +231,25 @@ class StatementContext(namedtuple("StatementContext", [
     def group_nodes(self, nodes):
         pass
 
+    def statement(self, cls, ast):
+        return self._on_compile(cls, ast)
+
     @classvisitormethod
-    def compile(self, cls, ast):
+    def _on_compile(self, cls, ast):
         pass
 
-    def compile_object(self, cls, ast):
+    def _on_compile_object(self, cls, ast):
         return cls()
 
-    def compile_IONode(self, cls, ast):
+    def _on_compile_IONode(self, cls, ast):
         return cls(arguments=[
             self.expression(a) for a in ast.arguments
         ])
 
-    def compile_Return(self, cls, ast):
+    def _on_compile_Return(self, cls, ast):
         return cls(value=self.expression(ast.value))
 
-    def compile_For(self, cls, ast):
+    def _on_compile_For(self, cls, ast):
         index = ForIndex(
             variable=Variable(name=ast.index),
             range=self.expression(ast.range),
@@ -223,7 +263,7 @@ class StatementContext(namedtuple("StatementContext", [
             ]).block(ast.body)
         )
 
-    def compile_SwitchNode(self, cls, ast):
+    def _on_compile_SwitchNode(self, cls, ast):
         return cls(
             value=self.expression(ast.value),
             cases=[
@@ -235,20 +275,20 @@ class StatementContext(namedtuple("StatementContext", [
             ],
         )
 
-    def compile_IfNode(self, cls, ast):
+    def _on_compile_IfNode(self, cls, ast):
         return cls(
             condition=self.expression(ast.condition),
             then_body=self.block(ast.then_body),
             else_body=self.block(ast.else_body) if ast.else_body is not None else None,
         )
 
-    def compile_Loop(self, cls, ast):
+    def _on_compile_Loop(self, cls, ast):
         return cls(
             body=self.with_loop().block(ast.body)
         )
 
-    def compile_CallNode(self, cls, ast):
-        method = self.global_context.methods_by_name.get(ast.name)
+    def _on_compile_CallNode(self, cls, ast):
+        method = self.methods_by_name.get(ast.name)
 
         body_by_name = {
             ast.declarator.name: ast.body
@@ -328,14 +368,14 @@ class StatementContext(namedtuple("StatementContext", [
         return {d for n in group for d in self.declaration_directions(n)}
 
     def _compile_block_flat(self, asts):
-        inner_context = self._replace(main_block=False)
+        inner = self
         for ast in asts:
             for cls in statement_classes[ast.statement_type]:
-                node = inner_context.compile(cls, ast)
-                if not inner_context.is_relevant(node):
+                node = inner.statement(cls, ast)
+                if not inner.is_relevant(node):
                     continue
                 yield node
-            inner_context = inner_context.with_reference_actions(inner_context.reference_actions(node))
+            inner = inner.with_reference_actions(inner.reference_actions(node))
 
     def block(self, ast, prepend_nodes=(), append_nodes=()):
         return Block(
