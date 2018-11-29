@@ -44,12 +44,8 @@ class CallArgumentsResolve(CallNode):
     __slots__ = []
 
 
-class CallReturn(CallNode):
-    __slots__ = []
-
-
-class CallCompleted(CallNode):
-    __slots__ = []
+CallReturn = namedtuple("CallReturn", ["return_value"])
+CallCompleted = namedtuple("CallCompleted", [])
 
 
 class AcceptCallbacks(CallNode):

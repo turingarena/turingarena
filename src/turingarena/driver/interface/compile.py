@@ -8,7 +8,7 @@ from turingarena.driver.interface.expressions import ExpressionCompiler
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return
+    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, ReferenceResolution
@@ -165,32 +165,6 @@ class Compiler(namedtuple("Compiler", [
     def with_loop(self):
         return self._replace(in_loop=True)
 
-    def is_relevant(self, n):
-        "Whether this node should be kept in the parent block"
-        return self._is_relevant(n)
-
-    @visitormethod
-    def _is_relevant(self, n):
-        pass
-
-    def _is_relevant_SwitchValueResolve(self, n):
-        return not self.is_resolved(n.value)
-
-    def _is_relevant_IfConditionResolve(self, n):
-        return not self.is_resolved(n.condition)
-
-    def _is_relevant_CallReturn(self, n):
-        return n.return_value is not None
-
-    def _is_relevant_PrintNoCallbacks(self, n):
-        return n.method and n.method.callbacks
-
-    def _is_relevant_AcceptCallbacks(self, n):
-        return n.method and n.method.has_callbacks
-
-    def _is_relevant_object(self, n):
-        return True
-
     @visitormethod
     def dimensions(self, e) -> int:
         pass
@@ -263,6 +237,12 @@ class Compiler(namedtuple("Compiler", [
             ]).block(ast.body)
         )
 
+    def _on_compile_SwitchValueResolve(self, cls, ast):
+        value = self.expression(ast.value)
+        if self.is_resolved(value):
+            return
+        return self._on_compile_SwitchNode(cls, ast)
+
     def _on_compile_SwitchNode(self, cls, ast):
         return cls(
             value=self.expression(ast.value),
@@ -275,6 +255,12 @@ class Compiler(namedtuple("Compiler", [
             ],
         )
 
+    def _on_compile_IfConditionResolve(self, cls, ast):
+        condition = self.expression(ast.condition)
+        if self.is_resolved(condition):
+            return
+        return self._on_compile_IfNode(cls, ast)
+
     def _on_compile_IfNode(self, cls, ast):
         return cls(
             condition=self.expression(ast.condition),
@@ -286,6 +272,29 @@ class Compiler(namedtuple("Compiler", [
         return cls(
             body=self.with_loop().block(ast.body)
         )
+
+    def _on_compile_CallReturn(self, cls, ast):
+        call = self.statement(Call, ast)
+        if call.return_value is None:
+            return
+        return cls(
+            return_value=call.return_value,
+        )
+
+    def _on_compile_CallCompleted(self, cls, ast):
+        return cls()
+
+    def _on_compile_PrintNoCallbacks(self, cls, ast):
+        method = self.methods_by_name.get(ast.name)
+        if not method.callbacks:
+            return
+        return self._on_compile_CallNode(cls, ast)
+
+    def _on_compile_AcceptCallbacks(self, cls, ast):
+        method = self.methods_by_name.get(ast.name)
+        if not method.callbacks:
+            return
+        return self._on_compile_CallNode(cls, ast)
 
     def _on_compile_CallNode(self, cls, ast):
         method = self.methods_by_name.get(ast.name)
@@ -393,7 +402,7 @@ class Compiler(namedtuple("Compiler", [
         for ast in asts:
             for cls in statement_classes[ast.statement_type]:
                 node = inner.statement(cls, ast)
-                if not inner.is_relevant(node):
+                if node is None:
                     continue
                 yield node
             inner = inner.with_reference_actions(inner.reference_actions(node))
