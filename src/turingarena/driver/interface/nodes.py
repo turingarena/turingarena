@@ -192,16 +192,7 @@ class Expression:
     __slots__ = []
 
 
-class Literal(Expression):
-    __slots__ = []
-
-    @property
-    @abstractmethod
-    def value(self):
-        pass
-
-
-class IntLiteral(namedtuple("IntLiteral", ["value"]), Literal):
+class IntLiteral(namedtuple("IntLiteral", ["value"]), Expression):
     __slots__ = []
 
 
