@@ -148,24 +148,6 @@ class CallbackImplementation(namedtuple("CallbackImplementation", [
 ])):
     __slots__ = []
 
-    @property
-    def default_body(self):
-        fake_ast_body = [
-            namedtuple("write", ["statement_type", "arguments"])("write", [
-                namedtuple("expression", ["expression_type", "variable_name", "indices"])("reference_subscript", p.name,
-                                                                                          "")
-                for p in self.prototype.parameters
-            ])
-        ]
-        if self.prototype.has_return_value:
-            return_var = namedtuple("expression", ["expression_type", "variable_name", "indices"])(
-                "reference_subscript", "_result", "")
-            fake_ast_body += [
-                namedtuple("read", ["statement_type", "arguments"])("read", [return_var]),
-                namedtuple("ret", ["statement_type", "value"])("return", return_var),
-            ]
-        return namedtuple("body", ["statements"])(fake_ast_body)
-
 
 class SequenceNode:
     pass

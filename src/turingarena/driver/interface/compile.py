@@ -8,7 +8,7 @@ from turingarena.driver.interface.expressions import ExpressionCompiler
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype
+    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDeclaration, ReferenceResolution
@@ -323,14 +323,35 @@ class Compiler(namedtuple("Compiler", [
         else:
             append_nodes = [CallbackEnd()]
 
-        return CallbackImplementation(
-            index=index,
-            prototype=prototype,
-            body=self.block(
+        if ast is None:
+            nodes = []
+            if prototype.parameters:
+                nodes.append(Write(prototype.parameters))
+            if prototype.has_return_value:
+                return_var = Variable("ans")
+                nodes.append(Read([return_var]))
+                nodes.append(Return(return_var))
+
+            body = Block(tuple(
+                self.group_children(
+                    itertools.chain(
+                        prepend_nodes,
+                        nodes,
+                        append_nodes,
+                    )
+                )
+            ))
+        else:
+            body = self.block(
                 ast,
                 prepend_nodes=prepend_nodes,
                 append_nodes=append_nodes,
             )
+
+        return CallbackImplementation(
+            index=index,
+            prototype=prototype,
+            body=body
         )
 
     def group_children(self, children):

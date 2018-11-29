@@ -24,9 +24,7 @@ def test_callback_no_arguments():
                 }
                 
                 main {
-                    call test() callbacks {
-                        procedure c() {}
-                    }
+                    call test();
                 }
             """,
             sources={
@@ -62,11 +60,7 @@ def test_callback_with_arguments():
                 }
                 
                 main {
-                    call test() callbacks {
-                        procedure c(a, b) {
-                            write a, b;
-                        }
-                    }
+                    call test();
                 }
             """,
             sources={
@@ -101,13 +95,7 @@ def test_callback_return_value():
                     function c(a);
                 }
                 main {
-                    call test() callbacks {
-                        function c(a) {
-                            write a;
-                            read b;
-                            return b;
-                        }
-                    }
+                    call test();
                     checkpoint;
                 }
             """,
@@ -169,9 +157,7 @@ def test_interface_one_callback():
                     procedure cb();
                 }
                 main {
-                    call o = test() callbacks {
-                        procedure cb() {}
-                    }
+                    call o = test();
                     write o;
                 }
             """,
@@ -210,10 +196,7 @@ def test_interface_multiple_callbacks():
                 }
                     
                 main {
-                    call o = test() callbacks {
-                        procedure cb1() {}
-                        procedure cb2() {}
-                    }
+                    call o = test();
                     write o;
                 }
             """,
