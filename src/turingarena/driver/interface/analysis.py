@@ -35,10 +35,6 @@ class TreeAnalyzer:
         for exp in n.arguments:
             yield ReferenceResolution(exp)
 
-    def _get_reference_actions_Switch(self, n):
-        for c in n.cases:
-            yield from self.reference_actions(c.body)
-
     def _get_reference_actions_SwitchValueResolve(self, n):
         yield ReferenceResolution(n.value)
 
