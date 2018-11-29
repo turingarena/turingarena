@@ -205,7 +205,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute(self, n):
         pass
 
-    def _on_execute_InterfaceDefinition(self, n):
+    def _on_execute_Interface(self, n):
         self.with_assigments({
             c.variable: self.evaluate(c.value)
             for c in n.constants

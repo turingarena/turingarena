@@ -9,7 +9,7 @@ from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
 from turingarena.driver.interface.exceptions import CommunicationError, DriverStop
 from turingarena.driver.interface.execution import NodeExecutionContext
-from turingarena.driver.interface.interface import InterfaceDefinition
+from turingarena.driver.interface.interface import Interface
 from turingarena.driver.language import Language
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def main():
 def run_server(driver_connection, source_path, interface_path):
     program = Program(source_path=source_path, interface_path=interface_path)
     language = Language.from_source_path(program.source_path)
-    interface = InterfaceDefinition.load(program.interface_path)
+    interface = Interface.load(program.interface_path)
 
     with ExitStack() as stack:
         temp_dir = stack.enter_context(TemporaryDirectory())

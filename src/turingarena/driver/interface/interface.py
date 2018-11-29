@@ -8,7 +8,7 @@ from turingarena.driver.interface.parser import parse_interface
 logger = logging.getLogger(__name__)
 
 
-class InterfaceDefinition(namedtuple("InterfaceDefinition", [
+class Interface(namedtuple("Interface", [
     "constants",
     "methods",
     "main_block",
@@ -20,7 +20,7 @@ class InterfaceDefinition(namedtuple("InterfaceDefinition", [
     @staticmethod
     def load(path):
         with open(path) as f:
-            return InterfaceDefinition.compile(f.read())
+            return Interface.compile(f.read())
 
     @staticmethod
     def compile(source_text, validate=False, descriptions=None):
@@ -39,7 +39,7 @@ class InterfaceDefinition(namedtuple("InterfaceDefinition", [
                 context.prototype(MethodPrototype, m)
             )
 
-        interface = InterfaceDefinition(
+        interface = Interface(
             constants=context.constants,
             methods=context.methods,
             main_block=context.main_block(ast.main_block),

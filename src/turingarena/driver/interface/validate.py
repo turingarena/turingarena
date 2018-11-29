@@ -8,7 +8,7 @@ class Validator:
     def validate(self, n):
         return []
 
-    def validate_InterfaceDefinition(self, n):
+    def validate_Interface(self, n):
         for method in n.methods:
             yield from self.validate(method)
         yield from self.validate(n.main_block)
