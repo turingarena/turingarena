@@ -122,7 +122,6 @@ class TreeAnalyzer:
                     yield d
 
     def first_requests(self, n):
-        logging.debug(f"first_requests({n.__class__.__name__}) -> {frozenset(self._get_first_requests(n))}")
         return frozenset(self._get_first_requests(n))
 
     @visitormethod
@@ -137,7 +136,6 @@ class TreeAnalyzer:
 
     def _get_first_requests_SequenceNode(self, n):
         for child in n.children:
-            logging.debug(f"first_requests_SequenceNode({n.__class__.__name__}) visiting {child.__class__.__name__}")
             for r in self.first_requests(child):
                 if r is not None:
                     yield r
