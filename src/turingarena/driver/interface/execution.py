@@ -2,6 +2,7 @@ import logging
 import threading
 from collections.__init__ import namedtuple
 from contextlib import contextmanager
+from enum import Enum
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
@@ -9,7 +10,6 @@ from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.exceptions import CommunicationError, DriverStop, InterfaceExitReached
 from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
     IfConditionResolve, Checkpoint, SwitchValueResolve
-from turingarena.driver.interface.phase import ExecutionPhase
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
 from turingarena.util.visitor import visitormethod
@@ -526,3 +526,9 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
     def with_request_processed(self):
         return self._replace(request_lookahead=None)
+
+
+class ExecutionPhase(Enum):
+    UPWARD = 1
+    REQUEST = 2
+    DOWNWARD = 3
