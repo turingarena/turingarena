@@ -8,8 +8,7 @@ from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
 from turingarena.driver.interface.compile import load_interface
-from turingarena.driver.interface.exceptions import CommunicationError, DriverStop
-from turingarena.driver.interface.execution import NodeExecutionContext
+from turingarena.driver.interface.execution import NodeExecutionContext, CommunicationError, DriverStop
 from turingarena.driver.language import Language
 
 logger = logging.getLogger(__name__)
