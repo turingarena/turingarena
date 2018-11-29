@@ -201,9 +201,6 @@ class StatementContext(namedtuple("StatementContext", [
     def compile_object(self, cls, ast):
         return cls()
 
-    def compile_AbstractSyntaxNodeWrapper(self, cls, ast):
-        return cls(ast, self)
-
     def compile_IONode(self, cls, ast):
         return cls(arguments=[
             self.expression(a) for a in ast.arguments
