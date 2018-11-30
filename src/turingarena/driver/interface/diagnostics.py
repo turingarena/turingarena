@@ -96,7 +96,10 @@ class InvalidNumberOfArguments(Diagnostic):
 
 
 class InvalidArgument(Diagnostic):
-    """parameter {parameter} of method {name} has {dimensions} dimensions, got {argument}"""
+    __doc__ = (
+        """parameter {parameter} of method {name} has {dimensions} dimensions, """
+        """got {argument} ({argument_dimensions} dimensions)"""
+    )
 
 
 class IgnoredReturnValue(Diagnostic):

@@ -400,11 +400,13 @@ class Compiler(namedtuple("Compiler", [
 
         for parameter_declaration, argument_ast in zip(method.parameter_declarations, ast.arguments):
             argument = self.value(argument_ast)
-            self.check(self.dimensions(argument) == parameter_declaration.dimensions, InvalidArgument(
+            argument_dimensions = self.dimensions(argument)
+            self.check(argument_dimensions == parameter_declaration.dimensions, InvalidArgument(
                 name=method.name,
                 parameter=parameter_declaration.variable.name,
                 dimensions=parameter_declaration.dimensions,
                 argument=Snippet(argument_ast),
+                argument_dimensions=argument_dimensions,
             ))
             arguments.append(argument)
 
