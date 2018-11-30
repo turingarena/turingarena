@@ -8,7 +8,7 @@ grammar_ebnf = r"""
 
     interface = 
         constants_declarations:{ constant_declaration }* ~ 
-        method_declarations:{ callable_declaration }* ~ 
+        method_declarations:{ method_declaration }* ~ 
         'main' main_block:block $;
     
     callable_declarator =
@@ -21,9 +21,9 @@ grammar_ebnf = r"""
 
     constant_declaration = 'const' ~ name:identifier '=' value:expression ';';
 
-    callable_declaration = declarator:callable_declarator callbacks:callback_declarations ;
-
-    callback_declarations = 'callbacks' ~ '{' @:{ callable_declaration }* '}' | ';' @:{} ;
+    method_declaration = declarator:callable_declarator callbacks:callback_declarations ;
+    callback_declarations = 'callbacks' ~ '{' @:{ callback_declaration }* '}' | ';' @:{} ;
+    callback_declaration = declarator:callable_declarator ';' ;
 
     block = '{' statements:{ statement }* '}';
     

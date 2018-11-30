@@ -36,7 +36,13 @@ def test_call_argument_wrong_type():
         main {
             call f(0);
         }
-    """, InvalidArgument(name="f", parameter="a", dimensions=1, argument="'0'"))
+    """, InvalidArgument(
+        name="f",
+        parameter="a",
+        dimensions=1,
+        argument="'0'",
+        argument_dimensions=0,
+    ))
 
 
 def test_call_missing_return_expression():

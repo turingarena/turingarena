@@ -65,6 +65,10 @@ class InvalidIndexForReference(Diagnostic):
     """expecting index {index}, got {expression}"""
 
 
+class UnexpectedIndexForReference(Diagnostic):
+    """no more index expected, got {expression}"""
+
+
 class ReferenceNotDefined(Diagnostic):
     """reference {expression} not defined"""
 
@@ -128,13 +132,13 @@ class CaseLabelDuplicated(Diagnostic):
     """duplicated case label {label}"""
 
 
-class UnexpectedBreak(Diagnostic):
-    """unexpected break, not inside loop"""
+class BreakOutsideLoop(Diagnostic):
+    """outside loop, got {statement}"""
 
 
-class UnexpectedReturn(Diagnostic):
-    """unexpected return, not inside callback"""
+class ReturnOutsideCallback(Diagnostic):
+    """outside callback, got {statement}"""
 
 
 class DanglingCode(Diagnostic):
-    """possibly unreachable code after break / exit"""
+    """possibly unreachable after break / exit, got {statement}"""

@@ -57,8 +57,7 @@ class TreeAnalyzer:
 
     def _get_reference_actions_CallArgumentsResolve(self, n):
         for p in n.arguments:
-            if self.is_reference(p):
-                yield ReferenceResolution(p)
+            yield ReferenceResolution(p)
 
     def _get_reference_actions_CallReturn(self, n):
         yield self.reference_declaration(n.return_value)

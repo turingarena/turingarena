@@ -8,7 +8,8 @@ from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, ExpressionNotScalar, Snippet, \
     ExpressionNotLiteral, CaseLabelDuplicated, InvalidReference, ReferenceAlreadyDefined, MethodNotDeclared, \
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
-    InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript
+    InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
+    UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
@@ -97,7 +98,7 @@ class Compiler(namedtuple("Compiler", [
 
         for m in ast.method_declarations:
             compiler = compiler.with_method(
-                compiler.prototype(MethodPrototype, m)
+                compiler.method(m)
             )
 
         return Interface(
@@ -131,25 +132,40 @@ class Compiler(namedtuple("Compiler", [
             value=self.scalar(ast.value),
         )
 
-    def prototype(self, cls, ast):
+    def method(self, ast):
+        return self.prototype(MethodPrototype, ast, is_callback=False)
+
+    def callback(self, ast):
+        return self.prototype(CallbackPrototype, ast, is_callback=True)
+
+    def prototype(self, cls, ast, is_callback):
+        if is_callback:
+            assert not ast.callbacks
+            callbacks = []
+        else:
+            callbacks = [
+                self.callback(c)
+                for c in ast.callbacks
+            ]
+
         return cls(
             name=ast.declarator.name,
             parameter_declarations=[
-                self.parameter_declaration(p)
+                self.parameter_declaration(p, is_callback)
                 for p in ast.declarator.parameters
             ],
             has_return_value=(ast.declarator.type == 'function'),
-            callbacks=[
-                self.prototype(CallbackPrototype, c)
-                for c in ast.callbacks
-            ],
+            callbacks=callbacks,
         )
 
-    def parameter_declaration(self, ast):
-        return ParameterDeclaration(
+    def parameter_declaration(self, ast, is_callback):
+        d = ParameterDeclaration(
             variable=Variable(name=ast.name),
             dimensions=len(ast.indexes),
         )
+        if is_callback:
+            self.check(d.dimensions == 0, CallbackParameterNotScalar(parameter=Snippet(ast)))
+        return d
 
     def with_reference_actions(self, actions):
         actions = tuple(actions)
@@ -337,6 +353,10 @@ class Compiler(namedtuple("Compiler", [
             body=self.with_loop().block(ast.body)
         )
 
+    def _on_compile_Break(self, cls, ast):
+        self.check(self.in_loop, BreakOutsideLoop(statement=Snippet(ast)))
+        return cls()
+
     def _on_compile_CallReturn(self, cls, ast):
         call = self.statement(Call, ast)
         if call.return_value is None:
@@ -344,9 +364,6 @@ class Compiler(namedtuple("Compiler", [
         return cls(
             return_value=call.return_value,
         )
-
-    def _on_compile_CallCompleted(self, cls, ast):
-        return cls()
 
     def _on_compile_PrintNoCallbacks(self, cls, ast):
         n = self._on_compile_CallNode(cls, ast)
@@ -420,10 +437,15 @@ class Compiler(namedtuple("Compiler", [
 
         ]
 
+        if ast.return_value is not None:
+            return_value = self.reference_definition(ast.return_value)
+        else:
+            return_value = None
+
         return cls(
             method=method,
             arguments=tuple(arguments),
-            return_value=self.reference_definition(ast.return_value) if ast.return_value is not None else None,
+            return_value=return_value,
             callbacks=tuple(callbacks),
         )
 
@@ -512,7 +534,7 @@ class Compiler(namedtuple("Compiler", [
                 if node is None:
                     continue
                 yield node
-            inner = inner.with_reference_actions(inner.reference_actions(node))
+                inner = inner.with_reference_actions(inner.reference_actions(node))
 
     def block(self, ast, prepend_nodes=(), append_nodes=()):
         return Block(
@@ -582,17 +604,16 @@ class Compiler(namedtuple("Compiler", [
             ).value(index_asts[-1])
 
             if self.expression_type is ExpressionType.REFERENCE:
-                self.check(
-                    self.index_variables,
-                    InvalidIndexForReference(index=None, expression=Snippet(ast)),
-                )
-                self.check(
-                    index == self.index_variables[-1].variable,
-                    InvalidIndexForReference(
-                        index=self.index_variables[-1].variable.name,
-                        expression=Snippet(ast),
-                    ),
-                )
+                if not self.index_variables:
+                    self.error(UnexpectedIndexForReference(expression=Snippet(ast)))
+                else:
+                    self.check(
+                        index == self.index_variables[-1].variable,
+                        InvalidIndexForReference(
+                            index=self.index_variables[-1].variable.name,
+                            expression=Snippet(ast),
+                        ),
+                    )
 
             array = self._replace(
                 index_variables=self.index_variables[:-1]

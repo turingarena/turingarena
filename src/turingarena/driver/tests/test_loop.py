@@ -1,4 +1,4 @@
-from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.diagnostics import Diagnostic, BreakOutsideLoop, DanglingCode
 from .test_utils import assert_interface_error, define_algorithm
 
 
@@ -130,7 +130,7 @@ def test_unexpected_break():
         main {
             break;
         }
-    """, Diagnostic.Messages.UNEXPECTED_BREAK)
+    """, BreakOutsideLoop(statement="'break;'"))
 
 
 def test_unreachable_code():
@@ -145,7 +145,7 @@ def test_unreachable_code():
                 write b;
             }
         }
-    """, Diagnostic.Messages.UNREACHABLE_CODE)
+    """, DanglingCode(statement="'call b = p();'"))
 
 
 # def test_infinite_loop():

@@ -1,8 +1,12 @@
-function f(a);
-
+function p();
+procedure f(x);
 main {
-    for i to 2 {
-        read a[i];
+    loop {
+        call a = p();
+        call f(a);
+        write a;
+        break;
+        call b = p();
+        write b;
     }
-    call b = f(a);
 }
