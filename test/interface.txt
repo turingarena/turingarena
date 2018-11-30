@@ -2,7 +2,7 @@ function f(a);
 
 main {
     for i to 2 {
-        read a;
-        call b = f(a[1]);
+        read a[i];
     }
+    call b = f(a);
 }

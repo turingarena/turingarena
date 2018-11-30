@@ -193,17 +193,19 @@ class Compiler(namedtuple("Compiler", [
 
     def dimensions_Variable(self, e):
         try:
-            reference_declaration = self.reference_definitions[e.name]
+            return self.reference_definitions[e].dimensions
         except KeyError:
             return 0
-        return reference_declaration.dimensions
 
     def dimensions_Subscript(self, e):
-        array_dimensions = self.dimensions(e.array)
-        if array_dimensions < 1:
-            self.error(InvalidSubscript(array="<TODO>", index="<TODO>"))
-            return 0
-        return array_dimensions - 1
+        try:
+            return self.reference_definitions[e].dimensions
+        except KeyError:
+            array_dimensions = self.dimensions(e.array)
+            if array_dimensions < 1:
+                self.error(InvalidSubscript(array="<TODO>", index="<TODO>"))
+                return 0
+            return array_dimensions - 1
 
     @visitormethod
     def is_defined(self, e) -> bool:
