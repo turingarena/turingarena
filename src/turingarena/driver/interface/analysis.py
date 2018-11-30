@@ -3,7 +3,7 @@ import logging
 from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop, \
     Variable, Subscript
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDeclaration, \
+from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDefinition, \
     ReferenceDirection, VariableDeclaration, ReferenceAllocation
 from turingarena.util.visitor import visitormethod
 
@@ -40,7 +40,7 @@ class TreeAnalyzer:
 
     def _get_reference_actions_CallbackStart(self, n):
         for p in n.prototype.parameters:
-            yield ReferenceDeclaration(p, dimensions=0)
+            yield ReferenceDefinition(p, dimensions=0)
 
     def _get_reference_actions_Return(self, n):
         yield ReferenceResolution(n.value)
@@ -50,7 +50,7 @@ class TreeAnalyzer:
             r = a.reference
             if isinstance(r, Subscript):
                 reference = r.array
-                if isinstance(a, ReferenceDeclaration):
+                if isinstance(a, ReferenceDefinition):
                     yield a._replace(reference=reference, dimensions=a.dimensions + 1)
                 if isinstance(a, ReferenceResolution):
                     yield a._replace(reference=reference)
@@ -185,7 +185,7 @@ class TreeAnalyzer:
         return self._reference_declaration(e, dimensions)
 
     def _reference_declaration_Variable(self, e, dimensions):
-        return ReferenceDeclaration(
+        return ReferenceDefinition(
             reference=Variable(name=e.name),
             dimensions=dimensions,
         )
@@ -193,7 +193,7 @@ class TreeAnalyzer:
     def _reference_declaration_Subscript(self, e, dimensions):
         array_declaration = self.reference_declaration(e.array, dimensions + 1)
         if array_declaration is not None:
-            return ReferenceDeclaration(
+            return ReferenceDefinition(
                 reference=Subscript(
                     array=array_declaration.reference,
                     index=e.index,
@@ -239,7 +239,7 @@ class TreeAnalyzer:
         if not any(isinstance(n, t) for t in types):
             return
         for a in self.reference_actions(n):
-            if isinstance(a, ReferenceDeclaration) and isinstance(a.reference, Variable):
+            if isinstance(a, ReferenceDefinition) and isinstance(a.reference, Variable):
                 yield VariableDeclaration(a.reference, a.dimensions)
 
     def reference_allocations(self, n):
@@ -251,7 +251,7 @@ class TreeAnalyzer:
 
     def _get_allocations_For(self, n):
         for a in self.reference_actions(n):
-            if not isinstance(a, ReferenceDeclaration):
+            if not isinstance(a, ReferenceDefinition):
                 continue
             assert a.dimensions > 0
             yield ReferenceAllocation(

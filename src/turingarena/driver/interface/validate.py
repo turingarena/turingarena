@@ -1,5 +1,5 @@
 from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.nodes import IntLiteral, Variable
+from turingarena.driver.interface.nodes import Variable
 from turingarena.util.visitor import visitormethod
 
 
@@ -7,45 +7,6 @@ class Validator:
     @visitormethod
     def validate(self, n):
         return []
-
-    def validate_Interface(self, n):
-        for method in n.methods:
-            yield from self.validate(method)
-        yield from self.validate(n.main_block)
-
-    def validate_Read(self, n):
-        for exp in n.arguments:
-            yield from self.validate_reference_declaration(exp)
-
-    def validate_Write(self, n):
-        for exp in n.arguments:
-            yield from self.validate(exp)
-
-    def validate_Switch(self, n):
-        yield from self.validate(n.value)
-
-        if len(n.cases) == 0:
-            yield Diagnostic(Diagnostic.Messages.EMPTY_SWITCH_BODY, parseinfo=n.ast.parseinfo)
-
-        labels = []
-        for case in n.cases:
-            for label in case.labels:
-                if label in labels:
-                    yield Diagnostic(Diagnostic.Messages.DUPLICATED_CASE_LABEL, label, parseinfo=n.ast.parseinfo)
-                labels.append(label)
-            yield from self.validate(case)
-
-    def validate_Case(self, n):
-        for l in n.labels:
-            if not isinstance(l, IntLiteral):
-                yield Diagnostic(
-                    Diagnostic.Messages.SWITCH_LABEL_NOT_LITERAL,
-                    parseinfo=n.ast.labels.parseinfo,
-                )
-        yield from self.validate(n.body)
-
-    def validate_CallbackImplementation(self, n):
-        yield from self.validate(n.prototype)
 
     def validate_Return(self, n):
         yield from self.validate_reference_declaration(n.value)
@@ -145,7 +106,7 @@ class Validator:
         return ()
 
     def validate_Variable(self, e):
-        if not e.name in self.reference_declaration_mapping:
+        if not e.name in self.reference_definitions:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_NOT_DECLARED,
                 e.name,
@@ -167,7 +128,7 @@ class Validator:
         return self._validate_reference_declaration(e, index_count)
 
     def _validate_reference_declaration_Variable(self, e, index_count):
-        if e.name in self.reference_declaration_mapping:
+        if e.name in self.reference_definitions:
             yield Diagnostic(
                 Diagnostic.Messages.VARIABLE_REUSED,
                 e.name,

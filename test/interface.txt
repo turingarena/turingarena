@@ -1,9 +1,10 @@
-                procedure test() callbacks {
-                    procedure c();
-                }
+procedure test() callbacks {
+    procedure c();
+}
 
-                main {
-                    call test() callbacks {
-                        procedure c() {}
-                    }
-                }
+main {
+    call h(t);
+    call test() callbacks {
+        procedure d() {}
+    }
+}

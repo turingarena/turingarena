@@ -3,7 +3,7 @@ from enum import Enum
 
 ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
 
-ReferenceDeclaration = namedtuple("ReferenceDeclaration", ["reference", "dimensions"])
+ReferenceDefinition = namedtuple("ReferenceDefinition", ["reference", "dimensions"])
 ReferenceResolution = namedtuple("ReferenceResolution", ["reference"])
 
 VariableDeclaration = namedtuple("VariableDeclaration", ["variable", "dimensions"])

@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 
-from turingarena.driver.interface.compile import Compiler
+from turingarena.driver.interface.compile import Compiler, compile_interface
 from turingarena.driver.language import Language
 from turingarena.text.parser import TextParser
 
@@ -61,7 +61,7 @@ class PackGeneratedDirectory:
     def _create_interface_code_generator(self, interface_path, descriptions, code_generator):
         def generator(outfile):
             with open(interface_path) as f:
-                interface = Compiler.create().compile(f.read(), descriptions=descriptions)
+                interface = compile_interface(f.read(), descriptions=descriptions)
 
             code_generator.generate_to_file(interface, outfile)
 

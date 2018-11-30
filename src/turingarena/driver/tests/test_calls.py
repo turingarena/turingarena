@@ -1,4 +1,5 @@
-from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.diagnostics import MethodNotDeclared, InvalidNumberOfArguments, \
+    InvalidArgument, IgnoredReturnValue, NoReturnValue
 from turingarena.driver.tests.test_utils import assert_interface_error
 
 
@@ -8,7 +9,7 @@ def test_call_not_defined():
         main {
             call g();
         }
-    """, Diagnostic.Messages.METHOD_NOT_DECLARED, "g")
+    """, MethodNotDeclared(name="g"))
 
 
 def test_call_extra_arguments():
@@ -17,7 +18,7 @@ def test_call_extra_arguments():
         main {
             call f(0, 1);
         }
-    """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 0, 2)
+    """, InvalidNumberOfArguments(name="f", n_parameters=0, n_arguments=2))
 
 
 def test_call_missing_arguments():
@@ -26,7 +27,7 @@ def test_call_missing_arguments():
         main {
             call f(0);
         }
-    """, Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER, "f", 2, 1)
+    """, InvalidNumberOfArguments(name="f", n_parameters=2, n_arguments=1))
 
 
 def test_call_argument_wrong_type():
@@ -35,7 +36,7 @@ def test_call_argument_wrong_type():
         main {
             call f(0);
         }
-    """, Diagnostic.Messages.CALL_WRONG_ARGS_TYPE, "a", "f", "1", "0")
+    """, InvalidArgument(name="f", parameter="a", dimensions=1, argument="'0'"))
 
 
 def test_call_missing_return_expression():
@@ -44,7 +45,7 @@ def test_call_missing_return_expression():
         main {
             call f();
         }
-    """, Diagnostic.Messages.CALL_NO_RETURN_EXPRESSION, "f", "int")
+    """, IgnoredReturnValue(name="f"))
 
 
 def test_call_extra_return_expression():
@@ -53,4 +54,4 @@ def test_call_extra_return_expression():
         main {
             call a = f();
         }
-    """, Diagnostic.Messages.METHOD_DOES_NOT_RETURN_VALUE, "f")
+    """, NoReturnValue(name="f"))

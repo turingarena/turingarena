@@ -1,46 +1,129 @@
-from collections import namedtuple
+class Diagnostic(tuple):
+    def __new__(cls, **kwargs):
+        return super().__new__(cls, [cls] + list(kwargs.items()))
+
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+        self.message = self.__class__.__doc__.format(**self.__dict__)
+
+    def __str__(self):
+        return self.message
 
 
-class Diagnostic(namedtuple("Diagnostic", [
-    "message",
-    "parseinfo",
-])):
-    class Messages:
-        VARIABLE_NOT_DECLARED = "variable {} not declared"
-        VARIABLE_REUSED = "variable {} already used"
-        METHOD_NOT_DECLARED = "method {} not declared"
-        METHOD_DOES_NOT_RETURN_VALUE = "method {} (procedure) does not return a value"
-        RETURN_TYPE_MUST_BE_SCALAR = "return type must be a scalar"
-        CALL_WRONG_ARGS_NUMBER = "method {} expects {} argument(s), got {}"
-        CALL_WRONG_ARGS_TYPE = "argument {} of method {}: expected {} dimensions, got {}"
-        CALL_NO_RETURN_EXPRESSION = "function call with no return expression given"
-        CALL_WRONG_RETURN_EXPRESSION = "method {} (function) returns {}, but return expression is {}"
-        CALLBACK_PARAMETERS_MUST_BE_SCALARS = "callback parameters must be scalars"
-        WRONG_ARRAY_INDEX = "expected array index {}"
-        UNEXPECTED_ARRAY_INDEX = "unexpected array index"
-        UNEXPECTED_BREAK = "break statement used outside a loop"
-        UNEXPECTED_RETURN = "return statement should only appear inside a callback declaration"
-        UNREACHABLE_CODE = "unreachable code after break/exit"
-        DUPLICATED_CASE_LABEL = "duplicated case label {}"
-        UNEXPECTED_CALLBACK = "callback {} not allowed here"
-        SWITCH_LABEL_NOT_LITERAL = "switch labels must be integer literals"
-        VARIABLE_NOT_WRITTEN = "missing write {}; statement"
+class CodeReference(tuple):
+    def __new__(cls, ast):
+        return super().__new__(cls, (cls, ast.parseinfo))
 
-    @staticmethod
-    def build_message(msg, *args):
-        return msg.format(*args)
-
-    def __new__(cls, msg, *args, **kwargs):
-        return super().__new__(
-            cls,
-            message=cls.build_message(msg, *args),
-            **kwargs
-        )
+    @property
+    def parseinfo(self):
+        return self[1]
 
     @property
     def line_info(self):
         return self.parseinfo.buffer.line_info(self.parseinfo.pos)
 
+    @property
+    def text(self):
+        return self.parseinfo.buffer.text[self.parseinfo.pos:self.parseinfo.endpos]
+
+
+class Location(CodeReference):
     def __str__(self):
-        lineinfo = self.line_info
-        return f"line {lineinfo.line + 1}: {self.message}"
+        return f"line {self.line_info.line + 1}"
+
+
+class Snippet(CodeReference):
+    def __str__(self):
+        return f"'{self.text}'"
+
+
+# Declarations
+
+class ConstantAlreadyDeclared(Diagnostic):
+    """constant {constant} already declared"""
+
+
+class MethodAlreadyDeclared(Diagnostic):
+    """method {method} already declared"""
+
+
+class CallbackParameterNotScalar(Diagnostic):
+    """expecting scalar callback parameter, got {parameter}"""
+
+
+# Expressions / references
+
+class InvalidReference(Diagnostic):
+    """expecting reference, got {expression}"""
+
+
+class ReferenceNotDefined(Diagnostic):
+    """reference {expression} not defined"""
+
+
+class ReferenceAlreadyDefined(Diagnostic):
+    """reference {expression} already defined"""
+
+
+class ReferenceNotUsed(Diagnostic):
+    """reference {expression} was never used"""
+
+
+class ExpressionNotScalar(Diagnostic):
+    """expecting a scalar, got {expression}"""
+
+
+class ExpressionNotLiteral(Diagnostic):
+    """expecting a literal, got {expression}"""
+
+
+# Call
+
+class MethodNotDeclared(Diagnostic):
+    """method {name} not declared"""
+
+
+class InvalidNumberOfArguments(Diagnostic):
+    """method {name} expects {n_parameters} parameters, got {n_arguments}"""
+
+
+class InvalidArgument(Diagnostic):
+    """parameter {parameter} of method {name} has {dimensions} dimensions, got {argument}"""
+
+
+class IgnoredReturnValue(Diagnostic):
+    """function {name} returns a value"""
+
+
+class NoReturnValue(Diagnostic):
+    """procedure {name} does not return a value"""
+
+
+class CallbackNotDeclared(Diagnostic):
+    """method {name} does not declare callback {callback}"""
+
+
+class CallbackAlreadyImplemented(Diagnostic):
+    """callback {name} already implemented"""
+
+
+# Others
+
+class SwitchEmpty(Diagnostic):
+    """switch body empty"""
+
+
+class CaseLabelDuplicated(Diagnostic):
+    """duplicated case label {label}"""
+
+
+class UnexpectedBreak(Diagnostic):
+    """unexpected break, not inside loop"""
+
+
+class UnexpectedReturn(Diagnostic):
+    """unexpected return, not inside callback"""
+
+
+class DanglingCode(Diagnostic):
+    """possibly unreachable code after break / exit"""

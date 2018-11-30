@@ -4,33 +4,36 @@ from collections import namedtuple
 from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.expressions import ExpressionCompiler
+from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, ExpressionNotScalar, Snippet, \
+    ExpressionNotLiteral, CaseLabelDuplicated, InvalidReference, ReferenceAlreadyDefined, MethodNotDeclared, \
+    IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
+    InvalidArgument
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call
+    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call, IntLiteral, \
+    Subscript
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.validate import Validator
-from turingarena.driver.interface.variables import ReferenceDeclaration, ReferenceResolution
+from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
 
-logger = logging.getLogger(__name__)
 
+def compile_interface(source_text, descriptions=None):
+    # FIXME: descriptions
 
-def compile(source_text, validate=False):
     compiler = Compiler.create()
     interface = compiler.compile(source_text)
 
-    if validate:
-        for msg in compiler.diagnostics:
-            logger.warning(f"interface contains an error: {msg}")
+    for msg in compiler.diagnostics:
+        logging.warning(f"interface contains an error: {msg}")
 
     return interface
 
 
 def load_interface(path):
     with open(path) as f:
-        return compile(f.read())
+        return compile_interface(f.read())
 
 
 class Compiler(namedtuple("Compiler", [
@@ -40,7 +43,7 @@ class Compiler(namedtuple("Compiler", [
     "index_variables",
     "in_loop",
     "diagnostics",
-]), Validator, TreeAnalyzer, ExpressionCompiler):
+]), Validator, TreeAnalyzer):
     @classmethod
     def create(cls):
         return cls(
@@ -58,6 +61,14 @@ class Compiler(namedtuple("Compiler", [
 
         ast = parse_interface(source_text)
         return self.interface(ast)
+
+    def error(self, e):
+        if e not in self.diagnostics:
+            self.diagnostics.append(e)
+
+    def check(self, condition, e):
+        if not condition:
+            self.error(e)
 
     def with_constant(self, declaration):
         return self._replace(constants=self.constants + (declaration,))
@@ -92,7 +103,7 @@ class Compiler(namedtuple("Compiler", [
                 a(c.variable)
                 for c in compiler.constants
                 for a in [
-                    partial(ReferenceDeclaration, dimensions=0),
+                    partial(ReferenceDefinition, dimensions=0),
                     ReferenceResolution,
                 ]
             ).block(
@@ -109,7 +120,7 @@ class Compiler(namedtuple("Compiler", [
     def constant_declaration(self, ast):
         return ConstantDeclaration(
             variable=Variable(name=ast.name),
-            value=self.expression(ast.value),
+            value=self.scalar(ast.value),
         )
 
     def prototype(self, cls, ast):
@@ -150,11 +161,11 @@ class Compiler(namedtuple("Compiler", [
         }
 
     @property
-    def reference_declaration_mapping(self):
+    def reference_definitions(self):
         return {
-            a.reference.variable.name: a
+            a.reference: a
             for a in self.prev_reference_actions
-            if isinstance(a, ReferenceDeclaration)
+            if isinstance(a, ReferenceDefinition)
         }
 
     def with_index_variable(self, variable):
@@ -169,12 +180,12 @@ class Compiler(namedtuple("Compiler", [
     def dimensions(self, e) -> int:
         pass
 
-    def dimensions_Literal(self, e):
+    def dimensions_IntLiteral(self, e):
         return 0
 
     def dimensions_Variable(self, e):
         try:
-            reference_declaration = self.reference_declaration_mapping[e.name]
+            reference_declaration = self.reference_definitions[e.name]
         except KeyError:
             return 0
         return reference_declaration.dimensions
@@ -215,55 +226,78 @@ class Compiler(namedtuple("Compiler", [
     def _on_compile_object(self, cls, ast):
         return cls()
 
-    def _on_compile_IONode(self, cls, ast):
+    def _on_compile_Read(self, cls, ast):
         return cls(arguments=[
-            self.expression(a) for a in ast.arguments
+            self.reference_definition(a) for a in ast.arguments
+        ])
+
+    def _on_compile_Write(self, cls, ast):
+        return cls(arguments=[
+            self.scalar(a) for a in ast.arguments
         ])
 
     def _on_compile_Return(self, cls, ast):
-        return cls(value=self.expression(ast.value))
+        return cls(value=self.scalar(ast.value))
 
     def _on_compile_For(self, cls, ast):
         index = ForIndex(
             variable=Variable(name=ast.index),
-            range=self.expression(ast.range),
+            range=self.scalar(ast.range),
         )
 
         return cls(
             index=index,
             body=self.with_index_variable(index).with_reference_actions([
-                ReferenceDeclaration(index.variable, dimensions=0),
+                ReferenceDefinition(index.variable, dimensions=0),
                 ReferenceResolution(index.variable),
             ]).block(ast.body)
         )
 
     def _on_compile_SwitchValueResolve(self, cls, ast):
-        value = self.expression(ast.value)
-        if self.is_resolved(value):
+        n = self._on_compile_SwitchNode(cls, ast)
+
+        if self.is_resolved(n.value):
             return
-        return self._on_compile_SwitchNode(cls, ast)
+
+        return n
 
     def _on_compile_SwitchNode(self, cls, ast):
+        value = self.scalar(ast.value)
+
+        self.check(len(ast.cases) > 0, SwitchEmpty(switch=Location(ast)))
+
+        cases = []
+        labels = set()
+
+        for case_ast in ast.cases:
+            case = self.case(case_ast)
+            cases.append(case)
+            for l in case.labels:
+                self.check(l not in labels, CaseLabelDuplicated(label=l))
+                labels.add(l)
+
         return cls(
-            value=self.expression(ast.value),
-            cases=[
-                Case(
-                    labels=[self.expression(l) for l in case_ast.labels],
-                    body=self.block(case_ast.body),
-                )
-                for case_ast in ast.cases
-            ],
+            value=value,
+            cases=tuple(cases),
+        )
+
+    def case(self, ast):
+        return Case(
+            labels=[self.literal(l) for l in ast.labels],
+            body=self.block(ast.body),
         )
 
     def _on_compile_IfConditionResolve(self, cls, ast):
-        condition = self.expression(ast.condition)
-        if self.is_resolved(condition):
+        n = self._on_compile_IfNode(cls, ast)
+
+        if self.is_resolved(n.condition):
             return
-        return self._on_compile_IfNode(cls, ast)
+
+        return n
 
     def _on_compile_IfNode(self, cls, ast):
         return cls(
-            condition=self.expression(ast.condition),
+            condition=self.scalar(ast.condition),
             then_body=self.block(ast.then_body),
             else_body=self.block(ast.else_body) if ast.else_body is not None else None,
         )
@@ -285,24 +319,64 @@ class Compiler(namedtuple("Compiler", [
         return cls()
 
     def _on_compile_PrintNoCallbacks(self, cls, ast):
-        method = self.methods_by_name.get(ast.name)
-        if not method.callbacks:
+        n = self._on_compile_CallNode(cls, ast)
+
+        if not n.method.callbacks:
             return
-        return self._on_compile_CallNode(cls, ast)
+
+        return n
 
     def _on_compile_AcceptCallbacks(self, cls, ast):
-        method = self.methods_by_name.get(ast.name)
-        if not method.callbacks:
+        n = self._on_compile_CallNode(cls, ast)
+
+        if not n.method.callbacks:
             return
-        return self._on_compile_CallNode(cls, ast)
+
+        return n
 
     def _on_compile_CallNode(self, cls, ast):
         method = self.methods_by_name.get(ast.name)
 
-        body_by_name = {
-            ast.declarator.name: ast.body
-            for ast in ast.callbacks
-        }
+        if method is None:
+            self.error(MethodNotDeclared(name=ast.name))
+            method = MethodPrototype(
+                name=ast.name,
+                parameter_declarations=(),
+                has_return_value=False,
+                callbacks=(),
+            )
+        else:
+            if method.has_return_value:
+                self.check(ast.return_value is not None, IgnoredReturnValue(name=method.name))
+            else:
+                self.check(ast.return_value is None, NoReturnValue(name=method.name))
+
+        body_by_name = {}
+        for cb in ast.callbacks:
+            name = cb.declarator.name
+            self.check(
+                name in {c.name for c in method.callbacks},
+                CallbackNotDeclared(name=method.name, callback=name),
+            )
+            self.check(name not in body_by_name, CallbackAlreadyImplemented(name=name))
+
+        self.check(len(ast.arguments) == len(method.parameters), InvalidNumberOfArguments(
+            name=method.name,
+            n_parameters=len(method.parameters),
+            n_arguments=len(ast.arguments),
+        ))
+
+        arguments = []
+
+        for parameter_declaration, argument_ast in zip(method.parameter_declarations, ast.arguments):
+            argument = self.expression(argument_ast)
+            self.check(self.dimensions(argument) == parameter_declaration.dimensions, InvalidArgument(
+                name=method.name,
+                parameter=parameter_declaration.variable.name,
+                dimensions=parameter_declaration.dimensions,
+                argument=Snippet(argument_ast),
+            ))
+            arguments.append(argument)
 
         callbacks = [
             self.callback_implementation(
@@ -311,13 +385,14 @@ class Compiler(namedtuple("Compiler", [
                 ast=body_by_name.get(prototype.name),
             )
             for index, prototype in enumerate(method.callbacks)
+
         ]
 
         return cls(
             method=method,
-            arguments=[self.expression(a) for a in ast.arguments],
-            return_value=self.expression(ast.return_value) if ast.return_value is not None else None,
-            callbacks=callbacks,
+            arguments=tuple(arguments),
+            return_value=self.reference_definition(ast.return_value) if ast.return_value is not None else None,
+            callbacks=tuple(callbacks),
         )
 
     def callback_implementation(self, prototype, index, ast):
@@ -419,3 +494,56 @@ class Compiler(namedtuple("Compiler", [
                 )
             )
         )
+
+    def reference_definition(self, ast):
+        e = self.expression(ast)
+        self.check(self.is_reference(e), InvalidReference(expression=Snippet(ast)))
+        self.check(e not in self.reference_definitions, ReferenceAlreadyDefined(expression=Snippet(ast)))
+        return e
+
+    @visitormethod
+    def is_reference(self, e):
+        pass
+
+    @visitormethod
+    def is_reference(self, e):
+        return False
+
+    @visitormethod
+    def is_reference(self, e):
+        return self.index_variables and self._replace(
+            index_variables=self.index_variables[:-1]
+        ).is_reference(e.array) and e.index == self.index_variables[-1]
+
+    def scalar(self, ast):
+        e = self.expression(ast)
+
+        if self.dimensions(e) > 0:
+            self.error(ExpressionNotScalar(expression=Snippet(ast)))
+
+        return e
+
+    def literal(self, ast):
+        e = self.expression(ast)
+
+        if not isinstance(e, IntLiteral):
+            self.error(ExpressionNotLiteral(expression=Snippet(ast)))
+
+        return e
+
+    def expression(self, ast):
+        return getattr(self, f"_compile_{ast.expression_type}")(ast)
+
+    def _compile_int_literal(self, ast):
+        return IntLiteral(value=int(ast.int_literal))
+
+    def _compile_reference_subscript(self, ast):
+        return self._compile_subscript(ast, ast.indices)
+
+    def _compile_subscript(self, ast, index_asts):
+        if index_asts:
+            array = self._compile_subscript(ast, index_asts[:-1])
+            index = self.expression(index_asts[-1])
+            return Subscript(array, index)
+        else:
+            return Variable(ast.variable_name)
