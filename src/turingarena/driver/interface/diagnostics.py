@@ -53,8 +53,16 @@ class CallbackParameterNotScalar(Diagnostic):
 
 # Expressions / references
 
+class InvalidSubscript(Diagnostic):
+    """cannot subscript {array}, got {index}"""
+
+
 class InvalidReference(Diagnostic):
     """expecting reference, got {expression}"""
+
+
+class InvalidIndexForReference(Diagnostic):
+    """expecting index {index}, got {expression}"""
 
 
 class ReferenceNotDefined(Diagnostic):

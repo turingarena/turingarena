@@ -70,41 +70,6 @@ class Validator:
                 parseinfo=n.ast.return_value.parseinfo,
             )
 
-    def validate_CallArgumentsResolve(self, n):
-        method = n.method
-        if method is None:
-            return
-
-        if len(n.arguments) != len(method.parameters):
-            yield Diagnostic(
-                Diagnostic.Messages.CALL_WRONG_ARGS_NUMBER,
-                method.name, len(method.parameters), len(n.arguments),
-                parseinfo=n.ast.parseinfo,
-            )
-        for parameter_declaration, expression in zip(method.parameter_declarations, n.arguments):
-            yield from self.validate(expression)
-            dimensions = self.dimensions(expression)
-            if dimensions != parameter_declaration.dimensions:
-                yield Diagnostic(
-                    Diagnostic.Messages.CALL_WRONG_ARGS_TYPE,
-                    parameter_declaration.variable.name,
-                    method.name,
-                    parameter_declaration.dimensions,
-                    dimensions,
-                    parseinfo=expression.ast.parseinfo,
-                )
-
-    def validate_CallReturn(self, n):
-        method = n.method
-        if method is None:
-            return
-
-        if n.return_value is not None:
-            yield from self.validate_reference_declaration(n.return_value)
-
-    def validate_object(self, n):
-        return ()
-
     def validate_Variable(self, e):
         if not e.name in self.reference_definitions:
             yield Diagnostic(

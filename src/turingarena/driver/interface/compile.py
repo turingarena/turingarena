@@ -1,13 +1,14 @@
 import itertools
 import logging
 from collections import namedtuple
+from enum import Enum
 from functools import partial
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, ExpressionNotScalar, Snippet, \
     ExpressionNotLiteral, CaseLabelDuplicated, InvalidReference, ReferenceAlreadyDefined, MethodNotDeclared, \
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
-    InvalidArgument
+    InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
@@ -36,6 +37,11 @@ def load_interface(path):
         return compile_interface(f.read())
 
 
+class ExpressionType(Enum):
+    VALUE = 0
+    REFERENCE = 1
+
+
 class Compiler(namedtuple("Compiler", [
     "constants",
     "methods",
@@ -43,6 +49,7 @@ class Compiler(namedtuple("Compiler", [
     "index_variables",
     "in_loop",
     "diagnostics",
+    "expression_type",
 ]), Validator, TreeAnalyzer):
     @classmethod
     def create(cls):
@@ -53,6 +60,7 @@ class Compiler(namedtuple("Compiler", [
             index_variables=None,
             in_loop=None,
             diagnostics=[],
+            expression_type=None,
         )
 
     def compile(self, source_text, descriptions=None):
@@ -193,15 +201,31 @@ class Compiler(namedtuple("Compiler", [
     def dimensions_Subscript(self, e):
         array_dimensions = self.dimensions(e.array)
         if array_dimensions < 1:
-            # not an array, fix
+            self.error(InvalidSubscript(array="<TODO>", index="<TODO>"))
             return 0
         return array_dimensions - 1
+
+    @visitormethod
+    def is_defined(self, e) -> bool:
+        pass
+
+    def is_defined_IntLiteral(self, e):
+        return True
+
+    def is_defined_Variable(self, e):
+        return e in self.reference_definitions
+
+    def is_defined_Subscript(self, e):
+        return (
+                e in self.reference_definitions
+                or self.is_defined(e.array)
+        )
 
     @visitormethod
     def is_resolved(self, e) -> bool:
         pass
 
-    def is_resolved_Literal(self, e):
+    def is_resolved_IntLiteral(self, e):
         return True
 
     def is_resolved_Variable(self, e):
@@ -227,13 +251,17 @@ class Compiler(namedtuple("Compiler", [
         return cls()
 
     def _on_compile_Read(self, cls, ast):
-        return cls(arguments=[
-            self.reference_definition(a) for a in ast.arguments
-        ])
+        arguments = []
+        inner = self
+        for a in ast.arguments:
+            d = inner.reference_definition(a)
+            arguments.append(d)
+            inner = inner.with_reference_actions([ReferenceDefinition(d, dimensions=0)])
+        return cls(arguments=tuple(arguments))
 
     def _on_compile_Write(self, cls, ast):
         return cls(arguments=[
-            self.scalar(a) for a in ast.arguments
+            self.scalar_reference(a) for a in ast.arguments
         ])
 
     def _on_compile_Return(self, cls, ast):
@@ -369,7 +397,7 @@ class Compiler(namedtuple("Compiler", [
         arguments = []
 
         for parameter_declaration, argument_ast in zip(method.parameter_declarations, ast.arguments):
-            argument = self.expression(argument_ast)
+            argument = self.value(argument_ast)
             self.check(self.dimensions(argument) == parameter_declaration.dimensions, InvalidArgument(
                 name=method.name,
                 parameter=parameter_declaration.variable.name,
@@ -495,46 +523,49 @@ class Compiler(namedtuple("Compiler", [
             )
         )
 
+    def scalar_reference(self, ast):
+        assert self.expression_type is None
+        e = self._replace(expression_type=ExpressionType.REFERENCE).expression(ast)
+        self.check(self.is_defined(e), ReferenceNotDefined(expression=Snippet(ast)))
+        return self.check_scalar(ast, e)
+
     def reference_definition(self, ast):
-        e = self.expression(ast)
-        self.check(self.is_reference(e), InvalidReference(expression=Snippet(ast)))
-        self.check(e not in self.reference_definitions, ReferenceAlreadyDefined(expression=Snippet(ast)))
+        assert self.expression_type is None
+        e = self._replace(expression_type=ExpressionType.REFERENCE).expression(ast)
+        self.check(not self.is_defined(e), ReferenceAlreadyDefined(expression=Snippet(ast)))
         return e
 
-    @visitormethod
-    def is_reference(self, e):
-        pass
-
-    @visitormethod
-    def is_reference(self, e):
-        return False
-
-    @visitormethod
-    def is_reference(self, e):
-        return self.index_variables and self._replace(
-            index_variables=self.index_variables[:-1]
-        ).is_reference(e.array) and e.index == self.index_variables[-1]
+    def value(self, ast):
+        assert self.expression_type is None
+        e = self._replace(expression_type=ExpressionType.VALUE).expression(ast)
+        # FIXME: should give a more precise error
+        self.check(self.is_defined(e), ReferenceNotDefined(expression=Snippet(ast)))
+        return e
 
     def scalar(self, ast):
-        e = self.expression(ast)
+        return self.check_scalar(ast, self.value(ast))
 
+    def check_scalar(self, ast, e):
         if self.dimensions(e) > 0:
             self.error(ExpressionNotScalar(expression=Snippet(ast)))
-
         return e
 
     def literal(self, ast):
-        e = self.expression(ast)
-
+        e = self.value(ast)
         if not isinstance(e, IntLiteral):
             self.error(ExpressionNotLiteral(expression=Snippet(ast)))
-
         return e
 
     def expression(self, ast):
+        assert self.expression_type is not None
         return getattr(self, f"_compile_{ast.expression_type}")(ast)
 
     def _compile_int_literal(self, ast):
+        self.check(
+            self.expression_type is ExpressionType.VALUE,
+            InvalidReference(expression=Snippet(ast)),
+        )
+
         return IntLiteral(value=int(ast.int_literal))
 
     def _compile_reference_subscript(self, ast):
@@ -542,8 +573,27 @@ class Compiler(namedtuple("Compiler", [
 
     def _compile_subscript(self, ast, index_asts):
         if index_asts:
-            array = self._compile_subscript(ast, index_asts[:-1])
-            index = self.expression(index_asts[-1])
+            index = self._replace(
+                expression_type=None,
+            ).value(index_asts[-1])
+
+            if self.expression_type is ExpressionType.REFERENCE:
+                self.check(
+                    self.index_variables,
+                    InvalidIndexForReference(index=None, expression=Snippet(ast)),
+                )
+                self.check(
+                    index == self.index_variables[-1].variable,
+                    InvalidIndexForReference(
+                        index=self.index_variables[-1].variable.name,
+                        expression=Snippet(ast),
+                    ),
+                )
+
+            array = self._replace(
+                index_variables=self.index_variables[:-1]
+            )._compile_subscript(ast, index_asts[:-1])
+
             return Subscript(array, index)
         else:
             return Variable(ast.variable_name)

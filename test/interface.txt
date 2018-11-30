@@ -1,10 +1,8 @@
-procedure test() callbacks {
-    procedure c();
-}
+function f(a);
 
 main {
-    call h(t);
-    call test() callbacks {
-        procedure d() {}
+    for i to 2 {
+        read a;
+        call b = f(a[1]);
     }
 }
