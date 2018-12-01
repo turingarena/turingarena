@@ -214,10 +214,7 @@ class TreeAnalyzer:
         return "terminate"
 
     def _get_comment_PrintCallbackRequest(self, n):
-        return "requesting a callback"
-
-    def _get_comment_PrintCallbackIndex(self, n):
-        return f"index of this callback: {n.index} = {n.prototype.name}"
+        return "callback '{n.prototype.name}' (index: {n.index})"
 
     def _get_comment_PrintNoCallbacks(self, n):
         return "no more callbacks"

@@ -1,5 +1,6 @@
 procedure p() callbacks {
-    procedure c();
+    procedure c(a, b);
+    procedure d(a, b);
 }
 
 main {

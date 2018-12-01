@@ -11,7 +11,7 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
     UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
-from turingarena.driver.interface.nodes import PrintCallbackRequest, PrintCallbackIndex, CallbackStart, CallbackEnd, \
+from turingarena.driver.interface.nodes import PrintCallbackRequest, CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
     CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call, IntLiteral, \
     Subscript
@@ -452,8 +452,7 @@ class Compiler(namedtuple("Compiler", [
     def callback_implementation(self, prototype, index, ast):
         prepend_nodes = [
             CallbackStart(prototype),
-            PrintCallbackRequest(),
-            PrintCallbackIndex(index=index, prototype=prototype),
+            PrintCallbackRequest(index=index, prototype=prototype),
         ]
 
         if prototype.has_return_value:

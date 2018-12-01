@@ -496,9 +496,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_AcceptCallbacks(self, n):
         while True:
-            [has_callback] = self.receive_upward()
+            [has_callback, callback_index] = self.receive_upward()
             if has_callback:
-                [callback_index] = self.receive_upward()
                 callback = n.callbacks[callback_index]
                 self.execute(callback)
             else:

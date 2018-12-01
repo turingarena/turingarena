@@ -252,17 +252,12 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
 
     def visit_PrintNoCallbacks(self, s):
         return self.visit(
-            Print([IntLiteral(0)])
+            Print([IntLiteral(0), IntLiteral(0)])
         )
 
     def visit_PrintCallbackRequest(self, s):
         return self.visit(
-            Print([IntLiteral(1)])
-        )
-
-    def visit_PrintCallbackIndex(self, s):
-        return self.visit(
-            Print([IntLiteral(s.index)])
+            Print([IntLiteral(1), IntLiteral(s.index)])
         )
 
     def generate_main_block(self, interface):

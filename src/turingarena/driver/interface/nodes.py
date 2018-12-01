@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from collections.__init__ import namedtuple
 
-PrintCallbackRequest = namedtuple("PrintCallbackRequest", [])
-PrintCallbackIndex = namedtuple("PrintCallbackIndex", ["index", "prototype"])
+PrintCallbackRequest = namedtuple("PrintCallbackRequest", ["index", "prototype"])
 CallbackStart = namedtuple("CallbackStart", ["prototype"])
 Return = namedtuple("Return", ["value"])
 CallbackEnd = namedtuple("CallbackEnd", [])
