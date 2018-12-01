@@ -111,13 +111,15 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
     def visit_If(self, n):
         condition = self.visit(n.condition)
-        self.line(f'if {condition}:')
-        with self.indent():
-            self.visit(n.then_body)
-        if n.else_body:
-            self.line('else:')
-            with self.indent():
-                self.visit(n.else_body)
+        headers = [
+            f"if {condition}:",
+            f"else:"
+        ]
+        for header, body in zip(headers, n.branches):
+            if body is not None:
+                self.line(header)
+                with self.indent():
+                    self.visit(body)
 
     def visit_For(self, n):
         index_name = n.index.variable.name

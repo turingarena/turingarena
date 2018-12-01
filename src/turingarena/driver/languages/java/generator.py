@@ -128,11 +128,11 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         condition = self.visit(statement.condition)
         self.line(f'if ({condition})'' {')
         with self.indent():
-            self.visit(statement.then_body)
-        if statement.else_body is not None:
+            self.visit(statement.branches.then_body)
+        if statement.branches.else_body is not None:
             self.line('} else {')
             with self.indent():
-                self.visit(statement.else_body)
+                self.visit(statement.branches.else_body)
         self.line('}')
 
     def visit_For(self, statement):

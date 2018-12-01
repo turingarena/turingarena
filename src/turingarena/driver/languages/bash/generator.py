@@ -31,11 +31,11 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         condition = self.visit(if_statement.condition)
         self.line(f"if (({condition})); then")
         with self.indent():
-            self.visit(if_statement.then_body)
-        if if_statement.else_body:
+            self.visit(if_statement.branches.then_body)
+        if if_statement.branches.else_body:
             self.line("else")
             with self.indent():
-                self.visit(if_statement.else_body)
+                self.visit(if_statement.branches.else_body)
         self.line("fi")
 
     def visit_For(self, for_statement):

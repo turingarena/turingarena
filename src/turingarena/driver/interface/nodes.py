@@ -26,7 +26,8 @@ CallCompleted = namedtuple("CallCompleted", [])
 AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
 
 IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
-If = namedtuple("If", ["condition", "then_body", "else_body"])
+If = namedtuple("If", ["condition", "branches"])
+IfBranches = namedtuple("IfBranches", ["then_body", "else_body"])
 
 Print = namedtuple("Print", ["arguments"])
 Flush = namedtuple("Flush", [])

@@ -1,3 +1,4 @@
+from turingarena.driver.interface.nodes import IfBranches
 from turingarena.util.visitor import visitormethod
 
 
@@ -38,8 +39,7 @@ class TreeTransformer:
     def transform_If(self, n):
         return n._replace(
             condition=self.transform(n.condition),
-            then_body=self.transform(n.then_body),
-            else_body=self.transform(n.else_body),
+            branches=IfBranches(*self.transform_all(n.branches)),
         )
 
     def transform_Switch(self, n):

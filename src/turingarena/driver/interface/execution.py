@@ -502,9 +502,10 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute_If(self, n):
         condition_value = self.evaluate(n.condition)
         if condition_value:
-            return self.execute(n.then_body)
-        elif n.else_body is not None:
-            return self.execute(n.else_body)
+            return self.execute(n.branches.then_body)
+        else:
+            if n.branches.else_body is not None:
+                return self.execute(n.branches.else_body)
 
     def _on_execute_IfConditionResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
@@ -523,15 +524,17 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return matching_conditions
 
     def _find_conditions_expecting(self, n, request):
-        if request in self.first_requests(n.then_body):
-            yield 1
-        if n.else_body is not None:
-            if request in self.first_requests(n.else_body):
-                yield 0
+        resolved_values = (
+            1,  # then
+            0,  # else
+        )
+        for value, body in zip(resolved_values, n.branches):
+            if body is not None and request in self.first_requests(body):
+                yield value
 
     def _find_conditions_expecting_no_request(self, n):
         yield from self._find_conditions_expecting(n, None)
-        if n.else_body is None:
+        if n.branches.else_body is None:
             yield 0
 
     def _on_execute_CallArgumentsResolve(self, n):

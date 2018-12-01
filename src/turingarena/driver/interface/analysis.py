@@ -124,9 +124,9 @@ class TreeAnalyzer:
         yield from self.declaration_directions(n.body)
 
     def _get_directions_If(self, n):
-        yield from self.declaration_directions(n.then_body)
-        if n.else_body is not None:
-            yield from self.declaration_directions(n.else_body)
+        for body in n.branches:
+            if body is not None:
+                yield from self.declaration_directions(body)
 
     def _get_directions_Switch(self, n):
         for c in n.cases:
@@ -187,11 +187,11 @@ class TreeAnalyzer:
             yield from self.first_requests(c.body)
 
     def _get_first_requests_If(self, n):
-        yield from self.first_requests(n.then_body)
-        if n.else_body is not None:
-            yield from self.first_requests(n.else_body)
-        else:
-            yield None
+        for body in n.branches:
+            if body is None:
+                yield None
+            else:
+                yield from self.first_requests(body)
 
     def _get_first_requests_object(self, n):
         yield None

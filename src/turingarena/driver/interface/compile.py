@@ -12,7 +12,7 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     UnexpectedIndexForReference, CallbackParameterNotScalar, CallbackPrototypeMismatch
 from turingarena.driver.interface.nodes import ForIndex, Case, Callback, Parameter, \
     Constant, Block, Variable, Write, Read, Return, IntLiteral, \
-    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface
+    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface, IfBranches
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
@@ -324,8 +324,10 @@ class Compiler(namedtuple("Compiler", [
     def _on_compile_If(self, cls, ast):
         return cls(
             condition=self.scalar(ast.condition),
-            then_body=self.block(ast.then_body),
-            else_body=self.block(ast.else_body) if ast.else_body is not None else None,
+            branches=IfBranches(
+                then_body=self.block(ast.then_body),
+                else_body=self.block(ast.else_body) if ast.else_body is not None else None,
+            ),
         )
 
     def _on_compile_Loop(self, cls, ast):
