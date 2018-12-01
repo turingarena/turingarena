@@ -163,9 +163,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         )
 
     def transform_CallbackImplementation(self, n):
+        prepend_nodes = (CallbackStart(n.prototype),)
+        if n.prototype.has_return_value:
+            append_nodes = ()
+        else:
+            append_nodes = (CallbackEnd(),)
         return super().transform_CallbackImplementation(n._replace(
             body=n.body._replace(
-                children=(CallbackStart(n.prototype),) + n.body.children
+                children=prepend_nodes + n.body.children + append_nodes
             )
         ))
 

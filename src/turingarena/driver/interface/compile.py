@@ -10,8 +10,7 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
     UnexpectedIndexForReference, CallbackParameterNotScalar, CallbackPrototypeMismatch
-from turingarena.driver.interface.nodes import CallbackEnd, \
-    ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
+from turingarena.driver.interface.nodes import ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
     ConstantDeclaration, Block, Variable, Write, Read, Return, IntLiteral, \
     Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface
 from turingarena.driver.interface.parser import parse_interface
@@ -413,11 +412,6 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def callback_implementation(self, prototype, index, ast):
-        if prototype.has_return_value:
-            append_nodes = []
-        else:
-            append_nodes = [CallbackEnd()]
-
         if ast is None:
             nodes = []
             if prototype.parameters:
@@ -427,20 +421,12 @@ class Compiler(namedtuple("Compiler", [
                 nodes.append(Read([return_var]))
                 nodes.append(Return(return_var))
 
-            body = Block(tuple(
-                itertools.chain(
-                    nodes,
-                    append_nodes,
-                )
-            ))
+            body = Block(tuple(nodes))
         else:
             body = self.with_reference_actions([
                 ReferenceDefinition(p.variable, dimensions=0)
                 for p in prototype.parameters
-            ]).block(
-                ast,
-                append_nodes=append_nodes,
-            )
+            ]).block(ast)
 
         return CallbackImplementation(
             index=index,
