@@ -1,27 +1,6 @@
-
 [parameters]
-MAXN = 500
-TIME_LIMIT = 40
+digits = 3
 
 [scoring]
-# list of goals of the problem
-goals = [
-	"goal_1",
-	"goal_2",
-]
+goals = ["correct"]
 
-
-[evaluator]
-# path to the evaluator program (default evaluator.{py, cpp, java, etc})
-path = "evaluator.py"
-# language to be used for the evaluator (default automatically choosen by extension)
-language = "python3"
-
-
-[external_evaluator]
-# url of the repository where to find the evaluator
-repository = "https://github.com/turingarena/turingarena"
-# branch of the evaluator (default HEAD)
-branch = "HEAD"
-# SHA-1 OID of the evaluator
-oid = ""

@@ -1,12 +1,5 @@
-import turingarena
-import turingarena.evallib.algorithm
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.util import evaluation_text, evaluation_goals
-
-
-def test_correct_solution():
-    with turingarena.evallib.algorithm.run_algorithm("solutions/correct.cpp") as p:
-        assert p.functions.sum(3, 5) == 8
 
 
 def evaluate(path):

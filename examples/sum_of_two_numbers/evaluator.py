@@ -1,31 +1,29 @@
 import random
 
 import turingarena as ta
-import turingarena.evallib.algorithm
 
 for _ in range(10):
-    value_range = range(10 ** 3, 5 * 10 ** 3)
+    value_range = range(10 ** ta.parameters.digits, 5 * 10 ** ta.parameters.digits)
     a, b = random.choices(value_range, k=2)
 
     try:
-        print(f"{a} + {b} -->", end="")
-        with turingarena.evallib.algorithm.run_algorithm(ta.submission.source) as process:
+        print(f"Testing {a} + {b} ...", end="")
+        with ta.run_algorithm(ta.submission.source) as process:
             c = process.functions.sum(a, b)
-        print(f" {c}", end="")
+        print(f" answer: {c}", end="")
         if c == a + b:
-            print(" correct", end="")
+            print(" (correct)", end="")
         else:
-            print("  WRONG!", end="")
+            print("  (WRONG!)", end="")
             ta.goals["correct"] = False
-        print(
-            f" ("
-            f"time: {int(process.time_usage * 1000000)} us, "
-            f"memory: {process.current_memory_usage}, "
-            f"peak: {process.peak_memory_usage})"
-            f")"
-        )
+        print(f"(time: {int(process.time_usage * 1000000)} us)")
     except ta.AlgorithmError as e:
-        print(f" {e}")
+        print(f" error: {e}")
         ta.goals["correct"] = False
 
 ta.goals.setdefault("correct", True)
+
+
+def test_correct_solution():
+    with ta.run_algorithm("solutions/correct.cpp") as p:
+        assert p.functions.sum(3, 5) == 8

@@ -1,20 +1,20 @@
 import random
 
-from turingarena import *
-from turingarena.evallib.algorithm import run_algorithm
+import turingarena as ta
 
-all_passed = True
 for _ in range(10):
     a = random.choices(range(10 ** 4, 10 ** 5), k=20)
 
     try:
-        with run_algorithm(submission.source) as process:
+        with ta.run_algorithm(ta.submission.source) as process:
             index = process.functions.max_index(len(a), a)
         if a[index] == max(a):
             print("correct!")
         else:
+            ta.goals["correct"] = False
             print("WRONG!")
-            all_passed = False
-    except AlgorithmError as e:
+    except ta.AlgorithmError as e:
+        ta.goals["correct"] = False
         print(e)
-        all_passed = False
+
+ta.goals.setdefault("correct", True)
