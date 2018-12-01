@@ -60,7 +60,12 @@ def test_callback_with_arguments():
                 }
                 
                 main {
-                    call test();
+                    call test() callbacks {
+                        procedure c(a, b) {
+                            write a;
+                            write b;
+                        }
+                    }
                 }
             """,
             sources={

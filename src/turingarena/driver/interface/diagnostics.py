@@ -121,6 +121,9 @@ class CallbackNotDeclared(Diagnostic):
 class CallbackAlreadyImplemented(Diagnostic):
     """callback {name} already implemented"""
 
+class CallbackPrototypeMismatch(Diagnostic):
+    """callback {name} does not match declared prototype"""
+
 
 # Others
 

@@ -9,7 +9,8 @@ from turingarena.driver.client.commands import deserialize_data, serialize_data,
 from turingarena.driver.description import TreeDumper
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
-    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn, Block
+    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn, Block, \
+    CallbackStart
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
@@ -160,6 +161,13 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 )
             ),
         )
+
+    def transform_CallbackImplementation(self, n):
+        return super().transform_CallbackImplementation(n._replace(
+            body=n.body._replace(
+                children=(CallbackStart(n.prototype),) + n.body.children
+            )
+        ))
 
     def expand_sequence(self, ns):
         for n in ns:
@@ -317,7 +325,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 )._execute_sequence(n.body.children))
 
                 logging.debug(f"step phase {phase} result: {result}")
-
 
             return result
 

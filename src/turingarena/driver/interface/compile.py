@@ -9,8 +9,8 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     ExpressionNotLiteral, CaseLabelDuplicated, InvalidReference, ReferenceAlreadyDefined, MethodNotDeclared, \
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
-    UnexpectedIndexForReference, CallbackParameterNotScalar
-from turingarena.driver.interface.nodes import CallbackStart, CallbackEnd, \
+    UnexpectedIndexForReference, CallbackParameterNotScalar, CallbackPrototypeMismatch
+from turingarena.driver.interface.nodes import CallbackEnd, \
     ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
     ConstantDeclaration, Block, Variable, Write, Read, Return, IntLiteral, \
     Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface
@@ -355,15 +355,6 @@ class Compiler(namedtuple("Compiler", [
             else:
                 self.check(ast.return_value is None, NoReturnValue(name=method.name))
 
-        body_by_name = {}
-        for cb in ast.callbacks:
-            name = cb.declarator.name
-            self.check(
-                name in {c.name for c in method.callbacks},
-                CallbackNotDeclared(name=method.name, callback=name),
-            )
-            self.check(name not in body_by_name, CallbackAlreadyImplemented(name=name))
-
         self.check(len(ast.arguments) == len(method.parameters), InvalidNumberOfArguments(
             name=method.name,
             n_parameters=len(method.parameters),
@@ -383,6 +374,21 @@ class Compiler(namedtuple("Compiler", [
                 argument_dimensions=argument_dimensions,
             ))
             arguments.append(argument)
+
+        callback_prototypes_by_name = {c.name: c for c in method.callbacks}
+        body_by_name = {}
+        for cb in ast.callbacks:
+            name = cb.declarator.name
+            self.check(
+                name in callback_prototypes_by_name,
+                CallbackNotDeclared(name=method.name, callback=name),
+            )
+            self.check(name not in body_by_name, CallbackAlreadyImplemented(name=name))
+            self.check(
+                self.prototype(cb, is_callback=True) == callback_prototypes_by_name[name],
+                CallbackPrototypeMismatch(name=name),
+            )
+            body_by_name[name] = cb.body
 
         callbacks = [
             self.callback_implementation(
@@ -407,10 +413,6 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def callback_implementation(self, prototype, index, ast):
-        prepend_nodes = [
-            CallbackStart(prototype),
-        ]
-
         if prototype.has_return_value:
             append_nodes = []
         else:
@@ -427,15 +429,16 @@ class Compiler(namedtuple("Compiler", [
 
             body = Block(tuple(
                 itertools.chain(
-                    prepend_nodes,
                     nodes,
                     append_nodes,
                 )
             ))
         else:
-            body = self.block(
+            body = self.with_reference_actions([
+                ReferenceDefinition(p.variable, dimensions=0)
+                for p in prototype.parameters
+            ]).block(
                 ast,
-                prepend_nodes=prepend_nodes,
                 append_nodes=append_nodes,
             )
 
