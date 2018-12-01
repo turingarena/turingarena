@@ -303,14 +303,6 @@ class Compiler(namedtuple("Compiler", [
             ]).block(ast.body)
         )
 
-    def _on_compile_SwitchValueResolve(self, cls, ast):
-        n = self._replace(diagnostics=[])._on_compile_SwitchNode(cls, ast)
-
-        if self.is_resolved(n.value):
-            return
-
-        return n
-
     def _on_compile_SwitchNode(self, cls, ast):
         value = self.scalar(ast.value)
 
@@ -337,15 +329,7 @@ class Compiler(namedtuple("Compiler", [
             body=self.block(ast.body),
         )
 
-    def _on_compile_IfConditionResolve(self, cls, ast):
-        n = self._replace(diagnostics=[])._on_compile_IfNode(cls, ast)
-
-        if self.is_resolved(n.condition):
-            return
-
-        return n
-
-    def _on_compile_IfNode(self, cls, ast):
+    def _on_compile_If(self, cls, ast):
         return cls(
             condition=self.scalar(ast.condition),
             then_body=self.block(ast.then_body),

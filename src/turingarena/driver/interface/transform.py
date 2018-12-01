@@ -35,14 +35,14 @@ class TreeTransformer:
             body=self.transform(n.body),
         )
 
-    def transform_If(self, n):
+    def transform_IfNode(self, n):
         return n._replace(
             condition=self.transform(n.condition),
             then_body=self.transform(n.then_body),
             else_body=self.transform(n.else_body),
         )
 
-    def transform_Switch(self, n):
+    def transform_SwitchNode(self, n):
         return n._replace(
             value=self.transform(n.value),
             cases=self.transform_all(n.cases),

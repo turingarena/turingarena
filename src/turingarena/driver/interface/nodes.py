@@ -71,8 +71,7 @@ class IfNode(namedtuple("IfNode", ["condition", "then_body", "else_body"])):
         )
 
 
-class IfConditionResolve(IfNode):
-    __slots__ = []
+IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
 
 
 class If(ControlStructure, IfNode):
@@ -131,10 +130,7 @@ class Switch(ControlStructure, SwitchNode):
 
 
 Case = namedtuple("Case", ["labels", "body"])
-
-
-class SwitchValueResolve(SwitchNode):
-    __slots__ = []
+SwitchValueResolve = namedtuple("SwitchValueResolve", ["node"])
 
 
 class CallbackImplementation(namedtuple("CallbackImplementation", [
@@ -241,7 +237,6 @@ statement_classes = {
         For,
     ],
     "if": [
-        IfConditionResolve,
         If,
     ],
     "loop": [
@@ -251,7 +246,6 @@ statement_classes = {
         Break,
     ],
     "switch": [
-        SwitchValueResolve,
         Switch,
     ],
 }

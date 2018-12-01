@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 UPWARD_TIMEOUT = 3.0
 
 
+class NotResolved(Exception):
+    """Expression evaluation failed because some values are not resolved"""
+
+
 class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "bindings",
     "direction",
@@ -150,8 +154,30 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def transform_SequenceNode(self, n):
         return n._replace(
-            children=tuple(self.group_children(self.transform_all(n.children))),
+            children=tuple(
+                self.group_children(
+                    self.transform_all(
+                        self.expand_sequence(n.children)))),
         )
+
+    def expand_sequence(self, ns):
+        for n in ns:
+            yield from self.node_replacement(n)
+
+    @visitormethod
+    def node_replacement(self, n):
+        pass
+
+    def node_replacement_object(self, n):
+        yield n
+
+    def node_replacement_If(self, n):
+        yield IfConditionResolve(n)
+        yield n
+
+    def node_replacement_Switch(self, n):
+        yield SwitchValueResolve(n)
+        yield n
 
     def group_children(self, children):
         group = []
@@ -195,13 +221,19 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return e.value
 
     def evaluate_Variable(self, e):
-        return self.bindings[e]
+        try:
+            return self.bindings[e]
+        except KeyError:
+            raise NotResolved from None
 
     def evaluate_Subscript(self, e):
         try:
             return self.bindings[e]
         except KeyError:
-            return self.evaluate(e.array)[self.evaluate(e.index)]
+            try:
+                return self.evaluate(e.array)[self.evaluate(e.index)]
+            except KeyError:
+                raise NotResolved from None
 
     def _needs_request_lookahead(self, n):
         types = [
@@ -321,12 +353,15 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_SwitchValueResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            matching_cases = self._find_matching_cases(n, self.request_lookahead)
-            [case] = matching_cases
-            [label] = case.labels
-            assignments = [(n.value, label.value)]
+            try:
+                self.evaluate(n.node.value)
+            except NotResolved:
+                matching_cases = self._find_matching_cases(n.node, self.request_lookahead)
+                [case] = matching_cases
+                [label] = case.labels
+                assignments = [(n.node.value, label.value)]
 
-            return self.result()._replace(assignments=assignments)
+                return self.result()._replace(assignments=assignments)
 
     def _find_matching_cases(self, n, request):
         matching_cases_requests = list(self._find_cases_expecting(n, request))
@@ -381,7 +416,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
         try:
             for_range = self.evaluate(n.index.range)
-        except KeyError:
+        except NotResolved:
             # we assume that if the range is not resolved, then the cycle should be skipped
             # FIXME: determine this situation statically
             logger.debug(f"skipping for (phase: {self.phase})")
@@ -445,10 +480,13 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def _on_execute_IfConditionResolve(self, n):
         if self.phase is ExecutionPhase.REQUEST:
-            [condition_value] = self._find_conditions(n, self.request_lookahead)
-            return self.result()._replace(
-                assignments=[(n.condition, condition_value)]
-            )
+            try:
+                self.evaluate(n.node.condition)
+            except NotResolved:
+                [condition_value] = self._find_conditions(n.node, self.request_lookahead)
+                return self.result()._replace(
+                    assignments=[(n.node.condition, condition_value)]
+                )
 
     def _find_conditions(self, n, request):
         matching_conditions = frozenset(self._find_conditions_expecting(n, request))
