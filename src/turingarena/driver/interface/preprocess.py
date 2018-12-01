@@ -1,7 +1,7 @@
 from collections.__init__ import namedtuple
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush, PrintNoCallbacks
+from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush
 from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.util.visitor import visitormethod
 
@@ -21,17 +21,15 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
     def transform_Checkpoint(self, s):
         return Print([IntLiteral(0)])
 
-    def transform_PrintNoCallbacks(self, s):
-        return Print([IntLiteral(0), IntLiteral(0)])
-
     def transform_Callback(self, n):
         n = super().transform_Callback(n)
+        prepend_nodes = (
+            Comment(f"callback {n.prototype.name}"),
+            Print([IntLiteral(1), IntLiteral(n.index)]),
+        )
         return n._replace(
             body=n.body._replace(
-                children=tuple([
-                    Print([IntLiteral(1), IntLiteral(n.index)]),
-                    *n.body.children,
-                ]),
+                children=prepend_nodes + n.body.children,
             ),
         )
 
@@ -44,10 +42,6 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
         )
 
     def statement_nodes(self, n):
-        comment = self.comment(n)
-        if comment is not None:
-            yield Comment(comment)
-
         yield from self.variable_declarations(n)
         yield from self.reference_allocations(n)
 
@@ -67,4 +61,5 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
     def replacement_nodes_Call(self, n):
         yield n
         if n.method.callbacks:
-            yield PrintNoCallbacks()
+            yield Comment("no more callbacks")
+            yield Print([IntLiteral(0), IntLiteral(0)])

@@ -121,7 +121,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         self.line(f"function {self.build_callable_declarator(m.function)}" + "{")
         with self.indent():

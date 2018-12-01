@@ -42,14 +42,14 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
 
     def generate_method_declarations(self, interface):
         for func in interface.methods:
-            self.visit_MethodPrototype(func)
+            self.method_declaration(func)
 
     def generate_constants_declarations(self, interface):
         for c in interface.constants:
             self.visit(c)
 
     @abstractmethod
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         pass
 
     @abstractmethod
@@ -133,11 +133,8 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def generate_statement(self, statement):
         self.visit(statement)
 
-    def visit_Flush(self, n):
-        return self.generate_flush()
-
     @abstractmethod
-    def generate_flush(self):
+    def visit_Flush(self, n):
         pass
 
 

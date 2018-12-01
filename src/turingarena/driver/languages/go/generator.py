@@ -37,7 +37,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         self.line(f"var {d.variable.name} {'[]' * d.dimensions + 'int'}")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         return []
 
     def visit_Constant(self, m):
@@ -152,7 +152,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_Break(self, statement):
         self.line("break")
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line("os.Stdout.Sync()")
 
 
@@ -160,7 +160,7 @@ class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
     def visit_Constant(self, m):
         self.line(f"const {m.variable.name} = {self.visit(m.value)}")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         self.line(f"{self.build_method_signature(m)}" " {")
         with self.indent():

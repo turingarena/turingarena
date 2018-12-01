@@ -30,18 +30,18 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         self.line("#include <cassert>")
         self.line()
 
-    def visit_VariableDeclaration(self, d):
-        pointers = "*" * d.dimensions
-        self.line(f"static int {pointers}{d.variable.name};")
+    def visit_VariableDeclaration(self, n):
+        pointers = "*" * n.dimensions
+        self.line(f"static int {pointers}{n.variable.name};")
 
-    def visit_ReferenceAllocation(self, a):
-        reference = self.visit(a.reference)
-        dimensions = "*" * a.dimensions
-        size = self.visit(a.size)
+    def visit_ReferenceAllocation(self, n):
+        reference = self.visit(n.reference)
+        dimensions = "*" * n.dimensions
+        size = self.visit(n.size)
         self.line(f"{reference} = new int{dimensions}[{size}];")
 
-    def visit_MethodPrototype(self, m):
-        self.line(f"{self.build_method_signature(m)};")
+    def method_declaration(self, n):
+        self.line(f"{self.build_method_signature(n)};")
 
     def generate_main_block(self, interface):
         self.line()
@@ -50,9 +50,9 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             self.visit(interface.main_block)
         self.line("}")
 
-    def visit_Callback(self, callback):
-        params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
-        if callback.prototype.has_return_value:
+    def visit_Callback(self, n):
+        params = ", ".join(self.visit(p) for p in n.prototype.parameters)
+        if n.prototype.has_return_value:
             return_value = " -> int"
         else:
             return_value = ""
@@ -60,22 +60,22 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         with self.collect_lines() as c:
             self.line(f"[]({params}){return_value}" " {")
             with self.indent():
-                self.visit(callback.body)
+                self.visit(n.body)
             self.line("}")
         return c.as_inline()
 
-    def visit_Constant(self, m):
-        self.line(f"static const int {m.variable.name} = {self.visit(m.value)};")
+    def visit_Constant(self, n):
+        self.line(f"static const int {n.variable.name} = {self.visit(n.value)};")
 
-    def visit_Call(self, call_statement):
-        method = call_statement.method
+    def visit_Call(self, n):
+        method = n.method
 
-        value_arguments = [self.visit(p) for p in call_statement.arguments]
-        callback_arguments = [self.visit(c) for c in call_statement.callbacks]
+        value_arguments = [self.visit(p) for p in n.arguments]
+        callback_arguments = [self.visit(c) for c in n.callbacks]
 
         parameters = ", ".join(value_arguments + callback_arguments)
         if method.has_return_value:
-            return_value = f"{self.visit(call_statement.return_value)} = "
+            return_value = f"{self.visit(n.return_value)} = "
         else:
             return_value = ""
 
@@ -86,20 +86,20 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         args = ", ".join(self.visit(v) for v in write_statement.arguments)
         self.line(f"""printf("{format_string}", {args});""")
 
-    def visit_Read(self, statement):
-        format_string = "".join("%d" for _ in statement.arguments)
-        scanf_args = ", ".join("&" + self.visit(v) for v in statement.arguments)
+    def visit_Read(self, n):
+        format_string = "".join("%d" for _ in n.arguments)
+        scanf_args = ", ".join("&" + self.visit(v) for v in n.arguments)
         self.line(f"""scanf("{format_string}", {scanf_args});""")
 
-    def visit_If(self, statement):
-        condition = self.visit(statement.condition)
+    def visit_If(self, n):
+        condition = self.visit(n.condition)
         self.line(f"if ({condition})" " {")
         with self.indent():
-            self.visit(statement.then_body)
-        if statement.else_body:
+            self.visit(n.then_body)
+        if n.else_body:
             self.line("} else {")
             with self.indent():
-                self.visit(statement.else_body)
+                self.visit(n.else_body)
         self.line("}")
 
     def visit_For(self, s):
@@ -110,16 +110,16 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             self.visit(s.body)
         self.line("}")
 
-    def visit_Loop(self, statement):
+    def visit_Loop(self, n):
         self.line("while (true) {")
         with self.indent():
-            self.visit(statement.body)
+            self.visit(n.body)
         self.line("}")
 
-    def visit_Switch(self, statement):
-        for i, case in enumerate(statement.cases):
+    def visit_Switch(self, n):
+        for i, case in enumerate(n.cases):
             condition = " || ".join(
-                f"{self.visit(statement.value)} == {self.visit(label)}"
+                f"{self.visit(n.value)} == {self.visit(label)}"
                 for label in case.labels
             )
             if i == 0:
@@ -130,16 +130,16 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
                 self.visit(case.body)
         self.line("}")
 
-    def visit_Exit(self, statement):
+    def visit_Exit(self, n):
         self.line("exit(0);")
 
-    def visit_Return(self, statement):
-        self.line(f"return {self.visit(statement.value)};")
+    def visit_Return(self, n):
+        self.line(f"return {self.visit(n.value)};")
 
-    def visit_Break(self, statement):
+    def visit_Break(self, n):
         self.line("break;")
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line("fflush(stdout);")
 
 
@@ -147,7 +147,7 @@ class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
     def visit_Constant(self, m):
         self.line(f"const int {m.variable.name} = {self.visit(m.value)};")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         if m.description is not None:
             for line in m.description.split("\n"):

@@ -237,22 +237,6 @@ class TreeAnalyzer:
     def comment(self, n):
         return self._get_comment(n)
 
-    @visitormethod
-    def _get_comment(self, n):
-        pass
-
-    def _get_comment_MainExit(self, n):
-        return "terminate"
-
-    def _get_comment_PrintCallbackRequest(self, n):
-        return "callback '{n.prototype.name}' (index: {n.index})"
-
-    def _get_comment_PrintNoCallbacks(self, n):
-        return "no more callbacks"
-
-    def _get_comment_object(self, n):
-        return None
-
     def variable_declarations(self, n):
         return frozenset(self._get_variable_declarations(n))
 

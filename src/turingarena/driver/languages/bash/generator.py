@@ -61,8 +61,8 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_Exit(self, exit_statement):
         self.line('exit')
 
-    def generate_flush(self):
-        ()
+    def visit_Flush(self, n):
+        pass
 
     def visit_Call(self, call_statement):
         arguments = " ".join(f"$(({self.visit(p)}))" for p in call_statement.arguments)
@@ -78,7 +78,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         # FIXME: not implemented
         pass
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         ()
 
     def visit_VariableDeclaration(self, d):
@@ -86,7 +86,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
 
 class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         arguments = [p.variable.name for p in m.parameters]
         self.line(f"function {m.name} " "{")
         with self.indent():

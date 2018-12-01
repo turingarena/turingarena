@@ -58,7 +58,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         self.line(f"{reference} = new int[{size}]{dimensions};")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         with self.indent():
             if m.callbacks:
                 self.line(f'interface {self.build_callbacks_interface_name(m)} ''{')
@@ -164,7 +164,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
                 self.visit(case.body)
         self.line('}')
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line('System.out.flush();')
 
     def visit_Exit(self, exit_statement):
@@ -181,7 +181,7 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
     def generate_header(self, interface):
         self.line('class Solution extends Skeleton {')
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         with self.indent():
             if m.callbacks:
                 self.line()

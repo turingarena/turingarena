@@ -24,7 +24,6 @@ CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["method", "arguments"
 CallReturn = namedtuple("CallReturn", ["return_value"])
 CallCompleted = namedtuple("CallCompleted", [])
 AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
-PrintNoCallbacks = namedtuple("PrintNoCallbacks", [])
 
 IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
 If = namedtuple("If", ["condition", "then_body", "else_body"])

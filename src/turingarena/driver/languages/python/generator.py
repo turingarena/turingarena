@@ -51,7 +51,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
             self.visit(interface.main_block)
 
     def visit_Exit(self, exit_statement):
-        self.generate_flush()
+        self.visit_Flush(None)
         self.line('_os._exit(0)')
 
     def visit_Break(self, break_statement):
@@ -60,7 +60,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def visit_Return(self, return_statement):
         self.line(f'return {self.visit(return_statement.value)}')
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line(f'print(end="", flush=True)')
 
     def visit_ReferenceAllocation(self, a):
@@ -69,7 +69,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         self.line(f"{name}{indexes} = [None] * {size}")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         pass
 
     def visit_VariableDeclaration(self, d):
@@ -96,9 +96,10 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         call_expr = f"_solution.{method_name}({arguments})"
         if call_statement.return_value is not None:
             return_value = self.visit(call_statement.return_value)
-            self.line(f'{return_value} = {call_expr}')
+            return_expr = f"{return_value} = "
         else:
-            self.line(f'{call_expr}')
+            return_expr = ""
+        self.line(f"{return_expr}{call_expr}")
 
     def visit_Print(self, n):
         args = ', '.join(self.visit(arg) for arg in n.arguments)
@@ -143,7 +144,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
 
 class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         self.build_method_declaration(m)
         with self.indent():

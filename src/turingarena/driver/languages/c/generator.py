@@ -6,7 +6,7 @@ class CSkeletonCodeGen(CppSkeletonCodeGen):
         self.line('extern "C" {')
         for func in interface.methods:
             with self.indent():
-                self.visit_MethodPrototype(func)
+                self.method_declaration(func)
         self.line("}")
 
 
