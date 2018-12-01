@@ -12,7 +12,7 @@ def test_unexpected_index():
             call p(a[5]);
             checkpoint;
         }
-    """, [UnexpectedIndexForReference(expression="'a[5]'")])
+    """, [UnexpectedIndexForReference(expression="'5'")])
 
 
 def test_invalid_index():
@@ -27,7 +27,7 @@ def test_invalid_index():
             }
             checkpoint;
         }
-    """, [InvalidIndexForReference(expression="'a[i]'", index="j")])
+    """, [InvalidIndexForReference(expression="'i'", index="j")])
 
 
 def test_array_basic():

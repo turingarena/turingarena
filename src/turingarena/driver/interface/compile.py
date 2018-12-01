@@ -43,6 +43,10 @@ class ExpressionType(Enum):
     REFERENCE = 1
 
 
+SubscriptAst = namedtuple("SubscriptAst", ["expression_type", "array", "index"])
+VariableAst = namedtuple("VariableAst", ["expression_type", "variable_name"])
+
+
 class Compiler(namedtuple("Compiler", [
     "constants",
     "methods",
@@ -581,43 +585,55 @@ class Compiler(namedtuple("Compiler", [
             self.error(ExpressionNotLiteral(expression=Snippet(ast)))
         return e
 
+    EXPRESSION_TYPE_MAP = {
+        "int_literal": IntLiteral,
+        "subscript": Subscript,
+        "variable": Variable,
+    }
+
     def expression(self, ast):
         assert self.expression_type is not None
-        return getattr(self, f"_compile_{ast.expression_type}")(ast)
+        ast = self._preprocess_expression_ast(ast)
+        return self._on_compile(self.EXPRESSION_TYPE_MAP[ast.expression_type], ast)
 
-    def _compile_int_literal(self, ast):
+    def _preprocess_expression_ast(self, ast):
+        if ast.expression_type == "reference_subscript":
+            new_ast = VariableAst("variable", ast.variable_name)
+            for i in ast.indices:
+                new_ast = SubscriptAst("subscript", new_ast, i)
+            ast = new_ast
+        return ast
+
+    def _on_compile_IntLiteral(self, cls, ast):
         self.check(
             self.expression_type is ExpressionType.VALUE,
             InvalidReference(expression=Snippet(ast)),
         )
 
-        return IntLiteral(value=int(ast.int_literal))
+        return cls(value=int(ast.int_literal))
 
-    def _compile_reference_subscript(self, ast):
-        return self._compile_subscript(ast, ast.indices)
+    def _on_compile_Variable(self, cls, ast):
+        return cls(ast.variable_name)
 
-    def _compile_subscript(self, ast, index_asts):
-        if index_asts:
-            index = self._replace(
-                expression_type=None,
-            ).value(index_asts[-1])
+    def _on_compile_Subscript(self, cls, ast):
+        array = self._replace(
+            index_variables=self.index_variables[:-1],
+        ).expression(ast.array)
 
-            if self.expression_type is ExpressionType.REFERENCE:
-                if not self.index_variables:
-                    self.error(UnexpectedIndexForReference(expression=Snippet(ast)))
-                else:
-                    self.check(
-                        index == self.index_variables[-1].variable,
-                        InvalidIndexForReference(
-                            index=self.index_variables[-1].variable.name,
-                            expression=Snippet(ast),
-                        ),
-                    )
+        index = self._replace(
+            expression_type=None,
+        ).value(ast.index)
 
-            array = self._replace(
-                index_variables=self.index_variables[:-1]
-            )._compile_subscript(ast, index_asts[:-1])
+        if self.expression_type is ExpressionType.REFERENCE:
+            if not self.index_variables:
+                self.error(UnexpectedIndexForReference(expression=Snippet(ast.index)))
+            else:
+                self.check(
+                    index == self.index_variables[-1].variable,
+                    InvalidIndexForReference(
+                        index=self.index_variables[-1].variable.name,
+                        expression=Snippet(ast.index),
+                    ),
+                )
 
-            return Subscript(array, index)
-        else:
-            return Variable(ast.variable_name)
+        return cls(array, index)
