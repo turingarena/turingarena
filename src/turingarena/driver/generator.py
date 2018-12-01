@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 
-from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.nodes import Print, IntLiteral
+from turingarena.driver.interface.preprocess import TreePreprocessor
 from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
@@ -95,6 +94,8 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
         file.write(lines.as_block())
 
     def generate(self, interface):
+        interface = TreePreprocessor.create().transform(interface)
+
         self.generate_header(interface)
         self.generate_constants_declarations(interface)
         self.generate_method_declarations(interface)
@@ -193,16 +194,6 @@ class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
 class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
 
-    def visit_Write(self, s):
-        return self.visit(
-            Print(s.arguments)
-        )
-
-    def visit_Checkpoint(self, s):
-        return self.visit(
-            Print([IntLiteral(0)])
-        )
-
     @abstractmethod
     def visit_Read(self, s):
         pass
@@ -260,40 +251,19 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         return []
 
     def visit_Step(self, s):
-        if s.direction is ReferenceDirection.DOWNWARD:
-            # insert an (upward) flush before receiving data downward
-            self.generate_flush()
         self.visit_SequenceNode(s)
 
-    def visit_PrintNoCallbacks(self, s):
-        return self.visit(
-            Print([IntLiteral(0), IntLiteral(0)])
-        )
-
-    def visit_PrintCallbackRequest(self, s):
-        return self.visit(
-            Print([IntLiteral(1), IntLiteral(s.index)])
-        )
+    def visit_Comment(self, s):
+        self.line_comment(s.text)
 
     def generate_main_block(self, interface):
         self.visit(interface.main_block)
 
     def generate_statement(self, statement):
-        analyzer = TreeAnalyzer()
-
-        comment = analyzer.comment(statement)
-        if comment is not None:
-            comment = StatementDescriptionCodeGen().visit(statement)
-        if comment is not None:
-            self.line_comment(comment)
-
-        for d in analyzer.variable_declarations(statement):
-            self.visit(d)
-
-        for a in analyzer.reference_allocations(statement):
-            self.visit(a)
-
         self.visit(statement)
+
+    def visit_Flush(self, n):
+        return self.generate_flush()
 
     @abstractmethod
     def generate_flush(self):

@@ -85,6 +85,7 @@ class If(ControlStructure, IfNode):
 
 
 Print = namedtuple("Print", ["arguments"])
+Flush = namedtuple("Flush", [])
 
 
 class IONode:
@@ -209,6 +210,8 @@ class Subscript(namedtuple("Subscript", [
 class Block(namedtuple("Block", ["children"]), SequenceNode):
     __slots__ = []
 
+
+Comment = namedtuple("Comment", ["text"])
 
 statement_classes = {
     "checkpoint": [
