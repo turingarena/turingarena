@@ -12,7 +12,7 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import PrintCallbackRequest, CallbackStart, CallbackEnd, \
-    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, Step, ParameterDeclaration, \
+    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, ParameterDeclaration, \
     CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call, IntLiteral, \
     Subscript
 from turingarena.driver.interface.parser import parse_interface
@@ -145,19 +145,19 @@ class Compiler(namedtuple("Compiler", [
     def prototype(self, cls, ast, is_callback):
         if is_callback:
             assert not ast.callbacks
-            callbacks = []
+            callbacks = ()
         else:
-            callbacks = [
+            callbacks = tuple(
                 self.callback(c)
                 for c in ast.callbacks
-            ]
+            )
 
         return cls(
             name=ast.declarator.name,
-            parameter_declarations=[
+            parameter_declarations=tuple(
                 self.parameter_declaration(p, is_callback)
                 for p in ast.declarator.parameters
-            ],
+            ),
             has_return_value=(ast.declarator.type == 'function'),
             callbacks=callbacks,
         )
@@ -475,12 +475,10 @@ class Compiler(namedtuple("Compiler", [
                 nodes.append(Return(return_var))
 
             body = Block(tuple(
-                self.group_children(
-                    itertools.chain(
-                        prepend_nodes,
-                        nodes,
-                        append_nodes,
-                    )
+                itertools.chain(
+                    prepend_nodes,
+                    nodes,
+                    append_nodes,
                 )
             ))
         else:
@@ -496,40 +494,6 @@ class Compiler(namedtuple("Compiler", [
             body=body
         )
 
-    def group_children(self, children):
-        group = []
-        for node in children:
-            can_be_grouped = self.can_be_grouped(node) and len(self._group_directions([node])) <= 1
-
-            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
-                group.append(node)
-                continue
-
-            if group:
-                yield self._make_step(group)
-                group.clear()
-
-            if not can_be_grouped:
-                yield node
-            else:
-                group.append(node)
-
-        if group:
-            yield self._make_step(group)
-
-    def _make_step(self, group):
-        return Step(tuple(group), self._group_direction(group))
-
-    def _group_direction(self, group):
-        directions = self._group_directions(group)
-        if not directions:
-            return None
-        [direction] = directions
-        return direction
-
-    def _group_directions(self, group):
-        return {d for n in group for d in self.declaration_directions(n)}
-
     def _compile_block_flat(self, asts):
         inner = self
         for ast in asts:
@@ -543,12 +507,10 @@ class Compiler(namedtuple("Compiler", [
     def block(self, ast, prepend_nodes=(), append_nodes=()):
         return Block(
             children=tuple(
-                self.group_children(
-                    itertools.chain(
-                        prepend_nodes,
-                        self._compile_block_flat(ast.statements),
-                        append_nodes,
-                    )
+                itertools.chain(
+                    prepend_nodes,
+                    self._compile_block_flat(ast.statements),
+                    append_nodes,
                 )
             )
         )

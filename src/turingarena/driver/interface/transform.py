@@ -12,14 +12,14 @@ class TreeTransformer:
     def transform_object(self, n):
         return n
 
-    def transform_Call(self, n):
+    def transform_CallNode(self, n):
         return n._replace(
             callbacks=self.transform_all(n.callbacks)
         )
 
     def transform_CallbackImplementation(self, n):
         return n._replace(
-            body=self.transform(n.body)
+            body=self.transform(n.body),
         )
 
     def transform_Interface(self, n):

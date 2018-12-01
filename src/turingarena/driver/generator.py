@@ -1,88 +1,13 @@
 from abc import ABC, abstractmethod
-from contextlib import contextmanager
 
+from turingarena.driver.expressions import AbstractExpressionCodeGen
+from turingarena.driver.genutils import LinesGenerator
 from turingarena.driver.interface.preprocess import TreePreprocessor
-from turingarena.driver.interface.variables import ReferenceDirection
 from turingarena.util.visitor import Visitor
 
 
 class CodeGen(ABC, Visitor):
     __slots__ = []
-
-
-class AbstractExpressionCodeGen(CodeGen):
-    __slots__ = []
-
-    def visit_Subscript(self, e):
-        return f"{self.visit(e.array)}[{self.visit(e.index)}]"
-
-    def visit_Variable(self, e):
-        return e.name
-
-    def visit_IntLiteral(self, e):
-        return str(e.value)
-
-
-class LineCollector:
-    def __init__(self):
-        self._lines = []
-
-    def indented_lines(self):
-        for indentation, l in self._lines:
-            if l is None:
-                yield "\n"
-            else:
-                yield "    " * indentation + l + "\n"
-
-    def add_line(self, indentation, line):
-        self._lines.append((indentation, line))
-
-    def _inline_chunks(self):
-        for i, (indentation, l) in enumerate(self._lines):
-            if i > 0:
-                yield "\n"
-                if l is not None:
-                    yield "    " * indentation
-            if l is not None:
-                yield l
-
-    def __iter__(self):
-        return iter(self.indented_lines())
-
-    def as_inline(self):
-        return "".join(self._inline_chunks())
-
-    def as_block(self):
-        return "".join(self.indented_lines())
-
-
-class LinesGenerator:
-    __slots__ = ["indentation", "collector"]
-
-    def __init__(self):
-        self.indentation = 0
-        self.collector = None
-
-    @contextmanager
-    def collect_lines(self):
-        old_collector = self.collector
-        self.collector = collector = LineCollector()
-        yield collector
-        assert self.collector is collector
-        self.collector = old_collector
-
-    @contextmanager
-    def indent(self):
-        self.indentation += 1
-        yield
-        self.indentation -= 1
-
-    def line(self, line=None):
-        self.collector.add_line(self.indentation, line)
-
-    @abstractmethod
-    def _on_generate(self, *args, **kwargs):
-        pass
 
 
 class InterfaceCodeGen(CodeGen, LinesGenerator):
@@ -131,64 +56,6 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
     @abstractmethod
     def line_comment(self, comment):
         pass
-
-
-class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
-    def visit_object(self, n):
-        pass
-
-    def visit_Read(self, s):
-        args = ", ".join(self.visit(a) for a in s.arguments)
-        return f"read {args}"
-
-    def visit_Print(self, s):
-        args = ", ".join(self.visit(a) for a in s.arguments)
-        return f"write {args}"
-
-    def visit_Checkpoint(self, s):
-        return f"checkpoint"
-
-    def visit_Call(self, s):
-        method = s.method
-
-        args = ", ".join(self.visit(p) for p in s.arguments)
-        if method.has_return_value:
-            return_value = f"{self.visit(s.return_value)} = "
-        else:
-            return_value = ""
-
-        if method.has_callbacks:
-            callbacks = " callbacks {...}"
-        else:
-            callbacks = ""
-
-        return f"call {return_value}{method.name}({args}){callbacks}"
-
-    def visit_Return(self, s):
-        return f"return {self.visit(s.value)}"
-
-    def visit_Exit(self, s):
-        return "exit"
-
-    def visit_Break(self, s):
-        return "break"
-
-    def visit_For(self, s):
-        index = s.index
-        return f"for {index.variable.name} to {self.visit(index.range)} " "{...}"
-
-    def visit_Loop(self, s):
-        return "loop {...}"
-
-    def visit_If(self, s):
-        if s.else_body is not None:
-            body = "{...} else {...}"
-        else:
-            body = "{...}"
-        return f"if {self.visit(s.condition)} {body}"
-
-    def visit_Switch(self, s):
-        return f"switch {self.visit(s.value)} " "{...}"
 
 
 class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
@@ -249,9 +116,6 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_object(self, s):
         # ignore any other node
         return []
-
-    def visit_Step(self, s):
-        self.visit_SequenceNode(s)
 
     def visit_Comment(self, s):
         self.line_comment(s.text)

@@ -6,10 +6,12 @@ from enum import Enum
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
+from turingarena.driver.description import TreeDumper
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
-    IfConditionResolve, Checkpoint, SwitchValueResolve
+    IfConditionResolve, Checkpoint, SwitchValueResolve, Step
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
+from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
 from turingarena.util.visitor import visitormethod
 
@@ -26,7 +28,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "request_lookahead",
     "driver_connection",
     "sandbox_connection",
-]), TreeAnalyzer):
+]), TreeTransformer, TreeAnalyzer):
     __slots__ = []
 
     def send_driver_state(self, state):
@@ -146,6 +148,45 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             does_break=False,
         )
 
+    def transform_SequenceNode(self, n):
+        return n._replace(
+            children=tuple(self.group_children(self.transform_all(n.children))),
+        )
+
+    def group_children(self, children):
+        group = []
+        for node in children:
+            can_be_grouped = self.can_be_grouped(node) and len(self._group_directions([node])) <= 1
+
+            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
+                group.append(node)
+                continue
+
+            if group:
+                yield self._make_step(group)
+                group.clear()
+
+            if not can_be_grouped:
+                yield node
+            else:
+                group.append(node)
+
+        if group:
+            yield self._make_step(group)
+
+    def _make_step(self, group):
+        return Step(tuple(group), self._group_direction(group))
+
+    def _group_direction(self, group):
+        directions = self._group_directions(group)
+        if not directions:
+            return None
+        [direction] = directions
+        return direction
+
+    def _group_directions(self, group):
+        return {d for n in group for d in self.declaration_directions(n)}
+
     @visitormethod
     def evaluate(self, e):
         pass
@@ -179,7 +220,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         context = self
 
         logging.debug(
-            f"EXECUTE: {n} "
+            f"EXECUTE: {TreeDumper().description(n)} "
             f"phase: {self.phase} "
             f"request LA: {self.request_lookahead}"
         )
@@ -208,7 +249,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         self.with_assigments({
             c.variable: self.evaluate(c.value)
             for c in n.constants
-        }).execute(n.main_block)
+        }).execute(self.transform(n.main_block))
 
     def _on_execute_Block(self, n):
         return self._execute_sequence(n.children)
