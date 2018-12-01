@@ -1,77 +1,126 @@
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 
-from turingarena.driver.interface.expressions import SyntheticExpression
-from turingarena.driver.interface.statements.statement import SyntheticStatement, Statement, AbstractStatement
-from turingarena.driver.visitors import StatementVisitor, ExpressionVisitor
+from turingarena.driver.interface.analysis import TreeAnalyzer
+from turingarena.driver.interface.nodes import Print, IntLiteral
+from turingarena.driver.interface.variables import ReferenceDirection
+from turingarena.util.visitor import Visitor
 
 
-class CodeGen(ABC):
+class CodeGen(ABC, Visitor):
     __slots__ = []
 
-    def indent_all(self, lines):
-        for line in lines:
-            yield self.indent(line)
 
-    def indent(self, line):
-        if line is None:
-            return None
-        else:
-            return "    " + line
-
-
-class AbstractExpressionCodeGen(ExpressionVisitor, CodeGen):
+class AbstractExpressionCodeGen(CodeGen):
     __slots__ = []
 
-    def subscript_expression(self, e):
-        return f"{self.expression(e.array)}[{self.expression(e.index)}]"
+    def visit_Subscript(self, e):
+        return f"{self.visit(e.array)}[{self.visit(e.index)}]"
 
-    def reference_expression(self, e):
-        return e.variable_name
+    def visit_Variable(self, e):
+        return e.name
 
-    def int_literal_expression(self, e):
+    def visit_IntLiteral(self, e):
         return str(e.value)
 
 
-class InterfaceCodeGen(CodeGen):
+class LineCollector:
+    def __init__(self):
+        self._lines = []
+
+    def indented_lines(self):
+        for indentation, l in self._lines:
+            if l is None:
+                yield "\n"
+            else:
+                yield "    " * indentation + l + "\n"
+
+    def add_line(self, indentation, line):
+        self._lines.append((indentation, line))
+
+    def _inline_chunks(self):
+        for i, (indentation, l) in enumerate(self._lines):
+            if i > 0:
+                yield "\n"
+                if l is not None:
+                    yield "    " * indentation
+            if l is not None:
+                yield l
+
+    def __iter__(self):
+        return iter(self.indented_lines())
+
+    def as_inline(self):
+        return "".join(self._inline_chunks())
+
+    def as_block(self):
+        return "".join(self.indented_lines())
+
+
+class LinesGenerator:
+    __slots__ = ["indentation", "collector"]
+
+    def __init__(self):
+        self.indentation = 0
+        self.collector = None
+
+    @contextmanager
+    def collect_lines(self):
+        old_collector = self.collector
+        self.collector = collector = LineCollector()
+        yield collector
+        assert self.collector is collector
+        self.collector = old_collector
+
+    @contextmanager
+    def indent(self):
+        self.indentation += 1
+        yield
+        self.indentation -= 1
+
+    def line(self, line=None):
+        self.collector.add_line(self.indentation, line)
+
+    @abstractmethod
+    def _on_generate(self, *args, **kwargs):
+        pass
+
+
+class InterfaceCodeGen(CodeGen, LinesGenerator):
     __slots__ = []
 
     def generate_to_file(self, interface, file):
-        for line in self.generate(interface):
-            if line is None:
-                print("", file=file)
-            else:
-                print(line, file=file)
+        with self.collect_lines() as lines:
+            self.generate(interface)
+        file.write(lines.as_block())
 
     def generate(self, interface):
-        yield from self.generate_header(interface)
-        yield from self.generate_constants_declarations(interface.constants)
-        yield from self.generate_method_declarations(interface)
-        yield from self.generate_main_block(interface)
-        yield from self.generate_footer(interface)
+        self.generate_header(interface)
+        self.generate_constants_declarations(interface)
+        self.generate_method_declarations(interface)
+        self.generate_main_block(interface)
+        self.generate_footer(interface)
 
     def generate_header(self, interface):
-        yield from ()
+        pass
 
     def generate_footer(self, interface):
-        yield from ()
+        pass
 
     def generate_method_declarations(self, interface):
         for func in interface.methods:
-            yield from self.generate_method_declaration(func)
+            self.visit_MethodPrototype(func)
 
-    def generate_constants_declarations(self, constants):
-        if constants:
-            yield self.line_comment("Constant declarations")
-            for name, value in constants.items():
-                yield from self.generate_constant_declaration(name, value)
-            yield
+    def generate_constants_declarations(self, interface):
+        for c in interface.constants:
+            self.visit(c)
 
     @abstractmethod
-    def generate_method_declaration(self, method_declaration):
+    def visit_MethodPrototype(self, m):
         pass
 
     @abstractmethod
-    def generate_constant_declaration(self, name, value):
+    def visit_ConstantDeclaration(self, m):
         pass
 
     @abstractmethod
@@ -83,24 +132,27 @@ class InterfaceCodeGen(CodeGen):
         pass
 
 
-class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
-    def read_statement(self, read_statement):
-        args = ", ".join(self.expression(a) for a in read_statement.arguments)
-        yield f"read {args}"
+class StatementDescriptionCodeGen(AbstractExpressionCodeGen):
+    def visit_object(self, n):
+        pass
 
-    def write_statement(self, write_statement):
-        args = ", ".join(self.expression(a) for a in write_statement.arguments)
-        yield f"write {args}"
+    def visit_Read(self, s):
+        args = ", ".join(self.visit(a) for a in s.arguments)
+        return f"read {args}"
 
-    def checkpoint_statement(self, checkpoint_statement):
-        yield f"checkpoint"
+    def visit_Print(self, s):
+        args = ", ".join(self.visit(a) for a in s.arguments)
+        return f"write {args}"
 
-    def call_statement(self, call_statement):
-        method = call_statement.method
+    def visit_Checkpoint(self, s):
+        return f"checkpoint"
 
-        args = ", ".join(self.expression(p) for p in call_statement.arguments)
+    def visit_Call(self, s):
+        method = s.method
+
+        args = ", ".join(self.visit(p) for p in s.arguments)
         if method.has_return_value:
-            return_value = f"{self.expression(call_statement.return_value)} = "
+            return_value = f"{self.visit(s.return_value)} = "
         else:
             return_value = ""
 
@@ -109,99 +161,145 @@ class StatementDescriptionCodeGen(StatementVisitor, AbstractExpressionCodeGen):
         else:
             callbacks = ""
 
-        yield f"call {return_value}{method.name}({args}){callbacks}"
+        return f"call {return_value}{method.name}({args}){callbacks}"
 
-    def return_statement(self, return_statement):
-        yield f"return {self.expression(return_statement.value)}"
+    def visit_Return(self, s):
+        return f"return {self.visit(s.value)}"
 
-    def exit_statement(self, exit_statement):
-        yield "exit"
+    def visit_Exit(self, s):
+        return "exit"
 
-    def break_statement(self, break_statement):
-        yield "break"
+    def visit_Break(self, s):
+        return "break"
 
-    def for_statement(self, for_statement):
-        index = for_statement.index
-        yield f"for {index.variable.name} to {self.expression(index.range)} " "{...}"
+    def visit_For(self, s):
+        index = s.index
+        return f"for {index.variable.name} to {self.visit(index.range)} " "{...}"
 
-    def loop_statement(self, loop_statement):
-        yield "loop {...}"
+    def visit_Loop(self, s):
+        return "loop {...}"
 
-    def if_statement(self, if_statement):
-        if if_statement.else_body is not None:
+    def visit_If(self, s):
+        if s.else_body is not None:
             body = "{...} else {...}"
         else:
             body = "{...}"
-        yield f"if {self.expression(if_statement.condition)} {body}"
+        return f"if {self.visit(s.condition)} {body}"
 
-    def switch_statement(self, switch_statement):
-        yield f"switch {self.expression(switch_statement.value)} " "{...}"
+    def visit_Switch(self, s):
+        return f"switch {self.visit(s.value)} " "{...}"
 
 
-class SkeletonCodeGen(InterfaceCodeGen, StatementVisitor, AbstractExpressionCodeGen):
+class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     __slots__ = []
 
-    @property
-    def statement_comment_generator(self):
-        return self._statement_comment_generator()
+    def visit_Write(self, s):
+        return self.visit(
+            Print(s.arguments)
+        )
 
-    def _statement_comment_generator(self):
-        return StatementDescriptionCodeGen()
+    def visit_Checkpoint(self, s):
+        return self.visit(
+            Print([IntLiteral(0)])
+        )
+
+    @abstractmethod
+    def visit_Read(self, s):
+        pass
+
+    @abstractmethod
+    def visit_Print(self, s):
+        pass
+
+    @abstractmethod
+    def visit_Call(self, s):
+        pass
+
+    @abstractmethod
+    def visit_If(self, s):
+        pass
+
+    @abstractmethod
+    def visit_For(self, s):
+        pass
+
+    @abstractmethod
+    def visit_Loop(self, s):
+        pass
+
+    @abstractmethod
+    def visit_Switch(self, s):
+        pass
+
+    @abstractmethod
+    def visit_Exit(self, statement):
+        pass
+
+    @abstractmethod
+    def visit_Return(self, statement):
+        pass
+
+    @abstractmethod
+    def visit_Break(self, statement):
+        pass
+
+    def visit_SequenceNode(self, node):
+        for child in node.children:
+            self.generate_statement(child)
+
+    @abstractmethod
+    def visit_VariableDeclaration(self, d):
+        pass
+
+    @abstractmethod
+    def visit_ReferenceAllocation(self, a):
+        pass
+
+    def visit_object(self, s):
+        # ignore any other node
+        return []
+
+    def visit_Step(self, s):
+        if s.direction is ReferenceDirection.DOWNWARD:
+            # insert an (upward) flush before receiving data downward
+            self.generate_flush()
+        self.visit_SequenceNode(s)
+
+    def visit_PrintNoCallbacks(self, s):
+        return self.visit(
+            Print([IntLiteral(0), IntLiteral(0)])
+        )
+
+    def visit_PrintCallbackRequest(self, s):
+        return self.visit(
+            Print([IntLiteral(1), IntLiteral(s.index)])
+        )
 
     def generate_main_block(self, interface):
-        yield from self.block_content(interface.main_block)
-
-    def block(self, block):
-        yield
-        yield from self.indent_all(self.block_content(block))
-        yield
-
-    def block_content(self, block):
-        for i, node in enumerate(block.flat_inner_nodes):
-            if i > 0:
-                yield
-            yield from self.generate_statement(node)
+        self.visit(interface.main_block)
 
     def generate_statement(self, statement):
-        if statement.comment is not None:
-            yield self.line_comment(statement.comment)
-        else:
-            if isinstance(statement, Statement):
-                for comment in self.statement_comment_generator.statement(statement):
-                    yield self.line_comment(comment)
+        analyzer = TreeAnalyzer()
 
-        for var in statement.variables_to_declare:
-            yield from self.generate_variable_declaration(var)
+        comment = analyzer.comment(statement)
+        if comment is not None:
+            comment = StatementDescriptionCodeGen().visit(statement)
+        if comment is not None:
+            self.line_comment(comment)
 
-        for allocation in statement.variables_to_allocate:
-            variable = allocation.reference.variable
-            indexes = statement.context.index_variables[-allocation.reference.index_count:]
-            yield from self.generate_variable_allocation(variable, indexes, allocation.size)
+        for d in analyzer.variable_declarations(statement):
+            self.visit(d)
 
-        if statement.needs_flush:
-            yield from self.generate_flush()
+        for a in analyzer.reference_allocations(statement):
+            self.visit(a)
 
-        if isinstance(statement, AbstractStatement):
-            yield from self.statement(statement)
-
-    @abstractmethod
-    def generate_variable_allocation(self, variables, indexes, size):
-        pass
-
-    @abstractmethod
-    def generate_variable_declaration(self, declared_variable):
-        pass
+        self.visit(statement)
 
     @abstractmethod
     def generate_flush(self):
         pass
 
-    def checkpoint_statement(self, checkpoint_statement):
-        return self.write_statement(SyntheticStatement("write", None, arguments=[
-            SyntheticExpression("int_literal", value=0),
-        ]))
-
 
 class TemplateCodeGen(InterfaceCodeGen):
     def generate_main_block(self, interface):
-        yield from ()
+        pass

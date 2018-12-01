@@ -1,4 +1,4 @@
-from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.diagnostics import Diagnostic, CallbackParameterNotScalar
 from turingarena.driver.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
 
 
@@ -207,4 +207,4 @@ def test_callback_accept_scalars():
 
         main {
         }
-    """, Diagnostic.Messages.CALLBACK_PARAMETERS_MUST_BE_SCALARS)
+    """, CallbackParameterNotScalar(parameter="'a[]'"))

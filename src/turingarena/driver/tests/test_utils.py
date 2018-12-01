@@ -1,11 +1,10 @@
 import os
 from contextlib import contextmanager, ExitStack
 from tempfile import TemporaryDirectory
-from typing import Dict, Generator, Sequence
+from typing import Dict, Generator
 
 from turingarena.driver.client.program import Program
-from turingarena.driver.interface.diagnostics import Diagnostic
-from turingarena.driver.interface.interface import InterfaceDefinition
+from turingarena.driver.interface.compile import Compiler
 from turingarena.driver.language import Language
 
 
@@ -45,11 +44,11 @@ def assert_no_interface_errors(text: str):
     assert_interface_diagnostics(text, [])
 
 
-def assert_interface_error(text: str, error: str, *args: str):
-    error = Diagnostic.build_message(error, *args)
-    assert_interface_diagnostics(text, [error])
+def assert_interface_error(text: str, diagnostic):
+    assert_interface_diagnostics(text, [diagnostic])
 
 
-def assert_interface_diagnostics(interface_text: str, messages: Sequence[str]):
-    interface = InterfaceDefinition.compile(interface_text)
-    assert messages == [m.message for m in interface.diagnostics()]
+def assert_interface_diagnostics(interface_text: str, diagnostics):
+    compiler = Compiler.create()
+    compiler.compile(interface_text)
+    assert [d.message for d in diagnostics] == [d.message for d in compiler.diagnostics]

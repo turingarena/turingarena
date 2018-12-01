@@ -1,151 +1,254 @@
-import logging
-from collections import namedtuple
-from typing import List, Mapping, Any
+from abc import abstractmethod
+from collections.__init__ import namedtuple
 
-from turingarena.driver.interface.phase import ExecutionPhase
-from turingarena.driver.interface.variables import ReferenceAction, Reference, ReferenceStatus
+PrintCallbackRequest = namedtuple("PrintCallbackRequest", ["index", "prototype"])
+CallbackStart = namedtuple("CallbackStart", ["prototype"])
+Return = namedtuple("Return", ["value"])
+CallbackEnd = namedtuple("CallbackEnd", [])
+Exit = namedtuple("Exit", [])
 
-Bindings = Mapping[Reference, Any]
-
-
-class ExecutionResult(namedtuple("ExecutionResult", [
-    "assignments",
-    "request_lookahead",
-    "does_break",
-])):
-    def merge(self, other):
-        if other is None:
-            return self
-
-        return ExecutionResult(
-            self.assignments + other.assignments,
-            request_lookahead=other.request_lookahead,
-            does_break=other.does_break,
-        )
-
-    def with_request_processed(self):
-        return self._replace(request_lookahead=None)
+ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 
-class IntermediateNode:
+class ControlStructure:
+    @property
+    def bodies(self):
+        return tuple(self._get_bodies())
+
+    @abstractmethod
+    def _get_bodies(self):
+        pass
+
+
+class For(namedtuple("For", ["index", "body"]), ControlStructure):
     __slots__ = []
 
-    def validate(self):
-        return []
+    def _get_bodies(self):
+        yield self.body
+
+
+CallNode = namedtuple("CallNode", [
+    "method",
+    "arguments",
+    "return_value",
+    "callbacks",
+])
+
+
+class Call(CallNode):
+    __slots__ = []
+
+
+class CallArgumentsResolve(CallNode):
+    __slots__ = []
+
+
+CallReturn = namedtuple("CallReturn", ["return_value"])
+CallCompleted = namedtuple("CallCompleted", [])
+
+
+class AcceptCallbacks(CallNode):
+    __slots__ = []
+
+
+class PrintNoCallbacks(CallNode):
+    __slots__ = []
+
+
+class MainExit(Exit):
+    pass
+
+
+class IfNode(namedtuple("IfNode", ["condition", "then_body", "else_body"])):
+    __slots__ = []
 
     @property
-    def needs_flush(self):
-        return False
-
-    @property
-    def variables_to_declare(self):
-        return frozenset(self._get_variables_to_declare())
-
-    def _get_variables_to_declare(self):
-        for a in self.reference_actions:
-            if a.reference.index_count == 0 and a.status == ReferenceStatus.DECLARED:
-                yield a.reference.variable
-
-    @property
-    def variables_to_allocate(self):
-        return list(self._get_allocations())
-
-    def _get_allocations(self):
-        return []
-
-    @property
-    def comment(self):
-        return self._get_comment()
-
-    def _get_comment(self):
-        return None
-
-    @property
-    def does_break(self):
-        return False
-
-    @property
-    def is_relevant(self):
-        "Whether this node should be kept in the parent block"
-        return self._is_relevant()
-
-    def _is_relevant(self):
-        return True
-
-    @property
-    def reference_actions(self) -> List[ReferenceAction]:
-        """
-        List of references involved in this instruction.
-        """
-        actions = list(self._get_reference_actions())
-        assert all(isinstance(a, ReferenceAction) for a in actions)
-        return actions
-
-    def _get_reference_actions(self):
-        return []
-
-    @property
-    def declaration_directions(self):
-        return frozenset(self._get_declaration_directions())
-
-    def _get_declaration_directions(self):
-        return frozenset()
-
-    @property
-    def first_requests(self):
-        return frozenset(self._get_first_requests())
-
-    def _get_first_requests(self):
-        yield None
-
-    def driver_run(self, context):
-        should_lookahead_request = (
-                context.request_lookahead is None
-                and self.needs_request_lookahead
-                and context.phase is ExecutionPhase.REQUEST
+    def branches(self):
+        return tuple(
+            b
+            for b in (self.then_body, self.else_body)
+            if b is not None
         )
 
-        result = context.result()
-        if should_lookahead_request:
-            lookahead = context.next_request()
-            result = result._replace(
-                request_lookahead=lookahead,
-            )
-            context = context.extend(result)
 
-        logging.debug(
-            f"driver_run: {type(self).__name__} "
-            f"phase: {context.phase} "
-            f"request LA: {context.request_lookahead}"
-        )
+class IfConditionResolve(IfNode):
+    __slots__ = []
 
-        return result.merge(self._driver_run(context))
 
-    def _driver_run(self, context):
-        return None
+class If(ControlStructure, IfNode):
+    __slots__ = []
+
+    def _get_bodies(self):
+        yield self.then_body
+        if self.else_body is not None:
+            yield self.else_body
+
+
+Print = namedtuple("Print", ["arguments"])
+
+
+class IONode:
+    __slots__ = []
+
+
+class Read(namedtuple("Read", ["arguments"]), IONode):
+    __slots__ = []
+
+
+class Write(namedtuple("Write", ["arguments"]), IONode):
+    __slots__ = []
+
+
+class Checkpoint(namedtuple("Checkpoint", [])):
+    __slots__ = []
+
+
+class InitialCheckpoint(Checkpoint):
+    __slots__ = []
+
+
+class Loop(namedtuple("Loop", ["body"]), ControlStructure):
+    __slots__ = []
+
+    def _get_bodies(self):
+        yield self.body
+
+
+Break = namedtuple("Break", [])
+
+
+class SwitchNode(namedtuple("SwitchNode", ["value", "cases"])):
+    __slots__ = []
+
+
+class Switch(ControlStructure, SwitchNode):
+    __slots__ = []
+
+    def _get_bodies(self):
+        for c in self.cases:
+            yield c.body
+
+
+Case = namedtuple("Case", ["labels", "body"])
+
+
+class SwitchValueResolve(SwitchNode):
+    __slots__ = []
+
+
+class CallbackImplementation(namedtuple("CallbackImplementation", [
+    "index",
+    "prototype",
+    "body",
+])):
+    __slots__ = []
+
+
+class SequenceNode:
+    pass
+
+
+class Step(namedtuple("Step", ["children", "direction"]), SequenceNode):
+    __slots__ = []
+
+
+class ParameterDeclaration(namedtuple("ParameterDeclaration", ["variable", "dimensions"])):
+    __slots__ = []
+
+
+class CallablePrototype(namedtuple("CallablePrototype", [
+    "name",
+    "parameter_declarations",
+    "has_return_value",
+    "callbacks",
+])):
+    __slots__ = []
 
     @property
-    def can_be_grouped(self):
-        return self._can_be_grouped()
-
-    def _can_be_grouped(self):
-        return True
-
-    @property
-    def needs_request_lookahead(self):
-        return self._needs_request_lookahead()
-
-    def _needs_request_lookahead(self):
-        return False
+    def parameters(self):
+        return [
+            p.variable
+            for p in self.parameter_declarations
+        ]
 
     @property
-    def node_description(self):
-        return list(self._describe_node())
+    def has_callbacks(self):
+        return bool(self.callbacks)
 
-    @staticmethod
-    def _indent_all(lines):
-        for l in lines:
-            yield "  " + l
 
-    def _describe_node(self):
-        yield str(self)
+class MethodPrototype(CallablePrototype):
+    __slots__ = []
+
+
+class CallbackPrototype(CallablePrototype):
+    __slots__ = []
+
+
+ConstantDeclaration = namedtuple("ConstantDeclaration", ["variable", "value"])
+
+
+class Expression:
+    __slots__ = []
+
+
+class IntLiteral(namedtuple("IntLiteral", ["value"]), Expression):
+    __slots__ = []
+
+
+class Variable(namedtuple("Variable", ["name"]), Expression):
+    __slots__ = []
+
+
+class Subscript(namedtuple("Subscript", [
+    "array",
+    "index",
+]), Expression):
+    __slots__ = []
+
+
+class Block(namedtuple("Block", ["children"]), SequenceNode):
+    __slots__ = []
+
+
+statement_classes = {
+    "checkpoint": [
+        Checkpoint,
+    ],
+    "read": [
+        Read,
+    ],
+    "write": [
+        Write,
+    ],
+    "call": [
+        CallArgumentsResolve,
+        AcceptCallbacks,
+        CallCompleted,
+        CallReturn,
+        Call,
+        PrintNoCallbacks,
+    ],
+    "return": [
+        Return,
+    ],
+    "exit": [
+        Exit,
+    ],
+    "for": [
+        For,
+    ],
+    "if": [
+        IfConditionResolve,
+        If,
+    ],
+    "loop": [
+        Loop,
+    ],
+    "break": [
+        Break,
+    ],
+    "switch": [
+        SwitchValueResolve,
+        Switch,
+    ],
+}

@@ -1,17 +1,33 @@
-from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.diagnostics import InvalidReference, UnexpectedIndexForReference, \
+    InvalidIndexForReference
 from turingarena.driver.tests.test_utils import assert_interface_diagnostics
 from .test_utils import assert_no_interface_errors
 
 
-def test_array_alloc():
+def test_unexpected_index():
     assert_interface_diagnostics("""
-        procedure p(a[]);
+        procedure p(x);
         main {
             read a[5];
-            call p(a);
+            call p(a[5]);
             checkpoint;
         }
-    """, [Diagnostic.build_message(Diagnostic.Messages.UNEXPECTED_ARRAY_INDEX)])
+    """, [UnexpectedIndexForReference(expression="'5'")])
+
+
+def test_invalid_index():
+    assert_interface_diagnostics("""
+        procedure p(x);
+        main {
+            for i to 2 {
+                for j to 2 {
+                    read a[i];
+                    call p(a[i]);
+                }
+            }
+            checkpoint;
+        }
+    """, [InvalidIndexForReference(expression="'i'", index="j")])
 
 
 def test_array_basic():

@@ -1,17 +1,8 @@
-            function f(n, a[]);
-            function g(i);
+procedure p() callbacks {
+    procedure c(a, b);
+    procedure d(a, b);
+}
 
-            main {
-                read n;
-                for i to n {
-                    read a[i];
-                }
-
-                call r = f(n, a);
-                write r;
-
-                for i to n {
-                    call s = g(i);
-                    write s;
-                }
-            }
+main {
+    call p();
+}

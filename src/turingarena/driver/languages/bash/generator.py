@@ -3,89 +3,94 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 class BashCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
-        return f"# {comment}"
+        self.line(f"# {comment}")
 
-    def generate_constant_declaration(self, name, value):
-        yield f"{name}={value}"
+    def visit_ConstantDeclaration(self, m):
+        self.line(f"{m.variable.name}={self.visit(m.value)}")
 
 
 class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def generate_header(self, interface):
-        yield "#!/usr/bin/env bash"
-        yield
-        yield "source solution.sh"
-        yield
+        self.line("#!/usr/bin/env bash")
+        self.line()
+        self.line("source solution.sh")
+        self.line()
 
-
-    def read_statement(self, read_statement):
+    def visit_Read(self, read_statement):
         for i in range(len(read_statement.arguments) - 1):
-            yield f"read -d ' ' {self.expression(read_statement.arguments[i])}"
-        yield f"read {self.expression(read_statement.arguments[i + 1])}"
+            self.line(f"read -d ' ' {self.visit(read_statement.arguments[i])}")
+        self.line(f"read {self.visit(read_statement.arguments[i + 1])}")
 
-    def write_statement(self, write_statement):
+    def visit_Print(self, write_statement):
         for arg in write_statement.arguments:
-            yield f"echo -n $(({self.expression(arg)}))"
-        yield "echo"
+            self.line(f"echo -n $(({self.visit(arg)}))")
+        self.line("echo")
 
-    def if_statement(self, if_statement):
-        condition = self.expression(if_statement.condition)
-        yield f"if (({condition})); then"
-        yield from self.block(if_statement.then_body)
+    def visit_If(self, if_statement):
+        condition = self.visit(if_statement.condition)
+        self.line(f"if (({condition})); then")
+        with self.indent():
+            self.visit(if_statement.then_body)
         if if_statement.else_body:
-            yield "else"
-            yield from self.block(if_statement.else_body)
-        yield "fi"
+            self.line("else")
+            with self.indent():
+                self.visit(if_statement.else_body)
+        self.line("fi")
 
-    def for_statement(self, for_statement):
+    def visit_For(self, for_statement):
         index = for_statement.index.variable.name
-        size = self.expression(for_statement.index.range)
-        yield f"for (({index}=0; index<{size}; i++)); do"
-        yield self.block(for_statement.body)
-        yield "done"
+        size = self.visit(for_statement.index.range)
+        self.line(f"for (({index}=0; index<{size}; i++)); do")
+        with self.indent():
+            self.visit(for_statement.body)
+        self.line("done")
 
-    def loop_statement(self, loop_statement):
-        yield "while true; do"
-        yield self.block(loop_statement.body())
-        yield "done"
+    def visit_Loop(self, loop_statement):
+        self.line("while true; do")
+        with self.indent():
+            self.visit(loop_statement.body)
+        self.line("done")
 
-    def break_statement(self, break_statement):
-        yield "break"
+    def visit_Break(self, break_statement):
+        self.line("break")
 
-    def return_statement(self, return_statement):
-        yield f"_return_val={self.expression(return_statement.value)}"
+    def visit_Return(self, return_statement):
+        self.line(f"_return_val={self.visit(return_statement.value)}")
 
-    def exit_statement(self, exit_statement):
-        yield 'exit'
+    def visit_Exit(self, exit_statement):
+        self.line('exit')
 
     def generate_flush(self):
-        yield from ()
+        ()
 
-    def call_statement(self, call_statement):
-        arguments = " ".join(f"$(({self.expression(p)}))" for p in call_statement.arguments)
-        yield f"{call_statement.method_name} {arguments}"
+    def visit_Call(self, call_statement):
+        arguments = " ".join(f"$(({self.visit(p)}))" for p in call_statement.arguments)
+        self.line(f"{call_statement.method.name} {arguments}")
         if call_statement.return_value is not None:
-            return_value = self.expression(call_statement.return_value)
-            yield f"{return_value}=$return_val"
+            return_value = self.visit(call_statement.return_value)
+            self.line(f"{return_value}=$return_val")
 
-    def switch_statement(self, switch_statement):
+    def visit_Switch(self, switch_statement):
         pass
 
-    def generate_variable_allocation(self, variables, indexes, size):
+    def visit_ReferenceAllocation(self, a):
+        # FIXME: not implemented
         pass
 
-    def generate_method_declaration(self, method_declaration):
-        yield from ()
+    def visit_MethodPrototype(self, m):
+        ()
 
-    def generate_variable_declaration(self, declared_variable):
-        yield from ()
+    def visit_VariableDeclaration(self, d):
+        ()
 
 
 class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
-    def generate_method_declaration(self, method_declaration):
-        arguments = [p.name for p in method_declaration.parameters]
-        yield f"function {method_declaration.name} " "{"
-        for i, arg in enumerate(arguments):
-            yield self.indent(f"{arg}=${i+1}")
-        yield self.indent(self.line_comment("TODO"))
-        yield "}"
+    def visit_MethodPrototype(self, m):
+        arguments = [p.name for p in m.parameters]
+        self.line(f"function {m.name} " "{")
+        with self.indent():
+            for i, arg in enumerate(arguments):
+                self.line(f"{arg}=${i+1}")
+            self.line_comment("TODO")
+        self.line("}")

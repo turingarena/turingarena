@@ -1,4 +1,5 @@
-from turingarena.driver.interface.diagnostics import Diagnostic
+from turingarena.driver.interface.diagnostics import ReferenceNotDefined, ReferenceAlreadyDefined, \
+    ReferenceNotUsed
 from turingarena.driver.tests.test_utils import assert_interface_error
 
 
@@ -7,7 +8,7 @@ def test_variable_not_declared():
         main {
             write a;
         }
-    """, Diagnostic.Messages.VARIABLE_NOT_DECLARED, "a")
+    """, ReferenceNotDefined(expression="'a'"))
 
 
 def test_variable_not_declared_for():
@@ -19,7 +20,7 @@ def test_variable_not_declared_for():
             }
             call p(b);
         }
-    """, Diagnostic.Messages.VARIABLE_NOT_DECLARED, "a")
+    """, ReferenceNotDefined(expression="'a'"))
 
 
 def test_variable_reused():
@@ -28,7 +29,7 @@ def test_variable_reused():
             read a;
             read a;
         }
-    """, Diagnostic.Messages.VARIABLE_REUSED, "a")
+    """, ReferenceAlreadyDefined(expression="'a'"))
 
 
 def test_variable_not_written():
@@ -38,4 +39,4 @@ def test_variable_not_written():
         main {
             call x = f();
         }
-    """, Diagnostic.Messages.VARIABLE_NOT_WRITTEN, "x")
+    """, ReferenceNotUsed(expression="x"))
