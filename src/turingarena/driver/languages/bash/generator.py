@@ -87,7 +87,7 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
 class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
     def visit_MethodPrototype(self, m):
-        arguments = [p.name for p in m.parameters]
+        arguments = [p.variable.name for p in m.parameters]
         self.line(f"function {m.name} " "{")
         with self.indent():
             for i, arg in enumerate(arguments):

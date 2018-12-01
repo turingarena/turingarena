@@ -47,26 +47,12 @@ Step = namedtuple("Step", ["direction", "body"])
 
 ParameterDeclaration = namedtuple("ParameterDeclaration", ["variable", "dimensions"])
 
-
-class Prototype(namedtuple("Prototype", [
+Prototype = namedtuple("Prototype", [
     "name",
-    "parameter_declarations",
+    "parameters",
     "has_return_value",
     "callbacks",
-])):
-    __slots__ = []
-
-    @property
-    def parameters(self):
-        return [
-            p.variable
-            for p in self.parameter_declarations
-        ]
-
-    @property
-    def has_callbacks(self):
-        return bool(self.callbacks)
-
+])
 
 ConstantDeclaration = namedtuple("ConstantDeclaration", ["variable", "value"])
 IntLiteral = namedtuple("IntLiteral", ["value"])

@@ -12,7 +12,7 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callable.parameters]
         if callbacks:
             value_parameters.append(
                 self.build_callbacks_interface_name(callable) + " callbacks")
@@ -24,7 +24,7 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def build_callback_signature(self, callback):
         return_type = "int" if callback.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callback.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callback.parameters]
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callback.name}({parameters})"
 

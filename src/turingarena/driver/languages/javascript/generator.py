@@ -4,7 +4,7 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen
 class JavaScriptCodeGen(InterfaceCodeGen):
     @classmethod
     def build_callable_declarator(cls, callable):
-        arguments = ", ".join(cls.visit(p) for p in callable.parameter_declarations)
+        arguments = ", ".join(cls.visit(p) for p in callable.parameters)
         return f"{callable.name}({arguments})"
 
     @classmethod
@@ -51,7 +51,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
     def visit_Call(self, statement):
         method_name = statement.method.name
-        parameters = ", ".join(self.visit(p) for p in statement.parameters)
+        parameters = ", ".join(self.visit(p) for p in statement.arguments)
         if statement.return_value is not None:
             return_value = self.visit(statement.return_value)
             self.line(f"{return_value} = {method_name}({parameters});")

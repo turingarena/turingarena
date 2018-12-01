@@ -8,7 +8,7 @@ class CppCodeGen(InterfaceCodeGen):
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callable.parameters]
         callback_parameters = [
             self.build_signature(callback, [])
             for callback in callbacks
@@ -51,7 +51,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         self.line("}")
 
     def visit_CallbackImplementation(self, callback):
-        params = ", ".join(f"int {parameter.name}" for parameter in callback.prototype.parameters)
+        params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
         if callback.prototype.has_return_value:
             return_value = " -> int"
         else:

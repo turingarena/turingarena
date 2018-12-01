@@ -401,7 +401,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute_CallbackStart(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             for p in n.prototype.parameters:
-                value = self.bindings[p]
+                value = self.bindings[p.variable]
                 self.send_driver_upward(value)
 
     def _on_execute_Return(self, n):

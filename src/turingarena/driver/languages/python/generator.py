@@ -17,8 +17,11 @@ if __name__ == '__main__':
 
 class PythonCodeGen(InterfaceCodeGen):
     def build_method_declaration(self, func):
-        arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
+        arguments = ', '.join([self.visit(p) for p in func.parameters] + [c.name for c in func.callbacks])
         self.line(f'def {func.name}({arguments}):')
+
+    def visit_ParameterDeclaration(self, n):
+        return self.visit(n.variable)
 
     def visit_ConstantDeclaration(self, m):
         self.line(f"{m.variable.name} = {self.visit(m.value)}")
@@ -73,7 +76,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         pass
 
     def visit_CallbackImplementation(self, callback):
-        params = ", ".join(parameter.name for parameter in callback.prototype.parameters)
+        params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
         self.line(f"def _callback_{callback.prototype.name}({params}):")
         with self.indent():
             self.visit(callback.body)

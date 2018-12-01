@@ -8,7 +8,7 @@ class GoCodeGen(InterfaceCodeGen):
 
     def build_signature(self, callable, callbacks, param=False):
         return_type = " int" if callable.has_return_value else ""
-        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callable.parameters]
         callback_parameters = [
             self.build_signature(callback, [], param=True)
             for callback in callbacks
@@ -57,7 +57,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         self.line("}")
 
     def visit_CallbackImplementation(self, callback):
-        params = ", ".join(f"{parameter.name}" for parameter in callback.prototype.parameters) + " int"
+        params = ", ".join(self.visit(p) for p in callback.prototype.parameters) + " int"
         if callback.prototype.has_return_value:
             return_value = "int"
         else:
@@ -88,7 +88,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         self.line(f"{return_value}{method.name}({parameters});")
 
     def visit_Call(self, call_statement):
-        if call_statement.method.has_callbacks:
+        if call_statement.method.callbacks:
             self.line("{")
             with self.indent():
                 self.call_statement_body(call_statement)

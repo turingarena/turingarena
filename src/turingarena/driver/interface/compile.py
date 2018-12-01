@@ -153,7 +153,7 @@ class Compiler(namedtuple("Compiler", [
 
         return Prototype(
             name=ast.declarator.name,
-            parameter_declarations=tuple(
+            parameters=tuple(
                 self.parameter_declaration(p, is_callback)
                 for p in ast.declarator.parameters
             ),
@@ -346,7 +346,7 @@ class Compiler(namedtuple("Compiler", [
             self.error(MethodNotDeclared(name=ast.name))
             method = Prototype(
                 name=ast.name,
-                parameter_declarations=(),
+                parameters=(),
                 has_return_value=False,
                 callbacks=(),
             )
@@ -373,7 +373,7 @@ class Compiler(namedtuple("Compiler", [
 
         arguments = []
 
-        for parameter_declaration, argument_ast in zip(method.parameter_declarations, ast.arguments):
+        for parameter_declaration, argument_ast in zip(method.parameters, ast.arguments):
             argument = self.value(argument_ast)
             argument_dimensions = self.dimensions(argument)
             self.check(argument_dimensions == parameter_declaration.dimensions, InvalidArgument(
@@ -420,7 +420,7 @@ class Compiler(namedtuple("Compiler", [
         if ast is None:
             nodes = []
             if prototype.parameters:
-                nodes.append(Write(prototype.parameters))
+                nodes.append(Write(tuple(p.variable for p in prototype.parameters)))
             if prototype.has_return_value:
                 return_var = Variable("ans")
                 nodes.append(Read([return_var]))
