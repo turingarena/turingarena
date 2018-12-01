@@ -181,12 +181,12 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         yield self.transform(n)
 
     def node_replacement_Call(self, n):
-        yield CallArgumentsResolve(n)
+        yield CallArgumentsResolve(method=n.method, arguments=n.arguments)
         if n.method.callbacks:
             yield AcceptCallbacks(self.transform_all(n.callbacks))
-        yield CallCompleted(n)
+        yield CallCompleted()
         if n.method.has_return_value:
-            yield CallReturn(n)
+            yield CallReturn(n.return_value)
 
     def group_children(self, children):
         group = []
@@ -523,8 +523,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is not ExecutionPhase.REQUEST:
             return
 
-        n = n.call
-
         method = n.method
 
         command = self.request_lookahead.command
@@ -547,26 +545,26 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             for a in n.arguments
         ]
 
-        has_return_value = bool(int(self.receive_driver_downward()))
-        expects_return_value = (n.return_value is not None)
-        if not has_return_value == expects_return_value:
+        actual_has_return_value = bool(int(self.receive_driver_downward()))
+        expected_has_return_value = n.method.has_return_value
+        if not actual_has_return_value == expected_has_return_value:
             names = ["procedure", "function"]
             raise InterfaceError(
-                f"'{method.name}' is a {names[expects_return_value]}, "
-                f"got call to {names[has_return_value]}"
+                f"'{method.name}' is a {names[expected_has_return_value]}, "
+                f"got call to {names[actual_has_return_value]}"
             )
 
         callback_count = int(self.receive_driver_downward())
-        expected_callback_count = len(n.callbacks)
+        expected_callback_count = len(n.method.callbacks)
         if not callback_count == expected_callback_count:
             raise InterfaceError(
                 f"'{method.name}' has a {expected_callback_count} callbacks, "
                 f"got {callback_count}"
             )
 
-        for c in n.callbacks:
+        for c in n.method.callbacks:
             parameter_count = int(self.receive_driver_downward())
-            expected_parameter_count = len(c.prototype.parameters)
+            expected_parameter_count = len(c.parameters)
             if not parameter_count == expected_parameter_count:
                 raise InterfaceError(
                     f"'{c.name}' has {expected_parameter_count} parameters, "
@@ -578,8 +576,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         )
 
     def _on_execute_CallReturn(self, n):
-        n = n.call
-
         if self.phase is ExecutionPhase.REQUEST:
             return_value = self.evaluate(n.return_value)
             self.report_ready()

@@ -16,9 +16,9 @@ Call = namedtuple("Call", [
     "callbacks",
 ])
 
-CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["call"])
-CallReturn = namedtuple("CallReturn", ["call"])
-CallCompleted = namedtuple("CallCompleted", ["call"])
+CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["method", "arguments"])
+CallReturn = namedtuple("CallReturn", ["return_value"])
+CallCompleted = namedtuple("CallCompleted", [])
 AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
 PrintNoCallbacks = namedtuple("PrintNoCallbacks", [])
 
