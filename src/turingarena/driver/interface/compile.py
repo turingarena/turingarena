@@ -11,9 +11,9 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
     UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
-from turingarena.driver.interface.nodes import PrintCallbackRequest, CallbackStart, CallbackEnd, \
+from turingarena.driver.interface.nodes import CallbackStart, CallbackEnd, \
     ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, Call, IntLiteral, \
+    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, IntLiteral, \
     Subscript
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.validate import Validator
@@ -345,32 +345,7 @@ class Compiler(namedtuple("Compiler", [
         self.check(self.in_loop, BreakOutsideLoop(statement=Snippet(ast)))
         return cls()
 
-    def _on_compile_CallReturn(self, cls, ast):
-        call = self._replace(diagnostics=[]).statement(Call, ast)
-        if call.return_value is None:
-            return
-        return cls(
-            return_value=call.return_value,
-        )
-
-    def _on_compile_PrintNoCallbacks(self, cls, ast):
-        # ignore diagnostics (FIXME: find a cleaner way?)
-        n = self._replace(diagnostics=[])._on_compile_CallNode(cls, ast)
-
-        if not n.method.callbacks:
-            return
-
-        return n
-
-    def _on_compile_AcceptCallbacks(self, cls, ast):
-        n = self._replace(diagnostics=[])._on_compile_CallNode(cls, ast)
-
-        if not n.method.callbacks:
-            return
-
-        return n
-
-    def _on_compile_CallNode(self, cls, ast):
+    def _on_compile_Call(self, cls, ast):
         method = self.methods_by_name.get(ast.name)
 
         if method is None:
@@ -441,7 +416,6 @@ class Compiler(namedtuple("Compiler", [
     def callback_implementation(self, prototype, index, ast):
         prepend_nodes = [
             CallbackStart(prototype),
-            PrintCallbackRequest(index=index, prototype=prototype),
         ]
 
         if prototype.has_return_value:

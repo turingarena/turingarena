@@ -12,7 +12,7 @@ class TreeTransformer:
     def transform_object(self, n):
         return n
 
-    def transform_CallNode(self, n):
+    def transform_Call(self, n):
         return n._replace(
             callbacks=self.transform_all(n.callbacks)
         )

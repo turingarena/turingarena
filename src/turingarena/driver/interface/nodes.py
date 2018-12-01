@@ -1,6 +1,5 @@
 from collections.__init__ import namedtuple
 
-PrintCallbackRequest = namedtuple("PrintCallbackRequest", ["index", "prototype"])
 CallbackStart = namedtuple("CallbackStart", ["prototype"])
 Return = namedtuple("Return", ["value"])
 CallbackEnd = namedtuple("CallbackEnd", [])
@@ -10,32 +9,18 @@ ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
 For = namedtuple("For", ["index", "body"])
 
-CallNode = namedtuple("CallNode", [
+Call = namedtuple("Call", [
     "method",
     "arguments",
     "return_value",
     "callbacks",
 ])
 
-
-class Call(CallNode):
-    __slots__ = []
-
-
-class CallArgumentsResolve(CallNode):
-    __slots__ = []
-
-
-CallReturn = namedtuple("CallReturn", ["return_value"])
-CallCompleted = namedtuple("CallCompleted", [])
-
-
-class AcceptCallbacks(CallNode):
-    __slots__ = []
-
-
-class PrintNoCallbacks(CallNode):
-    __slots__ = []
+CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["call"])
+CallReturn = namedtuple("CallReturn", ["call"])
+CallCompleted = namedtuple("CallCompleted", ["call"])
+AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
+PrintNoCallbacks = namedtuple("PrintNoCallbacks", [])
 
 
 class MainExit(Exit):
@@ -151,12 +136,7 @@ statement_classes = {
         Write,
     ],
     "call": [
-        CallArgumentsResolve,
-        AcceptCallbacks,
-        CallCompleted,
-        CallReturn,
         Call,
-        PrintNoCallbacks,
     ],
     "return": [
         Return,

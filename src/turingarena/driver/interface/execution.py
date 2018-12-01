@@ -9,7 +9,7 @@ from turingarena.driver.client.commands import deserialize_data, serialize_data,
 from turingarena.driver.description import TreeDumper
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
-    IfConditionResolve, Checkpoint, SwitchValueResolve, Step
+    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
@@ -156,13 +156,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return n._replace(
             children=tuple(
                 self.group_children(
-                    self.transform_all(
-                        self.expand_sequence(n.children)))),
+                    self.expand_sequence(n.children)
+                )
+            ),
         )
 
     def expand_sequence(self, ns):
         for n in ns:
-            yield from self.node_replacement(n)
+            yield from self.transform_all(self.node_replacement(n))
 
     @visitormethod
     def node_replacement(self, n):
@@ -173,11 +174,19 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def node_replacement_If(self, n):
         yield IfConditionResolve(n)
-        yield n
+        yield self.transform(n)
 
     def node_replacement_Switch(self, n):
         yield SwitchValueResolve(n)
-        yield n
+        yield self.transform(n)
+
+    def node_replacement_Call(self, n):
+        yield CallArgumentsResolve(n)
+        if n.method.callbacks:
+            yield AcceptCallbacks(self.transform_all(n.callbacks))
+        yield CallCompleted(n)
+        if n.method.has_return_value:
+            yield CallReturn(n)
 
     def group_children(self, children):
         group = []
@@ -252,7 +261,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         context = self
 
         logging.debug(
-            f"EXECUTE: {TreeDumper().description(n)} "
+            f"EXECUTE: {n.__class__.__name__} "
             f"phase: {self.phase} "
             f"request LA: {self.request_lookahead}"
         )
@@ -278,10 +287,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         pass
 
     def _on_execute_Interface(self, n):
+        main = self.transform(n.main_block)
+
+        logging.debug(f"transformed main block: {TreeDumper().description(main)}")
+
         self.with_assigments({
             c.variable: self.evaluate(c.value)
             for c in n.constants
-        }).execute(self.transform(n.main_block))
+        }).execute(main)
 
     def _on_execute_Block(self, n):
         return self._execute_sequence(n.children)
@@ -510,6 +523,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         if self.phase is not ExecutionPhase.REQUEST:
             return
 
+        n = n.call
+
         method = n.method
 
         command = self.request_lookahead.command
@@ -563,6 +578,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         )
 
     def _on_execute_CallReturn(self, n):
+        n = n.call
+
         if self.phase is ExecutionPhase.REQUEST:
             return_value = self.evaluate(n.return_value)
             self.report_ready()

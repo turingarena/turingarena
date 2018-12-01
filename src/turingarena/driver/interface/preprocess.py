@@ -1,7 +1,7 @@
 from collections.__init__ import namedtuple
 
 from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush
+from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush, PrintNoCallbacks
 from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.util.visitor import visitormethod
 
@@ -24,8 +24,16 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
     def transform_PrintNoCallbacks(self, s):
         return Print([IntLiteral(0), IntLiteral(0)])
 
-    def transform_PrintCallbackRequest(self, s):
-        return Print([IntLiteral(1), IntLiteral(s.index)])
+    def transform_CallbackImplementation(self, n):
+        n = super().transform_CallbackImplementation(n)
+        return n._replace(
+            body=n.body._replace(
+                children=tuple([
+                    Print([IntLiteral(1), IntLiteral(n.index)]),
+                    *n.body.children,
+                ]),
+            ),
+        )
 
     def transform_SequenceNode(self, n):
         children = []
@@ -43,15 +51,20 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
         yield from self.variable_declarations(n)
         yield from self.reference_allocations(n)
 
-        yield from self.extra_nodes(n)
-        yield self.transform(n)
+        yield from self.transform_all(self.replacement_nodes(n))
 
     @visitormethod
-    def extra_nodes(self, n):
+    def replacement_nodes(self, n):
         pass
 
-    def extra_nodes_object(self, n):
-        return []
+    def replacement_nodes_object(self, n):
+        yield n
 
-    def extra_nodes_Read(self, n):
+    def replacement_nodes_Read(self, n):
         yield Flush()
+        yield n
+
+    def replacement_nodes_Call(self, n):
+        yield n
+        if n.method.callbacks:
+            yield PrintNoCallbacks()

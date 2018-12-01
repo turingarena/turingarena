@@ -1,5 +1,7 @@
+import logging
 from abc import ABC, abstractmethod
 
+from turingarena.driver.description import TreeDumper
 from turingarena.driver.expressions import AbstractExpressionCodeGen
 from turingarena.driver.genutils import LinesGenerator
 from turingarena.driver.interface.preprocess import TreePreprocessor
@@ -16,10 +18,15 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
     def generate_to_file(self, interface, file):
         with self.collect_lines() as lines:
             self.generate(interface)
+
+        logging.debug(f"generated code: {lines.as_inline()}")
+
         file.write(lines.as_block())
 
     def generate(self, interface):
         interface = TreePreprocessor.create().transform(interface)
+
+        logging.debug(f"preprocessed interface: {TreeDumper().description(interface)}")
 
         self.generate_header(interface)
         self.generate_constants_declarations(interface)
