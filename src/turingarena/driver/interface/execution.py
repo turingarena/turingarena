@@ -162,13 +162,13 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             ),
         )
 
-    def transform_CallbackImplementation(self, n):
+    def transform_Callback(self, n):
         prepend_nodes = (CallbackStart(n.prototype),)
         if n.prototype.has_return_value:
             append_nodes = ()
         else:
             append_nodes = (CallbackEnd(),)
-        return super().transform_CallbackImplementation(n._replace(
+        return super().transform_Callback(n._replace(
             body=n.body._replace(
                 children=prepend_nodes + n.body.children + append_nodes
             )
@@ -403,7 +403,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             if request in self.first_requests(c.body):
                 yield c
 
-    def _on_execute_CallbackImplementation(self, n):
+    def _on_execute_Callback(self, n):
         assert self.phase is None
         self.report_ready()
         self.send_driver_upward(1)  # has callbacks

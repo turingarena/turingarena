@@ -53,7 +53,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
         pass
 
     @abstractmethod
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         pass
 
     @abstractmethod

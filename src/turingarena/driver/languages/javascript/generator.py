@@ -8,7 +8,7 @@ class JavaScriptCodeGen(InterfaceCodeGen):
         return f"{callable.name}({arguments})"
 
     @classmethod
-    def visit_ParameterDeclaration(cls, d):
+    def visit_Parameter(cls, d):
         return f"{d.parameter.name}"
 
 

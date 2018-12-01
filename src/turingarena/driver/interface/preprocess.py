@@ -24,8 +24,8 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
     def transform_PrintNoCallbacks(self, s):
         return Print([IntLiteral(0), IntLiteral(0)])
 
-    def transform_CallbackImplementation(self, n):
-        n = super().transform_CallbackImplementation(n)
+    def transform_Callback(self, n):
+        n = super().transform_Callback(n)
         return n._replace(
             body=n.body._replace(
                 children=tuple([

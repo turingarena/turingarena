@@ -5,7 +5,7 @@ class BashCodeGen(InterfaceCodeGen):
     def line_comment(self, comment):
         self.line(f"# {comment}")
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"{m.variable.name}={self.visit(m.value)}")
 
 

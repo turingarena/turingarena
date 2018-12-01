@@ -42,7 +42,7 @@ Break = namedtuple("Break", [])
 Switch = namedtuple("Switch", ["value", "cases"])
 Case = namedtuple("Case", ["labels", "body"])
 SwitchValueResolve = namedtuple("SwitchValueResolve", ["node"])
-CallbackImplementation = namedtuple("CallbackImplementation", [
+Callback = namedtuple("Callback", [
     "index",
     "prototype",
     "body",
@@ -50,7 +50,7 @@ CallbackImplementation = namedtuple("CallbackImplementation", [
 
 Step = namedtuple("Step", ["direction", "body"])
 
-ParameterDeclaration = namedtuple("ParameterDeclaration", ["variable", "dimensions"])
+Parameter = namedtuple("Parameter", ["variable", "dimensions"])
 
 Prototype = namedtuple("Prototype", [
     "name",
@@ -59,7 +59,7 @@ Prototype = namedtuple("Prototype", [
     "callbacks",
 ])
 
-ConstantDeclaration = namedtuple("ConstantDeclaration", ["variable", "value"])
+Constant = namedtuple("Constant", ["variable", "value"])
 IntLiteral = namedtuple("IntLiteral", ["value"])
 Variable = namedtuple("Variable", ["name"])
 Subscript = namedtuple("Subscript", [

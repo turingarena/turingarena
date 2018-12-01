@@ -3,7 +3,7 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 class JavaCodeGen(InterfaceCodeGen):
 
-    def visit_ParameterDeclaration(self, d):
+    def visit_Parameter(self, d):
         arrays = "[]" * d.dimensions
         return f"int {d.variable.name}{arrays}"
 
@@ -37,7 +37,7 @@ class JavaCodeGen(InterfaceCodeGen):
     def generate_callbacks_declaration(self, callback):
         return f'{self.build_method_signature(callback)};'
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"private static final {m.variable.name} = {self.visit(m.value)};")
 
 
@@ -80,7 +80,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         with self.indent():
             self.generate_main(interface)
 
-    def visit_CallbackImplementation(self, callback):
+    def visit_Callback(self, callback):
         self.line(f'public {self.build_callback_signature(callback.prototype)}' " {")
         with self.indent():
             self.visit(callback.body)
@@ -96,7 +96,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
             self.line(cb_name + " __clbks = new " + cb_name + "() {")
             with self.indent():
                 for callback in call_statement.callbacks:
-                    self.visit_CallbackImplementation(callback)
+                    self.visit_Callback(callback)
             self.line("};")
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]

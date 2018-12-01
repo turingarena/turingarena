@@ -2,7 +2,7 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 
 class GoCodeGen(InterfaceCodeGen):
-    def visit_ParameterDeclaration(self, d):
+    def visit_Parameter(self, d):
         indirections = "[]" * d.dimensions
         return f"{d.variable.name} {indirections}int"
 
@@ -40,7 +40,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_MethodPrototype(self, m):
         return []
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         return []
 
     def visit_ReferenceAllocation(self, a):
@@ -56,7 +56,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
             self.visit(interface.main_block)
         self.line("}")
 
-    def visit_CallbackImplementation(self, callback):
+    def visit_Callback(self, callback):
         params = ", ".join(self.visit(p) for p in callback.prototype.parameters) + " int"
         if callback.prototype.has_return_value:
             return_value = "int"
@@ -72,7 +72,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         method = call_statement.method
 
         for callback in call_statement.callbacks:
-            self.visit_CallbackImplementation(callback)
+            self.visit_Callback(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
@@ -157,7 +157,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
 
 
 class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"const {m.variable.name} = {self.visit(m.value)}")
 
     def visit_MethodPrototype(self, m):

@@ -20,10 +20,10 @@ class PythonCodeGen(InterfaceCodeGen):
         arguments = ', '.join([self.visit(p) for p in func.parameters] + [c.name for c in func.callbacks])
         self.line(f'def {func.name}({arguments}):')
 
-    def visit_ParameterDeclaration(self, n):
+    def visit_Parameter(self, n):
         return self.visit(n.variable)
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"{m.variable.name} = {self.visit(m.value)}")
 
     def line_comment(self, comment):
@@ -75,7 +75,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         pass
 
-    def visit_CallbackImplementation(self, callback):
+    def visit_Callback(self, callback):
         params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
         self.line(f"def _callback_{callback.prototype.name}({params}):")
         with self.indent():
@@ -85,7 +85,7 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         method_name = call_statement.method.name
 
         for callback in call_statement.callbacks:
-            self.visit_CallbackImplementation(callback)
+            self.visit_Callback(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [

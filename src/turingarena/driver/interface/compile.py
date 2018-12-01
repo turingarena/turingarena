@@ -10,8 +10,8 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
     UnexpectedIndexForReference, CallbackParameterNotScalar, CallbackPrototypeMismatch
-from turingarena.driver.interface.nodes import ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
-    ConstantDeclaration, Block, Variable, Write, Read, Return, IntLiteral, \
+from turingarena.driver.interface.nodes import ForIndex, Case, Callback, Parameter, \
+    Constant, Block, Variable, Write, Read, Return, IntLiteral, \
     Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
@@ -128,7 +128,7 @@ class Compiler(namedtuple("Compiler", [
         return {m.name: m for m in self.methods}
 
     def constant_declaration(self, ast):
-        return ConstantDeclaration(
+        return Constant(
             variable=Variable(name=ast.name),
             value=self.scalar(ast.value),
         )
@@ -160,7 +160,7 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def parameter_declaration(self, ast, is_callback):
-        d = ParameterDeclaration(
+        d = Parameter(
             variable=Variable(name=ast.name),
             dimensions=len(ast.indexes),
         )
@@ -428,7 +428,7 @@ class Compiler(namedtuple("Compiler", [
                 for p in prototype.parameters
             ]).block(ast)
 
-        return CallbackImplementation(
+        return Callback(
             index=index,
             prototype=prototype,
             body=body

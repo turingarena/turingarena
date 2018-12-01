@@ -17,7 +17,7 @@ class TreeTransformer:
             callbacks=self.transform_all(n.callbacks)
         )
 
-    def transform_CallbackImplementation(self, n):
+    def transform_Callback(self, n):
         return n._replace(
             body=self.transform(n.body),
         )

@@ -2,7 +2,7 @@ from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, Temp
 
 
 class CppCodeGen(InterfaceCodeGen):
-    def visit_ParameterDeclaration(self, d):
+    def visit_Parameter(self, d):
         indirections = "*" * d.dimensions
         return f"int {indirections}{d.variable.name}"
 
@@ -50,7 +50,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             self.visit(interface.main_block)
         self.line("}")
 
-    def visit_CallbackImplementation(self, callback):
+    def visit_Callback(self, callback):
         params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
         if callback.prototype.has_return_value:
             return_value = " -> int"
@@ -64,7 +64,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             self.line("}")
         return c.as_inline()
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"static const int {m.variable.name} = {self.visit(m.value)};")
 
     def visit_Call(self, call_statement):
@@ -144,7 +144,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
 
 
 class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"const int {m.variable.name} = {self.visit(m.value)};")
 
     def visit_MethodPrototype(self, m):

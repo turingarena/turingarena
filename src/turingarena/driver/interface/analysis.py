@@ -139,7 +139,7 @@ class TreeAnalyzer:
         for callback in n.callbacks:
             yield from self.declaration_directions(callback.body)
 
-    def _get_directions_CallbackImplementation(self, n):
+    def _get_directions_Callback(self, n):
         return self.declaration_directions(n.body)
 
     def _get_directions_object(self, n):
