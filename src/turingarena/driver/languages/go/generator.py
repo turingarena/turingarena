@@ -23,19 +23,19 @@ class GoCodeGen(InterfaceCodeGen):
         return self.build_signature(func, func.callbacks)
 
     def line_comment(self, comment):
-        return f"// {comment}"
+        self.line(f"// {comment}")
 
 
 class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
-        yield "package main"
-        yield
-        yield 'import "fmt"'
-        yield 'import "os"'
-        yield
+        self.line("package main")
+        self.line()
+        self.line('import "fmt"')
+        self.line('import "os"')
+        self.line()
 
     def visit_VariableDeclaration(self, d):
-        yield f"var {d.variable.name} {'[]' * d.dimensions + 'int'}"
+        self.line(f"var {d.variable.name} {'[]' * d.dimensions + 'int'}")
 
     def visit_MethodPrototype(self, m):
         return []
@@ -48,13 +48,13 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         # FIXME: is this + 1 needed?
         dimensions = "[]" * (a.dimensions + 1)
         size = self.visit(a.size)
-        yield f"{reference} = make({dimensions}int, {size})"
+        self.line(f"{reference} = make({dimensions}int, {size})")
 
     def generate_main_block(self, interface):
-        yield "func main() {"
+        self.line("func main() {")
         with self.indent():
-            yield from self.visit(interface.main_block)
-        yield "}"
+            self.visit(interface.main_block)
+        self.line("}")
 
     def visit_CallbackImplementation(self, callback):
         params = ", ".join(f"{parameter.name}" for parameter in callback.prototype.parameters) + " int"
@@ -63,16 +63,16 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         else:
             return_value = ""
 
-        yield f"_callback_{callback.prototype.name} := func({params}) {return_value}" " {"
+        self.line(f"_callback_{callback.prototype.name} := func({params}) {return_value}" " {")
         with self.indent():
-            yield from self.visit(callback.body)
-        yield "}"
+            self.visit(callback.body)
+        self.line("}")
 
     def call_statement_body(self, call_statement):
         method = call_statement.method
 
         for callback in call_statement.callbacks:
-            yield from self.visit_CallbackImplementation(callback)
+            self.visit_CallbackImplementation(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
@@ -85,84 +85,84 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         else:
             return_value = ""
 
-        yield f"{return_value}{method.name}({parameters});"
+        self.line(f"{return_value}{method.name}({parameters});")
 
     def visit_Call(self, call_statement):
         if call_statement.method.has_callbacks:
-            yield "{"
+            self.line("{")
             with self.indent():
-                yield from self.call_statement_body(call_statement)
-            yield "}"
+                self.call_statement_body(call_statement)
+            self.line("}")
         else:
-            yield from self.call_statement_body(call_statement)
+            self.call_statement_body(call_statement)
 
     def visit_Print(self, write_statement):
         format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
         args = ", ".join(self.visit(v) for v in write_statement.arguments)
-        yield f'fmt.Printf("{format_string}", {args})'
+        self.line(f'fmt.Printf("{format_string}", {args})')
 
     def visit_Read(self, statement):
         format_string = "".join("%d" for _ in statement.arguments)
         scanf_args = ", ".join("&" + self.visit(v) for v in statement.arguments)
-        yield f'fmt.Scanf("{format_string}", {scanf_args});'
+        self.line(f'fmt.Scanf("{format_string}", {scanf_args});')
 
     def visit_If(self, statement):
         condition = self.visit(statement.condition)
-        yield f"if {condition}" " {"
+        self.line(f"if {condition}" " {")
         with self.indent():
-            yield from self.visit(statement.then_body)
+            self.visit(statement.then_body)
         if statement.else_body:
-            yield "} else {"
+            self.line("} else {")
             with self.indent():
-                yield from self.visit(statement.else_body)
-        yield "}"
+                self.visit(statement.else_body)
+        self.line("}")
 
     def visit_For(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
-        yield f"for {index_name} := 0; {index_name} < {size}; {index_name}++" " {"
+        self.line(f"for {index_name} := 0; {index_name} < {size}; {index_name}++" " {")
         with self.indent():
-            yield from self.visit(s.body)
-        yield "}"
+            self.visit(s.body)
+        self.line("}")
 
     def visit_Loop(self, statement):
-        yield "for {"
+        self.line("for {")
         with self.indent():
-            yield from self.visit(statement.body)
-        yield "}"
+            self.visit(statement.body)
+        self.line("}")
 
     def build_switch_condition(self, variable, labels):
         variable = self.visit(variable)
         return " || ".join(f"{variable} == {label}" for label in labels)
 
     def visit_Switch(self, statement):
-        yield "switch {"
+        self.line("switch {")
         for case in statement.cases:
-            yield f"case {self.build_switch_condition(statement.variable, case.labels)}:"
+            self.line(f"case {self.build_switch_condition(statement.variable, case.labels)}:")
             with self.indent():
-                yield from self.visit(case.body)
-        yield "}"
+                self.visit(case.body)
+        self.line("}")
 
     def visit_Exit(self, statement):
-        yield "os.Exit(0)"
+        self.line("os.Exit(0)")
 
     def visit_Return(self, statement):
-        yield f"return {self.visit(statement.value)};"
+        self.line(f"return {self.visit(statement.value)};")
 
     def visit_Break(self, statement):
-        yield "break"
+        self.line("break")
 
     def generate_flush(self):
-        yield "os.Stdout.Sync()"
+        self.line("os.Stdout.Sync()")
 
 
 class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
     def visit_ConstantDeclaration(self, m):
-        yield f"const {m.variable.name} = {self.visit(m.value)}"
+        self.line(f"const {m.variable.name} = {self.visit(m.value)}")
 
     def visit_MethodPrototype(self, m):
-        yield
-        yield f"{self.build_method_signature(m)}" " {"
+        self.line()
+        self.line(f"{self.build_method_signature(m)}" " {")
         with self.indent():
-            yield "// TODO"
-        yield "}"
+            self.line("// TODO")
+        self.line("}")

@@ -25,10 +25,19 @@ class AbstractExpressionCodeGen(CodeGen):
 
 
 class LinesGenerator:
-    __slots__ = ["indentation"]
+    __slots__ = ["indentation", "lines"]
 
     def __init__(self):
         self.indentation = 0
+        self.lines = None
+
+    @contextmanager
+    def collect_lines(self):
+        old_lines = self.lines
+        self.lines = lines = []
+        yield lines
+        assert id(self.lines) == id(lines)
+        self.lines = old_lines
 
     @contextmanager
     def indent(self):
@@ -36,12 +45,11 @@ class LinesGenerator:
         yield
         self.indentation -= 1
 
-    def dump_to_file(self, generator, file):
-        for line in generator:
-            if line is None:
-                print("", file=file)
-            else:
-                print("    " * self.indentation + line, file=file)
+    def line(self, line=None):
+        if line is None:
+            self.lines.append("")
+        else:
+            self.lines.append("    " * self.indentation + line)
 
     @abstractmethod
     def _on_generate(self, *args, **kwargs):
@@ -52,28 +60,31 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
     __slots__ = []
 
     def generate_to_file(self, interface, file):
-        self.dump_to_file(self.generate(interface), file=file)
+        with self.collect_lines() as lines:
+            self.generate(interface)
+        for l in lines:
+            print(l, file=file)
 
     def generate(self, interface):
-        yield from self.generate_header(interface)
-        yield from self.generate_constants_declarations(interface)
-        yield from self.generate_method_declarations(interface)
-        yield from self.generate_main_block(interface)
-        yield from self.generate_footer(interface)
+        self.generate_header(interface)
+        self.generate_constants_declarations(interface)
+        self.generate_method_declarations(interface)
+        self.generate_main_block(interface)
+        self.generate_footer(interface)
 
     def generate_header(self, interface):
-        yield from ()
+        pass
 
     def generate_footer(self, interface):
-        yield from ()
+        pass
 
     def generate_method_declarations(self, interface):
         for func in interface.methods:
-            yield from self.visit_MethodPrototype(func)
+            self.visit_MethodPrototype(func)
 
     def generate_constants_declarations(self, interface):
         for c in interface.constants:
-            yield from self.visit(c)
+            self.visit(c)
 
     @abstractmethod
     def visit_MethodPrototype(self, m):
@@ -205,7 +216,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
 
     def visit_SequenceNode(self, node):
         for child in node.children:
-            yield from self.generate_statement(child)
+            self.generate_statement(child)
 
     @abstractmethod
     def visit_VariableDeclaration(self, d):
@@ -222,8 +233,8 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_Step(self, s):
         if s.direction is ReferenceDirection.DOWNWARD:
             # insert an (upward) flush before receiving data downward
-            yield from self.generate_flush()
-        yield from self.visit_SequenceNode(s)
+            self.generate_flush()
+        self.visit_SequenceNode(s)
 
     def visit_PrintNoCallbacks(self, s):
         return self.visit(
@@ -241,7 +252,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         )
 
     def generate_main_block(self, interface):
-        yield from self.visit(interface.main_block)
+        self.visit(interface.main_block)
 
     def generate_statement(self, statement):
         analyzer = TreeAnalyzer()
@@ -250,15 +261,15 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
         if comment is not None:
             comment = StatementDescriptionCodeGen().visit(statement)
         if comment is not None:
-            yield self.line_comment(comment)
+            self.line_comment(comment)
 
         for d in analyzer.variable_declarations(statement):
-            yield from self.visit(d)
+            self.visit(d)
 
         for a in analyzer.reference_allocations(statement):
-            yield from self.visit(a)
+            self.visit(a)
 
-        yield from self.visit(statement)
+        self.visit(statement)
 
     @abstractmethod
     def generate_flush(self):
@@ -267,4 +278,4 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
 
 class TemplateCodeGen(InterfaceCodeGen):
     def generate_main_block(self, interface):
-        yield from ()
+        pass

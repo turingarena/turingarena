@@ -3,11 +3,11 @@ from turingarena.driver.languages.cpp import CppSkeletonCodeGen, CppTemplateCode
 
 class CSkeletonCodeGen(CppSkeletonCodeGen):
     def generate_method_declarations(self, interface):
-        yield 'extern "C" {'
+        self.line('extern "C" {')
         for func in interface.methods:
             with self.indent():
-                yield from self.visit_MethodPrototype(func)
-        yield "}"
+                self.visit_MethodPrototype(func)
+        self.line("}")
 
 
 class CTemplateCodeGen(CppTemplateCodeGen):

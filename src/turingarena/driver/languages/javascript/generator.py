@@ -14,28 +14,28 @@ class JavaScriptCodeGen(InterfaceCodeGen):
 
 class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
     def generate(self):
-        yield "async function init() {}"
-        yield from self.visit(self.interface.body)
+        self.line("async function init() {}")
+        self.visit(self.interface.body)
 
     def var_statement(self, statement):
         names = ", ".join(v.name for v in statement.variables)
-        yield f"let {names};"
+        self.line(f"let {names};")
 
     def callback_statement(self, statement):
         callback = statement.callback
-        yield f"function {build_callable_declarator(callback)}" + "{"
+        self.line(f"function {build_callable_declarator(callback)}" + "{")
         with self.indent():
-            yield from self.visit(callback.body)
-        yield "}"
-        yield
+            self.visit(callback.body)
+        self.line("}")
+        self.line()
 
     def main_statement(self, statement):
-        yield
-        yield "async function main() {"
+        self.line()
+        self.line("async function main() {")
         with self.indent():
-            yield "__load_source__(); // load user source file"
-            yield from self.visit(statement.body)
-        yield "}"
+            self.line("__load_source__(); // load user source file")
+            self.visit(statement.body)
+        self.line("}")
 
     def any_statement(self, statement):
         generators = {
@@ -54,48 +54,48 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
         parameters = ", ".join(self.visit(p) for p in statement.parameters)
         if statement.return_value is not None:
             return_value = self.visit(statement.return_value)
-            yield f"{return_value} = {method_name}({parameters});"
+            self.line(f"{return_value} = {method_name}({parameters});")
         else:
-            yield f"{method_name}({parameters});"
+            self.line(f"{method_name}({parameters});")
 
     def alloc_statement(self, statement):
         for argument in statement.arguments:
             arg = self.visit(argument)
             size = self.visit(statement.size)
-            yield f"{arg} = Array({size});"
+            self.line(f"{arg} = Array({size});")
 
     def visit_Print(self, statement):
         args = ", ".join(self.visit(v) for v in statement.arguments)
-        yield f"print({args});"
+        self.line(f"print({args});")
 
     def visit_Read(self, statement):
         args = ", ".join(self.visit(arg) for arg in statement.arguments)
-        yield f"[{args}] = await readIntegers();"
+        self.line(f"[{args}] = await readIntegers();")
 
     def visit_If(self, statement):
         condition = self.visit(statement.condition)
-        yield f"if ({condition})" " {"
+        self.line(f"if ({condition})" " {")
         with self.indent():
-            yield from self.visit(statement.then_body)
+            self.visit(statement.then_body)
         if statement.else_body is not None:
-            yield "} else {"
+            self.line("} else {")
             with self.indent():
-                yield from self.visit(statement.else_body)
-        yield "}"
+                self.visit(statement.else_body)
+        self.line("}")
 
     def visit_For(self, statement):
         index_name = statement.index.variable.name
         size = self.visit(statement.index.range)
-        yield f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {"
+        self.line(f"for (let {index_name} = 0; {index_name} < {size}; {index_name}++)" " {")
         with self.indent():
-            yield from self.visit(statement.body)
-        yield "}"
+            self.visit(statement.body)
+        self.line("}")
 
     def visit_Loop(self, loop_statement):
-        yield "while (true) {"
+        self.line("while (true) {")
         with self.indent():
-            yield from self.visit(loop_statement.body)
-        yield "}"
+            self.visit(loop_statement.body)
+        self.line("}")
 
     def build_switch_condition(self, variable, labels):
         variable = self.visit(variable)
@@ -106,24 +106,24 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
     def visit_Switch(self, switch_statement):
         cases = [case for case in switch_statement.cases]
-        yield f"if ({self.build_switch_condition(switch_statement.value, cases[0].labels)}) " "{"
+        self.line(f"if ({self.build_switch_condition(switch_statement.value, cases[0].labels)}) " "{")
         with self.indent():
-            yield from self.visit(cases[0].body)
+            self.visit(cases[0].body)
         for case in cases[1:]:
-            yield "}" f" else if ({self.build_switch_condition(switch_statement.value, case.labels)}) " "{"
+            self.line("}" f" else if ({self.build_switch_condition(switch_statement.value, case.labels)}) " "{")
             with self.indent():
-                yield from self.visit(case.body)
+                self.visit(case.body)
         if switch_statement.default:
-            yield "} else {"
+            self.line("} else {")
             with self.indent():
-                yield from self.visit(switch_statement.default)
-        yield "}"
+                self.visit(switch_statement.default)
+        self.line("}")
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
     def visit_MethodPrototype(self, m):
-        yield
-        yield f"function {self.build_callable_declarator(m.function)}" + "{"
+        self.line()
+        self.line(f"function {self.build_callable_declarator(m.function)}" + "{")
         with self.indent():
-            yield "// TODO"
-        yield "}"
+            self.line("// TODO")
+        self.line("}")
