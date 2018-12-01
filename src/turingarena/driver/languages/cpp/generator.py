@@ -62,7 +62,7 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             with self.indent():
                 self.visit(callback.body)
             self.line("}")
-        return str(c)
+        return c.as_inline()
 
     def visit_ConstantDeclaration(self, m):
         self.line(f"static const int {m.variable.name} = {self.visit(m.value)};")
