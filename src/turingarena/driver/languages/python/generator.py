@@ -67,10 +67,10 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         self.line(f"{name}{indexes} = [None] * {size}")
 
     def visit_MethodPrototype(self, m):
-        ()
+        pass
 
     def visit_VariableDeclaration(self, d):
-        ()
+        pass
 
     def visit_CallbackImplementation(self, callback):
         params = ", ".join(parameter.name for parameter in callback.prototype.parameters)
@@ -97,49 +97,46 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         else:
             self.line(f'{call_expr}')
 
-    def visit_Print(self, write_statement):
-        args = ', '.join(self.visit(arg) for arg in write_statement.arguments)
+    def visit_Print(self, n):
+        args = ', '.join(self.visit(arg) for arg in n.arguments)
         self.line(f'print({args})')
 
-    def visit_Read(self, read_statement):
-        arguments = ", ".join(self.visit(arg) for arg in read_statement.arguments)
+    def visit_Read(self, n):
+        arguments = ", ".join(self.visit(arg) for arg in n.arguments)
         self.line(f'[{arguments}] = map(int, input().split())')
 
-    def visit_If(self, if_statement):
-        condition = self.visit(if_statement.condition)
+    def visit_If(self, n):
+        condition = self.visit(n.condition)
         self.line(f'if {condition}:')
         with self.indent():
-            self.visit(if_statement.then_body)
-        if if_statement.else_body:
+            self.visit(n.then_body)
+        if n.else_body:
             self.line('else:')
             with self.indent():
-                self.visit(if_statement.else_body)
+                self.visit(n.else_body)
 
-    def visit_For(self, for_statement):
-        index_name = for_statement.index.variable.name
-        size = self.visit(for_statement.index.range)
+    def visit_For(self, n):
+        index_name = n.index.variable.name
+        size = self.visit(n.index.range)
         self.line(f'for {index_name} in range({size}):')
         with self.indent():
-            self.visit(for_statement.body)
+            self.visit(n.body)
 
-    def visit_Loop(self, loop_statement):
+    def visit_Loop(self, n):
         self.line('while True:')
         with self.indent():
-            self.visit(loop_statement.body)
+            self.visit(n.body)
 
     def build_switch_cases(self, variable, labels):
         variable = self.visit(variable)
         return ' or '.join(f'{variable} == {label}' for label in labels)
 
     def visit_Switch(self, switch_statement):
-        cases = [case for case in switch_statement.cases]
-        self.line(f'if {self.build_switch_cases(switch_statement.variable, cases[0].labels)}:')
-        with self.indent():
-            self.visit(cases[0].body)
-        for case in cases[1:]:
-            self.line(f'elif {self.build_switch_cases(switch_statement.variable, case.labels)}:')
+        for i, c in enumerate(switch_statement.cases):
+            if_or_elif = "if" if i == 0 else "elif"
+            self.line(f'{if_or_elif} {self.build_switch_cases(switch_statement.variable, c.labels)}:')
             with self.indent():
-                self.visit(case.body)
+                self.visit(c.body)
 
 
 class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
