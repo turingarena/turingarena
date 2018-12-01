@@ -304,7 +304,7 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def _on_compile_SwitchValueResolve(self, cls, ast):
-        n = self._on_compile_SwitchNode(cls, ast)
+        n = self._replace(diagnostics=[])._on_compile_SwitchNode(cls, ast)
 
         if self.is_resolved(n.value):
             return
@@ -338,7 +338,7 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def _on_compile_IfConditionResolve(self, cls, ast):
-        n = self._on_compile_IfNode(cls, ast)
+        n = self._replace(diagnostics=[])._on_compile_IfNode(cls, ast)
 
         if self.is_resolved(n.condition):
             return
@@ -362,7 +362,7 @@ class Compiler(namedtuple("Compiler", [
         return cls()
 
     def _on_compile_CallReturn(self, cls, ast):
-        call = self.statement(Call, ast)
+        call = self._replace(diagnostics=[]).statement(Call, ast)
         if call.return_value is None:
             return
         return cls(
@@ -370,7 +370,8 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def _on_compile_PrintNoCallbacks(self, cls, ast):
-        n = self._on_compile_CallNode(cls, ast)
+        # ignore diagnostics (FIXME: find a cleaner way?)
+        n = self._replace(diagnostics=[])._on_compile_CallNode(cls, ast)
 
         if not n.method.callbacks:
             return
@@ -378,7 +379,7 @@ class Compiler(namedtuple("Compiler", [
         return n
 
     def _on_compile_AcceptCallbacks(self, cls, ast):
-        n = self._on_compile_CallNode(cls, ast)
+        n = self._replace(diagnostics=[])._on_compile_CallNode(cls, ast)
 
         if not n.method.callbacks:
             return

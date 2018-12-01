@@ -1,7 +1,5 @@
-import logging
-
 from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop, \
-    Variable, Subscript
+    Variable, Subscript, Call
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.variables import ReferenceResolution, ReferenceDefinition, \
     ReferenceDirection, VariableDeclaration, ReferenceAllocation
@@ -29,7 +27,7 @@ class TreeAnalyzer:
 
     def _get_reference_actions_Read(self, n):
         for exp in n.arguments:
-            yield self.reference_declaration(exp)
+            yield self.create_reference_definition(exp)
 
     def _get_reference_actions_Write(self, n):
         for exp in n.arguments:
@@ -55,12 +53,11 @@ class TreeAnalyzer:
                 if isinstance(a, ReferenceResolution):
                     yield a._replace(reference=reference)
 
-    def _get_reference_actions_CallArgumentsResolve(self, n):
+    def _get_reference_actions_Call(self, n):
         for p in n.arguments:
             yield ReferenceResolution(p)
-
-    def _get_reference_actions_CallReturn(self, n):
-        yield self.reference_declaration(n.return_value)
+        if n.return_value is not None:
+            yield self.create_reference_definition(n.return_value)
 
     def _get_reference_actions_SequenceNode(self, n):
         for child in n.children:
@@ -176,21 +173,21 @@ class TreeAnalyzer:
         # FIXME: we should check that the index is the one expected (should we?)
         return self.is_reference(e.array) and isinstance(e.index, Variable)
 
+    def create_reference_definition(self, e, dimensions=0):
+        return self._create_reference_definition(e, dimensions)
+
     @visitormethod
-    def _reference_declaration(self, e, dimensions):
+    def _create_reference_definition(self, e, dimensions):
         pass
 
-    def reference_declaration(self, e, dimensions=0):
-        return self._reference_declaration(e, dimensions)
-
-    def _reference_declaration_Variable(self, e, dimensions):
+    def _create_reference_definition_Variable(self, e, dimensions):
         return ReferenceDefinition(
             reference=Variable(name=e.name),
             dimensions=dimensions,
         )
 
-    def _reference_declaration_Subscript(self, e, dimensions):
-        array_declaration = self.reference_declaration(e.array, dimensions + 1)
+    def _create_reference_definition_Subscript(self, e, dimensions):
+        array_declaration = self.create_reference_definition(e.array, dimensions + 1)
         if array_declaration is not None:
             return ReferenceDefinition(
                 reference=Subscript(
@@ -200,7 +197,7 @@ class TreeAnalyzer:
                 dimensions=array_declaration.dimensions - 1,
             )
 
-    def _reference_declaration_Expression(self, e):
+    def _create_reference_definition_Expression(self, e):
         return None
 
     def comment(self, n):
@@ -226,11 +223,7 @@ class TreeAnalyzer:
         return frozenset(self._get_variable_declarations(n))
 
     def _get_variable_declarations(self, n):
-        types = [
-            Read,
-            CallReturn,
-            For,
-        ]
+        types = [Read, Call, For]
 
         if not any(isinstance(n, t) for t in types):
             return
