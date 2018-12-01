@@ -1,12 +1,7 @@
-function p();
-procedure f(x);
+procedure p() callbacks {
+    procedure c();
+}
+
 main {
-    loop {
-        call a = p();
-        call f(a);
-        write a;
-        break;
-        call b = p();
-        write b;
-    }
+    call p();
 }

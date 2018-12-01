@@ -24,20 +24,32 @@ class AbstractExpressionCodeGen(CodeGen):
         return str(e.value)
 
 
+class LineCollector:
+    def __init__(self):
+        self.lines = []
+
+    def __str__(self):
+        # skip the first indentation
+        return "".join(self.lines[2:])
+
+    def __iter__(self):
+        return iter(self.lines)
+
+
 class LinesGenerator:
-    __slots__ = ["indentation", "lines"]
+    __slots__ = ["indentation", "collector"]
 
     def __init__(self):
         self.indentation = 0
-        self.lines = None
+        self.collector = None
 
     @contextmanager
     def collect_lines(self):
-        old_lines = self.lines
-        self.lines = lines = []
-        yield lines
-        assert id(self.lines) == id(lines)
-        self.lines = old_lines
+        old_collector = self.collector
+        self.collector = collector = LineCollector()
+        yield collector
+        assert self.collector is collector
+        self.collector = old_collector
 
     @contextmanager
     def indent(self):
@@ -46,10 +58,12 @@ class LinesGenerator:
         self.indentation -= 1
 
     def line(self, line=None):
+        self.collector.lines.append("\n")
         if line is None:
-            self.lines.append("")
+            self.collector.lines.append("")
         else:
-            self.lines.append("    " * self.indentation + line)
+            self.collector.lines.append("    " * self.indentation)
+            self.collector.lines.append(line)
 
     @abstractmethod
     def _on_generate(self, *args, **kwargs):
@@ -63,7 +77,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
         with self.collect_lines() as lines:
             self.generate(interface)
         for l in lines:
-            print(l, file=file)
+            file.write(l)
 
     def generate(self, interface):
         self.generate_header(interface)

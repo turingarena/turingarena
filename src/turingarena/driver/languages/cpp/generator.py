@@ -57,25 +57,22 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         else:
             return_value = ""
 
-        self.line(f"auto _callback_{callback.prototype.name} = []({params}){return_value}" " {")
-        with self.indent():
-            self.visit(callback.body)
-        self.line("};")
+        with self.collect_lines() as c:
+            self.line(f"[]({params}){return_value}" " {")
+            with self.indent():
+                self.visit(callback.body)
+            self.line("}")
+        return str(c)
 
     def visit_ConstantDeclaration(self, m):
         self.line(f"static const int {m.variable.name} = {self.visit(m.value)};")
 
-    def call_statement_body(self, call_statement):
+    def visit_Call(self, call_statement):
         method = call_statement.method
 
-        for callback in call_statement.callbacks:
-            self.visit_CallbackImplementation(callback)
-
         value_arguments = [self.visit(p) for p in call_statement.arguments]
-        callback_arguments = [
-            f"_callback_{callback_signature.name}"
-            for callback_signature in method.callbacks
-        ]
+        callback_arguments = [self.visit(c) for c in call_statement.callbacks]
+
         parameters = ", ".join(value_arguments + callback_arguments)
         if method.has_return_value:
             return_value = f"{self.visit(call_statement.return_value)} = "
@@ -83,15 +80,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
             return_value = ""
 
         self.line(f"{return_value}{method.name}({parameters});")
-
-    def visit_Call(self, call_statement):
-        if call_statement.method.has_callbacks:
-            self.line("{")
-            with self.indent():
-                self.call_statement_body(call_statement)
-            self.line("}")
-        else:
-            self.call_statement_body(call_statement)
 
     def visit_Print(self, write_statement):
         format_string = " ".join("%d" for _ in write_statement.arguments) + r"\n"
