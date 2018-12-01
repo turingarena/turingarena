@@ -1,3 +1,5 @@
+import logging
+
 from turingarena.driver.interface.nodes import CallbackStart, For, CallReturn, AcceptCallbacks, Read, Checkpoint, Loop, \
     Variable, Subscript, Call
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
@@ -59,28 +61,42 @@ class TreeAnalyzer:
         if n.return_value is not None:
             yield self.create_reference_definition(n.return_value)
 
-    def _get_reference_actions_SequenceNode(self, n):
+    def _get_reference_actions_Block(self, n):
         for child in n.children:
             yield from self.reference_actions(child)
+
+    def _get_reference_actions_Step(self, n):
+        yield from self.reference_actions(n.body)
 
     def _get_reference_actions_object(self, n):
         return []
 
-    @visitormethod
     def can_be_grouped(self, n):
+        ans = self._can_be_grouped(n)
+        logging.debug(f"can_be_grouped({n}) -> {ans}")
+        return ans
+
+    @visitormethod
+    def _can_be_grouped(self, n):
         pass
 
-    def can_be_grouped_For(self, n):
+    def _can_be_grouped_For(self, n):
         # no local references
         return all(
             isinstance(a.reference, Subscript)
             for a in self.reference_actions(n.body)
-        ) and all(
+        ) and self.can_be_grouped(n.body)
+
+    def _can_be_grouped_Block(self, n):
+        return all(
             self.can_be_grouped(child)
-            for child in n.body.children
+            for child in n.children
         )
 
-    def can_be_grouped_object(self, n):
+    def _can_be_grouped_Step(self, n):
+        return self.can_be_grouped(n.body)
+
+    def _can_be_grouped_object(self, n):
         for t in [
             Loop,
             AcceptCallbacks,
@@ -96,9 +112,13 @@ class TreeAnalyzer:
     def _get_directions(self, n):
         pass
 
-    def _get_directions_SequenceNode(self, n):
+    def _get_directions_Block(self, n):
         for child in n.children:
             yield from self.declaration_directions(child)
+
+    def _get_directions_Step(self, n):
+        if n.direction is not None:
+            yield n.direction
 
     def _get_directions_For(self, n):
         yield from self.declaration_directions(n.body)
@@ -141,7 +161,7 @@ class TreeAnalyzer:
     def _get_first_requests_Call(self, n):
         yield CallRequestSignature("call", n.method.name)
 
-    def _get_first_requests_SequenceNode(self, n):
+    def _get_first_requests_Block(self, n):
         for child in n.children:
             for r in self.first_requests(child):
                 if r is not None:

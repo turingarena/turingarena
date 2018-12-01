@@ -9,7 +9,7 @@ from turingarena.driver.client.commands import deserialize_data, serialize_data,
 from turingarena.driver.description import TreeDumper
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
-    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn
+    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn, Block
 from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
 from turingarena.driver.interface.transform import TreeTransformer
 from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
@@ -152,7 +152,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             does_break=False,
         )
 
-    def transform_SequenceNode(self, n):
+    def transform_Block(self, n):
         return n._replace(
             children=tuple(
                 self.group_children(
@@ -163,14 +163,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
     def expand_sequence(self, ns):
         for n in ns:
-            yield from self.transform_all(self.node_replacement(n))
+            yield from self.node_replacement(n)
 
     @visitormethod
     def node_replacement(self, n):
         pass
 
     def node_replacement_object(self, n):
-        yield n
+        yield self.transform(n)
 
     def node_replacement_If(self, n):
         yield IfConditionResolve(n)
@@ -210,7 +210,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             yield self._make_step(group)
 
     def _make_step(self, group):
-        return Step(tuple(group), self._group_direction(group))
+        return Step(body=Block(tuple(group)), direction=self._group_direction(group))
 
     def _group_direction(self, group):
         directions = self._group_directions(group)
@@ -300,10 +300,8 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
         return self._execute_sequence(n.children)
 
     def _on_execute_Step(self, n):
-        assert n.children
-
         if self.phase is not None:
-            return self._execute_sequence(n.children)
+            return self._execute_sequence(n.body.children)
         else:
             result = self.result()
             for phase in ExecutionPhase:
@@ -312,9 +310,14 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
                 if phase == ExecutionPhase.UPWARD and direction != ReferenceDirection.UPWARD:
                     continue
 
+                logging.debug(f"about to run step phase {phase} (prev result: {result})")
+
                 result = result.merge(self.extend(result)._replace(
                     phase=phase,
-                )._execute_sequence(n.children))
+                )._execute_sequence(n.body.children))
+
+                logging.debug(f"step phase {phase} result: {result}")
+
 
             return result
 
@@ -578,6 +581,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute_CallReturn(self, n):
         if self.phase is ExecutionPhase.REQUEST:
             return_value = self.evaluate(n.return_value)
+
             self.report_ready()
             self.send_driver_upward(return_value)
 

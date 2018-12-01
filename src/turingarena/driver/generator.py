@@ -108,7 +108,7 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_Break(self, statement):
         pass
 
-    def visit_SequenceNode(self, node):
+    def visit_Block(self, node):
         for child in node.children:
             self.generate_statement(child)
 

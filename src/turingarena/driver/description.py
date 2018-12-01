@@ -29,4 +29,4 @@ class TreeDumper(AbstractExpressionCodeGen, LinesGenerator):
             else:
                 for v in n:
                     self.line(f"{self.description(v)},")
-        self.line(")")
+        self.line(f") # {n.__class__.__name__}")

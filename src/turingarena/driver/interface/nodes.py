@@ -56,13 +56,7 @@ CallbackImplementation = namedtuple("CallbackImplementation", [
     "body",
 ])
 
-
-class SequenceNode:
-    pass
-
-
-class Step(namedtuple("Step", ["children", "direction"]), SequenceNode):
-    __slots__ = []
+Step = namedtuple("Step", ["direction", "body"])
 
 
 class ParameterDeclaration(namedtuple("ParameterDeclaration", ["variable", "dimensions"])):
@@ -119,44 +113,6 @@ class Subscript(namedtuple("Subscript", [
     __slots__ = []
 
 
-class Block(namedtuple("Block", ["children"]), SequenceNode):
-    __slots__ = []
-
+Block = namedtuple("Block", ["children"])
 
 Comment = namedtuple("Comment", ["text"])
-
-statement_classes = {
-    "checkpoint": [
-        Checkpoint,
-    ],
-    "read": [
-        Read,
-    ],
-    "write": [
-        Write,
-    ],
-    "call": [
-        Call,
-    ],
-    "return": [
-        Return,
-    ],
-    "exit": [
-        Exit,
-    ],
-    "for": [
-        For,
-    ],
-    "if": [
-        If,
-    ],
-    "loop": [
-        Loop,
-    ],
-    "break": [
-        Break,
-    ],
-    "switch": [
-        Switch,
-    ],
-}

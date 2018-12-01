@@ -35,7 +35,7 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
             ),
         )
 
-    def transform_SequenceNode(self, n):
+    def transform_Block(self, n):
         children = []
         for c in n.children:
             children.extend(self.statement_nodes(c))

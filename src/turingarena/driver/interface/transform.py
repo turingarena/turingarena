@@ -58,7 +58,7 @@ class TreeTransformer:
             body=self.transform(n.body),
         )
 
-    def transform_SequenceNode(self, n):
+    def transform_Block(self, n):
         return n._replace(
             children=self.transform_all(n.children),
         )

@@ -12,11 +12,10 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import CallbackStart, CallbackEnd, \
-    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, statement_classes, ParameterDeclaration, \
+    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, ParameterDeclaration, \
     CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, IntLiteral, \
-    Subscript
+    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch
 from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.validate import Validator
 from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
 
@@ -55,7 +54,7 @@ class Compiler(namedtuple("Compiler", [
     "in_loop",
     "diagnostics",
     "expression_type",
-]), Validator, TreeAnalyzer):
+]), TreeAnalyzer):
     @classmethod
     def create(cls):
         return cls(
@@ -243,27 +242,22 @@ class Compiler(namedtuple("Compiler", [
                 or self.is_defined(e.array)
         )
 
-    @visitormethod
-    def is_resolved(self, e) -> bool:
-        pass
+    STATEMENT_CLASSES = {
+        "checkpoint": Checkpoint,
+        "read": Read,
+        "write": Write,
+        "call": Call,
+        "return": Return,
+        "exit": Exit,
+        "for": For,
+        "if": If,
+        "loop": Loop,
+        "break": Break,
+        "switch": Switch,
+    }
 
-    def is_resolved_IntLiteral(self, e):
-        return True
-
-    def is_resolved_Variable(self, e):
-        return e in self.get_resolved_references()
-
-    def is_resolved_Subscript(self, e):
-        return (
-                e in self.get_resolved_references()
-                or self.is_resolved(e.array)
-        )
-
-    def group_nodes(self, nodes):
-        pass
-
-    def statement(self, cls, ast):
-        return self._on_compile(cls, ast)
+    def statement(self, ast):
+        return self._on_compile(self.STATEMENT_CLASSES[ast.statement_type], ast)
 
     @classvisitormethod
     def _on_compile(self, cls, ast):
@@ -452,22 +446,19 @@ class Compiler(namedtuple("Compiler", [
             body=body
         )
 
-    def _compile_block_flat(self, asts):
+    def statements(self, asts):
         inner = self
         for ast in asts:
-            for cls in statement_classes[ast.statement_type]:
-                node = inner.statement(cls, ast)
-                if node is None:
-                    continue
-                yield node
-                inner = inner.with_reference_actions(inner.reference_actions(node))
+            node = inner.statement(ast)
+            yield node
+            inner = inner.with_reference_actions(inner.reference_actions(node))
 
     def block(self, ast, prepend_nodes=(), append_nodes=()):
         return Block(
             children=tuple(
                 itertools.chain(
                     prepend_nodes,
-                    self._compile_block_flat(ast.statements),
+                    self.statements(ast.statements),
                     append_nodes,
                 )
             )
