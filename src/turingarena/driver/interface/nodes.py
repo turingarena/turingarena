@@ -1,5 +1,10 @@
 from collections import namedtuple
 
+Interface = namedtuple("Interface", [
+    "constants",
+    "methods",
+    "main_block",
+])
 CallbackStart = namedtuple("CallbackStart", ["prototype"])
 Return = namedtuple("Return", ["value"])
 CallbackEnd = namedtuple("CallbackEnd", [])

@@ -10,11 +10,10 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
     InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
     UnexpectedIndexForReference, CallbackParameterNotScalar
-from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import CallbackStart, CallbackEnd, \
     ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
     ConstantDeclaration, Block, Variable, Write, Read, Return, IntLiteral, \
-    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype
+    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
