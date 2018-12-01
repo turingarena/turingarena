@@ -171,6 +171,9 @@ class TreeAnalyzer:
         else:
             yield None
 
+    def _get_first_requests_Step(self, n):
+        return self.first_requests(n.body)
+
     def _get_first_requests_For(self, n):
         yield None
         yield from self.first_requests(n.body)
