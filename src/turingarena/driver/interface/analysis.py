@@ -100,9 +100,20 @@ class TreeAnalyzer:
         for child in n.children:
             yield from self.declaration_directions(child)
 
-    def _get_directions_ControlStructure(self, n):
-        for b in n.bodies:
-            yield from self.declaration_directions(b)
+    def _get_directions_For(self, n):
+        yield from self.declaration_directions(n.body)
+
+    def _get_directions_If(self, n):
+        yield from self.declaration_directions(n.then_body)
+        if n.else_body is not None:
+            yield from self.declaration_directions(n.else_body)
+
+    def _get_directions_Switch(self, n):
+        for c in n.cases:
+            yield from self.declaration_directions(c.body)
+
+    def _get_directions_Loop(self, n):
+        yield from self.declaration_directions(n.body)
 
     def _get_directions_AcceptCallbacks(self, n):
         for callback in n.callbacks:

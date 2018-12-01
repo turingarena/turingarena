@@ -303,7 +303,7 @@ class Compiler(namedtuple("Compiler", [
             ]).block(ast.body)
         )
 
-    def _on_compile_SwitchNode(self, cls, ast):
+    def _on_compile_Switch(self, cls, ast):
         value = self.scalar(ast.value)
 
         self.check(len(ast.cases) > 0, SwitchEmpty(switch=Location(ast)))

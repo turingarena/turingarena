@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from collections.__init__ import namedtuple
 
 PrintCallbackRequest = namedtuple("PrintCallbackRequest", ["index", "prototype"])
@@ -9,23 +8,7 @@ Exit = namedtuple("Exit", [])
 
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
 
-
-class ControlStructure:
-    @property
-    def bodies(self):
-        return tuple(self._get_bodies())
-
-    @abstractmethod
-    def _get_bodies(self):
-        pass
-
-
-class For(namedtuple("For", ["index", "body"]), ControlStructure):
-    __slots__ = []
-
-    def _get_bodies(self):
-        yield self.body
-
+For = namedtuple("For", ["index", "body"])
 
 CallNode = namedtuple("CallNode", [
     "method",
@@ -59,44 +42,14 @@ class MainExit(Exit):
     pass
 
 
-class IfNode(namedtuple("IfNode", ["condition", "then_body", "else_body"])):
-    __slots__ = []
-
-    @property
-    def branches(self):
-        return tuple(
-            b
-            for b in (self.then_body, self.else_body)
-            if b is not None
-        )
-
-
 IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
-
-
-class If(ControlStructure, IfNode):
-    __slots__ = []
-
-    def _get_bodies(self):
-        yield self.then_body
-        if self.else_body is not None:
-            yield self.else_body
-
+If = namedtuple("If", ["condition", "then_body", "else_body"])
 
 Print = namedtuple("Print", ["arguments"])
 Flush = namedtuple("Flush", [])
 
-
-class IONode:
-    __slots__ = []
-
-
-class Read(namedtuple("Read", ["arguments"]), IONode):
-    __slots__ = []
-
-
-class Write(namedtuple("Write", ["arguments"]), IONode):
-    __slots__ = []
+Read = namedtuple("Read", ["arguments"])
+Write = namedtuple("Write", ["arguments"])
 
 
 class Checkpoint(namedtuple("Checkpoint", [])):
@@ -107,38 +60,16 @@ class InitialCheckpoint(Checkpoint):
     __slots__ = []
 
 
-class Loop(namedtuple("Loop", ["body"]), ControlStructure):
-    __slots__ = []
-
-    def _get_bodies(self):
-        yield self.body
-
-
+Loop = namedtuple("Loop", ["body"])
 Break = namedtuple("Break", [])
-
-
-class SwitchNode(namedtuple("SwitchNode", ["value", "cases"])):
-    __slots__ = []
-
-
-class Switch(ControlStructure, SwitchNode):
-    __slots__ = []
-
-    def _get_bodies(self):
-        for c in self.cases:
-            yield c.body
-
-
+Switch = namedtuple("Switch", ["value", "cases"])
 Case = namedtuple("Case", ["labels", "body"])
 SwitchValueResolve = namedtuple("SwitchValueResolve", ["node"])
-
-
-class CallbackImplementation(namedtuple("CallbackImplementation", [
+CallbackImplementation = namedtuple("CallbackImplementation", [
     "index",
     "prototype",
     "body",
-])):
-    __slots__ = []
+])
 
 
 class SequenceNode:
