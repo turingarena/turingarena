@@ -12,9 +12,9 @@ from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, Expr
     UnexpectedIndexForReference, CallbackParameterNotScalar
 from turingarena.driver.interface.interface import Interface
 from turingarena.driver.interface.nodes import CallbackStart, CallbackEnd, \
-    ForIndex, MainExit, InitialCheckpoint, Case, CallbackImplementation, ParameterDeclaration, \
-    CallbackPrototype, ConstantDeclaration, Block, Variable, MethodPrototype, Write, Read, Return, IntLiteral, \
-    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch
+    ForIndex, Case, CallbackImplementation, ParameterDeclaration, \
+    ConstantDeclaration, Block, Variable, Write, Read, Return, IntLiteral, \
+    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype
 from turingarena.driver.interface.parser import parse_interface
 from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
 from turingarena.util.visitor import visitormethod, classvisitormethod
@@ -120,8 +120,8 @@ class Compiler(namedtuple("Compiler", [
                 ]
             ).block(
                 ast.main_block,
-                prepend_nodes=[InitialCheckpoint()],
-                append_nodes=[MainExit()],
+                prepend_nodes=[Checkpoint()],
+                append_nodes=[Exit()],
             ),
         )
 
@@ -136,12 +136,12 @@ class Compiler(namedtuple("Compiler", [
         )
 
     def method(self, ast):
-        return self.prototype(MethodPrototype, ast, is_callback=False)
+        return self.prototype(ast, is_callback=False)
 
     def callback(self, ast):
-        return self.prototype(CallbackPrototype, ast, is_callback=True)
+        return self.prototype(ast, is_callback=True)
 
-    def prototype(self, cls, ast, is_callback):
+    def prototype(self, ast, is_callback):
         if is_callback:
             assert not ast.callbacks
             callbacks = ()
@@ -151,7 +151,7 @@ class Compiler(namedtuple("Compiler", [
                 for c in ast.callbacks
             )
 
-        return cls(
+        return Prototype(
             name=ast.declarator.name,
             parameter_declarations=tuple(
                 self.parameter_declaration(p, is_callback)
@@ -344,7 +344,7 @@ class Compiler(namedtuple("Compiler", [
 
         if method is None:
             self.error(MethodNotDeclared(name=ast.name))
-            method = MethodPrototype(
+            method = Prototype(
                 name=ast.name,
                 parameter_declarations=(),
                 has_return_value=False,

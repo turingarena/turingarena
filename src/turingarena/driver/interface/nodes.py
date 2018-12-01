@@ -1,4 +1,4 @@
-from collections.__init__ import namedtuple
+from collections import namedtuple
 
 CallbackStart = namedtuple("CallbackStart", ["prototype"])
 Return = namedtuple("Return", ["value"])
@@ -6,7 +6,6 @@ CallbackEnd = namedtuple("CallbackEnd", [])
 Exit = namedtuple("Exit", [])
 
 ForIndex = namedtuple("ForIndex", ["variable", "range"])
-
 For = namedtuple("For", ["index", "body"])
 
 Call = namedtuple("Call", [
@@ -22,11 +21,6 @@ CallCompleted = namedtuple("CallCompleted", [])
 AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
 PrintNoCallbacks = namedtuple("PrintNoCallbacks", [])
 
-
-class MainExit(Exit):
-    pass
-
-
 IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
 If = namedtuple("If", ["condition", "then_body", "else_body"])
 
@@ -36,14 +30,7 @@ Flush = namedtuple("Flush", [])
 Read = namedtuple("Read", ["arguments"])
 Write = namedtuple("Write", ["arguments"])
 
-
-class Checkpoint(namedtuple("Checkpoint", [])):
-    __slots__ = []
-
-
-class InitialCheckpoint(Checkpoint):
-    __slots__ = []
-
+Checkpoint = namedtuple("Checkpoint", [])
 
 Loop = namedtuple("Loop", ["body"])
 Break = namedtuple("Break", [])
@@ -58,12 +45,10 @@ CallbackImplementation = namedtuple("CallbackImplementation", [
 
 Step = namedtuple("Step", ["direction", "body"])
 
-
-class ParameterDeclaration(namedtuple("ParameterDeclaration", ["variable", "dimensions"])):
-    __slots__ = []
+ParameterDeclaration = namedtuple("ParameterDeclaration", ["variable", "dimensions"])
 
 
-class CallablePrototype(namedtuple("CallablePrototype", [
+class Prototype(namedtuple("Prototype", [
     "name",
     "parameter_declarations",
     "has_return_value",
@@ -83,36 +68,12 @@ class CallablePrototype(namedtuple("CallablePrototype", [
         return bool(self.callbacks)
 
 
-class MethodPrototype(CallablePrototype):
-    __slots__ = []
-
-
-class CallbackPrototype(CallablePrototype):
-    __slots__ = []
-
-
 ConstantDeclaration = namedtuple("ConstantDeclaration", ["variable", "value"])
-
-
-class Expression:
-    __slots__ = []
-
-
-class IntLiteral(namedtuple("IntLiteral", ["value"]), Expression):
-    __slots__ = []
-
-
-class Variable(namedtuple("Variable", ["name"]), Expression):
-    __slots__ = []
-
-
-class Subscript(namedtuple("Subscript", [
+IntLiteral = namedtuple("IntLiteral", ["value"])
+Variable = namedtuple("Variable", ["name"])
+Subscript = namedtuple("Subscript", [
     "array",
     "index",
-]), Expression):
-    __slots__ = []
-
-
+])
 Block = namedtuple("Block", ["children"])
-
 Comment = namedtuple("Comment", ["text"])

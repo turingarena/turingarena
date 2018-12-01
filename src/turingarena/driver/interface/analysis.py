@@ -228,7 +228,7 @@ class TreeAnalyzer:
                 dimensions=array_declaration.dimensions - 1,
             )
 
-    def _create_reference_definition_Expression(self, e):
+    def _create_reference_definition_object(self, e):
         return None
 
     def comment(self, n):
