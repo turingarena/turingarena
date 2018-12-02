@@ -34,14 +34,6 @@ class PopenProcessManager(ProcessManager):
 
     @staticmethod
     def _get_process_termination_message(status_code: int):
-        """
-        ProcessManager the status code of a process and return a tuple (status, error) where status is the process status
-        and error is the eventual error message in case the process fails either with non zero return code or with a
-        signal (for example is waited for exceeding time/memory limits or for trying to perform a blacklisted syscall).
-
-        See man wait(2) for more info.
-        """
-
         if os.WIFSTOPPED(status_code):
             return None
         if os.WIFEXITED(status_code):
@@ -106,24 +98,6 @@ class PopenProcessManager(ProcessManager):
             os.close(fd)
 
     def _do_get_status(self, kill_reason):
-        """
-        Get information about a running process, such as status (RUNNING, TERMINATED),
-        maximum memory utilization in bytes (maximum segment size, the maximum process lifetime memory utilization),
-        user cpu time utilization (with milliseconds precision), and eventual error code information.
-
-        If param wait is set, we wait for the process to terminate and then return the final resource
-        utilization.
-
-        Note: the memory usage is at least 20/30Mb even for small programs.
-
-        This is due to the fact that Linux calculates the maximum segment size since the process creation (fork())
-        and not since the effective program execution (exec()): after a fork the entire process address space is
-        duplicated, so the new process MSS is as big as the MSS of the father process.
-
-        Unfortunately there aren't simple workaround (or at least we didn't find any). But for processes that use more
-        than 30Mb of memory the value is correct, so this shouldn't be a problem in most applications.
-        """
-
         # if the process is already terminated, return the cached info
         if self.termination_info is not None:
             return self.termination_info
