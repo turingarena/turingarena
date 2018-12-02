@@ -1,6 +1,4 @@
 import sys
-import re
-
 from io import StringIO
 
 import commonmark
@@ -10,8 +8,8 @@ from turingarena.text.visitor import TextVisitor
 
 
 class DescriptionVisitor(TextVisitor):
-    def visit_description(self, el):
-        yield el.attrib['for'], re.sub(r"\n+", "\n", "".join(el.itertext())).strip("\n")
+    def visit_tag_description(self, el):
+        yield el.attrib['for'], el
 
     def visit_node(self, el):
         for c in el:

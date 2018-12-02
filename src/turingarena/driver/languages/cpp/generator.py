@@ -28,7 +28,7 @@ class CppCodeGen(InterfaceCodeGen):
             self.line()
         for m in n.methods:
             if m.description:
-                for l in m.description.splitlines():
+                for l in m.description:
                     self.line(f"// {l}")
             self.line(f"{self.visit(m.prototype)} {{")
             with self.indent():
