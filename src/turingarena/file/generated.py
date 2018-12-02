@@ -78,4 +78,5 @@ class PackGeneratedDirectory:
         for p, generator in self.targets:
             if p == path:
                 generator(file)
+                return
         raise FileNotFoundError(path)
