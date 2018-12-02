@@ -28,7 +28,7 @@ class JavaProgramRunner(ProgramRunner):
         shutil.copy(self.program.source_path, solution_path)
 
         with open(self.skeleton_path, "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
         try:
             subprocess.run(

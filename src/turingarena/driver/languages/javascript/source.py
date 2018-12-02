@@ -1,10 +1,10 @@
 import os
 
 import pkg_resources
-
 from turingarena.driver.sandbox.process import PopenProcess
-from turingarena.driver.sandbox.rlimits import set_rlimits
 from turingarena.driver.source import AlgorithmSource
+
+from turingarena.driver.sandbox.rlimits import set_rlimits
 
 
 class JavascriptAlgorithmSource(AlgorithmSource):
@@ -12,7 +12,7 @@ class JavascriptAlgorithmSource(AlgorithmSource):
 
     def compile(self, compilation_dir):
         with open(self.skeleton_path(compilation_dir), "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
     def skeleton_path(self, compilation_dir):
         return os.path.join(compilation_dir, "skeleton.js")

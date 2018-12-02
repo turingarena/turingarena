@@ -4,140 +4,99 @@ from abc import ABC, abstractmethod
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.common.expressions import AbstractExpressionCodeGen
 from turingarena.driver.common.genutils import LinesGenerator
-from turingarena.driver.gen.preprocess import TreePreprocessor
-from turingarena.util.visitor import Visitor
+from turingarena.driver.gen.preprocess import SkeletonPreprocessor
+from turingarena.driver.gen.template import interface_template
 
 
-class CodeGen(ABC, Visitor):
-    __slots__ = []
-
-
-class InterfaceCodeGen(CodeGen, LinesGenerator):
+class InterfaceCodeGen(ABC, LinesGenerator, AbstractExpressionCodeGen):
     __slots__ = []
 
     def generate_to_file(self, interface, file):
         with self.collect_lines() as lines:
-            self.generate(interface)
+            interface = SkeletonPreprocessor.create().transform(interface)
+            logging.debug(f"preprocessed interface: {TreeDumper().dump(interface)}")
+            self.visit(interface)
 
         logging.debug(f"generated code: {lines.as_inline()}")
 
         file.write(lines.as_block())
 
-    def generate(self, interface):
-        interface = TreePreprocessor.create().transform(interface)
+    def generate_template_to_file(self, interface, descriptions, file):
+        with self.collect_lines() as lines:
+            self.visit(interface_template(interface, descriptions))
 
-        logging.debug(f"preprocessed interface: {TreeDumper().dump(interface)}")
+        logging.debug(f"generated template: {lines.as_inline()}")
 
-        self.generate_header(interface)
-        self.generate_constants_declarations(interface)
-        self.generate_method_declarations(interface)
-        self.generate_main(interface)
-        self.generate_footer(interface)
+        file.write(lines.as_block())
 
-    def generate_header(self, interface):
-        pass
-
-    def generate_footer(self, interface):
-        pass
-
-    def generate_method_declarations(self, interface):
-        for func in interface.methods:
-            self.method_declaration(func)
-
-    def generate_constants_declarations(self, interface):
-        for c in interface.constants:
-            self.visit(c)
+    def visit_Block(self, n):
+        for child in n.children:
+            self.visit(child)
 
     @abstractmethod
-    def method_declaration(self, m):
+    def visit_Interface(self, n):
         pass
 
     @abstractmethod
-    def visit_Constant(self, m):
+    def visit_Constant(self, n):
         pass
 
     @abstractmethod
-    def generate_main(self, interface):
+    def visit_Comment(self, n):
         pass
 
     @abstractmethod
-    def line_comment(self, comment):
-        pass
-
-
-class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
-    __slots__ = []
-
-    @abstractmethod
-    def visit_Read(self, s):
+    def visit_Read(self, n):
         pass
 
     @abstractmethod
-    def visit_Print(self, s):
+    def visit_Print(self, n):
         pass
 
     @abstractmethod
-    def visit_Call(self, s):
+    def visit_Call(self, n):
         pass
 
     @abstractmethod
-    def visit_If(self, s):
+    def visit_If(self, n):
         pass
 
     @abstractmethod
-    def visit_For(self, s):
+    def visit_For(self, n):
         pass
 
     @abstractmethod
-    def visit_Loop(self, s):
+    def visit_Loop(self, n):
         pass
 
     @abstractmethod
-    def visit_Switch(self, s):
+    def visit_Switch(self, n):
         pass
 
     @abstractmethod
-    def visit_Exit(self, statement):
+    def visit_Exit(self, n):
         pass
 
     @abstractmethod
-    def visit_Return(self, statement):
+    def visit_Return(self, n):
         pass
 
     @abstractmethod
-    def visit_Break(self, statement):
-        pass
-
-    def visit_Block(self, node):
-        for child in node.children:
-            self.generate_statement(child)
-
-    @abstractmethod
-    def visit_VariableDeclaration(self, d):
+    def visit_Break(self, n):
         pass
 
     @abstractmethod
-    def visit_ReferenceAllocation(self, a):
+    def visit_VariableDeclaration(self, n):
         pass
 
-    def visit_object(self, s):
-        # ignore any other node
-        return []
-
-    def visit_Comment(self, s):
-        self.line_comment(s.text)
-
-    def generate_main(self, interface):
-        self.visit(interface.main)
-
-    def generate_statement(self, statement):
-        self.visit(statement)
+    @abstractmethod
+    def visit_ReferenceAllocation(self, n):
+        pass
 
     @abstractmethod
     def visit_Flush(self, n):
         pass
 
-
-class TemplateCodeGen(InterfaceCodeGen):
-    def generate_main(self, interface):
-        pass
+    def visit_object(self, n):
+        # ignore any other node
+        return []

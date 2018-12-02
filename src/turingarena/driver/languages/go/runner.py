@@ -20,7 +20,7 @@ class GoProgramRunner(ProgramRunner):
     @contextmanager
     def run_in_process(self):
         with open(os.path.join(self.temp_dir, "skeleton.go"), "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
         shutil.copyfile(self.program.source_path, os.path.join(self.temp_dir, "solution.go"))
 

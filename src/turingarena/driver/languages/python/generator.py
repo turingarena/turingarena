@@ -1,4 +1,4 @@
-from turingarena.driver.gen.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 SKELETON_REAL_MAIN = r"""
 if __name__ == '__main__':
@@ -16,8 +16,23 @@ if __name__ == '__main__':
 
 
 class PythonCodeGen(InterfaceCodeGen):
-    def build_method_declaration(self, func):
-        arguments = ', '.join([self.visit(p) for p in func.parameters] + [c.name for c in func.callbacks])
+    def visit_Interface(self, n):
+        self.line('import os as _os')
+        self.line()
+        for c in n.constants:
+            self.visit(c)
+            self.line()
+        self.line('def main(_solution):')
+        with self.indent():
+            self.visit(n.main)
+        self.line()
+        self.line(SKELETON_REAL_MAIN)
+
+    def visit_Prototype(self, func):
+        arguments = ', '.join(
+            [self.visit(p) for p in func.parameters] +
+            [c.name for c in func.callbacks]
+        )
         self.line(f'def {func.name}({arguments}):')
 
     def visit_Parameter(self, n):
@@ -26,29 +41,8 @@ class PythonCodeGen(InterfaceCodeGen):
     def visit_Constant(self, m):
         self.line(f"{m.variable.name} = {self.visit(m.value)}")
 
-    def line_comment(self, comment):
-        self.line(f"# {comment}")
-
-
-class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
-    def generate_header(self, interface):
-        self.line('import os as _os')
-        self.line()
-
-    def generate_footer(self, interface):
-        self.line()
-        self.line(SKELETON_REAL_MAIN)
-
-    def callback_statement(self, callback_statement):
-        self.build_method_declaration(callback_statement.callback)
-        with self.indent():
-            self.visit(callback_statement.callback.body)
-
-    def generate_main(self, interface):
-        self.line()
-        self.line('def main(_solution):')
-        with self.indent():
-            self.visit(interface.main)
+    def visit_Comment(self, n):
+        self.line(f"# {n.text}")
 
     def visit_Exit(self, exit_statement):
         self.visit_Flush(None)
@@ -68,9 +62,6 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
         size = self.visit(a.size)
         self.line(f"{name}{indexes} = [None] * {size}")
-
-    def method_declaration(self, m):
-        pass
 
     def visit_VariableDeclaration(self, d):
         pass
@@ -133,24 +124,27 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         with self.indent():
             self.visit(n.body)
 
-    def build_switch_cases(self, variable, labels):
-        variable = self.visit(variable)
-        return ' or '.join(f'{variable} == {label}' for label in labels)
-
-    def visit_Switch(self, switch_statement):
-        for i, c in enumerate(switch_statement.cases):
+    def visit_Switch(self, n):
+        for i, c in enumerate(n.cases):
             if_or_elif = "if" if i == 0 else "elif"
-            self.line(f'{if_or_elif} {self.build_switch_cases(switch_statement.variable, c.labels)}:')
+            condition = " or ".join(
+                f"{self.visit(n.value)} == {self.visit(l)}"
+                for l in c.labels
+            )
+            self.line(f'{if_or_elif} {condition}:')
             with self.indent():
                 self.visit(c.body)
 
+    def visit_InterfaceTemplate(self, n):
+        for m in n.methods:
+            self.visit(m)
+            self.line()
 
-class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
-    def method_declaration(self, m):
-        self.line()
-        self.build_method_declaration(m)
+    def visit_MethodTemplate(self, n):
+        if n.description:
+            for l in n.description.splitlines():
+                self.line(f"# {l}")
+        self.visit(n.prototype)
         with self.indent():
-            if m.has_return_value:
-                self.line("return 42")
-            else:
-                self.line('pass')
+            self.visit(n.body)
+            self.line(f"pass")

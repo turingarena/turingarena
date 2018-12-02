@@ -1,8 +1,9 @@
-# TODO: temporarily disable because there are errors in skeleton and template generators.
-# language = Language(
-#     name="javascript",
-#     extension=".js",
-#     source=JavascriptAlgorithmSource,
-#     skeleton_generator=JavaScriptSkeletonCodeGen,
-#     template_generator=JavaScriptTemplateCodeGen,
-# )
+from turingarena.driver.language import Language
+
+disabled_language = Language(
+    name="javascript",
+    extension=".js",
+    ProgramRunner=None,
+    Generator=None,
+    supported_for_evaluator=False,
+)

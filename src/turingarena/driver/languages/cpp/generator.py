@@ -1,4 +1,4 @@
-from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class CppCodeGen(InterfaceCodeGen):
@@ -6,29 +6,51 @@ class CppCodeGen(InterfaceCodeGen):
         indirections = "*" * d.dimensions
         return f"int {indirections}{d.variable.name}"
 
-    def build_signature(self, callable, callbacks):
-        return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callable.parameters]
-        callback_parameters = [
-            self.build_signature(callback, [])
-            for callback in callbacks
-        ]
-        parameters = ", ".join(value_parameters + callback_parameters)
-        return f"{return_type} {callable.name}({parameters})"
-
-    def build_method_signature(self, func):
-        return self.build_signature(func, func.callbacks)
-
-    def line_comment(self, comment):
-        self.line(f"// {comment}")
-
-
-class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
-    def generate_header(self, interface):
+    def visit_Interface(self, n):
         self.line("#include <cstdio>")
         self.line("#include <cstdlib>")
         self.line("#include <cassert>")
         self.line()
+        for c in n.constants:
+            self.visit(c)
+            self.line()
+        for m in n.methods:
+            self.line(f"{self.visit(m)};")
+            self.line()
+        self.line("int main() {")
+        with self.indent():
+            self.visit(n.main)
+        self.line("}")
+
+    def visit_InterfaceTemplate(self, n):
+        for c in n.constants:
+            self.visit(c)
+            self.line()
+        for m in n.methods:
+            if m.description:
+                for l in m.description.splitlines():
+                    self.line(f"// {l}")
+            self.line(f"{self.visit(m.prototype)} {{")
+            with self.indent():
+                self.visit(m.body)
+            self.line(f"}}")
+
+    def visit_Prototype(self, n):
+        return_type = "int" if n.has_return_value else "void"
+        value_parameters = [self.visit(p) for p in n.parameters]
+        callback_parameters = [
+            self.visit(callback)
+            for callback in n.callbacks
+        ]
+        parameters = ", ".join(value_parameters + callback_parameters)
+        return f"{return_type} {n.name}({parameters})"
+
+    def visit_Constant(self, n):
+        # TODO: remove static in template
+        self.line(f"static const int {self.visit(n.variable)} = {self.visit(n.value)};")
+
+    def visit_Comment(self, n):
+        self.line(f"// {n.text}")
 
     def visit_VariableDeclaration(self, n):
         pointers = "*" * n.dimensions
@@ -39,16 +61,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
         dimensions = "*" * n.dimensions
         size = self.visit(n.size)
         self.line(f"{reference} = new int{dimensions}[{size}];")
-
-    def method_declaration(self, n):
-        self.line(f"{self.build_method_signature(n)};")
-
-    def generate_main(self, interface):
-        self.line()
-        self.line("int main() {")
-        with self.indent():
-            self.visit(interface.main)
-        self.line("}")
 
     def visit_Callback(self, n):
         params = ", ".join(self.visit(p) for p in n.prototype.parameters)
@@ -63,9 +75,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
                 self.visit(n.body)
             self.line("}")
         return c.as_inline()
-
-    def visit_Constant(self, n):
-        self.line(f"static const int {n.variable.name} = {self.visit(n.value)};")
 
     def visit_Call(self, n):
         method = n.method
@@ -143,11 +152,6 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
 
     def visit_Flush(self, n):
         self.line("fflush(stdout);")
-
-
-class CppTemplateCodeGen(CppCodeGen, TemplateCodeGen):
-    def visit_Constant(self, m):
-        self.line(f"const int {m.variable.name} = {self.visit(m.value)};")
 
     def method_declaration(self, m):
         self.line()

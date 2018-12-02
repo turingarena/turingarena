@@ -17,7 +17,7 @@ class BashProgramRunner(ProgramRunner):
         shutil.copy(self.program.source_path, os.path.join(self.temp_dir, "solution.sh"))
 
         with open(self.skeleton_path, "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
         yield create_popen_process_connection(
             ["bash", self.skeleton_path],

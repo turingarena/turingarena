@@ -51,19 +51,22 @@ class PackGeneratedDirectory:
             interface_path = os.path.join(abspath, INTERFACE_TXT)
             yield (
                 os.path.join(relpath, lang.name, f"skeleton{lang.extension}"),
-                self._create_interface_code_generator(interface_path, descriptions, lang.skeleton_generator()),
+                self._create_interface_code_generator(interface_path, descriptions, lang.Generator()),
             )
             yield (
                 os.path.join(relpath, lang.name, f"template{lang.extension}"),
-                self._create_interface_code_generator(interface_path, descriptions, lang.template_generator()),
+                self._create_interface_code_generator(interface_path, descriptions, lang.Generator(), template=True),
             )
 
-    def _create_interface_code_generator(self, interface_path, descriptions, code_generator):
+    def _create_interface_code_generator(self, interface_path, descriptions, code_generator, template=False):
         def generator(outfile):
             with open(interface_path) as f:
-                interface = compile_interface(f.read(), descriptions=descriptions)
+                interface = compile_interface(f.read())
 
-            code_generator.generate_to_file(interface, outfile)
+            if template:
+                code_generator.generate_template_to_file(interface, descriptions, outfile)
+            else:
+                code_generator.generate_to_file(interface, outfile)
 
         return generator
 

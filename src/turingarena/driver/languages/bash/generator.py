@@ -1,15 +1,12 @@
-from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class BashCodeGen(InterfaceCodeGen):
-    def line_comment(self, comment):
-        self.line(f"# {comment}")
+    def visit_Comment(self, n):
+        self.line(f"# {n.text}")
 
     def visit_Constant(self, m):
         self.line(f"{m.variable.name}={self.visit(m.value)}")
-
-
-class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def generate_header(self, interface):
         self.line("#!/usr/bin/env bash")
@@ -79,13 +76,11 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         pass
 
     def method_declaration(self, m):
-        ()
+        pass
 
     def visit_VariableDeclaration(self, d):
-        ()
+        pass
 
-
-class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
     def method_declaration(self, m):
         arguments = [p.variable.name for p in m.parameters]
         self.line(f"function {m.name} " "{")

@@ -1,13 +1,12 @@
-from collections.__init__ import namedtuple
-
 from turingarena.driver.common.analysis import InterfaceAnalyzer
 from turingarena.driver.common.description import StatementDescriber
 from turingarena.driver.common.nodes import *
 from turingarena.driver.common.transform import TreeTransformer
+from turingarena.driver.gen.nodes import *
 from turingarena.util.visitor import visitormethod
 
 
-class TreePreprocessor(namedtuple("TreeTransformer", [
+class SkeletonPreprocessor(namedtuple("SkeletonPreprocessor", [
     "flushed",
 ]), InterfaceAnalyzer, TreeTransformer, StatementDescriber):
     @classmethod
@@ -68,6 +67,3 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
             yield Print([IntLiteral(0), IntLiteral(0)])
 
 
-Print = namedtuple("Print", ["arguments"])
-Flush = namedtuple("Flush", [])
-Comment = namedtuple("Comment", ["text"])

@@ -1,4 +1,4 @@
-from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class JavaCodeGen(InterfaceCodeGen):
@@ -31,8 +31,8 @@ class JavaCodeGen(InterfaceCodeGen):
     def generate_footer(self, interface):
         return "}"
 
-    def line_comment(self, comment):
-        self.line(f"// {comment}")
+    def visit_Comment(self, n):
+        self.line(f"// {n.text}")
 
     def generate_callbacks_declaration(self, callback):
         return f'{self.build_method_signature(callback)};'
@@ -40,8 +40,6 @@ class JavaCodeGen(InterfaceCodeGen):
     def visit_Constant(self, m):
         self.line(f"private static final {m.variable.name} = {self.visit(m.value)};")
 
-
-class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         self.line('import java.util.Scanner;')
         self.line()
@@ -176,8 +174,6 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_Break(self, break_statement):
         self.line('break;')
 
-
-class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
     def generate_header(self, interface):
         self.line('class Solution extends Skeleton {')
 
@@ -185,7 +181,7 @@ class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
         with self.indent():
             if m.callbacks:
                 self.line()
-                self.line_comment(f'interface {self.build_callbacks_interface_name(m)} ''{')
+                self.Executor(f'interface {self.build_callbacks_interface_name(m)} ''{')
                 for cbks in m.callbacks:
                     self.line_comment(self.generate_callbacks_declaration(cbks))
                 self.line_comment('}')

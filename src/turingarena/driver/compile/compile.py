@@ -400,9 +400,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer, CompilationPostprocessor):
         return cls(array, index)
 
 
-def compile_interface(source_text, descriptions=None):
-    # FIXME: descriptions
-
+def compile_interface(source_text):
     compiler = Compiler.create()
     interface = compiler.compile_interface_source(source_text)
 

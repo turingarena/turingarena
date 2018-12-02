@@ -1,4 +1,4 @@
-from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class GoCodeGen(InterfaceCodeGen):
@@ -22,11 +22,9 @@ class GoCodeGen(InterfaceCodeGen):
     def build_method_signature(self, func):
         return self.build_signature(func, func.callbacks)
 
-    def line_comment(self, comment):
-        self.line(f"// {comment}")
+    def visit_Comment(self, n):
+        self.line(f"// {n.text}")
 
-
-class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         self.line("package main")
         self.line()
@@ -155,8 +153,6 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_Flush(self, n):
         self.line("os.Stdout.Sync()")
 
-
-class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
     def visit_Constant(self, m):
         self.line(f"const {m.variable.name} = {self.visit(m.value)}")
 

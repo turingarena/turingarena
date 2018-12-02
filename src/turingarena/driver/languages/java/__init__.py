@@ -1,13 +1,12 @@
 from turingarena.driver.language import Language
 
-from .generator import JavaSkeletonCodeGen, JavaTemplateCodeGen
+from .generator import JavaCodeGen
 from .runner import JavaProgramRunner
 
-language = Language(
+disabled_language = Language(
     name="Java",
     extension=".java",
     ProgramRunner=JavaProgramRunner,
-    skeleton_generator=JavaSkeletonCodeGen,
-    template_generator=JavaTemplateCodeGen,
+    Generator=JavaCodeGen,
     supported_for_evaluator=False,
 )
