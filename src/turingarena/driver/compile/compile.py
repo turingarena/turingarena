@@ -1,4 +1,3 @@
-import itertools
 import logging
 from enum import Enum
 from functools import partial
@@ -9,6 +8,7 @@ from turingarena.driver.common.variables import ReferenceDefinition, ReferenceRe
 from turingarena.driver.compile.analysis import CompileAnalyzer
 from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.compile.parser import parse_interface
+from turingarena.driver.compile.postprocess import CompilationPostprocessor
 from turingarena.util.visitor import classvisitormethod
 
 STATEMENT_CLASSES = {
@@ -40,13 +40,13 @@ class ExpressionType(Enum):
     REFERENCE = 1
 
 
-class Compiler(CompileAnalyzer, InterfaceAnalyzer):
+class Compiler(CompileAnalyzer, InterfaceAnalyzer, CompilationPostprocessor):
     def compile_interface_source(self, source_text, descriptions=None):
         if descriptions is None:
             descriptions = {}
 
         ast = parse_interface(source_text)
-        return self.compile(Interface, ast)
+        return self.transform(self.compile(Interface, ast))
 
     def error(self, e):
         if e not in self.diagnostics:
@@ -96,11 +96,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer):
                     partial(ReferenceDefinition, dimensions=0),
                     ReferenceResolution,
                 ]
-            ).block(
-                ast.main_block,
-                prepend_nodes=[Checkpoint()],
-                append_nodes=[Exit()],
-            ),
+            ).compile(Block, ast.main_block),
         )
 
     def _on_compile_Constant(self, cls, ast):
@@ -168,7 +164,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer):
             body=self.with_index_variable(index).with_reference_actions([
                 ReferenceDefinition(index.variable, dimensions=0),
                 ReferenceResolution(index.variable),
-            ]).block(ast.body)
+            ]).compile(Block, ast.body)
         )
 
     def _on_compile_Switch(self, cls, ast):
@@ -194,21 +190,21 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer):
     def _on_compile_Case(self, cls, ast):
         return cls(
             labels=[self.literal(l) for l in ast.labels],
-            body=self.block(ast.body),
+            body=self.compile(Block, ast.body),
         )
 
     def _on_compile_If(self, cls, ast):
         return cls(
             condition=self.scalar(ast.condition),
             branches=IfBranches(
-                then_body=self.block(ast.then_body),
-                else_body=self.block(ast.else_body) if ast.else_body is not None else None,
+                then_body=self.compile(Block, ast.then_body),
+                else_body=self.compile(Block, ast.else_body) if ast.else_body is not None else None,
             ),
         )
 
     def _on_compile_Loop(self, cls, ast):
         return cls(
-            body=self.with_loop().block(ast.body)
+            body=self.with_loop().compile(Block, ast.body)
         )
 
     def _on_compile_Break(self, cls, ast):
@@ -305,7 +301,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer):
             body = self.with_reference_actions([
                 ReferenceDefinition(p.variable, dimensions=0)
                 for p in prototype.parameters
-            ]).block(ast)
+            ]).compile(Block, ast)
 
         return Callback(
             index=index,
@@ -313,23 +309,15 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer):
             body=body
         )
 
+    def _on_compile_Block(self, cls, ast):
+        return cls(tuple(self.statements(ast.statements)))
+
     def statements(self, asts):
         inner = self
         for ast in asts:
             node = inner.compile(STATEMENT_CLASSES[ast.statement_type], ast)
             yield node
             inner = inner.with_reference_actions(inner.reference_actions(node))
-
-    def block(self, ast, prepend_nodes=(), append_nodes=()):
-        return Block(
-            children=tuple(
-                itertools.chain(
-                    prepend_nodes,
-                    self.statements(ast.statements),
-                    append_nodes,
-                )
-            )
-        )
 
     def scalar_reference(self, ast):
         assert self.expression_type is None
