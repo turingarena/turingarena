@@ -13,7 +13,7 @@ class DescriptionVisitor(TextVisitor):
     def visit_description(self, el):
         yield el.attrib['for'], re.sub(r"\n+", "\n", "".join(el.itertext())).strip("\n")
 
-    def generic_visit(self, el):
+    def visit_node(self, el):
         for c in el:
             yield from self.visit(c)
 
