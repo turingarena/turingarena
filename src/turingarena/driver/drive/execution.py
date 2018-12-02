@@ -1,15 +1,14 @@
 import logging
 import threading
-from collections.__init__ import namedtuple
+from collections import namedtuple
 from contextlib import contextmanager
 from enum import Enum
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
-from turingarena.driver.common.analysis import InterfaceAnalyzer
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.common.variables import ReferenceDirection, ReferenceResolution
-from turingarena.driver.compile.preprocess import ExecutionPreprocessor
+from turingarena.driver.drive.preprocess import ExecutionPreprocessor
 from turingarena.driver.drive.requests import RequestSignature, CallRequestSignature
 from turingarena.util.visitor import visitormethod
 
