@@ -1,14 +1,14 @@
-from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen
 
 
 class JavaScriptCodeGen(InterfaceCodeGen):
     @classmethod
     def build_callable_declarator(cls, callable):
-        arguments = ", ".join(cls.visit(p) for p in callable.parameter_declarations)
+        arguments = ", ".join(cls.visit(p) for p in callable.parameters)
         return f"{callable.name}({arguments})"
 
     @classmethod
-    def visit_ParameterDeclaration(cls, d):
+    def visit_Parameter(cls, d):
         return f"{d.parameter.name}"
 
 
@@ -51,7 +51,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
     def visit_Call(self, statement):
         method_name = statement.method.name
-        parameters = ", ".join(self.visit(p) for p in statement.parameters)
+        parameters = ", ".join(self.visit(p) for p in statement.arguments)
         if statement.return_value is not None:
             return_value = self.visit(statement.return_value)
             self.line(f"{return_value} = {method_name}({parameters});")
@@ -76,11 +76,11 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
         condition = self.visit(statement.condition)
         self.line(f"if ({condition})" " {")
         with self.indent():
-            self.visit(statement.then_body)
-        if statement.else_body is not None:
+            self.visit(statement.branches.then_body)
+        if statement.branches.else_body is not None:
             self.line("} else {")
             with self.indent():
-                self.visit(statement.else_body)
+                self.visit(statement.branches.else_body)
         self.line("}")
 
     def visit_For(self, statement):
@@ -121,7 +121,7 @@ class JavaScriptSkeletonCodeGen(JavaScriptCodeGen, SkeletonCodeGen):
 
 
 class JavaScriptTemplateCodeGen(JavaScriptCodeGen):
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         self.line(f"function {self.build_callable_declarator(m.function)}" + "{")
         with self.indent():

@@ -1,4 +1,4 @@
-from turingarena.driver.interface.diagnostics import Diagnostic, BreakOutsideLoop, DanglingCode
+from turingarena.driver.compile.diagnostics import *
 from .test_utils import assert_interface_error, define_algorithm
 
 

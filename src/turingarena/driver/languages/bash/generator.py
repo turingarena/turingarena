@@ -1,15 +1,12 @@
-from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class BashCodeGen(InterfaceCodeGen):
-    def line_comment(self, comment):
-        self.line(f"# {comment}")
+    def visit_Comment(self, n):
+        self.line(f"# {n.text}")
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"{m.variable.name}={self.visit(m.value)}")
-
-
-class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
 
     def generate_header(self, interface):
         self.line("#!/usr/bin/env bash")
@@ -31,11 +28,11 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
         condition = self.visit(if_statement.condition)
         self.line(f"if (({condition})); then")
         with self.indent():
-            self.visit(if_statement.then_body)
-        if if_statement.else_body:
+            self.visit(if_statement.branches.then_body)
+        if if_statement.branches.else_body:
             self.line("else")
             with self.indent():
-                self.visit(if_statement.else_body)
+                self.visit(if_statement.branches.else_body)
         self.line("fi")
 
     def visit_For(self, for_statement):
@@ -61,8 +58,8 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_Exit(self, exit_statement):
         self.line('exit')
 
-    def generate_flush(self):
-        ()
+    def visit_Flush(self, n):
+        pass
 
     def visit_Call(self, call_statement):
         arguments = " ".join(f"$(({self.visit(p)}))" for p in call_statement.arguments)
@@ -74,20 +71,18 @@ class BashSkeletonCodeGen(BashCodeGen, SkeletonCodeGen):
     def visit_Switch(self, switch_statement):
         pass
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         # FIXME: not implemented
         pass
 
-    def visit_MethodPrototype(self, m):
-        ()
+    def method_declaration(self, m):
+        pass
 
     def visit_VariableDeclaration(self, d):
-        ()
+        pass
 
-
-class BashTemplateCodeGen(BashCodeGen, TemplateCodeGen):
-    def visit_MethodPrototype(self, m):
-        arguments = [p.name for p in m.parameters]
+    def method_declaration(self, m):
+        arguments = [p.variable.name for p in m.parameters]
         self.line(f"function {m.name} " "{")
         with self.indent():
             for i, arg in enumerate(arguments):

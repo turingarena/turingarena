@@ -1,13 +1,12 @@
 from turingarena.driver.language import Language
 
-from .generator import GoSkeletonCodeGen, GoTemplateCodeGen
+from .generator import GoCodeGen
 from .runner import GoProgramRunner
 
-language = Language(
+disabled_language = Language(
     name="Go",
     extension=".go",
     ProgramRunner=GoProgramRunner,
-    skeleton_generator=GoSkeletonCodeGen,
-    template_generator=GoTemplateCodeGen,
+    Generator=GoCodeGen,
     supported_for_evaluator=False,
 )

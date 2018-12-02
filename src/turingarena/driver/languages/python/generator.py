@@ -1,4 +1,4 @@
-from turingarena.driver.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 SKELETON_REAL_MAIN = r"""
 if __name__ == '__main__':
@@ -16,86 +16,81 @@ if __name__ == '__main__':
 
 
 class PythonCodeGen(InterfaceCodeGen):
-    def build_method_declaration(self, func):
-        arguments = ', '.join([p.name for p in func.parameters] + [c.name for c in func.callbacks])
-        self.line(f'def {func.name}({arguments}):')
-
-    def visit_ConstantDeclaration(self, m):
-        self.line(f"{m.variable.name} = {self.visit(m.value)}")
-
-    def line_comment(self, comment):
-        self.line(f"# {comment}")
-
-
-class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
-    def generate_header(self, interface):
+    def visit_Interface(self, n):
         self.line('import os as _os')
         self.line()
-
-    def generate_footer(self, interface):
+        for c in n.constants:
+            self.visit(c)
+            self.line()
+        self.line('def main(_solution):')
+        with self.indent():
+            self.visit(n.main)
         self.line()
         self.line(SKELETON_REAL_MAIN)
 
-    def callback_statement(self, callback_statement):
-        self.build_method_declaration(callback_statement.callback)
-        with self.indent():
-            self.visit(callback_statement.callback.body)
+    def visit_Prototype(self, func):
+        arguments = ', '.join(
+            [self.visit(p) for p in func.parameters] +
+            [c.name for c in func.callbacks]
+        )
+        self.line(f'def {func.name}({arguments}):')
 
-    def generate_main_block(self, interface):
-        self.line()
-        self.line('def main(_solution):')
-        with self.indent():
-            self.visit(interface.main_block)
+    def visit_Parameter(self, n):
+        return self.visit(n.variable)
 
-    def visit_Exit(self, exit_statement):
-        self.generate_flush()
+    def visit_Constant(self, n):
+        self.line(f"{n.variable.name} = {self.visit(n.value)}")
+
+    def visit_Comment(self, n):
+        self.line(f"# {n.text}")
+
+    def visit_Exit(self, n):
+        self.visit_Flush(None)
         self.line('_os._exit(0)')
 
-    def visit_Break(self, break_statement):
+    def visit_Break(self, n):
         self.line('break')
 
-    def visit_Return(self, return_statement):
-        self.line(f'return {self.visit(return_statement.value)}')
+    def visit_Return(self, n):
+        self.line(f'return {self.visit(n.value)}')
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line(f'print(end="", flush=True)')
 
-    def visit_ReferenceAllocation(self, a):
-        name = a.reference.variable.name
-        indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
-        size = self.visit(a.size)
+    def visit_Alloc(self, n):
+        name = n.reference.variable.name
+        indexes = "".join(f"[{idx.name}]" for idx in n.reference.indexes)
+        size = self.visit(n.size)
         self.line(f"{name}{indexes} = [None] * {size}")
 
-    def visit_MethodPrototype(self, m):
+    def visit_VariableDeclaration(self, n):
         pass
 
-    def visit_VariableDeclaration(self, d):
-        pass
-
-    def visit_CallbackImplementation(self, callback):
-        params = ", ".join(parameter.name for parameter in callback.prototype.parameters)
-        self.line(f"def _callback_{callback.prototype.name}({params}):")
+    def visit_Callback(self, n):
+        params = ", ".join(self.visit(p) for p in n.prototype.parameters)
+        self.line(f"def _callback_{n.prototype.name}({params}):")
         with self.indent():
-            self.visit(callback.body)
+            self.visit(n.body)
 
-    def visit_Call(self, call_statement):
-        method_name = call_statement.method.name
+    def visit_Call(self, n):
+        method_name = n.method.name
 
-        for callback in call_statement.callbacks:
-            self.visit_CallbackImplementation(callback)
+        for callback in n.callbacks:
+            self.visit_Callback(callback)
 
-        value_arguments = [self.visit(p) for p in call_statement.arguments]
+        value_arguments = [self.visit(p) for p in n.arguments]
         callback_arguments = [
-            f"_callback_{callback.prototype.name}"
-            for callback in call_statement.callbacks
+            f"_callback_{c.prototype.name}"
+            for c in n.callbacks
         ]
         arguments = ", ".join(value_arguments + callback_arguments)
         call_expr = f"_solution.{method_name}({arguments})"
-        if call_statement.return_value is not None:
-            return_value = self.visit(call_statement.return_value)
-            self.line(f'{return_value} = {call_expr}')
+        if n.return_value is not None:
+            return_value = self.visit(n.return_value)
+            return_expr = f"{return_value} = "
         else:
-            self.line(f'{call_expr}')
+            return_expr = ""
+        self.line(f"{return_expr}{call_expr}")
 
     def visit_Print(self, n):
         args = ', '.join(self.visit(arg) for arg in n.arguments)
@@ -107,13 +102,15 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
 
     def visit_If(self, n):
         condition = self.visit(n.condition)
-        self.line(f'if {condition}:')
-        with self.indent():
-            self.visit(n.then_body)
-        if n.else_body:
-            self.line('else:')
-            with self.indent():
-                self.visit(n.else_body)
+        headers = [
+            f"if {condition}:",
+            f"else:"
+        ]
+        for header, body in zip(headers, n.branches):
+            if body is not None:
+                self.line(header)
+                with self.indent():
+                    self.visit(body)
 
     def visit_For(self, n):
         index_name = n.index.variable.name
@@ -127,24 +124,27 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         with self.indent():
             self.visit(n.body)
 
-    def build_switch_cases(self, variable, labels):
-        variable = self.visit(variable)
-        return ' or '.join(f'{variable} == {label}' for label in labels)
-
-    def visit_Switch(self, switch_statement):
-        for i, c in enumerate(switch_statement.cases):
+    def visit_Switch(self, n):
+        for i, c in enumerate(n.cases):
             if_or_elif = "if" if i == 0 else "elif"
-            self.line(f'{if_or_elif} {self.build_switch_cases(switch_statement.variable, c.labels)}:')
+            condition = " or ".join(
+                f"{self.visit(n.value)} == {self.visit(l)}"
+                for l in c.labels
+            )
+            self.line(f'{if_or_elif} {condition}:')
             with self.indent():
                 self.visit(c.body)
 
+    def visit_InterfaceTemplate(self, n):
+        for m in n.methods:
+            self.visit(m)
+            self.line()
 
-class PythonTemplateCodeGen(PythonCodeGen, TemplateCodeGen):
-    def visit_MethodPrototype(self, m):
-        self.line()
-        self.build_method_declaration(m)
+    def visit_MethodTemplate(self, n):
+        if n.description:
+            for l in n.description.splitlines():
+                self.line(f"# {l}")
+        self.visit(n.prototype)
         with self.indent():
-            if m.has_return_value:
-                self.line("return 42")
-            else:
-                self.line('pass')
+            self.visit(n.body)
+            self.line(f"pass")

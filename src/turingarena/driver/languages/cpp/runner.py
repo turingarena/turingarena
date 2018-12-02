@@ -15,7 +15,7 @@ class CppProgramRunner(ProgramRunner):
     @contextmanager
     def run_in_process(self):
         with open(self._skeleton_path, "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
         try:
             self._compile_source()

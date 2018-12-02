@@ -1,4 +1,4 @@
-from turingarena.driver.interface.diagnostics import Diagnostic, CallbackParameterNotScalar
+from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.tests.test_utils import define_algorithms, assert_interface_error, define_algorithm
 
 

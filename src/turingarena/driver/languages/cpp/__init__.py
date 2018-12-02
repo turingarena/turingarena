@@ -1,13 +1,12 @@
 from turingarena.driver.language import Language
 
-from .generator import CppSkeletonCodeGen, CppTemplateCodeGen
+from .generator import CppCodeGen
 from .runner import CppProgramRunner
 
 language = Language(
     name="C++",
     extension=".cpp",
     ProgramRunner=CppProgramRunner,
-    skeleton_generator=CppSkeletonCodeGen,
-    template_generator=CppTemplateCodeGen,
+    Generator=CppCodeGen,
     supported_for_evaluator=True,
 )

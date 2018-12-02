@@ -20,7 +20,7 @@ class PythonProgramRunner(ProgramRunner):
         shutil.copy(self.program.source_path, self.temp_dir)
 
         with open(self.skeleton_path, "w") as f:
-            self.language.skeleton_generator().generate_to_file(self.interface, f)
+            self.language.Generator().generate_to_file(self.interface, f)
 
         sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.py")
 

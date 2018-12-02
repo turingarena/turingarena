@@ -1,9 +1,9 @@
-from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class JavaCodeGen(InterfaceCodeGen):
 
-    def visit_ParameterDeclaration(self, d):
+    def visit_Parameter(self, d):
         arrays = "[]" * d.dimensions
         return f"int {d.variable.name}{arrays}"
 
@@ -12,7 +12,7 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def build_signature(self, callable, callbacks):
         return_type = "int" if callable.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callable.parameters]
         if callbacks:
             value_parameters.append(
                 self.build_callbacks_interface_name(callable) + " callbacks")
@@ -24,24 +24,22 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def build_callback_signature(self, callback):
         return_type = "int" if callback.has_return_value else "void"
-        value_parameters = [self.visit(p) for p in callback.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callback.parameters]
         parameters = ", ".join(value_parameters)
         return f"{return_type} {callback.name}({parameters})"
 
     def generate_footer(self, interface):
         return "}"
 
-    def line_comment(self, comment):
-        self.line(f"// {comment}")
+    def visit_Comment(self, n):
+        self.line(f"// {n.text}")
 
     def generate_callbacks_declaration(self, callback):
         return f'{self.build_method_signature(callback)};'
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"private static final {m.variable.name} = {self.visit(m.value)};")
 
-
-class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         self.line('import java.util.Scanner;')
         self.line()
@@ -52,13 +50,13 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         self.line(f'int{"[]" * d.dimensions} {d.variable.name};')
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         reference = self.visit(a.reference)
         dimensions = "[]" * a.dimensions
         size = self.visit(a.size)
         self.line(f"{reference} = new int[{size}]{dimensions};")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         with self.indent():
             if m.callbacks:
                 self.line(f'interface {self.build_callbacks_interface_name(m)} ''{')
@@ -73,14 +71,14 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         self.line('public static void main(String args[]) {')
         with self.indent():
             self.line('Solution __solution = new Solution();')
-            self.visit(interface.main_block)
+            self.visit(interface.main)
         self.line('}')
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         with self.indent():
             self.generate_main(interface)
 
-    def visit_CallbackImplementation(self, callback):
+    def visit_Callback(self, callback):
         self.line(f'public {self.build_callback_signature(callback.prototype)}' " {")
         with self.indent():
             self.visit(callback.body)
@@ -96,7 +94,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
             self.line(cb_name + " __clbks = new " + cb_name + "() {")
             with self.indent():
                 for callback in call_statement.callbacks:
-                    self.visit_CallbackImplementation(callback)
+                    self.visit_Callback(callback)
             self.line("};")
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
@@ -128,11 +126,11 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         condition = self.visit(statement.condition)
         self.line(f'if ({condition})'' {')
         with self.indent():
-            self.visit(statement.then_body)
-        if statement.else_body is not None:
+            self.visit(statement.branches.then_body)
+        if statement.branches.else_body is not None:
             self.line('} else {')
             with self.indent():
-                self.visit(statement.else_body)
+                self.visit(statement.branches.else_body)
         self.line('}')
 
     def visit_For(self, statement):
@@ -164,7 +162,7 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
                 self.visit(case.body)
         self.line('}')
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line('System.out.flush();')
 
     def visit_Exit(self, exit_statement):
@@ -176,16 +174,14 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
     def visit_Break(self, break_statement):
         self.line('break;')
 
-
-class JavaTemplateCodeGen(JavaCodeGen, TemplateCodeGen):
     def generate_header(self, interface):
         self.line('class Solution extends Skeleton {')
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         with self.indent():
             if m.callbacks:
                 self.line()
-                self.line_comment(f'interface {self.build_callbacks_interface_name(m)} ''{')
+                self.Executor(f'interface {self.build_callbacks_interface_name(m)} ''{')
                 for cbks in m.callbacks:
                     self.line_comment(self.generate_callbacks_declaration(cbks))
                 self.line_comment('}')

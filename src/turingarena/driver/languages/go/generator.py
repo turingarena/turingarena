@@ -1,14 +1,14 @@
-from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
 class GoCodeGen(InterfaceCodeGen):
-    def visit_ParameterDeclaration(self, d):
+    def visit_Parameter(self, d):
         indirections = "[]" * d.dimensions
         return f"{d.variable.name} {indirections}int"
 
     def build_signature(self, callable, callbacks, param=False):
         return_type = " int" if callable.has_return_value else ""
-        value_parameters = [self.visit(p) for p in callable.parameter_declarations]
+        value_parameters = [self.visit(p) for p in callable.parameters]
         callback_parameters = [
             self.build_signature(callback, [], param=True)
             for callback in callbacks
@@ -22,11 +22,9 @@ class GoCodeGen(InterfaceCodeGen):
     def build_method_signature(self, func):
         return self.build_signature(func, func.callbacks)
 
-    def line_comment(self, comment):
-        self.line(f"// {comment}")
+    def visit_Comment(self, n):
+        self.line(f"// {n.text}")
 
-
-class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def generate_header(self, interface):
         self.line("package main")
         self.line()
@@ -37,27 +35,27 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_VariableDeclaration(self, d):
         self.line(f"var {d.variable.name} {'[]' * d.dimensions + 'int'}")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         return []
 
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         return []
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         reference = self.visit(a.reference)
         # FIXME: is this + 1 needed?
         dimensions = "[]" * (a.dimensions + 1)
         size = self.visit(a.size)
         self.line(f"{reference} = make({dimensions}int, {size})")
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         self.line("func main() {")
         with self.indent():
-            self.visit(interface.main_block)
+            self.visit(interface.main)
         self.line("}")
 
-    def visit_CallbackImplementation(self, callback):
-        params = ", ".join(f"{parameter.name}" for parameter in callback.prototype.parameters) + " int"
+    def visit_Callback(self, callback):
+        params = ", ".join(self.visit(p) for p in callback.prototype.parameters) + " int"
         if callback.prototype.has_return_value:
             return_value = "int"
         else:
@@ -72,7 +70,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         method = call_statement.method
 
         for callback in call_statement.callbacks:
-            self.visit_CallbackImplementation(callback)
+            self.visit_Callback(callback)
 
         value_arguments = [self.visit(p) for p in call_statement.arguments]
         callback_arguments = [
@@ -88,7 +86,7 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         self.line(f"{return_value}{method.name}({parameters});")
 
     def visit_Call(self, call_statement):
-        if call_statement.method.has_callbacks:
+        if call_statement.method.callbacks:
             self.line("{")
             with self.indent():
                 self.call_statement_body(call_statement)
@@ -110,11 +108,11 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         condition = self.visit(statement.condition)
         self.line(f"if {condition}" " {")
         with self.indent():
-            self.visit(statement.then_body)
-        if statement.else_body:
+            self.visit(statement.branches.then_body)
+        if statement.branches.else_body:
             self.line("} else {")
             with self.indent():
-                self.visit(statement.else_body)
+                self.visit(statement.branches.else_body)
         self.line("}")
 
     def visit_For(self, s):
@@ -152,15 +150,13 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
     def visit_Break(self, statement):
         self.line("break")
 
-    def generate_flush(self):
+    def visit_Flush(self, n):
         self.line("os.Stdout.Sync()")
 
-
-class GoTemplateCodeGen(GoCodeGen, TemplateCodeGen):
-    def visit_ConstantDeclaration(self, m):
+    def visit_Constant(self, m):
         self.line(f"const {m.variable.name} = {self.visit(m.value)}")
 
-    def visit_MethodPrototype(self, m):
+    def method_declaration(self, m):
         self.line()
         self.line(f"{self.build_method_signature(m)}" " {")
         with self.indent():

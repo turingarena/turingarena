@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Generator
 
 from turingarena.driver.client.program import Program
-from turingarena.driver.interface.compile import Compiler
+from turingarena.driver.compile.compile import Compiler
 from turingarena.driver.language import Language
 
 
@@ -50,5 +50,5 @@ def assert_interface_error(text: str, diagnostic):
 
 def assert_interface_diagnostics(interface_text: str, diagnostics):
     compiler = Compiler.create()
-    compiler.compile(interface_text)
+    compiler.compile_interface_source(interface_text)
     assert [d.message for d in diagnostics] == [d.message for d in compiler.diagnostics]
