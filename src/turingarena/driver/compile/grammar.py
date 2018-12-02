@@ -64,7 +64,7 @@ grammar_ebnf = r"""
         ;
     sum_expression = 
         | expression_type:`sum` signs:() operands:mul_expression { signs:('+'|'-') operands:mul_expression }+
-        | expression_type:`sum` signs+:('+'|'-') operands:mul_expression { signs+:('+'|'-') operands:mul_expression }*
+        | expression_type:`sum` signs+:('+'|'-') operands:mul_expression { signs+:('+'|'-') operands:mul_expression }+
         | mul_expression
         ;
     mul_expression =
