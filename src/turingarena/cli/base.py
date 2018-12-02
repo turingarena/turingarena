@@ -13,5 +13,5 @@ BASE_PARSER.add_argument(
     type=str.lower,
     metavar="LEVEL",
     choices=LOG_LEVELS,
-    default="WARNING",
+    default="INFO",
 )

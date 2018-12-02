@@ -58,10 +58,8 @@ class PythonCodeGen(InterfaceCodeGen):
         self.line(f'print(end="", flush=True)')
 
     def visit_Alloc(self, n):
-        name = n.reference.variable.name
-        indexes = "".join(f"[{idx.name}]" for idx in n.reference.indexes)
         size = self.visit(n.size)
-        self.line(f"{name}{indexes} = [None] * {size}")
+        self.line(f"{self.visit(n.reference)} = [None] * {size}")
 
     def visit_VariableDeclaration(self, n):
         pass
