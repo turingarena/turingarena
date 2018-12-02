@@ -4,6 +4,7 @@ node_modules/
 .dockerignore
 .serverless
 .pytest_cache
+turingarena-files/
 
 # just for Serverless plugins, not a Web project
 /backend/package-lock.json
