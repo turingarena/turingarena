@@ -1,38 +1,38 @@
 import itertools
 import logging
-from collections import namedtuple
 from enum import Enum
 from functools import partial
 
-from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.diagnostics import SwitchEmpty, Location, ExpressionNotScalar, Snippet, \
-    ExpressionNotLiteral, CaseLabelDuplicated, InvalidReference, ReferenceAlreadyDefined, MethodNotDeclared, \
-    IgnoredReturnValue, NoReturnValue, CallbackAlreadyImplemented, CallbackNotDeclared, InvalidNumberOfArguments, \
-    InvalidArgument, ReferenceNotDefined, InvalidIndexForReference, InvalidSubscript, BreakOutsideLoop, \
-    UnexpectedIndexForReference, CallbackParameterNotScalar, CallbackPrototypeMismatch
-from turingarena.driver.interface.nodes import ForIndex, Case, Callback, Parameter, \
-    Constant, Block, Variable, Write, Read, Return, IntLiteral, \
-    Subscript, Checkpoint, Call, Exit, For, If, Loop, Break, Switch, Prototype, Interface, IfBranches
-from turingarena.driver.interface.parser import parse_interface
-from turingarena.driver.interface.variables import ReferenceDefinition, ReferenceResolution
-from turingarena.util.visitor import visitormethod, classvisitormethod
+from turingarena.driver.common.analysis import InterfaceAnalyzer
+from turingarena.driver.common.nodes import *
+from turingarena.driver.common.variables import ReferenceDefinition, ReferenceResolution
+from turingarena.driver.compile.analysis import CompileAnalyzer
+from turingarena.driver.compile.diagnostics import *
+from turingarena.driver.compile.parser import parse_interface
+from turingarena.util.visitor import classvisitormethod
 
+STATEMENT_CLASSES = {
+    "checkpoint": Checkpoint,
+    "read": Read,
+    "write": Write,
+    "call": Call,
+    "return": Return,
+    "exit": Exit,
+    "for": For,
+    "if": If,
+    "loop": Loop,
+    "break": Break,
+    "switch": Switch,
+}
 
-def compile_interface(source_text, descriptions=None):
-    # FIXME: descriptions
+SubscriptAst = namedtuple("SubscriptAst", ["expression_type", "array", "index"])
+VariableAst = namedtuple("VariableAst", ["expression_type", "variable_name"])
 
-    compiler = Compiler.create()
-    interface = compiler.compile(source_text)
-
-    for msg in compiler.diagnostics:
-        logging.warning(f"interface contains an error: {msg}")
-
-    return interface
-
-
-def load_interface(path):
-    with open(path) as f:
-        return compile_interface(f.read())
+EXPRESSION_CLASSES = {
+    "int_literal": IntLiteral,
+    "subscript": Subscript,
+    "variable": Variable,
+}
 
 
 class ExpressionType(Enum):
@@ -40,37 +40,13 @@ class ExpressionType(Enum):
     REFERENCE = 1
 
 
-SubscriptAst = namedtuple("SubscriptAst", ["expression_type", "array", "index"])
-VariableAst = namedtuple("VariableAst", ["expression_type", "variable_name"])
-
-
-class Compiler(namedtuple("Compiler", [
-    "constants",
-    "methods",
-    "prev_reference_actions",
-    "index_variables",
-    "in_loop",
-    "diagnostics",
-    "expression_type",
-]), TreeAnalyzer):
-    @classmethod
-    def create(cls):
-        return cls(
-            constants=None,
-            methods=None,
-            prev_reference_actions=None,
-            index_variables=None,
-            in_loop=None,
-            diagnostics=[],
-            expression_type=None,
-        )
-
-    def compile(self, source_text, descriptions=None):
+class Compiler(CompileAnalyzer, InterfaceAnalyzer):
+    def compile_interface_source(self, source_text, descriptions=None):
         if descriptions is None:
             descriptions = {}
 
         ast = parse_interface(source_text)
-        return self.interface(ast)
+        return self.compile(Interface, ast)
 
     def error(self, e):
         if e not in self.diagnostics:
@@ -80,13 +56,17 @@ class Compiler(namedtuple("Compiler", [
         if not condition:
             self.error(e)
 
-    def with_constant(self, declaration):
-        return self._replace(constants=self.constants + (declaration,))
+    def compile(self, cls, ast):
+        return self._on_compile(cls, ast)
 
-    def with_method(self, method):
-        return self._replace(methods=self.methods + (method,))
+    @classvisitormethod
+    def _on_compile(self, cls, ast):
+        pass
 
-    def interface(self, ast):
+    def _on_compile_object(self, cls, ast):
+        return cls()
+
+    def _on_compile_Interface(self, cls, ast):
         compiler = self._replace(
             constants=(),
             methods=(),
@@ -94,15 +74,15 @@ class Compiler(namedtuple("Compiler", [
 
         for c in ast.constants_declarations:
             compiler = compiler.with_constant(
-                compiler.constant_declaration(c)
+                compiler.compile(Constant, c)
             )
 
         for m in ast.method_declarations:
             compiler = compiler.with_method(
-                compiler.method(m)
+                compiler.compile(Prototype, m)
             )
 
-        return Interface(
+        return cls(
             constants=compiler.constants,
             methods=compiler.methods,
             main_block=compiler._replace(
@@ -123,146 +103,42 @@ class Compiler(namedtuple("Compiler", [
             ),
         )
 
-    @property
-    def methods_by_name(self):
-        return {m.name: m for m in self.methods}
-
-    def constant_declaration(self, ast):
-        return Constant(
+    def _on_compile_Constant(self, cls, ast):
+        return cls(
             variable=Variable(name=ast.name),
             value=self.scalar(ast.value),
         )
 
-    def method(self, ast):
-        return self.prototype(ast, is_callback=False)
-
-    def callback(self, ast):
-        return self.prototype(ast, is_callback=True)
-
-    def prototype(self, ast, is_callback):
-        if is_callback:
+    def _on_compile_Prototype(self, cls, ast):
+        if self.in_callback:
             assert not ast.callbacks
             callbacks = ()
         else:
             callbacks = tuple(
-                self.callback(c)
+                self._replace(in_callback=True).compile(Prototype, c)
                 for c in ast.callbacks
             )
 
-        return Prototype(
+        return cls(
             name=ast.declarator.name,
             parameters=tuple(
-                self.parameter_declaration(p, is_callback)
+                self.compile(Parameter, p)
                 for p in ast.declarator.parameters
             ),
             has_return_value=(ast.declarator.type == 'function'),
             callbacks=callbacks,
         )
 
-    def parameter_declaration(self, ast, is_callback):
-        d = Parameter(
+    def _on_compile_Parameter(self, cls, ast):
+        dimensions = len(ast.indexes)
+        if self.in_callback:
+            self.check(dimensions == 0, CallbackParameterNotScalar(parameter=Snippet(ast)))
+            dimensions = 0
+
+        return cls(
             variable=Variable(name=ast.name),
-            dimensions=len(ast.indexes),
+            dimensions=dimensions,
         )
-        if is_callback:
-            self.check(d.dimensions == 0, CallbackParameterNotScalar(parameter=Snippet(ast)))
-        return d
-
-    def with_reference_actions(self, actions):
-        actions = tuple(actions)
-        assert all(
-            a.reference is not None
-            for a in actions
-        )
-        return self._replace(
-            prev_reference_actions=self.prev_reference_actions + actions
-        )
-
-    def get_resolved_references(self):
-        return {
-            a.reference
-            for a in self.prev_reference_actions
-            if isinstance(a, ReferenceResolution)
-        }
-
-    @property
-    def reference_definitions(self):
-        return {
-            a.reference: a
-            for a in self.prev_reference_actions
-            if isinstance(a, ReferenceDefinition)
-        }
-
-    def with_index_variable(self, variable):
-        return self._replace(
-            index_variables=self.index_variables + (variable,),
-        )
-
-    def with_loop(self):
-        return self._replace(in_loop=True)
-
-    @visitormethod
-    def dimensions(self, e) -> int:
-        pass
-
-    def dimensions_IntLiteral(self, e):
-        return 0
-
-    def dimensions_Variable(self, e):
-        try:
-            return self.reference_definitions[e].dimensions
-        except KeyError:
-            return 0
-
-    def dimensions_Subscript(self, e):
-        try:
-            return self.reference_definitions[e].dimensions
-        except KeyError:
-            array_dimensions = self.dimensions(e.array)
-            if array_dimensions < 1:
-                self.error(InvalidSubscript(array="<TODO>", index="<TODO>"))
-                return 0
-            return array_dimensions - 1
-
-    @visitormethod
-    def is_defined(self, e) -> bool:
-        pass
-
-    def is_defined_IntLiteral(self, e):
-        return True
-
-    def is_defined_Variable(self, e):
-        return e in self.reference_definitions
-
-    def is_defined_Subscript(self, e):
-        return (
-                e in self.reference_definitions
-                or self.is_defined(e.array)
-        )
-
-    STATEMENT_CLASSES = {
-        "checkpoint": Checkpoint,
-        "read": Read,
-        "write": Write,
-        "call": Call,
-        "return": Return,
-        "exit": Exit,
-        "for": For,
-        "if": If,
-        "loop": Loop,
-        "break": Break,
-        "switch": Switch,
-    }
-
-    def statement(self, ast):
-        return self._on_compile(self.STATEMENT_CLASSES[ast.statement_type], ast)
-
-    @classvisitormethod
-    def _on_compile(self, cls, ast):
-        pass
-
-    def _on_compile_object(self, cls, ast):
-        return cls()
 
     def _on_compile_Read(self, cls, ast):
         arguments = []
@@ -304,7 +180,7 @@ class Compiler(namedtuple("Compiler", [
         labels = set()
 
         for case_ast in ast.cases:
-            case = self.case(case_ast)
+            case = self.compile(Case, case_ast)
             cases.append(case)
             for l in case.labels:
                 self.check(l not in labels, CaseLabelDuplicated(label=l))
@@ -315,8 +191,8 @@ class Compiler(namedtuple("Compiler", [
             cases=tuple(cases),
         )
 
-    def case(self, ast):
-        return Case(
+    def _on_compile_Case(self, cls, ast):
+        return cls(
             labels=[self.literal(l) for l in ast.labels],
             body=self.block(ast.body),
         )
@@ -379,14 +255,15 @@ class Compiler(namedtuple("Compiler", [
         callback_prototypes_by_name = {c.name: c for c in method.callbacks}
         body_by_name = {}
         for cb in ast.callbacks:
-            name = cb.declarator.name
+            prototype = self._replace(in_callback=True).compile(Prototype, cb)
+            name = prototype.name
             self.check(
                 name in callback_prototypes_by_name,
                 CallbackNotDeclared(name=method.name, callback=name),
             )
             self.check(name not in body_by_name, CallbackAlreadyImplemented(name=name))
             self.check(
-                self.prototype(cb, is_callback=True) == callback_prototypes_by_name[name],
+                prototype == callback_prototypes_by_name[name],
                 CallbackPrototypeMismatch(name=name),
             )
             body_by_name[name] = cb.body
@@ -439,7 +316,7 @@ class Compiler(namedtuple("Compiler", [
     def statements(self, asts):
         inner = self
         for ast in asts:
-            node = inner.statement(ast)
+            node = inner.compile(STATEMENT_CLASSES[ast.statement_type], ast)
             yield node
             inner = inner.with_reference_actions(inner.reference_actions(node))
 
@@ -487,16 +364,10 @@ class Compiler(namedtuple("Compiler", [
             self.error(ExpressionNotLiteral(expression=Snippet(ast)))
         return e
 
-    EXPRESSION_TYPE_MAP = {
-        "int_literal": IntLiteral,
-        "subscript": Subscript,
-        "variable": Variable,
-    }
-
     def expression(self, ast):
         assert self.expression_type is not None
         ast = self._preprocess_expression_ast(ast)
-        return self._on_compile(self.EXPRESSION_TYPE_MAP[ast.expression_type], ast)
+        return self._on_compile(EXPRESSION_CLASSES[ast.expression_type], ast)
 
     def _preprocess_expression_ast(self, ast):
         if ast.expression_type == "reference_subscript":
@@ -539,3 +410,20 @@ class Compiler(namedtuple("Compiler", [
                 )
 
         return cls(array, index)
+
+
+def compile_interface(source_text, descriptions=None):
+    # FIXME: descriptions
+
+    compiler = Compiler.create()
+    interface = compiler.compile_interface_source(source_text)
+
+    for msg in compiler.diagnostics:
+        logging.warning(f"interface contains an error: {msg}")
+
+    return interface
+
+
+def load_interface(path):
+    with open(path) as f:
+        return compile_interface(f.read())

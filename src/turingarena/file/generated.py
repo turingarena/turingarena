@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 
-from turingarena.driver.interface.compile import Compiler, compile_interface
+from turingarena.driver.compile.compile import compile_interface
 from turingarena.driver.language import Language
 from turingarena.text.parser import TextParser
 

@@ -1,15 +1,15 @@
 from collections.__init__ import namedtuple
 
-from turingarena.driver.description import StatementDescriber
-from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush
-from turingarena.driver.interface.transform import TreeTransformer
+from turingarena.driver.common.analysis import InterfaceAnalyzer
+from turingarena.driver.common.description import StatementDescriber
+from turingarena.driver.common.nodes import *
+from turingarena.driver.common.transform import TreeTransformer
 from turingarena.util.visitor import visitormethod
 
 
 class TreePreprocessor(namedtuple("TreeTransformer", [
     "flushed",
-]), TreeAnalyzer, TreeTransformer, StatementDescriber):
+]), InterfaceAnalyzer, TreeTransformer, StatementDescriber):
     @classmethod
     def create(cls):
         return cls(
@@ -66,3 +66,8 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
         if n.method.callbacks:
             yield Comment("no more callbacks")
             yield Print([IntLiteral(0), IntLiteral(0)])
+
+
+Print = namedtuple("Print", ["arguments"])
+Flush = namedtuple("Flush", [])
+Comment = namedtuple("Comment", ["text"])

@@ -1,5 +1,4 @@
-from turingarena.driver.interface.diagnostics import ReferenceNotDefined, ReferenceAlreadyDefined, \
-    ReferenceNotUsed
+from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.tests.test_utils import assert_interface_error
 
 

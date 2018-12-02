@@ -3,7 +3,7 @@ from functools import lru_cache
 
 import tatsu
 
-from turingarena.driver.interface.grammar import grammar_ebnf
+from turingarena.driver.compile.grammar import grammar_ebnf
 
 logger = logging.getLogger(__name__)
 

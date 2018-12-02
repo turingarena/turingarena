@@ -1,5 +1,4 @@
-from turingarena.driver.interface.diagnostics import MethodNotDeclared, InvalidNumberOfArguments, \
-    InvalidArgument, IgnoredReturnValue, NoReturnValue
+from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.tests.test_utils import assert_interface_error
 
 

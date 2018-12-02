@@ -6,19 +6,36 @@ from enum import Enum
 
 from turingarena import InterfaceError
 from turingarena.driver.client.commands import deserialize_data, serialize_data, DriverState
-from turingarena.driver.description import TreeDumper
-from turingarena.driver.interface.analysis import TreeAnalyzer
-from turingarena.driver.interface.nodes import Return, CallbackEnd, Exit, CallArgumentsResolve, \
-    IfConditionResolve, Checkpoint, SwitchValueResolve, Step, AcceptCallbacks, CallCompleted, CallReturn, Block, \
-    CallbackStart
-from turingarena.driver.interface.requests import RequestSignature, CallRequestSignature
-from turingarena.driver.interface.transform import TreeTransformer
-from turingarena.driver.interface.variables import ReferenceDirection, ReferenceResolution
+from turingarena.driver.common.analysis import InterfaceAnalyzer
+from turingarena.driver.common.description import TreeDumper
+from turingarena.driver.common.variables import ReferenceDirection, ReferenceResolution
+from turingarena.driver.compile.preprocess import ExecutionPreprocessor
+from turingarena.driver.drive.requests import RequestSignature, CallRequestSignature
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
 
 UPWARD_TIMEOUT = 3.0
+
+
+class ExecutionPhase(Enum):
+    UPWARD = 1
+    REQUEST = 2
+    DOWNWARD = 3
+
+
+class CommunicationError(Exception):
+    """
+    Raised when the communication with a process is interrupted.
+    """
+
+
+class InterfaceExitReached(Exception):
+    pass
+
+
+class DriverStop(Exception):
+    pass
 
 
 class NotResolved(Exception):
@@ -33,7 +50,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     "request_lookahead",
     "driver_connection",
     "sandbox_connection",
-]), TreeTransformer, TreeAnalyzer):
+]), ExecutionPreprocessor):
     __slots__ = []
 
     def send_driver_state(self, state):
@@ -153,88 +170,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             does_break=False,
         )
 
-    def transform_Block(self, n):
-        return n._replace(
-            children=tuple(
-                self.group_children(
-                    self.expand_sequence(n.children)
-                )
-            ),
-        )
-
-    def transform_Callback(self, n):
-        prepend_nodes = (CallbackStart(n.prototype),)
-        if n.prototype.has_return_value:
-            append_nodes = ()
-        else:
-            append_nodes = (CallbackEnd(),)
-        return super().transform_Callback(n._replace(
-            body=n.body._replace(
-                children=prepend_nodes + n.body.children + append_nodes
-            )
-        ))
-
-    def expand_sequence(self, ns):
-        for n in ns:
-            yield from self.node_replacement(n)
-
-    @visitormethod
-    def node_replacement(self, n):
-        pass
-
-    def node_replacement_object(self, n):
-        yield self.transform(n)
-
-    def node_replacement_If(self, n):
-        yield IfConditionResolve(n)
-        yield self.transform(n)
-
-    def node_replacement_Switch(self, n):
-        yield SwitchValueResolve(n)
-        yield self.transform(n)
-
-    def node_replacement_Call(self, n):
-        yield CallArgumentsResolve(method=n.method, arguments=n.arguments)
-        if n.method.callbacks:
-            yield AcceptCallbacks(self.transform_all(n.callbacks))
-        yield CallCompleted()
-        if n.method.has_return_value:
-            yield CallReturn(n.return_value)
-
-    def group_children(self, children):
-        group = []
-        for node in children:
-            can_be_grouped = self.can_be_grouped(node) and len(self._group_directions([node])) <= 1
-
-            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
-                group.append(node)
-                continue
-
-            if group:
-                yield self._make_step(group)
-                group.clear()
-
-            if not can_be_grouped:
-                yield node
-            else:
-                group.append(node)
-
-        if group:
-            yield self._make_step(group)
-
-    def _make_step(self, group):
-        return Step(body=Block(tuple(group)), direction=self._group_direction(group))
-
-    def _group_direction(self, group):
-        directions = self._group_directions(group)
-        if not directions:
-            return None
-        [direction] = directions
-        return direction
-
-    def _group_directions(self, group):
-        return {d for n in group for d in self.declaration_directions(n)}
-
     @visitormethod
     def evaluate(self, e):
         pass
@@ -257,19 +192,6 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
             except KeyError:
                 raise NotResolved from None
 
-    def _needs_request_lookahead(self, n):
-        types = [
-            Checkpoint,
-            SwitchValueResolve,
-            IfConditionResolve,
-            CallbackEnd,
-            Return,
-            CallArgumentsResolve,
-            Exit,
-        ]
-
-        return any(isinstance(n, t) for t in types)
-
     def execute(self, n):
         context = self
 
@@ -281,7 +203,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
 
         should_lookahead_request = (
                 context.request_lookahead is None
-                and self._needs_request_lookahead(n)
+                and self.needs_request_lookahead(n)
                 and context.phase is ExecutionPhase.REQUEST
         )
 
@@ -635,23 +557,3 @@ class ExecutionResult(namedtuple("ExecutionResult", [
 
     def with_request_processed(self):
         return self._replace(request_lookahead=None)
-
-
-class ExecutionPhase(Enum):
-    UPWARD = 1
-    REQUEST = 2
-    DOWNWARD = 3
-
-
-class CommunicationError(Exception):
-    """
-    Raised when the communication with a process is interrupted.
-    """
-
-
-class InterfaceExitReached(Exception):
-    pass
-
-
-class DriverStop(Exception):
-    pass

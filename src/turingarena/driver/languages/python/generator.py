@@ -1,4 +1,4 @@
-from turingarena.driver.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import SkeletonCodeGen, InterfaceCodeGen, TemplateCodeGen
 
 SKELETON_REAL_MAIN = r"""
 if __name__ == '__main__':

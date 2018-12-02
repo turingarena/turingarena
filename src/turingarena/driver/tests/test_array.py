@@ -1,5 +1,4 @@
-from turingarena.driver.interface.diagnostics import InvalidReference, UnexpectedIndexForReference, \
-    InvalidIndexForReference
+from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.tests.test_utils import assert_interface_diagnostics
 from .test_utils import assert_no_interface_errors
 

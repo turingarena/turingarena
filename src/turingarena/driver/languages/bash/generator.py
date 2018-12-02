@@ -1,4 +1,4 @@
-from turingarena.driver.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
+from turingarena.driver.gen.generator import InterfaceCodeGen, SkeletonCodeGen, TemplateCodeGen
 
 
 class BashCodeGen(InterfaceCodeGen):

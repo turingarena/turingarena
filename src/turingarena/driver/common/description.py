@@ -1,5 +1,5 @@
-from turingarena.driver.expressions import AbstractExpressionCodeGen
-from turingarena.driver.genutils import LinesGenerator
+from turingarena.driver.common.expressions import AbstractExpressionCodeGen
+from turingarena.driver.common.genutils import LinesGenerator
 from turingarena.util.visitor import visitormethod
 
 

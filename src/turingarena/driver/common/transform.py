@@ -1,4 +1,4 @@
-from turingarena.driver.interface.nodes import IfBranches
+from turingarena.driver.common.nodes import *
 from turingarena.util.visitor import visitormethod
 
 

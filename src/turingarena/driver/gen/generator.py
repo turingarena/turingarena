@@ -1,10 +1,10 @@
 import logging
 from abc import ABC, abstractmethod
 
-from turingarena.driver.description import TreeDumper
-from turingarena.driver.expressions import AbstractExpressionCodeGen
-from turingarena.driver.genutils import LinesGenerator
-from turingarena.driver.interface.preprocess import TreePreprocessor
+from turingarena.driver.common.description import TreeDumper
+from turingarena.driver.common.expressions import AbstractExpressionCodeGen
+from turingarena.driver.common.genutils import LinesGenerator
+from turingarena.driver.gen.preprocess import TreePreprocessor
 from turingarena.util.visitor import Visitor
 
 
