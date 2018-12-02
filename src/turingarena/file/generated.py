@@ -24,7 +24,10 @@ class PackGeneratedDirectory:
     @property
     @lru_cache(None)
     def targets(self):
-        return list(self._generate_targets())
+        return list(
+            (os.path.normpath(path), gen)
+            for path, gen in self._generate_targets()
+        )
 
     def _create_text_generator(self, path):
         def generate(outfile):
@@ -71,7 +74,8 @@ class PackGeneratedDirectory:
         return generator
 
     def cat_file(self, path, *, file):
+        path = os.path.normpath(path)
         for p, generator in self.targets:
-            if os.path.normpath(p) == os.path.normpath(path):
-                return generator(file)
+            if p == path:
+                generator(file)
         raise FileNotFoundError(path)

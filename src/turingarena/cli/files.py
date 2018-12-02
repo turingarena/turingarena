@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import sys
 from argparse import ArgumentParser
 
@@ -33,12 +34,25 @@ class FileSyncCommand(FileCommand):
         parents=[FileCommand.PARSER],
         add_help=False,
     )
-    PARSER.add_argument("output", help="Output folder")
+    PARSER.add_argument(
+        "output",
+        help="Output folder",
+        nargs="?",
+        default="turingarena-files/",
+    )
+    PARSER.add_argument(
+        "-f", "--force",
+        help="Remove output folder before sync",
+        action="store_true",
+    )
 
     def run(self):
+        output = self.args.output
+        if self.args.force:
+            shutil.rmtree(output, ignore_errors=True)
+
         directory = PackGeneratedDirectory(".")
 
-        output = self.args.output
         os.mkdir(output)
         for path, g in directory.targets:
             fullpath = os.path.join(output, path)
