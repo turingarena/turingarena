@@ -1,5 +1,6 @@
 from collections.__init__ import namedtuple
 
+from turingarena.driver.description import StatementDescriber
 from turingarena.driver.interface.analysis import TreeAnalyzer
 from turingarena.driver.interface.nodes import Print, IntLiteral, Comment, Flush
 from turingarena.driver.interface.transform import TreeTransformer
@@ -8,7 +9,7 @@ from turingarena.util.visitor import visitormethod
 
 class TreePreprocessor(namedtuple("TreeTransformer", [
     "flushed",
-]), TreeAnalyzer, TreeTransformer):
+]), TreeAnalyzer, TreeTransformer, StatementDescriber):
     @classmethod
     def create(cls):
         return cls(
@@ -42,10 +43,12 @@ class TreePreprocessor(namedtuple("TreeTransformer", [
         )
 
     def statement_nodes(self, n):
+        yield Comment(self.description(n))
+
         yield from self.variable_declarations(n)
         yield from self.reference_allocations(n)
 
-        yield from self.transform_all(self.replacement_nodes(n))
+        yield from self.replacement_nodes(self.transform(n))
 
     @visitormethod
     def replacement_nodes(self, n):

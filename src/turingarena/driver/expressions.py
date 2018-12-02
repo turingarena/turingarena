@@ -1,4 +1,7 @@
-class AbstractExpressionCodeGen:
+from turingarena.util.visitor import Visitor
+
+
+class AbstractExpressionCodeGen(Visitor):
     __slots__ = []
 
     def visit_Subscript(self, e):

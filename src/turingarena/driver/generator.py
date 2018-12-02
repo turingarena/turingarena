@@ -26,7 +26,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
     def generate(self, interface):
         interface = TreePreprocessor.create().transform(interface)
 
-        logging.debug(f"preprocessed interface: {TreeDumper().description(interface)}")
+        logging.debug(f"preprocessed interface: {TreeDumper().dump(interface)}")
 
         self.generate_header(interface)
         self.generate_constants_declarations(interface)

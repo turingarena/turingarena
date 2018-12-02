@@ -302,7 +302,7 @@ class NodeExecutionContext(namedtuple("NodeExecutionContext", [
     def _on_execute_Interface(self, n):
         main = self.transform(n.main_block)
 
-        logging.debug(f"transformed main block: {TreeDumper().description(main)}")
+        logging.debug(f"transformed main block: {TreeDumper().dump(main)}")
 
         self.with_assigments({
             c.variable: self.evaluate(c.value)
