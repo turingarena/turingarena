@@ -1,6 +1,6 @@
 from turingarena.driver.common.nodes import *
-from turingarena.driver.common.variables import ReferenceDefinition, \
-    VariableDeclaration, ReferenceAllocation, ReferenceResolution
+from turingarena.driver.compile.analysis import ReferenceDefinition, ReferenceResolution
+from turingarena.driver.gen.nodes import VariableDeclaration, Alloc
 from turingarena.util.visitor import visitormethod
 
 
@@ -115,7 +115,7 @@ class InterfaceAnalyzer:
             if not isinstance(a, ReferenceDefinition):
                 continue
             assert a.dimensions > 0
-            yield ReferenceAllocation(
+            yield Alloc(
                 reference=a.reference,
                 dimensions=a.dimensions - 1,
                 size=n.index.range,

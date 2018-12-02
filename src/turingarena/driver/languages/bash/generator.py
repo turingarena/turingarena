@@ -71,7 +71,7 @@ class BashCodeGen(InterfaceCodeGen):
     def visit_Switch(self, switch_statement):
         pass
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         # FIXME: not implemented
         pass
 

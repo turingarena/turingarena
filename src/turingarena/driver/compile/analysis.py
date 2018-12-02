@@ -1,9 +1,19 @@
+from collections.__init__ import namedtuple
+
 from turingarena.driver.compile.context import CompilationContext
 from turingarena.driver.compile.diagnostics import *
 from turingarena.util.visitor import visitormethod
 
 
 class CompileAnalyzer(CompilationContext):
+    @property
+    def reference_definitions(self):
+        return {
+            a.reference: a
+            for a in self.prev_reference_actions
+            if isinstance(a, ReferenceDefinition)
+        }
+
     @visitormethod
     def dimensions(self, e) -> int:
         pass
@@ -42,3 +52,7 @@ class CompileAnalyzer(CompilationContext):
                 e in self.reference_definitions
                 or self.is_defined(e.array)
         )
+
+
+ReferenceDefinition = namedtuple("ReferenceDefinition", ["reference", "dimensions"])
+ReferenceResolution = namedtuple("ReferenceResolution", ["reference"])

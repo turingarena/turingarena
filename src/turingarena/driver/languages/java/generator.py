@@ -50,7 +50,7 @@ class JavaCodeGen(InterfaceCodeGen):
     def visit_VariableDeclaration(self, d):
         self.line(f'int{"[]" * d.dimensions} {d.variable.name};')
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         reference = self.visit(a.reference)
         dimensions = "[]" * a.dimensions
         size = self.visit(a.size)

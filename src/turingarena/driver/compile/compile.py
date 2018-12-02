@@ -4,8 +4,7 @@ from functools import partial
 
 from turingarena.driver.common.analysis import InterfaceAnalyzer
 from turingarena.driver.common.nodes import *
-from turingarena.driver.common.variables import ReferenceDefinition, ReferenceResolution
-from turingarena.driver.compile.analysis import CompileAnalyzer
+from turingarena.driver.compile.analysis import CompileAnalyzer, ReferenceDefinition, ReferenceResolution
 from turingarena.driver.compile.diagnostics import *
 from turingarena.driver.compile.parser import parse_interface
 from turingarena.driver.compile.postprocess import CompilationPostprocessor

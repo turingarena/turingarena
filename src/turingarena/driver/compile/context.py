@@ -1,7 +1,5 @@
 from collections import namedtuple
 
-from turingarena.driver.common.variables import ReferenceDefinition
-
 
 class CompilationContext(namedtuple("Compiler", [
     "constants",
@@ -25,14 +23,6 @@ class CompilationContext(namedtuple("Compiler", [
             expression_type=None,
             diagnostics=[],
         )
-
-    @property
-    def reference_definitions(self):
-        return {
-            a.reference: a
-            for a in self.prev_reference_actions
-            if isinstance(a, ReferenceDefinition)
-        }
 
     @property
     def methods_by_name(self):

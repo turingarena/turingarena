@@ -38,55 +38,55 @@ class PythonCodeGen(InterfaceCodeGen):
     def visit_Parameter(self, n):
         return self.visit(n.variable)
 
-    def visit_Constant(self, m):
-        self.line(f"{m.variable.name} = {self.visit(m.value)}")
+    def visit_Constant(self, n):
+        self.line(f"{n.variable.name} = {self.visit(n.value)}")
 
     def visit_Comment(self, n):
         self.line(f"# {n.text}")
 
-    def visit_Exit(self, exit_statement):
+    def visit_Exit(self, n):
         self.visit_Flush(None)
         self.line('_os._exit(0)')
 
-    def visit_Break(self, break_statement):
+    def visit_Break(self, n):
         self.line('break')
 
-    def visit_Return(self, return_statement):
-        self.line(f'return {self.visit(return_statement.value)}')
+    def visit_Return(self, n):
+        self.line(f'return {self.visit(n.value)}')
 
     def visit_Flush(self, n):
         self.line(f'print(end="", flush=True)')
 
-    def visit_ReferenceAllocation(self, a):
-        name = a.reference.variable.name
-        indexes = "".join(f"[{idx.name}]" for idx in a.reference.indexes)
-        size = self.visit(a.size)
+    def visit_Alloc(self, n):
+        name = n.reference.variable.name
+        indexes = "".join(f"[{idx.name}]" for idx in n.reference.indexes)
+        size = self.visit(n.size)
         self.line(f"{name}{indexes} = [None] * {size}")
 
-    def visit_VariableDeclaration(self, d):
+    def visit_VariableDeclaration(self, n):
         pass
 
-    def visit_Callback(self, callback):
-        params = ", ".join(self.visit(p) for p in callback.prototype.parameters)
-        self.line(f"def _callback_{callback.prototype.name}({params}):")
+    def visit_Callback(self, n):
+        params = ", ".join(self.visit(p) for p in n.prototype.parameters)
+        self.line(f"def _callback_{n.prototype.name}({params}):")
         with self.indent():
-            self.visit(callback.body)
+            self.visit(n.body)
 
-    def visit_Call(self, call_statement):
-        method_name = call_statement.method.name
+    def visit_Call(self, n):
+        method_name = n.method.name
 
-        for callback in call_statement.callbacks:
+        for callback in n.callbacks:
             self.visit_Callback(callback)
 
-        value_arguments = [self.visit(p) for p in call_statement.arguments]
+        value_arguments = [self.visit(p) for p in n.arguments]
         callback_arguments = [
-            f"_callback_{callback.prototype.name}"
-            for callback in call_statement.callbacks
+            f"_callback_{c.prototype.name}"
+            for c in n.callbacks
         ]
         arguments = ", ".join(value_arguments + callback_arguments)
         call_expr = f"_solution.{method_name}({arguments})"
-        if call_statement.return_value is not None:
-            return_value = self.visit(call_statement.return_value)
+        if n.return_value is not None:
+            return_value = self.visit(n.return_value)
             return_expr = f"{return_value} = "
         else:
             return_expr = ""

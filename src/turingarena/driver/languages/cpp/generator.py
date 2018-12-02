@@ -56,7 +56,7 @@ class CppCodeGen(InterfaceCodeGen):
         pointers = "*" * n.dimensions
         self.line(f"static int {pointers}{n.variable.name};")
 
-    def visit_ReferenceAllocation(self, n):
+    def visit_Alloc(self, n):
         reference = self.visit(n.reference)
         dimensions = "*" * n.dimensions
         size = self.visit(n.size)

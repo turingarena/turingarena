@@ -1,23 +1,11 @@
 from turingarena.driver.common.analysis import InterfaceAnalyzer
 from turingarena.driver.common.nodes import *
-from turingarena.driver.common.variables import ReferenceDirection
 from turingarena.driver.drive.nodes import *
 from turingarena.driver.drive.requests import RequestSignature, CallRequestSignature
 from turingarena.util.visitor import visitormethod
 
 
 class ExecutionAnalyzer(InterfaceAnalyzer):
-    DIRECTION_MAP = {
-        ReferenceDirection.DOWNWARD: [
-            Read,
-        ],
-        ReferenceDirection.UPWARD: [
-            Checkpoint,
-            CallbackStart,
-            CallReturn,
-        ],
-    }
-
     def first_requests(self, n):
         return frozenset(self._get_first_requests(n))
 

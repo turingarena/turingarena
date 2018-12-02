@@ -90,7 +90,7 @@ class InterfaceCodeGen(ABC, LinesGenerator, AbstractExpressionCodeGen):
         pass
 
     @abstractmethod
-    def visit_ReferenceAllocation(self, n):
+    def visit_Alloc(self, n):
         pass
 
     @abstractmethod

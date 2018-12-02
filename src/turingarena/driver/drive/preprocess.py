@@ -1,8 +1,23 @@
+from enum import Enum
+
 from turingarena.driver.common.nodes import *
 from turingarena.driver.common.transform import TreeTransformer
 from turingarena.driver.drive.analysis import ExecutionAnalyzer
 from turingarena.driver.drive.nodes import *
 from turingarena.util.visitor import visitormethod
+
+ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
+
+DIRECTION_MAP = {
+    ReferenceDirection.DOWNWARD: [
+        Read,
+    ],
+    ReferenceDirection.UPWARD: [
+        Checkpoint,
+        CallbackStart,
+        CallReturn,
+    ],
+}
 
 
 class ExecutionPreprocessor(
@@ -79,7 +94,7 @@ class ExecutionPreprocessor(
         return self.declaration_directions(n.body)
 
     def _get_directions_object(self, n):
-        for d, ts in self.DIRECTION_MAP.items():
+        for d, ts in DIRECTION_MAP.items():
             for t in ts:
                 if isinstance(n, t):
                     yield d

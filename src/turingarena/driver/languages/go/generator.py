@@ -41,7 +41,7 @@ class GoCodeGen(InterfaceCodeGen):
     def visit_Constant(self, m):
         return []
 
-    def visit_ReferenceAllocation(self, a):
+    def visit_Alloc(self, a):
         reference = self.visit(a.reference)
         # FIXME: is this + 1 needed?
         dimensions = "[]" * (a.dimensions + 1)
