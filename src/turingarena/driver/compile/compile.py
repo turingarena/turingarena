@@ -85,7 +85,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer, CompilationPostprocessor):
         return cls(
             constants=compiler.constants,
             methods=compiler.methods,
-            main_block=compiler._replace(
+            main=compiler._replace(
                 prev_reference_actions=(),
                 index_variables=(),
                 in_loop=None,
@@ -96,7 +96,7 @@ class Compiler(CompileAnalyzer, InterfaceAnalyzer, CompilationPostprocessor):
                     partial(ReferenceDefinition, dimensions=0),
                     ReferenceResolution,
                 ]
-            ).compile(Block, ast.main_block),
+            ).compile(Block, ast.main),
         )
 
     def _on_compile_Constant(self, cls, ast):

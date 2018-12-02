@@ -43,11 +43,11 @@ class CppSkeletonCodeGen(CppCodeGen, SkeletonCodeGen):
     def method_declaration(self, n):
         self.line(f"{self.build_method_signature(n)};")
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         self.line()
         self.line("int main() {")
         with self.indent():
-            self.visit(interface.main_block)
+            self.visit(interface.main)
         self.line("}")
 
     def visit_Callback(self, n):

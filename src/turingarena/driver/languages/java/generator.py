@@ -73,10 +73,10 @@ class JavaSkeletonCodeGen(JavaCodeGen, SkeletonCodeGen):
         self.line('public static void main(String args[]) {')
         with self.indent():
             self.line('Solution __solution = new Solution();')
-            self.visit(interface.main_block)
+            self.visit(interface.main)
         self.line('}')
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         with self.indent():
             self.generate_main(interface)
 

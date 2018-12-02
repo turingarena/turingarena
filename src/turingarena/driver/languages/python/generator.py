@@ -44,11 +44,11 @@ class PythonSkeletonCodeGen(PythonCodeGen, SkeletonCodeGen):
         with self.indent():
             self.visit(callback_statement.callback.body)
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         self.line()
         self.line('def main(_solution):')
         with self.indent():
-            self.visit(interface.main_block)
+            self.visit(interface.main)
 
     def visit_Exit(self, exit_statement):
         self.visit_Flush(None)

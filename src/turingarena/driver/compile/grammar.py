@@ -9,7 +9,7 @@ grammar_ebnf = r"""
     interface = 
         constants_declarations:{ constant_declaration }* ~ 
         method_declarations:{ method_declaration }* ~ 
-        'main' main_block:block $;
+        'main' main:block $;
     
     callable_declarator =
         type:('function' | 'procedure')

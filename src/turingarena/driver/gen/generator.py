@@ -31,7 +31,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
         self.generate_header(interface)
         self.generate_constants_declarations(interface)
         self.generate_method_declarations(interface)
-        self.generate_main_block(interface)
+        self.generate_main(interface)
         self.generate_footer(interface)
 
     def generate_header(self, interface):
@@ -57,7 +57,7 @@ class InterfaceCodeGen(CodeGen, LinesGenerator):
         pass
 
     @abstractmethod
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         pass
 
     @abstractmethod
@@ -127,8 +127,8 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
     def visit_Comment(self, s):
         self.line_comment(s.text)
 
-    def generate_main_block(self, interface):
-        self.visit(interface.main_block)
+    def generate_main(self, interface):
+        self.visit(interface.main)
 
     def generate_statement(self, statement):
         self.visit(statement)
@@ -139,5 +139,5 @@ class SkeletonCodeGen(InterfaceCodeGen, AbstractExpressionCodeGen):
 
 
 class TemplateCodeGen(InterfaceCodeGen):
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         pass

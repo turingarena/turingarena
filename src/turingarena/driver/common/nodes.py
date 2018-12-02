@@ -14,7 +14,7 @@ Subscript = namedtuple("Subscript", [
 Interface = namedtuple("Interface", [
     "constants",
     "methods",
-    "main_block",
+    "main",
 ])
 
 Constant = namedtuple("Constant", ["variable", "value"])

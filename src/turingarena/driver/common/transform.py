@@ -27,7 +27,7 @@ class TreeTransformer:
         return n._replace(
             constants=self.transform_all(n.constants),
             methods=self.transform_all(n.methods),
-            main_block=self.transform(n.main_block),
+            main=self.transform(n.main),
         )
 
     def transform_For(self, n):

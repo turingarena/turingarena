@@ -50,10 +50,10 @@ class GoSkeletonCodeGen(GoCodeGen, SkeletonCodeGen):
         size = self.visit(a.size)
         self.line(f"{reference} = make({dimensions}int, {size})")
 
-    def generate_main_block(self, interface):
+    def generate_main(self, interface):
         self.line("func main() {")
         with self.indent():
-            self.visit(interface.main_block)
+            self.visit(interface.main)
         self.line("}")
 
     def visit_Callback(self, callback):
