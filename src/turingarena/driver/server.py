@@ -8,7 +8,8 @@ from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
 from turingarena.driver.compile.compile import load_interface
-from turingarena.driver.drive.execution import NodeExecutionContext, CommunicationError, DriverStop
+from turingarena.driver.drive.comm import CommunicationError, DriverStop
+from turingarena.driver.drive.execution import Executor
 from turingarena.driver.language import Language
 
 logger = logging.getLogger(__name__)
@@ -46,10 +47,9 @@ def run_server(driver_connection, source_path, interface_path):
             kill_reason="still running after communication end",
         ))
 
-        context = NodeExecutionContext(
+        context = Executor(
             bindings={},
             phase=None,
-            direction=None,
             process=connection.manager,
             request_lookahead=None,
             driver_connection=driver_connection,
