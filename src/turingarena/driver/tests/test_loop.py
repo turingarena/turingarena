@@ -67,8 +67,8 @@ def test_loop_switch_procedures():
         """,
             language_name="C++",
             source_text="""
-            int p1() {}
-            int p2() {}
+            void p1() {}
+            void p2() {}
         """,
     ) as algo:
         with algo.run() as p:

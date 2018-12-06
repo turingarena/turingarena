@@ -74,6 +74,7 @@ def test_malloc_succeeds():
 
             free(small);
             free(big);
+            return 0;
         }
     """)
 
@@ -89,6 +90,7 @@ def test_vector_succeeds():
             /* 1Mb (should use mmap) */
             std::vector<char> v2(1000 * 1000);
             for (int i = 0; i < v2.size(); i++) v2[i] = '0';
+            return 0;
         }
     """)
 
