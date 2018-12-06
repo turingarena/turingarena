@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from collections.__init__ import namedtuple
+from collections import namedtuple
 from typing import ContextManager
 
 from turingarena.driver.sandbox.connection import SandboxProcessConnection

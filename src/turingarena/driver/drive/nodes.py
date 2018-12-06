@@ -1,4 +1,4 @@
-from collections.__init__ import namedtuple
+from collections import namedtuple
 
 Step = namedtuple("Step", ["direction", "body"])
 CallbackStart = namedtuple("CallbackStart", ["prototype"])

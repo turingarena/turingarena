@@ -1,4 +1,4 @@
-from collections.__init__ import namedtuple
+from collections import namedtuple
 
 from turingarena.driver.compile.context import CompilationContext
 from turingarena.driver.compile.diagnostics import *

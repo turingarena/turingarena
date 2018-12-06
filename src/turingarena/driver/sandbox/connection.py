@@ -1,6 +1,6 @@
 import io
 from abc import abstractmethod
-from collections.__init__ import namedtuple
+from collections import namedtuple
 
 from turingarena.driver.client.processinfo import SandboxProcessInfo
 
