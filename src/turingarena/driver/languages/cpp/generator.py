@@ -9,7 +9,6 @@ class CppCodeGen(InterfaceCodeGen):
     def visit_Interface(self, n):
         self.line("#include <cstdio>")
         self.line("#include <cstdlib>")
-        self.line("#include <cassert>")
         self.line()
         for c in n.constants:
             self.visit(c)
@@ -152,15 +151,3 @@ class CppCodeGen(InterfaceCodeGen):
 
     def visit_Flush(self, n):
         self.line("fflush(stdout);")
-
-    def method_declaration(self, m):
-        self.line()
-        if m.description is not None:
-            for line in m.description.split("\n"):
-                self.line_comment(line)
-        self.line(f"{self.build_method_signature(m)}" " {")
-        with self.indent():
-            self.line("// TODO")
-            if m.has_return_value:
-                self.line("return 42;")
-        self.line("}")
