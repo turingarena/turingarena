@@ -40,22 +40,22 @@ def should_succeed(cpp_source):
 def test_open():
     should_raise(r"""
         #include <cstdio>
-        int test() { fopen("name", "r"); }
+        int test() { fopen("name", "r"); return 0; }
     """, signal.SIGSYS)
 
 
 def test_constructor():
     should_raise(r"""
         #include <stdio.h>
-        __attribute__((constructor(0))) static void init() { fopen("name", "r"); }
-        int test() {}
+        __attribute__((constructor)) static void init() { fopen("name", "r"); }
+        int test() { return 0; }
     """, signal.SIGSYS)
 
 
-def test_istream():
+def test_ifstream():
     should_raise(r"""
         #include <fstream>
-        int test() { std::ifstream in("name"); }
+        int test() { std::ifstream in("name"); return 0; }
     """, signal.SIGSYS)
 
 
@@ -74,6 +74,7 @@ def test_malloc_succeeds():
 
             free(small);
             free(big);
+            return 0;
         }
     """)
 
@@ -84,11 +85,12 @@ def test_vector_succeeds():
         int test() {
             /* 10b (should use brk) */
             std::vector<char> v(10);
-            for (int i = 0; i < v.size(); i++) v[i] = '0';
+            for (size_t i = 0; i < v.size(); i++) v[i] = '0';
         
             /* 1Mb (should use mmap) */
             std::vector<char> v2(1000 * 1000);
-            for (int i = 0; i < v2.size(); i++) v2[i] = '0';
+            for (size_t i = 0; i < v2.size(); i++) v2[i] = '0';
+            return 0;
         }
     """)
 
@@ -106,7 +108,7 @@ def test_memory_limit_static():
     should_raise("""
         const int size = 1 * 1024 * 1024 * 1024;
         char big[size];
-        int test() {}
+        int test() { return 0; }
     """, signal.SIGSEGV)
 
 
@@ -120,19 +122,20 @@ def test_memory_limit_malloc():
             char* a = (char*) malloc(size);
             for(int i = 0; i < size; i++) a[i] = i;
             assert(a == NULL);
+            return 0;
         }
     """, signal.SIGSEGV)
 
 
 def test_memory_limit_new():
     should_raise("""
-        int test() { new int[1 * 1024 * 1024 * 1024]; }
+        int test() { new int[1 * 1024 * 1024 * 1024]; return 0; }
     """, signal.SIGSYS)
 
 
 def test_segmentation_fault():
     should_raise("""
-        int test() { *((int*) 0) = 1; }
+        int test() { *((int*) 0) = 1; return 0; }
     """, signal.SIGSEGV)
 
 

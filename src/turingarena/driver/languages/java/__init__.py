@@ -3,7 +3,7 @@ from turingarena.driver.language import Language
 from .generator import JavaCodeGen
 from .runner import JavaProgramRunner
 
-disabled_language = Language(
+language = Language(
     name="Java",
     extension=".java",
     ProgramRunner=JavaProgramRunner,

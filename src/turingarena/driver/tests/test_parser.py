@@ -39,7 +39,7 @@ interface = '''
         read g; 
         call h = accept_callbacks(g) callbacks {
             function sum(a, b) {
-                return a + b;
+                return a;
             }
             procedure test(a) {
                 write a;

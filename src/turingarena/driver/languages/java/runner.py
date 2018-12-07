@@ -41,7 +41,6 @@ class JavaProgramRunner(ProgramRunner):
                 bufsize=1,
                 check=True,
             )
-            logger.info("Java file compilation succeded")
         except CalledProcessError:
             yield create_failed_connection("Compilation failed.")
         else:
