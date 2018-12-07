@@ -1,15 +1,12 @@
 {
   "name": "@turingarena/client",
   "version": "0.0.0",
-  "main": "build/index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "neutrino build",
-    "start": "neutrino start"
+    "start": "parcel watch src/index.ts"
   },
   "devDependencies": {
-    "@neutrinojs/library": "^8.3.0",
-    "neutrino-preset-typescript": "^2.0.0",
-    "typescript": "^3.0.3"
+    "parcel-bundler": "^1.10.3"
   }
 }

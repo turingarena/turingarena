@@ -91,6 +91,9 @@ export class Client {
       afterOption = "";
     }
     const response = await this.safeFetch(this.endpoint + "/evaluation_events?evaluation=" + id + afterOption);
+    if (!response.ok) {
+      throw Error(response.statusText);
+    }
     return await response.json();
   }
 

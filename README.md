@@ -13,7 +13,7 @@
 Some of the innovative features are:
 
 * a language independent workflow, the problem designer is required a basic knowledge in just one programming language of its choice, and can always decide to which languages the evaluation service of solutions is open;
-* virtually no restriction on the generality of challanges that can be represented;
+* virtually no restriction on the generality of challenges that can be represented;
 * support for defining and implementing with minimum effort meaty problems from various fields (mainly in computer science and mathematics, but let's offer more concrete hints: algorithms, reductions between problems, computational complexity, games in a broad sense, mathematical programming, criptography, zero-knowledge proofs, programming tasks in specific languages or environments, workflows, ... and even support for problem solving without programming);  
 * high levels of interactivity allowed and open ends for gamifications;
 * an effective problem sharing approach which allows teachers and the like to organize in networks collaborating to the joint development of problem based didactive projects for the active learner and open source publishing the problems without neither spoiling them nor giving up their paternity, possibly even copyrighting them.

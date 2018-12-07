@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "lib": [
             "es5",
             "es6",
@@ -16,7 +15,7 @@
             "es2015.symbol.wellknown",
             "esnext.asynciterable"
         ],
-        "target": "es2015",
+        "target": "es5",
         "experimentalDecorators": true,
         "jsx": "react"
     },
