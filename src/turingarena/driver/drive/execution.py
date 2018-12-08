@@ -97,6 +97,19 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
 
             return result
 
+    def _on_execute_Checkpoint(self, n):
+        values = self.receive_upward()
+        if values != (0,):
+            raise CommunicationError(f"expecting checkpoint, got {values}")
+
+        command = self.request_lookahead.command
+        if not command == "checkpoint":
+            raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
+        self.report_ready()
+        return self.result().with_request_processed()
+
+
+
     def _on_execute_Callback(self, n):
         assert self.phase is None
         self.report_ready()
@@ -187,11 +200,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
 
         return self.result()._replace(assignments=assignments)
 
-    def _on_upward_Checkpoint(self, n):
-        values = self.receive_upward()
-        if values != (0,):
-            raise CommunicationError(f"expecting checkpoint, got {values}")
-
     @visitormethod
     def _on_request(self, n):
         pass
@@ -206,13 +214,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         return self.result()._replace(
             request_lookahead=lookahead,
         )
-
-    def _on_request_Checkpoint(self, n):
-        command = self.request_lookahead.command
-        if not command == "checkpoint":
-            raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
-        self.report_ready()
-        return self.result().with_request_processed()
 
     def _on_request_CallbackStart(self, n):
         for p in n.prototype.parameters:

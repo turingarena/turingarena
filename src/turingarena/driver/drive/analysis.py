@@ -13,7 +13,6 @@ DIRECTION_MAP = {
         Read,
     ],
     ReferenceDirection.UPWARD: [
-        Checkpoint,
         CallbackStart,
         CallReturn,
     ],
@@ -96,6 +95,7 @@ class ExecutionAnalyzer(InterfaceAnalyzer):
         for t in [
             Loop,
             AcceptCallbacks,
+            Checkpoint,
         ]:
             if isinstance(n, t):
                 return False
