@@ -14,7 +14,7 @@ def main():
 
     evaluator_path = sys.argv[1]
     sys.argv.pop(1)
-    runpy.run_path(evaluator_path)
+    runpy.run_path(evaluator_path, run_name="__main__")
 
 
 if __name__ == '__main__':
