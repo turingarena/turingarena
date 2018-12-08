@@ -139,7 +139,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         context = self
         while True:
             result = context.execute(n.body)
-            logger.debug(f"request_lookahead: {result.request_lookahead}")
             context = context._replace(
                 request_lookahead=result.request_lookahead,
             )
@@ -345,7 +344,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         pass
 
     def _on_downward_Read(self, n):
-        logging.debug(f"Bindings: {self.bindings}")
         self.send_downward([
             self.evaluate(a)
             for a in n.arguments
