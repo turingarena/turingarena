@@ -73,7 +73,7 @@ class ExecutionPreprocessor(
 
     def node_replacement_Call(self, n):
         yield RequestLookahead()
-        yield CallArgumentsResolve(method=n.method, arguments=n.arguments)
+        yield CallAccept(method=n.method, arguments=n.arguments)
         if n.method.callbacks:
             yield AcceptCallbacks(self.transform_all(n.callbacks))
         yield CallCompleted()

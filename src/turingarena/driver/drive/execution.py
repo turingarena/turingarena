@@ -4,9 +4,9 @@ from enum import Enum
 from turingarena import InterfaceError
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.compile.analysis import ReferenceResolution
+from turingarena.driver.drive.analysis import ReferenceDirection
 from turingarena.driver.drive.comm import ExecutionCommunicator, CommunicationError, InterfaceExitReached
 from turingarena.driver.drive.preprocess import ExecutionPreprocessor
-from turingarena.driver.drive.analysis import ReferenceDirection
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
@@ -107,8 +107,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
             raise InterfaceError(f"expecting 'checkpoint', got '{command}'")
         self.report_ready()
         return self.result().with_request_processed()
-
-
 
     def _on_execute_Callback(self, n):
         assert self.phase is None
@@ -268,7 +266,7 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 assignments=[(n.value, value)]
             )
 
-    def _on_request_CallArgumentsResolve(self, n):
+    def _on_request_CallAccept(self, n):
         command = self.request_lookahead.command
         if not command == "call":
             raise InterfaceError(f"expected call to '{n.method.name}', got {command}")
@@ -284,10 +282,19 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 f"got {parameter_count}"
             )
 
-        assignments = [
-            (a, self.deserialize_request_data())
-            for a in n.arguments
-        ]
+        assignments = []
+        for p, a in zip(n.method.parameters, n.arguments):
+            v = self.deserialize_request_data()
+            try:
+                expected_value = self.evaluate(a)
+            except NotResolved:
+                assignments.append((a, v))
+            else:
+                if isinstance(expected_value, int) and v != expected_value:
+                    raise InterfaceError(
+                        f"parameter {p.variable.name}: expecting {expected_value}, "
+                        f"got {v}"
+                    )
 
         actual_has_return_value = bool(int(self.receive_driver_downward()))
         expected_has_return_value = n.method.has_return_value
