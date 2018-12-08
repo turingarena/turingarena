@@ -47,29 +47,13 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 raise NotResolved from None
 
     def execute(self, n):
-        context = self
-
         logging.debug(
             f"EXECUTE: {n.__class__.__name__} "
             f"phase: {self.phase} "
             f"request LA: {self.request_lookahead}"
         )
 
-        should_lookahead_request = (
-                context.request_lookahead is None
-                and self.needs_request_lookahead(n)
-                and context.phase is ExecutionPhase.REQUEST
-        )
-
-        result = context.result()
-        if should_lookahead_request:
-            lookahead = context.next_request()
-            result = result._replace(
-                request_lookahead=lookahead,
-            )
-            context = context.extend(result)
-
-        return context._on_execute(n)
+        return self._on_execute(n)
 
     @visitormethod
     def _on_execute(self, n):
@@ -214,6 +198,14 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
 
     def _on_request_object(self, n):
         pass
+
+    def _on_request_RequestLookahead(self, n):
+        if self.request_lookahead is not None:
+            return
+        lookahead = self.next_request()
+        return self.result()._replace(
+            request_lookahead=lookahead,
+        )
 
     def _on_request_Checkpoint(self, n):
         command = self.request_lookahead.command

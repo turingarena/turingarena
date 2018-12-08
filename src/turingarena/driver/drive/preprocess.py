@@ -113,7 +113,7 @@ class ExecutionPreprocessor(
         if n.prototype.has_return_value:
             append_nodes = ()
         else:
-            append_nodes = (CallbackEnd(),)
+            append_nodes = (RequestLookahead(), CallbackEnd(),)
         return super().transform_Callback(n._replace(
             body=n.body._replace(
                 children=prepend_nodes + n.body.children + append_nodes
@@ -131,15 +131,30 @@ class ExecutionPreprocessor(
     def node_replacement_object(self, n):
         yield self.transform(n)
 
+    def node_replacement_Checkpoint(self, n):
+        yield RequestLookahead()
+        yield self.transform(n)
+
+    def node_replacement_Return(self, n):
+        yield RequestLookahead()
+        yield self.transform(n)
+
+    def node_replacement_Exit(self, n):
+        yield RequestLookahead()
+        yield self.transform(n)
+
     def node_replacement_If(self, n):
+        yield RequestLookahead()
         yield IfConditionResolve(n)
         yield self.transform(n)
 
     def node_replacement_Switch(self, n):
+        yield RequestLookahead()
         yield SwitchValueResolve(n)
         yield self.transform(n)
 
     def node_replacement_Call(self, n):
+        yield RequestLookahead()
         yield CallArgumentsResolve(method=n.method, arguments=n.arguments)
         if n.method.callbacks:
             yield AcceptCallbacks(self.transform_all(n.callbacks))

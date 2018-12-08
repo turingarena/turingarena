@@ -1,6 +1,4 @@
 from turingarena.driver.common.analysis import InterfaceAnalyzer
-from turingarena.driver.common.nodes import *
-from turingarena.driver.drive.nodes import *
 from turingarena.driver.drive.requests import RequestSignature, CallRequestSignature
 from turingarena.util.visitor import visitormethod
 
@@ -53,16 +51,3 @@ class ExecutionAnalyzer(InterfaceAnalyzer):
 
     def _get_first_requests_object(self, n):
         yield None
-
-    def needs_request_lookahead(self, n):
-        types = [
-            Checkpoint,
-            SwitchValueResolve,
-            IfConditionResolve,
-            CallbackEnd,
-            Return,
-            CallArgumentsResolve,
-            Exit,
-        ]
-
-        return any(isinstance(n, t) for t in types)

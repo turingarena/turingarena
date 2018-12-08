@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 Step = namedtuple("Step", ["direction", "body"])
+RequestLookahead = namedtuple("RequestLookahead", [])
 CallbackStart = namedtuple("CallbackStart", ["prototype"])
 CallbackEnd = namedtuple("CallbackEnd", [])
 CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["method", "arguments"])
