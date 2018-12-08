@@ -5,7 +5,8 @@ from turingarena import InterfaceError
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.compile.analysis import ReferenceResolution
 from turingarena.driver.drive.comm import ExecutionCommunicator, CommunicationError, InterfaceExitReached
-from turingarena.driver.drive.preprocess import ExecutionPreprocessor, ReferenceDirection
+from turingarena.driver.drive.preprocess import ExecutionPreprocessor
+from turingarena.driver.drive.analysis import ReferenceDirection
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
