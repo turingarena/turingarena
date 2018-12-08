@@ -83,9 +83,19 @@ class ExecutionPreprocessor(
     def group_children(self, children):
         group = []
         for node in children:
-            can_be_grouped = self.can_be_grouped(node) and len(self._group_directions([node])) <= 1
+            # steps cannot have both UPWARD and DOWNWARD phases
 
-            if can_be_grouped and len(self._group_directions(group + [node])) <= 1:
+            can_be_grouped = self.can_be_grouped(node) and not all(
+                phase in self.phases(node)
+                for phase in (ExecutionPhase.UPWARD, ExecutionPhase.DOWNWARD)
+            )
+
+            can_be_added_to_group = can_be_grouped and not all(
+                phase in self._group_phases(group + [node])
+                for phase in (ExecutionPhase.UPWARD, ExecutionPhase.DOWNWARD)
+            )
+
+            if can_be_added_to_group:
                 group.append(node)
                 continue
 
@@ -102,14 +112,7 @@ class ExecutionPreprocessor(
             yield self._make_step(group)
 
     def _make_step(self, group):
-        return Step(body=Block(tuple(group)), direction=self._group_direction(group))
+        return Step(body=Block(tuple(group)), phases=self._group_phases(group))
 
-    def _group_direction(self, group):
-        directions = self._group_directions(group)
-        if not directions:
-            return None
-        [direction] = directions
-        return direction
-
-    def _group_directions(self, group):
-        return {d for n in group for d in self.declaration_directions(n)}
+    def _group_phases(self, group):
+        return {d for n in group for d in self.phases(n)}

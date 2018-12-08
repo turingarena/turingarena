@@ -1,21 +1,37 @@
-from enum import Enum
-
 from turingarena.driver.common.analysis import InterfaceAnalyzer
 from turingarena.driver.common.nodes import *
 from turingarena.driver.drive.nodes import *
 from turingarena.driver.drive.requests import *
 from turingarena.util.visitor import visitormethod
 
-ReferenceDirection = Enum("ReferenceDirection", names=["DOWNWARD", "UPWARD"])
-
-DIRECTION_MAP = {
-    ReferenceDirection.DOWNWARD: [
-        Read,
+PHASES_MAP = {
+    RequestLookahead: [
+        ExecutionPhase.REQUEST,
     ],
-    ReferenceDirection.UPWARD: [
-        Checkpoint,
-        CallbackStart,
-        CallReturn,
+    Read: [
+        ExecutionPhase.DOWNWARD,
+    ],
+    Write: [
+        ExecutionPhase.UPWARD,
+    ],
+    Checkpoint: [
+        ExecutionPhase.UPWARD,
+        ExecutionPhase.REQUEST,
+    ],
+    CallbackStart: [
+        ExecutionPhase.UPWARD,
+        ExecutionPhase.REQUEST,
+    ],
+    CallbackEnd: [
+        ExecutionPhase.REQUEST,
+    ],
+    CallReturn: [
+        ExecutionPhase.UPWARD,
+
+        ExecutionPhase.REQUEST,
+    ],
+    Return: [
+        ExecutionPhase.REQUEST,
     ],
 }
 
@@ -101,45 +117,43 @@ class ExecutionAnalyzer(InterfaceAnalyzer):
                 return False
         return True
 
-    def declaration_directions(self, n):
-        return frozenset(self._get_directions(n))
+    def phases(self, n):
+        return frozenset(self._get_phases(n))
 
     @visitormethod
-    def _get_directions(self, n):
+    def _get_phases(self, n):
         pass
 
-    def _get_directions_Block(self, n):
+    def _get_phases_Block(self, n):
         for child in n.children:
-            yield from self.declaration_directions(child)
+            yield from self.phases(child)
 
-    def _get_directions_Step(self, n):
-        if n.direction is not None:
-            yield n.direction
+    def _get_phases_Step(self, n):
+        yield from n.phases
 
-    def _get_directions_For(self, n):
-        yield from self.declaration_directions(n.body)
+    def _get_phases_For(self, n):
+        yield from self.phases(n.body)
 
-    def _get_directions_If(self, n):
+    def _get_phases_If(self, n):
         for body in n.branches:
             if body is not None:
-                yield from self.declaration_directions(body)
+                yield from self.phases(body)
 
-    def _get_directions_Switch(self, n):
+    def _get_phases_Switch(self, n):
         for c in n.cases:
-            yield from self.declaration_directions(c.body)
+            yield from self.phases(c.body)
 
-    def _get_directions_Loop(self, n):
-        yield from self.declaration_directions(n.body)
+    def _get_phases_Loop(self, n):
+        yield from self.phases(n.body)
 
-    def _get_directions_AcceptCallbacks(self, n):
+    def _get_phases_AcceptCallbacks(self, n):
         for callback in n.callbacks:
-            yield from self.declaration_directions(callback.body)
+            yield from self.phases(callback.body)
 
-    def _get_directions_Callback(self, n):
-        return self.declaration_directions(n.body)
+    def _get_phases_Callback(self, n):
+        return self.phases(n.body)
 
-    def _get_directions_object(self, n):
-        for d, ts in DIRECTION_MAP.items():
-            for t in ts:
-                if isinstance(n, t):
-                    yield d
+    def _get_phases_object(self, n):
+        for t, v in PHASES_MAP.items():
+            if isinstance(n, t):
+                yield from v
