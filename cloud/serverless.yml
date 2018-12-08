@@ -1,7 +1,7 @@
 service: turingarena
 
 plugins:
-  #- serverless-python-requirements
+  - serverless-python-requirements
   - serverless-apigw-binary
 
 provider:

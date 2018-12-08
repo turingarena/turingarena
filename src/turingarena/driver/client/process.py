@@ -100,6 +100,9 @@ class Process:
                 self._send_exit()
                 self.stop()
                 raise
+            except AlgorithmLogicError:
+                self.stop()
+                raise
 
     @property
     def current_memory_usage(self):
