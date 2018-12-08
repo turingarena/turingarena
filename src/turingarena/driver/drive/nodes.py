@@ -8,5 +8,4 @@ CallArgumentsResolve = namedtuple("CallArgumentsResolve", ["method", "arguments"
 CallReturn = namedtuple("CallReturn", ["return_value"])
 CallCompleted = namedtuple("CallCompleted", [])
 AcceptCallbacks = namedtuple("AcceptCallbacks", ["callbacks"])
-IfConditionResolve = namedtuple("IfConditionResolve", ["node"])
-SwitchValueResolve = namedtuple("SwitchValueResolve", ["node"])
+ValueResolve = namedtuple("ValueResolve", ["value", "map"])

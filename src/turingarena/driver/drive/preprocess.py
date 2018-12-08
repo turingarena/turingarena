@@ -145,12 +145,20 @@ class ExecutionPreprocessor(
 
     def node_replacement_If(self, n):
         yield RequestLookahead()
-        yield IfConditionResolve(n)
+        yield ValueResolve(n.condition, tuple(
+            (request, value)
+            for value, branch in zip((1, 0), n.branches)
+            for request in (self.first_requests(branch) if branch is not None else (None,))
+        ))
         yield self.transform(n)
 
     def node_replacement_Switch(self, n):
         yield RequestLookahead()
-        yield SwitchValueResolve(n)
+        yield ValueResolve(n.value, tuple(
+            (request, case.labels[0].value)
+            for case in n.cases
+            for request in self.first_requests(case.body)
+        ))
         yield self.transform(n)
 
     def node_replacement_Call(self, n):

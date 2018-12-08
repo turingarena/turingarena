@@ -214,29 +214,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         self.report_ready()
         return self.result().with_request_processed()
 
-    def _on_request_SwitchValueResolve(self, n):
-        try:
-            self.evaluate(n.node.value)
-        except NotResolved:
-            matching_cases = self._find_matching_cases(n.node, self.request_lookahead)
-            [case] = matching_cases
-            [label] = case.labels
-            assignments = [(n.node.value, label.value)]
-
-            return self.result()._replace(assignments=assignments)
-
-    def _find_matching_cases(self, n, request):
-        matching_cases_requests = list(self._find_cases_expecting(n, request))
-        if matching_cases_requests:
-            return matching_cases_requests
-        else:
-            return list(self._find_cases_expecting(n, None))
-
-    def _find_cases_expecting(self, n, request):
-        for c in n.cases:
-            if request in self.first_requests(c.body):
-                yield c
-
     def _on_request_CallbackStart(self, n):
         for p in n.prototype.parameters:
             value = self.bindings[p.variable]
@@ -276,34 +253,19 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
             raise InterfaceError(f"Expecting exit, got {command}")
         raise InterfaceExitReached
 
-    def _on_request_IfConditionResolve(self, n):
+    def _on_request_ValueResolve(self, n):
         try:
-            self.evaluate(n.node.condition)
+            self.evaluate(n.value)
         except NotResolved:
-            [condition_value] = self._find_conditions(n.node, self.request_lookahead)
+            assert self.request_lookahead is not None
+            map = dict(n.map)
+            try:
+                value = map[self.request_lookahead]
+            except KeyError:
+                value = map[None]  # default
             return self.result()._replace(
-                assignments=[(n.node.condition, condition_value)]
+                assignments=[(n.value, value)]
             )
-
-    def _find_conditions(self, n, request):
-        matching_conditions = frozenset(self._find_conditions_expecting(n, request))
-        if not matching_conditions:
-            matching_conditions = frozenset(self._find_conditions_expecting_no_request(n))
-        return matching_conditions
-
-    def _find_conditions_expecting(self, n, request):
-        resolved_values = (
-            1,  # then
-            0,  # else
-        )
-        for value, body in zip(resolved_values, n.branches):
-            if body is not None and request in self.first_requests(body):
-                yield value
-
-    def _find_conditions_expecting_no_request(self, n):
-        yield from self._find_conditions_expecting(n, None)
-        if n.branches.else_body is None:
-            yield 0
 
     def _on_request_CallArgumentsResolve(self, n):
         command = self.request_lookahead.command

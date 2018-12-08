@@ -14,11 +14,18 @@ class TreeDumper(AbstractExpressionCodeGen, LinesGenerator):
         pass
 
     def _on_dump_object(self, n):
+        self.line(repr(n))
+
+    def _on_dump_Enum(self, n):
         self.line(str(n))
 
     def _on_dump_tuple(self, n):
         if len(n) == 0:
             self.line(f"{n.__class__.__name__}()")
+            return
+
+        if len(n) == 1:
+            self.line(f"{n.__class__.__name__}({self.dump(n[0])})")
             return
 
         self.line(f"{n.__class__.__name__}(")
@@ -29,7 +36,8 @@ class TreeDumper(AbstractExpressionCodeGen, LinesGenerator):
             else:
                 for v in n:
                     self.line(f"{self.dump(v)},")
-        self.line(f") # {n.__class__.__name__}")
+            self.line(f"# end {n.__class__.__name__}")
+        self.line(f")")
 
 
 class StatementDescriber(AbstractExpressionCodeGen):
