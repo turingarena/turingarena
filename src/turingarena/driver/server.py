@@ -8,7 +8,7 @@ from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
 from turingarena.driver.compile.compile import load_interface
-from turingarena.driver.drive.comm import CommunicationError, DriverStop
+from turingarena.driver.drive.comm import CommunicationError, DriverStop, InterfaceExitReached
 from turingarena.driver.drive.execution import Executor
 from turingarena.driver.language import Language
 
@@ -57,7 +57,10 @@ def run_server(driver_connection, source_path, interface_path):
         )
 
         try:
-            context.execute(interface)
+            try:
+                context.execute(interface)
+            except InterfaceExitReached:
+                pass
             context.report_ready()
             request = context.next_request()
             assert False, f"driver was not explicitly stopped, got {request}"

@@ -76,9 +76,4 @@ class Program(namedtuple("Program", [
 
             process = Process(driver_connection)
             with process._run(**kwargs):
-                try:
-                    yield process
-                except InterfaceExit:
-                    pass
-                finally:
-                    process.stop()
+                yield process

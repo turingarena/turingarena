@@ -4,8 +4,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 
 from turingarena.driver.client.commands import DriverState, serialize_data
-from turingarena.driver.client.exceptions import AlgorithmRuntimeError, AlgorithmLogicError, MemoryLimitExceeded, \
-    TimeLimitExceeded
+from turingarena.driver.client.exceptions import *
 from turingarena.driver.client.processinfo import SandboxProcessInfo
 from turingarena.driver.client.proxy import MethodProxy
 
@@ -93,7 +92,14 @@ class Process:
         assert self._latest_resource_usage is not None
         with self.section(**kwargs) as main_section:
             self._main_section = main_section
-            yield self
+            try:
+                yield self
+                self._send_exit()
+            except InterfaceExit:
+                self._send_exit()
+                raise
+            finally:
+                self.stop()
 
     @property
     def current_memory_usage(self):
@@ -150,7 +156,7 @@ class Process:
             return None
 
     def exit(self):
-        self._send_request_line("exit")
+        raise InterfaceExit
 
     def stop(self):
         self._send_request_line("stop")
@@ -159,6 +165,9 @@ class Process:
     def checkpoint(self):
         self._send_request_line("checkpoint")
         self._wait_ready()
+
+    def _send_exit(self):
+        self._send_request_line("exit")
 
     def _accept_callbacks(self, callback_list):
         while True:
