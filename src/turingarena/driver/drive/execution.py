@@ -1,14 +1,21 @@
 import logging
+from enum import Enum
 
 from turingarena import InterfaceError
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.compile.analysis import ReferenceResolution
 from turingarena.driver.drive.comm import ExecutionCommunicator, CommunicationError, InterfaceExitReached
-from turingarena.driver.drive.nodes import *
 from turingarena.driver.drive.preprocess import ExecutionPreprocessor
+from turingarena.driver.drive.analysis import ReferenceDirection
 from turingarena.util.visitor import visitormethod
 
 logger = logging.getLogger(__name__)
+
+
+class ExecutionPhase(Enum):
+    UPWARD = 1
+    REQUEST = 2
+    DOWNWARD = 3
 
 
 class NotResolved(Exception):
@@ -75,7 +82,9 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         else:
             result = self.result()
             for phase in ExecutionPhase:
-                if phase not in n.phases:
+                direction = n.direction
+
+                if phase == ExecutionPhase.UPWARD and direction != ReferenceDirection.UPWARD:
                     continue
 
                 logging.debug(f"about to run step phase {phase} (prev result: {result})")
@@ -99,11 +108,13 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         if self.phase is None:
             assert self.request_lookahead is None
 
-        if self.phase is not None:
-            if self.phase not in self.phases(n.body):
-                return
-
-        for_range = self.evaluate(n.index.range)
+        try:
+            for_range = self.evaluate(n.index.range)
+        except NotResolved:
+            # we assume that if the range is not resolved, then the cycle should be skipped
+            # FIXME: determine this situation statically
+            logger.debug(f"skipping for (phase: {self.phase})")
+            return
 
         results_by_iteration = [
             self.with_assigments(
