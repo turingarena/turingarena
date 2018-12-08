@@ -140,7 +140,7 @@ class PythonCodeGen(InterfaceCodeGen):
 
     def visit_MethodTemplate(self, n):
         if n.description:
-            for l in n.description.splitlines():
+            for l in n.description:
                 self.line(f"# {l}")
         self.visit(n.prototype)
         with self.indent():
