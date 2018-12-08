@@ -95,11 +95,11 @@ class Process:
             try:
                 yield self
                 self._send_exit()
+                self.stop()
             except InterfaceExit:
                 self._send_exit()
-                raise
-            finally:
                 self.stop()
+                raise
 
     @property
     def current_memory_usage(self):
