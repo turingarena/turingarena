@@ -135,8 +135,6 @@ class Process:
             error=None,
         )
 
-        logging.debug(f"got resource usage: {resource_usage}")
-
         self._latest_resource_usage = resource_usage
 
         for section in self._running_sections:
@@ -153,7 +151,6 @@ class Process:
 
         if request.has_return_value:
             self._wait_ready()
-            logging.debug(f"Receiving return value...")
             return self._get_response_value()
         else:
             return None
@@ -177,7 +174,6 @@ class Process:
             self._wait_ready()
             response = self._get_response_value()
             if response == 1:  # has callback
-                logging.debug(f"has callback")
                 index = self._get_response_value()
                 callback = callback_list[index]
                 args = [
@@ -185,7 +181,6 @@ class Process:
                     for _ in range(callback.__code__.co_argcount)
                 ]
                 return_value = callback(*args)
-                logging.debug(f"callback {index} ({args}) -> {return_value}")
                 self._on_callback_return(return_value)
             elif response == 0:  # no callbacks
                 break
@@ -202,10 +197,8 @@ class Process:
 
     def _get_response_line(self):
         self._connection.downward.flush()
-        logging.debug(f"receiving upward from driver...")
         line = self._connection.upward.readline().strip()
         assert line, "no line received from driver"
-        logging.debug(f"Read response line: {line}")
         return line
 
     def _get_response_value(self):
@@ -216,7 +209,6 @@ class Process:
         self.fail(message, exc_type=AlgorithmRuntimeError)
 
     def _wait_ready(self):
-        logging.debug(f"waiting for response ok")
         while True:
             state = DriverState(self._get_response_value())
             if state is DriverState.READY:

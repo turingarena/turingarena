@@ -9,8 +9,6 @@ from turingarena.driver.drive.comm import ExecutionCommunicator, CommunicationEr
 from turingarena.driver.drive.preprocess import ExecutionPreprocessor
 from turingarena.util.visitor import visitormethod
 
-logger = logging.getLogger(__name__)
-
 
 class ExecutionPhase(Enum):
     UPWARD = 1
@@ -48,12 +46,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 raise NotResolved from None
 
     def execute(self, n):
-        logging.debug(
-            f"EXECUTE: {n.__class__.__name__} "
-            f"phase: {self.phase} "
-            f"request LA: {self.request_lookahead}"
-        )
-
         return self._on_execute(n)
 
     @visitormethod
@@ -87,13 +79,9 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 if phase == ExecutionPhase.UPWARD and direction != ReferenceDirection.UPWARD:
                     continue
 
-                logging.debug(f"about to run step phase {phase} (prev result: {result})")
-
                 result = result.merge(self.extend(result)._replace(
                     phase=phase,
                 ).execute(n.body))
-
-                logging.debug(f"step phase {phase} result: {result}")
 
             return result
 
@@ -124,7 +112,6 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         except NotResolved:
             # we assume that if the range is not resolved, then the cycle should be skipped
             # FIXME: determine this situation statically
-            logger.debug(f"skipping for (phase: {self.phase})")
             return
 
         results_by_iteration = [

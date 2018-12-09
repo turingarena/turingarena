@@ -76,7 +76,6 @@ class PopenProcessManager(ProcessManager):
         trials = 10
         for trial in range(trials):
             status = self._read_proc_stat()[2]
-            logging.debug(f"ProcessManager status: {status}")
             if status in ("S", "Z"):
                 break
             time.sleep(timeout / trials)
