@@ -28,17 +28,13 @@ class ExecutionCommunicator(ExecutionContext):
         self.send_driver_upward(state.value)
 
     def send_driver_upward(self, item):
-        logging.debug(f"send_driver_upward: {item}")
         if isinstance(item, bool):
             item = int(item)
         print(item, file=self.driver_connection.upward)
 
     def receive_driver_downward(self):
         self.driver_connection.upward.flush()
-        logging.debug(f"receive_driver_downward...")
-        line = self.driver_connection.downward.readline().strip()
-        logging.debug(f"receive_driver_downward -> {line}")
-        return line
+        return self.driver_connection.downward.readline().strip()
 
     def report_ready(self):
         self.send_resource_usage_upward()
@@ -77,7 +73,6 @@ class ExecutionCommunicator(ExecutionContext):
             raise CommunicationError(f"downward pipe broken") from e
 
     def send_downward(self, values):
-        logging.debug(f"send_downward: {values}")
         with self._check_downward_pipe():
             print(*values, file=self.sandbox_connection.downward)
 
@@ -88,9 +83,7 @@ class ExecutionCommunicator(ExecutionContext):
         timer = threading.Timer(UPWARD_TIMEOUT, self._on_timeout)
         timer.start()
 
-        logging.debug(f"receive upward from process...")
         line = self.sandbox_connection.upward.readline().strip()
-        logging.debug(f"receive upward from process -> {line!r}")
 
         timer.cancel()
         timer.join()
@@ -104,13 +97,11 @@ class ExecutionCommunicator(ExecutionContext):
             raise CommunicationError(f"process sent invalid data") from e
 
     def deserialize_request_data(self):
-        logging.debug(f"deserialize_request_data")
         deserializer = deserialize_data()
         next(deserializer)
         lines_it = iter(self.receive_driver_downward, None)
         try:
             for line in lines_it:
-                logging.debug(f"deserializing line {line}...")
                 deserializer.send(line)
         except StopIteration as e:
             result = e.value

@@ -238,7 +238,6 @@ class Process:
             yield c.__code__.co_argcount
 
     def _send_request_line(self, line):
-        logging.debug(f"sending request downward to driver: {line}")
         print(line, file=self._connection.downward)
 
 
