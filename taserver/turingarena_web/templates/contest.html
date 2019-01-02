@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% set title = "Contest " + contest.name %}
+{% block body %}
+    <div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Goals</th>
+            </tr>
+            </thead>
+            <tbody style="cursor: pointer">
+            {% for problem in contest.problems %}
+                <tr onclick="window.location = '{{ url_for("problem.problem_view", name=problem.name) }}'">
+                    <td>{{ problem.name }}</td>
+                    <td>{{ problem.title }}</td>
+                    <td>{{ problem.max_goals_of_user_in_contest(user, contest) }} / {{ problem.n_goals }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <div>
+        <p>In this contest, you can use the following programming languages:</p>
+        <ul>
+            {% for language in contest.allowed_languages %}
+            <li>{{ language }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

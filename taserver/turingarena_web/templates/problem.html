@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% set title = problem.title %}
+{% block body %}
+    <div id="statement">
+        {{ problem.statement(contest) | safe }}
+    </div>
+    <div>
+    </div>
+    <hr>
+    {% if user is none %}
+        <h3>You must <a href="{{ url_for("user.login", redirect=request.url) }}">log in</a> to submit a solution!</h3>
+    {% else %}
+        <div id="submission">
+            <h3>Submit your solution</h3>
+            <form method="post" enctype="multipart/form-data">
+                <div class="input-group form-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Select source file</span>
+                    </div>
+                    <div class="input-group custom-file">
+                        <input id="source_upload" class="custom-file-input" type="file" name="source" required>
+                        <label id="source_label" for="source_upload" class="custom-file-label">Choose</label>
+                    </div>
+                </div>
+                <a class="btn btn-primary" role="button" href={{ url_for("problem.files", name=problem.name) }}>Download problem
+                    files</a>
+                <button class="btn btn-success" type="submit">Submit</button>
+                {% if error is not none %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endif %}
+                <script>
+                    document.getElementById("source_upload").onchange = function (e) {
+                        document.getElementById("source_label").innerText = e.target.files[0].name;
+                    }
+                </script>
+            </form>
+        </div>
+        <hr>
+        <div id="submissions">
+            <h3>Your previous submissions</h3>
+            <table class="table">
+                <tr>
+                    <th>Date</th>
+                    <th>Goals</th>
+                    <th>Details</th>
+                    <th>Download</th>
+                </tr>
+                {% for submission in submissions %}
+                    {% set correct_goals = submission.goals.values()|sum %}
+                    {% set total_goals = submission.goals|length %}
+                    {% if correct_goals == total_goals %}
+                        <tr class="table-success">
+                            {% elif correct_goals == 0 %}
+                        <tr class="table-danger">
+                            {% else %}
+                        <tr class="table-warning">
+                    {% endif %}
+                <td>{{ submission.timestamp.strftime("%H:%M %d/%m/%Y") }}</td>
+                <td>{{ correct_goals }} / {{ total_goals }}</td>
+                <td><a href="{{ url_for("submission.submission_view", submission_id=submission["id"]) }}">Info</a></td>
+                <td>
+                    <a href="{{ url_for("submission.download", submission_id=submission["id"], filename=submission["filename"]) }}">{{ submission.filename }}</a>
+                </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}
