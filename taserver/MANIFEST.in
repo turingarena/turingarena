@@ -1,0 +1,2 @@
+recursive-include turingarena_web/templates *
+recursive-include turingarena_web/static *
