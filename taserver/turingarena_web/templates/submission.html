@@ -4,20 +4,31 @@
         {# TODO: dymaically get evaluation events via some JavaScript code #}
         <meta http-equiv="refresh" content="1">
     {% endif %}
+    <style>
+        #evaluation-output {
+            overflow: auto;
+            height: 400px;
+        }
+
+        #goals {
+            overflow: auto;
+        }
+    </style>
 {% endblock %}
 {% block body %}
-    <div id="evaluation_output">
+    <div>
         <h3>Evaluation output</h3>
-        <pre>
+        <pre id="evaluation-output">
             {%- for event in events -%}
                 {{ event | safe }}
             {%- endfor -%}
+            {% if not end %}<br>Evaluating...{% endif %}
         </pre>
     </div>
     <hr>
-    <div id="goals">
+    <div>
         <h3>Your goals</h3>
-        <table class="table">
+        <table id="goals" class="table">
             <tr>
                 <th>Goal</th>
                 <th>Result</th>
@@ -25,12 +36,12 @@
             {% for goal, value in goals.items() %}
                 {% if value %}
                     <tr class="table-success">
-                {% else %}
+                        {% else %}
                     <tr class="table-danger">
                 {% endif %}
-                        <td>{{ goal.name }}</td>
-                        <td>{% if value %} 👌 {% else %} 🙁 {% endif %}</td>
-                    </tr>
+            <td>{{ goal.name }}</td>
+            <td>{% if value %} 👌 {% else %} 🙁 {% endif %}</td>
+            </tr>
             {% endfor %}
         </table>
     </div>

@@ -79,6 +79,5 @@ CREATE TABLE problem_contest (
 CREATE TABLE session (
   cookie     CHAR(64) PRIMARY KEY,
   user_id    INTEGER NOT NULL REFERENCES _user (id),
-  contest_id INTEGER REFERENCES contest (id),
   timestamp  TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
