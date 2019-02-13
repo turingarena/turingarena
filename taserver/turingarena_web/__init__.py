@@ -5,7 +5,7 @@ from turingarena_web.controller.root import root_bp
 from turingarena_web.controller.submission import submission_bp
 from turingarena_web.controller.contest import contest_bp
 from turingarena_web.config import config
-from turingarena_web.init_logger import init_logger
+from turingarena_web.logging import init_logger
 
 
 def create_app():

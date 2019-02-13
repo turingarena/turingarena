@@ -10,6 +10,7 @@ from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.problem import Problem
+from turingarena_web.model.user import User
 
 
 class ContestCommand(Command, ABC):
@@ -104,7 +105,10 @@ class AddUserContestCommand(AddContestCommand):
     PARSER.add_argument("contest", help="name of the contest")
 
     def run(self):
-        user = User.from_name(self.args.user)
+        user = User.from_username(self.args.user)
+        if user is None:
+            print(f"No user with username {self.args.user} found!")
+            exit(1)
         contest = Contest.from_name(self.args.contest)
         contest.add_user(user)
 
@@ -120,7 +124,10 @@ class RemoveUserContestCommand(RemoveContestCommand):
     PARSER.add_argument("contest", help="name of the contest")
 
     def run(self):
-        user = User.from_name(self.args.user)
+        user = User.from_username(self.args.user)
+        if user is None:
+            print(f"No user with username {self.args.user} found!")
+            exit(1)
         contest = Contest.from_name(self.args.contest)
         contest.remove_user(user)
 

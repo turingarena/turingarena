@@ -23,21 +23,21 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <div class="navbar-nav mr-auto">
-                        <span class="navbar-text disabled">{{ title or "" }}</span>
-                    </div>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav mr-auto">
+                        {% if contest %}
+                            <li class="navbar-item active">
+                                <a class="nav-link"
+                                   href="{{ url_for("contest.contest_view", contest_name=contest.name) }}">Contest {{ contest.name }}</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    <ul class="nav navbar-nav">
                         {% if user is defined and user is not none %}
                             <li class="nav-item active">
                                 <a class="nav-link"
                                    href="{{ url_for("user.user_view", username=user.username) }}">
                                     {{ user.first_name }} {{ user.last_name }} ({{ user.username }})</a>
                             </li>
-{#                            {% if user.privilege.value == "ADMIN" %}#}
-{#                                <li class="nav-item active">#}
-{#                                    <a class="nav-link" href="{{ url_for("admin.home") }}">Admin</a>#}
-{#                                </li>#}
-{#                            {% endif %}#}
                             <li class="nav-item active">
                                 <a class="nav-link" href="{{ url_for("user.logout") }}">Logout</a>
                             </li>
@@ -51,7 +51,7 @@
             </nav>
         {% endblock %}
     </header>
-    <div>
+    <div class="container">
         {% block body %}
         {% endblock %}
     </div>
