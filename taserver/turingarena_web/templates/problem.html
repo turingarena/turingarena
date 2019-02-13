@@ -22,7 +22,7 @@
                         <label id="source_label" for="source_upload" class="custom-file-label">Choose</label>
                     </div>
                 </div>
-                <a class="btn btn-primary" role="button" href={{ url_for("problem.files", name=problem.name) }}>Download problem
+                <a class="btn btn-primary" role="button" href={{ url_for("contest.files", contest_name=contest.name, name=problem.name) }}>Download problem
                     files</a>
                 <button class="btn btn-success" type="submit">Submit</button>
                 {% if error is not none %}

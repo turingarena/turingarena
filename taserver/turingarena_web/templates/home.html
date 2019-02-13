@@ -1,39 +1,42 @@
 {% extends "base.html" %}
 {% set title = "Contests available" %}
 {% block body %}
-    <div>
-        <p>Your contests</p>
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th>Contest</th>
-            </tr>
-            </thead>
-            <tbody style="cursor: pointer">
-            {% for contest in contests %}
-                <tr onclick="window.location = '{{ url_for("contest.contest", contest_name=contest.name) }}'">
-                    <td>{{ contest.name }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div>
-        <p>Available contests</p>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Contest</th>
-            </tr>
-            </thead>
-            <tbody style="cursor: pointer">
-            {% for contest in available_contests %}
+    {% if contests|length > 0 %}
+        <div>
+            <table class="table table-hover">
+                <thead>
                 <tr>
-                    <td>{{ contest.name }}</td>
-                    <td><a href="{{ url_for("contest.subscribe", contest_name=contest.name) }}">Subscribe</a></td>
+                    <th>Contest</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody style="cursor: pointer">
+                {% for contest in contests %}
+                    <tr onclick="window.location = '{{ url_for("contest.contest_view", contest_name=contest.name) }}'">
+                        <td>{{ contest.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    {% if available_contests|length > 0 %}
+        <div>
+            <p>Available contests</p>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Contest</th>
+                </tr>
+                </thead>
+                <tbody style="cursor: pointer">
+                {% for contest in available_contests %}
+                    <tr>
+                        <td>{{ contest.name }}</td>
+                        <td><a href="{{ url_for("contest.subscribe", contest_name=contest.name) }}">Subscribe</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}
