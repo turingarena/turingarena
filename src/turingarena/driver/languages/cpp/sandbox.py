@@ -2,11 +2,7 @@ import errno
 import os
 import sys
 
-try:
-    import seccomplite
-except ImportError:
-    seccomplite = None
-    print("WARNING: no code sandboxing! Install seccomplite")
+import seccomplite
 
 
 def init_sandbox():
@@ -30,12 +26,11 @@ def init_sandbox():
 
 
 def main():
-    if seccomplite is not None:
-        init_sandbox()
+    init_sandbox()
 
     # From here every system call that is not allowed will result in an Exception
 
-    os.execl(sys.argv[1], sys.argv[1])
+    os.execle(sys.argv[1], sys.argv[1], {})
 
 
 if __name__ == "__main__":

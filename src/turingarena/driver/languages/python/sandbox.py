@@ -1,11 +1,8 @@
 import errno
 import sys
+import os
 
-try:
-    import seccomplite
-except ImportError:
-    seccomplite = None
-    print("WARNING: no code sandboxing! Install seccomplite")
+import seccomplite
 
 
 def init_sandbox():
@@ -33,8 +30,9 @@ def main():
     with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
 
-    if seccomplite is not None:
-        init_sandbox()
+    os.environ.clear()
+
+    init_sandbox()
 
     class Wrapper: pass
 
