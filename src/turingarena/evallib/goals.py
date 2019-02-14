@@ -42,3 +42,6 @@ class Goals(MutableMapping):
 
     def __len__(self):
         return len(self._assigned_goals)
+
+    def __str__(self):
+        return f"Goals({dict(self)})"
