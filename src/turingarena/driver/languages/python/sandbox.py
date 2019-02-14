@@ -2,11 +2,7 @@ import errno
 import sys
 import os
 
-try:
-    import seccomplite
-except ImportError:
-    seccomplite = None
-    print("WARNING: no code sandboxing! Install seccomplite")
+import seccomplite
 
 
 def init_sandbox():
@@ -36,8 +32,7 @@ def main():
 
     os.environ.clear()
 
-    if seccomplite is not None:
-        init_sandbox()
+    init_sandbox()
 
     class Wrapper: pass
 
