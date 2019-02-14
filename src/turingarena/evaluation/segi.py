@@ -17,7 +17,7 @@ def submission_environ(submission_fields):
 
 
 @contextmanager
-def process_stdout_pipe(cmd, env, reset_env=False, **popen_kwargs):
+def process_stdout_pipe(cmd, **popen_kwargs):
     with ExitStack() as stack:
         read_pipe_fd, write_pipe_fd = os.pipe2(os.O_NONBLOCK)
 
@@ -28,27 +28,11 @@ def process_stdout_pipe(cmd, env, reset_env=False, **popen_kwargs):
 
         stack.callback(close_pipes)
 
-        env_whitelist = [
-            "PATH"
-        ]
-
-        if reset_env:
-            base_env = {
-                k: os.environ[k]
-                for k in env_whitelist
-            }
-        else:
-            base_env = os.environ
-
         stack.enter_context(subprocess.Popen(
             cmd,
             **popen_kwargs,
             stdin=subprocess.DEVNULL,
             stdout=write_pipe_fd,
-            env={
-                **base_env,
-                **env,
-            },
         ))
         os.close(write_pipe_fd)
         write_pipe_fd = None
@@ -65,6 +49,7 @@ def segi_subprocess(submission, cmd, env=None, **popen_kwargs):
     )
 
     env = {
+        **os.environ,
         **env,
         "EVALUATION_DATA_BEGIN": data_begin,
         "EVALUATION_DATA_END": data_end,

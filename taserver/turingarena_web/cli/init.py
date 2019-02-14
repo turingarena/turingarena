@@ -15,4 +15,10 @@ class InitCommand(Command, ABC):
     )
 
     def run(self):
-        database.init()
+        print("Really initialize the database?")
+        print("WARNING: all existing database data will be lost!!!")
+        print("Type the string \"yes, I know what I'm doing\" to do so: ", end="")
+        if input() == "yes, I know what I'm doing":
+            database.init()
+        else:
+            print("Aborted")

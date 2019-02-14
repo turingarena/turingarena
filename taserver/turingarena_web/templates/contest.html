@@ -12,7 +12,7 @@
             </thead>
             <tbody style="cursor: pointer">
             {% for problem in contest.problems %}
-                <tr onclick="window.location = '{{ url_for("problem.problem_view", name=problem.name) }}'">
+                <tr onclick="window.location = '{{ url_for("contest.problem_view", contest_name=contest.name, name=problem.name) }}'">
                     <td>{{ problem.name }}</td>
                     <td>{{ problem.title }}</td>
                     <td>{{ problem.max_goals_of_user_in_contest(user, contest) }} / {{ problem.n_goals }}</td>

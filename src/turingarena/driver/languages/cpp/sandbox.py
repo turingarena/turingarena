@@ -1,12 +1,12 @@
 import errno
 import os
-import resource
 import sys
-from seccomplite import Filter, ERRNO, ALLOW, TRAP
+
+import seccomplite
 
 
 def init_sandbox():
-    filter = Filter(TRAP)
+    filter = seccomplite.Filter(seccomplite.TRAP)
     # no need to specify arguments of read/write (there should not be any other readable/writable fd)
     for syscall in [
         "read", "write", "readv", "writev",  # base I/O
@@ -17,11 +17,11 @@ def init_sandbox():
         "arch_prctl", "uname", "set_tid_address",
         "time",
     ]:
-        filter.add_rule(ALLOW, syscall)
+        filter.add_rule(seccomplite.ALLOW, syscall)
     for syscall in [
         "access", "madvise", "readlink",
     ]:
-        filter.add_rule(ERRNO(errno.EACCES), syscall)
+        filter.add_rule(seccomplite.ERRNO(errno.EACCES), syscall)
     filter.load()
 
 
@@ -30,7 +30,7 @@ def main():
 
     # From here every system call that is not allowed will result in an Exception
 
-    os.execl(sys.argv[1], sys.argv[1])
+    os.execle(sys.argv[1], sys.argv[1], {})
 
 
 if __name__ == "__main__":

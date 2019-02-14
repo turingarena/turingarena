@@ -2,7 +2,6 @@ import os
 from argparse import ArgumentParser
 
 from turingarena.cli.base import BASE_PARSER
-from turingarena.cli.cloud import CloudCommand
 from turingarena.cli.common import init_logger
 from turingarena.cli.evaluate import EvaluateCommand
 from turingarena.cli.files import FileCommand
@@ -36,11 +35,6 @@ subparsers.add_parser(
     "file",
     parents=[FileCommand.PARSER, BASE_PARSER],
     help=FileCommand.PARSER.description,
-)
-subparsers.add_parser(
-    "cloud",
-    parents=[CloudCommand.PARSER],
-    help=CloudCommand.PARSER.description,
 )
 subparsers.add_parser(
     "search",

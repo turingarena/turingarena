@@ -42,7 +42,8 @@ class Database:
         with self.cursor as cursor:
             cursor.execute(query, tuple(args))
             if convert is None:
-                return list(cursor)
+                for x in cursor:
+                    yield x
             for e in map(lambda x: convert(*x), cursor):
                 yield e
 

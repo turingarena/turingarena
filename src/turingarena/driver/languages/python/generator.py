@@ -88,7 +88,7 @@ class PythonCodeGen(InterfaceCodeGen):
             return_expr = f"{return_value} = "
         else:
             return_expr = ""
-        self.line(f"{return_expr}{call_expr}")
+        self.line(f"{return_expr}int({call_expr})")
 
     def visit_Print(self, n):
         args = ', '.join(self.visit(arg) for arg in n.arguments)

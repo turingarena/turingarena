@@ -6,7 +6,7 @@ from turingarena.api.git_manager import create_working_directory
 from turingarena.evaluation.evaluator import Evaluator
 
 
-def cloud_evaluate(evaluate_request: EvaluateRequest, reset_env=False):
+def cloud_evaluate(evaluate_request: EvaluateRequest):
     with TemporaryDirectory() as temp_dir:
         files = {}
         for name, submission_file in evaluate_request.submission.items():
@@ -23,7 +23,7 @@ def cloud_evaluate(evaluate_request: EvaluateRequest, reset_env=False):
                 evaluate_request.working_directory.current_directory,
             )
 
-            yield from Evaluator(evaluator_dir, reset_env=reset_env).evaluate(
+            yield from Evaluator(evaluator_dir).evaluate(
                 files,
                 seed=evaluate_request.seed,
             )

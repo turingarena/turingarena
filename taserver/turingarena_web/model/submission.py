@@ -76,12 +76,12 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "us
     @property
     def goals(self):
         goals = {
-            goal: False
+            goal: None
             for goal in self.problem.goals
         }
 
-        for goal in Goal.from_submission(self):
-            goals[goal] = True
+        for goal, result in Goal.from_submission(self):
+            goals[goal] = result
 
         return goals
 

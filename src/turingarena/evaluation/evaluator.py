@@ -13,7 +13,7 @@ from turingarena.evaluation.segi import segi_subprocess
 
 
 class Evaluator:
-    def __init__(self, evaluator_dir=None, evaluator_parameters=None, *, reset_env=False):
+    def __init__(self, evaluator_dir=None, evaluator_parameters=None):
         if evaluator_dir is None:
             evaluator_dir = os.path.curdir
 
@@ -25,7 +25,6 @@ class Evaluator:
 
         self.evaluator_dir = evaluator_dir
         self.parameter_overrides = evaluator_parameters
-        self.reset_env = reset_env
 
     def _find_evaluators(self):
         filenames = os.listdir(self.evaluator_dir)
@@ -87,7 +86,6 @@ class Evaluator:
                 files,
                 command,
                 env=env,
-                reset_env=self.reset_env,
                 cwd=self.evaluator_dir,
                 **popen_args,
             )

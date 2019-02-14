@@ -32,8 +32,7 @@ def evaluate_thread(problem, submission):
             if data.get("type") == "goal_result":
                 goal = problem.goal(data["goal"])
                 result = data["result"]
-                if result:
-                    goal.acquire(submission)
+                goal.acquire(submission, result)
                 continue  # process next event
 
         submission.event(event_type=event.type, payload=str(event.payload))

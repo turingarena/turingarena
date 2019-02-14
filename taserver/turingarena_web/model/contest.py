@@ -18,7 +18,7 @@ class Contest(namedtuple("Contest", ["id", "name", "public", "allowed_languages"
         query = "INSERT INTO user_contest(user_id, contest_id) VALUES (%s, %s)"
         database.query(query, user.id, self.id)
 
-    def remove_user(self, username):
+    def remove_user(self, user):
         query = "DELETE FROM user_contest WHERE contest_id = %s AND user_id = %s"
         database.query(query, self.id, user.id)
 

@@ -1,18 +1,9 @@
-from flask import Blueprint, render_template, current_app, send_file, abort
+from flask import Blueprint, render_template, send_file, abort
 
 from turingarena_web.model.submission import Submission, EvaluationEventType, SubmissionStatus
 from turingarena_web.controller.session import get_current_user
 
 submission_bp = Blueprint('submission', __name__)
-
-
-def submitted_file_path(*, problem_name, username, timestamp, filename):
-    return current_app.config["SUBMITTED_FILE_PATH"].format(
-        problem_name=problem_name,
-        username=username,
-        timestamp=str(timestamp).replace(' ', '_'),
-        filename=filename
-    )
 
 
 @submission_bp.route('/<int:submission_id>')

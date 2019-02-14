@@ -1,0 +1,3 @@
+recursive-include turingarena_web/templates *
+recursive-include turingarena_web/static *
+include turingarena_web/model/init.sql

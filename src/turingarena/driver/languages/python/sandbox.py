@@ -1,23 +1,24 @@
 import errno
 import sys
+import os
 
-from seccomplite import Filter, Arg, ERRNO, ALLOW, EQ
+import seccomplite
 
 
 def init_sandbox():
-    filter = Filter(ERRNO(errno.EACCES))
-    filter.add_rule(ALLOW, "read", Arg(0, EQ, 0))
-    filter.add_rule(ALLOW, "write", Arg(0, EQ, 1))
-    filter.add_rule(ALLOW, "write", Arg(0, EQ, 2))
-    filter.add_rule(ALLOW, "exit")
-    filter.add_rule(ALLOW, "exit_group")
-    filter.add_rule(ALLOW, "rt_sigreturn")
-    filter.add_rule(ALLOW, "mmap")
-    filter.add_rule(ALLOW, "munmap")
-    filter.add_rule(ALLOW, "mremap")
-    filter.add_rule(ALLOW, "brk")
-    filter.add_rule(ALLOW, "lseek")
-    filter.add_rule(ALLOW, "ioctl")
+    filter = seccomplite.Filter(seccomplite.ERRNO(errno.EACCES))
+    filter.add_rule(seccomplite.ALLOW, "read", seccomplite.Arg(0, seccomplite.EQ, 0))
+    filter.add_rule(seccomplite.ALLOW, "write", seccomplite.Arg(0, seccomplite.EQ, 1))
+    filter.add_rule(seccomplite.ALLOW, "write", seccomplite.Arg(0, seccomplite.EQ, 2))
+    filter.add_rule(seccomplite.ALLOW, "exit")
+    filter.add_rule(seccomplite.ALLOW, "exit_group")
+    filter.add_rule(seccomplite.ALLOW, "rt_sigreturn")
+    filter.add_rule(seccomplite.ALLOW, "mmap")
+    filter.add_rule(seccomplite.ALLOW, "munmap")
+    filter.add_rule(seccomplite.ALLOW, "mremap")
+    filter.add_rule(seccomplite.ALLOW, "brk")
+    filter.add_rule(seccomplite.ALLOW, "lseek")
+    filter.add_rule(seccomplite.ALLOW, "ioctl")
     filter.load()
 
 
@@ -28,6 +29,8 @@ def main():
         source_string = source_file.read()
     with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
+
+    os.environ.clear()
 
     init_sandbox()
 
