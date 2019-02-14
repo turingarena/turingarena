@@ -147,8 +147,12 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
 
     def _git_clone(self):
         os.mkdir(self.path)
-        logging.debug(f"git clone {self.location} -> {self.path}")
-        subprocess.call(["git", "clone", self.location, self.path])
+        if self.location.startswith("/"):
+            os.system(f"cp -r {self.location}/* {self.path}")
+            logging.debug(f"cp {self.location} -> {self.path}")
+        else:
+            logging.debug(f"git clone {self.location} -> {self.path}")
+            subprocess.call(["git", "clone", self.location, self.path])
 
     def update_files(self, contest):
         logging.info(f"Generating file for contest {contest}")
