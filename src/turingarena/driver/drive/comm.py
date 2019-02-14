@@ -94,7 +94,7 @@ class ExecutionCommunicator(ExecutionContext):
         try:
             return tuple(map(int, line.split()))
         except ValueError as e:
-            raise CommunicationError(f"process sent invalid data") from e
+            raise CommunicationError(f"process sent invalid data '{line:50}'") from e
 
     def deserialize_request_data(self):
         deserializer = deserialize_data()
