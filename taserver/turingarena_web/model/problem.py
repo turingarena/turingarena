@@ -19,17 +19,18 @@ class Goal(namedtuple("Goal", ["id", "problem_id", "name"])):
 
     @staticmethod
     def from_submission(submission):
-        query = "SELECT g.* FROM goal g JOIN acquired_goal ag ON g.id = ag.goal_id WHERE ag.submission_id = %s"
-        return database.query_all(query, submission.id, convert=Goal)
+        query = "SELECT ag.goal_id, ag.result FROM acquired_goal ag WHERE ag.submission_id = %s"
+        for id, result in database.query_all(query, submission.id):
+            yield database.query_one("SELECT * FROM goal WHERE id = %s", id, convert=Goal), bool(result)
 
     @staticmethod
     def insert(problem, name):
         query = "INSERT INTO goal(problem_id, name) VALUES (%s, %s) RETURNING *"
         return database.query_one(query, problem.id, name, convert=Goal)
 
-    def acquire(self, submission):
-        query = "INSERT INTO acquired_goal(submission_id, goal_id) VALUES (%s, %s)"
-        database.query(query, submission.id, self.id)
+    def acquire(self, submission, result: bool):
+        query = "INSERT INTO acquired_goal(submission_id, goal_id, result) VALUES (%s, %s, %s)"
+        database.query(query, submission.id, self.id, int(result))
 
     @staticmethod
     def from_problem_and_name(problem, name):

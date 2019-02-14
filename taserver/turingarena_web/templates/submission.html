@@ -34,14 +34,16 @@
                 <th>Result</th>
             </tr>
             {% for goal, value in goals.items() %}
-                {% if value %}
+                {% if value is none %}
+                    <tr class="table-info">
+                {% elif value %}
                     <tr class="table-success">
                         {% else %}
                     <tr class="table-danger">
                 {% endif %}
-            <td>{{ goal.name }}</td>
-            <td>{% if value %} 👌 {% else %} 🙁 {% endif %}</td>
-            </tr>
+                <td>{{ goal.name }}</td>
+                <td>{% if value is none %} ? {% elif value %} 👌 {% else %} 🙁 {% endif %}</td>
+                </tr>
             {% endfor %}
         </table>
     </div>
