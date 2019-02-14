@@ -85,10 +85,9 @@ class PythonCodeGen(InterfaceCodeGen):
         call_expr = f"_solution.{method_name}({arguments})"
         if n.return_value is not None:
             return_value = self.visit(n.return_value)
-            return_expr = f"{return_value} = "
+            self.line(f"{return_value} = int({call_expr})")
         else:
-            return_expr = ""
-        self.line(f"{return_expr}int({call_expr})")
+            self.line(call_expr)
 
     def visit_Print(self, n):
         args = ', '.join(self.visit(arg) for arg in n.arguments)
