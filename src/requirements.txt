@@ -1,10 +1,11 @@
-bidict
+dict
 coloredlogs
 commonmark
 lxml
 psutil
-seccomplite
+# seccomplite
 pytest
 tatsu
 toml
 networkx
+requests
