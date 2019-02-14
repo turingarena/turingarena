@@ -35,7 +35,7 @@ def main():
 
     # From here every system call that is not allowed will result in an Exception
 
-    os.execl(sys.argv[1], sys.argv[1])
+    os.execle(sys.argv[1], sys.argv[1], {})
 
 
 if __name__ == "__main__":

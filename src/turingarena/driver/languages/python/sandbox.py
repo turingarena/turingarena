@@ -1,5 +1,6 @@
 import errno
 import sys
+import os
 
 try:
     import seccomplite
@@ -32,6 +33,8 @@ def main():
         source_string = source_file.read()
     with open(skeleton_path) as skeleton_file:
         skeleton_string = skeleton_file.read()
+
+    os.environ.clear()
 
     if seccomplite is not None:
         init_sandbox()
