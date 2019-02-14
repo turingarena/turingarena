@@ -44,17 +44,16 @@
                 <th>Download</th>
             </tr>
             {% for submission in submissions %}
-                {% set correct_goals = submission.goals.values()|sum %}
                 {% set total_goals = submission.goals|length %}
-                {% if correct_goals == total_goals %}
+                {% if correct_goals[submission.id] == total_goals %}
                     <tr class="table-success">
-                        {% elif correct_goals == 0 %}
+                        {% elif correct_goals[submission.id] == 0 %}
                     <tr class="table-danger">
                         {% else %}
                     <tr class="table-warning">
                 {% endif %}
             <td>{{ submission.timestamp.strftime("%H:%M %d/%m/%Y") }}</td>
-            <td>{{ correct_goals }} / {{ total_goals }}</td>
+            <td>{{ correct_goals[submission.id] }} / {{ total_goals }}</td>
             <td><a href="{{ url_for("submission.submission_view", submission_id=submission["id"]) }}">Info</a></td>
             <td>
                 <a href="{{ url_for("submission.download", submission_id=submission["id"], filename=submission["filename"]) }}">{{ submission.filename }}</a>
