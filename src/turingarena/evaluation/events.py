@@ -6,6 +6,7 @@ from enum import Enum
 class EvaluationEventType(Enum):
     TEXT = "text"
     DATA = "data"
+    FILE = "file"
 
 
 class EvaluationEvent(namedtuple("EvaluationEvent", ["type", "payload"])):

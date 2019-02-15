@@ -1,8 +1,10 @@
 import json
 import os
+import cgi
 import secrets
 import selectors
 import subprocess
+import base64
 import time
 from contextlib import ExitStack, contextmanager
 
@@ -43,9 +45,12 @@ def segi_subprocess(submission, cmd, env=None, **popen_kwargs):
     if env is None:
         env = {}
 
-    data_begin, data_end = (
+    data_begin, data_end, file_begin, file_end = (
         f"@DATA_BEGIN_{secrets.token_hex(5)}--".encode(),
         f"@DATA_END___{secrets.token_hex(5)}--".encode(),
+        f"@FILE_BEGIN_{secrets.token_hex(5)}--".encode(),
+        f"@FILE_END___{secrets.token_hex(5)}--".encode(),
+
     )
 
     env = {
@@ -53,27 +58,33 @@ def segi_subprocess(submission, cmd, env=None, **popen_kwargs):
         **env,
         "EVALUATION_DATA_BEGIN": data_begin,
         "EVALUATION_DATA_END": data_end,
+        "EVALUATION_FILE_BEGIN": file_begin,
+        "EVALUATION_FILE_END": file_end,
         **submission_environ(submission),
     }
 
     with process_stdout_pipe(cmd, **popen_kwargs, env=env) as fd:
-        yield from process_segi_output(fd, data_begin, data_end)
+        yield from process_segi_output(fd, data_begin, data_end, file_begin, file_end)
 
 
-def process_segi_output(fd, data_begin, data_end):
+def process_segi_output(fd, data_begin, data_end, file_begin, file_end):
     parts = generate_chunks(fd)
     parts = split_line_terminators(parts)
     parts = join_text_parts(parts)
-    yield from generate_events(parts, data_begin, data_end)
+    yield from generate_events(parts, data_begin, data_end, file_begin, file_end)
 
 
-def generate_events(parts, data_begin, data_end):
+def generate_events(parts, data_begin, data_end, file_begin, file_end):
     newline_event = EvaluationEvent(EvaluationEventType.TEXT, "\n")
     pending_newline = False
     for part in parts:
         if pending_newline and part == data_begin:
             assert next(parts) == b"\n"
             yield from parse_data_events(parts, data_end)
+            pending_newline = False
+        elif pending_newline and part == file_begin:
+            assert next(parts) == b"\n"
+            yield from parse_file_events(parts, file_end)
             pending_newline = False
         else:
             if pending_newline:
@@ -118,6 +129,55 @@ def parse_data_events(parts, data_end):
         if line == data_end:
             break
         yield EvaluationEvent(EvaluationEventType.DATA, json.loads(line))
+
+
+def parse_header(line):
+    main, params = cgi.parse_header(line.decode())
+    name, value = main.split(": ", 1)
+    return name.lower(), value, params
+
+
+def process_headers(headers, body):
+    payload = {}
+    if "content-type" in headers:
+        value, params = headers["content-type"]
+        payload["content_type"] = value
+        assert params == {}
+    else:
+        payload["content_type"] = "text/plain"
+
+    if "x-segi-as" in headers:
+        segi_as, params = headers["x-segi-as"]
+        assert params == {}
+        assert segi_as in ("path", "content")
+    else:
+        segi_as = "content"
+
+    if segi_as == "content":
+        with open(body, "rb") as f:
+            content = f.read()
+    else:
+        content = body
+
+    payload["content_base64"] = base64.encodebytes(content).decode().replace("\n", "")
+    return payload
+
+
+def parse_file_events(parts, file_end):
+    line = b"".join(iter(lambda: next(parts), b"\n"))
+    headers = {}
+    while line != b"":
+        name, value, params = parse_header(line)
+        headers[name] = value, params
+        line = b"".join(iter(lambda: next(parts), b"\n"))
+    line = b"".join(iter(lambda: next(parts), b"\n"))
+    body = []
+    while line != file_end:
+        body.append(line)
+        line = b"".join(iter(lambda: next(parts), b"\n"))
+    body = b"\n".join(body)
+
+    yield EvaluationEvent(EvaluationEventType.FILE, process_headers(headers, body))
 
 
 def split_line_terminators(parts):
