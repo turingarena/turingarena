@@ -3,7 +3,7 @@ import os
 from turingarena.driver.client.program import Program
 
 
-def run_algorithm(source_path, interface_path=None):
+def run_algorithm(source_path, interface_path=None, **kwargs):
     if interface_path is None:
         interface_path = os.path.abspath("interface.txt")
 
@@ -12,4 +12,4 @@ def run_algorithm(source_path, interface_path=None):
     return Program(
         source_path=source_path,
         interface_path=interface_path,
-    ).run()
+    ).run(**kwargs)
