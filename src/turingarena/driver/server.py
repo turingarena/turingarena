@@ -8,7 +8,7 @@ from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
 from turingarena.driver.compile.compile import load_interface
-from turingarena.driver.drive.comm import CommunicationError, DriverStop, InterfaceExitReached
+from turingarena.driver.drive.comm import CommunicationError, DriverStop, InterfaceExitReached, SandboxTee
 from turingarena.driver.drive.execution import Executor
 from turingarena.driver.language import Language
 
@@ -16,17 +16,17 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    _, source_path, interface_path = sys.argv
+    _, source_path, interface_path, downward_tee, upward_tee = sys.argv
 
     init_logger()
 
     run_server(DriverProcessConnection(
         downward=sys.stdin,
         upward=sys.stdout,
-    ), source_path, interface_path)
+    ), source_path, interface_path, downward_tee, upward_tee)
 
 
-def run_server(driver_connection, source_path, interface_path):
+def run_server(driver_connection, source_path, interface_path, downward_tee, upward_tee):
     program = Program(source_path=source_path, interface_path=interface_path)
     language = Language.from_source_path(program.source_path)
     interface = load_interface(program.interface_path)
@@ -43,6 +43,11 @@ def run_server(driver_connection, source_path, interface_path):
 
         connection = stack.enter_context(runner.run_in_process())
 
+        sandbox_tee = SandboxTee(
+            downward_tee=stack.enter_context(open(downward_tee, "w")),
+            upward_tee=stack.enter_context(open(upward_tee, "w")),
+        )
+
         stack.callback(lambda: connection.manager.get_status(
             kill_reason="still running after communication end",
         ))
@@ -54,6 +59,7 @@ def run_server(driver_connection, source_path, interface_path):
             request_lookahead=None,
             driver_connection=driver_connection,
             sandbox_connection=connection,
+            sandbox_tee=sandbox_tee,
         )
 
         try:
