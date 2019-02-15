@@ -26,6 +26,15 @@
         </pre>
     </div>
     <hr>
+    {% if files|length > 0 %}
+        <h3>Files of your submission</h3>
+        {% for f in files %}
+            <a href="data:{{ f.content_type }};base64,{{ f.content_base64 }}"
+               download="{{ f.filename }}"
+            >{{ f.filename }}</a>
+        {% endfor %}
+        <hr>
+    {% endif %}
     <div>
         <h3>Your goals</h3>
         <table id="goals" class="table">

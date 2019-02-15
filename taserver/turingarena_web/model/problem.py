@@ -148,7 +148,7 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
 
     def _git_clone(self):
         os.mkdir(self.path)
-        if self.location.startswith("/"):
+        if not self.location.startswith("git://"):
             os.system(f"cp -r {self.location}/* {self.path}")
             logging.debug(f"cp {self.location} -> {self.path}")
         else:

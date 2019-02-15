@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, send_file, abort
+import json
 
-from turingarena_web.model.submission import Submission, EvaluationEventType, SubmissionStatus
+from flask import Blueprint, render_template, send_file, abort
+from turingarena_web.model.submission import Submission, SubmissionStatus
 from turingarena_web.controller.session import get_current_user
 
 submission_bp = Blueprint('submission', __name__)
@@ -15,10 +16,15 @@ def submission_view(submission_id):
     end = submission.status == SubmissionStatus.EVALUATED
     events = [
         event.data
-        for event in submission.events
-        if event.type == EvaluationEventType.TEXT
+        for event in submission.text_events
     ]
-    return render_template('submission.html', events=events, end=end, goals=submission.goals, user=current_user)
+
+    files = [
+        json.loads(event.data.replace("'", "\""))
+        for event in submission.file_events
+    ]
+
+    return render_template('submission.html', events=events, end=end, goals=submission.goals, user=current_user, files=files)
 
 
 @submission_bp.route('/<int:submission_id>/<string:filename>')

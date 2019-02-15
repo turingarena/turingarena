@@ -16,9 +16,9 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
         return EvaluationEventType(self.type_.lower())
 
     @staticmethod
-    def from_submission(submission):
-        query = "SELECT * FROM evaluation_event WHERE submission_id = %s ORDER BY serial"
-        return database.query_all(query, submission.id, convert=EvaluationEvent)
+    def from_submission(submission, event_type=EvaluationEventType.TEXT):
+        query = "SELECT * FROM evaluation_event WHERE submission_id = %s AND type = %s ORDER BY serial"
+        return database.query_all(query, submission.id, event_type.value.upper(), convert=EvaluationEvent)
 
     @staticmethod
     def insert(submission, event_type, payload):
@@ -86,8 +86,12 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "us
         return goals
 
     @property
-    def events(self):
-        return EvaluationEvent.from_submission(self)
+    def text_events(self):
+        return EvaluationEvent.from_submission(self, event_type=EvaluationEventType.TEXT)
+
+    @property
+    def file_events(self):
+        return EvaluationEvent.from_submission(self, event_type=EvaluationEventType.FILE)
 
     def event(self, event_type, payload):
         return EvaluationEvent.insert(self, event_type.value, payload)
