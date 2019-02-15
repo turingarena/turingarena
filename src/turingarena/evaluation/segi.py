@@ -153,6 +153,14 @@ def process_headers(headers, body):
     else:
         segi_as = "content"
 
+    if "content-disposition" in headers:
+        value, params = headers["content-disposition"]
+        assert value == "attachment"
+        assert "filename" in params and len(params) == 1
+        payload["filename"] = params["filename"]
+    else:
+        payload["filename"] = "file.txt"
+
     if segi_as == "content":
         with open(body, "rb") as f:
             content = f.read()
