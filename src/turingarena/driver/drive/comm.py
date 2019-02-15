@@ -88,13 +88,19 @@ class ExecutionCommunicator(ExecutionContext):
         timer = threading.Timer(UPWARD_TIMEOUT, self._on_timeout)
         timer.start()
 
-        line = self.sandbox_connection.upward.readline().strip()
+        max_line_size = 256
+
+        line = self.sandbox_connection.upward.readline(max_line_size)
+        if not line[-1] == "\n":
+            raise CommunicationError(f"line sent by process is too long '{line:50}'...")
+
+        line = line.strip()
 
         timer.cancel()
         timer.join()
 
         if not line:
-            raise CommunicationError(f"stopped sending data")
+            raise CommunicationError(f"process stopped sending data")
 
         data = tuple(map(int, line.split()))
 
