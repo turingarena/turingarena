@@ -107,6 +107,7 @@ the process must:
 
 At the moment only 2 headers are supported:
 - `Content-type`: indicate the MIME type of the file (exactly as HTTP, defaults to text/plain)
+- `Content-Disposition`: refear to the HTTP specification (default inline, if `X-SEGI-as: path` basename of the path)
 - `X-SEGI-as`: indicate how to interpret the body of the message, it can contain the following values:
     * `content`: interpretate the body as content of the file. (default)
     * `path`: interpretate the body as a path to the file. 
