@@ -1,5 +1,3 @@
-// evaluation_assert data["goals"]["quadratic"]
-// evaluation_assert not data["goals"]["n_log_n"]
 #include <vector>
 #include <algorithm>
 
