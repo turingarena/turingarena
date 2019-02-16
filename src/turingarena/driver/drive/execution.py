@@ -1,6 +1,8 @@
 import logging
 from enum import Enum
 
+from turingarena.driver.common.nodes import Subscript
+
 from turingarena import InterfaceError
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.compile.analysis import ReferenceResolution
@@ -44,6 +46,14 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
                 return self.evaluate(e.array)[self.evaluate(e.index)]
             except KeyError:
                 raise NotResolved from None
+
+    def is_resolved(self, e):
+        try:
+            self.evaluate(e)
+        except NotResolved:
+            return False
+        else:
+            return True
 
     def execute(self, n):
         return self._on_execute(n)
@@ -123,13 +133,12 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
 
         assignments = [
             (a.reference, [
-                result.assignments[a.reference._replace(
-                    indexes=a.reference.indexes + (self.variable(n.index),),
-                )]
+                dict(result.assignments)[Subscript(a.reference, n.index.variable)]
                 for result in results_by_iteration
             ])
             for a in self.reference_actions(n)
             if isinstance(a, ReferenceResolution)
+            if not self.is_resolved(a.reference)
         ]
 
         return self.result()._replace(assignments=assignments)
@@ -240,18 +249,18 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         raise InterfaceExitReached
 
     def _on_request_ValueResolve(self, n):
+        if self.is_resolved(n.value):
+            return
+
+        assert self.request_lookahead is not None
+        map = dict(n.map)
         try:
-            self.evaluate(n.value)
-        except NotResolved:
-            assert self.request_lookahead is not None
-            map = dict(n.map)
-            try:
-                value = map[self.request_lookahead]
-            except KeyError:
-                value = map[None]  # default
-            return self.result()._replace(
-                assignments=[(n.value, value)]
-            )
+            value = map[self.request_lookahead]
+        except KeyError:
+            value = map[None]  # default
+        return self.result()._replace(
+            assignments=[(n.value, value)]
+        )
 
     def _on_request_CallAccept(self, n):
         command = self.request_lookahead.command
