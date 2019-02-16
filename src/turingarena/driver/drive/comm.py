@@ -1,5 +1,6 @@
 import logging
 import threading
+from collections import namedtuple
 from contextlib import contextmanager
 
 from turingarena.driver.client.commands import DriverState, deserialize_data, serialize_data
@@ -7,6 +8,9 @@ from turingarena.driver.drive.context import ExecutionContext
 from turingarena.driver.drive.requests import CallRequestSignature, RequestSignature
 
 UPWARD_TIMEOUT = 3.0
+
+
+SandboxTee = namedtuple("SandboxTee", ["upward_tee", "downward_tee"])
 
 
 class CommunicationError(Exception):
@@ -75,6 +79,7 @@ class ExecutionCommunicator(ExecutionContext):
     def send_downward(self, values):
         with self._check_downward_pipe():
             print(*values, file=self.sandbox_connection.downward)
+        print(*values, file=self.sandbox_tee.downward_tee)
 
     def receive_upward(self):
         with self._check_downward_pipe():
@@ -83,16 +88,26 @@ class ExecutionCommunicator(ExecutionContext):
         timer = threading.Timer(UPWARD_TIMEOUT, self._on_timeout)
         timer.start()
 
-        line = self.sandbox_connection.upward.readline().strip()
+        max_line_size = 256
+
+        line = self.sandbox_connection.upward.readline(max_line_size)
+        if line and line[-1] != "\n":
+            raise CommunicationError(f"line sent by process is too long '{line:50}'...")
+
+        line = line.strip()
 
         timer.cancel()
         timer.join()
 
         if not line:
-            raise CommunicationError(f"stopped sending data")
+            raise CommunicationError(f"process stopped sending data")
+
+        data = tuple(map(int, line.split()))
+
+        print(*data, file=self.sandbox_tee.upward_tee)
 
         try:
-            return tuple(map(int, line.split()))
+            return data
         except ValueError as e:
             raise CommunicationError(f"process sent invalid data '{line:50}'") from e
 

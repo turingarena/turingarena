@@ -20,7 +20,7 @@ class Program(namedtuple("Program", [
         ]
 
     @contextmanager
-    def _run_server_in_thread(self):
+    def _run_server_in_thread(self, downward_tee, upward_tee):
         with ExitStack() as stack:
             client_upward, server_upward = self._open_pipes(stack)
             server_downward, client_downward = self._open_pipes(stack)
@@ -31,7 +31,8 @@ class Program(namedtuple("Program", [
                     run_server(DriverProcessConnection(
                         upward=server_upward,
                         downward=server_downward,
-                    ), self.source_path, self.interface_path)
+                    ), self.source_path, self.interface_path, downward_tee=downward_tee, upward_tee=upward_tee)
+
                     logging.debug("driver server terminated")
                 except Exception as e:
                     logging.exception(f"server terminated with exception")
@@ -40,7 +41,6 @@ class Program(namedtuple("Program", [
                     server_downward.close()
 
             thread = threading.Thread(target=server_thread)
-
             thread.start()
 
             yield DriverProcessConnection(
@@ -51,7 +51,7 @@ class Program(namedtuple("Program", [
             stack.callback(thread.join)
 
     @contextmanager
-    def _run_server_in_process(self):
+    def _run_server_in_process(self, downward_tee, upward_tee):
         with subprocess.Popen(
                 [
                     "python3",
@@ -59,6 +59,8 @@ class Program(namedtuple("Program", [
                     "turingarena.driver.server",
                     self.source_path,
                     self.interface_path,
+                    downward_tee,
+                    upward_tee,
                 ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -70,9 +72,9 @@ class Program(namedtuple("Program", [
             )
 
     @contextmanager
-    def run(self, **kwargs):
+    def run(self, downward_tee="/dev/null", upward_tee="/dev/null", **kwargs):
         with ExitStack() as stack:
-            driver_connection = stack.enter_context(self._run_server_in_thread())
+            driver_connection = stack.enter_context(self._run_server_in_thread(downward_tee, upward_tee))
 
             process = Process(driver_connection)
             with process._run(**kwargs):

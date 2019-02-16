@@ -1,0 +1,6 @@
+[scoring]
+goals = [
+    "exponential",
+    "quadratic",
+    "n_log_n",
+]

@@ -29,7 +29,7 @@ class CppEvaluatorRunner(EvaluatorRunner):
 class BashEvaluatorRunner(EvaluatorRunner):
     @contextmanager
     def perform_run(self):
-        return ["bash", "evaluator.sh"]
+        yield ["bash", "evaluator.sh"]
 
 
 evaluator_runner_by_extension = {

@@ -54,7 +54,7 @@ CREATE TABLE acquired_goal (
   PRIMARY KEY (goal_id, submission_id)
 );
 
-CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA');
+CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'FILE');
 
 CREATE TABLE evaluation_event (
   submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,

@@ -8,6 +8,7 @@ class ExecutionContext(namedtuple("Executor", [
     "request_lookahead",
     "driver_connection",
     "sandbox_connection",
+    "sandbox_tee",
 ])):
     def with_assigments(self, assignments):
         return self._replace(bindings={

@@ -1,14 +1,15 @@
 import random
 
-from turingarena import *
-from turingarena.evallib.algorithm import run_algorithm
+import turingarena as ta
 
+DEBUG = False
 
 def run(algorithm, a):
-    with run_algorithm(algorithm) as process:
+    with ta.run_algorithm(algorithm, time_limit=0.05) as process:
         process.procedures.compute(len(a), a)
         subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
-    print(f"Time usage: {process.time_usage}")
+    if DEBUG:
+        print(f"Time usage: {process.time_usage}")
     return subsequence
 
 
@@ -23,43 +24,52 @@ def create_random_instance(n, digits=6):
 
 
 def main():
-    algorithm = submission.source
-    goals = {
-        "exponential": True,
-        "quadratic": True,
-        "n_log_n": True,
-    }
+    algorithm = ta.submission.source
 
     for gs, ns in [
-        (["exponential", "quadratic", "n_log_n"], [10] * 3),
-        (["quadratic", "n_log_n"], [100]),
-        (["n_log_n"], [1000]),
+        (["exponential", "quadratic", "n_log_n"], [10, 50, 100]),
+        (["quadratic", "n_log_n"], [500, 750, 1000]),
+        (["n_log_n"], [3000, 6000, 10000]),
     ]:
         for n in ns:
-            if not any(goals[g] for g in gs):
+            if not any(ta.goals.get(g, True) for g in gs):
                 break
 
+<<<<<<< HEAD
             print(f"Testing n={n}")
+=======
+            print(f"Testing N = {n}...\t", end="")
+>>>>>>> a3eb856f484c4ee43d0a84397831546061125485
 
             a = create_random_instance(n)
             optimal_subsequence = get_optimal_subsequence(a)
             try:
                 subsequence = run(algorithm, a)
-            except AlgorithmError as e:
-                print("Error:", e)
+            except ta.AlgorithmError as e:
+                print(f"[WRONG: {e}]")
                 correct = False
             else:
-                print("Subsequence:", subsequence)
-                print("Optimal subsequence:", optimal_subsequence)
+                if DEBUG:
+                    print("Subsequence:", subsequence)
+                    print("Optimal subsequence:", optimal_subsequence)
                 correct = (
                         is_subsequence(subsequence, a) and
                         is_increasing(subsequence) and
                         len(subsequence) == len(optimal_subsequence)
                 )
-                print("Correct:", correct)
-            if not correct:
+            if correct:
+                print("[CORRECT]")
+            else:
                 for g in gs:
-                    goals[g] = False
+                    ta.goals[g] = False
+    for goal in (
+        "exponential",
+        "quadratic",
+        "n_log_n",
+    ):
+        ta.goals.setdefault(goal, True)
+
+    print(ta.goals)
 
 
 def optimal_subsequence_exponential(a):

@@ -32,7 +32,7 @@ How the termination of the evaluator program is determined is not specified by S
 - All the communication occurs through:
     - enviroment variables,
     - standard file descriptors, and
-    - files on the local filesystem, whose path is specified in enviroment variables.
+    - files on the local filesystem, whose path is specified via either of the previous methods.
 - Other data can be provided to the evaluator program, preferably through enviroment variables,
 as long as they do not depend on the submission.
 
@@ -70,15 +70,20 @@ Normally, whatever is written to `stdout`
 results in *text* events (with the requirement that line terminators
 are recorded in their own event).
 
-In order to generate *data* events,
+In order to generate *data* and *file* events,
 escape sequences are used.
 Specifically,
-two hard-to-guess strings are provided as enviroment variables:
+four hard-to-guess strings are provided as enviroment variables:
 
 - `EVALUATION_DATA_BEGIN`
 - `EVALUATION_DATA_END`
+- `EVALUATION_FILE_BEGIN`
+- `EVALUATION_FILE_END`
 
 These strings must not be valid JSON.
+
+### Data events 
+
 In order to generate data events,
 the process must:
 
@@ -86,6 +91,34 @@ the process must:
 2. print the value of `EVALUATION_DATA_BEGIN`, followed by a line terminator
 3. for every data event to generate, print its payload as JSON in a single line, followed by a line terminator
 4. print  the value of `EVALUATION_DATA_END`, followed by a line terminator
+
+### File events 
+
+In order to generate file events,
+the process must:
+
+1. print a line terminator
+2. print the value of `EVALUATION_FILE_BEGIN`, followed by a line terminator
+3. print a number of headers, as described below, each one followed by a line terminator (like HTTP)
+4. print an empty line
+5. print the body of the event, as described below
+6. print a line terminator, which is not part of the body
+7. print the value of `EVALUATION_FILE_END`, followed by a line terminator
+
+At the moment only the following headers are supported:
+
+- `X-SEGI-As`: indicate how to interpret the body of the message, it can contain the following values:
+    * `content`: interpretate the body as content of the file. (default)
+    * `path`: interpretate the body as a path to the file on the filesystem.
+- `Content-Type`: indicate the MIME type of the file (exactly as HTTP, defaults to `text/plain`)
+- `Content-Disposition`: the main value *must* be `attachment`, and it *must* contain a parameter `filename` (e.g., `Content-Disposition: attachment; filename="filename.jpg"`). If the header `X-SEGI-as` is set to `path`, then the header is optional, and `filename` defaults to the basename of the path given in the body. Otherwise the header is mandatory and must contain the `filename` parameter.
+
+If the `X-SEGI-as: path` header is specified, we must assume that after the event is generated, the file is 
+not opened by the evaluator and it will never be opened again until the end of the evaluation. Every subsequent 
+interaction with the file is undefined behaviour. In particular, you must not trigger two events with the same path. 
+
+Rationale: the ownership of the file is transefed to the SEGI implementation, that can move, delete, modify it 
+as it will.
 
 ### Example
 

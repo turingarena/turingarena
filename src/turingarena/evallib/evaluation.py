@@ -17,3 +17,17 @@ def output_data(*data):
         print(json.dumps(d))
     print(os.environ["EVALUATION_DATA_END"])
     sys.stdout.flush()
+
+
+def send_file_as_path(path, *, content_type="text/plain", filename=None):
+    print()
+    print(os.environ["EVALUATION_FILE_BEGIN"])
+    print("Content-Type:", content_type)
+    if filename:
+        assert ";" not in filename and "\"" not in filename
+        print(f"Content-disposition: attachment; filename=\"{filename}\"")
+    print()
+    print(path)
+    print(os.environ["EVALUATION_FILE_END"])
+    sys.stdout.flush()
+
