@@ -175,7 +175,7 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         for path in public_paths:
             for filename in glob.glob(os.path.join(self.location, path)):
                 relpath = os.path.relpath(filename, self.location)
-                destination = os.path.join(files_dir, relpath)
+                destination = os.path.join(files_dir, "public", relpath)
                 os.makedirs(os.path.split(destination)[0], exist_ok=True)
                 shutil.copy(filename, destination)
 
