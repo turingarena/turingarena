@@ -123,6 +123,11 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         if title is None:
             title = name
 
+        if Problem.from_name(name) is not None:
+            raise RuntimeError(f"problem {name} already present in the database!")
+        if not os.path.exists(location):
+            raise RuntimeError(f"{location} is not a valid path")
+
         query = "INSERT INTO problem(name, title, location) VALUES (%s, %s, %s) RETURNING *"
         problem = Problem(*database.query_one(query, name, title, location))
         problem._git_clone()
@@ -173,8 +178,8 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
 
         public_paths = self.metadata.get("files", {}).get("public_paths", [])
         for path in public_paths:
-            for filename in glob.glob(os.path.join(self.location, path)):
-                relpath = os.path.relpath(filename, self.location)
+            for filename in glob.glob(os.path.join(self.path, path)):
+                relpath = os.path.relpath(filename, self.path)
                 destination = os.path.join(files_dir, "public", relpath)
                 os.makedirs(os.path.split(destination)[0], exist_ok=True)
                 shutil.copy(filename, destination)
