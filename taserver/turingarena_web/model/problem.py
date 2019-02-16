@@ -80,7 +80,8 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
         query = """
             SELECT MAX(n_goals) FROM (
                 SELECT COUNT(*) AS n_goals, s.id 
-                FROM acquired_goal ac JOIN submission s ON ac.submission_id = s.id 
+                FROM acquired_goal ac JOIN submission s ON ac.submission_id = s.id
+                WHERE ac.result = TRUE 
                 GROUP BY s.id
                 HAVING s.contest_id = %s AND s.user_id = %s and s.problem_id = %s
             ) AS goals_of_submission

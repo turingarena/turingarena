@@ -51,6 +51,7 @@ CREATE TABLE goal (
 CREATE TABLE acquired_goal (
   goal_id       INTEGER REFERENCES goal (id) ON DELETE CASCADE,
   submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,
+  result        BOOLEAN NOT NULL,
   PRIMARY KEY (goal_id, submission_id)
 );
 
