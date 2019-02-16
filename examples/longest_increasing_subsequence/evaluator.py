@@ -8,7 +8,7 @@ def run(algorithm, a):
     with run_algorithm(algorithm) as process:
         process.procedures.compute(len(a), a)
         subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
-    print(f"Time usage: {process.time_usage}", file=sys.stderr)
+    print(f"Time usage: {process.time_usage}")
     return subsequence
 
 
@@ -39,7 +39,7 @@ def main():
             if not any(goals[g] for g in gs):
                 break
 
-            print(f"Testing n={n}", file=sys.stderr)
+            print(f"Testing n={n}")
 
             a = create_random_instance(n)
             optimal_subsequence = get_optimal_subsequence(a)
