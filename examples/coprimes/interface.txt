@@ -1,0 +1,13 @@
+const YES = 1;
+const NO = 0;
+
+function are_coprime(a, b) callbacks {
+    procedure give_divisor(d);
+    procedure give_multipliers(x, y);
+}
+
+main {
+    read a, b;
+    call ans = are_coprime(a, b);
+    write ans;
+}

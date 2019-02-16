@@ -35,7 +35,11 @@ def main():
             if not any(ta.goals.get(g, True) for g in gs):
                 break
 
+<<<<<<< HEAD
+            print(f"Testing n={n}")
+=======
             print(f"Testing N = {n}...\t", end="")
+>>>>>>> a3eb856f484c4ee43d0a84397831546061125485
 
             a = create_random_instance(n)
             optimal_subsequence = get_optimal_subsequence(a)

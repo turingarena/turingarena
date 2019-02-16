@@ -1,0 +1,7 @@
+function sum(a, b);
+
+main {
+    read a, b;
+    call c = sum(a, b);
+    write c;
+}
