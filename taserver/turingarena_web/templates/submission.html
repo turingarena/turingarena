@@ -18,21 +18,25 @@
 {% block body %}
     <div>
         <h3>Evaluation output</h3>
-        <pre id="evaluation-output">
-            {%- for event in events -%}
-                {{ event | safe }}
-            {%- endfor -%}
-            {% if not end %}<br>Evaluating...{% endif %}
-        </pre>
+        <div id="evaluation-output">
+            <pre>
+                {%- for event in events -%}
+                    {{ event | safe }}
+                {%- endfor -%}
+                {% if not end %}<br>Evaluating...{% endif %}
+            </pre>
+        </div>
     </div>
     <hr>
     {% if files|length > 0 %}
         <h3>Files of your submission</h3>
+        <ul>
         {% for f in files %}
-            <a href="data:{{ f.content_type }};base64,{{ f.content_base64 }}"
+            <li><a href="data:{{ f.content_type }};base64,{{ f.content_base64 }}"
                download="{{ f.filename }}"
-            >{{ f.filename }}</a>
+            >{{ f.filename }}</a></li>
         {% endfor %}
+        </ul>
         <hr>
     {% endif %}
     <div>
@@ -56,4 +60,8 @@
             {% endfor %}
         </table>
     </div>
+    <script>
+        var div = document.getElementById("evaluation-output");
+        div.scrollTop = div.scrollHeight;
+    </script>
 {% endblock %}

@@ -29,6 +29,7 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
 class SubmissionStatus(Enum):
     EVALUATING = "EVALUATING"
     EVALUATED = "EVALUATED"
+    RECEIVED = "RECEIVED"
 
 
 class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "user_id", "timestamp", "filename", "status_"])):
