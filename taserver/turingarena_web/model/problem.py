@@ -1,9 +1,10 @@
-import logging
 import os
+import glob
 import shutil
+import logging
 import subprocess
-from collections import namedtuple
 
+from collections import namedtuple
 from commonmark import commonmark
 from turingarena.evallib.metadata import load_metadata
 from turingarena.file.generated import PackGeneratedDirectory
@@ -169,6 +170,12 @@ class Problem(namedtuple("Problem", ["id", "name", "title", "location"])):
             os.makedirs(directory, exist_ok=True)
             with open(os.path.join(directory, filename), "w") as file:
                 generator(file)
+
+        public_paths = self.metadata.get("files", {}).get("public_paths", [])
+        for path in public_paths:
+            for filename in glob.glob(os.path.join(self.location, path)):
+                relpath = os.path.relpath(filename, self.location)
+                shutil.copy(filename, os.path.join(files_dir, relpath))
 
         os.chdir(files_dir)
         subprocess.call(["zip", "-r", self.zip_path(contest), "."])

@@ -4,3 +4,5 @@ digits = 3
 [scoring]
 goals = ["correct"]
 
+[files]
+public_paths = ["interface.txt", "evaluator.py"]
