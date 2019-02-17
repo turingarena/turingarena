@@ -1,6 +1,24 @@
 from turingarena.driver.gen.generator import InterfaceCodeGen
 
 
+read_macro = r"""
+macro_rules! readln {
+    ($($var:expr),*) => {{
+        let mut buf = String::new();
+        std::io::stdin().read_line(&mut buf).unwrap();
+        let parts: Vec<&str> = buf.trim().split(" ").collect();
+        let mut i: usize = 0;
+        $(
+            assert!(i < parts.len(), "input format incorrect: too few values on this line"); 
+            $var = parts[i].parse().unwrap();
+            i += 1;
+        )*
+        assert!(i == parts.len(), "input format incorrect: too many values on the line")
+    }};
+}
+"""
+
+
 class RustCodeGen(InterfaceCodeGen):
     def visit_Parameter(self, d):
         # TODO: support for arrays
@@ -9,7 +27,7 @@ class RustCodeGen(InterfaceCodeGen):
     def visit_Interface(self, n):
         self.line("mod solution;")
         self.line("use std::io::Write;")
-        self.line()
+        self.line(read_macro)
         for c in n.constants:
             self.visit(c)
             self.line()
@@ -26,7 +44,7 @@ class RustCodeGen(InterfaceCodeGen):
             if m.description:
                 for l in m.description:
                     self.line(f"// {l}")
-            self.line(f"{self.visit(m.prototype)} {{")
+            self.line(f"pub fn {self.visit(m.prototype)} {{")
             with self.indent():
                 self.visit(m.body)
             self.line(f"}}")
@@ -84,7 +102,7 @@ class RustCodeGen(InterfaceCodeGen):
         else:
             return_value = ""
 
-        self.line(f"{return_value}{method.name}({parameters});")
+        self.line(f"{return_value}solution::{method.name}({parameters});")
 
     def visit_Print(self, write_statement):
         format_string = " ".join("{}" for _ in write_statement.arguments)
@@ -92,10 +110,8 @@ class RustCodeGen(InterfaceCodeGen):
         self.line(f"println!(\"{format_string}\", {args});")
 
     def visit_Read(self, n):
-        self.line(f"// TODO: {n}")
-        # format_string = "".join("%d" for _ in n.arguments)
-        # scanf_args = ", ".join("&" + self.visit(v) for v in n.arguments)
-        # self.line(f"""scanf("{format_string}", {scanf_args});""")
+        args = ", ".join(self.visit(v) for v in n.arguments)
+        self.line(f"readln!({args});")
 
     def visit_If(self, n):
         condition = self.visit(n.condition)
