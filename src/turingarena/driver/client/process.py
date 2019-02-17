@@ -55,6 +55,8 @@ class Process:
 
         section._time_usage = time_usage_after - time_usage_before
 
+        logging.debug(f"Section usage - time: {section._time_usage:2.3}, memory: {section.peak_memory_usage:9}")
+
         self.check(
             section.time_usage <= time_limit,
             f"time usage: {section.time_usage:.6f}s > {time_limit:.6f}s",
@@ -87,22 +89,28 @@ class Process:
         raise exc_type(message, process=self)
 
     @contextmanager
-    def _run(self, **kwargs):
+    def _do_run(self, **kwargs):
         self.checkpoint()
-        assert self._latest_resource_usage is not None
         with self.section(**kwargs) as main_section:
             self._main_section = main_section
             try:
                 yield self
                 self._send_exit()
-                self.stop()
             except InterfaceExit:
                 self._send_exit()
-                self.stop()
-                raise
-            except AlgorithmLogicError:
-                self.stop()
-                raise
+
+    @contextmanager
+    def _run(self, **kwargs):
+        assert self._latest_resource_usage is not None
+        try:
+            yield self._do_run(**kwargs)
+        except ProcessStop:
+            # TODO: allow configuring what to do with these exceptions
+            # (e.g.: on_exit, on_stop, on_error = "raise" | "ignore")
+            # this should apply also to callbacks, and to AlgorithmError
+            pass
+        finally:
+            self._send_stop()
 
     @property
     def current_memory_usage(self):
@@ -159,11 +167,14 @@ class Process:
         raise InterfaceExit
 
     def stop(self):
-        self._send_request_line("stop")
-        self._wait_ready()
+        raise ProcessStop
 
     def checkpoint(self):
         self._send_request_line("checkpoint")
+        self._wait_ready()
+
+    def _send_stop(self):
+        self._send_request_line("stop")
         self._wait_ready()
 
     def _send_exit(self):

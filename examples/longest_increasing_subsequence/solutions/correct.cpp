@@ -15,9 +15,9 @@ int max_len;
 vector<int> taken;
 vector<int> antichain_of;
 
-void compute(int n, int *a) {
+void compute(int n, int *s) {
     int values[n+2];
-    for(int i = 0; i < n; i++) values[i+1] = a[i];
+    for(int i = 0; i < n; i++) values[i+1] = s[i];
     values[n+1] = std::numeric_limits<int>::max(); // append a last element. Now every optimal solution takes the last (dummy) element and len[n+1] will eventullly contain the length of an optimal solution.
     values[0] = std::numeric_limits<int>::min(); // append a first element. This will also belong to every optimal solution and acts as sentinel for the binary searches.
 
@@ -31,7 +31,7 @@ void compute(int n, int *a) {
     antichains[0].push_back(0); // the first dummy element is placed at the beginning of the first antichain (decreasing subsequence)
     antichain_of.push_back(0); //the first dummy element is placed in antichain 0
 
-    for(int i = 1; i <= n +1; i++) {
+    for(int i = 1; i <= n+1; i++) {
         auto p = std::upper_bound(antichains.begin(), antichains.end(), i, [&](int i, vector<int>& ac) -> bool {
             return ac.empty() || values[i] < values[ac.back()];
         });
@@ -55,7 +55,7 @@ void compute(int n, int *a) {
         last_taken = prev[last_taken];
     }
 
-// set up the data structure to support the takes() query function: 
+// set up the data structure to support the color_of() query function: 
     for(int i = 0; i <= n+1; i++)
       for(auto j = antichains[i].begin(); j < antichains[i].end(); j++)
         antichain_of[*j] = i;
@@ -69,7 +69,7 @@ int takes(int i) {
     return taken[i+1];
 }
 
-int color(int i) {
+int color_of(int i) {
     return antichain_of[i+1];
 }
 

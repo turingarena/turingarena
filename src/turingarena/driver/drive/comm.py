@@ -9,7 +9,6 @@ from turingarena.driver.drive.requests import CallRequestSignature, RequestSigna
 
 UPWARD_TIMEOUT = 3.0
 
-
 SandboxTee = namedtuple("SandboxTee", ["upward_tee", "downward_tee"])
 
 
@@ -27,41 +26,7 @@ class DriverStop(Exception):
     pass
 
 
-class ExecutionCommunicator(ExecutionContext):
-    def send_driver_state(self, state):
-        self.send_driver_upward(state.value)
-
-    def send_driver_upward(self, item):
-        if isinstance(item, bool):
-            item = int(item)
-        print(item, file=self.driver_connection.upward)
-
-    def receive_driver_downward(self):
-        self.driver_connection.upward.flush()
-        return self.driver_connection.downward.readline().strip()
-
-    def report_ready(self):
-        self.send_resource_usage_upward()
-        self.send_driver_state(DriverState.READY)
-
-    def next_request(self):
-        command = self.receive_driver_downward()
-        if command == "stop":
-            raise DriverStop
-        if command == "call":
-            method_name = self.receive_driver_downward()
-            return CallRequestSignature(command, method_name)
-        else:
-            return RequestSignature(command)
-
-    def send_resource_usage_upward(self):
-        info = self.process.get_status()
-        self.send_driver_state(DriverState.RESOURCE_USAGE)
-        self.send_driver_upward(info.time_usage)
-        self.send_driver_upward(info.peak_memory_usage)
-        self.send_driver_upward(info.current_memory_usage)
-        return info
-
+class SandboxCommunicator(ExecutionContext):
     def _on_timeout(self):
         try:
             logging.info(f"process communication timeout expired")
@@ -110,6 +75,42 @@ class ExecutionCommunicator(ExecutionContext):
             return data
         except ValueError as e:
             raise CommunicationError(f"process sent invalid data '{line:50}'") from e
+
+
+class DriverCommunicator(ExecutionContext):
+    def send_driver_state(self, state):
+        self.send_driver_upward(state.value)
+
+    def send_driver_upward(self, item):
+        if isinstance(item, bool):
+            item = int(item)
+        print(item, file=self.driver_connection.upward)
+
+    def receive_driver_downward(self):
+        self.driver_connection.upward.flush()
+        return self.driver_connection.downward.readline().strip()
+
+    def report_ready(self):
+        self.send_resource_usage_upward()
+        self.send_driver_state(DriverState.READY)
+
+    def next_request(self):
+        command = self.receive_driver_downward()
+        if command == "stop":
+            raise DriverStop
+        if command == "call":
+            method_name = self.receive_driver_downward()
+            return CallRequestSignature(command, method_name)
+        else:
+            return RequestSignature(command)
+
+    def send_resource_usage_upward(self):
+        info = self.process.get_status()
+        self.send_driver_state(DriverState.RESOURCE_USAGE)
+        self.send_driver_upward(info.time_usage)
+        self.send_driver_upward(info.peak_memory_usage)
+        self.send_driver_upward(info.current_memory_usage)
+        return info
 
     def deserialize_request_data(self):
         deserializer = deserialize_data()

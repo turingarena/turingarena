@@ -90,6 +90,10 @@ def test_memory_limit_process_exceeded():
             with algo.run(memory_limit=100e6) as p:
                 p.procedures.p1(0)
                 p.checkpoint()
+                p.procedures.p2(0)
+                p.checkpoint()
+                p.procedures.p3(0)
+                p.checkpoint()
 
 
 def test_memory_limit_section_exceeded():
@@ -99,6 +103,7 @@ def test_memory_limit_section_exceeded():
                 with p.section(memory_limit=100e6):
                     p.procedures.p1(0)
                     p.checkpoint()
+            p.stop()
 
 
 def test_memory_limit_point_exceeded():
@@ -108,3 +113,4 @@ def test_memory_limit_point_exceeded():
                 p.procedures.p1(0)
                 p.checkpoint()
                 p.limit_memory(100e6)
+            p.stop()

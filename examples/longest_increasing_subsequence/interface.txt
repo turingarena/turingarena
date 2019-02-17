@@ -1,19 +1,33 @@
-// compute sequence
-procedure compute(n, a[]);
+// receives the input sequence and does the hard computing to solve the problem
+procedure compute(n, s[]);
 
-// return i-th sequence element
+// returns the maximum length of an increasing subsequence of s:
+function max_length();
+
+// tells whether the optimal subsequence computed contains element s[i] of the original sequence s or not (0=no, 1=yes):
 function takes(i);
+
+// returns which decreasing subsequence contains the element s[i]:
+function color_of(i);
 
 main {
     read n;
     for i to n {
-        read a[i];
+        read s[i];
     }
 
-    call compute(n, a);
+    call compute(n, s);
+
+    call res = max_length();
+    write res;
 
     for i to n {
         call x = takes(i);
         write x;
+    }
+
+    for i to n {
+        call y = color_of(i);
+        write y;
     }
 }

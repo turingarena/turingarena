@@ -1,8 +1,8 @@
 import pickle
 import sys
 
-from turingarena.api.commands import WorkingDirectory, Pack, GitRepository
-from turingarena.api.request import CloudGenerateFileRequest
+from turingarena_cloud.commands import WorkingDirectory, Pack, GitRepository
+from turingarena_cloud.request import CloudGenerateFileRequest
 
 pickle.dump(CloudGenerateFileRequest(
     working_directory=WorkingDirectory(

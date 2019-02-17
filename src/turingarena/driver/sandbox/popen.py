@@ -136,7 +136,7 @@ class PopenProcessManager(ProcessManager):
 
         if running:
             if kill_reason is not None:
-                logging.debug(f"killing process")
+                logging.debug(f"killing process because {kill_reason}")
                 self.os_process.send_signal(signal.SIGKILL)
                 os.wait4(self.os_process.pid, 0)
                 self.termination_info = info

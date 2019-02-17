@@ -4,13 +4,13 @@ import secrets
 from http import HTTPStatus
 from urllib.request import urlopen
 
-from turingarena.api.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
+from turingarena_cloud.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
 from turingarena.evaluation.submission import SubmissionFile
 
-from turingarena.api.common import ProxyError
-from turingarena.api.dynamodb_events import load_event_page
-from turingarena.api.dynamodb_files import fetch_file
-from turingarena.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
+from turingarena_cloud.common import ProxyError
+from turingarena_cloud.dynamodb_events import load_event_page
+from turingarena_cloud.dynamodb_files import fetch_file
+from turingarena_cloud.request import CloudEvaluateRequest, CloudGenerateFileRequest
 
 
 def get_children_field(base, params):

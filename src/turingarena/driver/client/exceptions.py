@@ -2,6 +2,10 @@ class InterfaceExit(BaseException):
     pass
 
 
+class ProcessStop(BaseException):
+    pass
+
+
 class InterfaceError(Exception):
     pass
 

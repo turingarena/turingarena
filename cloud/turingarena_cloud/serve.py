@@ -3,7 +3,7 @@ import argparse
 
 from wsgiref.simple_server import make_server
 
-from turingarena.api.wsgi_proxy import application
+from turingarena_cloud.wsgi_proxy import application
 
 
 def serve_cli():

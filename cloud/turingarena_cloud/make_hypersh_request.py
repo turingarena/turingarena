@@ -1,8 +1,8 @@
 import pickle
 import sys
 
-from turingarena.api.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
-from turingarena.api.request import CloudEvaluateRequest
+from turingarena_cloud.commands import WorkingDirectory, Pack, GitRepository, EvaluateRequest
+from turingarena_cloud.request import CloudEvaluateRequest
 from turingarena.evaluation.submission import SubmissionFile
 
 filename = sys.argv[1]

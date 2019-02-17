@@ -3,8 +3,8 @@ import json
 from http import HTTPStatus
 from urllib.parse import parse_qsl
 
-from turingarena.api import aws_backend
-from turingarena.api.common import execute_api
+from turingarena_cloud import aws_backend
+from turingarena_cloud.common import execute_api
 
 
 def get_fields(environ):

@@ -101,7 +101,6 @@ def test_callback_return_value():
                 }
                 main {
                     call test();
-                    checkpoint;
                 }
             """,
             sources={

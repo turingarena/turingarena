@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from turingarena.api.common import ProxyError
+from turingarena_cloud.common import ProxyError
 
 DUMMY_SUBMISSION_ID = "dummy_submission_id"
 

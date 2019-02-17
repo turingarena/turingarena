@@ -1,21 +1,24 @@
-import random
-
+import random, sys
 import turingarena as ta
 
 DEBUG = False
 
-def run(algorithm, a):
+def run(algorithm, s):
     with ta.run_algorithm(algorithm, time_limit=0.05) as process:
-        process.procedures.compute(len(a), a)
-        subsequence = [x for i, x in enumerate(a) if process.functions.takes(i)]
+        process.procedures.compute(len(s), s)
+        subsequence_length = process.functions.max_length()
+        subsequence = [x for i, x in enumerate(s) if process.functions.takes(i)]
+        color = []
+        for i in range(len(s)):
+            color.append(process.functions.color_of(i))
     if DEBUG:
-        print(f"Time usage: {process.time_usage}")
-    return subsequence
+        print(f"Time usage: {process.time_usage}", file=sys.stderr)
+    return (subsequence_length, subsequence, color)
 
 
-def get_optimal_subsequence(a):
+def get_an_optimal_subsequence_of(s):
     correct_algorithm = "solutions/correct.cpp"
-    return run(correct_algorithm, a)
+    return run(correct_algorithm, s)[1]
 
 
 def create_random_instance(n, digits=6):
@@ -35,25 +38,23 @@ def main():
             if not any(ta.goals.get(g, True) for g in gs):
                 break
 
-<<<<<<< HEAD
-            print(f"Testing n={n}")
-=======
             print(f"Testing N = {n}...\t", end="")
->>>>>>> a3eb856f484c4ee43d0a84397831546061125485
 
-            a = create_random_instance(n)
-            optimal_subsequence = get_optimal_subsequence(a)
+            s = create_random_instance(n)
+            optimal_subsequence = get_an_optimal_subsequence_of(s)
             try:
-                subsequence = run(algorithm, a)
+                subsequence_length, subsequence, color = run(algorithm, s)
             except ta.AlgorithmError as e:
                 print(f"[WRONG: {e}]")
                 correct = False
             else:
                 if DEBUG:
+                    print("Declared maximum subsequence length:", subsequence_length)
                     print("Subsequence:", subsequence)
                     print("Optimal subsequence:", optimal_subsequence)
+                    print("Coloring:", color)
                 correct = (
-                        is_subsequence(subsequence, a) and
+                        is_subsequence(subsequence, s) and
                         is_increasing(subsequence) and
                         len(subsequence) == len(optimal_subsequence)
                 )
@@ -72,29 +73,29 @@ def main():
     print(ta.goals)
 
 
-def optimal_subsequence_exponential(a):
-    assert len(a) <= 10
+def optimal_subsequence_exponential(s):
+    assert len(s) <= 10
     return max(
-        (s for s in subsequences(a) if is_increasing(s)),
+        (ss for ss in subsequences_of(s) if is_increasing(ss)),
         key=len,
     )
 
 
-def subsequences(seq):
-    if not seq:
+def subsequences_of(s):
+    if not s:
         yield []
     else:
-        [first, *rest] = seq
-        for s in subsequences(rest):
-            yield [first] + s
-            yield s
+        [first, *rest] = s
+        for ss in subsequences_of(rest):
+            yield [first] + ss
+            yield ss
 
 
-def is_subsequence(a, b):
+def is_subsequence(ss, s):
     j = 0
-    for x in a:
+    for x in ss:
         try:
-            j += b[j:].index(x) + 1
+            j += s[j:].index(x) + 1
         except ValueError:
             return False
     return True
@@ -106,12 +107,12 @@ def is_increasing(s):
 
 def test_correct_algorithm():
     for _ in range(10):
-        a = create_random_instance(10, digits=2)
-        s = get_optimal_subsequence(a)
-        print(s, a)
-        assert is_subsequence(s, a)
-        assert is_increasing(s)
-        assert len(s) == len(optimal_subsequence_exponential(a))
+        s = create_random_instance(10, digits=2)
+        ss = get_an_optimal_subsequence_of(s)
+        print(ss, s)
+        assert is_subsequence(ss, s)
+        assert is_increasing(ss)
+        assert len(ss) == len(optimal_subsequence_exponential(s))
 
 
 if __name__ == "__main__":

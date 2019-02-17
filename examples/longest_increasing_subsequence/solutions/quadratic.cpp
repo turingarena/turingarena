@@ -1,36 +1,47 @@
 #include <vector>
 #include <algorithm>
 
+int max_len;
+
 std::vector<bool> taken;
 
-void compute(int n, int *a) {
+void compute(int n, int *s) {
     int prev[n], len[n];
-    int best, best_len;
+    int best = -1;
 
-    best_len = 0;
+    max_len = 0;
     for(int i = 0; i < n; i++) {
         prev[i] = -1;
         len[i] = 1;
         for(int j = 0; j < i; j++) {
-            if(a[i] > a[j] && len[j]+1 > len[i]) {
+            if(s[i] > s[j] && len[j]+1 > len[i]) {
                 len[i] = len[j]+1;
                 prev[i] = j;
             }
         }
-        if(len[i] > best_len) {
+        if(len[i] > max_len) {
+            max_len = len[i];
             best = i;
-            best_len = len[i];
         }
     }
 
     taken.resize(n);
-    while(best_len) {
+    while(best >= 0) {
         taken[best] = true;
         best = prev[best];
-        best_len--;
     }
+}
+
+
+int max_length() {
+    return max_len;
 }
 
 int takes(int i) {
     return taken[i];
 }
+
+int color_of(int i) {
+    return 32;
+}
+

@@ -7,7 +7,8 @@ from turingarena import InterfaceError
 from turingarena.driver.common.description import TreeDumper
 from turingarena.driver.compile.analysis import ReferenceResolution
 from turingarena.driver.drive.analysis import ReferenceDirection
-from turingarena.driver.drive.comm import ExecutionCommunicator, CommunicationError, InterfaceExitReached
+from turingarena.driver.drive.comm import CommunicationError, InterfaceExitReached, SandboxCommunicator, \
+    DriverCommunicator
 from turingarena.driver.drive.preprocess import ExecutionPreprocessor
 from turingarena.util.visitor import visitormethod
 
@@ -22,34 +23,42 @@ class NotResolved(Exception):
     """Expression evaluation failed because some values are not resolved"""
 
 
-class Executor(ExecutionCommunicator, ExecutionPreprocessor):
+class Executor(SandboxCommunicator, DriverCommunicator, ExecutionPreprocessor):
     __slots__ = []
 
-    @visitormethod
     def evaluate(self, e):
+        try:
+            return self.try_evaluate(e)
+        except NotResolved:
+            raise ValueError(f"unable to evaluate expression {e}")
+
+    @visitormethod
+    def try_evaluate(self, e):
         pass
 
-    def evaluate_IntLiteral(self, e):
+    def try_evaluate_IntLiteral(self, e):
         return e.value
 
-    def evaluate_Variable(self, e):
+    def try_evaluate_Variable(self, e):
         try:
             return self.bindings[e]
         except KeyError:
-            raise NotResolved from None
+            raise NotResolved
 
-    def evaluate_Subscript(self, e):
+    def try_evaluate_Subscript(self, e):
         try:
             return self.bindings[e]
         except KeyError:
-            try:
-                return self.evaluate(e.array)[self.evaluate(e.index)]
-            except KeyError:
-                raise NotResolved from None
+            pass
+
+        array = self.try_evaluate(e.array)
+        index = self.evaluate(e.index)
+
+        return array[index]
 
     def is_resolved(self, e):
         try:
-            self.evaluate(e)
+            self.try_evaluate(e)
         except NotResolved:
             return False
         else:
@@ -117,12 +126,12 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
         if self.phase is None:
             assert self.request_lookahead is None
 
-        try:
-            for_range = self.evaluate(n.index.range)
-        except NotResolved:
+        if not self.is_resolved(n.index.range):
             # we assume that if the range is not resolved, then the cycle should be skipped
             # FIXME: determine this situation statically
             return
+
+        for_range = self.evaluate(n.index.range)
 
         results_by_iteration = [
             self.with_assigments(
@@ -280,17 +289,17 @@ class Executor(ExecutionCommunicator, ExecutionPreprocessor):
 
         assignments = []
         for p, a in zip(n.method.parameters, n.arguments):
-            v = self.deserialize_request_data()
-            try:
+            actual_value = self.deserialize_request_data()
+
+            if self.is_resolved(a):
                 expected_value = self.evaluate(a)
-            except NotResolved:
-                assignments.append((a, v))
-            else:
-                if isinstance(expected_value, int) and v != expected_value:
+                if isinstance(expected_value, int) and actual_value != expected_value:
                     raise InterfaceError(
                         f"parameter {p.variable.name}: expecting {expected_value}, "
-                        f"got {v}"
+                        f"got {actual_value}"
                     )
+            else:
+                assignments.append((a, actual_value))
 
         actual_has_return_value = bool(int(self.receive_driver_downward()))
         expected_has_return_value = n.method.has_return_value
