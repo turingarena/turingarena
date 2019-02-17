@@ -4,9 +4,10 @@ import secrets
 from io import StringIO
 
 import boto3
-from turingarena.api.commands import WorkingDirectory
-from turingarena.api.git_manager import create_working_directory
+
 from turingarena.file.generated import PackGeneratedDirectory
+from turingarena_cloud.commands import WorkingDirectory
+from turingarena_cloud.git_manager import create_working_directory
 
 S3_FILES_BUCKET = os.environ["S3_FILES_BUCKET"]
 

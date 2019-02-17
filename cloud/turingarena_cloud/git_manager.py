@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import TemporaryDirectory
 
-from turingarena.api.commands import GitRepository, WorkingDirectory
+from turingarena_cloud.commands import GitRepository, WorkingDirectory
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ import json
 from http import HTTPStatus
 from io import BytesIO
 
-from turingarena.api import aws_backend
-from turingarena.api.common import ProxyError, execute_api
+from turingarena_cloud import aws_backend
+from turingarena_cloud.common import ProxyError, execute_api
 
 
 def main(event, context):

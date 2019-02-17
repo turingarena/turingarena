@@ -2,9 +2,9 @@ import pickle
 import sys
 import traceback
 
-from turingarena.api.hypersh_evaluate import handle_evaluate
-from turingarena.api.hypersh_files import handle_generate_file
-from turingarena.api.request import CloudEvaluateRequest, CloudGenerateFileRequest
+from turingarena_cloud.hypersh_evaluate import handle_evaluate
+from turingarena_cloud.hypersh_files import handle_generate_file
+from turingarena_cloud.request import CloudEvaluateRequest, CloudGenerateFileRequest
 
 
 def handle(request):
