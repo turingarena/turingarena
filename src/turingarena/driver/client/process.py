@@ -91,6 +91,7 @@ class Process:
     @contextmanager
     def _do_run(self, **kwargs):
         self.checkpoint()
+        assert self._latest_resource_usage is not None
         with self.section(**kwargs) as main_section:
             self._main_section = main_section
             try:
@@ -101,9 +102,9 @@ class Process:
 
     @contextmanager
     def _run(self, **kwargs):
-        assert self._latest_resource_usage is not None
         try:
-            yield self._do_run(**kwargs)
+            with self._do_run(**kwargs) as p:
+                yield p
         except ProcessStop:
             # TODO: allow configuring what to do with these exceptions
             # (e.g.: on_exit, on_stop, on_error = "raise" | "ignore")
