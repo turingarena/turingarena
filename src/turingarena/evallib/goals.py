@@ -2,7 +2,7 @@ import logging
 import re
 from typing import MutableMapping
 
-from turingarena.evallib.evaluation import output_data
+from turingarena.evallib.evaluation import send_data
 from turingarena.evallib.metadata import load_metadata
 
 
@@ -56,7 +56,7 @@ class Goals(MutableMapping):
             )
         except KeyError:
             self._assigned_goals[key] = value
-            output_data(dict(type="goal_result", goal=key, result=value))
+            send_data(dict(type="goal_result", goal=key, result=value))
 
     def __delitem__(self, key):
         raise NotImplementedError
