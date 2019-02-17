@@ -67,7 +67,7 @@ class RustCodeGen(InterfaceCodeGen):
 
     def visit_VariableDeclaration(self, n):
         type = "i64"  # TODO: support for arrays
-        self.line(f"let mut {n.variable.name}: {type};")
+        self.line(f"let {n.variable.name}: {type};")
 
     def visit_Alloc(self, n):
         pass
