@@ -1,8 +1,8 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg viewBox="-250 -200 400 400" xmlns="http://www.w3.org/2000/svg" version="1.1">
-    <clipPath transform="scale(.75, 1.05)" id="clip">
+<svg viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <clipPath transform="scale(.7, 1.05)" id="clip">
         <!-- negative unit circle -->
         <path d="
             M -10,-10
@@ -28,8 +28,12 @@
             scale(1 1)
         "
     />
-    <text fill="#24292e" x="-125" dy=".7ex" style="
-        font: 200px 'Liberation Mono';
+    <text fill="#24292e" x="-140" dy=".8ex" style="
+        font: 200px 'DejaVu Sans Mono';
         text-anchor: end;
-    ">t</text>
+    " transform="scale(.78 1)">t</text>
+    <text fill="#24292e" x="+140" dy=".8ex" style="
+        font: 200px 'DejaVu Sans Mono';
+        text-anchor: start;
+    " transform="scale(.78 1)">;</text>
 </svg>
