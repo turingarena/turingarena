@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from turingarena.cli.base import BASE_PARSER
-from turingarena.cli.common import init_logger
+from turingarena.logging_helper import init_logger
 from turingarena.cli.evaluate import EvaluateCommand
 from turingarena.cli.files import FileCommand
 from turingarena.cli.new import NewCommand

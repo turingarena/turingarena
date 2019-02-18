@@ -3,7 +3,7 @@ import sys
 from contextlib import ExitStack
 from tempfile import TemporaryDirectory
 
-from turingarena.cli.common import init_logger
+from turingarena.logging_helper import init_logger
 from turingarena.driver.client.commands import DriverState
 from turingarena.driver.client.connection import DriverProcessConnection
 from turingarena.driver.client.program import Program
