@@ -20,9 +20,15 @@ macro_rules! readln {
 
 
 class RustCodeGen(InterfaceCodeGen):
+    @staticmethod
+    def build_type(dimensions):
+        if dimensions == 0:
+            return "i64"
+        else:
+            return f"Vec<{RustCodeGen.build_type(dimensions - 1)}>"
+
     def visit_Parameter(self, d):
-        # TODO: support for arrays
-        return f"{d.variable.name}: i64"
+        return f"{d.variable.name}: {self.build_type(d.dimensions)}"
 
     def visit_Interface(self, n):
         self.line("mod solution;")
@@ -49,6 +55,9 @@ class RustCodeGen(InterfaceCodeGen):
                 self.visit(m.body)
             self.line(f"}}")
 
+    def visit_Subscript(self, e):
+        return f"{self.visit(e.array)}[{self.visit(e.index)} as usize]"
+
     def visit_Prototype(self, n):
         return_type = "-> i64" if n.has_return_value else ""
         value_parameters = [self.visit(p) for p in n.parameters]
@@ -66,15 +75,16 @@ class RustCodeGen(InterfaceCodeGen):
         self.line(f"// {n.text}")
 
     def visit_VariableDeclaration(self, n):
-        type = "i64"  # TODO: support for arrays
-        self.line(f"let {n.variable.name}: {type};")
+        t = self.build_type(n.dimensions)
+        init = " = Vec::new()" if n.dimensions > 0 else ""
+        mut = "mut " if n.dimensions > 0 else ""
+        self.line(f"let {mut}{n.variable.name}: {t}{init};")
 
     def visit_Alloc(self, n):
-        pass
-        # reference = self.visit(n.reference)
-        # dimensions = "*" * n.dimensions
-        # size = self.visit(n.size)
-        # self.line(f"{reference} = new int{dimensions}[{size}];")
+        t = "vec::new()" if n.dimensions > 0 else "0"
+        reference = self.visit(n.reference)
+        size = self.visit(n.size)
+        self.line(f"{reference}.resize({size} as usize, {t});")
 
     def visit_Callback(self, n):
         params = ", ".join(self.visit(p) for p in n.prototype.parameters)
@@ -129,7 +139,7 @@ class RustCodeGen(InterfaceCodeGen):
     def visit_For(self, s):
         index_name = s.index.variable.name
         size = self.visit(s.index.range)
-        self.line(f"for i in  {index_name}..{size} {{")
+        self.line(f"for {index_name} in 0..{size} {{")
         with self.indent():
             self.visit(s.body)
         self.line("}")
