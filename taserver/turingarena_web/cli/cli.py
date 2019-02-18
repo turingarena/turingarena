@@ -12,7 +12,7 @@ from turingarena_web.cli.command import add_subparser
 from turingarena_web.cli.contest import ContestCommand
 from turingarena_web.cli.problem import ProblemCommand
 from turingarena_web.cli.user import UserCommand
-from turingarena_web.cli.init import InitCommand
+from turingarena_web.cli.server import ServerCommand
 
 VERSION = "v0.0.1"  # TODO: load version from file
 
@@ -23,7 +23,7 @@ subparsers.required = True
 add_subparser(subparsers, UserCommand)
 add_subparser(subparsers, ProblemCommand)
 add_subparser(subparsers, ContestCommand)
-add_subparser(subparsers, InitCommand)
+add_subparser(subparsers, ServerCommand)
 
 
 def main():
