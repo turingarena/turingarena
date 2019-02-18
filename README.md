@@ -25,7 +25,9 @@ Here is how to use TuringArena on your local machine to develop and test challen
 
 ### Prerequisites
 
-TuringArena is currently supported *only on Linux*.
+TuringArena is currently supported *only on Linux*, because we use
+Linux-specific kernel interfaces to sandbox submissions and measure resource utilization. 
+
 To use TuringArena on a local machine, the following tools are needed:
 - `python3.6` or newer
 - `pip`
@@ -33,23 +35,36 @@ To use TuringArena on a local machine, the following tools are needed:
 - `libseccomp-dev` used for the submission sandbox
 - `jq` used to format json output
 
+You may also want the following optional dependencies:
+- `openjdk-*-jdk` to run Java submissions
+- `rustc` to run Rust submissions 
+- `pipenv` to install in a virtual environment 
+
 To install all of these dependencies on Ubuntu 18.04:
 ```bash
 sudo apt install python3.6 python3-pip build-essential jq libseccomp-dev 
 ```
 
 ### Install / Upgrade
-
-To install / upgrade the latest version of TuringArena from pip:
-```bash
-sudo pip3 install -U turingarena-dev
-```
-
-If you want to install TuringArena from this repository (for development)
+To install the TuringArena core, run the `setup.py` inside `src`. 
 ```bash
 cd src/
 python3 setup.py develop
 ```
+
+To install the TuringArena web interface, run the `setup.py` inside `taserver`. 
+```bash
+cd taserver/
+python3 setup.py develop
+```
+You may want to execute these commands inside a virtual environment. 
+
+#### Install using Pipenv (reccomanded)
+You can install TuringArena with `pipenv`, this will install both the 
+core and the web interface in a virtual environment automatically. 
+
+Simply run `pipenv install` in the root directory of this repository, 
+and then use `pipenv shell` to open a shell inside the created virtual environment. 
 
 ### Usage
 
