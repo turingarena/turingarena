@@ -1,5 +1,3 @@
-// evaluation_assert data["goals"]["correct"]
-
 #include <vector>
 #include <algorithm>
 

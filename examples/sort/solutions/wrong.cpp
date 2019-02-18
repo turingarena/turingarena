@@ -1,5 +1,3 @@
-// evaluation_assert not data["goals"]["correct"]
-
 #include <algorithm>
 
 int *b;
