@@ -1,5 +1,3 @@
-// evaluation_assert data["goals"]["correct"]
-// evaluation_assert not data["goals"]["efficient"]
 #include <cassert>
 
 const int YES = 1;

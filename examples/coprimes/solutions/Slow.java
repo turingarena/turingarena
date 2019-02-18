@@ -1,6 +1,3 @@
-// evaluation_assert data["goals"]["correct"]
-// evaluation_assert not data["goals"]["efficient"]
-
 class Solution extends Skeleton {
 // Constant declarations
 private static final YES = 1;

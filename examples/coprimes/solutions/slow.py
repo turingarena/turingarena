@@ -1,6 +1,3 @@
-// evaluation_assert data["goals"]["correct"]
-// evaluation_assert not data["goals"]["efficient"]
-
 YES = 1
 NO = 0
 
