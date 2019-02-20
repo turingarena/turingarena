@@ -1,5 +1,7 @@
 import os
 import sys
+
+from abc import ABC
 from argparse import ArgumentParser
 from functools import lru_cache
 
@@ -9,7 +11,7 @@ from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.submission import SubmissionFile
 
 
-class SubmissionCommand(Command):
+class SubmissionCommand(Command, ABC):
     PARSER = ArgumentParser(
         add_help=False,
     )

@@ -2,6 +2,8 @@ import logging
 import os
 import shutil
 import sys
+
+from abc import ABC
 from argparse import ArgumentParser
 
 from turingarena.cli.base import BASE_PARSER
@@ -9,7 +11,7 @@ from turingarena.cli.command import Command
 from turingarena.file.generated import PackGeneratedDirectory
 
 
-class FileCommand(Command):
+class FileCommand(Command, ABC):
     PARSER = ArgumentParser(
         description="Get generated files",
         add_help=False,
