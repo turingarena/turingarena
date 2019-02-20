@@ -18,6 +18,19 @@ class FileCommand(Command, ABC):
     )
 
 
+class FileListCommand(FileCommand):
+    PARSER = ArgumentParser(
+        description="List the available files in the current directory",
+        parents=[FileCommand.PARSER],
+        add_help=False,
+    )
+
+    def run(self):
+        directory = PackGeneratedDirectory(".")
+        for path, _ in directory.targets:
+            print(path)
+
+
 class FileCatCommand(FileCommand):
     PARSER = ArgumentParser(
         description="Print the content of a file to stdout",
@@ -76,3 +89,8 @@ subparsers.add_parser(
     parents=[FileSyncCommand.PARSER, BASE_PARSER],
     help=FileSyncCommand.PARSER.description,
 ).set_defaults(Command=FileSyncCommand)
+subparsers.add_parser(
+    "list",
+    parents=[FileListCommand.PARSER, BASE_PARSER],
+    help=FileListCommand.PARSER.description,
+).set_defaults(Command=FileListCommand)
