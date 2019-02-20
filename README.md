@@ -70,7 +70,7 @@ and then use `pipenv shell` to open a shell inside the created virtual environme
 
 To evaluate a solution, `cd` in the directory of the problem and run:
 ```bash
-turingarena evaluate path/to/solution.cpp
+turingarena-dev evaluate path/to/solution.cpp
 ```
 
 ### First tests (running the example problems)
@@ -85,5 +85,5 @@ cd examples/sum_of_two_numbers/
 ```
 3. Evaluate a solution, say, `correct.cpp`:
 ```bash
-turingarena evaluate solutions/correct.cpp
+turingarena-dev evaluate solutions/correct.cpp
 ```
