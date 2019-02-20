@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from turingarena.cli.base import BASE_PARSER
 from turingarena.logging_helper import init_logger
 from turingarena.cli.evaluate import EvaluateCommand
-from turingarena.cli.files import FileCommand
+from turingarena.cli.file import FileCommand
 from turingarena.version import VERSION
 
 # PYTHON_ARGCOMPLETE_OK
