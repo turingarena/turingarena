@@ -6,17 +6,7 @@ from turingarena.driver.language import Language
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType
 
-from turingarena_web.config import config
 from turingarena_web.model.submission import Submission, SubmissionStatus
-
-
-def available_languages():
-    if "allowed_languages" in config:
-        return [
-            Language.from_name(lang)
-            for lang in config["allowed_languages"]
-        ]
-    return Language.languages()
 
 
 def evaluate_thread(problem, submission):
@@ -33,7 +23,6 @@ def evaluate_thread(problem, submission):
                 goal = problem.goal(data["goal"])
                 result = data["result"]
                 goal.acquire(submission, result)
-                continue  # process next event
 
         submission.event(event_type=event.type, payload=str(event.payload))
 
