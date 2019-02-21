@@ -27,6 +27,14 @@ class RustCodeGen(InterfaceCodeGen):
         else:
             return f"Vec<{RustCodeGen.build_type(dimensions - 1)}>"
 
+    def build_callback(self, c):
+        return_type = "-> i64" if c.has_return_value else ""
+        args = ", ".join([
+            self.build_type(arg.dimensions)
+            for arg in c.parameters
+        ])
+        return f"{c.name}: fn({args}){return_type}"
+
     def visit_Parameter(self, d):
         return f"{d.variable.name}: {self.build_type(d.dimensions)}"
 
@@ -36,7 +44,7 @@ class RustCodeGen(InterfaceCodeGen):
         self.line(read_macro)
         for c in n.constants:
             self.visit(c)
-            self.line()
+        self.line()
         self.line("fn main() {")
         with self.indent():
             self.visit(n.main)
@@ -45,7 +53,7 @@ class RustCodeGen(InterfaceCodeGen):
     def visit_InterfaceTemplate(self, n):
         for c in n.constants:
             self.visit(c)
-            self.line()
+        self.line()
         for m in n.methods:
             if m.description:
                 for l in m.description:
@@ -62,7 +70,7 @@ class RustCodeGen(InterfaceCodeGen):
         return_type = "-> i64" if n.has_return_value else ""
         value_parameters = [self.visit(p) for p in n.parameters]
         callback_parameters = [
-            self.visit(callback)
+            self.build_callback(callback)
             for callback in n.callbacks
         ]
         parameters = ", ".join(value_parameters + callback_parameters)
@@ -126,7 +134,7 @@ class RustCodeGen(InterfaceCodeGen):
     def visit_If(self, n):
         condition = self.visit(n.condition)
         headers = [
-            f"if {condition} {{",
+            f"if {condition} != 0 {{",
             f"}} else {{",
         ]
         for header, body in zip(headers, n.branches):

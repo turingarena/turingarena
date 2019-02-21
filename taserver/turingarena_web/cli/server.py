@@ -6,6 +6,7 @@ from turingarena_web.cli.command import Command, add_subparser
 from turingarena_web.model.database import database
 from turingarena_web import create_app
 
+
 class ServerCommand(Command, ABC):
     NAME = "server"
     PARSER = ArgumentParser(
@@ -49,6 +50,6 @@ class RunCommand(ServerCommand):
         app.run(self.args.host, self.args.port, self.args.debug)
 
 
-subparsers = ServerCommand.PARSER.add_subparsers(title="subcommand")
+subparsers = ServerCommand.PARSER.add_subparsers(metavar="COMMAND")
 add_subparser(subparsers, RunCommand)
 add_subparser(subparsers, InitDBCommand)
