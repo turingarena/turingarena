@@ -42,7 +42,6 @@
         const evaluationOutput = document.getElementById("evaluation-output");
 
         function goalResult(goal, result) {
-            console.log(goal, result);
             const goalTr = document.getElementById(goal + "_tr");
             const goalResult = document.getElementById(goal + "_result");
             if (result) {
@@ -69,7 +68,6 @@
                     return response.json()
                 }).then(response => {
                     response.events.forEach(event => {
-                        console.log(event);
                         after = event.serial;
                         switch (event.type) {
                             case 'text':
