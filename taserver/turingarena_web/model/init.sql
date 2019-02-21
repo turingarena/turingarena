@@ -59,7 +59,7 @@ CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'FILE');
 
 CREATE TABLE evaluation_event (
   submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,
-  serial        SERIAL,
+  serial        BIGSERIAL,
   type          event_type_e NOT NULL,
   data          TEXT,
   PRIMARY KEY (submission_id, serial)

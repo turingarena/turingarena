@@ -16,9 +16,13 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
         return EvaluationEventType(self.type_.lower())
 
     @staticmethod
-    def from_submission(submission, event_type=EvaluationEventType.TEXT):
-        query = "SELECT * FROM evaluation_event WHERE submission_id = %s AND type = %s ORDER BY serial"
-        return database.query_all(query, submission.id, event_type.value.upper(), convert=EvaluationEvent)
+    def from_submission(submission, event_type=None, after=0):
+        if event_type is None:
+            t = ""
+        else:
+            t = f"AND type = {event_type.value.upper()}"
+        query = f"SELECT * FROM evaluation_event WHERE submission_id = %s {t} AND serial > %s ORDER BY serial"
+        return database.query_all(query, submission.id, after, convert=EvaluationEvent)
 
     @staticmethod
     def insert(submission, event_type, payload):
