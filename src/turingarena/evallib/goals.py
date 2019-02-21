@@ -16,7 +16,7 @@ class Goals(MutableMapping):
     def _declared_goals(self):
         return load_metadata().get("scoring", {}).get("goals", [])
 
-    def check_goal(self, goal, checker):
+    def check(self, goal, checker):
         """
         Check the specify goal:
             - if the goal was already assigned to False, skip check
