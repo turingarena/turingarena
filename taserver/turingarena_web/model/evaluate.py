@@ -24,8 +24,9 @@ def evaluate_thread(problem, submission):
                 result = data["result"]
                 goal.acquire(submission, result)
 
-        submission.event(event_type=event.type, payload=str(event.payload))
+        submission.event(event_type=event.type, payload=event.payload)
 
+    submission.event(event_type=EvaluationEventType.DATA, payload=dict(type="end"))
     submission.set_status(SubmissionStatus.EVALUATED)
 
 

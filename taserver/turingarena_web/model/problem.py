@@ -31,7 +31,7 @@ class Goal(namedtuple("Goal", ["id", "problem_id", "name"])):
 
     def acquire(self, submission, result: bool):
         query = "INSERT INTO acquired_goal(submission_id, goal_id, result) VALUES (%s, %s, %s)"
-        database.query(query, submission.id, self.id, int(result))
+        database.query(query, submission.id, self.id, result)
 
     @staticmethod
     def from_problem_and_name(problem, name):

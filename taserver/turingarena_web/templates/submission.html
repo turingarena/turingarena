@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 {% block head %}
-    {% if not end %}
-        {# TODO: dymaically get evaluation events via some JavaScript code #}
-        <meta http-equiv="refresh" content="1">
-    {% endif %}
     <style>
         #evaluation-output {
             overflow: auto;
@@ -18,27 +14,15 @@
 {% block body %}
     <div>
         <h3>Evaluation output</h3>
-        <div id="evaluation-output">
-            <pre>
-                {%- for event in events -%}
-                    {{ event | safe }}
-                {%- endfor -%}
-                {% if not end %}<br>Evaluating...{% endif %}
-            </pre>
-        </div>
+            <pre id="evaluation-output"></pre>
     </div>
     <hr>
-    {% if files|length > 0 %}
+    <div id="files" hidden>
         <h3>Files of your submission</h3>
-        <ul>
-        {% for f in files %}
-            <li><a href="data:{{ f.content_type }};base64,{{ f.content_base64 }}"
-               download="{{ f.filename }}"
-            >{{ f.filename }}</a></li>
-        {% endfor %}
+        <ul id="files_list">
         </ul>
         <hr>
-    {% endif %}
+    </div>
     <div>
         <h3>Your goals</h3>
         <table id="goals" class="table">
@@ -47,21 +31,69 @@
                 <th>Result</th>
             </tr>
             {% for goal, value in goals.items() %}
-                {% if value is none %}
-                    <tr class="table-info">
-                {% elif value %}
-                    <tr class="table-success">
-                        {% else %}
-                    <tr class="table-danger">
-                {% endif %}
+                <tr class="table-info" id="{{ goal.name }}_tr">
                 <td>{{ goal.name }}</td>
-                <td>{% if value is none %} ? {% elif value %} 👌 {% else %} 🙁 {% endif %}</td>
-                </tr>
+                <td id="{{ goal.name }}_result">?</td>
+            </tr>
             {% endfor %}
         </table>
     </div>
     <script>
-        var div = document.getElementById("evaluation-output");
-        div.scrollTop = div.scrollHeight;
+        const evaluationOutput = document.getElementById("evaluation-output");
+
+        function goalResult(goal, result) {
+            console.log(goal, result);
+            const goalTr = document.getElementById(goal + "_tr");
+            const goalResult = document.getElementById(goal + "_result");
+            if (result) {
+                goalTr.className = "table-success";
+                goalResult.innerText = "👌";
+            } else {
+                goalTr.className = "table-danger";
+                goalResult.innerText = "🙁";
+            }
+        }
+
+        function addFile(file) {
+            document.getElementById("files").removeAttribute("hidden");
+            document.getElementById("files_list").innerHTML += "<li><a href=\"data:"
+                + file.content_type + ";base64," + file.content_base64 +"\" download=\"" + file.filename
+                + "\">" + file.filename +"</a></li>"; // FIXME: how horrible is it?
+        }
+
+        (async () => {
+            let end = false;
+            let after = 0;
+            while (!end) {
+                await fetch('/api/evaluation_event?id={{ id }}&after=' + after).then(response => {
+                    return response.json()
+                }).then(response => {
+                    response.events.forEach(event => {
+                        console.log(event);
+                        after = event.serial;
+                        switch (event.type) {
+                            case 'text':
+                                evaluationOutput.innerHTML += event.payload;
+                                break;
+                            case 'data':
+                                const data = event.payload;
+                                switch (data.type) {
+                                    case 'end':
+                                        end = true;
+                                        break;
+                                    case 'goal_result':
+                                        goalResult(data.goal, data.result);
+                                        break;
+                                }
+                                break;
+                            case 'file':
+                                addFile(event.payload);
+                                break;
+                        }
+                    });
+                    return new Promise(resolve => setTimeout(resolve, 500));
+                });
+            }
+        })()
     </script>
 {% endblock %}

@@ -31,8 +31,8 @@ def evaluation_event():
         return error(400, "the after parameter must be an integer")
 
     events = [
-        {"serial": event.serial, "type": event.type.value, "payload": event.data}
+        {"serial": event.serial, "type": event.type.value, "payload": event.payload}
         for event in EvaluationEvent.from_submission(submission, after=after)
     ]
 
-    return jsonify(events)
+    return jsonify(events=events)

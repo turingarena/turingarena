@@ -1,3 +1,5 @@
+import json
+
 from collections import namedtuple
 from enum import Enum
 
@@ -15,18 +17,27 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
     def type(self):
         return EvaluationEventType(self.type_.lower())
 
+    @property
+    def payload(self):
+        if self.type == EvaluationEventType.TEXT:
+            return str(self.data)
+        else:
+            return json.loads(self.data)
+
     @staticmethod
     def from_submission(submission, event_type=None, after=0):
         if event_type is None:
             t = ""
         else:
-            t = f"AND type = {event_type.value.upper()}"
+            t = f"AND type = '{event_type.value.upper()}'"
         query = f"SELECT * FROM evaluation_event WHERE submission_id = %s {t} AND serial > %s ORDER BY serial"
         return database.query_all(query, submission.id, after, convert=EvaluationEvent)
 
     @staticmethod
     def insert(submission, event_type, payload):
         query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
+        if event_type != 'text':
+            payload = json.dumps(payload)
         return database.query_one(query, submission.id, event_type.upper(), payload, convert=EvaluationEvent)
 
 
