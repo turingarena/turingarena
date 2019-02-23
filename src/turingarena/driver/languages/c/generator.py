@@ -32,19 +32,23 @@ class CCodeGen(CppCodeGen):
 
     def visit_Call(self, n):
         method = n.method
-        self.line("{")
-        with self.indent():
+
+        if method.callbacks:
+            self.line("{")
+            self.indentation += 1
             for c in n.callbacks:
                 self.visit(c)
 
-            value_arguments = [self.visit(p) for p in n.arguments]
-            callback_arguments = [c.prototype.name for c in n.callbacks]
+        value_arguments = [self.visit(p) for p in n.arguments]
+        callback_arguments = [c.prototype.name for c in n.callbacks]
 
-            parameters = ", ".join(value_arguments + callback_arguments)
-            if method.has_return_value:
-                return_value = f"{self.visit(n.return_value)} = "
-            else:
-                return_value = ""
+        parameters = ", ".join(value_arguments + callback_arguments)
+        if method.has_return_value:
+            return_value = f"{self.visit(n.return_value)} = "
+        else:
+            return_value = ""
 
-            self.line(f"{return_value}{method.name}({parameters});")
-        self.line("}")
+        self.line(f"{return_value}{method.name}({parameters});")
+        if method.callbacks:
+            self.indentation -= 1
+            self.line("}")
