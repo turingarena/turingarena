@@ -14,7 +14,7 @@
 {% block body %}
     <div>
         <h3>Evaluation output</h3>
-            <pre id="evaluation-output"></pre>
+        <pre id="evaluation-output"></pre>
     </div>
     <hr>
     <div id="files" hidden>
@@ -32,9 +32,9 @@
             </tr>
             {% for goal, value in goals.items() %}
                 <tr class="table-info" id="{{ goal.name }}_tr">
-                <td>{{ goal.name }}</td>
-                <td id="{{ goal.name }}_result">?</td>
-            </tr>
+                    <td>{{ goal.name }}</td>
+                    <td id="{{ goal.name }}_result">?</td>
+                </tr>
             {% endfor %}
         </table>
     </div>
@@ -56,8 +56,8 @@
         function addFile(file) {
             document.getElementById("files").removeAttribute("hidden");
             document.getElementById("files_list").innerHTML += "<li><a href=\"data:"
-                + file.content_type + ";base64," + file.content_base64 +"\" download=\"" + file.filename
-                + "\">" + file.filename +"</a></li>"; // FIXME: how horrible is it?
+                + file.content_type + ";base64," + file.content_base64 + "\" download=\"" + file.filename
+                + "\">" + file.filename + "</a></li>"; // FIXME: how horrible is it?
         }
 
         (async () => {

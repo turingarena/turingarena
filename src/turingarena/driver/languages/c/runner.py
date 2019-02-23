@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class CProgramRunner(CppProgramRunner):
     def _compile_source(self):
         cli = [
-            *self._ccache(), "gcc", "-c", "-O2", "-std=c11", "-Wall",
+            *self._ccache(), "gcc", "-c", "-O2", "-std=gnu11", "-Wall",
             "-o", self._source_object_path,
             self.program.source_path,
         ]
@@ -20,7 +20,7 @@ class CProgramRunner(CppProgramRunner):
 
     def _compile_skeleton(self):
         cli = [
-            *self._ccache(), "gcc", "-c", "-O2", "-std=c++17", "-Wno-unused-result",
+            *self._ccache(), "gcc", "-c", "-O2", "-std=gnu11", "-Wno-unused-result",
             "-o", self._skeleton_object_path,
             self._skeleton_path,
         ]
