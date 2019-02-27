@@ -59,7 +59,7 @@ python3 setup.py develop
 ```
 You may want to execute these commands inside a virtual environment. 
 
-#### Install using Pipenv (reccomanded)
+#### Install using Pipenv (recommended)
 You can install TuringArena with `pipenv`, this will install both the 
 core and the web interface in a virtual environment automatically. 
 
