@@ -1,5 +1,8 @@
+import base64
+
 import os
 import sys
+import json
 
 from abc import ABC
 from argparse import ArgumentParser
@@ -70,6 +73,7 @@ class EvaluateCommand(SubmissionCommand):
         parents=[SubmissionCommand.PARSER]
     )
     PARSER.add_argument("--events", help="show evaluation events as JSON Lines", action="store_true")
+    PARSER.add_argument("--store-files", help="stores files produced by the evaluator", action="store_true")
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
     def _do_evaluate(self):
@@ -79,7 +83,13 @@ class EvaluateCommand(SubmissionCommand):
         )
 
     def run(self):
+        files_dir = os.path.join(os.getcwd(), "generated-files")
+        if self.args.store_files:
+            os.makedirs(files_dir, exist_ok=True)
         for event in self._do_evaluate():
+            if self.args.store_files and event.type is EvaluationEventType.FILE:
+                with open(os.path.join(files_dir, event.payload["filename"]), "w") as f:
+                    f.write(base64.standard_b64decode(event.payload["content_base64"]).decode("utf-8"))
             if self.args.events:
                 print(event)
             else:
