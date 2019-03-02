@@ -5,7 +5,6 @@ from turingarena_web.controller import session
 from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.problem import Problem
 from turingarena_web.model.submission import Submission
-from turingarena_web.model.user import UserPrivilege
 
 
 contest_bp = Blueprint("contest", __name__)
@@ -24,16 +23,6 @@ def contest_view(contest_name):
         return abort(403)
 
     return render_template("contest.html", contest=contest, user=user)
-
-
-@contest_bp.route("/<contest_name>/scoreboard")
-def scoreboard(contest_name):
-    if session.get_current_user().privilege not in (UserPrivilege.ADMIN, UserPrivilege.TUTOR):
-        return abort(403)
-
-    contest = Contest.from_name(contest_name)
-
-    return render_template("scoreboard.html", contest=contest)
 
 
 @contest_bp.route("/<contest_name>/subscribe")

@@ -18,7 +18,7 @@ def login():
     user = User.from_username(username)
     if user.auth(password):
         session.set_current_user(user)
-        return redirect(url_for("root.home", username=username))
+        return redirect(url_for("root.home"))
     else:
         return render_template("login.html", message="Wrong username or password", registrarion_allowed=reg_ok)
 
