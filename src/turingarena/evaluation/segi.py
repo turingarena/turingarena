@@ -161,7 +161,7 @@ def process_headers(headers, body):
     else:
         payload["filename"] = "file.txt"
 
-    if segi_as == "content":
+    if segi_as == "path":
         with open(body, "rb") as f:
             content = f.read()
     else:
