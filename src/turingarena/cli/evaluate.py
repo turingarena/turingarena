@@ -1,8 +1,6 @@
-import base64
-
 import os
 import sys
-import json
+import base64
 
 from abc import ABC
 from argparse import ArgumentParser
@@ -11,7 +9,6 @@ from functools import lru_cache
 from turingarena.cli.command import Command
 from turingarena.evaluation.events import EvaluationEventType
 from turingarena.evaluation.evaluator import Evaluator
-from turingarena.evaluation.submission import SubmissionFile
 
 
 class SubmissionCommand(Command, ABC):
@@ -24,13 +21,6 @@ class SubmissionCommand(Command, ABC):
     def default_fields(self):
         return ["source"]
 
-    def _should_load_submission_files(self):
-        """
-        Override and return True to load file content in memory,
-        to use with remote services.
-        """
-        return False
-
     @property
     @lru_cache(None)
     def submission(self):
@@ -40,30 +30,16 @@ class SubmissionCommand(Command, ABC):
             for arg in self.args.file
         )
 
-    def _load_file(self, path):
-        if not self._should_load_submission_files():
-            return path
-
-        filename = os.path.basename(path)
-        with open(path, "rb") as f:
-            content = f.read()
-        return SubmissionFile(filename=filename, content=content)
-
     def _parse_file(self, argument, default_fields):
         if ":" in argument:
             name, path = argument.split(":", 1)
-            return name, self._load_file(path)
+        else:
+            name, path = next(default_fields), argument
 
-        if self._should_load_submission_files() and "=" in argument:
-            name, text_content = argument.split("=", 1)
-            return name, SubmissionFile(
-                filename=name + ".txt",
-                content=text_content.encode(),
-            )
-
-        name = next(default_fields)
-        path = argument
-        return name, self._load_file(path)
+        if not os.path.exists(path):
+            print(f"ERROR: file `{path}` does not exist!")
+            exit(1)
+        return name, path
 
 
 class EvaluateCommand(SubmissionCommand):

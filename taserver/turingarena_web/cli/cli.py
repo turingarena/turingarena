@@ -34,5 +34,5 @@ def main():
 
     init_logger(args.log_level, isatty=True)
 
-    command = args.Command(args=args, cwd=os.curdir)
+    command = args.Command(args=args)
     command.run()
