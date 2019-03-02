@@ -13,11 +13,6 @@
         <input name="username" type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
         <label for="inputPassword" class="sr-only">Password</label>
         <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-{#        <div class="checkbox mb-3">#}
-{#            <label>#}
-{#                <input type="checkbox" value="remember-me"> Remember me#}
-{#            </label>#}
-{#        </div>#}
         {% if registrarion_allowed %}
             <p>Don't have an account? <a href="{{ url_for("user.register") }}">Sign Up</a>!</p>
         {% endif %}
