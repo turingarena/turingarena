@@ -124,7 +124,7 @@ class JavaCodeGen(InterfaceCodeGen):
 
     def visit_If(self, statement):
         condition = self.visit(statement.condition)
-        self.line(f"if ({condition})"" {")
+        self.line(f"if ({condition} != 0) {{")
         with self.indent():
             self.visit(statement.branches.then_body)
         if statement.branches.else_body is not None:
