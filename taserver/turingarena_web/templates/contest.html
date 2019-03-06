@@ -1,19 +1,17 @@
 {% extends "base.html" %}
-{% set title = contest.name %}
+{% set title = contest.title %}
 {% block body %}
     <div>
         <table class="table table-hover">
             <thead>
             <tr>
                 <th>Name</th>
-                <th>Title</th>
             </tr>
             </thead>
             <tbody style="cursor: pointer">
             {% for problem in contest.problems %}
                 <tr onclick="window.location = '{{ url_for("contest.problem_view", contest_name=contest.name, name=problem.name) }}'">
-                    <td>{{ problem.name }}</td>
-                    <td>{{ problem.title }}</td>
+                    <td>{{ problem.title }} ({{ problem.name }})</td>
                 </tr>
             {% endfor %}
             </tbody>

@@ -44,7 +44,7 @@
                 <th>Download</th>
             </tr>
             {% for submission in submissions %}
-                {% set total_goals = submission.goals|length %}
+                {% set total_goals = problem.goals|length %}
                 {% set acquired_goals = submission.acquired_goals|length %}
                 {% if acquired_goals == total_goals %}
                     <tr class="table-success">
