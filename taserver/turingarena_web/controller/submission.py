@@ -19,6 +19,6 @@ def submission_view(submission_id):
 def download(submission_id, filename):
     submission = Submission.from_id(submission_id)
     user = get_current_user()
-    if submission is None or user is None or user.id != submission.user_id or submission.filename == filename:
+    if submission is None or user is None or user != submission.user or submission.filename != filename:
         return abort(404)
-    return send_file(submission.path)
+    return send_file(submission.files["source"])

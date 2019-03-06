@@ -15,8 +15,6 @@ CREATE TABLE _user (
   privilege  user_privilege_e NOT NULL DEFAULT 'STANDARD'
 );
 
-CREATE TYPE submission_status_e AS ENUM ('RECEIVED', 'EVALUATING', 'EVALUATED');
-
 CREATE TABLE submission (
   id         SERIAL PRIMARY KEY,
   problem    VARCHAR(50)         NOT NULL,
@@ -24,7 +22,6 @@ CREATE TABLE submission (
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   timestamp  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
   filename   VARCHAR(100)        NOT NULL CHECK (LENGTH(filename) > 0),
-  status     submission_status_e NOT NULL DEFAULT 'RECEIVED'
 );
 
 CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'FILE');

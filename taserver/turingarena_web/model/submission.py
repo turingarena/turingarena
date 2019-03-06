@@ -2,7 +2,6 @@ import json
 import os
 
 from collections import namedtuple
-from enum import Enum
 
 from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
 
@@ -12,13 +11,7 @@ from turingarena_web.model.database import database
 from turingarena_web.model.user import User
 
 
-class SubmissionStatus(Enum):
-    EVALUATING = "EVALUATING"
-    EVALUATED = "EVALUATED"
-    RECEIVED = "RECEIVED"
-
-
-class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name", "user_id", "timestamp", "filename", "status_"])):
+class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name", "user_id", "timestamp", "filename"])):
     @staticmethod
     def from_user_and_problem_and_contest(user, problem, contest):
         query = "SELECT * FROM submission WHERE user_id = %s AND problem = %s AND contest = %s ORDER BY timestamp DESC"
@@ -33,10 +26,6 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
     def new(user, problem, contest, filename):
         query = "INSERT INTO submission(problem, contest, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
         return database.query_one(query, problem.name, contest.name, user.id, filename, convert=Submission)
-
-    @property
-    def status(self):
-        return SubmissionStatus(self.status_)
 
     @property
     def problem(self):
@@ -55,13 +44,15 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
         return config.submission_dir_path.format(
             problem_name=self.problem.name,
             username=self.user.username,
-            timestamp=str(self.timestamp).replace(' ', '_'),
+            timestamp=self.timestamp,
             contest_name=self.contest.name
         )
 
     @property
-    def source_path(self):
-        return os.path.join(self.path, self.filename)
+    def files(self):
+        return {
+            "source": os.path.join(self.path, self.filename)
+        }
 
     @property
     def events_path(self):
@@ -91,10 +82,6 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
                     yield EvaluationEvent.from_json(json.loads(line))
                 i += 1
 
-    def set_status(self, status):
-        query = "UPDATE submission SET status = %s WHERE id = %s"
-        database.query(query, status.value, self.id)
-
     def as_json_data(self):
         return {
             "id": self.id,
@@ -102,6 +89,5 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
             "problem": self.problem.name,
             "contest": self.contest.name,
             "timestamp": self.timestamp,
-            "filename": self.filename,
-            "status": self.status.value,
+            "files": self.files,
         }
