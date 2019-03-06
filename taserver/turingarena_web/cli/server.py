@@ -33,4 +33,3 @@ class RunCommand(ServerCommand):
 
 subparsers = ServerCommand.PARSER.add_subparsers(metavar="COMMAND")
 add_subparser(subparsers, RunCommand)
-add_subparser(subparsers, InitDBCommand)
