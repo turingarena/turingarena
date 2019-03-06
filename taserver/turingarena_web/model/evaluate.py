@@ -1,7 +1,6 @@
 import os
 import threading
 
-from flask import request, redirect, url_for
 from turingarena.driver.language import Language
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType
@@ -23,20 +22,21 @@ def evaluate_thread(problem, submission):
     submission.set_status(SubmissionStatus.EVALUATED)
 
 
-def evaluate(current_user, problem, contest):
-    submitted_file = request.files["source"]
+def evaluate(current_user, problem, contest, submitted_file):
 
-    ext = os.path.splitext(submitted_file.filename)[1]
+    ext = os.path.splitext(submitted_file["filename"])[1]
 
     language = Language.from_extension(ext)
     if language not in contest.languages:
         raise RuntimeError(f"Unsupported file extension {ext}: please select another file!")
 
-    submission = Submission.new(current_user, problem, contest, submitted_file.filename)
+    submission = Submission.new(current_user, problem, contest, submitted_file["filename"])
 
     os.makedirs(os.path.split(submission.path)[0], exist_ok=True)
-    submitted_file.save(submission.path)
+
+    with open(submission.path, "w") as f:
+        f.write(submitted_file["content"])
 
     threading.Thread(target=evaluate_thread, args=(problem, submission)).start()
 
-    return redirect(url_for("submission.submission_view", submission_id=submission.id))
+    return submission

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from turingarena_web.model.contest import Contest
+from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.submission import Submission, StoredEvaluationEvent
 from turingarena_web.model.user import User
 from turingarena_web.controller.session import get_current_user, set_current_user
@@ -122,6 +123,57 @@ def problem_api():
         return error(404, f"problem {args['name']} not found in contest {contest.name}")
 
     return jsonify(problem.as_json_data())
+
+
+@api_bp.route("/evaluate", methods=("POST",))
+def evaluate_api():
+    args = request.json
+    if args is None:
+        return error(400, "missing request JSON arguments")
+
+    user = get_current_user()
+    if user is None:
+        return error(401, "authentication required")
+
+    if "problem" not in args:
+        return error(400, "missing required parameter name")
+    if "contest" not in args:
+        return error(400, "missing required parameter contest")
+
+    contest = Contest.contest(args["contest"])
+    if contest is None:
+        return error(404, f"contest {args['contest']} not found")
+
+    if contest not in user.contests:
+        return error(403, "you have not the permission to submit in this contest")
+
+    problem = contest.problem(args["problem"])
+    if problem is None:
+        return error(404, f"problem {args['name']} not found in contest {contest.name}")
+
+    if "files" not in args:
+        return error(400, "missing parameter files")
+
+    if not isinstance(args["files"], dict):
+        return error(400, "files parameter must be a dict")
+
+    files = args["files"]
+
+    if "source" not in files:
+        return error(400, "missing source file")
+
+    source = files["source"]
+    if not isinstance(source, dict):
+        return error(400, "source parameter must be a dict")
+
+    if "filename" not in source:
+        return error(400, "missing filename for source file")
+    if "content" not in source:
+        return error(400, "missing content for source file")
+
+    submission = evaluate(user, problem, contest, source)
+
+    return jsonify(submission.as_json_data())
 
 
 @api_bp.route("/user", methods=("POST",))

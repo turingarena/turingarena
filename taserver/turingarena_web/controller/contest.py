@@ -58,7 +58,13 @@ def problem_view(contest_name, name):
     error = None
     if request.method == "POST":
         try:
-            return evaluate(current_user, problem, contest)
+            file = request.files["source"]
+            file = {
+                "filename": file.filename,
+                "content": file.read(),
+            }
+            submission = evaluate(current_user, problem, contest, file)
+            return redirect(url_for("submission.submission_view", submission_id=submission.id))
         except RuntimeError as e:
             error = str(e)
 
