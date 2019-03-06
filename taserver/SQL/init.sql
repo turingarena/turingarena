@@ -29,14 +29,6 @@ CREATE TABLE submission (
 
 CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'FILE');
 
-CREATE TABLE evaluation_event (
-  submission_id INTEGER REFERENCES submission (id) ON DELETE CASCADE,
-  serial        BIGSERIAL,
-  type          event_type_e NOT NULL,
-  data          TEXT,
-  PRIMARY KEY (submission_id, serial)
-);
-
 CREATE TABLE user_contest (
   contest    VARCHAR(50)         NOT NULL,
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,

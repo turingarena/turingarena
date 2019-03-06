@@ -62,7 +62,7 @@
 
         (async () => {
             let end = false;
-            let after = 0;
+            let after = -1;
             while (!end) {
                 await fetch('/api/events', {
                     method: 'POST',
@@ -79,7 +79,6 @@
                     return response.json()
                 }).then(response => {
                     response.events.forEach(event => {
-                        after = event.serial;
                         switch (event.type) {
                             case 'text':
                                 evaluationOutput.innerHTML += event.payload;
@@ -100,6 +99,7 @@
                                 break;
                         }
                     });
+                    after += response.events.length;
                     return new Promise(resolve => setTimeout(resolve, 500));
                 });
             }

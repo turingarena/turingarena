@@ -51,7 +51,7 @@ def problem_view(contest_name, name):
             file = request.files["source"]
             file = {
                 "filename": file.filename,
-                "content": file.read(),
+                "content": file.read().decode("utf-8"),
             }
             submission = evaluate(current_user, problem, contest, file)
             return redirect(url_for("submission.submission_view", submission_id=submission.id))

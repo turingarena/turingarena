@@ -1,4 +1,5 @@
 import json
+import os
 
 from collections import namedtuple
 from enum import Enum
@@ -51,13 +52,20 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
 
     @property
     def path(self):
-        return config.submitted_file_path.format(
+        return config.submission_dir_path.format(
             problem_name=self.problem.name,
             username=self.user.username,
             timestamp=str(self.timestamp).replace(' ', '_'),
-            filename=self.filename,
             contest_name=self.contest.name
         )
+
+    @property
+    def source_path(self):
+        return os.path.join(self.path, self.filename)
+
+    @property
+    def events_path(self):
+        return os.path.join(self.path, "events.jsonl")
 
     @property
     def goals(self):
@@ -75,19 +83,13 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
             if goal["result"]
         ]
 
-    def events(self, after=0):
-        query = f"SELECT type, data FROM evaluation_event WHERE submission_id = %s AND serial > %s ORDER BY serial"
-        for event_type, payload in database.query_all(query, self.id, after):
-            event_type = EvaluationEventType(event_type.lower())
-            if event_type != EvaluationEventType.TEXT:
-                payload = json.loads(payload)
-            yield EvaluationEvent(event_type, payload)
-
-    def event(self, event_type, payload):
-        query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
-        if event_type != 'text':
-            payload = json.dumps(payload)
-        database.query_one(query, self.id, event_type.upper(), payload)
+    def events(self, after=-1):
+        with open(self.events_path) as f:
+            i = 0
+            for line in f:
+                if i > after:
+                    yield EvaluationEvent.from_json(json.loads(line))
+                i += 1
 
     def set_status(self, status):
         query = "UPDATE submission SET status = %s WHERE id = %s"
