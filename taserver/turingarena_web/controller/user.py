@@ -16,11 +16,12 @@ def login():
     password = request.form["password"]
 
     user = User.from_username(username)
-    if user.check_password(password):
+
+    if user is None or not user.check_password(password):
+        return render_template("login.html", message="Wrong username or password", registrarion_allowed=reg_ok)
+    else:
         session.set_current_user(user)
         return redirect(url_for("root.home"))
-    else:
-        return render_template("login.html", message="Wrong username or password", registrarion_allowed=reg_ok)
 
 
 @user_bp.route("/logout")

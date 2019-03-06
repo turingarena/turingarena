@@ -42,9 +42,3 @@ CREATE TABLE user_contest (
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   PRIMARY KEY (contest, user_id)
 );
-
-CREATE TABLE session (
-  cookie     CHAR(64) PRIMARY KEY,
-  user_id    INTEGER NOT NULL REFERENCES _user (id),
-  timestamp  TIMESTAMP NOT NULL DEFAULT current_timestamp
-);

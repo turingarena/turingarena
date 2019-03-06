@@ -18,8 +18,8 @@ def contest_view(contest_name):
 
     user = session.get_current_user()
 
-    if not contest.public and not contest not in user.contests():
-        return abort(403)
+    if user is None or contest not in user.contests():
+        return abort(401)
 
     return render_template("contest.html", contest=contest, user=user)
 
@@ -33,7 +33,7 @@ def subscribe(contest_name):
         return abort(404)
 
     if user is None or not contest.public:
-        return abort(403)
+        return abort(401)
 
     contest.add_user(user)
 
@@ -43,14 +43,12 @@ def subscribe(contest_name):
 @contest_bp.route("/<contest_name>/<name>", methods=("GET", "POST"))
 def problem_view(contest_name, name):
     contest = Contest.contest(contest_name)
+
     if contest is None:
         return abort(404)
 
     current_user = get_current_user()
-    if contest is None or contest not in current_user.contests:
-        return abort(403)
-
-    if request.method == "POST" and current_user is None:
+    if current_user is None or contest not in current_user.contests:
         return abort(401)
 
     problem = contest.problem(name)
@@ -73,6 +71,9 @@ def problem_view(contest_name, name):
 def files(contest_name, name):
     contest = Contest.contest(contest_name)
     problem = contest.problem(name)
+    user = get_current_user()
+    if user is None:
+        return abort(401)
     if problem is None or contest is None:
         return abort(404)
     return send_file(problem.files_zip)
