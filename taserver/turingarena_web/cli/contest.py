@@ -19,24 +19,6 @@ class ContestCommand(Command, ABC):
     )
 
 
-class AddContestCommand(ContestCommand, ABC):
-    NAME = "add"
-    PARSER = ArgumentParser(
-        description="Add a resource to contest",
-        parents=[ContestCommand.PARSER],
-        add_help=False,
-    )
-
-
-class RemoveContestCommand(ContestCommand, ABC):
-    NAME = "remove"
-    PARSER = ArgumentParser(
-        description="Remove a resource to contest",
-        parents=[ContestCommand.PARSER],
-        add_help=False,
-    )
-
-
 class ListContestCommand(ContestCommand):
     NAME = "list"
     PARSER = ArgumentParser(
@@ -50,11 +32,11 @@ class ListContestCommand(ContestCommand):
         print(tabulate(contests, headers=("Name",)))
 
 
-class AddUserContestCommand(AddContestCommand):
-    NAME = "user"
+class AddUserContestCommand(ContestCommand):
+    NAME = "add_user"
     PARSER = ArgumentParser(
         description="add user to contest",
-        parents=[AddContestCommand.PARSER],
+        parents=[ContestCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("user", help="user to add to the contest")
@@ -72,11 +54,11 @@ class AddUserContestCommand(AddContestCommand):
         user.add_to_contest(contest)
 
 
-class RemoveUserContestCommand(RemoveContestCommand):
-    NAME = "user"
+class RemoveUserContestCommand(ContestCommand):
+    NAME = "remove_user"
     PARSER = ArgumentParser(
         description="remove user from contest",
-        parents=[RemoveContestCommand.PARSER],
+        parents=[ContestCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("user", help="user to remove from the contest")
@@ -91,11 +73,11 @@ class RemoveUserContestCommand(RemoveContestCommand):
         user.remove_from_contest(contest)
 
 
-class ListUserContestCommand(ListContestCommand):
-    NAME = "users"
+class ListUserContestCommand(ContestCommand):
+    NAME = "list_users"
     PARSER = ArgumentParser(
         description="list contest users",
-        parents=[ListContestCommand.PARSER],
+        parents=[ContestCommand.PARSER],
         add_help=False,
     )
     PARSER.add_argument("contest", help="name of the contest")
@@ -105,19 +87,8 @@ class ListUserContestCommand(ListContestCommand):
         print(tabulate(contest.users, headers=("Id", "First name", "Last name", "Username", "Email", "Privilege")))
 
 
-subparsers = AddContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
-subparsers.required = True
-add_subparser(subparsers, AddUserContestCommand)
-
-subparsers = RemoveContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
-subparsers.required = True
-add_subparser(subparsers, RemoveUserContestCommand)
-
-subparsers = ListContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
-add_subparser(subparsers, ListUserContestCommand)
-
-subparsers = ContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
+subparsers = ContestCommand.PARSER.add_subparsers()
 subparsers.required = True
 add_subparser(subparsers, ListContestCommand)
-add_subparser(subparsers, AddContestCommand)
-add_subparser(subparsers, RemoveContestCommand)
+add_subparser(subparsers, AddUserContestCommand)
+add_subparser(subparsers, RemoveUserContestCommand)
