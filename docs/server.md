@@ -10,7 +10,9 @@ sudo su postgres
 createuser --pwprompt turingarena
 createdb --owner=turingarena turingarena
 psql --dbname=turingarena --command 'ALTER SCHEMA public OWNER TO turingarena' 
+psql turingarena < SQL/init.sql
 ```
+
 
 Next, you need to take the example configuration file (in `etc/turingarena.conf`) and put it in one of the following paths:
 - `/etc/turingarena.conf`
