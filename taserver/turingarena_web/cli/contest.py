@@ -105,42 +105,6 @@ class ListUserContestCommand(ListContestCommand):
         print(tabulate(contest.users, headers=("Id", "First name", "Last name", "Username", "Email", "Privilege")))
 
 
-class ListProblemContestCommand(ListContestCommand):
-    NAME = "problems"
-    PARSER = ArgumentParser(
-        description="list contest problems",
-        parents=[ListContestCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("contest", help="name of the contest")
-
-    def run(self):
-        contest = Contest.contest(self.args.contest)
-        print(tabulate([
-                (p.name, p.title)
-                for p in contest.problems
-            ], headers=("Name", "Title")
-        ))
-
-
-class ListLanguageContestCommand(ListContestCommand):
-    NAME = "languages"
-    PARSER = ArgumentParser(
-        description="add a language to a contest",
-        parents=[ListContestCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("contest", help="name of the contest")
-
-    def run(self):
-        contest = Contest.contest(self.args.contest)
-        if contest is None:
-            print(f"No contest named {self.args.contest}!", file=sys.stderr)
-            exit(1)
-
-        print(tabulate(((lang.name, lang.extension) for lang in contest.languages), headers=("Name", "Extension")))
-
-
 subparsers = AddContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 subparsers.required = True
 add_subparser(subparsers, AddUserContestCommand)
@@ -151,8 +115,6 @@ add_subparser(subparsers, RemoveUserContestCommand)
 
 subparsers = ListContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 add_subparser(subparsers, ListUserContestCommand)
-add_subparser(subparsers, ListProblemContestCommand)
-add_subparser(subparsers, ListLanguageContestCommand)
 
 subparsers = ContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 subparsers.required = True
