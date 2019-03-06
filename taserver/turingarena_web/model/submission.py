@@ -44,7 +44,7 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
         return config.submission_dir_path.format(
             problem_name=self.problem.name,
             username=self.user.username,
-            timestamp=self.timestamp,
+            timestamp=self.timestamp.strftime("%Y-%m-%d_%H:%M:%S"),
             contest_name=self.contest.name
         )
 
