@@ -1,5 +1,4 @@
 import argparse
-import os
 
 # PYTHON_ARGCOMPLETE_OK
 try:

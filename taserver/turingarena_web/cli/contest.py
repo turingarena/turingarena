@@ -1,4 +1,3 @@
-import sys
 from abc import ABC
 from argparse import ArgumentParser
 
