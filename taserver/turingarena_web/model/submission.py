@@ -117,10 +117,10 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
 
     def as_json_data(self):
         return {
-            "user": self.user.name,
+            "user": self.user.username,
             "problem": self.problem.name,
             "contest": self.contest.name,
             "timestamp": self.timestamp,
             "filename": self.filename,
-            "status": self.status.value(),
+            "status": self.status.value,
         }

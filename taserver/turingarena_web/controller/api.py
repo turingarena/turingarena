@@ -48,6 +48,29 @@ def evaluation_event():
     return jsonify(events=events)
 
 
+@api_bp.route("/submission", methods=("POST",))
+def submission_api():
+    args = request.json
+    if args is None:
+        return error(400, "missing request JSON arguments")
+
+    user = get_current_user()
+    if user is None:
+        return error(401, "authentication required")
+
+    if "id" not in args:
+        return error(401, "missing required argument id")
+
+    submission = Submission.from_id(args["id"])
+    if submission is None:
+        return error(404, f"no submission with id {args['id']}")
+
+    if submission.user != user:
+        return error(403, f"you are trying to get information on a submission that is not yours")
+
+    return jsonify(submission.as_json_data())
+
+
 @api_bp.route("/contest", methods=("POST",))
 def contest_api():
     args = request.json
@@ -69,7 +92,7 @@ def contest_api():
     if contest not in user.contests:
         return error(403, f"you have not the permission to view this contest")
 
-    return jsonify(contest=contest.as_json_data())
+    return jsonify(contest.as_json_data())
 
 
 @api_bp.route("/problem", methods=("POST",))
@@ -98,7 +121,7 @@ def problem_api():
     if problem is None:
         return error(404, f"problem {args['name']} not found in contest {contest.name}")
 
-    return jsonify(problem=problem.as_json_data())
+    return jsonify(problem.as_json_data())
 
 
 @api_bp.route("/user", methods=("POST",))
@@ -121,7 +144,7 @@ def user_api():
     if current_user != user:
         return error(403, f"you are trying to access information of another user")
 
-    return jsonify(user=user.as_json_data())
+    return jsonify(user.as_json_data())
 
 
 @api_bp.route("/auth", methods=("POST",))
