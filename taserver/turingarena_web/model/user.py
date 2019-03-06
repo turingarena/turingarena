@@ -27,7 +27,7 @@ class User(namedtuple("User", ["id", "first_name", "last_name", "username", "ema
     @staticmethod
     def from_contest(contest):
         query = "SELECT u.* FROM _user u JOIN user_contest uc on u.id = uc.user_id WHERE uc.contest = %s"
-        return database.query_all(query, contest.id, convert=User)
+        return database.query_all(query, contest.name, convert=User)
 
     @staticmethod
     def users():

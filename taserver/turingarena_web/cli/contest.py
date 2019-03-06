@@ -83,7 +83,7 @@ class ListUserContestCommand(ContestCommand):
 
     def run(self):
         contest = Contest.contest(self.args.contest)
-        print(tabulate(contest.users, headers=("Id", "First name", "Last name", "Username", "Email", "Privilege")))
+        print(tabulate(User.from_contest(contest), headers=("Id", "First name", "Last name", "Username", "Email", "Password", "Privilege")))
 
 
 subparsers = ContestCommand.PARSER.add_subparsers()
@@ -91,3 +91,4 @@ subparsers.required = True
 add_subparser(subparsers, ListContestCommand)
 add_subparser(subparsers, AddUserContestCommand)
 add_subparser(subparsers, RemoveUserContestCommand)
+add_subparser(subparsers, ListUserContestCommand)
