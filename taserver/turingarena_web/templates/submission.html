@@ -64,7 +64,18 @@
             let end = false;
             let after = 0;
             while (!end) {
-                await fetch('/api/evaluation_event?id={{ id }}&after=' + after).then(response => {
+                await fetch('/api/events', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: {{ id }},
+                        after: after,
+                    })
+                }).then(response => {
                     return response.json()
                 }).then(response => {
                     response.events.forEach(event => {

@@ -17,18 +17,20 @@ def error(status_code, message):
     return response
 
 
-@api_bp.route("/evaluation_event")
+@api_bp.route("/events", methods=("POST",))
 def evaluation_event():
-    submission_id = request.args.get("id", None)
+    args = request.json
+    if args is None:
+        return error(400, "missing request JSON arguments")
 
-    if submission_id is None:
+    if "id" not in args:
         return error(400, "you must specify a submission id")
 
     user = get_current_user()
     if user is None:
         return error(401, "authentication required")
 
-    submission = Submission.from_id(submission_id)
+    submission = Submission.from_id(args["id"])
 
     if submission is None:
         return error(400, "you provided an invalid submission id")
@@ -36,10 +38,11 @@ def evaluation_event():
     if submission.user != user:
         return error(403, "you are trying to access a submission that is not yours")
 
-    try:
-        after = int(request.args.get("after", 0))
-    except ValueError:
-        return error(400, "the after parameter must be an integer")
+    after = 0
+    if "after" in args:
+        after = args["after"]
+        if not isinstance(after, int):
+            return error(400, "the after parameter must be an integer")
 
     events = [
         event.event.as_json_data()
