@@ -15,12 +15,13 @@ def home():
         return redirect(url_for("user.login"))
     contests = list(user.contests)
 
-    available_contests = [
+    contests = [
         contest
         for contest in Contest.contests()
         if contest.public and contest not in contests
-    ]
-    return render_template("home.html", contests=contests, available_contests=available_contests, user=user)
+    ] + contests
+
+    return render_template("home.html", contests=sorted(contests, key=lambda x: x.title), user=user)
 
 
 @root_bp.route('/favicon.ico')

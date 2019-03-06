@@ -6,20 +6,12 @@
                 <thead>
                 <tr>
                     <th>Contest</th>
-                    <th></th>
                 </tr>
                 </thead>
                 <tbody style="cursor: pointer">
                 {% for contest in contests %}
                     <tr onclick="window.location = '{{ url_for("contest.contest_view", contest_name=contest.name) }}'">
                         <td>{{ contest.title }} ({{ contest.name }})</td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-                {% for contest in available_contests %}
-                    <tr>
-                        <td>{{ contest.title }} ({{ contest.name }})</td>
-                        <td><a href="{{ url_for("contest.subscribe", contest_name=contest.name) }}">Subscribe</a></td>
                     </tr>
                 {% endfor %}
                 </tbody>

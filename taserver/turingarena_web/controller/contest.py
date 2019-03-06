@@ -18,26 +18,16 @@ def contest_view(contest_name):
 
     user = session.get_current_user()
 
-    if user is None or contest not in user.contests:
+    if user is None:
         return abort(401)
+
+    if contest not in user.contests:
+        if contest.public:
+            user.add_to_contest(contest)
+        else:
+            return abort(403)
 
     return render_template("contest.html", contest=contest, user=user)
-
-
-@contest_bp.route("/<contest_name>/subscribe")
-def subscribe(contest_name):
-    contest = Contest.contest(contest_name)
-    user = session.get_current_user()
-
-    if contest is None:
-        return abort(404)
-
-    if user is None or not contest.public:
-        return abort(401)
-
-    contest.add_user(user)
-
-    return redirect(url_for("contest.contest_view", contest_name=contest_name))
 
 
 @contest_bp.route("/<contest_name>/<name>", methods=("GET", "POST"))
