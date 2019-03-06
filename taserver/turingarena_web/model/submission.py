@@ -11,39 +11,6 @@ from turingarena_web.model.database import database
 from turingarena_web.model.user import User
 
 
-class StoredEvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", "type_", "data"])):
-    @property
-    def type(self):
-        return EvaluationEventType(self.type_.lower())
-
-    @property
-    def payload(self):
-        if self.type == EvaluationEventType.TEXT:
-            return str(self.data)
-        else:
-            return json.loads(self.data)
-
-    @property
-    def event(self):
-        return EvaluationEvent(self.type, self.payload)
-
-    @staticmethod
-    def from_submission(submission, event_type=None, after=0):
-        if event_type is None:
-            t = ""
-        else:
-            t = f"AND type = '{event_type.value.upper()}'"
-        query = f"SELECT * FROM evaluation_event WHERE submission_id = %s {t} AND serial > %s ORDER BY serial"
-        return database.query_all(query, submission.id, after, convert=StoredEvaluationEvent)
-
-    @staticmethod
-    def insert(submission, event_type, payload):
-        query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
-        if event_type != 'text':
-            payload = json.dumps(payload)
-        return database.query_one(query, submission.id, event_type.upper(), payload, convert=StoredEvaluationEvent)
-
-
 class SubmissionStatus(Enum):
     EVALUATING = "EVALUATING"
     EVALUATED = "EVALUATED"
@@ -96,8 +63,8 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
     def goals(self):
         return [
             event.payload
-            for event in StoredEvaluationEvent.from_submission(self, event_type=EvaluationEventType.DATA)
-            if event.payload["type"] == "goal_result"
+            for event in self.events()
+            if event.type == EvaluationEventType.DATA and event.payload["type"] == "goal_result"
         ]
 
     @property
@@ -108,8 +75,19 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
             if goal["result"]
         ]
 
+    def events(self, after=0):
+        query = f"SELECT type, data FROM evaluation_event WHERE submission_id = %s AND serial > %s ORDER BY serial"
+        for event_type, payload in database.query_all(query, self.id, after):
+            event_type = EvaluationEventType(event_type.lower())
+            if event_type != EvaluationEventType.TEXT:
+                payload = json.loads(payload)
+            yield EvaluationEvent(event_type, payload)
+
     def event(self, event_type, payload):
-        return StoredEvaluationEvent.insert(self, event_type.value, payload)
+        query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
+        if event_type != 'text':
+            payload = json.dumps(payload)
+        database.query_one(query, self.id, event_type.upper(), payload)
 
     def set_status(self, status):
         query = "UPDATE submission SET status = %s WHERE id = %s"

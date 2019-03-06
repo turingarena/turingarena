@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.evaluate import evaluate
-from turingarena_web.model.submission import Submission, StoredEvaluationEvent
+from turingarena_web.model.submission import Submission
 from turingarena_web.model.user import User
 from turingarena_web.controller.session import get_current_user, set_current_user
 
@@ -45,8 +45,8 @@ def evaluation_event():
             return error(400, "the after parameter must be an integer")
 
     events = [
-        event.event.as_json_data()
-        for event in StoredEvaluationEvent.from_submission(submission, after=after)
+        event.as_json_data()
+        for event in submission.events(after)
     ]
 
     return jsonify(events=events)
