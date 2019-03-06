@@ -9,7 +9,6 @@ from turingarena.driver.language import Language
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
 from turingarena_web.model.contest import Contest
-from turingarena_web.model.problem import Problem
 from turingarena_web.model.user import User
 
 
@@ -44,23 +43,15 @@ class DeleteContestCommand(ContestCommand):
         add_help=False
     )
     PARSER.add_argument("contest", help="name of the contest to delete")
+    PARSER.add_argument("--yes", help="don't ask for confirmation", action="store_true")
 
     def run(self):
-        Contest.delete_contest(self.args.contest)
-
-
-class ScoreBoardContestCommand(ContestCommand):
-    NAME = "scoreboard"
-    PARSER = ArgumentParser(
-        description="get scoreboard of contest",
-        parents=[ContestCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("contest", help="name of the contest")
-
-    def run(self):
-        contest = Contest.from_name(self.args.contest)
-        print(tabulate(contest.scoreboard, headers=("Username", "Solved problems", "Goals")))
+        if not self.args.yes:
+            self.args.yes = input("Really initialize the database? (y/n)") == "y"
+        if self.args.yes:
+            Contest.delete_contest(self.args.contest)
+        else:
+            print("Abort")
 
 
 class AddContestCommand(ContestCommand, ABC):
@@ -146,38 +137,6 @@ class ListUserContestCommand(ListContestCommand):
         print(tabulate(contest.users, headers=("Id", "First name", "Last name", "Username", "Email", "Privilege")))
 
 
-class AddProblemContestCommand(AddContestCommand):
-    NAME = "problem"
-    PARSER = ArgumentParser(
-        description="add problem to contest",
-        parents=[AddContestCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("problem", help="problem to add to the contest")
-    PARSER.add_argument("contest", help="name of the contest")
-
-    def run(self):
-        contest = Contest.from_name(self.args.contest)
-        problem = Problem.from_name(self.args.problem)
-        contest.add_problem(problem)
-
-
-class RemoveProblemContestCommand(RemoveContestCommand):
-    NAME = "problem"
-    PARSER = ArgumentParser(
-        description="remove problem from contest",
-        parents=[RemoveContestCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("problem", help="problem to remove from the contest")
-    PARSER.add_argument("contest", help="name of the contest")
-
-    def run(self):
-        contest = Contest.from_name(self.args.contest)
-        problem = Problem.from_name(self.args.problem)
-        contest.remove_problem(problem)
-
-
 class ListProblemContestCommand(ListContestCommand):
     NAME = "problems"
     PARSER = ArgumentParser(
@@ -189,7 +148,11 @@ class ListProblemContestCommand(ListContestCommand):
 
     def run(self):
         contest = Contest.from_name(self.args.contest)
-        print(tabulate(contest.problems, headers=("Id", "Name", "Title", "Location", "Path")))
+        print(tabulate([
+                (p.name, p.title)
+                for p in contest.problems
+            ], headers=("Name", "Title")
+        ))
 
 
 class AddLanguageContestCommand(AddContestCommand):
@@ -258,12 +221,10 @@ class ListLanguageContestCommand(ListContestCommand):
 subparsers = AddContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 subparsers.required = True
 add_subparser(subparsers, AddUserContestCommand)
-add_subparser(subparsers, AddProblemContestCommand)
 add_subparser(subparsers, AddLanguageContestCommand)
 
 subparsers = RemoveContestCommand.PARSER.add_subparsers(title="subcommand", metavar="subcommand")
 subparsers.required = True
-add_subparser(subparsers, RemoveProblemContestCommand)
 add_subparser(subparsers, RemoveUserContestCommand)
 add_subparser(subparsers, RemoveLanguageContestCommand)
 
@@ -279,4 +240,3 @@ add_subparser(subparsers, DeleteContestCommand)
 add_subparser(subparsers, ListContestCommand)
 add_subparser(subparsers, AddContestCommand)
 add_subparser(subparsers, RemoveContestCommand)
-add_subparser(subparsers, ScoreBoardContestCommand)

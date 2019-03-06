@@ -7,7 +7,6 @@
             <tr>
                 <th>Name</th>
                 <th>Title</th>
-                <th>Goals</th>
             </tr>
             </thead>
             <tbody style="cursor: pointer">
@@ -15,7 +14,6 @@
                 <tr onclick="window.location = '{{ url_for("contest.problem_view", contest_name=contest.name, name=problem.name) }}'">
                     <td>{{ problem.name }}</td>
                     <td>{{ problem.title }}</td>
-                    <td>{{ problem.max_goals_of_user_in_contest(user, contest) }} / {{ problem.n_goals }}</td>
                 </tr>
             {% endfor %}
             </tbody>

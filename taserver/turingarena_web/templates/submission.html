@@ -30,10 +30,10 @@
                 <th>Goal</th>
                 <th>Result</th>
             </tr>
-            {% for goal, value in goals.items() %}
-                <tr class="table-info" id="{{ goal.name }}_tr">
-                    <td>{{ goal.name }}</td>
-                    <td id="{{ goal.name }}_result">?</td>
+            {% for goal in goals %}
+                <tr class="table-info" id="{{ goal }}_tr">
+                    <td>{{ goal }}</td>
+                    <td id="{{ goal }}_result">?</td>
                 </tr>
             {% endfor %}
         </table>

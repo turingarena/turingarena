@@ -2,7 +2,7 @@
 {% set title = problem.title %}
 {% block body %}
     <div id="statement">
-        {{ problem.statement(contest) | safe }}
+        {{ problem.statement | safe }}
     </div>
     <div>
     </div>
@@ -45,15 +45,16 @@
             </tr>
             {% for submission in submissions %}
                 {% set total_goals = submission.goals|length %}
-                {% if correct_goals[submission.id] == total_goals %}
+                {% set acquired_goals = submission.acquired_goals|length %}
+                {% if acquired_goals == total_goals %}
                     <tr class="table-success">
-                        {% elif correct_goals[submission.id] == 0 %}
+                        {% elif acquired_goals == 0 %}
                     <tr class="table-danger">
                         {% else %}
                     <tr class="table-warning">
                 {% endif %}
             <td>{{ submission.timestamp.strftime("%H:%M %d/%m/%Y") }}</td>
-            <td>{{ correct_goals[submission.id] }} / {{ total_goals }}</td>
+            <td>{{ acquired_goals }} / {{ total_goals }}</td>
             <td><a href="{{ url_for("submission.submission_view", submission_id=submission["id"]) }}">Info</a></td>
             <td>
                 <a href="{{ url_for("submission.download", submission_id=submission["id"], filename=submission["filename"]) }}">{{ submission.filename }}</a>

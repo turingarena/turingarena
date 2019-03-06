@@ -9,7 +9,6 @@ from turingarena_web.config import config
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.database import database
 from turingarena_web.model.user import User
-from turingarena_web.model.problem import Problem, Goal
 
 
 class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", "type_", "data"])):
@@ -47,11 +46,11 @@ class SubmissionStatus(Enum):
     RECEIVED = "RECEIVED"
 
 
-class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "user_id", "timestamp", "filename", "status_"])):
+class Submission(namedtuple("Submission", ["id", "problem_name", "contest_id", "user_id", "timestamp", "filename", "status_"])):
     @staticmethod
     def from_user_and_problem_and_contest(user, problem, contest):
-        query = "SELECT * FROM submission WHERE user_id = %s AND problem_id = %s AND contest_id = %s ORDER BY timestamp DESC"
-        return database.query_all(query, user.id, problem.id, contest.id, convert=Submission)
+        query = "SELECT * FROM submission WHERE user_id = %s AND problem = %s AND contest_id = %s ORDER BY timestamp DESC"
+        return database.query_all(query, user.id, problem.name, contest.id, convert=Submission)
 
     @staticmethod
     def from_id(submission_id):
@@ -60,8 +59,8 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "us
 
     @staticmethod
     def new(user, problem, contest, filename):
-        query = "INSERT INTO submission(problem_id, contest_id, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
-        return database.query_one(query, problem.id, contest.id, user.id, filename, convert=Submission)
+        query = "INSERT INTO submission(problem, contest_id, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
+        return database.query_one(query, problem.name, contest.id, user.id, filename, convert=Submission)
 
     @property
     def status(self):
@@ -69,7 +68,7 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "us
 
     @property
     def problem(self):
-        return Problem.from_id(self.problem_id)
+        return self.contest.problem(self.problem_name)
 
     @property
     def contest(self):
@@ -91,23 +90,19 @@ class Submission(namedtuple("Submission", ["id", "problem_id", "contest_id", "us
 
     @property
     def goals(self):
-        goals = {
-            goal: None
-            for goal in self.problem.goals
-        }
-
-        for goal, result in Goal.from_submission(self):
-            goals[goal] = result
-
-        return goals
+        return [
+            dict(name=event.payload["name"], result=event.payload["result"])
+            for event in EvaluationEvent.from_submission(self, event_type=EvaluationEventType.DATA)
+            if event.payload["type"] == "goal_result"
+        ]
 
     @property
-    def text_events(self):
-        return EvaluationEvent.from_submission(self, event_type=EvaluationEventType.TEXT)
-
-    @property
-    def file_events(self):
-        return EvaluationEvent.from_submission(self, event_type=EvaluationEventType.FILE)
+    def acquired_goals(self):
+        return [
+            goal
+            for goal in self.goals
+            if goal["result"]
+        ]
 
     def event(self, event_type, payload):
         return EvaluationEvent.insert(self, event_type.value, payload)

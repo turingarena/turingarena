@@ -23,12 +23,12 @@ class InitDBCommand(ServerCommand):
         parents=[ServerCommand.PARSER],
         add_help=False,
     )
+    PARSER.add_argument("--yes", help="don't ask for confirmation", action="store_true")
 
     def run(self):
-        print("Really initialize the database?")
-        print("WARNING: all existing database data will be lost!!!")
-        print("Type the string \"yes, I know what I'm doing\" to do so: ", end="")
-        if input() == "yes, I know what I'm doing":
+        if not self.args.yes:
+            self.args.yes = input("Really initialize the database? (y/n)") == "y"
+        if self.args.yes:
             database.init()
         else:
             print("Aborted")

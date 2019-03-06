@@ -10,7 +10,6 @@ except ImportError:
 from turingarena_web import init_logger
 from turingarena_web.cli.command import add_subparser
 from turingarena_web.cli.contest import ContestCommand
-from turingarena_web.cli.problem import ProblemCommand
 from turingarena_web.cli.user import UserCommand
 from turingarena_web.cli.server import ServerCommand
 
@@ -21,7 +20,6 @@ PARSER.add_argument("--version", action="version", version=VERSION)
 subparsers = PARSER.add_subparsers(dest="command", metavar="COMMAND")
 subparsers.required = True
 add_subparser(subparsers, UserCommand)
-add_subparser(subparsers, ProblemCommand)
 add_subparser(subparsers, ContestCommand)
 add_subparser(subparsers, ServerCommand)
 

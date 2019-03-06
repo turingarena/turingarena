@@ -12,7 +12,7 @@ def submission_view(submission_id):
     if current_user is None or current_user.id != submission.user.id:
         return abort(403)
 
-    return render_template('submission.html', goals=submission.goals, user=current_user, id=submission.id)
+    return render_template('submission.html', goals=submission.problem.goals, user=current_user, id=submission.id)
 
 
 @submission_bp.route('/<int:submission_id>/<string:filename>')

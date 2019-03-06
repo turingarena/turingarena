@@ -17,13 +17,6 @@ def evaluate_thread(problem, submission):
 
     submission.set_status(SubmissionStatus.EVALUATING)
     for event in evaluator.evaluate(files=submission_files, redirect_stderr=True, log_level="WARNING"):
-        if event.type == EvaluationEventType.DATA:
-            data = event.payload
-            if data.get("type") == "goal_result":
-                goal = problem.goal(data["goal"])
-                result = data["result"]
-                goal.acquire(submission, result)
-
         submission.event(event_type=event.type, payload=event.payload)
 
     submission.event(event_type=EvaluationEventType.DATA, payload=dict(type="end"))

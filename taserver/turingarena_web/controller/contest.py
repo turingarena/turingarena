@@ -54,7 +54,7 @@ def problem_view(contest_name, name):
     if request.method == "POST" and current_user is None:
         return abort(401)
 
-    problem = Problem.from_name(name)
+    problem = contest.problem(name)
     if problem is None:
         return abort(404)
 
@@ -67,18 +67,13 @@ def problem_view(contest_name, name):
 
     subs = list(Submission.from_user_and_problem_and_contest(current_user, problem, contest))
 
-    correct_goals = {
-        sub.id: sum(val for val in sub.goals.values() if val is not None)
-        for sub in subs
-    }
-
-    return render_template("problem.html", correct_goals=correct_goals, error=error, problem=problem, contest=contest, user=current_user, submissions=subs)
+    return render_template("problem.html", error=error, problem=problem, contest=contest, user=current_user, submissions=subs)
 
 
 @contest_bp.route("/<contest_name>/<name>.zip")
 def files(contest_name, name):
-    problem = Problem.from_name(name)
     contest = Contest.from_name(contest_name)
+    problem = contest.problem(name)
     if problem is None or contest is None:
         return abort(404)
-    return send_file(problem.zip_path(contest))
+    return send_file(problem.zip_path)
