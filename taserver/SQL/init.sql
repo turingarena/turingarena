@@ -21,7 +21,7 @@ CREATE TABLE submission (
   contest    VARCHAR(50)         NOT NULL,
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   timestamp  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  filename   VARCHAR(100)        NOT NULL CHECK (LENGTH(filename) > 0),
+  filename   VARCHAR(100)        NOT NULL CHECK (LENGTH(filename) > 0)
 );
 
 CREATE TYPE event_type_e AS ENUM ('TEXT', 'DATA', 'FILE');

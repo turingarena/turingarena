@@ -51,7 +51,14 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
     @property
     def files(self):
         return {
-            "source": os.path.join(self.path, self.filename)
+            "source": self.filename
+        }
+
+    @property
+    def files_absolute(self):
+        return {
+            name: os.path.join(self.path, filename)
+            for name, filename in self.files.items()
         }
 
     @property

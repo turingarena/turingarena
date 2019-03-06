@@ -11,7 +11,7 @@ from turingarena_web.model.submission import Submission
 def evaluate_thread(problem, submission):
     evaluator = Evaluator(problem.path)
     with open(submission.events_path, "w") as f:
-        for event in evaluator.evaluate(files=submission.files, redirect_stderr=True, log_level="WARNING"):
+        for event in evaluator.evaluate(files=submission.files_absolute, redirect_stderr=True, log_level="WARNING"):
             print(event.json_line(), file=f, flush=True)
 
         print(EvaluationEvent(EvaluationEventType.DATA, payload=dict(type="end")).json_line(), file=f, flush=True)
@@ -29,7 +29,7 @@ def evaluate(current_user, problem, contest, submitted_file):
 
     os.makedirs(submission.path)
 
-    with open(submission.files["source"], "w") as f:
+    with open(submission.files_absolute["source"], "w") as f:
         f.write(submitted_file["content"])
 
     threading.Thread(target=evaluate_thread, args=(problem, submission)).start()
