@@ -37,7 +37,7 @@ class Goals(MutableMapping):
             result = checker()
             assert isinstance(result, bool), "Checker function must return a boolean"
             if not result:
-                self._assigned_goals[goal] = False
+                self[goal] = False
             return result
 
     def __getitem__(self, item):
