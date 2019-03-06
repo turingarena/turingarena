@@ -1,4 +1,3 @@
-import os
 from argparse import ArgumentParser
 
 from turingarena.cli.base import BASE_PARSER
