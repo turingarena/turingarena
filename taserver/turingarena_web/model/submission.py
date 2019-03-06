@@ -110,3 +110,13 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
     def set_status(self, status):
         query = "UPDATE submission SET status = %s WHERE id = %s"
         database.query(query, status.value, self.id)
+
+    def to_json(self):
+        return json.dumps({
+            "user": self.user.name,
+            "problem": self.problem.name,
+            "contest": self.contest.name,
+            "timestamp": self.timestamp,
+            "filename": self.filename,
+            "status": self.status.value(),
+        })

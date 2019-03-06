@@ -1,4 +1,6 @@
 from collections import namedtuple
+
+import json
 from enum import Enum
 
 import bcrypt
@@ -66,3 +68,15 @@ class User(namedtuple("User", ["id", "first_name", "last_name", "username", "ema
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+
+    def to_json(self):
+        return json.dumps({
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "privilege": self.privilege.value(),
+            "password": self.password,
+            "contests": [c.name for c in self.contests]
+        })
+
