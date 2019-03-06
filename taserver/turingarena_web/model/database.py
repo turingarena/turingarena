@@ -1,5 +1,3 @@
-import logging
-import pkgutil
 from contextlib import contextmanager
 from functools import lru_cache
 
@@ -26,17 +24,6 @@ class Database:
         with self._connection:
             with self._connection.cursor() as cursor:
                 yield cursor
-
-    def init(self):
-        logging.debug(f"Loading initialization SQL...")
-        # avoid pkg_resources overkill (non-stdlib and slower)
-        initsql = pkgutil.get_data(__package__, "init.sql")
-        logging.info(f"Initializing the database...")
-
-        with self.cursor as cursor:
-            cursor.execute(initsql)
-
-        logging.info(f"Database initialized successfully.")
 
     def query_all(self, query, *args, convert=None):
         with self.cursor as cursor:

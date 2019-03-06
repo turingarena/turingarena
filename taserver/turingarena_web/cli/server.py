@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 
 from turingarena_web.cli.base import BASE_PARSER
 from turingarena_web.cli.command import Command, add_subparser
-from turingarena_web.model.database import database
 from turingarena_web import create_app
 
 
@@ -14,24 +13,6 @@ class ServerCommand(Command, ABC):
         parents=[BASE_PARSER],
         add_help=False,
     )
-
-
-class InitDBCommand(ServerCommand):
-    NAME = "initdb"
-    PARSER = ArgumentParser(
-        description="initialize the database",
-        parents=[ServerCommand.PARSER],
-        add_help=False,
-    )
-    PARSER.add_argument("--yes", help="don't ask for confirmation", action="store_true")
-
-    def run(self):
-        if not self.args.yes:
-            self.args.yes = input("Really initialize the database? (y/n)") == "y"
-        if self.args.yes:
-            database.init()
-        else:
-            print("Aborted")
 
 
 class RunCommand(ServerCommand):
