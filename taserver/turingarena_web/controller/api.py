@@ -43,7 +43,7 @@ class Args:
         return self.args[item]
 
     def __contains__(self, item):
-        return item in self.args[item]
+        return item in self.args
 
 
 def require_auth():
@@ -55,10 +55,8 @@ def require_auth():
 
 @api_bp.route("/events", methods=("POST",))
 def evaluation_event():
-    args = Args
-
+    args = Args()
     user = require_auth()
-
     submission = Submission.from_id(args.id)
 
     if submission is None:
