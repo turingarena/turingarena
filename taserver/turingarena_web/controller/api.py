@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
-from turingarena_web.model.submission import Submission, EvaluationEvent
+from turingarena_web.model.contest import Contest
+from turingarena_web.model.submission import Submission, StoredEvaluationEvent
+from turingarena_web.model.user import User
 
 api_bp = Blueprint("api", __name__)
 
@@ -31,8 +33,58 @@ def evaluation_event():
         return error(400, "the after parameter must be an integer")
 
     events = [
-        {"serial": event.serial, "type": event.type.value, "payload": event.payload}
-        for event in EvaluationEvent.from_submission(submission, after=after)
+        event.event.as_json_data()
+        for event in StoredEvaluationEvent.from_submission(submission, after=after)
     ]
 
     return jsonify(events=events)
+
+
+@api_bp.route("/contest", methods=("POST",))
+def contest_api():
+    args = request.json
+
+    if "name" not in args:
+        return error(400, "missing required parameter name")
+
+    contest = Contest.contest(args["name"])
+
+    if contest is None:
+        return error(404, f"contest {args['name']} not found")
+
+    return jsonify(contest=contest.as_json_data())
+
+
+@api_bp.route("/problem", methods=("POST",))
+def problem_api():
+    args = request.json
+
+    if "name" not in args:
+        return error(400, "missing required parameter name")
+    if "contest" not in args:
+        return error(400, "missing required parameter contest")
+
+    contest = Contest.contest(args["contest"])
+    if contest is None:
+        return error(404, f"contest {args['contest']} not found")
+
+    problem = contest.problem(args["name"])
+    if problem is None:
+        return error(404, f"problem {args['name']} not found in contest {contest.name}")
+
+    return jsonify(problem=problem.as_json_data())
+
+
+@api_bp.route("/user", methods=("POST",))
+def user_api():
+    args = request.json
+
+    if "username" not in args:
+        return error(400, "missing required argument username")
+
+    user = User.from_username(args["username"])
+    if user is None:
+        return error(404, f"user {args['username']} does not exist")
+
+    return jsonify(user=user.as_json_data())
+

@@ -18,7 +18,7 @@ def contest_view(contest_name):
 
     user = session.get_current_user()
 
-    if user is None or contest not in user.contests():
+    if user is None or contest not in user.contests:
         return abort(401)
 
     return render_template("contest.html", contest=contest, user=user)

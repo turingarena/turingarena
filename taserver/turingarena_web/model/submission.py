@@ -3,7 +3,7 @@ import json
 from collections import namedtuple
 from enum import Enum
 
-from turingarena.evaluation.events import EvaluationEventType
+from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
 
 from turingarena_web.config import config
 from turingarena_web.model.contest import Contest
@@ -11,7 +11,7 @@ from turingarena_web.model.database import database
 from turingarena_web.model.user import User
 
 
-class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", "type_", "data"])):
+class StoredEvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", "type_", "data"])):
     @property
     def type(self):
         return EvaluationEventType(self.type_.lower())
@@ -23,6 +23,10 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
         else:
             return json.loads(self.data)
 
+    @property
+    def event(self):
+        return EvaluationEvent(self.type, self.payload)
+
     @staticmethod
     def from_submission(submission, event_type=None, after=0):
         if event_type is None:
@@ -30,14 +34,14 @@ class EvaluationEvent(namedtuple("EvaluationEvent", ["submission_id", "serial", 
         else:
             t = f"AND type = '{event_type.value.upper()}'"
         query = f"SELECT * FROM evaluation_event WHERE submission_id = %s {t} AND serial > %s ORDER BY serial"
-        return database.query_all(query, submission.id, after, convert=EvaluationEvent)
+        return database.query_all(query, submission.id, after, convert=StoredEvaluationEvent)
 
     @staticmethod
     def insert(submission, event_type, payload):
         query = "INSERT INTO evaluation_event(submission_id, type, data) VALUES (%s, %s, %s) RETURNING *"
         if event_type != 'text':
             payload = json.dumps(payload)
-        return database.query_one(query, submission.id, event_type.upper(), payload, convert=EvaluationEvent)
+        return database.query_one(query, submission.id, event_type.upper(), payload, convert=StoredEvaluationEvent)
 
 
 class SubmissionStatus(Enum):
@@ -92,7 +96,7 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
     def goals(self):
         return [
             event.payload
-            for event in EvaluationEvent.from_submission(self, event_type=EvaluationEventType.DATA)
+            for event in StoredEvaluationEvent.from_submission(self, event_type=EvaluationEventType.DATA)
             if event.payload["type"] == "goal_result"
         ]
 
@@ -105,18 +109,18 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
         ]
 
     def event(self, event_type, payload):
-        return EvaluationEvent.insert(self, event_type.value, payload)
+        return StoredEvaluationEvent.insert(self, event_type.value, payload)
 
     def set_status(self, status):
         query = "UPDATE submission SET status = %s WHERE id = %s"
         database.query(query, status.value, self.id)
 
-    def to_json(self):
-        return json.dumps({
+    def as_json_data(self):
+        return {
             "user": self.user.name,
             "problem": self.problem.name,
             "contest": self.contest.name,
             "timestamp": self.timestamp,
             "filename": self.filename,
             "status": self.status.value(),
-        })
+        }

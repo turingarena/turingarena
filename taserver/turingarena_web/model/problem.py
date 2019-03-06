@@ -1,6 +1,4 @@
-import json
 import os
-import base64
 
 from collections import namedtuple
 from commonmark import commonmark
@@ -39,10 +37,10 @@ class Problem(namedtuple("Problem", ["contest", "name"])):
         with open(path) as f:
             return commonmark(f.read())
 
-    def to_json(self):
-        return json.dumps({
+    def as_json_data(self):
+        return {
             "name": self.name,
             "title": self.title,
-            "statement": base64.b64encode(self.statement),
+            "statement": self.statement,
             "goals": self.goals
-        })
+        }

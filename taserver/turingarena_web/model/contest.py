@@ -1,4 +1,3 @@
-import json
 import os
 from collections import namedtuple
 
@@ -63,11 +62,11 @@ class Contest(namedtuple("Contest", ["name"])):
             return None
         return Problem(self, name)
 
-    def to_json(self):
-        return json.dumps({
+    def as_json_data(self):
+        return {
             "name": self.name,
             "title": self.title,
             "public": self.public,
             "languages": [l.name for l in self.languages],
             "problems": [p.name for p in self.problems]
-        })
+        }
