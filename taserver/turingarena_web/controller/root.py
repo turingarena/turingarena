@@ -13,7 +13,7 @@ def home():
     user = get_current_user()
     if user is None:
         return redirect(url_for("user.login"))
-    contests = list(Contest.of_user(user))
+    contests = list(user.contests)
 
     available_contests = [
         contest

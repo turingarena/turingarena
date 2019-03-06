@@ -46,11 +46,11 @@ class SubmissionStatus(Enum):
     RECEIVED = "RECEIVED"
 
 
-class Submission(namedtuple("Submission", ["id", "problem_name", "contest_id", "user_id", "timestamp", "filename", "status_"])):
+class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name", "user_id", "timestamp", "filename", "status_"])):
     @staticmethod
     def from_user_and_problem_and_contest(user, problem, contest):
-        query = "SELECT * FROM submission WHERE user_id = %s AND problem = %s AND contest_id = %s ORDER BY timestamp DESC"
-        return database.query_all(query, user.id, problem.name, contest.id, convert=Submission)
+        query = "SELECT * FROM submission WHERE user_id = %s AND problem = %s AND contest = %s ORDER BY timestamp DESC"
+        return database.query_all(query, user.id, problem.name, contest.name, convert=Submission)
 
     @staticmethod
     def from_id(submission_id):
@@ -59,8 +59,8 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_id", "
 
     @staticmethod
     def new(user, problem, contest, filename):
-        query = "INSERT INTO submission(problem, contest_id, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
-        return database.query_one(query, problem.name, contest.id, user.id, filename, convert=Submission)
+        query = "INSERT INTO submission(problem, contest, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
+        return database.query_one(query, problem.name, contest.name, user.id, filename, convert=Submission)
 
     @property
     def status(self):
@@ -72,7 +72,7 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_id", "
 
     @property
     def contest(self):
-        return Contest.from_id(self.contest_id)
+        return Contest.contest(self.contest_name)
 
     @property
     def user(self):
@@ -91,7 +91,7 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_id", "
     @property
     def goals(self):
         return [
-            dict(name=event.payload["name"], result=event.payload["result"])
+            event.payload
             for event in EvaluationEvent.from_submission(self, event_type=EvaluationEventType.DATA)
             if event.payload["type"] == "goal_result"
         ]

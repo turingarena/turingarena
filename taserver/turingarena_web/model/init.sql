@@ -20,7 +20,7 @@ CREATE TYPE submission_status_e AS ENUM ('RECEIVED', 'EVALUATING', 'EVALUATED');
 CREATE TABLE submission (
   id         SERIAL PRIMARY KEY,
   problem    VARCHAR(50)         NOT NULL,
-  contest_id INTEGER             NOT NULL REFERENCES contest (id) ON DELETE CASCADE,
+  contest    VARCHAR(50)         NOT NULL,
   user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
   timestamp  TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
   filename   VARCHAR(100)        NOT NULL CHECK (LENGTH(filename) > 0),
@@ -38,9 +38,9 @@ CREATE TABLE evaluation_event (
 );
 
 CREATE TABLE user_contest (
-  contest_id INTEGER REFERENCES contest (id) ON DELETE CASCADE,
-  user_id    INTEGER REFERENCES _user (id) ON DELETE CASCADE,
-  PRIMARY KEY (contest_id, user_id)
+  contest    VARCHAR(50)         NOT NULL,
+  user_id    INTEGER             NOT NULL REFERENCES _user (id) ON DELETE CASCADE,
+  PRIMARY KEY (contest, user_id)
 );
 
 CREATE TABLE session (

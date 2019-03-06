@@ -28,8 +28,8 @@ def evaluate(current_user, problem, contest):
 
     ext = os.path.splitext(submitted_file.filename)[1]
 
-    allowed_extensions = [Language.from_name(lang).extension for lang in contest.allowed_languages]
-    if ext not in allowed_extensions:
+    language = Language.from_extension(ext)
+    if language not in contest.languages:
         raise RuntimeError(f"Unsupported file extension {ext}: please select another file!")
 
     submission = Submission.new(current_user, problem, contest, submitted_file.filename)

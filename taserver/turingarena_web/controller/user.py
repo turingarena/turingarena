@@ -16,7 +16,7 @@ def login():
     password = request.form["password"]
 
     user = User.from_username(username)
-    if user.auth(password):
+    if user.check_password(password):
         session.set_current_user(user)
         return redirect(url_for("root.home"))
     else:
