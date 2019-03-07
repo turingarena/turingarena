@@ -11,7 +11,7 @@
                 <tbody style="cursor: pointer">
                 {% for contest in contests %}
                     <tr onclick="window.location = '{{ url_for("contest.contest_view", contest_name=contest.name) }}'">
-                        <td>{{ contest.title }} ({{ contest.name }})</td>
+                        <td>{{ contest.title }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
