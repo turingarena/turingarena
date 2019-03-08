@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from flask import Blueprint, request, jsonify
+from turingarena.evaluation.submission import SubmissionFile
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.submission import Submission
@@ -57,13 +60,13 @@ def require_auth():
 def evaluation_event():
     args = Args()
     user = require_auth()
-    submission = Submission.from_id(args.id)
+    contest = Contest(args.contest)
+    problem = contest.problem(args.problem)
+    time = datetime.fromtimestamp(args.timestamp)
+    submission = Submission(contest, problem, user, time)
 
-    if submission is None:
-        raise ApiError(400, "you provided an invalid submission id")
-
-    if submission.user != user:
-        raise ApiError(403, "you are trying to access a submission that is not yours")
+    if not submission.exists:
+        raise ApiError(404, "the specified submission does not exist")
 
     after = 0
     if "after" in args:
@@ -82,15 +85,13 @@ def evaluation_event():
 @api_bp.route("/submission", methods=("POST",))
 def submission_api():
     args = Args()
-
     user = require_auth()
-
-    submission = Submission.from_id(args.id)
-    if submission is None:
-        raise ApiError(404, f"no submission with id {args.id}")
-
-    if submission.user != user:
-        raise ApiError(403, f"you are trying to get information on a submission that is not yours")
+    contest = Contest(args.contest)
+    problem = contest.problem(args.problem)
+    time = args.timestamp
+    submission = Submission(contest, problem, user, time)
+    if not submission.exists:
+        return error(404, "the specified submission doesn't exists")
 
     return jsonify(submission.as_json_data())
 
@@ -146,19 +147,14 @@ def evaluate_api():
     if not isinstance(args.files, dict):
         raise ApiError(400, "files parameter must be a dict")
 
-    if "source" not in args.files:
-        raise ApiError(400, "missing source file")
-
-    source = args.files["source"]
-    if not isinstance(source, dict):
-        raise ApiError(400, "source parameter must be a dict")
-
-    if "filename" not in source:
-        raise ApiError(400, "missing filename for source file")
-    if "content" not in source:
-        raise ApiError(400, "missing content for source file")
-
-    submission = evaluate(user, problem, contest, source)
+    files = {
+        name: SubmissionFile(
+            filename=file["filename"],
+            content=file["content"],
+        )
+        for name, file in args.files.items()
+    }
+    submission = evaluate(user, problem, contest, files)
 
     return jsonify(submission.as_json_data())
 

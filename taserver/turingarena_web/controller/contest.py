@@ -1,10 +1,10 @@
 from flask import Blueprint, abort, render_template, redirect, url_for, request, send_file
+from turingarena.evaluation.submission import SubmissionFile
 from turingarena_web.controller.session import get_current_user
 from turingarena_web.model.contest import Contest
 from turingarena_web.controller import session
 from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.submission import Submission
-
 
 contest_bp = Blueprint("contest", __name__)
 
@@ -48,19 +48,26 @@ def problem_view(contest_name, name):
     error = None
     if request.method == "POST":
         try:
-            file = request.files["source"]
-            file = {
-                "filename": file.filename,
-                "content": file.read().decode("utf-8"),
+            files = {
+                name: SubmissionFile(
+                    filename=file.filename,
+                    content=file.read().decode("utf-8"),
+                )
+                for name, file in request.files.items()
             }
-            submission = evaluate(current_user, problem, contest, file)
-            return redirect(url_for("submission.submission_view", submission_id=submission.id))
+            submission = evaluate(current_user, problem, contest, files)
+            return redirect(url_for("submission.submission_view",
+                                    contest=contest.name,
+                                    problem=problem.name,
+                                    timestamp=submission.timestamp,
+                                    ))
         except RuntimeError as e:
             error = str(e)
 
     subs = list(Submission.from_user_and_problem_and_contest(current_user, problem, contest))
 
-    return render_template("problem.html", error=error, problem=problem, contest=contest, user=current_user, submissions=subs)
+    return render_template("problem.html", error=error, problem=problem, contest=contest, user=current_user,
+                           submissions=subs)
 
 
 @contest_bp.route("/<contest_name>/<name>.zip")

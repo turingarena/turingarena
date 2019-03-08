@@ -1,58 +1,80 @@
-import json
 import os
+import json
 
+from datetime import datetime
 from collections import namedtuple
 
+from functools import lru_cache
 from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
-
 from turingarena_web.config import config
-from turingarena_web.model.contest import Contest
-from turingarena_web.model.database import database
-from turingarena_web.model.user import User
 
 
-class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name", "user_id", "timestamp", "filename"])):
+class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"])):
+    SUBMISSION_TIME_FORMAT = "%Y-%m-%d_%H:%M:%S"
+
     @staticmethod
     def from_user_and_problem_and_contest(user, problem, contest):
-        query = "SELECT * FROM submission WHERE user_id = %s AND problem = %s AND contest = %s ORDER BY timestamp DESC"
-        return database.query_all(query, user.id, problem.name, contest.name, convert=Submission)
+        submissions_dir = os.path.join(config.submission_dir_path, contest.name, problem.name, user.username)
+        if not os.path.exists(submissions_dir):
+            return []
+        return sorted([
+            Submission(
+                problem=problem,
+                contest=contest,
+                user=user,
+                time=datetime.strptime(timestamp, Submission.SUBMISSION_TIME_FORMAT),
+            )
+            for timestamp in os.listdir(submissions_dir)
+        ], key=lambda x: x.time, reverse=True)
 
     @staticmethod
-    def from_id(submission_id):
-        query = "SELECT * FROM submission WHERE id = %s"
-        return database.query_one(query, submission_id, convert=Submission)
+    def new(user, problem, contest, files):
+        submission = Submission(
+            contest=contest,
+            problem=problem,
+            user=user,
+            time=datetime.now(),
+        )
 
-    @staticmethod
-    def new(user, problem, contest, filename):
-        query = "INSERT INTO submission(problem, contest, user_id, filename) VALUES (%s, %s, %s, %s) RETURNING *"
-        return database.query_one(query, problem.name, contest.name, user.id, filename, convert=Submission)
+        os.makedirs(submission.path)
+
+        for file in files.values():
+            with open(os.path.join(submission.path, file.filename), "w") as f:
+                f.write(file.content)
+
+        files = {
+            name: file.filename
+            for name, file in files.items()
+        }
+
+        with open(os.path.join(submission.path, "files.json"), "w") as f:
+            f.write(json.dumps(files))
+
+        return submission
 
     @property
-    def problem(self):
-        return self.contest.problem(self.problem_name)
+    def exists(self):
+        return os.path.exists(self.path)
 
     @property
-    def contest(self):
-        return Contest.contest(self.contest_name)
-
-    @property
-    def user(self):
-        return User.from_id(self.user_id)
+    def timestamp(self):
+        return int(self.time.timestamp())
 
     @property
     def path(self):
-        return config.submission_dir_path.format(
-            problem_name=self.problem.name,
-            username=self.user.username,
-            timestamp=self.timestamp.strftime("%Y-%m-%d_%H:%M:%S"),
-            contest_name=self.contest.name
+        return os.path.join(
+            config.submission_dir_path,
+            self.contest.name,
+            self.problem.name,
+            self.user.username,
+            self.time.strftime(self.SUBMISSION_TIME_FORMAT)
         )
 
     @property
+    @lru_cache(None)
     def files(self):
-        return {
-            "source": self.filename
-        }
+        with open(os.path.join(self.path, "files.json")) as f:
+            return json.loads(f.read())
 
     @property
     def files_absolute(self):
@@ -91,10 +113,9 @@ class Submission(namedtuple("Submission", ["id", "problem_name", "contest_name",
 
     def as_json_data(self):
         return {
-            "id": self.id,
             "user": self.user.username,
             "problem": self.problem.name,
             "contest": self.contest.name,
-            "timestamp": self.timestamp,
+            "timestamp": self.time,
             "files": self.files,
         }

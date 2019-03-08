@@ -1,24 +1,35 @@
+import os
+from datetime import datetime
+
 from flask import Blueprint, render_template, send_file, abort
+from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
 from turingarena_web.controller.session import get_current_user
 
-submission_bp = Blueprint('submission', __name__)
+submission_bp = Blueprint("submission", __name__)
 
 
-@submission_bp.route('/<int:submission_id>')
-def submission_view(submission_id):
-    current_user = get_current_user()
-    submission = Submission.from_id(submission_id)
-    if submission is None or current_user is None or current_user.id != submission.user.id:
-        return abort(404)
-
-    return render_template('submission.html', goals=submission.problem.goals, user=current_user, id=submission.id)
-
-
-@submission_bp.route('/<int:submission_id>/<string:filename>')
-def download(submission_id, filename):
-    submission = Submission.from_id(submission_id)
+@submission_bp.route('/<contest>/<problem>/<int:timestamp>')
+def submission_view(contest, problem, timestamp):
+    time = datetime.fromtimestamp(timestamp)
     user = get_current_user()
-    if submission is None or user is None or user != submission.user or submission.filename != filename:
+    contest = Contest(contest)
+    problem = contest.problem(problem)
+    submission = Submission(contest, problem, user, time)
+    if not submission.exists:
         return abort(404)
-    return send_file(submission.files_absolute["source"])
+
+    return render_template('submission.html', goals=submission.problem.goals, user=user, submission=submission)
+
+
+@submission_bp.route('/<contest>/<problem>/<int:timestamp>/<filename>')
+def download(contest, problem, timestamp, filename):
+    time = datetime.fromtimestamp(timestamp)
+    user = get_current_user()
+    contest = Contest(contest)
+    print(problem)
+    problem = contest.problem(problem)
+    submission = Submission(contest, problem, user, time)
+    if not submission.exists or filename not in submission.files.values():
+        return abort(404)
+    return send_file(os.path.join(submission.path, filename))

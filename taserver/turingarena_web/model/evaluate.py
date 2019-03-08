@@ -1,7 +1,5 @@
-import os
 import threading
 
-from turingarena.driver.language import Language
 from turingarena.evaluation.evaluator import Evaluator
 from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
 
@@ -17,20 +15,13 @@ def evaluate_thread(problem, submission):
         print(EvaluationEvent(EvaluationEventType.DATA, payload=dict(type="end")).json_line(), file=f, flush=True)
 
 
-def evaluate(current_user, problem, contest, submitted_file):
+def evaluate(current_user, problem, contest, files):
 
-    ext = os.path.splitext(submitted_file["filename"])[1]
+    for name, file in files.items():
+        if file.language not in contest.languages:
+            raise RuntimeError(f"Unsupported file extension {file.extension}: please select another file!")
 
-    language = Language.from_extension(ext)
-    if language not in contest.languages:
-        raise RuntimeError(f"Unsupported file extension {ext}: please select another file!")
-
-    submission = Submission.new(current_user, problem, contest, submitted_file["filename"])
-
-    os.makedirs(submission.path)
-
-    with open(submission.files_absolute["source"], "w") as f:
-        f.write(submitted_file["content"])
+    submission = Submission.new(current_user, problem, contest, files)
 
     threading.Thread(target=evaluate_thread, args=(problem, submission)).start()
 

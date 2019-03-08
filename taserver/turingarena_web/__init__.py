@@ -14,7 +14,7 @@ def create_app():
     app.config.from_mapping(config.__dict__)
     app.register_blueprint(root_bp, url_prefix="/")
     app.register_blueprint(user_bp, url_prefix="/")
-    app.register_blueprint(submission_bp, url_prefix="/submission")
+    app.register_blueprint(submission_bp, url_prefix="/")
     app.register_blueprint(contest_bp, url_prefix="/")
     app.register_blueprint(api_bp, url_prefix="/api")
 

@@ -40,7 +40,8 @@ class Problem(namedtuple("Problem", ["contest", "name"])):
     def as_json_data(self):
         return {
             "name": self.name,
+            "contest": self.contest.name,
             "title": self.title,
             "statement": self.statement,
-            "goals": self.goals
+            "goals": self.goals,
         }

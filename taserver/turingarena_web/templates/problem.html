@@ -53,11 +53,18 @@
                         {% else %}
                     <tr class="table-warning">
                 {% endif %}
-            <td>{{ submission.timestamp.strftime("%H:%M %d/%m/%Y") }}</td>
+            <td>{{ submission.time.strftime("%H:%M %d/%m/%Y") }}</td>
             <td>{{ acquired_goals }} / {{ total_goals }}</td>
-            <td><a href="{{ url_for("submission.submission_view", submission_id=submission["id"]) }}">Info</a></td>
+            <td><a href="{{ url_for("submission.submission_view",
+                    contest=submission.contest.name,
+                    problem=submission.problem.name,
+                    timestamp=submission.timestamp) }}">Info</a></td>
             <td>
-                <a href="{{ url_for("submission.download", submission_id=submission["id"], filename=submission["filename"]) }}">{{ submission.filename }}</a>
+                <a href="{{ url_for("submission.download",
+                    contest=submission.contest.name,
+                    problem=submission.problem.name,
+                    timestamp=submission.timestamp,
+                    filename=submission.files["source"]) }}">{{ submission.files["source"] }}</a>
             </td>
             </tr>
             {% endfor %}
