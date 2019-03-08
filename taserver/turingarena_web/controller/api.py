@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from turingarena.evaluation.submission import SubmissionFile
 from turingarena_web.model.contest import Contest
-from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.submission import Submission
 from turingarena_web.model.user import User
 from turingarena_web.controller.session import get_current_user, set_current_user
@@ -154,7 +153,7 @@ def evaluate_api():
         )
         for name, file in args.files.items()
     }
-    submission = evaluate(user, problem, contest, files)
+    submission = Submission.new(user, problem, contest, files)
 
     return jsonify(submission.as_json_data())
 

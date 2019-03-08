@@ -3,7 +3,6 @@ from turingarena.evaluation.submission import SubmissionFile
 from turingarena_web.controller.session import get_current_user
 from turingarena_web.model.contest import Contest
 from turingarena_web.controller import session
-from turingarena_web.model.evaluate import evaluate
 from turingarena_web.model.submission import Submission
 
 contest_bp = Blueprint("contest", __name__)
@@ -55,7 +54,7 @@ def problem_view(contest_name, name):
                 )
                 for name, file in request.files.items()
             }
-            submission = evaluate(current_user, problem, contest, files)
+            submission = Submission.new(current_user, problem, contest, files)
             return redirect(url_for("submission.submission_view",
                                     contest=contest.name,
                                     problem=problem.name,

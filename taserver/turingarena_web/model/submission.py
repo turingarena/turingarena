@@ -1,11 +1,14 @@
 import os
 import json
+import threading
 
 from datetime import datetime
+from functools import lru_cache
 from collections import namedtuple
 
-from functools import lru_cache
 from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
+from turingarena.evaluation.evaluator import Evaluator
+
 from turingarena_web.config import config
 
 
@@ -29,6 +32,10 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
 
     @staticmethod
     def new(user, problem, contest, files):
+        for name, file in files.items():
+            if file.language not in contest.languages:
+                raise RuntimeError(f"Unsupported file extension {file.extension}: please select another file!")
+
         submission = Submission(
             contest=contest,
             problem=problem,
@@ -49,6 +56,8 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
 
         with open(os.path.join(submission.path, "files.json"), "w") as f:
             print(json.dumps(files), file=f)
+
+        threading.Thread(target=lambda: submission.evaluate()).start()
 
         return submission
 
@@ -110,6 +119,14 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
                 if i > after:
                     yield EvaluationEvent.from_json(json.loads(line))
                 i += 1
+
+    def evaluate(self):
+        evaluator = Evaluator(self.problem.path)
+        with open(self.events_path, "w") as f:
+            for event in evaluator.evaluate(files=self.files_absolute, redirect_stderr=True, log_level="WARNING"):
+                print(event.json_line(), file=f, flush=True)
+
+            print(EvaluationEvent(EvaluationEventType.DATA, payload=dict(type="end")).json_line(), file=f, flush=True)
 
     def as_json_data(self):
         return {
