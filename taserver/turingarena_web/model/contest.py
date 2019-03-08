@@ -1,4 +1,5 @@
 import os
+
 from collections import namedtuple
 
 from turingarena.driver.language import Language

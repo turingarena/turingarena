@@ -106,11 +106,7 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
 
     @property
     def acquired_goals(self):
-        return [
-            goal
-            for goal in self.goals
-            if goal["result"]
-        ]
+        return list(filter(lambda g: g["result"], self.goals))
 
     def events(self, after=-1):
         with open(self.events_path) as f:

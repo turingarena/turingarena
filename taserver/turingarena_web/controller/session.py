@@ -1,4 +1,5 @@
 from flask import session
+
 from turingarena_web.model.user import User
 
 

@@ -1,8 +1,8 @@
-from collections import namedtuple
+import bcrypt
 
 from enum import Enum
+from collections import namedtuple
 
-import bcrypt
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.database import database
 

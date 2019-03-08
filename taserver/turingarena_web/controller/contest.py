@@ -1,9 +1,12 @@
 from flask import Blueprint, abort, render_template, redirect, url_for, request, send_file
+
 from turingarena.evaluation.submission import SubmissionFile
-from turingarena_web.controller.session import get_current_user
-from turingarena_web.model.contest import Contest
+
 from turingarena_web.controller import session
+from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
+from turingarena_web.controller.session import get_current_user
+
 
 contest_bp = Blueprint("contest", __name__)
 
@@ -18,7 +21,7 @@ def contest_view(contest_name):
     user = session.get_current_user()
 
     if user is None:
-        return abort(401)
+        return redirect("user.login")
 
     if contest not in user.contests:
         if contest.public:
@@ -37,8 +40,11 @@ def problem_view(contest_name, name):
         return abort(404)
 
     current_user = get_current_user()
-    if current_user is None or contest not in current_user.contests:
-        return abort(401)
+    if current_user is None:
+        return redirect("user.login")
+
+    if contest not in current_user.contests:
+        return abort(403)
 
     problem = contest.problem(name)
     if problem is None:
@@ -75,7 +81,9 @@ def files(contest_name, name):
     problem = contest.problem(name)
     user = get_current_user()
     if user is None:
-        return abort(401)
+        return redirect("user.login")
     if problem is None or contest is None:
         return abort(404)
+    if user not in contest.users():
+        return abort(403)
     return send_file(problem.files_zip)

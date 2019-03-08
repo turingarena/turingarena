@@ -1,7 +1,7 @@
 import os
 
-from collections import namedtuple
 from commonmark import commonmark
+from collections import namedtuple
 
 from turingarena.evallib.metadata import load_metadata
 

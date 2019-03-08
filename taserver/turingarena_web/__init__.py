@@ -1,5 +1,5 @@
 from flask import Flask
-from turingarena_web.controller.api import api_bp
+from turingarena_web.controller.api import api
 
 from turingarena_web.controller.user import user_bp
 from turingarena_web.controller.root import root_bp
@@ -16,7 +16,7 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix="/")
     app.register_blueprint(submission_bp, url_prefix="/")
     app.register_blueprint(contest_bp, url_prefix="/")
-    app.register_blueprint(api_bp, url_prefix="/api")
+    app.register_blueprint(api, url_prefix="/api")
 
     init_logger()
 

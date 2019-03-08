@@ -1,10 +1,12 @@
 import os
-from datetime import datetime
 
 from flask import Blueprint, render_template, send_file, abort
+from datetime import datetime
+
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
 from turingarena_web.controller.session import get_current_user
+
 
 submission_bp = Blueprint("submission", __name__)
 
@@ -27,7 +29,6 @@ def download(contest, problem, timestamp, filename):
     time = datetime.fromtimestamp(timestamp)
     user = get_current_user()
     contest = Contest(contest)
-    print(problem)
     problem = contest.problem(problem)
     submission = Submission(contest, problem, user, time)
     if not submission.exists or filename not in submission.files.values():

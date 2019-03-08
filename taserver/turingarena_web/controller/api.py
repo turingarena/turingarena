@@ -1,13 +1,15 @@
+from flask import Blueprint, request, jsonify
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify
 from turingarena.evaluation.submission import SubmissionFile
+
+from turingarena_web.model.user import User
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
-from turingarena_web.model.user import User
 from turingarena_web.controller.session import get_current_user, set_current_user
 
-api_bp = Blueprint("api", __name__)
+
+api = Blueprint("api", __name__)
 
 
 class ApiError(Exception):
@@ -25,7 +27,7 @@ def error(status_code, message):
     return response
 
 
-@api_bp.errorhandler(ApiError)
+@api.errorhandler(ApiError)
 def handle_api_error(e):
     return error(e.status_code, e.message)
 
@@ -55,7 +57,7 @@ def require_auth():
     return user
 
 
-@api_bp.route("/events", methods=("POST",))
+@api.route("/events", methods=("POST",))
 def evaluation_event():
     args = Args()
     user = require_auth()
@@ -81,7 +83,7 @@ def evaluation_event():
     return jsonify(events=events)
 
 
-@api_bp.route("/submission", methods=("POST",))
+@api.route("/submission", methods=("POST",))
 def submission_api():
     args = Args()
     user = require_auth()
@@ -95,7 +97,7 @@ def submission_api():
     return jsonify(submission.as_json_data())
 
 
-@api_bp.route("/contest", methods=("POST",))
+@api.route("/contest", methods=("POST",))
 def contest_api():
     args = Args()
     user = require_auth()
@@ -110,7 +112,7 @@ def contest_api():
     return jsonify(contest.as_json_data())
 
 
-@api_bp.route("/problem", methods=("POST",))
+@api.route("/problem", methods=("POST",))
 def problem_api():
     args = Args()
     user = require_auth()
@@ -128,7 +130,7 @@ def problem_api():
     return jsonify(problem.as_json_data())
 
 
-@api_bp.route("/evaluate", methods=("POST",))
+@api.route("/evaluate", methods=("POST",))
 def evaluate_api():
     args = Args()
     user = require_auth()
@@ -158,7 +160,7 @@ def evaluate_api():
     return jsonify(submission.as_json_data())
 
 
-@api_bp.route("/user", methods=("POST",))
+@api.route("/user", methods=("POST",))
 def user_api():
     args = Args()
     current_user = require_auth()
@@ -172,7 +174,7 @@ def user_api():
     return jsonify(user.as_json_data())
 
 
-@api_bp.route("/auth", methods=("POST",))
+@api.route("/auth", methods=("POST",))
 def auth_api():
     args = Args()
 

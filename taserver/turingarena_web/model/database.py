@@ -1,7 +1,7 @@
+import psycopg2.extensions
+
 from contextlib import contextmanager
 from functools import lru_cache
-
-import psycopg2.extensions
 
 from turingarena_web.config import config
 
