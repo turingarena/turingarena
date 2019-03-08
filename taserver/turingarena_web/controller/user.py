@@ -1,7 +1,6 @@
-from flask import Blueprint, request, render_template, redirect, url_for, abort
+from flask import Blueprint, request, render_template, redirect, url_for, abort, session
 
 from turingarena_web.config import config
-from turingarena_web.controller import session
 from turingarena_web.model.user import User
 
 
@@ -19,14 +18,14 @@ def login():
     if user is None or not user.check_password(request.form["password"]):
         return render_template("login.html", message="Wrong username or password", registrarion_allowed=reg_ok)
     else:
-        session.set_current_user(user)
-        return redirect(url_for("root.home"))
+        set_current_user(user)
+        return redirect(url_for("main.home"))
 
 
 @user_bp.route("/logout")
 def logout():
-    session.set_current_user(None)
-    return redirect(url_for("root.home"))
+    set_current_user(None)
+    return redirect(url_for("main.home"))
 
 
 @user_bp.route("/register", methods=("GET", "POST"))
@@ -44,6 +43,20 @@ def register():
         password=request.form["password"],
     )
 
-    session.set_current_user(user)
+    set_current_user(user)
 
-    return redirect(url_for("root.home"))
+    return redirect(url_for("main.home"))
+
+
+def get_current_user():
+    username = session.get("username", None)
+    if username is None:
+        return None
+    return User.from_username(username)
+
+
+def set_current_user(user):
+    if user is None:
+        session.clear()
+    else:
+        session["username"] = user.username

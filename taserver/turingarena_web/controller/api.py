@@ -6,7 +6,7 @@ from turingarena.evaluation.submission import SubmissionFile
 from turingarena_web.model.user import User
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
-from turingarena_web.controller.session import get_current_user, set_current_user
+from turingarena_web.controller.user import get_current_user, set_current_user
 
 
 api = Blueprint("api", __name__)

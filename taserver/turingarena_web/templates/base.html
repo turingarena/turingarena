@@ -12,7 +12,7 @@
     <header>
         {% block header %}
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <a class="navbar-brand" href="{{ url_for("root.home") }}">TuringArena</a>
+                <a class="navbar-brand" href="{{ url_for("main.home") }}">TuringArena</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,7 @@
                         {% if contest %}
                             <li class="navbar-item active">
                                 <a class="nav-link"
-                                   href="{{ url_for("contest.contest_view", contest_name=contest.name) }}">{{ contest.title }}</a>
+                                   href="{{ url_for("main.contest_view", contest_name=contest.name) }}">{{ contest.title }}</a>
                             </li>
                         {% endif %}
                     </ul>
