@@ -48,7 +48,7 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
         }
 
         with open(os.path.join(submission.path, "files.json"), "w") as f:
-            f.write(json.dumps(files))
+            print(json.dumps(files), file=f)
 
         return submission
 
