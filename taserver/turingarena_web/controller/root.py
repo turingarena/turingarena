@@ -85,7 +85,7 @@ def problem_view(contest_name, name):
                 for name, file in request.files.items()
             }
             submission = Submission.new(current_user, problem, contest, files)
-            return redirect(url_for("submission_view",
+            return redirect(url_for("main.submission_view",
                                     contest=contest.name,
                                     problem=problem.name,
                                     timestamp=submission.timestamp,

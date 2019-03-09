@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     {% block head %}{% endblock %}
     <title>{{ title or "TuringArena" }}</title>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 <div class="container-fluid">
@@ -50,7 +51,6 @@
         {% block footer %}
         {% endblock %}
     </footer>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </div>
 </body>
 </html>

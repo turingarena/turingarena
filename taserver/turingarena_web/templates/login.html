@@ -6,7 +6,7 @@
 {% block header %}{% endblock %}
 {% block body %}
 <div class="text-center">
-    <form class="form-signin" method="post">
+    <form class="form-signin" action="#" onsubmit="singIn(); return false">
         <img class="mb-4" src="{{ url_for("static", filename="img/turingarena_logo.svg") }}" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
         <label for="inputUsername" class="sr-only">Username</label>
@@ -16,8 +16,27 @@
         {% if registrarion_allowed %}
             <p>Don't have an account? <a href="{{ url_for("user.register") }}">Sign Up</a>!</p>
         {% endif %}
-        <p>{{ message }}</p>
+        <p id="message"></p>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
     </form>
+    <script>
+        const AUTH_ENDPOINT = "/api/auth";
+
+        function singIn() {
+            const username = document.getElementById("inputUsername").value;
+            const password = document.getElementById("inputPassword").value;
+
+            jsonRequest(AUTH_ENDPOINT, {
+                username: username,
+                password: password,
+            }).then(response => {
+                if (response.status !== 200) {
+                    response.json().then(r => document.getElementById("message").innerText = r.message);
+                } else {
+                    document.location = "/";
+                }
+            });
+        }
+    </script>
 </div>
 {% endblock %}

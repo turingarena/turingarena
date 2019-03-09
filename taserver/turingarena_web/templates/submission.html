@@ -64,19 +64,11 @@
             let end = false;
             let after = -1;
             while (!end) {
-                await fetch('/api/events', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contest: '{{ submission.contest.name }}',
-                        problem: '{{ submission.problem.name }}',
-                        timestamp: {{ submission.timestamp }},
-                        after: after
-                    })
+                await jsonRequest('/api/events', {
+                    contest: '{{ submission.contest.name }}',
+                    problem: '{{ submission.problem.name }}',
+                    timestamp: {{ submission.timestamp }},
+                    after: after
                 }).then(response => {
                     return response.json()
                 }).then(response => {
