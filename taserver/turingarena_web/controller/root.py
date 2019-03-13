@@ -108,7 +108,7 @@ def files(contest_name, name):
         return redirect("user.login")
     if problem is None or contest is None:
         return abort(404)
-    if user not in contest.users():
+    if contest not in user.contests:
         return abort(403)
     return send_file(problem.files_zip)
 
