@@ -67,7 +67,7 @@ class JavaCodeGen(InterfaceCodeGen):
         return f"{ self._build_method_signature(callback) };"
 
     def visit_Constant(self, m):
-        self.line(f"private static final {m.variable.name} = {self.visit(m.value)};")
+        self.line(f"private static final int {m.variable.name} = {self.visit(m.value)};")
 
     def visit_VariableDeclaration(self, d):
         self.line(f'int{"[]" * d.dimensions} {d.variable.name};')
