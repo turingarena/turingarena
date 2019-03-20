@@ -1,5 +1,5 @@
-[parameters]
-digits = 3
+[problem]
+title = "Ping pong"
 
 [scoring]
 goals = ["correct"]

@@ -1,5 +1,6 @@
 [problem]
-title = "Guess the number"
+title = "Shortest path"
 
 [scoring]
 goals = ["correct"]
+

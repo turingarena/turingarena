@@ -1,5 +1,5 @@
 [problem]
-title = "Guess the number"
+title = "Triangle dynamic programming"
 
 [scoring]
 goals = ["correct"]

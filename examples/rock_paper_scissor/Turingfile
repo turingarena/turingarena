@@ -1,5 +1,5 @@
 [problem]
-title = "Guess the number"
+title = "Rock, papaer, scrissor"
 
 [scoring]
 goals = ["correct"]
