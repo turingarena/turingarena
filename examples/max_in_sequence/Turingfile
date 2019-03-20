@@ -1,0 +1,5 @@
+[problem]
+title = "Luci al Pirellone"
+
+[scoring]
+goals = ["correct"]
