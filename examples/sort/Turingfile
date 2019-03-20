@@ -1,0 +1,6 @@
+[problem]
+title = "Sort"
+
+[scoring]
+goals = ["correct"]
+

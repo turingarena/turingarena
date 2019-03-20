@@ -1,0 +1,5 @@
+[problem]
+title = "Longest common subsequence"
+
+[scoring]
+goals = ["correct"]

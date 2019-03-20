@@ -1,0 +1,6 @@
+[problem]
+title = "Guess the number"
+
+[scoring]
+goals = ["correct"]
+

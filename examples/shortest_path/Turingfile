@@ -1,0 +1,6 @@
+[problem]
+title = "Shortest path"
+
+[scoring]
+goals = ["correct"]
+

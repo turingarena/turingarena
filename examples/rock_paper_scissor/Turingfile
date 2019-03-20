@@ -1,0 +1,5 @@
+[problem]
+title = "Rock, papaer, scrissor"
+
+[scoring]
+goals = ["correct"]

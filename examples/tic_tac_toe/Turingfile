@@ -1,0 +1,6 @@
+[problem]
+title = "Tic-tac-toe"
+
+[scoring]
+goals = ["correct"]
+

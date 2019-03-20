@@ -1,0 +1,6 @@
+[problem]
+title = "Connectivity query"
+
+[scoring]
+goals = ["correct"] 
+

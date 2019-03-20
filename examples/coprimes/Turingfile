@@ -1,0 +1,9 @@
+[problem]
+title = "Coprimes"
+
+[parameters]
+digits = 3
+
+[scoring]
+goals = ["correct"]
+

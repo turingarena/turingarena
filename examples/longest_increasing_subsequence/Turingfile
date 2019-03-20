@@ -1,3 +1,6 @@
+[problem]
+title = "Longest increasing subsequence"
+
 [scoring]
 goals = [
     "exponential",

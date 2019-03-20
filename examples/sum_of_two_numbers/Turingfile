@@ -1,3 +1,6 @@
+[problem]
+title = "Sum of two numbers"
+
 [parameters]
 digits = 3
 
