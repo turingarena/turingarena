@@ -50,10 +50,6 @@ class Contest(namedtuple("Contest", ["name"])):
         ]
 
     @property
-    def public(self):
-        return self.metadata.get("public", False)
-
-    @property
     def title(self):
         return self.metadata.get("title", self.name)
 
