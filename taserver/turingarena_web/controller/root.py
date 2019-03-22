@@ -18,13 +18,7 @@ def home():
     user = get_current_user()
     if user is None:
         return redirect(url_for("user.login"))
-    contests = list(user.contests)
-
-    contests = [
-        contest
-        for contest in Contest.contests()
-        if contest.public and contest not in contests
-    ] + contests
+    contests = Contest.contests()
 
     return render_template("home.html", contests=sorted(contests, key=lambda x: x.title), user=user)
 
@@ -47,12 +41,6 @@ def contest_view(contest_name):
     if user is None:
         return redirect("user.login")
 
-    if contest not in user.contests:
-        if contest.public:
-            user.add_to_contest(contest)
-        else:
-            return abort(403)
-
     return render_template("contest.html", contest=contest, user=user)
 
 
@@ -66,9 +54,6 @@ def problem_view(contest_name, name):
     current_user = get_current_user()
     if current_user is None:
         return redirect("user.login")
-
-    if contest not in current_user.contests:
-        return abort(403)
 
     problem = contest.problem(name)
     if problem is None:
@@ -108,8 +93,6 @@ def files(contest_name, name):
         return redirect("user.login")
     if problem is None or contest is None:
         return abort(404)
-    if contest not in user.contests:
-        return abort(403)
     return send_file(problem.files_zip)
 
 

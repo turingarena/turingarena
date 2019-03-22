@@ -106,9 +106,6 @@ def contest_api():
     if contest is None:
         raise ApiError(404, f"contest {args.name} not found")
 
-    if contest not in user.contests:
-        raise ApiError(403, f"you have not the permission to view this contest")
-
     return jsonify(contest.as_json_data())
 
 
@@ -119,9 +116,6 @@ def problem_api():
     contest = Contest.contest(args.contest)
     if contest is None:
         raise ApiError(404, f"contest {args['contest']} not found")
-
-    if contest not in user.contests:
-        raise ApiError(403, f"you have not the permission to view this contest")
 
     problem = contest.problem(args.name)
     if problem is None:
@@ -137,9 +131,6 @@ def evaluate_api():
     contest = Contest.contest(args.contest)
     if contest is None:
         raise ApiError(404, f"contest {args.contest} not found")
-
-    if contest not in user.contests:
-        raise ApiError(403, "you have not the permission to submit in this contest")
 
     problem = contest.problem(args.problem)
     if problem is None:
