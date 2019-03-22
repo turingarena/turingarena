@@ -13,7 +13,7 @@ from turingarena_web.config import config
 
 
 class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"])):
-    SUBMISSION_TIME_FORMAT = "%Y-%m-%d_%H:%M:%S"
+    SUBMISSION_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
     @staticmethod
     def from_user_and_problem_and_contest(user, problem, contest):
