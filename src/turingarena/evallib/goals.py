@@ -16,7 +16,7 @@ class Goals(MutableMapping):
     def _declared_goals(self):
         return load_metadata().get("scoring", {}).get("goals", [])
 
-    def check(self, goal, checker):
+    def check(self, goal, checker, *args, **kwargs):
         """
         Check the specify goal:
             - if the goal was already assigned to False, skip check
@@ -34,7 +34,7 @@ class Goals(MutableMapping):
             else:
                 logging.info(f"Skipping goal {goal} because it was already failed")
         else:
-            result = checker()
+            result = checker(*args, **kwargs)
             assert isinstance(result, bool), "Checker function must return a boolean"
             if not result:
                 self[goal] = False
