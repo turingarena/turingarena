@@ -2,6 +2,10 @@ import random
 
 import turingarena as ta
 
+
+for i in range(10):
+    ta.evallib.evaluation.send_data(dict(type="value", key=f"field_{i}", value=i**2))
+
 for _ in range(10):
     value_range = range(10 ** ta.parameters.digits, 5 * 10 ** ta.parameters.digits)
     a, b = random.choices(value_range, k=2)
@@ -22,6 +26,7 @@ for _ in range(10):
         ta.goals["correct"] = False
 
 ta.goals.setdefault("correct", True)
+
 
 
 def test_correct_solution():
