@@ -6,7 +6,7 @@ from datetime import datetime
 from functools import lru_cache
 from collections import namedtuple
 
-from turingarena.evaluation.events import EvaluationEventType, EvaluationEvent
+from turingarena.evaluation.events import EvaluationEvent
 from turingarena.evaluation.evaluator import Evaluator
 
 from turingarena_web.config import config
@@ -101,7 +101,7 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
         return [
             event.payload
             for event in self.events()
-            if event.type == EvaluationEventType.DATA and event.payload["type"] == "goal_result"
+            if event.type ==  and event.payload["type"] == "goal_result"
         ]
 
     @property

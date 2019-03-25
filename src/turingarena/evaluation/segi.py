@@ -8,7 +8,7 @@ import base64
 import time
 from contextlib import ExitStack, contextmanager
 
-from turingarena.evaluation.events import EvaluationEvent, EvaluationEventType
+from turingarena.evaluation.events import EvaluationEvent
 
 
 def submission_environ(submission_fields):
@@ -75,7 +75,7 @@ def process_segi_output(fd, data_begin, data_end, file_begin, file_end):
 
 
 def generate_events(parts, data_begin, data_end, file_begin, file_end):
-    newline_event = EvaluationEvent(EvaluationEventType.TEXT, "\n")
+    newline_event = EvaluationEvent(dict(type="text", payload="\n"))
     pending_newline = False
     for part in parts:
         if pending_newline and part == data_begin:
@@ -93,7 +93,7 @@ def generate_events(parts, data_begin, data_end, file_begin, file_end):
             if part == b"\n":
                 pending_newline = True
             else:
-                yield EvaluationEvent(EvaluationEventType.TEXT, part.decode())
+                yield EvaluationEvent(dict(type="text", payload=part.decode()))
     if pending_newline:
         yield newline_event
 
@@ -128,7 +128,11 @@ def parse_data_events(parts, data_end):
         line = b"".join(iter(lambda: next(parts), b"\n"))
         if line == data_end:
             break
-        yield EvaluationEvent(EvaluationEventType.DATA, json.loads(line))
+        json_data = json.loads(line)
+        assert isinstance(json_data, dict)
+        assert "type" in json_data
+        assert isinstance(json_data["type"], str)
+        yield EvaluationEvent(json_data)
 
 
 def parse_header(line):
@@ -185,7 +189,7 @@ def parse_file_events(parts, file_end):
         line = b"".join(iter(lambda: next(parts), b"\n"))
     body = b"\n".join(body)
 
-    yield EvaluationEvent(EvaluationEventType.FILE, process_headers(headers, body))
+    yield EvaluationEvent(dict(type="file", payload=process_headers(headers, body)))
 
 
 def split_line_terminators(parts):

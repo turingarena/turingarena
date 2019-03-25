@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from functools import lru_cache
 
 from turingarena.cli.command import Command
-from turingarena.evaluation.events import EvaluationEventType
 from turingarena.evaluation.evaluator import Evaluator
 
 
@@ -63,13 +62,13 @@ class EvaluateCommand(SubmissionCommand):
         if self.args.store_files:
             os.makedirs(files_dir, exist_ok=True)
         for event in self._do_evaluate():
-            if self.args.store_files and event.type is EvaluationEventType.FILE:
-                with open(os.path.join(files_dir, event.payload["filename"]), "wb") as f:
-                    f.write(base64.standard_b64decode(event.payload["content_base64"]))
+            if self.args.store_files and event.type == "file":
+                with open(os.path.join(files_dir, event.payload["filename"]), "w") as f:
+                    f.write(base64.standard_b64decode(event.payload["content_base64"]).decode("utf-8"))
             if self.args.events:
                 print(event)
             else:
-                if event.type is EvaluationEventType.TEXT:
+                if event.type == "text":
                     sys.stdout.write(event.payload)
 
 
