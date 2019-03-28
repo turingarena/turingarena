@@ -148,4 +148,5 @@ class PythonCodeGen(InterfaceCodeGen):
         self.visit(n.prototype)
         with self.indent():
             self.visit(n.body)
-            self.line(f"pass")
+            if not n.prototype.has_return_value:
+                self.line(f"pass")
