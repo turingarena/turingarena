@@ -133,6 +133,10 @@ class PythonCodeGen(InterfaceCodeGen):
                 self.visit(c.body)
 
     def visit_InterfaceTemplate(self, n):
+        for c in n.constants:
+            self.visit(c)
+        
+        self.line()
         for m in n.methods:
             self.visit(m)
             self.line()
