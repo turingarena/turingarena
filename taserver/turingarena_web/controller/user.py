@@ -1,31 +1,18 @@
-from flask import Blueprint, render_template, redirect, url_for, session
+from flask import session
+from turingarena_web.model.contest import Contest
 
 from turingarena_web.model.user import User
 
 
-user_bp = Blueprint("user", __name__)
-
-
-@user_bp.route("/login")
-def login():
-    return render_template("login.html")
-
-
-@user_bp.route("/logout")
-def logout():
-    set_current_user(None)
-    return redirect(url_for("main.home"))
-
-
-def get_current_user():
-    username = session.get("username", None)
+def get_current_user(contest):
+    username = session.get(contest, None)
     if username is None:
         return None
-    return User.from_username(username)
+    return User.from_username(Contest.contest(contest), username)
 
 
-def set_current_user(user):
+def set_current_user(contest, user):
     if user is None:
         session.clear()
     else:
-        session["username"] = user.username
+        session[contest] = user.username

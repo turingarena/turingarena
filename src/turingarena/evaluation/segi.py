@@ -96,6 +96,7 @@ def generate_events(parts, data_begin, data_end, file_begin, file_end):
                 yield EvaluationEvent(dict(type="text", payload=part.decode()))
     if pending_newline:
         yield newline_event
+    yield EvaluationEvent(dict(type="end_evaluation"))
 
 
 def collect_joinable_parts(parts):

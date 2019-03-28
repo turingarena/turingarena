@@ -1,15 +1,14 @@
 import bcrypt
 import json
+import os
 
 from collections import namedtuple
-
-from turingarena_web.config import config
 
 
 class User(namedtuple("User", ["first_name", "last_name", "username", "password"])):
     @staticmethod
-    def users():
-        with open(config["users_file"]) as f:
+    def users(contest):
+        with open(os.path.join(contest.directory, "users.jsonl")) as f:
             return [
                 User.from_json_data(json.loads(line))
                 for line in f
@@ -25,8 +24,8 @@ class User(namedtuple("User", ["first_name", "last_name", "username", "password"
         )
 
     @staticmethod
-    def from_username(username):
-        for user in User.users():
+    def from_username(contest, username):
+        for user in User.users(contest):
             if user.username == username:
                 return user
         return None

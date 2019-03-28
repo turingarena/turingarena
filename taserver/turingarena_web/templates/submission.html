@@ -77,17 +77,12 @@
                             case 'text':
                                 evaluationOutput.innerHTML += event.payload;
                                 break;
-                            case 'data':
-                                const data = event.payload;
-                                switch (data.type) {
-                                    case 'end':
-                                        end = true;
-                                        break;
-                                    case 'goal_result':
-                                        goalResult(data.goal, data.result);
-                                        break;
-                                }
+                            case 'end_evaluation':
+                                end = true;
                                 break;
+                            case 'goal_result':
+                                 goalResult(event.goal, event.result);
+                                 break;
                             case 'file':
                                 addFile(event.payload);
                                 break;
