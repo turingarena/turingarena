@@ -50,8 +50,8 @@ class Args:
         return item in self.args
 
 
-def require_auth():
-    user = get_current_user()
+def require_auth(contest):
+    user = get_current_user(contest)
     if user is None:
         raise ApiError(401, "authentication required")
     return user
@@ -60,7 +60,7 @@ def require_auth():
 @api.route("/events", methods=("POST",))
 def evaluation_event():
     args = Args()
-    user = require_auth()
+    user = require_auth(args.contest)
     contest = Contest(args.contest)
     problem = contest.problem(args.problem)
     time = datetime.fromtimestamp(args.timestamp)
@@ -76,7 +76,7 @@ def evaluation_event():
             raise ApiError(400, "the after parameter must be an integer")
 
     events = [
-        event.as_json_data()
+        event
         for event in submission.events(after)
     ]
 
@@ -86,7 +86,7 @@ def evaluation_event():
 @api.route("/submission", methods=("POST",))
 def submission_api():
     args = Args()
-    user = require_auth()
+    user = require_auth(args.contest)
     contest = Contest(args.contest)
     problem = contest.problem(args.problem)
     time = args.timestamp
@@ -100,7 +100,7 @@ def submission_api():
 @api.route("/contest", methods=("POST",))
 def contest_api():
     args = Args()
-    user = require_auth()
+    user = require_auth(args.contest)
     contest = Contest.contest(args.name)
 
     if contest is None:
@@ -112,7 +112,7 @@ def contest_api():
 @api.route("/problem", methods=("POST",))
 def problem_api():
     args = Args()
-    user = require_auth()
+    user = require_auth(args.contest)
     contest = Contest.contest(args.contest)
     if contest is None:
         raise ApiError(404, f"contest {args['contest']} not found")
@@ -127,7 +127,7 @@ def problem_api():
 @api.route("/evaluate", methods=("POST",))
 def evaluate_api():
     args = Args()
-    user = require_auth()
+    user = require_auth(args.contest)
     contest = Contest.contest(args.contest)
     if contest is None:
         raise ApiError(404, f"contest {args.contest} not found")
@@ -151,27 +151,13 @@ def evaluate_api():
     return jsonify(submission.as_json_data())
 
 
-@api.route("/user", methods=("POST",))
-def user_api():
-    args = Args()
-    current_user = require_auth()
-    user = User.from_username(args.username)
-    if user is None:
-        raise ApiError(404, f"user {args.username} does not exist")
-
-    if current_user != user:
-        raise ApiError(403, f"you are trying to access information of another user")
-
-    return jsonify(user.as_json_data())
-
-
 @api.route("/auth", methods=("POST",))
 def auth_api():
     args = Args()
-
-    user = User.from_username(args.username)
+    contest = Contest.contest(args.contest)
+    user = User.from_username(contest, args.username)
     if user is None or not user.check_password(args.password):
         raise ApiError(401, "wrong username or password")
 
-    set_current_user(user)
+    set_current_user(args.contest, user)
     return jsonify(status="OK")

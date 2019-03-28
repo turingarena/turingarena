@@ -22,15 +22,17 @@
         function singIn() {
             const username = document.getElementById("inputUsername").value;
             const password = document.getElementById("inputPassword").value;
+            const contest = "{{ contest_name }}";
 
             jsonRequest(AUTH_ENDPOINT, {
                 username: username,
                 password: password,
+                contest: contest,
             }).then(response => {
                 if (response.status !== 200) {
                     response.json().then(r => document.getElementById("message").innerText = r.message);
                 } else {
-                    document.location = "/";
+                    document.location = "{{ url_for("main.contest_view", contest_name=contest_name) }}";
                 }
             });
         }

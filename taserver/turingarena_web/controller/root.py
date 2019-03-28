@@ -15,12 +15,9 @@ root = Blueprint("main", __name__, static_url_path="")
 
 @root.route("/")
 def home():
-    user = get_current_user()
-    if user is None:
-        return redirect(url_for("user.login"))
     contests = Contest.contests()
 
-    return render_template("home.html", contests=sorted(contests, key=lambda x: x.title), user=user)
+    return render_template("home.html", contests=sorted(contests, key=lambda x: x.title))
 
 
 @root.route("/favicon.ico")
@@ -33,15 +30,19 @@ def favicon():
 def contest_view(contest_name):
     contest = Contest.contest(contest_name)
 
+    user = get_current_user(contest_name)
+    if user is None:
+        return redirect(url_for("main.login", contest_name=contest_name))
+
     if contest is None:
         return abort(404)
 
-    user = get_current_user()
-
-    if user is None:
-        return redirect("user.login")
-
     return render_template("contest.html", contest=contest, user=user)
+
+
+@root.route("/<contest_name>/login")
+def login(contest_name):
+    return render_template("login.html", contest_name=contest_name)
 
 
 @root.route("/<contest_name>/<name>", methods=("GET", "POST"))
@@ -51,7 +52,7 @@ def problem_view(contest_name, name):
     if contest is None:
         return abort(404)
 
-    current_user = get_current_user()
+    current_user = get_current_user(contest_name)
     if current_user is None:
         return redirect("user.login")
 
@@ -88,7 +89,7 @@ def problem_view(contest_name, name):
 def files(contest_name, name):
     contest = Contest.contest(contest_name)
     problem = contest.problem(name)
-    user = get_current_user()
+    user = get_current_user(contest_name)
     if user is None:
         return redirect("user.login")
     if problem is None or contest is None:
@@ -99,7 +100,7 @@ def files(contest_name, name):
 @root.route('/<contest>/<problem>/<int:timestamp>')
 def submission_view(contest, problem, timestamp):
     time = datetime.fromtimestamp(timestamp)
-    user = get_current_user()
+    user = get_current_user(contest)
     contest = Contest(contest)
     problem = contest.problem(problem)
     submission = Submission(contest, problem, user, time)
@@ -112,7 +113,7 @@ def submission_view(contest, problem, timestamp):
 @root.route('/<contest>/<problem>/<int:timestamp>/<filename>')
 def submission_download(contest, problem, timestamp, filename):
     time = datetime.fromtimestamp(timestamp)
-    user = get_current_user()
+    user = get_current_user(contest)
     contest = Contest(contest)
     problem = contest.problem(problem)
     submission = Submission(contest, problem, user, time)

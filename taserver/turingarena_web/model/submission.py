@@ -1,13 +1,11 @@
+import subprocess
+
 import os
 import json
-import threading
 
 from datetime import datetime
 from functools import lru_cache
 from collections import namedtuple
-
-from turingarena.evaluation.events import EvaluationEvent
-from turingarena.evaluation.evaluator import Evaluator
 
 from turingarena_web.config import config
 
@@ -57,7 +55,7 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
         with open(os.path.join(submission.path, "files.json"), "w") as f:
             print(json.dumps(files), file=f)
 
-        threading.Thread(target=lambda: submission.evaluate()).start()
+        submission.evaluate()
 
         return submission
 
@@ -98,31 +96,27 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
 
     @property
     def goals(self):
-        return [
-            event.payload
+        return {
+            event["name"]: event["result"]
             for event in self.events()
-            if event.type ==  and event.payload["type"] == "goal_result"
-        ]
-
-    @property
-    def acquired_goals(self):
-        return list(filter(lambda g: g["result"], self.goals))
+            if event.type == "goal_result"
+        }
 
     def events(self, after=-1):
         with open(self.events_path) as f:
             i = 0
             for line in f:
                 if i > after:
-                    yield EvaluationEvent.from_json(json.loads(line))
+                    yield json.loads(line)
                 i += 1
 
     def evaluate(self):
-        evaluator = Evaluator(self.problem.path)
+        files = [
+            f"{name}:{filename}"
+            for name, filename in self.files_absolute.items()
+        ]
         with open(self.events_path, "w") as f:
-            for event in evaluator.evaluate(files=self.files_absolute, redirect_stderr=True, log_level="WARNING"):
-                print(event.json_line(), file=f, flush=True)
-
-            print(EvaluationEvent(EvaluationEventType.DATA, payload=dict(type="end")).json_line(), file=f, flush=True)
+            subprocess.Popen(["turingarena-dev", "evaluate", "--events"] + files, stdout=f, cwd=self.problem.path)
 
     def as_json_data(self):
         return {
