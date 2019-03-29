@@ -144,6 +144,7 @@ def evaluate_api():
         )
         for name, file in args.files.items()
     }
+
     submission = Submission.new(user, problem, contest, files)
 
     return jsonify(submission.as_json_data())

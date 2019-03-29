@@ -1,7 +1,7 @@
 import os
 
 from datetime import datetime
-from flask import Blueprint, abort, render_template, redirect, url_for, request, send_file, current_app
+from flask import Blueprint, abort, render_template, redirect, url_for, send_file, current_app
 
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
@@ -45,7 +45,7 @@ def login(contest_name):
     return render_template("login.html", contest=contest)
 
 
-@root.route("/<contest_name>/<name>", methods=("GET", "POST"))
+@root.route("/<contest_name>/<name>")
 def problem_view(contest_name, name):
     contest = Contest.contest(contest_name)
 
@@ -60,29 +60,9 @@ def problem_view(contest_name, name):
     if problem is None:
         return abort(404)
 
-    error = None
-    if request.method == "POST":
-        try:
-            submitted_files = {
-                name: dict(
-                    filename=file.filename,
-                    content=file.read().decode("utf-8"),
-                )
-                for name, file in request.files.items()
-            }
-            submission = Submission.new(current_user, problem, contest, submitted_files)
-            return redirect(url_for("main.submission_view",
-                                    contest=contest.name,
-                                    problem=problem.name,
-                                    timestamp=submission.timestamp,
-                                    ))
-        except RuntimeError as e:
-            error = str(e)
-
     subs = list(Submission.from_user_and_problem_and_contest(current_user, problem, contest))
 
-    return render_template("problem.html", error=error, problem=problem, contest=contest, user=current_user,
-                           submissions=subs)
+    return render_template("problem.html", problem=problem, contest=contest, user=current_user, submissions=subs)
 
 
 @root.route("/<contest_name>/<name>.zip")

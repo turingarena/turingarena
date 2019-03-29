@@ -124,6 +124,6 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
             "user": self.user.username,
             "problem": self.problem.name,
             "contest": self.contest.name,
-            "timestamp": self.time,
+            "timestamp": self.timestamp,
             "files": self.files,
         }

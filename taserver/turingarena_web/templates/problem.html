@@ -4,12 +4,10 @@
     <div id="statement">
         {{ problem.statement | safe }}
     </div>
-    <div>
-    </div>
     <hr>
     <div id="submission">
         <h3>Submit your solution</h3>
-        <form method="post" enctype="multipart/form-data">
+        <form id="submission_form" action="#">
             <div class="input-group form-group">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Select source file</span>
@@ -27,9 +25,25 @@
                 <span class="text-danger">{{ error }}</span>
             {% endif %}
             <script>
-                document.getElementById("source_upload").onchange = function (e) {
-                    document.getElementById("source_label").innerText = e.target.files[0].name;
+                let contest = '{{ contest.name }}';
+                let problem = '{{ problem.name }}';
+                let fileUpload = document.getElementById('source_upload');
+
+                fileUpload.onchange = e => {
+                    document.getElementById('source_label').innerText = e.target.files[0].name;
+                };
+
+                let form = document.getElementById('submission_form');
+                form.onsubmit = () => {
+                    buildFileList(fileUpload).then(files => {
+                        evaluateRequest(contest, problem, files)
+                            .then(r => {
+                                document.location += "/" + r.timestamp;
+                            }).catch(e => alert(e));
+                    });
+                    return false;
                 }
+
             </script>
         </form>
     </div>

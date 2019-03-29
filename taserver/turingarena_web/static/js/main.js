@@ -33,3 +33,42 @@ function logoutRequest(contest) {
     return authRequest(contest, null, null);
 }
 
+
+const SUBMIT_ENDPOINT = "/api/evaluate";
+
+
+function evaluateRequest(contest, problem, files) {
+    return new Promise((resolve, reject) => {
+        jsonRequest(SUBMIT_ENDPOINT, {
+            contest: contest,
+            problem: problem,
+            files: files,
+        }).then(response => {
+            response.json().then(r => {
+                if (response.status !== 200) {
+                    reject(r.message);
+                } else {
+                    resolve(r);
+                }
+            })
+        })
+    });
+}
+
+
+function buildFileList(fileInput) {
+    return new Promise(resolve => {
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+
+        reader.readAsText(file);
+        reader.onload = () => {
+            resolve({
+                source: {
+                    filename: file.name,
+                    content: reader.result,
+                }
+            });
+        };
+    });
+}
