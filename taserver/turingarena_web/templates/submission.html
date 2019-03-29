@@ -75,7 +75,8 @@
                     response.events.forEach(event => {
                         switch (event.type) {
                             case 'text':
-                                evaluationOutput.innerHTML += event.payload;
+                                if (event.stream === 'stdout')
+                                    evaluationOutput.innerHTML += event.text;
                                 break;
                             case 'end_evaluation':
                                 end = true;

@@ -63,13 +63,15 @@ class EvaluateCommand(SubmissionCommand):
             os.makedirs(files_dir, exist_ok=True)
         for event in self._do_evaluate():
             if self.args.store_files and event.type == "file":
-                with open(os.path.join(files_dir, event.payload["filename"]), "w") as f:
-                    f.write(base64.standard_b64decode(event.payload["content_base64"]).decode("utf-8"))
+                with open(os.path.join(files_dir, event.filename), "w") as f:
+                    f.write(base64.standard_b64decode(event.content_base64).decode("utf-8"))
             if self.args.events:
                 print(event)
             else:
-                if event.type == "text":
-                    sys.stdout.write(event.payload)
+                if event.type == "text" and event.stream == "stdout":
+                    sys.stdout.write(event.text)
+                if event.type == "text" and event.stream == "stderr":
+                    sys.stderr.write(event.text)
 
 
 EvaluateCommand.PARSER.set_defaults(Command=EvaluateCommand)

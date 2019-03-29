@@ -75,7 +75,7 @@ def process_segi_output(fd, data_begin, data_end, file_begin, file_end):
 
 
 def generate_events(parts, data_begin, data_end, file_begin, file_end):
-    newline_event = EvaluationEvent(dict(type="text", payload="\n"))
+    newline_event = EvaluationEvent(dict(type="text", stream="stdout", text="\n"))
     pending_newline = False
     for part in parts:
         if pending_newline and part == data_begin:
@@ -93,7 +93,7 @@ def generate_events(parts, data_begin, data_end, file_begin, file_end):
             if part == b"\n":
                 pending_newline = True
             else:
-                yield EvaluationEvent(dict(type="text", payload=part.decode()))
+                yield EvaluationEvent(dict(type="text", stream="stdout", text=part.decode()))
     if pending_newline:
         yield newline_event
     yield EvaluationEvent(dict(type="end_evaluation"))
