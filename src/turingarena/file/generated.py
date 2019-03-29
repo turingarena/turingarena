@@ -6,7 +6,7 @@ from turingarena.driver.language import Language
 from turingarena.text.parser import TextParser
 
 INTERFACE_TXT = "interface.txt"
-TEXT_FILENAMES = ["statement.md", "README.md"]
+TEXT_FILENAME = "statement.md"
 
 
 class PackGeneratedDirectory:
@@ -40,12 +40,10 @@ class PackGeneratedDirectory:
         for dirpath, dirnames, filenames in os.walk(self.work_dir):
             relpath = os.path.relpath(dirpath, self.work_dir)
             descriptions = {}
-            for file in TEXT_FILENAMES:
-                if file in filenames:
-                    text_path = os.path.join(dirpath, file)
-                    descriptions = TextParser(text_path).descriptions
-                    yield (os.path.join(relpath, TEXT_FILENAMES[0]), self._create_text_generator(text_path))
-                    break
+            if TEXT_FILENAME in filenames:
+                text_path = os.path.join(dirpath, TEXT_FILENAME)
+                descriptions = TextParser(text_path).descriptions
+                yield (os.path.join(relpath, TEXT_FILENAME), self._create_text_generator(text_path))
             if INTERFACE_TXT in filenames:
                 yield from self._generate_interface_targets(dirpath, relpath, descriptions)
 

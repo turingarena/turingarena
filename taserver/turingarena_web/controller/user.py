@@ -1,6 +1,6 @@
 from flask import session
-from turingarena_web.model.contest import Contest
 
+from turingarena_web.model.contest import Contest
 from turingarena_web.model.user import User
 
 
