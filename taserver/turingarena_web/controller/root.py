@@ -3,8 +3,6 @@ import os
 from datetime import datetime
 from flask import Blueprint, abort, render_template, redirect, url_for, request, send_file, current_app
 
-from turingarena.evaluation.submission import SubmissionFile
-
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
 from turingarena_web.controller.user import get_current_user
@@ -65,14 +63,14 @@ def problem_view(contest_name, name):
     error = None
     if request.method == "POST":
         try:
-            files = {
-                name: SubmissionFile(
+            submitted_files = {
+                name: dict(
                     filename=file.filename,
                     content=file.read().decode("utf-8"),
                 )
                 for name, file in request.files.items()
             }
-            submission = Submission.new(current_user, problem, contest, files)
+            submission = Submission.new(current_user, problem, contest, submitted_files)
             return redirect(url_for("main.submission_view",
                                     contest=contest.name,
                                     problem=problem.name,

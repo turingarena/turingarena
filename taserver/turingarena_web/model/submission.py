@@ -31,8 +31,9 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
     @staticmethod
     def new(user, problem, contest, files):
         for name, file in files.items():
-            if file.language not in contest.languages:
-                raise RuntimeError(f"Unsupported file extension {file.extension}: please select another file!")
+            ext = os.path.splitext(file["filename"])[1]
+            if ext not in contest.languages:
+                raise RuntimeError(f"Unsupported file extension {ext}: please select another file!")
 
         submission = Submission(
             contest=contest,
@@ -44,11 +45,11 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
         os.makedirs(submission.path)
 
         for file in files.values():
-            with open(os.path.join(submission.path, file.filename), "w") as f:
-                f.write(file.content)
+            with open(os.path.join(submission.path, file["filename"]), "w") as f:
+                f.write(file["content"])
 
         files = {
-            name: file.filename
+            name: file["filename"]
             for name, file in files.items()
         }
 

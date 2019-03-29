@@ -2,7 +2,6 @@ import os
 
 from collections import namedtuple
 
-from turingarena.driver.language import Language
 from turingarena.evallib.metadata import load_metadata
 from turingarena_web.model.problem import Problem
 from turingarena_web.config import config
@@ -41,13 +40,7 @@ class Contest(namedtuple("Contest", ["name"])):
 
     @property
     def languages(self):
-        languages = self.metadata.get("languages", None)
-        if languages is None:
-            return Language.languages()
-        return [
-            Language.from_name(lang)
-            for lang in languages
-        ]
+        return self.metadata.get("languages", [".cpp", ".c", ".java", ".py"])
 
     @property
     def title(self):
@@ -63,7 +56,6 @@ class Contest(namedtuple("Contest", ["name"])):
         return {
             "name": self.name,
             "title": self.title,
-            "public": self.public,
-            "languages": [l.name for l in self.languages],
+            "languages": self.languages,
             "problems": [p.name for p in self.problems]
         }
