@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 
-from turingarena.evaluation.submission import SubmissionFile
-
 from turingarena_web.model.user import User
 from turingarena_web.model.contest import Contest
 from turingarena_web.model.submission import Submission
@@ -140,7 +138,7 @@ def evaluate_api():
         raise ApiError(400, "files parameter must be a dict")
 
     files = {
-        name: SubmissionFile(
+        name: dict(
             filename=file["filename"],
             content=file["content"],
         )
