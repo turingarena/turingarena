@@ -22,8 +22,7 @@ def home():
 
 @root.route("/favicon.ico")
 def favicon():
-    # TODO: not all browsers supports SVG favicon. Check if browser is supported and if not serve a standard PNG image
-    return current_app.send_static_file("img/turingarena_logo.svg")
+    return current_app.send_static_file("icon/favicon.ico")
 
 
 @root.route("/<contest_name>")
@@ -42,7 +41,10 @@ def contest_view(contest_name):
 
 @root.route("/<contest_name>/login")
 def login(contest_name):
-    return render_template("login.html", contest_name=contest_name)
+    contest = Contest.contest(contest_name)
+    if contest is None:
+        return abort(404)
+    return render_template("login.html", contest=contest)
 
 
 @root.route("/<contest_name>/<name>", methods=("GET", "POST"))
@@ -107,7 +109,7 @@ def submission_view(contest, problem, timestamp):
     if not submission.exists:
         return abort(404)
 
-    return render_template('submission.html', goals=submission.problem.goals, user=user, submission=submission)
+    return render_template('submission.html', goals=submission.problem.goals, user=user, submission=submission, contest=contest)
 
 
 @root.route('/<contest>/<problem>/<int:timestamp>/<filename>')

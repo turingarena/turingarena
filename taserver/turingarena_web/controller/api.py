@@ -155,9 +155,15 @@ def evaluate_api():
 def auth_api():
     args = Args()
     contest = Contest.contest(args.contest)
-    user = User.from_username(contest, args.username)
-    if user is None or not user.check_password(args.password):
-        raise ApiError(401, "wrong username or password")
+    if contest is None:
+        raise ApiError(400, f"Invalid contest {args.contest}")
 
-    set_current_user(args.contest, user)
+    if args.username is None:
+        set_current_user(contest, None)
+    else:
+        user = User.from_username(contest, args.username)
+        if user is None or not user.check_password(args.password):
+            raise ApiError(401, "wrong username or password")
+
+        set_current_user(args.contest, user)
     return jsonify(status="OK")

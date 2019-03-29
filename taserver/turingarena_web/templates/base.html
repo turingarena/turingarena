@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <link rel="mask-icon" href="{{ url_for('static', filename='icons/safari-pinned-tab.svg') }}" color="#5bbad5">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
     {% block head %}{% endblock %}
     <title>{{ title or "TuringArena" }}</title>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -29,16 +36,17 @@
                             </li>
                         {% endif %}
                     </ul>
-		    {% if user %}
-                    <ul class="nav navbar-nav">
-                        <li class="nav-item active">
-                            <span class="nav-link">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</span>
-                        </li>
-{#                        <li class="nav-item active">#}
-{#                            <a class="nav-link" href="{{ url_for("user.logout") }}">Logout</a>#}
-{#                        </li>#}
-                    </ul>
-		    {% endif %}
+                    {% if user %}
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item active">
+                                <span class="nav-link">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</span>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#"
+                                   onclick="logoutRequest('{{ contest.name }}').then(() => document.location = '/')">Logout</a>
+                            </li>
+                        </ul>
+                    {% endif %}
                 </div>
             </nav>
         {% endblock %}
