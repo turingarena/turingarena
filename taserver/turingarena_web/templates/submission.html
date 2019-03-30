@@ -55,9 +55,13 @@
 
         function addFile(file) {
             document.getElementById("files").removeAttribute("hidden");
-            document.getElementById("files_list").innerHTML += "<li><a href=\"data:"
-                + file.content_type + ";base64," + file.content_base64 + "\" download=\"" + file.filename
-                + "\">" + file.filename + "</a></li>"; // FIXME: how horrible is it?
+            let li = document.createElement("li");
+            let a = document.createElement("a");
+            a.setAttribute("href", "data:" + file.content_type + ";base64," + file.content_base64);
+            a.setAttribute("download", file.filename);
+            a.innerText = file.filename;
+            li.appendChild(a);
+            document.getElementById("files_list").appendChild(li);
         }
 
         (async () => {
