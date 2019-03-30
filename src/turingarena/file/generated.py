@@ -48,8 +48,9 @@ class PackGeneratedDirectory:
                 yield from self._generate_interface_targets(dirpath, relpath, descriptions)
 
     def _generate_interface_targets(self, abspath, relpath, descriptions):
+        interface_path = os.path.join(abspath, INTERFACE_TXT)
+        yield (os.path.join(relpath, INTERFACE_TXT)), self._create_text_generator(interface_path)
         for lang in self.languages:
-            interface_path = os.path.join(abspath, INTERFACE_TXT)
             yield (
                 os.path.join(relpath, lang.name, f"skeleton{lang.extension}"),
                 self._create_interface_code_generator(interface_path, descriptions, lang.Generator()),
