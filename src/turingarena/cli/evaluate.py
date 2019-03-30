@@ -49,12 +49,14 @@ class EvaluateCommand(SubmissionCommand):
     )
     PARSER.add_argument("--events", help="show evaluation events as JSON Lines", action="store_true")
     PARSER.add_argument("--store-files", help="stores files produced by the evaluator", action="store_true")
+    PARSER.add_argument("--redirect-stderr", help="redirect evaluation stderr to stdout events", action="store_true")
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
     def _do_evaluate(self):
         return Evaluator().evaluate(
             self.submission,
             seed=self.args.seed,
+            redirect_stderr=self.args.redirect_stderr,
         )
 
     def run(self):
