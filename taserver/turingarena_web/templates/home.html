@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% set title = "Contests available" %}
 {% block body %}
-        <div>
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th>Contest</th>
+    <div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Contest</th>
+            </tr>
+            </thead>
+            <tbody style="cursor: pointer">
+            {% for contest in contests %}
+                <tr onclick="window.location = '{{ url_for("main.contest_view", contest_name=contest.name) }}'">
+                    <td>{{ contest.title }}</td>
                 </tr>
-                </thead>
-                <tbody style="cursor: pointer">
-                {% for contest in contests %}
-                    <tr onclick="window.location = '{{ url_for("main.contest_view", contest_name=contest.name) }}'">
-                        <td>{{ contest.title }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
