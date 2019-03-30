@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import base64
@@ -50,6 +51,7 @@ class EvaluateCommand(SubmissionCommand):
     PARSER.add_argument("--events", help="show evaluation events as JSON Lines", action="store_true")
     PARSER.add_argument("--store-files", help="stores files produced by the evaluator", action="store_true")
     PARSER.add_argument("--redirect-stderr", help="redirect evaluation stderr to stdout events", action="store_true")
+    PARSER.add_argument("--limit", help="limit the number of produced evaluation events", type=int, default=0)
     PARSER.add_argument("--seed", help="set random seed", type=int)
 
     def _do_evaluate(self):
@@ -63,7 +65,12 @@ class EvaluateCommand(SubmissionCommand):
         files_dir = os.path.join(os.getcwd(), "generated-files")
         if self.args.store_files:
             os.makedirs(files_dir, exist_ok=True)
+        n_events = 0
         for event in self._do_evaluate():
+            n_events += 1
+            if self.args.limit != 0 and n_events > self.args.limit:
+                print(json.dumps(dict(type="evaluation_error", message="too many evaluation events")))
+                exit(1)
             if self.args.store_files and event.type == "file":
                 with open(os.path.join(files_dir, event.filename), "w") as f:
                     f.write(base64.standard_b64decode(event.content_base64).decode("utf-8"))

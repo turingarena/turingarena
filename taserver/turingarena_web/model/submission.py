@@ -117,7 +117,7 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
             for name, filename in self.files_absolute.items()
         ]
         with open(self.events_path, "w") as f:
-            subprocess.Popen(["turingarena-dev", "evaluate", "--events", "--redirect-stderr"] + files, stdout=f, cwd=self.problem.path)
+            subprocess.Popen(["turingarena-dev", "evaluate", "--events", "--redirect-stderr", "--limit", "10000"] + files, stdout=f, cwd=self.problem.path)
 
     def as_json_data(self):
         return {
