@@ -34,7 +34,6 @@ class User(namedtuple("User", ["first_name", "last_name", "username", "password"
         if self.password.startswith("$"):
             return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
         else:
-            print(password, "==", self.password)
             return password == self.password
 
     def as_json_data(self):
