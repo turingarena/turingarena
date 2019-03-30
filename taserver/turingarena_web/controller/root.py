@@ -66,7 +66,8 @@ def problem_view(contest_name, name):
 
 
 @root.route("/<contest_name>/<name>.zip")
-def files(contest_name, name):
+@root.route("/<contest_name>/<name>/assets/<path:path>")
+def files(contest_name, name, path=None):
     contest = Contest.contest(contest_name)
     problem = contest.problem(name)
     user = get_current_user(contest_name)
@@ -74,7 +75,9 @@ def files(contest_name, name):
         return redirect("user.login")
     if problem is None or contest is None:
         return abort(404)
-    return send_file(problem.files_zip)
+    if path is None:
+        return send_file(problem.files_zip)
+    return send_file(os.path.join(problem.path, "assets", path))
 
 
 @root.route('/<contest>/<problem>/<int:timestamp>')
