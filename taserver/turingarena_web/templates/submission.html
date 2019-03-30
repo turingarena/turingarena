@@ -81,6 +81,7 @@
                             case 'text':
                                 if (event.stream === 'stdout')
                                     evaluationOutput.innerHTML += event.text;
+                                    evaluationOutput.scrollTop = evaluationOutput.scrollHeight;
                                 break;
                             case 'end_evaluation':
                                 end = true;
