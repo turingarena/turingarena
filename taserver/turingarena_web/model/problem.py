@@ -33,7 +33,7 @@ class Problem(namedtuple("Problem", ["contest", "name"])):
 
     @property
     def statement(self):
-        path = os.path.join(self.files_dir, "statement.md")
+        path = os.path.join(self.path, "statement.md")
         with open(path) as f:
             return commonmark(f.read())
 
