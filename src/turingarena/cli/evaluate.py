@@ -68,7 +68,7 @@ class EvaluateCommand(SubmissionCommand):
                 with open(os.path.join(files_dir, event.filename), "w") as f:
                     f.write(base64.standard_b64decode(event.content_base64).decode("utf-8"))
             if self.args.events:
-                print(event)
+                print(event, flush=True)
             else:
                 if event.type == "text" and event.stream == "stdout":
                     sys.stdout.write(event.text)
