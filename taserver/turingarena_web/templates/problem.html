@@ -65,16 +65,15 @@
             </tr>
             {% for submission in submissions %}
                 {% set total_goals = problem.goals|length %}
-                {% set acquired_goals = submission.acquired_goals|length %}
-                {% if acquired_goals == total_goals %}
+                {% if submission.n_acquired_goals == total_goals %}
                     <tr class="table-success">
-                        {% elif acquired_goals == 0 %}
+                        {% elif submission.n_acquired_goals == 0 %}
                     <tr class="table-danger">
                         {% else %}
                     <tr class="table-warning">
                 {% endif %}
             <td>{{ submission.time.strftime("%H:%M %d/%m/%Y") }}</td>
-            <td>{{ acquired_goals }} / {{ total_goals }}</td>
+            <td>{{ submission.n_acquired_goals }} / {{ total_goals }}</td>
             <td><a href="{{ url_for("main.submission_view",
                     contest=submission.contest.name,
                     problem=submission.problem.name,

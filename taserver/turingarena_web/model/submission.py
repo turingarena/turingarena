@@ -98,10 +98,14 @@ class Submission(namedtuple("Submission", ["contest", "problem", "user", "time"]
     @property
     def goals(self):
         return {
-            event["name"]: event["result"]
+            event["goal"]: event["result"]
             for event in self.events()
-            if event.type == "goal_result"
+            if event["type"] == "goal_result"
         }
+
+    @property
+    def n_acquired_goals(self):
+        return sum(self.goals.values())
 
     def events(self, after=-1):
         with open(self.events_path) as f:
