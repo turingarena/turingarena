@@ -1,6 +1,7 @@
 function jsonRequest(url, args) {
     return fetch(url, {
         method: 'post',
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
         },
