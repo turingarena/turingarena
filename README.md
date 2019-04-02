@@ -34,6 +34,7 @@ To use TuringArena on a local machine, the following tools are needed:
 - `gcc and g++` for compiling C/C++ submissions
 - `libseccomp-dev` used for the submission sandbox
 - `jq` used to format json output
+- on Ubuntu/Debian, `python3-dev` for addictional header files 
 
 You may also want the following optional dependencies:
 - `openjdk-*-jdk` to run Java submissions
