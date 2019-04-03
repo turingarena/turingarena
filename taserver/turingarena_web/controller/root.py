@@ -66,7 +66,7 @@ def problem_view(contest_name, name):
 
 
 @root.route("/<contest_name>/<name>.zip")
-@root.route("/<contest_name>/<name>/assets/<path:path>")
+@root.route("/<contest_name>/<name>/public/<path:path>")
 def files(contest_name, name, path=None):
     contest = Contest.contest(contest_name)
     problem = contest.problem(name)
