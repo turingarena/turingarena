@@ -77,7 +77,7 @@ def files(contest_name, name, path=None):
         return abort(404)
     if path is None:
         return send_file(problem.files_zip)
-    return send_file(os.path.join(problem.path, "assets", path))
+    return send_file(os.path.join(problem.path, "public", path))
 
 
 @root.route('/<contest>/<problem>/<int:timestamp>')
