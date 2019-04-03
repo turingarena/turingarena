@@ -5,5 +5,5 @@ title = "Coprimes"
 digits = 3
 
 [scoring]
-goals = ["correct"]
+goals = ["correct_answer", "correct_NO_certificate", "correct_YES_certificate"]
 

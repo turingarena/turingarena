@@ -3,10 +3,10 @@ YES = 1
 NO = 0
 
 def recEuclide(a,b):
-"""returns the triple [d,x,y] where:
-       d is the greatest divisor of a and b;
-       x and y are integers such that  xa + yb = d.
-"""    
+    """returns the triple [d,x,y] where:
+           d is the greatest divisor of a and b;
+           x and y are integers such that  xa + yb = d.
+    """    
     assert a >= 0 and b >= 0 and a + b > 0
     if b > a:
         answ =  recEuclide(b,a)
