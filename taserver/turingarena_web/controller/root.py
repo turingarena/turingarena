@@ -23,7 +23,7 @@ def favicon():
     return current_app.send_static_file("icon/favicon.ico")
 
 
-@root.route("/<contest_name>")
+@root.route("/<contest_name>/")
 def contest_view(contest_name):
     contest = Contest.contest(contest_name)
 
@@ -45,7 +45,7 @@ def login(contest_name):
     return render_template("login.html", contest=contest)
 
 
-@root.route("/<contest_name>/<name>")
+@root.route("/<contest_name>/<name>/")
 def problem_view(contest_name, name):
     contest = Contest.contest(contest_name)
 
