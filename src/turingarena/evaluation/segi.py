@@ -143,7 +143,7 @@ def parse_header(line):
 
 
 def process_headers(headers, body):
-    payload = {}
+    payload = {"type": "file"}
     if "content-type" in headers:
         value, params = headers["content-type"]
         payload["content_type"] = value
@@ -190,7 +190,7 @@ def parse_file_events(parts, file_end):
         line = b"".join(iter(lambda: next(parts), b"\n"))
     body = b"\n".join(body)
 
-    yield EvaluationEvent(dict(type="file", payload=process_headers(headers, body)))
+    yield EvaluationEvent(process_headers(headers, body))
 
 
 def split_line_terminators(parts):
