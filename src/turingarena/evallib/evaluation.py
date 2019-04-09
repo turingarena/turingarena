@@ -26,8 +26,8 @@ def _send_file(payload, content_type, filename, segi_as):
     if filename:
         assert ";" not in filename and "\"" not in filename
         print(f"Content-disposition: attachment; filename=\"{filename}\"")
-    print()
     print(f"X-SEGI-as: {segi_as}")
+    print()
     print(payload)
     print(os.environ["EVALUATION_FILE_END"])
     sys.stdout.flush()
