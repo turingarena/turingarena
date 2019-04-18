@@ -29,9 +29,9 @@ for _ in range(20):
             obtained_answer = p.functions.are_coprime(a, b, callbacks=[give_divisor, give_multipliers])
     except ta.AlgorithmError as e:
         print(f" error: {e}")
-        ta.goals.setdefault("correct_answer", True)
-        ta.goals.setdefault("correct_NO_certificate", True)
-        ta.goals.setdefault("correct_YES_certificate", True)
+        ta.goals.setdefault("correct_answer", False)
+        ta.goals.setdefault("correct_NO_certificate", False)
+        ta.goals.setdefault("correct_YES_certificate", False)
         
     if obtained_answer == 0:
         print(f" your answer: {a} and {b} are NOT coprime", end="")

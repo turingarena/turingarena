@@ -12,17 +12,17 @@ Ogni volta che spari una possibile risposta, invocando da `play(n)` la funzione 
 
 + se `candidato` è proprio il numero pensato dall'avversario allora la partita termina con successo.
 
-+ se `candidato` è maggiora del numero segreto allora la procedura `guess(candidato)` restituisce il valore `1` ed il controllo torna alla procedura `play(n)` che dovrà stabilire come proseguire la partita.
++ se `candidato` è maggiore del numero segreto allora la procedura `guess(candidato)` restituisce il valore `1` ed il controllo torna alla procedura `play(n)` che dovrà stabilire come proseguire la partita.
 
-+ situazione del tutto analoga se `candidato` è minore del numero segreto, solo che ora la procedura `guess(candidato)` restituisce il valore `-1`
++ situazione del tutto analoga se `candidato` è minore del numero segreto, solo che ora la procedura `guess(candidato)` restituisce il valore `-1`.
 
-Nel progettare la tua logica, lasciati guidare dal caso peggiore, ossia cerca di ridurre al minimo i tentativi che compirai alla peggio (come ad esempio del caso l'avversario fingesse di avere pensato un numero ma in realtà stesse solo attento a fornire risposte coerenti ma il meno informative possibile).
+Nel progettare la tua logica, lasciati guidare dal criterio del caso peggiore, ossia cerca di ridurre al minimo i tentativi che compirai alla peggio (come ad esempio del caso l'avversario fingesse di avere pensato un numero ma in realtà stesse solo attento a fornire risposte coerenti ma il meno informative possibile).
 
 
 ### Goals
 
 In TuringArena, i goal di un problema sono quegli obiettivi che ti proponiamo di provare a raggiungere.
-Non li abbiamo ancora implementati nell'evaluator ma per questo problema i seguenti goal piono ben azzeccati:
+Non li abbiamo ancora implementati nell'evaluator ma per questo problema i seguenti goal appaiono ben azzeccati:
 
 - `correct`: giungere infine ad indovinare il numero segreto.
 

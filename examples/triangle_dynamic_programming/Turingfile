@@ -1,5 +1,5 @@
 [problem]
-title = "Triangle dynamic programming"
+title = "Triangle"
 
 [scoring]
-goals = ["correct"]
+goals = ["given-example","all-equal","N10","N30","N50","N100"]
