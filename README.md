@@ -39,6 +39,7 @@ To use TuringArena on a local machine, the following tools are needed:
 You may also want the following optional dependencies:
 - `openjdk-*-jdk` to run Java submissions
 - `rustc` to run Rust submissions 
+- `ruby` to run Ruby submissions
 - `pipenv` to install in a virtual environment 
 
 To install all of these dependencies on Ubuntu 18.04:
