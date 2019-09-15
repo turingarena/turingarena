@@ -57,7 +57,7 @@ sudo apt-get install python3-venv
 
 1. Install the above dependencies.
 
-2. Create the TuringArena base directory (see where you prefer within you file system):
+2. Create the TuringArena base directory (see where you prefer within your file system):
 ```bash
 mkdir turingarena
 ```
@@ -88,9 +88,9 @@ If you used virtual environments as we suggested, just remove the TA base direct
 ```bash
 rm -rf turingarena
 ```
-This will delete also its turingarena subdirectory where the core of the TA software is installed and the venv_ta subdirectory containing all softwares you have decided to install for experimenting or develping during your journey with that TA installation.
+This will delete also its turingarena subdirectory where the core of the TA software is installed and the <code>venv_ta</code> subdirectory containing all softwares you have decided to install for experimenting or developing during your journey with that TA installation.
 
-Apart for the installation of the prerequisites above (all anyhow useful and established, and well designed and robust softwares), it will all be back to the point when you first installed TurigArena if you opt to create a virtual environment in the TuringArena base directory and use it whenever installing any further software relating with your TuringArena experiences. Depending on the use you will make of TA, you might end up installing other softwares for the only purpouse of experimenting or working with TA. We suggest to install all these in the TA virtual environment.
+Apart for the installation of the prerequisites above (all anyhow useful and established, and well designed and robust softwares), it will all be back to the point when you first installed TurigArena if you opt to create a virtual environment in the TA base directory and use it whenever installing any further software relating with your TA experiences. Depending on the use you will make of TA, you might end up installing other softwares for the only purpouse of experimenting or working with TA. We suggest to install all these in the TA virtual environment.
 
 
 ### Setting Up a Virtual Environment
@@ -101,30 +101,30 @@ To create an environment for a project, after entering in the base directory for
 user@machine:~/.../turingarena$ python3 -m venv venv_ta
 ```
 <p>With this command, you (user on your machine) are asking Python to create a virtual environment named <code>venv_ta</code>.
-<p>After the command completes, the TA base directory has now a subdirectory named <em>venv_ta</em> where the virtual environment files are stored. Every software or library you are going to install for this environment (that is, when this environment is activated) will be stored here, without introducing conflicts with other versions of that same library in use by the global system on your machine or within other projects. Virtual environments are meant to prevent the breaking of dependencies you might have sometimes encountered. Already now, at its very creation, the directory ivenv_ta contains several packages which, at the beginning, provide just a copy of the global configuration at the time the environment was created.</p>
+<p>After the command completes, the TA base directory has now a subdirectory named <em>venv_ta</em> where the virtual environment files are stored. Every software or library you are going to install for this environment (that is, when this environment is activated) will be stored here, without introducing conflicts with other versions of that same library in use by the global system on your machine or within other projects. Virtual environments are meant to prevent the breaking of dependencies you might have sometimes encountered. Already now, at its very creation, the directory <code>venv_ta</code> contains several packages which, at the beginning, provide just a copy of the global configuration at the time the environment was created.</p>
 
 A common custome is to give a same name (usually <code>venv</code>) to each one of the virtual environments one creates. In this way, whenever you <code>cd</code> into a project, you know that the associated virtual environment, if any, is in the <code>venv</code> subfolder. If such a subfolder already exists then you know/remember that that project comes with its own environment already set up.
-Moreoever, you always know by heart the name of the virtual environment you need to activate each time you begin working on a project.
+Moreover, you always know by heart the name of the virtual environment you need to activate each time you begin working on a project.
  We propose the <code>venv_ta</code> name that is short and explicit enough for that purpouse, because
 
 1. a few solutions for the authomatic opening of the environments when you just enter in the project directory already exists (https://direnv.net/) (https://docs.pipenv.org/en/latest/advanced/) and you can give them a try in case you are in search for totally smooth workflows.
 
-2. we envite our (more or less experienced) users to install under the venv_ta environment whatever other softwares they might end up using or experimenting in their explorations with TA.
+2. we envite our (more or less experienced) users to install under the <code>venv_ta</code> environment whatever other softwares they might end up using or experimenting in their explorations with TA.
 Indeed, the isolation offered by virtual environments might actually help us in two ways: (1) preventing the disruption of the configuration of the python libraries on your machine, as it can be in use by other applications or projects, and (2) offering a common and uniform platform for collaborating with others on projects without paying any compatibility of versions nuisances toll. And the TuringArena project, in its broad vision, is much about collaborating with others.
 
 <p>Note that in some operating systems you may need to use <code>python</code> instead of <code>python3</code> in the command above. Some installations use <code>python</code> for Python 2.x releases and <code>python3</code> for the 3.x releases, while others map <code>python</code> to the 3.x releases.
-And there are many other possible differences and options for even more advanced uses of the environments, and these can change in time though environments and their use are here to stay. Also for these reasons, what you should get and appreciate here is more the aims and the why of environments. We suggest you to have a look at the [Install Flask Section](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world) of this well designed tutorial and or to browse for some good introductory pages about python envronments and their use. After this, try to put this knowledgment into use to maintain all your future installations clean, also with other projects or when installing anything only to have a look or just a try at it. Be told this discipline will ultimately pay.</p>
+And there are many other possible differences and options for even more advanced uses of the environments, and these can change in time though environments and their use are here to stay. Also for these reasons, what you should get and appreciate here is more the aims and the why of environments. We suggest you to browse for some good introductory pages about python environments and their use. After this, try to put this knowlede into use to maintain all your future installations clean, also with other projects or when installing anything only to have a look or just a try at it. Be told this discipline will ultimately pay.</p>
 
 #### Activating the environment (each time you want start acting on that project)
 
 <p>You just finished some boring and nasty work and it is time for you to do something joyful and highly recreative. Why not to create a new TA problem or play a bit with TA?
-You then go in the TA base directory, but, before starting, you need to activate the venv_ta virtual environment so that all dependencies will be there and, even if you end up installing and experimenting something new, this will not affect in any way the other installations and configurations on your machine.
+You then go in the TA base directory, but, before starting, you need to activate the <code>venv_ta</code> virtual environment so that all dependencies will be there and, even if you end up installing and experimenting something new, this will not affect in any way the other installations and configurations on your machine.
  We assume that, regardless of the method you used to create it, you should now have your virtual environment created. To proceed, you have to tell the system that you want to use it, and you do that by <em>activating</em> it. This can be done by entering the following command from the TA base directory:</p>
 <pre><code>$ source venv_ta/bin/activate
 (venv) $ _
 </code></pre>
 
-When you activate a virtual environment, the configuration of your terminal session is modified so that the Python interpreter stored inside it (in the directory <code>venv_ta</code>) is the one that is invoked when you type <code>python</code>. Also, the terminal prompt is modified to include the name of the activated virtual environment. The changes made to your terminal session are all temporary and private to that session, so they will not persist when you close the terminal window. If you work with multiple terminal windows open at the same time, it is perfectly fine to have different virtual environments activated on each one. (So you can keep up with your boring work meanwhile playing with TA.)</p>
+As you can see, when you activate a virtual environment, the configuration of your terminal session is modified so that the Python interpreter stored inside it (in the directory <code>venv_ta</code>) is the one that is invoked when you type <code>python</code>. Also, the terminal prompt is modified to include the name of the activated virtual environment. The changes made to your terminal session are all temporary and private to that session, so they will not persist when you close the terminal window. If you work with multiple terminal windows open at the same time, it is perfectly fine to have different virtual environments activated on each one. (So you can keep up with your boring work meanwhile playing with TA.)</p>
 
 ### Installing/Updating TA
 
@@ -142,7 +142,7 @@ cd turingarena
 git pull
 cd ..
 ```
-and in most cases it might be the case you do not need to act the following steps.
+and in most cases when only updating it might actually be the case you do not need to act the following steps.
 
 For sure you need to act them on a first intallation:</p>
 
@@ -151,6 +151,7 @@ To install the TuringArena core, run the `setup.py` inside `src`.
 ```bash
 cd src/
 python3 setup.py develop
+cd ..
 ```
 
 <p>If you want to confirm that your virtual environment now has TuringArena installed, you can start the Python interpreter and <em>import</em> the turingarena library into it:</p>
@@ -164,6 +165,7 @@ To install the TuringArena web interface, run the `setup.py` inside `taserver`.
 ```bash
 cd taserver/
 python3 setup.py develop
+cd ..
 ```
 With this interface you can offer to your community of problem solvers (if you are a teacher these might be your students), or pals, or customers to be trained, the experience of submitting their solutions via web, get it evaluated, and receive the rich feedback that TuringArena allows you to offer them at that point.
 
@@ -176,15 +178,12 @@ turingarena-dev evaluate path/to/solution.cpp
 
 ### First tests (running the example problems)
 
-1. Clone this repository.
+1. `cd` into any of the example problem directories.
+   For example the one coming in this repo, with the TA core:
 ```bash
-git clone https://github.com/turingarena/turingarena.git
+cd turingarena/examples/sum_of_two_numbers/
 ```
-2. `cd` into any of the example problem directories. Example:
-```bash
-cd examples/sum_of_two_numbers/
-```
-3. Evaluate a solution, say, `correct.cpp`:
+2. Evaluate a solution, say, `correct.cpp`:
 ```bash
 turingarena-dev evaluate solutions/correct.cpp
 ```
