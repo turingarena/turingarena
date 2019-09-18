@@ -21,7 +21,8 @@ May use a `Metadata::Context` to load the configuration.
 
 `Sandbox::Program`: a runnable program.
 
-* `run()`: runs this program, and returns a `Sandbox::Process`.
+* `run()`: runs this program within a sandbox, and returns a `Sandbox::Process`.
+* `exec()`: runs this program directly, without a sandbox, in this very process if possible (i.e., using UNIX `exec`).
 
 `Sandbox::Process`: a process running in the sandbox.
 
@@ -36,3 +37,32 @@ May use a `Metadata::Context` to load the configuration.
 * `cpu_time`: current CPU time usage. Only reliable when computing the difference between two `peek()` calls.
 * `current_memory`: current memory usage. Only meaningful in a `peek()` call, as it is zero after termination.
 * `peak_memory`: peak memory usage since last `peek()` call which read this value. Asking for this value implicitly resets the peak watermark to zero.
+
+
+## Sandbox CLI
+
+A CLI tool runs a program within a sandbox, forwarding `stdin` and `stdout` to the process via sandbox API.
+
+Regularly, data is flushed to `stdout` with `write()` and `stdin` is polled with `read_line()`.
+If the timeout is reached when polling, the reading of `stdin` stops, and a message is printed to `stderr` to notify this situation.
+The polling resumes when new data is sent to `stdout`.
+
+When a special signal is received, the current process state (obtained using `peek()`) is dumped on `stderr`, and the polling of `stdin` resumes (even if nothing was sent to `stdout`).
+
+On `SIGTERM` or `SIGHUP`, the sandbox is closed calling `close()`, and the state is dumped to stderr.
+
+The sandbox CLI may also create named pipes as an alternative method to send data to the process.
+
+## Submission / Evaluation
+
+Even if using SEGI to communicate with the evaluator,
+when using Rust or its C bindings, submission and evaluations are mapped to the same type of structures on both sides.
+In particular, the API allows producing evaluations without using SEGI (say, in unit tests).
+
+`LocalSubmission`: maps each submission field to a path on the local filesystem.
+
+`NetworkSubmission`: maps each submission field to a pair of file name, sanitized (i.e., short, without `/`, possibly alphanumeric-only, but preserving file extension), and file content (TODO: as byte array? assume UTF-8?). Differently from Web API `File`s, the MIME type is always implicit in the file name extension. (Rationale: otherwise, we need to complicate local submissions to store MIME-type.)
+
+`EvaluationEvent`: a wrapper on the JSON object representing an evaluation event.
+
+Evaluations would probably use some native Rust type for streams of objects.
