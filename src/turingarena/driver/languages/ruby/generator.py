@@ -13,7 +13,10 @@ class RubyCodeGen(InterfaceCodeGen):
             self.visit(n.main)
         self.line("end")
         self.line()
-        self.line("main")
+        self.line("if __FILE__ == $0")
+        with self.indent():
+            self.line("main")
+        self.line("end")
 
     def visit_InterfaceTemplate(self, n):
         for c in n.constants:
@@ -51,7 +54,7 @@ class RubyCodeGen(InterfaceCodeGen):
     def visit_Read(self, n):
         args = ", ".join(self.visit(a) for a in n.arguments)
         l = "[0]" if len(n.arguments) == 1 else ""
-        self.line(f"{args} = gets.split.map(&:to_i){l}")
+        self.line(f"{args} = STDIN.gets.split.map(&:to_i){l}")
 
     def visit_Print(self, n):
         args = ''.join("#{"+str(self.visit(a))+"}" for a in n.arguments)

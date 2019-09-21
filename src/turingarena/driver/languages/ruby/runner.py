@@ -21,10 +21,9 @@ class RubyProgramRunner(ProgramRunner):
         with open(self.skeleton_path, "w") as f:
             self.language.Generator().generate_to_file(self.interface, f)
 
-        os.chmod(self.skeleton_path, 484)
-        sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.py")
+        sandbox_path = pkg_resources.resource_filename(__name__, "sandbox.rb")
 
         yield create_popen_process_connection(
-            ["python3", sandbox_path, self.skeleton_path],
+            ["ruby", sandbox_path, self.skeleton_path],
             preexec_fn=set_rlimits,
         )
