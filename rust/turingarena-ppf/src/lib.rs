@@ -64,6 +64,8 @@ pub struct TextVariant {
     value: String,
 }
 
+pub type Text = Vec<TextVariant>;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FileVariant {
     attributes: VariantAttributes,
@@ -73,11 +75,19 @@ pub struct FileVariant {
     content: Vec<u8>,
 }
 
+pub type File = Vec<FileVariant>;
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Attachment {
+    title: Text,
+    file: File,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
-    title: Vec<TextVariant>,
-    statement: Vec<FileVariant>,
-    attachments: HashMap<String, FileVariant>,
+    title: Text,
+    statement: File,
+    attachments: Vec<Attachment>,
 }
 
 #[cfg(test)]
@@ -87,7 +97,7 @@ mod tests {
     fn it_works() {
         println!(
             "{}",
-            serde_json::to_string(&Problem {
+            serde_json::to_string_pretty(&Problem {
                 title: vec![TextVariant {
                     attributes: VariantAttributes::builder()
                         .language("en-US".into())
@@ -102,19 +112,20 @@ mod tests {
                     r#type: Some(MediaType::from("application/pdf")),
                     content: vec![],
                 }],
-                attachments: {
-                    let mut map = HashMap::new();
-                    map.insert(
-                        "skeleton".into(),
-                        FileVariant {
-                            attributes: VariantAttributes::default(),
-                            name: Some(FileName("skeleton.cpp".into())),
-                            r#type: None,
-                            content: vec![0],
-                        },
-                    );
-                    map
-                },
+                attachments: vec![Attachment {
+                    title: vec![TextVariant {
+                        attributes: VariantAttributes::builder()
+                            .language("en-US".into())
+                            .build(),
+                        value: "Skeleton".into(),
+                    }],
+                    file: vec![FileVariant {
+                        attributes: VariantAttributes::default(),
+                        name: Some(FileName("skeleton.cpp".into())),
+                        r#type: None,
+                        content: vec![0],
+                    },],
+                }],
             })
             .unwrap()
         );
