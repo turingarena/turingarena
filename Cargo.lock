@@ -5,6 +5,10 @@ name = "turingarena_autoio"
 version = "0.1.0"
 
 [[package]]
+name = "turingarena_batch"
+version = "0.1.0"
+
+[[package]]
 name = "turingarena_bios"
 version = "0.1.0"
 
@@ -17,6 +21,10 @@ name = "turingarena_dce"
 version = "0.1.0"
 
 [[package]]
+name = "turingarena_diff"
+version = "0.1.0"
+
+[[package]]
 name = "turingarena_ev"
 version = "0.1.0"
 
@@ -25,11 +33,15 @@ name = "turingarena_evr"
 version = "0.1.0"
 
 [[package]]
-name = "turingarena_fdbk"
+name = "turingarena_feedback"
 version = "0.1.0"
 
 [[package]]
-name = "turingarena_pdf"
+name = "turingarena_make"
+version = "0.1.0"
+
+[[package]]
+name = "turingarena_ppf"
 version = "0.1.0"
 
 [[package]]
@@ -45,6 +57,6 @@ name = "turingarena_score"
 version = "0.1.0"
 
 [[package]]
-name = "turingarena_subm"
+name = "turingarena_submission"
 version = "0.1.0"
 
