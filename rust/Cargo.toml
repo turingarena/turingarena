@@ -1,2 +1,2 @@
 [workspace]
-members = ["turingarena-*"]
+members = ["turingarena-*", "contrib/turingarena-*"]
