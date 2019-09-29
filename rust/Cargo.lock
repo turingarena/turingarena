@@ -875,6 +875,16 @@ name = "turingarena-bios"
 version = "0.1.0"
 
 [[package]]
+name = "turingarena-content"
+version = "0.1.0"
+dependencies = [
+ "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "base64-serde 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "turingarena-contest"
 version = "0.1.0"
 
@@ -925,6 +935,7 @@ dependencies = [
  "base64-serde 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
+ "turingarena-content 0.1.0",
 ]
 
 [[package]]
