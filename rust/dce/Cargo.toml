@@ -1,0 +1,7 @@
+[package]
+name = "turingarena_dce"
+version = "0.1.0"
+authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
