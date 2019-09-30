@@ -8,6 +8,7 @@ use base64_serde::base64_serde_type;
 use serde::{Deserialize, Serialize};
 
 use std::collections::HashMap;
+use std::str::FromStr;
 
 base64_serde_type!(Base64Standard, STANDARD);
 
@@ -15,10 +16,11 @@ base64_serde_type!(Base64Standard, STANDARD);
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LanguageTag(String);
 
-impl From<&str> for LanguageTag {
-    fn from(s: &str) -> LanguageTag {
+impl FromStr for LanguageTag {
+    type Err = ();
+    fn from_str(s: &str) -> Result<LanguageTag, Self::Err> {
         // TODO: validation
-        LanguageTag(s.to_owned())
+        Ok(LanguageTag(s.to_owned()))
     }
 }
 
@@ -26,10 +28,11 @@ impl From<&str> for LanguageTag {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MediaType(String);
 
-impl From<&str> for MediaType {
-    fn from(s: &str) -> MediaType {
+impl FromStr for MediaType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<MediaType, Self::Err> {
         // TODO: validation
-        MediaType(s.to_owned())
+        Ok(MediaType(s.to_owned()))
     }
 }
 
@@ -58,10 +61,11 @@ impl VariantAttributesBuilder {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FileName(String);
 
-impl From<&str> for FileName {
-    fn from(s: &str) -> FileName {
+impl FromStr for FileName {
+    type Err = ();
+    fn from_str(s: &str) -> Result<FileName, Self::Err> {
         // TODO: validation
-        FileName(s.into())
+        Ok(FileName(s.into()))
     }
 }
 

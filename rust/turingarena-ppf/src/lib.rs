@@ -27,28 +27,28 @@ mod tests {
             serde_json::to_string_pretty(&Problem {
                 title: vec![TextVariant {
                     attributes: VariantAttributes::builder()
-                        .language("en-US".into())
+                        .language("en-US".parse().unwrap())
                         .build(),
-                    value: "Title".into(),
+                    value: "Title".parse().unwrap(),
                 }],
                 statement: vec![FileVariant {
                     attributes: VariantAttributes::builder()
-                        .language("en-US".into())
+                        .language("en-US".parse().unwrap())
                         .build(),
-                    name: Some("english.pdf".into()),
-                    r#type: Some(MediaType::from("application/pdf")),
+                    name: Some("english.pdf".parse().unwrap()),
+                    r#type: Some("application/pdf".parse().unwrap()),
                     content: vec![],
                 }],
                 attachments: vec![Attachment {
                     title: vec![TextVariant {
                         attributes: VariantAttributes::builder()
-                            .language("en-US".into())
+                            .language("en-US".parse().unwrap())
                             .build(),
-                        value: "Skeleton".into(),
+                        value: "Skeleton".parse().unwrap(),
                     }],
                     file: vec![FileVariant {
                         attributes: VariantAttributes::default(),
-                        name: Some("skeleton.cpp".into()),
+                        name: Some("skeleton.cpp".parse().unwrap()),
                         r#type: None,
                         content: vec![0],
                     },],
