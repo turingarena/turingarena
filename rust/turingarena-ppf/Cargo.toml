@@ -10,3 +10,4 @@ serde = { version = "1.0.101", features = ["derive"] }
 base64 = "0.10.1"
 base64-serde = "0.3.2"
 turingarena-content = { path = "../turingarena-content" }
+derive_builder = "0.7.2"

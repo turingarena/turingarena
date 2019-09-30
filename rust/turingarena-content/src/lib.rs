@@ -1,7 +1,8 @@
 extern crate base64;
-extern crate serde;
-
 extern crate base64_serde;
+#[macro_use]
+extern crate derive_builder;
+extern crate serde;
 
 use base64::STANDARD;
 use base64_serde::base64_serde_type;
@@ -39,13 +40,8 @@ impl FromStr for MediaType {
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct VariantAttributes(HashMap<String, String>);
 
+#[derive(Default)]
 pub struct VariantAttributesBuilder(HashMap<String, String>);
-
-impl VariantAttributes {
-    pub fn builder() -> VariantAttributesBuilder {
-        VariantAttributesBuilder(HashMap::new())
-    }
-}
 
 impl VariantAttributesBuilder {
     pub fn language(mut self, tag: LanguageTag) -> VariantAttributesBuilder {
@@ -69,21 +65,27 @@ impl FromStr for FileName {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Builder)]
 pub struct TextVariant {
-    pub attributes: VariantAttributes,
-    pub value: String,
+    #[builder(default)]
+    attributes: VariantAttributes,
+    #[builder(setter(into))]
+    value: String,
 }
 
 pub type Text = Vec<TextVariant>;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Builder)]
 pub struct FileVariant {
-    pub attributes: VariantAttributes,
-    pub name: Option<FileName>,
-    pub r#type: Option<MediaType>,
+    #[builder(default)]
+    attributes: VariantAttributes,
+    #[builder(setter(strip_option), default)]
+    name: Option<FileName>,
+    #[builder(setter(strip_option), default)]
+    r#type: Option<MediaType>,
     #[serde(with = "Base64Standard")]
-    pub content: Vec<u8>,
+    #[builder(setter(into))]
+    content: Vec<u8>,
 }
 
 pub type File = Vec<FileVariant>;
