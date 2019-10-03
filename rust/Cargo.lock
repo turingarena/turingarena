@@ -933,19 +933,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "turingarena-autoio"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-batch"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-bios"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-content"
+name = "turingarena"
 version = "0.1.0"
 dependencies = [
  "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -954,10 +942,6 @@ dependencies = [
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "turingarena-contest"
-version = "0.1.0"
 
 [[package]]
 name = "turingarena-contrib-task-maker"
@@ -973,58 +957,6 @@ dependencies = [
  "task-maker-store 0.1.0 (git+https://github.com/edomora97/task-maker-rust.git)",
  "tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "turingarena-dce"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-diff"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-ev"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-evr"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-feedback"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-make"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-ppf"
-version = "0.1.0"
-dependencies = [
- "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "base64-serde 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "derive_builder 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
- "turingarena-content 0.1.0",
-]
-
-[[package]]
-name = "turingarena-ps"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-rusage"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-score"
-version = "0.1.0"
-
-[[package]]
-name = "turingarena-submission"
-version = "0.1.0"
 
 [[package]]
 name = "typenum"
