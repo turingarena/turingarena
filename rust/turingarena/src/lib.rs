@@ -1,19 +1,19 @@
-mod autoio;
-mod batch;
-mod bios;
-mod content;
-mod contest;
-mod dce;
-mod diff;
-mod ev;
-mod evr;
-mod feedback;
-mod make;
-mod ppf;
-mod ps;
-mod rusage;
-mod score;
-mod submission;
+pub mod autoio;
+pub mod batch;
+pub mod bios;
+pub mod content;
+pub mod contest;
+pub mod dce;
+pub mod diff;
+pub mod ev;
+pub mod evr;
+pub mod feedback;
+pub mod make;
+pub mod ppf;
+pub mod ps;
+pub mod rusage;
+pub mod score;
+pub mod submission;
 
 #[cfg(test)]
 mod tests {
