@@ -9,7 +9,7 @@ pub mod ev;
 pub mod evr;
 pub mod feedback;
 pub mod make;
-pub mod ppf;
+pub mod problem;
 pub mod ps;
 pub mod rusage;
 pub mod score;
