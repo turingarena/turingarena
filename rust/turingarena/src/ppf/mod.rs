@@ -1,15 +1,15 @@
 extern crate serde;
 
-use serde::{Deserialize, Serialize};
 use super::content::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Builder)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
     title: Text,
     file: File,
 }
 
-#[derive(Serialize, Deserialize, Clone, Builder)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
     title: Text,
     statement: File,
@@ -24,43 +24,28 @@ mod tests {
         println!(
             "{}",
             serde_json::to_string_pretty(&Problem {
-                title: vec![TextVariantBuilder::default()
-                    .attributes(
-                        VariantAttributesBuilder::default()
-                            .language("en-US".parse().unwrap())
-                            .build()
-                    )
-                    .value("Title")
-                    .build()
-                    .unwrap()],
-                statement: vec![FileVariantBuilder::default()
-                    .attributes(
-                        VariantAttributesBuilder::default()
-                            .language("en-US".parse().unwrap())
-                            .build()
-                    )
-                    .name("english.pdf".parse().unwrap())
-                    .r#type("application/pdf".parse().unwrap())
-                    .content(vec![])
-                    .build()
-                    .unwrap()],
-                attachments: vec![AttachmentBuilder::default()
-                    .title(vec![TextVariantBuilder::default()
-                        .attributes(
-                            VariantAttributesBuilder::default()
-                                .language("en-US".parse().unwrap())
-                                .build()
-                        )
-                        .value("Title")
-                        .build()
-                        .unwrap()])
-                    .file(vec![FileVariantBuilder::default()
-                        .name("skeleton.cpp".parse().unwrap())
-                        .content(vec![])
-                        .build()
-                        .unwrap()])
-                    .build()
-                    .unwrap()],
+                title: vec![TextVariant {
+                    attributes: vec!["language:en-US".to_owned()],
+                    value: "Title".to_owned(),
+                }],
+                statement: vec![FileVariant {
+                    attributes: vec!["language:en-US".to_owned()],
+                    name: Some(FileName("english.pdf".to_owned())),
+                    r#type: Some(MediaType("application/pdf".to_owned())),
+                    content: vec![],
+                }],
+                attachments: vec![Attachment {
+                    title: vec![TextVariant {
+                        attributes: vec!["language:en-US".to_owned()],
+                        value: "Skeleton".to_owned(),
+                    }],
+                    file: vec![FileVariant {
+                        attributes: vec![],
+                        name: Some(FileName("skeleton.cpp".to_owned())),
+                        r#type: None,
+                        content: vec![],
+                    }],
+                }],
             })
             .unwrap()
         );

@@ -15,9 +15,6 @@ mod rusage;
 mod score;
 mod submission;
 
-#[macro_use]
-extern crate derive_builder;
-
 #[cfg(test)]
 mod tests {
     #[test]
