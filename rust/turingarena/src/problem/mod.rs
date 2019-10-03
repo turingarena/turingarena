@@ -5,15 +5,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
-    title: Text,
-    file: File,
+    pub title: Text,
+    pub file: File,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
-    title: Text,
-    statement: File,
-    attachments: Vec<Attachment>,
+    pub title: Text,
+    pub statement: File,
+    pub attachments: Vec<Attachment>,
 }
 
 #[cfg(test)]
