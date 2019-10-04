@@ -55,29 +55,54 @@ pub mod form {
     }
 }
 
-/// Contains types to represent a submission available on the local machine
-mod local {
-    use super::*;
+#[derive(Clone)]
+pub struct Submission<T: Clone> {
+    /// Submission form associated with this submission
+    pub form: form::Form,
+
+    /// A value for each field of the associated form.
+    pub field_values: Vec<FieldValue<T>>,
+}
+
+/// Value of a submission field
+#[derive(Clone)]
+pub struct FieldValue<T: Clone> {
+    pub file: T,
+}
+
+/// Contains types to represent a submission stored on the local machine
+pub mod local {
     use std::path;
 
-    /// Value of a submission field
+    /// A submission file stored on the local filesystem.
     #[derive(Clone)]
-    pub struct FieldValue {
+    pub struct File {
         /// Local path of a submission file.
-        /// File name must follow the format `<field_id>.<file_type_id>.<ext>`.
-        pub path: Option<path::PathBuf>,
+        /// File name should follow the format `<field_id>.<file_type_id>.<ext>`.
+        pub path: path::PathBuf,
     }
 
-    /// Content of a submission stored on the local filesystem.
+    /// A submission stored on the local filesystem.
+    pub type Submission = super::Submission<File>;
+}
+
+/// Contains types to represent a submission in memory
+pub mod mem {
+    /// Wraps a sanitized file name.
     #[derive(Clone)]
-    pub struct Local {
-        /// Submission form associated with this submission
-        pub form: form::Form,
+    pub struct FileName(pub String);
 
-        /// A value for each field of the associated form.
-        /// Values are given in
-        pub field_values: Vec<FieldValue>,
+    /// A submission file stored on the local filesystem.
+    #[derive(Clone)]
+    pub struct File {
+        /// Name of the submitted file.
+        pub name: FileName,
+        /// Byte content of the submitted file.
+        pub content: Vec<u8>,
     }
+
+    /// A submission stored in memory.
+    pub type Submission = super::Submission<File>;
 }
 
 #[cfg(test)]
