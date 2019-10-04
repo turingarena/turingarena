@@ -28,9 +28,11 @@ pub struct FileName(pub String);
 /// A variant of a text (say, for a given locale).
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TextVariant {
+    /// Attributes of this variant, used for content negotiation
     #[serde(default)]
     pub attributes: Vec<VariantAttribute>,
 
+    /// Actual text of this variant
     pub value: String,
 }
 
@@ -47,12 +49,16 @@ pub type Text = Vec<TextVariant>;
 /// A variant of a file (say, for a given locale).
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FileVariant {
+    /// Attributes of this variant, used for content negotiation
     #[serde(default)]
     pub attributes: Vec<VariantAttribute>,
 
+    /// Name of this file, if relevant
     pub name: Option<FileName>,
+    /// Media type of this file, if relevant
     pub r#type: Option<MediaType>,
 
+    /// Byte content of this file
     #[serde(with = "Base64Standard")]
     pub content: Vec<u8>,
 }
