@@ -3,7 +3,7 @@
 extern crate serde;
 
 use super::content::*;
-use super::submission;
+use super::submission::form;
 use serde::{Deserialize, Serialize};
 
 /// A file that users can download
@@ -24,7 +24,7 @@ pub struct Problem {
     pub statement: File,
     /// A collection of zero or more attachments for this problem
     pub attachments: Vec<Attachment>,
-    pub submission_form: submission::Form,
+    pub submission_form: form::Form,
 }
 
 #[cfg(test)]
@@ -61,20 +61,21 @@ mod tests {
                         content: vec![],
                     }],
                 }],
-                submission_form: submission::Form {
-                    fields: vec![submission::Field {
-                        id: submission::FieldId("solution".to_owned()),
+                submission_form: form::Form {
+                    fields: vec![form::Field {
+                        id: form::FieldId("solution".to_owned()),
                         title: vec![TextVariant {
                             attributes: vec![language_attr.clone()],
                             value: "Solution".to_owned(),
                         }],
-                        types: vec![submission::FileType {
-                            id: submission::FileTypeId("cpp".to_owned()),
+                        types: vec![form::FileType {
+                            id: form::FileTypeId("cpp".to_owned()),
                             title: vec![TextVariant {
                                 attributes: vec![language_attr.clone()],
                                 value: "C/C++".to_owned(),
                             }],
-                            extensions: vec![submission::FileTypeExtension(".cpp".to_owned())]
+                            extensions: vec![form::FileTypeExtension(".cpp".to_owned())],
+                            primary_extension: form::FileTypeExtension(".cpp".to_owned()),
                         }],
                     }]
                 },
