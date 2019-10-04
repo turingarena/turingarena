@@ -1,3 +1,5 @@
+#![feature(external_doc)]
+
 pub mod autoio;
 pub mod batch;
 pub mod bios;

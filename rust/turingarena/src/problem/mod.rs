@@ -1,18 +1,27 @@
+#![doc(include = "README.md")]
+
 extern crate serde;
 
 use super::content::*;
 use serde::{Deserialize, Serialize};
 
+/// A file that users can download
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
+    /// Name of this attachment, as shown to users
     pub title: Text,
+    /// Downloadable file for this attachment
     pub file: File,
 }
 
+/// Meta-data of a problem
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
+    /// Name of this problem, as shown to users
     pub title: Text,
+    /// File rendered to users, containing the description of the problem
     pub statement: File,
+    /// A collection of zero or more attachments
     pub attachments: Vec<Attachment>,
 }
 
