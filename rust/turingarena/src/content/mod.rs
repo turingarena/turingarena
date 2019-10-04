@@ -29,12 +29,17 @@ pub struct FileName(pub String);
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TextVariant {
     #[serde(default)]
-    pub attributes: VariantAttributes,
+    pub attributes: Vec<VariantAttribute>,
 
     pub value: String,
 }
 
-pub type VariantAttributes = Vec<String>;
+/// An attribute of a variant, used for content negotiation
+#[derive(Serialize, Deserialize, Clone)]
+pub struct VariantAttribute {
+    pub key: String,
+    pub value: String,
+}
 
 /// A text to show to users, expressed as a collection of variants (for content negotiation).
 pub type Text = Vec<TextVariant>;
@@ -43,7 +48,7 @@ pub type Text = Vec<TextVariant>;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FileVariant {
     #[serde(default)]
-    pub attributes: VariantAttributes,
+    pub attributes: Vec<VariantAttribute>,
 
     pub name: Option<FileName>,
     pub r#type: Option<MediaType>,

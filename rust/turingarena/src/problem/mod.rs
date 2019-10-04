@@ -30,22 +30,26 @@ mod tests {
     use super::*;
     #[test]
     fn it_works() {
+        let language_attr = VariantAttribute {
+            key: "language".to_owned(),
+            value: "en-US".to_owned(),
+        };
         println!(
             "{}",
             serde_json::to_string_pretty(&Problem {
                 title: vec![TextVariant {
-                    attributes: vec!["language:en-US".to_owned()],
+                    attributes: vec![language_attr.clone()],
                     value: "Title".to_owned(),
                 }],
                 statement: vec![FileVariant {
-                    attributes: vec!["language:en-US".to_owned()],
+                    attributes: vec![language_attr.clone()],
                     name: Some(FileName("english.pdf".to_owned())),
                     r#type: Some(MediaType("application/pdf".to_owned())),
                     content: vec![],
                 }],
                 attachments: vec![Attachment {
                     title: vec![TextVariant {
-                        attributes: vec!["language:en-US".to_owned()],
+                        attributes: vec![language_attr.clone()],
                         value: "Skeleton".to_owned(),
                     }],
                     file: vec![FileVariant {
