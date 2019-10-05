@@ -1,3 +1,1 @@
-# Turingarena Score
-
-Library to represent and manipulate scorable parts of problems, and actual scores.
+Library to represent and manipulate scorable items of problems, and actual scores.

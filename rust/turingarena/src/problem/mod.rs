@@ -3,6 +3,7 @@
 extern crate serde;
 
 use super::content::*;
+use super::score;
 use super::submission::form;
 use serde::{Deserialize, Serialize};
 
@@ -25,11 +26,13 @@ pub struct Problem {
     /// A collection of zero or more attachments for this problem
     pub attachments: Vec<Attachment>,
     pub submission_form: form::Form,
+    pub scored_items: Vec<score::ScoredItem>,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use score::*;
     #[test]
     fn it_works() {
         let language_attr = VariantAttribute {
@@ -79,6 +82,28 @@ mod tests {
                         }],
                     }]
                 },
+                scored_items: vec![
+                    ScoredItem {
+                        title: vec![TextVariant {
+                            attributes: vec![language_attr.clone()],
+                            value: "Sub-task 1".to_owned(),
+                        }],
+                        range: score::Range {
+                            precision: 2,
+                            max: Some(Score(40.)),
+                        },
+                    },
+                    ScoredItem {
+                        title: vec![TextVariant {
+                            attributes: vec![language_attr.clone()],
+                            value: "Sub-task 2".to_owned(),
+                        }],
+                        range: score::Range {
+                            precision: 2,
+                            max: Some(Score(60.)),
+                        },
+                    }
+                ],
             })
             .unwrap()
         );
