@@ -90,7 +90,7 @@ mod tests {
                         }],
                         range: score::Range {
                             precision: 2,
-                            max: Some(Score(40.)),
+                            max: Score(40.),
                         },
                     },
                     ScoredItem {
@@ -100,7 +100,7 @@ mod tests {
                         }],
                         range: score::Range {
                             precision: 2,
-                            max: Some(Score(60.)),
+                            max: Score(60.),
                         },
                     }
                 ],

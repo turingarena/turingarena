@@ -12,8 +12,8 @@ pub struct Score(pub f64);
 pub struct Range {
     /// Number of significant decimal places.
     pub precision: u8,
-    /// Maximum score, if applicable.
-    pub max: Option<Score>,
+    /// Maximum score.
+    pub max: Score,
 }
 
 /// Describes an item to which a score can be assigned
