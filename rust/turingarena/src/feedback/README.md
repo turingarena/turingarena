@@ -1,3 +1,1 @@
-# Turingarena Feedback
-
-A library to represent formats of evaluation feedback.
+A library to represent the format of a evaluation feedbacks, and actual feedbacks.
