@@ -2,9 +2,7 @@
 
 extern crate serde;
 
-use super::content::*;
-use super::score;
-use super::submission::form;
+use crate::{content::*, feedback, score, submission};
 use serde::{Deserialize, Serialize};
 
 /// A file that users can download
@@ -25,13 +23,15 @@ pub struct Problem {
     pub statement: File,
     /// A collection of zero or more attachments for this problem
     pub attachments: Vec<Attachment>,
-    pub submission_form: form::Form,
+    pub submission_form: submission::form::Form,
     pub scored_items: Vec<score::ScoredItem>,
+    pub feedback: feedback::Template,
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{feedback::table::*, submission::form::*, *};
+    use crate::evaluation::record::Key;
     use score::*;
     #[test]
     fn it_works() {
@@ -64,21 +64,21 @@ mod tests {
                         content: vec![],
                     }],
                 }],
-                submission_form: form::Form {
-                    fields: vec![form::Field {
-                        id: form::FieldId("solution".to_owned()),
+                submission_form: Form {
+                    fields: vec![Field {
+                        id: FieldId("solution".to_owned()),
                         title: vec![TextVariant {
                             attributes: vec![language_attr.clone()],
                             value: "Solution".to_owned(),
                         }],
-                        types: vec![form::FileType {
-                            id: form::FileTypeId("cpp".to_owned()),
+                        types: vec![FileType {
+                            id: FileTypeId("cpp".to_owned()),
                             title: vec![TextVariant {
                                 attributes: vec![language_attr.clone()],
                                 value: "C/C++".to_owned(),
                             }],
-                            extensions: vec![form::FileTypeExtension(".cpp".to_owned())],
-                            primary_extension: form::FileTypeExtension(".cpp".to_owned()),
+                            extensions: vec![FileTypeExtension(".cpp".to_owned())],
+                            primary_extension: FileTypeExtension(".cpp".to_owned()),
                         }],
                     }]
                 },
@@ -104,6 +104,77 @@ mod tests {
                         },
                     }
                 ],
+                feedback: vec![feedback::Section::Table(Table {
+                    cols: vec![
+                        Col {
+                            title: vec![TextVariant {
+                                attributes: vec![language_attr.clone()],
+                                value: "Test Case".to_owned(),
+                            }],
+                            content: ColContent::Index,
+                        },
+                        Col {
+                            title: vec![TextVariant {
+                                attributes: vec![language_attr.clone()],
+                                value: "Score".to_owned(),
+                            }],
+                            content: ColContent::Score {
+                                range: score::Range {
+                                    precision: 2,
+                                    max: Score(100.),
+                                }
+                            },
+                        }
+                    ],
+                    row_groups: vec![
+                        RowGroup {
+                            title: vec![TextVariant {
+                                attributes: vec![language_attr.clone()],
+                                value: "Subtask 1".to_owned(),
+                            }],
+                            rows: vec![Row {
+                                content: RowContent::Data,
+                                cells: vec![
+                                    Cell {
+                                        content: CellContent::Index(1),
+                                    },
+                                    Cell {
+                                        content: CellContent::Score {
+                                            range: score::Range {
+                                                precision: 2,
+                                                max: Score(50.),
+                                            },
+                                            r#ref: Key("subtask.1.testcase.1.score".into()),
+                                        },
+                                    },
+                                ]
+                            },],
+                        },
+                        RowGroup {
+                            title: vec![TextVariant {
+                                attributes: vec![language_attr.clone()],
+                                value: "Subtask 1".to_owned(),
+                            }],
+                            rows: vec![Row {
+                                content: RowContent::Data,
+                                cells: vec![
+                                    Cell {
+                                        content: CellContent::Index(2),
+                                    },
+                                    Cell {
+                                        content: CellContent::Score {
+                                            range: score::Range {
+                                                precision: 2,
+                                                max: Score(50.),
+                                            },
+                                            r#ref: Key("subtask.2.testcase.2.score".into()),
+                                        },
+                                    },
+                                ]
+                            },],
+                        },
+                    ],
+                })],
             })
             .unwrap()
         );
