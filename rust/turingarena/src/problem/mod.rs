@@ -5,26 +5,29 @@ extern crate serde;
 use crate::{content::*, feedback, score, submission};
 use serde::{Deserialize, Serialize};
 
-/// A file that users can download
+/// A file that users can download.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
-    /// Name of this attachment, as shown to users
+    /// Name of this attachment, as shown to users.
     pub title: Text,
-    /// Downloadable file for this attachment
+    /// Downloadable file for this attachment.
     pub file: File,
 }
 
 /// Meta-data of a problem
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
-    /// Name of this problem, as shown to users
+    /// Name of this problem, as shown to users.
     pub title: Text,
-    /// File rendered to users, containing the description of this problem
+    /// File rendered to users, containing the description of this problem.
     pub statement: File,
-    /// A collection of zero or more attachments for this problem
+    /// A collection of zero or more attachments for this problem.
     pub attachments: Vec<Attachment>,
+    /// Form to show to users, for submitting solutions.
     pub submission_form: submission::form::Form,
+    /// Items of this problem which will receive a numerical score.
     pub scored_items: Vec<score::ScoredItem>,
+    /// Template of the feedback to show to users, for a submitted solution.
     pub feedback: feedback::Template,
 }
 
@@ -104,14 +107,18 @@ mod tests {
                         },
                     }
                 ],
-                feedback: vec![feedback::Section::Table(Table {
+                feedback: vec![feedback::Section::Table {
+                    caption: vec![TextVariant {
+                        attributes: vec![language_attr.clone()],
+                        value: "Test cases".to_owned(),
+                    }],
                     cols: vec![
                         Col {
                             title: vec![TextVariant {
                                 attributes: vec![language_attr.clone()],
-                                value: "Test Case".to_owned(),
+                                value: "Case".to_owned(),
                             }],
-                            content: ColContent::Index,
+                            content: ColContent::RowNumber,
                         },
                         Col {
                             title: vec![TextVariant {
@@ -136,7 +143,7 @@ mod tests {
                                 content: RowContent::Data,
                                 cells: vec![
                                     Cell {
-                                        content: CellContent::Index(1),
+                                        content: CellContent::RowNumber(1),
                                     },
                                     Cell {
                                         content: CellContent::Score {
@@ -159,7 +166,7 @@ mod tests {
                                 content: RowContent::Data,
                                 cells: vec![
                                     Cell {
-                                        content: CellContent::Index(2),
+                                        content: CellContent::RowNumber(2),
                                     },
                                     Cell {
                                         content: CellContent::Score {
@@ -174,7 +181,7 @@ mod tests {
                             },],
                         },
                     ],
-                })],
+                }],
             })
             .unwrap()
         );
