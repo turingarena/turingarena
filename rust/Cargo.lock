@@ -885,6 +885,7 @@ dependencies = [
  "task-maker-format 0.1.0 (git+https://github.com/edomora97/task-maker-rust.git)",
  "task-maker-store 0.1.0 (git+https://github.com/edomora97/task-maker-rust.git)",
  "tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "turingarena 0.1.0",
 ]
 
 [[package]]
