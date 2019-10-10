@@ -1,5 +1,5 @@
 [package]
-name = "turingarena-contrib-task-maker"
+name = "turingarena-task-maker"
 version = "0.1.0"
 authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
 edition = "2018"
