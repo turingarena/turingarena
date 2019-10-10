@@ -3,15 +3,14 @@ use task_maker_format::ioi;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
 use turingarena::feedback::{table::*, *};
-use turingarena::problem::*;
+use turingarena::problem::material::*;
 use turingarena::score::*;
 use turingarena::submission::form::*;
 
 use std::convert::*;
 
-pub fn get_problem_metadata(task: ioi::Task) -> Problem {
-    Problem {
-        name: ProblemName(task.name.clone()),
+pub fn get_problem_metadata(task: ioi::Task) -> Material {
+    Material {
         title: vec![TextVariant {
             attributes: vec![],
             value: task.name.clone().into(),
