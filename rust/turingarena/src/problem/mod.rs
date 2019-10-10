@@ -5,6 +5,10 @@ extern crate serde;
 use crate::{content::*, feedback, score, submission};
 use serde::{Deserialize, Serialize};
 
+/// Wraps a string representing the name of a problem
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ProblemName(pub String);
+
 /// A file that users can download.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
@@ -17,7 +21,10 @@ pub struct Attachment {
 /// Meta-data of a problem
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Problem {
-    /// Name of this problem, as shown to users.
+    /// Name of this problem, used to identify it in a constest.
+    /// Should be never shown to (non-admin) users.
+    pub name: ProblemName,
+    /// Title of this problem, as shown to users.
     pub title: Text,
     /// File rendered to users, containing the description of this problem.
     pub statement: File,
@@ -45,6 +52,7 @@ mod tests {
         println!(
             "{}",
             serde_json::to_string_pretty(&Problem {
+                name: ProblemName("name".into()),
                 title: vec![TextVariant {
                     attributes: vec![language_attr.clone()],
                     value: "Title".to_owned(),

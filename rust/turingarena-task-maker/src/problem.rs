@@ -11,9 +11,10 @@ use std::convert::*;
 
 pub fn get_problem_metadata(task: ioi::Task) -> Problem {
     Problem {
+        name: ProblemName(task.name.clone()),
         title: vec![TextVariant {
             attributes: vec![],
-            value: task.name.into(),
+            value: task.name.clone().into(),
         }],
         statement: vec![],   // TODO
         attachments: vec![], // TODO
