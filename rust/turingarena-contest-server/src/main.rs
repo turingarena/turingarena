@@ -10,6 +10,7 @@ extern crate rocket;
 use diesel::prelude::*;
 
 mod contest_config;
+mod submission;
 
 pub struct Context {}
 impl juniper::Context for Context {}
@@ -58,7 +59,10 @@ fn post_graphql_handler(
 
 fn main() {
     rocket::ignite()
-        .manage(Schema::new(contest_config::Contest, contest_config::Contest))
+        .manage(Schema::new(
+            contest_config::Contest,
+            contest_config::Contest,
+        ))
         .manage(Context {})
         .mount(
             "/",
