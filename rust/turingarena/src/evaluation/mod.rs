@@ -1,9 +1,17 @@
 pub mod record;
 
-pub enum Event {}
+pub enum Event {
+    Value {
+        key: record::Key,
+        value: record::Value,
+    },
+}
 
 pub mod mem {
-    pub struct Evaluation {}
+    use super::*;
+    use std::sync::mpsc::Receiver;
+    // FIXME: should we use futures (async) or std::sync (theaded) `Receiver`s?
+    pub struct Evaluation(pub Receiver<Event>);
 }
 
 #[cfg(test)]

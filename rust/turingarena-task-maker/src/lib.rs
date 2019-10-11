@@ -25,6 +25,7 @@ use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISen
 use task_maker_store::*;
 
 pub mod driver;
+pub(crate) mod material;
 
 pub fn run_task<'a, T: AsRef<Path>>(p: T) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
     let (message_tx, message_rx) = channel();
