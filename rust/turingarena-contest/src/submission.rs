@@ -1,7 +1,5 @@
-use diesel::prelude::*;
-use juniper::{FieldError, FieldResult};
-
 use super::*;
+use juniper::FieldResult;
 
 const DDL: &str = "
 DROP TABLE IF EXISTS submissions;
@@ -48,9 +46,20 @@ table! {
 
 #[derive(Insertable, juniper::GraphQLInputObject)]
 #[table_name = "submission_files"]
-struct SubmissionFileInput {
+pub struct SubmissionFileInput {
     field_id: String,
     type_id: String,
     name: String,
     content_base64: String,
+}
+
+pub struct SubmissionRepository;
+
+#[juniper::object(Context = Context)]
+impl SubmissionRepository {
+    fn init(context: &Context) -> FieldResult<MutationOk> {
+        let connection = context.connect_db()?;
+        connection.execute(DDL)?;
+        Ok(MutationOk)
+    }
 }

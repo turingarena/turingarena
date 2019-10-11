@@ -1255,9 +1255,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "turingarena-contest-server"
+name = "turingarena-contest"
 version = "0.1.0"
 dependencies = [
+ "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper_rocket 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",

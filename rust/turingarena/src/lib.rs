@@ -4,7 +4,6 @@ pub mod autoio;
 pub mod batch;
 pub mod bios;
 pub mod content;
-pub mod contest;
 pub mod dce;
 pub mod diff;
 pub mod evaluation;
