@@ -13,10 +13,10 @@ impl Contest {
         return Ok(MutationOk);
     }
 
-    fn user(context: &Context, id: String) -> FieldResult<Vec<User>> {
+    fn user(context: &Context, id: String) -> FieldResult<User> {
         // TODO: check user credentials
         let connection = context.connect_db()?;
-        return Ok(users::table.find(id).load::<User>(&connection)?);
+        return Ok(users::table.find(id).first(&connection)?);
     }
 
     fn problems(context: &Context) -> FieldResult<Vec<Problem>> {
