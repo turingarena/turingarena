@@ -24,7 +24,7 @@ use task_maker_format::ui::UIMessage;
 use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISender};
 use task_maker_store::*;
 
-pub mod problem;
+pub mod driver;
 
 pub fn run_task<'a, T: AsRef<Path>>(p: T) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
     let (message_tx, message_rx) = channel();

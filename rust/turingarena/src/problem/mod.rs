@@ -1,6 +1,9 @@
+#![doc(include = "README.md")]
+
 use serde::{Deserialize, Serialize};
 
 pub mod material;
+pub mod driver;
 
 /// Wraps a string representing the name of a problem.
 /// Used only to identify a problem. Should never be shown to (non-admin) users.
