@@ -36,30 +36,29 @@ fn post_graphql_handler(
     request.execute(&schema, &context)
 }
 
-#[rocket::get("/<file..>")]
-fn dist<'r>(file: PathBuf) -> rocket::response::Result<'r> {
-    let path = file.display().to_string();
-    let filename = if path.eq("") {
-        "/index.html".to_owned()
-    } else {
-        path
-    };
-    WebContent::get(&filename).map_or_else(
-        || Err(Status::NotFound),
-        |d| {
-            let ext = file
-                .as_path()
-                .extension()
-                .and_then(OsStr::to_str)
-                .ok_or(Status::new(400, "Could not get file extension"))?;
-            let content_type = ContentType::from_extension(ext)
-                .ok_or(Status::new(400, "Could not get file content type"))?;
-            response::Response::build()
-                .header(content_type)
-                .sized_body(Cursor::new(d))
-                .ok()
-        },
-    )
+#[rocket::get("/")]
+fn index<'r>() -> rocket::response::Result<'r> {
+    dist(Some(PathBuf::from("index.html")))
+}
+
+#[rocket::get("/<file_option..>")]
+fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
+    let file = file_option.unwrap_or(PathBuf::new());
+    let filename = file.display().to_string();
+    let content = WebContent::get(&filename)
+        .or(WebContent::get("index.html"))
+        .unwrap();
+    let ext = file
+        .as_path()
+        .extension()
+        .and_then(OsStr::to_str)
+        .unwrap_or("html");
+    let content_type = ContentType::from_extension(ext)
+        .ok_or(Status::new(400, "Could not get file content type"))?;
+    response::Response::build()
+        .header(content_type)
+        .sized_body(Cursor::new(content))
+        .ok()
 }
 
 fn main() {
@@ -68,7 +67,7 @@ fn main() {
         .manage(Context {})
         .mount(
             "/",
-            rocket::routes![graphiql, get_graphql_handler, post_graphql_handler, dist],
+            rocket::routes![graphiql, get_graphql_handler, post_graphql_handler, index, dist],
         )
         .launch();
 }
