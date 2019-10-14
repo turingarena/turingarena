@@ -118,13 +118,27 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
     }
 }
 
+fn booklet_of(task: &ioi::Task) -> FileVariant {
+    let file_path = &task.path.join("testo.pdf");
+
+    FileVariant {
+        attributes: vec![VariantAttribute {
+            key: "language".to_owned(),
+            value: "it-IT".to_owned(), //TODO: get language from booklet
+        }],
+        name: Some(FileName("testo.pdf".to_owned())), //TODO: get filename from booklet
+        r#type: Some(MediaType("application/pdf".to_owned())),
+        content: std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap(),
+    }
+}
+
 pub fn gen_material(task: &ioi::Task) -> Material {
     Material {
         title: vec![TextVariant {
             attributes: vec![],
             value: task.name.clone().into(),
         }],
-        statement: vec![],   // TODO
+        statement: vec![booklet_of(task)],
         attachments: vec![], // TODO
         submission_form: submission_form(),
         scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
