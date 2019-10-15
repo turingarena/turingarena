@@ -1,0 +1,13 @@
+name: Rust testing
+on: [push, pull_request_review]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install Rust nightly toolchain
+      run: rustup default nightly
+    - name: Build
+      run: cargo build
+    - name: Run tests
+      run: cargo test
