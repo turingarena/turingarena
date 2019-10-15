@@ -1,4 +1,4 @@
-name: Rust testing
+name: CI testing
 on: [push, pull_request_review]
 jobs:
   build:
@@ -7,7 +7,9 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install Rust nightly toolchain
       run: rustup default nightly
-    - name: Build
+    - name: Build web interface
+      run: cd web/ && npm install && npx ng build
+    - name: Build Rust project
       run: cd rust/ && cargo build
-    - name: Run tests
+    - name: Run Rust tests
       run: cd rust/ && cargo test
