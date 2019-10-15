@@ -5,18 +5,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install dependencies
-      run: sudo apt update && sudo apt install libsqlite3-dev
-    - name: Install Rust nightly toolchain
-      run: rustup default nightly
-    - name: Build web interface
-      run: cd web/ && npm install && npx ng build
-    - name: Build Rust project
-      run: cd rust/ && cargo build
-    - name: Run Rust tests
-      run: cd rust/ && cargo test --no-fail-fast || true
-    - name: Build Rust doc
-      run: cd rust/ && cargo doc --no-deps
+      #    - name: Install dependencies
+      #run: sudo apt update && sudo apt install libsqlite3-dev
+      #- name: Install Rust nightly toolchain
+      # run: rustup default nightly
+      #- name: Build web interface
+      #run: cd web/ && npm install && npx ng build
+      #- name: Build Rust project
+      #run: cd rust/ && cargo build
+      #- name: Build Rust doc
+      #run: cd rust/ && cargo doc --no-deps
+    - name: create doc
+      run: mkdir -p rust/target/doc && echo "<h1>prova</h1>" >  rust/target/doc/index.html
     - name: Deploy documentation to GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1
       with:
@@ -24,3 +24,5 @@ jobs:
         build_dir: rust/target/doc/
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+    #- name: Run Rust tests
+    #  run: cd rust/ && cargo test --no-fail-fast
