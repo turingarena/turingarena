@@ -118,14 +118,53 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
     }
 }
 
+fn files_of(file_path: &std::path::PathBuf, pattern: String) -> Vec<std::path::PathBuf> {
+    let path = &file_path.join(pattern);
+    let mut atts = Vec::new();
+
+    for entry in glob::glob(&path.to_string_lossy()).expect("Failed to read glob pattern") {
+        atts.push(entry.unwrap().to_owned());
+    }
+    atts
+}
+
+fn attachments_of(file_path: std::path::PathBuf) -> Attachment {
+    Attachment {
+        title: vec![ TextVariant {
+            attributes: vec![],
+            value: file_path.file_name().unwrap().to_string_lossy().into_owned(),
+        }],
+        file: vec![ FileVariant {
+            attributes: vec![],
+            name: Some(FileName(file_path.file_name().unwrap().to_string_lossy().into_owned())),
+            r#type: None,
+            content: std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap(),
+        }]
+    }
+}
+
+fn booklet_of(task: &ioi::Task) -> FileVariant {
+    let path = &task.path.join("testo.pdf");
+
+    FileVariant {
+        attributes: vec![VariantAttribute {
+            key: "language".to_owned(),
+            value: "it-IT".to_owned(), //TODO: get language from booklet
+        }],
+        name: Some(FileName("testo.pdf".to_owned())), //TODO: get filename from booklet
+        r#type: Some(MediaType("application/pdf".to_owned())),
+        content: std::fs::read(&path.to_string_lossy().as_ref()).unwrap(),
+    }
+}
+
 pub fn gen_material(task: &ioi::Task) -> Material {
     Material {
         title: vec![TextVariant {
             attributes: vec![],
             value: task.name.clone().into(),
         }],
-        statement: vec![],   // TODO
-        attachments: vec![], // TODO
+        statement: vec![booklet_of(task)],
+        attachments: files_of(&task.path, "att/*.*".to_owned()).into_iter().map(attachments_of).collect(),
         submission_form: submission_form(),
         scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
         feedback: vec![Section::Table {
