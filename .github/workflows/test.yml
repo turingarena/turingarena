@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install libsqlite3-dev
     - name: Install Rust nightly toolchain
       run: rustup default nightly
     - name: Build web interface
