@@ -10,7 +10,7 @@ extern crate log;
 extern crate serde_json;
 extern crate tempdir;
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{
     mpsc::{self, channel},
     Arc,
@@ -27,9 +27,9 @@ use task_maker_store::*;
 pub mod driver;
 pub(crate) mod material;
 
-pub fn run_task<'a, T: AsRef<Path>>(p: T) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
+pub fn run_task(task_dir: PathBuf, submitted_file: PathBuf) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
     let (message_tx, message_rx) = channel();
-    let path = PathBuf::from(p.as_ref());
+    let path = PathBuf::from(task_dir);
 
     let store_path = tempdir::TempDir::new("task-maker").unwrap().into_path();
     let file_store =
@@ -77,6 +77,7 @@ pub fn run_task<'a, T: AsRef<Path>>(p: T) -> (thread::JoinHandle<()>, mpsc::Into
             let eval_config = EvaluationConfig {
                 solution_filter: vec!["-no-solution".into()],
                 booklet_solutions: false,
+                solution_paths: vec![submitted_file.to_owned()],
             };
             let task = ioi::Task::new(path, &eval_config).expect("Invalid task");
             task.execute(&mut eval, &eval_config)
