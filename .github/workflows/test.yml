@@ -13,8 +13,6 @@ jobs:
       run: cd web/ && npm install && npx ng build
     - name: Build Rust project
       run: cd rust/ && cargo build
-    - name: Run Rust tests
-      run: cd rust/ && cargo test --no-fail-fast || true
     - name: Build Rust doc
       run: cd rust/ && cargo doc --no-deps
     - name: Deploy documentation to GitHub Pages
@@ -24,3 +22,6 @@ jobs:
         build_dir: rust/target/doc/
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+    - name: Run Rust tests
+      run: cd rust/ && cargo test --no-fail-fast
+      
