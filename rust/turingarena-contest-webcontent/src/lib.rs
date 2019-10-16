@@ -1,5 +1,5 @@
 use rust_embed::RustEmbed;
 
 #[derive(RustEmbed)]
-#[folder = "../web/dist/turingarena-contest/"]
+#[folder = "$CARGO_MANIFEST_DIR/../../web/dist/turingarena-contest/"]
 pub struct WebContent;

@@ -10,4 +10,4 @@ include = ["../web/dist/turingarena-contest/"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rust-embed = "5.1.0"
+rust-embed = { version = "5.1.0", features = ["interpolate-folder-path"] }
