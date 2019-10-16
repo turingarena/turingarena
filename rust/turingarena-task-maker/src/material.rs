@@ -143,17 +143,15 @@ fn attachments_of(file_path: std::path::PathBuf) -> Attachment {
     }
 }
 
-fn booklet_of(task: &ioi::Task) -> FileVariant {
-    let path = &task.path.join("testo.pdf");
-
+fn statement_of(booklet: &ioi::Booklet) -> FileVariant {
     FileVariant {
         attributes: vec![VariantAttribute {
             key: "language".to_owned(),
-            value: "it-IT".to_owned(), //TODO: get language from booklet
+            value: booklet.config().language.to_owned(),
         }],
-        name: Some(FileName("testo.pdf".to_owned())), //TODO: get filename from booklet
+        name: Some(FileName(booklet.dest().file_name().unwrap().to_string_lossy().into_owned())),
         r#type: Some(MediaType("application/pdf".to_owned())),
-        content: FileContent(std::fs::read(&path.to_string_lossy().as_ref()).unwrap()),
+        content: FileContent(std::fs::read(booklet.dest().to_string_lossy().into_owned()).unwrap()),
     }
 }
 
@@ -163,7 +161,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             attributes: vec![],
             value: task.name.clone().into(),
         }],
-        statement: vec![booklet_of(task)],
+        statement: task.booklets.iter().map(statement_of).collect(),
         attachments: files_of(&task.path, "att/*.*".to_owned()).into_iter().map(attachments_of).collect(),
         submission_form: submission_form(),
         scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
