@@ -1,32 +1,29 @@
 #![doc(include = "README.md")]
 
-extern crate base64;
-extern crate base64_serde;
 extern crate serde;
 
-use base64::STANDARD;
-use base64_serde::base64_serde_type;
 use serde::{Deserialize, Serialize};
-
-base64_serde_type!(Base64Standard, STANDARD);
 
 /// Wraps a language tag string, as defined in
 /// https://tools.ietf.org/html/bcp47
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct LanguageTag(pub String);
 
 /// Wraps a media type string, as defined in
 /// https://tools.ietf.org/html/rfc7231#section-3.1.1.1
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct MediaType(pub String);
 
 /// Wraps a sanitized file name.
 /// Allows extensions, but no path components.
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct FileName(pub String);
 
+mod file;
+pub use file::FileContent;
+
 /// A variant of a text (say, for a given locale).
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct TextVariant {
     /// Attributes of this variant, used for content negotiation
     #[serde(default)]
@@ -37,7 +34,7 @@ pub struct TextVariant {
 }
 
 /// An attribute of a variant, used for content negotiation
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct VariantAttribute {
     pub key: String,
     pub value: String,
@@ -47,7 +44,7 @@ pub struct VariantAttribute {
 pub type Text = Vec<TextVariant>;
 
 /// A variant of a file (say, for a given locale).
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct FileVariant {
     /// Attributes of this variant, used for content negotiation
     #[serde(default)]
@@ -59,8 +56,7 @@ pub struct FileVariant {
     pub r#type: Option<MediaType>,
 
     /// Byte content of this file
-    #[serde(with = "Base64Standard")]
-    pub content: Vec<u8>,
+    pub content: FileContent,
 }
 
 /// A file, expressed as a collection of variants (for content negotiation).

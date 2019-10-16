@@ -53,7 +53,7 @@ mod tests {
                     attributes: vec![language_attr.clone()],
                     name: Some(FileName("english.pdf".to_owned())),
                     r#type: Some(MediaType("application/pdf".to_owned())),
-                    content: vec![],
+                    content: FileContent(vec![]),
                 }],
                 attachments: vec![Attachment {
                     title: vec![TextVariant {
@@ -64,7 +64,7 @@ mod tests {
                         attributes: vec![],
                         name: Some(FileName("skeleton.cpp".to_owned())),
                         r#type: None,
-                        content: vec![],
+                        content: FileContent(vec![]),
                     }],
                 }],
                 submission_form: Form {
