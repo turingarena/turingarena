@@ -16,6 +16,8 @@ pub mod rusage;
 pub mod score;
 pub mod submission;
 
+extern crate juniper;
+
 #[cfg(test)]
 mod tests {
     #[test]
