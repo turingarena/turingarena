@@ -138,7 +138,7 @@ fn attachments_of(file_path: std::path::PathBuf) -> Attachment {
             attributes: vec![],
             name: Some(FileName(file_path.file_name().unwrap().to_string_lossy().into_owned())),
             r#type: None,
-            content: std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap(),
+            content: FileContent(std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap()),
         }]
     }
 }
@@ -153,7 +153,7 @@ fn booklet_of(task: &ioi::Task) -> FileVariant {
         }],
         name: Some(FileName("testo.pdf".to_owned())), //TODO: get filename from booklet
         r#type: Some(MediaType("application/pdf".to_owned())),
-        content: std::fs::read(&path.to_string_lossy().as_ref()).unwrap(),
+        content: FileContent(std::fs::read(&path.to_string_lossy().as_ref()).unwrap()),
     }
 }
 

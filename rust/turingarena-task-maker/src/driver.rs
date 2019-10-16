@@ -24,31 +24,32 @@ fn load_task(pack: ProblemPack) -> Result<ioi::Task, Error> {
     )
 }
 
-// impl ProblemDriver for IoiProblemDriver {
-//     type Error = failure::Error;
-//     type StatError = Self::Error;
+impl ProblemDriver for IoiProblemDriver {
+    type Error = failure::Error;
+    type StatError = Self::Error;
 
-//     fn stat(pack: ProblemPack) -> Result<ProblemStat, Self::Error> {
-//         let task = load_task(pack)?;
-//         Ok(ProblemStat {
-//             name: ProblemName(task.name),
-//         })
-//     }
+    fn stat(pack: ProblemPack) -> Result<ProblemStat, Self::Error> {
+        let task = load_task(pack)?;
+        Ok(ProblemStat {
+            name: ProblemName(task.name),
+        })
+    }
 
-//     fn gen_material(pack: ProblemPack) -> Result<Material, Self::Error> {
-//         let task = load_task(pack)?;
-//         Ok(super::material::gen_material(&task))
-//     }
+    fn gen_material(pack: ProblemPack) -> Result<Material, Self::Error> {
+        let task = load_task(pack)?;
+        Ok(super::material::gen_material(&task))
+    }
 
-//     fn evaluate(pack: ProblemPack, submission: Submission) -> Evaluation {
-//         let file = submission.field_values[0].file; 
-//         let filename = file.name.0;
-//         let tmpdir = tempdir::TempDir::new("turingarena")
-//             .expect("Cannot create temporary directory");
-//         let solution = tmpdir.path().join(filename);
-//         fs::write(solution, file.content)
-//             .expect("Cannot write submission file");
+    fn evaluate(pack: ProblemPack, submission: Submission) -> Evaluation {
+        unimplemented!();
 
-//         run_task(pack.0, solution);
-//     }
-// }
+        // let file = submission.field_values[0].file; 
+        // let filename = file.name.0;
+        // let tmpdir = tempdir::TempDir::new("turingarena")
+        //     .expect("Cannot create temporary directory");
+        // let solution = tmpdir.path().join(filename);
+        // fs::write(solution, file.content)
+        //     .expect("Cannot write submission file");
+        //run_task(pack.0, solution);
+    }
+}

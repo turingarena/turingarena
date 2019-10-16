@@ -100,11 +100,3 @@ pub fn run_task(task_dir: PathBuf, submitted_file: PathBuf) -> (thread::JoinHand
 
     (client, message_rx.into_iter())
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
