@@ -1,3 +1,5 @@
+#![doc(include = "README.md")]
+
 #[cfg(test)]
 mod tests {
     #[test]

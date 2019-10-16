@@ -1,3 +1,5 @@
+#![doc(include = "README.md")]
+
 pub mod record;
 
 pub enum Event {

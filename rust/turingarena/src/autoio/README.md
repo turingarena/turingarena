@@ -1,4 +1,14 @@
-# Turingarena AutoIO (Automatic Input/Output)
+Automatization of generation/parsing of input/output streams.
 
-A library to define the format of input/output streams using abstract machines.
-Used for automatic validation, documentation, and code generation for a given input/output format.
+Used for automatic validation, documentation, and code generation.
+
+# Skeletons
+
+A format of I/O is expressed by defining a _skeleton_.
+
+A skeleton is a program which reads the input variables,
+invokes user-defined functions,
+and writes the output variables.
+This skeleton is defined in abstract language,
+it is analyzed statically,
+and is used to generate concrete skeletons in various programming languages.

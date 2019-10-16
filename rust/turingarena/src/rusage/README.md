@@ -1,3 +1,1 @@
-# Turingarena Resource Usage
-
-A library to express usage of computational resources.
+Data-types for usage of computational resources.

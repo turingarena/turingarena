@@ -1,1 +1,1 @@
-Library to represent and manipulate scorable items of problems, and actual scores.
+Data-types for scorable items and scores.
