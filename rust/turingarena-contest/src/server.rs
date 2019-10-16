@@ -1,5 +1,3 @@
-#![feature(decl_macro, proc_macro_hygiene)]
-
 extern crate turingarena_contest_webcontent;
 
 use rocket::{
@@ -10,8 +8,8 @@ use rocket::{
 use std::ffi::OsStr;
 use std::io::Cursor;
 use std::path::PathBuf;
-use turingarena_contest::*;
 use turingarena_contest_webcontent::WebContent;
+use crate::*;
 
 #[rocket::get("/graphiql")]
 fn graphiql() -> content::Html<String> {
@@ -61,7 +59,7 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-fn main() {
+pub fn run_server(host: String, port: u16) {
     rocket::ignite()
         .manage(Schema::new(contest::Contest, contest::Contest))
         .manage(Context {})
@@ -70,12 +68,4 @@ fn main() {
             rocket::routes![graphiql, get_graphql_handler, post_graphql_handler, index, dist],
         )
         .launch();
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }

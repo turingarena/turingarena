@@ -7,12 +7,16 @@ extern crate juniper_rocket;
 extern crate rand;
 extern crate rocket;
 
+#[macro_use]
+extern crate structopt;
+
 use diesel::prelude::*;
 
 pub mod contest;
 pub mod problem;
 pub mod submission;
 pub mod user;
+pub mod server;
 
 pub struct Context {}
 impl juniper::Context for Context {}
