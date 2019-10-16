@@ -4,7 +4,8 @@ CREATE TABLE problems(
 
 CREATE TABLE users(
     id              TEXT NOT NULL PRIMARY KEY,
-    display_name    TEXT NOT NULL
+    display_name    TEXT NOT NULL,
+    password        TEXT NOT NULL -- bcrypt encrypted
 );
 
 CREATE TABLE submissions(

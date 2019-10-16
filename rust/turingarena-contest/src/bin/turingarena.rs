@@ -63,10 +63,14 @@ fn main() {
     }
 }
 
-fn add_user(id: String, display_name: String, _password: String) {
+fn add_user(id: String, display_name: String, password: String) {
     // TODO: insert password
     use turingarena_contest::user::UserInput;
-    let user = UserInput { id, display_name };
+    let user = UserInput { 
+        id, 
+        display_name,
+        password: bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap(),
+    };
     let conn = connect_db().expect("cannot connect to database");
     diesel::insert_into(schema::users::table)
         .values(user)

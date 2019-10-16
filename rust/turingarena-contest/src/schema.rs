@@ -27,6 +27,7 @@ table! {
     users (id) {
         id -> Text,
         display_name -> Text,
+        password -> Text,
     }
 }
 

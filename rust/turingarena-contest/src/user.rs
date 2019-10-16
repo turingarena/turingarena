@@ -7,12 +7,14 @@ use schema::users;
 pub struct UserInput {
     pub id: String,
     pub display_name: String,
+    pub password: String,
 }
 
 #[derive(Queryable)]
 pub struct User {
     pub id: String,
     pub display_name: String,
+    pub password: String,
 }
 
 /// A task
@@ -25,6 +27,11 @@ impl User {
     /// Name of this task. Unique in the current contest.
     fn display_name(&self) -> String {
         return self.display_name.clone();
+    }
+
+    /// checks the user password
+    fn check_password(&self, password: String) -> bool {
+        bcrypt::verify(&password, &self.password).unwrap()
     }
 }
 
