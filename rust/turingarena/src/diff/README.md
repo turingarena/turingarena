@@ -1,4 +1,5 @@
-# Turingarena Diff
+Test if two file have the same content.
 
-A library to test if two file are identical, usable by `turingarena-make`.
-Use to check output files against correct outputs.
+Use to check user outputs against correct outputs.
+
+Exposes a `turignarena::make` task type for convenience.

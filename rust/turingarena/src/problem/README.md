@@ -1,4 +1,5 @@
-A library to manage problems.
+Problem definitions and runners.
+
 In our case, a "problem" has the following characteristics:
 
 * describes a challenge, which requires the submission of a "solution",

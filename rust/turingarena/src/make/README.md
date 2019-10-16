@@ -1,4 +1,5 @@
-# Turingarena Make
+Computations described by task dependency graphs.
 
-A library to execute computations described by a pre-defined task dependency-graph.
-Use to support existing problem formats which do not require interactivity.
+Use to support existing problem formats
+based on a _pre-defined_ task dependency graph
+(i.e., directed acyclic graph where nodes are tasks to run and edges are their dependencies).

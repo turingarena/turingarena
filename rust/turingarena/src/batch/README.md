@@ -1,4 +1,6 @@
-# Turingarena Batch
+Securely run a program on a pre-defined input.
 
-A library to execute a sandboxed program with a pre-defined input and measuring overall resource usage.
-Usable with `turingarena-make`.
+Use to test solutions which do not require interactivity,
+while limiting and/or measuring overall resource usage.
+
+Exposes a `turignarena::make` task type for convenience.

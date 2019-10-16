@@ -1,3 +1,3 @@
-# Turingarena Evaluation Events
+Data-types for evaluations.
 
-A library to manage evaluations, i.e., streams of JSON-serializable evaluation events.
+Evaluations are streams of (JSON-serializable) evaluation events.
