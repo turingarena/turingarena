@@ -2,6 +2,7 @@
 
 use structopt::StructOpt;
 use turingarena_contest::server::run_server;
+use turingarena_contest::init_db;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "turingarena", about = "CLI to manage the turingarena contest server")]
@@ -41,6 +42,10 @@ enum Command {
     RemoveTask {
         /// name of the task to remove
         name: String,
+    },
+    /// initializes the database
+    InitDb {
+
     }
 }
 
@@ -48,6 +53,7 @@ fn main() {
     use Command::*;
     match Command::from_args() {
         Serve { host, port } => run_server(host, port),
+        InitDb {} => init_db(),
         command => unimplemented!("command {:?} not jet implemented", command),
     }
 }

@@ -1,5 +1,3 @@
-extern crate turingarena_contest_webcontent;
-
 use rocket::{
     http::{ContentType, Status},
     response::{self, content},
@@ -60,7 +58,12 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
 }
 
 pub fn run_server(host: String, port: u16) {
-    rocket::ignite()
+    let config = rocket::Config::build(rocket::config::Environment::active().unwrap())
+        .port(port)
+        .address(host)
+        .finalize()
+        .unwrap();
+    rocket::custom(config)
         .manage(Schema::new(contest::Contest, contest::Contest))
         .manage(Context {})
         .mount(

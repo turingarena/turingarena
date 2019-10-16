@@ -1,21 +1,6 @@
-use juniper::FieldResult;
-
 use super::*;
 
-const DDL: &str = "
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
-    id TEXT PRIMARY KEY,
-    display_name TEXT
-);
-";
-
-table! {
-    users (id) {
-        id -> Text,
-        display_name -> Text,
-    }
-}
+use schema::users;
 
 #[derive(Insertable, juniper::GraphQLInputObject)]
 #[table_name = "users"]
@@ -46,9 +31,4 @@ impl User {
 pub struct UserRepository;
 
 impl UserRepository {
-    pub fn init(context: &Context) -> FieldResult<MutationOk> {
-        let connection = context.connect_db()?;
-        connection.execute(DDL)?;
-        Ok(MutationOk)
-    }
 }

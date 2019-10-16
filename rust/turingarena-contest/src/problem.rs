@@ -1,18 +1,6 @@
 use super::*;
-use juniper::FieldResult;
 
-const DDL: &str = "
-DROP TABLE IF EXISTS problems;
-CREATE TABLE problems (
-    name TEXT PRIMARY KEY
-);
-";
-
-table! {
-    problems (name) {
-        name -> Text,
-    }
-}
+use schema::problems;
 
 #[derive(Insertable, juniper::GraphQLInputObject)]
 #[table_name = "problems"]
@@ -37,9 +25,4 @@ impl Problem {
 pub struct ProblemRepository;
 
 impl ProblemRepository {
-    pub fn init(context: &Context) -> FieldResult<MutationOk> {
-        let connection = context.connect_db()?;
-        connection.execute(DDL)?;
-        Ok(MutationOk)
-    }
 }

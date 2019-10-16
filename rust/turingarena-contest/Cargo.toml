@@ -9,6 +9,7 @@ juniper = "0.14.0"
 juniper_rocket = "0.5.0"
 rocket = "0.4.2"
 diesel = { version = "1.4.2", features = ["sqlite"] }
+diesel_migrations = "1.4.0"
 rand = "0.7.2"
 chrono = "0.4.9"
 turingarena-contest-webcontent = { path = "../turingarena-contest-webcontent/" }
