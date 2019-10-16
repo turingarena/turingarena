@@ -1,5 +1,7 @@
 #![doc(include = "README.md")]
 
+extern crate juniper;
+
 pub mod table;
 
 use serde::{Deserialize, Serialize};
