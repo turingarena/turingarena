@@ -25,7 +25,7 @@ embed_migrations!();
 pub struct Context {}
 impl juniper::Context for Context {}
 
-fn connect_db() -> ConnectionResult<SqliteConnection> {
+pub fn connect_db() -> ConnectionResult<SqliteConnection> {
     let path = std::env::var("DATABASE_URL").unwrap_or("./database.sqlite3".to_owned());
     SqliteConnection::establish(&path)
 }

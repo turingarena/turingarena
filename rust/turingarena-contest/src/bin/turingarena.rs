@@ -2,7 +2,9 @@
 
 use structopt::StructOpt;
 use turingarena_contest::server::run_server;
-use turingarena_contest::init_db;
+use turingarena_contest::{init_db, connect_db};
+use diesel::prelude::*;
+use turingarena_contest::schema;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "turingarena", about = "CLI to manage the turingarena contest server")]
@@ -29,18 +31,18 @@ enum Command {
         password: String,
     },
     /// removes a user from the contest database
-    RemoveUser {
+    DeleteUser {
         /// name of the user to remove
         username: String,
     },
-    /// add a task to the contest database
-    AddTask {
-        /// name of the task to add
+    /// add a problem to the contest database
+    AddProblem {
+        /// name of the problem to add
         name: String,
     },
-    /// removes a task from the contest database
-    RemoveTask {
-        /// name of the task to remove
+    /// removes a problem from the contest database
+    DeleteProblem {
+        /// name of the problem to remove
         name: String,
     },
     /// initializes the database
@@ -54,6 +56,46 @@ fn main() {
     match Command::from_args() {
         Serve { host, port } => run_server(host, port),
         InitDb {} => init_db(),
-        command => unimplemented!("command {:?} not jet implemented", command),
+        AddUser { username, display_name, password } => add_user(username, display_name, password),
+        DeleteUser { username } => delete_user(username),
+        AddProblem { name } => add_problem(name),
+        DeleteProblem { name } => delete_problem(name),
     }
+}
+
+fn add_user(id: String, display_name: String, _password: String) {
+    // TODO: insert password
+    use turingarena_contest::user::UserInput;
+    let user = UserInput { id, display_name };
+    let conn = connect_db().expect("cannot connect to database");
+    diesel::insert_into(schema::users::table)
+        .values(user)
+        .execute(&conn)
+        .expect("error executing user insert query");
+}
+
+fn delete_user(id: String) {
+    use schema::users::dsl;
+    let conn = connect_db().expect("cannot connect to database");
+    diesel::delete(dsl::users.filter(dsl::id.eq(id)))
+        .execute(&conn)
+        .expect("error executing user delete query");
+}
+
+fn add_problem(name: String) {
+    use turingarena_contest::problem::ProblemInput;
+    let problem = ProblemInput { name };
+    let conn = connect_db().expect("cannot connect to database");
+    diesel::insert_into(schema::problems::table)
+        .values(problem)
+        .execute(&conn)
+        .expect("error executing problem insert query");
+}
+
+fn delete_problem(name: String) {
+    use schema::problems::dsl;
+    let conn = connect_db().expect("cannot connect to database");
+    diesel::delete(dsl::problems.filter(dsl::name.eq(name)))
+        .execute(&conn)
+        .expect("error executing problem delete query");
 }

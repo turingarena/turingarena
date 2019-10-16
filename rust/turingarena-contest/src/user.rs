@@ -5,8 +5,8 @@ use schema::users;
 #[derive(Insertable, juniper::GraphQLInputObject)]
 #[table_name = "users"]
 pub struct UserInput {
-    pub id: Option<String>,
-    pub display_name: Option<String>,
+    pub id: String,
+    pub display_name: String,
 }
 
 #[derive(Queryable)]
