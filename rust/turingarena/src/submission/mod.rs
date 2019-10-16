@@ -1,5 +1,6 @@
 #![doc(include = "README.md")]
 
+extern crate juniper;
 extern crate serde;
 
 use super::content::*;
@@ -10,15 +11,15 @@ pub mod form {
     use super::*;
 
     /// Wraps a string identifying a field in a submission
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
     pub struct FieldId(pub String);
 
     /// Wraps a string identifying a file type for a field in a submission
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
     pub struct FileTypeId(pub String);
 
     /// Describes a field of a submission form
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct Field {
         /// ID of this field
         pub id: FieldId,
@@ -31,10 +32,10 @@ pub mod form {
 
     /// Wraps a file extension.
     /// Should start with a dot, followed by a non-empty ASCII alphanumeric string.
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
     pub struct FileTypeExtension(pub String);
 
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct FileType {
         /// ID of this file type
         pub id: FileTypeId,
@@ -48,7 +49,7 @@ pub mod form {
     }
 
     /// Describes the schema of a submission
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct Form {
         /// List of fields of this form
         pub fields: Vec<Field>,

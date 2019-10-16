@@ -1,12 +1,13 @@
 #![doc(include = "README.md")]
 
 extern crate serde;
+extern crate juniper;
 
 use crate::{content::*, feedback, score, submission};
 use serde::{Deserialize, Serialize};
 
 /// A file that users can download.
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct Attachment {
     /// Name of this attachment, as shown to users.
     pub title: Text,
@@ -15,7 +16,7 @@ pub struct Attachment {
 }
 
 /// Meta-data of a problem
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct Material {
     /// Title of this problem, as shown to users.
     pub title: Text,
@@ -28,6 +29,7 @@ pub struct Material {
     /// Items of this problem which will receive a numerical score.
     pub scored_items: Vec<score::ScoredItem>,
     /// Template of the feedback to show to users, for a submitted solution.
+    #[graphql(skip)] // FIXME
     pub feedback: feedback::Template,
 }
 
