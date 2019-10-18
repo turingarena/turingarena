@@ -4,12 +4,15 @@
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
+#[macro_use]
+extern crate serde;
 extern crate juniper;
 extern crate juniper_rocket;
 extern crate rand;
 extern crate rocket;
 extern crate structopt;
 extern crate turingarena_contest_webcontent;
+extern crate jsonwebtoken as jwt;
 
 use diesel::prelude::*;
 
@@ -19,10 +22,15 @@ pub mod submission;
 pub mod user;
 pub mod server;
 pub mod schema;
+pub mod auth;
 
 embed_migrations!();
 
-pub struct Context {}
+
+pub struct Context {
+    jwt_data: Option<auth::JwtData>,
+}
+
 impl juniper::Context for Context {}
 
 pub fn connect_db() -> ConnectionResult<SqliteConnection> {

@@ -64,7 +64,6 @@ fn main() {
 }
 
 fn add_user(id: String, display_name: String, password: String) {
-    // TODO: insert password
     use turingarena_contest::user::UserInput;
     let user = UserInput { 
         id, 

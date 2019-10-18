@@ -17,7 +17,7 @@ pub struct User {
     pub password: String,
 }
 
-/// A task
+/// A user
 #[juniper::object(Context = Context)]
 impl User {
     fn id(&self) -> String {
@@ -27,11 +27,6 @@ impl User {
     /// Name of this task. Unique in the current contest.
     fn display_name(&self) -> String {
         return self.display_name.clone();
-    }
-
-    /// checks the user password
-    fn check_password(&self, password: String) -> bool {
-        bcrypt::verify(&password, &self.password).unwrap()
     }
 }
 

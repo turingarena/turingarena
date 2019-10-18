@@ -2,33 +2,47 @@ use rocket::{
     http::{ContentType, Status},
     response::{self, content},
     State,
+    Outcome,
 };
+use rocket::request::{self, Request, FromRequest};
 use std::ffi::OsStr;
 use std::io::Cursor;
 use std::path::PathBuf;
 use turingarena_contest_webcontent::WebContent;
 use crate::*;
 
+struct Authorization(Option<auth::JwtData>);
+
+impl<'a, 'r> FromRequest<'a, 'r> for Authorization {
+    type Error = String;
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        match request.headers().get_one("Authorization") {
+            None => Outcome::Success(Authorization(None)),
+            Some(token) => {
+                match auth::validate(&token) {
+                    Ok(claims) => Outcome::Success(Authorization(Some(claims))),
+                    Err(_) => Outcome::Failure((Status::Unauthorized, "JWT token validation failed".to_owned())),
+                }
+            }
+        }
+    }
+}
+
 #[rocket::get("/graphiql")]
 fn graphiql() -> content::Html<String> {
     juniper_rocket::graphiql_source("/graphql")
 }
 
-#[rocket::get("/graphql?<request>")]
-fn get_graphql_handler(
-    context: State<Context>,
-    request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>,
-) -> juniper_rocket::GraphQLResponse {
-    request.execute(&schema, &context)
-}
-
 #[rocket::post("/graphql", data = "<request>")]
 fn post_graphql_handler(
-    context: State<Context>,
     request: juniper_rocket::GraphQLRequest,
     schema: State<Schema>,
+    auth: Authorization,
 ) -> juniper_rocket::GraphQLResponse {
+    let context = Context {
+        jwt_data: auth.0,
+    };
     request.execute(&schema, &context)
 }
 
@@ -65,10 +79,9 @@ pub fn run_server(host: String, port: u16) {
         .unwrap();
     rocket::custom(config)
         .manage(Schema::new(contest::Contest, contest::Contest))
-        .manage(Context {})
         .mount(
             "/",
-            rocket::routes![graphiql, get_graphql_handler, post_graphql_handler, index, dist],
+            rocket::routes![graphiql, post_graphql_handler, index, dist],
         )
         .launch();
 }
