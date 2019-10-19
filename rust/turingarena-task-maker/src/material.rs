@@ -178,7 +178,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             value: task.name.clone().into(),
         }],
         statement: task.booklets.iter().map(statement_of).collect(),
-        attachments: files_in_dir(&task.path).map(attachment_at_path).collect(),
+        attachments: files_in_dir(&task.path.join("att")).map(attachment_at_path).collect(),
         submission_form: submission_form(),
         scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
         feedback: vec![Section::Table(TableSection {

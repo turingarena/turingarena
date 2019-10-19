@@ -1,6 +1,7 @@
 use juniper::{FieldError, FieldResult};
 
 use crate::*;
+use problem::*;
 use schema::{problems, users};
 
 #[derive(Clone)]
@@ -23,8 +24,8 @@ impl Contest {
     }
 
     pub fn with_database(database_url: &str) -> Contest {
-        Contest { 
-            database_url: database_url.to_owned() 
+        Contest {
+            database_url: database_url.to_owned(),
         }
     }
 
@@ -64,10 +65,10 @@ impl Contest {
         Ok(users::table.find(id).first(&self.connect_db()?)?)
     }
 
-    pub fn add_problem(&self, name: &str) {
-        use crate::problem::ProblemInput;
-        let problem = ProblemInput { 
-            name: name.to_owned() 
+    pub fn add_problem(&self, name: &str, path: &str) {
+        let problem = ContestProblemInput {
+            name: name.to_owned(),
+            path: path.to_owned(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::problems::table)
@@ -84,8 +85,8 @@ impl Contest {
             .expect("error executing problem delete query");
     }
 
-    pub fn get_problems(&self) -> Result<Vec<problem::Problem>> {
-        Ok(problems::table.load::<problem::Problem>(&self.connect_db()?)?)
+    pub fn get_problems(&self) -> Result<Vec<ContestProblem>> {
+        Ok(problems::table.load::<ContestProblem>(&self.connect_db()?)?)
     }
 }
 
@@ -109,17 +110,27 @@ impl Contest {
         Ok(self.get_user(id)?)
     }
 
-    fn problems(&self, context: &Context) -> FieldResult<Vec<problem::Problem>> {
+    fn problems(&self, context: &Context) -> FieldResult<Vec<ContestProblem>> {
         Ok(self.get_problems()?)
     }
 
-    fn submit(&self, 
-            ctx: &Context, 
-            problem: String, 
-            files: Vec<submission::GraphQLFileInput>
-        ) -> FieldResult<submission::Submission> {
+    fn submit(
+        &self,
+        ctx: &Context,
+        problem: String,
+        files: Vec<submission::GraphQLFileInput>,
+    ) -> FieldResult<submission::Submission> {
         if let Some(data) = &ctx.jwt_data {
+<<<<<<< HEAD
             Ok(submission::insert(&self.connect_db()?, data.user.clone(), problem, files)?)
+=======
+            Ok(submission::insert(
+                &self.connect_db()?,
+                &data.user,
+                &problem,
+                files,
+            )?)
+>>>>>>> 2a017edb3b600ab404faeebb3becda009a2dea06
         } else {
             Err(FieldError::from("Authentication required"))
         }
