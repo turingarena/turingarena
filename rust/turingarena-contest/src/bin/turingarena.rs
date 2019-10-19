@@ -38,6 +38,8 @@ enum Command {
     AddProblem {
         /// name of the problem to add
         name: String,
+        /// name of the problem to add
+        path: String,
     },
     /// removes a problem from the contest database
     DeleteProblem {
@@ -59,7 +61,7 @@ fn main() {
             password,
         } => Contest::from_env().add_user(&username, &display_name, &password),
         DeleteUser { username } => Contest::from_env().delete_user(&username),
-        AddProblem { name } => Contest::from_env().add_problem(&name),
+        AddProblem { name, path } => Contest::from_env().add_problem(&name, &path),
         DeleteProblem { name } => Contest::from_env().delete_problem(&name),
     }
 }
