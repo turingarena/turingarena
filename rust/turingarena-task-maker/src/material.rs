@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use task_maker_format::ioi;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
@@ -63,20 +64,20 @@ fn cols() -> Vec<Col> {
                 attributes: vec![],
                 value: format!("Case"),
             }],
-            content: ColContent::RowNumber,
+            content: ColContent::RowNumber(RowNumberColContent {}),
         },
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
                 value: format!("Score"),
             }],
-            content: ColContent::Score {
+            content: ColContent::Score(ScoreColContent {
                 range: Range {
                     // FIXME: assuming per-test-case score has fixed precision
                     precision: 2,
                     max: Score(1.),
                 },
-            },
+            }),
         },
     ]
 }
@@ -103,43 +104,51 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
         content: RowContent::Data,
         cells: vec![
             Cell {
-                content: CellContent::RowNumber(testcase.id.into()),
+                content: CellContent::RowNumber(RowNumberCellContent {
+                    number: testcase.id.try_into().expect("Testcase ID too large"),
+                }),
             },
             Cell {
-                content: CellContent::Score {
+                content: CellContent::Score(ScoreCellContent {
                     range: Range {
                         precision: 2,
                         max: Score(1.),
                     },
                     r#ref: Key(format!("testcase.{}.score", testcase.id)),
-                },
+                }),
             },
         ],
     }
 }
 
-fn files_of(file_path: &std::path::PathBuf, pattern: String) -> Vec<std::path::PathBuf> {
-    let path = &file_path.join(pattern);
-    let mut atts = Vec::new();
-
-    for entry in glob::glob(&path.to_string_lossy()).expect("Failed to read glob pattern") {
-        atts.push(entry.unwrap().to_owned());
-    }
-    atts
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
+    std::fs::read_dir(dir_path)
+        .expect("unable to read_dir")
+        .map(|entry| entry.expect("unable to read_dir").path())
 }
 
-fn attachments_of(file_path: std::path::PathBuf) -> Attachment {
+fn attachment_at_path(file_path: std::path::PathBuf) -> Attachment {
     Attachment {
-        title: vec![ TextVariant {
+        title: vec![TextVariant {
             attributes: vec![],
-            value: file_path.file_name().unwrap().to_string_lossy().into_owned(),
+            value: file_path
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned(),
         }],
-        file: vec![ FileVariant {
+        file: vec![FileVariant {
             attributes: vec![],
-            name: Some(FileName(file_path.file_name().unwrap().to_string_lossy().into_owned())),
+            name: Some(FileName(
+                file_path
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .into_owned(),
+            )),
             r#type: None,
             content: FileContent(std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap()),
-        }]
+        }],
     }
 }
 
@@ -149,9 +158,16 @@ fn statement_of(booklet: &ioi::Booklet) -> FileVariant {
             key: "language".to_owned(),
             value: booklet.config().language.to_owned(),
         }],
-        name: Some(FileName(booklet.dest().file_name().unwrap().to_string_lossy().into_owned())),
+        name: Some(FileName(
+            booklet
+                .dest()
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned(),
+        )),
         r#type: Some(MediaType("application/pdf".to_owned())),
-        content: FileContent(std::fs::read(booklet.dest().to_string_lossy().into_owned()).unwrap()),
+        content: FileContent(std::fs::read(booklet.dest()).expect("Unable to read statement file")),
     }
 }
 
@@ -162,13 +178,13 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             value: task.name.clone().into(),
         }],
         statement: task.booklets.iter().map(statement_of).collect(),
-        attachments: files_of(&task.path, "att/*.*".to_owned()).into_iter().map(attachments_of).collect(),
+        attachments: files_in_dir(&task.path).map(attachment_at_path).collect(),
         submission_form: submission_form(),
         scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
-        feedback: vec![Section::Table {
+        feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
             row_groups: subtasks_of(task).into_iter().map(row_group_of).collect(),
-        }],
+        })],
     }
 }
