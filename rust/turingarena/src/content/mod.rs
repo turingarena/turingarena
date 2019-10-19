@@ -53,6 +53,7 @@ pub struct FileVariant {
     /// Name of this file, if relevant
     pub name: Option<FileName>,
     /// Media type of this file, if relevant
+    #[graphql(name = "type")]
     pub r#type: Option<MediaType>,
 
     /// Byte content of this file
