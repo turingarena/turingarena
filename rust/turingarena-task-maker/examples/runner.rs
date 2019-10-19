@@ -1,5 +1,5 @@
-use turingarena_task_maker::*;
 use std::path::PathBuf;
+use turingarena_task_maker::*;
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();

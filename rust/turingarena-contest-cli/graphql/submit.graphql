@@ -1,0 +1,6 @@
+mutation SubmitMutation($problem: String!, $files: [FileInput!]!) {
+    submit(problem: $problem, files: $files) {
+        id,
+        createdAt,
+    }
+}

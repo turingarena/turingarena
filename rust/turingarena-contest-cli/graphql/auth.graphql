@@ -1,0 +1,5 @@
+query AuthQuery($user: String!, $password: String!) {
+    auth(user: $user, password: $password) {
+        token
+    }
+}

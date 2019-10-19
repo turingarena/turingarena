@@ -8,8 +8,8 @@ use turingarena::evaluation::mem::*;
 use turingarena::problem::{driver::*, material::*, *};
 use turingarena::submission::mem::*;
 
-use failure::Error;
 use crate::run_task;
+use failure::Error;
 
 pub struct IoiProblemDriver;
 
@@ -43,7 +43,7 @@ impl ProblemDriver for IoiProblemDriver {
     fn evaluate(pack: ProblemPack, submission: Submission) -> Evaluation {
         unimplemented!();
 
-        // let file = submission.field_values[0].file; 
+        // let file = submission.field_values[0].file;
         // let filename = file.name.0;
         // let tmpdir = tempdir::TempDir::new("turingarena")
         //     .expect("Cannot create temporary directory");

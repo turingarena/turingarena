@@ -42,7 +42,7 @@ pub struct Submission {
 
 /// Input file for a submission file
 #[derive(juniper::GraphQLInputObject)]
-pub struct GraphQLFileInput {
+pub struct FileInput {
     /// type of the file submitted
     type_id: String,
 
@@ -80,7 +80,7 @@ pub fn insert(
     conn: &SqliteConnection,
     user_id: String,
     problem_name: String,
-    files: Vec<GraphQLFileInput>,
+    files: Vec<FileInput>,
 ) -> Result<Submission, Box<dyn std::error::Error>> {
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Local::now().to_rfc3339();

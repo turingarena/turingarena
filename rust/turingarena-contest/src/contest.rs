@@ -12,7 +12,7 @@ pub struct Contest {
 /// a user authorization token
 #[derive(juniper::GraphQLObject)]
 pub struct UserToken {
-    token: Option<String>,
+    token: String,
 }
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -95,7 +95,7 @@ impl Contest {
     fn auth(&self, user: String, password: String) -> FieldResult<UserToken> {
         let user = self.get_user(&user)?;
         Ok(UserToken {
-            token: auth::auth(&user, &password),
+            token: auth::auth(&user, &password)?,
         })
     }
 
@@ -118,7 +118,7 @@ impl Contest {
         &self,
         ctx: &Context,
         problem: String,
-        files: Vec<submission::GraphQLFileInput>,
+        files: Vec<submission::FileInput>,
     ) -> FieldResult<submission::Submission> {
         if let Some(data) = &ctx.jwt_data {
             Ok(submission::insert(

@@ -1,5 +1,4 @@
 ///! Contains a trait to implement to support a problem format.
-
 use std::path;
 
 use super::*;

@@ -27,7 +27,10 @@ use task_maker_store::*;
 pub mod driver;
 pub(crate) mod material;
 
-pub fn run_task(task_dir: PathBuf, submitted_file: PathBuf) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
+pub fn run_task(
+    task_dir: PathBuf,
+    submitted_file: PathBuf,
+) -> (thread::JoinHandle<()>, mpsc::IntoIter<UIMessage>) {
     let (message_tx, message_rx) = channel();
     let path = PathBuf::from(task_dir);
 
