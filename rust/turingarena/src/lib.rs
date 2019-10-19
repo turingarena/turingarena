@@ -1,6 +1,9 @@
 #![feature(external_doc)]
 #![doc(include = "../README.md")]
 
+#[macro_use]
+mod juniper_ext;
+
 pub mod autoio;
 pub mod batch;
 pub mod bios;

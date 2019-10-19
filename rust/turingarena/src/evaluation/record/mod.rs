@@ -1,22 +1,26 @@
 #![doc(include = "README.md")]
 
+extern crate juniper;
+
 use crate::{content, score};
 use serde::{Deserialize, Serialize};
 
 /// Wraps a string used to identify a value of a given kind
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct Key(pub String);
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLEnum)]
 pub enum Kind {
     Message,
     Score,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub enum Value {
-    Message(content::Text),
-    Score(score::Score),
+graphql_derive_union_from_enum! {
+    #[derive(Serialize, Deserialize, Clone)]
+    pub enum Value {
+        Message(content::Text),
+        Score(score::Score),
+    }
 }
 
 #[cfg(test)]

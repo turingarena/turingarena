@@ -1,7 +1,7 @@
 #![doc(include = "README.md")]
 
-extern crate serde;
 extern crate juniper;
+extern crate serde;
 
 use crate::{content::*, feedback, score, submission};
 use serde::{Deserialize, Serialize};
@@ -29,7 +29,6 @@ pub struct Material {
     /// Items of this problem which will receive a numerical score.
     pub scored_items: Vec<score::ScoredItem>,
     /// Template of the feedback to show to users, for a submitted solution.
-    #[graphql(skip)] // FIXME
     pub feedback: feedback::Template,
 }
 
@@ -85,7 +84,7 @@ mod tests {
                             extensions: vec![FileTypeExtension(".cpp".to_owned())],
                             primary_extension: FileTypeExtension(".cpp".to_owned()),
                         }],
-                    }]
+                    }],
                 },
                 scored_items: vec![
                     ScoredItem {
@@ -107,9 +106,9 @@ mod tests {
                             precision: 2,
                             max: Score(60.),
                         },
-                    }
+                    },
                 ],
-                feedback: vec![feedback::Section::Table {
+                feedback: vec![feedback::Section::Table(feedback::table::TableSection {
                     caption: vec![TextVariant {
                         attributes: vec![language_attr.clone()],
                         value: "Test cases".to_owned(),
@@ -120,20 +119,20 @@ mod tests {
                                 attributes: vec![language_attr.clone()],
                                 value: "Case".to_owned(),
                             }],
-                            content: ColContent::RowNumber,
+                            content: ColContent::RowNumber(RowNumberColContent {}),
                         },
                         Col {
                             title: vec![TextVariant {
                                 attributes: vec![language_attr.clone()],
                                 value: "Score".to_owned(),
                             }],
-                            content: ColContent::Score {
+                            content: ColContent::Score(ScoreColContent {
                                 range: score::Range {
                                     precision: 2,
                                     max: Score(100.),
-                                }
-                            },
-                        }
+                                },
+                            }),
+                        },
                     ],
                     row_groups: vec![
                         RowGroup {
@@ -145,19 +144,21 @@ mod tests {
                                 content: RowContent::Data,
                                 cells: vec![
                                     Cell {
-                                        content: CellContent::RowNumber(1),
+                                        content: CellContent::RowNumber(RowNumberCellContent {
+                                            number: 1,
+                                        }),
                                     },
                                     Cell {
-                                        content: CellContent::Score {
+                                        content: CellContent::Score(ScoreCellContent {
                                             range: score::Range {
                                                 precision: 2,
                                                 max: Score(50.),
                                             },
-                                            r#ref: Key("subtask.1.testcase.1.score".into()),
-                                        },
+                                            r#ref: Key("subtask.1.testcase.1.score".to_owned()),
+                                        }),
                                     },
-                                ]
-                            },],
+                                ],
+                            }],
                         },
                         RowGroup {
                             title: vec![TextVariant {
@@ -168,22 +169,24 @@ mod tests {
                                 content: RowContent::Data,
                                 cells: vec![
                                     Cell {
-                                        content: CellContent::RowNumber(2),
+                                        content: CellContent::RowNumber(RowNumberCellContent {
+                                            number: 2,
+                                        }),
                                     },
                                     Cell {
-                                        content: CellContent::Score {
+                                        content: CellContent::Score(ScoreCellContent {
                                             range: score::Range {
                                                 precision: 2,
                                                 max: Score(50.),
                                             },
-                                            r#ref: Key("subtask.2.testcase.2.score".into()),
-                                        },
+                                            r#ref: Key("subtask.2.testcase.2.score".to_owned()),
+                                        }),
                                     },
-                                ]
-                            },],
+                                ],
+                            }],
                         },
                     ],
-                }],
+                })],
             })
             .unwrap()
         );
