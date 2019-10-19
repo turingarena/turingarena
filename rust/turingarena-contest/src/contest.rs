@@ -119,7 +119,7 @@ impl Contest {
             files: Vec<submission::GraphQLFileInput>
         ) -> FieldResult<submission::Submission> {
         if let Some(data) = &ctx.jwt_data {
-            Ok(submission::insert(&self.connect_db()?, &data.user, &problem, files)?)
+            Ok(submission::insert(&self.connect_db()?, data.user.clone(), problem, files)?)
         } else {
             Err(FieldError::from("Authentication required"))
         }
