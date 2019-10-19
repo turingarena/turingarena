@@ -56,7 +56,6 @@ pub struct GraphQLFileInput {
     content_base64: String,
 }
 
-<<<<<<< HEAD
 #[derive(Queryable, Insertable)]
 #[table_name = "submissions"]
 struct SubmissionTable {
@@ -101,34 +100,6 @@ pub fn insert(
             content: base64::decode(&file.content_base64)?,
         };
         diesel::insert_into(submission_files::table).values(submission_file).execute(conn)?;
-=======
-/// Insert a new submission into the database, returning a submission object
-pub fn insert(
-    conn: &SqliteConnection,
-    user: &str,
-    problem: &str,
-    files: Vec<GraphQLFileInput>,
-) -> Result<Submission, Box<dyn std::error::Error>> {
-    let submission_id = uuid::Uuid::new_v4().to_string();
-    diesel::insert_into(submissions::table)
-        .values((
-            submissions::dsl::id.eq(&submission_id),
-            submissions::dsl::user_id.eq(user),
-            submissions::dsl::problem_name.eq(problem),
-            submissions::dsl::created_at.eq(chrono::Local::now().to_rfc3339()),
-        ))
-        .execute(conn)?;
-    for file in files {
-        diesel::insert_into(submission_files::table)
-            .values((
-                submission_files::dsl::submission_id.eq(&submission_id),
-                submission_files::dsl::type_id.eq(file.type_id),
-                submission_files::dsl::field_id.eq(file.field_id),
-                submission_files::dsl::name.eq(file.name),
-                submission_files::dsl::content.eq(base64::decode(&file.content_base64)?),
-            ))
-            .execute(conn)?;
->>>>>>> 2a017edb3b600ab404faeebb3becda009a2dea06
     }
     Ok(query(conn, id)?)
 }
@@ -137,7 +108,6 @@ pub fn insert(
 pub fn query(conn: &SqliteConnection, id: String) -> Result<Submission, Box<dyn std::error::Error>> {
     let submission = submissions::table.filter(submissions::dsl::id.eq(id)).first::<SubmissionTable>(conn)?;
     let files = submission_files::table
-<<<<<<< HEAD
         .load::<SubmissionFileTable>(conn)?
         .into_iter()
         .map(|submission_file| SubmissionFile {
@@ -153,26 +123,6 @@ pub fn query(conn: &SqliteConnection, id: String) -> Result<Submission, Box<dyn 
         problem_name: submission.problem_name, 
         created_at: submission.created_at, 
         files 
-=======
-        .load::<(String, String, String, String, Vec<u8>)>(conn)?
-        .iter()
-        .map(
-            |(submission_id, field_id, type_id, name, content)| SubmissionFile {
-                submission_id: submission_id.to_owned(),
-                field_id: field_id.to_owned(),
-                type_id: type_id.to_owned(),
-                name: name.to_owned(),
-                content_base64: base64::encode(&content),
-            },
-        )
-        .collect();
-    Ok(Submission {
-        id,
-        user_id,
-        problem_name,
-        created_at,
-        files,
->>>>>>> 2a017edb3b600ab404faeebb3becda009a2dea06
     })
 }
 
