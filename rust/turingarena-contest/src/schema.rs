@@ -10,7 +10,7 @@ table! {
         field_id -> Text,
         type_id -> Text,
         name -> Text,
-        content_base64 -> Text,
+        content -> Binary,
     }
 }
 
@@ -27,9 +27,12 @@ table! {
     users (id) {
         id -> Text,
         display_name -> Text,
-        password -> Text,
+        password_bcrypt -> Text,
     }
 }
+
+joinable!(submission_files -> submissions (submission_id));
+joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     problems,

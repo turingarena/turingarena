@@ -5,21 +5,21 @@ CREATE TABLE problems(
 CREATE TABLE users(
     id              TEXT NOT NULL PRIMARY KEY,
     display_name    TEXT NOT NULL,
-    password        TEXT NOT NULL -- bcrypt encrypted
+    password_bcrypt TEXT NOT NULL
 );
 
 CREATE TABLE submissions(
     id              TEXT NOT NULL PRIMARY KEY,
-    user_id         TEXT NOT NULL,
-    problem_name    TEXT NOT NULL,
+    user_id         TEXT NOT NULL REFERENCES users(id),
+    problem_name    TEXT NOT NULL REFERENCES problem(name),
     created_at      TEXT NOT NULL
 );
 
 CREATE TABLE submission_files(
-    submission_id   TEXT NOT NULL,
+    submission_id   TEXT NOT NULL REFERENCES submissions(id),
     field_id        TEXT NOT NULL,
     type_id         TEXT NOT NULL,
     name            TEXT NOT NULL,
-    content_base64  TEXT NOT NULL,
+    content         BLOB NOT NULL,
     PRIMARY KEY (submission_id, field_id)
 );

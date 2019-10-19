@@ -57,9 +57,9 @@ fn main() {
             username,
             display_name,
             password,
-        } => Contest::from_env().add_user(username, display_name, password),
-        DeleteUser { username } => Contest::from_env().delete_user(username),
-        AddProblem { name } => Contest::from_env().add_problem(name),
-        DeleteProblem { name } => Contest::from_env().delete_problem(name),
+        } => Contest::from_env().add_user(&username, &display_name, &password),
+        DeleteUser { username } => Contest::from_env().delete_user(&username),
+        AddProblem { name } => Contest::from_env().add_problem(&name),
+        DeleteProblem { name } => Contest::from_env().delete_problem(&name),
     }
 }

@@ -14,14 +14,18 @@ pub struct UserToken {
     token: Option<String>,
 }
 
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
 impl Contest {
     pub fn from_env() -> Contest {
         let database_url = std::env::var("DATABASE_URL").unwrap_or("./database.sqlite3".to_owned());
-        Contest::with_database(database_url)
+        Contest::with_database(&database_url)
     }
 
-    pub fn with_database(database_url: String) -> Contest {
-        Contest { database_url }
+    pub fn with_database(database_url: &str) -> Contest {
+        Contest { 
+            database_url: database_url.to_owned() 
+        }
     }
 
     pub fn connect_db(&self) -> ConnectionResult<SqliteConnection> {
@@ -34,12 +38,12 @@ impl Contest {
             .expect("Error while initializing the database");
     }
 
-    pub fn add_user(&self, id: String, display_name: String, password: String) {
+    pub fn add_user(&self, id: &str, display_name: &str, password: &str) {
         use crate::user::UserInput;
         let user = UserInput {
-            id,
-            display_name,
-            password: bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap(),
+            id: id.to_owned(),
+            display_name: display_name.to_owned(),
+            password_bcrypt: bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::users::table)
@@ -48,7 +52,7 @@ impl Contest {
             .expect("error executing user insert query");
     }
 
-    pub fn delete_user(&self, id: String) {
+    pub fn delete_user(&self, id: &str) {
         use schema::users::dsl;
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::delete(dsl::users.filter(dsl::id.eq(id)))
@@ -56,9 +60,15 @@ impl Contest {
             .expect("error executing user delete query");
     }
 
-    pub fn add_problem(&self, name: String) {
+    pub fn get_user(&self, id: &str) -> Result<user::User> {
+        Ok(users::table.find(id).first(&self.connect_db()?)?)
+    }
+
+    pub fn add_problem(&self, name: &str) {
         use crate::problem::ProblemInput;
-        let problem = ProblemInput { name };
+        let problem = ProblemInput { 
+            name: name.to_owned() 
+        };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::problems::table)
             .values(problem)
@@ -66,27 +76,29 @@ impl Contest {
             .expect("error executing problem insert query");
     }
 
-    pub fn delete_problem(&self, name: String) {
+    pub fn delete_problem(&self, name: &str) {
         use schema::problems::dsl;
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::delete(dsl::problems.filter(dsl::name.eq(name)))
             .execute(&conn)
             .expect("error executing problem delete query");
     }
+
+    pub fn get_problems(&self) -> Result<Vec<problem::Problem>> {
+        Ok(problems::table.load::<problem::Problem>(&self.connect_db()?)?)
+    }
 }
 
 #[juniper::object(Context = Context)]
 impl Contest {
     fn auth(&self, user: String, password: String) -> FieldResult<UserToken> {
-        let connection = self.connect_db()?;
-        let user = users::table.find(user).first(&connection)?;
+        let user = self.get_user(&user)?;
         Ok(UserToken {
             token: auth::auth(&user, &password),
         })
     }
 
     fn user(&self, context: &Context, id: Option<String>) -> FieldResult<user::User> {
-        let connection = self.connect_db()?;
         let id = if let Some(id) = &id {
             id
         } else if let Some(ctx) = &context.jwt_data {
@@ -94,11 +106,22 @@ impl Contest {
         } else {
             return Err(FieldError::from("invalid authorization token"));
         };
-        Ok(users::table.find(id).first(&connection)?)
+        Ok(self.get_user(id)?)
     }
 
     fn problems(&self, context: &Context) -> FieldResult<Vec<problem::Problem>> {
-        let connection = self.connect_db()?;
-        return Ok(problems::table.load::<problem::Problem>(&connection)?);
+        Ok(self.get_problems()?)
+    }
+
+    fn submit(&self, 
+            ctx: &Context, 
+            problem: String, 
+            files: Vec<submission::GraphQLFileInput>
+        ) -> FieldResult<submission::Submission> {
+        if let Some(data) = &ctx.jwt_data {
+            Ok(submission::insert(&self.connect_db()?, &data.user, &problem, files)?)
+        } else {
+            Err(FieldError::from("Authentication required"))
+        }
     }
 }

@@ -14,6 +14,11 @@ extern crate structopt;
 extern crate turingarena;
 extern crate turingarena_contest_webcontent;
 extern crate jsonwebtoken as jwt;
+extern crate uuid;
+extern crate base64;
+
+#[cfg(test)]
+extern crate tempdir;
 
 use diesel::prelude::*;
 

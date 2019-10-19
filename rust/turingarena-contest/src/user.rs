@@ -2,12 +2,12 @@ use super::*;
 
 use schema::users;
 
-#[derive(Insertable, juniper::GraphQLInputObject)]
+#[derive(Insertable)]
 #[table_name = "users"]
 pub struct UserInput {
     pub id: String,
     pub display_name: String,
-    pub password: String,
+    pub password_bcrypt: String,
 }
 
 #[derive(Queryable)]
