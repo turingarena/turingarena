@@ -6,6 +6,8 @@ extern crate diesel;
 extern crate diesel_migrations;
 #[macro_use]
 extern crate serde;
+extern crate base64;
+extern crate jsonwebtoken as jwt;
 extern crate juniper;
 extern crate juniper_rocket;
 extern crate rand;
@@ -13,25 +15,22 @@ extern crate rocket;
 extern crate structopt;
 extern crate turingarena;
 extern crate turingarena_contest_webcontent;
-extern crate jsonwebtoken as jwt;
 extern crate uuid;
-extern crate base64;
 
 #[cfg(test)]
 extern crate tempdir;
 
 use diesel::prelude::*;
 
+pub mod auth;
 pub mod contest;
 pub mod problem;
+pub mod schema;
+pub mod server;
 pub mod submission;
 pub mod user;
-pub mod server;
-pub mod schema;
-pub mod auth;
 
 embed_migrations!();
-
 
 pub struct Context {
     jwt_data: Option<auth::JwtData>,

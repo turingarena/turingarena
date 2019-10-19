@@ -77,20 +77,22 @@ struct SubmissionFileTable {
 
 /// Insert a new submission into the database, returning a submission object
 pub fn insert(
-        conn: &SqliteConnection, 
-        user_id: String, 
-        problem_name: String, 
-        files: Vec<GraphQLFileInput>
-    ) -> Result<Submission, Box<dyn std::error::Error>> {
+    conn: &SqliteConnection,
+    user_id: String,
+    problem_name: String,
+    files: Vec<GraphQLFileInput>,
+) -> Result<Submission, Box<dyn std::error::Error>> {
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Local::now().to_rfc3339();
     let submission = SubmissionTable {
         id: id.clone(),
-        user_id, 
+        user_id,
         problem_name,
         created_at,
     };
-    diesel::insert_into(submissions::table).values(submission).execute(conn)?;
+    diesel::insert_into(submissions::table)
+        .values(submission)
+        .execute(conn)?;
     for file in files {
         let submission_file = SubmissionFileTable {
             submission_id: id.clone(),
@@ -99,30 +101,38 @@ pub fn insert(
             name: file.name,
             content: base64::decode(&file.content_base64)?,
         };
-        diesel::insert_into(submission_files::table).values(submission_file).execute(conn)?;
+        diesel::insert_into(submission_files::table)
+            .values(submission_file)
+            .execute(conn)?;
     }
     Ok(query(conn, id)?)
 }
 
 /// Gets the submission with the specified id from the database
-pub fn query(conn: &SqliteConnection, id: String) -> Result<Submission, Box<dyn std::error::Error>> {
-    let submission = submissions::table.filter(submissions::dsl::id.eq(id)).first::<SubmissionTable>(conn)?;
+pub fn query(
+    conn: &SqliteConnection,
+    id: String,
+) -> Result<Submission, Box<dyn std::error::Error>> {
+    let submission = submissions::table
+        .filter(submissions::dsl::id.eq(id))
+        .first::<SubmissionTable>(conn)?;
     let files = submission_files::table
         .load::<SubmissionFileTable>(conn)?
         .into_iter()
         .map(|submission_file| SubmissionFile {
             submission_id: submission_file.submission_id,
-            field_id: submission_file.field_id, 
-            type_id: submission_file.type_id, 
-            name: submission_file.name, 
+            field_id: submission_file.field_id,
+            type_id: submission_file.type_id,
+            name: submission_file.name,
             content_base64: base64::encode(&submission_file.content),
-        }).collect();
-    Ok(Submission { 
-        id: submission.id, 
-        user_id: submission.user_id, 
-        problem_name: submission.problem_name, 
-        created_at: submission.created_at, 
-        files 
+        })
+        .collect();
+    Ok(Submission {
+        id: submission.id,
+        user_id: submission.user_id,
+        problem_name: submission.problem_name,
+        created_at: submission.created_at,
+        files,
     })
 }
 
@@ -158,7 +168,13 @@ mod tests {
             name: "solution.cpp".to_owned(),
             content_base64: "dGVzdHRlc3R0ZXN0cHJvdmEK".to_owned(),
         });
-        let sub = insert(&contest.connect_db().unwrap(), "user".to_owned(), "problem".to_owned(), files).unwrap();
+        let sub = insert(
+            &contest.connect_db().unwrap(),
+            "user".to_owned(),
+            "problem".to_owned(),
+            files,
+        )
+        .unwrap();
         assert_eq!(sub.problem_name, "problem");
         assert_eq!(sub.user_id, "user");
         assert_eq!(sub.files.len(), 3);

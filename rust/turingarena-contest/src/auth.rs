@@ -1,6 +1,6 @@
 use crate::*;
+use jwt::{decode, encode, Header, Validation};
 use user::User;
-use jwt::{Header, encode, decode, Validation};
 
 fn secret_key() -> String {
     // TODO: read secret key from a configuration file

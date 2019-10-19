@@ -35,9 +35,4 @@ table! {
 joinable!(submission_files -> submissions (submission_id));
 joinable!(submissions -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    problems,
-    submission_files,
-    submissions,
-    users,
-);
+allow_tables_to_appear_in_same_query!(problems, submission_files, submissions, users,);
