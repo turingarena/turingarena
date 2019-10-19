@@ -18,7 +18,7 @@ pub struct JwtData {
 
 /// auth the user, generating a JWT token
 pub fn auth(user: &User, password: &str) -> Option<String> {
-    if bcrypt::verify(password, &user.password).unwrap() {
+    if bcrypt::verify(password, &user.password_bcrypt).unwrap() {
         let claims = JwtData {
             user: user.id.clone(),
             exp: 100000000000000, // TODO: generate this number as current_time + X seconds

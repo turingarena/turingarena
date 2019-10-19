@@ -14,23 +14,19 @@ pub struct UserInput {
 pub struct User {
     pub id: String,
     pub display_name: String,
-    pub password: String,
+    pub password_bcrypt: String,
 }
 
 /// A user
 #[juniper::object(Context = Context)]
 impl User {
+    /// ID of this user. Should never be shown to any (non-admin) user.
     fn id(&self) -> String {
         return self.id.clone();
     }
 
-    /// Name of this task. Unique in the current contest.
+    /// Name of this user to be shown to them or other users.
     fn display_name(&self) -> String {
         return self.display_name.clone();
     }
-}
-
-pub struct UserRepository;
-
-impl UserRepository {
 }

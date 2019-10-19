@@ -28,8 +28,3 @@ impl Problem {
         unimplemented!();
     }
 }
-
-pub struct ProblemRepository;
-
-impl ProblemRepository {
-}
