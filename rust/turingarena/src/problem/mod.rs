@@ -13,5 +13,5 @@ pub mod driver;
 /// It could be overidden (as with the `package` option in `Cargo.toml`),
 /// in the rare case two problems with the same name are desired in the same contest
 /// (or two versions of the same problem).
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct ProblemName(pub String);

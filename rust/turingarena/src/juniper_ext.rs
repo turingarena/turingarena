@@ -33,3 +33,24 @@ macro_rules! graphql_union_from_enum {
         }
     };
 }
+
+macro_rules! graphql_derive_object_from_unit {
+    (
+        $( $struct:tt )*
+    ) => {
+        $( $struct )*
+        graphql_object_from_unit! { $( $struct )* }
+    };
+}
+
+macro_rules! graphql_object_from_unit {
+    (
+        $( #[ $struct_attr:meta ] )* $vis:vis struct $struct_ident:ident;
+    ) => {
+        $crate::juniper::graphql_object!{
+            $struct_ident: () as (stringify!($struct_ident)) where Scalar = <S> |&self| {
+                field ok() -> bool { true }
+            }
+        }
+    };
+}

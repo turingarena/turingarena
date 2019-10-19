@@ -71,15 +71,19 @@ graphql_derive_union_from_enum! {
     }
 }
 
-/// Column of row titles.
-/// Cells must contain `CellContent::RowTitle`.
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct RowTitleColContent {}
+graphql_derive_object_from_unit! {
+    /// Column of row titles.
+    /// Cells must contain `CellContent::RowTitle`.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct RowTitleColContent;
+}
 
-/// Column of row numbers.
-/// Cells must contain `CellContent::RowNumber`.
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct RowNumberColContent {}
+graphql_derive_object_from_unit! {
+    /// Column of row numbers.
+    /// Cells must contain `CellContent::RowNumber`.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct RowNumberColContent;
+}
 
 /// Column of scores.
 /// Cells must contain `CellContent::Score` or `CellContent::Missing`.
@@ -101,9 +105,11 @@ graphql_derive_union_from_enum! {
     }
 }
 
-/// Cell containing no value.
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct MissingCellContent {}
+graphql_derive_object_from_unit! {
+    /// Cell containing no value.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct MissingCellContent;
+}
 
 /// Cell containing the name of the corresponding row,
 /// shown as row header (e.g., using `<th scope=col>` elements).
@@ -126,5 +132,6 @@ pub struct ScoreCellContent {
     /// Must be a sub-range of the column score range.
     pub range: score::Range,
     /// Reference to the evaluation value containing the score to show in this cell.
+    #[graphql(name = "ref")]
     pub r#ref: Key,
 }
