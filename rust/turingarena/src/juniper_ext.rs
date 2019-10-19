@@ -12,8 +12,8 @@ macro_rules! graphql_union_from_enum {
         $( #[ $enum_attr:meta ] )* $vis:vis enum $enum_ident:ident {
             $(
                 $( #[ $variant_attr:meta ] )*
-                $variant_ident:ident ( $delegate:ident )
-            )*
+                $variant_ident:ident ( $delegate:path )
+            ),*
 
             $( , )?
         }
@@ -22,8 +22,12 @@ macro_rules! graphql_union_from_enum {
             $enum_ident: () as (stringify!($enum_ident)) where Scalar = <S> |&self| {
                 instance_resolvers: |_| {
                     $(
-                        &$delegate => match self { $enum_ident::$variant_ident(delegate) => Some(delegate) },
-                    ),*
+                        &$delegate => match self {
+                            $enum_ident::$variant_ident(delegate) => Some(delegate),
+                            #[allow(unreachable_patterns)]
+                            _ => None,
+                        },
+                    )*
                 }
             }
         }
