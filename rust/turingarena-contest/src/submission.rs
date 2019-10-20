@@ -150,19 +150,19 @@ mod tests {
         contest.add_user("user", "x", "x");
         contest.add_problem("problem", "test-path");
         let mut files = Vec::new();
-        files.push(GraphQLFileInput {
+        files.push(FileInput {
             field_id: "field1".to_owned(),
             type_id: "text/plain".to_owned(),
             name: "solution.cpp".to_owned(),
             content_base64: "dGVzdHRlc3R0ZXN0cHJvdmEK".to_owned(),
         });
-        files.push(GraphQLFileInput {
+        files.push(FileInput {
             field_id: "field2".to_owned(),
             type_id: "text/plain".to_owned(),
             name: "solution.cpp".to_owned(),
             content_base64: "dGVzdHRlc3R0ZXN0cHJvdmEK".to_owned(),
         });
-        files.push(GraphQLFileInput {
+        files.push(FileInput {
             field_id: "field3".to_owned(),
             type_id: "text/plain".to_owned(),
             name: "solution.cpp".to_owned(),
