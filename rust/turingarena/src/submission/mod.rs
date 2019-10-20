@@ -59,7 +59,7 @@ pub mod form {
 #[derive(Clone)]
 pub struct Submission<T: Clone> {
     /// Submission form associated with this submission
-    pub form: form::Form,
+    /// pub form: form::Form,
 
     /// A value for each field of the associated form.
     pub field_values: Vec<FieldValue<T>>,
@@ -68,6 +68,7 @@ pub struct Submission<T: Clone> {
 /// Value of a submission field
 #[derive(Clone)]
 pub struct FieldValue<T: Clone> {
+    pub field: form::FieldId,
     pub file: T,
 }
 

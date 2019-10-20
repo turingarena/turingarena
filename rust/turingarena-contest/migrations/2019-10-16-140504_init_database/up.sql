@@ -24,3 +24,10 @@ CREATE TABLE submission_files(
     content         BLOB NOT NULL,
     PRIMARY KEY (submission_id, field_id)
 );
+
+CREATE TABLE evaluation_events(
+    submission_id   TEXT NOT NULL REFERENCES submission(id),
+    serial          INT  NOT NULL,
+    value_json      TEXT NOT NULL,
+    PRIMARY KEY(submission_id, serial)
+)

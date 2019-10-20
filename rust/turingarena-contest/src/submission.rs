@@ -1,6 +1,7 @@
 use super::*;
 
 use schema::{submission_files, submissions};
+use turingarena::submission::*;
 
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
@@ -47,7 +48,7 @@ impl SubmissionFile {
 /// A submission in the database
 pub struct Submission {
     /// id of the submission, that is a random generated UUID
-    id: String,
+    pub id: String,
 
     /// id of user who made submission
     user_id: String,
@@ -60,6 +61,23 @@ pub struct Submission {
 
     /// files submitted in this submission
     files: Vec<SubmissionFile>,
+}
+
+impl Submission {
+    /// converts this submission to a TuringArena submission
+    pub fn to_mem_submission(&self) -> mem::Submission {
+        let mut field_values = Vec::new();
+        for file in &self.files {
+            field_values.push(FieldValue {
+                field: form::FieldId(file.field_id.clone()),
+                file: mem::File {
+                    name: mem::FileName(file.name.clone()),
+                    content: file.content.clone(),
+                },
+            })
+        }
+        mem::Submission { field_values }
+    }
 }
 
 #[juniper::object]

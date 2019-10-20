@@ -19,6 +19,7 @@ turingarena = { path = "../turingarena/" }
 structopt = "~0.3.3"
 jsonwebtoken = "5.0.1"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 uuid = { version = "0.8", features = ["v4"] }
 base64 = "0.10.1"
 

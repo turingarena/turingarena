@@ -78,7 +78,7 @@ pub fn run_task(
                 .extra_time(0.0);
 
             let eval_config = EvaluationConfig {
-                solution_filter: vec!["-no-solution".into()],
+                solution_filter: vec![],
                 booklet_solutions: false,
                 solution_paths: vec![submitted_file.to_owned()],
             };

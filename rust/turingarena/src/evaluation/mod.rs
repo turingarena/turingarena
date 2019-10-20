@@ -1,7 +1,9 @@
 #![doc(include = "README.md")]
 
 pub mod record;
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub enum Event {
     Value {
         key: record::Key,

@@ -24,6 +24,7 @@ use diesel::prelude::*;
 
 pub mod auth;
 pub mod contest;
+pub mod evaluation;
 pub mod problem;
 pub mod schema;
 pub mod server;
@@ -31,6 +32,11 @@ pub mod submission;
 pub mod user;
 
 embed_migrations!();
+
+pub fn db_connect() -> ConnectionResult<SqliteConnection> {
+    let url = std::env::var("DATABASE_URL").unwrap_or("./database.sqlite3".to_owned());
+    SqliteConnection::establish(&url)
+}
 
 pub struct Context {
     jwt_data: Option<auth::JwtData>,

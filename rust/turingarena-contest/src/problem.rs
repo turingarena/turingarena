@@ -26,18 +26,23 @@ pub struct ContestProblem {
 }
 
 /// A problem in a contest
-#[juniper::object(Context = Context)]
+#[juniper::object]
 impl ContestProblem {
     /// Name of this problem. Unique in the current contest.
-    fn name(&self, context: &Context) -> ProblemName {
-        return ProblemName(self.name.clone());
+    fn name(&self) -> ProblemName {
+        ProblemName(self.name.clone())
     }
 
     /// Name of this problem. Unique in the current contest.
-    fn material(context: &Context) -> FieldResult<Material> {
-        turingarena_task_maker::driver::IoiProblemDriver::gen_material(ProblemPack(
-            std::path::PathBuf::from(self.path.clone()),
-        ))
-        .map_err(|e| FieldError::from(e))
+    fn material(&self) -> FieldResult<Material> {
+        turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack())
+            .map_err(|e| FieldError::from(e))
+    }
+}
+
+impl ContestProblem {
+    /// return the problem pack object
+    pub fn pack(&self) -> ProblemPack {
+        ProblemPack(std::path::PathBuf::from(&self.path))
     }
 }

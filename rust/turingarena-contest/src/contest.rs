@@ -88,6 +88,12 @@ impl Contest {
     pub fn get_problems(&self) -> Result<Vec<ContestProblem>> {
         Ok(problems::table.load::<ContestProblem>(&self.connect_db()?)?)
     }
+
+    pub fn get_problem(&self, name: &str) -> Result<ContestProblem> {
+        Ok(problems::table
+            .find(name)
+            .first::<ContestProblem>(&self.connect_db()?)?)
+    }
 }
 
 #[juniper::object(Context = Context)]
@@ -117,16 +123,15 @@ impl Contest {
     fn submit(
         &self,
         ctx: &Context,
-        problem: String,
+        problem_name: String,
         files: Vec<submission::FileInput>,
     ) -> FieldResult<submission::Submission> {
         if let Some(data) = &ctx.jwt_data {
-            Ok(submission::insert(
-                &self.connect_db()?,
-                &data.user,
-                &problem,
-                files,
-            )?)
+            let problem = self.get_problem(&problem_name)?;
+            let submission =
+                submission::insert(&self.connect_db()?, &data.user, &problem_name, files)?;
+            evaluation::evaluate(&problem, &submission);
+            Ok(submission)
         } else {
             Err(FieldError::from("Authentication required"))
         }
