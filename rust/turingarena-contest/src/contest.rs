@@ -123,8 +123,8 @@ impl Contest {
         if let Some(data) = &ctx.jwt_data {
             Ok(submission::insert(
                 &self.connect_db()?,
-                data.user.clone(),
-                problem,
+                &data.user,
+                &problem,
                 files,
             )?)
         } else {
