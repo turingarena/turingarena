@@ -10,22 +10,18 @@ use std::io::Cursor;
 use std::path::PathBuf;
 use turingarena_contest_webcontent::WebContent;
 
-struct Authorization(Option<auth::JwtData>);
+struct Authorization(Option<String>);
 
 impl<'a, 'r> FromRequest<'a, 'r> for Authorization {
     type Error = String;
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        match request.headers().get_one("Authorization") {
-            None => Outcome::Success(Authorization(None)),
-            Some(token) => match auth::validate(&token) {
-                Ok(claims) => Outcome::Success(Authorization(Some(claims))),
-                Err(_) => Outcome::Failure((
-                    Status::Unauthorized,
-                    "JWT token validation failed".to_owned(),
-                )),
+        request::Outcome::Success(Authorization(
+            match request.headers().get_one("Authorization") {
+                Some(token) => Some(token.to_owned()),
+                None => None,
             },
-        }
+        ))
     }
 }
 
@@ -40,7 +36,23 @@ fn post_graphql_handler(
     schema: State<Schema>,
     auth: Authorization,
 ) -> juniper_rocket::GraphQLResponse {
-    let context = Context { jwt_data: auth.0 };
+    let skip_auth = std::env::var("SKIP_AUTH").unwrap_or(String::new()) == "1";
+    let secret_str = std::env::var("SECRET").unwrap_or(String::new());
+    if secret_str == "" && !skip_auth {
+        return juniper_rocket::GraphQLResponse::error(juniper::FieldError::from(
+            "Cannot authenticate users: set environment variable SECRET or SKIP_AUTH=1",
+        ));
+    }
+    let secret = secret_str.as_bytes().to_owned();
+    let jwt_data = auth.0.map(|token| match auth::validate(&token, &secret) {
+        Ok(claims) => claims,
+        Err(_) => panic!("Invalid token"),
+    });
+    let context = Context {
+        skip_auth,
+        jwt_data,
+        secret,
+    };
     request.execute(&schema, &context)
 }
 

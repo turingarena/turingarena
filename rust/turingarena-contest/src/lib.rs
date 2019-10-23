@@ -40,7 +40,24 @@ pub fn db_connect() -> ConnectionResult<SqliteConnection> {
 }
 
 pub struct Context {
+    skip_auth: bool,
+    secret: Vec<u8>,
     jwt_data: Option<auth::JwtData>,
+}
+
+impl Context {
+    pub fn authorize_user(&self, user_id: &str) -> juniper::FieldResult<()> {
+        if !self.skip_auth {
+            if let Some(data) = &self.jwt_data {
+                if data.user != user_id {
+                    Err(juniper::FieldError::from("Forbidden for the given user id"))?
+                }
+            } else {
+                Err(juniper::FieldError::from("Authentication required"))?
+            }
+        }
+        Ok(())
+    }
 }
 
 impl juniper::Context for Context {}

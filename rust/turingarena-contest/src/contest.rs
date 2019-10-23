@@ -98,10 +98,10 @@ impl Contest {
 
 #[juniper::object(Context = Context)]
 impl Contest {
-    fn auth(&self, user: String, password: String) -> FieldResult<UserToken> {
+    fn auth(&self, ctx: &Context, user: String, password: String) -> FieldResult<UserToken> {
         let user = self.get_user(&user)?;
         Ok(UserToken {
-            token: auth::auth(&user, &password)?,
+            token: auth::auth(&user, &password, &ctx.secret)?,
         })
     }
 
@@ -123,18 +123,15 @@ impl Contest {
     fn submit(
         &self,
         ctx: &Context,
+        user_id: String,
         problem_name: String,
         files: Vec<submission::FileInput>,
     ) -> FieldResult<submission::Submission> {
-        if let Some(data) = &ctx.jwt_data {
-            let problem = self.get_problem(&problem_name)?;
-            let submission =
-                submission::insert(&self.connect_db()?, &data.user, &problem_name, files)?;
-            evaluation::evaluate(&problem, &submission);
-            Ok(submission)
-        } else {
-            Err(FieldError::from("Authentication required"))
-        }
+        ctx.authorize_user(&user_id)?;
+        let problem = self.get_problem(&problem_name)?;
+        let submission = submission::insert(&self.connect_db()?, &user_id, &problem_name, files)?;
+        evaluation::evaluate(&problem, &submission);
+        Ok(submission)
     }
 
     /// get the evaluation events for the specified submission
