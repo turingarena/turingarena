@@ -1,4 +1,6 @@
 use crate::*;
+use rocket::fairing::AdHoc;
+use rocket::http::hyper::header::AccessControlAllowOrigin;
 use rocket::request::{self, FromRequest, Request};
 use rocket::{
     http::{ContentType, Status},
@@ -93,6 +95,9 @@ pub fn run_server(host: String, port: u16) {
             contest::Contest::from_env(),
             contest::Contest::from_env(),
         ))
+        .attach(AdHoc::on_response("Cors header", |_, res| {
+            res.set_header(AccessControlAllowOrigin::Any);
+        }))
         .mount(
             "/",
             rocket::routes![graphiql, post_graphql_handler, index, dist],

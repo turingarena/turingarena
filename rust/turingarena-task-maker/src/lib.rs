@@ -8,5 +8,5 @@ extern crate task_maker_store;
 extern crate log;
 
 pub mod driver;
-pub(crate) mod material;
 pub(crate) mod evaluate;
+pub(crate) mod material;

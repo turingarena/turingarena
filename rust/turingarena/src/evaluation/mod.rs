@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 graphql_derive_union_from_enum! {
     #[derive(Serialize, Deserialize)]
     pub enum Event {
-        Value(Value),
+        Value(ValueEvent),
     }
 }
 
 /// Rappresents a key/value record type
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct Value {
+pub struct ValueEvent {
     /// key of the record
     pub key: record::Key,
 

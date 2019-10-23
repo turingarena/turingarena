@@ -18,9 +18,19 @@ pub enum Kind {
 graphql_derive_union_from_enum! {
     #[derive(Serialize, Deserialize, Clone)]
     pub enum Value {
-        Message(content::Text),
-        Score(score::Score),
+        Message(TextValue),
+        Score(ScoreValue),
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ScoreValue {
+    pub score: score::Score,
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct TextValue {
+    pub text: content::Text,
 }
 
 #[cfg(test)]
