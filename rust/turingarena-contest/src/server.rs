@@ -110,7 +110,7 @@ pub fn run_server(host: String, port: u16) {
         }))
         .mount(
             "/",
-            rocket::routes![graphiql, post_graphql_handler, index, dist],
+            rocket::routes![graphiql, options_graphql, post_graphql_handler, index, dist],
         )
         .launch();
 }
