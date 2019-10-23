@@ -2,6 +2,7 @@ use crate::*;
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
 use rocket::request::{self, FromRequest, Request};
+use rocket::response::Response;
 use rocket::{
     http::{ContentType, Status},
     response::{self, content},
@@ -30,6 +31,15 @@ impl<'a, 'r> FromRequest<'a, 'r> for Authorization {
 #[rocket::get("/graphiql")]
 fn graphiql() -> content::Html<String> {
     juniper_rocket::graphiql_source("/graphql")
+}
+
+#[rocket::options("/graphql")]
+fn options_graphql<'a>() -> Response<'a> {
+    Response::build()
+        .raw_header("Access-Control-Allow-Origin", "*")
+        .raw_header("Access-Control-Allow-Methods", "OPTIONS, POST")
+        .raw_header("Access-Control-Allow-Headers", "Content-Type")
+        .finalize()
 }
 
 #[rocket::post("/graphql", data = "<request>")]
