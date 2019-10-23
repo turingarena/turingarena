@@ -1,11 +1,25 @@
 use std::path::PathBuf;
-use turingarena_task_maker::*;
+
+use turingarena::problem::driver::*;
+use turingarena::submission::{form::*, mem::*};
+use turingarena_task_maker::driver::*;
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
-    let (server, messages) = run_task(PathBuf::from(&args[1]), PathBuf::from("sol/solution.cpp"));
-    for m in messages {
-        println!("{:?}", m);
+
+    let pack = ProblemPack(PathBuf::from(&args[1]));
+    let submission = Submission {
+        field_values: vec![FieldValue {
+            field: FieldId("solution".to_owned()),
+            file: File {
+                name: FileName("solution.cpp".to_owned()),
+                content: std::fs::read(PathBuf::from(&args[2])).unwrap(),
+            },
+        }],
+    };
+
+    let evaluation = IoiProblemDriver::evaluate(pack, submission);
+    for m in evaluation.0.into_iter() {
+        // println!("{:?}", m);
     }
-    server.join().unwrap();
 }

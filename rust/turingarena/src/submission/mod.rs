@@ -103,6 +103,8 @@ pub mod mem {
         pub content: Vec<u8>,
     }
 
+    /// A field of a submission stored in memory.
+    pub type FieldValue = super::FieldValue<File>;
     /// A submission stored in memory.
     pub type Submission = super::Submission<File>;
 }
