@@ -28,6 +28,6 @@ CREATE TABLE submission_files(
 CREATE TABLE evaluation_events(
     submission_id   TEXT NOT NULL REFERENCES submission(id),
     serial          INT  NOT NULL,
-    value_json      TEXT NOT NULL,
+    event_json      TEXT NOT NULL,
     PRIMARY KEY(submission_id, serial)
 )

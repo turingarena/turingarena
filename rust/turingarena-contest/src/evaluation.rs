@@ -2,6 +2,7 @@ use crate::problem::ContestProblem;
 use crate::schema::evaluation_events;
 use crate::submission::Submission;
 use diesel::prelude::*;
+use juniper::FieldResult;
 use std::error::Error;
 use std::thread;
 use turingarena::evaluation::mem::Evaluation;
@@ -11,7 +12,7 @@ use turingarena_task_maker::driver::IoiProblemDriver;
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
-struct EvaluationEvent {
+pub struct EvaluationEvent {
     /// id of the submission
     submission_id: String,
 
@@ -19,7 +20,27 @@ struct EvaluationEvent {
     serial: i32,
 
     /// value of the event, serialized
-    value_json: String,
+    event_json: String,
+}
+
+#[juniper::object]
+impl EvaluationEvent {
+    /// serial number of the event
+    fn serial(&self) -> i32 {
+        self.serial
+    }
+
+    /// value of this evaluation event
+    fn event(&self) -> FieldResult<Event> {
+        Ok(serde_json::from_str(&self.event_json)?)
+    }
+
+    /// events as JSON format
+    /// This is currently provided only as a woraround the fact that
+    /// events doesn't work, and should be removed in the future!
+    fn event_json(&self) -> &String {
+        &self.event_json
+    }
 }
 
 #[derive(Insertable)]
@@ -27,7 +48,7 @@ struct EvaluationEvent {
 struct EvaluationEventInput<'a> {
     submission_id: &'a str,
     serial: i32,
-    value_json: String,
+    event_json: String,
 }
 
 fn insert_event(
@@ -39,12 +60,22 @@ fn insert_event(
     let event_input = EvaluationEventInput {
         serial,
         submission_id,
-        value_json: serde_json::to_string(event)?,
+        event_json: serde_json::to_string(event)?,
     };
     diesel::insert_into(evaluation_events::table)
         .values(&event_input)
         .execute(conn)?;
     Ok(())
+}
+
+/// return a list of evaluation events for the specified evaluation
+pub fn query_events(
+    conn: &SqliteConnection,
+    submission_id: String,
+) -> QueryResult<Vec<EvaluationEvent>> {
+    evaluation_events::table
+        .filter(evaluation_events::dsl::submission_id.eq(submission_id))
+        .load(conn)
 }
 
 /// start the evaluation thread

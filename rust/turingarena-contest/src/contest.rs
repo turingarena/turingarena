@@ -136,4 +136,12 @@ impl Contest {
             Err(FieldError::from("Authentication required"))
         }
     }
+
+    /// get the evaluation events for the specified submission
+    fn events(&self, submission_id: String) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
+        Ok(evaluation::query_events(
+            &self.connect_db()?,
+            submission_id,
+        )?)
+    }
 }

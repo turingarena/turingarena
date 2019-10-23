@@ -3,16 +3,25 @@
 pub mod record;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub enum Event {
-    Value {
-        key: record::Key,
-        value: record::Value,
-    },
+graphql_derive_union_from_enum! {
+    #[derive(Serialize, Deserialize)]
+    pub enum Event {
+        Value(Value),
+    }
+}
+
+/// Rappresents a key/value record type
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct Value {
+    /// key of the record
+    pub key: record::Key,
+
+    /// value of the record
+    pub value: record::Value,
 }
 
 pub mod mem {
-    use super::*;
+    pub use super::*;
     use std::sync::mpsc::Receiver;
     // FIXME: should we use futures (async) or std::sync (theaded) `Receiver`s?
     pub struct Evaluation(pub Receiver<Event>);

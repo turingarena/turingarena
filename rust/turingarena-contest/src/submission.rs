@@ -5,6 +5,7 @@ use turingarena::submission::*;
 
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
+#[allow(dead_code)]
 pub struct SubmissionFile {
     /// id of the submmission
     submission_id: String,

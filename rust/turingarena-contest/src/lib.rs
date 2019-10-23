@@ -12,6 +12,7 @@ extern crate juniper;
 extern crate juniper_rocket;
 extern crate rand;
 extern crate rocket;
+extern crate serde_json;
 extern crate structopt;
 extern crate turingarena;
 extern crate turingarena_contest_webcontent;

@@ -9,7 +9,6 @@ use task_maker_format::{ioi, EvaluationConfig};
 
 use turingarena::evaluation::mem::*;
 use turingarena::evaluation::record;
-use turingarena::evaluation::Event;
 use turingarena::problem::{driver::*, material::*, *};
 use turingarena::score::Score;
 use turingarena::submission::mem::*;
@@ -74,18 +73,18 @@ fn ui_message_to_events(ui_message: UIMessage) -> Vec<Event> {
             solution,
             score,
             message,
-        } => events.push(Event::Value {
+        } => events.push(Event::Value(Value {
             key: record::Key(format!("subtask.{}.testcase.{}.score", subtask, testcase)),
             value: record::Value::Score(Score(score as f64)),
-        }),
+        })),
         UIMessage::IOISubtaskScore {
             subtask,
             solution,
             score,
-        } => events.push(Event::Value {
+        } => events.push(Event::Value(Value {
             key: record::Key(format!("subtask.{}.score", subtask)),
             value: record::Value::Score(Score(score as f64)),
-        }),
+        })),
         _ => (),
     }
     events

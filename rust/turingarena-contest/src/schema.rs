@@ -2,7 +2,7 @@ table! {
     evaluation_events (submission_id, serial) {
         submission_id -> Text,
         serial -> Integer,
-        value_json -> Text,
+        event_json -> Text,
     }
 }
 
