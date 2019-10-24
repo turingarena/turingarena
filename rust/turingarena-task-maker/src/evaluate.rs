@@ -52,6 +52,7 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
             let solution_path = dir.path().join(&solution_file.name.0);
             std::fs::write(&solution_path, &solution_file.content)
                 .expect("Unable to write solution file");
+            println!("=={:?} start", solution_path);
 
             let (mut eval, receiver) = EvaluationData::new();
 
@@ -74,7 +75,7 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
                 .extra_time(0.0);
 
             let eval_config = EvaluationConfig {
-                solution_filter: vec!["-no-solution".into()],
+                solution_filter: vec![],
                 booklet_solutions: false,
                 solution_paths: vec![solution_path.to_owned()],
             };
@@ -95,7 +96,6 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
 }
 
 fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(), failure::Error> {
-    println!("{:?}", ui_message);
     match ui_message {
         UIMessage::IOITestcaseScore {
             subtask,
@@ -103,17 +103,21 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
             solution,
             score,
             message,
-        } => tx.send(Event::Value(Value {
+        } => tx.send(Event::Value(ValueEvent {
             key: record::Key(format!("subtask.{}.testcase.{}.score", subtask, testcase)),
-            value: record::Value::Score(Score(score as f64)),
+            value: record::Value::Score(record::ScoreValue {
+                score: Score(score as f64),
+            }),
         }))?,
         UIMessage::IOISubtaskScore {
             subtask,
             solution,
             score,
-        } => tx.send(Event::Value(Value {
+        } => tx.send(Event::Value(ValueEvent {
             key: record::Key(format!("subtask.{}.score", subtask)),
-            value: record::Value::Score(Score(score as f64)),
+            value: record::Value::Score(record::ScoreValue {
+                score: Score(score as f64),
+            }),
         }))?,
         _ => (),
     };

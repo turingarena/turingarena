@@ -190,7 +190,9 @@ pub fn query(conn: &SqliteConnection, id: &str) -> Result<Submission, Box<dyn st
     let submission = submissions::table
         .filter(submissions::dsl::id.eq(id))
         .first::<SubmissionTable>(conn)?;
-    let files = submission_files::table.load::<SubmissionFile>(conn)?;
+    let files = submission_files::table
+        .filter(submission_files::dsl::submission_id.eq(id))
+        .load::<SubmissionFile>(conn)?;
     Ok(Submission {
         id: submission.id,
         user_id: submission.user_id,

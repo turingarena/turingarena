@@ -1,13 +1,11 @@
-/// main CLI of TuringArena
 use structopt::StructOpt;
-use turingarena_contest::{contest::Contest, server::run_server};
 
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "turingarena",
     about = "CLI to manage the turingarena contest server"
 )]
-enum Command {
+pub enum Command {
     /// start a contest HTTP server
     Serve {
         /// host to bind the server to
@@ -17,7 +15,17 @@ enum Command {
         /// port for the server to listen
         #[structopt(short, long, default_value = "8080")]
         port: u16,
+
+        /// secret key for the webserver
+        #[structopt(long, short, env = "SECRET")]
+        secret_key: Option<String>,
+
+        /// skip authentication (DANGEROUS: only for debug!)
+        #[structopt(long, env = "SKIP_AUTH")]
+        skip_auth: bool,
     },
+    /// generate GraphQL schema
+    GenerateSchema {},
     /// add a new user to the contest database
     AddUser {
         /// name of the user
@@ -48,20 +56,4 @@ enum Command {
     },
     /// initializes the database
     InitDb {},
-}
-
-fn main() {
-    use Command::*;
-    match Command::from_args() {
-        Serve { host, port } => run_server(host, port),
-        InitDb {} => Contest::from_env().init_db(),
-        AddUser {
-            username,
-            display_name,
-            password,
-        } => Contest::from_env().add_user(&username, &display_name, &password),
-        DeleteUser { username } => Contest::from_env().delete_user(&username),
-        AddProblem { name, path } => Contest::from_env().add_problem(&name, &path),
-        DeleteProblem { name } => Contest::from_env().delete_problem(&name),
-    }
 }

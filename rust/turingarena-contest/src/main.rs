@@ -15,22 +15,29 @@ extern crate rocket;
 extern crate serde_json;
 extern crate structopt;
 extern crate turingarena;
-extern crate turingarena_contest_webcontent;
 extern crate uuid;
 
 #[cfg(test)]
 extern crate tempdir;
 
-use diesel::prelude::*;
+#[cfg(feature = "webcontent")]
+extern crate turingarena_contest_webcontent;
 
-pub mod auth;
-pub mod contest;
-pub mod evaluation;
-pub mod problem;
-pub mod schema;
-pub mod server;
-pub mod submission;
-pub mod user;
+mod args;
+mod auth;
+mod contest;
+mod evaluation;
+mod problem;
+mod schema;
+mod server;
+mod submission;
+mod user;
+
+use args::Command;
+use contest::Contest;
+use diesel::prelude::*;
+use server::{generate_schema, run_server};
+use structopt::StructOpt;
 
 embed_migrations!();
 
@@ -39,6 +46,7 @@ pub fn db_connect() -> ConnectionResult<SqliteConnection> {
     SqliteConnection::establish(&url)
 }
 
+#[derive(Clone)]
 pub struct Context {
     skip_auth: bool,
     secret: Vec<u8>,
@@ -46,6 +54,13 @@ pub struct Context {
 }
 
 impl Context {
+    pub fn with_jwt_data(&self, jwt_data: Option<auth::JwtData>) -> Context {
+        Context {
+            jwt_data: jwt_data,
+            ..self.clone()
+        }
+    }
+
     pub fn authorize_user(&self, user_id: &str) -> juniper::FieldResult<()> {
         if !self.skip_auth {
             if let Some(data) = &self.jwt_data {
@@ -72,3 +87,25 @@ impl MutationOk {
 }
 
 pub type Schema = juniper::RootNode<'static, contest::Contest, contest::Contest>;
+
+fn main() {
+    use Command::*;
+    match Command::from_args() {
+        GenerateSchema {} => generate_schema(),
+        Serve {
+            host,
+            port,
+            secret_key,
+            skip_auth,
+        } => run_server(host, port, skip_auth, secret_key),
+        InitDb {} => Contest::from_env().init_db(),
+        AddUser {
+            username,
+            display_name,
+            password,
+        } => Contest::from_env().add_user(&username, &display_name, &password),
+        DeleteUser { username } => Contest::from_env().delete_user(&username),
+        AddProblem { name, path } => Contest::from_env().add_problem(&name, &path),
+        DeleteProblem { name } => Contest::from_env().delete_problem(&name),
+    }
+}

@@ -4,11 +4,9 @@ extern crate turingarena;
 extern crate turingarena_task_maker;
 
 use schema::problems;
-use turingarena::problem::{
-    driver::{ProblemDriver, ProblemPack},
-    material::Material,
-    ProblemName,
-};
+use turingarena::problem::driver::{ProblemDriver, ProblemPack};
+use turingarena::problem::material::Material;
+use turingarena::problem::ProblemName;
 
 use juniper::{FieldError, FieldResult};
 
