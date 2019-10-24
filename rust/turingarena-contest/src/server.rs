@@ -6,7 +6,7 @@ use rocket::response::Response;
 use rocket::{
     http::{ContentType, Status},
     response::{self, content},
-    Outcome, State,
+    State,
 };
 use std::ffi::OsStr;
 use std::io::Cursor;
@@ -54,24 +54,15 @@ fn post_graphql_handler(
     request: juniper_rocket::GraphQLRequest,
     schema: State<Schema>,
     auth: Authorization,
+    context: State<Context>,
 ) -> juniper_rocket::GraphQLResponse {
-    let skip_auth = std::env::var("SKIP_AUTH").unwrap_or(String::new()) == "1";
-    let secret_str = std::env::var("SECRET").unwrap_or(String::new());
-    if secret_str == "" && !skip_auth {
-        return juniper_rocket::GraphQLResponse::error(juniper::FieldError::from(
-            "Cannot authenticate users: set environment variable SECRET or SKIP_AUTH=1",
-        ));
-    }
-    let secret = secret_str.as_bytes().to_owned();
-    let jwt_data = auth.0.map(|token| match auth::validate(&token, &secret) {
-        Ok(claims) => claims,
-        Err(_) => panic!("Invalid token"),
-    });
-    let context = Context {
-        skip_auth,
-        jwt_data,
-        secret,
-    };
+    let jwt_data = auth
+        .0
+        .map(|token| match auth::validate(&token, &context.secret) {
+            Ok(claims) => claims,
+            Err(_) => panic!("Invalid token"),
+        });
+    let context = context.with_jwt_data(jwt_data);
     request.execute(&schema, &context)
 }
 
@@ -124,7 +115,16 @@ pub fn generate_schema() {
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
 
-pub fn run_server(host: String, port: u16) {
+pub fn run_server(host: String, port: u16, skip_auth: bool, secret_key: Option<String>) {
+    let secret = if skip_auth {
+        eprintln!("WARNING: Skipping all authentication! Use only for debugging");
+        Vec::new()
+    } else if secret_key == None {
+        eprintln!("ERROR: You must provide a secret key OR specify --skip-auth");
+        return;
+    } else {
+        secret_key.unwrap().as_bytes().to_owned()
+    };
     let config = rocket::Config::build(rocket::config::Environment::active().unwrap())
         .port(port)
         .address(host)
@@ -136,6 +136,11 @@ pub fn run_server(host: String, port: u16) {
             contest::Contest::from_env(),
             contest::Contest::from_env(),
         ))
+        .manage(Context {
+            secret,
+            skip_auth,
+            jwt_data: None,
+        })
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);
         }))

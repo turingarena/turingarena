@@ -20,6 +20,14 @@ enum Command {
         /// port for the server to listen
         #[structopt(short, long, default_value = "8080")]
         port: u16,
+
+        /// secret key for the webserver
+        #[structopt(long, short, env = "SECRET")]
+        secret_key: Option<String>,
+
+        /// skip authentication (DANGEROUS: only for debug!)
+        #[structopt(long, env = "SKIP_AUTH")]
+        skip_auth: bool,
     },
     /// generate GraphQL schema
     GenerateSchema {},
@@ -58,8 +66,13 @@ enum Command {
 fn main() {
     use Command::*;
     match Command::from_args() {
-        Serve { host, port } => run_server(host, port),
         GenerateSchema {} => generate_schema(),
+        Serve {
+            host,
+            port,
+            secret_key,
+            skip_auth,
+        } => run_server(host, port, skip_auth, secret_key),
         InitDb {} => Contest::from_env().init_db(),
         AddUser {
             username,
