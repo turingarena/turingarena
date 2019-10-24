@@ -11,6 +11,11 @@ use rocket::{
 use std::ffi::OsStr;
 use std::io::Cursor;
 use std::path::PathBuf;
+
+#[cfg(feature = "webcontent")]
+extern crate turingarena_contest_webcontent;
+
+#[cfg(feature = "webcontent")]
 use turingarena_contest_webcontent::WebContent;
 
 extern crate serde_json;
@@ -75,6 +80,16 @@ fn index<'r>() -> rocket::response::Result<'r> {
     dist(Some(PathBuf::from("index.html")))
 }
 
+#[cfg(not(feature = "webcontent"))]
+#[rocket::get("/<_file_option..>")]
+fn dist<'r>(_file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
+    Err(Status::new(
+        404,
+        "Static files not embedded. Enable feature `webcontent`",
+    ))
+}
+
+#[cfg(feature = "webcontent")]
 #[rocket::get("/<file_option..>")]
 fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
     let file = file_option.unwrap_or(PathBuf::new());
@@ -104,7 +119,8 @@ pub fn generate_schema() {
             secret: vec![],
         },
         juniper::IntrospectionFormat::All,
-    ).unwrap();
+    )
+    .unwrap();
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
 

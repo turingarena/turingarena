@@ -15,7 +15,6 @@ extern crate rocket;
 extern crate serde_json;
 extern crate structopt;
 extern crate turingarena;
-extern crate turingarena_contest_webcontent;
 extern crate uuid;
 
 #[cfg(test)]
