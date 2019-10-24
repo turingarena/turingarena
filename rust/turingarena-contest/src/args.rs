@@ -5,6 +5,17 @@ use structopt::StructOpt;
     name = "turingarena",
     about = "CLI to manage the turingarena contest server"
 )]
+pub struct Args {
+    /// url of the database
+    #[structopt(long, env = "DATABASE_URL", default_value = "./database.sqlite3")]
+    pub database_url: String,
+
+    /// command  
+    #[structopt(subcommand)]
+    pub subcommand: Command
+}
+
+#[derive(StructOpt, Debug)]
 pub enum Command {
     /// start a contest HTTP server
     Serve {

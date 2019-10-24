@@ -18,11 +18,6 @@ pub struct UserToken {
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 impl Contest {
-    pub fn from_env() -> Contest {
-        let database_url = std::env::var("DATABASE_URL").unwrap_or("./database.sqlite3".to_owned());
-        Contest::with_database(&database_url)
-    }
-
     pub fn with_database(database_url: &str) -> Contest {
         Contest {
             database_url: database_url.to_owned(),

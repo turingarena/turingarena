@@ -97,7 +97,7 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
 
 pub fn generate_schema() {
     let (schema, _errors) = juniper::introspect(
-        &Schema::new(contest::Contest::from_env(), contest::Contest::from_env()),
+        &Schema::new(contest::Contest::with_database(""), contest::Contest::with_database("")),
         &Context {
             skip_auth: false,
             jwt_data: None,
@@ -109,7 +109,7 @@ pub fn generate_schema() {
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
 
-pub fn run_server(host: String, port: u16, skip_auth: bool, secret_key: Option<String>) {
+pub fn run_server(host: String, port: u16, skip_auth: bool, secret_key: Option<String>, database_url: String) {
     let secret = if skip_auth {
         eprintln!("WARNING: Skipping all authentication! Use only for debugging");
         Vec::new()
@@ -127,8 +127,8 @@ pub fn run_server(host: String, port: u16, skip_auth: bool, secret_key: Option<S
 
     rocket::custom(config)
         .manage(Schema::new(
-            contest::Contest::from_env(),
-            contest::Contest::from_env(),
+            contest::Contest::with_database(&database_url),
+            contest::Contest::with_database(&database_url),
         ))
         .manage(Context {
             secret,

@@ -33,7 +33,7 @@ mod server;
 mod submission;
 mod user;
 
-use args::Command;
+use args::{Command, Args};
 use contest::Contest;
 use diesel::prelude::*;
 use server::{generate_schema, run_server};
@@ -89,23 +89,25 @@ impl MutationOk {
 pub type Schema = juniper::RootNode<'static, contest::Contest, contest::Contest>;
 
 fn main() {
+    let args = Args::from_args();
+    let contest = Contest::with_database(&args.database_url);
     use Command::*;
-    match Command::from_args() {
+    match args.subcommand {
         GenerateSchema {} => generate_schema(),
         Serve {
             host,
             port,
             secret_key,
             skip_auth,
-        } => run_server(host, port, skip_auth, secret_key),
-        InitDb {} => Contest::from_env().init_db(),
+        } => run_server(host, port, skip_auth, secret_key, args.database_url),
+        InitDb {} => contest.init_db(),
         AddUser {
             username,
             display_name,
             password,
-        } => Contest::from_env().add_user(&username, &display_name, &password),
-        DeleteUser { username } => Contest::from_env().delete_user(&username),
-        AddProblem { name, path } => Contest::from_env().add_problem(&name, &path),
-        DeleteProblem { name } => Contest::from_env().delete_problem(&name),
+        } => contest.add_user(&username, &display_name, &password),
+        DeleteUser { username } => contest.delete_user(&username),
+        AddProblem { name, path } => contest.add_problem(&name, &path),
+        DeleteProblem { name } => contest.delete_problem(&name),
     }
 }
