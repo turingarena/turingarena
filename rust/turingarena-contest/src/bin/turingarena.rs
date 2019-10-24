@@ -1,6 +1,9 @@
 /// main CLI of TuringArena
 use structopt::StructOpt;
-use turingarena_contest::{contest::Contest, server::run_server};
+use turingarena_contest::{
+    contest::Contest,
+    server::{generate_schema, run_server},
+};
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -18,6 +21,8 @@ enum Command {
         #[structopt(short, long, default_value = "8080")]
         port: u16,
     },
+    /// generate GraphQL schema
+    GenerateSchema {},
     /// add a new user to the contest database
     AddUser {
         /// name of the user
@@ -54,6 +59,7 @@ fn main() {
     use Command::*;
     match Command::from_args() {
         Serve { host, port } => run_server(host, port),
+        GenerateSchema {} => generate_schema(),
         InitDb {} => Contest::from_env().init_db(),
         AddUser {
             username,

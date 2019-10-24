@@ -13,6 +13,8 @@ use std::io::Cursor;
 use std::path::PathBuf;
 use turingarena_contest_webcontent::WebContent;
 
+extern crate serde_json;
+
 struct Authorization(Option<String>);
 
 impl<'a, 'r> FromRequest<'a, 'r> for Authorization {
@@ -91,6 +93,19 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .header(content_type)
         .sized_body(Cursor::new(content))
         .ok()
+}
+
+pub fn generate_schema() {
+    let (schema, _errors) = juniper::introspect(
+        &Schema::new(contest::Contest::from_env(), contest::Contest::from_env()),
+        &Context {
+            skip_auth: false,
+            jwt_data: None,
+            secret: vec![],
+        },
+        juniper::IntrospectionFormat::All,
+    ).unwrap();
+    println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
 
 pub fn run_server(host: String, port: u16) {
