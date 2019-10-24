@@ -79,16 +79,15 @@ pub fn query_events(
 }
 
 /// start the evaluation thread
-pub fn evaluate(problem: &ContestProblem, submission: &Submission) {
+pub fn evaluate(problem: &ContestProblem, submission: &Submission, db_connection: SqliteConnection) {
     let pack = problem.pack();
     let submission_id = submission.id.clone();
     let submission = submission.to_mem_submission();
     thread::spawn(move || {
-        let conn = crate::db_connect().unwrap();
         let Evaluation(receiver) = IoiProblemDriver::evaluate(pack, submission);
         let mut serial = 0;
         for event in receiver {
-            insert_event(&conn, serial, &submission_id, &event).unwrap();
+            insert_event(&db_connection, serial, &submission_id, &event).unwrap();
             serial = serial + 1;
         }
     });

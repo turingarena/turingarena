@@ -41,11 +41,6 @@ use structopt::StructOpt;
 
 embed_migrations!();
 
-pub fn db_connect() -> ConnectionResult<SqliteConnection> {
-    let url = std::env::var("DATABASE_URL").unwrap_or("./database.sqlite3".to_owned());
-    SqliteConnection::establish(&url)
-}
-
 #[derive(Clone)]
 pub struct Context {
     skip_auth: bool,

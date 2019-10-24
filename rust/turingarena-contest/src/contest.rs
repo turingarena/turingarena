@@ -125,7 +125,7 @@ impl Contest {
         ctx.authorize_user(&user_id)?;
         let problem = self.get_problem(&problem_name)?;
         let submission = submission::insert(&self.connect_db()?, &user_id, &problem_name, files)?;
-        evaluation::evaluate(&problem, &submission);
+        evaluation::evaluate(&problem, &submission, self.connect_db().unwrap());
         Ok(submission)
     }
 
