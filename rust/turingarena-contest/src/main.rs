@@ -20,6 +20,10 @@ extern crate uuid;
 #[cfg(test)]
 extern crate tempdir;
 
+#[cfg(feature = "webcontent")]
+extern crate turingarena_contest_webcontent;
+
+mod args;
 mod auth;
 mod contest;
 mod evaluation;
@@ -28,12 +32,11 @@ mod schema;
 mod server;
 mod submission;
 mod user;
-mod args;
 
-use diesel::prelude::*;
 use args::Command;
 use contest::Contest;
-use server::{run_server, generate_schema};
+use diesel::prelude::*;
+use server::{generate_schema, run_server};
 use structopt::StructOpt;
 
 embed_migrations!();

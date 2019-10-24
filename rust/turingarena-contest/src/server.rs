@@ -1,24 +1,18 @@
 use crate::*;
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
+use rocket::http::{ContentType, Status};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::Response;
-use rocket::{
-    http::{ContentType, Status},
-    response::{self, content},
-    State,
-};
+use rocket::response::{self, content};
+use rocket::State;
+
 use std::ffi::OsStr;
 use std::io::Cursor;
 use std::path::PathBuf;
 
 #[cfg(feature = "webcontent")]
-extern crate turingarena_contest_webcontent;
-
-#[cfg(feature = "webcontent")]
 use turingarena_contest_webcontent::WebContent;
-
-extern crate serde_json;
 
 struct Authorization(Option<String>);
 
