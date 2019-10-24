@@ -20,16 +20,21 @@ extern crate uuid;
 #[cfg(test)]
 extern crate tempdir;
 
-use diesel::prelude::*;
+mod auth;
+mod contest;
+mod evaluation;
+mod problem;
+mod schema;
+mod server;
+mod submission;
+mod user;
+mod args;
 
-pub mod auth;
-pub mod contest;
-pub mod evaluation;
-pub mod problem;
-pub mod schema;
-pub mod server;
-pub mod submission;
-pub mod user;
+use diesel::prelude::*;
+use args::Command;
+use contest::Contest;
+use server::{run_server, generate_schema};
+use structopt::StructOpt;
 
 embed_migrations!();
 
@@ -79,3 +84,25 @@ impl MutationOk {
 }
 
 pub type Schema = juniper::RootNode<'static, contest::Contest, contest::Contest>;
+
+fn main() {
+    use Command::*;
+    match Command::from_args() {
+        GenerateSchema {} => generate_schema(),
+        Serve {
+            host,
+            port,
+            secret_key,
+            skip_auth,
+        } => run_server(host, port, skip_auth, secret_key),
+        InitDb {} => Contest::from_env().init_db(),
+        AddUser {
+            username,
+            display_name,
+            password,
+        } => Contest::from_env().add_user(&username, &display_name, &password),
+        DeleteUser { username } => Contest::from_env().delete_user(&username),
+        AddProblem { name, path } => Contest::from_env().add_problem(&name, &path),
+        DeleteProblem { name } => Contest::from_env().delete_problem(&name),
+    }
+}
