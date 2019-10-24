@@ -39,6 +39,7 @@ pub fn db_connect() -> ConnectionResult<SqliteConnection> {
     SqliteConnection::establish(&url)
 }
 
+#[derive(Clone)]
 pub struct Context {
     skip_auth: bool,
     secret: Vec<u8>,
@@ -46,6 +47,13 @@ pub struct Context {
 }
 
 impl Context {
+    pub fn with_jwt_data(&self, jwt_data: Option<auth::JwtData>) -> Context {
+        Context {
+            jwt_data: jwt_data,
+            ..self.clone()
+        }
+    }
+
     pub fn authorize_user(&self, user_id: &str) -> juniper::FieldResult<()> {
         if !self.skip_auth {
             if let Some(data) = &self.jwt_data {
