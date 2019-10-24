@@ -7,6 +7,7 @@ extern crate structopt;
 
 mod auth;
 mod client;
+mod events;
 mod submit;
 mod token;
 mod user;
@@ -33,6 +34,10 @@ struct Args {
 enum Command {
     /// Submit a problem to the TuringArena server
     Submit {
+        /// id of the user (default current authenticated user)
+        #[structopt(long, short)]
+        user_id: Option<String>,
+
         /// name of the problem
         problem: String,
 
@@ -47,7 +52,15 @@ enum Command {
     /// Lougout from the TuringArena server
     Logout {},
     /// Get informations about the currently logged in user
-    Info {},
+    Info {
+        /// id of the user
+        #[structopt(long, short)]
+        user_id: Option<String>,
+    },
+    Events {
+        /// id of the submission
+        submission_id: String,
+    },
 }
 
 fn main() {
@@ -59,9 +72,28 @@ fn main() {
     }
 
     match args.command {
-        Submit { problem, files } => submit::submit(problem, files),
+        Submit {
+            problem,
+            files,
+            user_id,
+        } => {
+            let user_id = if let Some(id) = user_id {
+                id
+            } else {
+                token::get().expect("Specify an user_id or login first").0
+            };
+            submit::submit(user_id, problem, files)
+        }
         Login { username } => auth::login(username),
         Logout {} => auth::logout(),
-        Info {} => user::info(),
+        Info { user_id } => {
+            let user_id = if let Some(id) = user_id {
+                id
+            } else {
+                token::get().expect("Specify an user_id or login first").0
+            };
+            user::info(user_id)
+        }
+        Events { submission_id } => events::events(submission_id),
     }
 }

@@ -40,8 +40,9 @@ fn parse_files(files: Vec<String>) -> Vec<submit_mutation::FileInput> {
 }
 
 /// send a submission to the TuringArena server
-pub fn submit(problem: String, files: Vec<String>) {
+pub fn submit(user_id: String, problem: String, files: Vec<String>) {
     let variables = submit_mutation::Variables {
+        user_id,
         problem,
         files: parse_files(files),
     };
