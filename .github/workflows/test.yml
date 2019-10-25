@@ -9,10 +9,8 @@ jobs:
       run: sudo apt update && sudo apt install libsqlite3-dev
     - name: Install Rust nightly toolchain
       run: rustup default nightly
-    - name: Build web interface
-      run: cd web/ && npm install && npm run build
-    - name: Build Rust project
-      run: cd rust/ && cargo build
+    - name: Build
+      run: make
     - name: Build Rust doc
       run: cd rust/ && cargo doc --no-deps
     - name: Deploy documentation to GitHub Pages
