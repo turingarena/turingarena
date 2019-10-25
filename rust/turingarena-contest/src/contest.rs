@@ -27,7 +27,9 @@ impl Contest {
     }
 
     pub fn connect_db(&self) -> ConnectionResult<SqliteConnection> {
-        SqliteConnection::establish(self.database_url.to_str().unwrap())
+        let conn = SqliteConnection::establish(self.database_url.to_str().unwrap())?;
+        conn.execute("PRAGMA busy_timeout = 5000;").expect("Unable to set `busy_timeout`");
+        Ok(conn)
     }
 
     pub fn init_db(&self) {
