@@ -9,6 +9,9 @@ import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuer
 export class ContestQueryService extends Query<ContestQuery, ContestQueryVariables> {
   document = gql`
     query ContestQuery($userId: String!) {
+      user(id: $userId) {
+        displayName
+      }
       problems {
         name
         scorables(userId: $userId) {
