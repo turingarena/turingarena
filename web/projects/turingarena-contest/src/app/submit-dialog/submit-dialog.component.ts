@@ -109,7 +109,7 @@ export class SubmitDialogComponent {
 
 class FieldState {
   file?: File;
-  wantCustomTypes = false;
+  moreTypes = false;
 
   constructor(private field: Field) { }
 
@@ -124,11 +124,12 @@ class FieldState {
   get notRecommendedTypes() {
     return this.field.types.filter(t => this.isCompatible(t));
   }
+
   get typeChoices() {
     const recommendedTypes = this.field.types.filter(t => this.isCompatible(t));
     const otherTypes = this.field.types.filter(t => !this.isCompatible(t));
 
-    return this.wantCustomTypes || recommendedTypes.length === 0 ? {
+    return this.moreTypes || recommendedTypes.length === 0 ? {
       type: 'custom',
       allTypes: [...recommendedTypes, ...otherTypes],
     } : recommendedTypes.length === 1 ? {
