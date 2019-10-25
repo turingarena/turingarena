@@ -20,7 +20,17 @@ export class AppComponent {
 
   selectedProblemName?: string = undefined;
 
-  openSubmitDialog() {
-    this.modal.open(SubmitDialogComponent);
+  async openSubmitDialog() {
+    const modalRef = this.modal.open(SubmitDialogComponent);
+    const modal = modalRef.componentInstance as SubmitDialogComponent;
+
+    modal.appComponent = this;
+    modal.problemName = this.selectedProblemName;
+
+    try {
+      await modalRef.result;
+    } catch (e) {
+      // dismissed, do nothing
+    }
   }
 }

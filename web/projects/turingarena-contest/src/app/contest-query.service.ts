@@ -31,6 +31,21 @@ export class ContestQueryService extends Query<ContestQuery> {
               type
             }
           }
+          submissionForm {
+            fields {
+              id
+              title {
+                value
+              }
+              types {
+                id
+                title {
+                  value
+                }
+                extensions
+              }
+            }
+          }
         }
       }
     }
