@@ -1,7 +1,8 @@
 <ng-container *ngIf="appComponent.contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as contest">
     <ng-container *ngFor="let problem of contest.problems">
-      <form *ngIf="problem.name === problemName" class="submission_form" (submit)="$event.preventDefault(); 'TODO'">
+      <form *ngIf="problem.name === problemName" class="submission_form"
+        (submit)="$event.preventDefault(); submit($event)">
         <div class="submission_form_body">
           <div *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
             <ng-container *ngIf="fieldState(field) as state">
@@ -40,7 +41,7 @@
           </div>
         </div>
         <div class="submission_form_footer">
-          <button class="submission_form_submit" [disabled]="'TODO'" type="submit">Submit</button>
+          <button class="submission_form_submit" [disabled]="submitting" type="submit">Submit</button>
         </div>
       </form>
     </ng-container>
