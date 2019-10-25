@@ -3,7 +3,7 @@ use graphql_client::{GraphQLQuery, Response};
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
+    schema_path = "__generated__/graphql-schema.json",
     query_path = "graphql/events.graphql",
     response_derives = "Debug"
 )]
