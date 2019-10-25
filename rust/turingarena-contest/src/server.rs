@@ -101,14 +101,12 @@ pub fn generate_schema() {
         problems_dir: PathBuf::from("/tmp"),
     };
     let (schema, _errors) = juniper::introspect(
-        &Schema::new(
-            contest.clone(),
-            contest,
-        ),
+        &Schema::new(contest::ContestQueries {}, contest::ContestMutations {}),
         &Context {
             skip_auth: false,
             jwt_data: None,
             secret: vec![],
+            contest,
         },
         juniper::IntrospectionFormat::All,
     )
@@ -140,13 +138,14 @@ pub fn run_server(
 
     rocket::custom(config)
         .manage(Schema::new(
-            contest.clone(),
-            contest,
+            contest::ContestQueries {},
+            contest::ContestMutations {},
         ))
         .manage(Context {
             secret,
             skip_auth,
             jwt_data: None,
+            contest,
         })
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);

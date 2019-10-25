@@ -46,6 +46,7 @@ pub struct Context {
     skip_auth: bool,
     secret: Vec<u8>,
     jwt_data: Option<auth::JwtData>,
+    contest: Contest,
 }
 
 impl Context {
@@ -81,11 +82,11 @@ impl MutationOk {
     }
 }
 
-pub type Schema = juniper::RootNode<'static, contest::Contest, contest::Contest>;
+pub type Schema = juniper::RootNode<'static, contest::ContestQueries, contest::ContestMutations>;
 
 fn main() {
     let args = Args::from_args();
-    let contest = Contest { 
+    let contest = Contest {
         database_url: args.database_url.clone(),
         problems_dir: args.problems_dir.clone(),
     };

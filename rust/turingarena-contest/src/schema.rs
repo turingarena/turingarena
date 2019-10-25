@@ -14,6 +14,14 @@ table! {
 }
 
 table! {
+    scorables (submission_id, scorable_id) {
+        submission_id -> Text,
+        scorable_id -> Text,
+        score -> Double,
+    }
+}
+
+table! {
     submission_files (submission_id, field_id) {
         submission_id -> Text,
         field_id -> Text,
@@ -46,6 +54,7 @@ joinable!(submissions -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     evaluation_events,
     problems,
+    scorables,
     submission_files,
     submissions,
     users,

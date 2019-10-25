@@ -30,4 +30,11 @@ CREATE TABLE evaluation_events(
     serial          INT  NOT NULL,
     event_json      TEXT NOT NULL,
     PRIMARY KEY(submission_id, serial)
-)
+);
+
+CREATE TABLE scorables(
+    submission_id   TEXT   NOT NULL REFERENCES submission(id),
+    scorable_id     TEXT   NOT NULL,
+    score           DOUBLE NOT NULL,
+    PRIMARY KEY(submission_id, scorable_id)
+);
