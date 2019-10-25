@@ -12,6 +12,16 @@ export class ContestQueryService extends Query<ContestQuery> {
       problems {
         name
         material {
+          title {
+            value
+          }
+          statement {
+            name
+            type
+            content {
+              base64
+            }
+          }
           attachments {
             title {
               value

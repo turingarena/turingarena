@@ -9,8 +9,9 @@ import { ContestQueryService } from './contest-query.service';
 export class AppComponent {
   constructor(private contestQueryService: ContestQueryService) { }
 
-  title = 'turingarena-contest';
   contestQuery = this.contestQueryService.watch({}, {
     pollInterval: 10000,
   });
+
+  selectedProblemName?: string = undefined;
 }
