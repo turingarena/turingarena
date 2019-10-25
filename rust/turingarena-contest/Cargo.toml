@@ -5,7 +5,6 @@ authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
 edition = "2018"
 
 [features]
-default = ["webcontent"]
 webcontent = ["turingarena-contest-webcontent"]
 
 [dependencies]
