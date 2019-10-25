@@ -78,12 +78,13 @@
               </iframe>
               <div>
                 <span class="task_download_statement_label">Download statement: </span>
-                <a download
+                <a [download]="statement.name"
                   [href]="'data:' + statement.type + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
                   {{statement.name}}
                 </a> | <span class="task_download_attachments_label">Attachments: </span>
-                <a *ngFor="let attachment of problem.material.attachments; last as last" download
-                  [href]="'data:' + attachment.file[0].type + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
+                <a *ngFor="let attachment of problem.material.attachments; last as last"
+                  [download]="attachment.file[0].name"
+                  [href]="'data:' + (attachment.file[0].type || 'application/octet-stream') + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
                   {{attachment.title[0].value}}
                   <ng-container *ngIf="!last"> | </ng-container>
                 </a>
