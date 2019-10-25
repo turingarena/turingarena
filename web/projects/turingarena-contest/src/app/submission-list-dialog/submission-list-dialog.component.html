@@ -52,7 +52,7 @@
                       <td>
                         <app-relative-time [time]="submission.timestamp"></app-relative-time>
                         <br />
-                        <a href="#" (click)="'TODO'">
+                        <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
                           details
                         </a>
                       </td>
