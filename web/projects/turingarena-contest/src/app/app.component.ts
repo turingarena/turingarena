@@ -6,6 +6,7 @@ import { map, startWith } from 'rxjs/operators';
 import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
+import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -71,6 +72,20 @@ export class AppComponent {
 
     modal.appComponent = this;
     modal.problemName = this.selectedProblemName;
+
+    try {
+      await modalRef.result;
+    } catch (e) {
+      // dismissed, do nothing
+    }
+  }
+
+  async openSubmissionList(problem: ContestProblem) {
+    const modalRef = this.modal.open(SubmissionListDialogComponent);
+    const modal = modalRef.componentInstance;
+
+    modal.appComponent = this;
+    modal.problemName = problem.name;
 
     try {
       await modalRef.result;

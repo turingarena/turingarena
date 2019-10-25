@@ -1,0 +1,56 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.submission_score,
+.submission_total_score,
+.submission_best_score,
+.submission_best_total_score {
+  &.score_zero {
+    @extend .table-danger;
+  }
+  &.score_partial {
+    @extend .table-warning;
+  }
+  &.score_full {
+    @extend .table-success;
+  }
+  &.score_zero.score_full {
+    @extend .table-light;
+  }
+}
+
+.submissions_modal_header {
+  @extend .modal-header;
+}
+
+.submissions_modal_body {
+  @extend .modal-body;
+  padding: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.submissions_modal_footer {
+  @extend .modal-footer;
+}
+
+.submission_table {
+  @extend .table, .table-bordered;
+  margin: 0;
+}
+
+.submission_table_header {
+  @extend .thead-light;
+}
+
+.submission_score,
+.submission_total_score,
+.submission_best_score,
+.submission_best_total_score {
+  text-align: end;
+}
+
+.submission_total_score,
+.submission_best_score,
+.submission_best_total_score {
+  font-weight: bold;
+}

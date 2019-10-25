@@ -59,7 +59,7 @@
                 <span class="task_last_submission">
                   <span class="task_last_submission_label">Last submission: </span>
                   <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time>
-                  (<a class="task_explore_submissions" href="#" (click)="'TODO'">explore
+                  (<a class="task_explore_submissions" href="#" (click)="openSubmissionList(problem); $event.preventDefault()">explore
                     submissions</a>)
                 </span> | <span class="task_best_scores_label">Best scores: </span>
                 <span *ngFor="let scorable of problem.material.scorables; last as last">
