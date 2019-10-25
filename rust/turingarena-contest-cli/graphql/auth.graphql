@@ -1,4 +1,4 @@
-query AuthQuery($user: String!, $password: String!) {
+mutation AuthQuery($user: String!, $password: String!) {
     auth(user: $user, password: $password) {
         token
     }

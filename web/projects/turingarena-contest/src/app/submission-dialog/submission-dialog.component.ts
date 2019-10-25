@@ -4,7 +4,7 @@ import { QueryRef } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
-import { SubmissionQuery, SubmissionQueryVariables, SubmissionQuery_events_event_value as Value } from '../__generated__/SubmissionQuery';
+import { SubmissionQuery, SubmissionQueryVariables, SubmissionQuery_events_event_ValueEvent_value as Value } from '../__generated__/SubmissionQuery';
 
 @Component({
   selector: 'app-submission-dialog',
