@@ -41,7 +41,7 @@ impl Contest {
         let user = UserInput {
             id: id.to_owned(),
             display_name: display_name.to_owned(),
-            password_bcrypt: bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap(),
+            password_bcrypt: bcrypt::hash(password, 6).unwrap(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::users::table)
