@@ -50,7 +50,7 @@
             -->
           </div>
           <a *ngIf="problem.material.statement[0] as statement" download
-            [href]="'data:' + statement.type + ';base64,' + statement.content.base64">Download</a>
+            [href]="getDataURL(statement)">Download</a>
           <!--
           <iframe *ngIf="taskMetadata.statement.html as html" class="task_statement_html" [attr.srcDoc]="html"
             sandbox="allow-scripts">

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ContestQueryService } from './contest-query.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,7 @@ export class AppComponent {
   constructor(
     private contestQueryService: ContestQueryService,
     private modal: NgbModal,
+    private sanitizer: DomSanitizer,
   ) { }
 
   contestQuery = this.contestQueryService.watch({}, {
@@ -32,5 +34,9 @@ export class AppComponent {
     } catch (e) {
       // dismissed, do nothing
     }
+  }
+
+  getDataURL(statement) {
+    return this.sanitizer.bypassSecurityTrustUrl('data:' + statement.type + ';base64,' + statement.content.base64);
   }
 }
