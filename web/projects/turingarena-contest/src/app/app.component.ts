@@ -2,9 +2,8 @@ import { Component } from '@angular/core';
 import { ContestQueryService } from './contest-query.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { DomSanitizer } from '@angular/platform-browser';
 import { map } from 'rxjs/operators';
-import { ContestQuery_problems as ContestProblem } from './__generated__/ContestQuery';
+import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +14,6 @@ export class AppComponent {
   constructor(
     private contestQueryService: ContestQueryService,
     private modal: NgbModal,
-    private sanitizer: DomSanitizer,
   ) { }
 
   contestQuery = this.contestQueryService.watch({
@@ -34,9 +32,15 @@ export class AppComponent {
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
+
+        const getScorableState = (scorable: Scorable) => problem.scorables.find((s) => s.scorableId === scorable.name) || {
+          score: 0,
+        };
+
         return {
+          getScorableState,
           score: scorables
-            .map((scorable) => problem.scorables.find((s) => s.scorableId === scorable.name))
+            .map(getScorableState)
             .map((scorable) => scorable && scorable.score || 0)
             .reduce((a, b) => a + b, 0),
           maxScore: scorables.map(s => s.range.max).reduce((a, b) => a + b, 0),
@@ -67,13 +71,5 @@ export class AppComponent {
     } catch (e) {
       // dismissed, do nothing
     }
-  }
-
-  getDataURL(statement) {
-    return this.sanitizer.bypassSecurityTrustUrl('data:' + statement.type + ';base64,' + statement.content.base64);
-  }
-
-  getDataResourceURL(statement) {
-    return this.sanitizer.bypassSecurityTrustResourceUrl('data:' + statement.type + ';base64,' + statement.content.base64);
   }
 }
