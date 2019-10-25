@@ -32,6 +32,7 @@ mod schema;
 mod server;
 mod submission;
 mod user;
+mod config;
 
 use args::{Args, Command};
 use contest::Contest;
@@ -99,7 +100,7 @@ fn main() {
             secret_key,
             skip_auth,
         } => run_server(host, port, skip_auth, secret_key, contest),
-        InitDb {} => contest.init_db(),
+        InitDb { contest_name } => contest.init_db(&contest_name),
         AddUser {
             username,
             display_name,

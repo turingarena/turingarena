@@ -3,6 +3,7 @@ use super::*;
 use schema::{submission_files, submissions};
 use turingarena::submission::*;
 use diesel::QueryResult;
+use juniper::FieldResult;
 
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
@@ -82,7 +83,7 @@ impl Submission {
     }
 }
 
-#[juniper::object]
+#[juniper::object(Context = Context)]
 impl Submission {
     /// UUID of the submission
     fn id(&self) -> &String {
@@ -107,6 +108,11 @@ impl Submission {
     /// list of files of this submission
     fn files(&self) -> &Vec<SubmissionFile> {
         &self.files
+    }
+
+    /// Scorables of this submission
+    fn scorables(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
+        Ok(evaluation::query_scorables(&ctx.contest.connect_db()?, &self.id)?)
     }
 }
 

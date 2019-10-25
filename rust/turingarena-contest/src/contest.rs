@@ -32,10 +32,12 @@ impl Contest {
         Ok(conn)
     }
 
-    pub fn init_db(&self) {
+    pub fn init_db(&self, contest_title: &str) {
         let connection = self.connect_db().expect("Error connecting to the database");
         embedded_migrations::run_with_output(&connection, &mut std::io::stdout())
             .expect("Error while initializing the database");
+        config::create_config(&connection, contest_title)
+            .expect("Error creating contest configuration in the DB");
     }
 
     pub fn add_user(&self, id: &str, display_name: &str, password: &str) {
@@ -105,7 +107,7 @@ pub struct ContestQueries {}
 
 #[juniper::object(Context = Context)]
 impl ContestQueries {
-    /// get a user
+    /// Get a user
     fn user(&self, ctx: &Context, id: Option<String>) -> FieldResult<user::User> {
         let id = if let Some(id) = &id {
             id
@@ -117,12 +119,12 @@ impl ContestQueries {
         Ok(ctx.contest.get_user(id)?)
     }
 
-    /// list of problems in the contest
+    /// List of problems in the contest
     fn problems(&self, ctx: &Context, context: &Context) -> FieldResult<Vec<ContestProblem>> {
         Ok(ctx.contest.get_problems()?)
     }
 
-    /// get the evaluation events for the specified submission
+    /// Get the evaluation events for the specified submission
     fn events(
         &self,
         ctx: &Context,
@@ -132,6 +134,11 @@ impl ContestQueries {
             &ctx.contest.connect_db()?,
             submission_id,
         )?)
+    }
+
+    /// Get the contest configuration 
+    fn config(&self, ctx: &Context) -> FieldResult<config::Config> {
+        Ok(config::current_config(&ctx.contest.connect_db()?)?)
     }
 }
 

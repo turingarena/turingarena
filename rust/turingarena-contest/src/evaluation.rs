@@ -62,6 +62,31 @@ struct ScorableInput<'a> {
     score: f64,
 }
 
+#[derive(Queryable)]
+pub struct ScorableResult {
+    /// Id of the submission  
+    submission_id: String,
+
+    /// Id of the scorable
+    scorable_id: String,
+
+    /// Score of the submission
+    score: f64,
+}
+
+#[juniper::object]
+impl ScorableResult {
+    /// The score
+    fn score(&self) -> Score {
+        Score(self.score)
+    }
+
+    /// Id of the scorable
+    fn scorable_id(&self) -> &String {
+        &self.scorable_id
+    }
+}
+
 #[derive(QueryableByName)]
 pub struct MaxScore {
     #[sql_type = "Text"]
@@ -129,6 +154,8 @@ pub fn query_events(
         .filter(evaluation_events::dsl::submission_id.eq(submission_id))
         .load(conn)
 }
+
+/// Get the scorable for (user, problem)
 pub fn query_scorables_of_user_and_problem(
     conn: &SqliteConnection,
     user_id: &str,
@@ -151,6 +178,13 @@ pub fn query_scorables_of_user_and_problem(
     .bind::<Text, _>(problem_name)
     .bind::<Text, _>(user_id)
     .load::<MaxScore>(conn)
+}
+
+/// Get the scorable of (user, problem, submission)
+pub fn query_scorables(conn: &SqliteConnection, submission_id: &str) -> QueryResult<Vec<ScorableResult>> {
+    scorables::table
+        .filter(scorables::dsl::submission_id.eq(submission_id))
+        .load(conn)
 }
 
 /// start the evaluation thread

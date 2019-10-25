@@ -71,5 +71,8 @@ pub enum Command {
         name: String,
     },
     /// initializes the database
-    InitDb {},
+    InitDb {
+        /// Name of the contest 
+        contest_title: String,
+    },
 }
