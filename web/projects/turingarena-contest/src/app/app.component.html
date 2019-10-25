@@ -23,7 +23,7 @@
           </div>
           <h2>Remaining Time</h2>
           <div class="contest_remaining_time">
-            02:49:53
+            {{ state.remainingTime | async }}
           </div>
           <h2>Tasks</h2>
           <ol class="contest_tasks_nav_container">
