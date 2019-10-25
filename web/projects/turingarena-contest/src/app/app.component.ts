@@ -33,7 +33,9 @@ export class AppComponent {
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
 
-        const getScorableState = (scorable: Scorable) => problem.scorables.find((s) => s.scorableId === scorable.name);
+        const getScorableState = (scorable: Scorable) => problem.scorables.find((s) => s.scorableId === scorable.name) || {
+          score: 0,
+        };
 
         return {
           getScorableState,
