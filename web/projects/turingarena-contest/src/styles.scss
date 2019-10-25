@@ -174,7 +174,10 @@ body {
   box-shadow: inset 4px 4px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
-.task_last_submission_label {
+.task_last_submission_label,
+.task_best_scores_label,
+.task_download_attachments_label,
+.task_download_statement_label {
   font-weight: bold;
 }
 
