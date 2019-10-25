@@ -45,6 +45,11 @@ impl ContestProblem {
             &self.name,
         )?)
     }
+
+    /// Submissions of the specified user
+    fn submissions(&self, ctx: &Context, user_id: String) -> FieldResult<Vec<submission::Submission>> {
+        Ok(submission::of_user(&ctx.contest.connect_db()?, &user_id)?)
+    }
 }
 
 impl ContestProblem {
