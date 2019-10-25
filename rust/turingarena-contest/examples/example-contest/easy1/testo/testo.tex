@@ -1,0 +1,101 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{lmodern}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage{sfmath}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+%\usepackage[group-separator={\,}]{siunitx}
+\usepackage[left=2cm, right=2cm, bottom=3cm]{geometry}
+\frenchspacing
+
+\newcommand{\num}[1]{#1}
+
+% Macro varie...
+\newcommand{\file}[1]{\texttt{#1}}
+\renewcommand{\arraystretch}{1.3}
+\newcommand{\esempio}[2]{
+\noindent\begin{minipage}{\textwidth}
+\begin{tabular}{|p{11cm}|p{5cm}|}
+    \hline
+    \textbf{File \file{input.txt}} & \textbf{File \file{output.txt}}\\
+    \hline
+    \tt \small #1 &
+    \tt \small #2 \\
+    \hline
+\end{tabular}
+\end{minipage}
+}
+
+\pagestyle{empty}
+
+% Dati del task
+\newcommand{\nome}{Trova il massimo}
+\newcommand{\nomebreve}{easy1}
+
+\begin{document}
+% Intestazione
+\noindent{\Huge \textbf \nome~(\texttt{\nomebreve})}
+
+% Descrizione del task
+\section*{Descrizione del problema}
+Topolino ha ricevuto in regalo una sequenza di $N$ numeri interi. Puoi aiutarlo
+a trovare il numero più grande presente nella sequenza scrivendo un programma?
+Se $N$ fosse uguale a 12 e la sequenza ricevuta da Topolino fosse la seguente:
+
+\begin{center}
+\setlength{\tabcolsep}{10pt}
+    \begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c | c |}
+    \hline
+    -331 & -341 & 389 & 349 & -37 & -287 & 441 & -871 & -913 & -853 & -617 & -150 \\
+    \hline
+    \end{tabular}
+\end{center}
+
+\noindent
+allora il tuo programma dovrebbe restituire \textbf{441}.
+
+% input.txt
+\section*{Dati di input}
+\noindent
+Nel file \file{input.txt} sono presenti due righe di testo: nella prima c'è un singolo
+numero intero positivo $N$; nella seconda riga ci sono gli $N$ interi $S_i$ che
+compongono la sequenza di Topolino, separati da spazio.
+
+% output.txt
+\section*{Dati di output}
+\noindent
+Nel file \file{output.txt} dovrai stampare un singolo numero intero, il valore massimo
+della sequenza.
+
+% Assunzioni
+\section*{Assunzioni}
+\begin{itemize}
+\item $1 \le N \le 1000$.
+\item $|S_i| < 1000$, ovvero $-1000 < S_i < 1000$.
+\end{itemize}
+
+% Esempi
+\section*{Esempi di input/output}
+\setlength{\tabcolsep}{6pt}
+\esempio{
+12
+
+-331 -341 389 349 -37 -287 441 -871 -913 -853 -617 -150
+}{441}
+
+\esempio{
+3
+
+896 -242 -311
+}{896}
+
+\esempio{
+1
+
+-677
+}{-677}
+
+\end{document}
