@@ -4,7 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { DomSanitizer } from '@angular/platform-browser';
 import { map } from 'rxjs/operators';
-import { ContestQuery_problems as ContestProblem } from './__generated__/ContestQuery';
+import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
 
 @Component({
   selector: 'app-root',
@@ -34,9 +34,13 @@ export class AppComponent {
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
+
+        const getScorableState = (scorable: Scorable) => problem.scorables.find((s) => s.scorableId === scorable.name);
+
         return {
+          getScorableState,
           score: scorables
-            .map((scorable) => problem.scorables.find((s) => s.scorableId === scorable.name))
+            .map(getScorableState)
             .map((scorable) => scorable && scorable.score || 0)
             .reduce((a, b) => a + b, 0),
           maxScore: scorables.map(s => s.range.max).reduce((a, b) => a + b, 0),
