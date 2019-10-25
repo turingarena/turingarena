@@ -46,6 +46,28 @@ export class ContestQueryService extends Query<ContestQuery> {
               }
             }
           }
+          feedback {
+            __typename
+            ... on TableSection {
+              caption {
+                value
+              }
+              cols {
+                title {
+                  value
+                }
+                content {
+                  __typename
+                  ... on ScoreColContent {
+                    range {
+                      precision
+                      max
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

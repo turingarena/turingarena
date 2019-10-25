@@ -1,0 +1,124 @@
+<ng-container *ngIf="appComponent.contestQuery.valueChanges | async as contestResult">
+  <ng-container *ngIf="contestResult.data as contest">
+    <ng-container *ngFor="let problem of contest.problems">
+      <ng-container *ngIf="problem.name === problemName">
+        <div class="evaluation_modal_header">
+          Evaluation
+        </div>
+        <div class="evaluation_modal_body">
+          {{ recordObservable | async | json }}
+          <ng-container *ngFor="let section of problem.material.feedback">
+            <ng-container [ngSwitch]="section.__typename">
+              <div *ngSwitchCase="'TableSection'">TABLE</div>
+            </ng-container>
+          </ng-container>
+          <!--
+          <ng-container *ngFor="let section of taskMainComponent.taskMetadata.evaluation_sections">
+            <ng-container [ngSwitch]="section.type">
+              <table class="evaluation_table">
+                <tbody *ngFor="let group of table.groups; index as i" class="evaluation_group">
+                  <tr *ngIf="group.header as header">
+                    <th [colSpan]="table.columns.length">
+                      {{ header.title | json }}
+                    </th>
+                  </tr>
+                  <tr class="group_header_row">
+                    <ng-container *ngFor="let column of table.columns; trackBy: columnTrackBy" [ngSwitch]="column.type">
+                      <ng-container *ngSwitchCase="'memory_usage'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'message'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'percentage'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'return_code'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'row_name'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'row_number'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'row_status'">
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'score'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'signal'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'status'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'time_usage'">
+                        <ng-container *ngTemplateOutlet="named"></ng-container>
+                      </ng-container>
+                      <ng-template #named>
+                        <th class="named_column_header">
+                          {{ column.name | json }}
+                        </th>
+                      </ng-template>
+                    </ng-container>
+                  </tr>
+                  <tr *ngFor="let row of group.rows" class="evaluation_row" [classList]="getRowClasses(table, row, state)">
+                    <ng-container *ngFor="let column of table.columns; index as i; trackBy: columnTrackBy">
+                      <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="column.type">
+                        <td *ngSwitchCase="'memory_usage'" class="memory_usage_cell">
+                          <ng-container *ngIf="cell.value | evaluate:state as value">
+                            {{ value.memory_usage_bytes | filesize }}
+                          </ng-container>
+                        </td>
+                        <td *ngSwitchCase="'message'" class="message_cell">
+                          <ng-container *ngIf="cell.value | evaluate:state as value">
+                            {{ value.message | json }}
+                          </ng-container>
+                        </td>
+                        <td *ngSwitchCase="'percentage'" class="percentage_cell">
+                        </td>
+                        <td *ngSwitchCase="'return_code'" class="return_code_cell">
+                        </td>
+                        <th *ngSwitchCase="'row_name'" class="row_name_cell">
+                          {{ cell.name | json }}
+                        </th>
+                        <th *ngSwitchCase="'row_number'" class="row_number_cell">
+                          {{ cell.number | number }}
+                        </th>
+                        <ng-container *ngSwitchCase="'row_status'"></ng-container>
+                        <td *ngSwitchCase="'score'" class="score_cell">
+                          <ng-container *ngIf="cell.value | evaluate:state as value">
+                            {{
+                                  value.score.toFixed(column.precision)
+                                }}<ng-container *ngIf="cell.max_score"> / {{
+                                  cell.max_score.toFixed(column.precision)
+                                }}</ng-container>
+                          </ng-container>
+                        </td>
+                        <td *ngSwitchCase="'signal'" class="signal_cell">
+                        </td>
+                        <td *ngSwitchCase="'status'" class="status_cell">
+                        </td>
+                        <td *ngSwitchCase="'time_usage'" class="time_usage_cell">
+                          <ng-container *ngIf="cell.value | evaluate:state as value">
+                            <span class="time_usage_value">{{ value.time_usage_seconds | number:'.3' }}</span> <span
+                              class="time_usage_unit">s</span>
+                          </ng-container>
+                        </td>
+                      </ng-container>
+                    </ng-container>
+                  </tr>
+                </tbody>
+              </table>
+            </ng-container>
+          </ng-container>
+          -->
+        </div>
+        <div class="evaluation_modal_footer">
+          <button (click)="activeModal.close()" class="evaluation_modal_close_button">Close</button>
+        </div>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</ng-container>

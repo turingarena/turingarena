@@ -4,6 +4,8 @@ import { ContestQuery_problems_material_submissionForm_fields as Field } from '.
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitMutationService } from '../submit-mutation.service';
 import { FileInput } from '../../../../../__generated__/globalTypes';
+import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
+import { SubmissionQueryService } from '../submission-query.service';
 
 @Component({
   selector: 'app-submit-dialog',
@@ -15,6 +17,7 @@ export class SubmitDialogComponent {
     private activeModal: NgbActiveModal,
     private modal: NgbModal,
     private submitMutation: SubmitMutationService,
+    private submissionQueryService: SubmissionQueryService,
   ) { }
 
   @Input()
@@ -63,20 +66,16 @@ export class SubmitDialogComponent {
 
     this.activeModal.close();
 
-    /*
-      const submission = data.submit;
+    const modalRef = this.modal.open(SubmissionDialogComponent);
+    const modal = modalRef.componentInstance as SubmissionDialogComponent;
 
-      const modalRef = this.modal.open(EvaluationLiveDialogComponent);
-      const modal = modalRef.componentInstance as EvaluationLiveDialogComponent;
-
-      modal.submission = submission;
-      modal.taskMainComponent = this.taskMainComponent;
-      modal.evaluationStateObservable = this.evaluationObserverService.observe({
-        evaluationId: submission.scoredEvaluation.id,
-      });
-
-      this.activeModal.close();
-    */
+    modal.setSubmissionQueryRef(this.submissionQueryService.watch({
+      submissionId: data.submit.id,
+    }, {
+        pollInterval: 1000,
+      }));
+    modal.appComponent = this.appComponent;
+    modal.problemName = this.problemName;
   }
 
   private async getFileForField(field: Field, formData: FormData): Promise<FileInput> {
