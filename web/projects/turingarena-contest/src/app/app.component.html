@@ -1,6 +1,12 @@
 <ng-container *ngIf="contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as contest">
     <ng-container *ngIf="stateObservable | async as state">
+      <nav class="nav">
+        <h1 class="contest_title"><a href="#" (click)="selectedProblemName = undefined; $event.preventDefault()">CONTEST
+            NAME</a></h1>
+        <span class="user_display_name">{{contest.user.displayName}}</span>
+        <button class="logout">Logout</button>
+      </nav>
       <div class="contest_main">
         <nav class="contest_nav">
           <h2>Score</h2>
