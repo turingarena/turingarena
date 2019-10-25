@@ -2,11 +2,13 @@
 
 pub mod record;
 use serde::{Deserialize, Serialize};
+use crate::score;
 
 graphql_derive_union_from_enum! {
     #[derive(Serialize, Deserialize)]
     pub enum Event {
         Value(ValueEvent),
+        Score(ScoreEvent),
     }
 }
 
@@ -18,6 +20,16 @@ pub struct ValueEvent {
 
     /// value of the record
     pub value: record::Value,
+}
+
+/// Rappresents a key/value record type
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ScoreEvent {
+    /// key of the record
+    pub scorable_id: String,
+
+    /// value of the record
+    pub score: score::Score,
 }
 
 pub mod mem {

@@ -41,7 +41,7 @@ impl Contest {
         let user = UserInput {
             id: id.to_owned(),
             display_name: display_name.to_owned(),
-            password_bcrypt: bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap(),
+            password_bcrypt: bcrypt::hash(password, 6).unwrap(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::users::table)
@@ -65,7 +65,12 @@ impl Contest {
     pub fn add_problem(&self, name: &str, path: &Path) {
         let problem = ContestProblemInput {
             name: name.to_owned(),
-            path: self.problem_rel_path(path).unwrap().to_str().unwrap().to_owned(),
+            path: self
+                .problem_rel_path(path)
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_owned(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::problems::table)
@@ -93,30 +98,55 @@ impl Contest {
     }
 }
 
+/// dummy structure to do GraphQL queries to the contest
+pub struct ContestQueries {}
+
 #[juniper::object(Context = Context)]
-impl Contest {
+impl ContestQueries {
+    /// get a user
+    fn user(&self, ctx: &Context, id: Option<String>) -> FieldResult<user::User> {
+        let id = if let Some(id) = &id {
+            id
+        } else if let Some(ctx) = &ctx.jwt_data {
+            &ctx.user
+        } else {
+            return Err(FieldError::from("invalid authorization token"));
+        };
+        Ok(ctx.contest.get_user(id)?)
+    }
+
+    /// list of problems in the contest
+    fn problems(&self, ctx: &Context, context: &Context) -> FieldResult<Vec<ContestProblem>> {
+        Ok(ctx.contest.get_problems()?)
+    }
+
+    /// get the evaluation events for the specified submission
+    fn events(
+        &self,
+        ctx: &Context,
+        submission_id: String,
+    ) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
+        Ok(evaluation::query_events(
+            &ctx.contest.connect_db()?,
+            submission_id,
+        )?)
+    }
+}
+
+/// dummy structure to do GraphQL mutations to the contest
+pub struct ContestMutations {}
+
+#[juniper::object(Context = Context)]
+impl ContestMutations {
+    /// authenticate a user, generating an authentication code
     fn auth(&self, ctx: &Context, user: String, password: String) -> FieldResult<UserToken> {
-        let user = self.get_user(&user)?;
+        let user = ctx.contest.get_user(&user)?;
         Ok(UserToken {
             token: auth::auth(&user, &password, &ctx.secret)?,
         })
     }
 
-    fn user(&self, context: &Context, id: Option<String>) -> FieldResult<user::User> {
-        let id = if let Some(id) = &id {
-            id
-        } else if let Some(ctx) = &context.jwt_data {
-            &ctx.user
-        } else {
-            return Err(FieldError::from("invalid authorization token"));
-        };
-        Ok(self.get_user(id)?)
-    }
-
-    fn problems(&self, context: &Context) -> FieldResult<Vec<ContestProblem>> {
-        Ok(self.get_problems()?)
-    }
-
+    /// submit a solution to the specified problem
     fn submit(
         &self,
         ctx: &Context,
@@ -125,18 +155,11 @@ impl Contest {
         files: Vec<submission::FileInput>,
     ) -> FieldResult<submission::Submission> {
         ctx.authorize_user(&user_id)?;
-        let problem = self.get_problem(&problem_name)?;
-        let submission = submission::insert(&self.connect_db()?, &user_id, &problem_name, files)?;
-        evaluation::evaluate(&problem, &submission, self.connect_db().unwrap());
+        let problem = ctx.contest.get_problem(&problem_name)?;
+        let submission =
+            submission::insert(&ctx.contest.connect_db()?, &user_id, &problem_name, files)?;
+        evaluation::evaluate(&problem, &submission, ctx.contest.connect_db().unwrap());
         Ok(submission)
-    }
-
-    /// get the evaluation events for the specified submission
-    fn events(&self, submission_id: String) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
-        Ok(evaluation::query_events(
-            &self.connect_db()?,
-            submission_id,
-        )?)
     }
 }
 

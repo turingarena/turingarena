@@ -213,7 +213,7 @@ mod tests {
         let db = tmp.path().join("db.sqlite");
         let pp = tmp.path().join("test-problem");
         std::fs::create_dir(&pp);
-        let contest = Contest { 
+        let contest = Contest {
             database_url: db.to_owned(),
             problems_dir: tmp.path().to_owned(),
         };

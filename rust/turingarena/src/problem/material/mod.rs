@@ -27,7 +27,7 @@ pub struct Material {
     /// Form to show to users, for submitting solutions.
     pub submission_form: submission::form::Form,
     /// Items of this problem which will receive a numerical score.
-    pub scored_items: Vec<score::ScoredItem>,
+    pub scorables: Vec<score::Scorable>,
     /// Template of the feedback to show to users, for a submitted solution.
     pub feedback: feedback::Template,
 }

@@ -43,8 +43,9 @@ fn submission_form() -> Form {
     }
 }
 
-fn scored_item_of(subtask: &ioi::SubtaskInfo) -> ScoredItem {
-    ScoredItem {
+fn scorable_of(subtask: &ioi::SubtaskInfo) -> Scorable {
+    Scorable {
+        name: ScorableName(format!("subtask.{}", subtask.id)),
         title: vec![TextVariant {
             attributes: vec![],
             value: format!("Subtask {}", subtask.id),
@@ -182,7 +183,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             .map(attachment_at_path)
             .collect(),
         submission_form: submission_form(),
-        scored_items: { subtasks_of(task).into_iter().map(scored_item_of).collect() },
+        scorables: { subtasks_of(task).into_iter().map(scorable_of).collect() },
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),

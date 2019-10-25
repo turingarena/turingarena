@@ -9,6 +9,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLScalarValue)]
 pub struct Score(pub f64);
 
+/// Wraps a string that identifies a scorable
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
+pub struct ScorableName(pub String);
+
 /// Describes the possible values of a score.
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]
 pub struct Range {
@@ -21,8 +25,11 @@ pub struct Range {
 
 /// Describes an item to which a score can be assigned
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct ScoredItem {
-    /// Name of this scored item, as shown to users.
+pub struct Scorable {
+    /// Name of this scorable, used to identify it.
+    /// Should never be shown to (non-admin) users.
+    pub name: ScorableName,
+    /// Name of this scorable, as shown to users.
     pub title: Text,
     /// Possible values for the score assigned to this item.
     pub range: Range,
