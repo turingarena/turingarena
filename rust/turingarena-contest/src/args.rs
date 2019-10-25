@@ -72,7 +72,7 @@ pub enum Command {
     },
     /// initializes the database
     InitDb {
-        /// Name of the contest 
+        /// Name of the contest
         contest_title: String,
     },
 }

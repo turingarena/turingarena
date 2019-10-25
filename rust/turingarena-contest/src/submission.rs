@@ -1,21 +1,21 @@
 use super::*;
 
-use schema::{submission_files, submissions};
-use turingarena::submission::*;
 use diesel::QueryResult;
 use juniper::FieldResult;
+use schema::{submission_files, submissions};
+use turingarena::submission::*;
 
 /// Status of a submission
 #[derive(Copy, Clone, juniper::GraphQLEnum)]
 pub enum SubmissionStatus {
-    /// The submission is in the process of evaluation by the server 
-    Pending, 
+    /// The submission is in the process of evaluation by the server
+    Pending,
 
     /// The evaluation process terminated correctly
-    Success, 
+    Success,
 
-    /// The evaluation process crashed with an error 
-    Failed, 
+    /// The evaluation process crashed with an error
+    Failed,
 }
 
 impl SubmissionStatus {
@@ -33,7 +33,8 @@ impl SubmissionStatus {
             SubmissionStatus::Pending => "PENDING",
             SubmissionStatus::Success => "SUCCESS",
             SubmissionStatus::Failed => "FAILED",
-        }.to_owned()
+        }
+        .to_owned()
     }
 }
 
@@ -145,14 +146,17 @@ impl Submission {
         &self.files
     }
 
-    /// Submission status 
+    /// Submission status
     fn status(&self) -> &SubmissionStatus {
         &self.status
     }
 
     /// Scorables of this submission
     fn scorables(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
-        Ok(evaluation::query_scorables(&ctx.contest.connect_db()?, &self.id)?)
+        Ok(evaluation::query_scorables(
+            &ctx.contest.connect_db()?,
+            &self.id,
+        )?)
     }
 }
 
@@ -236,7 +240,10 @@ pub fn insert(
 }
 
 /// Gets the files of a submission
-fn submission_files(conn: &SqliteConnection, submission_id: &str) -> QueryResult<Vec<SubmissionFile>> {
+fn submission_files(
+    conn: &SqliteConnection,
+    submission_id: &str,
+) -> QueryResult<Vec<SubmissionFile>> {
     submission_files::table
         .filter(submission_files::dsl::submission_id.eq(submission_id))
         .load::<SubmissionFile>(conn)
@@ -257,7 +264,7 @@ pub fn query(conn: &SqliteConnection, id: &str) -> QueryResult<Submission> {
     })
 }
 
-/// Gets all the submissions of the specified user 
+/// Gets all the submissions of the specified user
 pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submission>> {
     Ok(submissions::table
         .filter(submissions::dsl::user_id.eq(user_id))
@@ -270,11 +277,16 @@ pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submis
             created_at: s.created_at,
             status: SubmissionStatus::from(&s.status),
             files: submission_files(conn, &s.id).unwrap(),
-        }).collect())
+        })
+        .collect())
 }
 
 /// Sets the submission status
-pub fn set_status(conn: &SqliteConnection, submission_id: &str, status: SubmissionStatus) -> QueryResult<()> {
+pub fn set_status(
+    conn: &SqliteConnection,
+    submission_id: &str,
+    status: SubmissionStatus,
+) -> QueryResult<()> {
     let target = submissions::dsl::submissions.find(submission_id);
     diesel::update(target)
         .set(submissions::dsl::status.eq(status.to_string()))

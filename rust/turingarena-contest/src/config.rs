@@ -40,7 +40,7 @@ impl Config {
     }
 }
 
-/// Get the current configuration 
+/// Get the current configuration
 pub fn current_config(conn: &SqliteConnection) -> QueryResult<Config> {
     config::table.first(conn)
 }

@@ -181,7 +181,10 @@ pub fn query_scorables_of_user_and_problem(
 }
 
 /// Get the scorable of (user, problem, submission)
-pub fn query_scorables(conn: &SqliteConnection, submission_id: &str) -> QueryResult<Vec<ScorableResult>> {
+pub fn query_scorables(
+    conn: &SqliteConnection,
+    submission_id: &str,
+) -> QueryResult<Vec<ScorableResult>> {
     scorables::table
         .filter(scorables::dsl::submission_id.eq(submission_id))
         .load(conn)

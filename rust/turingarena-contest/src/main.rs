@@ -25,6 +25,7 @@ extern crate turingarena_contest_webcontent;
 
 mod args;
 mod auth;
+mod config;
 mod contest;
 mod evaluation;
 mod problem;
@@ -32,7 +33,6 @@ mod schema;
 mod server;
 mod submission;
 mod user;
-mod config;
 
 use args::{Args, Command};
 use contest::Contest;
