@@ -180,7 +180,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
     Material {
         title: vec![TextVariant {
             attributes: vec![],
-            value: task.name.clone().into(),
+            value: task.title.clone().into(),
         }],
         statement: task.booklets.iter().map(statement_of).collect(),
         attachments: files_in_dir(&task.path.join("att"))
