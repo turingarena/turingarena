@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-    schema_path = "graphql/schema.json",
+    schema_path = "__generated__/graphql-schema.json",
     query_path = "graphql/submit.graphql",
     result_derive = "Debug"
 )]

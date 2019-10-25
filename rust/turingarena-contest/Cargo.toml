@@ -6,7 +6,7 @@ edition = "2018"
 
 [features]
 default = ["webcontent"]
-webcontent = []
+webcontent = ["turingarena-contest-webcontent"]
 
 [dependencies]
 juniper = "0.14.0"
@@ -17,7 +17,7 @@ diesel_migrations = "1.4.0"
 rand = "0.7.2"
 chrono = "0.4.9"
 bcrypt = "0.6"
-turingarena-contest-webcontent = { path = "../turingarena-contest-webcontent/" }
+turingarena-contest-webcontent = { path = "../turingarena-contest-webcontent/", optional = true }
 turingarena-task-maker = { path = "../turingarena-task-maker/" }
 turingarena = { path = "../turingarena/" }
 structopt = "~0.3.3"

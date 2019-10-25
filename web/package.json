@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "npm run apollo-codegen && ng serve",
-    "build": "npm run apollo-codegen && ng build",
-    "test": "npm run apollo-codegen && ng test",
-    "lint": "npm run apollo-codegen && ng lint",
-    "e2e": "npm run apollo-codegen && ng e2e",
-    "apollo-codegen": "apollo client:codegen --target typescript"
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "prepare": "apollo client:codegen --target typescript"
   },
   "private": true,
   "dependencies": {

@@ -9,7 +9,7 @@ const config = {
       name: "turingarena-contest",
       localSchemaFile: path.resolve(
         __dirname,
-        "../rust/turingarena-contest-cli/graphql/schema.json"
+        "__generated__/graphql-schema.json"
       )
     }
   }
