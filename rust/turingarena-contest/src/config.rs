@@ -33,6 +33,11 @@ impl Config {
     fn end_time(&self) -> &String {
         &self.end_time
     }
+
+    /// Current time on the server, as RFC3339 date
+    fn server_time(&self) -> String {
+        chrono::Local::now().to_rfc3339()
+    }
 }
 
 /// Get the current configuration 

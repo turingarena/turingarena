@@ -6,7 +6,7 @@ use diesel::QueryResult;
 use juniper::FieldResult;
 
 /// Status of a submission
-#[derive(juniper::GraphQLEnum)]
+#[derive(Copy, Clone, juniper::GraphQLEnum)]
 pub enum SubmissionStatus {
     /// The submission is in the process of evaluation by the server 
     Pending, 
@@ -273,7 +273,14 @@ pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submis
         }).collect())
 }
 
-
+/// Sets the submission status
+pub fn set_status(conn: &SqliteConnection, submission_id: &str, status: SubmissionStatus) -> QueryResult<()> {
+    let target = submissions::dsl::submissions.find(submission_id);
+    diesel::update(target)
+        .set(submissions::dsl::status.eq(status.to_string()))
+        .execute(conn)?;
+    Ok(())
+}
 
 #[cfg(test)]
 mod tests {
