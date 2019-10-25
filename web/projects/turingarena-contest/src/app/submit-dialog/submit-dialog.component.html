@@ -17,7 +17,8 @@
                   <dd [ngSwitch]="state.typeChoices.type">
                     <ng-container *ngSwitchCase="'oneRecommended'">
                       {{ state.typeChoices.recommendedType!.title[0].value }}
-                      (<a href="#" class="submission_file_type_change" (click)="state.wantMoreTypes = true">change</a>)
+                      (<a href="#" class="submission_file_type_change"
+                        (click)="state.moreTypes = true; $event.preventDefault()">change</a>)
                       <input type="hidden" [name]="field.id + '.type'"
                         [value]="state.typeChoices.recommendedType!.id" />
                     </ng-container>
@@ -28,7 +29,7 @@
                         {{ type.title[0].value }}
                       </label>
                       (<a href="#" class="submission_file_type_more_options"
-                        (click)="state.wantMoreTypes = true">more...</a>)
+                        (click)="state.moreTypes = true; $event.preventDefault()">more...</a>)
                     </ng-container>
                     <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submission_file_type_select">
                       <option *ngFor="let type of state.typeChoices.allTypes" [value]="type.id">
