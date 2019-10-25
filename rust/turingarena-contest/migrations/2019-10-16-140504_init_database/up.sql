@@ -12,7 +12,7 @@ CREATE TABLE users(
 CREATE TABLE submissions(
     id              TEXT NOT NULL PRIMARY KEY,
     user_id         TEXT NOT NULL REFERENCES users(id),
-    problem_name    TEXT NOT NULL REFERENCES problem(name),
+    problem_name    TEXT NOT NULL REFERENCES problems(name),
     created_at      TEXT NOT NULL
 );
 
@@ -26,14 +26,14 @@ CREATE TABLE submission_files(
 );
 
 CREATE TABLE evaluation_events(
-    submission_id   TEXT NOT NULL REFERENCES submission(id),
+    submission_id   TEXT NOT NULL REFERENCES submissions(id),
     serial          INT  NOT NULL,
     event_json      TEXT NOT NULL,
     PRIMARY KEY(submission_id, serial)
 );
 
 CREATE TABLE scorables(
-    submission_id   TEXT   NOT NULL REFERENCES submission(id),
+    submission_id   TEXT   NOT NULL REFERENCES submissions(id),
     scorable_id     TEXT   NOT NULL,
     score           DOUBLE NOT NULL,
     PRIMARY KEY(submission_id, scorable_id)

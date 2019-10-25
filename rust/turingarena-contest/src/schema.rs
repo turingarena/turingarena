@@ -48,7 +48,10 @@ table! {
     }
 }
 
+joinable!(evaluation_events -> submissions (submission_id));
+joinable!(scorables -> submissions (submission_id));
 joinable!(submission_files -> submissions (submission_id));
+joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
