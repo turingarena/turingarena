@@ -79,6 +79,12 @@
               <iframe class="task_statement_html" [attr.src]="getDataResourceURL(statement)">
               </iframe>
             </ng-container>
+            <div>
+              <a *ngFor="let attachment of problem.material.attachments" download
+                [href]="getDataURL(attachment.file[0])">
+                {{attachment.title[0].value}}
+              </a>
+            </div>
           </main>
         </ng-container>
       </div>
