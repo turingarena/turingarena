@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { ContestQueryService } from './contest-query.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DateTime } from 'luxon';
+import { interval } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { map } from 'rxjs/operators';
 import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
 
 @Component({
@@ -28,7 +30,7 @@ export class AppComponent {
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { problems } = data;
+      const { config: { startTime, endTime }, problems } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
@@ -51,6 +53,10 @@ export class AppComponent {
       const problemsState = problems.map(getProblemState);
 
       return {
+        remainingTime: interval(1000).pipe(
+          startWith([0]),
+          map(() => DateTime.fromISO(endTime).diffNow().toFormat('hh:mm:ss')),
+        ),
         score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
         maxScore: problemsState.map((s) => s.maxScore).reduce((a, b) => a + b, 0),
         precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),

@@ -12,6 +12,11 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
       user(id: $userId) {
         displayName
       }
+      config {
+        contestTitle
+        startTime
+        endTime
+      }
       problems {
         name
         submissions(userId: $userId) {
