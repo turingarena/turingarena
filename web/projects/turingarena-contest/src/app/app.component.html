@@ -63,16 +63,15 @@
                   <span *ngIf="!last"> | </span>
                 </span>
               </div>
-              <!--
-              <div *ngIf="lastSubmission as submission" class="task_last_submission_container">
+              <div *ngIf="problem.submissions[problem.submissions.length-1] as submission"
+                class="task_last_submission_container">
                 <span class="task_last_submission">
                   <span class="task_last_submission_label">Last submission: </span>
-                  <app-relative-time [time]="submission.timestamp"></app-relative-time>
-                  (<a class="task_explore_submissions" href="#" (click)="openSubmissions()">explore
+                  <app-relative-time [time]="submission.createdAt"></app-relative-time>
+                  (<a class="task_explore_submissions" href="#" (click)="'TODO'">explore
                     submissions</a>)
                 </span>
               </div>
-              -->
             </div>
             <ng-container *ngIf="problem.material.statement[0] as statement">
               <a download

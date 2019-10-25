@@ -14,6 +14,9 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
       }
       problems {
         name
+        submissions(userId: $userId) {
+          createdAt
+        }
         scorables(userId: $userId) {
           scorableId
           score
