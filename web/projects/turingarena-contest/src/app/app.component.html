@@ -58,14 +58,12 @@
               </span>
             </div>
             -->
-          </div>
-          <a *ngIf="problem.material.statement[0] as statement" download
-            [href]="getDataURL(statement)">Download</a>
-          <!--
-          <iframe *ngIf="taskMetadata.statement.html as html" class="task_statement_html" [attr.srcDoc]="html"
-            sandbox="allow-scripts">
-          </iframe>
-          -->
+            </div>
+            <ng-container *ngIf="problem.material.statement[0] as statement">
+              <a download [href]="getDataURL(statement)">Download</a>
+              <iframe class="task_statement_html" [attr.src]="getDataResourceURL(statement)">
+              </iframe>
+            </ng-container>
           </main>
         </ng-container>
       </div>

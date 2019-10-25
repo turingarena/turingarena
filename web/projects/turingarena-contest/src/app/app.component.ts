@@ -72,4 +72,8 @@ export class AppComponent {
   getDataURL(statement) {
     return this.sanitizer.bypassSecurityTrustUrl('data:' + statement.type + ';base64,' + statement.content.base64);
   }
+
+  getDataResourceURL(statement) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl('data:' + statement.type + ';base64,' + statement.content.base64);
+  }
 }
