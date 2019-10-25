@@ -2,6 +2,7 @@ use super::*;
 
 use schema::{submission_files, submissions};
 use turingarena::submission::*;
+use diesel::QueryResult;
 
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
@@ -185,21 +186,40 @@ pub fn insert(
     Ok(query(conn, &id)?)
 }
 
+/// Gets the files of a submission
+fn submission_files(conn: &SqliteConnection, submission_id: &str) -> QueryResult<Vec<SubmissionFile>> {
+    submission_files::table
+        .filter(submission_files::dsl::submission_id.eq(submission_id))
+        .load::<SubmissionFile>(conn)
+}
+
 /// Gets the submission with the specified id from the database
-pub fn query(conn: &SqliteConnection, id: &str) -> Result<Submission, Box<dyn std::error::Error>> {
+pub fn query(conn: &SqliteConnection, id: &str) -> QueryResult<Submission> {
     let submission = submissions::table
         .filter(submissions::dsl::id.eq(id))
         .first::<SubmissionTable>(conn)?;
-    let files = submission_files::table
-        .filter(submission_files::dsl::submission_id.eq(id))
-        .load::<SubmissionFile>(conn)?;
     Ok(Submission {
         id: submission.id,
         user_id: submission.user_id,
         problem_name: submission.problem_name,
         created_at: submission.created_at,
-        files,
+        files: submission_files(conn, id)?,
     })
+}
+
+/// Gets all the submissions of the specified user 
+pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submission>> {
+    Ok(submissions::table
+        .filter(submissions::dsl::user_id.eq(user_id))
+        .load::<SubmissionTable>(conn)?
+        .into_iter()
+        .map(|s| Submission {
+            id: s.id.clone(),
+            user_id: s.user_id,
+            problem_name: s.problem_name,
+            created_at: s.created_at,
+            files: submission_files(conn, &s.id).unwrap(),
+        }).collect())
 }
 
 #[cfg(test)]
