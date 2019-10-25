@@ -1,44 +1,54 @@
 <ng-container *ngIf="contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as contest">
-    <div class="contest_main">
-      <nav class="contest_nav">
-        <!--
+    <ng-container *ngIf="stateObservable | async as state">
+      <div class="contest_main">
+        <nav class="contest_nav">
           <h2>Score</h2>
           <div class="contest_score_container">
-            <span class="contest_score_display score" [class.score_zero]="scoreInfo.score <= 0"
-              [class.score_partial]="0 < scoreInfo.score && scoreInfo.score < scoreInfo.maxScore"
-              [class.score_full]="scoreInfo.maxScore <= scoreInfo.score">
+            <span class="contest_score_display score" [class.score_zero]="state.score <= 0"
+              [class.score_partial]="0 < state.score && state.score < state.maxScore"
+              [class.score_full]="state.maxScore <= state.score">
               <span class="contest_score">
-                {{ scoreInfo.score.toFixed(scoreInfo.precision) }}
+                {{ state.score.toFixed(state.precision) }}
               </span>/<span class="contest_max_score">
-                {{ scoreInfo.maxScore.toFixed(scoreInfo.precision) }}
+                {{ state.maxScore.toFixed(state.precision) }}
               </span>
             </span>
           </div>
-        -->
-        <h2>Remaining Time</h2>
-        <div class="contest_remaining_time">
-          02:49:53
-        </div>
-        <h2>Tasks</h2>
-        <ol class="contest_tasks_nav_container">
-          <li *ngFor="let problem of contest.problems" class="task_list_item">
-            <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
-              (click)="selectedProblemName = problem.name; $event.preventDefault()">
-              <span class="task_short_title">{{ problem.material.title[0].value }}</span>
-            </a>
-          </li>
-        </ol>
-      </nav>
-      <ng-container *ngFor="let problem of contest.problems">
-        <main class="task_main" *ngIf="selectedProblemName === problem.name">
-          <div class="task_header">
-            <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
-            <div class="task_submit_container">
-              <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">Submit a
-                solution</a>
-            </div>
-            <!--
+          <h2>Remaining Time</h2>
+          <div class="contest_remaining_time">
+            02:49:53
+          </div>
+          <h2>Tasks</h2>
+          <ol class="contest_tasks_nav_container">
+            <li *ngFor="let problem of contest.problems" class="task_list_item">
+              <ng-container *ngIf="state.getProblemState(problem) as problemState">
+                <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
+                  (click)="selectedProblemName = problem.name; $event.preventDefault()">
+                  <span class="task_short_title">{{ problem.material.title[0].value }}</span>
+                  <span class="task_score_badge score" [class.score_zero]="problemState.score <= 0"
+                    [class.score_partial]="0 < problemState.score && problemState.score < problemState.maxScore"
+                    [class.score_full]="problemState.maxScore <= problemState.score">
+                    <span class="task_score">
+                      {{ problemState.score.toFixed(problemState.precision) }}
+                    </span>/<span class="task_max_score">
+                      {{ problemState.maxScore.toFixed(problemState.precision) }}
+                    </span>
+                  </span>
+                </a>
+              </ng-container>
+            </li>
+          </ol>
+        </nav>
+        <ng-container *ngFor="let problem of contest.problems">
+          <main class="task_main" *ngIf="selectedProblemName === problem.name">
+            <div class="task_header">
+              <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
+              <div class="task_submit_container">
+                <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">Submit a
+                  solution</a>
+              </div>
+              <!--
             <div *ngIf="lastSubmission as submission" class="task_last_submission_container">
               <span class="task_last_submission">
                 <span class="task_last_submission_label">Last submission: </span>
@@ -48,16 +58,17 @@
               </span>
             </div>
             -->
-          </div>
-          <a *ngIf="problem.material.statement[0] as statement" download
-            [href]="'data:' + statement.type + ';base64,' + statement.content.base64">Download</a>
-          <!--
+            </div>
+            <a *ngIf="problem.material.statement[0] as statement" download
+              [href]="'data:' + statement.type + ';base64,' + statement.content.base64">Download</a>
+            <!--
           <iframe *ngIf="taskMetadata.statement.html as html" class="task_statement_html" [attr.srcDoc]="html"
             sandbox="allow-scripts">
           </iframe>
           -->
-        </main>
-      </ng-container>
-    </div>
+          </main>
+        </ng-container>
+      </div>
+    </ng-container>
   </ng-container>
 </ng-container>
