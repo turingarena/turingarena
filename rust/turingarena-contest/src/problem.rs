@@ -4,7 +4,6 @@ extern crate turingarena;
 extern crate turingarena_task_maker;
 
 use schema::problems;
-use turingarena::evaluation::ScoreEvent;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 use turingarena::problem::material::Material;
 use turingarena::problem::ProblemName;
@@ -39,7 +38,7 @@ impl ContestProblem {
     }
 
     /// Scorables of the specified user
-    fn scorables(&self, ctx: &Context, user_id: String) -> FieldResult<Vec<ScoreEvent>> {
+    fn scorables(&self, ctx: &Context, user_id: String) -> FieldResult<Vec<evaluation::MaxScore>> {
         Ok(evaluation::query_scorables_of_user_and_problem(
             &ctx.contest.connect_db()?,
             &user_id,
