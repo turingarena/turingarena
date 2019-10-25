@@ -28,5 +28,5 @@ graphql-schema:
 clean:
 	rm -rf rust/target/
 	rm -rf web/dist/
-	find web/ -name __generated__ -delete
+	find web/ -name __generated__ | xargs rm -r
 	git clean -nxd

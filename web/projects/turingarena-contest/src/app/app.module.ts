@@ -9,13 +9,15 @@ import { GraphQLModule } from './graphql.module';
 import { RelativeTimePipe } from './relative-time.pipe';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
+import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RelativeTimeComponent,
     RelativeTimePipe,
-    SubmitDialogComponent
+    SubmitDialogComponent,
+    SubmissionDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -29,6 +31,7 @@ import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
   bootstrap: [AppComponent],
   entryComponents: [
     SubmitDialogComponent,
+    SubmissionDialogComponent,
   ]
 })
 export class AppModule { }
