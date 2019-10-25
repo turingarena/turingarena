@@ -85,7 +85,10 @@ pub type Schema = juniper::RootNode<'static, contest::Contest, contest::Contest>
 
 fn main() {
     let args = Args::from_args();
-    let contest = Contest::with_database(&args.database_url);
+    let contest = Contest { 
+        database_url: args.database_url.clone(),
+        problems_dir: args.problems_dir.clone(),
+    };
     use Command::*;
     match args.subcommand {
         GenerateSchema {} => generate_schema(),
@@ -94,7 +97,7 @@ fn main() {
             port,
             secret_key,
             skip_auth,
-        } => run_server(host, port, skip_auth, secret_key, args.database_url),
+        } => run_server(host, port, skip_auth, secret_key, contest),
         InitDb {} => contest.init_db(),
         AddUser {
             username,
