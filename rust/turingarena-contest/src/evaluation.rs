@@ -1,6 +1,6 @@
 use crate::problem::ContestProblem;
 use crate::schema::{evaluation_events, scorables};
-use crate::submission::Submission;
+use crate::submission::{self, Submission, SubmissionStatus};
 use diesel::prelude::*;
 use diesel::query_dsl::LoadQuery;
 use diesel::sql_types::{Double, Text};
@@ -181,7 +181,10 @@ pub fn query_scorables_of_user_and_problem(
 }
 
 /// Get the scorable of (user, problem, submission)
-pub fn query_scorables(conn: &SqliteConnection, submission_id: &str) -> QueryResult<Vec<ScorableResult>> {
+pub fn query_scorables(
+    conn: &SqliteConnection,
+    submission_id: &str,
+) -> QueryResult<Vec<ScorableResult>> {
     scorables::table
         .filter(scorables::dsl::submission_id.eq(submission_id))
         .load(conn)
@@ -203,5 +206,6 @@ pub fn evaluate(
             insert_event(&db_connection, serial, &submission_id, &event).unwrap();
             serial = serial + 1;
         }
+        submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
     });
 }

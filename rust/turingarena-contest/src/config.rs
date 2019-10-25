@@ -33,9 +33,14 @@ impl Config {
     fn end_time(&self) -> &String {
         &self.end_time
     }
+
+    /// Current time on the server, as RFC3339 date
+    fn server_time(&self) -> String {
+        chrono::Local::now().to_rfc3339()
+    }
 }
 
-/// Get the current configuration 
+/// Get the current configuration
 pub fn current_config(conn: &SqliteConnection) -> QueryResult<Config> {
     config::table.first(conn)
 }

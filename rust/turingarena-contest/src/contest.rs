@@ -28,7 +28,8 @@ impl Contest {
 
     pub fn connect_db(&self) -> ConnectionResult<SqliteConnection> {
         let conn = SqliteConnection::establish(self.database_url.to_str().unwrap())?;
-        conn.execute("PRAGMA busy_timeout = 5000;").expect("Unable to set `busy_timeout`");
+        conn.execute("PRAGMA busy_timeout = 5000;")
+            .expect("Unable to set `busy_timeout`");
         Ok(conn)
     }
 
@@ -120,7 +121,7 @@ impl ContestQueries {
     }
 
     /// List of problems in the contest
-    fn problems(&self, ctx: &Context, context: &Context) -> FieldResult<Vec<ContestProblem>> {
+    fn problems(&self, ctx: &Context) -> FieldResult<Vec<ContestProblem>> {
         Ok(ctx.contest.get_problems()?)
     }
 
@@ -136,7 +137,7 @@ impl ContestQueries {
         )?)
     }
 
-    /// Get the contest configuration 
+    /// Get the contest configuration
     fn config(&self, ctx: &Context) -> FieldResult<config::Config> {
         Ok(config::current_config(&ctx.contest.connect_db()?)?)
     }
@@ -171,16 +172,3 @@ impl ContestMutations {
         Ok(submission)
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     #[test]
-//     fn test_problem_rel_path() {
-//         let contest = Contest {
-//             database_url: PathBuf::from(""),
-//             problems_dir: PathBuf::from("test/dir1"),
-//         };
-//         assert_eq!(contest.problem_rel_path(&PathBuf::from("test/dir1/problems/problem1")).unwrap(), PathBuf::from("problems/p1"));
-//     }
-// }
