@@ -10,6 +10,7 @@ import { RelativeTimePipe } from './relative-time.pipe';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
+import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { SubmissionDialogComponent } from './submission-dialog/submission-dialog
     RelativeTimeComponent,
     RelativeTimePipe,
     SubmitDialogComponent,
-    SubmissionDialogComponent
+    SubmissionDialogComponent,
+    BypassSanitizerPipe
   ],
   imports: [
     BrowserModule,

@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { ContestQueryService } from './contest-query.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { DomSanitizer } from '@angular/platform-browser';
 import { map } from 'rxjs/operators';
 import { ContestQuery_problems as ContestProblem } from './__generated__/ContestQuery';
 
@@ -15,7 +14,6 @@ export class AppComponent {
   constructor(
     private contestQueryService: ContestQueryService,
     private modal: NgbModal,
-    private sanitizer: DomSanitizer,
   ) { }
 
   contestQuery = this.contestQueryService.watch({
@@ -67,13 +65,5 @@ export class AppComponent {
     } catch (e) {
       // dismissed, do nothing
     }
-  }
-
-  getDataURL(statement) {
-    return this.sanitizer.bypassSecurityTrustUrl('data:' + statement.type + ';base64,' + statement.content.base64);
-  }
-
-  getDataResourceURL(statement) {
-    return this.sanitizer.bypassSecurityTrustResourceUrl('data:' + statement.type + ';base64,' + statement.content.base64);
   }
 }
