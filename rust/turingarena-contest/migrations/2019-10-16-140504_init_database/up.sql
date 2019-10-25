@@ -29,12 +29,19 @@ CREATE TABLE evaluation_events(
     submission_id   TEXT NOT NULL REFERENCES submissions(id),
     serial          INT  NOT NULL,
     event_json      TEXT NOT NULL,
-    PRIMARY KEY(submission_id, serial)
+    PRIMARY KEY (submission_id, serial)
 );
 
 CREATE TABLE scorables(
     submission_id   TEXT   NOT NULL REFERENCES submissions(id),
     scorable_id     TEXT   NOT NULL,
     score           DOUBLE NOT NULL,
-    PRIMARY KEY(submission_id, scorable_id)
+    PRIMARY KEY (submission_id, scorable_id)
+);
+
+CREATE TABLE config(
+    id              INT  NOT NULL PRIMARY KEY DEFAULT 0 CHECK (id = 0), -- to ensure this table has a single row
+    contest_title   TEXT NOT NULL, 
+    start_time      TEXT NOT NULL,
+    end_time        TEXT NOT NULL
 );

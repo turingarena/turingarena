@@ -1,4 +1,13 @@
 table! {
+    config (id) {
+        id -> Integer,
+        contest_title -> Text,
+        start_time -> Text,
+        end_time -> Text,
+    }
+}
+
+table! {
     evaluation_events (submission_id, serial) {
         submission_id -> Text,
         serial -> Integer,
@@ -55,6 +64,7 @@ joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    config,
     evaluation_events,
     problems,
     scorables,
