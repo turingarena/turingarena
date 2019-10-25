@@ -104,7 +104,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
             score,
             message,
         } => tx.send(Event::Value(ValueEvent {
-            key: record::Key(format!("subtask.{}.testcase.{}.score", subtask, testcase)),
+            key: record::Key(format!("testcase.{}.score", testcase)),
             value: record::Value::Score(record::ScoreValue {
                 score: Score(score as f64),
             }),
