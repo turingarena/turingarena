@@ -22,7 +22,7 @@ fn auth_request(user: String, password: String) -> Response<auth_query::Response
 pub fn login(username: String) {
     println!("Logging in as {}", username);
     let password = rpassword::read_password_from_tty(Some("Password: ")).unwrap();
-    let response = auth_request(username, password);
+    let response = auth_request(username.clone(), password);
 
     if let Some(errors) = response.errors {
         for error in errors {
@@ -32,8 +32,8 @@ pub fn login(username: String) {
     }
 
     if let Some(data) = response.data {
-        token::store(data.auth.token);
-        println!("Welcome, {}", user::current().display_name);
+        token::store(username.clone(), data.auth.token);
+        println!("Welcome, {}", user::query(username).display_name);
     }
 }
 

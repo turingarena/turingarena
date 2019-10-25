@@ -12,16 +12,20 @@ fn path() -> PathBuf {
 }
 
 /// reads a token from the application directory, if it exists
-pub fn get() -> Option<String> {
+pub fn get() -> Option<(String, String)> {
     match fs::read_to_string(path()) {
-        Ok(token) => Some(token),
+        Ok(info) => {
+            let parts: Vec<&str> = info.split(";").collect();
+            Some((parts[0].to_owned(), parts[1].to_owned()))
+        }
         Err(_) => None,
     }
 }
 
 /// saves an authorization token to the filesystem
-pub fn store(token: String) {
-    fs::write(path(), token).expect("Error saving authorization token");
+pub fn store(user_id: String, token: String) {
+    let info = format!("{};{}", user_id, token);
+    fs::write(path(), info).expect("Error saving authorization token");
 }
 
 /// deletes a saved authorization token

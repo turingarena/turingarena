@@ -10,8 +10,8 @@ use graphql_client::{GraphQLQuery, Response};
 struct UserQuery;
 
 /// get the current user
-pub fn current() -> user_query::UserQueryUser {
-    let body = UserQuery::build_query(user_query::Variables {});
+pub fn query(user_id: String) -> user_query::UserQueryUser {
+    let body = UserQuery::build_query(user_query::Variables { user_id });
     let response: Response<user_query::ResponseData> = client::authenticated_request(&body);
 
     if let Some(errors) = response.errors {
@@ -25,7 +25,7 @@ pub fn current() -> user_query::UserQueryUser {
 }
 
 /// print user informations
-pub fn info() {
-    let user = current();
+pub fn info(user_id: String) {
+    let user = query(user_id);
     println!("Currently logged in as {} ({})", user.display_name, user.id);
 }
