@@ -96,10 +96,14 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
 }
 
 pub fn generate_schema() {
+    let contest = Contest {
+        database_url: PathBuf::from("/tmp/db.sqlite3"),
+        problems_dir: PathBuf::from("/tmp"),
+    };
     let (schema, _errors) = juniper::introspect(
         &Schema::new(
-            contest::Contest::with_database(""),
-            contest::Contest::with_database(""),
+            contest.clone(),
+            contest,
         ),
         &Context {
             skip_auth: false,
@@ -117,7 +121,7 @@ pub fn run_server(
     port: u16,
     skip_auth: bool,
     secret_key: Option<String>,
-    database_url: String,
+    contest: Contest,
 ) {
     let secret = if skip_auth {
         eprintln!("WARNING: Skipping all authentication! Use only for debugging");
@@ -136,8 +140,8 @@ pub fn run_server(
 
     rocket::custom(config)
         .manage(Schema::new(
-            contest::Contest::with_database(&database_url),
-            contest::Contest::with_database(&database_url),
+            contest.clone(),
+            contest,
         ))
         .manage(Context {
             secret,

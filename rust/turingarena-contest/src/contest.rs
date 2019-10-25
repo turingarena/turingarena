@@ -3,10 +3,12 @@ use juniper::{FieldError, FieldResult};
 use crate::*;
 use problem::*;
 use schema::{problems, users};
+use std::path::{Path, PathBuf};
 
 #[derive(Clone)]
 pub struct Contest {
-    database_url: String,
+    pub database_url: PathBuf,
+    pub problems_dir: PathBuf,
 }
 
 /// a user authorization token
@@ -18,14 +20,14 @@ pub struct UserToken {
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 impl Contest {
-    pub fn with_database(database_url: &str) -> Contest {
-        Contest {
-            database_url: database_url.to_owned(),
-        }
+    pub fn problem_rel_path(&self, problem_path: &Path) -> Result<PathBuf> {
+        let problems_abs = self.problems_dir.canonicalize()?;
+        let problem_abs = problem_path.canonicalize()?;
+        Ok(problem_abs.strip_prefix(problems_abs)?.to_owned())
     }
 
     pub fn connect_db(&self) -> ConnectionResult<SqliteConnection> {
-        SqliteConnection::establish(&self.database_url)
+        SqliteConnection::establish(self.database_url.to_str().unwrap())
     }
 
     pub fn init_db(&self) {
@@ -60,10 +62,10 @@ impl Contest {
         Ok(users::table.find(id).first(&self.connect_db()?)?)
     }
 
-    pub fn add_problem(&self, name: &str, path: &str) {
+    pub fn add_problem(&self, name: &str, path: &Path) {
         let problem = ContestProblemInput {
             name: name.to_owned(),
-            path: path.to_owned(),
+            path: self.problem_rel_path(path).unwrap().to_str().unwrap().to_owned(),
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::problems::table)
@@ -137,3 +139,16 @@ impl Contest {
         )?)
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     #[test]
+//     fn test_problem_rel_path() {
+//         let contest = Contest {
+//             database_url: PathBuf::from(""),
+//             problems_dir: PathBuf::from("test/dir1"),
+//         };
+//         assert_eq!(contest.problem_rel_path(&PathBuf::from("test/dir1/problems/problem1")).unwrap(), PathBuf::from("problems/p1"));
+//     }
+// }

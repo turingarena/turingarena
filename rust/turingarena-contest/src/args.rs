@@ -1,4 +1,5 @@
 use structopt::StructOpt;
+use std::path::PathBuf;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -8,7 +9,11 @@ use structopt::StructOpt;
 pub struct Args {
     /// url of the database
     #[structopt(long, env = "DATABASE_URL", default_value = "./database.sqlite3")]
-    pub database_url: String,
+    pub database_url: PathBuf,
+
+    /// path of the directory in which are contained the problems
+    #[structopt(long, env = "PROBLEMS_DIR", default_value = "./")]
+    pub problems_dir: PathBuf,
 
     /// command  
     #[structopt(subcommand)]
@@ -57,8 +62,8 @@ pub enum Command {
     AddProblem {
         /// name of the problem to add
         name: String,
-        /// name of the problem to add
-        path: String,
+        /// path of the problem to add
+        path: PathBuf,
     },
     /// removes a problem from the contest database
     DeleteProblem {

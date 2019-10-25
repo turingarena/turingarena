@@ -209,12 +209,17 @@ mod tests {
 
     #[test]
     fn test_submission_insert() {
-        let db = tempdir::TempDir::new("tests").unwrap();
-        let db = db.path().join("db.sqlite");
-        let contest = Contest::with_database(db.to_str().unwrap());
+        let tmp = tempdir::TempDir::new("tests").unwrap();
+        let db = tmp.path().join("db.sqlite");
+        let pp = tmp.path().join("test-problem");
+        std::fs::create_dir(&pp);
+        let contest = Contest { 
+            database_url: db.to_owned(),
+            problems_dir: tmp.path().to_owned(),
+        };
         contest.init_db();
         contest.add_user("user", "x", "x");
-        contest.add_problem("problem", "test-path");
+        contest.add_problem("problem", &pp);
         let mut files = Vec::new();
         files.push(FileInput {
             field_id: "field1".to_owned(),
