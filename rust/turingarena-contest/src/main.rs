@@ -33,7 +33,7 @@ mod server;
 mod submission;
 mod user;
 
-use args::{Command, Args};
+use args::{Args, Command};
 use contest::Contest;
 use diesel::prelude::*;
 use server::{generate_schema, run_server};

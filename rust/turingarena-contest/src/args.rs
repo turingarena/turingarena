@@ -12,7 +12,7 @@ pub struct Args {
 
     /// command  
     #[structopt(subcommand)]
-    pub subcommand: Command
+    pub subcommand: Command,
 }
 
 #[derive(StructOpt, Debug)]

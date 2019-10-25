@@ -79,7 +79,11 @@ pub fn query_events(
 }
 
 /// start the evaluation thread
-pub fn evaluate(problem: &ContestProblem, submission: &Submission, db_connection: SqliteConnection) {
+pub fn evaluate(
+    problem: &ContestProblem,
+    submission: &Submission,
+    db_connection: SqliteConnection,
+) {
     let pack = problem.pack();
     let submission_id = submission.id.clone();
     let submission = submission.to_mem_submission();
