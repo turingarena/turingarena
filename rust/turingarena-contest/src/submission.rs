@@ -5,6 +5,38 @@ use turingarena::submission::*;
 use diesel::QueryResult;
 use juniper::FieldResult;
 
+/// Status of a submission
+#[derive(juniper::GraphQLEnum)]
+pub enum SubmissionStatus {
+    /// The submission is in the process of evaluation by the server 
+    Pending, 
+
+    /// The evaluation process terminated correctly
+    Success, 
+
+    /// The evaluation process crashed with an error 
+    Failed, 
+}
+
+impl SubmissionStatus {
+    fn from(value: &str) -> Self {
+        match value {
+            "PENDING" => SubmissionStatus::Pending,
+            "SUCCESS" => SubmissionStatus::Success,
+            "FAILED" => SubmissionStatus::Failed,
+            _ => unreachable!("Corrupted db"),
+        }
+    }
+
+    fn to_string(&self) -> String {
+        match self {
+            SubmissionStatus::Pending => "PENDING",
+            SubmissionStatus::Success => "SUCCESS",
+            SubmissionStatus::Failed => "FAILED",
+        }.to_owned()
+    }
+}
+
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
 #[allow(dead_code)]
@@ -64,6 +96,9 @@ pub struct Submission {
 
     /// files submitted in this submission
     files: Vec<SubmissionFile>,
+
+    /// Submission status
+    status: SubmissionStatus,
 }
 
 impl Submission {
@@ -110,6 +145,11 @@ impl Submission {
         &self.files
     }
 
+    /// Submission status 
+    fn status(&self) -> &SubmissionStatus {
+        &self.status
+    }
+
     /// Scorables of this submission
     fn scorables(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
         Ok(evaluation::query_scorables(&ctx.contest.connect_db()?, &self.id)?)
@@ -138,6 +178,7 @@ struct SubmissionTable {
     user_id: String,
     problem_name: String,
     created_at: String,
+    status: String,
 }
 
 #[derive(Insertable)]
@@ -147,6 +188,7 @@ struct SubmissionTableInput<'a> {
     user_id: &'a str,
     problem_name: &'a str,
     created_at: &'a str,
+    status: &'a str,
 }
 
 #[derive(Insertable)]
@@ -172,6 +214,7 @@ pub fn insert(
         id: &id,
         user_id,
         problem_name,
+        status: &SubmissionStatus::Pending.to_string(),
         created_at: &created_at,
     };
     diesel::insert_into(submissions::table)
@@ -209,6 +252,7 @@ pub fn query(conn: &SqliteConnection, id: &str) -> QueryResult<Submission> {
         user_id: submission.user_id,
         problem_name: submission.problem_name,
         created_at: submission.created_at,
+        status: SubmissionStatus::from(&submission.status),
         files: submission_files(conn, id)?,
     })
 }
@@ -224,9 +268,12 @@ pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submis
             user_id: s.user_id,
             problem_name: s.problem_name,
             created_at: s.created_at,
+            status: SubmissionStatus::from(&s.status),
             files: submission_files(conn, &s.id).unwrap(),
         }).collect())
 }
+
+
 
 #[cfg(test)]
 mod tests {

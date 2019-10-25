@@ -100,7 +100,7 @@ fn main() {
             secret_key,
             skip_auth,
         } => run_server(host, port, skip_auth, secret_key, contest),
-        InitDb { contest_name } => contest.init_db(&contest_name),
+        InitDb { contest_title } => contest.init_db(&contest_title),
         AddUser {
             username,
             display_name,

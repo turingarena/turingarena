@@ -46,6 +46,7 @@ table! {
         user_id -> Text,
         problem_name -> Text,
         created_at -> Text,
+        status -> Text,
     }
 }
 

@@ -13,7 +13,8 @@ CREATE TABLE submissions(
     id              TEXT NOT NULL PRIMARY KEY,
     user_id         TEXT NOT NULL REFERENCES users(id),
     problem_name    TEXT NOT NULL REFERENCES problems(name),
-    created_at      TEXT NOT NULL
+    created_at      TEXT NOT NULL, 
+    status          TEXT NOT NULL CHECK(status IN ('PENDING', 'SUCCESS', 'FAILED'))
 );
 
 CREATE TABLE submission_files(
