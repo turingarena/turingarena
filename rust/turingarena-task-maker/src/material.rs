@@ -1,3 +1,5 @@
+extern crate mime_guess;
+
 use std::convert::TryInto;
 use task_maker_format::ioi;
 use turingarena::content::*;
@@ -147,7 +149,9 @@ fn attachment_at_path(file_path: std::path::PathBuf) -> Attachment {
                     .to_string_lossy()
                     .into_owned(),
             )),
-            r#type: None,
+            r#type: mime_guess::from_path(&file_path)
+                .first_raw()
+                .map(|t| MediaType(t.to_owned())),
             content: FileContent(std::fs::read(&file_path.to_string_lossy().as_ref()).unwrap()),
         }],
     }
