@@ -1,0 +1,44 @@
+<form class="submission_form" (submit)="$event.preventDefault(); 'TODO'">
+  <div class="submission_form_body">
+    <!--
+    <div class="submission_file_field">
+      <label class="submission_file_label" [for]="field.id + '.file'">{{ field.title | localize}}</label>
+      <input class="submission_file_input" [id]="field.id + '.file'" [name]="field.id + '.file'" type="file"
+        (change)="changeFile($event.target)" />
+      <label class="submission_file_choose_button" [for]="field.id + '.file'">Choose file</label>
+
+      <dl *ngIf="file as file" class="submission_file_info">
+        <dt>Name:</dt>
+        <dd>{{ file.name }}</dd>
+        <dt>Type:</dt>
+        <dd [ngSwitch]="choices.type">
+          <ng-container *ngSwitchCase="'oneRecommended'">
+            {{ choices.recommendedType!.title | localize }}
+            (<a href="#" class="submission_file_type_change" (click)="moreTypes()">change</a>)
+            <input type="hidden" [name]="field.id + '.type'" [value]="choices.recommendedType!.id" />
+          </ng-container>
+          <ng-container *ngSwitchCase="'manyRecommended'">
+            <label *ngFor="let type of choices.recommendedTypes!; trackBy: typeTrackBy"
+              class="submission_file_type_suggested_option">
+              <input type="radio" [name]="field.id + '.type'" [value]="type.id" />
+              {{ type.title | localize }}
+            </label>
+            (<a href="#" class="submission_file_type_more_options" (click)="moreTypes()">more...</a>)
+          </ng-container>
+          <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submission_file_type_select">
+            <option *ngFor="let type of choices.allTypes; trackBy: typeTrackBy" [value]="type.id">
+              {{ type.title | localize }}</option>
+          </select>
+        </dd>
+        <dt>Size:</dt>
+        <dd [ngSwitch]="choices.type">
+          {{ file.size | filesize }}
+        </dd>
+      </dl>
+    </div>
+    -->
+  </div>
+  <div class="submission_form_footer">
+    <button class="submission_form_submit" [disabled]="submitting" type="submit">Submit</button>
+  </div>
+</form>

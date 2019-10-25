@@ -35,7 +35,8 @@
           <div class="task_header">
             <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
             <div class="task_submit_container">
-              <a href="#" class="task_submit_start" (click)="'TODO'">Submit a solution</a>
+              <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">Submit a
+                solution</a>
             </div>
             <!--
             <div *ngIf="lastSubmission as submission" class="task_last_submission_container">
