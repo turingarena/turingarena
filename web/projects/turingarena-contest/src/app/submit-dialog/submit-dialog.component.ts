@@ -66,6 +66,9 @@ export class SubmitDialogComponent {
 
     this.activeModal.close();
 
+    // FIXME: causes a flicker in main component, investigate
+    await this.appComponent.contestQuery.refetch();
+
     const modalRef = this.modal.open(SubmissionDialogComponent);
     const modal = modalRef.componentInstance as SubmissionDialogComponent;
 
@@ -76,6 +79,14 @@ export class SubmitDialogComponent {
       }));
     modal.appComponent = this.appComponent;
     modal.problemName = this.problemName;
+
+    try {
+      await modalRef.result;
+    } catch (e) {
+      // No-op
+    }
+
+    await this.appComponent.contestQuery.refetch();
   }
 
   private async getFileForField(field: Field, formData: FormData): Promise<FileInput> {
