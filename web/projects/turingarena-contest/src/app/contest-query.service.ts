@@ -80,6 +80,34 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
                   }
                 }
               }
+              rowGroups {
+                title {
+                  value
+                }
+                rows {
+                  content
+                  cells {
+                    content {
+                      __typename
+                      ... on RowNumberCellContent {
+                        number
+                      }
+                      ... on RowTitleCellContent {
+                        title {
+                          value
+                        }
+                      }
+                      ... on ScoreCellContent {
+                        ref
+                        range {
+                          max
+                          precision
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }

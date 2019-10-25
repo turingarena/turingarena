@@ -1,0 +1,44 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.evaluation_modal_header {
+  @extend .modal-header;
+}
+
+.evaluation_modal_body {
+  @extend .modal-body;
+  padding: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.evaluation_modal_footer {
+  @extend .modal-footer;
+}
+
+.evaluation_modal_close_button {
+  @extend .btn, .btn-primary;
+}
+
+.evaluation_table {
+  @extend .table;
+}
+
+.message_cell {
+  font-size: small;
+}
+
+.score_cell {
+  font-weight: bold;
+}
+
+.row_status.success {
+  @extend .table-success;
+}
+
+.row_status.fail {
+  @extend .table-danger;
+}
+
+.row_status.skip {
+  @extend .table-secondary;
+}
