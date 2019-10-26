@@ -1,4 +1,5 @@
 #![feature(decl_macro, proc_macro_hygiene)]
+#![warn()]
 
 extern crate base64;
 #[macro_use]

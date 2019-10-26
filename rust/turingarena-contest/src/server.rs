@@ -36,7 +36,7 @@ fn options_graphql<'a>() -> Response<'a> {
     Response::build()
         .raw_header("Access-Control-Allow-Origin", "*")
         .raw_header("Access-Control-Allow-Methods", "OPTIONS, POST")
-        .raw_header("Access-Control-Allow-Headers", "Content-Type")
+        .raw_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         .finalize()
 }
 
