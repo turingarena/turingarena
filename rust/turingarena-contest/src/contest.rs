@@ -41,7 +41,7 @@ impl ContestQueries {
             &token,
             ctx.secret
                 .as_ref()
-                .ok_or(FieldError::from("Authentication disabled"))?,
+                .ok_or_else(|| FieldError::from("Authentication disabled"))?,
         )?)
     }
 

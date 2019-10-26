@@ -199,10 +199,8 @@ pub fn evaluate(
     let submission = submission.to_mem_submission(&db_connection)?;
     thread::spawn(move || {
         let Evaluation(receiver) = IoiProblemDriver::evaluate(problem_pack, submission);
-        let mut serial = 0;
-        for event in receiver {
-            insert_event(&db_connection, serial, &submission_id, &event).unwrap();
-            serial = serial + 1;
+        for (serial, event) in receiver.into_iter().enumerate() {
+            insert_event(&db_connection, serial as i32, &submission_id, &event).unwrap();
         }
         submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
     });

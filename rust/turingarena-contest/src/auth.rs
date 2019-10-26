@@ -25,7 +25,7 @@ pub fn auth(conn: &SqliteConnection, token: &str, secret: &[u8]) -> FieldResult<
     let result = if let Ok(user) = user {
         let claims = JwtData {
             user: user.id,
-            exp: 100000000000000, // TODO: generate this number as current_time + X seconds
+            exp: 100_000_000_000_000, // TODO: generate this number as current_time + X seconds
         };
         Some(UserToken {
             token: encode(&Header::default(), &claims, &secret)?,

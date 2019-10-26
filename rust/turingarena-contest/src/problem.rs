@@ -42,7 +42,7 @@ impl Problem {
     /// Material of this problem
     fn material(&self, ctx: &Context) -> FieldResult<Material> {
         turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack(ctx))
-            .map_err(|e| FieldError::from(e))
+            .map_err(FieldError::from)
     }
 
     /// Scorables of the current user (if to be shown)

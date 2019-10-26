@@ -32,7 +32,7 @@ impl SubmissionStatus {
         }
     }
 
-    fn to_string(&self) -> String {
+    fn to_string(self) -> String {
         match self {
             SubmissionStatus::Pending => "PENDING",
             SubmissionStatus::Success => "SUCCESS",
