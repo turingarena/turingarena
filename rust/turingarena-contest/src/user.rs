@@ -6,21 +6,21 @@ use schema::users;
 
 #[derive(Insertable)]
 #[table_name = "users"]
-pub struct UserInput {
-    pub id: String,
-    pub display_name: String,
-    pub password_bcrypt: String,
+pub struct UserInput<'a> {
+    pub id: &'a str,
+    pub display_name: &'a str,
+    pub token: &'a str,
 }
 
 #[derive(Queryable)]
 pub struct User {
     pub id: String,
     pub display_name: String,
-    pub password_bcrypt: String,
+    pub token: String,
 }
 
 /// Wraps a String that identifies a user
-#[derive(juniper::GraphQLScalarValue)]
+#[derive(Clone, juniper::GraphQLScalarValue)]
 pub struct UserId(pub String);
 
 /// A user
@@ -50,4 +50,18 @@ impl User {
             .collect();
         Ok(Some(problems))
     }
+}
+
+/// Find a user from his token
+pub fn by_token(conn: &SqliteConnection, token: &str) -> QueryResult<User> {
+    users::table
+        .filter(users::dsl::token.eq(token))
+        .first(conn)
+}
+
+/// Find a user from his ID
+pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
+    users::table
+        .find(user_id.0)
+        .first(conn)
 }

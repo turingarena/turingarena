@@ -11,10 +11,11 @@ pub struct Contest {
     pub problems_dir: PathBuf,
 }
 
-/// a user authorization token
+/// A user authorization token
 #[derive(juniper::GraphQLObject)]
 pub struct UserToken {
-    token: String,
+    /// The user token encoded as a JWT
+    pub token: String,
 }
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -41,12 +42,12 @@ impl Contest {
             .expect("Error creating contest configuration in the DB");
     }
 
-    pub fn add_user(&self, id: &str, display_name: &str, password: &str) {
+    pub fn add_user(&self, id: &str, display_name: &str, token: &str) {
         use crate::user::UserInput;
         let user = UserInput {
-            id: id.to_owned(),
-            display_name: display_name.to_owned(),
-            password_bcrypt: bcrypt::hash(password, 6).unwrap(),
+            id: id,
+            display_name,
+            token,
         };
         let conn = self.connect_db().expect("cannot connect to database");
         diesel::insert_into(schema::users::table)
@@ -138,11 +139,8 @@ impl ContestQueries {
         Ok(config::current_config(&ctx.contest.connect_db()?)?)
     }
 
-    /// Authenticate a user, generating an authentication code
-    fn auth(&self, ctx: &Context, user: String, password: String) -> FieldResult<UserToken> {
-        let user = ctx.contest.get_user(&user)?;
-        Ok(UserToken {
-            token: auth::auth(&user, &password, &ctx.secret)?,
-        })
+    /// Authenticate a user, generating a JWT authentication token 
+    fn auth(&self, ctx: &Context, token: String) -> FieldResult<Option<UserToken>> {
+        Ok(auth::auth(&ctx.contest.connect_db()?, &token, &ctx.secret)?)
     }
 }

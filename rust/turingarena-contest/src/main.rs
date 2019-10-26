@@ -104,8 +104,8 @@ fn main() {
         AddUser {
             username,
             display_name,
-            password,
-        } => contest.add_user(&username, &display_name, &password),
+            token,
+        } => contest.add_user(&username, &display_name, &token),
         DeleteUser { username } => contest.delete_user(&username),
         AddProblem { name, path } => contest.add_problem(&name, &path),
         DeleteProblem { name } => contest.delete_problem(&name),
