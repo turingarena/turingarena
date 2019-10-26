@@ -7,34 +7,53 @@ use turingarena::problem::ProblemName;
 
 #[derive(Insertable)]
 #[table_name = "users"]
-pub struct UserInput<'a> {
-    pub id: &'a str,
-    pub display_name: &'a str,
-    pub token: &'a str,
+pub struct UserDataInput<'a> {
+    id: &'a str,
+    display_name: &'a str,
+    token: &'a str,
 }
 
 #[derive(Queryable)]
-pub struct User {
+pub struct UserData {
+    /// Id of the user
     pub id: String,
-    pub display_name: String,
-    pub token: String,
+
+    /// Display name of the user
+    display_name: String,
+
+    /// Login token of the user
+    #[allow(dead_code)]
+    token: String,
 }
 
 /// Wraps a String that identifies a user
 #[derive(Clone, juniper::GraphQLScalarValue)]
 pub struct UserId(pub String);
 
+/// A User structure
+pub struct User {
+    /// DB data of the user
+    pub data: Option<UserData>,
+}
+
+impl User {
+    /// Id of this user (if any)
+    pub fn user_id(&self) -> Option<UserId> {
+        self.data.as_ref().map(|u| UserId(u.id.clone()))
+    }
+}
+
 /// A user
 #[juniper::object(Context = Context)]
 impl User {
     /// ID of this user. Should never be shown to any (non-admin) user.
-    fn id(&self) -> UserId {
-        UserId(self.id.clone())
+    fn id(&self) -> Option<UserId> {
+        self.user_id()
     }
 
     /// Name of this user to be shown to them or other users.
-    fn display_name(&self) -> String {
-        self.display_name.clone()
+    fn display_name(&self) -> Option<String> {
+        self.data.as_ref().map(|u| u.display_name.clone())
     }
 
     /// A problem that the user can see
@@ -43,7 +62,7 @@ impl User {
         let data = problem::by_name(&ctx.connect_db()?, name)?;
         Ok(Problem {
             data,
-            user_id: Some(UserId(self.id.clone())),
+            user_id: self.user_id(),
         })
     }
 
@@ -54,7 +73,7 @@ impl User {
             .into_iter()
             .map(|p| Problem {
                 data: p,
-                user_id: Some(UserId(self.id.clone())),
+                user_id: self.user_id(),
             })
             .collect();
         Ok(Some(problems))
@@ -77,12 +96,12 @@ impl User {
 }
 
 /// Find a user from his token
-pub fn by_token(conn: &SqliteConnection, token: &str) -> QueryResult<User> {
+pub fn by_token(conn: &SqliteConnection, token: &str) -> QueryResult<UserData> {
     users::table.filter(users::dsl::token.eq(token)).first(conn)
 }
 
 /// Find a user from his ID
-pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
+pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<UserData> {
     users::table.find(user_id.0).first(conn)
 }
 
@@ -93,7 +112,7 @@ pub fn insert(
     display_name: &str,
     token: &str,
 ) -> QueryResult<()> {
-    let user = UserInput {
+    let user = UserDataInput {
         id: &user_id.0,
         display_name,
         token,

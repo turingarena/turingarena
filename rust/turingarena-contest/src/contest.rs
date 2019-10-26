@@ -24,7 +24,9 @@ impl ContestQueries {
             return Err(FieldError::from("invalid authorization token"));
         };
         let user_id = user::UserId(id.to_owned());
-        Ok(user::by_id(&ctx.connect_db()?, user_id)?)
+        Ok(user::User {
+            data: Some(user::by_id(&ctx.connect_db()?, user_id)?)
+        })
     }
 
     /// Get the submission with the specified id
