@@ -1,9 +1,9 @@
 use juniper::{FieldError, FieldResult};
 
 use crate::*;
-use problem::*;
-use schema::{problems, users};
 use std::path::{Path, PathBuf};
+use user::UserId;
+use turingarena::problem::ProblemName;
 
 #[derive(Clone)]
 pub struct Contest {
@@ -43,64 +43,30 @@ impl Contest {
     }
 
     pub fn add_user(&self, id: &str, display_name: &str, token: &str) {
-        use crate::user::UserInput;
-        let user = UserInput {
-            id: id,
-            display_name,
-            token,
-        };
         let conn = self.connect_db().expect("cannot connect to database");
-        diesel::insert_into(schema::users::table)
-            .values(user)
-            .execute(&conn)
-            .expect("error executing user insert query");
+        user::insert(&conn, UserId(id.to_owned()), display_name, token)
+            .expect("Error inserting user into the db");
     }
 
     pub fn delete_user(&self, id: &str) {
-        use schema::users::dsl;
         let conn = self.connect_db().expect("cannot connect to database");
-        diesel::delete(dsl::users.filter(dsl::id.eq(id)))
-            .execute(&conn)
-            .expect("error executing user delete query");
-    }
-
-    pub fn get_user(&self, id: &str) -> Result<user::User> {
-        Ok(users::table.find(id).first(&self.connect_db()?)?)
+        user::delete(&conn, UserId(id.to_owned()))
+            .expect("Error deleting user from db");
     }
 
     pub fn add_problem(&self, name: &str, path: &Path) {
-        let problem = ProblemDataInput {
-            name: name.to_owned(),
-            path: self
-                .problem_rel_path(path)
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_owned(),
-        };
         let conn = self.connect_db().expect("cannot connect to database");
-        diesel::insert_into(schema::problems::table)
-            .values(problem)
-            .execute(&conn)
-            .expect("error executing problem insert query");
+        let rel_path = self
+            .problem_rel_path(path)
+            .expect("Problem path is not valid");
+        problem::insert(&conn, ProblemName(name.to_owned()), &rel_path)
+            .expect("Error inserting the problem into the db")
     }
 
     pub fn delete_problem(&self, name: &str) {
-        use schema::problems::dsl;
         let conn = self.connect_db().expect("cannot connect to database");
-        diesel::delete(dsl::problems.filter(dsl::name.eq(name)))
-            .execute(&conn)
-            .expect("error executing problem delete query");
-    }
-
-    pub fn get_problems(&self) -> Result<Vec<ProblemData>> {
-        Ok(problems::table.load::<ProblemData>(&self.connect_db()?)?)
-    }
-
-    pub fn get_problem(&self, name: &str) -> Result<ProblemData> {
-        Ok(problems::table
-            .find(name)
-            .first::<ProblemData>(&self.connect_db()?)?)
+        problem::delete(&conn, ProblemName(name.to_owned()))
+            .expect("Error deleting problem from the db");
     }
 }
 
@@ -118,7 +84,8 @@ impl ContestQueries {
         } else {
             return Err(FieldError::from("invalid authorization token"));
         };
-        Ok(ctx.contest.get_user(id)?)
+        let user_id = user::UserId(id.to_owned());
+        Ok(user::by_id(&ctx.contest.connect_db()?, user_id)?)
     }
 
     /// Get the submission with the specified id
@@ -139,7 +106,7 @@ impl ContestQueries {
         Ok(config::current_config(&ctx.contest.connect_db()?)?)
     }
 
-    /// Authenticate a user, generating a JWT authentication token 
+    /// Authenticate a user, generating a JWT authentication token
     fn auth(&self, ctx: &Context, token: String) -> FieldResult<Option<UserToken>> {
         Ok(auth::auth(&ctx.contest.connect_db()?, &token, &ctx.secret)?)
     }

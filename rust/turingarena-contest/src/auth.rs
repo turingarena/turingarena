@@ -1,9 +1,9 @@
 use crate::*;
 use contest::UserToken;
-use jwt::{decode, encode, Header, Validation};
-use std::error::Error;
 use diesel::SqliteConnection;
 use juniper::FieldResult;
+use jwt::{decode, encode, Header, Validation};
+use std::error::Error;
 
 /// Wraps a JWT User token
 #[derive(juniper::GraphQLScalarValue)]
@@ -19,7 +19,7 @@ pub struct JwtData {
     exp: usize,
 }
 
-/// Auth the user, generating a JWT token. Returns None if the token is not valid. 
+/// Auth the user, generating a JWT token. Returns None if the token is not valid.
 pub fn auth(conn: &SqliteConnection, token: &str, secret: &[u8]) -> FieldResult<Option<UserToken>> {
     let user = user::by_token(conn, token);
     let result = if let Ok(user) = user {
