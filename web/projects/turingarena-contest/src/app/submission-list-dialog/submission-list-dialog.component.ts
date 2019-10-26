@@ -49,11 +49,11 @@ export class SubmissionListDialogComponent implements OnInit {
   getSubmissionState(problem: Problem, submission: Submission) {
     return {
       score: problem.material.awards
-        .map((award) => submission.scores.find((s) => s.scorableId === award.name))
+        .map((award) => submission.scores.find((s) => s.awardName === award.name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
       award(award: Award) {
-        return submission.scores.find((s) => s.scorableId === award.name) || { score: 0 }
+        return submission.scores.find((s) => s.awardName === award.name) || { score: 0 };
       },
     };
   }
@@ -61,12 +61,12 @@ export class SubmissionListDialogComponent implements OnInit {
   getProblemState(problem: Problem) {
     return {
       award(award: Award) {
-        return problem.scores.find((s) => s.scorableId === award.name) || { score: 0 };
+        return problem.scores.find((s) => s.awardName === award.name) || { score: 0 };
       },
       maxScore: scoreRanges(problem).map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
       precision: scoreRanges(problem).map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
       score: scoreRanges(problem)
-        .map(({ name }) => problem.scores.find((s) => s.scorableId === name))
+        .map(({ name }) => problem.scores.find((s) => s.awardName === name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
     };

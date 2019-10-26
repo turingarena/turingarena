@@ -94,12 +94,21 @@
                     <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as curScore">
                       <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
-                          {{award.title[0].value}}: <span class="badge badge-info">{{range.max.toFixed(range.precision)}} pts</span>
+                          {{award.title[0].value}}: <span
+                            class="badge badge-info">{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
                         <span [ngbTooltip]="tipContent" class="award_badge" [class.score_zero]="curScore.score <= 0"
                           [class.score_partial]="0 < curScore.score && curScore.score < range.max"
                           [class.score_full]="range.max <= curScore.score">
                           {{ curScore.score.toFixed(range.precision) }}
+                        </span>
+                      </ng-container>
+                      <ng-container *ngIf="!award.content.range">
+                        <ng-template #tipContent>
+                          {{award.title[0].value}}
+                        </ng-template>
+                        <span [ngbTooltip]="tipContent" class="award_badge">
+                          Badge (todo)
                         </span>
                       </ng-container>
                     </ng-container>

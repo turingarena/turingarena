@@ -62,7 +62,7 @@ export class AppComponent {
       const getProblemState = (problem: ContestProblem) => {
         if (problem.scores === null) { return; }
 
-        const getAwardState = ({ name }) => problem.scores.find((s) => s.scorableId === name) || {
+        const getAwardState = ({ name }) => problem.scores.find((s) => s.awardName === name) || {
           score: 0,
         };
 

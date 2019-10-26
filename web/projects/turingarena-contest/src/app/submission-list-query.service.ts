@@ -17,7 +17,7 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
         problem(name: $problemName) {
           name
           scores {
-            scorableId
+            awardName
             score
             submissionId
           }
@@ -32,7 +32,7 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
             }
             status
             scores {
-              scorableId
+              awardName
               score
             }
           }

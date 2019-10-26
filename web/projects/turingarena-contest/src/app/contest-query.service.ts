@@ -26,7 +26,7 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
             createdAt
           }
           scores {
-            scorableId
+            awardName
             score
           }
           ...ProblemMaterialFragment
