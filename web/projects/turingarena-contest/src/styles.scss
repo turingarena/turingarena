@@ -92,6 +92,7 @@ body {
 }
 
 .user_display_name,
+.login,
 .logout {
   margin-right: 1em;
 }
@@ -100,6 +101,7 @@ body {
   margin-left: auto;
 }
 
+.login,
 .logout {
   @extend .btn, .btn-sm, .btn-light;
 }
@@ -277,4 +279,39 @@ body {
   &.score_zero {
     @extend .badge-danger;
   }
+}
+
+.evaluation_modal_header {
+  @extend .modal-header;
+}
+
+.login_modal_body,
+.evaluation_modal_body {
+  @extend .modal-body;
+  padding: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.login_modal_footer,
+.evaluation_modal_footer {
+  @extend .modal-footer;
+}
+
+.login_modal_submit_button,
+.evaluation_modal_close_button {
+  @extend .btn, .btn-primary;
+}
+
+.login_modal_close_button {
+  @extend .btn, .btn-secondary;
+}
+
+.login_token_input_group {
+  @extend .form-group;
+  margin: 16px;
+}
+
+.login_token_input {
+  @extend .form-control;
 }

@@ -1,15 +1,13 @@
-use crate::problem::ContestProblem;
 use crate::schema::{evaluation_events, scorables};
 use crate::submission::{self, Submission, SubmissionStatus};
 use diesel::prelude::*;
-use diesel::query_dsl::LoadQuery;
 use diesel::sql_types::{Double, Text};
 use juniper::FieldResult;
 use std::error::Error;
 use std::thread;
 use turingarena::evaluation::mem::Evaluation;
-use turingarena::evaluation::{Event, ScoreEvent};
-use turingarena::problem::driver::ProblemDriver;
+use turingarena::evaluation::Event;
+use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 use turingarena::score::Score;
 use turingarena_task_maker::driver::IoiProblemDriver;
 
@@ -65,6 +63,7 @@ struct ScorableInput<'a> {
 #[derive(Queryable)]
 pub struct ScorableResult {
     /// Id of the submission  
+    #[allow(dead_code)]
     submission_id: String,
 
     /// Id of the scorable
@@ -148,7 +147,7 @@ fn insert_event(
 /// return a list of evaluation events for the specified evaluation
 pub fn query_events(
     conn: &SqliteConnection,
-    submission_id: String,
+    submission_id: &str,
 ) -> QueryResult<Vec<EvaluationEvent>> {
     evaluation_events::table
         .filter(evaluation_events::dsl::submission_id.eq(submission_id))
@@ -192,15 +191,14 @@ pub fn query_scorables(
 
 /// start the evaluation thread
 pub fn evaluate(
-    problem: &ContestProblem,
+    problem_pack: ProblemPack,
     submission: &Submission,
     db_connection: SqliteConnection,
-) {
-    let pack = problem.pack();
+) -> QueryResult<()> {
     let submission_id = submission.id.clone();
-    let submission = submission.to_mem_submission();
+    let submission = submission.to_mem_submission(&db_connection)?;
     thread::spawn(move || {
-        let Evaluation(receiver) = IoiProblemDriver::evaluate(pack, submission);
+        let Evaluation(receiver) = IoiProblemDriver::evaluate(problem_pack, submission);
         let mut serial = 0;
         for event in receiver {
             insert_event(&db_connection, serial, &submission_id, &event).unwrap();
@@ -208,4 +206,5 @@ pub fn evaluate(
         }
         submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
     });
+    Ok(())
 }

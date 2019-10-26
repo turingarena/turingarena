@@ -1,8 +1,8 @@
 #![doc(include = "README.md")]
 
 pub mod record;
-use serde::{Deserialize, Serialize};
 use crate::score;
+use serde::{Deserialize, Serialize};
 
 graphql_derive_union_from_enum! {
     #[derive(Serialize, Deserialize)]

@@ -5,6 +5,10 @@ use juniper::FieldResult;
 use schema::{submission_files, submissions};
 use turingarena::submission::*;
 
+/// Wraps a String that identifies a submission
+#[derive(juniper::GraphQLScalarValue)]
+pub struct SubmissionId(pub String);
+
 /// Status of a submission
 #[derive(Copy, Clone, juniper::GraphQLEnum)]
 pub enum SubmissionStatus {
@@ -82,6 +86,7 @@ impl SubmissionFile {
 }
 
 /// A submission in the database
+#[derive(Queryable)]
 pub struct Submission {
     /// id of the submission, that is a random generated UUID
     pub id: String,
@@ -95,18 +100,16 @@ pub struct Submission {
     /// time in wich the submission was created, saved as a RFC3339 date
     created_at: String,
 
-    /// files submitted in this submission
-    files: Vec<SubmissionFile>,
-
     /// Submission status
-    status: SubmissionStatus,
+    status: String,
 }
 
 impl Submission {
     /// converts this submission to a TuringArena submission
-    pub fn to_mem_submission(&self) -> mem::Submission {
+    pub fn to_mem_submission(&self, conn: &SqliteConnection) -> QueryResult<mem::Submission> {
         let mut field_values = Vec::new();
-        for file in &self.files {
+        let files = submission_files(conn, &self.id)?;
+        for file in files {
             field_values.push(FieldValue {
                 field: form::FieldId(file.field_id.clone()),
                 file: mem::File {
@@ -115,45 +118,53 @@ impl Submission {
                 },
             })
         }
-        mem::Submission { field_values }
+        Ok(mem::Submission { field_values })
     }
 }
 
 #[juniper::object(Context = Context)]
 impl Submission {
     /// UUID of the submission
-    fn id(&self) -> &String {
-        &self.id
+    fn id(&self) -> SubmissionId {
+        SubmissionId(self.id.clone())
     }
 
-    /// id of the user who made the submission
+    /// Id of the user who made the submission
     fn user_id(&self) -> &String {
         &self.user_id
     }
 
-    /// name of the problem wich the submission refers to
+    /// Name of the problem wich the submission refers to
     fn problem_name(&self) -> &String {
         &self.problem_name
     }
 
-    /// time at wich the submission was created
+    /// Time at wich the submission was created
     fn created_at(&self) -> &String {
         &self.created_at
     }
 
-    /// list of files of this submission
-    fn files(&self) -> &Vec<SubmissionFile> {
-        &self.files
+    /// List of files of this submission
+    fn files(&self, ctx: &Context) -> FieldResult<Vec<SubmissionFile>> {
+        Ok(submission_files(&ctx.contest.connect_db()?, &self.id)?)
     }
 
     /// Submission status
-    fn status(&self) -> &SubmissionStatus {
-        &self.status
+    fn status(&self) -> SubmissionStatus {
+        SubmissionStatus::from(&self.status)
     }
 
-    /// Scorables of this submission
-    fn scorables(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
+    /// Scores of this submission
+    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
         Ok(evaluation::query_scorables(
+            &ctx.contest.connect_db()?,
+            &self.id,
+        )?)
+    }
+
+    /// Evaluation events of this submission
+    fn evaluation_events(&self, ctx: &Context) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
+        Ok(evaluation::query_events(
             &ctx.contest.connect_db()?,
             &self.id,
         )?)
@@ -174,15 +185,6 @@ pub struct FileInput {
 
     /// content of the file codified in base64
     content_base64: String,
-}
-
-#[derive(Queryable)]
-struct SubmissionTable {
-    id: String,
-    user_id: String,
-    problem_name: String,
-    created_at: String,
-    status: String,
 }
 
 #[derive(Insertable)]
@@ -251,34 +253,21 @@ fn submission_files(
 
 /// Gets the submission with the specified id from the database
 pub fn query(conn: &SqliteConnection, id: &str) -> QueryResult<Submission> {
-    let submission = submissions::table
+    submissions::table
         .filter(submissions::dsl::id.eq(id))
-        .first::<SubmissionTable>(conn)?;
-    Ok(Submission {
-        id: submission.id,
-        user_id: submission.user_id,
-        problem_name: submission.problem_name,
-        created_at: submission.created_at,
-        status: SubmissionStatus::from(&submission.status),
-        files: submission_files(conn, id)?,
-    })
+        .first::<Submission>(conn)
 }
 
 /// Gets all the submissions of the specified user
-pub fn of_user(conn: &SqliteConnection, user_id: &str) -> QueryResult<Vec<Submission>> {
-    Ok(submissions::table
+pub fn of_user_and_problem(
+    conn: &SqliteConnection,
+    user_id: &str,
+    problem_name: &str,
+) -> QueryResult<Vec<Submission>> {
+    submissions::table
         .filter(submissions::dsl::user_id.eq(user_id))
-        .load::<SubmissionTable>(conn)?
-        .into_iter()
-        .map(|s| Submission {
-            id: s.id.clone(),
-            user_id: s.user_id,
-            problem_name: s.problem_name,
-            created_at: s.created_at,
-            status: SubmissionStatus::from(&s.status),
-            files: submission_files(conn, &s.id).unwrap(),
-        })
-        .collect())
+        .filter(submissions::dsl::problem_name.eq(problem_name))
+        .load::<Submission>(conn)
 }
 
 /// Sets the submission status
@@ -334,7 +323,7 @@ mod tests {
         let sub = insert(&contest.connect_db().unwrap(), "user", "problem", files).unwrap();
         assert_eq!(sub.problem_name, "problem");
         assert_eq!(sub.user_id, "user");
-        assert_eq!(sub.files.len(), 3);
-        assert_eq!(sub.files[0].content, b"testtesttestprova");
+        // assert_eq!(sub.files.len(), 3);
+        // assert_eq!(sub.files[0].content, b"testtesttestprova");
     }
 }

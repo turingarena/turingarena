@@ -1,0 +1,12 @@
+<form class="login_modal" (submit)="$event.preventDefault(); submit($event)">
+  <div class="login_modal_body">
+    <div class="login_token_input_group">
+      <label class="login_token_label" for="token">Token</label>
+      <input class="login_token_input" id="token" name="token" type="password" />
+    </div>
+  </div>
+  <div class="login_modal_footer">
+    <button (click)="activeModal.close()" class="login_modal_close_button">Cancel</button>
+    <button class="login_modal_submit_button" type="submit">Log in</button>
+  </div>
+</form>

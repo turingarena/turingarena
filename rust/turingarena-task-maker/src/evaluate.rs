@@ -124,7 +124,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                 scorable_id: format!("subtask.{}", subtask),
                 score: Score(score as f64),
             }))?;
-        },
+        }
         _ => (),
     };
     Ok(())

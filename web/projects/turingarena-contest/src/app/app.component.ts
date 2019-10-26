@@ -7,6 +7,7 @@ import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
+import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -93,4 +94,18 @@ export class AppComponent {
       // dismissed, do nothing
     }
   }
+
+  async openLoginDialog() {
+    const modalRef = this.modal.open(LoginDialogComponent);
+    const modal = modalRef.componentInstance as LoginDialogComponent;
+
+    modal.appComponent = this;
+
+    try {
+      await modalRef.result;
+    } catch (e) {
+      // dismissed, do nothing
+    }
+  }
+
 }
