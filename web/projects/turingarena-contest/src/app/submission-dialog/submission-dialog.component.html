@@ -1,6 +1,6 @@
 <ng-container *ngIf="appComponent.contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as contest">
-    <ng-container *ngFor="let problem of contest.problems">
+    <ng-container *ngFor="let problem of contest.user.problems">
       <ng-container *ngIf="problem.name === problemName">
         <div class="evaluation_modal_header">
           Evaluation

@@ -8,9 +8,9 @@ import { SubmissionListQuery, SubmissionListQueryVariables } from './__generated
 })
 export class SubmissionListQueryService extends Query<SubmissionListQuery, SubmissionListQueryVariables> {
   document = gql`
-    query SubmissionListQuery($userId: String!) {
+    query SubmissionListQuery($userId: String!, $problemName: ProblemName!) {
       user(id: $userId) {
-        problems {
+        problem(name: $problemName) {
           name
           submissions {
             id

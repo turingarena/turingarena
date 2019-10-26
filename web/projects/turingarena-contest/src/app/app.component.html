@@ -29,7 +29,7 @@
           </div>
           <h2>Tasks</h2>
           <ol class="contest_tasks_nav_container">
-            <li *ngFor="let problem of contest.problems" class="task_list_item">
+            <li *ngFor="let problem of contest.user.problems" class="task_list_item">
               <ng-container *ngIf="state.getProblemState(problem) as problemState">
                 <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
                   (click)="selectedProblemName = problem.name; $event.preventDefault()">
@@ -48,7 +48,7 @@
             </li>
           </ol>
         </nav>
-        <ng-container *ngFor="let problem of contest.problems">
+        <ng-container *ngFor="let problem of contest.user.problems">
           <main class="task_main" *ngIf="selectedProblemName === problem.name">
             <div class="task_header">
               <h2 class="task_title">{{ problem.material.title[0].value }}</h2>

@@ -8,7 +8,7 @@ import { SubmissionQueryService } from '../submission-query.service';
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
-  SubmissionListQuery_user_problems_submissions as Submission,
+  SubmissionListQuery_user_problem_submissions as Submission,
 } from '../__generated__/SubmissionListQuery';
 import { ContestQuery_user_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
 
@@ -36,6 +36,7 @@ export class SubmissionListDialogComponent implements OnInit {
   ngOnInit() {
     this.submissionListQuery = this.submissionListQueryService.watch({
       userId: 'test', // FIXME
+      problemName: this.problemName,
     });
   }
 

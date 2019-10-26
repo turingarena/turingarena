@@ -1,27 +1,26 @@
 <ng-container *ngIf="appComponent.contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as contest">
-    <ng-container *ngFor="let problem of contest.problems">
+    <ng-container *ngFor="let problem of contest.user.problems">
       <ng-container *ngIf="problem.name === problemName">
         <ng-container *ngIf="submissionListQuery.valueChanges | async as submissionListResult">
-          <ng-container *ngFor="let submissionListProblem of submissionListResult.data.problems">
-            <ng-container *ngIf="submissionListProblem.name === problemName">
-              <div class="submissions_modal_header">
-                Submissions
-              </div>
-              <div class="submissions_modal_body">
-                <table class="submission_table">
-                  <thead class="submission_table_header">
-                    <tr>
-                      <th scope="col" rowspan="2">Submission</th>
-                      <th scope="col" [colSpan]="problem.scorables.length">Score</th>
-                      <th scope="col" rowspan="2">Total score</th>
-                    </tr>
-                    <tr>
-                      <th *ngFor="let scorable of problem.material.scorables">
-                        {{ scorable.title[0].value }}
-                      </th>
-                    </tr>
-                    <!--
+          <ng-container *ngIf="submissionListResult.data.problem as submissionListProblem">
+            <div class="submissions_modal_header">
+              Submissions
+            </div>
+            <div class="submissions_modal_body">
+              <table class="submission_table">
+                <thead class="submission_table_header">
+                  <tr>
+                    <th scope="col" rowspan="2">Submission</th>
+                    <th scope="col" [colSpan]="problem.scorables.length">Score</th>
+                    <th scope="col" rowspan="2">Total score</th>
+                  </tr>
+                  <tr>
+                    <th *ngFor="let scorable of problem.material.scorables">
+                      {{ scorable.title[0].value }}
+                    </th>
+                  </tr>
+                  <!--
               <tr>
                 <th scope="row">Best</th>
                 <td *ngFor="let scorable of taskMainComponent.taskMetadata.scorables"
@@ -46,29 +45,29 @@
                 </td>
               </tr>
               -->
-                  </thead>
-                  <tbody class="submission_table_body">
-                    <tr class="submission_row" *ngFor="let submission of submissionListProblem.submissions">
-                      <td>
-                        <app-relative-time [time]="submission.timestamp"></app-relative-time>
-                        <br />
-                        <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
-                          details
-                        </a>
+                </thead>
+                <tbody class="submission_table_body">
+                  <tr class="submission_row" *ngFor="let submission of submissionListProblem.submissions">
+                    <td>
+                      <app-relative-time [time]="submission.timestamp"></app-relative-time>
+                      <br />
+                      <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
+                        details
+                      </a>
+                    </td>
+                    <ng-container *ngFor="let scorable of problem.material.scorables">
+                      <td *ngIf="getState(scorable, submission) as state" class="submission_score score"
+                        [class.score_zero]="state.score <= 0"
+                        [class.score_partial]="0 < state.score && state.score < scorable.range.max"
+                        [class.score_full]="scorable.range.max <= state.score">
+                        <span class="submission_score">
+                          {{ state.score.toFixed(scorable.range.precision) }}
+                        </span>/<span class="submission_max_score">
+                          {{ scorable.range.max.toFixed(scorable.range.precision) }}
+                        </span>
                       </td>
-                      <ng-container *ngFor="let scorable of problem.material.scorables">
-                        <td *ngIf="getState(scorable, submission) as state" class="submission_score score"
-                          [class.score_zero]="state.score <= 0"
-                          [class.score_partial]="0 < state.score && state.score < scorable.range.max"
-                          [class.score_full]="scorable.range.max <= state.score">
-                          <span class="submission_score">
-                            {{ state.score.toFixed(scorable.range.precision) }}
-                          </span>/<span class="submission_max_score">
-                            {{ scorable.range.max.toFixed(scorable.range.precision) }}
-                          </span>
-                        </td>
-                      </ng-container>
-                      <!--
+                    </ng-container>
+                    <!--
                       <td class="submission_total_score score" [class.score_zero]="totalScoreInfo.score <= 0"
                         [class.score_partial]="0 < totalScoreInfo.score && totalScoreInfo.score < totalScoreInfo.maxScore"
                         [class.score_full]="totalScoreInfo.maxScore <= totalScoreInfo.score">
@@ -79,13 +78,12 @@
                         </span>
                       </td>
                       -->
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="submissions_modal_footer">
-              </div>
-            </ng-container>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="submissions_modal_footer">
+            </div>
           </ng-container>
         </ng-container>
       </ng-container>
