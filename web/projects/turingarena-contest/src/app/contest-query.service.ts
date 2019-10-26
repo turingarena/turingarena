@@ -9,11 +9,13 @@ import { problemMaterialFragment } from './graphql-fragments';
 })
 export class ContestQueryService extends Query<ContestQuery, ContestQueryVariables> {
   document = gql`
-    query ContestQuery($userId: String) {
+    query ContestQuery($userId: UserId) {
       serverTime
-      user(id: $userId) {
-        id
-        displayName
+      contestView(userId: $userId) {
+        user {
+          id
+          displayName
+        }
         contestTitle
         startTime
         endTime

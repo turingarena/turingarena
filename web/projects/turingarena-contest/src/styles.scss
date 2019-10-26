@@ -127,10 +127,16 @@ body {
   list-style: none;
 }
 
+.contest_starting_in,
+.contest_ended_by,
 .contest_remaining_time {
   font-size: large;
   text-align: right;
   margin-bottom: 1rem;
+}
+
+.contest_ended_by {
+  @extend .text-danger;
 }
 
 .task_main {

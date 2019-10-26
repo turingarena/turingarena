@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import {
-  ContestQuery_user_problems as ContestProblem,
-  ContestQuery_user_problems_material_scorables as Scorable,
+  ContestQuery_contestView_problems as ContestProblem,
+  ContestQuery_contestView_problems_material_scorables as Scorable,
 } from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
@@ -33,11 +33,16 @@ export class AppComponent {
 
   selectedProblemName?: string = undefined;
 
+  nowObservable = interval(1000).pipe(
+    startWith([0]),
+    map(() => DateTime.local()),
+  );
+
   stateObservable = this.contestQuery.valueChanges.pipe(
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { user: { endTime, problems } } = data;
+      const { contestView: { startTime, endTime, problems } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
@@ -62,10 +67,9 @@ export class AppComponent {
       const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
 
       return {
-        remainingTime: interval(1000).pipe(
-          startWith([0]),
-          map(() => DateTime.fromISO(endTime).diffNow().toFormat('hh:mm:ss')),
-        ),
+        hasScore: problemsState.length > 0,
+        startTime: DateTime.fromISO(startTime),
+        endTime: DateTime.fromISO(endTime),
         score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
         maxScore: problemsState.map((s) => s.maxScore).reduce((a, b) => a + b, 0),
         precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),
@@ -74,11 +78,18 @@ export class AppComponent {
     })
   );
 
+  formatDuration(duration: Duration) {
+    return duration.toFormat('hh:mm:ss');
+  }
+
   setUserId(id: string) {
     this.userId = id;
-    this.contestQuery.refetch({
+    this.contestQuery.stopPolling();
+    this.contestQuery.setVariables({
       userId: this.userId,
     });
+    this.contestQuery.refetch();
+    this.contestQuery.startPolling(10000);
   }
 
   async openSubmitDialog() {
