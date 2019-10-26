@@ -9,4 +9,4 @@ for i in {1..10}; do
 done
 cargo run -- add-user test Test test
 cargo run -- add-problem easy1
-cargo run -- serve --secret-key secret --skip-auth 1
+cargo run -- serve --secret-key secret

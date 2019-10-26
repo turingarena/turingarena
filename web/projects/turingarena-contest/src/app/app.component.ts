@@ -11,6 +11,7 @@ import {
 } from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
+import { getAuth, Auth, setAuth } from './auth';
 
 @Component({
   selector: 'app-root',
@@ -23,17 +24,9 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  get auth(): Auth {
-    try {
-      return JSON.parse(localStorage.getItem('auth')) as Auth;
-    } catch (e) {
-      localStorage.removeItem('userId');
-      return undefined;
-    }
-  }
-
   get userId() {
-    return this.auth && this.auth.userId;
+    const auth = getAuth();
+    return auth && auth.userId;
   }
 
   contestQuery = this.contestQueryService.watch({
@@ -100,7 +93,7 @@ export class AppComponent {
   }
 
   setAuth(auth: Auth) {
-    localStorage.setItem('auth', JSON.stringify(auth));
+    setAuth(auth);
     this.contestQuery.stopPolling();
     this.contestQuery.setVariables({
       userId: this.userId,
@@ -150,9 +143,4 @@ export class AppComponent {
     }
   }
 
-}
-
-export interface Auth {
-  token: string;
-  userId: string;
 }
