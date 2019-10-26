@@ -1,2 +1,6 @@
 /target
 __generated__
+*.aux
+*.fdb_latexmk
+*.fls
+*.log

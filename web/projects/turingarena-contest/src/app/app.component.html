@@ -88,12 +88,9 @@
                       (click)="openSubmissionList(problem); $event.preventDefault()">explore
                       submissions</a>)
                   </span> | <span class="task_best_scores_label">Best scores: </span>
-                  <span *ngFor="let scorable of problem.material.scorables; last as last">
-                    {{scorable.title[0].value}}:
+                  <!-- <ng-template #tipContent let-state="state" let-scorable="scorable"><strong>{{}}</strong> [{{}} / {{}}</ng-template> -->
+                  <span class="scorable_badge" *ngFor="let scorable of problem.material.scorables; last as last" [ngbTooltip]="scorable.title[0].value + ' [' + state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision) + '/' + scorable.range.max.toFixed(scorable.range.precision) + ']'" [class.completely_solved]="state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision) > 99">
                     {{state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision)}}
-                    /
-                    {{scorable.range.max.toFixed(scorable.range.precision)}}
-                    <span *ngIf="!last"> | </span>
                   </span>
                 </div>
               </div>

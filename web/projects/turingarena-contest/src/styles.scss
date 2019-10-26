@@ -189,6 +189,18 @@ body {
   font-weight: bold;
 }
 
+.scorable_badge {
+  @extend .badge;
+
+  border: 1px solid #bbb;
+  margin-right: 1pt;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
 .contest_score_container {
   text-align: right;
 }
