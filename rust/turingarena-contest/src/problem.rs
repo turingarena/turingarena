@@ -5,6 +5,7 @@ extern crate turingarena_task_maker;
 
 use juniper::{FieldError, FieldResult};
 use schema::problems;
+use std::path::Path;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 use turingarena::problem::material::Material;
 use turingarena::problem::ProblemName;
@@ -12,9 +13,9 @@ use user::UserId;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
-pub struct ProblemDataInput {
-    pub name: String,
-    pub path: String,
+struct ProblemDataInput<'a> {
+    name: &'a str,
+    path: &'a str,
 }
 
 #[derive(Queryable)]
@@ -96,4 +97,32 @@ impl Problem {
     fn pack(&self) -> ProblemPack {
         ProblemPack(std::path::PathBuf::from(&self.data.path))
     }
+}
+
+/// Get a problem data by its name
+pub fn by_name(conn: &SqliteConnection, name: ProblemName) -> QueryResult<ProblemData> {
+    problems::table.find(name.0).first(conn)
+}
+
+/// Get all the problems data in the database
+pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
+    problems::table.load(conn)
+}
+
+/// Insert a problem in the database
+pub fn insert(conn: &SqliteConnection, name: ProblemName, path: &Path) -> QueryResult<()> {
+    let problem = ProblemDataInput {
+        name: &name.0,
+        path: path.to_str().unwrap(),
+    };
+    diesel::insert_into(schema::problems::table)
+        .values(problem)
+        .execute(conn)?;
+    Ok(())
+}
+
+/// Delete a problem from the database
+pub fn delete(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
+    diesel::delete(problems::table.find(name.0)).execute(conn)?;
+    Ok(())
 }
