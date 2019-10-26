@@ -3,6 +3,7 @@ use super::*;
 use juniper::FieldResult;
 use problem::Problem;
 use schema::users;
+use turingarena::problem::ProblemName;
 
 #[derive(Insertable)]
 #[table_name = "users"]
@@ -34,6 +35,16 @@ impl User {
     /// Name of this user to be shown to them or other users.
     fn display_name(&self) -> String {
         return self.display_name.clone();
+    }
+
+    /// A problem that the user can see
+    fn problem(&self, ctx: &Context, name: ProblemName) -> FieldResult<Problem> {
+        // TODO: check permissions
+        let data = ctx.contest.get_problem(&name.0)?;
+        Ok(Problem {
+            data,
+            user_id: Some(UserId(self.id.clone())),
+        })
     }
 
     /// List of problems that the user can see
