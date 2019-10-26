@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { ContestQueryService } from './contest-query.service';
@@ -33,11 +33,16 @@ export class AppComponent {
 
   selectedProblemName?: string = undefined;
 
+  nowObservable = interval(1000).pipe(
+    startWith([0]),
+    map(() => DateTime.local()),
+  );
+
   stateObservable = this.contestQuery.valueChanges.pipe(
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { user: { endTime, problems } } = data;
+      const { user: { startTime, endTime, problems } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
@@ -62,10 +67,8 @@ export class AppComponent {
       const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
 
       return {
-        remainingTime: interval(1000).pipe(
-          startWith([0]),
-          map(() => DateTime.fromISO(endTime).diffNow().toFormat('hh:mm:ss')),
-        ),
+        startTime: DateTime.fromISO(startTime),
+        endTime: DateTime.fromISO(endTime),
         score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
         maxScore: problemsState.map((s) => s.maxScore).reduce((a, b) => a + b, 0),
         precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),
@@ -73,6 +76,10 @@ export class AppComponent {
       };
     })
   );
+
+  formatDuration(duration: Duration) {
+    return duration.toFormat('hh:mm:ss');
+  }
 
   setUserId(id: string) {
     this.userId = id;

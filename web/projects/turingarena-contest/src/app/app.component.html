@@ -30,10 +30,26 @@
               </span>
             </div>
           </ng-container>
-          <h2>Remaining Time</h2>
-          <div class="contest_remaining_time">
-            {{ state.remainingTime | async }}
-          </div>
+          <ng-container *ngIf="nowObservable | async as now">
+            <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
+              <h2>Remaining Time</h2>
+              <div class="contest_remaining_time">
+                {{ formatDuration(state.endTime.diff(now)) }}
+              </div>
+            </ng-container>
+            <ng-container *ngIf="now < state.startTime">
+              <h2>Starting In</h2>
+              <div class="contest_starting_in">
+                {{ formatDuration(state.startTime.diff(now)) }}
+              </div>
+            </ng-container>
+            <ng-container *ngIf="state.endTime < now">
+              <h2>Ended</h2>
+              <div class="contest_ended_by">
+                {{ formatDuration(now.diff(state.endTime)) }}
+              </div>
+            </ng-container>
+          </ng-container>
           <h2>Tasks</h2>
           <ol class="contest_tasks_nav_container">
             <li *ngFor="let problem of contest.user.problems" class="task_list_item">
