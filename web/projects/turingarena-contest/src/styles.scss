@@ -252,6 +252,9 @@ body {
 .task_link {
   display: block;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin: 0 -16px;
   padding: 0.5rem 16px;
 }

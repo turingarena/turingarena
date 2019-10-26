@@ -33,16 +33,16 @@
               <ng-container *ngIf="state.getProblemState(problem) as problemState">
                 <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
                   (click)="selectedProblemName = problem.name; $event.preventDefault()">
-                  <span class="task_short_title">{{ problem.material.title[0].value }}</span>
                   <span class="task_score_badge score" [class.score_zero]="problemState.score <= 0"
-                    [class.score_partial]="0 < problemState.score && problemState.score < problemState.maxScore"
-                    [class.score_full]="problemState.maxScore <= problemState.score">
-                    <span class="task_score">
+                  [class.score_partial]="0 < problemState.score && problemState.score < problemState.maxScore"
+                  [class.score_full]="problemState.maxScore <= problemState.score">
+                  <span class="task_score">
                       {{ problemState.score.toFixed(problemState.precision) }}
                     </span>/<span class="task_max_score">
-                      {{ problemState.maxScore.toFixed(problemState.precision) }}
+                        {{ problemState.maxScore.toFixed(problemState.precision) }}
                     </span>
                   </span>
+                  <span class="task_short_title">{{ problem.material.title[0].value }}</span>
                 </a>
               </ng-container>
             </li>
