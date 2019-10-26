@@ -118,10 +118,10 @@ impl Context {
             if self.secret != None {
                 if let Some(data) = &self.jwt_data {
                     if data.user != id.0 {
-                        return Err(juniper::FieldError::from("Forbidden for the given user id"))
+                        return Err(juniper::FieldError::from("Forbidden for the given user id"));
                     }
                 } else {
-                    return Err(juniper::FieldError::from("Authentication required"))
+                    return Err(juniper::FieldError::from("Authentication required"));
                 }
             }
         }
