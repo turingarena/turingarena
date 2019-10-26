@@ -10,7 +10,7 @@
             <ng-container *ngFor="let section of problem.material.feedback">
               <ng-container [ngSwitch]="section.__typename">
                 <table *ngSwitchCase="'TableSection'" class="evaluation_table">
-                  <thead>
+                  <thead class="evaluation_table_header">
                     <tr>
                       <th [colSpan]="section.cols.length">
                         {{ section.caption[0].value }}
@@ -26,30 +26,36 @@
                     <tr class="group_header_row">
                       <ng-container *ngFor="let col of section.cols; index as i">
                         <ng-container [ngSwitch]="col.content.__typename">
-                          <td *ngSwitchDefault="">
+                          <th *ngSwitchDefault="">
                             {{ col.title[0].value }}
-                          </td>
+                          </th>
                         </ng-container>
                       </ng-container>
                     </tr>
                     <tr *ngFor="let row of group.rows" class="evaluation_row">
                       <ng-container *ngFor="let col of section.cols; index as i">
                         <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
-                          <td *ngSwitchCase="'RowNumberCellContent'" class="score_cell">
+                          <th *ngSwitchCase="'RowNumberCellContent'" class="score_cell">
                             {{ cell.content.number }}
-                          </td>
-                          <td *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
+                          </th>
+                          <th *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
                             {{ cell.content.title[0].value }}
-                          </td>
-                          <td *ngSwitchCase="'ScoreCellContent'" class="score_cell">
+                          </th>
+                          <ng-container *ngSwitchCase="'ScoreCellContent'">
                             <ng-container *ngIf="record[cell.content.ref] as value">
-                              {{ value.score.toFixed(cell.content.range.precision) }}
+                              <td class="score_cell" [class.score_zero]="value.score <= 0"
+                                [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
+                                [class.score_full]="cell.content.range.max <= value.score">
+                                {{ value.score.toFixed(cell.content.range.precision) }} /
+                                {{ col.content.range.max.toFixed(cell.content.range.precision) }}
+                              </td>
                             </ng-container>
                             <ng-container *ngIf="!record[cell.content.ref]">
-                              ...
+                              <td class="score_cell">
+                                ... / {{ col.content.range.max.toFixed(cell.content.range.precision) }}
+                              </td>
                             </ng-container>
-                            / {{ col.content.range.max.toFixed(cell.content.range.precision) }}
-                          </td>
+                          </ng-container>
                           <td *ngSwitchDefault="">
                             ?
                           </td>
