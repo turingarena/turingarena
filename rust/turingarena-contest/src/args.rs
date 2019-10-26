@@ -50,8 +50,8 @@ pub enum Command {
         /// display name, e.g. the full name of the user
         display_name: String,
 
-        /// password for the new user
-        password: String,
+        /// login token for the new user
+        token: String,
     },
     /// removes a user from the contest database
     DeleteUser {

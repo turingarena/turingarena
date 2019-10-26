@@ -15,7 +15,6 @@ diesel = { version = "1.4.2", features = ["sqlite"] }
 diesel_migrations = "1.4.0"
 rand = "0.7.2"
 chrono = "0.4.9"
-bcrypt = "0.6"
 turingarena-contest-webcontent = { path = "../turingarena-contest-webcontent/", optional = true }
 turingarena-task-maker = { path = "../turingarena-task-maker/" }
 turingarena = { path = "../turingarena/" }

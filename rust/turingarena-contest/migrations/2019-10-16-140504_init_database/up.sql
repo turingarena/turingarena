@@ -6,7 +6,7 @@ CREATE TABLE problems(
 CREATE TABLE users(
     id              TEXT NOT NULL PRIMARY KEY,
     display_name    TEXT NOT NULL,
-    password_bcrypt TEXT NOT NULL
+    token           TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE submissions(

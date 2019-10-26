@@ -54,7 +54,7 @@ table! {
     users (id) {
         id -> Text,
         display_name -> Text,
-        password_bcrypt -> Text,
+        token -> Text,
     }
 }
 
