@@ -88,10 +88,20 @@
                       (click)="openSubmissionList(problem); $event.preventDefault()">explore
                       submissions</a>)
                   </span> | <span class="task_best_scores_label">Score breakdown: </span>
-                  <!-- <ng-template #tipContent let-state="state" let-scorable="scorable"><strong>{{}}</strong> [{{}} / {{}}</ng-template> -->
-                  <span class="scorable_badge" *ngFor="let scorable of problem.material.scorables; last as last" [ngbTooltip]="scorable.title[0].value + ' [' + state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision) + '/' + scorable.range.max.toFixed(scorable.range.precision) + ']'" [class.completely_solved]="state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision) > 99">
-                    {{state.getProblemState(problem).getScorableState(scorable).score.toFixed(scorable.range.precision)}}
-                  </span>
+                  <ng-container *ngFor="let scorable of problem.material.scorables">
+                    <ng-container *ngIf="state.getProblemState(problem).getScorableState(scorable).score as curScore">
+                      <ng-container *ngIf="scorable.range.max as maxScore">
+                        <ng-template #tipContent>
+                          {{scorable.title[0].value}}: <span class="badge badge-info">{{maxScore.toFixed(scorable.range.precision)}} pts</span>
+                        </ng-template>
+                        <span [ngbTooltip]="tipContent" class="scorable_badge" [class.score_zero]="curScore <= 0"
+                          [class.score_partial]="0 < curScore && curScore < maxScore"
+                          [class.score_full]="maxScore <= curScore">
+                          {{ curScore.toFixed(scorable.range.precision) }}
+                        </span>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
                 </div>
               </div>
             </div>

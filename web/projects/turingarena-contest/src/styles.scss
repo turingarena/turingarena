@@ -192,9 +192,21 @@ body {
 .scorable_badge {
   @extend .badge;
 
-  border: 1px solid #bbb;
   margin-right: 1pt;
   cursor: pointer;
+
+  &.score_zero {
+    @extend .badge-light;
+    border: 1px solid #ccc;
+  }
+
+  &.score_partial {
+    @extend .badge-warning;
+  }
+
+  &.score_full {
+    @extend .badge-success;
+  }
 
   &:hover {
     opacity: 0.7;
