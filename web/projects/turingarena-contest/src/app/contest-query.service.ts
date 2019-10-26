@@ -21,6 +21,7 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
         endTime
         problems {
           name
+          canSubmit
           submissions {
             createdAt
           }

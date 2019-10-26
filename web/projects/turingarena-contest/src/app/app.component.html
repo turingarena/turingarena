@@ -75,7 +75,7 @@
           <main class="task_main" *ngIf="selectedProblemName === problem.name">
             <div class="task_header">
               <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
-              <div class="task_submit_container">
+              <div *ngIf="problem.canSubmit" class="task_submit_container">
                 <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">Submit a
                   solution</a>
               </div>
