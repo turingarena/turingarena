@@ -8,7 +8,6 @@ import { AppComponent } from './app.component';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { GraphQLModule } from './graphql.module';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
-import { RelativeTimePipe } from './relative-time.pipe';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
@@ -18,7 +17,6 @@ import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
   declarations: [
     AppComponent,
     RelativeTimeComponent,
-    RelativeTimePipe,
     SubmitDialogComponent,
     SubmissionDialogComponent,
     BypassSanitizerPipe,
