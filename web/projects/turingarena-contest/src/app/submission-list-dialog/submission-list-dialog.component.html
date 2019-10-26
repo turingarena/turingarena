@@ -1,84 +1,85 @@
 <ng-container *ngIf="submissionListQuery.valueChanges | async as submissionListResult">
   <ng-container *ngIf="submissionListResult.data.user.problem as problem">
-    <div class="submissions_modal_header">
-      Submissions
-    </div>
-    <div class="submissions_modal_body">
-      <table class="submission_table">
-        <thead class="submission_table_header">
-          <tr>
-            <th scope="col" rowspan="2">Submission</th>
-            <th scope="col" [colSpan]="problem.material.scorables.length">Score</th>
-            <th scope="col" rowspan="2">Total score</th>
-          </tr>
-          <tr>
-            <th *ngFor="let scorable of problem.material.scorables">
-              {{ scorable.title[0].value }}
-            </th>
-          </tr>
-          <!--
-              <tr>
-                <th scope="row">Best</th>
-                <td *ngFor="let scorable of taskMainComponent.taskMetadata.scorables"
-                  class="submission_best_score score" [class.score_zero]="taskMainComponent.getScore(scorable) <= 0"
-                  [class.score_partial]="0 < taskMainComponent.getScore(scorable) && taskMainComponent.getScore(scorable) < scorable.max_score"
-                  [class.score_full]="scorable.max_score <= taskMainComponent.getScore(scorable)">
+    <ng-container *ngIf="getProblemState(problem) as problemState">
+      <div class="submissions_modal_header">
+        Submissions
+      </div>
+      <div class="submissions_modal_body">
+        <table class="submission_table">
+          <thead class="submission_table_header">
+            <tr>
+              <th scope="col" rowspan="2">Submission</th>
+              <th scope="col" [colSpan]="problem.material.scorables.length">Score</th>
+              <th scope="col" rowspan="2">Total score</th>
+            </tr>
+            <tr>
+              <th *ngFor="let scorable of problem.material.scorables">
+                {{ scorable.title[0].value }}
+              </th>
+            </tr>
+            <tr>
+              <th scope="row">Best</th>
+              <ng-container *ngFor="let scorable of problem.material.scorables">
+                <td *ngIf="problemState.scorable(scorable) as state" class="submission_best_score score"
+                  [class.score_zero]="state.score <= 0"
+                  [class.score_partial]="0 < state.score && state.score < scorable.range.max"
+                  [class.score_full]="scorable.range.max <= state.score">
                   <span>
-                    {{ taskMainComponent.getScore(scorable).toFixed(scorable.precision) }}
+                    {{ state.score.toFixed(scorable.precision) }}
                   </span>/<span>
-                    {{ scorable.max_score.toFixed(scorable.precision) }}
+                    {{ scorable.range.max.toFixed(scorable.precision) }}
                   </span>
                 </td>
-                <td class="submission_best_total_score score"
-                  [class.score_zero]="taskMainComponent.totalScoreInfo.score <= 0"
-                  [class.score_partial]="0 < taskMainComponent.totalScoreInfo.score && taskMainComponent.totalScoreInfo.score < taskMainComponent.totalScoreInfo.maxScore"
-                  [class.score_full]="taskMainComponent.totalScoreInfo.maxScore <= taskMainComponent.totalScoreInfo.score">
-                  <span>
-                    {{ taskMainComponent.totalScoreInfo.score.toFixed(taskMainComponent.totalScoreInfo.precision) }}
-                  </span>/<span>
-                    {{ taskMainComponent.totalScoreInfo.maxScore.toFixed(taskMainComponent.totalScoreInfo.precision) }}
+              </ng-container>
+              <td class="submission_best_total_score score" [class.score_zero]="getProblemState(problem).score <= 0"
+                [class.score_partial]="0 < getProblemState(problem).score && getProblemState(problem).score < getProblemState(problem).maxScore"
+                [class.score_full]="getProblemState(problem).maxScore <= getProblemState(problem).score">
+                <span>
+                  {{ getProblemState(problem).score.toFixed(getProblemState(problem).precision) }}
+                </span>/<span>
+                  {{ getProblemState(problem).maxScore.toFixed(getProblemState(problem).precision) }}
+                </span>
+              </td>
+            </tr>
+          </thead>
+          <tbody class="submission_table_body">
+            <tr class="submission_row" *ngFor="let submission of problem.submissions">
+              <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
+                <td>
+                  <app-relative-time [time]="submission.timestamp"></app-relative-time>
+                  <br />
+                  <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
+                    details
+                  </a>
+                </td>
+                <ng-container *ngFor="let scorable of problem.material.scorables">
+                  <td *ngIf="submissionState.scorable(scorable) as state" class="submission_score score"
+                    [class.score_zero]="state.score <= 0"
+                    [class.score_partial]="0 < state.score && state.score < scorable.range.max"
+                    [class.score_full]="scorable.range.max <= state.score">
+                    <span class="submission_score">
+                      {{ state.score.toFixed(scorable.range.precision) }}
+                    </span>/<span class="submission_max_score">
+                      {{ scorable.range.max.toFixed(scorable.range.precision) }}
+                    </span>
+                  </td>
+                </ng-container>
+                <td class="submission_total_score score" [class.score_zero]="submissionState.score <= 0"
+                  [class.score_partial]="0 < submissionState.score && submissionState.score < problemState.maxScore"
+                  [class.score_full]="problemState.maxScore <= submissionState.score">
+                  <span class="submission_total_score">
+                    {{ submissionState.score.toFixed(problemState.precision) }}
+                  </span>/<span class="submission_total_max_score">
+                    {{ problemState.maxScore.toFixed(problemState.precision) }}
                   </span>
                 </td>
-              </tr>
-              -->
-        </thead>
-        <tbody class="submission_table_body">
-          <tr class="submission_row" *ngFor="let submission of problem.submissions">
-            <td>
-              <app-relative-time [time]="submission.timestamp"></app-relative-time>
-              <br />
-              <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
-                details
-              </a>
-            </td>
-            <ng-container *ngFor="let scorable of problem.material.scorables">
-              <td *ngIf="getState(scorable, submission) as state" class="submission_score score"
-                [class.score_zero]="state.score <= 0"
-                [class.score_partial]="0 < state.score && state.score < scorable.range.max"
-                [class.score_full]="scorable.range.max <= state.score">
-                <span class="submission_score">
-                  {{ state.score.toFixed(scorable.range.precision) }}
-                </span>/<span class="submission_max_score">
-                  {{ scorable.range.max.toFixed(scorable.range.precision) }}
-                </span>
-              </td>
-            </ng-container>
-            <!--
-              <td class="submission_total_score score" [class.score_zero]="totalScoreInfo.score <= 0"
-                [class.score_partial]="0 < totalScoreInfo.score && totalScoreInfo.score < totalScoreInfo.maxScore"
-                [class.score_full]="totalScoreInfo.maxScore <= totalScoreInfo.score">
-                <span class="submission_total_score">
-                  {{ totalScoreInfo.score.toFixed(totalScoreInfo.precision) }}
-                </span>/<span class="submission_total_max_score">
-                  {{ totalScoreInfo.maxScore.toFixed(totalScoreInfo.precision) }}
-                </span>
-              </td>
-            -->
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="submissions_modal_footer">
-    </div>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="submissions_modal_footer">
+      </div>
+    </ng-container>
   </ng-container>
 </ng-container>

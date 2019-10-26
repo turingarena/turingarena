@@ -14,6 +14,11 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
         id
         problem(name: $problemName) {
           name
+          scores {
+            scorableId
+            score
+            submissionId
+          }
           submissions {
             id
             createdAt

@@ -9,6 +9,7 @@ import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
   SubmissionListQuery_user_problem_submissions as Submission,
+  SubmissionListQuery_user_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
 import { ContestQuery_user_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
 
@@ -40,8 +41,30 @@ export class SubmissionListDialogComponent implements OnInit {
     });
   }
 
-  getState(scorable: Scorable, submission: Submission) {
-    return submission.scores.find((s) => s.scorableId === scorable.name) || { score: 0 };
+  getSubmissionState(problem: Problem, submission: Submission) {
+    return {
+      score: problem.material.scorables
+        .map((scorable) => submission.scores.find((s) => s.scorableId === scorable.name))
+        .map((state) => state ? state.score as number : 0)
+        .reduce((a, b) => a + b, 0),
+      scorable(scorable: Scorable) {
+        return submission.scores.find((s) => s.scorableId === scorable.name) || { score: 0 }
+      },
+    };
+  }
+
+  getProblemState(problem: Problem) {
+    return {
+      scorable(scorable: Scorable) {
+        return problem.scores.find((s) => s.scorableId === scorable.name) || { score: 0 };
+      },
+      maxScore: problem.material.scorables.map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
+      precision: problem.material.scorables.map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
+      score: problem.material.scorables
+        .map((scorable) => problem.scores.find((s) => s.scorableId === scorable.name))
+        .map((state) => state ? state.score as number : 0)
+        .reduce((a, b) => a + b, 0),
+    };
   }
 
   async openDetail(submission: Submission) {
