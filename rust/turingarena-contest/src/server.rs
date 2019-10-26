@@ -5,11 +5,16 @@ use rocket::http::Status;
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::content;
 use rocket::response::Response;
-use rocket::State;
+use rocket::{State, response};
 use std::path::PathBuf;
 
 #[cfg(feature = "webcontent")]
-use turingarena_contest_webcontent::WebContent;
+use ::{
+    turingarena_contest_webcontent::WebContent,
+    std::ffi::OsStr,
+    std::io::Cursor,
+    rocket::http::ContentType,
+};
 
 struct Authorization(Option<String>);
 

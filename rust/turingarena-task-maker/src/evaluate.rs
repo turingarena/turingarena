@@ -113,12 +113,21 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
             subtask,
             solution,
             score,
+            normalized_score,
         } => {
             tx.send(Event::Value(ValueEvent {
                 key: record::Key(format!("subtask.{}.score", subtask)),
                 value: record::Value::Score(record::ScoreValue {
-                    score: Score(score as f64),
+                    score: Score(score),
                 }),
+            }))?;
+            tx.send(Event::Score(ScoreEvent {
+                award_name: AwardName(format!("subtask.{}", subtask)),
+                score: Score(score),
+            }))?;
+            tx.send(Event::Badge(BadgeEvent {
+                award_name: AwardName(format!("subtask.{}", subtask)),
+                badge: normalized_score > 0.0,
             }))?;
         },
         _ => (),
