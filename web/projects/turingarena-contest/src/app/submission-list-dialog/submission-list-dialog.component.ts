@@ -52,16 +52,28 @@ export class SubmissionListDialogComponent implements OnInit {
         .map((award) => submission.scores.find((s) => s.awardName === award.name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
-      award(award: Award) {
-        return submission.scores.find((s) => s.awardName === award.name) || { score: 0 };
+      award({ name }) {
+        // FIXME: repeated code
+        const scoreState = submission.scores.find((s) => s.awardName === name);
+        const badgeState = submission.badges.find((s) => s.awardName === name);
+        return {
+          score: scoreState ? scoreState.score : 0,
+          badge: badgeState ? badgeState.badge : false,
+        };
       },
     };
   }
 
   getProblemState(problem: Problem) {
     return {
-      award(award: Award) {
-        return problem.scores.find((s) => s.awardName === award.name) || { score: 0 };
+      award({ name }) {
+        // FIXME: repeated code
+        const scoreState = problem.scores.find((s) => s.awardName === name);
+        const badgeState = problem.badges.find((s) => s.awardName === name);
+        return {
+          score: scoreState ? scoreState.score : 0,
+          badge: badgeState ? badgeState.badge : false,
+        };
       },
       maxScore: scoreRanges(problem).map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
       precision: scoreRanges(problem).map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
