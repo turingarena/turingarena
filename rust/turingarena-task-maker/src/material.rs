@@ -3,11 +3,11 @@ extern crate mime_guess;
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 use task_maker_format::ioi;
+use turingarena::award::*;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
 use turingarena::feedback::{table::*, *};
 use turingarena::problem::material::*;
-use turingarena::award::*;
 use turingarena::submission::form::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
@@ -63,8 +63,7 @@ fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
             })
         } else {
             AwardContent::Badge(BadgeAwardContent)
-        }
-
+        },
     }
 }
 
@@ -238,13 +237,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             .map(attachment_at_path)
             .collect(),
         submission_form: submission_form(),
-        awards: {
-            subtasks_of(task)
-                .into_iter()
-                .filter(|s| s.max_score > 0.0)
-                .map(award_of)
-                .collect()
-        },
+        awards: { subtasks_of(task).into_iter().map(award_of).collect() },
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
