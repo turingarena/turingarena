@@ -78,6 +78,8 @@ export class SubmissionListDialogComponent implements OnInit {
     modal.problemName = this.problemName;
     modal.setSubmissionQueryRef(this.submissionQueryService.watch({
       submissionId: submission.id,
+    }, {
+      pollInterval: 1000,
     }));
 
     try {

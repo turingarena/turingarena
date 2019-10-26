@@ -8,7 +8,7 @@
         <table class="submission_table">
           <thead class="submission_table_header">
             <tr>
-              <th scope="col" rowspan="2">Submission</th>
+              <th scope="col" rowspan="3">Submission</th>
               <th scope="col" [colSpan]="problem.material.scorables.length">Score</th>
               <th scope="col" rowspan="2">Total score</th>
             </tr>
@@ -18,9 +18,8 @@
               </th>
             </tr>
             <tr>
-              <th scope="row">Best</th>
               <ng-container *ngFor="let scorable of problem.material.scorables">
-                <td *ngIf="problemState.scorable(scorable) as state" class="submission_best_score score"
+                <th *ngIf="problemState.scorable(scorable) as state" class="submission_best_score score"
                   [class.score_zero]="state.score <= 0"
                   [class.score_partial]="0 < state.score && state.score < scorable.range.max"
                   [class.score_full]="scorable.range.max <= state.score">
@@ -29,9 +28,9 @@
                   </span>/<span>
                     {{ scorable.range.max.toFixed(scorable.precision) }}
                   </span>
-                </td>
+                </th>
               </ng-container>
-              <td class="submission_best_total_score score" [class.score_zero]="getProblemState(problem).score <= 0"
+              <th class="submission_best_total_score score" [class.score_zero]="getProblemState(problem).score <= 0"
                 [class.score_partial]="0 < getProblemState(problem).score && getProblemState(problem).score < getProblemState(problem).maxScore"
                 [class.score_full]="getProblemState(problem).maxScore <= getProblemState(problem).score">
                 <span>
@@ -39,7 +38,7 @@
                 </span>/<span>
                   {{ getProblemState(problem).maxScore.toFixed(getProblemState(problem).precision) }}
                 </span>
-              </td>
+              </th>
             </tr>
           </thead>
           <tbody class="submission_table_body">
