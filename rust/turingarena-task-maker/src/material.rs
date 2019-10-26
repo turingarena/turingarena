@@ -187,7 +187,13 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             .map(attachment_at_path)
             .collect(),
         submission_form: submission_form(),
-        scorables: { subtasks_of(task).into_iter().map(scorable_of).collect() },
+        scorables: {
+            subtasks_of(task)
+                .into_iter()
+                .filter(|s| s.max_score > 0.0)
+                .map(scorable_of)
+                .collect()
+        },
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
