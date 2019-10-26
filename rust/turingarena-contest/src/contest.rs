@@ -16,17 +16,18 @@ pub struct ContestQueries {}
 impl ContestQueries {
     /// Get a user
     fn user(&self, ctx: &Context, id: Option<String>) -> FieldResult<user::User> {
-        let id = if let Some(id) = &id {
-            id
-        } else if let Some(ctx) = &ctx.jwt_data {
-            &ctx.user
+        ctx.authorize_user(&id)?;
+
+        let data = if let Some(id) = id {
+            Some(user::by_id(
+                &ctx.connect_db()?,
+                user::UserId(id.to_owned()),
+            )?)
         } else {
-            return Err(FieldError::from("invalid authorization token"));
+            None
         };
-        let user_id = user::UserId(id.to_owned());
-        Ok(user::User {
-            data: Some(user::by_id(&ctx.connect_db()?, user_id)?)
-        })
+
+        Ok(user::User { data })
     }
 
     /// Get the submission with the specified id

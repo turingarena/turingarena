@@ -108,14 +108,16 @@ impl Context {
     }
 
     /// Authenticate user
-    pub fn authorize_user(&self, user_id: &str) -> juniper::FieldResult<()> {
-        if self.secret != None {
-            if let Some(data) = &self.jwt_data {
-                if data.user != user_id {
-                    Err(juniper::FieldError::from("Forbidden for the given user id"))?
+    pub fn authorize_user(&self, user_id: &Option<String>) -> juniper::FieldResult<()> {
+        if let Some(id) = user_id {
+            if self.secret != None {
+                if let Some(data) = &self.jwt_data {
+                    if &data.user != id {
+                        Err(juniper::FieldError::from("Forbidden for the given user id"))?
+                    }
+                } else {
+                    Err(juniper::FieldError::from("Authentication required"))?
                 }
-            } else {
-                Err(juniper::FieldError::from("Authentication required"))?
             }
         }
         Ok(())
