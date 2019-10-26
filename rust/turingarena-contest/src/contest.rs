@@ -18,6 +18,7 @@ pub struct ContestQueries {}
 impl ContestQueries {
     /// Get the view of a contest
     fn contest_view(&self, ctx: &Context, user_id: Option<String>) -> FieldResult<ContestView> {
+        ctx.authorize_user(&user_id)?;
         let id = if let Some(id) = &user_id {
             id
         } else if let Some(ctx) = &ctx.jwt_data {
