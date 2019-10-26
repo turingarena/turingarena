@@ -1,27 +1,36 @@
 #![feature(decl_macro, proc_macro_hygiene)]
 
+extern crate base64;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
-#[macro_use]
-extern crate serde;
-extern crate base64;
 extern crate jsonwebtoken as jwt;
 extern crate juniper;
 extern crate juniper_rocket;
 extern crate rand;
 extern crate rocket;
+#[macro_use]
+extern crate serde;
 extern crate serde_json;
 extern crate structopt;
-extern crate turingarena;
-extern crate uuid;
-
 #[cfg(test)]
 extern crate tempdir;
-
+extern crate turingarena;
 #[cfg(feature = "webcontent")]
 extern crate turingarena_contest_webcontent;
+extern crate uuid;
+
+use std::default::Default;
+use std::path::PathBuf;
+
+use diesel::prelude::*;
+use structopt::StructOpt;
+
+use args::{Args, Command};
+use server::{generate_schema, run_server};
+use turingarena::problem::ProblemName;
+use user::UserId;
 
 mod args;
 mod auth;
@@ -33,15 +42,6 @@ mod schema;
 mod server;
 mod submission;
 mod user;
-
-use args::{Args, Command};
-use diesel::prelude::*;
-use server::{generate_schema, run_server};
-use std::default::Default;
-use std::path::PathBuf;
-use structopt::StructOpt;
-use user::UserId;
-use turingarena::problem::ProblemName;
 
 embed_migrations!();
 
@@ -212,7 +212,7 @@ fn main() {
             token,
         } => context.add_user(&username, &display_name, &token),
         DeleteUser { username } => context.delete_user(&username),
-        AddProblem { name} => context.add_problem(&name),
+        AddProblem { name } => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
     }
 }

@@ -1,14 +1,15 @@
-use super::*;
-
 extern crate turingarena;
 extern crate turingarena_task_maker;
 
 use juniper::{FieldError, FieldResult};
+
 use schema::problems;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 use turingarena::problem::material::Material;
 use turingarena::problem::ProblemName;
 use user::UserId;
+
+use super::*;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
@@ -113,9 +114,7 @@ pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
 
 /// Insert a problem in the database
 pub fn insert(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
-    let problem = ProblemDataInput {
-        name: &name.0,
-    };
+    let problem = ProblemDataInput { name: &name.0 };
     diesel::insert_into(schema::problems::table)
         .values(problem)
         .execute(conn)?;
