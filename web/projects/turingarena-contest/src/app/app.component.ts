@@ -23,7 +23,7 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  userId: string = 'test';
+  userId: string;
 
   contestQuery = this.contestQueryService.watch({
     userId: this.userId,
@@ -67,6 +67,7 @@ export class AppComponent {
       const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
 
       return {
+        hasScore: problemsState.length > 0,
         startTime: DateTime.fromISO(startTime),
         endTime: DateTime.fromISO(endTime),
         score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
@@ -83,9 +84,12 @@ export class AppComponent {
 
   setUserId(id: string) {
     this.userId = id;
-    this.contestQuery.refetch({
+    this.contestQuery.stopPolling();
+    this.contestQuery.setVariables({
       userId: this.userId,
     });
+    this.contestQuery.refetch();
+    this.contestQuery.startPolling(10000);
   }
 
   async openSubmitDialog() {

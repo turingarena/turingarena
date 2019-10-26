@@ -5,18 +5,18 @@
         <h1 class="contest_title"><a href="#" (click)="selectedProblemName = undefined; $event.preventDefault()">
             {{data.contestView.contestTitle}}
           </a></h1>
-        <ng-container *ngIf="data.contestView.id">
-          <span class="user_display_name">{{data.contestView.displayName}}</span>
+        <ng-container *ngIf="data.contestView.user">
+          <span class="user_display_name">{{data.contestView.user.displayName}}</span>
           <button class="logout" (click)="setUserId(undefined)">Logout</button>
         </ng-container>
-        <ng-container *ngIf="!data.contestView.id">
+        <ng-container *ngIf="!data.contestView.user">
           <span class="user_display_name"></span>
           <button class="login" (click)="openLoginDialog()">Login</button>
         </ng-container>
       </nav>
       <div class="contest_main">
         <nav class="contest_nav">
-          <ng-container *ngIf="data.contestView.scores">
+          <ng-container *ngIf="state.hasScore">
             <h2>Score</h2>
             <div class="contest_score_container">
               <span class="contest_score_display score" [class.score_zero]="state.score <= 0"
