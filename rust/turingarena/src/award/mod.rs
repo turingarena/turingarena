@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLScalarValue)]
 pub struct Score(pub f64);
 
-/// Wraps a string that identifies a scorable
+/// Wraps a string that identifies an award
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
 pub struct AwardName(pub String);
 
