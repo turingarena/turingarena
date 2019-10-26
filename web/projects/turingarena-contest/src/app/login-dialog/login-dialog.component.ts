@@ -19,4 +19,8 @@ export class LoginDialogComponent implements OnInit {
   ngOnInit() {
   }
 
+  submit(event: Event) {
+
+  }
+
 }

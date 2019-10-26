@@ -278,7 +278,6 @@ body {
   }
 }
 
-.login_modal_header,
 .evaluation_modal_header {
   @extend .modal-header;
 }
@@ -296,7 +295,20 @@ body {
   @extend .modal-footer;
 }
 
-.login_modal_close_button,
+.login_modal_submit_button,
 .evaluation_modal_close_button {
   @extend .btn, .btn-primary;
+}
+
+.login_modal_close_button {
+  @extend .btn, .btn-secondary;
+}
+
+.login_token_input_group {
+  @extend .form-group;
+  margin: 16px;
+}
+
+.login_token_input {
+  @extend .form-control;
 }
