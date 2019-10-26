@@ -1,14 +1,11 @@
 use crate::*;
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
-use rocket::http::{ContentType, Status};
+use rocket::http::Status;
 use rocket::request::{self, FromRequest, Request};
+use rocket::response::content;
 use rocket::response::Response;
-use rocket::response::{self, content};
 use rocket::State;
-
-use std::ffi::OsStr;
-use std::io::Cursor;
 use std::path::PathBuf;
 
 #[cfg(feature = "webcontent")]
@@ -101,7 +98,7 @@ pub fn generate_schema() {
         problems_dir: PathBuf::from("/tmp"),
     };
     let (schema, _errors) = juniper::introspect(
-        &Schema::new(contest::ContestQueries {}, contest::ContestMutations {}),
+        &Schema::new(contest::ContestQueries {}, contest::ContestQueries {}),
         &Context {
             skip_auth: false,
             jwt_data: None,
@@ -139,7 +136,7 @@ pub fn run_server(
     rocket::custom(config)
         .manage(Schema::new(
             contest::ContestQueries {},
-            contest::ContestMutations {},
+            contest::ContestQueries {},
         ))
         .manage(Context {
             secret,

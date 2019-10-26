@@ -83,7 +83,7 @@ impl MutationOk {
     }
 }
 
-pub type Schema = juniper::RootNode<'static, contest::ContestQueries, contest::ContestMutations>;
+pub type Schema = juniper::RootNode<'static, contest::ContestQueries, contest::ContestQueries>;
 
 fn main() {
     let args = Args::from_args();

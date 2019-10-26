@@ -68,7 +68,7 @@ impl Contest {
     }
 
     pub fn add_problem(&self, name: &str, path: &Path) {
-        let problem = ContestProblemInput {
+        let problem = ProblemDataInput {
             name: name.to_owned(),
             path: self
                 .problem_rel_path(path)
@@ -92,14 +92,14 @@ impl Contest {
             .expect("error executing problem delete query");
     }
 
-    pub fn get_problems(&self) -> Result<Vec<ContestProblem>> {
-        Ok(problems::table.load::<ContestProblem>(&self.connect_db()?)?)
+    pub fn get_problems(&self) -> Result<Vec<ProblemData>> {
+        Ok(problems::table.load::<ProblemData>(&self.connect_db()?)?)
     }
 
-    pub fn get_problem(&self, name: &str) -> Result<ContestProblem> {
+    pub fn get_problem(&self, name: &str) -> Result<ProblemData> {
         Ok(problems::table
             .find(name)
-            .first::<ContestProblem>(&self.connect_db()?)?)
+            .first::<ProblemData>(&self.connect_db()?)?)
     }
 }
 
@@ -120,20 +120,16 @@ impl ContestQueries {
         Ok(ctx.contest.get_user(id)?)
     }
 
-    /// List of problems in the contest
-    fn problems(&self, ctx: &Context) -> FieldResult<Vec<ContestProblem>> {
-        Ok(ctx.contest.get_problems()?)
-    }
-
-    /// Get the evaluation events for the specified submission
-    fn events(
+    /// Get the submission with the specified id
+    fn submission(
         &self,
         ctx: &Context,
         submission_id: String,
-    ) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
-        Ok(evaluation::query_events(
+    ) -> FieldResult<submission::Submission> {
+        // TODO: check privilage
+        Ok(submission::query(
             &ctx.contest.connect_db()?,
-            submission_id,
+            &submission_id,
         )?)
     }
 
@@ -141,34 +137,12 @@ impl ContestQueries {
     fn config(&self, ctx: &Context) -> FieldResult<config::Config> {
         Ok(config::current_config(&ctx.contest.connect_db()?)?)
     }
-}
 
-/// dummy structure to do GraphQL mutations to the contest
-pub struct ContestMutations {}
-
-#[juniper::object(Context = Context)]
-impl ContestMutations {
-    /// authenticate a user, generating an authentication code
+    /// Authenticate a user, generating an authentication code
     fn auth(&self, ctx: &Context, user: String, password: String) -> FieldResult<UserToken> {
         let user = ctx.contest.get_user(&user)?;
         Ok(UserToken {
             token: auth::auth(&user, &password, &ctx.secret)?,
         })
-    }
-
-    /// submit a solution to the specified problem
-    fn submit(
-        &self,
-        ctx: &Context,
-        user_id: String,
-        problem_name: String,
-        files: Vec<submission::FileInput>,
-    ) -> FieldResult<submission::Submission> {
-        ctx.authorize_user(&user_id)?;
-        let problem = ctx.contest.get_problem(&problem_name)?;
-        let submission =
-            submission::insert(&ctx.contest.connect_db()?, &user_id, &problem_name, files)?;
-        evaluation::evaluate(&problem, &submission, ctx.contest.connect_db().unwrap());
-        Ok(submission)
     }
 }
