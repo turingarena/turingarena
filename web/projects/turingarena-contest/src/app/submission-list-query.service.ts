@@ -9,7 +9,7 @@ import { problemMaterialFragment } from './graphql-fragments';
 })
 export class SubmissionListQueryService extends Query<SubmissionListQuery, SubmissionListQueryVariables> {
   document = gql`
-    query SubmissionListQuery($userId: String!, $problemName: ProblemName!) {
+    query SubmissionListQuery($userId: UserId!, $problemName: ProblemName!) {
       contestView(userId: $userId) {
         user {
           id

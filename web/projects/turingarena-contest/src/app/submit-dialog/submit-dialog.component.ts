@@ -46,8 +46,8 @@ export class SubmitDialogComponent {
     }
     this.submitting = true;
 
-    const contest = this.appComponent.contestQuery.getLastResult().data;
-    const problem = contest.user.problems.find((p) => p.name === this.problemName);
+    const { contestView } = this.appComponent.contestQuery.getLastResult().data;
+    const problem = contestView.problems.find((p) => p.name === this.problemName);
     const files = await Promise.all(
       problem.material.submissionForm.fields.map(async (field) => this.getFileForField(field, formData))
     );
@@ -74,7 +74,7 @@ export class SubmitDialogComponent {
     const modal = modalRef.componentInstance as SubmissionDialogComponent;
 
     modal.setSubmissionQueryRef(this.submissionQueryService.watch({
-      submissionId: data.user.problem.submit.id,
+      submissionId: data.contestView.problem.submit.id,
     }, {
         pollInterval: 1000,
       }));

@@ -6,8 +6,8 @@ import { map, startWith } from 'rxjs/operators';
 import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import {
-  ContestQuery_user_problems as ContestProblem,
-  ContestQuery_user_problems_material_scorables as Scorable,
+  ContestQuery_contestView_problems as ContestProblem,
+  ContestQuery_contestView_problems_material_scorables as Scorable,
 } from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
