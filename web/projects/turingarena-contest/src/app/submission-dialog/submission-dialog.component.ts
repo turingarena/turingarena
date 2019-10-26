@@ -4,7 +4,11 @@ import { QueryRef } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppComponent } from '../app.component';
-import { SubmissionQuery, SubmissionQueryVariables, SubmissionQuery_events_event_ValueEvent_value as Value } from '../__generated__/SubmissionQuery';
+import {
+  SubmissionQuery,
+  SubmissionQueryVariables,
+  SubmissionQuery_submission_evaluationEvents_event_ValueEvent_value as Value,
+} from '../__generated__/SubmissionQuery';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -27,7 +31,7 @@ export class SubmissionDialogComponent {
         if (result.data === undefined) { return {}; }
 
         const record: Record<string, Value> = {};
-        for (const event of result.data.events) {
+        for (const event of result.data.submission.evaluationEvents) {
           if (event.event.__typename === 'ValueEvent') {
             const { key, value } = event.event;
             record[key] = value;

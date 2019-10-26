@@ -5,7 +5,10 @@ import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { ContestQuery_problems as ContestProblem, ContestQuery_problems_material_scorables as Scorable } from './__generated__/ContestQuery';
+import {
+  ContestQuery_user_problems as ContestProblem,
+  ContestQuery_user_problems_material_scorables as Scorable,
+} from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 
@@ -32,12 +35,12 @@ export class AppComponent {
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { config: { startTime, endTime }, problems } = data;
+      const { user: { problems }, config: { startTime, endTime } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
 
-        const getScorableState = (scorable: Scorable) => problem.scorables.find((s) => s.scorableId === scorable.name) || {
+        const getScorableState = (scorable: Scorable) => problem.scores.find((s) => s.scorableId === scorable.name) || {
           score: 0,
         };
 

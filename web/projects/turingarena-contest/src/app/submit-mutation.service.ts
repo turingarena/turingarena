@@ -8,9 +8,13 @@ import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitM
 })
 export class SubmitMutationService extends Mutation<SubmitMutation, SubmitMutationVariables> {
   document = gql`
-    mutation SubmitMutation($userId: String!, $problemName: String!, $files: [FileInput!]!) {
-      submit(userId: $userId, problemName: $problemName, files: $files) {
-        id
+    mutation SubmitMutation($userId: String!, $problemName: ProblemName!, $files: [FileInput!]!) {
+      user(id: $userId) {
+        problem(name: $problemName) {
+          submit(files: $files) {
+            id
+          }
+        }
       }
     }
   `;
