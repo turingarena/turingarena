@@ -7,12 +7,13 @@ import { ContestQueryService } from './contest-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import {
   ContestQuery_contestView_problems as ContestProblem,
-  ContestQuery_contestView_problems_material_scorables as Scorable,
+  ContestQuery_contestView_problems_material_awards as Award,
 } from './__generated__/ContestQuery';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { getAuth, Auth, setAuth } from './auth';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { scoreRanges } from './problem-material';
 
 
 @Component({
@@ -59,22 +60,20 @@ export class AppComponent {
       const { contestView: { startTime, endTime, problems } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
-        const { scorables } = problem.material;
-
         if (problem.scores === null) { return; }
 
-        const getScorableState = (scorable: Scorable) => problem.scores.find((s) => s.scorableId === scorable.name) || {
+        const getAwardState = ({ name }) => problem.scores.find((s) => s.scorableId === name) || {
           score: 0,
         };
 
         return {
-          getScorableState,
-          score: scorables
-            .map(getScorableState)
-            .map((scorable) => scorable && scorable.score || 0)
+          getAwardState,
+          score: scoreRanges(problem)
+            .map(getAwardState)
+            .map((award) => award && award.score || 0)
             .reduce((a, b) => a + b, 0),
-          maxScore: scorables.map(s => s.range.max).reduce((a, b) => a + b, 0),
-          precision: scorables.map(s => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
+          maxScore: scoreRanges(problem).map((s) => s.range.max).reduce((a, b) => a + b, 0),
+          precision: scoreRanges(problem).map((s) => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
         };
       };
 

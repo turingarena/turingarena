@@ -10,26 +10,33 @@
             <thead class="submission_table_header">
               <tr>
                 <th scope="col" rowspan="3">Submission</th>
-                <th scope="col" [colSpan]="problem.material.scorables.length">Score</th>
+                <th scope="col" [colSpan]="problem.material.awards.length">Score</th>
                 <th scope="col" rowspan="2">Total score</th>
               </tr>
               <tr>
-                <th *ngFor="let scorable of problem.material.scorables">
-                  {{ scorable.title[0].value }}
+                <th *ngFor="let award of problem.material.awards">
+                  {{ award.title[0].value }}
                 </th>
               </tr>
               <tr>
-                <ng-container *ngFor="let scorable of problem.material.scorables">
-                  <th *ngIf="problemState.scorable(scorable) as state" class="submission_best_score score"
-                    [class.score_zero]="state.score <= 0"
-                    [class.score_partial]="0 < state.score && state.score < scorable.range.max"
-                    [class.score_full]="scorable.range.max <= state.score">
-                    <span>
-                      {{ state.score.toFixed(scorable.precision) }}
-                    </span>/<span>
-                      {{ scorable.range.max.toFixed(scorable.precision) }}
-                    </span>
-                  </th>
+                <ng-container *ngFor="let award of problem.material.awards">
+                  <ng-container *ngIf="award.content.range as range">
+                    <th *ngIf="problemState.award(award) as state" class="submission_best_score score"
+                      [class.score_zero]="state.score <= 0"
+                      [class.score_partial]="0 < state.score && state.score < range.max"
+                      [class.score_full]="range.max <= state.score">
+                      <span>
+                        {{ state.score.toFixed(award.precision) }}
+                      </span>/<span>
+                        {{ range.max.toFixed(award.precision) }}
+                      </span>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="!award.content.range">
+                    <th>
+                      Badge (todo)
+                    </th>
+                  </ng-container>
                 </ng-container>
                 <th class="submission_best_total_score score" [class.score_zero]="getProblemState(problem).score <= 0"
                   [class.score_partial]="0 < getProblemState(problem).score && getProblemState(problem).score < getProblemState(problem).maxScore"
@@ -54,17 +61,24 @@
                   </td>
                   <ng-container *ngIf="submission.status === 'SUCCESS'">
                     <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
-                      <ng-container *ngFor="let scorable of problem.material.scorables">
-                        <td *ngIf="submissionState.scorable(scorable) as state" class="submission_score score"
-                          [class.score_zero]="state.score <= 0"
-                          [class.score_partial]="0 < state.score && state.score < scorable.range.max"
-                          [class.score_full]="scorable.range.max <= state.score">
-                          <span class="submission_score">
-                            {{ state.score.toFixed(scorable.range.precision) }}
-                          </span>/<span class="submission_max_score">
-                            {{ scorable.range.max.toFixed(scorable.range.precision) }}
-                          </span>
-                        </td>
+                      <ng-container *ngFor="let award of problem.material.awards">
+                        <ng-container *ngIf="award.content.range as range">
+                          <td *ngIf="submissionState.award(award) as state" class="submission_score score"
+                            [class.score_zero]="state.score <= 0"
+                            [class.score_partial]="0 < state.score && state.score < range.max"
+                            [class.score_full]="range.max <= state.score">
+                            <span class="submission_score">
+                              {{ state.score.toFixed(range.precision) }}
+                            </span>/<span class="submission_max_score">
+                              {{ range.max.toFixed(range.precision) }}
+                            </span>
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="!award.content.range">
+                          <td>
+                            Badge (todo)
+                          </td>
+                        </ng-container>
                       </ng-container>
                       <td class="submission_total_score score" [class.score_zero]="submissionState.score <= 0"
                         [class.score_partial]="0 < submissionState.score && submissionState.score < problemState.maxScore"
@@ -78,7 +92,7 @@
                     </ng-container>
                   </ng-container>
                   <ng-container *ngIf="submission.status === 'PENDING'">
-                    <td [colSpan]="problem.material.scorables.length + 1">Evaluating...</td>
+                    <td [colSpan]="problem.material.awards.length + 1">Evaluating...</td>
                   </ng-container>
                 </ng-container>
               </tr>

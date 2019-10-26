@@ -11,7 +11,8 @@ import {
   SubmissionListQuery_contestView_problem_submissions as Submission,
   SubmissionListQuery_contestView_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
-import { ContestQuery_contestView_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
+import { ContestQuery_contestView_problems_material_awards as Award } from '../__generated__/ContestQuery';
+import { scoreRanges } from '../problem-material';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -47,25 +48,25 @@ export class SubmissionListDialogComponent implements OnInit {
 
   getSubmissionState(problem: Problem, submission: Submission) {
     return {
-      score: problem.material.scorables
-        .map((scorable) => submission.scores.find((s) => s.scorableId === scorable.name))
+      score: problem.material.awards
+        .map((award) => submission.scores.find((s) => s.scorableId === award.name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
-      scorable(scorable: Scorable) {
-        return submission.scores.find((s) => s.scorableId === scorable.name) || { score: 0 }
+      award(award: Award) {
+        return submission.scores.find((s) => s.scorableId === award.name) || { score: 0 }
       },
     };
   }
 
   getProblemState(problem: Problem) {
     return {
-      scorable(scorable: Scorable) {
-        return problem.scores.find((s) => s.scorableId === scorable.name) || { score: 0 };
+      award(award: Award) {
+        return problem.scores.find((s) => s.scorableId === award.name) || { score: 0 };
       },
-      maxScore: problem.material.scorables.map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
-      precision: problem.material.scorables.map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
-      score: problem.material.scorables
-        .map((scorable) => problem.scores.find((s) => s.scorableId === scorable.name))
+      maxScore: scoreRanges(problem).map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
+      precision: scoreRanges(problem).map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
+      score: scoreRanges(problem)
+        .map(({ name }) => problem.scores.find((s) => s.scorableId === name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
     };

@@ -90,16 +90,16 @@
                       (click)="openSubmissionList(problem); $event.preventDefault()">explore
                       submissions</a>)
                   </span> | <span class="task_best_scores_label">Score breakdown: </span>
-                  <ng-container *ngFor="let scorable of problem.material.scorables">
-                    <ng-container *ngIf="state.getProblemState(problem).getScorableState(scorable) as curScore">
-                      <ng-container *ngIf="scorable.range.max as maxScore">
+                  <ng-container *ngFor="let award of problem.material.awards">
+                    <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as curScore">
+                      <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
-                          {{scorable.title[0].value}}: <span class="badge badge-info">{{maxScore.toFixed(scorable.range.precision)}} pts</span>
+                          {{award.title[0].value}}: <span class="badge badge-info">{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
-                        <span [ngbTooltip]="tipContent" class="scorable_badge" [class.score_zero]="curScore.score <= 0"
-                          [class.score_partial]="0 < curScore.score && curScore.score < maxScore"
-                          [class.score_full]="maxScore <= curScore.score">
-                          {{ curScore.score.toFixed(scorable.range.precision) }}
+                        <span [ngbTooltip]="tipContent" class="award_badge" [class.score_zero]="curScore.score <= 0"
+                          [class.score_partial]="0 < curScore.score && curScore.score < range.max"
+                          [class.score_full]="range.max <= curScore.score">
+                          {{ curScore.score.toFixed(range.precision) }}
                         </span>
                       </ng-container>
                     </ng-container>

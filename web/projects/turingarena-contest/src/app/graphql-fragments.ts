@@ -39,14 +39,19 @@ export const problemMaterialFragment = gql`
           }
         }
       }
-      scorables {
+      awards {
         name
         title {
           value
         }
-        range {
-          precision
-          max
+        content {
+          __typename
+          ... on ScoreAwardContent {
+            range {
+              precision
+              max
+            }
+          }
         }
       }
       feedback {
