@@ -59,6 +59,21 @@ impl User {
             .collect();
         Ok(Some(problems))
     }
+
+    /// Title of the contest, as shown to the user
+    fn contest_title(&self, ctx: &Context) -> FieldResult<String> {
+        Ok(config::current_config(&ctx.contest.connect_db()?)?.contest_title)
+    }
+
+    /// Start time of the user participation, as RFC3339 date
+    fn start_time(&self, ctx: &Context) -> FieldResult<String> {
+        Ok(config::current_config(&ctx.contest.connect_db()?)?.start_time)
+    }
+
+    /// End time of the user participation, as RFC3339 date
+    fn end_time(&self, ctx: &Context) -> FieldResult<String> {
+        Ok(config::current_config(&ctx.contest.connect_db()?)?.end_time)
+    }
 }
 
 /// Find a user from his token

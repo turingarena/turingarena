@@ -2,8 +2,8 @@ use juniper::{FieldError, FieldResult};
 
 use crate::*;
 use std::path::{Path, PathBuf};
-use user::UserId;
 use turingarena::problem::ProblemName;
+use user::UserId;
 
 #[derive(Clone)]
 pub struct Contest {
@@ -50,8 +50,7 @@ impl Contest {
 
     pub fn delete_user(&self, id: &str) {
         let conn = self.connect_db().expect("cannot connect to database");
-        user::delete(&conn, UserId(id.to_owned()))
-            .expect("Error deleting user from db");
+        user::delete(&conn, UserId(id.to_owned())).expect("Error deleting user from db");
     }
 
     pub fn add_problem(&self, name: &str, path: &Path) {
@@ -101,13 +100,13 @@ impl ContestQueries {
         )?)
     }
 
-    /// Get the contest configuration
-    fn config(&self, ctx: &Context) -> FieldResult<config::Config> {
-        Ok(config::current_config(&ctx.contest.connect_db()?)?)
-    }
-
     /// Authenticate a user, generating a JWT authentication token
     fn auth(&self, ctx: &Context, token: String) -> FieldResult<Option<UserToken>> {
         Ok(auth::auth(&ctx.contest.connect_db()?, &token, &ctx.secret)?)
+    }
+
+    /// Current time on the server as RFC3339 date
+    fn server_time(&self) -> String {
+        chrono::Local::now().to_rfc3339()
     }
 }

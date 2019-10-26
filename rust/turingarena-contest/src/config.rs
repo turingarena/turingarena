@@ -17,29 +17,6 @@ pub struct Config {
     pub end_time: String,
 }
 
-#[juniper::object]
-impl Config {
-    /// Title of the contest, shown to the users
-    fn contest_title(&self) -> &String {
-        &self.contest_title
-    }
-
-    /// Starting time of the contest, as RFC3339 date
-    fn start_time(&self) -> &String {
-        &self.start_time
-    }
-
-    /// End time of the contest, as RFC3339 date
-    fn end_time(&self) -> &String {
-        &self.end_time
-    }
-
-    /// Current time on the server, as RFC3339 date
-    fn server_time(&self) -> String {
-        chrono::Local::now().to_rfc3339()
-    }
-}
-
 /// Get the current configuration
 pub fn current_config(conn: &SqliteConnection) -> QueryResult<Config> {
     config::table.first(conn)
