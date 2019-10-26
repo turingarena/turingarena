@@ -237,16 +237,16 @@ pub fn query_score_awards_of_user_and_problem(
 ) -> QueryResult<Vec<MaxScoreAward>> {
     diesel::sql_query(
         "
-        SELECT sc.award_id, MAX(sc.score) as score, (
+        SELECT sc.award_name, MAX(sc.score) as score, (
             SELECT s.id
-            FROM submissions s JOIN badge_awards sci ON s.id = sci.submission_id
-            WHERE sci.score = score AND sci.award_id = sc.award_id
+            FROM submissions s JOIN score_awards sci ON s.id = sci.submission_id
+            WHERE sci.score = score AND sci.award_name = sc.award_name
             ORDER BY s.created_at DESC
             LIMIT 1
         ) as submission_id
-        FROM badge_awards sc JOIN submissions s ON sc.submission_id = s.id
+        FROM score_awards sc JOIN submissions s ON sc.submission_id = s.id
         WHERE s.problem_name = ? AND s.user_id = ?
-        GROUP BY sc.award_id
+        GROUP BY sc.award_name
     ",
     )
         .bind::<Text, _>(problem_name)
@@ -262,16 +262,16 @@ pub fn query_badge_awards_of_user_and_problem(
 ) -> QueryResult<Vec<BestBadgeAward>> {
     diesel::sql_query(
         "
-        SELECT sc.award_id, MAX(sc.badge) as badge, (
+        SELECT sc.award_name, MAX(sc.badge) as badge, (
             SELECT s.id
             FROM submissions s JOIN badge_awards sci ON s.id = sci.submission_id
-            WHERE sci.badge = badge AND sci.award_id = sc.award_id
+            WHERE sci.badge = badge AND sci.award_name = sc.award_name
             ORDER BY s.created_at DESC
             LIMIT 1
         ) as submission_id
         FROM badge_awards sc JOIN submissions s ON sc.submission_id = s.id
         WHERE s.problem_name = ? AND s.user_id = ?
-        GROUP BY sc.award_id
+        GROUP BY sc.award_name
     ",
     )
         .bind::<Text, _>(problem_name)
