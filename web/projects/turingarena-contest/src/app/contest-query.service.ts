@@ -11,9 +11,11 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
   document = gql`
     query ContestQuery($userId: String) {
       serverTime
-      user(id: $userId) {
-        id
-        displayName
+      contestView(userId: $userId) {
+        user {
+          id
+          displayName
+        }
         contestTitle
         startTime
         endTime

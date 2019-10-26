@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AppComponent } from '../app.component';
-import { ContestQuery_user_problems_material_submissionForm_fields as Field } from '../__generated__/ContestQuery';
+import { ContestQuery_contestView_problems_material_submissionForm_fields as Field } from '../__generated__/ContestQuery';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SubmitMutationService } from '../submit-mutation.service';
 import { FileInput } from '../../../../../__generated__/globalTypes';

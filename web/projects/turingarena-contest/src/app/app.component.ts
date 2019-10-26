@@ -23,7 +23,7 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  userId: string;
+  userId: string = 'test';
 
   contestQuery = this.contestQueryService.watch({
     userId: this.userId,
@@ -42,7 +42,7 @@ export class AppComponent {
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { user: { startTime, endTime, problems } } = data;
+      const { contestView: { startTime, endTime, problems } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;

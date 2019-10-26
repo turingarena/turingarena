@@ -8,10 +8,10 @@ import { SubmissionQueryService } from '../submission-query.service';
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
-  SubmissionListQuery_user_problem_submissions as Submission,
-  SubmissionListQuery_user_problem as Problem,
+  SubmissionListQuery_contestView_problem_submissions as Submission,
+  SubmissionListQuery_contestView_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
-import { ContestQuery_user_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
+import { ContestQuery_contestView_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
 
 @Component({
   selector: 'app-submission-list-dialog',
