@@ -16,7 +16,7 @@ use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISen
 use task_maker_store::*;
 
 use turingarena::evaluation::{mem::*, record};
-use turingarena::award::Score;
+use turingarena::award::{Score, AwardName};
 use turingarena::submission::mem::Submission;
 
 use turingarena::evaluation::Event;
@@ -120,11 +120,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                     score: Score(score as f64),
                 }),
             }))?;
-            tx.send(Event::Score(ScoreEvent {
-                scorable_id: format!("subtask.{}", subtask),
-                score: Score(score as f64),
-            }))?;
-        }
+        },
         _ => (),
     };
     Ok(())

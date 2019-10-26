@@ -45,10 +45,24 @@ impl Problem {
             .map_err(FieldError::from)
     }
 
-    /// Scorables of the current user (if to be shown)
-    fn scores(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::MaxScore>>> {
+    /// Score awards of the current user (if to be shown)
+    fn scores(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::MaxScoreAward>>> {
         let result = if let Some(UserId(user_id)) = &self.user_id {
-            Some(evaluation::query_scorables_of_user_and_problem(
+            Some(evaluation::query_score_awards_of_user_and_problem(
+                &ctx.connect_db()?,
+                &user_id,
+                &self.data.name,
+            )?)
+        } else {
+            None
+        };
+        Ok(result)
+    }
+
+    /// Badge awards of the current user (if to be shown)
+    fn badges(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::BestBadgeAward>>> {
+        let result = if let Some(UserId(user_id)) = &self.user_id {
+            Some(evaluation::query_badge_awards_of_user_and_problem(
                 &ctx.connect_db()?,
                 &user_id,
                 &self.data.name,

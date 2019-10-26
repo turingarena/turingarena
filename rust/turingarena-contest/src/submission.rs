@@ -155,8 +155,13 @@ impl Submission {
     }
 
     /// Scores of this submission
-    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
-        Ok(evaluation::query_scorables(&ctx.connect_db()?, &self.id)?)
+    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScoreAward>> {
+        Ok(evaluation::query_score_awards(&ctx.connect_db()?, &self.id)?)
+    }
+
+    /// Scores of this submission
+    fn badges(&self, ctx: &Context) -> FieldResult<Vec<evaluation::BadgeAward>> {
+        Ok(evaluation::query_badge_awards(&ctx.connect_db()?, &self.id)?)
     }
 
     /// Evaluation events of this submission

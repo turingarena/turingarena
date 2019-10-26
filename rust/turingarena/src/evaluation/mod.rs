@@ -9,6 +9,7 @@ graphql_derive_union_from_enum! {
     pub enum Event {
         Value(ValueEvent),
         Score(ScoreEvent),
+        Badge(BadgeEvent),
     }
 }
 
@@ -26,10 +27,20 @@ pub struct ValueEvent {
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct ScoreEvent {
     /// key of the record
-    pub scorable_id: String,
+    pub award_name: award::AwardName,
 
     /// value of the record
     pub score: award::Score,
+}
+
+/// Rappresents a key/value record type
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct BadgeEvent {
+    /// key of the record
+    pub award_name: award::AwardName,
+
+    /// value of the record
+    pub badge: bool,
 }
 
 pub mod mem {

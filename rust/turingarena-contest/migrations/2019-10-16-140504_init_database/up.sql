@@ -13,7 +13,7 @@ CREATE TABLE submissions(
     user_id         TEXT NOT NULL REFERENCES users(id),
     problem_name    TEXT NOT NULL REFERENCES problems(name),
     created_at      TEXT NOT NULL, 
-    status          TEXT NOT NULL CHECK(status IN ('PENDING', 'SUCCESS', 'FAILED'))
+    status          TEXT NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED'))
 );
 
 CREATE TABLE submission_files(
@@ -32,11 +32,18 @@ CREATE TABLE evaluation_events(
     PRIMARY KEY (submission_id, serial)
 );
 
-CREATE TABLE scorables(
+CREATE TABLE badge_awards(
     submission_id   TEXT   NOT NULL REFERENCES submissions(id),
-    scorable_id     TEXT   NOT NULL,
+    award_name      TEXT   NOT NULL,
+    badge           BOOLEAN NOT NULL,
+    PRIMARY KEY (submission_id, award_name)
+);
+
+CREATE TABLE score_awards(
+    submission_id   TEXT   NOT NULL REFERENCES submissions(id),
+    award_name      TEXT   NOT NULL,
     score           DOUBLE NOT NULL,
-    PRIMARY KEY (submission_id, scorable_id)
+    PRIMARY KEY (submission_id, award_name)
 );
 
 CREATE TABLE config(

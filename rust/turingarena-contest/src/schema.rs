@@ -1,4 +1,12 @@
 table! {
+    badge_awards (submission_id, award_name) {
+        submission_id -> Text,
+        award_name -> Text,
+        badge -> Bool,
+    }
+}
+
+table! {
     config (id) {
         id -> Integer,
         contest_title -> Text,
@@ -22,9 +30,9 @@ table! {
 }
 
 table! {
-    scorables (submission_id, scorable_id) {
+    score_awards (submission_id, award_name) {
         submission_id -> Text,
-        scorable_id -> Text,
+        award_name -> Text,
         score -> Double,
     }
 }
@@ -57,17 +65,19 @@ table! {
     }
 }
 
+joinable!(badge_awards -> submissions (submission_id));
 joinable!(evaluation_events -> submissions (submission_id));
-joinable!(scorables -> submissions (submission_id));
+joinable!(score_awards -> submissions (submission_id));
 joinable!(submission_files -> submissions (submission_id));
 joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    badge_awards,
     config,
     evaluation_events,
     problems,
-    scorables,
+    score_awards,
     submission_files,
     submissions,
     users,
