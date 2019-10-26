@@ -1,20 +1,16 @@
 import { Component } from '@angular/core';
+import { faCheck, faPaperPlane, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { Auth, getAuth, setAuth } from './auth';
 import { ContestQueryService } from './contest-query.service';
-import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import {
-  ContestQuery_contestView_problems as ContestProblem,
-  ContestQuery_contestView_problems_material_awards as Award,
-} from './__generated__/ContestQuery';
-import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
-import { getAuth, Auth, setAuth } from './auth';
-import { faPaperPlane, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { scoreRanges } from './problem-material';
-
+import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
+import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
+import { ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +20,8 @@ import { scoreRanges } from './problem-material';
 export class AppComponent {
   faPaperPlane = faPaperPlane;
   faCheck = faCheck;
+  faSignInAlt = faSignInAlt;
+  faSignOutAlt = faSignOutAlt;
 
   constructor(
     private contestQueryService: ContestQueryService,
@@ -126,7 +124,7 @@ export class AppComponent {
   }
 
   async openSubmissionList(problem: ContestProblem) {
-    const modalRef = this.modal.open(SubmissionListDialogComponent);
+    const modalRef = this.modal.open(SubmissionListDialogComponent, { size: 'xl' });
     const modal = modalRef.componentInstance;
 
     modal.appComponent = this;

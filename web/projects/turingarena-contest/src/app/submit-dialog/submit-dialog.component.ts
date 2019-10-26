@@ -70,7 +70,7 @@ export class SubmitDialogComponent {
     // FIXME: causes a flicker in main component, investigate
     await this.appComponent.contestQuery.refetch();
 
-    const modalRef = this.modal.open(SubmissionDialogComponent);
+    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
     const modal = modalRef.componentInstance as SubmissionDialogComponent;
 
     modal.setSubmissionQueryRef(this.submissionQueryService.watch({

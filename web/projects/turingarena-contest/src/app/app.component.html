@@ -7,11 +7,17 @@
           </a></h1>
         <ng-container *ngIf="data.contestView.user">
           <span class="user_display_name">{{data.contestView.user.displayName}}</span>
-          <button class="logout" (click)="setAuth(undefined)">Logout</button>
+          <button class="logout" (click)="setAuth(undefined)">
+            <fa-icon [icon]="faSignOutAlt"></fa-icon>
+            Logout
+          </button>
         </ng-container>
         <ng-container *ngIf="!data.contestView.user">
           <span class="user_display_name"></span>
-          <button class="login" (click)="openLoginDialog()">Login</button>
+          <button class="login" (click)="openLoginDialog()">
+            <fa-icon [icon]="faSignInAlt"></fa-icon>
+            Login
+          </button>
         </ng-container>
       </nav>
       <div class="contest_main">
@@ -95,7 +101,7 @@
                       <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
                           {{award.title[0].value}}: <span
-                            class="badge badge-info">{{range.max.toFixed(range.precision)}} pts</span>
+                            class="badge badge-info">+{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
                         <ng-container *ngIf="state.badge > 0">
                           <span [ngbTooltip]="tipContent" class="award_badge"
