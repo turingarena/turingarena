@@ -88,6 +88,11 @@ impl Problem {
             Err(FieldError::from("Must specify a user id"))
         }
     }
+
+    /// Indicates if the user can submit to this problem
+    fn can_submit(&self) -> bool {
+        self.user_id.is_some()
+    }
 }
 
 impl Problem {
