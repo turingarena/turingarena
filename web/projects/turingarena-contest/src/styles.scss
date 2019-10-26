@@ -197,6 +197,7 @@ body {
 
   &.score_zero {
     @extend .badge-light;
+
     border: 1px solid #ccc;
   }
 
@@ -303,11 +304,15 @@ body {
   &.score_full {
     @extend .badge-success;
   }
+
   &.score_partial {
     @extend .badge-warning;
   }
+
   &.score_zero {
-    @extend .badge-danger;
+    @extend .badge-light;
+
+    border: 1px solid #ccc;
   }
 }
 

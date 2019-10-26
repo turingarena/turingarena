@@ -100,8 +100,8 @@
                     <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
                       <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
-                          {{award.title[0].value}}: <span
-                            class="badge badge-info">+{{range.max.toFixed(range.precision)}} pts</span>
+                          {{award.title[0].value}}
+                          <span class="badge badge-info">+{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
                         <ng-container *ngIf="state.badge > 0">
                           <span [ngbTooltip]="tipContent" class="award_badge"
