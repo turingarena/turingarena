@@ -8,7 +8,7 @@ use std::thread;
 use turingarena::evaluation::mem::Evaluation;
 use turingarena::evaluation::Event;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
-use turingarena::score::Score;
+use turingarena::award::Score;
 use turingarena_task_maker::driver::IoiProblemDriver;
 
 /// An evaluation event

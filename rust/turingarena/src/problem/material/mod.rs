@@ -3,7 +3,7 @@
 extern crate juniper;
 extern crate serde;
 
-use crate::{content::*, feedback, score, submission};
+use crate::{content::*, feedback, award, submission};
 use serde::{Deserialize, Serialize};
 
 /// A file that users can download.
@@ -26,8 +26,8 @@ pub struct Material {
     pub attachments: Vec<Attachment>,
     /// Form to show to users, for submitting solutions.
     pub submission_form: submission::form::Form,
-    /// Items of this problem which will receive a numerical score.
-    pub scorables: Vec<score::Scorable>,
+    /// Awards that this problem can assign to submissions.
+    pub awards: Vec<award::Award>,
     /// Template of the feedback to show to users, for a submitted solution.
     pub feedback: feedback::Template,
 }
@@ -36,7 +36,7 @@ pub struct Material {
 mod tests {
     use super::{feedback::table::*, submission::form::*, *};
     use crate::evaluation::record::Key;
-    use score::*;
+    use award::*;
     #[test]
     fn it_works() {
         let language_attr = VariantAttribute {
@@ -92,7 +92,7 @@ mod tests {
                             attributes: vec![language_attr.clone()],
                             value: "Sub-task 1".to_owned(),
                         }],
-                        range: score::Range {
+                        range: award::ScoreRange {
                             precision: 2,
                             max: Score(40.),
                         },
@@ -102,7 +102,7 @@ mod tests {
                             attributes: vec![language_attr.clone()],
                             value: "Sub-task 2".to_owned(),
                         }],
-                        range: score::Range {
+                        range: award::ScoreRange {
                             precision: 2,
                             max: Score(60.),
                         },
@@ -127,7 +127,7 @@ mod tests {
                                 value: "Score".to_owned(),
                             }],
                             content: ColContent::Score(ScoreColContent {
-                                range: score::Range {
+                                range: award::ScoreRange {
                                     precision: 2,
                                     max: Score(100.),
                                 },
@@ -150,7 +150,7 @@ mod tests {
                                     },
                                     Cell {
                                         content: CellContent::Score(ScoreCellContent {
-                                            range: score::Range {
+                                            range: award::ScoreRange {
                                                 precision: 2,
                                                 max: Score(50.),
                                             },
@@ -175,7 +175,7 @@ mod tests {
                                     },
                                     Cell {
                                         content: CellContent::Score(ScoreCellContent {
-                                            range: score::Range {
+                                            range: award::ScoreRange {
                                                 precision: 2,
                                                 max: Score(50.),
                                             },

@@ -1,7 +1,7 @@
 #![doc(include = "README.md")]
 
 pub mod record;
-use crate::score;
+use crate::award;
 use serde::{Deserialize, Serialize};
 
 graphql_derive_union_from_enum! {
@@ -29,7 +29,7 @@ pub struct ScoreEvent {
     pub scorable_id: String,
 
     /// value of the record
-    pub score: score::Score,
+    pub score: award::Score,
 }
 
 pub mod mem {

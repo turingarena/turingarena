@@ -6,7 +6,7 @@ use turingarena::content::*;
 use turingarena::evaluation::record::*;
 use turingarena::feedback::{table::*, *};
 use turingarena::problem::material::*;
-use turingarena::score::*;
+use turingarena::award::*;
 use turingarena::submission::form::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
@@ -45,18 +45,25 @@ fn submission_form() -> Form {
     }
 }
 
-fn scorable_of(subtask: &ioi::SubtaskInfo) -> Scorable {
-    Scorable {
-        name: ScorableName(format!("subtask.{}", subtask.id)),
+fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
+    Award {
+        name: AwardName(format!("subtask.{}", subtask.id)),
         title: vec![TextVariant {
             attributes: vec![],
             value: format!("Subtask {}", subtask.id),
         }],
-        range: Range {
-            // TODO: assuming IOI-like tasks have integer scores
-            precision: 0,
-            max: Score(subtask.max_score),
-        },
+        content: if subtask.max_score > 0.0 {
+            AwardContent::Score(ScoreAwardContent {
+                range: ScoreRange {
+                    // TODO: assuming IOI-like tasks have integer scores
+                    precision: 0,
+                    max: Score(subtask.max_score),
+                },
+            })
+        } else {
+            AwardContent::Badge(BadgeAwardContent)
+        }
+
     }
 }
 
@@ -75,7 +82,7 @@ fn cols() -> Vec<Col> {
                 value: format!("Score"),
             }],
             content: ColContent::Score(ScoreColContent {
-                range: Range {
+                range: ScoreRange {
                     // FIXME: assuming per-test-case score has fixed precision
                     precision: 2,
                     max: Score(1.),
@@ -113,7 +120,7 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
             },
             Cell {
                 content: CellContent::Score(ScoreCellContent {
-                    range: Range {
+                    range: ScoreRange {
                         precision: 2,
                         max: Score(1.),
                     },
@@ -187,11 +194,11 @@ pub fn gen_material(task: &ioi::Task) -> Material {
             .map(attachment_at_path)
             .collect(),
         submission_form: submission_form(),
-        scorables: {
+        awards: {
             subtasks_of(task)
                 .into_iter()
                 .filter(|s| s.max_score > 0.0)
-                .map(scorable_of)
+                .map(award_of)
                 .collect()
         },
         feedback: vec![Section::Table(TableSection {

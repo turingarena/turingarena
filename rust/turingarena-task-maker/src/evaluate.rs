@@ -16,7 +16,7 @@ use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISen
 use task_maker_store::*;
 
 use turingarena::evaluation::{mem::*, record};
-use turingarena::score::Score;
+use turingarena::award::Score;
 use turingarena::submission::mem::Submission;
 
 use turingarena::evaluation::Event;

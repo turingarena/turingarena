@@ -1,6 +1,6 @@
 #![doc(include = "README.md")]
 
-use crate::{content::Text, evaluation::record::Key, score};
+use crate::{content::Text, evaluation::record::Key, award};
 use serde::{Deserialize, Serialize};
 
 /// Feedback section ontaining tabular data.
@@ -90,7 +90,7 @@ graphql_derive_object_from_unit! {
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct ScoreColContent {
     /// Score range that applies to all column cells.
-    pub range: score::Range,
+    pub range: award::ScoreRange,
 }
 
 graphql_derive_union_from_enum! {
@@ -130,7 +130,7 @@ pub struct RowNumberCellContent {
 pub struct ScoreCellContent {
     /// Score range for this cell.
     /// Must be a sub-range of the column score range.
-    pub range: score::Range,
+    pub range: award::ScoreRange,
     /// Reference to the evaluation value containing the score to show in this cell.
     #[graphql(name = "ref")]
     pub r#ref: Key,

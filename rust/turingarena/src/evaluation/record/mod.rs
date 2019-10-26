@@ -2,7 +2,7 @@
 
 extern crate juniper;
 
-use crate::{content, score};
+use crate::{content, award};
 use serde::{Deserialize, Serialize};
 
 /// Wraps a string used to identify a value of a given kind
@@ -25,7 +25,7 @@ graphql_derive_union_from_enum! {
 
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct ScoreValue {
-    pub score: score::Score,
+    pub score: award::Score,
 }
 
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]

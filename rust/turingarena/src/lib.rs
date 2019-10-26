@@ -16,7 +16,7 @@ pub mod feedback;
 pub mod make;
 pub mod problem;
 pub mod rusage;
-pub mod score;
+pub mod award;
 pub mod submission;
 
 extern crate juniper;
