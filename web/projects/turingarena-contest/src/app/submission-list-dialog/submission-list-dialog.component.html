@@ -43,36 +43,43 @@
             </tr>
           </thead>
           <tbody class="submission_table_body">
-            <tr class="submission_row" *ngFor="let submission of problem.submissions">
-              <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
+            <tr class="submission_row" *ngFor="let _ of problem.submissions; index as submissionIndex">
+              <ng-container *ngIf="problem.submissions[problem.submissions.length-submissionIndex-1] as submission">
                 <td>
-                  <app-relative-time [time]="submission.timestamp"></app-relative-time>
+                  <app-relative-time [time]="submission.createdAt"></app-relative-time>
                   <br />
                   <a href="#" (click)="this.openDetail(submission); $event.preventDefault()">
                     details
                   </a>
                 </td>
-                <ng-container *ngFor="let scorable of problem.material.scorables">
-                  <td *ngIf="submissionState.scorable(scorable) as state" class="submission_score score"
-                    [class.score_zero]="state.score <= 0"
-                    [class.score_partial]="0 < state.score && state.score < scorable.range.max"
-                    [class.score_full]="scorable.range.max <= state.score">
-                    <span class="submission_score">
-                      {{ state.score.toFixed(scorable.range.precision) }}
-                    </span>/<span class="submission_max_score">
-                      {{ scorable.range.max.toFixed(scorable.range.precision) }}
-                    </span>
-                  </td>
+                <ng-container *ngIf="submission.status === 'SUCCESS'">
+                  <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
+                    <ng-container *ngFor="let scorable of problem.material.scorables">
+                      <td *ngIf="submissionState.scorable(scorable) as state" class="submission_score score"
+                        [class.score_zero]="state.score <= 0"
+                        [class.score_partial]="0 < state.score && state.score < scorable.range.max"
+                        [class.score_full]="scorable.range.max <= state.score">
+                        <span class="submission_score">
+                          {{ state.score.toFixed(scorable.range.precision) }}
+                        </span>/<span class="submission_max_score">
+                          {{ scorable.range.max.toFixed(scorable.range.precision) }}
+                        </span>
+                      </td>
+                    </ng-container>
+                    <td class="submission_total_score score" [class.score_zero]="submissionState.score <= 0"
+                      [class.score_partial]="0 < submissionState.score && submissionState.score < problemState.maxScore"
+                      [class.score_full]="problemState.maxScore <= submissionState.score">
+                      <span class="submission_total_score">
+                        {{ submissionState.score.toFixed(problemState.precision) }}
+                      </span>/<span class="submission_total_max_score">
+                        {{ problemState.maxScore.toFixed(problemState.precision) }}
+                      </span>
+                    </td>
+                  </ng-container>
                 </ng-container>
-                <td class="submission_total_score score" [class.score_zero]="submissionState.score <= 0"
-                  [class.score_partial]="0 < submissionState.score && submissionState.score < problemState.maxScore"
-                  [class.score_full]="problemState.maxScore <= submissionState.score">
-                  <span class="submission_total_score">
-                    {{ submissionState.score.toFixed(problemState.precision) }}
-                  </span>/<span class="submission_total_max_score">
-                    {{ problemState.maxScore.toFixed(problemState.precision) }}
-                  </span>
-                </td>
+                <ng-container *ngIf="submission.status === 'PENDING'">
+                  <td [colSpan]="problem.material.scorables.length + 1">Evaluating...</td>
+                </ng-container>
               </ng-container>
             </tr>
           </tbody>

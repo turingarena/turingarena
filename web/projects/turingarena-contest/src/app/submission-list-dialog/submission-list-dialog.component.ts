@@ -38,7 +38,10 @@ export class SubmissionListDialogComponent implements OnInit {
     this.submissionListQuery = this.submissionListQueryService.watch({
       userId: 'test', // FIXME
       problemName: this.problemName,
-    });
+    }, {
+        fetchPolicy: 'cache-and-network',
+        pollInterval: 1000,
+      });
   }
 
   getSubmissionState(problem: Problem, submission: Submission) {
