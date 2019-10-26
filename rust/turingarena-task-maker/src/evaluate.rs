@@ -24,7 +24,7 @@ use turingarena::evaluation::Event;
 pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
     let (event_tx, event_rx) = channel();
 
-    let store_path = tempdir::TempDir::new("task-maker").unwrap().into_path();
+    let store_path = task_path.join(".task-maker-files");
     let file_store =
         Arc::new(FileStore::new(store_path.join("store")).expect("Cannot create the file store"));
 
