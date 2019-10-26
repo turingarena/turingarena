@@ -24,11 +24,12 @@ pub fn auth(conn: &SqliteConnection, token: &str, secret: &[u8]) -> FieldResult<
     let user = user::by_token(conn, token);
     let result = if let Ok(user) = user {
         let claims = JwtData {
-            user: user.id,
+            user: user.id.clone(),
             exp: 100_000_000_000_000, // TODO: generate this number as current_time + X seconds
         };
         Some(UserToken {
             token: encode(&Header::default(), &claims, &secret)?,
+            user_id: Some(UserId(user.id)),
         })
     } else {
         None

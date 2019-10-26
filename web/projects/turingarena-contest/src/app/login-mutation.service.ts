@@ -11,6 +11,7 @@ export class LoginMutationService extends Mutation<LoginMutation, LoginMutationV
     mutation LoginMutation($token: String!) {
       auth(token: $token) {
         token
+        userId
       }
     }
   `;

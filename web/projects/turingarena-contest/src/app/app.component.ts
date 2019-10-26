@@ -23,7 +23,18 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  userId: string;
+  get auth(): Auth {
+    try {
+      return JSON.parse(localStorage.getItem('auth')) as Auth;
+    } catch (e) {
+      localStorage.removeItem('userId');
+      return undefined;
+    }
+  }
+
+  get userId() {
+    return this.auth && this.auth.userId;
+  }
 
   contestQuery = this.contestQueryService.watch({
     userId: this.userId,
@@ -31,7 +42,13 @@ export class AppComponent {
       pollInterval: 10000,
     });
 
-  selectedProblemName?: string = undefined;
+  get selectedProblemName() {
+    return localStorage.getItem('selectedProblemName');
+  }
+
+  set selectedProblemName(name: string) {
+    localStorage.setItem('selectedProblemName', name);
+  }
 
   nowObservable = interval(1000).pipe(
     startWith([0]),
@@ -82,8 +99,8 @@ export class AppComponent {
     return duration.toFormat('hh:mm:ss');
   }
 
-  setUserId(id: string) {
-    this.userId = id;
+  setAuth(auth: Auth) {
+    localStorage.setItem('auth', JSON.stringify(auth));
     this.contestQuery.stopPolling();
     this.contestQuery.setVariables({
       userId: this.userId,
@@ -133,4 +150,9 @@ export class AppComponent {
     }
   }
 
+}
+
+export interface Auth {
+  token: string;
+  userId: string;
 }

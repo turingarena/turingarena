@@ -1,5 +1,5 @@
 <ng-container *ngIf="submissionListQuery.valueChanges | async as submissionListResult">
-  <ng-container *ngIf="submissionListResult.data.user.problem as problem">
+  <ng-container *ngIf="submissionListResult.data.contestView.problem as problem">
     <ng-container *ngIf="getProblemState(problem) as problemState">
       <div class="submissions_modal_header">
         Submissions
