@@ -10,7 +10,7 @@ use std::error::Error;
 pub struct JwtToken(pub String);
 
 /// Structure that will be encoded in the JWT
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct JwtData {
     /// Name of the user
     pub user: String,

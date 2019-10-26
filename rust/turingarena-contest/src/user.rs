@@ -29,18 +29,18 @@ pub struct UserId(pub String);
 impl User {
     /// ID of this user. Should never be shown to any (non-admin) user.
     fn id(&self) -> UserId {
-        return UserId(self.id.clone());
+        UserId(self.id.clone())
     }
 
     /// Name of this user to be shown to them or other users.
     fn display_name(&self) -> String {
-        return self.display_name.clone();
+        self.display_name.clone()
     }
 
     /// A problem that the user can see
     fn problem(&self, ctx: &Context, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
-        let data = problem::by_name(&ctx.contest.connect_db()?, name)?;
+        let data = problem::by_name(&ctx.connect_db()?, name)?;
         Ok(Problem {
             data,
             user_id: Some(UserId(self.id.clone())),
@@ -50,7 +50,7 @@ impl User {
     /// List of problems that the user can see
     fn problems(&self, ctx: &Context) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
-        let problems = problem::all(&ctx.contest.connect_db()?)?
+        let problems = problem::all(&ctx.connect_db()?)?
             .into_iter()
             .map(|p| Problem {
                 data: p,
@@ -62,17 +62,17 @@ impl User {
 
     /// Title of the contest, as shown to the user
     fn contest_title(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.contest.connect_db()?)?.contest_title)
+        Ok(config::current_config(&ctx.connect_db()?)?.contest_title)
     }
 
     /// Start time of the user participation, as RFC3339 date
     fn start_time(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.contest.connect_db()?)?.start_time)
+        Ok(config::current_config(&ctx.connect_db()?)?.start_time)
     }
 
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.contest.connect_db()?)?.end_time)
+        Ok(config::current_config(&ctx.connect_db()?)?.end_time)
     }
 }
 

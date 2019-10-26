@@ -47,13 +47,14 @@ fn post_graphql_handler(
     auth: Authorization,
     context: State<Context>,
 ) -> juniper_rocket::GraphQLResponse {
-    let jwt_data = auth
-        .0
-        .map(|token| match auth::validate(&token, &context.secret) {
-            Ok(claims) => claims,
-            Err(_) => panic!("Invalid token"),
-        });
-    let context = context.with_jwt_data(jwt_data);
+    let claims = context.secret.as_ref().and_then(|secret| {
+        auth.0
+            .and_then(|token| match auth::validate(&token, secret) {
+                Ok(claims) => Some(claims),
+                Err(_) => panic!("Invalid token"),
+            })
+    });
+    let context = context.clone().with_jwt_data(claims);
     request.execute(&schema, &context)
 }
 
@@ -92,41 +93,17 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-pub fn generate_schema() {
-    let contest = Contest {
-        database_url: PathBuf::from("/tmp/db.sqlite3"),
-        problems_dir: PathBuf::from("/tmp"),
-    };
+pub fn generate_schema(context: Context) {
     let (schema, _errors) = juniper::introspect(
         &Schema::new(contest::ContestQueries {}, contest::ContestQueries {}),
-        &Context {
-            skip_auth: false,
-            jwt_data: None,
-            secret: vec![],
-            contest,
-        },
+        &context,
         juniper::IntrospectionFormat::All,
     )
     .unwrap();
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
 
-pub fn run_server(
-    host: String,
-    port: u16,
-    skip_auth: bool,
-    secret_key: Option<String>,
-    contest: Contest,
-) {
-    let secret = if skip_auth {
-        eprintln!("WARNING: Skipping all authentication! Use only for debugging");
-        Vec::new()
-    } else if secret_key == None {
-        eprintln!("ERROR: You must provide a secret key OR specify --skip-auth");
-        return;
-    } else {
-        secret_key.unwrap().as_bytes().to_owned()
-    };
+pub fn run_server(host: String, port: u16, context: Context) {
     let config = rocket::Config::build(rocket::config::Environment::active().unwrap())
         .port(port)
         .address(host)
@@ -138,12 +115,7 @@ pub fn run_server(
             contest::ContestQueries {},
             contest::ContestQueries {},
         ))
-        .manage(Context {
-            secret,
-            skip_auth,
-            jwt_data: None,
-            contest,
-        })
+        .manage(context)
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);
         }))

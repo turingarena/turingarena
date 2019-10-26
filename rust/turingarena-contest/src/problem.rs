@@ -51,7 +51,7 @@ impl Problem {
     fn scores(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::MaxScore>>> {
         let result = if let Some(UserId(user_id)) = &self.user_id {
             Some(evaluation::query_scorables_of_user_and_problem(
-                &ctx.contest.connect_db()?,
+                &ctx.connect_db()?,
                 &user_id,
                 &self.data.name,
             )?)
@@ -65,7 +65,7 @@ impl Problem {
     fn submissions(&self, ctx: &Context) -> FieldResult<Option<Vec<submission::Submission>>> {
         let result = if let Some(UserId(user_id)) = &self.user_id {
             Some(submission::of_user_and_problem(
-                &ctx.contest.connect_db()?,
+                &ctx.connect_db()?,
                 &user_id,
                 &self.data.name,
             )?)
@@ -83,8 +83,8 @@ impl Problem {
     ) -> FieldResult<submission::Submission> {
         if let Some(UserId(user_id)) = &self.user_id {
             let submission =
-                submission::insert(&ctx.contest.connect_db()?, &user_id, &self.data.name, files)?;
-            evaluation::evaluate(self.pack(), &submission, ctx.contest.connect_db()?)?;
+                submission::insert(&ctx.connect_db()?, &user_id, &self.data.name, files)?;
+            evaluation::evaluate(self.pack(), &submission, ctx.connect_db()?)?;
             Ok(submission)
         } else {
             Err(FieldError::from("Must specify a user id"))

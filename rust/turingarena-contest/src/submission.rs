@@ -146,7 +146,7 @@ impl Submission {
 
     /// List of files of this submission
     fn files(&self, ctx: &Context) -> FieldResult<Vec<SubmissionFile>> {
-        Ok(submission_files(&ctx.contest.connect_db()?, &self.id)?)
+        Ok(submission_files(&ctx.connect_db()?, &self.id)?)
     }
 
     /// Submission status
@@ -156,18 +156,12 @@ impl Submission {
 
     /// Scores of this submission
     fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScorableResult>> {
-        Ok(evaluation::query_scorables(
-            &ctx.contest.connect_db()?,
-            &self.id,
-        )?)
+        Ok(evaluation::query_scorables(&ctx.connect_db()?, &self.id)?)
     }
 
     /// Evaluation events of this submission
     fn evaluation_events(&self, ctx: &Context) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
-        Ok(evaluation::query_events(
-            &ctx.contest.connect_db()?,
-            &self.id,
-        )?)
+        Ok(evaluation::query_events(&ctx.connect_db()?, &self.id)?)
     }
 }
 
