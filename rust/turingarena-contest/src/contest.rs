@@ -17,18 +17,10 @@ pub struct ContestQueries {}
 #[juniper::object(Context = Context)]
 impl ContestQueries {
     /// Get the view of a contest
-    fn contest_view(&self, ctx: &Context, user_id: Option<String>) -> FieldResult<ContestView> {
+    fn contest_view(&self, ctx: &Context, user_id: Option<UserId>) -> FieldResult<ContestView> {
         ctx.authorize_user(&user_id)?;
-        let id = if let Some(id) = &user_id {
-            id
-        } else if let Some(ctx) = &ctx.jwt_data {
-            &ctx.user
-        } else {
-            return Err(FieldError::from("invalid authorization token"));
-        };
-        let user_id = user::UserId(id.to_owned());
         Ok(ContestView {
-            user_id: Some(user_id),
+            user_id,
         })
     }
 
