@@ -12,7 +12,7 @@ import {
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { getAuth, Auth, setAuth } from './auth';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { scoreRanges } from './problem-material';
 
 
@@ -23,6 +23,7 @@ import { scoreRanges } from './problem-material';
 })
 export class AppComponent {
   faPaperPlane = faPaperPlane;
+  faCheck = faCheck;
 
   constructor(
     private contestQueryService: ContestQueryService,
@@ -62,8 +63,13 @@ export class AppComponent {
       const getProblemState = (problem: ContestProblem) => {
         if (problem.scores === null) { return; }
 
-        const getAwardState = ({ name }) => problem.scores.find((s) => s.awardName === name) || {
-          score: 0,
+        const getAwardState = ({ name }) => {
+          const scoreState = problem.scores.find((s) => s.awardName === name);
+          const badgeState = problem.badges.find((s) => s.awardName === name);
+          return {
+            score: scoreState ? scoreState.score : 0,
+            badge: badgeState ? badgeState.badge : false,
+          };
         };
 
         return {

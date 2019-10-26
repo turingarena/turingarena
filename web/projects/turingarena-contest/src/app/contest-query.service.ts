@@ -29,6 +29,10 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
             awardName
             score
           }
+          badges {
+            awardName
+            badge
+          }
           ...ProblemMaterialFragment
         }
       }

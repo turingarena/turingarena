@@ -91,25 +91,42 @@
                       submissions</a>)
                   </span> | <span class="task_best_scores_label">Score breakdown: </span>
                   <ng-container *ngFor="let award of problem.material.awards">
-                    <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as curScore">
+                    <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
                       <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
                           {{award.title[0].value}}: <span
                             class="badge badge-info">{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
-                        <span [ngbTooltip]="tipContent" class="award_badge" [class.score_zero]="curScore.score <= 0"
-                          [class.score_partial]="0 < curScore.score && curScore.score < range.max"
-                          [class.score_full]="range.max <= curScore.score">
-                          {{ curScore.score.toFixed(range.precision) }}
-                        </span>
+                        <ng-container *ngIf="state.badge > 0">
+                          <span [ngbTooltip]="tipContent" class="award_badge"
+                            [class.score_partial]="0 < state.score && state.score < range.max"
+                            [class.score_full]="range.max <= state.score">
+                            {{ state.score.toFixed(range.precision) }}
+                          </span>
+                        </ng-container>
+                        <ng-container *ngIf="state.badge <= 0">
+                          <span [ngbTooltip]="tipContent" class="award_badge score_zero">
+                            <!-- cross mark -->
+                            &#x2717;
+                          </span>
+                        </ng-container>
                       </ng-container>
                       <ng-container *ngIf="!award.content.range">
                         <ng-template #tipContent>
                           {{award.title[0].value}}
                         </ng-template>
-                        <span [ngbTooltip]="tipContent" class="award_badge">
-                          Badge (todo)
-                        </span>
+                        <ng-container *ngIf="state.badge">
+                          <span [ngbTooltip]="tipContent" class="award_badge score_full">
+                            <!-- check mark -->
+                            &#x2713;
+                          </span>
+                        </ng-container>
+                        <ng-container *ngIf="!state.badge">
+                          <span [ngbTooltip]="tipContent" class="award_badge score_zero">
+                            <!-- cross mark -->
+                            &#x2717;
+                          </span>
+                        </ng-container>
                       </ng-container>
                     </ng-container>
                   </ng-container>

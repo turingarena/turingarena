@@ -21,6 +21,11 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
             score
             submissionId
           }
+          badges {
+            awardName
+            badge
+            submissionId
+          }
           submissions {
             id
             createdAt
@@ -34,6 +39,10 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
             scores {
               awardName
               score
+            }
+            badges {
+              awardName
+              badge
             }
           }
           ...ProblemMaterialFragment
