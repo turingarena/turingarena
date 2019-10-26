@@ -1,14 +1,16 @@
 use juniper::{FieldError, FieldResult};
 
 use crate::*;
-use user::User;
 use problem::Problem;
+use user::User;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
 pub struct UserToken {
     /// The user token encoded as a JWT
     pub token: String,
+    /// The ID of the user associated with the given credentials, if any
+    pub user_id: Option<UserId>,
 }
 
 /// dummy structure to do GraphQL queries to the contest
@@ -19,9 +21,7 @@ impl ContestQueries {
     /// Get the view of a contest
     fn contest_view(&self, ctx: &Context, user_id: Option<UserId>) -> FieldResult<ContestView> {
         ctx.authorize_user(&user_id)?;
-        Ok(ContestView {
-            user_id,
-        })
+        Ok(ContestView { user_id })
     }
 
     /// Get the submission with the specified id
