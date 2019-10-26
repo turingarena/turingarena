@@ -102,6 +102,7 @@ export class AppComponent {
   setAuth(auth: Auth) {
     setAuth(auth);
     this.contestQuery.stopPolling();
+    this.contestQuery.resetLastResults();
     this.contestQuery.setVariables({
       userId: this.userId,
     });
