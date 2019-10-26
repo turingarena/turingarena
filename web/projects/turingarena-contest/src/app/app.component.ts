@@ -23,7 +23,7 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  userId = 'test';
+  userId: string;
 
   contestQuery = this.contestQueryService.watch({
     userId: this.userId,
@@ -42,6 +42,8 @@ export class AppComponent {
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
 
+        if (problem.scores === null) { return; }
+
         const getScorableState = (scorable: Scorable) => problem.scores.find((s) => s.scorableId === scorable.name) || {
           score: 0,
         };
@@ -57,7 +59,7 @@ export class AppComponent {
         };
       };
 
-      const problemsState = problems.map(getProblemState);
+      const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
 
       return {
         remainingTime: interval(1000).pipe(
