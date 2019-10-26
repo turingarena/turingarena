@@ -33,9 +33,8 @@ export class LoginDialogComponent implements OnInit {
       // FIXME
       alert('Login failed');
     } else {
-      // FIXME
-      const userId = 'test';
-      this.appComponent.setUserId(userId);
+      const { token, userId } = data.auth;
+      this.appComponent.setAuth({ token, userId });
 
       this.activeModal.close();
     }

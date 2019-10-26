@@ -23,13 +23,17 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
-  get userId() {
+  get auth(): Auth {
     try {
-      return JSON.parse(localStorage.getItem('userId')) as string;
+      return JSON.parse(localStorage.getItem('auth')) as Auth;
     } catch (e) {
       localStorage.removeItem('userId');
       return undefined;
     }
+  }
+
+  get userId() {
+    return this.auth && this.auth.userId;
   }
 
   contestQuery = this.contestQueryService.watch({
@@ -95,8 +99,8 @@ export class AppComponent {
     return duration.toFormat('hh:mm:ss');
   }
 
-  setUserId(id: string) {
-    localStorage.setItem('userId', JSON.stringify(id));
+  setAuth(auth: Auth) {
+    localStorage.setItem('auth', JSON.stringify(auth));
     this.contestQuery.stopPolling();
     this.contestQuery.setVariables({
       userId: this.userId,
@@ -146,4 +150,9 @@ export class AppComponent {
     }
   }
 
+}
+
+export interface Auth {
+  token: string;
+  userId: string;
 }
