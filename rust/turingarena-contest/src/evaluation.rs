@@ -74,7 +74,7 @@ pub struct ScoreAward {
     #[allow(dead_code)]
     submission_id: String,
 
-    /// Id of the scorable
+    /// Name of the award
     award_name: String,
 
     /// Score of the submission
@@ -87,7 +87,7 @@ pub struct BadgeAward {
     #[allow(dead_code)]
     submission_id: String,
 
-    /// Id of the scorable
+    /// Name of the award
     award_name: String,
 
     /// Score of the submission
@@ -123,7 +123,7 @@ impl BadgeAward {
 #[derive(QueryableByName)]
 pub struct MaxScoreAward {
     #[sql_type = "Text"]
-    scorable_id: String,
+    award_name: String,
 
     #[sql_type = "Double"]
     score: f64,
@@ -135,7 +135,7 @@ pub struct MaxScoreAward {
 #[derive(QueryableByName)]
 pub struct BestBadgeAward {
     #[sql_type = "Text"]
-    scorable_id: String,
+    award_name: String,
 
     #[sql_type = "Bool"]
     badge: bool,
@@ -157,9 +157,9 @@ impl MaxScoreAward {
         Score(self.score)
     }
 
-    /// Id of the scorable
-    fn scorable_id(&self) -> &String {
-        &self.scorable_id
+    /// Name of the award
+    fn award_name(&self) -> &String {
+        &self.award_name
     }
 }
 
@@ -176,9 +176,9 @@ impl BestBadgeAward {
         self.badge
     }
 
-    /// Id of the scorable
-    fn scorable_id(&self) -> &String {
-        &self.scorable_id
+    /// Name of the award
+    fn award_name(&self) -> &String {
+        &self.award_name
     }
 }
 
