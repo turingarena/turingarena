@@ -3,10 +3,10 @@
 set -ex
 ( cd easy1/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
 rm -f database.sqlite3
-cargo run -- init-db "Test contest"
+cargo run -- --problems-dir $PWD init-db "Test contest"
 for i in {1..10}; do 
-    cargo run -- add-user "user$i" "User #$i" "user$i"
+    cargo run -- --problems-dir $PWD add-user "user$i" "User #$i" "user$i"
 done
-cargo run -- add-user test Test test
-cargo run -- add-problem easy1
-cargo run -- serve --secret-key secret
+cargo run -- --problems-dir $PWD add-user test Test test
+cargo run -- --problems-dir $PWD add-problem easy1
+cargo run -- --problems-dir $PWD serve --secret-key secret
