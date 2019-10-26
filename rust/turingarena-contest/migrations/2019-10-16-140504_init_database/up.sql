@@ -1,6 +1,5 @@
 CREATE TABLE problems(
-    name            TEXT NOT NULL PRIMARY KEY,
-    path            TEXT NOT NULL
+    name            TEXT NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE users(

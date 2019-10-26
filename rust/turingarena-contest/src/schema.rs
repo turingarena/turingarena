@@ -18,7 +18,6 @@ table! {
 table! {
     problems (name) {
         name -> Text,
-        path -> Text,
     }
 }
 

@@ -5,7 +5,6 @@ extern crate turingarena_task_maker;
 
 use juniper::{FieldError, FieldResult};
 use schema::problems;
-use std::path::Path;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 use turingarena::problem::material::Material;
 use turingarena::problem::ProblemName;
@@ -15,13 +14,11 @@ use user::UserId;
 #[table_name = "problems"]
 struct ProblemDataInput<'a> {
     name: &'a str,
-    path: &'a str,
 }
 
 #[derive(Queryable)]
 pub struct ProblemData {
     name: String,
-    path: String,
 }
 
 /// A problem in the contest
@@ -42,8 +39,8 @@ impl Problem {
     }
 
     /// Material of this problem
-    fn material(&self) -> FieldResult<Material> {
-        turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack())
+    fn material(&self, ctx: &Context) -> FieldResult<Material> {
+        turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack(ctx))
             .map_err(|e| FieldError::from(e))
     }
 
@@ -84,7 +81,7 @@ impl Problem {
         if let Some(UserId(user_id)) = &self.user_id {
             let submission =
                 submission::insert(&ctx.connect_db()?, &user_id, &self.data.name, files)?;
-            evaluation::evaluate(self.pack(), &submission, ctx.connect_db()?)?;
+            evaluation::evaluate(self.pack(ctx), &submission, ctx.connect_db()?)?;
             Ok(submission)
         } else {
             Err(FieldError::from("Must specify a user id"))
@@ -93,9 +90,14 @@ impl Problem {
 }
 
 impl Problem {
+    /// Path of the problem
+    fn path(&self, ctx: &Context) -> PathBuf {
+        ctx.problems_dir.join(&self.data.name)
+    }
+
     /// return the problem pack object
-    fn pack(&self) -> ProblemPack {
-        ProblemPack(std::path::PathBuf::from(&self.data.path))
+    fn pack(&self, ctx: &Context) -> ProblemPack {
+        ProblemPack(std::path::PathBuf::from(&self.path(ctx)))
     }
 }
 
@@ -110,10 +112,9 @@ pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
 }
 
 /// Insert a problem in the database
-pub fn insert(conn: &SqliteConnection, name: ProblemName, path: &Path) -> QueryResult<()> {
+pub fn insert(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
     let problem = ProblemDataInput {
         name: &name.0,
-        path: path.to_str().unwrap(),
     };
     diesel::insert_into(schema::problems::table)
         .values(problem)

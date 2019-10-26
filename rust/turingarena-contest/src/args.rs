@@ -62,8 +62,6 @@ pub enum Command {
     AddProblem {
         /// name of the problem to add
         name: String,
-        /// path of the problem to add
-        path: PathBuf,
     },
     /// removes a problem from the contest database
     DeleteProblem {

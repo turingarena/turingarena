@@ -38,7 +38,7 @@ use args::{Args, Command};
 use diesel::prelude::*;
 use server::{generate_schema, run_server};
 use std::default::Default;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use structopt::StructOpt;
 use user::UserId;
 use turingarena::problem::ProblemName;
@@ -140,12 +140,6 @@ impl Context {
             .expect("Error creating contest configuration in the DB");
     }
 
-    fn problem_rel_path(&self, problem_path: &Path) -> Result<PathBuf, Box<dyn std::error::Error>> {
-        let problems_abs = self.problems_dir.canonicalize()?;
-        let problem_abs = problem_path.canonicalize()?;
-        Ok(problem_abs.strip_prefix(problems_abs)?.to_owned())
-    }
-
     fn add_user(&self, id: &str, display_name: &str, token: &str) {
         let conn = self.connect_db().expect("cannot connect to database");
         user::insert(&conn, UserId(id.to_owned()), display_name, token)
@@ -157,12 +151,9 @@ impl Context {
         user::delete(&conn, UserId(id.to_owned())).expect("Error deleting user from db");
     }
 
-    fn add_problem(&self, name: &str, path: &Path) {
+    fn add_problem(&self, name: &str) {
         let conn = self.connect_db().expect("cannot connect to database");
-        let rel_path = self
-            .problem_rel_path(path)
-            .expect("Problem path is not valid");
-        problem::insert(&conn, ProblemName(name.to_owned()), &rel_path)
+        problem::insert(&conn, ProblemName(name.to_owned()))
             .expect("Error inserting the problem into the db")
     }
 
@@ -221,7 +212,7 @@ fn main() {
             token,
         } => context.add_user(&username, &display_name, &token),
         DeleteUser { username } => context.delete_user(&username),
-        AddProblem { name, path } => context.add_problem(&name, &path),
+        AddProblem { name} => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
     }
 }
