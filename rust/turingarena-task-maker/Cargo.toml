@@ -17,3 +17,4 @@ serde_json = "1.0.40"
 turingarena = { path = "../turingarena" }
 failure = "0.1.5"
 glob = "0.2"
+mime_guess = "2.0.1"

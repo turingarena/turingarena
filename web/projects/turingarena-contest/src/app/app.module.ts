@@ -5,12 +5,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { GraphQLModule } from './graphql.module';
+import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { RelativeTimePipe } from './relative-time.pipe';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
-import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
-import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
+import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
+import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,9 @@ import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
     RelativeTimePipe,
     SubmitDialogComponent,
     SubmissionDialogComponent,
-    BypassSanitizerPipe
+    BypassSanitizerPipe,
+    SubmissionListDialogComponent,
+    LoginDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -34,6 +38,8 @@ import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
   entryComponents: [
     SubmitDialogComponent,
     SubmissionDialogComponent,
+    SubmissionListDialogComponent,
+    LoginDialogComponent,
   ]
 })
 export class AppModule { }
