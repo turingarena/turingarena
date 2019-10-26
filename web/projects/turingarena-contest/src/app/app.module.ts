@@ -12,6 +12,8 @@ import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 
 @NgModule({
   declarations: [
@@ -30,6 +32,7 @@ import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
     HttpClientModule,
     NgxFilesizeModule,
     NgbModule,
+    FontAwesomeModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -76,8 +76,10 @@
             <div class="task_header">
               <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
               <div *ngIf="problem.canSubmit" class="task_submit_container">
-                <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">Submit a
-                  solution</a>
+                <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">
+                  <fa-icon [icon]="faPaperPlane"></fa-icon>
+                  Submit a solution
+                </a>
               </div>
               <div *ngIf="problem.submissions as submissions">
                 <div *ngIf="submissions[submissions.length-1] as lastSubmission" class="task_last_submission_container">

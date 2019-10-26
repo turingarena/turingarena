@@ -1,9 +1,9 @@
 #![doc(include = "README.md")]
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+/// Wraps a memory usage in Bytes
+//#[derive(juniper::GraphQlScalarValue)]
+pub struct MemoryUsage(pub usize);
+
+/// Wraps a time usage in seconds
+//#[derive(juniper::GrapjQLScalarValue)]
+pub struct TimeUsage(pub f64);

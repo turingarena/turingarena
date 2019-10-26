@@ -12,6 +12,8 @@ import {
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { getAuth, Auth, setAuth } from './auth';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+
 
 @Component({
   selector: 'app-root',
@@ -19,6 +21,8 @@ import { getAuth, Auth, setAuth } from './auth';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+  faPaperPlane = faPaperPlane;
+
   constructor(
     private contestQueryService: ContestQueryService,
     private modal: NgbModal,
