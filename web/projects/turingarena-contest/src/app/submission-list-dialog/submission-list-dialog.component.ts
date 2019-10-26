@@ -35,8 +35,9 @@ export class SubmissionListDialogComponent implements OnInit {
   submissionListQuery: QueryRef<SubmissionListQuery, SubmissionListQueryVariables>;
 
   ngOnInit() {
+    const { userId } = this.appComponent;
     this.submissionListQuery = this.submissionListQueryService.watch({
-      userId: 'test', // FIXME
+      userId,
       problemName: this.problemName,
     }, {
         fetchPolicy: 'cache-and-network',
@@ -79,8 +80,8 @@ export class SubmissionListDialogComponent implements OnInit {
     modal.setSubmissionQueryRef(this.submissionQueryService.watch({
       submissionId: submission.id,
     }, {
-      pollInterval: 1000,
-    }));
+        pollInterval: 1000,
+      }));
 
     try {
       await modalRef.result;

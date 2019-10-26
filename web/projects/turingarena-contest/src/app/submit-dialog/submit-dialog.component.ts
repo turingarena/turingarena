@@ -54,9 +54,10 @@ export class SubmitDialogComponent {
 
     console.log(files);
 
+    const { userId } = this.appComponent;
     const { data, errors } = await this.submitMutation.mutate({
       problemName: this.problemName,
-      userId: 'test', // FIXME
+      userId,
       files,
     }).toPromise();
 

@@ -23,8 +23,10 @@ export class AppComponent {
     private modal: NgbModal,
   ) { }
 
+  userId = 'test';
+
   contestQuery = this.contestQueryService.watch({
-    userId: 'test' // FIXME
+    userId: this.userId,
   }, {
       pollInterval: 10000,
     });
@@ -69,6 +71,13 @@ export class AppComponent {
       };
     })
   );
+
+  setUserId(id: string) {
+    this.userId = id;
+    this.contestQuery.refetch({
+      userId: this.userId,
+    });
+  }
 
   async openSubmitDialog() {
     const modalRef = this.modal.open(SubmitDialogComponent);
