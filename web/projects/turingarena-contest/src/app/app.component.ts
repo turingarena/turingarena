@@ -35,7 +35,7 @@ export class AppComponent {
     map(({ data }) => {
       if (data === undefined) { return undefined; }
 
-      const { user: { problems }, config: { startTime, endTime } } = data;
+      const { user: { endTime, problems } } = data;
 
       const getProblemState = (problem: ContestProblem) => {
         const { scorables } = problem.material;
