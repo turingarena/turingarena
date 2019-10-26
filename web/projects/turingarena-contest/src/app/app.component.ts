@@ -12,7 +12,7 @@ import {
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { getAuth, Auth, setAuth } from './auth';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { scoreRanges } from './problem-material';
 
 
@@ -23,6 +23,8 @@ import { scoreRanges } from './problem-material';
 })
 export class AppComponent {
   faPaperPlane = faPaperPlane;
+  faSignInAlt = faSignInAlt;
+  faSignOutAlt = faSignOutAlt;
 
   constructor(
     private contestQueryService: ContestQueryService,
@@ -120,7 +122,7 @@ export class AppComponent {
   }
 
   async openSubmissionList(problem: ContestProblem) {
-    const modalRef = this.modal.open(SubmissionListDialogComponent);
+    const modalRef = this.modal.open(SubmissionListDialogComponent, { size: 'xl' });
     const modal = modalRef.componentInstance;
 
     modal.appComponent = this;

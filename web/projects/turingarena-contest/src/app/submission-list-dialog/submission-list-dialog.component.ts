@@ -73,7 +73,7 @@ export class SubmissionListDialogComponent implements OnInit {
   }
 
   async openDetail(submission: Submission) {
-    const modalRef = this.modal.open(SubmissionDialogComponent);
+    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
     const modal = modalRef.componentInstance;
 
     modal.appComponent = this.appComponent;

@@ -2,8 +2,8 @@
   <ng-container *ngIf="submissionListResult.data as data">
     <ng-container *ngIf="data.contestView.problem as problem">
       <ng-container *ngIf="getProblemState(problem) as problemState">
-        <div class="submissions_modal_header">
-          Submissions
+        <div class="modal-header">
+          <h4 class="modal-title">Submissions</h4>
         </div>
         <div class="submissions_modal_body">
           <table class="submission_table">
