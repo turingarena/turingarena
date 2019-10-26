@@ -1,12 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AppComponent } from '../app.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SubmissionListQueryService } from '../submission-list-query.service';
 import { QueryRef } from 'apollo-angular';
-import { SubmissionListQuery, SubmissionListQueryVariables, SubmissionListQuery_problems, SubmissionListQuery_problems_submissions } from '../__generated__/SubmissionListQuery';
-import { ContestQuery_problems_material, ContestQuery_problems_material_scorables } from '../__generated__/ContestQuery';
+import { AppComponent } from '../app.component';
 import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
+import { SubmissionListQueryService } from '../submission-list-query.service';
 import { SubmissionQueryService } from '../submission-query.service';
+import {
+  SubmissionListQuery,
+  SubmissionListQueryVariables,
+  SubmissionListQuery_user_problems_submissions as Submission,
+} from '../__generated__/SubmissionListQuery';
+import { ContestQuery_user_problems_material_scorables as Scorable } from '../__generated__/ContestQuery';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -35,11 +39,11 @@ export class SubmissionListDialogComponent implements OnInit {
     });
   }
 
-  getState(scorable: ContestQuery_problems_material_scorables, submission: SubmissionListQuery_problems_submissions) {
-    return submission.scorables.find((s) => s.scorableId === scorable.name) || { score: 0 };
+  getState(scorable: Scorable, submission: Submission) {
+    return submission.scores.find((s) => s.scorableId === scorable.name) || { score: 0 };
   }
 
-  async openDetail(submission: SubmissionListQuery_problems_submissions) {
+  async openDetail(submission: Submission) {
     const modalRef = this.modal.open(SubmissionDialogComponent);
     const modal = modalRef.componentInstance;
 

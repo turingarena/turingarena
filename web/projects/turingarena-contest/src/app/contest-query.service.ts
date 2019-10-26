@@ -9,113 +9,115 @@ import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuer
 export class ContestQueryService extends Query<ContestQuery, ContestQueryVariables> {
   document = gql`
     query ContestQuery($userId: String!) {
-      user(id: $userId) {
-        displayName
-      }
       config {
         contestTitle
         startTime
         endTime
+        serverTime
       }
-      problems {
-        name
-        submissions(userId: $userId) {
-          createdAt
-        }
-        scorables(userId: $userId) {
-          scorableId
-          score
-        }
-        material {
-          title {
-            value
+      user(id: $userId) {
+        id
+        displayName
+        problems {
+          name
+          submissions {
+            createdAt
           }
-          statement {
-            name
-            type
-            content {
-              base64
-            }
+          scores {
+            scorableId
+            score
           }
-          attachments {
+          material {
             title {
               value
             }
-            file {
+            statement {
               name
               type
               content {
                 base64
               }
             }
-          }
-          submissionForm {
-            fields {
-              id
+            attachments {
               title {
                 value
               }
-              types {
+              file {
+                name
+                type
+                content {
+                  base64
+                }
+              }
+            }
+            submissionForm {
+              fields {
                 id
                 title {
                   value
                 }
-                extensions
+                types {
+                  id
+                  title {
+                    value
+                  }
+                  extensions
+                }
               }
             }
-          }
-          scorables {
-            name
-            title {
-              value
-            }
-            range {
-              precision
-              max
-            }
-          }
-          feedback {
-            __typename
-            ... on TableSection {
-              caption {
+            scorables {
+              name
+              title {
                 value
               }
-              cols {
-                title {
+              range {
+                precision
+                max
+              }
+            }
+            feedback {
+              __typename
+              ... on TableSection {
+                caption {
                   value
                 }
-                content {
-                  __typename
-                  ... on ScoreColContent {
-                    range {
-                      precision
-                      max
+                cols {
+                  title {
+                    value
+                  }
+                  content {
+                    __typename
+                    ... on ScoreColContent {
+                      range {
+                        precision
+                        max
+                      }
                     }
                   }
                 }
-              }
-              rowGroups {
-                title {
-                  value
-                }
-                rows {
-                  content
-                  cells {
-                    content {
-                      __typename
-                      ... on RowNumberCellContent {
-                        number
-                      }
-                      ... on RowTitleCellContent {
-                        title {
-                          value
+                rowGroups {
+                  title {
+                    value
+                  }
+                  rows {
+                    content
+                    cells {
+                      content {
+                        __typename
+                        ... on RowNumberCellContent {
+                          number
                         }
-                      }
-                      ... on ScoreCellContent {
-                        ref
-                        range {
-                          max
-                          precision
+                        ... on RowTitleCellContent {
+                          title {
+                            value
+                          }
+                        }
+                        ... on ScoreCellContent {
+                          ref
+                          range {
+                            max
+                            precision
+                          }
                         }
                       }
                     }

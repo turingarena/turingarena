@@ -9,20 +9,22 @@ import { SubmissionQuery, SubmissionQueryVariables } from './__generated__/Submi
 export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQueryVariables> {
   document = gql`
     query SubmissionQuery($submissionId: String!) {
-      events(submissionId: $submissionId) {
-        event {
-          __typename
-          ... on ValueEvent {
-            key
-            value {
-              __typename
-              ... on TextValue {
-                text {
-                  value
+      submission(submissionId: $submissionId) {
+        evaluationEvents {
+          event {
+            __typename
+            ... on ValueEvent {
+              key
+              value {
+                __typename
+                ... on TextValue {
+                  text {
+                    value
+                  }
                 }
-              }
-              ... on ScoreValue {
-                score
+                ... on ScoreValue {
+                  score
+                }
               }
             }
           }
