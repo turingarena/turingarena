@@ -23,6 +23,14 @@
   @extend .table;
 }
 
+.evaluation_table_header {
+  text-align: center;
+}
+
+.evaluation_group {
+  @extend .thead-light;
+}
+
 .message_cell {
   font-size: small;
 }
@@ -41,4 +49,19 @@
 
 .row_status.skip {
   @extend .table-secondary;
+}
+
+.score_cell {
+  &.score_zero {
+    @extend .table-danger;
+  }
+  &.score_partial {
+    @extend .table-warning;
+  }
+  &.score_full {
+    @extend .table-success;
+  }
+  &.score_zero.score_full {
+    @extend .table-light;
+  }
 }
