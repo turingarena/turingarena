@@ -68,6 +68,7 @@ graphql_derive_union_from_enum! {
         RowTitle(RowTitleColContent),
         RowNumber(RowNumberColContent),
         Score(ScoreColContent),
+        Message(MessageColContent),
     }
 }
 
@@ -93,6 +94,13 @@ pub struct ScoreColContent {
     pub range: award::ScoreRange,
 }
 
+graphql_derive_object_from_unit! {
+    /// Column of text messages.
+    /// Cells must contain `CellContent::Message` or `CellContent::Missing`.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct MessageColContent;
+}
+
 graphql_derive_union_from_enum! {
     /// Describes the kind of data shown in a cell.
     #[derive(Serialize, Deserialize, Clone)]
@@ -102,6 +110,7 @@ graphql_derive_union_from_enum! {
         RowTitle(RowTitleCellContent),
         RowNumber(RowNumberCellContent),
         Score(ScoreCellContent),
+        Message(MessageCellContent),
     }
 }
 
@@ -132,6 +141,14 @@ pub struct ScoreCellContent {
     /// Must be a sub-range of the column score range.
     pub range: award::ScoreRange,
     /// Reference to the evaluation value containing the score to show in this cell.
+    #[graphql(name = "ref")]
+    pub r#ref: Key,
+}
+
+/// Cell containing a textual message.
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct MessageCellContent {
+    /// Reference to the evaluation value containing the message to show in this cell.
     #[graphql(name = "ref")]
     pub r#ref: Key,
 }

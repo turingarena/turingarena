@@ -2,11 +2,13 @@ extern crate mime_guess;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
+
 use task_maker_format::ioi;
+
 use turingarena::award::*;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
-use turingarena::feedback::{table::*, *};
+use turingarena::feedback::{*, table::*};
 use turingarena::problem::material::*;
 use turingarena::submission::form::*;
 
@@ -98,6 +100,13 @@ fn cols() -> Vec<Col> {
                 },
             }),
         },
+        Col {
+            title: vec![TextVariant {
+                attributes: vec![],
+                value: format!("Message"),
+            }],
+            content: ColContent::Message(MessageColContent),
+        },
     ]
 }
 
@@ -136,11 +145,16 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
                     r#ref: Key(format!("testcase.{}.score", testcase.id)),
                 }),
             },
+            Cell {
+                content: CellContent::Message(MessageCellContent {
+                    r#ref: Key(format!("testcase.{}.message", testcase.id)),
+                })
+            },
         ],
     }
 }
 
-fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item=std::path::PathBuf> {
     std::fs::read_dir(dir_path)
         .expect("unable to read_dir")
         .map(|entry| entry.expect("unable to read_dir").path())

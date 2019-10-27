@@ -109,6 +109,9 @@ export const problemMaterialFragment = gql`
                       precision
                     }
                   }
+                  ... on MessageCellContent {
+                    ref
+                  }
                 }
               }
             }

@@ -56,6 +56,16 @@
                               </td>
                             </ng-container>
                           </ng-container>
+                          <ng-container *ngSwitchCase="'MessageCellContent'">
+                            <ng-container *ngIf="record[cell.content.ref] as value">
+                              <td>
+                                {{ value.text | textVariant }}
+                              </td>
+                            </ng-container>
+                            <ng-container *ngIf="!record[cell.content.ref]">
+                              <td></td>
+                            </ng-container>
+                          </ng-container>
                           <td *ngSwitchDefault="">
                             ?
                           </td>
