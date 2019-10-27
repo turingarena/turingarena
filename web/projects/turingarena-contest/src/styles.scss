@@ -147,16 +147,17 @@ body {
 }
 
 .task_header {
-  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  width: 16em;
   padding: 16px;
   font-size: large;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
   background-color: #f8f9fa;
 }
 
 .task_title {
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   margin: 0 0 0.5rem;
   font-weight: 500;
   line-height: 1.2;
