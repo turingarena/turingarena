@@ -1,0 +1,99 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.topbar {
+  display: flex;
+  background-color: #0275d8;
+  align-items: center;
+  padding: 8px;
+  color: #fff;
+}
+
+.contest-title {
+  display: inline-block;
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem;
+  margin: 0;
+  margin-right: 1rem;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.contest-title > a {
+  color: white;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+.user-display-name,
+.login,
+.logout {
+  margin-right: 1em;
+}
+
+.user-display-name {
+  margin-left: auto;
+}
+
+.user-login,
+.user-logout {
+  @extend .btn, .btn-sm, .btn-light;
+}
+
+.contest-main {
+  flex: 1;
+  display: flex;
+}
+
+.contest-aside {
+  flex: 0 0 auto;
+  padding: 16px;
+  order: -1;
+  width: 16em;
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contest-aside h2 {
+  text-transform: uppercase;
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.contest-aside ol {
+  padding: 0;
+  list-style: none;
+}
+
+.problem-aside {
+  flex: 0 0 auto;
+  padding: 16px;
+  order: -1;
+  width: 14em;
+  background-color: #f8f9fa;
+}
+
+.problem-aside h2 {
+  text-transform: uppercase;
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.problem-aside ol {
+  padding: 0;
+  list-style: none;
+}
+
+.problem-submit {
+  @extend .btn, .btn-block, .btn-success;
+}
+
+.problem-last-submission,
+.problem-submission-list {
+  @extend .btn, .btn-block, .btn-light;
+}

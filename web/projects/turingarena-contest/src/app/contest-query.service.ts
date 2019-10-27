@@ -23,6 +23,7 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
           name
           canSubmit
           submissions {
+            id
             createdAt
           }
           scores {

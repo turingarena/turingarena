@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -11,6 +11,9 @@ import { scoreRanges } from './problem-material';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
+import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
+import { SubmissionListQuery_contestView_problem_submissions as Submission } from './__generated__/SubmissionListQuery';
+import { SubmissionQueryService } from './submission-query.service';
 
 @Component({
   selector: 'app-root',
@@ -24,9 +27,11 @@ export class AppComponent {
   faSignOutAlt = faSignOutAlt;
   faList = faList;
   faFilePdf = faFilePdf;
+  faHistory = faHistory;
 
   constructor(
     private contestQueryService: ContestQueryService,
+    private submissionQueryService: SubmissionQueryService,
     private modal: NgbModal,
   ) { }
 
@@ -137,6 +142,26 @@ export class AppComponent {
       await modalRef.result;
     } catch (e) {
       // dismissed, do nothing
+    }
+  }
+
+  // FIXME: repeated code
+  async openSubmission(submission: Submission) {
+    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
+    const modal = modalRef.componentInstance;
+
+    modal.appComponent = this;
+    modal.problemName = this.selectedProblemName;
+    modal.setSubmissionQueryRef(this.submissionQueryService.watch({
+      submissionId: submission.id,
+    }, {
+        pollInterval: 1000,
+      }));
+
+    try {
+      await modalRef.result;
+    } catch (e) {
+      // No-op
     }
   }
 

@@ -43,12 +43,6 @@ app-root,
 body,
 html {
   flex-direction: column;
-}
-
-app-root,
-.contest_main,
-body,
-html {
   flex: 1 0 100%;
   display: flex;
 }
@@ -65,67 +59,7 @@ body {
   background-color: #fff;
 }
 
-.nav {
-  display: flex;
-  background-color: #0275d8;
-  align-items: center;
-  padding: 8px;
-  color: #fff;
-}
 
-.contest_title {
-  display: inline-block;
-  padding-top: 0.3125rem;
-  padding-bottom: 0.3125rem;
-  margin: 0;
-  margin-right: 1rem;
-  font-size: 1.25rem;
-  font-weight: 400;
-  line-height: inherit;
-  white-space: nowrap;
-}
-
-.contest_title > a {
-  color: white;
-  text-decoration: none;
-  background-color: transparent;
-}
-
-.user_display_name,
-.login,
-.logout {
-  margin-right: 1em;
-}
-
-.user_display_name {
-  margin-left: auto;
-}
-
-.login,
-.logout {
-  @extend .btn, .btn-sm, .btn-light;
-}
-
-.contest_nav {
-  flex: 0 0 auto;
-  padding: 16px;
-  order: -1;
-  width: 16em;
-  background-color: #f8f9fa;
-}
-
-.contest_nav h2 {
-  text-transform: uppercase;
-  font-size: 1.25rem;
-  margin: 0 0 0.5rem;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.contest_nav ol {
-  padding: 0;
-  list-style: none;
-}
 
 .contest_starting_in,
 .contest_ended_by,
@@ -137,13 +71,6 @@ body {
 
 .contest_ended_by {
   @extend .text-danger;
-}
-
-.task_main {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  font-size: large;
 }
 
 .task_header {
@@ -163,17 +90,10 @@ body {
   line-height: 1.2;
 }
 
-.task_submit_container {
-  display: flex;
-  align-items: baseline;
-}
-
-.task_last_submission {
-  font-size: 100%;
-}
 
 .task_submit_start {
   @extend .btn, .btn-success;
+  margin-bottom: 16px;
 }
 
 .task_explore_submissions {

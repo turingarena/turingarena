@@ -11,7 +11,6 @@ import {
   SubmissionListQuery_contestView_problem_submissions as Submission,
   SubmissionListQuery_contestView_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
-import { ContestQuery_contestView_problems_material_awards as Award } from '../__generated__/ContestQuery';
 import { scoreRanges } from '../problem-material';
 
 @Component({
