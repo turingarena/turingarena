@@ -95,7 +95,7 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .unwrap_or("html");
     let content_type = ContentType::from_extension(ext)
         .ok_or(Status::new(400, "Could not get file content type"))?;
-    response::Response::build()
+    Response::build()
         .header(content_type)
         .sized_body(Cursor::new(content))
         .ok()
