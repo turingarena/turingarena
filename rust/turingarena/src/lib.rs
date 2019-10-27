@@ -5,6 +5,7 @@
 mod juniper_ext;
 
 pub mod autoio;
+pub mod award;
 pub mod batch;
 pub mod bios;
 pub mod content;
@@ -16,7 +17,6 @@ pub mod feedback;
 pub mod make;
 pub mod problem;
 pub mod rusage;
-pub mod award;
 pub mod submission;
 
 extern crate juniper;

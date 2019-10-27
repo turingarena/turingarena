@@ -73,4 +73,12 @@ pub enum Command {
         /// Name of the contest
         contest_title: String,
     },
+    ImportContest {
+        /// Path of the contest to import
+        path: PathBuf,
+
+        /// Import format
+        #[structopt(long, short, default_value = "italy_yaml")]
+        format: String,
+    },
 }
