@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { QueryRef } from 'apollo-angular';
 import { AppComponent } from '../app.component';
 import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
@@ -22,6 +22,7 @@ import { scoreRanges } from '../problem-material';
 export class SubmissionListDialogComponent implements OnInit {
 
   constructor(
+    readonly activeModal: NgbActiveModal,
     private modal: NgbModal,
     private submissionListQueryService: SubmissionListQueryService,
     private submissionQueryService: SubmissionQueryService,

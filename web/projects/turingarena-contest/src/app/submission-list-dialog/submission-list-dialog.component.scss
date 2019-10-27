@@ -33,6 +33,10 @@
   @extend .modal-footer;
 }
 
+.submissions_modal_close_button {
+  @extend .btn, .btn-secondary;
+}
+
 .submission_table {
   @extend .table, .table-bordered;
   margin: 0;

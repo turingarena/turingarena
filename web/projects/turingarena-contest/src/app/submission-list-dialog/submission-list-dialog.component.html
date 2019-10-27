@@ -3,20 +3,17 @@
     <ng-container *ngIf="data.contestView.problem as problem">
       <ng-container *ngIf="getProblemState(problem) as problemState">
         <div class="modal-header">
-          <h4 class="modal-title">Submissions</h4>
+          <h4 class="modal-title">Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
         </div>
         <div class="submissions_modal_body">
           <table class="submission_table">
             <thead class="submission_table_header">
               <tr>
-                <th scope="col" rowspan="3">Submission</th>
-                <th scope="col" [colSpan]="problem.material.awards.length">Score</th>
-                <th scope="col" rowspan="2">Total score</th>
-              </tr>
-              <tr>
+                <th scope="col" rowspan="2">Submission time</th>
                 <th *ngFor="let award of problem.material.awards">
                   {{ award.title[0].value }}
                 </th>
+                <th scope="col">Total score</th>
               </tr>
               <tr>
                 <ng-container *ngFor="let award of problem.material.awards">
@@ -100,6 +97,7 @@
           </table>
         </div>
         <div class="submissions_modal_footer">
+          <button (click)="activeModal.close()" class="submissions_modal_close_button">Cancel</button>
         </div>
       </ng-container>
     </ng-container>
