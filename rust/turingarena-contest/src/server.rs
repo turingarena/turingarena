@@ -10,10 +10,8 @@ use std::path::PathBuf;
 
 #[cfg(feature = "webcontent")]
 use ::{
+    rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
     turingarena_contest_webcontent::WebContent,
-    std::ffi::OsStr,
-    std::io::Cursor,
-    rocket::http::ContentType,
 };
 
 struct Authorization(Option<String>);

@@ -1,6 +1,6 @@
 #![doc(include = "README.md")]
 
-use crate::{content::Text, evaluation::record::Key, award};
+use crate::{award, content::Text, evaluation::record::Key};
 use serde::{Deserialize, Serialize};
 
 /// Feedback section ontaining tabular data.

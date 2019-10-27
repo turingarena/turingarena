@@ -1,6 +1,6 @@
 #![doc(include = "README.md")]
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Wraps a memory usage in Bytes
 #[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLScalarValue)]

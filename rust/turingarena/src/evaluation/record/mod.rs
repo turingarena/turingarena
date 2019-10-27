@@ -2,7 +2,7 @@
 
 extern crate juniper;
 
-use crate::{content, award, rusage};
+use crate::{award, content, rusage};
 use serde::{Deserialize, Serialize};
 
 /// Wraps a string used to identify a value of a given kind

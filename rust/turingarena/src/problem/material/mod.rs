@@ -3,7 +3,7 @@
 extern crate juniper;
 extern crate serde;
 
-use crate::{content::*, feedback, award, submission};
+use crate::{award, content::*, feedback, submission};
 use serde::{Deserialize, Serialize};
 
 /// A file that users can download.

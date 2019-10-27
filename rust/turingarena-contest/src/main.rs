@@ -14,22 +14,23 @@ extern crate rocket;
 #[macro_use]
 extern crate serde;
 extern crate serde_json;
+extern crate serde_yaml;
 extern crate structopt;
 #[cfg(test)]
 extern crate tempdir;
 extern crate turingarena;
-#[cfg(feature = "webcontent")]
-extern crate turingarena_contest_webcontent;
 extern crate uuid;
 
-use std::default::Default;
-use std::path::PathBuf;
-
-use diesel::prelude::*;
-use structopt::StructOpt;
+#[cfg(feature = "webcontent")]
+extern crate turingarena_contest_webcontent;
 
 use args::{Args, Command};
+use chrono::{DateTime, Local};
+use diesel::prelude::*;
 use server::{generate_schema, run_server};
+use std::default::Default;
+use std::path::PathBuf;
+use structopt::StructOpt;
 use turingarena::problem::ProblemName;
 use user::UserId;
 
@@ -38,6 +39,7 @@ mod auth;
 mod config;
 mod contest;
 mod evaluation;
+mod formats;
 mod problem;
 mod schema;
 mod server;
@@ -169,6 +171,14 @@ impl Context {
         problem::delete(&conn, ProblemName(name.to_owned()))
             .expect("Error deleting problem from the db");
     }
+
+    fn set_start_time(&self, time: DateTime<Local>) {
+        println!("TODO: set start date {}", time.to_rfc3339());
+    }
+
+    fn set_end_time(&self, time: DateTime<Local>) {
+        println!("TODO: set start date {}", time.to_rfc3339());
+    }
 }
 
 impl juniper::Context for Context {}
@@ -221,5 +231,8 @@ fn main() {
         DeleteUser { username } => context.delete_user(&username),
         AddProblem { name } => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
+        ImportContest { path, format } => {
+            formats::import(&context, &path, &format).expect("Error importing contest");
+        }
     }
 }

@@ -11,17 +11,17 @@ use std::thread;
 use task_maker_cache::Cache;
 use task_maker_dag::CacheMode;
 use task_maker_exec::{executors::LocalExecutor, ExecutorClient};
-use task_maker_format::ui::{UIMessage, UIExecutionStatus};
+use task_maker_format::ui::{UIExecutionStatus, UIMessage};
 use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISender};
 use task_maker_store::*;
 
+use turingarena::award::{AwardName, Score};
 use turingarena::evaluation::{mem::*, record};
-use turingarena::award::{Score, AwardName};
 use turingarena::submission::mem::Submission;
 
-use turingarena::evaluation::Event;
 use turingarena::content::TextVariant;
-use turingarena::rusage::{TimeUsage, MemoryUsage};
+use turingarena::evaluation::Event;
+use turingarena::rusage::{MemoryUsage, TimeUsage};
 
 pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
     let (event_tx, event_rx) = channel();
@@ -118,7 +118,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                     text: vec![TextVariant {
                         value: message,
                         attributes: vec![],
-                    }]
+                    }],
                 }),
             }))?;
         }
@@ -149,9 +149,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
             solution: _,
             status,
         } => {
-            if let UIExecutionStatus::Done {
-                result
-            } = status {
+            if let UIExecutionStatus::Done { result } = status {
                 tx.send(Event::Value(ValueEvent {
                     key: record::Key(format!("testcase.{}.time_usage", testcase)),
                     value: record::Value::TimeUsage(record::TimeUsageValue {

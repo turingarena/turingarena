@@ -1,14 +1,14 @@
-use crate::schema::{evaluation_events, score_awards, badge_awards};
+use crate::schema::{badge_awards, evaluation_events, score_awards};
 use crate::submission::{self, Submission, SubmissionStatus};
 use diesel::prelude::*;
-use diesel::sql_types::{Double, Text, Bool};
+use diesel::sql_types::{Bool, Double, Text};
 use juniper::FieldResult;
 use std::error::Error;
 use std::thread;
+use turingarena::award::{AwardName, Score};
 use turingarena::evaluation::mem::Evaluation;
 use turingarena::evaluation::Event;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
-use turingarena::award::{Score, AwardName};
 use turingarena_task_maker::driver::IoiProblemDriver;
 
 /// An evaluation event
@@ -278,7 +278,6 @@ pub fn query_badge_awards_of_user_and_problem(
         .bind::<Text, _>(user_id)
         .load::<BestBadgeAward>(conn)
 }
-
 
 /// Get the score awards of (user, problem, submission)
 pub fn query_score_awards(
