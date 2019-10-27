@@ -1,9 +1,20 @@
 import gql from 'graphql-tag';
+
+export const textFragment = gql`
+  fragment TextFragment on TextVariant {
+    attributes {
+      key
+      value
+    }
+    value
+  }
+`;
+
 export const problemMaterialFragment = gql`
   fragment ProblemMaterialFragment on Problem {
     material {
       title {
-        value
+        ...TextFragment
       }
       statement {
         name
@@ -14,7 +25,7 @@ export const problemMaterialFragment = gql`
       }
       attachments {
         title {
-          value
+          ...TextFragment
         }
         file {
           name
@@ -28,12 +39,12 @@ export const problemMaterialFragment = gql`
         fields {
           id
           title {
-            value
+            ...TextFragment
           }
           types {
             id
             title {
-              value
+              ...TextFragment
             }
             extensions
           }
@@ -42,7 +53,7 @@ export const problemMaterialFragment = gql`
       awards {
         name
         title {
-          value
+          ...TextFragment
         }
         content {
           __typename
@@ -58,11 +69,11 @@ export const problemMaterialFragment = gql`
         __typename
         ... on TableSection {
           caption {
-            value
+            ...TextFragment
           }
           cols {
             title {
-              value
+              ...TextFragment
             }
             content {
               __typename
@@ -76,7 +87,7 @@ export const problemMaterialFragment = gql`
           }
           rowGroups {
             title {
-              value
+              ...TextFragment
             }
             rows {
               content
@@ -88,7 +99,7 @@ export const problemMaterialFragment = gql`
                   }
                   ... on RowTitleCellContent {
                     title {
-                      value
+                      ...TextFragment
                     }
                   }
                   ... on ScoreCellContent {
@@ -106,4 +117,5 @@ export const problemMaterialFragment = gql`
       }
     }
   }
+  ${textFragment}
 `;

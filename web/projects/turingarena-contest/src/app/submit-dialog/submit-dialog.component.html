@@ -6,7 +6,7 @@
           <div class="submission_form_body">
             <div *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
               <ng-container *ngIf="fieldState(field) as state">
-                <label class="submission_file_label" [for]="field.id + '.file'">{{ field.title[0].value }}</label>
+                <label class="submission_file_label" [for]="field.id + '.file'">{{ field.title | textVariant }}</label>
                 <input class="submission_file_input" [id]="field.id + '.file'" [name]="field.id + '.file'" type="file"
                   (change)="fieldState(field).file = $event.target.files[0]" />
                 <label class="submission_file_choose_button" [for]="field.id + '.file'">Choose file</label>
@@ -16,7 +16,7 @@
                   <dt>Type:</dt>
                   <dd [ngSwitch]="state.typeChoices.type">
                     <ng-container *ngSwitchCase="'oneRecommended'">
-                      {{ state.typeChoices.recommendedType!.title[0].value }}
+                      {{ state.typeChoices.recommendedType!.title | textVariant }}
                       (<a href="#" class="submission_file_type_change"
                         (click)="state.moreTypes = true; $event.preventDefault()">change</a>)
                       <input type="hidden" [name]="field.id + '.type'"
@@ -26,14 +26,14 @@
                       <label *ngFor="let type of state.typeChoices.recommendedTypes!"
                         class="submission_file_type_suggested_option">
                         <input type="radio" [name]="field.id + '.type'" [value]="type.id" />
-                        {{ type.title[0].value }}
+                        {{ type.title | textVariant }}
                       </label>
                       (<a href="#" class="submission_file_type_more_options"
                         (click)="state.moreTypes = true; $event.preventDefault()">more...</a>)
                     </ng-container>
                     <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submission_file_type_select">
                       <option *ngFor="let type of state.typeChoices.allTypes" [value]="type.id">
-                        {{ type.title[0].value }}</option>
+                        {{ type.title | textVariant }}</option>
                     </select>
                   </dd>
                   <dt>Size:</dt>

@@ -15,7 +15,7 @@
               </tr>
               <tr>
                 <th *ngFor="let award of problem.material.awards">
-                  {{ award.title[0].value }}
+                  {{ award.title | textVariant:'short' }}
                 </th>
               </tr>
               <tr>

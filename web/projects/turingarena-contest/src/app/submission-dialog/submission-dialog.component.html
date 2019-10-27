@@ -13,21 +13,21 @@
                   <thead class="evaluation_table_header">
                     <tr>
                       <th [colSpan]="section.cols.length">
-                        {{ section.caption[0].value }}
+                        {{ section.caption | textVariant }}
                       </th>
                     </tr>
                   </thead>
                   <tbody *ngFor="let group of section.rowGroups; index as i" class="evaluation_group">
                     <tr>
                       <th [colSpan]="section.cols.length">
-                        {{ group.title[0].value }}
+                        {{ group.title | textVariant }}
                       </th>
                     </tr>
                     <tr class="group_header_row">
                       <ng-container *ngFor="let col of section.cols; index as i">
                         <ng-container [ngSwitch]="col.content.__typename">
                           <th *ngSwitchDefault="">
-                            {{ col.title[0].value }}
+                            {{ col.title | textVariant }}
                           </th>
                         </ng-container>
                       </ng-container>
@@ -39,7 +39,7 @@
                             {{ cell.content.number }}
                           </th>
                           <th *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
-                            {{ cell.content.title[0].value }}
+                            {{ cell.content.title | textVariant }}
                           </th>
                           <ng-container *ngSwitchCase="'ScoreCellContent'">
                             <ng-container *ngIf="record[cell.content.ref] as value">

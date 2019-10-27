@@ -13,6 +13,7 @@ import { SubmissionDialogComponent } from './submission-dialog/submission-dialog
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TextVariantPipe } from './text-variant.pipe';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     SubmissionDialogComponent,
     BypassSanitizerPipe,
     SubmissionListDialogComponent,
-    LoginDialogComponent
+    LoginDialogComponent,
+    TextVariantPipe
   ],
   imports: [
     BrowserModule,

@@ -72,7 +72,7 @@
                     </span>
                   </span>
                 </ng-container>
-                <span class="task_short_title">{{ problem.material.title[0].value }}</span>
+                <span class="task_short_title">{{ problem.material.title | textVariant:'short' }}</span>
               </a>
             </li>
           </ol>
@@ -80,7 +80,7 @@
         <ng-container *ngFor="let problem of data.contestView.problems">
           <main class="task_main" *ngIf="selectedProblemName === problem.name">
             <div class="task_header">
-              <h2 class="task_title">{{ problem.material.title[0].value }}</h2>
+              <h2 class="task_title">{{ problem.material.title | textVariant }}</h2>
               <div *ngIf="problem.canSubmit" class="task_submit_container">
                 <a href="#" class="task_submit_start" (click)="openSubmitDialog(); $event.preventDefault()">
                   <fa-icon [icon]="faPaperPlane"></fa-icon>
@@ -100,7 +100,7 @@
                     <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
                       <ng-container *ngIf="award.content.range as range">
                         <ng-template #tipContent>
-                          {{award.title[0].value}}
+                          {{award.title | textVariant}}
                           <span class="badge badge-info">+{{range.max.toFixed(range.precision)}} pts</span>
                         </ng-template>
                         <ng-container *ngIf="state.badge > 0">
@@ -119,7 +119,7 @@
                       </ng-container>
                       <ng-container *ngIf="!award.content.range">
                         <ng-template #tipContent>
-                          {{award.title[0].value}}
+                          {{award.title | textVariant}}
                         </ng-template>
                         <ng-container *ngIf="state.badge">
                           <span [ngbTooltip]="tipContent" class="award_badge score_full">
@@ -152,7 +152,7 @@
                 <a *ngFor="let attachment of problem.material.attachments; last as last"
                   [download]="attachment.file[0].name"
                   [href]="'data:' + (attachment.file[0].type || 'application/octet-stream') + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
-                  {{attachment.title[0].value}}
+                  {{attachment.title | textVariant}}
                   <ng-container *ngIf="!last"> | </ng-container>
                 </a>
               </div>
