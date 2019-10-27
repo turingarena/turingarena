@@ -20,64 +20,66 @@
         </ng-container>
       </nav>
       <div class="contest-main">
-        <aside class="contest-aside">
-          <ng-container *ngIf="state.hasScore">
-            <h2>Score</h2>
-            <div class="contest_score_container">
-              <span class="contest_score_display score" [class.score_zero]="state.score <= 0"
-                [class.score_partial]="0 < state.score && state.score < state.maxScore"
-                [class.score_full]="state.maxScore <= state.score">
-                <span class="contest_score">
-                  {{ state.score.toFixed(state.precision) }}
-                </span>/<span class="contest_max_score">
-                  {{ state.maxScore.toFixed(state.precision) }}
+        <ng-container *ngIf="!focusMode">
+          <aside class="contest-aside">
+            <ng-container *ngIf="state.hasScore">
+              <h2>Score</h2>
+              <div class="contest_score_container">
+                <span class="contest_score_display score" [class.score_zero]="state.score <= 0"
+                  [class.score_partial]="0 < state.score && state.score < state.maxScore"
+                  [class.score_full]="state.maxScore <= state.score">
+                  <span class="contest_score">
+                    {{ state.score.toFixed(state.precision) }}
+                  </span>/<span class="contest_max_score">
+                    {{ state.maxScore.toFixed(state.precision) }}
+                  </span>
                 </span>
-              </span>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="nowObservable | async as now">
-            <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
-              <h2>Remaining Time</h2>
-              <div class="contest_remaining_time">
-                {{ formatDuration(state.endTime.diff(now)) }}
               </div>
             </ng-container>
-            <ng-container *ngIf="now < state.startTime">
-              <h2>Starting In</h2>
-              <div class="contest_starting_in">
-                {{ formatDuration(state.startTime.diff(now)) }}
-              </div>
+            <ng-container *ngIf="nowObservable | async as now">
+              <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
+                <h2>Remaining Time</h2>
+                <div class="contest_remaining_time">
+                  {{ formatDuration(state.endTime.diff(now)) }}
+                </div>
+              </ng-container>
+              <ng-container *ngIf="now < state.startTime">
+                <h2>Starting In</h2>
+                <div class="contest_starting_in">
+                  {{ formatDuration(state.startTime.diff(now)) }}
+                </div>
+              </ng-container>
+              <ng-container *ngIf="state.endTime < now">
+                <h2>Ended</h2>
+                <div class="contest_ended_by">
+                  {{ formatDuration(now.diff(state.endTime)) }}
+                </div>
+              </ng-container>
             </ng-container>
-            <ng-container *ngIf="state.endTime < now">
-              <h2>Ended</h2>
-              <div class="contest_ended_by">
-                {{ formatDuration(now.diff(state.endTime)) }}
-              </div>
-            </ng-container>
-          </ng-container>
-          <ng-container *ngIf="data.contestView.problems as problems">
-            <h2>Tasks</h2>
-            <ol class="contest_tasks_nav_container">
-              <li *ngFor="let problem of problems" class="task_list_item">
-                <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
-                  (click)="selectedProblemName = problem.name; $event.preventDefault()">
-                  <ng-container *ngIf="state.getProblemState(problem) as problemState">
-                    <span class="task_score_badge score" [class.score_zero]="problemState.score <= 0"
-                      [class.score_partial]="0 < problemState.score && problemState.score < problemState.maxScore"
-                      [class.score_full]="problemState.maxScore <= problemState.score">
-                      <span class="task_score">
-                        {{ problemState.score.toFixed(problemState.precision) }}
-                      </span>/<span class="task_max_score">
-                        {{ problemState.maxScore.toFixed(problemState.precision) }}
+            <ng-container *ngIf="data.contestView.problems as problems">
+              <h2>Tasks</h2>
+              <ol class="contest_tasks_nav_container">
+                <li *ngFor="let problem of problems" class="task_list_item">
+                  <a href="#" class="task_link" [class.active]="problem.name === selectedProblemName"
+                    (click)="selectedProblemName = problem.name; $event.preventDefault()">
+                    <ng-container *ngIf="state.getProblemState(problem) as problemState">
+                      <span class="task_score_badge score" [class.score_zero]="problemState.score <= 0"
+                        [class.score_partial]="0 < problemState.score && problemState.score < problemState.maxScore"
+                        [class.score_full]="problemState.maxScore <= problemState.score">
+                        <span class="task_score">
+                          {{ problemState.score.toFixed(problemState.precision) }}
+                        </span>/<span class="task_max_score">
+                          {{ problemState.maxScore.toFixed(problemState.precision) }}
+                        </span>
                       </span>
-                    </span>
-                  </ng-container>
-                  <span class="task_short_title">{{ problem.material.title | textVariant:'short' }}</span>
-                </a>
-              </li>
-            </ol>
-          </ng-container>
-        </aside>
+                    </ng-container>
+                    <span class="task_short_title">{{ problem.material.title | textVariant:'short' }}</span>
+                  </a>
+                </li>
+              </ol>
+            </ng-container>
+          </aside>
+        </ng-container>
         <ng-container *ngFor="let problem of data.contestView.problems">
           <ng-container *ngIf="selectedProblemName === problem.name">
             <aside class="problem-aside">
@@ -152,6 +154,11 @@
                 </a>
               </ng-container>
             </aside>
+
+            <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
+              <fa-icon [icon]="faChevronLeft"></fa-icon>
+            </aside>
+
             <ng-container *ngIf="problem.material.statement[0] as statement">
               <iframe class="task_statement_html"
                 [attr.src]="'data:' + statement.type + ';base64,' + statement.content.base64 | bypassSanitizer:'ResourceUrl'">

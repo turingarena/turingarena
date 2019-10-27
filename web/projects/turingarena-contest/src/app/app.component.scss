@@ -97,3 +97,19 @@
 .problem-submission-list {
   @extend .btn, .btn-block, .btn-light;
 }
+
+.focus-mode-toggler {
+  flex: 0 0 100%;
+  max-width: 1rem;
+  background-color: rgba(0, 0, 0, 0.25);
+  color: rgba(0, 0, 0, 0.5);
+
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
