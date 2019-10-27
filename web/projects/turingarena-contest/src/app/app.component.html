@@ -189,24 +189,26 @@
                   <div class="problem-awards">
                     <ng-container *ngFor="let award of awards">
                       <div class="problem-award" [title]="award.title | textVariant">
-                        <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
-                          <ng-container *ngIf="award.content.range as range">
-                            <span class="problem-award-badge" [class.zero]="state.score <= 0"
-                              [class.partial]="0 < state.score && state.score < range.max"
-                              [class.full]="range.max <= state.score">
-                              {{ state.score.toFixed(range.precision) }} / {{ range.max.toFixed(range.precision) }}
-                            </span>
-                          </ng-container>
-                          <ng-container *ngIf="!award.content.range">
-                            <ng-container *ngIf="state.badge">
-                              <span class="problem-award-badge full">
-                                &#x2713;
+                        <ng-container *ngIf="state.getProblemState(problem) as problemState">
+                          <ng-container *ngIf="problemState.getAwardState(award) as state">
+                            <ng-container *ngIf="award.content.range as range">
+                              <span class="problem-award-badge" [class.zero]="state.score <= 0"
+                                [class.partial]="0 < state.score && state.score < range.max"
+                                [class.full]="range.max <= state.score">
+                                {{ state.score.toFixed(range.precision) }} / {{ range.max.toFixed(range.precision) }}
                               </span>
                             </ng-container>
-                            <ng-container *ngIf="!state.badge">
-                              <span class="problem-award-badge zero">
-                                &#x2717;
-                              </span>
+                            <ng-container *ngIf="!award.content.range">
+                              <ng-container *ngIf="state.badge">
+                                <span class="problem-award-badge full">
+                                  &#x2713;
+                                </span>
+                              </ng-container>
+                              <ng-container *ngIf="!state.badge">
+                                <span class="problem-award-badge zero">
+                                  &#x2717;
+                                </span>
+                              </ng-container>
                             </ng-container>
                           </ng-container>
                         </ng-container>
