@@ -76,90 +76,103 @@
         </ng-container>
         <ng-container *ngFor="let problem of data.contestView.problems">
           <ng-container *ngIf="selectedProblemName === problem.name">
-            <aside class="problem-aside">
-              <!-- <h2 class="problem-title">{{ problem.material.title | textVariant }}</h2> -->
-              <ng-container *ngIf="problem.canSubmit || problem.submissions">
-                <div class="problem-submission-panel">
+            <ng-container *ngIf="focusMode">
+              <aside class="narrow-problem-aside">
+                <ng-container *ngIf="problem.canSubmit || problem.submissions">
                   <ng-container *ngIf="problem.canSubmit">
                     <a href="#" class="problem-submit" (click)="openSubmitDialog(); $event.preventDefault()">
                       <fa-icon [icon]="faPaperPlane"></fa-icon>
-                      Submit a solution
                     </a>
                   </ng-container>
-                  <ng-container *ngIf="problem.submissions as submissions">
-                    <!-- <h2>Submissions</h2> -->
-                    <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
-                      <a href="#" class="problem-last-submission"
-                        (click)="openSubmission(lastSubmission); $event.preventDefault()">
-                        <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
-                        <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
-                        </fa-icon>
-                        Last submission
-                        <!-- <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time> -->
-                      </a>
-                      <a href="#" class="problem-submission-list"
-                        (click)="openSubmissionList(problem); $event.preventDefault()">
-                        <fa-icon [icon]="faList"></fa-icon>
-                        All submissions
+                </ng-container>
+              </aside>
+            </ng-container>
+            <ng-container *ngIf="!focusMode">
+              <aside class="problem-aside">
+                <!-- <h2 class="problem-title">{{ problem.material.title | textVariant }}</h2> -->
+                <ng-container *ngIf="problem.canSubmit || problem.submissions">
+                  <div class="problem-submission-panel">
+                    <ng-container *ngIf="problem.canSubmit">
+                      <a href="#" class="problem-submit" (click)="openSubmitDialog(); $event.preventDefault()">
+                        <fa-icon [icon]="faPaperPlane"></fa-icon>
+                        Submit a solution
                       </a>
                     </ng-container>
-                  </ng-container>
-                </div>
-              </ng-container>
-              <ng-container *ngIf="problem.material.awards as awards">
-                <h2>Awards</h2>
-                <div class="problem-awards">
-                  <ng-container *ngFor="let award of awards">
-                    <div class="problem-award">
-                      <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
-                        <ng-container *ngIf="award.content.range as range">
-                          <span class="problem-award-badge" [class.zero]="state.score <= 0"
-                            [class.partial]="0 < state.score && state.score < range.max"
-                            [class.full]="range.max <= state.score">
-                            {{ state.score.toFixed(range.precision) }} / {{ range.max.toFixed(range.precision) }}
-                          </span>
-                        </ng-container>
-                        <ng-container *ngIf="!award.content.range">
-                          <ng-container *ngIf="state.badge">
-                            <span class="problem-award-badge full">
-                              &#x2713;
-                            </span>
-                          </ng-container>
-                          <ng-container *ngIf="!state.badge">
-                            <span class="problem-award-badge zero">
-                              &#x2717;
-                            </span>
-                          </ng-container>
-                        </ng-container>
+                    <ng-container *ngIf="problem.submissions as submissions">
+                      <!-- <h2>Submissions</h2> -->
+                      <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
+                        <a href="#" class="problem-last-submission"
+                          (click)="openSubmission(lastSubmission); $event.preventDefault()">
+                          <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
+                          <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
+                          </fa-icon>
+                          Last submission
+                          <!-- <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time> -->
+                        </a>
+                        <a href="#" class="problem-submission-list"
+                          (click)="openSubmissionList(problem); $event.preventDefault()">
+                          <fa-icon [icon]="faList"></fa-icon>
+                          All submissions
+                        </a>
                       </ng-container>
-                      {{award.title | textVariant}}
-                    </div>
-                  </ng-container>
-                </div>
-              </ng-container>
-              <ng-container *ngIf="problem.material.attachments as attachments">
-                <h2>Attachments</h2>
-                <div class="problem-attachments">
-                  <a class="problem-attachment" [title]="attachment.title | textVariant"
-                    *ngFor="let attachment of attachments" [download]="attachment.file[0].name"
-                    [href]="'data:' + (attachment.file[0].type || 'application/octet-stream') + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
-                    <fa-icon [icon]="mimeTypeIcons[attachment.file[0].type] || faFile"></fa-icon>
-                    {{attachment.title | textVariant}}
-                  </a>
-                </div>
-                <h2>Statement file</h2>
-                <ng-container *ngIf="problem.material.statement[0] as statement">
-                  <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
-                    [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
-                    <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
-                    {{statement.name}}
-                  </a>
+                    </ng-container>
+                  </div>
                 </ng-container>
-              </ng-container>
-            </aside>
+                <ng-container *ngIf="problem.material.awards as awards">
+                  <h2>Awards</h2>
+                  <div class="problem-awards">
+                    <ng-container *ngFor="let award of awards">
+                      <div class="problem-award">
+                        <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
+                          <ng-container *ngIf="award.content.range as range">
+                            <span class="problem-award-badge" [class.zero]="state.score <= 0"
+                              [class.partial]="0 < state.score && state.score < range.max"
+                              [class.full]="range.max <= state.score">
+                              {{ state.score.toFixed(range.precision) }} / {{ range.max.toFixed(range.precision) }}
+                            </span>
+                          </ng-container>
+                          <ng-container *ngIf="!award.content.range">
+                            <ng-container *ngIf="state.badge">
+                              <span class="problem-award-badge full">
+                                &#x2713;
+                              </span>
+                            </ng-container>
+                            <ng-container *ngIf="!state.badge">
+                              <span class="problem-award-badge zero">
+                                &#x2717;
+                              </span>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                        {{award.title | textVariant}}
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="problem.material.attachments as attachments">
+                  <h2>Attachments</h2>
+                  <div class="problem-attachments">
+                    <a class="problem-attachment" [title]="attachment.title | textVariant"
+                      *ngFor="let attachment of attachments" [download]="attachment.file[0].name"
+                      [href]="'data:' + (attachment.file[0].type || 'application/octet-stream') + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
+                      <fa-icon [icon]="mimeTypeIcons[attachment.file[0].type] || faFile"></fa-icon>
+                      {{attachment.title | textVariant}}
+                    </a>
+                  </div>
+                  <h2>Statement file</h2>
+                  <ng-container *ngIf="problem.material.statement[0] as statement">
+                    <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
+                      [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
+                      <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
+                      {{statement.name}}
+                    </a>
+                  </ng-container>
+                </ng-container>
+              </aside>
+            </ng-container>
 
             <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
-              <fa-icon [icon]="faChevronLeft"></fa-icon>
+              <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
             </aside>
 
             <ng-container *ngIf="problem.material.statement[0] as statement">
