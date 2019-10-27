@@ -145,20 +145,18 @@
                     {{attachment.title | textVariant}}
                   </a>
                 </div>
-                <h2>Statement</h2>
-                <div class="problem-statements">
-                  <ng-container *ngIf="problem.material.statement[0] as statement">
-                    <a class="problem-statement" [title]="statement.name" [download]="statement.name"
-                      [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
-                      <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
-                      {{statement.name}}
-                    </a>
-                  </ng-container>
-                </div>
+                <h2>Statement file</h2>
+                <ng-container *ngIf="problem.material.statement[0] as statement">
+                  <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
+                    [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
+                    <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
+                    {{statement.name}}
+                  </a>
+                </ng-container>
               </ng-container>
             </aside>
             <ng-container *ngIf="problem.material.statement[0] as statement">
-              <iframe class="task_statement_html"
+              <iframe class="problem-statement"
                 [attr.src]="'data:' + statement.type + ';base64,' + statement.content.base64 | bypassSanitizer:'ResourceUrl'">
               </iframe>
             </ng-container>

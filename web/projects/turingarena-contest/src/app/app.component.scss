@@ -185,13 +185,12 @@
   @extend .contest-problem-score;
 }
 
-.problem-attachments,
-.problem-statements {
+.problem-attachments {
   margin-bottom: 16px;
 }
 
 .problem-attachment,
-.problem-statement {
+.problem-download-statement {
   display: block;
   color: inherit;
 
@@ -202,4 +201,11 @@
   &:hover {
     text-decoration: none;
   }
+}
+
+.problem-statement {
+  flex: 1 1 100%;
+  align-items: stretch;
+  border: none;
+  box-shadow: inset 4px 4px 4px -2px rgba(0, 0, 0, 0.1);
 }
