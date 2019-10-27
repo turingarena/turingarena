@@ -20,58 +20,60 @@
         </ng-container>
       </nav>
       <div class="contest-main">
-        <aside class="contest-aside">
-          <ng-container *ngIf="state.hasScore">
-            <h2>Score</h2>
-            <div class="contest-score-panel">
-              <span class="contest-score">
-                {{ state.score.toFixed(state.precision) }}
-              </span>/<span class="contest-max-score">
-                {{ state.maxScore.toFixed(state.precision) }}
-              </span>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="nowObservable | async as now">
-            <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
-              <h2>Remaining Time</h2>
-              <div class="contest-clock remaining-time">
-                {{ formatDuration(state.endTime.diff(now)) }}
+        <ng-container *ngIf="!focusMode">
+          <aside class="contest-aside">
+            <ng-container *ngIf="state.hasScore">
+              <h2>Score</h2>
+              <div class="contest-score-panel">
+                <span class="contest-score">
+                  {{ state.score.toFixed(state.precision) }}
+                </span>/<span class="contest-max-score">
+                  {{ state.maxScore.toFixed(state.precision) }}
+                </span>
               </div>
             </ng-container>
-            <ng-container *ngIf="now < state.startTime">
-              <h2>Starting In</h2>
-              <div class="contest-clock starting-in-time">
-                {{ formatDuration(state.startTime.diff(now)) }}
-              </div>
-            </ng-container>
-            <ng-container *ngIf="state.endTime < now">
-              <h2>Ended</h2>
-              <div class="contest-clock ended-by-time">
-                {{ formatDuration(now.diff(state.endTime)) }}
-              </div>
-            </ng-container>
-          </ng-container>
-          <ng-container *ngIf="data.contestView.problems as problems">
-            <h2>Problems</h2>
-            <div class="contest-problems">
-              <ng-container *ngFor="let problem of problems">
-                <a class="contest-problem" href="#" [title]="problem.material.title | textVariant"
-                  [class.active]="problem.name === selectedProblemName"
-                  (click)="selectedProblemName = problem.name; $event.preventDefault()">
-                  <ng-container *ngIf="state.getProblemState(problem) as problemState">
-                    <span class="contest-problem-score" [class.zero]="problemState.score <= 0"
-                      [class.partial]="0 < problemState.score && problemState.score < problemState.maxScore"
-                      [class.full]="problemState.maxScore <= problemState.score">
-                      {{ problemState.score.toFixed(problemState.precision) }} /
-                      {{ problemState.maxScore.toFixed(problemState.precision) }}
-                    </span>
-                  </ng-container>
-                  {{ problem.material.title | textVariant:'short' }}
-                </a>
+            <ng-container *ngIf="nowObservable | async as now">
+              <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
+                <h2>Remaining Time</h2>
+                <div class="contest-clock remaining-time">
+                  {{ formatDuration(state.endTime.diff(now)) }}
+                </div>
               </ng-container>
-            </div>
-          </ng-container>
-        </aside>
+              <ng-container *ngIf="now < state.startTime">
+                <h2>Starting In</h2>
+                <div class="contest-clock starting-in-time">
+                  {{ formatDuration(state.startTime.diff(now)) }}
+                </div>
+              </ng-container>
+              <ng-container *ngIf="state.endTime < now">
+                <h2>Ended</h2>
+                <div class="contest-clock ended-by-time">
+                  {{ formatDuration(now.diff(state.endTime)) }}
+                </div>
+              </ng-container>
+            </ng-container>
+            <ng-container *ngIf="data.contestView.problems as problems">
+              <h2>Problems</h2>
+              <div class="contest-problems">
+                <ng-container *ngFor="let problem of problems">
+                  <a class="contest-problem" href="#" [title]="problem.material.title | textVariant"
+                    [class.active]="problem.name === selectedProblemName"
+                    (click)="selectedProblemName = problem.name; $event.preventDefault()">
+                    <ng-container *ngIf="state.getProblemState(problem) as problemState">
+                      <span class="contest-problem-score" [class.zero]="problemState.score <= 0"
+                        [class.partial]="0 < problemState.score && problemState.score < problemState.maxScore"
+                        [class.full]="problemState.maxScore <= problemState.score">
+                        {{ problemState.score.toFixed(problemState.precision) }} /
+                        {{ problemState.maxScore.toFixed(problemState.precision) }}
+                      </span>
+                    </ng-container>
+                    {{ problem.material.title | textVariant:'short' }}
+                  </a>
+                </ng-container>
+              </div>
+            </ng-container>
+          </aside>
+        </ng-container>
         <ng-container *ngFor="let problem of data.contestView.problems">
           <ng-container *ngIf="selectedProblemName === problem.name">
             <aside class="problem-aside">
@@ -155,6 +157,11 @@
                 </ng-container>
               </ng-container>
             </aside>
+
+            <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
+              <fa-icon [icon]="faChevronLeft"></fa-icon>
+            </aside>
+
             <ng-container *ngIf="problem.material.statement[0] as statement">
               <iframe class="problem-statement"
                 [attr.src]="'data:' + statement.type + ';base64,' + statement.content.base64 | bypassSanitizer:'ResourceUrl'">

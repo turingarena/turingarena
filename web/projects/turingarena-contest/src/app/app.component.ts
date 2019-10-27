@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faHistory, faSpinner, faFileCsv, faFileArchive, faFile, faFileCode } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faChevronLeft, faFile, faFileArchive, faFileCode, faFilePdf, faHistory, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -8,12 +8,12 @@ import { Auth, getAuth, setAuth } from './auth';
 import { ContestQueryService } from './contest-query.service';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { scoreRanges } from './problem-material';
+import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
+import { SubmissionQueryService } from './submission-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
-import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListQuery_contestView_problem_submissions as Submission } from './__generated__/SubmissionListQuery';
-import { SubmissionQueryService } from './submission-query.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +29,8 @@ export class AppComponent {
   faFilePdf = faFilePdf;
   faHistory = faHistory;
   faSpinner = faSpinner;
-
+  faChevronLeft = faChevronLeft;
+  
   mimeTypeIcons = {
     'application/pdf': faFilePdf,
     'text/plain': faFileCode,
@@ -37,6 +38,8 @@ export class AppComponent {
     'application/zip': faFileArchive,
   };
   faFile = faFile;
+  
+  focusMode = false;
 
   constructor(
     private contestQueryService: ContestQueryService,
