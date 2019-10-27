@@ -49,10 +49,19 @@ fn submission_form() -> Form {
 fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
     Award {
         name: AwardName(format!("subtask.{}", subtask.id)),
-        title: vec![TextVariant {
-            attributes: vec![],
-            value: format!("Subtask {}", subtask.id),
-        }],
+        title: vec![
+            TextVariant {
+                attributes: vec![],
+                value: format!("Subtask {}", subtask.id),
+            },
+            TextVariant {
+                attributes: vec![VariantAttribute {
+                    key: "style".to_owned(),
+                    value: "short".to_owned(),
+                }],
+                value: format!("ST {}", subtask.id),
+            },
+        ],
         content: if subtask.max_score > 0.0 {
             AwardContent::Score(ScoreAwardContent {
                 range: ScoreRange {
@@ -228,10 +237,19 @@ fn statements_of(task_dir: &Path) -> Vec<FileVariant> {
 
 pub fn gen_material(task: &ioi::Task) -> Material {
     Material {
-        title: vec![TextVariant {
-            attributes: vec![],
-            value: task.title.clone().into(),
-        }],
+        title: vec![
+            TextVariant {
+                attributes: vec![],
+                value: task.title.clone().into(),
+            },
+            TextVariant {
+                attributes: vec![VariantAttribute {
+                    key: "style".to_owned(),
+                    value: "short".to_owned(),
+                }],
+                value: task.name.clone().into(),
+            },
+        ],
         statement: statements_of(&task.path),
         attachments: files_in_dir(&task.path.join("att"))
             .map(attachment_at_path)
