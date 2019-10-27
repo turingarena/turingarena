@@ -47,12 +47,12 @@
                                 [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
                                 [class.score_full]="cell.content.range.max <= value.score">
                                 {{ value.score.toFixed(cell.content.range.precision) }} /
-                                {{ col.content.range.max.toFixed(cell.content.range.precision) }}
+                                {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                               </td>
                             </ng-container>
                             <ng-container *ngIf="!record[cell.content.ref]">
                               <td class="score_cell">
-                                ... / {{ col.content.range.max.toFixed(cell.content.range.precision) }}
+                                ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                               </td>
                             </ng-container>
                           </ng-container>

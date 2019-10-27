@@ -113,7 +113,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                 }),
             }))?;
             tx.send(Event::Value(ValueEvent {
-                key: record::Key(format!("testcase.{}.score", testcase)),
+                key: record::Key(format!("testcase.{}.message", testcase)),
                 value: record::Value::Message(record::TextValue {
                     text: vec![TextVariant {
                         value: message,
