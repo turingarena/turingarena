@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { faCheck, faPaperPlane, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -22,6 +22,8 @@ export class AppComponent {
   faCheck = faCheck;
   faSignInAlt = faSignInAlt;
   faSignOutAlt = faSignOutAlt;
+  faList = faList;
+  faFilePdf = faFilePdf;
 
   constructor(
     private contestQueryService: ContestQueryService,

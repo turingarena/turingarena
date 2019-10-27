@@ -175,6 +175,12 @@ body {
   @extend .btn, .btn-success;
 }
 
+.task_explore_submissions {
+  @extend .btn, .btn-outline-success;
+
+  margin-left: 2pt;
+}
+
 .task_statement_html {
   flex: 1 1 100%;
   align-items: stretch;
@@ -183,10 +189,13 @@ body {
 }
 
 .task_last_submission_label,
-.task_best_scores_label,
 .task_download_attachments_label,
 .task_download_statement_label {
   font-weight: bold;
+}
+
+.tooltip.show {
+  opacity: 1;
 }
 
 .award_badge {
@@ -274,10 +283,6 @@ body {
 
 .submission_form_submit {
   @extend .btn, .btn-success;
-}
-
-.submissions_modal_close_button {
-  @extend .btn, .btn-primary;
 }
 
 .task_link {
