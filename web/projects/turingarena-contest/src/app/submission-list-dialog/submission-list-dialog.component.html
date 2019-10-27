@@ -30,9 +30,16 @@
                     </th>
                   </ng-container>
                   <ng-container *ngIf="!award.content.range">
-                    <th>
-                      Badge (todo)
-                    </th>
+                    <ng-container *ngIf="problemState.award(award) as state">
+                      <th *ngIf="state.badge" class="submission_best_score score score_full">
+                        <!-- check mark -->
+                        &#x2713;
+                      </th>
+                      <th *ngIf="!state.badge" class="submission_best_score score score_zero">
+                        <!-- cross mark -->
+                        &#x2717;
+                      </th>
+                    </ng-container>
                   </ng-container>
                 </ng-container>
                 <th class="submission_best_total_score score" [class.score_zero]="getProblemState(problem).score <= 0"
@@ -72,9 +79,16 @@
                           </td>
                         </ng-container>
                         <ng-container *ngIf="!award.content.range">
-                          <td>
-                            Badge (todo)
-                          </td>
+                          <ng-container *ngIf="submissionState.award(award) as state">
+                            <td *ngIf="state.badge" class="submission_score score score_full">
+                              <!-- check mark -->
+                              &#x2713;
+                            </td>
+                            <td *ngIf="!state.badge" class="submission_score score score_zero">
+                              <!-- cross mark -->
+                              &#x2717;
+                            </td>
+                          </ng-container>
                         </ng-container>
                       </ng-container>
                       <td class="submission_total_score score" [class.score_zero]="submissionState.score <= 0"

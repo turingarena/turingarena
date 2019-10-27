@@ -11,12 +11,12 @@ all: graphql-schema
 
 .PHONY: no-web
 no-web: graphql-schema
-	cd rust/ && cargo build --no-default-features
+	cd rust/ && cargo build
 
 .PHONY: graphql-schema
 graphql-schema:
 	mkdir -p __generated__
-	( cd rust/turingarena-contest/ && cargo run --no-default-features -- generate-schema ) > __generated__/graphql-schema.json
+	( cd rust/turingarena-contest/ && cargo run -- generate-schema ) > __generated__/graphql-schema.json
 
 	mkdir -p rust/turingarena-contest-cli/__generated__/
 	cat __generated__/graphql-schema.json > rust/turingarena-contest-cli/__generated__/graphql-schema.json
