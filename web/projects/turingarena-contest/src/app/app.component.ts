@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faFilePdf, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faHistory, faSpinner, faFileCsv, faFileArchive, faFile, faFileCode } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -28,6 +28,15 @@ export class AppComponent {
   faList = faList;
   faFilePdf = faFilePdf;
   faHistory = faHistory;
+  faSpinner = faSpinner;
+
+  mimeTypeIcons = {
+    'application/pdf': faFilePdf,
+    'text/plain': faFileCode,
+    'application/gzip': faFileArchive,
+    'application/zip': faFileArchive,
+  };
+  faFile = faFile;
 
   constructor(
     private contestQueryService: ContestQueryService,

@@ -24,6 +24,7 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
           canSubmit
           submissions {
             id
+            status
             createdAt
           }
           scores {
