@@ -20,7 +20,7 @@
 }
 
 .evaluation_table {
-  @extend .table;
+  @extend .table, .table-sm;
 }
 
 .evaluation_table_header {

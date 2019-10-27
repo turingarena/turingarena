@@ -38,7 +38,7 @@
 }
 
 .submission_table {
-  @extend .table, .table-bordered;
+  @extend .table, .table-sm, .table-bordered;
   margin: 0;
 }
 

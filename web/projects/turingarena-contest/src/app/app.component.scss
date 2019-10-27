@@ -170,6 +170,10 @@
   margin: 0 -16px;
   padding: 0 16px;
 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   &:nth-of-type(odd) {
     background-color: rgba(0, 0, 0, 0.05);
   }

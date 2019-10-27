@@ -123,7 +123,9 @@
                 </ng-container>
 
                 <ng-container *ngIf="state.hasScore">
-                  <button class="btn btn-outline-dark" [ngbTooltip]="state.score.toFixed(state.precision) + '&nbsp;/&nbsp;' + state.maxScore.toFixed(state.precision)" triggers="click:blur" placement="right">
+                  <button class="btn btn-outline-dark"
+                    [ngbTooltip]="state.score.toFixed(state.precision) + '&nbsp;/&nbsp;' + state.maxScore.toFixed(state.precision)"
+                    triggers="click:blur" placement="right">
                     <fa-icon [icon]="faAward"></fa-icon>
                   </button>
                 </ng-container>
@@ -133,18 +135,19 @@
                     <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
                       Remaining Time: {{ formatDuration(state.endTime.diff(now)) }}
                     </ng-container>
-  
+
                     <ng-container *ngIf="now < state.startTime">
                       Starting In: {{ formatDuration(state.startTime.diff(now)) }}
                     </ng-container>
-  
+
                     <ng-container *ngIf="state.endTime < now">
                       Ended: {{ formatDuration(now.diff(state.endTime)) }}
                     </ng-container>
                   </ng-container>
                 </ng-template>
 
-                <button class="btn btn-outline-dark" [ngbTooltip]="clockTemplate" triggers="click:blur" placement="right">
+                <button class="btn btn-outline-dark" [ngbTooltip]="clockTemplate" triggers="click:blur"
+                  placement="right">
                   <fa-icon [icon]="faHourglassHalf"></fa-icon>
                 </button>
 
@@ -185,7 +188,7 @@
                   <h2>Awards</h2>
                   <div class="problem-awards">
                     <ng-container *ngFor="let award of awards">
-                      <div class="problem-award">
+                      <div class="problem-award" [title]="award.title | textVariant">
                         <ng-container *ngIf="state.getProblemState(problem).getAwardState(award) as state">
                           <ng-container *ngIf="award.content.range as range">
                             <span class="problem-award-badge" [class.zero]="state.score <= 0"
