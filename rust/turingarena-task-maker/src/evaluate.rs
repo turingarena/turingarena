@@ -11,7 +11,7 @@ use std::thread;
 use task_maker_cache::Cache;
 use task_maker_dag::CacheMode;
 use task_maker_exec::{executors::LocalExecutor, ExecutorClient};
-use task_maker_format::ui::UIMessage;
+use task_maker_format::ui::{UIMessage, UIExecutionStatus};
 use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISender};
 use task_maker_store::*;
 
@@ -20,6 +20,8 @@ use turingarena::award::{Score, AwardName};
 use turingarena::submission::mem::Submission;
 
 use turingarena::evaluation::Event;
+use turingarena::content::TextVariant;
+use turingarena::rusage::{TimeUsage, MemoryUsage};
 
 pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
     let (event_tx, event_rx) = channel();
@@ -89,7 +91,7 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
             ExecutorClient::evaluate(eval.dag, tx, &rx, file_store, move |status| {
                 ui_sender.send(UIMessage::ServerStatus { status })
             })
-            .expect("Client failed");
+                .expect("Client failed");
         })
         .expect("Failed to spawn the executor thread");
     event_rx
@@ -98,20 +100,31 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
 fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(), failure::Error> {
     match ui_message {
         UIMessage::IOITestcaseScore {
-            subtask,
+            subtask: _,
             testcase,
-            solution,
+            solution: _,
             score,
             message,
-        } => tx.send(Event::Value(ValueEvent {
-            key: record::Key(format!("testcase.{}.score", testcase)),
-            value: record::Value::Score(record::ScoreValue {
-                score: Score(score as f64),
-            }),
-        }))?,
+        } => {
+            tx.send(Event::Value(ValueEvent {
+                key: record::Key(format!("testcase.{}.score", testcase)),
+                value: record::Value::Score(record::ScoreValue {
+                    score: Score(score as f64),
+                }),
+            }))?;
+            tx.send(Event::Value(ValueEvent {
+                key: record::Key(format!("testcase.{}.score", testcase)),
+                value: record::Value::Message(record::TextValue {
+                    text: vec![TextVariant {
+                        value: message,
+                        attributes: vec![],
+                    }]
+                }),
+            }))?;
+        }
         UIMessage::IOISubtaskScore {
             subtask,
-            solution,
+            solution: _,
             score,
             normalized_score,
         } => {
@@ -129,7 +142,30 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                 award_name: AwardName(format!("subtask.{}", subtask)),
                 badge: normalized_score > 0.0,
             }))?;
-        },
+        }
+        UIMessage::IOIEvaluation {
+            testcase,
+            subtask: _,
+            solution: _,
+            status,
+        } => {
+            if let UIExecutionStatus::Done {
+                result
+            } = status {
+                tx.send(Event::Value(ValueEvent {
+                    key: record::Key(format!("testcase.{}.time_usage", testcase)),
+                    value: record::Value::TimeUsage(record::TimeUsageValue {
+                        time_usage: TimeUsage(result.resources.cpu_time),
+                    }),
+                }))?;
+                tx.send(Event::Value(ValueEvent {
+                    key: record::Key(format!("testcase.{}.memory_usage", testcase)),
+                    value: record::Value::MemoryUsage(record::MemoryUsageValue {
+                        memory_usage: MemoryUsage(result.resources.memory as i32),
+                    }),
+                }))?;
+            }
+        }
         _ => (),
     };
     Ok(())

@@ -5,7 +5,7 @@ use rocket::http::Status;
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::content;
 use rocket::response::Response;
-use rocket::{State, response};
+use rocket::State;
 use std::path::PathBuf;
 
 #[cfg(feature = "webcontent")]

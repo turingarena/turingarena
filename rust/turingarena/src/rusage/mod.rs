@@ -1,9 +1,11 @@
 #![doc(include = "README.md")]
 
+use serde::{Serialize, Deserialize};
+
 /// Wraps a memory usage in Bytes
-//#[derive(juniper::GraphQlScalarValue)]
-pub struct MemoryUsage(pub usize);
+#[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLScalarValue)]
+pub struct MemoryUsage(pub i32);
 
 /// Wraps a time usage in seconds
-//#[derive(juniper::GrapjQLScalarValue)]
+#[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLScalarValue)]
 pub struct TimeUsage(pub f64);
