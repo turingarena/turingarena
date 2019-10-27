@@ -153,12 +153,12 @@
 }
 
 .problem-submit {
-  @extend .btn, .btn-block, .btn-primary;
+  @extend .btn, .btn-block, .btn-success;
 }
 
 .problem-last-submission,
 .problem-submission-list {
-  @extend .btn, .btn-block, .btn-outline-primary;
+  @extend .btn, .btn-block, .btn-outline-dark;
 }
 
 .problem-awards {

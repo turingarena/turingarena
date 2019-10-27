@@ -67,6 +67,10 @@ export class AppComponent {
     localStorage.setItem('selectedProblemName', name);
   }
 
+  getTaskLetter(index: number) {
+    return String.fromCharCode(65 + index);
+  }
+
   nowObservable = interval(1000).pipe(
     startWith([0]),
     map(() => DateTime.local()),
