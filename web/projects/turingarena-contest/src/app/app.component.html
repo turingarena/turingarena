@@ -99,16 +99,14 @@
                 </ng-container>
                 <ng-container *ngIf="problem.submissions as submissions">
                   <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
-                    <a href="#" class="problem-last-submission"
-                      (click)="openSubmission(lastSubmission); $event.preventDefault()">
+                    <button class="problem-last-submission" (click)="openSubmission(lastSubmission)">
                       <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                       <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                       </fa-icon>
-                    </a>
-                    <a href="#" class="problem-submission-list"
-                      (click)="openSubmissionList(problem); $event.preventDefault()">
+                    </button>
+                    <button class="problem-submission-list" (click)="openSubmissionList(problem)">
                       <fa-icon [icon]="faList"></fa-icon>
-                    </a>
+                    </button>
                   </ng-container>
                 </ng-container>
                 <ng-container *ngIf="data.contestView.problems as problems">
