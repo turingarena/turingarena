@@ -50,7 +50,6 @@
 .contest-aside {
   flex: 0 0 auto;
   padding: 16px;
-  order: -1;
   width: 16em;
   background-color: #f8f9fa;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -133,7 +132,6 @@
 .problem-aside {
   flex: 0 0 auto;
   padding: 16px;
-  order: -1;
   width: 15em;
   background-color: #f8f9fa;
 
@@ -213,8 +211,8 @@
 .focus-mode-toggler {
   flex: 0 0 100%;
   max-width: 1rem;
-  background-color: rgba(0, 0, 0, 0.25);
-  color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.4);
 
   cursor: pointer;
   display: flex;

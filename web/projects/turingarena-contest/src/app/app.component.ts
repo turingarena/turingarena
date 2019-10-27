@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { faCheck, faChevronLeft, faChevronRight, faFile, faFileArchive, faFileCode, faFilePdf, faHistory, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faAward, faCheck, faChevronLeft, faChevronRight, faFile, faFileArchive, faFileCode, faFilePdf, faHistory, faHourglassHalf, faList, faPaperPlane, faSignInAlt, faSignOutAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -31,6 +31,8 @@ export class AppComponent {
   faSpinner = faSpinner;
   faChevronLeft = faChevronLeft;
   faChevronRight = faChevronRight;
+  faHourglassHalf = faHourglassHalf;
+  faAward = faAward;
   
   mimeTypeIcons = {
     'application/pdf': faFilePdf,

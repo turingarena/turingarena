@@ -20,6 +20,10 @@
         </ng-container>
       </nav>
       <div class="contest-main">
+        <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
+          <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
+        </aside>
+
         <ng-container *ngIf="!focusMode">
           <aside class="contest-aside">
             <ng-container *ngIf="state.hasScore">
@@ -80,10 +84,18 @@
               <aside class="btn-group-vertical">
                 <ng-container *ngIf="problem.canSubmit || problem.submissions">
                   <ng-container *ngIf="problem.canSubmit">
-                    <a href="#" class="problem-submit" style="border-radius: 0" (click)="openSubmitDialog(); $event.preventDefault()">
+                    <button class="problem-submit" style="border-radius: 0" (click)="openSubmitDialog()">
                       <fa-icon [icon]="faPaperPlane"></fa-icon>
-                    </a>
+                    </button>
                   </ng-container>
+                </ng-container>
+                <ng-container *ngIf="!problem.submissions.length">
+                  <button class="problem-last-submission disabled">
+                    <fa-icon [icon]="faHistory"></fa-icon>
+                  </button>
+                  <button class="problem-submission-list disabled">
+                    <fa-icon [icon]="faList"></fa-icon>
+                  </button>
                 </ng-container>
                 <ng-container *ngIf="problem.submissions as submissions">
                   <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
@@ -101,14 +113,41 @@
                 </ng-container>
                 <ng-container *ngIf="data.contestView.problems as problems">
                   <ng-container *ngFor="let problem of problems; index as index">
-                    <a class="btn" href="#" [title]="problem.material.title | textVariant"
+                    <button class="btn" [title]="problem.material.title | textVariant"
                       [class.btn-primary]="problem.name === selectedProblemName"
                       [class.btn-outline-primary]="problem.name !== selectedProblemName"
-                      (click)="selectedProblemName = problem.name; $event.preventDefault()">
+                      (click)="selectedProblemName = problem.name">
                       {{getTaskLetter(index)}}
-                    </a>
+                    </button>
                   </ng-container>
                 </ng-container>
+
+                <ng-container *ngIf="state.hasScore">
+                  <button class="btn btn-outline-dark" [ngbTooltip]="state.score.toFixed(state.precision) + '&nbsp;/&nbsp;' + state.maxScore.toFixed(state.precision)" triggers="click:blur" placement="right">
+                    <fa-icon [icon]="faAward"></fa-icon>
+                  </button>
+                </ng-container>
+
+                <ng-template #clockTemplate>
+                  <ng-container *ngIf="nowObservable | async as now">
+                    <ng-container *ngIf="state.startTime <= now && now <= state.endTime">
+                      Remaining Time: {{ formatDuration(state.endTime.diff(now)) }}
+                    </ng-container>
+  
+                    <ng-container *ngIf="now < state.startTime">
+                      Starting In: {{ formatDuration(state.startTime.diff(now)) }}
+                    </ng-container>
+  
+                    <ng-container *ngIf="state.endTime < now">
+                      Ended: {{ formatDuration(now.diff(state.endTime)) }}
+                    </ng-container>
+                  </ng-container>
+                </ng-template>
+
+                <button class="btn btn-outline-dark" [ngbTooltip]="clockTemplate" triggers="click:blur" placement="right">
+                  <fa-icon [icon]="faHourglassHalf"></fa-icon>
+                </button>
+
               </aside>
             </ng-container>
             <ng-container *ngIf="!focusMode">
@@ -194,10 +233,6 @@
                 </ng-container>
               </aside>
             </ng-container>
-
-            <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
-              <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
-            </aside>
 
             <ng-container *ngIf="problem.material.statement[0] as statement">
               <iframe class="problem-statement"
