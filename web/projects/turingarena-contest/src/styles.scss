@@ -42,9 +42,13 @@ html {
 app-root,
 body,
 html {
-  flex-direction: column;
-  flex: 1 0 100%;
+  display: block;
+  height: 100%;
+}
+
+app-root {
   display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -57,62 +61,6 @@ body {
   color: #212529;
   text-align: left;
   background-color: #fff;
-}
-
-
-
-.contest_starting_in,
-.contest_ended_by,
-.contest_remaining_time {
-  font-size: large;
-  text-align: right;
-  margin-bottom: 1rem;
-}
-
-.contest_ended_by {
-  @extend .text-danger;
-}
-
-.task_header {
-  display: flex;
-  flex-direction: column;
-  width: 16em;
-  padding: 16px;
-  font-size: large;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-  background-color: #f8f9fa;
-}
-
-.task_title {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-
-.task_submit_start {
-  @extend .btn, .btn-success;
-  margin-bottom: 16px;
-}
-
-.task_explore_submissions {
-  @extend .btn, .btn-outline-success;
-
-  margin-left: 2pt;
-}
-
-.task_statement_html {
-  flex: 1 1 100%;
-  align-items: stretch;
-  border: none;
-  box-shadow: inset 4px 4px 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.task_last_submission_label,
-.task_download_attachments_label,
-.task_download_statement_label {
-  font-weight: bold;
 }
 
 .tooltip.show {
@@ -142,18 +90,6 @@ body {
   &:hover {
     opacity: 0.7;
   }
-}
-
-.contest_score_container {
-  text-align: right;
-}
-
-.contest_score_display {
-  font-size: 2rem;
-}
-
-.contest_score {
-  font-size: 4rem;
 }
 
 .submission_file_label {
@@ -204,42 +140,6 @@ body {
 
 .submission_form_submit {
   @extend .btn, .btn-success;
-}
-
-.task_link {
-  display: block;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0 -16px;
-  padding: 0.5rem 16px;
-}
-
-.task_link.active {
-  color: #fff;
-  background-color: #007bff;
-}
-
-.task_score_badge {
-  @extend .badge, .badge-pill;
-
-  margin-top: 0.2rem;
-  float: right;
-
-  &.score_full {
-    @extend .badge-success;
-  }
-
-  &.score_partial {
-    @extend .badge-warning;
-  }
-
-  &.score_zero {
-    @extend .badge-light;
-
-    border: 1px solid #ccc;
-  }
 }
 
 .evaluation_modal_header {

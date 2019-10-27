@@ -44,6 +44,7 @@
 .contest-main {
   flex: 1;
   display: flex;
+  overflow: hidden;
 }
 
 .contest-aside {
@@ -68,12 +69,75 @@
   list-style: none;
 }
 
+.contest-score-panel {
+  text-align: right;
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.contest-score {
+  font-size: 4rem;
+}
+
+.contest-clock {
+  font-size: 2rem;
+  text-align: right;
+  margin-bottom: 16px;
+
+  &.ended-by-time {
+    @extend .text-danger;
+  }
+}
+
+.contest-problem {
+  display: block;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  margin: 0 -16px;
+  padding: 0.5rem 16px;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &.active {
+    color: #fff;
+    background-color: #007bff;
+  }
+}
+
+.contest-problem-score {
+  @extend .badge, .badge-pill;
+
+  margin-top: 0.2rem;
+  float: right;
+
+  &.zero {
+    @extend .badge-light;
+    border: 1px solid #ccc;
+  }
+
+  &.full {
+    @extend .badge-success;
+  }
+
+  &.partial {
+    @extend .badge-warning;
+  }
+}
+
 .problem-aside {
   flex: 0 0 auto;
   padding: 16px;
   order: -1;
-  width: 14em;
+  width: 15em;
   background-color: #f8f9fa;
+
+  overflow-y: auto;
 }
 
 .problem-aside h2 {
@@ -84,18 +148,66 @@
   line-height: 1.2;
 }
 
-.problem-aside ol {
-  padding: 0;
-  list-style: none;
+.problem-submission-panel {
+  margin-bottom: 16px;
 }
 
 .problem-submit {
-  @extend .btn, .btn-block, .btn-success;
+  @extend .btn, .btn-block, .btn-primary;
 }
 
 .problem-last-submission,
 .problem-submission-list {
-  @extend .btn, .btn-block, .btn-light;
+  @extend .btn, .btn-block, .btn-outline-primary;
+}
+
+.problem-awards {
+  padding: 0;
+  list-style: none;
+
+  margin-bottom: 16px;
+}
+
+.problem-award {
+  margin: 0 -16px;
+  padding: 0 16px;
+
+  &:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.problem-award-badge {
+  @extend .contest-problem-score;
+}
+
+.problem-attachments {
+  margin-bottom: 16px;
+}
+
+.problem-attachment,
+.problem-download-statement {
+  display: block;
+  color: inherit;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.problem-statement {
+  flex: 1 1 100%;
+  align-items: stretch;
+  border: none;
+  box-shadow: inset 4px 4px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
 .focus-mode-toggler {
