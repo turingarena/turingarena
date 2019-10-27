@@ -3,6 +3,9 @@
     <ng-container *ngFor="let problem of data.contestView.problems">
       <ng-container *ngIf="problem.name === problemName">
         <form class="submission_form" (submit)="$event.preventDefault(); submit($event)">
+          <div class="modal-header">
+            <h4 class="modal-title">New submission</h4>
+          </div>
           <div class="submission_form_body">
             <div *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
               <ng-container *ngIf="fieldState(field) as state">
