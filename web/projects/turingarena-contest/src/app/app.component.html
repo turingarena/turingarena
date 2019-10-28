@@ -113,7 +113,7 @@
                   <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
                   </app-submission-dialog>
                 </ng-template>
-                <button class="problem-last-submission" (click)="modalService.open(dialog)">
+                <button class="problem-last-submission" (click)="modalService.open(dialog, { size: 'lg' })">
                   <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                   <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                   </fa-icon>
@@ -179,7 +179,7 @@
                       <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
                       </app-submission-dialog>
                     </ng-template>
-                    <button class="problem-last-submission" (click)="modalService.open(dialog)">
+                    <button class="problem-last-submission" (click)="modalService.open(dialog, { size: 'lg' })">
                       <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                       <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                       </fa-icon>

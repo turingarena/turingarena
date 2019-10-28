@@ -112,6 +112,16 @@ export const problemMaterialFragment = gql`
                   ... on MessageCellContent {
                     ref
                   }
+                  ... on TimeUsageCellContent {
+                    timeUsageMaxRelevant: maxRelevant
+                    timeUsagePrimaryWatermark: primaryWatermark
+                    ref
+                  }
+                  ... on MemoryUsageCellContent {
+                    memoryUsageMaxRelevant: maxRelevant
+                    memoryUsagePrimaryWatermark: primaryWatermark
+                    ref
+                  }
                 }
               }
             }

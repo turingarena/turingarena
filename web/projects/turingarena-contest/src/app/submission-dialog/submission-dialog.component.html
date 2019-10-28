@@ -69,6 +69,32 @@
                           <td></td>
                         </ng-container>
                       </ng-container>
+                      <ng-container *ngSwitchCase="'TimeUsageCellContent'">
+                        <ng-container *ngIf="record[cell.content.ref] as value">
+                          <td class="cell-time-usage">
+                            {{ displayTimeSeconds(value.timeUsage) }}
+                            <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
+                              {{ displayTimeSeconds(watermark) }}
+                            </small>
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="!record[cell.content.ref]">
+                          <td></td>
+                        </ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'MemoryUsageCellContent'">
+                        <ng-container *ngIf="record[cell.content.ref] as value">
+                          <td class="cell-memory-usage">
+                            {{ value.memoryUsage | filesize }}
+                            <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
+                              {{ watermark | filesize }}
+                            </small>
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="!record[cell.content.ref]">
+                          <td></td>
+                        </ng-container>
+                      </ng-container>
                       <td *ngSwitchDefault="">
                         ?
                       </td>

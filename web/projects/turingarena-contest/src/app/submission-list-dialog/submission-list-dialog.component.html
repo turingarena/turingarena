@@ -63,7 +63,7 @@
                   <td>
                     <app-relative-time [time]="submission.createdAt"></app-relative-time>
                     <br />
-                    <a href="#" (click)="modalService.open(submissionDialog); $event.preventDefault()">
+                    <a href="#" (click)="modalService.open(submissionDialog, { size: 'lg' }); $event.preventDefault()">
                       details
                     </a>
                   </td>

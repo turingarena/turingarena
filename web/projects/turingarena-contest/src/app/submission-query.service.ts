@@ -28,6 +28,12 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
                 ... on ScoreValue {
                   score
                 }
+                ... on TimeUsageValue {
+                  timeUsage
+                }
+                ... on MemoryUsageValue {
+                  memoryUsage
+                }
               }
             }
           }

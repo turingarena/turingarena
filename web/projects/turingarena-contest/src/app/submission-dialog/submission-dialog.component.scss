@@ -24,6 +24,11 @@
   @extend .btn, .btn-primary;
 }
 
+.cell-time-usage,
+.cell-memory-usage {
+  text-align: right;
+}
+
 .evaluation_table {
   @extend .table, .table-sm;
 }

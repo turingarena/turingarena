@@ -5,10 +5,12 @@ import {
   SubmissionQuery,
   SubmissionQueryVariables,
   SubmissionQuery_submission_evaluationEvents_event_ValueEvent_value as Value,
+  SubmissionQuery_submission,
 } from '../__generated__/SubmissionQuery';
 import { SubmissionQueryService } from '../submission-query.service';
 import { ContestQuery_contestView_problems as Problem } from '../__generated__/ContestQuery';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { Duration } from 'luxon';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -51,6 +53,14 @@ export class SubmissionDialogComponent implements OnInit {
       }
     }
     return record;
+  }
+
+  displayTimeSeconds(seconds: number) {
+    if (seconds < 1) {
+      return `${(seconds * 1000).toPrecision(3)} ms`;
+    } else {
+      return `${seconds.toPrecision(3)} s`;
+    }
   }
 
 }
