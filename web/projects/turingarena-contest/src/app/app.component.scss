@@ -49,6 +49,8 @@
 
 .contest-aside {
   flex: 0 0 auto;
+  overflow-y: auto;
+
   padding: 16px;
   width: 16em;
   background-color: #f8f9fa;
@@ -130,12 +132,11 @@
 }
 
 .problem-aside {
+  display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
-  padding: 16px;
   width: 15em;
   background-color: #f8f9fa;
-
-  overflow-y: auto;
 }
 
 .problem-aside h2 {
@@ -147,7 +148,14 @@
 }
 
 .problem-submission-panel {
-  margin-bottom: 16px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.problem-info {
+  padding: 16px;
+  flex: 0 0 100%;
+  overflow-y: auto;
 }
 
 .problem-submit {
