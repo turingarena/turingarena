@@ -218,7 +218,7 @@ pub fn insert(
     user_id: &str,
     problem_name: &str,
     files: Vec<FileInput>,
-) -> Result<Submission, Box<dyn std::error::Error>> {
+) -> Result<Submission> {
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Local::now().to_rfc3339();
     let submission = SubmissionTableInput {

@@ -99,22 +99,22 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-pub fn generate_schema(context: Context) {
+pub fn generate_schema(context: Context) -> Result<()> {
     let (schema, _errors) = juniper::introspect(
         &Schema::new(contest::ContestQueries {}, contest::ContestQueries {}),
         &context,
         juniper::IntrospectionFormat::All,
     )
-    .unwrap();
-    println!("{}", serde_json::to_string_pretty(&schema).unwrap());
+    .unwrap(); // TODO: GraphQLError doesn't yet implement Error trait... there is a PR open
+    println!("{}", serde_json::to_string_pretty(&schema)?);
+    Ok(())
 }
 
-pub fn run_server(host: String, port: u16, context: Context) {
-    let config = rocket::Config::build(rocket::config::Environment::active().unwrap())
+pub fn run_server(host: String, port: u16, context: Context) -> Result<()> {
+    let config = rocket::Config::build(rocket::config::Environment::active()?)
         .port(port)
         .address(host)
-        .finalize()
-        .unwrap();
+        .finalize()?;
 
     rocket::custom(config)
         .manage(Schema::new(
@@ -130,4 +130,5 @@ pub fn run_server(host: String, port: u16, context: Context) {
             rocket::routes![graphiql, options_graphql, post_graphql_handler, index, dist],
         )
         .launch();
+    Ok(())
 }

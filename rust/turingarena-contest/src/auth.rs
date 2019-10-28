@@ -38,6 +38,6 @@ pub fn auth(conn: &SqliteConnection, token: &str, secret: &[u8]) -> FieldResult<
 }
 
 /// Validates a JWT token
-pub fn validate(token: &str, secret: &[u8]) -> Result<JwtData, Box<dyn Error>> {
+pub fn validate(token: &str, secret: &[u8]) -> Result<JwtData> {
     Ok(decode(token, &secret, &Validation::default())?.claims)
 }

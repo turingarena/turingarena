@@ -48,6 +48,9 @@ mod user;
 
 embed_migrations!();
 
+/// Convenience Result type
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
 /// Context for the API
 #[derive(Debug, Clone)]
 pub struct Context {
@@ -141,43 +144,45 @@ impl Context {
     // TODO: move the following methods in a more appropriate location
 
     /// Initialize the database
-    fn init_db(&self, contest_title: &str) {
-        let connection = self.connect_db().expect("Error connecting to the database");
-        embedded_migrations::run_with_output(&connection, &mut std::io::stdout())
-            .expect("Error while initializing the database");
-        config::create_config(&connection, contest_title)
-            .expect("Error creating contest configuration in the DB");
+    fn init_db(&self, contest_title: &str) -> Result<()> {
+        embedded_migrations::run_with_output(&self.connect_db()?, &mut std::io::stdout())?;
+        config::create_config(&self.connect_db()?, contest_title)?;
+        Ok(())
     }
 
-    fn add_user(&self, id: &str, display_name: &str, token: &str) {
-        let conn = self.connect_db().expect("cannot connect to database");
-        user::insert(&conn, UserId(id.to_owned()), display_name, token)
-            .expect("Error inserting user into the db");
+    fn add_user(&self, id: &str, display_name: &str, token: &str) -> Result<()> {
+        user::insert(
+            &self.connect_db()?,
+            UserId(id.to_owned()),
+            display_name,
+            token,
+        )?;
+        Ok(())
     }
 
-    fn delete_user(&self, id: &str) {
-        let conn = self.connect_db().expect("cannot connect to database");
-        user::delete(&conn, UserId(id.to_owned())).expect("Error deleting user from db");
+    fn delete_user(&self, id: &str) -> Result<()> {
+        user::delete(&self.connect_db()?, UserId(id.to_owned()))?;
+        Ok(())
     }
 
-    fn add_problem(&self, name: &str) {
-        let conn = self.connect_db().expect("cannot connect to database");
-        problem::insert(&conn, ProblemName(name.to_owned()))
-            .expect("Error inserting the problem into the db")
+    fn add_problem(&self, name: &str) -> Result<()> {
+        problem::insert(&self.connect_db()?, ProblemName(name.to_owned()))?;
+        Ok(())
     }
 
-    fn delete_problem(&self, name: &str) {
-        let conn = self.connect_db().expect("cannot connect to database");
-        problem::delete(&conn, ProblemName(name.to_owned()))
-            .expect("Error deleting problem from the db");
+    fn delete_problem(&self, name: &str) -> Result<()> {
+        problem::delete(&self.connect_db()?, ProblemName(name.to_owned()))?;
+        Ok(())
     }
 
-    fn set_start_time(&self, time: DateTime<Local>) {
+    fn set_start_time(&self, time: DateTime<Local>) -> Result<()> {
         println!("TODO: set start date {}", time.to_rfc3339());
+        Ok(())
     }
 
-    fn set_end_time(&self, time: DateTime<Local>) {
+    fn set_end_time(&self, time: DateTime<Local>) -> Result<()> {
         println!("TODO: set start date {}", time.to_rfc3339());
+        Ok(())
     }
 }
 
@@ -194,7 +199,7 @@ impl MutationOk {
 
 pub type Schema = juniper::RootNode<'static, contest::ContestQueries, contest::ContestQueries>;
 
-fn main() {
+fn main() -> Result<()> {
     let args = Args::from_args();
     let context = Context::new()
         .with_database_url(args.database_url)
@@ -212,7 +217,7 @@ fn main() {
                 eprintln!("WARNING: authentication disabled");
             } else if secret_key == None {
                 eprintln!("ERROR: provide a secret OR set skip-auth");
-                return;
+                Err::<(), String>("Secret not provided".to_owned())?;
             }
             run_server(
                 host,
@@ -220,7 +225,7 @@ fn main() {
                 context
                     .with_skip_auth(skip_auth)
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
-            );
+            )
         }
         InitDb { contest_title } => context.init_db(&contest_title),
         AddUser {
@@ -231,8 +236,6 @@ fn main() {
         DeleteUser { username } => context.delete_user(&username),
         AddProblem { name } => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
-        ImportContest { path, format } => {
-            formats::import(&context, &path, &format).expect("Error importing contest");
-        }
+        ImportContest { path, format } => formats::import(&context, &path, &format),
     }
 }
