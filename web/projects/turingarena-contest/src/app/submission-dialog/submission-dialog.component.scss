@@ -61,17 +61,17 @@
   @extend .table-secondary;
 }
 
-.score_cell {
-  &.score_zero {
+.cell-valence {
+  &.failure {
     @extend .table-danger;
   }
-  &.score_partial {
+  &.warning {
     @extend .table-warning;
   }
-  &.score_full {
-    @extend .table-success;
+  &.partial {
+    @extend .table-warning;
   }
-  &.score_zero.score_full {
-    @extend .table-light;
+  &.success {
+    @extend .table-success;
   }
 }

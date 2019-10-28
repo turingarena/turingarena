@@ -111,16 +111,19 @@ export const problemMaterialFragment = gql`
                   }
                   ... on MessageCellContent {
                     key
+                    valenceKey
                   }
                   ... on TimeUsageCellContent {
                     timeUsageMaxRelevant: maxRelevant
                     timeUsagePrimaryWatermark: primaryWatermark
                     key
+                    valenceKey
                   }
                   ... on MemoryUsageCellContent {
                     memoryUsageMaxRelevant: maxRelevant
                     memoryUsagePrimaryWatermark: primaryWatermark
                     key
+                    valenceKey
                   }
                 }
               }

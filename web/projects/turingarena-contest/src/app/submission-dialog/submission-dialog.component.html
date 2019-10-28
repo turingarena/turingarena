@@ -38,30 +38,30 @@
                 <tr *ngFor="let row of group.rows" class="evaluation_row">
                   <ng-container *ngFor="let col of section.cols; index as i">
                     <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
-                      <th *ngSwitchCase="'RowNumberCellContent'" class="score_cell">
+                      <th *ngSwitchCase="'RowNumberCellContent'">
                         {{ cell.content.number }}
                       </th>
-                      <th *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
+                      <th *ngSwitchCase="'RowTitleCellContent'">
                         {{ cell.content.title | textVariant }}
                       </th>
                       <ng-container *ngSwitchCase="'ScoreCellContent'">
                         <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="score_cell" [class.score_zero]="value.score <= 0"
-                            [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
-                            [class.score_full]="cell.content.range.max <= value.score">
+                          <td class="cell-valence" [class.failure]="value.score <= 0"
+                            [class.partial]="0 < value.score && value.score < cell.content.range.max"
+                            [class.success]="cell.content.range.max <= value.score">
                             {{ value.score.toFixed(cell.content.range.precision) }} /
                             {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                           </td>
                         </ng-container>
                         <ng-container *ngIf="!record[cell.content.key]">
-                          <td class="score_cell">
+                          <td>
                             ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                           </td>
                         </ng-container>
                       </ng-container>
                       <ng-container *ngSwitchCase="'MessageCellContent'">
                         <ng-container *ngIf="record[cell.content.key] as value">
-                          <td>
+                          <td class="cell-valence" [ngClass]="getValence(record, cell.content.valenceKey)">
                             {{ value.text | textVariant }}
                           </td>
                         </ng-container>
@@ -71,7 +71,8 @@
                       </ng-container>
                       <ng-container *ngSwitchCase="'TimeUsageCellContent'">
                         <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-time-usage">
+                          <td class="cell-time-usage cell-valence"
+                            [ngClass]="getValence(record, cell.content.valenceKey)">
                             {{ displayTimeSeconds(value.timeUsage) }}
                             <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
                               {{ displayTimeSeconds(watermark) }}
@@ -84,7 +85,8 @@
                       </ng-container>
                       <ng-container *ngSwitchCase="'MemoryUsageCellContent'">
                         <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-memory-usage">
+                          <td class="cell-memory-usage cell-valence"
+                            [ngClass]="getValence(record, cell.content.valenceKey)">
                             {{ value.memoryUsage | filesize }}
                             <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
                               {{ watermark | filesize }}

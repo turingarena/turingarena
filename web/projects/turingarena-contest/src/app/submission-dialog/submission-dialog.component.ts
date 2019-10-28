@@ -63,4 +63,9 @@ export class SubmissionDialogComponent implements OnInit {
     }
   }
 
+  getValence(record: Record<string, any>, key: string) {
+    const value = record[key];
+    if (value === undefined) { return 'unknown'; }
+    return value.valence.toLowerCase();
+  }
 }

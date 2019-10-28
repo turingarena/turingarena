@@ -34,6 +34,9 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
                 ... on MemoryUsageValue {
                   memoryUsage
                 }
+                ... on ValenceValue {
+                  valence
+                }
               }
             }
           }
