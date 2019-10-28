@@ -162,26 +162,26 @@ fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcase
                         max: Score(1.),
                         allow_partial: true,
                     },
-                    r#ref: Key(format!("testcase.{}.score", testcase.id)),
+                    key: Key(format!("testcase.{}.score", testcase.id)),
                 }),
             },
             Cell {
                 content: CellContent::TimeUsage(TimeUsageCellContent {
                     max_relevant: TimeUsage(task.time_limit.unwrap_or(10.0)),
                     primary_watermark: task.time_limit.map(|l| TimeUsage(l)),
-                    r#ref: Key(format!("testcase.{}.time_usage", testcase.id)),
+                    key: Key(format!("testcase.{}.time_usage", testcase.id)),
                 }),
             },
             Cell {
                 content: CellContent::MemoryUsage(MemoryUsageCellContent {
                     max_relevant: MemoryUsage((task.memory_limit.unwrap_or(1024) * 1024 * 1024 * 2) as i32),
                     primary_watermark: task.memory_limit.map(|l| MemoryUsage((l * 1024 * 1024) as i32)),
-                    r#ref: Key(format!("testcase.{}.memory_usage", testcase.id)),
+                    key: Key(format!("testcase.{}.memory_usage", testcase.id)),
                 }),
             },
             Cell {
                 content: CellContent::Message(MessageCellContent {
-                    r#ref: Key(format!("testcase.{}.message", testcase.id)),
+                    key: Key(format!("testcase.{}.message", testcase.id)),
                 }),
             },
         ],

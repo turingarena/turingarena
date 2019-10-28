@@ -103,24 +103,24 @@ export const problemMaterialFragment = gql`
                     }
                   }
                   ... on ScoreCellContent {
-                    ref
+                    key
                     range {
                       max
                       precision
                     }
                   }
                   ... on MessageCellContent {
-                    ref
+                    key
                   }
                   ... on TimeUsageCellContent {
                     timeUsageMaxRelevant: maxRelevant
                     timeUsagePrimaryWatermark: primaryWatermark
-                    ref
+                    key
                   }
                   ... on MemoryUsageCellContent {
                     memoryUsageMaxRelevant: maxRelevant
                     memoryUsagePrimaryWatermark: primaryWatermark
-                    ref
+                    key
                   }
                 }
               }

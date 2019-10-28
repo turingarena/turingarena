@@ -45,7 +45,7 @@
                         {{ cell.content.title | textVariant }}
                       </th>
                       <ng-container *ngSwitchCase="'ScoreCellContent'">
-                        <ng-container *ngIf="record[cell.content.ref] as value">
+                        <ng-container *ngIf="record[cell.content.key] as value">
                           <td class="score_cell" [class.score_zero]="value.score <= 0"
                             [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
                             [class.score_full]="cell.content.range.max <= value.score">
@@ -53,24 +53,24 @@
                             {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                           </td>
                         </ng-container>
-                        <ng-container *ngIf="!record[cell.content.ref]">
+                        <ng-container *ngIf="!record[cell.content.key]">
                           <td class="score_cell">
                             ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
                           </td>
                         </ng-container>
                       </ng-container>
                       <ng-container *ngSwitchCase="'MessageCellContent'">
-                        <ng-container *ngIf="record[cell.content.ref] as value">
+                        <ng-container *ngIf="record[cell.content.key] as value">
                           <td>
                             {{ value.text | textVariant }}
                           </td>
                         </ng-container>
-                        <ng-container *ngIf="!record[cell.content.ref]">
+                        <ng-container *ngIf="!record[cell.content.key]">
                           <td></td>
                         </ng-container>
                       </ng-container>
                       <ng-container *ngSwitchCase="'TimeUsageCellContent'">
-                        <ng-container *ngIf="record[cell.content.ref] as value">
+                        <ng-container *ngIf="record[cell.content.key] as value">
                           <td class="cell-time-usage">
                             {{ displayTimeSeconds(value.timeUsage) }}
                             <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
@@ -78,12 +78,12 @@
                             </small>
                           </td>
                         </ng-container>
-                        <ng-container *ngIf="!record[cell.content.ref]">
+                        <ng-container *ngIf="!record[cell.content.key]">
                           <td></td>
                         </ng-container>
                       </ng-container>
                       <ng-container *ngSwitchCase="'MemoryUsageCellContent'">
-                        <ng-container *ngIf="record[cell.content.ref] as value">
+                        <ng-container *ngIf="record[cell.content.key] as value">
                           <td class="cell-memory-usage">
                             {{ value.memoryUsage | filesize }}
                             <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
@@ -91,7 +91,7 @@
                             </small>
                           </td>
                         </ng-container>
-                        <ng-container *ngIf="!record[cell.content.ref]">
+                        <ng-container *ngIf="!record[cell.content.key]">
                           <td></td>
                         </ng-container>
                       </ng-container>

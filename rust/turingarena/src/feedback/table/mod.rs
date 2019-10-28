@@ -161,8 +161,7 @@ pub struct ScoreCellContent {
     /// Must be a sub-range of the column score range.
     pub range: award::ScoreRange,
     /// Reference to the evaluation value containing the score to show in this cell.
-    #[graphql(name = "ref")]
-    pub r#ref: Key,
+    pub key: Key,
 }
 
 /// Cell containing an amount of time used for computation.
@@ -178,8 +177,7 @@ pub struct TimeUsageCellContent {
     // TODO: add secondary watermarks (each with a title)
 
     /// Reference to the evaluation value containing the time usage to show in this cell.
-    #[graphql(name = "ref")]
-    pub r#ref: Key,
+    pub key: Key,
 }
 
 
@@ -196,13 +194,11 @@ pub struct MemoryUsageCellContent {
     // TODO: add secondary watermarks (each with a title)
 
     /// Reference to the evaluation value containing the memory usage to show in this cell.
-    #[graphql(name = "ref")]
-    pub r#ref: Key,
+    pub key: Key,
 }
 
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct MessageCellContent {
     /// Reference to the evaluation value containing the message to show in this cell.
-    #[graphql(name = "ref")]
-    pub r#ref: Key,
+    pub key: Key,
 }
