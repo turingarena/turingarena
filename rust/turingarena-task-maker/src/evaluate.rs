@@ -159,7 +159,7 @@ fn ui_message_to_events(ui_message: UIMessage, tx: &Sender<Event>) -> Result<(),
                 tx.send(Event::Value(ValueEvent {
                     key: record::Key(format!("testcase.{}.memory_usage", testcase)),
                     value: record::Value::MemoryUsage(record::MemoryUsageValue {
-                        memory_usage: MemoryUsage(result.resources.memory as i32),
+                        memory_usage: MemoryUsage((result.resources.memory * 1024) as i32),
                     }),
                 }))?;
             }

@@ -8,8 +8,9 @@ use task_maker_format::ioi;
 use turingarena::award::*;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
-use turingarena::feedback::{table::*, *};
+use turingarena::feedback::{*, table::*};
 use turingarena::problem::material::*;
+use turingarena::rusage::{MemoryUsage, TimeUsage};
 use turingarena::submission::form::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
@@ -107,6 +108,20 @@ fn cols() -> Vec<Col> {
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
+                value: format!("Time usage"),
+            }],
+            content: ColContent::TimeUsage(TimeUsageColContent),
+        },
+        Col {
+            title: vec![TextVariant {
+                attributes: vec![],
+                value: format!("Memory usage"),
+            }],
+            content: ColContent::MemoryUsage(MemoryUsageColContent),
+        },
+        Col {
+            title: vec![TextVariant {
+                attributes: vec![],
                 value: format!("Message"),
             }],
             content: ColContent::Message(MessageColContent),
@@ -121,17 +136,17 @@ fn caption() -> Text {
     }]
 }
 
-fn row_group_of(subtask: &ioi::SubtaskInfo) -> RowGroup {
+fn row_group_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo) -> RowGroup {
     RowGroup {
         title: vec![TextVariant {
             attributes: vec![],
             value: format!("Subtask {}", subtask.id),
         }],
-        rows: testcases_of(subtask).into_iter().map(row_of).collect(),
+        rows: testcases_of(subtask).into_iter().map(|testcase| row_of(task, subtask, testcase)).collect(),
     }
 }
 
-fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
+fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::TestcaseInfo) -> Row {
     Row {
         content: RowContent::Data,
         cells: vec![
@@ -151,6 +166,20 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
                 }),
             },
             Cell {
+                content: CellContent::TimeUsage(TimeUsageCellContent {
+                    max_relevant: TimeUsage(task.time_limit.unwrap_or(10.0)),
+                    primary_watermark: task.time_limit.map(|l| TimeUsage(l)),
+                    r#ref: Key(format!("testcase.{}.time_usage", testcase.id)),
+                }),
+            },
+            Cell {
+                content: CellContent::MemoryUsage(MemoryUsageCellContent {
+                    max_relevant: MemoryUsage((task.memory_limit.unwrap_or(1024) * 1024 * 1024 * 2) as i32),
+                    primary_watermark: task.memory_limit.map(|l| MemoryUsage((l * 1024 * 1024) as i32)),
+                    r#ref: Key(format!("testcase.{}.memory_usage", testcase.id)),
+                }),
+            },
+            Cell {
                 content: CellContent::Message(MessageCellContent {
                     r#ref: Key(format!("testcase.{}.message", testcase.id)),
                 }),
@@ -159,7 +188,7 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
     }
 }
 
-fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item=std::path::PathBuf> {
     std::fs::read_dir(dir_path)
         .expect("unable to read_dir")
         .map(|entry| entry.expect("unable to read_dir").path())
@@ -278,7 +307,7 @@ pub fn gen_material(task: &ioi::Task) -> Material {
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
-            row_groups: subtasks_of(task).into_iter().map(row_group_of).collect(),
+            row_groups: subtasks_of(task).into_iter().map(|subtask| row_group_of(task, subtask)).collect(),
         })],
     }
 }
