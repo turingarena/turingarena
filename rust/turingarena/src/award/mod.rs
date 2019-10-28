@@ -21,6 +21,8 @@ pub struct ScoreRange {
     pub precision: i32,
     /// Maximum score.
     pub max: Score,
+    /// Whether partial scores are allowed. If `false`, score must be either zero or `max`.
+    pub allow_partial: bool,
 }
 
 /// An award that has a numerical score

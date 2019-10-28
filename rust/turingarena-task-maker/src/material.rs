@@ -67,9 +67,11 @@ fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
         content: if subtask.max_score > 0.0 {
             AwardContent::Score(ScoreAwardContent {
                 range: ScoreRange {
-                    // TODO: assuming IOI-like tasks have integer scores
+                    // TODO: determine actual precision (may depend on the task)
                     precision: 0,
                     max: Score(subtask.max_score),
+                    // TODO: determine whether partial scores are allowed (may depend on the task)
+                    allow_partial: true,
                 },
             })
         } else {
@@ -94,9 +96,11 @@ fn cols() -> Vec<Col> {
             }],
             content: ColContent::Score(ScoreColContent {
                 range: ScoreRange {
-                    // FIXME: assuming per-test-case score has fixed precision
+                    // TODO: determine actual precision
                     precision: 2,
                     max: Score(1.),
+                    // TODO: determine if partial scores are actually allowed
+                    allow_partial: true,
                 },
             }),
         },
@@ -141,6 +145,7 @@ fn row_of(testcase: &ioi::TestcaseInfo) -> Row {
                     range: ScoreRange {
                         precision: 2,
                         max: Score(1.),
+                        allow_partial: true,
                     },
                     r#ref: Key(format!("testcase.{}.score", testcase.id)),
                 }),
