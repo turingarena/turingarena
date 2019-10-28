@@ -137,7 +137,7 @@ export class AppComponent {
       precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),
       getProblemState,
     };
-  };
+  }
 
   formatDuration(duration: Duration) {
     return duration.toFormat('hh:mm:ss');
@@ -152,50 +152,6 @@ export class AppComponent {
     });
     this.contestQuery.refetch();
     this.contestQuery.startPolling(10000);
-  }
-
-  async openSubmitDialog() {
-    const modalRef = this.modalService.open(SubmitDialogComponent);
-    const modal = modalRef.componentInstance as SubmitDialogComponent;
-
-    modal.appComponent = this;
-    modal.problemName = this.selectedProblemName;
-
-    try {
-      await modalRef.result;
-    } catch (e) {
-      // dismissed, do nothing
-    }
-  }
-
-  async openSubmissionList(problem: ContestProblem) {
-    const modalRef = this.modalService.open(SubmissionListDialogComponent, { size: 'xl' });
-    const modal = modalRef.componentInstance;
-
-    modal.appComponent = this;
-    modal.problemName = problem.name;
-
-    try {
-      await modalRef.result;
-    } catch (e) {
-      // dismissed, do nothing
-    }
-  }
-
-  // FIXME: repeated code
-  async openSubmission(submission: Submission) {
-    const modalRef = this.modalService.open(SubmissionDialogComponent, { size: 'lg' });
-    const modal = modalRef.componentInstance;
-
-    modal.appComponent = this;
-    modal.problemName = this.selectedProblemName;
-    modal.submissionId = submission.id;
-
-    try {
-      await modalRef.result;
-    } catch (e) {
-      // No-op
-    }
   }
 
   async openLoginDialog() {
