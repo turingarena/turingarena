@@ -89,7 +89,7 @@
             </app-submit-dialog>
           </ng-template>
           <ng-template #submissionListDialog let-modal>
-            <app-submission-list-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal">
+            <app-submission-list-dialog [problemName]="problem.name" [userId]="data.contestView.user.id" [modal]="modal">
             </app-submission-list-dialog>
           </ng-template>
           <aside class="focus-mode-aside" [hidden]="selectedProblemName !== problem.name || !focusMode">

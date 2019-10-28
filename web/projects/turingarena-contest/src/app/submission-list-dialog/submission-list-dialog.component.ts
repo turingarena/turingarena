@@ -6,9 +6,9 @@ import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
   SubmissionListQuery_contestView_problem_submissions as Submission,
+  SubmissionListQuery_contestView_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
 import { scoreRanges } from '../problem-material';
-import { ContestQuery_contestView_problems as Problem } from '../__generated__/ContestQuery';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -26,7 +26,7 @@ export class SubmissionListDialogComponent implements OnInit {
   userId: string;
 
   @Input()
-  problem: Problem;
+  problemName: string;
 
   @Input()
   modal: NgbActiveModal;
@@ -36,16 +36,16 @@ export class SubmissionListDialogComponent implements OnInit {
   ngOnInit() {
     this.submissionListQuery = this.submissionListQueryService.watch({
       userId: this.userId,
-      problemName: this.problem.name,
+      problemName: this.problemName,
     }, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 1000,
       });
   }
 
-  getSubmissionState(submission: Submission) {
+  getSubmissionState(problem: Problem, submission: Submission) {
     return {
-      score: this.problem.material.awards
+      score: problem.material.awards
         .map((award) => submission.scores.find((s) => s.awardName === award.name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
