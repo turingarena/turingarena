@@ -1,7 +1,7 @@
 /// Italy YAML contest importation format
 use super::{Importer, ImporterResult};
 use crate::Context;
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
+use chrono::{Local, TimeZone};
 use std::path::{Path, PathBuf};
 
 /// The Italy YAML contest.yaml file
@@ -9,8 +9,8 @@ use std::path::{Path, PathBuf};
 struct ContestYaml {
     name: String,
     description: String,
-    start: f64,
-    stop: f64,
+    start: Option<f64>,
+    stop: Option<f64>,
     tasks: Vec<String>,
     users: Vec<ItalyYamlUser>,
 }
@@ -40,7 +40,12 @@ impl Importer for ItalyYamlImporter {
         let content = std::fs::read(&self.path)?;
         let contest_yaml = serde_yaml::from_slice::<ContestYaml>(&content)?;
         context.init_db(&contest_yaml.description)?;
-        // TODO: start and end date
+        if let Some(start) = contest_yaml.start {
+            context.set_start_time(Local.timestamp(start as i64, 0))?;
+        }
+        if let Some(end) = contest_yaml.stop {
+            context.set_end_time(Local.timestamp(end as i64, 0))?;
+        }
         for task in contest_yaml.tasks {
             context.add_problem(&task)?;
         }

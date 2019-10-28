@@ -80,5 +80,9 @@ pub enum Command {
         /// Import format
         #[structopt(long, short, default_value = "italy_yaml")]
         format: String,
+
+        /// Delete existing contest if already exists
+        #[structopt(long)]
+        force: bool,
     },
 }

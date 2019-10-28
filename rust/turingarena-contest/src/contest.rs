@@ -1,7 +1,7 @@
-use juniper::{FieldError, FieldResult};
-
 use crate::*;
+use juniper::{FieldError, FieldResult};
 use problem::Problem;
+use schema::contest;
 use user::User;
 
 /// A user authorization token
@@ -95,16 +95,81 @@ impl ContestView {
 
     /// Title of the contest, as shown to the user
     fn contest_title(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.connect_db()?)?.contest_title)
+        Ok(current_contest(&ctx.connect_db()?)?.title)
     }
 
     /// Start time of the user participation, as RFC3339 date
     fn start_time(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.connect_db()?)?.start_time)
+        Ok(current_contest(&ctx.connect_db()?)?.start_time)
     }
 
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(config::current_config(&ctx.connect_db()?)?.end_time)
+        Ok(current_contest(&ctx.connect_db()?)?.end_time)
     }
+}
+
+/// The configuration of a contest
+#[derive(Queryable)]
+pub struct ContestData {
+    /// Primary key of the table. Should be *always* 0!
+    pub id: i32,
+
+    /// Title of the contest, shown to the users
+    pub title: String,
+
+    /// Starting time of the contest, as RFC3339 date
+    pub start_time: String,
+
+    /// End time of the contest, as RFC3339 date
+    pub end_time: String,
+}
+
+/// Get the current configuration
+pub fn current_contest(conn: &SqliteConnection) -> QueryResult<ContestData> {
+    contest::table.first(conn)
+}
+
+#[derive(Insertable)]
+#[table_name = "contest"]
+struct ContestDataInput<'a> {
+    title: &'a str,
+    start_time: &'a str,
+    end_time: &'a str,
+}
+
+/// Create a defualt configuration
+pub fn create_config(conn: &SqliteConnection, title: &str) -> QueryResult<()> {
+    let now = chrono::Local::now();
+    let configuration = ContestDataInput {
+        title,
+        start_time: &now.to_rfc3339(),
+        end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
+    };
+    diesel::insert_into(contest::table)
+        .values(configuration)
+        .execute(conn)?;
+    Ok(())
+}
+
+/// Set the contest start date
+pub fn set_start_time(
+    conn: &SqliteConnection,
+    start: chrono::DateTime<chrono::Local>,
+) -> QueryResult<()> {
+    diesel::update(contest::table)
+        .set(contest::dsl::start_time.eq(start.to_rfc3339()))
+        .execute(conn)?;
+    Ok(())
+}
+
+/// Set the contest end date
+pub fn set_end_time(
+    conn: &SqliteConnection,
+    end: chrono::DateTime<chrono::Local>,
+) -> QueryResult<()> {
+    diesel::update(contest::table)
+        .set(contest::dsl::end_time.eq(end.to_rfc3339()))
+        .execute(conn)?;
+    Ok(())
 }

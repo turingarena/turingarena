@@ -46,9 +46,9 @@ CREATE TABLE score_awards(
     PRIMARY KEY (submission_id, award_name)
 );
 
-CREATE TABLE config(
+CREATE TABLE contest(
     id              INT  NOT NULL PRIMARY KEY DEFAULT 0 CHECK (id = 0), -- to ensure this table has a single row
-    contest_title   TEXT NOT NULL, 
+    title           TEXT NOT NULL,
     start_time      TEXT NOT NULL,
     end_time        TEXT NOT NULL
 );

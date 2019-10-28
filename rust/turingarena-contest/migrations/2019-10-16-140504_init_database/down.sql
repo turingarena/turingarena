@@ -5,4 +5,4 @@ DROP TABLE submission_files;
 DROP TABLE evaluation_events;
 DROP TABLE score_awards;
 DROP TABLE badge_awards;
-DROP TABLE config;
+DROP TABLE contest;

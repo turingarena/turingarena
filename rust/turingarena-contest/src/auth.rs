@@ -3,7 +3,6 @@ use contest::UserToken;
 use diesel::SqliteConnection;
 use juniper::FieldResult;
 use jwt::{decode, encode, Header, Validation};
-use std::error::Error;
 
 /// Wraps a JWT User token
 #[derive(juniper::GraphQLScalarValue)]

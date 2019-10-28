@@ -146,7 +146,7 @@ impl Context {
     /// Initialize the database
     fn init_db(&self, contest_title: &str) -> Result<()> {
         embedded_migrations::run_with_output(&self.connect_db()?, &mut std::io::stdout())?;
-        config::create_config(&self.connect_db()?, contest_title)?;
+        contest::create_config(&self.connect_db()?, contest_title)?;
         Ok(())
     }
 
@@ -176,12 +176,12 @@ impl Context {
     }
 
     fn set_start_time(&self, time: DateTime<Local>) -> Result<()> {
-        println!("TODO: set start date {}", time.to_rfc3339());
+        contest::set_start_time(&self.connect_db()?, time)?;
         Ok(())
     }
 
     fn set_end_time(&self, time: DateTime<Local>) -> Result<()> {
-        println!("TODO: set start date {}", time.to_rfc3339());
+        contest::set_end_time(&self.connect_db()?, time)?;
         Ok(())
     }
 }
@@ -236,6 +236,15 @@ fn main() -> Result<()> {
         DeleteUser { username } => context.delete_user(&username),
         AddProblem { name } => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
-        ImportContest { path, format } => formats::import(&context, &path, &format),
+        ImportContest {
+            path,
+            format,
+            force,
+        } => {
+            if force {
+                std::fs::remove_file(&context.database_url)?;
+            }
+            formats::import(&context, &path, &format)
+        }
     }
 }

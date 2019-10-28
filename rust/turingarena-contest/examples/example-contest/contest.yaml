@@ -1,7 +1,7 @@
 name: test
 description: Test contest
-start: 1571986800.0
-stop: 1572003000.0
+# start: 1571986800.0
+# stop: 1572003000.0
 tasks:
   - easy1
 users:
