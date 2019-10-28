@@ -3,9 +3,9 @@ all: graphql-schema
 	cd web/ && npm ci --ignore-scripts
 	cd web/ && npm run prepare
 	cd web/ && npm run build
-	rm -rf rust/turingarena-contest-webcontent/__generated__/webcontent/
-	mkdir -p rust/turingarena-contest-webcontent/__generated__/webcontent/
-	cp -r web/dist/turingarena-contest/* rust/turingarena-contest-webcontent/__generated__/webcontent/
+	rm -rf rust/turingarena-contest-web-content/__generated__/web-content/
+	mkdir -p rust/turingarena-contest-web-content/__generated__/web-content/
+	cp -r web/dist/turingarena-contest/* rust/turingarena-contest-web-content/__generated__/web-content/
 
 	cd rust/ && cargo build
 

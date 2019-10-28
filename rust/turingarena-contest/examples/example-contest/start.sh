@@ -9,4 +9,4 @@ for i in {1..10}; do
 done
 cargo run -- --problems-dir $PWD add-user test Test test
 cargo run -- --problems-dir $PWD add-problem easy1
-cargo run --features webcontent -- --problems-dir $PWD serve --skip-auth 1 --secret-key secret
+cargo run --features web-content -- --problems-dir $PWD serve --skip-auth 1 --secret-key secret

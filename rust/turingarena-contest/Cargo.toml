@@ -5,7 +5,7 @@ authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
 edition = "2018"
 
 [features]
-webcontent = ["turingarena-contest-webcontent"]
+web-content = ["turingarena-contest-web-content"]
 
 [dependencies]
 juniper = "0.14.0"
@@ -15,7 +15,7 @@ diesel = { version = "1.4.2", features = ["sqlite"] }
 diesel_migrations = "1.4.0"
 rand = "0.7.2"
 chrono = "0.4.9"
-turingarena-contest-webcontent = { path = "../turingarena-contest-webcontent/", optional = true }
+turingarena-contest-web-content = { path = "../turingarena-contest-web-content/", optional = true }
 turingarena-task-maker = { path = "../turingarena-task-maker/" }
 turingarena = { path = "../turingarena/" }
 structopt = "~0.3.3"

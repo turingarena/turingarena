@@ -21,8 +21,8 @@ extern crate tempdir;
 extern crate turingarena;
 extern crate uuid;
 
-#[cfg(feature = "webcontent")]
-extern crate turingarena_contest_webcontent;
+#[cfg(feature = "web-content")]
+extern crate turingarena_contest_web_content;
 
 use args::{Args, Command};
 use chrono::{DateTime, Local};
