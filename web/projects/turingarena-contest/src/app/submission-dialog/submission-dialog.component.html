@@ -1,81 +1,88 @@
-<div class="evaluation_modal_header">
-  Evaluation
-</div>
-<div class="evaluation_modal_body">
-  <ng-container *ngIf="submissionQueryRef.valueChanges | async as submissionResult">
-    <ng-container *ngIf="getEvaluationRecord(submissionResult.data) as record">
-      <ng-container *ngFor="let section of problem.material.feedback">
-        <ng-container [ngSwitch]="section.__typename">
-          <table *ngSwitchCase="'TableSection'" class="evaluation_table">
-            <thead class="evaluation_table_header">
-              <tr>
-                <th [colSpan]="section.cols.length">
-                  {{ section.caption | textVariant }}
-                </th>
-              </tr>
-            </thead>
-            <tbody *ngFor="let group of section.rowGroups; index as i" class="evaluation_group">
-              <tr>
-                <th [colSpan]="section.cols.length">
-                  {{ group.title | textVariant }}
-                </th>
-              </tr>
-              <tr class="group_header_row">
-                <ng-container *ngFor="let col of section.cols; index as i">
-                  <ng-container [ngSwitch]="col.content.__typename">
-                    <th *ngSwitchDefault="">
-                      {{ col.title | textVariant }}
-                    </th>
-                  </ng-container>
-                </ng-container>
-              </tr>
-              <tr *ngFor="let row of group.rows" class="evaluation_row">
-                <ng-container *ngFor="let col of section.cols; index as i">
-                  <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
-                    <th *ngSwitchCase="'RowNumberCellContent'" class="score_cell">
-                      {{ cell.content.number }}
-                    </th>
-                    <th *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
-                      {{ cell.content.title | textVariant }}
-                    </th>
-                    <ng-container *ngSwitchCase="'ScoreCellContent'">
-                      <ng-container *ngIf="record[cell.content.ref] as value">
-                        <td class="score_cell" [class.score_zero]="value.score <= 0"
-                          [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
-                          [class.score_full]="cell.content.range.max <= value.score">
-                          {{ value.score.toFixed(cell.content.range.precision) }} /
-                          {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
-                        </td>
-                      </ng-container>
-                      <ng-container *ngIf="!record[cell.content.ref]">
-                        <td class="score_cell">
-                          ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
-                        </td>
-                      </ng-container>
+<ng-container *ngIf="submissionQueryRef.valueChanges | async as submissionResult">
+  <ng-container *ngIf="submissionResult.data.submission as submission">
+    <div class="submission-dialog-header">
+      <h5>
+        Submission for: <strong>{{problem.material.title | textVariant}}</strong>
+      </h5>
+    </div>
+    <div class="submission-pending" *ngIf="submission.status === 'PENDING'">
+      <fa-icon [icon]="faSpinner" [pulse]="true"></fa-icon> Evaluating...
+    </div>
+    <div class="submission-dialog-body">
+      <ng-container *ngIf="getEvaluationRecord(submission) as record">
+        <ng-container *ngFor="let section of problem.material.feedback">
+          <ng-container [ngSwitch]="section.__typename">
+            <table *ngSwitchCase="'TableSection'" class="evaluation_table">
+              <thead class="evaluation_table_header">
+                <tr>
+                  <th [colSpan]="section.cols.length">
+                    {{ section.caption | textVariant }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody *ngFor="let group of section.rowGroups; index as i" class="evaluation_group">
+                <tr>
+                  <th [colSpan]="section.cols.length">
+                    {{ group.title | textVariant }}
+                  </th>
+                </tr>
+                <tr class="group_header_row">
+                  <ng-container *ngFor="let col of section.cols; index as i">
+                    <ng-container [ngSwitch]="col.content.__typename">
+                      <th *ngSwitchDefault="">
+                        {{ col.title | textVariant }}
+                      </th>
                     </ng-container>
-                    <ng-container *ngSwitchCase="'MessageCellContent'">
-                      <ng-container *ngIf="record[cell.content.ref] as value">
-                        <td>
-                          {{ value.text | textVariant }}
-                        </td>
-                      </ng-container>
-                      <ng-container *ngIf="!record[cell.content.ref]">
-                        <td></td>
-                      </ng-container>
-                    </ng-container>
-                    <td *ngSwitchDefault="">
-                      ?
-                    </td>
                   </ng-container>
-                </ng-container>
-              </tr>
-            </tbody>
-          </table>
+                </tr>
+                <tr *ngFor="let row of group.rows" class="evaluation_row">
+                  <ng-container *ngFor="let col of section.cols; index as i">
+                    <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
+                      <th *ngSwitchCase="'RowNumberCellContent'" class="score_cell">
+                        {{ cell.content.number }}
+                      </th>
+                      <th *ngSwitchCase="'RowTitleCellContent'" class="score_cell">
+                        {{ cell.content.title | textVariant }}
+                      </th>
+                      <ng-container *ngSwitchCase="'ScoreCellContent'">
+                        <ng-container *ngIf="record[cell.content.ref] as value">
+                          <td class="score_cell" [class.score_zero]="value.score <= 0"
+                            [class.score_partial]="0 < value.score && value.score < cell.content.range.max"
+                            [class.score_full]="cell.content.range.max <= value.score">
+                            {{ value.score.toFixed(cell.content.range.precision) }} /
+                            {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="!record[cell.content.ref]">
+                          <td class="score_cell">
+                            ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
+                          </td>
+                        </ng-container>
+                      </ng-container>
+                      <ng-container *ngSwitchCase="'MessageCellContent'">
+                        <ng-container *ngIf="record[cell.content.ref] as value">
+                          <td>
+                            {{ value.text | textVariant }}
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="!record[cell.content.ref]">
+                          <td></td>
+                        </ng-container>
+                      </ng-container>
+                      <td *ngSwitchDefault="">
+                        ?
+                      </td>
+                    </ng-container>
+                  </ng-container>
+                </tr>
+              </tbody>
+            </table>
+          </ng-container>
         </ng-container>
       </ng-container>
-    </ng-container>
+    </div>
+    <div class="submission-dialog-footer">
+      <button (click)="modal.close()" class="submission-dialog-close">Close</button>
+    </div>
   </ng-container>
-</div>
-<div class="evaluation_modal_footer">
-  <button (click)="modal.close()" class="evaluation_modal_close_button">Close</button>
-</div>
+</ng-container>

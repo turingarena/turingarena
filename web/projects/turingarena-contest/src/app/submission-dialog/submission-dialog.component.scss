@@ -1,21 +1,26 @@
 @import "node_modules/bootstrap/scss/bootstrap";
 
-.evaluation_modal_header {
+.submission-dialog-header {
   @extend .modal-header;
 }
 
-.evaluation_modal_body {
+.submission-dialog-body {
   @extend .modal-body;
   padding: 0;
   max-height: calc(100vh - 260px);
   overflow-y: auto;
 }
 
-.evaluation_modal_footer {
+.submission-pending {
+  background-color: rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.submission-dialog-footer {
   @extend .modal-footer;
 }
 
-.evaluation_modal_close_button {
+.submission-dialog-close {
   @extend .btn, .btn-primary;
 }
 

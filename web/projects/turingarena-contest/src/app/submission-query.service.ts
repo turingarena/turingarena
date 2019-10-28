@@ -10,6 +10,9 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
   document = gql`
     query SubmissionQuery($submissionId: String!) {
       submission(submissionId: $submissionId) {
+        id
+        createdAt
+        status
         evaluationEvents {
           event {
             __typename
