@@ -249,9 +249,9 @@ pub fn query_score_awards_of_user_and_problem(
         GROUP BY sc.award_name
     ",
     )
-        .bind::<Text, _>(problem_name)
-        .bind::<Text, _>(user_id)
-        .load::<MaxScoreAward>(conn)
+    .bind::<Text, _>(problem_name)
+    .bind::<Text, _>(user_id)
+    .load::<MaxScoreAward>(conn)
 }
 
 /// Get the best award badge for (user, problem)
@@ -274,9 +274,9 @@ pub fn query_badge_awards_of_user_and_problem(
         GROUP BY sc.award_name
     ",
     )
-        .bind::<Text, _>(problem_name)
-        .bind::<Text, _>(user_id)
-        .load::<BestBadgeAward>(conn)
+    .bind::<Text, _>(problem_name)
+    .bind::<Text, _>(user_id)
+    .load::<BestBadgeAward>(conn)
 }
 
 /// Get the score awards of (user, problem, submission)

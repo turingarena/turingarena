@@ -91,7 +91,7 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
             ExecutorClient::evaluate(eval.dag, tx, &rx, file_store, move |status| {
                 ui_sender.send(UIMessage::ServerStatus { status })
             })
-                .expect("Client failed");
+            .expect("Client failed");
         })
         .expect("Failed to spawn the executor thread");
     event_rx
