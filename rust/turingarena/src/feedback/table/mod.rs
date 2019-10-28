@@ -2,8 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{award, content::Text, evaluation::record::Key};
 use crate::rusage::{MemoryUsage, TimeUsage};
+use crate::{award, content::Text, evaluation::record::Key};
 
 /// Feedback section containing tabular data.
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
@@ -175,11 +175,11 @@ pub struct TimeUsageCellContent {
     pub primary_watermark: Option<TimeUsage>,
 
     // TODO: add secondary watermarks (each with a title)
-
-    /// Reference to the evaluation value containing the time usage to show in this cell.
+    /// Time usage to show in this cell (reference).
     pub key: Key,
+    /// Valence associated with this cell, if any (reference).
+    pub valence_key: Option<Key>,
 }
-
 
 /// Cell containing an amount of memory used for computation.
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
@@ -192,13 +192,16 @@ pub struct MemoryUsageCellContent {
     pub primary_watermark: Option<MemoryUsage>,
 
     // TODO: add secondary watermarks (each with a title)
-
-    /// Reference to the evaluation value containing the memory usage to show in this cell.
+    /// Memory usage to show in this cell (reference).
     pub key: Key,
+    /// Valence associated with this cell, if any (reference).
+    pub valence_key: Option<Key>,
 }
 
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct MessageCellContent {
-    /// Reference to the evaluation value containing the message to show in this cell.
+    /// Message to show in this cell (reference).
     pub key: Key,
+    /// Valence associated with this cell, if any (reference).
+    pub valence_key: Option<Key>,
 }

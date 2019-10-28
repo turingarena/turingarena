@@ -2,6 +2,7 @@
 
 extern crate juniper;
 
+use crate::feedback::valence::Valence;
 use crate::{award, content, rusage};
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +17,7 @@ graphql_derive_union_from_enum! {
         Score(ScoreValue),
         MemoryUsage(MemoryUsageValue),
         TimeUsage(TimeUsageValue),
+        Valence(ValenceValue),
     }
 }
 
@@ -45,4 +47,11 @@ pub struct MemoryUsageValue {
 pub struct TimeUsageValue {
     /// The time usage
     pub time_usage: rusage::TimeUsage,
+}
+
+/// Wraps a Valence
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ValenceValue {
+    /// The valence
+    pub valence: Valence,
 }

@@ -3,6 +3,7 @@
 extern crate juniper;
 
 pub mod table;
+pub mod valence;
 
 use serde::{Deserialize, Serialize};
 use table::TableSection;
