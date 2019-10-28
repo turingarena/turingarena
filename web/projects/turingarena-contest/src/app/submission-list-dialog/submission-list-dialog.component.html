@@ -1,10 +1,10 @@
 <ng-container *ngIf="submissionListQuery.valueChanges | async as submissionListResult">
   <ng-container *ngIf="submissionListResult.data as data">
     <ng-container *ngIf="getProblemState(problem) as problemState">
-      <div class="modal-header">
-        <h4 class="modal-title">Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
+      <div class="submission-list-dialog-header">
+        <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
       </div>
-      <div class="submissions_modal_body">
+      <div class="submission-list-dialog-body">
         <table class="submission_table">
           <thead class="submission_table_header">
             <tr>
@@ -113,8 +113,8 @@
           </tbody>
         </table>
       </div>
-      <div class="submissions_modal_footer">
-        <button (click)="modal.close()" class="submissions_modal_close_button">Cancel</button>
+      <div class="submission-list-dialog-footer">
+        <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
       </div>
     </ng-container>
   </ng-container>

@@ -1,5 +1,24 @@
 @import "node_modules/bootstrap/scss/bootstrap";
 
+.submission-list-dialog-header {
+  @extend .modal-header;
+}
+
+.submission-list-dialog-body {
+  @extend .modal-body;
+  padding: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.submission-list-dialog-footer {
+  @extend .modal-footer;
+}
+
+.submission-list-dialog-close {
+  @extend .btn, .btn-secondary;
+}
+
 .submission_score,
 .submission_total_score,
 .submission_best_score,
@@ -16,25 +35,6 @@
   &.score_zero.score_full {
     @extend .table-light;
   }
-}
-
-.submissions_modal_header {
-  @extend .modal-header;
-}
-
-.submissions_modal_body {
-  @extend .modal-body;
-  padding: 0;
-  max-height: calc(100vh - 260px);
-  overflow-y: auto;
-}
-
-.submissions_modal_footer {
-  @extend .modal-footer;
-}
-
-.submissions_modal_close_button {
-  @extend .btn, .btn-secondary;
 }
 
 .submission_table {
