@@ -99,15 +99,15 @@
                 <fa-icon [icon]="faPaperPlane"></fa-icon>
               </button>
             </ng-container>
-            <ng-container *ngIf="!problem.submissions.length">
-              <button class="problem-last-submission disabled">
-                <fa-icon [icon]="faHistory"></fa-icon>
-              </button>
-              <button class="problem-submission-list disabled">
-                <fa-icon [icon]="faList"></fa-icon>
-              </button>
-            </ng-container>
             <ng-container *ngIf="problem.submissions as submissions">
+              <ng-container *ngIf="submissions.length === 0">
+                <button class="problem-last-submission disabled">
+                  <fa-icon [icon]="faHistory"></fa-icon>
+                </button>
+                <button class="problem-submission-list disabled">
+                  <fa-icon [icon]="faList"></fa-icon>
+                </button>
+              </ng-container>
               <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
                 <ng-template #dialog let-modal>
                   <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
