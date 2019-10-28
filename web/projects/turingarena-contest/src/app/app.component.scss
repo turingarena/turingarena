@@ -159,7 +159,7 @@
   @extend .btn, .btn-block, .btn-outline-dark;
 }
 
-.problem-awards {
+.problem-award-list {
   padding: 0;
   list-style: none;
 
@@ -226,4 +226,28 @@
   &:hover {
     opacity: 0.8;
   }
+}
+
+.focus-mode-aside {
+  @extend .btn-group-vertical;
+}
+
+.focus-mode-problem {
+  @extend .btn;
+
+  &:not(.selected) {
+    @extend .btn-outline-primary;
+  }
+
+  &.selected {
+    @extend .btn-primary;
+  }
+}
+
+.focus-mode-score {
+  @extend .btn, .btn-outline-dark;
+}
+
+.focus-mode-clock {
+  @extend .btn, .btn-outline-dark;
 }

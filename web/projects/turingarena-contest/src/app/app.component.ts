@@ -28,7 +28,7 @@ import { SubmissionDialogComponent } from './submission-dialog/submission-dialog
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmissionQueryService } from './submission-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
+import { ContestQuery_contestView_problems as ContestProblem, ContestQuery } from './__generated__/ContestQuery';
 import { SubmissionListQuery_contestView_problem_submissions as Submission } from './__generated__/SubmissionListQuery';
 
 @Component({
@@ -78,15 +78,15 @@ export class AppComponent {
     });
 
   get selectedProblemName() {
-    return localStorage.getItem('selectedProblemName');
+    try {
+      return JSON.parse(localStorage.getItem('selectedProblemName'));
+    } catch (e) {
+      localStorage.removeItem('selectedProblemName');
+    }
   }
 
   set selectedProblemName(name: string) {
-    localStorage.setItem('selectedProblemName', name);
-  }
-
-  getTaskLetter(index: number) {
-    return String.fromCharCode(65 + index);
+    localStorage.setItem('selectedProblemName', JSON.stringify(name));
   }
 
   nowObservable = interval(1000).pipe(
@@ -94,48 +94,50 @@ export class AppComponent {
     map(() => DateTime.local()),
   );
 
-  stateObservable = this.contestQuery.valueChanges.pipe(
-    map(({ data }) => {
-      if (data === undefined) { return undefined; }
+  getTaskLetter(index: number) {
+    return String.fromCharCode(65 + index);
+  }
 
-      const { contestView: { startTime, endTime, problems } } = data;
+  getContestState(data: ContestQuery) {
+    if (data === undefined) { return undefined; }
 
-      const getProblemState = (problem: ContestProblem) => {
-        if (problem.scores === null) { return; }
+    const { contestView: { startTime, endTime, problems } } = data;
 
-        const getAwardState = ({ name }) => {
-          const scoreState = problem.scores.find((s) => s.awardName === name);
-          const badgeState = problem.badges.find((s) => s.awardName === name);
-          return {
-            score: scoreState ? scoreState.score : 0,
-            badge: badgeState ? badgeState.badge : false,
-          };
-        };
+    const getProblemState = (problem: ContestProblem) => {
+      if (problem.scores === null) { return; }
 
+      const getAwardState = ({ name }) => {
+        const scoreState = problem.scores.find((s) => s.awardName === name);
+        const badgeState = problem.badges.find((s) => s.awardName === name);
         return {
-          getAwardState,
-          score: scoreRanges(problem)
-            .map(getAwardState)
-            .map((award) => award && award.score || 0)
-            .reduce((a, b) => a + b, 0),
-          maxScore: scoreRanges(problem).map((s) => s.range.max).reduce((a, b) => a + b, 0),
-          precision: scoreRanges(problem).map((s) => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
+          score: scoreState ? scoreState.score : 0,
+          badge: badgeState ? badgeState.badge : false,
         };
       };
-
-      const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
 
       return {
-        hasScore: problemsState.length > 0,
-        startTime: DateTime.fromISO(startTime),
-        endTime: DateTime.fromISO(endTime),
-        score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
-        maxScore: problemsState.map((s) => s.maxScore).reduce((a, b) => a + b, 0),
-        precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),
-        getProblemState,
+        getAwardState,
+        score: scoreRanges(problem)
+          .map(getAwardState)
+          .map((award) => award && award.score || 0)
+          .reduce((a, b) => a + b, 0),
+        maxScore: scoreRanges(problem).map((s) => s.range.max).reduce((a, b) => a + b, 0),
+        precision: scoreRanges(problem).map((s) => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
       };
-    })
-  );
+    };
+
+    const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
+
+    return {
+      hasScore: problemsState.length > 0,
+      startTime: DateTime.fromISO(startTime),
+      endTime: DateTime.fromISO(endTime),
+      score: problemsState.map((s) => s.score).reduce((a, b) => a + b, 0),
+      maxScore: problemsState.map((s) => s.maxScore).reduce((a, b) => a + b, 0),
+      precision: problemsState.map((s) => s.precision).reduce((a, b) => Math.max(a, b), 0),
+      getProblemState,
+    };
+  };
 
   formatDuration(duration: Duration) {
     return duration.toFormat('hh:mm:ss');
