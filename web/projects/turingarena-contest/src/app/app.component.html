@@ -96,7 +96,11 @@
             </ng-container>
             <ng-container *ngIf="problem.submissions as submissions">
               <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
-                <button class="problem-last-submission" (click)="openSubmission(lastSubmission)">
+                <ng-template #dialog let-modal>
+                  <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                  </app-submission-dialog>
+                </ng-template>
+                <button class="problem-last-submission" (click)="modal.open(dialog)">
                   <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                   <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                   </fa-icon>
@@ -149,27 +153,29 @@
             <ng-container *ngIf="problem.canSubmit || problem.submissions">
               <div class="problem-submission-panel">
                 <ng-container *ngIf="problem.canSubmit">
-                  <a href="#" class="problem-submit" (click)="openSubmitDialog(); $event.preventDefault()">
+                  <button class="problem-submit" (click)="openSubmitDialog()">
                     <fa-icon [icon]="faPaperPlane"></fa-icon>
                     Submit a solution
-                  </a>
+                  </button>
                 </ng-container>
                 <ng-container *ngIf="problem.submissions as submissions">
                   <!-- <h2>Submissions</h2> -->
                   <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
-                    <a href="#" class="problem-last-submission"
-                      (click)="openSubmission(lastSubmission); $event.preventDefault()">
+                    <ng-template #dialog let-modal>
+                      <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                      </app-submission-dialog>
+                    </ng-template>
+                    <button class="problem-last-submission" (click)="modal.open(dialog)">
                       <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                       <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                       </fa-icon>
                       Last submission
                       <!-- <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time> -->
-                    </a>
-                    <a href="#" class="problem-submission-list"
-                      (click)="openSubmissionList(problem); $event.preventDefault()">
+                    </button>
+                    <button class="problem-submission-list" (click)="openSubmissionList(problem)">
                       <fa-icon [icon]="faList"></fa-icon>
                       All submissions
-                    </a>
+                    </button>
                   </ng-container>
                 </ng-container>
               </div>

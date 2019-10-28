@@ -4,7 +4,6 @@ import { QueryRef } from 'apollo-angular';
 import { AppComponent } from '../app.component';
 import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
 import { SubmissionListQueryService } from '../submission-list-query.service';
-import { SubmissionQueryService } from '../submission-query.service';
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
@@ -24,7 +23,6 @@ export class SubmissionListDialogComponent implements OnInit {
     readonly activeModal: NgbActiveModal,
     private modal: NgbModal,
     private submissionListQueryService: SubmissionListQueryService,
-    private submissionQueryService: SubmissionQueryService,
   ) { }
 
   @Input()
@@ -90,11 +88,7 @@ export class SubmissionListDialogComponent implements OnInit {
 
     modal.appComponent = this.appComponent;
     modal.problemName = this.problemName;
-    modal.setSubmissionQueryRef(this.submissionQueryService.watch({
-      submissionId: submission.id,
-    }, {
-        pollInterval: 1000,
-      }));
+    modal.submissionId = submission.id;
 
     try {
       await modalRef.result;

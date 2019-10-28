@@ -26,7 +26,6 @@ import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { scoreRanges } from './problem-material';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
-import { SubmissionQueryService } from './submission-query.service';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { ContestQuery_contestView_problems as ContestProblem, ContestQuery } from './__generated__/ContestQuery';
 import { SubmissionListQuery_contestView_problem_submissions as Submission } from './__generated__/SubmissionListQuery';
@@ -62,8 +61,7 @@ export class AppComponent {
 
   constructor(
     private contestQueryService: ContestQueryService,
-    private submissionQueryService: SubmissionQueryService,
-    private modal: NgbModal,
+    readonly modal: NgbModal,
   ) { }
 
   get userId() {
@@ -189,11 +187,7 @@ export class AppComponent {
 
     modal.appComponent = this;
     modal.problemName = this.selectedProblemName;
-    modal.setSubmissionQueryRef(this.submissionQueryService.watch({
-      submissionId: submission.id,
-    }, {
-        pollInterval: 1000,
-      }));
+    modal.submissionId = submission.id;
 
     try {
       await modalRef.result;
