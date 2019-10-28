@@ -39,8 +39,6 @@ import { TextVariantPipe } from './text-variant.pipe';
   providers: [],
   bootstrap: [AppComponent],
   entryComponents: [
-    SubmitDialogComponent,
-    SubmissionListDialogComponent,
     LoginDialogComponent,
   ]
 })

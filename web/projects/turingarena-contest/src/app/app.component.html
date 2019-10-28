@@ -79,9 +79,22 @@
           </ng-container>
         </aside>
         <ng-container *ngFor="let problem of data.contestView.problems">
+          <ng-template #newSubmissionDialog let-modal>
+            <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
+            </app-submission-dialog>
+          </ng-template>
+          <ng-template #submitDialog let-modal>
+            <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal">
+            </app-submit-dialog>
+          </ng-template>
+          <ng-template #submissionListDialog let-modal>
+            <app-submission-list-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
+              (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog)">
+            </app-submission-list-dialog>
+          </ng-template>
           <aside class="focus-mode-aside" [hidden]="selectedProblemName !== problem.name || !focusMode">
             <ng-container *ngIf="problem.canSubmit || problem.submissions">
-              <button class="problem-submit" style="border-radius: 0" (click)="openSubmitDialog()"
+              <button class="problem-submit" style="border-radius: 0" (click)="modalService.open(submitDialog)"
                 [hidden]="!problem.canSubmit">
                 <fa-icon [icon]="faPaperPlane"></fa-icon>
               </button>
@@ -100,12 +113,13 @@
                   <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
                   </app-submission-dialog>
                 </ng-template>
-                <button class="problem-last-submission" (click)="modal.open(dialog)">
+                <button class="problem-last-submission" (click)="modalService.open(dialog)">
                   <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                   <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                   </fa-icon>
                 </button>
-                <button class="problem-submission-list" (click)="openSubmissionList(problem)">
+                <button class="problem-submission-list"
+                  (click)="modalService.open(submissionListDialog, { size: 'xl' })">
                   <fa-icon [icon]="faList"></fa-icon>
                 </button>
               </ng-container>
@@ -153,7 +167,7 @@
             <ng-container *ngIf="problem.canSubmit || problem.submissions">
               <div class="problem-submission-panel">
                 <ng-container *ngIf="problem.canSubmit">
-                  <button class="problem-submit" (click)="openSubmitDialog()">
+                  <button class="problem-submit" (click)="modalService.open(submitDialog)">
                     <fa-icon [icon]="faPaperPlane"></fa-icon>
                     Submit a solution
                   </button>
@@ -165,14 +179,15 @@
                       <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
                       </app-submission-dialog>
                     </ng-template>
-                    <button class="problem-last-submission" (click)="modal.open(dialog)">
+                    <button class="problem-last-submission" (click)="modalService.open(dialog)">
                       <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
                       <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                       </fa-icon>
                       Last submission
                       <!-- <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time> -->
                     </button>
-                    <button class="problem-submission-list" (click)="openSubmissionList(problem)">
+                    <button class="problem-submission-list"
+                      (click)="modalService.open(submissionListDialog, { size: 'xl' })">
                       <fa-icon [icon]="faList"></fa-icon>
                       All submissions
                     </button>

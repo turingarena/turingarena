@@ -59,9 +59,11 @@ export class AppComponent {
 
   focusMode = false;
 
+  newSubmissionId: string;
+
   constructor(
     private contestQueryService: ContestQueryService,
-    readonly modal: NgbModal,
+    readonly modalService: NgbModal,
   ) { }
 
   get userId() {
@@ -153,7 +155,7 @@ export class AppComponent {
   }
 
   async openSubmitDialog() {
-    const modalRef = this.modal.open(SubmitDialogComponent);
+    const modalRef = this.modalService.open(SubmitDialogComponent);
     const modal = modalRef.componentInstance as SubmitDialogComponent;
 
     modal.appComponent = this;
@@ -167,7 +169,7 @@ export class AppComponent {
   }
 
   async openSubmissionList(problem: ContestProblem) {
-    const modalRef = this.modal.open(SubmissionListDialogComponent, { size: 'xl' });
+    const modalRef = this.modalService.open(SubmissionListDialogComponent, { size: 'xl' });
     const modal = modalRef.componentInstance;
 
     modal.appComponent = this;
@@ -182,7 +184,7 @@ export class AppComponent {
 
   // FIXME: repeated code
   async openSubmission(submission: Submission) {
-    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
+    const modalRef = this.modalService.open(SubmissionDialogComponent, { size: 'lg' });
     const modal = modalRef.componentInstance;
 
     modal.appComponent = this;
@@ -197,7 +199,7 @@ export class AppComponent {
   }
 
   async openLoginDialog() {
-    const modalRef = this.modal.open(LoginDialogComponent);
+    const modalRef = this.modalService.open(LoginDialogComponent);
     const modal = modalRef.componentInstance as LoginDialogComponent;
 
     modal.appComponent = this;

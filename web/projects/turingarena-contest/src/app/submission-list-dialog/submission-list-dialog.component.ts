@@ -1,16 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QueryRef } from 'apollo-angular';
-import { AppComponent } from '../app.component';
-import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
 import { SubmissionListQueryService } from '../submission-list-query.service';
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
   SubmissionListQuery_contestView_problem_submissions as Submission,
-  SubmissionListQuery_contestView_problem as Problem,
 } from '../__generated__/SubmissionListQuery';
 import { scoreRanges } from '../problem-material';
+import { ContestQuery_contestView_problems as Problem } from '../__generated__/ContestQuery';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -20,33 +18,34 @@ import { scoreRanges } from '../problem-material';
 export class SubmissionListDialogComponent implements OnInit {
 
   constructor(
-    readonly activeModal: NgbActiveModal,
-    private modal: NgbModal,
+    readonly modalService: NgbModal,
     private submissionListQueryService: SubmissionListQueryService,
   ) { }
 
   @Input()
-  appComponent: AppComponent;
+  userId: string;
 
   @Input()
-  problemName: string;
+  problem: Problem;
+
+  @Input()
+  modal: NgbActiveModal;
 
   submissionListQuery: QueryRef<SubmissionListQuery, SubmissionListQueryVariables>;
 
   ngOnInit() {
-    const { userId } = this.appComponent;
     this.submissionListQuery = this.submissionListQueryService.watch({
-      userId,
-      problemName: this.problemName,
+      userId: this.userId,
+      problemName: this.problem.name,
     }, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 1000,
       });
   }
 
-  getSubmissionState(problem: Problem, submission: Submission) {
+  getSubmissionState(submission: Submission) {
     return {
-      score: problem.material.awards
+      score: this.problem.material.awards
         .map((award) => submission.scores.find((s) => s.awardName === award.name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
@@ -80,21 +79,6 @@ export class SubmissionListDialogComponent implements OnInit {
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
     };
-  }
-
-  async openDetail(submission: Submission) {
-    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
-    const modal = modalRef.componentInstance;
-
-    modal.appComponent = this.appComponent;
-    modal.problemName = this.problemName;
-    modal.submissionId = submission.id;
-
-    try {
-      await modalRef.result;
-    } catch (e) {
-      // No-op
-    }
   }
 
 }

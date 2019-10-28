@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FileInput } from '../../../../../__generated__/globalTypes';
-import { AppComponent } from '../app.component';
-import { SubmissionDialogComponent } from '../submission-dialog/submission-dialog.component';
 import { SubmitMutationService } from '../submit-mutation.service';
-import { ContestQuery_contestView_problems_material_submissionForm_fields as Field } from '../__generated__/ContestQuery';
+import {
+  ContestQuery_contestView_problems_material_submissionForm_fields as Field,
+  ContestQuery_contestView_problems as Problem,
+} from '../__generated__/ContestQuery';
 
 @Component({
   selector: 'app-submit-dialog',
@@ -13,16 +14,20 @@ import { ContestQuery_contestView_problems_material_submissionForm_fields as Fie
 })
 export class SubmitDialogComponent {
   constructor(
-    private activeModal: NgbActiveModal,
-    private modal: NgbModal,
     private submitMutation: SubmitMutationService,
   ) { }
 
   @Input()
-  appComponent: AppComponent;
+  problem: Problem;
 
   @Input()
-  problemName: string;
+  userId: string;
+
+  @Input()
+  modal: NgbActiveModal;
+
+  @Output()
+  done = new EventEmitter();
 
   submitting = false;
 
@@ -44,18 +49,15 @@ export class SubmitDialogComponent {
     }
     this.submitting = true;
 
-    const { contestView } = this.appComponent.contestQuery.getLastResult().data;
-    const problem = contestView.problems.find((p) => p.name === this.problemName);
     const files = await Promise.all(
-      problem.material.submissionForm.fields.map(async (field) => this.getFileForField(field, formData))
+      this.problem.material.submissionForm.fields.map(async (field) => this.getFileForField(field, formData))
     );
 
     console.log(files);
 
-    const { userId } = this.appComponent;
     const { data, errors } = await this.submitMutation.mutate({
-      problemName: this.problemName,
-      userId,
+      problemName: this.problem.name,
+      userId: this.userId,
       files,
     }).toPromise();
 
@@ -63,25 +65,9 @@ export class SubmitDialogComponent {
       throw new Error('error in submit');
     }
 
-    this.activeModal.close();
+    this.done.emit({ id: data.contestView.problem.submit.id });
 
-    // FIXME: causes a flicker in main component, investigate
-    await this.appComponent.contestQuery.refetch();
-
-    const modalRef = this.modal.open(SubmissionDialogComponent, { size: 'lg' });
-    const modal = modalRef.componentInstance as SubmissionDialogComponent;
-
-    modal.appComponent = this.appComponent;
-    modal.problemName = this.problemName;
-    modal.submissionId = data.contestView.problem.submit.id;
-
-    try {
-      await modalRef.result;
-    } catch (e) {
-      // No-op
-    }
-
-    await this.appComponent.contestQuery.refetch();
+    this.modal.close();
   }
 
   private async getFileForField(field: Field, formData: FormData): Promise<FileInput> {
