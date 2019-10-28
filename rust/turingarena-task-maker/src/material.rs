@@ -8,7 +8,7 @@ use task_maker_format::ioi;
 use turingarena::award::*;
 use turingarena::content::*;
 use turingarena::evaluation::record::*;
-use turingarena::feedback::{*, table::*};
+use turingarena::feedback::{table::*, *};
 use turingarena::problem::material::*;
 use turingarena::rusage::{MemoryUsage, TimeUsage};
 use turingarena::submission::form::*;
@@ -142,7 +142,10 @@ fn row_group_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo) -> RowGroup {
             attributes: vec![],
             value: format!("Subtask {}", subtask.id),
         }],
-        rows: testcases_of(subtask).into_iter().map(|testcase| row_of(task, subtask, testcase)).collect(),
+        rows: testcases_of(subtask)
+            .into_iter()
+            .map(|testcase| row_of(task, subtask, testcase))
+            .collect(),
     }
 }
 
@@ -170,25 +173,35 @@ fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcase
                     max_relevant: TimeUsage(task.time_limit.unwrap_or(10.0)),
                     primary_watermark: task.time_limit.map(|l| TimeUsage(l)),
                     key: Key(format!("testcase.{}.time_usage", testcase.id)),
+                    valence_key: Some(Key(format!("testcase.{}.time_usage_valence", testcase.id))),
                 }),
             },
             Cell {
                 content: CellContent::MemoryUsage(MemoryUsageCellContent {
-                    max_relevant: MemoryUsage((task.memory_limit.unwrap_or(1024) * 1024 * 1024 * 2) as i32),
-                    primary_watermark: task.memory_limit.map(|l| MemoryUsage((l * 1024 * 1024) as i32)),
+                    max_relevant: MemoryUsage(
+                        (task.memory_limit.unwrap_or(1024) * 1024 * 1024 * 2) as i32,
+                    ),
+                    primary_watermark: task
+                        .memory_limit
+                        .map(|l| MemoryUsage((l * 1024 * 1024) as i32)),
                     key: Key(format!("testcase.{}.memory_usage", testcase.id)),
+                    valence_key: Some(Key(format!(
+                        "testcase.{}.memory_usage_valence",
+                        testcase.id
+                    ))),
                 }),
             },
             Cell {
                 content: CellContent::Message(MessageCellContent {
                     key: Key(format!("testcase.{}.message", testcase.id)),
+                    valence_key: Some(Key(format!("testcase.{}.valence", testcase.id))),
                 }),
             },
         ],
     }
 }
 
-fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item=std::path::PathBuf> {
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
     std::fs::read_dir(dir_path)
         .expect("unable to read_dir")
         .map(|entry| entry.expect("unable to read_dir").path())
@@ -307,7 +320,10 @@ pub fn gen_material(task: &ioi::Task) -> Material {
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
-            row_groups: subtasks_of(task).into_iter().map(|subtask| row_group_of(task, subtask)).collect(),
+            row_groups: subtasks_of(task)
+                .into_iter()
+                .map(|subtask| row_group_of(task, subtask))
+                .collect(),
         })],
     }
 }
