@@ -84,12 +84,12 @@
             </app-submission-dialog>
           </ng-template>
           <ng-template #submitDialog let-modal>
-            <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal">
+            <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
+              (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog)">
             </app-submit-dialog>
           </ng-template>
           <ng-template #submissionListDialog let-modal>
-            <app-submission-list-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
-              (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog)">
+            <app-submission-list-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal">
             </app-submission-list-dialog>
           </ng-template>
           <aside class="focus-mode-aside" [hidden]="selectedProblemName !== problem.name || !focusMode">
