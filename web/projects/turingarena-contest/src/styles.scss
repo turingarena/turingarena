@@ -67,79 +67,9 @@ body {
   opacity: 1;
 }
 
-.award_badge {
-  @extend .badge;
-
-  margin-right: 1pt;
-  cursor: pointer;
-
-  &.score_zero {
-    @extend .badge-light;
-
-    border: 1px solid #ccc;
-  }
-
-  &.score_partial {
-    @extend .badge-warning;
-  }
-
-  &.score_full {
-    @extend .badge-success;
-  }
-
-  &:hover {
-    opacity: 0.7;
-  }
-}
-
-.submission_file_label {
-  display: block;
-}
-
-.submission_file_input {
-  display: none;
-}
-
-.submission_file_choose_button {
-  @extend .btn, .btn-primary;
-}
-
-.submission_file_info {
-  display: flex;
-  flex-flow: row wrap;
-}
-
-.submission_file_info > dt {
-  margin-bottom: 0px;
-  min-width: 6rem;
-}
-
-.submission_file_info > dd {
-  margin-bottom: 0px;
-  margin-left: -6rem;
-  padding-left: 8rem;
-  flex: 1 1 100%;
-}
-
-.submission_file_type_suggested_option {
-  margin-right: 1rem;
-}
-
 .modal-body {
   max-height: calc(100vh - 260px);
   overflow-y: auto;
-}
-
-.submission_form_body {
-  @extend .modal-body;
-}
-
-.submission_form_footer {
-  @extend .modal-footer;
-}
-
-.submission_form_submit {
-  @extend .btn, .btn-success;
 }
 
 .evaluation_modal_header {

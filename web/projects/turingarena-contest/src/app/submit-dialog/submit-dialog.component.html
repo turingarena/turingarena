@@ -2,39 +2,38 @@
   <ng-container *ngIf="contestResult.data as data">
     <ng-container *ngFor="let problem of data.contestView.problems">
       <ng-container *ngIf="problem.name === problemName">
-        <form class="submission_form" (submit)="$event.preventDefault(); submit($event)">
-          <div class="modal-header">
-            <h4 class="modal-title">Solution of: <strong>{{problem.material.title | textVariant}}</strong></h4>
+        <form class="submit-dialog" (submit)="$event.preventDefault(); submit($event)">
+          <div class="submit-dialog-header">
+            <h4>Solution of: <strong>{{problem.material.title | textVariant}}</strong></h4>
           </div>
-          <div class="submission_form_body">
-            <div *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
+          <div class="submit-dialog-body">
+            <ng-container *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
               <ng-container *ngIf="fieldState(field) as state">
-                <label class="submission_file_label" [for]="field.id + '.file'">{{ field.title | textVariant }}</label>
-                <input class="submission_file_input" [id]="field.id + '.file'" [name]="field.id + '.file'" type="file"
-                  (change)="fieldState(field).file = $event.target.files[0]" />
-                <label class="submission_file_choose_button" [for]="field.id + '.file'">Choose file</label>
-                <dl *ngIf="state.file as file" class="submission_file_info">
+                <label class="submit-field-label" [for]="field.id + '.file'">{{ field.title | textVariant }}</label>
+                <input #input class="submit-field-input" [id]="field.id + '.file'" [name]="field.id + '.file'"
+                  type="file" (change)="fieldState(field).file = $event.target.files[0]" />
+                <button class="submit-field-choose" (click)="input.click(); $event.preventDefault()">Choose file</button>
+                <dl *ngIf="state.file as file" class="submit-field-info">
                   <dt>Name:</dt>
                   <dd>{{ file.name }}</dd>
                   <dt>Type:</dt>
                   <dd [ngSwitch]="state.typeChoices.type">
                     <ng-container *ngSwitchCase="'oneRecommended'">
                       {{ state.typeChoices.recommendedType!.title | textVariant }}
-                      (<a href="#" class="submission_file_type_change"
+                      (<a href="#" class="submit-field-change-type"
                         (click)="state.moreTypes = true; $event.preventDefault()">change</a>)
                       <input type="hidden" [name]="field.id + '.type'"
                         [value]="state.typeChoices.recommendedType!.id" />
                     </ng-container>
                     <ng-container *ngSwitchCase="'manyRecommended'">
-                      <label *ngFor="let type of state.typeChoices.recommendedTypes!"
-                        class="submission_file_type_suggested_option">
+                      <label *ngFor="let type of state.typeChoices.recommendedTypes!" class="submit-field-type-radio">
                         <input type="radio" [name]="field.id + '.type'" [value]="type.id" />
                         {{ type.title | textVariant }}
                       </label>
-                      (<a href="#" class="submission_file_type_more_options"
+                      (<a href="#" class="submit-field-more-types"
                         (click)="state.moreTypes = true; $event.preventDefault()">more...</a>)
                     </ng-container>
-                    <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submission_file_type_select">
+                    <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submit-field-select-type">
                       <option *ngFor="let type of state.typeChoices.allTypes" [value]="type.id">
                         {{ type.title | textVariant }}</option>
                     </select>
@@ -43,10 +42,10 @@
                   <dd>{{ file.size | filesize }}</dd>
                 </dl>
               </ng-container>
-            </div>
+            </ng-container>
           </div>
-          <div class="submission_form_footer">
-            <button class="submission_form_submit" [disabled]="submitting" type="submit">Submit</button>
+          <div class="submit-dialog-footer">
+            <button class="submit-dialog-submit" [disabled]="submitting" type="submit">Submit</button>
           </div>
         </form>
       </ng-container>
