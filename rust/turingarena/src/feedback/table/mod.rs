@@ -1,9 +1,11 @@
 #![doc(include = "README.md")]
 
-use crate::{award, content::Text, evaluation::record::Key};
 use serde::{Deserialize, Serialize};
 
-/// Feedback section ontaining tabular data.
+use crate::{award, content::Text, evaluation::record::Key};
+use crate::rusage::{MemoryUsage, TimeUsage};
+
+/// Feedback section containing tabular data.
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct TableSection {
     /// Caption of this table. Roughly corresponding to `<caption>` HTML tag.
@@ -69,6 +71,8 @@ graphql_derive_union_from_enum! {
         RowNumber(RowNumberColContent),
         Score(ScoreColContent),
         Message(MessageColContent),
+        TimeUsage(TimeUsageColContent),
+        MemoryUsage(MemoryUsageColContent),
     }
 }
 
@@ -101,6 +105,20 @@ graphql_derive_object_from_unit! {
     pub struct MessageColContent;
 }
 
+graphql_derive_object_from_unit! {
+    /// Column containing amounts of time used for computation.
+    /// Cells must contain `CellContent::TimeUsage`.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct TimeUsageColContent;
+}
+
+graphql_derive_object_from_unit! {
+    /// Column containing amounts of memory used for computation.
+    /// Cells must contain `CellContent::MemoryUsage`.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct MemoryUsageColContent;
+}
+
 graphql_derive_union_from_enum! {
     /// Describes the kind of data shown in a cell.
     #[derive(Serialize, Deserialize, Clone)]
@@ -111,6 +129,8 @@ graphql_derive_union_from_enum! {
         RowNumber(RowNumberCellContent),
         Score(ScoreCellContent),
         Message(MessageCellContent),
+        TimeUsage(TimeUsageCellContent),
+        MemoryUsage(MemoryUsageCellContent),
     }
 }
 
@@ -145,7 +165,41 @@ pub struct ScoreCellContent {
     pub r#ref: Key,
 }
 
-/// Cell containing a textual message.
+/// Cell containing an amount of time used for computation.
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct TimeUsageCellContent {
+    /// Maximum time usage expected to be represented faithfully.
+    /// Determines the scale of the representation (e.g., the units).
+    pub max_relevant: TimeUsage,
+
+    /// Time usage that should be presented as the main limit.
+    pub primary_watermark: Option<TimeUsage>,
+
+    // TODO: add secondary watermarks (each with a title)
+
+    /// Reference to the evaluation value containing the time usage to show in this cell.
+    #[graphql(name = "ref")]
+    pub r#ref: Key,
+}
+
+
+/// Cell containing an amount of memory used for computation.
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct MemoryUsageCellContent {
+    /// Maximum memory usage expected to be represented faithfully.
+    /// Determines the scale of the representation (e.g., the units).
+    pub max_relevant: MemoryUsage,
+
+    /// Memory usage that should be presented as the main limit.
+    pub primary_watermark: Option<MemoryUsage>,
+
+    // TODO: add secondary watermarks (each with a title)
+
+    /// Reference to the evaluation value containing the memory usage to show in this cell.
+    #[graphql(name = "ref")]
+    pub r#ref: Key,
+}
+
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct MessageCellContent {
     /// Reference to the evaluation value containing the message to show in this cell.
