@@ -1,13 +1,13 @@
 .PHONY: all
-all: rust rust-contest-web-content
+all: rust-contest-web-content
 
-.PHONY: rust
-rust: graphql-schema
-	make just-rust
+.PHONY: rust-contest
+rust-contest: graphql-schema
+	make just-rust-contest
 
-.PHONY: just-rust
-just-rust:
-	cd rust/ && cargo build
+.PHONY: just-rust-contest
+just-rust-contest:
+	cd rust/turingarena-contest/ && cargo build
 
 .PHONY: rust-contest-web-content
 rust-contest-web-content: graphql-schema web-content
