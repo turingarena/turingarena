@@ -1,6 +1,8 @@
 #!/bin/bash 
 
 set -ex
-( cd easy1/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
+for d in easy*/ ; do
+    ( cd $d/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
+done
 cargo run import-contest --force contest.yaml
 cargo run --features web-content -- --problems-dir $PWD serve --skip-auth 1 --secret-key secret
