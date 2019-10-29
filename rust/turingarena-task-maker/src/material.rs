@@ -93,21 +93,6 @@ fn cols() -> Vec<Col> {
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Score"),
-            }],
-            content: ColContent::Score(ScoreColContent {
-                range: ScoreRange {
-                    // TODO: determine actual precision
-                    precision: 2,
-                    max: Score(1.),
-                    // TODO: determine if partial scores are actually allowed
-                    allow_partial: true,
-                },
-            }),
-        },
-        Col {
-            title: vec![TextVariant {
-                attributes: vec![],
                 value: format!("Time usage"),
             }],
             content: ColContent::TimeUsage(TimeUsageColContent),
@@ -125,6 +110,21 @@ fn cols() -> Vec<Col> {
                 value: format!("Message"),
             }],
             content: ColContent::Message(MessageColContent),
+        },
+        Col {
+            title: vec![TextVariant {
+                attributes: vec![],
+                value: format!("Score"),
+            }],
+            content: ColContent::Score(ScoreColContent {
+                range: ScoreRange {
+                    // TODO: determine actual precision
+                    precision: 2,
+                    max: Score(1.),
+                    // TODO: determine if partial scores are actually allowed
+                    allow_partial: true,
+                },
+            }),
         },
     ]
 }
@@ -159,16 +159,6 @@ fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcase
                 }),
             },
             Cell {
-                content: CellContent::Score(ScoreCellContent {
-                    range: ScoreRange {
-                        precision: 2,
-                        max: Score(1.),
-                        allow_partial: true,
-                    },
-                    key: Key(format!("testcase.{}.score", testcase.id)),
-                }),
-            },
-            Cell {
                 content: CellContent::TimeUsage(TimeUsageCellContent {
                     max_relevant: TimeUsage(task.time_limit.unwrap_or(10.0)),
                     primary_watermark: task.time_limit.map(|l| TimeUsage(l)),
@@ -195,6 +185,16 @@ fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcase
                 content: CellContent::Message(MessageCellContent {
                     key: Key(format!("testcase.{}.message", testcase.id)),
                     valence_key: Some(Key(format!("testcase.{}.valence", testcase.id))),
+                }),
+            },
+            Cell {
+                content: CellContent::Score(ScoreCellContent {
+                    range: ScoreRange {
+                        precision: 2,
+                        max: Score(1.),
+                        allow_partial: true,
+                    },
+                    key: Key(format!("testcase.{}.score", testcase.id)),
                 }),
             },
         ],
