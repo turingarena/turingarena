@@ -1,0 +1,113 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{lmodern}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage{sfmath}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+%\usepackage[group-separator={\,}]{siunitx}
+\usepackage[left=2cm, right=2cm, bottom=3cm]{geometry}
+\frenchspacing
+
+\newcommand{\num}[1]{#1}
+
+% Macro varie...
+\newcommand{\file}[1]{\texttt{#1}}
+\renewcommand{\arraystretch}{1.3}
+\newcommand{\esempio}[2]{
+\noindent\begin{minipage}{\textwidth}
+\begin{tabular}{|p{11cm}|p{5cm}|}
+    \hline
+    \textbf{File \file{input.txt}} & \textbf{File \file{output.txt}}\\
+    \hline
+    \tt \small #1 &
+    \tt \small #2 \\
+    \hline
+\end{tabular}
+\end{minipage}
+}
+
+\pagestyle{empty}
+
+% Dati del task
+\newcommand{\nome}{Trova la somma pari massima}
+\newcommand{\nomebreve}{easy2}
+
+\begin{document}
+% Intestazione
+\noindent{\Huge \textbf \nome~(\texttt{\nomebreve})}
+
+% Descrizione del task
+\section*{Descrizione del problema}
+Topolino ha ricevuto in regalo una sequenza di $N$ coppie $(a_i,b_i)$ di numeri
+interi. Ha deciso che per ogni coppia calcolerà la somma $a_i+b_i$, con
+l'obiettivo di cercare la somma più grande. Fin qui tutto normale, purtroppo però
+il dottore ha ordinato a Topolino di stare alla larga dai numeri dispari!
+
+Aiuta Topolino scrivendo un programma che, presi in ingresso $N$ e la sequenza
+di coppie $(a_i, b_i)$, stampi in uscita la somma massima \textit{tra quelle pari}.
+
+Se $N$ fosse uguale a 5 e la sequenza di coppie ricevuta da Topolino fosse
+la seguente:
+
+\begin{center}
+\setlength{\tabcolsep}{10pt}
+    \begin{tabular}{| c | c | c | c | c | c |}
+    \hline
+    \textbf{coppie:} & (746, 985) & (168, 440) & (425, 940) & (72, 376) & (801, 264) \\ \hline
+    \textbf{somme:} & 1731 & 608 & 1365 & 448 & 1065 \\
+    \hline
+    \end{tabular}
+\end{center}
+
+\noindent
+allora il tuo programma dovrebbe stampare \textbf{608}.
+
+% input.txt
+\section*{Dati di input}
+\noindent
+Nel file \file{input.txt} sono presenti $N+1$ righe di testo: nella prima c'è un singolo
+numero intero positivo $N$, dalla seconda riga alla $N+1$-esima ci sono le $N$ coppie di
+interi $a_i$ e $b_i$, separati da uno spazio, che compongono le coppie $(a_i,b_i)$ nella
+sequenza di Topolino.
+
+% output.txt
+\section*{Dati di output}
+\noindent
+Nel file \file{output.txt} dovrai stampare un singolo numero intero, la somma massima tra
+le somme pari delle coppie ricevute in input. \textbf{Se tale somma non dovesse esistere,
+allora dovrai stampare \texttt{-1}}.
+
+% Assunzioni
+\section*{Assunzioni}
+\begin{itemize}
+\item $1 \le N \le 1000$.
+\item $0 \le a_i, b_i < 1000$.
+\end{itemize}
+
+% Esempi
+\section*{Esempi di input/output}
+\setlength{\tabcolsep}{6pt}
+\esempio{
+5
+
+746 985
+
+168 440
+
+425 940
+
+72 376
+
+801 264
+}{608}
+
+\esempio{
+1
+
+383 886
+}{-1}
+
+\end{document}

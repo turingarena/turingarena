@@ -4,8 +4,11 @@ description: Test contest
 # stop: 1572003000.0
 tasks:
   - easy1
+  - easy2
+  - easy3
 users:
   - first_name: Test
     last_name: Test
     username: test
     password: test
+

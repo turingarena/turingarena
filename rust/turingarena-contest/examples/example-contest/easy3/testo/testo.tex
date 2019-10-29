@@ -1,0 +1,101 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{lmodern}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage{sfmath}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+%\usepackage[group-separator={\,}]{siunitx}
+\usepackage[left=2cm, right=2cm, bottom=3cm]{geometry}
+\frenchspacing
+
+\newcommand{\num}[1]{#1}
+
+% Macro varie...
+\newcommand{\file}[1]{\texttt{#1}}
+\renewcommand{\arraystretch}{1.3}
+\newcommand{\esempio}[2]{
+\noindent\begin{minipage}{\textwidth}
+\begin{tabular}{|p{11cm}|p{5cm}|}
+    \hline
+    \textbf{File \file{input.txt}} & \textbf{File \file{output.txt}}\\
+    \hline
+    \tt \small #1 &
+    \tt \small #2 \\
+    \hline
+\end{tabular}
+\end{minipage}
+}
+
+\pagestyle{empty}
+
+% Dati del task
+\newcommand{\nome}{Trova la somma pari massima v2.0}
+\newcommand{\nomebreve}{easy3}
+
+\begin{document}
+% Intestazione
+\noindent{\Huge \textbf \nome~(\texttt{\nomebreve})}
+
+% Descrizione del task
+\section*{Descrizione del problema}
+Topolino ha ricevuto in regalo un'altra sequenza di $N$ numeri interi $S_i$. Vuole cercare,
+per ogni possibile coppia di numeri (in posizioni distinte) scelti dalla sequenza, la somma
+massima che sia anche pari.
+Aiuta Topolino scrivendo un programma che, presi in ingresso $N$ e la sequenza
+di interi $S_i$, stampi in uscita la somma massima di una coppia \textit{tra le somme pari}.
+
+Se $N$ fosse uguale a 10 e la sequenza ricevuta da Topolino fosse la seguente:
+
+\begin{center}
+\setlength{\tabcolsep}{10pt}
+    \begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c | c |}
+    \hline
+    1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+    \hline
+    \end{tabular}
+\end{center}
+
+\noindent
+allora il tuo programma dovrebbe stampare \textbf{18} (ottenibile come 10 + 8).
+
+% input.txt
+\section*{Dati di input}
+\noindent
+Nel file \file{input.txt} sono presenti due righe di testo: nella prima c'è un singolo
+numero intero positivo $N$, nella seconda ci sono gli $N$ interi $S_i$, separati da spazio,
+che compongono la sequenza di Topolino.
+
+% output.txt
+\section*{Dati di output}
+\noindent
+Nel file \file{output.txt} dovrai stampare un singolo numero intero, la somma massima tra
+le somme pari delle coppie ricevute in input. \textbf{Se tale somma non dovesse esistere,
+allora dovrai stampare \texttt{-1}}.
+
+% Assunzioni
+\section*{Assunzioni}
+\begin{itemize}
+\item $1 \le N \le 100\,000$.
+\item $0 \le S_i < 1\,000\,000$.
+\end{itemize}
+
+% Esempi
+\section*{Esempi di input/output}
+\setlength{\tabcolsep}{6pt}
+\esempio{
+10
+
+1 2 3 4 5 6 7 8 9 10
+}{18}
+
+\esempio{
+2
+
+13 13
+}{26}
+
+\end{document}
+
