@@ -45,57 +45,44 @@
                         {{ cell.content.title | textVariant }}
                       </th>
                       <ng-container *ngSwitchCase="'ScoreCellContent'">
-                        <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-valence" [class.failure]="value.score <= 0"
-                            [class.partial]="0 < value.score && value.score < cell.content.range.max"
-                            [class.success]="cell.content.range.max <= value.score">
-                            {{ value.score.toFixed(cell.content.range.precision) }} /
+                        <td class="cell-score cell-valence"
+                          [ngClass]="getScoreValence(record[cell.content.key], cell.content.range)">
+                          <ng-container *ngIf="record[cell.content.key] as value">
+                            {{ value.score.toFixed(cell.content.range.precision) }}
+                          </ng-container>
+                          <small> /
                             {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
-                          </td>
-                        </ng-container>
-                        <ng-container *ngIf="!record[cell.content.key]">
-                          <td>
-                            ... / {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
-                          </td>
-                        </ng-container>
+                          </small>
+                        </td>
                       </ng-container>
                       <ng-container *ngSwitchCase="'MessageCellContent'">
-                        <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-valence" [ngClass]="getValence(record, cell.content.valenceKey)">
+                        <td class="cell-valence" [ngClass]="getValence(record[cell.content.valenceKey])">
+                          <ng-container *ngIf="record[cell.content.key] as value">
                             {{ value.text | textVariant }}
-                          </td>
-                        </ng-container>
-                        <ng-container *ngIf="!record[cell.content.key]">
-                          <td></td>
-                        </ng-container>
+                          </ng-container>
+                        </td>
                       </ng-container>
                       <ng-container *ngSwitchCase="'TimeUsageCellContent'">
-                        <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-time-usage cell-valence"
-                            [ngClass]="getValence(record, cell.content.valenceKey)">
+                        <td class="cell-time-usage cell-valence"
+                          [ngClass]="getValence(record[cell.content.valenceKey])">
+                          <ng-container *ngIf="record[cell.content.key] as value">
                             {{ displayTimeSeconds(value.timeUsage) }}
-                            <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
-                              {{ displayTimeSeconds(watermark) }}
-                            </small>
-                          </td>
-                        </ng-container>
-                        <ng-container *ngIf="!record[cell.content.key]">
-                          <td></td>
-                        </ng-container>
+                          </ng-container>
+                          <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
+                            {{ displayTimeSeconds(watermark) }}
+                          </small>
+                        </td>
                       </ng-container>
                       <ng-container *ngSwitchCase="'MemoryUsageCellContent'">
-                        <ng-container *ngIf="record[cell.content.key] as value">
-                          <td class="cell-memory-usage cell-valence"
-                            [ngClass]="getValence(record, cell.content.valenceKey)">
+                        <td class="cell-memory-usage cell-valence"
+                          [ngClass]="getValence(record[cell.content.valenceKey])">
+                          <ng-container *ngIf="record[cell.content.key] as value">
                             {{ value.memoryUsage | filesize }}
-                            <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
-                              {{ watermark | filesize }}
-                            </small>
-                          </td>
-                        </ng-container>
-                        <ng-container *ngIf="!record[cell.content.key]">
-                          <td></td>
-                        </ng-container>
+                          </ng-container>
+                          <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
+                            {{ watermark | filesize }}
+                          </small>
+                        </td>
                       </ng-container>
                       <td *ngSwitchDefault="">
                         ?

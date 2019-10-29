@@ -63,9 +63,17 @@ export class SubmissionDialogComponent implements OnInit {
     }
   }
 
-  getValence(record: Record<string, any>, key: string) {
-    const value = record[key];
+  getValence(value: any) {
     if (value === undefined) { return 'unknown'; }
     return value.valence.toLowerCase();
+  }
+
+  // FIXME: type this correctly
+  getScoreValence(value: any, range: any) {
+    if (value === undefined) { return 'unknown'; }
+    const { score } = value;
+    if (score <= 0) { return 'failure'; }
+    if (score < range.max) { return 'partial'; }
+    return 'success';
   }
 }

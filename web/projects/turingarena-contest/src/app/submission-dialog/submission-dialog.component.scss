@@ -24,6 +24,7 @@
   @extend .btn, .btn-primary;
 }
 
+.cell-score,
 .cell-time-usage,
 .cell-memory-usage {
   text-align: right;
@@ -39,26 +40,6 @@
 
 .evaluation_group {
   @extend .thead-light;
-}
-
-.message_cell {
-  font-size: small;
-}
-
-.score_cell {
-  font-weight: bold;
-}
-
-.row_status.success {
-  @extend .table-success;
-}
-
-.row_status.fail {
-  @extend .table-danger;
-}
-
-.row_status.skip {
-  @extend .table-secondary;
 }
 
 .cell-valence {
