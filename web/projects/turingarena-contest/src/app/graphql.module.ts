@@ -1,17 +1,20 @@
 import { NgModule } from '@angular/core';
-import { ApolloModule, APOLLO_OPTIONS } from 'apollo-angular';
+import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
 import { HttpLink, HttpLinkModule } from 'apollo-angular-link-http';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
+
 import schema from '../../../../__generated__/graphql-schema.json';
+
 import { getAuth } from './auth';
 
-export function createApollo(httpLink: HttpLink) {
+const createApollo = (httpLink: HttpLink) => {
   const authContext = setContext((operation, context) => {
     const auth = getAuth();
+
     return {
-      headers: auth ? {
+      headers: auth !== undefined ? {
         Authorization: auth.token,
       } : {},
     };
@@ -24,10 +27,10 @@ export function createApollo(httpLink: HttpLink) {
     cache: new InMemoryCache({
       fragmentMatcher: new IntrospectionFragmentMatcher({
         introspectionQueryResultData: schema,
-      })
+      }),
     }),
   };
-}
+};
 
 @NgModule({
   exports: [ApolloModule, HttpLinkModule],

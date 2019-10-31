@@ -1,12 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { AppComponent } from '../app.component';
 import { LoginMutationService } from '../login-mutation.service';
 
 @Component({
   selector: 'app-login-dialog',
   templateUrl: './login-dialog.component.html',
-  styleUrls: ['./login-dialog.component.scss']
+  styleUrls: ['./login-dialog.component.scss'],
 })
 export class LoginDialogComponent implements OnInit {
 
@@ -16,7 +17,7 @@ export class LoginDialogComponent implements OnInit {
   ) { }
 
   @Input()
-  appComponent: AppComponent;
+  appComponent!: AppComponent;
 
   ngOnInit() {
   }
@@ -27,7 +28,7 @@ export class LoginDialogComponent implements OnInit {
       token: formData.get('token') as string,
     }).toPromise();
 
-    if (!data) { throw Error('error during login'); }
+    if (!data || errors) { throw Error('error during login'); }
 
     if (data.auth === null) {
       // FIXME

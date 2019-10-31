@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Mutation } from 'apollo-angular';
 import gql from 'graphql-tag';
+
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoginMutationService extends Mutation<LoginMutation, LoginMutationVariables> {
   document = gql`

@@ -1,4 +1,5 @@
-import { Pipe, PipeTransform, LOCALE_ID, Inject } from '@angular/core';
+import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+
 import { TextFragment } from './__generated__/TextFragment';
 
 export interface AttributeLookup {
@@ -7,7 +8,7 @@ export interface AttributeLookup {
 }
 
 @Pipe({
-  name: 'textVariant'
+  name: 'textVariant',
 })
 export class TextVariantPipe implements PipeTransform {
 
@@ -21,10 +22,12 @@ export class TextVariantPipe implements PipeTransform {
       const [aScore, bScore] = [a, b].map((v) =>
         (v.attributes.find(({ key, value }) => key === 'style' && value === style) ? 10 : 0)
         +
-        (v.attributes.find(({ key, value }) => key === 'locale' && value === this.locale) ? 5 : 0)
+        (v.attributes.find(({ key, value }) => key === 'locale' && value === this.locale) ? 5 : 0),
       );
+
       return bScore - aScore;
     });
+
     return sortedVariants[0].value;
   }
 

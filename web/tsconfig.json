@@ -20,7 +20,8 @@
       "esnext.asynciterable"
     ],
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "strict": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

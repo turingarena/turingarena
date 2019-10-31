@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Query } from 'apollo-angular';
 import gql from 'graphql-tag';
+
 import { SubmissionQuery, SubmissionQueryVariables } from './__generated__/SubmissionQuery';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQueryVariables> {
   document = gql`

@@ -1,6 +1,8 @@
+import gql from 'graphql-tag';
+
 import { ProblemMaterialFragment } from './__generated__/ProblemMaterialFragment';
 import { textFragment } from './text';
-import gql from 'graphql-tag';
+import { scoreRangeFragment } from './score';
 
 export const problemMaterialFragment = gql`
   fragment ProblemMaterialFragment on Problem {
@@ -51,8 +53,7 @@ export const problemMaterialFragment = gql`
           __typename
           ... on ScoreAwardContent {
             range {
-              precision
-              max
+              ...ScoreRangeFragment
             }
           }
         }
@@ -71,8 +72,7 @@ export const problemMaterialFragment = gql`
               __typename
               ... on ScoreColContent {
                 range {
-                  precision
-                  max
+                  ...ScoreRangeFragment
                 }
               }
             }
@@ -97,8 +97,7 @@ export const problemMaterialFragment = gql`
                   ... on ScoreCellContent {
                     key
                     range {
-                      max
-                      precision
+                      ...ScoreRangeFragment
                     }
                   }
                   ... on MessageCellContent {
@@ -126,8 +125,8 @@ export const problemMaterialFragment = gql`
     }
   }
   ${textFragment}
+  ${scoreRangeFragment}
 `;
-
 
 export const scoreRanges = (problem: ProblemMaterialFragment) => problem.material.awards.map(({ name, content }) => {
   if (content.__typename === 'ScoreAwardContent') {

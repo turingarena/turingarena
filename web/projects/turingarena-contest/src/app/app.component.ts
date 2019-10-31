@@ -5,6 +5,7 @@ import {
   faChevronLeft,
   faChevronRight,
   faFile,
+  faFileAlt,
   faFileArchive,
   faFilePdf,
   faHistory,
@@ -14,26 +15,24 @@ import {
   faSignInAlt,
   faSignOutAlt,
   faSpinner,
-  faFileAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+
+import { ContestQuery, ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
 import { Auth, getAuth, setAuth } from './auth';
 import { ContestQueryService } from './contest-query.service';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { scoreRanges } from './problem-material';
-import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
-import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
-import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
-import { ContestQuery_contestView_problems as ContestProblem, ContestQuery } from './__generated__/ContestQuery';
-import { SubmissionListQuery_contestView_problem_submissions as Submission } from './__generated__/SubmissionListQuery';
+
+const pollInterval = 5000;
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
   faPaperPlane = faPaperPlane;
@@ -59,74 +58,78 @@ export class AppComponent {
 
   focusMode = false;
 
-  newSubmissionId: string;
+  newSubmissionId?: string;
 
   constructor(
-    private contestQueryService: ContestQueryService,
+    private readonly contestQueryService: ContestQueryService,
     readonly modalService: NgbModal,
   ) { }
 
   get userId() {
     const auth = getAuth();
-    return auth && auth.userId;
+
+    return auth !== undefined ? auth.userId : undefined;
   }
 
-  contestQuery = this.contestQueryService.watch({
-    userId: this.userId,
-  }, {
-      pollInterval: 10000,
-    });
+  contestQuery = this.contestQueryService.watch({ userId: this.userId }, { pollInterval });
 
   get selectedProblemName() {
     try {
-      return JSON.parse(localStorage.getItem('selectedProblemName'));
+      const selectedProblemNameJson = localStorage.getItem('selectedProblemName');
+
+      if (selectedProblemNameJson === null) { return undefined; }
+
+      return JSON.parse(selectedProblemNameJson) as string;
     } catch (e) {
       localStorage.removeItem('selectedProblemName');
     }
   }
 
-  set selectedProblemName(name: string) {
+  set selectedProblemName(name: string | undefined) {
     localStorage.setItem('selectedProblemName', JSON.stringify(name));
   }
 
+  // tslint:disable-next-line: no-magic-numbers
   nowObservable = interval(1000).pipe(
     startWith([0]),
     map(() => DateTime.local()),
   );
 
   getTaskLetter(index: number) {
-    return String.fromCharCode(65 + index);
+    return String.fromCharCode('A'.charCodeAt(0) + index);
   }
 
-  getContestState(data: ContestQuery) {
+  getContestState(data: ContestQuery | undefined) {
     if (data === undefined) { return undefined; }
 
     const { contestView: { startTime, endTime, problems } } = data;
 
     const getProblemState = (problem: ContestProblem) => {
-      if (problem.scores === null) { return; }
+      if (problem.scores === null) { throw new Error(); }
+      if (problem.badges === null) { throw new Error(); }
 
-      const getAwardState = ({ name }) => {
+      const getAwardState = ({ name }: { name: string }) => {
+        if (problem.scores === null) { throw new Error(); }
+        if (problem.badges === null) { throw new Error(); }
+
         const scoreState = problem.scores.find((s) => s.awardName === name);
         const badgeState = problem.badges.find((s) => s.awardName === name);
+
         return {
-          score: scoreState ? scoreState.score : 0,
-          badge: badgeState ? badgeState.badge : false,
+          score: scoreState !== undefined ? scoreState.score as number : 0,
+          badge: badgeState !== undefined ? badgeState.badge : false,
         };
       };
 
       return {
         getAwardState,
-        score: scoreRanges(problem)
-          .map(getAwardState)
-          .map((award) => award && award.score || 0)
-          .reduce((a, b) => a + b, 0),
-        maxScore: scoreRanges(problem).map((s) => s.range.max).reduce((a, b) => a + b, 0),
+        score: scoreRanges(problem).map(getAwardState).map(({ score }) => score).reduce((a, b) => a + b, 0),
+        maxScore: scoreRanges(problem).map((s) => s.range.max as number).reduce((a, b) => a + b, 0),
         precision: scoreRanges(problem).map((s) => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
       };
     };
 
-    const problemsState = problems.map(getProblemState).filter((state) => state !== undefined);
+    const problemsState = problems !== null ? problems.map(getProblemState) : [];
 
     return {
       hasScore: problemsState.length > 0,
@@ -147,23 +150,23 @@ export class AppComponent {
     setAuth(auth);
     this.contestQuery.stopPolling();
     this.contestQuery.resetLastResults();
+    // tslint:disable-next-line: no-floating-promises
     this.contestQuery.setVariables({
       userId: this.userId,
     });
-    this.contestQuery.refetch();
-    this.contestQuery.startPolling(10000);
+    this.contestQuery.startPolling(pollInterval);
   }
 
   async openLoginDialog() {
     const modalRef = this.modalService.open(LoginDialogComponent);
-    const modal = modalRef.componentInstance as LoginDialogComponent;
+    const modal = modalRef.componentInstance;
 
     modal.appComponent = this;
 
     try {
       await modalRef.result;
     } catch (e) {
-      // dismissed, do nothing
+      // Dismissed, do nothing
     }
   }
 

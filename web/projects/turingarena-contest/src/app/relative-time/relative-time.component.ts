@@ -8,20 +8,21 @@ import { map, startWith } from 'rxjs/operators';
   template: `<abbr [title]="time | date:'full'">{{ relativeTimeObservable | async }}</abbr>`,
 })
 export class RelativeTimeComponent implements OnChanges {
-  constructor(@Inject(LOCALE_ID) private locale: string) { }
+  constructor(@Inject(LOCALE_ID) private readonly locale: string) { }
 
   @Input()
   time!: string;
 
-  relativeTimeObservable: Observable<string>;
+  relativeTimeObservable!: Observable<string>;
 
   ngOnChanges() {
     this.relativeTimeObservable = interval(10000).pipe(
       startWith([0]),
       map(() => {
         const time = DateTime.fromISO(this.time).setLocale(this.locale);
+
         return time.diffNow().as('seconds') > -10 ? 'now' : (time.toRelative() || '');
       }),
-    )
+    );
   }
 }

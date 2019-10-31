@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import gql from 'graphql-tag';
 import { Query } from 'apollo-angular';
+import gql from 'graphql-tag';
+
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { problemMaterialFragment } from './problem-material';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ContestQueryService extends Query<ContestQuery, ContestQueryVariables> {
   document = gql`

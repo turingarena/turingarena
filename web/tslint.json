@@ -1,5 +1,5 @@
 {
-  "extends": "tslint:recommended",
+  "extends": "tslint:all",
   "rulesDirectory": [
     "codelyzer"
   ],
@@ -59,7 +59,23 @@
       true,
       "single"
     ],
-    "trailing-comma": false,
+    "completed-docs": false,
+    "typedef": false,
+    "file-name-casing": [
+      false,
+      "kebab-case"
+    ],
+    "unnecessary-else": false,
+    "prefer-function-over-method": false,
+    "no-unsafe-any": false,
+    "no-parameter-properties": false,
+    "newline-per-chained-call": false,
+    "no-this-assignment": [
+      true,
+      {
+        "allow-destructuring": true
+      }
+    ],
     "component-class-suffix": true,
     "contextual-lifecycle": true,
     "directive-class-suffix": true,

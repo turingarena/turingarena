@@ -3,15 +3,24 @@ export interface Auth {
   userId: string;
 }
 
-export const getAuth = (): Auth => {
+export const getAuth = (): Auth | undefined => {
   try {
-    return JSON.parse(localStorage.getItem('auth')) as Auth;
+    const authString = localStorage.getItem('auth');
+
+    if (authString === null) { return undefined; }
+
+    return JSON.parse(authString) as Auth;
   } catch (e) {
     localStorage.removeItem('userId');
+
     return undefined;
   }
 };
 
-export const setAuth = (auth: Auth) => {
-  localStorage.setItem('auth', JSON.stringify(auth));
+export const setAuth = (auth: Auth | undefined) => {
+  if (auth === undefined) {
+    localStorage.removeItem('auth');
+  } else {
+    localStorage.setItem('auth', JSON.stringify(auth));
+  }
 };
