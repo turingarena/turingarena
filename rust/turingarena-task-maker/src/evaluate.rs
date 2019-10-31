@@ -112,11 +112,10 @@ fn ui_message_to_events(
 ) -> Result<(), failure::Error> {
     match ui_message {
         UIMessage::IOITestcaseScore {
-            subtask: _,
             testcase,
-            solution: _,
             score,
             message,
+            ..
         } => {
             tx.send(Event::Value(ValueEvent {
                 key: record::Key(format!("testcase.{}.score", testcase)),
@@ -148,9 +147,9 @@ fn ui_message_to_events(
         }
         UIMessage::IOISubtaskScore {
             subtask,
-            solution: _,
             score,
             normalized_score,
+            ..
         } => {
             tx.send(Event::Value(ValueEvent {
                 key: record::Key(format!("subtask.{}.score", subtask)),
@@ -169,9 +168,8 @@ fn ui_message_to_events(
         }
         UIMessage::IOIEvaluation {
             testcase,
-            subtask: _,
-            solution: _,
             status,
+            ..
         } => {
             if let UIExecutionStatus::Done { result } = status {
                 let time_usage = result.resources.cpu_time;

@@ -5,6 +5,7 @@ use diesel::{Connection, ConnectionResult, SqliteConnection};
 use std::path::PathBuf;
 use turingarena::problem::ProblemName;
 use user::UserId;
+use std::default::Default;
 
 embed_migrations!();
 
@@ -27,9 +28,8 @@ pub struct Context {
     pub problems_dir: PathBuf,
 }
 
-impl Context {
-    /// Create a new Context
-    pub fn new() -> Context {
+impl Default for Context {
+    fn default() -> Context {
         Context {
             skip_auth: false,
             secret: None,
@@ -38,7 +38,9 @@ impl Context {
             problems_dir: PathBuf::default(),
         }
     }
+}
 
+impl Context {
     /// Set the database URL
     pub fn with_database_url(self, database_url: PathBuf) -> Context {
         Context {

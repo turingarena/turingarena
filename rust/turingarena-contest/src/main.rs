@@ -60,7 +60,7 @@ fn main() -> Result<()> {
     use structopt::StructOpt;
 
     let args = Args::from_args();
-    let context = Context::new()
+    let context = Context::default()
         .with_database_url(args.database_url)
         .with_problems_dir(args.problems_dir);
     match args.subcommand {
@@ -75,7 +75,7 @@ fn main() -> Result<()> {
                 eprintln!("WARNING: authentication disabled");
             } else if secret_key == None {
                 eprintln!("ERROR: provide a secret OR set skip-auth");
-                Err::<(), String>("Secret not provided".to_owned())?;
+                return Err("Secret not provided".to_owned().into());
             }
             run_server(
                 host,

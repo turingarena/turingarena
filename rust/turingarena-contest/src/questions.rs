@@ -34,7 +34,7 @@ impl Question {
 
     /// Optionally the problem which the question refers to
     fn problem_name(&self) -> Option<ProblemName> {
-        self.problem_name.clone().map(|name| ProblemName(name))
+        self.problem_name.clone().map(ProblemName)
     }
 }
 
@@ -76,7 +76,7 @@ pub fn question_of_user(
 /// Answer to the question, if present
 pub fn answer_to(conn: &SqliteConnection, question_id: i32) -> QueryResult<Option<Answer>> {
     let answers = answers::table.find(question_id).load::<Answer>(conn)?;
-    if answers.len() == 0 {
+    if answers.is_empty() {
         Ok(None)
     } else {
         Ok(Some(answers[0].clone()))

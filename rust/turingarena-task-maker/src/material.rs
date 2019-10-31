@@ -86,35 +86,35 @@ fn cols() -> Vec<Col> {
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Case"),
+                value: "Case".to_owned(),
             }],
             content: ColContent::RowNumber(RowNumberColContent {}),
         },
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Time usage"),
+                value: "Time usage".to_owned(),
             }],
             content: ColContent::TimeUsage(TimeUsageColContent),
         },
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Memory usage"),
+                value: "Memory usage".to_owned(),
             }],
             content: ColContent::MemoryUsage(MemoryUsageColContent),
         },
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Message"),
+                value: "Message".to_owned(),
             }],
             content: ColContent::Message(MessageColContent),
         },
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
-                value: format!("Score"),
+                value: "Score".to_owned(),
             }],
             content: ColContent::Score(ScoreColContent {
                 range: ScoreRange {
@@ -132,7 +132,7 @@ fn cols() -> Vec<Col> {
 fn caption() -> Text {
     vec![TextVariant {
         attributes: vec![],
-        value: format!("Test case results"),
+        value: "Test case results".to_owned(),
     }]
 }
 
@@ -149,7 +149,7 @@ fn row_group_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo) -> RowGroup {
     }
 }
 
-fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::TestcaseInfo) -> Row {
+fn row_of(task: &ioi::Task, _subtask: &ioi::SubtaskInfo, testcase: &ioi::TestcaseInfo) -> Row {
     Row {
         content: RowContent::Data,
         cells: vec![
@@ -161,7 +161,7 @@ fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcase
             Cell {
                 content: CellContent::TimeUsage(TimeUsageCellContent {
                     max_relevant: TimeUsage(task.time_limit.unwrap_or(10.0)),
-                    primary_watermark: task.time_limit.map(|l| TimeUsage(l)),
+                    primary_watermark: task.time_limit.map(TimeUsage),
                     key: Key(format!("testcase.{}.time_usage", testcase.id)),
                     valence_key: Some(Key(format!("testcase.{}.time_usage_valence", testcase.id))),
                 }),
@@ -235,7 +235,7 @@ fn attachment_at_path(file_path: std::path::PathBuf) -> Attachment {
 }
 
 /// Mapping (extension, MIME type)
-const STATEMENT_FORMATS: [(&'static str, &'static str); 3] = [
+const STATEMENT_FORMATS: [(&str, &str); 3] = [
     ("pdf", "application/pdf"),
     ("html", "text/html"),
     ("md", "application/markdown"),
@@ -244,7 +244,7 @@ const STATEMENT_FORMATS: [(&'static str, &'static str); 3] = [
 /// Find the statements directory, as in the italy_yaml task format
 /// Searches the paths $task_dir/statement and $task_dir/testo
 fn statements_dir(task_dir: &Path) -> Option<PathBuf> {
-    for dir in vec!["statement", "testo"] {
+    for dir in &["statement", "testo"] {
         let dir = task_dir.join(dir);
         if dir.exists() && dir.is_dir() {
             return Some(dir);
@@ -301,14 +301,14 @@ pub fn gen_material(task: &ioi::Task) -> Material {
         title: vec![
             TextVariant {
                 attributes: vec![],
-                value: task.title.clone().into(),
+                value: task.title.clone(),
             },
             TextVariant {
                 attributes: vec![VariantAttribute {
                     key: "style".to_owned(),
                     value: "short".to_owned(),
                 }],
-                value: task.name.clone().into(),
+                value: task.name.clone(),
             },
         ],
         statement: statements_of(&task.path),
