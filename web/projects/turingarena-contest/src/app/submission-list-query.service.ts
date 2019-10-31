@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Query } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { SubmissionListQuery, SubmissionListQueryVariables } from './__generated__/SubmissionListQuery';
-import { problemMaterialFragment } from './graphql-fragments';
+import { problemMaterialFragment } from './problem-material';
 
 @Injectable({
   providedIn: 'root'
