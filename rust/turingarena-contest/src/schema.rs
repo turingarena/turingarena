@@ -1,4 +1,18 @@
 table! {
+    announcements (id) {
+        id -> Integer,
+        text -> Text,
+    }
+}
+
+table! {
+    answers (question_id) {
+        question_id -> Integer,
+        text -> Text,
+    }
+}
+
+table! {
     badge_awards (submission_id, award_name) {
         submission_id -> Text,
         award_name -> Text,
@@ -26,6 +40,16 @@ table! {
 table! {
     problems (name) {
         name -> Text,
+    }
+}
+
+table! {
+    questions (id) {
+        id -> Integer,
+        user_id -> Text,
+        problem_name -> Nullable<Text>,
+        time -> Text,
+        text -> Text,
     }
 }
 
@@ -65,18 +89,24 @@ table! {
     }
 }
 
+joinable!(answers -> questions (question_id));
 joinable!(badge_awards -> submissions (submission_id));
 joinable!(evaluation_events -> submissions (submission_id));
+joinable!(questions -> problems (problem_name));
+joinable!(questions -> users (user_id));
 joinable!(score_awards -> submissions (submission_id));
 joinable!(submission_files -> submissions (submission_id));
 joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    announcements,
+    answers,
     badge_awards,
     contest,
     evaluation_events,
     problems,
+    questions,
     score_awards,
     submission_files,
     submissions,

@@ -1,6 +1,6 @@
 /// Italy YAML contest importation format
 use super::{Importer, ImporterResult};
-use crate::Context;
+use crate::context::Context;
 use chrono::{Local, TimeZone};
 use std::path::{Path, PathBuf};
 

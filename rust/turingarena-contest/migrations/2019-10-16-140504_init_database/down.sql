@@ -6,3 +6,6 @@ DROP TABLE evaluation_events;
 DROP TABLE score_awards;
 DROP TABLE badge_awards;
 DROP TABLE contest;
+DROP TABLE questions;
+DROP TABLE answers;
+DROP TABLE announcements;

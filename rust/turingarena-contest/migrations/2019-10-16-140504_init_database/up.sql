@@ -52,3 +52,21 @@ CREATE TABLE contest(
     start_time      TEXT NOT NULL,
     end_time        TEXT NOT NULL
 );
+
+CREATE TABLE questions(
+    id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    user_id         TEXT NOT NULL REFERENCES users(id),
+    problem_name    TEXT REFERENCES problems(name),
+    time            TEXT NOT NULL,
+    text            TEXT NOT NULL
+);
+
+CREATE TABLE answers(
+    question_id     INT NOT NULL PRIMARY KEY REFERENCES questions(id),
+    text            TEXT NOT NULL
+);
+
+CREATE TABLE announcements(
+    id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    text            TEXT NOT NULL
+);

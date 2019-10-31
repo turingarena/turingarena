@@ -1,8 +1,13 @@
 use crate::*;
+use announcements::Announcement;
+use context::Context;
+use diesel::{ExpressionMethods, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use problem::Problem;
+use questions::{Question, QuestionInput};
 use schema::contest;
-use user::User;
+use turingarena::problem::ProblemName;
+use user::{User, UserId};
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -106,6 +111,27 @@ impl ContestView {
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self, ctx: &Context) -> FieldResult<String> {
         Ok(current_contest(&ctx.connect_db()?)?.end_time)
+    }
+
+    /// Questions made by the current user
+    fn questions(&self, ctx: &Context) -> FieldResult<Option<Vec<Question>>> {
+        if let Some(user_id) = &self.user_id {
+            Ok(Some(questions::question_of_user(
+                &ctx.connect_db()?,
+                user_id,
+            )?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn make_question(&self, ctx: &Context, question: QuestionInput) -> FieldResult<MutationOk> {
+        unimplemented!()
+    }
+
+    /// Return a list of announcements
+    fn announcements(&self, ctx: &Context) -> FieldResult<Vec<Announcement>> {
+        Ok(announcements::query_all(&ctx.connect_db()?)?)
     }
 }
 

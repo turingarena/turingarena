@@ -1,7 +1,8 @@
 /// Module of various importing formats for contest
 mod italy_yaml;
 
-use crate::{Context, Result};
+use crate::context::Context;
+use crate::Result;
 use std::path::Path;
 
 /// Result of an import

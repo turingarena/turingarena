@@ -1,5 +1,7 @@
 use super::*;
 
+use context::Context;
+use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use schema::users;
 
 #[derive(Insertable)]
