@@ -99,7 +99,7 @@ fn main() -> Result<()> {
             format,
             force,
         } => {
-            if force {
+            if force && context.database_url.exists() {
                 std::fs::remove_file(&context.database_url)?;
             }
             formats::import(&context, &path, &format)

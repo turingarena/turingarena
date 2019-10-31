@@ -5,11 +5,11 @@ authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-task-maker-cache = { git = "https://github.com/turingarena/task-maker-rust.git" }
-task-maker-dag = { git = "https://github.com/turingarena/task-maker-rust.git" }
-task-maker-exec = { git = "https://github.com/turingarena/task-maker-rust.git" }
-task-maker-format = { git = "https://github.com/turingarena/task-maker-rust.git" }
-task-maker-store = { git = "https://github.com/turingarena/task-maker-rust.git" }
+task-maker-cache = { git = "https://github.com/edomora97/task-maker-rust.git" }
+task-maker-dag = { git = "https://github.com/edomora97/task-maker-rust.git" }
+task-maker-exec = { git = "https://github.com/edomora97/task-maker-rust.git" }
+task-maker-format = { git = "https://github.com/edomora97/task-maker-rust.git" }
+task-maker-store = { git = "https://github.com/edomora97/task-maker-rust.git" }
 log = "0.4.8"
 tempdir = "0.3.7"
 num_cpus = "1.10.1"
