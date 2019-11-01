@@ -64,14 +64,14 @@
                         <ng-container *ngFor="let award of problem.material.awards"
                           [ngSwitch]="award.content.__typename">
                           <ng-container *ngIf="submissionState.award(award) as state">
-                            <th *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
+                            <td *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
                               [attr.data-score-tier]="getScoreTier(state)">
                               <ng-container *ngTemplateOutlet="scoreTemplate; context: state">
                               </ng-container>
-                            </th>
-                            <th *ngSwitchCase="'BadgeAwardContent'" class="badge-cell" [attr.data-badge]="state.badge">
+                            </td>
+                            <td *ngSwitchCase="'BadgeAwardContent'" class="badge-cell" [attr.data-badge]="state.badge">
                               <ng-container *ngTemplateOutlet="badgeTemplate; context: state"></ng-container>
-                            </th>
+                            </td>
                           </ng-container>
                         </ng-container>
                         <td class="score-cell"

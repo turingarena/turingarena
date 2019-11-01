@@ -66,10 +66,10 @@
                         <td class="cell-time-usage cell-valence"
                           [ngClass]="getValence(record[cell.content.valenceKey])">
                           <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ displayTimeSeconds(value.timeUsage) }}
+                            {{ displayTimeUsage(value.timeUsage, cell.content) }}
                           </ng-container>
                           <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
-                            {{ displayTimeSeconds(watermark) }}
+                            {{ displayTimeUsage(watermark, cell.content) }}
                           </small>
                         </td>
                       </ng-container>

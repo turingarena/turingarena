@@ -13,6 +13,7 @@ import {
   SubmissionQuery,
   SubmissionQueryVariables,
 } from '../__generated__/SubmissionQuery';
+import { TimeUsageCellContentFragment } from '../__generated__/TimeUsageCellContentFragment';
 import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
 import { ValueFragment } from '../__generated__/ValueFragment';
 import { evaluationFragment } from '../evaluation';
@@ -71,13 +72,18 @@ export class SubmissionDialogComponent implements OnInit {
     return record;
   }
 
-  displayTimeSeconds(seconds: number) {
-    const precision = 3;
+  displayTimeUsage(seconds: number, content: TimeUsageCellContentFragment) {
+    const maxRelevant = content.timeUsageMaxRelevant as number;
+    const extraPrecision = 3;
+    const fractionDigits = Math.max(Math.round(-Math.log10(maxRelevant) + extraPrecision), 0);
+
+    const millisPrecision = 3;
+
     const duration = Duration.fromObject({ seconds });
-    if (seconds < 1) {
-      return `${duration.as('milliseconds').toPrecision(precision)} ms`;
+    if (fractionDigits > millisPrecision) {
+      return `${duration.as('milliseconds').toFixed(fractionDigits - millisPrecision)} ms`;
     } else {
-      return `${duration.as('seconds').toPrecision(precision)} s`;
+      return `${duration.as('seconds').toFixed(fractionDigits)} s`;
     }
   }
 

@@ -1,11 +1,12 @@
 import gql from 'graphql-tag';
-import { problemFragment, getProblemState } from './problem';
-import { problemMaterialFragment } from './problem-material';
-import { submissionFragment } from './submission';
-import { ContestViewFragment } from './__generated__/ContestViewFragment';
 import { DateTime } from 'luxon';
 import { interval } from 'rxjs';
-import { startWith, map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
+
+import { ContestViewFragment } from './__generated__/ContestViewFragment';
+import { getProblemState, problemFragment } from './problem';
+import { problemMaterialFragment } from './problem-material';
+import { submissionFragment } from './submission';
 
 export const contestViewFragment = gql`
   fragment ContestViewFragment on ContestView {
@@ -49,7 +50,7 @@ export const getContestState = (contestView: ContestViewFragment) => {
   }) : [];
 
   return {
-    hasScore: problemTacklings.length > 0,
+    hasScore: problems !== null && problems.some(({ tackling }) => tackling !== null),
     score: problemTacklings.map((s) => s.score).reduce((a, b) => a + b, 0),
     range: {
       max: problemTacklings.map((s) => s.range.max as number).reduce((a, b) => a + b, 0),

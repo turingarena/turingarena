@@ -9,6 +9,7 @@ import {
   faFileArchive,
   faFilePdf,
   faHistory,
+  faHome,
   faHourglassHalf,
   faList,
   faPaperPlane,
@@ -23,19 +24,17 @@ import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 import { Auth, AuthService } from '../auth.service';
-import { getProblemState, problemFragment } from '../problem';
-import { problemMaterialFragment } from '../problem-material';
+import { contestViewFragment, getContestState } from '../contest';
+import { getProblemState } from '../problem';
 import { getScoreTier } from '../score';
-import { submissionFragment } from '../submission';
 
 import {
   ContestQuery,
   ContestQueryVariables,
 } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
-import { contestViewFragment, getContestState } from '../contest';
-import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 const pollInterval = 5000;
 
 @Component({
@@ -73,6 +72,7 @@ export class ContestViewComponent implements OnInit {
     localStorage.setItem('selectedProblemName', JSON.stringify(name));
   }
 
+  faHome = faHome;
   faPaperPlane = faPaperPlane;
   faCheck = faCheck;
   faSignInAlt = faSignInAlt;
