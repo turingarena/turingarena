@@ -16,12 +16,13 @@ struct ProblemDataInput<'a> {
     name: &'a str,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Clone)]
 pub struct ProblemData {
     name: String,
 }
 
 /// A problem in the contest
+#[derive(Clone)]
 pub struct Problem {
     /// Raw database data of the contest
     pub data: ProblemData,
@@ -44,67 +45,9 @@ impl Problem {
             .map_err(FieldError::from)
     }
 
-    /// Score awards of the current user (if to be shown)
-    fn scores(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::MaxScoreAward>>> {
-        let result = if let Some(UserId(user_id)) = &self.user_id {
-            Some(evaluation::query_score_awards_of_user_and_problem(
-                &ctx.connect_db()?,
-                &user_id,
-                &self.data.name,
-            )?)
-        } else {
-            None
-        };
-        Ok(result)
-    }
-
-    /// Badge awards of the current user (if to be shown)
-    fn badges(&self, ctx: &Context) -> FieldResult<Option<Vec<evaluation::BestBadgeAward>>> {
-        let result = if let Some(UserId(user_id)) = &self.user_id {
-            Some(evaluation::query_badge_awards_of_user_and_problem(
-                &ctx.connect_db()?,
-                &user_id,
-                &self.data.name,
-            )?)
-        } else {
-            None
-        };
-        Ok(result)
-    }
-
-    /// Submissions of the current user (if to be shown)
-    fn submissions(&self, ctx: &Context) -> FieldResult<Option<Vec<submission::Submission>>> {
-        let result = if let Some(UserId(user_id)) = &self.user_id {
-            Some(submission::of_user_and_problem(
-                &ctx.connect_db()?,
-                &user_id,
-                &self.data.name,
-            )?)
-        } else {
-            None
-        };
-        Ok(result)
-    }
-
-    /// Submit a solution to the problem
-    fn submit(
-        &self,
-        ctx: &Context,
-        files: Vec<submission::FileInput>,
-    ) -> FieldResult<submission::Submission> {
-        if let Some(UserId(user_id)) = &self.user_id {
-            let submission =
-                submission::insert(&ctx.connect_db()?, &user_id, &self.data.name, files)?;
-            evaluation::evaluate(self.pack(ctx), &submission, ctx.connect_db()?)?;
-            Ok(submission)
-        } else {
-            Err(FieldError::from("Must specify a user id"))
-        }
-    }
-
-    /// Indicates if the user can submit to this problem
-    fn can_submit(&self) -> bool {
-        self.user_id.is_some()
+    /// Material of this problem
+    fn tackling(&self, ctx: &Context) -> Option<ProblemTackling> {
+        self.user_id.as_ref().map(|_| ProblemTackling { problem: Box::new((*self).clone()) })
     }
 }
 
@@ -143,4 +86,72 @@ pub fn insert(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
 pub fn delete(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
     diesel::delete(problems::table.find(name.0)).execute(conn)?;
     Ok(())
+}
+
+/// Attempts at solving a problem by a user in the contest
+pub struct ProblemTackling {
+    /// The problem
+    pub problem: Box<Problem>,
+}
+
+impl ProblemTackling {
+    fn user_id(&self) -> UserId {
+        self.problem.user_id.clone().unwrap()
+    }
+
+    fn name(&self) -> &str {
+        &self.problem.data.name
+    }
+}
+
+/// Attempts at solving a problem by a user in the contest
+#[juniper::object(Context = Context)]
+impl ProblemTackling {
+    /// Score awards of the current user (if to be shown)
+    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::MaxScoreAward>> {
+        Ok(evaluation::query_score_awards_of_user_and_problem(
+            &ctx.connect_db()?,
+            &self.user_id().0,
+            self.name(),
+        )?)
+    }
+
+    /// Badge awards of the current user (if to be shown)
+    fn badges(&self, ctx: &Context) -> FieldResult<Vec<evaluation::BestBadgeAward>> {
+        Ok(evaluation::query_badge_awards_of_user_and_problem(
+            &ctx.connect_db()?,
+            &self.user_id().0,
+            self.name(),
+        )?)
+    }
+
+    /// Submissions of the current user (if to be shown)
+    fn submissions(&self, ctx: &Context) -> FieldResult<Vec<submission::Submission>> {
+        Ok(submission::of_user_and_problem(
+            &ctx.connect_db()?,
+            &self.user_id().0,
+            self.name(),
+        )?)
+    }
+
+    /// Submit a solution to the problem
+    fn submit(
+        &self,
+        ctx: &Context,
+        files: Vec<submission::FileInput>,
+    ) -> FieldResult<submission::Submission> {
+        let submission = submission::insert(
+            &ctx.connect_db()?,
+            &self.user_id().0,
+            self.name(),
+            files,
+        )?;
+        evaluation::evaluate(self.problem.pack(ctx), &submission, ctx.connect_db()?)?;
+        Ok(submission)
+    }
+
+    /// Indicates if the user can submit to this problem
+    fn can_submit(&self) -> bool {
+        true
+    }
 }
