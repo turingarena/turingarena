@@ -19,7 +19,8 @@
             <form class="login-form" (submit)="$event.preventDefault(); logIn($event, modal)">
               <div class="login-dialog-body">
                 <label class="login-token-label" for="token">Token</label>
-                <input class="login-token-input" id="token" name="token" type="password" [class.is-invalid]="logInInvalidToken" />
+                <input class="login-token-input" id="token" name="token" type="password"
+                  [class.is-invalid]="logInInvalidToken" />
                 <small class="login-token-suggestion" [hidden]="logInInvalidToken">
                   Insert the token or password provided to you. No username needed.
                 </small>
@@ -49,9 +50,9 @@
             <h2>Score</h2>
             <div class="contest-score-panel">
               <span class="contest-score">
-                {{ state.score.toFixed(state.precision) }}
+                {{ state.score.toFixed(state.range.precision) }}
               </span>/<span class="contest-max-score">
-                {{ state.maxScore.toFixed(state.precision) }}
+                {{ state.range.max.toFixed(state.range.precision) }}
               </span>
             </div>
           </ng-container>
@@ -83,12 +84,10 @@
                   [class.active]="problem.name === selectedProblemName"
                   (click)="selectedProblemName = problem.name; $event.preventDefault()">
                   <ng-container *ngIf="problem.tackling as tackling">
-                    <ng-container *ngIf="state.getProblemState(problem, tackling) as problemState">
-                      <span class="contest-problem-score" [class.zero]="problemState.score <= 0"
-                        [class.partial]="0 < problemState.score && problemState.score < problemState.maxScore"
-                        [class.full]="problemState.maxScore <= problemState.score">
-                        {{ problemState.score.toFixed(problemState.precision) }} /
-                        {{ problemState.maxScore.toFixed(problemState.precision) }}
+                    <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
+                      <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(problemState)">
+                        {{ problemState.score.toFixed(problemState.range.precision) }} /
+                        {{ problemState.range.max.toFixed(problemState.range.precision) }}
                       </span>
                     </ng-container>
                   </ng-container>
@@ -155,9 +154,10 @@
             </ng-container>
 
             <ng-container *ngIf="state.hasScore">
-              <button class="focus-mode-score"
-                [ngbTooltip]="state.score.toFixed(state.precision) + '&nbsp;/&nbsp;' + state.maxScore.toFixed(state.precision)"
-                triggers="click:blur" placement="right">
+              <ng-template #tooltip>
+                {{state.score.toFixed(state.range.precision)}}&nbsp;/&nbsp;{{state.range.max.toFixed(state.range.precision)}}
+              </ng-template>
+              <button class="focus-mode-score" [ngbTooltip]="tooltip" triggers="click:mouseleave" placement="right">
                 <fa-icon [icon]="faAward"></fa-icon>
               </button>
             </ng-container>
@@ -178,7 +178,7 @@
               </ng-container>
             </ng-template>
 
-            <button class="focus-mode-clock" [ngbTooltip]="clockTemplate" triggers="click:blur" placement="right">
+            <button class="focus-mode-clock" [ngbTooltip]="clockTemplate" triggers="click:click" placement="right">
               <fa-icon [icon]="faHourglassHalf"></fa-icon>
             </button>
 
@@ -194,7 +194,6 @@
                   </button>
                 </ng-container>
                 <ng-container *ngIf="tackling.submissions as submissions">
-                  <!-- <h2>Submissions</h2> -->
                   <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
                     <ng-template #dialog let-modal>
                       <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
@@ -205,7 +204,6 @@
                       <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                       </fa-icon>
                       Last submission
-                      <!-- <app-relative-time [time]="lastSubmission.createdAt"></app-relative-time> -->
                     </button>
                     <button class="problem-submission-list"
                       (click)="modalService.open(submissionListDialog, { size: 'xl' })">
@@ -220,30 +218,20 @@
               <ng-container *ngIf="problem.material.awards as awards">
                 <h2>Awards</h2>
                 <div class="problem-award-list">
-                  <ng-container *ngFor="let award of awards">
+                  <ng-container *ngFor="let award of awards" [ngSwitch]="award.content.__typename">
                     <div class="problem-award" [title]="award.title | textVariant">
                       <ng-container *ngIf="problem.tackling as tackling">
-                        <ng-container *ngIf="state.getProblemState(problem, tackling) as problemState">
-                          <ng-container *ngIf="problemState.getAwardState(award) as state">
-                            <ng-container *ngIf="award.content.range as range">
-                              <span class="problem-award-badge" [class.zero]="state.score <= 0"
-                                [class.partial]="0 < state.score && state.score < range.max"
-                                [class.full]="range.max <= state.score">
-                                {{ state.score.toFixed(range.precision) }} / {{ range.max.toFixed(range.precision) }}
-                              </span>
-                            </ng-container>
-                            <ng-container *ngIf="!award.content.range">
-                              <ng-container *ngIf="state.badge">
-                                <span class="problem-award-badge full">
-                                  &#x2713;
-                                </span>
-                              </ng-container>
-                              <ng-container *ngIf="!state.badge">
-                                <span class="problem-award-badge zero">
-                                  &#x2717;
-                                </span>
-                              </ng-container>
-                            </ng-container>
+                        <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
+                          <ng-container *ngIf="problemState.award(award) as state">
+                            <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
+                              [attr.data-score-tier]="getScoreTier(state)">
+                              {{ state.score.toFixed(state.range.precision) }} /
+                              {{ state.range.max.toFixed(state.range.precision) }}
+                            </th>
+                            <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge" [attr.data-badge]="state.badge">
+                              <ng-container *ngIf="state.badge">&#x2713;</ng-container>
+                              <ng-container *ngIf="!state.badge">&#x2717;</ng-container>
+                            </th>
                           </ng-container>
                         </ng-container>
                       </ng-container>

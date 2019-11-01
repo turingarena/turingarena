@@ -16,45 +16,41 @@
 }
 
 .submission-list-dialog-close {
-  @extend .btn, .btn-secondary;
+  @extend .btn, .btn-primary;
 }
 
-.submission_score,
-.submission_total_score,
-.submission_best_score,
-.submission_best_total_score {
-  &.score_zero {
-    @extend .table-danger;
-  }
-  &.score_partial {
-    @extend .table-warning;
-  }
-  &.score_full {
-    @extend .table-success;
-  }
-  &.score_zero.score_full {
-    @extend .table-light;
-  }
-}
-
-.submission_table {
+.submission-table {
   @extend .table, .table-sm, .table-bordered;
   margin: 0;
 }
 
-.submission_table_header {
+.submission-table-header {
   @extend .thead-light;
 }
 
-.submission_score,
-.submission_total_score,
-.submission_best_score,
-.submission_best_total_score {
-  text-align: end;
+.submission-table .badge-cell {
+  text-align: center;
+  vertical-align: middle;
+
+  &[data-badge="true"] {
+    @extend .table-success;
+  }
+  &[data-badge="false"] {
+    @extend .table-danger;
+  }
 }
 
-.submission_total_score,
-.submission_best_score,
-.submission_best_total_score {
-  font-weight: bold;
+.submission-table .score-cell {
+  text-align: end;
+  vertical-align: middle;
+
+  &[data-score-tier="ZERO"] {
+    @extend .table-danger;
+  }
+  &[data-score-tier="PARTIAL"] {
+    @extend .table-warning;
+  }
+  &[data-score-tier="FULL"] {
+    @extend .table-success;
+  }
 }

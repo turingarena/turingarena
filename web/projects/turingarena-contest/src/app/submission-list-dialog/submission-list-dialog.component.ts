@@ -9,6 +9,7 @@ import {
 } from '../__generated__/SubmissionListQuery';
 import { getProblemState, problemFragment } from '../problem';
 import { problemMaterialFragment } from '../problem-material';
+import { getScoreTier } from '../score';
 import { getSubmissionState, submissionFragment } from '../submission';
 
 @Component({
@@ -36,6 +37,7 @@ export class SubmissionListDialogComponent implements OnInit {
 
   getProblemState = getProblemState;
   getSubmissionState = getSubmissionState;
+  getScoreTier = getScoreTier;
 
   ngOnInit() {
     const { userId, problemName } = this;

@@ -32,6 +32,7 @@
   margin-right: 1em;
 }
 
+.user-login,
 .user-display-name {
   margin-left: auto;
 }
@@ -139,24 +140,30 @@
   }
 }
 
-.contest-problem-score {
+%score-badge {
   @extend .badge, .badge-pill;
 
   margin-top: 0.2rem;
   float: right;
 
-  &.zero {
+  &[data-score-tier="ZERO"],
+  &[data-badge="false"] {
     @extend .badge-light;
     border: 1px solid #ccc;
   }
 
-  &.full {
+  &[data-score-tier="FULL"],
+  &[data-badge="true"] {
     @extend .badge-success;
   }
 
-  &.partial {
+  &[data-score-tier="PARTIAL"] {
     @extend .badge-warning;
   }
+}
+
+.contest-problem-score {
+  @extend %score-badge;
 }
 
 .problem-aside {
@@ -219,8 +226,9 @@
   }
 }
 
-.problem-award-badge {
-  @extend .contest-problem-score;
+.problem-award-badge,
+.problem-award-score {
+  @extend %score-badge;
 }
 
 .problem-attachments {
