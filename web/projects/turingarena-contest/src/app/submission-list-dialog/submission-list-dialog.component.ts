@@ -1,15 +1,15 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { QueryRef, Apollo } from 'apollo-angular';
+import { Apollo, QueryRef } from 'apollo-angular';
+import gql from 'graphql-tag';
 
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
 } from '../__generated__/SubmissionListQuery';
-import { problemMaterialFragment } from '../problem-material';
 import { getProblemState, problemFragment } from '../problem';
+import { problemMaterialFragment } from '../problem-material';
 import { getSubmissionState, submissionFragment } from '../submission';
-import gql from 'graphql-tag';
 
 @Component({
   selector: 'app-submission-list-dialog',

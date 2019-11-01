@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
 
 import { FileInput } from '../../../../../__generated__/globalTypes';
 import {
   ContestQuery_contestView_problems as Problem,
   ContestQuery_contestView_problems_material_submissionForm_fields as Field,
 } from '../__generated__/ContestQuery';
-import { Apollo } from 'apollo-angular';
-import gql from 'graphql-tag';
 import { SubmitMutation, SubmitMutationVariables } from '../__generated__/SubmitMutation';
 
 class FieldState {

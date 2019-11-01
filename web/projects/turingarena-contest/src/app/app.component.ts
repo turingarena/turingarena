@@ -17,6 +17,8 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -24,10 +26,8 @@ import { map, startWith } from 'rxjs/operators';
 import { ContestQuery, ContestQuery_contestView_problems as ContestProblem, ContestQueryVariables } from './__generated__/ContestQuery';
 import { Auth, getAuth, setAuth } from './auth';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
-import { scoreRanges, problemMaterialFragment } from './problem-material';
-import { Apollo } from 'apollo-angular';
-import gql from 'graphql-tag';
 import { problemFragment } from './problem';
+import { problemMaterialFragment, scoreRanges } from './problem-material';
 import { submissionFragment } from './submission';
 
 const pollInterval = 5000;

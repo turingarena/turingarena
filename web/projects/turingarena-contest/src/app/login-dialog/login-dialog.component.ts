@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-
-import { AppComponent } from '../app.component';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
+
 import { LoginMutation, LoginMutationVariables } from '../__generated__/LoginMutation';
+import { AppComponent } from '../app.component';
 
 @Component({
   selector: 'app-login-dialog',

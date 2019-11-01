@@ -1,7 +1,8 @@
 import gql from 'graphql-tag';
-import { scoreRanges } from './problem-material';
+
 import { ProblemMaterialFragment } from './__generated__/ProblemMaterialFragment';
 import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
+import { scoreRanges } from './problem-material';
 
 export const problemFragment = gql`
   fragment ProblemTacklingFragment on ProblemTackling {

@@ -1,22 +1,22 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { QueryRef, Apollo } from 'apollo-angular';
+import { Apollo, QueryRef } from 'apollo-angular';
+import gql from 'graphql-tag';
 import { Duration } from 'luxon';
 
+import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
+import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
+import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
+import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
 import {
   SubmissionQuery,
   SubmissionQueryVariables,
 } from '../__generated__/SubmissionQuery';
-import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
-import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
-import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
-import { ValueFragment } from '../__generated__/ValueFragment';
 import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
-import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
-import { submissionFragment } from '../submission';
+import { ValueFragment } from '../__generated__/ValueFragment';
 import { evaluationFragment } from '../evaluation';
-import gql from 'graphql-tag';
+import { submissionFragment } from '../submission';
 
 @Component({
   selector: 'app-submission-dialog',
