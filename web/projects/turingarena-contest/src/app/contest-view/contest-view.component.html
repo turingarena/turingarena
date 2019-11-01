@@ -15,7 +15,25 @@
           </button>
         </ng-container>
         <ng-container *ngIf="!data.contestView.user">
-          <button class="user-login" (click)="openLoginDialog()">
+          <ng-template #loginDialog let-modal>
+            <form class="login-form" (submit)="$event.preventDefault(); logIn($event, modal)">
+              <div class="login-dialog-body">
+                <label class="login-token-label" for="token">Token</label>
+                <input class="login-token-input" id="token" name="token" type="password" [class.is-invalid]="logInInvalidToken" />
+                <small class="login-token-suggestion" [hidden]="logInInvalidToken">
+                  Insert the token or password provided to you. No username needed.
+                </small>
+                <small class="login-token-invalid">
+                  Invalid token.
+                </small>
+              </div>
+              <div class="login-dialog-footer">
+                <button (click)="modal.close()" class="login-dialog-cancel" type="button">Cancel</button>
+                <button class="login-dialog-submit" type="submit">Log in</button>
+              </div>
+            </form>
+          </ng-template>
+          <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
             <fa-icon [icon]="faSignInAlt"></fa-icon>
             Login
           </button>

@@ -16,15 +16,16 @@ import {
   faSignOutAlt,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
+import { ProblemTacklingFragment } from '../__generated__/ProblemTacklingFragment';
 import { Auth, AuthService } from '../auth.service';
-import { LoginDialogComponent } from '../login-dialog/login-dialog.component';
 import { problemFragment } from '../problem';
 import { problemMaterialFragment, scoreRanges } from '../problem-material';
 import { submissionFragment } from '../submission';
@@ -33,9 +34,7 @@ import {
   ContestQuery,
   ContestQueryVariables,
 } from './__generated__/ContestQuery';
-import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
-import { ProblemTacklingFragment } from '../__generated__/ProblemTacklingFragment';
-
+import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 
 const pollInterval = 5000;
 
@@ -69,6 +68,8 @@ export class ContestViewComponent implements OnInit {
   focusMode = false;
 
   newSubmissionId?: string;
+
+  logInInvalidToken = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -203,15 +204,34 @@ export class ContestViewComponent implements OnInit {
     this.setQuery();
   }
 
-  async openLoginDialog() {
-    const modalRef = this.modalService.open(LoginDialogComponent);
+  async logIn(event: Event, modal: NgbActiveModal) {
+    const formData = new FormData(event.target as HTMLFormElement);
+    const { data } = await this.apollo.mutate<LoginMutation, LoginMutationVariables>({
+      mutation: gql`
+        mutation LoginMutation($token: String!) {
+          auth(token: $token) {
+            token
+            userId
+          }
+        }
+      `,
+      variables: {
+        token: formData.get('token') as string,
+      },
+    }).toPromise();
 
-    try {
-      await modalRef.result;
-      this.setQuery();
-    } catch (e) {
-      // Dismissed, do nothing
+    if (data === null || data === undefined) { throw Error('error during login'); }
+
+    if (data.auth === null) {
+      this.logInInvalidToken = true;
+    } else {
+      const { token, userId } = data.auth;
+
+      await this.setAuth({ token, userId });
+      modal.close();
     }
   }
+
+
 }
 

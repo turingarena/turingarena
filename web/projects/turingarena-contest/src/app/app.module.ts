@@ -9,14 +9,13 @@ import { NgxFilesizeModule } from 'ngx-filesize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
+import { ContestViewComponent } from './contest-view/contest-view.component';
 import { GraphQLModule } from './graphql.module';
-import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TextVariantPipe } from './text-variant.pipe';
-import { ContestViewComponent } from './contest-view/contest-view.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +25,6 @@ import { ContestViewComponent } from './contest-view/contest-view.component';
     SubmissionDialogComponent,
     BypassSanitizerPipe,
     SubmissionListDialogComponent,
-    LoginDialogComponent,
     TextVariantPipe,
     ContestViewComponent,
   ],
@@ -41,8 +39,5 @@ import { ContestViewComponent } from './contest-view/contest-view.component';
   ],
   providers: [],
   bootstrap: [AppComponent],
-  entryComponents: [
-    LoginDialogComponent,
-  ],
 })
 export class AppModule { }

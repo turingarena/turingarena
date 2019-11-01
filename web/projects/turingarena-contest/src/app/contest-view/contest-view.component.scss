@@ -41,6 +41,34 @@
   @extend .btn, .btn-sm, .btn-light;
 }
 
+.login-dialog-body {
+  @extend .modal-body;
+}
+
+.login-token-input {
+  @extend .form-control;
+}
+
+.login-token-suggestion {
+  @extend .form-text, .text-muted;
+}
+
+.login-token-invalid {
+  @extend .invalid-feedback;
+}
+
+.login-dialog-footer {
+  @extend .modal-footer;
+}
+
+.login-dialog-submit {
+  @extend .btn, .btn-primary;
+}
+
+.login-dialog-cancel {
+  @extend .btn, .btn-secondary;
+}
+
 .contest-main {
   flex: 1;
   display: flex;
