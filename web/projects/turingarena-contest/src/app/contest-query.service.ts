@@ -5,6 +5,7 @@ import gql from 'graphql-tag';
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { problemMaterialFragment } from './problem-material';
 import { problemFragment } from './problem';
+import { submissionFragment } from './submission';
 
 @Injectable({
   providedIn: 'root',
@@ -23,12 +24,16 @@ export class ContestQueryService extends Query<ContestQuery, ContestQueryVariabl
         endTime
         problems {
           name
-          ...ProblemStateFragment
+          tackling {
+            ...ProblemTacklingFragment
+            submissions { ...SubmissionFragment }
+          }
           ...ProblemMaterialFragment
         }
       }
     }
     ${problemFragment}
     ${problemMaterialFragment}
+    ${submissionFragment}
   `;
 }

@@ -103,7 +103,7 @@ export class SubmitDialogComponent {
       throw new Error('error in submit');
     }
 
-    this.done.emit({ id: data.contestView.problem.submit.id });
+    this.done.emit({ id: data.contestView.problem.tackling!.submit.id });
 
     this.modal.close();
   }

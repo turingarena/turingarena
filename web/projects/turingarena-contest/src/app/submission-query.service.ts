@@ -18,5 +18,6 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
       }
     }
     ${submissionFragment}
+    ${evaluationFragment}
   `;
 }

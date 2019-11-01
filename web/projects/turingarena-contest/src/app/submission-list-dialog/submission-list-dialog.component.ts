@@ -10,7 +10,7 @@ import { scoreRanges } from '../problem-material';
 import { SubmissionListQueryService } from '../submission-list-query.service';
 import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
 import { SubmissionFragment } from '../__generated__/SubmissionFragment';
-import { ProblemStateFragment } from '../__generated__/ProblemStateFragment';
+import { ProblemTacklingFragment } from '../__generated__/ProblemTacklingFragment';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -64,12 +64,12 @@ export class SubmissionListDialogComponent implements OnInit {
     };
   }
 
-  getProblemState(problem: ProblemStateFragment & ProblemMaterialFragment) {
+  getProblemState(problem: ProblemTacklingFragment & ProblemMaterialFragment) {
     return {
       award({ name }: { name: string }) {
         // FIXME: repeated code
-        const scoreState = problem.scores!.find((s) => s.awardName === name);
-        const badgeState = problem.badges!.find((s) => s.awardName === name);
+        const scoreState = problem.tackling!.scores.find((s) => s.awardName === name);
+        const badgeState = problem.tackling!.badges.find((s) => s.awardName === name);
 
         return {
           score: scoreState ? scoreState.score : 0,
@@ -79,7 +79,7 @@ export class SubmissionListDialogComponent implements OnInit {
       maxScore: scoreRanges(problem).map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
       precision: scoreRanges(problem).map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
       score: scoreRanges(problem)
-        .map(({ name }) => problem.scores!.find((s) => s.awardName === name))
+        .map(({ name }) => problem.tackling!.scores.find((s) => s.awardName === name))
         .map((state) => state ? state.score as number : 0)
         .reduce((a, b) => a + b, 0),
     };

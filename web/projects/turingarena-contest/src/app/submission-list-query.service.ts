@@ -19,8 +19,10 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
         }
         problem(name: $problemName) {
           ...ProblemMaterialFragment
-          ...ProblemStateFragment
-          submissions { ...SubmissionFragment }
+          tackling {
+            ...ProblemTacklingFragment
+            submissions { ...SubmissionFragment }
+          }
         }
       }
     }

@@ -105,15 +105,14 @@ export class AppComponent {
     const { contestView: { startTime, endTime, problems } } = data;
 
     const getProblemState = (problem: ContestProblem) => {
-      if (problem.scores === null) { throw new Error(); }
-      if (problem.badges === null) { throw new Error(); }
+      const { tackling } = problem;
+      if (tackling === null) { throw new Error(); }
 
       const getAwardState = ({ name }: { name: string }) => {
-        if (problem.scores === null) { throw new Error(); }
-        if (problem.badges === null) { throw new Error(); }
+        if (tackling === null) { throw new Error(); }
 
-        const scoreState = problem.scores.find((s) => s.awardName === name);
-        const badgeState = problem.badges.find((s) => s.awardName === name);
+        const scoreState = tackling.scores.find((s) => s.awardName === name);
+        const badgeState = tackling.badges.find((s) => s.awardName === name);
 
         return {
           score: scoreState !== undefined ? scoreState.score as number : 0,

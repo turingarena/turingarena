@@ -12,8 +12,10 @@ export class SubmitMutationService extends Mutation<SubmitMutation, SubmitMutati
     mutation SubmitMutation($userId: UserId!, $problemName: ProblemName!, $files: [FileInput!]!) {
       contestView(userId: $userId) {
         problem(name: $problemName) {
-          submit(files: $files) {
-            id
+          tackling {
+            submit(files: $files) {
+              id
+            }
           }
         }
       }

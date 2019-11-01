@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
 export const problemFragment = gql`
-  fragment ProblemStateFragment on Problem {
+  fragment ProblemTacklingFragment on ProblemTackling {
     scores {
       awardName
       score
@@ -12,5 +12,6 @@ export const problemFragment = gql`
       badge
       submissionId
     }
+    canSubmit
   }
 `;

@@ -94,35 +94,35 @@
             </app-submission-list-dialog>
           </ng-template>
           <aside class="focus-mode-aside" [hidden]="selectedProblemName !== problem.name || !focusMode">
-            <ng-container *ngIf="problem.canSubmit || problem.submissions">
+            <ng-container *ngIf="problem.tackling as tackling">
               <button class="problem-submit" style="border-radius: 0" (click)="modalService.open(submitDialog)"
-                [hidden]="!problem.canSubmit">
+                [hidden]="!tackling.canSubmit">
                 <fa-icon [icon]="faPaperPlane"></fa-icon>
               </button>
-            </ng-container>
-            <ng-container *ngIf="problem.submissions as submissions">
-              <ng-container *ngIf="submissions.length === 0">
-                <button class="problem-last-submission disabled">
-                  <fa-icon [icon]="faHistory"></fa-icon>
-                </button>
-                <button class="problem-submission-list disabled">
-                  <fa-icon [icon]="faList"></fa-icon>
-                </button>
-              </ng-container>
-              <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
-                <ng-template #dialog let-modal>
-                  <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
-                  </app-submission-dialog>
-                </ng-template>
-                <button class="problem-last-submission" (click)="modalService.open(dialog, { size: 'lg' })">
-                  <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
-                  <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
-                  </fa-icon>
-                </button>
-                <button class="problem-submission-list"
-                  (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-                  <fa-icon [icon]="faList"></fa-icon>
-                </button>
+              <ng-container *ngIf="tackling.submissions as submissions">
+                <ng-container *ngIf="submissions.length === 0">
+                  <button class="problem-last-submission disabled">
+                    <fa-icon [icon]="faHistory"></fa-icon>
+                  </button>
+                  <button class="problem-submission-list disabled">
+                    <fa-icon [icon]="faList"></fa-icon>
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
+                  <ng-template #dialog let-modal>
+                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                    </app-submission-dialog>
+                  </ng-template>
+                  <button class="problem-last-submission" (click)="modalService.open(dialog, { size: 'lg' })">
+                    <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory"></fa-icon>
+                    <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
+                    </fa-icon>
+                  </button>
+                  <button class="problem-submission-list"
+                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+                    <fa-icon [icon]="faList"></fa-icon>
+                  </button>
+                </ng-container>
               </ng-container>
             </ng-container>
             <ng-container *ngIf="data.contestView.problems as problems">
@@ -165,15 +165,15 @@
           </aside>
           <aside class="problem-aside" [hidden]="selectedProblemName !== problem.name || focusMode">
             <!-- <h2 class="problem-title">{{ problem.material.title | textVariant }}</h2> -->
-            <ng-container *ngIf="problem.canSubmit || problem.submissions">
+            <ng-container *ngIf="problem.tackling as tackling">
               <div class="problem-submission-panel">
-                <ng-container *ngIf="problem.canSubmit">
+                <ng-container *ngIf="tackling.canSubmit">
                   <button class="problem-submit" (click)="modalService.open(submitDialog)">
                     <fa-icon [icon]="faPaperPlane"></fa-icon>
                     Submit a solution
                   </button>
                 </ng-container>
-                <ng-container *ngIf="problem.submissions as submissions">
+                <ng-container *ngIf="tackling.submissions as submissions">
                   <!-- <h2>Submissions</h2> -->
                   <ng-container *ngIf="submissions[submissions.length-1] as lastSubmission">
                     <ng-template #dialog let-modal>
