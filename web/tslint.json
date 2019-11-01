@@ -45,7 +45,7 @@
       true,
       "ignore-params"
     ],
-    "no-non-null-assertion": true,
+    "no-non-null-assertion": false,
     "no-redundant-jsdoc": true,
     "no-switch-case-fall-through": true,
     "no-var-requires": false,
@@ -75,6 +75,10 @@
       {
         "allow-destructuring": true
       }
+    ],
+    "no-submodule-imports": [
+      true,
+      "rxjs/operators"
     ],
     "component-class-suffix": true,
     "contextual-lifecycle": true,

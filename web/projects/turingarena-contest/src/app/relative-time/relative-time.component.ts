@@ -16,13 +16,14 @@ export class RelativeTimeComponent implements OnChanges {
   relativeTimeObservable!: Observable<string>;
 
   ngOnChanges() {
-    this.relativeTimeObservable = interval(10000).pipe(
-      startWith([0]),
-      map(() => {
-        const time = DateTime.fromISO(this.time).setLocale(this.locale);
+    const time = DateTime.fromISO(this.time).setLocale(this.locale);
 
-        return time.diffNow().as('seconds') > -10 ? 'now' : (time.toRelative() || '');
-      }),
+    const refreshInterval = 10000;
+    const nowToleranceSeconds = 10;
+
+    this.relativeTimeObservable = interval(refreshInterval).pipe(
+      startWith(0),
+      map(() => time.diffNow().as('seconds') > -nowToleranceSeconds ? 'now' : time.toRelative()!),
     );
   }
 }

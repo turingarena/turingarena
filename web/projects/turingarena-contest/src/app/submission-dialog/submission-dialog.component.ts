@@ -73,7 +73,6 @@ export class SubmissionDialogComponent implements OnInit {
     return value.valence.toLowerCase();
   }
 
-  // FIXME: type this correctly
   getScoreValence(value: ScoreValueFragment | undefined, range: ScoreRangeFragment) {
     if (value === undefined) { return 'unknown'; }
 

@@ -24,11 +24,11 @@ export class LoginDialogComponent implements OnInit {
 
   async submit(event: Event) {
     const formData = new FormData(event.target as HTMLFormElement);
-    const { data, errors } = await this.loginMutationService.mutate({
+    const { data } = await this.loginMutationService.mutate({
       token: formData.get('token') as string,
     }).toPromise();
 
-    if (!data || errors) { throw Error('error during login'); }
+    if (data === null || data === undefined) { throw Error('error during login'); }
 
     if (data.auth === null) {
       // FIXME

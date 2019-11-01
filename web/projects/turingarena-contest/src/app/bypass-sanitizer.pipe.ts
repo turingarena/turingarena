@@ -8,7 +8,7 @@ export class BypassSanitizerPipe implements PipeTransform {
 
   constructor(private readonly sanitizer: DomSanitizer) {}
 
-  transform(value: any, urlType: 'Url' | 'ResourceUrl'): any {
+  transform(value: string, urlType: 'Url' | 'ResourceUrl') {
     if (urlType === 'Url') {
       return this.sanitizer.bypassSecurityTrustUrl(value);
     } else {

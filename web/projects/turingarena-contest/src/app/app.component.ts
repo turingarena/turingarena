@@ -109,8 +109,6 @@ export class AppComponent {
       if (tackling === null) { throw new Error(); }
 
       const getAwardState = ({ name }: { name: string }) => {
-        if (tackling === null) { throw new Error(); }
-
         const scoreState = tackling.scores.find((s) => s.awardName === name);
         const badgeState = tackling.badges.find((s) => s.awardName === name);
 

@@ -1,5 +1,13 @@
 {
   "extends": "../../tslint.json",
+  "linterOptions": {
+    "exclude": [
+      "src/environments/environment.ts",
+      "src/polyfills.ts",
+      "**/*.e2e-spec.ts",
+      "**/*.spec.ts"
+    ]
+  },
   "rules": {
     "directive-selector": [
       true,

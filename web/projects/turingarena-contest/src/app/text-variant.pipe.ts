@@ -17,12 +17,15 @@ export class TextVariantPipe implements PipeTransform {
   ) { }
 
   transform(variants: TextFragment[], style?: string): string {
+    const styleScore = 10;
+    const languageScore = 5;
     const sortedVariants = variants.slice();
+
     sortedVariants.sort((a, b) => {
       const [aScore, bScore] = [a, b].map((v) =>
-        (v.attributes.find(({ key, value }) => key === 'style' && value === style) ? 10 : 0)
+        (v.attributes.some(({ key, value }) => key === 'style' && value === style) ? styleScore : 0)
         +
-        (v.attributes.find(({ key, value }) => key === 'locale' && value === this.locale) ? 5 : 0),
+        (v.attributes.some(({ key, value }) => key === 'locale' && value === this.locale) ? languageScore : 0),
       );
 
       return bScore - aScore;
