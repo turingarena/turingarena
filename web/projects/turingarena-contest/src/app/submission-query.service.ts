@@ -3,6 +3,7 @@ import { Query } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { SubmissionQuery, SubmissionQueryVariables } from './__generated__/SubmissionQuery';
+import { evaluationFragment } from './evaluation';
 
 @Injectable({
   providedIn: 'root',
@@ -14,35 +15,9 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
         id
         createdAt
         status
-        evaluationEvents {
-          event {
-            __typename
-            ... on ValueEvent {
-              key
-              value {
-                __typename
-                ... on TextValue {
-                  text {
-                    value
-                  }
-                }
-                ... on ScoreValue {
-                  score
-                }
-                ... on TimeUsageValue {
-                  timeUsage
-                }
-                ... on MemoryUsageValue {
-                  memoryUsage
-                }
-                ... on ValenceValue {
-                  valence
-                }
-              }
-            }
-          }
-        }
+        ...SubmissionEvaluationFragment
       }
     }
+    ${evaluationFragment}
   `;
 }
