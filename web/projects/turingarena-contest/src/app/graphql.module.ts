@@ -8,11 +8,11 @@ import { setContext } from 'apollo-link-context';
 // tslint:disable-next-line: no-default-import
 import schema from '../../../../__generated__/graphql-schema.json';
 
-import { getAuth } from './auth';
+import { AuthService } from './auth.service.js';
 
-const createApollo = (httpLink: HttpLink) => {
+const createApollo = (httpLink: HttpLink, authService: AuthService) => {
   const authContext = setContext((operation, context) => {
-    const auth = getAuth();
+    const auth = authService.getAuth();
 
     return {
       headers: auth !== undefined ? {
@@ -39,7 +39,7 @@ const createApollo = (httpLink: HttpLink) => {
     {
       provide: APOLLO_OPTIONS,
       useFactory: createApollo,
-      deps: [HttpLink],
+      deps: [HttpLink, AuthService],
     },
   ],
 })

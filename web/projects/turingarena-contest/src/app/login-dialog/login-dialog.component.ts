@@ -4,25 +4,20 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { LoginMutation, LoginMutationVariables } from '../__generated__/LoginMutation';
-import { AppComponent } from '../app.component';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login-dialog',
   templateUrl: './login-dialog.component.html',
   styleUrls: ['./login-dialog.component.scss'],
 })
-export class LoginDialogComponent implements OnInit {
+export class LoginDialogComponent {
 
   constructor(
+    private readonly authService: AuthService,
     readonly activeModal: NgbActiveModal,
     readonly apollo: Apollo,
   ) { }
-
-  @Input()
-  appComponent!: AppComponent;
-
-  ngOnInit() {
-  }
 
   async submit(event: Event) {
     const formData = new FormData(event.target as HTMLFormElement);
@@ -47,7 +42,8 @@ export class LoginDialogComponent implements OnInit {
       alert('Login failed');
     } else {
       const { token, userId } = data.auth;
-      this.appComponent.setAuth({ token, userId });
+
+      await this.authService.setAuth({ token, userId });
 
       this.activeModal.close();
     }

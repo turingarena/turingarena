@@ -16,6 +16,7 @@ import { SubmissionDialogComponent } from './submission-dialog/submission-dialog
 import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TextVariantPipe } from './text-variant.pipe';
+import { ContestViewComponent } from './contest-view/contest-view.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { TextVariantPipe } from './text-variant.pipe';
     SubmissionListDialogComponent,
     LoginDialogComponent,
     TextVariantPipe,
+    ContestViewComponent,
   ],
   imports: [
     BrowserModule,
