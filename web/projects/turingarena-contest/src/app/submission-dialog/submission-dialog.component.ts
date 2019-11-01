@@ -4,15 +4,17 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { QueryRef } from 'apollo-angular';
 import { Duration } from 'luxon';
 
-import { ContestQuery_contestView_problems as Problem } from '../__generated__/ContestQuery';
 import {
   SubmissionQuery,
-  SubmissionQuery_submission,
-  SubmissionQuery_submission_evaluationEvents_event_ValueEvent_value as Value,
   SubmissionQueryVariables,
 } from '../__generated__/SubmissionQuery';
 import { SubmissionQueryService } from '../submission-query.service';
 import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
+import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
+import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
+import { ValueFragment } from '../__generated__/ValueFragment';
+import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
+import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -30,7 +32,7 @@ export class SubmissionDialogComponent implements OnInit {
   submissionId!: string;
 
   @Input()
-  problem!: Problem;
+  problem!: ProblemMaterialFragment;
 
   @Input()
   modal!: NgbActiveModal;
@@ -43,8 +45,8 @@ export class SubmissionDialogComponent implements OnInit {
       { submissionId }, { pollInterval: 1000 });
   }
 
-  getEvaluationRecord(submission: SubmissionQuery_submission) {
-    const record: Record<string, Value> = {};
+  getEvaluationRecord(submission: SubmissionEvaluationFragment) {
+    const record: Record<string, ValueFragment> = {};
     for (const event of submission.evaluationEvents) {
       if (event.event.__typename === 'ValueEvent') {
         const { key, value } = event.event;
@@ -65,17 +67,15 @@ export class SubmissionDialogComponent implements OnInit {
     }
   }
 
-  getValence(value?: Value) {
+  getValence(value?: ValenceValueFragment) {
     if (value === undefined) { return 'unknown'; }
-    if (value.__typename !== 'ValenceValue') { throw new Error(); }
 
     return value.valence.toLowerCase();
   }
 
   // FIXME: type this correctly
-  getScoreValence(value: Value | undefined, range: ScoreRangeFragment) {
+  getScoreValence(value: ScoreValueFragment | undefined, range: ScoreRangeFragment) {
     if (value === undefined) { return 'unknown'; }
-    if (value.__typename !== 'ScoreValue') { throw new Error(); }
 
     const { score } = value;
     if (score <= 0) { return 'failure'; }

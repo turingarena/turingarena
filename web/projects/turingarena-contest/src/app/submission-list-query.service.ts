@@ -4,6 +4,8 @@ import gql from 'graphql-tag';
 
 import { SubmissionListQuery, SubmissionListQueryVariables } from './__generated__/SubmissionListQuery';
 import { problemMaterialFragment } from './problem-material';
+import { submissionFragment } from './submission';
+import { problemFragment } from './problem';
 
 @Injectable({
   providedIn: 'root',
@@ -16,40 +18,14 @@ export class SubmissionListQueryService extends Query<SubmissionListQuery, Submi
           id
         }
         problem(name: $problemName) {
-          name
-          scores {
-            awardName
-            score
-            submissionId
-          }
-          badges {
-            awardName
-            badge
-            submissionId
-          }
-          submissions {
-            id
-            createdAt
-            files {
-              fieldId
-              typeId
-              name
-              contentBase64
-            }
-            status
-            scores {
-              awardName
-              score
-            }
-            badges {
-              awardName
-              badge
-            }
-          }
           ...ProblemMaterialFragment
+          ...ProblemStateFragment
+          submissions { ...SubmissionFragment }
         }
       }
     }
     ${problemMaterialFragment}
+    ${problemFragment}
+    ${submissionFragment}
   `;
 }

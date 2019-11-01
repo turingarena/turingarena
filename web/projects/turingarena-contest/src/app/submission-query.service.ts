@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 
 import { SubmissionQuery, SubmissionQueryVariables } from './__generated__/SubmissionQuery';
 import { evaluationFragment } from './evaluation';
+import { submissionFragment } from './submission';
 
 @Injectable({
   providedIn: 'root',
@@ -12,12 +13,10 @@ export class SubmissionQueryService extends Query<SubmissionQuery, SubmissionQue
   document = gql`
     query SubmissionQuery($submissionId: String!) {
       submission(submissionId: $submissionId) {
-        id
-        createdAt
-        status
+        ...SubmissionFragment
         ...SubmissionEvaluationFragment
       }
     }
-    ${evaluationFragment}
+    ${submissionFragment}
   `;
 }

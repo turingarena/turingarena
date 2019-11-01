@@ -4,12 +4,13 @@ import { QueryRef } from 'apollo-angular';
 
 import {
   SubmissionListQuery,
-  SubmissionListQuery_contestView_problem as Problem,
-  SubmissionListQuery_contestView_problem_submissions as Submission,
   SubmissionListQueryVariables,
 } from '../__generated__/SubmissionListQuery';
 import { scoreRanges } from '../problem-material';
 import { SubmissionListQueryService } from '../submission-list-query.service';
+import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
+import { SubmissionFragment } from '../__generated__/SubmissionFragment';
+import { ProblemStateFragment } from '../__generated__/ProblemStateFragment';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -38,13 +39,13 @@ export class SubmissionListDialogComponent implements OnInit {
     this.submissionListQuery = this.submissionListQueryService.watch({
       userId: this.userId,
       problemName: this.problemName,
-    },                                                               {
+    }, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 1000,
       });
   }
 
-  getSubmissionState(problem: Problem, submission: Submission) {
+  getSubmissionState(problem: ProblemMaterialFragment, submission: SubmissionFragment) {
     return {
       score: problem.material.awards
         .map((award) => submission.scores.find((s) => s.awardName === award.name))
@@ -63,7 +64,7 @@ export class SubmissionListDialogComponent implements OnInit {
     };
   }
 
-  getProblemState(problem: Problem) {
+  getProblemState(problem: ProblemStateFragment & ProblemMaterialFragment) {
     return {
       award({ name }: { name: string }) {
         // FIXME: repeated code
