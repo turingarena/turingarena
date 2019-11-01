@@ -35,6 +35,7 @@ import {
 } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 import { contestViewFragment, getContestState } from '../contest';
+import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 const pollInterval = 5000;
 
 @Component({
@@ -125,6 +126,33 @@ export class ContestViewComponent implements OnInit {
 
   getProblemLetter(index: number) {
     return String.fromCharCode('A'.charCodeAt(0) + index);
+  }
+
+  selectedProblem(contestView: ContestViewFragment) {
+    if (contestView.problems === null) { return undefined; }
+
+    return contestView.problems.find(({ name }) => name === this.selectedProblemName);
+  }
+
+  selectedProblemTackling(contestView: ContestViewFragment) {
+    const problem = this.selectedProblem(contestView);
+    if (problem === undefined || problem.tackling === null) { return undefined; }
+
+    return problem.tackling;
+  }
+
+  canSubmit(contestView: ContestViewFragment) {
+    const tackling = this.selectedProblemTackling(contestView);
+
+    return tackling !== undefined && tackling.canSubmit;
+  }
+
+  selectedProblemLastSubmission(contestView: ContestViewFragment) {
+    const tackling = this.selectedProblemTackling(contestView);
+    if (tackling === undefined) { return undefined; }
+    const { submissions } = tackling;
+
+    return submissions[submissions.length - 1];
   }
 
   async setAuth(auth: Auth) {

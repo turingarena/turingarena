@@ -40,7 +40,7 @@
           </button>
         </ng-container>
       </nav>
-      <div class="contest-main" #main>
+      <div class="contest-main">
         <ng-template #clockTemplate>
           <ng-container *ngIf="state.clock | async as clock">
             <h2 class="contest-clock-title" [ngSwitch]="clock.status">
@@ -71,7 +71,8 @@
           <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
         </aside>
 
-        <aside class="aside" [attr.data-focus-mode]="focusMode">
+        <aside class="contest-view-aside" [attr.data-focus-mode]="focusMode"
+          [attr.data-has-problem]="selectedProblem(data.contestView) !== undefined">
           <aside class="contest-aside">
             <ng-container *ngTemplateOutlet="scoreTemplate"></ng-container>
             <ng-container *ngTemplateOutlet="clockTemplate"></ng-container>
@@ -97,63 +98,68 @@
               </div>
             </ng-container>
           </aside>
-          <ng-container *ngFor="let problem of data.contestView.problems">
-            <ng-template #newSubmissionDialog let-modal>
-              <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
-              </app-submission-dialog>
-            </ng-template>
-            <ng-template #submitDialog let-modal>
-              <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
-                (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
-              </app-submit-dialog>
-            </ng-template>
-            <aside class="problem-aside" [hidden]="selectedProblemName !== problem.name">
-              <ng-container *ngIf="problem.tackling as tackling">
-                <div class="problem-submission-panel">
-                  <ng-container *ngIf="tackling.canSubmit">
-                    <button class="problem-submit" (click)="modalService.open(submitDialog)">
-                      <fa-icon [icon]="faPaperPlane"></fa-icon>
-                      <span class="button-label"> Submit a solution</span>
-                    </button>
-                  </ng-container>
-
-                  <ng-template #lastSubmissionButton let-lastSubmission="lastSubmission">
-                    <ng-template #lastSubmissionDialog let-modal>
-                      <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
-                      </app-submission-dialog>
-                    </ng-template>
-                    <button class="problem-last-submission" [disabled]="lastSubmission === undefined"
-                      (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-                      <fa-icon *ngIf="!lastSubmission || lastSubmission.status !== 'PENDING'" [icon]="faHistory">
-                      </fa-icon>
-                      <fa-icon *ngIf="lastSubmission && lastSubmission.status === 'PENDING'" [icon]="faSpinner"
-                        [pulse]="true">
-                      </fa-icon>
-                      <span class="button-label"> Last submission</span>
-                    </button>
-                  </ng-template>
-
-                  <ng-template #submissionListButton let-submissions="submissions">
-                    <ng-template #submissionListDialog let-modal>
-                      <app-submission-list-dialog [problemName]="problem.name" [userId]="data.contestView.user.id"
-                        [modal]="modal">
-                      </app-submission-list-dialog>
-                    </ng-template>
-                    <button class="problem-submission-list" [disabled]="submissions.length === 0"
-                      (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-                      <fa-icon [icon]="faList"></fa-icon>
-                      <span class="button-label"> All submissions</span>
-                    </button>
-                  </ng-template>
-
-                  <ng-container
-                    *ngTemplateOutlet="lastSubmissionButton; context: { lastSubmission: tackling.submissions[tackling.submissions.length-1] }">
-                  </ng-container>
-                  <ng-container
-                    *ngTemplateOutlet="submissionListButton; context: { submissions: tackling.submissions }">
-                  </ng-container>
-                </div>
+          <aside class="problem-aside">
+            <div class="problem-submission-panel">
+              <ng-container *ngIf="selectedProblem(data.contestView) as problem">
+                <ng-template #newSubmissionDialog let-modal>
+                  <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
+                  </app-submission-dialog>
+                </ng-template>
+                <ng-template #submitDialog let-modal>
+                  <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
+                    (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
+                  </app-submit-dialog>
+                </ng-template>
+                <button class="problem-submit" (click)="modalService.open(submitDialog)"
+                  [disabled]="!canSubmit(data.contestView)">
+                  <fa-icon [icon]="faPaperPlane"></fa-icon>
+                  <span class="button-label"> Submit a solution</span>
+                </button>
               </ng-container>
+              <button *ngIf="!selectedProblem(data.contestView)" class="problem-submit" [disabled]="true">
+                <fa-icon [icon]="faPaperPlane"></fa-icon>
+                <span class="button-label"> Submit a solution</span>
+              </button>
+
+              <ng-container *ngIf="selectedProblem(data.contestView) as problem">
+                <ng-container *ngIf="selectedProblemLastSubmission(data.contestView) as lastSubmission">
+                  <ng-template #lastSubmissionDialog let-modal>
+                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                    </app-submission-dialog>
+                  </ng-template>
+                  <button class="problem-last-submission"
+                    (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
+                    <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory">
+                    </fa-icon>
+                    <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
+                    </fa-icon>
+                    <span class="button-label"> Last submission</span>
+                  </button>
+
+                  <ng-template #submissionListDialog let-modal>
+                    <app-submission-list-dialog [problemName]="problem.name" [userId]="data.contestView.user.id"
+                      [modal]="modal">
+                    </app-submission-list-dialog>
+                  </ng-template>
+                  <button class="problem-submission-list"
+                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+                    <fa-icon [icon]="faList"></fa-icon>
+                    <span class="button-label"> All submissions</span>
+                  </button>
+                </ng-container>
+              </ng-container>
+              <ng-container *ngIf="!selectedProblemLastSubmission(data.contestView)">
+                <button class="problem-last-submission" [disabled]="true">
+                  <fa-icon [icon]="faHistory"></fa-icon>
+                  <span class="button-label"> Last submission</span>
+                </button>
+                <button class="problem-submission-list" [disabled]="true">
+                  <fa-icon [icon]="faList"></fa-icon>
+                  <span class="button-label"> All submissions</span>
+                </button>
+              </ng-container>
+            </div>
+            <ng-container *ngIf="selectedProblem(data.contestView) as problem">
               <div class="problem-info">
                 <ng-container *ngIf="problem.material.awards.length > 0">
                   <h2>Awards</h2>
@@ -203,24 +209,34 @@
                   </ng-container>
                 </ng-container>
               </div>
-            </aside>
-          </ng-container>
+            </ng-container>
+          </aside>
           <aside class="focus-mode-contest-aside">
             <ng-container *ngIf="state.hasScore">
-              <button class="focus-mode-score" [ngbTooltip]="scoreTemplate" triggers="click:blur"
-                placement="right">
+              <button class="focus-mode-score" [ngbTooltip]="scoreTemplate" triggers="click:blur" placement="right">
+                <fa-icon [icon]="faAward"></fa-icon>
+              </button>
+            </ng-container>
+            <ng-container *ngIf="!state.hasScore">
+              <button class="focus-mode-score" [disabled]="true">
                 <fa-icon [icon]="faAward"></fa-icon>
               </button>
             </ng-container>
 
-            <button class="focus-mode-clock" [ngbTooltip]="clockTemplate" triggers="click:click"
-              placement="right">
-              <fa-icon [icon]="faHourglassHalf"></fa-icon>
-            </button>
+            <ng-container *ngIf="state.clock">
+              <button class="focus-mode-clock" [ngbTooltip]="clockTemplate" triggers="click:click" placement="right">
+                <fa-icon [icon]="faHourglassHalf"></fa-icon>
+              </button>
+            </ng-container>
+            <ng-container *ngIf="!state.clock">
+              <button class="focus-mode-clock" [disabled]="true">
+                <fa-icon [icon]="faHourglassHalf"></fa-icon>
+              </button>
+            </ng-container>
           </aside>
         </aside>
 
-        <div [hidden]="selectedProblemName !== undefined">
+        <div [hidden]="selectedProblem(data.contestView) !== undefined">
           HOME (todo)
         </div>
 

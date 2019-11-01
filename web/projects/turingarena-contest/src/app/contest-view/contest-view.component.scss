@@ -76,7 +76,7 @@
   overflow: hidden;
 }
 
-.aside {
+.contest-view-aside {
   flex: 0 0 auto;
   display: flex;
 
@@ -85,6 +85,12 @@
 
     .contest-problem-letter {
       display: none;
+    }
+
+    &[data-has-problem="false"] {
+      .problem-aside {
+        display: none;
+      }
     }
   }
 
@@ -287,7 +293,11 @@
 .problem-last-submission,
 .problem-submission-list {
   @extend .btn, .btn-block, .btn-outline-dark;
+}
 
+.problem-submit,
+.problem-last-submission,
+.problem-submission-list {
   [data-focus-mode="false"] &[disabled] {
     display: none;
   }
