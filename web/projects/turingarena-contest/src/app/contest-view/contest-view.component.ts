@@ -34,6 +34,7 @@ import {
   ContestQueryVariables,
 } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
+import { contestViewFragment, getContestState } from '../contest';
 const pollInterval = 5000;
 
 @Component({
@@ -100,12 +101,7 @@ export class ContestViewComponent implements OnInit {
 
   contestQuery!: QueryRef<ContestQuery, ContestQueryVariables>;
 
-  // tslint:disable-next-line: no-magic-numbers
-  nowObservable = interval(1000).pipe(
-    startWith(0),
-    map(() => DateTime.local()),
-  );
-
+  getContestState = getContestState;
   getProblemState = getProblemState;
   getScoreTier = getScoreTier;
 
@@ -118,71 +114,17 @@ export class ContestViewComponent implements OnInit {
       query: gql`
         query ContestQuery($userId: UserId) {
           serverTime
-          contestView(userId: $userId) {
-            user {
-              id
-              displayName
-            }
-            contestTitle
-            startTime
-            endTime
-            problems {
-              name
-              tackling {
-                ...ProblemTacklingFragment
-                submissions { ...SubmissionFragment }
-              }
-              ...ProblemMaterialFragment
-            }
-          }
+          contestView(userId: $userId) { ...ContestViewFragment }
         }
-        ${problemFragment}
-        ${problemMaterialFragment}
-        ${submissionFragment}
+        ${contestViewFragment}
       `,
       variables: { userId: this.userId },
       pollInterval,
     });
   }
 
-  getTaskLetter(index: number) {
+  getProblemLetter(index: number) {
     return String.fromCharCode('A'.charCodeAt(0) + index);
-  }
-
-  getContestState(data: ContestQuery | undefined) {
-    if (data === undefined) { return undefined; }
-
-    const { contestView: { startTime, endTime, problems } } = data;
-
-    const problemTacklings = problems !== null ? problems.map((problem) => {
-      const { tackling } = problem;
-      if (tackling !== null) {
-        return getProblemState(problem, tackling);
-      } else {
-        return {
-          score: 0,
-          range: {
-            max: 0,
-            precision: 0,
-          },
-        };
-      }
-    }) : [];
-
-    return {
-      hasScore: problemTacklings.length > 0,
-      startTime: DateTime.fromISO(startTime),
-      endTime: DateTime.fromISO(endTime),
-      score: problemTacklings.map((s) => s.score).reduce((a, b) => a + b, 0),
-      range: {
-        max: problemTacklings.map((s) => s.range.max as number).reduce((a, b) => a + b, 0),
-        precision: problemTacklings.map((s) => s.range.precision).reduce((a, b) => Math.max(a, b), 0),
-      },
-    };
-  }
-
-  formatDuration(duration: Duration) {
-    return duration.toFormat('hh:mm:ss');
   }
 
   async setAuth(auth: Auth) {

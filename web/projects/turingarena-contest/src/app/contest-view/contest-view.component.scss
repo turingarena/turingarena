@@ -76,59 +76,150 @@
   overflow: hidden;
 }
 
-.contest-aside {
+.aside {
   flex: 0 0 auto;
-  overflow-y: auto;
+  display: flex;
 
-  padding: 16px;
-  width: 16em;
-  background-color: #f8f9fa;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  &[data-focus-mode="false"] {
+    overflow: hidden;
+
+    .contest-problem-letter {
+      display: none;
+    }
+  }
+
+  &[data-focus-mode="true"] {
+    flex-direction: column;
+
+    .problem-aside {
+      order: -1;
+    }
+
+    .contest-aside {
+      .contest-score-title,
+      .contest-score-panel,
+      .contest-clock-title,
+      .contest-clock,
+      .contest-problem-list-title,
+      .contest-problem-title,
+      .contest-problem-score {
+        display: none;
+      }
+    }
+
+    .problem-info {
+      display: none;
+    }
+
+    .button-label {
+      display: none;
+    }
+
+    .contest-problem-list,
+    .problem-submission-panel,
+    .focus-mode-contest-aside {
+      @extend .btn-group-vertical;
+      flex: 1 0 auto;
+
+      button,
+      a {
+        border-radius: 0;
+      }
+    }
+  }
 }
 
-.contest-aside h2 {
-  text-transform: uppercase;
-  font-size: 1.25rem;
-  margin: 0 0 0.5rem;
-  font-weight: 500;
-  line-height: 1.2;
+.contest-score-title,
+.contest-clock-title,
+.contest-problem-list-title {
+  .contest-aside & {
+    text-transform: uppercase;
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  font-size: inherit;
 }
 
-.contest-aside ol {
+.contest-aside,
+.problem-aside {
+  [data-focus-mode="true"] & {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.contest-aside {
+  [data-focus-mode="false"] & {
+    flex: 0 0 auto;
+    overflow-y: auto;
+
+    padding: 16px;
+    width: 16em;
+    background-color: #f8f9fa;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
+
+.contest-problem-list {
   padding: 0;
   list-style: none;
 }
 
 .contest-score-panel {
+  white-space: nowrap;
   text-align: right;
-  font-size: 2rem;
-  margin-bottom: 16px;
+  [data-focus-mode="false"] & {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
 }
 
 .contest-score {
-  font-size: 4rem;
+  [data-focus-mode="false"] & {
+    font-size: 4rem;
+  }
 }
 
 .contest-clock {
-  font-size: 2rem;
-  text-align: right;
-  margin-bottom: 16px;
+  .contest-aside & {
+    font-size: 2rem;
+    text-align: right;
+    margin-bottom: 16px;
 
-  &.ended-by-time {
-    @extend .text-danger;
+    &[data-clock-status="endedBy"] {
+      @extend .text-danger;
+    }
   }
 }
 
 .contest-problem {
-  display: block;
   text-transform: uppercase;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  margin: 0 -16px;
-  padding: 0.5rem 16px;
+  [data-focus-mode="false"] & {
+    display: block;
+    margin: 0 -16px;
+    padding: 0.5rem 16px;
+  }
+
+  [data-focus-mode="true"] & {
+    @extend .btn;
+
+    &:not(.selected) {
+      @extend .btn-outline-primary;
+    }
+
+    &.selected {
+      @extend .btn-primary;
+    }
+  }
 
   &:hover {
     text-decoration: none;
@@ -167,24 +258,20 @@
 }
 
 .problem-aside {
-  display: flex;
-  flex-direction: column;
-  flex: 0 0 auto;
-  width: 15em;
-  background-color: #f8f9fa;
-}
-
-.problem-aside h2 {
-  text-transform: uppercase;
-  font-size: 1.125rem;
-  margin: 0 0 0.5rem;
-  font-weight: 500;
-  line-height: 1.2;
+  [data-focus-mode="false"] & {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: 15em;
+    background-color: #f8f9fa;
+  }
 }
 
 .problem-submission-panel {
-  padding: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  [data-focus-mode="false"] & {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
 }
 
 .problem-info {
@@ -200,6 +287,10 @@
 .problem-last-submission,
 .problem-submission-list {
   @extend .btn, .btn-block, .btn-outline-dark;
+
+  [data-focus-mode="false"] &[disabled] {
+    display: none;
+  }
 }
 
 .problem-award-list {
@@ -272,26 +363,13 @@
   }
 }
 
-.focus-mode-aside {
-  @extend .btn-group-vertical;
-}
-
-.focus-mode-problem {
-  @extend .btn;
-
-  &:not(.selected) {
-    @extend .btn-outline-primary;
-  }
-
-  &.selected {
-    @extend .btn-primary;
-  }
-}
-
-.focus-mode-score {
-  @extend .btn, .btn-outline-dark;
-}
-
+.focus-mode-score,
 .focus-mode-clock {
   @extend .btn, .btn-outline-dark;
+
+  flex: 1 0 auto;
+
+  [data-focus-mode="false"] & {
+    display: none;
+  }
 }
