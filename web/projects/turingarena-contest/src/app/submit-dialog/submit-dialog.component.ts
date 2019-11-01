@@ -6,7 +6,9 @@ import {
   ContestQuery_contestView_problems as Problem,
   ContestQuery_contestView_problems_material_submissionForm_fields as Field,
 } from '../__generated__/ContestQuery';
-import { SubmitMutationService } from '../submit-mutation.service';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
+import { SubmitMutation, SubmitMutationVariables } from '../__generated__/SubmitMutation';
 
 class FieldState {
   file?: File;
@@ -50,7 +52,7 @@ class FieldState {
 })
 export class SubmitDialogComponent {
   constructor(
-    private readonly submitMutation: SubmitMutationService,
+    private readonly apollo: Apollo,
   ) { }
 
   @Input()
@@ -92,10 +94,25 @@ export class SubmitDialogComponent {
 
     console.log(files);
 
-    const { data, errors } = await this.submitMutation.mutate({
-      problemName: this.problem.name,
-      userId: this.userId,
-      files,
+    const { data, errors } = await this.apollo.mutate<SubmitMutation, SubmitMutationVariables>({
+      mutation: gql`
+        mutation SubmitMutation($userId: UserId!, $problemName: ProblemName!, $files: [FileInput!]!) {
+          contestView(userId: $userId) {
+            problem(name: $problemName) {
+              tackling {
+                submit(files: $files) {
+                  id
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: {
+        problemName: this.problem.name,
+        userId: this.userId,
+        files,
+      },
     })
       .toPromise();
 

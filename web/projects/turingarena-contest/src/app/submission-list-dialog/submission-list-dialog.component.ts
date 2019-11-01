@@ -1,18 +1,15 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { QueryRef } from 'apollo-angular';
+import { QueryRef, Apollo } from 'apollo-angular';
 
 import {
   SubmissionListQuery,
   SubmissionListQueryVariables,
 } from '../__generated__/SubmissionListQuery';
-import { scoreRanges } from '../problem-material';
-import { SubmissionListQueryService } from '../submission-list-query.service';
-import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
-import { SubmissionFragment } from '../__generated__/SubmissionFragment';
-import { ProblemTacklingFragment } from '../__generated__/ProblemTacklingFragment';
-import { getProblemState } from '../problem';
-import { getSubmissionState } from '../submission';
+import { problemMaterialFragment } from '../problem-material';
+import { getProblemState, problemFragment } from '../problem';
+import { getSubmissionState, submissionFragment } from '../submission';
+import gql from 'graphql-tag';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -23,7 +20,7 @@ export class SubmissionListDialogComponent implements OnInit {
 
   constructor(
     readonly modalService: NgbModal,
-    private readonly submissionListQueryService: SubmissionListQueryService,
+    private readonly apollo: Apollo,
   ) { }
 
   @Input()
@@ -42,8 +39,29 @@ export class SubmissionListDialogComponent implements OnInit {
 
   ngOnInit() {
     const { userId, problemName } = this;
-    this.submissionListQuery = this.submissionListQueryService
-      .watch({ userId, problemName }, { pollInterval: 1000 });
+    this.submissionListQuery = this.apollo.watchQuery({
+      query: gql`
+        query SubmissionListQuery($userId: UserId!, $problemName: ProblemName!) {
+          contestView(userId: $userId) {
+            user {
+              id
+            }
+            problem(name: $problemName) {
+              ...ProblemMaterialFragment
+              tackling {
+                ...ProblemTacklingFragment
+                submissions { ...SubmissionFragment }
+              }
+            }
+          }
+        }
+        ${problemMaterialFragment}
+        ${problemFragment}
+        ${submissionFragment}
+      `,
+      variables: { userId, problemName },
+      pollInterval: 1000,
+    });
   }
 
 }

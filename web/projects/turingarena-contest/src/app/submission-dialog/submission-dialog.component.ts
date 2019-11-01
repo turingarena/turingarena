@@ -1,20 +1,22 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { QueryRef } from 'apollo-angular';
+import { QueryRef, Apollo } from 'apollo-angular';
 import { Duration } from 'luxon';
 
 import {
   SubmissionQuery,
   SubmissionQueryVariables,
 } from '../__generated__/SubmissionQuery';
-import { SubmissionQueryService } from '../submission-query.service';
 import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
 import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
 import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
 import { ValueFragment } from '../__generated__/ValueFragment';
 import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
 import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
+import { submissionFragment } from '../submission';
+import { evaluationFragment } from '../evaluation';
+import gql from 'graphql-tag';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -23,7 +25,7 @@ import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
 })
 export class SubmissionDialogComponent implements OnInit {
   constructor(
-    private readonly submissionQueryService: SubmissionQueryService,
+    private readonly apollo: Apollo,
   ) { }
 
   faSpinner = faSpinner;
@@ -41,8 +43,20 @@ export class SubmissionDialogComponent implements OnInit {
 
   ngOnInit() {
     const { submissionId } = this;
-    this.submissionQueryRef = this.submissionQueryService.watch(
-      { submissionId }, { pollInterval: 1000 });
+    this.submissionQueryRef = this.apollo.watchQuery({
+      query: gql`
+        query SubmissionQuery($submissionId: String!) {
+          submission(submissionId: $submissionId) {
+            ...SubmissionFragment
+            ...SubmissionEvaluationFragment
+          }
+        }
+        ${submissionFragment}
+        ${evaluationFragment}
+      `,
+      variables: { submissionId },
+      pollInterval: 1000,
+    });
   }
 
   getEvaluationRecord(submission: SubmissionEvaluationFragment) {

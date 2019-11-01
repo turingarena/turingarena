@@ -21,11 +21,14 @@ import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ContestQuery, ContestQuery_contestView_problems as ContestProblem } from './__generated__/ContestQuery';
+import { ContestQuery, ContestQuery_contestView_problems as ContestProblem, ContestQueryVariables } from './__generated__/ContestQuery';
 import { Auth, getAuth, setAuth } from './auth';
-import { ContestQueryService } from './contest-query.service';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
-import { scoreRanges } from './problem-material';
+import { scoreRanges, problemMaterialFragment } from './problem-material';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
+import { problemFragment } from './problem';
+import { submissionFragment } from './submission';
 
 const pollInterval = 5000;
 
@@ -61,7 +64,7 @@ export class AppComponent {
   newSubmissionId?: string;
 
   constructor(
-    private readonly contestQueryService: ContestQueryService,
+    private readonly apollo: Apollo,
     readonly modalService: NgbModal,
   ) { }
 
@@ -71,7 +74,35 @@ export class AppComponent {
     return auth !== undefined ? auth.userId : undefined;
   }
 
-  contestQuery = this.contestQueryService.watch({ userId: this.userId }, { pollInterval });
+  contestQuery = this.apollo.watchQuery<ContestQuery, ContestQueryVariables>({
+    query: gql`
+      query ContestQuery($userId: UserId) {
+        serverTime
+        contestView(userId: $userId) {
+          user {
+            id
+            displayName
+          }
+          contestTitle
+          startTime
+          endTime
+          problems {
+            name
+            tackling {
+              ...ProblemTacklingFragment
+              submissions { ...SubmissionFragment }
+            }
+            ...ProblemMaterialFragment
+          }
+        }
+      }
+      ${problemFragment}
+      ${problemMaterialFragment}
+      ${submissionFragment}
+    `,
+    variables: { userId: this.userId },
+    pollInterval,
+  });
 
   get selectedProblemName() {
     try {

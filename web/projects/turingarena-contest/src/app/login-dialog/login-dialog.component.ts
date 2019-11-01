@@ -2,7 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from '../app.component';
-import { LoginMutationService } from '../login-mutation.service';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
+import { LoginMutation, LoginMutationVariables } from '../__generated__/LoginMutation';
 
 @Component({
   selector: 'app-login-dialog',
@@ -13,7 +15,7 @@ export class LoginDialogComponent implements OnInit {
 
   constructor(
     readonly activeModal: NgbActiveModal,
-    readonly loginMutationService: LoginMutationService,
+    readonly apollo: Apollo,
   ) { }
 
   @Input()
@@ -24,8 +26,18 @@ export class LoginDialogComponent implements OnInit {
 
   async submit(event: Event) {
     const formData = new FormData(event.target as HTMLFormElement);
-    const { data } = await this.loginMutationService.mutate({
-      token: formData.get('token') as string,
+    const { data } = await this.apollo.mutate<LoginMutation, LoginMutationVariables>({
+      mutation: gql`
+        mutation LoginMutation($token: String!) {
+          auth(token: $token) {
+            token
+            userId
+          }
+        }
+      `,
+      variables: {
+        token: formData.get('token') as string,
+      },
     }).toPromise();
 
     if (data === null || data === undefined) { throw Error('error during login'); }
