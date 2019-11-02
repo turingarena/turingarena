@@ -1,17 +1,10 @@
 import gql from 'graphql-tag';
 
 import { MaterialFragment } from './__generated__/MaterialFragment';
+import { fileFragment } from './file';
 import { textFragment } from './text';
 
 export const problemMaterialFragment = gql`
-  fragment FileFragment on FileVariant {
-    name
-    type
-    content {
-      base64
-    }
-  }
-
   fragment AttachmentFragment on Attachment {
     title { ...TextFragment }
     file { ...FileFragment }
@@ -130,6 +123,7 @@ export const problemMaterialFragment = gql`
   }
 
   ${textFragment}
+  ${fileFragment}
 `;
 
 export const getAwardScoreRanges = (material: MaterialFragment) => material.awards.map(({ name, content }) => {

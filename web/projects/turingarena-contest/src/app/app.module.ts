@@ -15,6 +15,7 @@ import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TextVariantPipe } from './text-variant.pipe';
+import { FileVariantPipe } from './file-variant.pipe';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { TextVariantPipe } from './text-variant.pipe';
     BypassSanitizerPipe,
     TextVariantPipe,
     ContestViewComponent,
+    FileVariantPipe,
   ],
   imports: [
     BrowserModule,

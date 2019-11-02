@@ -218,17 +218,20 @@
                 <ng-container *ngIf="problem.material.attachments.length > 0">
                   <h3 class="problem-attachment-list-title">Attachments</h3>
                   <div class="problem-attachment-list">
-                    <a *ngFor="let attachment of problem.material.attachments" class="problem-attachment"
-                      [title]="attachment.title | textVariant" [download]="attachment.file[0].name"
-                      [href]="'data:' + (attachment.file[0].type || 'application/octet-stream') + ';base64,' + attachment.file[0].content.base64 | bypassSanitizer:'Url'">
-                      <fa-icon [icon]="mimeTypeIcons[attachment.file[0].type] || faFile"></fa-icon>
-                      {{attachment.title | textVariant}}
-                    </a>
+                    <ng-container *ngFor="let attachment of problem.material.attachments">
+                      <ng-container *ngIf="attachment.file | fileVariant as file">
+                        <a class="problem-attachment" [title]="attachment.title | textVariant" [download]="file.name"
+                          [href]="'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64 | bypassSanitizer:'Url'">
+                          <fa-icon [icon]="mimeTypeIcons[file.type] || faFile"></fa-icon>
+                          {{attachment.title | textVariant}}
+                        </a>
+                      </ng-container>
+                    </ng-container>
                   </div>
                 </ng-container>
                 <ng-container *ngIf="problem.material.statement.length > 0">
                   <h2 class="problem-download-statement-title">Statement file</h2>
-                  <ng-container *ngIf="problem.material.statement[0] as statement">
+                  <ng-container *ngIf="problem.material.statement | fileVariant as statement">
                     <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
                       [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
                       <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
