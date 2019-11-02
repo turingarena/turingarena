@@ -13,4 +13,8 @@ juniper::graphql_object!(FileContent: () where Scalar = <S> |&self| {
     field base64() -> String {
         base64::encode(&self.0)
     }
+
+    field text() -> Option<String> {
+        String::from_utf8(self.0.clone()).ok()
+    }
 });

@@ -92,6 +92,7 @@ impl ContestView {
                     content: FileContent(read(entry.path()).unwrap()),
                     r#type: match extension.to_str().unwrap() {
                         "pdf" => Some(MediaType("application/pdf".to_owned())),
+                        "md" => Some(MediaType("text/markdown".to_owned())),
                         "html" => Some(MediaType("text/html".to_owned())),
                         _ => None
                     }
