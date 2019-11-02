@@ -10,53 +10,43 @@ use graphql_client::{GraphQLQuery, QueryBody};
 
 use serde::{Serialize, Deserialize};
 
-use turingarena_contest::user::UserId;
+use turingarena_contest::user::{UserId, User};
 use turingarena_contest::submission::SubmissionId;
 use turingarena::submission::form::FieldId;
 use turingarena::problem::ProblemName;
 use turingarena_contest::api::ApiContext;
 use turingarena_contest::args::ContestArgs;
-use turingarena_contest::Schema;
-use turingarena_contest::contest::ContestQueries;
 use juniper::{InputValue, DefaultScalarValue};
 use std::collections::HashMap;
 use juniper::http::GraphQLRequest;
 
 macro_rules! graphql_operations {
     (
-        $(
-            $file:literal {
-                $( $name:ident ),*
-                $(,)?
-            }
-        ),*
+        $( $name:ident : $file: literal ),*
         $(,)?
     ) => {
         $(
-            $(
-                #[derive(GraphQLQuery)]
-                #[graphql(
-                    schema_path = "__generated__/graphql-schema.json",
-                    query_path = $file,
-                    response_derives = "Debug"
-                )]
-                struct $name;
-            )*
+            #[derive(GraphQLQuery)]
+            #[graphql(
+                schema_path = "__generated__/graphql-schema.json",
+                query_path = $file,
+                response_derives = "Debug"
+            )]
+            struct $name;
         )*
     }
 }
 
 graphql_operations! {
-    "src/admin.graphql" {
-        ViewContestQuery,
-        InitDbMutation,
-    },
+    InitDbMutation: "src/graphql/InitDbMutation.graphql",
+    ViewContestQuery: "src/graphql/ViewContestQuery.graphql",
+    AddUserMutation: "src/graphql/AddUserMutation.graphql",
 }
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name = "turingarena",
-    about = "CLI to manage the turingarena contest server"
+name = "turingarena",
+about = "CLI to manage the turingarena contest server"
 )]
 struct Args {
     #[structopt(flatten)]
@@ -70,10 +60,18 @@ struct Args {
 enum Command {
     ViewContest,
     InitDb,
+    AddUser {
+        #[structopt(long)]
+        id: String,
+        #[structopt(long)]
+        display_name: String,
+        #[structopt(long)]
+        token: String,
+    },
 }
 
 impl Command {
-    pub fn to_graphql_request(&self) -> GraphQLRequest {
+    pub fn to_graphql_request(self) -> GraphQLRequest {
         use Command::*;
         match self {
             ViewContest => {
@@ -81,6 +79,17 @@ impl Command {
             }
             InitDb => {
                 make_request(InitDbMutation::build_query, init_db_mutation::Variables {})
+            }
+            AddUser {
+                id, display_name, token
+            } => {
+                make_request(AddUserMutation::build_query, add_user_mutation::Variables {
+                    input: add_user_mutation::UserInput {
+                        id: UserId(id),
+                        display_name,
+                        token,
+                    },
+                })
             }
         }
     }
@@ -103,8 +112,8 @@ fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
 
 fn main() {
     let args = Args::from_args();
-    let root_node = Schema::new(ContestQueries {}, ContestQueries {});
     let context = ApiContext::default().with_args(args.contest).with_skip_auth(true);
+    let root_node = context.root_node();
 
     let request = args.command.to_graphql_request();
     let response = request.execute(&root_node, &context);

@@ -31,12 +31,6 @@ fn main() -> Result<()> {
             )
         }
         InitDb {} => context.init_db(),
-        AddUser {
-            username,
-            display_name,
-            token,
-        } => context.add_user(&username, &display_name, &token),
-        DeleteUser { username } => context.delete_user(&username),
         AddProblem { name } => context.add_problem(&name),
         DeleteProblem { name } => context.delete_problem(&name),
         ImportContest {

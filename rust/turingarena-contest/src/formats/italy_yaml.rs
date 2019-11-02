@@ -3,6 +3,8 @@ use super::{Importer, ImporterResult};
 use crate::api::ApiContext;
 use chrono::{Local, TimeZone};
 use std::path::{Path, PathBuf};
+use crate::user;
+use crate::user::{UserId, UserInput};
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,9 +51,17 @@ impl Importer for ItalyYamlImporter {
         for task in contest_yaml.tasks {
             context.add_problem(&task)?;
         }
+
+        let conn = context.connect_db()?;
         for user in contest_yaml.users {
-            let display_name = format!("{} {}", user.first_name, user.last_name);
-            context.add_user(&user.username, &display_name, &user.password)?;
+            user::insert(
+                &conn,
+                &UserInput {
+                    id: user.username,
+                    display_name: format!("{} {}", user.first_name, user.last_name),
+                    token: user.password,
+                },
+            )?;
         }
         Ok(())
     }

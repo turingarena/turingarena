@@ -13,6 +13,7 @@ use crate::{auth, contest, problem, Result, user};
 use crate::args::ContestArgs;
 use crate::submission;
 use crate::contest::{ContestView, UserToken};
+use crate::user::UserInput;
 
 embed_migrations!();
 
@@ -144,23 +145,6 @@ impl ApiContext {
         Ok(())
     }
 
-    /// Add a user to the current contest
-    pub fn add_user(&self, id: &str, display_name: &str, token: &str) -> Result<()> {
-        user::insert(
-            &self.connect_db()?,
-            UserId(id.to_owned()),
-            display_name,
-            token,
-        )?;
-        Ok(())
-    }
-
-    /// Delete a user from the current contest
-    pub fn delete_user(&self, id: &str) -> Result<()> {
-        user::delete(&self.connect_db()?, UserId(id.to_owned()))?;
-        Ok(())
-    }
-
     /// Add a problem to the current contest
     pub fn add_problem(&self, name: &str) -> Result<()> {
         problem::insert(&self.connect_db()?, ProblemName(name.to_owned()))?;
@@ -226,6 +210,28 @@ impl ApiContext {
     fn server_time(&self) -> String {
         chrono::Local::now().to_rfc3339()
     }
+
+    /// Add a user to the current contest
+    pub fn add_user(&self, input: UserInput) -> FieldResult<MutationOk> {
+        self.authorize_admin()?;
+
+        user::insert(
+            &self.connect_db()?,
+            &input,
+        )?;
+
+        Ok(MutationOk)
+    }
+
+    /// Delete a user from the current contest
+    pub fn delete_user(&self, id: String) -> FieldResult<MutationOk> {
+        self.authorize_admin()?;
+
+        user::delete(&self.connect_db()?, UserId(id.to_owned()))?;
+
+        Ok(MutationOk)
+    }
+
 }
 
 impl juniper::Context for ApiContext {}

@@ -4,9 +4,19 @@ use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use schema::users;
 
+#[derive(Debug, juniper::GraphQLInputObject)]
+pub struct UserInput {
+    /// Id of the user
+    pub id: String,
+    /// Display name of the user
+    pub display_name: String,
+    /// Login token of the user
+    pub token: String,
+}
+
 #[derive(Insertable)]
 #[table_name = "users"]
-pub struct UserInput<'a> {
+pub struct UserInsertable<'a> {
     id: &'a str,
     display_name: &'a str,
     token: &'a str,
@@ -14,19 +24,14 @@ pub struct UserInput<'a> {
 
 #[derive(Queryable)]
 pub struct User {
-    /// Id of the user
     pub id: String,
-
-    /// Display name of the user
     display_name: String,
-
-    /// Login token of the user
     #[allow(dead_code)]
     token: String,
 }
 
 /// Wraps a String that identifies a user
-#[derive(Clone, juniper::GraphQLScalarValue)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, juniper::GraphQLScalarValue)]
 pub struct UserId(pub String);
 
 #[juniper::object(Context = ApiContext)]
@@ -55,14 +60,12 @@ pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
 /// Insert a new user in the db
 pub fn insert(
     conn: &SqliteConnection,
-    user_id: UserId,
-    display_name: &str,
-    token: &str,
+    input: &UserInput,
 ) -> QueryResult<()> {
-    let user = UserInput {
-        id: &user_id.0,
-        display_name,
-        token,
+    let user = UserInsertable {
+        id: &input.id,
+        display_name: &input.display_name,
+        token: &input.token,
     };
     diesel::insert_into(users::table)
         .values(user)

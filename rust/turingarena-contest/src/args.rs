@@ -48,22 +48,6 @@ pub enum Command {
     },
     /// generate GraphQL schema
     GenerateSchema {},
-    /// add a new user to the contest database
-    AddUser {
-        /// name of the user
-        username: String,
-
-        /// display name, e.g. the full name of the user
-        display_name: String,
-
-        /// login token for the new user
-        token: String,
-    },
-    /// removes a user from the contest database
-    DeleteUser {
-        /// name of the user to remove
-        username: String,
-    },
     /// add a problem to the contest database
     AddProblem {
         /// name of the problem to add
