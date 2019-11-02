@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-export const fileFragment = gql`
+export const variantAttributeFragment = gql`
   fragment VariantAttributeFragment on VariantAttribute {
     key
     value

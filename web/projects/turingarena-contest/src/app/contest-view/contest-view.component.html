@@ -244,14 +244,17 @@
           </ng-container>
         </aside>
 
-        <div [hidden]="selectedProblemName !== undefined">
-          HOME (todo)
-        </div>
+        <ng-container *ngIf="data.contestView.home | fileVariant as file">
+          <iframe class="problem-statement"
+            [attr.src]="'data:' + file.type + ';base64,' + file.content.base64 | bypassSanitizer:'ResourceUrl'"
+            [hidden]="selectedProblemName !== undefined">
+          </iframe>
+        </ng-container>
 
         <ng-container *ngFor="let problem of data.contestView.problems">
-          <ng-container *ngIf="problem.material.statement[0] as statement">
+          <ng-container *ngIf="problem.material.statement | fileVariant as file">
             <iframe class="problem-statement"
-              [attr.src]="'data:' + statement.type + ';base64,' + statement.content.base64 | bypassSanitizer:'ResourceUrl'"
+              [attr.src]="'data:' + file.type + ';base64,' + file.content.base64 | bypassSanitizer:'ResourceUrl'"
               [hidden]="selectedProblemName !== problem.name">
             </iframe>
           </ng-container>

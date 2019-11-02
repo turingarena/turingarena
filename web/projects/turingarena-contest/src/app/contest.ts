@@ -7,10 +7,12 @@ import { ContestViewFragment } from './__generated__/ContestViewFragment';
 import { problemMaterialFragment } from './material';
 import { getProblemState, problemFragment } from './problem';
 import { submissionFragment } from './submission';
+import { fileFragment } from './file';
 
 export const contestViewFragment = gql`
   fragment ContestViewFragment on ContestView {
     user { ...UserFragment }
+    home { ...FileFragment }
     contestTitle
     startTime
     endTime
@@ -34,6 +36,7 @@ export const contestViewFragment = gql`
   ${problemFragment}
   ${problemMaterialFragment}
   ${submissionFragment}
+  ${fileFragment}
 `;
 
 export const getContestState = (contestView: ContestViewFragment) => {
