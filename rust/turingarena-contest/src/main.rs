@@ -60,9 +60,7 @@ fn main() -> Result<()> {
     use structopt::StructOpt;
 
     let args = Args::from_args();
-    let context = Context::default()
-        .with_database_url(args.database_url)
-        .with_problems_dir(args.problems_dir);
+    let context = Context::default().with_args(args.contest);
     match args.subcommand {
         GenerateSchema {} => generate_schema(context),
         Serve {

@@ -2,11 +2,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(
-    name = "turingarena",
-    about = "CLI to manage the turingarena contest server"
-)]
-pub struct Args {
+pub struct ContestArgs {
     /// url of the database
     #[structopt(long, env = "DATABASE_URL", default_value = "./database.sqlite3")]
     pub database_url: PathBuf,
@@ -14,8 +10,18 @@ pub struct Args {
     /// path of the directory in which are contained the problems
     #[structopt(long, env = "PROBLEMS_DIR", default_value = "./")]
     pub problems_dir: PathBuf,
+}
 
-    /// command  
+#[derive(StructOpt, Debug)]
+#[structopt(
+    name = "turingarena",
+    about = "CLI to manage the turingarena contest server"
+)]
+pub struct Args {
+    #[structopt(flatten)]
+    pub contest: ContestArgs,
+
+    /// command
     #[structopt(subcommand)]
     pub subcommand: Command,
 }

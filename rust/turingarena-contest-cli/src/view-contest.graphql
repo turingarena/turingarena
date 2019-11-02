@@ -1,0 +1,9 @@
+query ViewContestQuery {
+    contestView {
+        startTime
+        endTime
+        problems {
+            name
+        }
+    }
+}

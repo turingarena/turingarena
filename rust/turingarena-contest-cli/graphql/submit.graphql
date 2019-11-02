@@ -1,6 +1,0 @@
-mutation SubmitMutation($userId: String!, $problem: String!, $files: [FileInput!]!) {
-    submit(userId: $userId, problemName: $problem, files: $files) {
-        id,
-        createdAt,
-    }
-}

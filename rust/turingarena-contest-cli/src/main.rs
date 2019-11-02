@@ -5,16 +5,21 @@ extern crate rpassword;
 extern crate serde_json;
 extern crate structopt;
 
-mod auth;
-mod client;
-mod events;
-mod submit;
-mod token;
-mod user;
-
 use structopt::StructOpt;
+use graphql_client::{GraphQLQuery, QueryBody};
 
-pub static mut ENDPOINT: String = String::new();
+use serde::{Serialize, Deserialize};
+
+use turingarena_contest::user::UserId;
+use turingarena_contest::submission::SubmissionId;
+use turingarena::submission::form::FieldId;
+use turingarena::problem::ProblemName;
+use turingarena_contest::context::Context;
+use turingarena_contest::args::ContestArgs;
+use turingarena_contest::Schema;
+use turingarena_contest::contest::ContestQueries;
+use juniper::InputValue;
+use std::collections::HashMap;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -22,9 +27,8 @@ pub static mut ENDPOINT: String = String::new();
     about = "CLI to manage the turingarena contest server"
 )]
 struct Args {
-    /// TuringArena endpoint to use
-    #[structopt(long, short, env = "TURINGARENA_ENDPOINT")]
-    endpoint: String,
+    #[structopt(flatten)]
+    contest: ContestArgs,
 
     #[structopt(subcommand)]
     command: Command,
@@ -32,68 +36,38 @@ struct Args {
 
 #[derive(StructOpt, Debug)]
 enum Command {
-    /// Submit a problem to the TuringArena server
-    Submit {
-        /// id of the user (default current authenticated user)
-        #[structopt(long, short)]
-        user_id: Option<String>,
-
-        /// name of the problem
-        problem: String,
-
-        /// files of the problem, in format field=path
-        files: Vec<String>,
-    },
-    /// Login to the TuringArena server
-    Login {
-        /// your username
-        username: String,
-    },
-    /// Lougout from the TuringArena server
-    Logout {},
-    /// Get informations about the currently logged in user
-    Info {
-        /// id of the user
-        #[structopt(long, short)]
-        user_id: Option<String>,
-    },
-    Events {
-        /// id of the submission
-        submission_id: String,
+    ViewContest {
     },
 }
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "__generated__/graphql-schema.json",
+    query_path = "src/view-contest.graphql",
+    response_derives = "Debug"
+)]
+struct ViewContestQuery;
 
 fn main() {
     use Command::*;
     let args = Args::from_args();
 
-    unsafe {
-        ENDPOINT = args.endpoint;
-    }
-
     match args.command {
-        Submit {
-            problem,
-            files,
-            user_id,
-        } => {
-            let user_id = if let Some(id) = user_id {
-                id
-            } else {
-                token::get().expect("Specify an user_id or login first").0
-            };
-            submit::submit(user_id, problem, files)
+        ViewContest {} => {
+            let query_body: QueryBody<_> = ViewContestQuery::build_query(view_contest_query::Variables {});
+            let variables_json = serde_json::to_string(&query_body.variables).unwrap();
+            let variables = serde_json::from_str::<InputValue<_>>(&variables_json).unwrap();
+            let schema = Schema::new(ContestQueries {}, ContestQueries {});
+            let response = juniper::execute(
+                &query_body.query,
+                Some(query_body.operation_name),
+                &schema,
+                &variables.to_object_value().map(|v| v.into_iter()
+                        .map(|(k, v)| (k.to_owned(), v.clone()))
+                        .collect()).unwrap_or(HashMap::new()),
+                &Context::default().with_args(args.contest),
+            );
+            println!("{:?}", response)
         }
-        Login { username } => auth::login(username),
-        Logout {} => auth::logout(),
-        Info { user_id } => {
-            let user_id = if let Some(id) = user_id {
-                id
-            } else {
-                token::get().expect("Specify an user_id or login first").0
-            };
-            user::info(user_id)
-        }
-        Events { submission_id } => events::events(submission_id),
     }
 }

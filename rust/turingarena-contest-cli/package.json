@@ -1,0 +1,6 @@
+{
+  "description": "Used only by Apollo GraphQL VSCode extension for query validation and auto-complete.",
+  "devDependencies": {
+    "apollo": "^2.21.0"
+  }
+}

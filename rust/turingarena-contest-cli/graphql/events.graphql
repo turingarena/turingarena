@@ -1,5 +1,0 @@
-query EventsQuery($submissionId: String!) {
-    events(submissionId: $submissionId) {
-        eventJson
-    }
-}

@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use turingarena::problem::ProblemName;
 use user::UserId;
 use std::default::Default;
+use crate::args::ContestArgs;
 
 embed_migrations!();
 
@@ -41,6 +42,10 @@ impl Default for Context {
 }
 
 impl Context {
+    pub fn with_args(self, args: ContestArgs) -> Context {
+        self.with_database_url(args.database_url).with_problems_dir(args.problems_dir)
+    }
+
     /// Set the database URL
     pub fn with_database_url(self, database_url: PathBuf) -> Context {
         Context {

@@ -1,6 +1,0 @@
-query UserQuery($userId: String!) {
-    user(id: $userId) {
-        id,
-        displayName,
-    }
-}

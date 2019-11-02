@@ -1,2 +1,2 @@
 [workspace]
-members = ["turingarena", "turingarena-contest", "turingarena-contest-web-content", "turingarena-task-maker"]
+members = ["turingarena", "turingarena-*"]
