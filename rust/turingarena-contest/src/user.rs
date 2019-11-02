@@ -1,6 +1,6 @@
 use super::*;
 
-use context::Context;
+use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use schema::users;
 
@@ -29,7 +29,7 @@ pub struct User {
 #[derive(Clone, juniper::GraphQLScalarValue)]
 pub struct UserId(pub String);
 
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl User {
     /// Id of the user
     fn id(&self) -> UserId {

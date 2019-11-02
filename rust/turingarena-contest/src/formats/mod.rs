@@ -1,7 +1,7 @@
 /// Module of various importing formats for contest
 mod italy_yaml;
 
-use crate::context::Context;
+use crate::api::ApiContext;
 use crate::Result;
 use std::path::Path;
 
@@ -14,11 +14,11 @@ trait Importer {
     fn from_file(path: &Path) -> Self;
 
     /// Import the contest in the specified Context
-    fn import(&self, context: &Context) -> ImporterResult;
+    fn import(&self, context: &ApiContext) -> ImporterResult;
 }
 
 /// Imports a contest in a Context
-pub fn import(context: &Context, path: &Path, format: &str) -> ImporterResult {
+pub fn import(context: &ApiContext, path: &Path, format: &str) -> ImporterResult {
     match format {
         "italy_yaml" => italy_yaml::ItalyYamlImporter::from_file(path).import(context),
         _ => unimplemented!("Unsupported import format {}", format),

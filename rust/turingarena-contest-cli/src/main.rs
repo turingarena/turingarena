@@ -14,7 +14,7 @@ use turingarena_contest::user::UserId;
 use turingarena_contest::submission::SubmissionId;
 use turingarena::submission::form::FieldId;
 use turingarena::problem::ProblemName;
-use turingarena_contest::context::Context;
+use turingarena_contest::api::ApiContext;
 use turingarena_contest::args::ContestArgs;
 use turingarena_contest::Schema;
 use turingarena_contest::contest::ContestQueries;
@@ -104,7 +104,7 @@ fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
 fn main() {
     let args = Args::from_args();
     let root_node = Schema::new(ContestQueries {}, ContestQueries {});
-    let context = Context::default().with_args(args.contest).with_skip_auth(true);
+    let context = ApiContext::default().with_args(args.contest).with_skip_auth(true);
 
     let request = args.command.to_graphql_request();
     let response = request.execute(&root_node, &context);

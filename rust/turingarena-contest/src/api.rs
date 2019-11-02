@@ -1,18 +1,36 @@
-use crate::{auth, contest, problem, user, Result};
-use auth::JwtData;
+use std::default::Default;
+use std::path::PathBuf;
+
 use chrono::{DateTime, Local};
 use diesel::{Connection, ConnectionResult, SqliteConnection};
-use std::path::PathBuf;
+use juniper::{FieldResult, FieldError};
+
+use auth::JwtData;
 use turingarena::problem::ProblemName;
 use user::UserId;
-use std::default::Default;
+
+use crate::{auth, contest, problem, Result, user};
 use crate::args::ContestArgs;
+use crate::submission;
+use crate::contest::{ContestView, UserToken};
 
 embed_migrations!();
 
-/// Context for the API
+pub struct MutationOk;
+
+#[juniper::object]
+impl MutationOk {
+    fn ok() -> bool {
+        true
+    }
+}
+
+pub type Schema = juniper::RootNode<'static, ApiContext, ApiContext>;
+
+/// API entry point.
+/// The same struct is used as context, query and mutation type.
 #[derive(Debug, Clone)]
-pub struct Context {
+pub struct ApiContext {
     /// Skip all authentication
     skip_auth: bool,
 
@@ -29,9 +47,9 @@ pub struct Context {
     pub problems_dir: PathBuf,
 }
 
-impl Default for Context {
-    fn default() -> Context {
-        Context {
+impl Default for ApiContext {
+    fn default() -> ApiContext {
+        ApiContext {
             skip_auth: false,
             secret: None,
             jwt_data: None,
@@ -41,40 +59,44 @@ impl Default for Context {
     }
 }
 
-impl Context {
-    pub fn with_args(self, args: ContestArgs) -> Context {
+impl ApiContext {
+    pub fn root_node(&self) -> Schema {
+        Schema::new(self.clone(), self.clone())
+    }
+
+    pub fn with_args(self, args: ContestArgs) -> ApiContext {
         self.with_database_url(args.database_url).with_problems_dir(args.problems_dir)
     }
 
     /// Set the database URL
-    pub fn with_database_url(self, database_url: PathBuf) -> Context {
-        Context {
+    pub fn with_database_url(self, database_url: PathBuf) -> ApiContext {
+        ApiContext {
             database_url,
             ..self
         }
     }
 
     /// Set the problems directory
-    pub fn with_problems_dir(self, problems_dir: PathBuf) -> Context {
-        Context {
+    pub fn with_problems_dir(self, problems_dir: PathBuf) -> ApiContext {
+        ApiContext {
             problems_dir,
             ..self
         }
     }
 
     /// Sets a JWT data
-    pub fn with_jwt_data(self, jwt_data: Option<JwtData>) -> Context {
-        Context { jwt_data, ..self }
+    pub fn with_jwt_data(self, jwt_data: Option<JwtData>) -> ApiContext {
+        ApiContext { jwt_data, ..self }
     }
 
     /// Sets a secret
-    pub fn with_secret(self, secret: Option<Vec<u8>>) -> Context {
-        Context { secret, ..self }
+    pub fn with_secret(self, secret: Option<Vec<u8>>) -> ApiContext {
+        ApiContext { secret, ..self }
     }
 
     /// Sets if to skip authentication
-    pub fn with_skip_auth(self, skip_auth: bool) -> Context {
-        Context { skip_auth, ..self }
+    pub fn with_skip_auth(self, skip_auth: bool) -> ApiContext {
+        ApiContext { skip_auth, ..self }
     }
 
     /// Authorize admin operations
@@ -164,4 +186,46 @@ impl Context {
     }
 }
 
-impl juniper::Context for Context {}
+#[juniper::object(Context = ApiContext)]
+impl ApiContext {
+    /// Reset database
+    fn init_db(&self, ctx: &ApiContext) -> FieldResult<MutationOk> {
+        ctx.authorize_admin()?;
+        ctx.init_db()?;
+        Ok(MutationOk)
+    }
+
+    /// Get the view of a contest
+    fn contest_view(&self, ctx: &ApiContext, user_id: Option<UserId>) -> FieldResult<ContestView> {
+        ctx.authorize_user(&user_id)?;
+        Ok(ContestView { user_id })
+    }
+
+    /// Get the submission with the specified id
+    fn submission(
+        &self,
+        ctx: &ApiContext,
+        submission_id: String,
+    ) -> FieldResult<submission::Submission> {
+        // TODO: check privilage
+        Ok(submission::query(&ctx.connect_db()?, &submission_id)?)
+    }
+
+    /// Authenticate a user, generating a JWT authentication token
+    fn auth(&self, ctx: &ApiContext, token: String) -> FieldResult<Option<UserToken>> {
+        Ok(auth::auth(
+            &ctx.connect_db()?,
+            &token,
+            ctx.secret
+                .as_ref()
+                .ok_or_else(|| FieldError::from("Authentication disabled"))?,
+        )?)
+    }
+
+    /// Current time on the server as RFC3339 date
+    fn server_time(&self) -> String {
+        chrono::Local::now().to_rfc3339()
+    }
+}
+
+impl juniper::Context for ApiContext {}

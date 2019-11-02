@@ -1,5 +1,5 @@
 use crate::*;
-use context::Context;
+use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use schema::{answers, questions};
@@ -15,7 +15,7 @@ pub struct Question {
     text: String,
 }
 
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl Question {
     /// Time at which the question was inserted
     fn time(&self) -> &String {
@@ -28,7 +28,7 @@ impl Question {
     }
 
     /// Answer to the question, if answered
-    fn answer(&self, ctx: &Context) -> FieldResult<Option<Answer>> {
+    fn answer(&self, ctx: &ApiContext) -> FieldResult<Option<Answer>> {
         Ok(answer_to(&ctx.connect_db()?, self.id)?)
     }
 

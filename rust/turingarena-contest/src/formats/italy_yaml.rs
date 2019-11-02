@@ -1,6 +1,6 @@
 /// Italy YAML contest importation format
 use super::{Importer, ImporterResult};
-use crate::context::Context;
+use crate::api::ApiContext;
 use chrono::{Local, TimeZone};
 use std::path::{Path, PathBuf};
 
@@ -36,7 +36,7 @@ impl Importer for ItalyYamlImporter {
         }
     }
 
-    fn import(&self, context: &Context) -> ImporterResult {
+    fn import(&self, context: &ApiContext) -> ImporterResult {
         let content = std::fs::read(&self.path)?;
         let contest_yaml = serde_yaml::from_slice::<ContestYaml>(&content)?;
         context.init_db()?;

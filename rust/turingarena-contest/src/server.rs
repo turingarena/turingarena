@@ -1,5 +1,5 @@
 use crate::*;
-use context::Context;
+use api::ApiContext;
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
 use rocket::http::Status;
@@ -14,6 +14,7 @@ use ::{
     rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
     turingarena_contest_web_content::WebContent,
 };
+use crate::api::Schema;
 
 struct Authorization(Option<String>);
 
@@ -52,7 +53,7 @@ fn post_graphql_handler(
     request: juniper_rocket::GraphQLRequest,
     schema: State<Schema>,
     auth: Authorization,
-    context: State<Context>,
+    context: State<ApiContext>,
 ) -> juniper_rocket::GraphQLResponse {
     let claims = context.secret.as_ref().and_then(|secret| {
         auth.0
@@ -100,9 +101,9 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-pub fn generate_schema(context: Context) -> Result<()> {
+pub fn generate_schema(context: ApiContext) -> Result<()> {
     let (schema, _errors) = juniper::introspect(
-        &Schema::new(contest::ContestQueries {}, contest::ContestQueries {}),
+        &context.root_node(),
         &context,
         juniper::IntrospectionFormat::All,
     )
@@ -111,17 +112,14 @@ pub fn generate_schema(context: Context) -> Result<()> {
     Ok(())
 }
 
-pub fn run_server(host: String, port: u16, context: Context) -> Result<()> {
+pub fn run_server(host: String, port: u16, context: ApiContext) -> Result<()> {
     let config = rocket::Config::build(rocket::config::Environment::active()?)
         .port(port)
         .address(host)
         .finalize()?;
 
     rocket::custom(config)
-        .manage(Schema::new(
-            contest::ContestQueries {},
-            contest::ContestQueries {},
-        ))
+        .manage(context.root_node())
         .manage(context)
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);

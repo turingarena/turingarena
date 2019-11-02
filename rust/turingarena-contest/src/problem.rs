@@ -1,6 +1,6 @@
 use crate::*;
 
-use context::Context;
+use api::ApiContext;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use schema::problems;
@@ -32,7 +32,7 @@ pub struct Problem {
 }
 
 /// A problem in a contest
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl Problem {
     /// Name of this problem. Unique in the current contest.
     fn name(&self) -> ProblemName {
@@ -40,25 +40,25 @@ impl Problem {
     }
 
     /// Material of this problem
-    fn material(&self, ctx: &Context) -> FieldResult<Material> {
+    fn material(&self, ctx: &ApiContext) -> FieldResult<Material> {
         turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack(ctx))
             .map_err(FieldError::from)
     }
 
     /// Material of this problem
-    fn tackling(&self, ctx: &Context) -> Option<ProblemTackling> {
+    fn tackling(&self, ctx: &ApiContext) -> Option<ProblemTackling> {
         self.user_id.as_ref().map(|_| ProblemTackling { problem: Box::new((*self).clone()) })
     }
 }
 
 impl Problem {
     /// Path of the problem
-    fn path(&self, ctx: &Context) -> PathBuf {
+    fn path(&self, ctx: &ApiContext) -> PathBuf {
         ctx.problems_dir.join(&self.data.name)
     }
 
     /// return the problem pack object
-    fn pack(&self, ctx: &Context) -> ProblemPack {
+    fn pack(&self, ctx: &ApiContext) -> ProblemPack {
         ProblemPack(std::path::PathBuf::from(&self.path(ctx)))
     }
 }
@@ -105,10 +105,10 @@ impl ProblemTackling {
 }
 
 /// Attempts at solving a problem by a user in the contest
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl ProblemTackling {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::MaxScoreAward>> {
+    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::MaxScoreAward>> {
         Ok(evaluation::query_score_awards_of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
@@ -117,7 +117,7 @@ impl ProblemTackling {
     }
 
     /// Badge awards of the current user (if to be shown)
-    fn badges(&self, ctx: &Context) -> FieldResult<Vec<evaluation::BestBadgeAward>> {
+    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::BestBadgeAward>> {
         Ok(evaluation::query_badge_awards_of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
@@ -126,7 +126,7 @@ impl ProblemTackling {
     }
 
     /// Submissions of the current user (if to be shown)
-    fn submissions(&self, ctx: &Context) -> FieldResult<Vec<submission::Submission>> {
+    fn submissions(&self, ctx: &ApiContext) -> FieldResult<Vec<submission::Submission>> {
         Ok(submission::of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
@@ -137,7 +137,7 @@ impl ProblemTackling {
     /// Submit a solution to the problem
     fn submit(
         &self,
-        ctx: &Context,
+        ctx: &ApiContext,
         files: Vec<submission::FileInput>,
     ) -> FieldResult<submission::Submission> {
         let submission = submission::insert(

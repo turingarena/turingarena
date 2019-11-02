@@ -1,6 +1,6 @@
 use crate::*;
 
-use context::Context;
+use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use schema::{submission_files, submissions};
@@ -123,7 +123,7 @@ impl Submission {
     }
 }
 
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl Submission {
     /// UUID of the submission
     fn id(&self) -> SubmissionId {
@@ -146,7 +146,7 @@ impl Submission {
     }
 
     /// List of files of this submission
-    fn files(&self, ctx: &Context) -> FieldResult<Vec<SubmissionFile>> {
+    fn files(&self, ctx: &ApiContext) -> FieldResult<Vec<SubmissionFile>> {
         Ok(submission_files(&ctx.connect_db()?, &self.id)?)
     }
 
@@ -156,7 +156,7 @@ impl Submission {
     }
 
     /// Scores of this submission
-    fn scores(&self, ctx: &Context) -> FieldResult<Vec<evaluation::ScoreAward>> {
+    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::ScoreAward>> {
         Ok(evaluation::query_score_awards(
             &ctx.connect_db()?,
             &self.id,
@@ -164,7 +164,7 @@ impl Submission {
     }
 
     /// Scores of this submission
-    fn badges(&self, ctx: &Context) -> FieldResult<Vec<evaluation::BadgeAward>> {
+    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::BadgeAward>> {
         Ok(evaluation::query_badge_awards(
             &ctx.connect_db()?,
             &self.id,
@@ -172,7 +172,7 @@ impl Submission {
     }
 
     /// Evaluation events of this submission
-    fn evaluation_events(&self, ctx: &Context) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
+    fn evaluation_events(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
         Ok(evaluation::query_events(&ctx.connect_db()?, &self.id)?)
     }
 }

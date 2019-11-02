@@ -29,7 +29,7 @@ pub mod args;
 pub mod auth;
 pub mod config;
 pub mod contest;
-pub mod context;
+pub mod api;
 pub mod evaluation;
 pub mod formats;
 pub mod problem;
@@ -41,15 +41,3 @@ pub mod user;
 
 /// Convenience Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-pub struct MutationOk;
-
-#[juniper::object]
-impl MutationOk {
-    fn ok() -> bool {
-        true
-    }
-}
-
-pub type Schema = juniper::RootNode<'static, contest::ContestQueries, contest::ContestQueries>;
-

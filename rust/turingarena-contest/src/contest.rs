@@ -4,13 +4,14 @@ use diesel::{ExpressionMethods, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 
 use announcements::Announcement;
-use context::Context;
+use api::ApiContext;
 use problem::Problem;
 use questions::{Question, QuestionInput};
 use schema::contest;
 use turingarena::content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
 use turingarena::problem::ProblemName;
 use user::{User, UserId};
+use api::MutationOk;
 
 use crate::*;
 
@@ -23,51 +24,6 @@ pub struct UserToken {
     pub user_id: Option<UserId>,
 }
 
-/// dummy structure to do GraphQL queries to the contest
-pub struct ContestQueries {}
-
-#[juniper::object(Context = Context)]
-impl ContestQueries {
-    /// Reset database
-    fn init_db(&self, ctx: &Context) -> FieldResult<MutationOk> {
-        ctx.authorize_admin()?;
-        ctx.init_db()?;
-        Ok(MutationOk)
-    }
-
-    /// Get the view of a contest
-    fn contest_view(&self, ctx: &Context, user_id: Option<UserId>) -> FieldResult<ContestView> {
-        ctx.authorize_user(&user_id)?;
-        Ok(ContestView { user_id })
-    }
-
-    /// Get the submission with the specified id
-    fn submission(
-        &self,
-        ctx: &Context,
-        submission_id: String,
-    ) -> FieldResult<submission::Submission> {
-        // TODO: check privilage
-        Ok(submission::query(&ctx.connect_db()?, &submission_id)?)
-    }
-
-    /// Authenticate a user, generating a JWT authentication token
-    fn auth(&self, ctx: &Context, token: String) -> FieldResult<Option<UserToken>> {
-        Ok(auth::auth(
-            &ctx.connect_db()?,
-            &token,
-            ctx.secret
-                .as_ref()
-                .ok_or_else(|| FieldError::from("Authentication disabled"))?,
-        )?)
-    }
-
-    /// Current time on the server as RFC3339 date
-    fn server_time(&self) -> String {
-        chrono::Local::now().to_rfc3339()
-    }
-}
-
 /// A ContestView structure
 pub struct ContestView {
     /// User of the current contest view
@@ -75,10 +31,10 @@ pub struct ContestView {
 }
 
 /// A user
-#[juniper::object(Context = Context)]
+#[juniper::object(Context = ApiContext)]
 impl ContestView {
     /// The user for this contest view, if any
-    fn user(&self, ctx: &Context) -> FieldResult<Option<User>> {
+    fn user(&self, ctx: &ApiContext) -> FieldResult<Option<User>> {
         let result = if let Some(user_id) = &self.user_id {
             Some(user::by_id(&ctx.connect_db()?, user_id.clone())?)
         } else {
@@ -88,7 +44,7 @@ impl ContestView {
     }
 
     /// The user for this contest view, if any
-    fn home(&self, ctx: &Context) -> File {
+    fn home(&self, ctx: &ApiContext) -> File {
         ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
             let entry = result.unwrap();
             if entry.file_type().unwrap().is_dir() { return None; }
@@ -113,7 +69,7 @@ impl ContestView {
     }
 
     /// Title of the contest, as shown to the user
-    fn title(&self, ctx: &Context) -> Text {
+    fn title(&self, ctx: &ApiContext) -> Text {
         ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
             let entry = result.unwrap();
             if entry.file_type().unwrap().is_dir() { return None; }
@@ -134,7 +90,7 @@ impl ContestView {
     }
 
     /// A problem that the user can see
-    fn problem(&self, ctx: &Context, name: ProblemName) -> FieldResult<Problem> {
+    fn problem(&self, ctx: &ApiContext, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
         let data = problem::by_name(&ctx.connect_db()?, name)?;
         Ok(Problem {
@@ -144,7 +100,7 @@ impl ContestView {
     }
 
     /// List of problems that the user can see
-    fn problems(&self, ctx: &Context) -> FieldResult<Option<Vec<Problem>>> {
+    fn problems(&self, ctx: &ApiContext) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
         let problems = problem::all(&ctx.connect_db()?)?
             .into_iter()
@@ -157,17 +113,17 @@ impl ContestView {
     }
 
     /// Start time of the user participation, as RFC3339 date
-    fn start_time(&self, ctx: &Context) -> FieldResult<String> {
+    fn start_time(&self, ctx: &ApiContext) -> FieldResult<String> {
         Ok(current_contest(&ctx.connect_db()?)?.start_time)
     }
 
     /// End time of the user participation, as RFC3339 date
-    fn end_time(&self, ctx: &Context) -> FieldResult<String> {
+    fn end_time(&self, ctx: &ApiContext) -> FieldResult<String> {
         Ok(current_contest(&ctx.connect_db()?)?.end_time)
     }
 
     /// Questions made by the current user
-    fn questions(&self, ctx: &Context) -> FieldResult<Option<Vec<Question>>> {
+    fn questions(&self, ctx: &ApiContext) -> FieldResult<Option<Vec<Question>>> {
         if let Some(user_id) = &self.user_id {
             Ok(Some(questions::question_of_user(
                 &ctx.connect_db()?,
@@ -178,12 +134,12 @@ impl ContestView {
         }
     }
 
-    fn make_question(&self, ctx: &Context, question: QuestionInput) -> FieldResult<MutationOk> {
+    fn make_question(&self, ctx: &ApiContext, question: QuestionInput) -> FieldResult<MutationOk> {
         unimplemented!()
     }
 
     /// Return a list of announcements
-    fn announcements(&self, ctx: &Context) -> FieldResult<Vec<Announcement>> {
+    fn announcements(&self, ctx: &ApiContext) -> FieldResult<Vec<Announcement>> {
         Ok(announcements::query_all(&ctx.connect_db()?)?)
     }
 }
