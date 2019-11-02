@@ -116,16 +116,16 @@
   list-style: none;
 }
 
-.contest-score-panel {
+.contest-score {
   white-space: nowrap;
   text-align: right;
 
   font-size: 2rem;
   margin-bottom: 16px;
-}
 
-.contest-score {
-  font-size: 4rem;
+  & > .score-value {
+    font-size: 4rem;
+  }
 }
 
 .contest-clock {

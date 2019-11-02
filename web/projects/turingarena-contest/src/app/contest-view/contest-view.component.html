@@ -15,25 +15,6 @@
           </button>
         </ng-container>
         <ng-container *ngIf="!data.contestView.user">
-          <ng-template #loginDialog let-modal>
-            <form class="login-form" (submit)="$event.preventDefault(); logIn($event, modal)">
-              <div class="login-dialog-body">
-                <label class="login-token-label" for="token">Token</label>
-                <input class="login-token-input" id="token" name="token" type="password"
-                  [class.is-invalid]="logInInvalidToken" />
-                <small class="login-token-suggestion" [hidden]="logInInvalidToken">
-                  Insert the token or password provided to you. No username needed.
-                </small>
-                <small class="login-token-invalid">
-                  Invalid token.
-                </small>
-              </div>
-              <div class="login-dialog-footer">
-                <button (click)="modal.close()" class="login-dialog-cancel" type="button">Cancel</button>
-                <button class="login-dialog-submit" type="submit">Log in</button>
-              </div>
-            </form>
-          </ng-template>
           <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
             <fa-icon [icon]="faSignInAlt"></fa-icon>
             Login
@@ -49,12 +30,8 @@
           <aside class="contest-aside">
             <ng-container *ngIf="state.hasScore">
               <h2 class="contest-score-title">Score</h2>
-              <div class="contest-score-panel">
-                <span class="contest-score">
-                  {{ state.score.toFixed(state.range.precision) }}
-                </span> / <span class="contest-max-score">
-                  {{ state.range.max.toFixed(state.range.precision) }}
-                </span>
+              <div class="contest-score">
+                <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
               </div>
             </ng-container>
             <ng-container *ngIf="state.clock | async as clock">
@@ -76,12 +53,11 @@
                     (click)="selectedProblemName = problem.name; $event.preventDefault()">
                     {{ problem.material.title | textVariant:'short' }}
                     <ng-container *ngIf="problem.tackling as tackling">
-                      <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
-                        <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(problemState)">
-                          {{ problemState.score.toFixed(problemState.range.precision) }} /
-                          {{ problemState.range.max.toFixed(problemState.range.precision) }}
-                        </span>
-                      </ng-container>
+                      <span class="contest-problem-score"
+                        [attr.data-score-tier]="getScoreTier(getProblemState(problem, tackling))">
+                        <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem, tackling)">
+                        </ng-container>
+                      </span>
                     </ng-container>
                   </a>
                 </ng-container>
@@ -108,10 +84,6 @@
                 </ng-container>
 
                 <ng-container *ngIf="tackling.submissions[tackling.submissions.length - 1] as lastSubmission">
-                  <ng-template #lastSubmissionDialog let-modal>
-                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
-                    </app-submission-dialog>
-                  </ng-template>
                   <button class="problem-last-submission"
                     (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
                     <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory">
@@ -120,16 +92,17 @@
                     </fa-icon>
                     Last submission
                   </button>
+                  <ng-template #lastSubmissionDialog let-modal>
+                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                    </app-submission-dialog>
+                  </ng-template>
 
+                  <button class="problem-submission-list"
+                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+                    <fa-icon [icon]="faList"></fa-icon>
+                    All submissions
+                  </button>
                   <ng-template #submissionListDialog let-modal>
-                    <ng-template #scoreTemplate let-score="score" let-range="range">
-                      {{ score.toFixed(range.precision) }} /
-                      {{ range.max.toFixed(range.precision) }}
-                    </ng-template>
-                    <ng-template #badgeTemplate let-badge="badge">
-                      <ng-container *ngIf="badge">&#x2713;</ng-container>
-                      <ng-container *ngIf="!badge">&#x2717;</ng-container>
-                    </ng-template>
                     <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
                       <div class="submission-list-dialog-header">
                         <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
@@ -219,11 +192,6 @@
                       </div>
                     </ng-container>
                   </ng-template>
-                  <button class="problem-submission-list"
-                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-                    <fa-icon [icon]="faList"></fa-icon>
-                    All submissions
-                  </button>
                 </ng-container>
               </div>
               <div class="problem-info">
@@ -238,13 +206,11 @@
                             <ng-container *ngIf="problemState.award(award) as state">
                               <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
                                 [attr.data-score-tier]="getScoreTier(state)">
-                                {{ state.score.toFixed(state.range.precision) }} /
-                                {{ state.range.max.toFixed(state.range.precision) }}
+                                <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
                               </th>
                               <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
                                 [attr.data-badge]="state.badge">
-                                <ng-container *ngIf="state.badge">&#x2713;</ng-container>
-                                <ng-container *ngIf="!state.badge">&#x2717;</ng-container>
+                                <ng-container *ngTemplateOutlet="badgeTemplate; context: state"></ng-container>
                               </th>
                             </ng-container>
                           </ng-container>
@@ -296,3 +262,32 @@
     </ng-container>
   </ng-container>
 </ng-container>
+
+<ng-template #scoreTemplate let-score="score" let-range="range">
+  <span class="score-value">{{ score.toFixed(range.precision) }}</span>
+  <span class="score-max"> / {{ range.max.toFixed(range.precision) }}</span>
+</ng-template>
+
+<ng-template #badgeTemplate let-badge="badge">
+  <ng-container *ngIf="badge">&#x2713;</ng-container>
+  <ng-container *ngIf="!badge">&#x2717;</ng-container>
+</ng-template>
+
+<ng-template #loginDialog let-modal>
+  <form class="login-form" (submit)="$event.preventDefault(); logIn($event, modal)">
+    <div class="login-dialog-body">
+      <label class="login-token-label" for="token">Token</label>
+      <input class="login-token-input" id="token" name="token" type="password" [class.is-invalid]="logInInvalidToken" />
+      <small class="login-token-suggestion" [hidden]="logInInvalidToken">
+        Insert the token or password provided to you. No username needed.
+      </small>
+      <small class="login-token-invalid">
+        Invalid token.
+      </small>
+    </div>
+    <div class="login-dialog-footer">
+      <button (click)="modal.close()" class="login-dialog-cancel" type="button">Cancel</button>
+      <button class="login-dialog-submit" type="submit">Log in</button>
+    </div>
+  </form>
+</ng-template>
