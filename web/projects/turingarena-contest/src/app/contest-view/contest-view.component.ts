@@ -20,21 +20,15 @@ import {
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { DateTime, Duration } from 'luxon';
-import { interval } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 
-import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 import { Auth, AuthService } from '../auth.service';
 import { contestViewFragment, getContestState } from '../contest';
 import { getProblemState } from '../problem';
 import { getScoreTier } from '../score';
 
-import {
-  ContestQuery,
-  ContestQueryVariables,
-} from './__generated__/ContestQuery';
+import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
+
 const pollInterval = 5000;
 
 @Component({
@@ -124,37 +118,6 @@ export class ContestViewComponent implements OnInit {
     });
   }
 
-  getProblemLetter(index: number) {
-    return String.fromCharCode('A'.charCodeAt(0) + index);
-  }
-
-  selectedProblem(contestView: ContestViewFragment) {
-    if (contestView.problems === null) { return undefined; }
-
-    return contestView.problems.find(({ name }) => name === this.selectedProblemName);
-  }
-
-  selectedProblemTackling(contestView: ContestViewFragment) {
-    const problem = this.selectedProblem(contestView);
-    if (problem === undefined || problem.tackling === null) { return undefined; }
-
-    return problem.tackling;
-  }
-
-  canSubmit(contestView: ContestViewFragment) {
-    const tackling = this.selectedProblemTackling(contestView);
-
-    return tackling !== undefined && tackling.canSubmit;
-  }
-
-  selectedProblemLastSubmission(contestView: ContestViewFragment) {
-    const tackling = this.selectedProblemTackling(contestView);
-    if (tackling === undefined) { return undefined; }
-    const { submissions } = tackling;
-
-    return submissions[submissions.length - 1];
-  }
-
   async setAuth(auth: Auth) {
     await this.authService.setAuth(auth);
     this.setQuery();
@@ -181,6 +144,7 @@ export class ContestViewComponent implements OnInit {
     if (data.auth === null) {
       this.logInInvalidToken = true;
     } else {
+      this.logInInvalidToken = false;
       const { token, userId } = data.auth;
 
       await this.setAuth({ token, userId });
