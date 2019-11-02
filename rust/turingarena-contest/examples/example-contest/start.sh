@@ -1,6 +1,7 @@
 #!/bin/bash 
 
 set -ex
+cargo build
 for d in easy*/ ; do
     ( cd $d/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
 done
