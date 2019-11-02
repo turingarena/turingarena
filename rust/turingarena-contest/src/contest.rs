@@ -6,8 +6,10 @@ use juniper::{FieldError, FieldResult};
 use problem::Problem;
 use questions::{Question, QuestionInput};
 use schema::contest;
+use turingarena::content::{File, FileVariant, FileContent, MediaType, FileName};
 use turingarena::problem::ProblemName;
 use user::{User, UserId};
+use std::fs::read;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -73,6 +75,30 @@ impl ContestView {
             None
         };
         Ok(result)
+    }
+
+    /// The user for this contest view, if any
+    fn home(&self, ctx: &Context) -> File {
+        ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
+            let entry = result.unwrap();
+            if entry.file_type().unwrap().is_dir() { return None; }
+
+            if let (Some(stem), Some(extension)) = (entry.path().file_stem(), entry.path().extension()) {
+                if stem != "home" { return None; }
+
+                return Some(FileVariant {
+                    attributes: vec![],
+                    name: Some(FileName(entry.file_name().to_str().unwrap().to_owned())),
+                    content: FileContent(read(entry.path()).unwrap()),
+                    r#type: match extension.to_str().unwrap() {
+                        "pdf" => Some(MediaType("application/pdf".to_owned())),
+                        "html" => Some(MediaType("text/html".to_owned())),
+                        _ => None
+                    }
+                })
+            }
+            None
+        }).collect()
     }
 
     /// A problem that the user can see
