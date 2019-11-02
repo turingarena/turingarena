@@ -28,6 +28,13 @@ pub struct ContestQueries {}
 
 #[juniper::object(Context = Context)]
 impl ContestQueries {
+    /// Reset database
+    fn init_db(&self, ctx: &Context) -> FieldResult<MutationOk> {
+        ctx.authorize_admin()?;
+        ctx.init_db()?;
+        Ok(MutationOk)
+    }
+
     /// Get the view of a contest
     fn contest_view(&self, ctx: &Context, user_id: Option<UserId>) -> FieldResult<ContestView> {
         ctx.authorize_user(&user_id)?;
@@ -98,8 +105,8 @@ impl ContestView {
                         "md" => Some(MediaType("text/markdown".to_owned())),
                         "html" => Some(MediaType("text/html".to_owned())),
                         _ => None
-                    }
-                })
+                    },
+                });
             }
             None
         }).collect()
@@ -120,7 +127,7 @@ impl ContestView {
                 return Some(TextVariant {
                     attributes: vec![],
                     value: String::from_utf8(read(entry.path()).unwrap()).unwrap(),
-                })
+                });
             }
             None
         }).collect()

@@ -1,3 +1,9 @@
+mutation InitDbMutation {
+    initDb {
+        ok
+    }
+}
+
 query ViewContestQuery {
     contestView {
         startTime

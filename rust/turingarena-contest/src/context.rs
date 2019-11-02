@@ -77,6 +77,14 @@ impl Context {
         Context { skip_auth, ..self }
     }
 
+    /// Authorize admin operations
+    pub fn authorize_admin(&self) -> juniper::FieldResult<()> {
+        if self.skip_auth {
+            return Ok(());
+        }
+        return Err(juniper::FieldError::from("Forbidden"));
+    }
+
     /// Authenticate user
     pub fn authorize_user(&self, user_id: &Option<UserId>) -> juniper::FieldResult<()> {
         if self.skip_auth {

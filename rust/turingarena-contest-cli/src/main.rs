@@ -18,8 +18,40 @@ use turingarena_contest::context::Context;
 use turingarena_contest::args::ContestArgs;
 use turingarena_contest::Schema;
 use turingarena_contest::contest::ContestQueries;
-use juniper::InputValue;
+use juniper::{InputValue, DefaultScalarValue};
 use std::collections::HashMap;
+use juniper::http::GraphQLRequest;
+
+macro_rules! graphql_operations {
+    (
+        $(
+            $file:literal {
+                $( $name:ident ),*
+                $(,)?
+            }
+        ),*
+        $(,)?
+    ) => {
+        $(
+            $(
+                #[derive(GraphQLQuery)]
+                #[graphql(
+                    schema_path = "__generated__/graphql-schema.json",
+                    query_path = $file,
+                    response_derives = "Debug"
+                )]
+                struct $name;
+            )*
+        )*
+    }
+}
+
+graphql_operations! {
+    "src/admin.graphql" {
+        ViewContestQuery,
+        InitDbMutation,
+    },
+}
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -36,38 +68,46 @@ struct Args {
 
 #[derive(StructOpt, Debug)]
 enum Command {
-    ViewContest {
-    },
+    ViewContest,
+    InitDb,
 }
 
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "__generated__/graphql-schema.json",
-    query_path = "src/view-contest.graphql",
-    response_derives = "Debug"
-)]
-struct ViewContestQuery;
-
-fn main() {
-    use Command::*;
-    let args = Args::from_args();
-
-    match args.command {
-        ViewContest {} => {
-            let query_body: QueryBody<_> = ViewContestQuery::build_query(view_contest_query::Variables {});
-            let variables_json = serde_json::to_string(&query_body.variables).unwrap();
-            let variables = serde_json::from_str::<InputValue<_>>(&variables_json).unwrap();
-            let schema = Schema::new(ContestQueries {}, ContestQueries {});
-            let response = juniper::execute(
-                &query_body.query,
-                Some(query_body.operation_name),
-                &schema,
-                &variables.to_object_value().map(|v| v.into_iter()
-                        .map(|(k, v)| (k.to_owned(), v.clone()))
-                        .collect()).unwrap_or(HashMap::new()),
-                &Context::default().with_args(args.contest),
-            );
-            println!("{:?}", response)
+impl Command {
+    pub fn to_graphql_request(&self) -> GraphQLRequest {
+        use Command::*;
+        match self {
+            ViewContest => {
+                make_request(ViewContestQuery::build_query, view_contest_query::Variables {})
+            }
+            InitDb => {
+                make_request(InitDbMutation::build_query, init_db_mutation::Variables {})
+            }
         }
     }
+}
+
+fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
+    where B: FnOnce(V) -> QueryBody<V>,
+          V: Serialize {
+    let query_body = query_builder(variables);
+
+    let variables_json = serde_json::to_string(&query_body.variables).unwrap();
+    let variables = serde_json::from_str::<InputValue<_>>(&variables_json).unwrap();
+
+    GraphQLRequest::new(
+        query_body.query.to_owned(),
+        Some(query_body.operation_name.to_owned()),
+        Some(variables),
+    )
+}
+
+fn main() {
+    let args = Args::from_args();
+    let root_node = Schema::new(ContestQueries {}, ContestQueries {});
+    let context = Context::default().with_args(args.contest).with_skip_auth(true);
+
+    let request = args.command.to_graphql_request();
+    let response = request.execute(&root_node, &context);
+
+    println!("{}", serde_json::to_string_pretty(&response).unwrap())
 }
