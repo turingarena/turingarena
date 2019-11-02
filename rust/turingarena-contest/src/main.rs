@@ -30,9 +30,6 @@ fn main() -> Result<()> {
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
         }
-        InitDb {} => context.init_db(),
-        AddProblem { name } => context.add_problem(&name),
-        DeleteProblem { name } => context.delete_problem(&name),
         ImportContest {
             path,
             format,

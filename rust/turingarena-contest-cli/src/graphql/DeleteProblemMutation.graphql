@@ -1,0 +1,5 @@
+mutation DeleteProblemMutation($name: String!) {
+    deleteProblem(name: $name) {
+        ok
+    }
+}

@@ -145,18 +145,6 @@ impl ApiContext {
         Ok(())
     }
 
-    /// Add a problem to the current contest
-    pub fn add_problem(&self, name: &str) -> Result<()> {
-        problem::insert(&self.connect_db()?, ProblemName(name.to_owned()))?;
-        Ok(())
-    }
-
-    /// Delete a problem from the current contest
-    pub fn delete_problem(&self, name: &str) -> Result<()> {
-        problem::delete(&self.connect_db()?, ProblemName(name.to_owned()))?;
-        Ok(())
-    }
-
     /// Set the start time of the current contest
     pub fn set_start_time(&self, time: DateTime<Local>) -> Result<()> {
         contest::set_start_time(&self.connect_db()?, time)?;
@@ -229,6 +217,18 @@ impl ApiContext {
 
         user::delete(&self.connect_db()?, UserId(id.to_owned()))?;
 
+        Ok(MutationOk)
+    }
+
+    /// Add a problem to the current contest
+    pub fn add_problem(&self, name: String) -> FieldResult<MutationOk> {
+        problem::insert(&self.connect_db()?, ProblemName(name))?;
+        Ok(MutationOk)
+    }
+
+    /// Delete a problem from the current contest
+    pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
+        problem::delete(&self.connect_db()?, ProblemName(name))?;
         Ok(MutationOk)
     }
 

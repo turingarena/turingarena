@@ -48,18 +48,6 @@ pub enum Command {
     },
     /// generate GraphQL schema
     GenerateSchema {},
-    /// add a problem to the contest database
-    AddProblem {
-        /// name of the problem to add
-        name: String,
-    },
-    /// removes a problem from the contest database
-    DeleteProblem {
-        /// name of the problem to remove
-        name: String,
-    },
-    /// initializes the database
-    InitDb {},
     ImportContest {
         /// Path of the contest to import
         path: PathBuf,

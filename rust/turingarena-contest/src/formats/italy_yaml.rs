@@ -1,10 +1,16 @@
-/// Italy YAML contest importation format
-use super::{Importer, ImporterResult};
-use crate::api::ApiContext;
-use chrono::{Local, TimeZone};
 use std::path::{Path, PathBuf};
+
+use chrono::{Local, TimeZone};
+
+use turingarena::problem::ProblemName;
+
+use crate::api::ApiContext;
+use crate::problem;
 use crate::user;
 use crate::user::{UserId, UserInput};
+
+/// Italy YAML contest importation format
+use super::{Importer, ImporterResult};
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
@@ -48,11 +54,13 @@ impl Importer for ItalyYamlImporter {
         if let Some(end) = contest_yaml.stop {
             context.set_end_time(Local.timestamp(end as i64, 0))?;
         }
-        for task in contest_yaml.tasks {
-            context.add_problem(&task)?;
-        }
 
         let conn = context.connect_db()?;
+
+        for task in contest_yaml.tasks {
+            problem::insert(&conn, ProblemName(task))?;
+        }
+
         for user in contest_yaml.users {
             user::insert(
                 &conn,

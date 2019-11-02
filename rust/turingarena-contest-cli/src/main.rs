@@ -41,6 +41,9 @@ graphql_operations! {
     InitDbMutation: "src/graphql/InitDbMutation.graphql",
     ViewContestQuery: "src/graphql/ViewContestQuery.graphql",
     AddUserMutation: "src/graphql/AddUserMutation.graphql",
+    DeleteUserMutation: "src/graphql/DeleteUserMutation.graphql",
+    AddProblemMutation: "src/graphql/AddProblemMutation.graphql",
+    DeleteProblemMutation: "src/graphql/DeleteProblemMutation.graphql",
 }
 
 #[derive(StructOpt, Debug)]
@@ -68,29 +71,42 @@ enum Command {
         #[structopt(long)]
         token: String,
     },
+    DeleteUser {
+        id: String,
+    },
+    AddProblem {
+        #[structopt(long)]
+        name: String,
+    },
+    DeleteProblem {
+        name: String,
+    },
 }
 
 impl Command {
     pub fn to_graphql_request(self) -> GraphQLRequest {
         use Command::*;
         match self {
-            ViewContest => {
-                make_request(ViewContestQuery::build_query, view_contest_query::Variables {})
-            }
-            InitDb => {
-                make_request(InitDbMutation::build_query, init_db_mutation::Variables {})
-            }
+            ViewContest => make_request(ViewContestQuery::build_query, view_contest_query::Variables {}),
+            InitDb => make_request(InitDbMutation::build_query, init_db_mutation::Variables {}),
             AddUser {
                 id, display_name, token
-            } => {
-                make_request(AddUserMutation::build_query, add_user_mutation::Variables {
-                    input: add_user_mutation::UserInput {
-                        id: UserId(id),
-                        display_name,
-                        token,
-                    },
-                })
-            }
+            } => make_request(AddUserMutation::build_query, add_user_mutation::Variables {
+                input: add_user_mutation::UserInput {
+                    id,
+                    display_name,
+                    token,
+                },
+            }),
+            DeleteUser { id } => make_request(DeleteUserMutation::build_query, delete_user_mutation::Variables {
+                id
+            }),
+            AddProblem { name } => make_request(AddProblemMutation::build_query, add_problem_mutation::Variables {
+                name
+            }),
+            DeleteProblem { name } => make_request(DeleteProblemMutation::build_query, delete_problem_mutation::Variables {
+                name
+            }),
         }
     }
 }
