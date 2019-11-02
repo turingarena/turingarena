@@ -45,7 +45,7 @@
           <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
         </aside>
 
-        <aside class="contest-view-aside floating" [hidden]="focusMode">
+        <aside class="contest-view-aside" [hidden]="focusMode">
           <aside class="contest-aside">
             <ng-container *ngIf="state.hasScore">
               <h2 class="contest-score-title">Score</h2>
@@ -122,9 +122,102 @@
                   </button>
 
                   <ng-template #submissionListDialog let-modal>
-                    <app-submission-list-dialog [problemName]="problem.name" [userId]="data.contestView.user.id"
-                      [modal]="modal">
-                    </app-submission-list-dialog>
+                    <ng-template #scoreTemplate let-score="score" let-range="range">
+                      {{ score.toFixed(range.precision) }} /
+                      {{ range.max.toFixed(range.precision) }}
+                    </ng-template>
+                    <ng-template #badgeTemplate let-badge="badge">
+                      <ng-container *ngIf="badge">&#x2713;</ng-container>
+                      <ng-container *ngIf="!badge">&#x2717;</ng-container>
+                    </ng-template>
+                    <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
+                      <div class="submission-list-dialog-header">
+                        <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
+                      </div>
+                      <div class="submission-list-dialog-body">
+                        <table class="submission-table">
+                          <thead class="submission-table-header">
+                            <tr>
+                              <th scope="col" rowspan="2">Submission time</th>
+                              <th *ngFor="let award of problem.material.awards">
+                                {{ award.title | textVariant:'short' }}
+                              </th>
+                              <th scope="col">Total score</th>
+                            </tr>
+                            <tr>
+                              <ng-container *ngFor="let award of problem.material.awards"
+                                [ngSwitch]="award.content.__typename">
+                                <ng-container *ngIf="problemState.award(award) as state">
+                                  <th *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
+                                    [attr.data-score-tier]="getScoreTier(state)">
+                                    <ng-container *ngTemplateOutlet="scoreTemplate; context: state">
+                                    </ng-container>
+                                  </th>
+                                  <th *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
+                                    [attr.data-badge]="state.badge">
+                                    <ng-container *ngTemplateOutlet="badgeTemplate; context: state">
+                                    </ng-container>
+                                  </th>
+                                </ng-container>
+                              </ng-container>
+                              <th class="score-cell" [attr.data-score-tier]="getScoreTier(problemState)">
+                                <ng-container *ngTemplateOutlet="scoreTemplate; context: problemState">
+                                </ng-container>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="submission-table-body">
+                            <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
+                              <ng-container
+                                *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
+                                <ng-template #submissionDialog let-modal>
+                                  <app-submission-dialog [problem]="problem" [submissionId]="submission.id"
+                                    [modal]="modal">
+                                  </app-submission-dialog>
+                                </ng-template>
+                                <td>
+                                  <app-relative-time [time]="submission.createdAt"></app-relative-time>
+                                  <br />
+                                  <a href="#"
+                                    (click)="modalService.open(submissionDialog, { size: 'lg' }); $event.preventDefault()">
+                                    details
+                                  </a>
+                                </td>
+                                <ng-container *ngIf="submission.status === 'SUCCESS'">
+                                  <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
+                                    <ng-container *ngFor="let award of problem.material.awards"
+                                      [ngSwitch]="award.content.__typename">
+                                      <ng-container *ngIf="submissionState.award(award) as state">
+                                        <td *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
+                                          [attr.data-score-tier]="getScoreTier(state)">
+                                          <ng-container *ngTemplateOutlet="scoreTemplate; context: state">
+                                          </ng-container>
+                                        </td>
+                                        <td *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
+                                          [attr.data-badge]="state.badge">
+                                          <ng-container *ngTemplateOutlet="badgeTemplate; context: state">
+                                          </ng-container>
+                                        </td>
+                                      </ng-container>
+                                    </ng-container>
+                                    <td class="score-cell" [attr.data-score-tier]="getScoreTier(submissionState)">
+                                      <ng-container *ngTemplateOutlet="scoreTemplate; context: submissionState">
+                                      </ng-container>
+                                    </td>
+                                  </ng-container>
+                                </ng-container>
+                                <ng-container *ngIf="submission.status === 'PENDING'">
+                                  <td [colSpan]="problem.material.awards.length + 1">Evaluating...</td>
+                                </ng-container>
+                              </ng-container>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="submission-list-dialog-footer">
+                        <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
+                      </div>
+                    </ng-container>
                   </ng-template>
                   <button class="problem-submission-list"
                     (click)="modalService.open(submissionListDialog, { size: 'xl' })">

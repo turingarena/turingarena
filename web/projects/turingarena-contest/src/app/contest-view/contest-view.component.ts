@@ -28,6 +28,7 @@ import { getScoreTier } from '../score';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
+import { getSubmissionState } from '../submission';
 
 const pollInterval = 5000;
 
@@ -98,6 +99,7 @@ export class ContestViewComponent implements OnInit {
 
   getContestState = getContestState;
   getProblemState = getProblemState;
+  getSubmissionState = getSubmissionState;
   getScoreTier = getScoreTier;
 
   ngOnInit() {
