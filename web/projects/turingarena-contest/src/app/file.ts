@@ -9,6 +9,7 @@ export const fileFragment = gql`
     type
     content {
       base64
+      text
     }
   }
   ${variantAttributeFragment}

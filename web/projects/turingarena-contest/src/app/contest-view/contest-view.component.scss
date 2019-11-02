@@ -267,11 +267,18 @@
   }
 }
 
+.contest-home-content,
 .problem-statement {
   flex: 1 1 100%;
-  align-items: stretch;
+  overflow: auto;
+}
+
+.inline-file-markdown,
+.inline-file-iframe {
+  display: block;
+  height: 100%;
+  width: 100%;
   border: none;
-  box-shadow: inset 4px 4px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
 .focus-mode-toggler {

@@ -33,8 +33,11 @@
     "bootstrap": "^4.3.1",
     "graphql": "^14.5.0",
     "graphql-tag": "^2.10.0",
+    "katex": "^0.11.1",
     "luxon": "^1.19.3",
     "ngx-filesize": "^2.0.1",
+    "ngx-markdown": "^8.2.1",
+    "prismjs": "^1.17.1",
     "rxjs": "~6.5.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
