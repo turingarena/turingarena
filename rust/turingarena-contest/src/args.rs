@@ -69,10 +69,7 @@ pub enum Command {
         name: String,
     },
     /// initializes the database
-    InitDb {
-        /// Name of the contest
-        contest_title: String,
-    },
+    InitDb {},
     ImportContest {
         /// Path of the contest to import
         path: PathBuf,

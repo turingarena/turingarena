@@ -39,7 +39,7 @@ impl Importer for ItalyYamlImporter {
     fn import(&self, context: &Context) -> ImporterResult {
         let content = std::fs::read(&self.path)?;
         let contest_yaml = serde_yaml::from_slice::<ContestYaml>(&content)?;
-        context.init_db(&contest_yaml.description)?;
+        context.init_db()?;
         if let Some(start) = contest_yaml.start {
             context.set_start_time(Local.timestamp(start as i64, 0))?;
         }

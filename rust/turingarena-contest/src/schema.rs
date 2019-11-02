@@ -23,7 +23,6 @@ table! {
 table! {
     contest (id) {
         id -> Integer,
-        title -> Text,
         start_time -> Text,
         end_time -> Text,
     }

@@ -85,7 +85,7 @@ fn main() -> Result<()> {
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
         }
-        InitDb { contest_title } => context.init_db(&contest_title),
+        InitDb {} => context.init_db(),
         AddUser {
             username,
             display_name,

@@ -103,9 +103,9 @@ impl Context {
     // TODO: move the following methods in a more appropriate location
 
     /// Initialize the database
-    pub fn init_db(&self, contest_title: &str) -> Result<()> {
+    pub fn init_db(&self) -> Result<()> {
         embedded_migrations::run_with_output(&self.connect_db()?, &mut std::io::stdout())?;
-        contest::create_config(&self.connect_db()?, contest_title)?;
+        contest::create_config(&self.connect_db()?)?;
         Ok(())
     }
 

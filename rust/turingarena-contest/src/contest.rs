@@ -1,15 +1,18 @@
-use crate::*;
-use announcements::Announcement;
-use context::Context;
+use std::fs::read;
+
 use diesel::{ExpressionMethods, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
+
+use announcements::Announcement;
+use context::Context;
 use problem::Problem;
 use questions::{Question, QuestionInput};
 use schema::contest;
-use turingarena::content::{File, FileVariant, FileContent, MediaType, FileName};
+use turingarena::content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
 use turingarena::problem::ProblemName;
 use user::{User, UserId};
-use std::fs::read;
+
+use crate::*;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -102,6 +105,27 @@ impl ContestView {
         }).collect()
     }
 
+    /// Title of the contest, as shown to the user
+    fn title(&self, ctx: &Context) -> Text {
+        ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
+            let entry = result.unwrap();
+            if entry.file_type().unwrap().is_dir() { return None; }
+
+            if let (Some(stem), Some(extension)) = (entry.path().file_stem(), entry.path().extension()) {
+                if extension.to_str() != Some("txt") { return None; }
+                if stem.to_str() != Some("title") { return None; }
+
+                // TODO: handle multiple languages
+
+                return Some(TextVariant {
+                    attributes: vec![],
+                    value: String::from_utf8(read(entry.path()).unwrap()).unwrap(),
+                })
+            }
+            None
+        }).collect()
+    }
+
     /// A problem that the user can see
     fn problem(&self, ctx: &Context, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
@@ -123,11 +147,6 @@ impl ContestView {
             })
             .collect();
         Ok(Some(problems))
-    }
-
-    /// Title of the contest, as shown to the user
-    fn contest_title(&self, ctx: &Context) -> FieldResult<String> {
-        Ok(current_contest(&ctx.connect_db()?)?.title)
     }
 
     /// Start time of the user participation, as RFC3339 date
@@ -168,9 +187,6 @@ pub struct ContestData {
     /// Primary key of the table. Should be *always* 0!
     pub id: i32,
 
-    /// Title of the contest, shown to the users
-    pub title: String,
-
     /// Starting time of the contest, as RFC3339 date
     pub start_time: String,
 
@@ -186,16 +202,14 @@ pub fn current_contest(conn: &SqliteConnection) -> QueryResult<ContestData> {
 #[derive(Insertable)]
 #[table_name = "contest"]
 struct ContestDataInput<'a> {
-    title: &'a str,
     start_time: &'a str,
     end_time: &'a str,
 }
 
 /// Create a defualt configuration
-pub fn create_config(conn: &SqliteConnection, title: &str) -> QueryResult<()> {
+pub fn create_config(conn: &SqliteConnection) -> QueryResult<()> {
     let now = chrono::Local::now();
     let configuration = ContestDataInput {
-        title,
         start_time: &now.to_rfc3339(),
         end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
     };
