@@ -9,22 +9,27 @@ export enum ScoreTier {
 }
 
 export interface ScoreState {
-  score: number;
+  score: number | undefined;
   range: ScoreRangeFragment;
 }
 
-export const getScoreTier = ({ score, range: { max } }: ScoreState) =>
-  score >= max
-    ? ScoreTier.FULL
-    : score <= 0
-      ? ScoreTier.ZERO
-      : ScoreTier.PARTIAL;
+export const getScoreTier = ({ score, range: { max } }: ScoreState) => {
+  if (score === undefined) { return undefined; }
+  if (score <= 0) { return ScoreTier.ZERO; }
+  if (score >= max) { return ScoreTier.FULL; }
+  if (true) { return ScoreTier.PARTIAL; }
+};
 
-export const getScoreValence = (state: ScoreState) => ({
-  [ScoreTier.ZERO]: Valence.FAILURE,
-  [ScoreTier.PARTIAL]: Valence.PARTIAL,
-  [ScoreTier.FULL]: Valence.SUCCESS,
-}[getScoreTier(state)]);
+export const getScoreValence = (state: ScoreState) => {
+  const tier = getScoreTier(state);
+  if (tier === undefined) { return undefined; }
+
+  return {
+    [ScoreTier.ZERO]: Valence.FAILURE,
+    [ScoreTier.PARTIAL]: Valence.PARTIAL,
+    [ScoreTier.FULL]: Valence.SUCCESS,
+  }[tier];
+};
 
 export const getBadgeValence = (badge: boolean) => (badge ? Valence.SUCCESS : Valence.FAILURE);
 

@@ -25,10 +25,10 @@ import { Auth, AuthService } from '../auth.service';
 import { contestViewFragment, getContestState } from '../contest';
 import { getProblemState } from '../problem';
 import { getScoreTier } from '../score';
+import { getSubmissionState } from '../submission';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
-import { getSubmissionState } from '../submission';
 
 const pollInterval = 5000;
 

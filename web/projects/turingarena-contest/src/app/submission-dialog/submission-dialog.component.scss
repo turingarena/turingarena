@@ -30,15 +30,15 @@
   text-align: right;
 }
 
-.evaluation_table {
+.feedback-table {
   @extend .table, .table-sm;
 }
 
-.evaluation_table_header {
+.feedback-table-header {
   text-align: center;
 }
 
-.evaluation_group {
+.feedback-row-group {
   @extend .thead-light;
 }
 

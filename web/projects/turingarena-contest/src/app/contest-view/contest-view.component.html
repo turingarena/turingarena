@@ -52,13 +52,10 @@
                     [class.active]="problem.name === selectedProblemName"
                     (click)="selectedProblemName = problem.name; $event.preventDefault()">
                     {{ problem.material.title | textVariant:'short' }}
-                    <ng-container *ngIf="problem.tackling as tackling">
-                      <span class="contest-problem-score"
-                        [attr.data-score-tier]="getScoreTier(getProblemState(problem, tackling))">
-                        <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem, tackling)">
-                        </ng-container>
-                      </span>
-                    </ng-container>
+                    <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
+                      <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem)">
+                      </ng-container>
+                    </span>
                   </a>
                 </ng-container>
               </div>
@@ -103,7 +100,7 @@
                     All submissions
                   </button>
                   <ng-template #submissionListDialog let-modal>
-                    <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
+                    <ng-container *ngIf="getProblemState(problem) as problemState">
                       <div class="submission-list-dialog-header">
                         <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
                       </div>
@@ -157,7 +154,8 @@
                                   </a>
                                 </td>
                                 <ng-container *ngIf="submission.status === 'SUCCESS'">
-                                  <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
+                                  <ng-container
+                                    *ngIf="getSubmissionState(problem.material, submission) as submissionState">
                                     <ng-container *ngFor="let award of problem.material.awards"
                                       [ngSwitch]="award.content.__typename">
                                       <ng-container *ngIf="submissionState.award(award) as state">
@@ -201,18 +199,16 @@
                     <ng-container *ngFor="let award of problem.material.awards" [ngSwitch]="award.content.__typename">
                       <div class="problem-award" [title]="award.title | textVariant">
                         {{award.title | textVariant}}
-                        <ng-container *ngIf="problem.tackling as tackling">
-                          <ng-container *ngIf="getProblemState(problem, tackling) as problemState">
-                            <ng-container *ngIf="problemState.award(award) as state">
-                              <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
-                                [attr.data-score-tier]="getScoreTier(state)">
-                                <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
-                              </th>
-                              <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
-                                [attr.data-badge]="state.badge">
-                                <ng-container *ngTemplateOutlet="badgeTemplate; context: state"></ng-container>
-                              </th>
-                            </ng-container>
+                        <ng-container *ngIf="getProblemState(problem) as problemState">
+                          <ng-container *ngIf="problemState.award(award) as state">
+                            <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
+                              [attr.data-score-tier]="getScoreTier(state)">
+                              <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
+                            </th>
+                            <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
+                              [attr.data-badge]="state.badge">
+                              <ng-container *ngTemplateOutlet="badgeTemplate; context: state"></ng-container>
+                            </th>
                           </ng-container>
                         </ng-container>
                       </div>
@@ -264,13 +260,20 @@
 </ng-container>
 
 <ng-template #scoreTemplate let-score="score" let-range="range">
-  <span class="score-value">{{ score.toFixed(range.precision) }}</span>
-  <span class="score-max"> / {{ range.max.toFixed(range.precision) }}</span>
+  <ng-container *ngIf="score === undefined">
+    <span class="score-max"> + {{ range.max.toFixed(range.precision) }}</span>
+  </ng-container>
+  <ng-container *ngIf="score !== undefined">
+    <span class="score-value">{{ score.toFixed(range.precision) }}</span>
+    <span class="score-max"> / {{ range.max.toFixed(range.precision) }}</span>
+  </ng-container>
 </ng-template>
 
 <ng-template #badgeTemplate let-badge="badge">
-  <ng-container *ngIf="badge">&#x2713;</ng-container>
-  <ng-container *ngIf="!badge">&#x2717;</ng-container>
+  <ng-container [ngSwitch]="badge">
+    <ng-container *ngSwitchCase="true">&#x2713;</ng-container>
+    <ng-container *ngSwitchCase="false">&#x2717;</ng-container>
+  </ng-container>
 </ng-template>
 
 <ng-template #loginDialog let-modal>

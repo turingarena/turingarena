@@ -161,6 +161,7 @@
   margin-top: 0.2rem;
   float: right;
 
+  &:not([data-score-tier]):not([data-badge]),
   &[data-score-tier="ZERO"],
   &[data-badge="false"] {
     @extend .badge-light;

@@ -4,19 +4,18 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { FileInput } from '../../../../../__generated__/globalTypes';
-import {
-  ContestQuery_contestView_problems as Problem,
-  ContestQuery_contestView_problems_material_submissionForm_fields as Field,
-} from '../__generated__/ContestQuery';
+import { FieldFragment } from '../__generated__/FieldFragment';
+import { FieldTypeFragment } from '../__generated__/FieldTypeFragment';
+import { ProblemFragment } from '../__generated__/ProblemFragment';
 import { SubmitMutation, SubmitMutationVariables } from '../__generated__/SubmitMutation';
 
 class FieldState {
   file?: File;
   moreTypes = false;
 
-  constructor(private readonly field: Field) { }
+  constructor(private readonly field: FieldFragment) { }
 
-  isCompatible(type: Field['types'][number]) {
+  isCompatible(type: FieldTypeFragment) {
     return type.extensions.some((ext) => this.file !== undefined && this.file.name.endsWith(ext));
   }
 
@@ -56,7 +55,7 @@ export class SubmitDialogComponent {
   ) { }
 
   @Input()
-  problem!: Problem;
+  problem!: ProblemFragment;
 
   @Input()
   userId!: string;
@@ -71,7 +70,7 @@ export class SubmitDialogComponent {
 
   private readonly fields: Record<string, FieldState> = {};
 
-  fieldState(field: Field) {
+  fieldState(field: FieldFragment) {
     const { id } = field;
     if (!(id in this.fields)) {
       this.fields[id] = new FieldState(field);
@@ -125,7 +124,7 @@ export class SubmitDialogComponent {
     this.modal.close();
   }
 
-  private async getFileForField(field: Field, formData: FormData): Promise<FileInput> {
+  private async getFileForField(field: FieldFragment, formData: FormData): Promise<FileInput> {
     const file = formData.get(`${field.id}.file`) as File;
 
     return {

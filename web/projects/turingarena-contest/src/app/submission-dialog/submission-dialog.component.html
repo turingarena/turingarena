@@ -12,21 +12,21 @@
       <ng-container *ngIf="getEvaluationRecord(submission) as record">
         <ng-container *ngFor="let section of problem.material.feedback">
           <ng-container [ngSwitch]="section.__typename">
-            <table *ngSwitchCase="'TableSection'" class="evaluation_table">
-              <thead class="evaluation_table_header">
+            <table *ngSwitchCase="'TableSection'" class="feedback-table">
+              <thead class="feedback-table-header">
                 <tr>
                   <th [colSpan]="section.cols.length">
                     {{ section.caption | textVariant }}
                   </th>
                 </tr>
               </thead>
-              <tbody *ngFor="let group of section.rowGroups; index as i" class="evaluation_group">
+              <tbody *ngFor="let group of section.rowGroups; index as i" class="feedback-row-group">
                 <tr>
                   <th [colSpan]="section.cols.length">
                     {{ group.title | textVariant }}
                   </th>
                 </tr>
-                <tr class="group_header_row">
+                <tr>
                   <ng-container *ngFor="let col of section.cols; index as i">
                     <ng-container [ngSwitch]="col.content.__typename">
                       <th *ngSwitchDefault="">
@@ -35,7 +35,7 @@
                     </ng-container>
                   </ng-container>
                 </tr>
-                <tr *ngFor="let row of group.rows" class="evaluation_row">
+                <tr *ngFor="let row of group.rows">
                   <ng-container *ngFor="let col of section.cols; index as i">
                     <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
                       <th *ngSwitchCase="'RowNumberCellContent'">
