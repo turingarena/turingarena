@@ -4,7 +4,7 @@
       <nav class="topbar">
         <a href="#" class="contest-home" (click)="selectedProblemName = undefined; $event.preventDefault()">
           <h1 class="contest-title">
-            <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.contestTitle}}
+            <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.title | textVariant}}
           </h1>
         </a>
         <ng-container *ngIf="data.contestView.user as user">

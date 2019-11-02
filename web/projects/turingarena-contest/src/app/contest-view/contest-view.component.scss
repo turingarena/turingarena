@@ -273,6 +273,11 @@
   overflow: auto;
 }
 
+.inline-file-markdown {
+  padding: .75rem;
+  max-width: 60rem;
+}
+
 .inline-file-markdown,
 .inline-file-iframe {
   display: block;
