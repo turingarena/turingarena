@@ -4,11 +4,11 @@ use diesel::SqliteConnection;
 use juniper::FieldResult;
 use jwt::{decode, encode, Header, Validation};
 use user::UserId;
+use turingarena::juniper_ext::*;
 
-graphql_derive_newtype! {
-    /// Wraps a JWT User token
-    pub struct JwtToken(pub String);
-}
+/// Wraps a JWT User token
+#[derive(GraphQLNewtype)]
+pub struct JwtToken(pub String);
 
 /// Structure that will be encoded in the JWT
 #[derive(Debug, Serialize, Deserialize, Clone)]

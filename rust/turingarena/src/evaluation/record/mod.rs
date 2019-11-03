@@ -2,25 +2,23 @@
 
 extern crate juniper;
 
-use crate::feedback::valence::Valence;
-use crate::{award, content, rusage};
 use serde::{Deserialize, Serialize};
 
-graphql_derive_newtype! {
-    /// Wraps a string used to identify a value of a given kind
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct Key(pub String);
-}
+use crate::{award, content, rusage};
+use crate::feedback::valence::Valence;
+use crate::juniper_ext::*;
 
-graphql_derive_union_from_enum! {
-    #[derive(Serialize, Deserialize, Clone)]
-    pub enum Value {
-        Message(TextValue),
-        Score(ScoreValue),
-        MemoryUsage(MemoryUsageValue),
-        TimeUsage(TimeUsageValue),
-        Valence(ValenceValue),
-    }
+/// Wraps a string used to identify a value of a given kind
+#[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+pub struct Key(pub String);
+
+#[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
+pub enum Value {
+    Message(TextValue),
+    Score(ScoreValue),
+    MemoryUsage(MemoryUsageValue),
+    TimeUsage(TimeUsageValue),
+    Valence(ValenceValue),
 }
 
 /// Wraps a Score

@@ -1,12 +1,4 @@
-
-#[macro_export]macro_rules! graphql_derive_union_from_enum {
-    (
-        $( $enum:tt )*
-    ) => {
-        $( $enum )*
-        graphql_union_from_enum! { $( $enum )* }
-    };
-}
+pub use turingarena_proc_macro::*;
 
 #[macro_export]
 macro_rules! graphql_union_from_enum {
@@ -37,16 +29,6 @@ macro_rules! graphql_union_from_enum {
 }
 
 #[macro_export]
-macro_rules! graphql_derive_object_from_unit {
-    (
-        $( $struct:tt )*
-    ) => {
-        $( $struct )*
-        graphql_object_from_unit! { $( $struct )* }
-    };
-}
-
-#[macro_export]
 macro_rules! graphql_object_from_unit {
     (
         $( #[ $struct_attr:meta ] )* $vis:vis struct $struct_ident:ident;
@@ -56,16 +38,6 @@ macro_rules! graphql_object_from_unit {
                 field ok() -> bool { true }
             }
         }
-    };
-}
-
-#[macro_export]
-macro_rules! graphql_derive_newtype {
-    (
-        $( $struct:tt )*
-    ) => {
-        $( $struct )*
-        graphql_newtype! { $( $struct )* }
     };
 }
 
@@ -125,10 +97,4 @@ macro_rules! graphql_newtype {
             }
         }
     };
-}
-
-graphql_derive_newtype! {
-    /// Test
-    #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-    struct A(pub String);
 }

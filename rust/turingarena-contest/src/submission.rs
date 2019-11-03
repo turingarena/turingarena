@@ -5,11 +5,11 @@ use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnec
 use juniper::FieldResult;
 use schema::{submission_files, submissions};
 use turingarena::submission::*;
+use turingarena::juniper_ext::*;
 
-graphql_derive_newtype! {
-    /// Wraps a String that identifies a submission
-    pub struct SubmissionId(pub String);
-}
+/// Wraps a String that identifies a submission
+#[derive(GraphQLNewtype)]
+pub struct SubmissionId(pub String);
 
 /// Status of a submission
 #[derive(Copy, Clone, juniper::GraphQLEnum)]

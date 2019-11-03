@@ -3,8 +3,10 @@
 
 pub extern crate juniper;
 
+extern crate turingarena_proc_macro;
+
 #[macro_use]
-mod juniper_ext;
+pub mod juniper_ext;
 
 pub mod autoio;
 pub mod award;

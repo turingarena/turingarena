@@ -3,24 +3,22 @@
 extern crate juniper;
 extern crate serde;
 
-use super::content::*;
 use serde::{Deserialize, Serialize};
+
+use crate::content::*;
+use crate::juniper_ext::*;
 
 /// Contains types to define a submission form
 pub mod form {
     use super::*;
 
-    graphql_derive_newtype! {
-        /// Wraps a string identifying a field in a submission
-        #[derive(Serialize, Deserialize, Clone)]
-        pub struct FieldId(pub String);
-    }
+    /// Wraps a string identifying a field in a submission
+    #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+    pub struct FieldId(pub String);
 
-    graphql_derive_newtype! {
-        /// Wraps a string identifying a file type for a field in a submission
-        #[derive(Serialize, Deserialize, Clone)]
-        pub struct FileTypeId(pub String);
-    }
+    /// Wraps a string identifying a file type for a field in a submission
+    #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+    pub struct FileTypeId(pub String);
 
     /// Describes a field of a submission form
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
@@ -34,12 +32,10 @@ pub mod form {
         pub types: Vec<FileType>,
     }
 
-    graphql_derive_newtype! {
-        /// Wraps a file extension.
-        /// Should start with a dot, followed by a non-empty ASCII alphanumeric string.
-        #[derive(Serialize, Deserialize, Clone)]
-        pub struct FileTypeExtension(pub String);
-    }
+    /// Wraps a file extension.
+    /// Should start with a dot, followed by a non-empty ASCII alphanumeric string.
+    #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+    pub struct FileTypeExtension(pub String);
 
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct FileType {

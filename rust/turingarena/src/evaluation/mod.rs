@@ -3,14 +3,13 @@
 pub mod record;
 use crate::award;
 use serde::{Deserialize, Serialize};
+use crate::juniper_ext::*;
 
-graphql_derive_union_from_enum! {
-    #[derive(Serialize, Deserialize)]
-    pub enum Event {
-        Value(ValueEvent),
-        Score(ScoreEvent),
-        Badge(BadgeEvent),
-    }
+#[derive(Serialize, Deserialize, GraphQLUnionFromEnum)]
+pub enum Event {
+    Value(ValueEvent),
+    Score(ScoreEvent),
+    Badge(BadgeEvent),
 }
 
 /// Rappresents a key/value record type

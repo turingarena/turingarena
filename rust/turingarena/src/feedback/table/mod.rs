@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::rusage::{MemoryUsage, TimeUsage};
 use crate::{award, content::Text, evaluation::record::Key};
+use crate::juniper_ext::*;
 
 /// Feedback section containing tabular data.
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
@@ -62,33 +63,27 @@ pub enum RowContent {
     GroupSummary,
 }
 
-graphql_derive_union_from_enum! {
-    /// Describes the kind of data shown in a column.
-    #[derive(Serialize, Deserialize, Clone)]
-    #[serde(rename_all = "snake_case")]
-    pub enum ColContent {
-        RowTitle(RowTitleColContent),
-        RowNumber(RowNumberColContent),
-        Score(ScoreColContent),
-        Message(MessageColContent),
-        TimeUsage(TimeUsageColContent),
-        MemoryUsage(MemoryUsageColContent),
-    }
+/// Describes the kind of data shown in a column.
+#[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum ColContent {
+    RowTitle(RowTitleColContent),
+    RowNumber(RowNumberColContent),
+    Score(ScoreColContent),
+    Message(MessageColContent),
+    TimeUsage(TimeUsageColContent),
+    MemoryUsage(MemoryUsageColContent),
 }
 
-graphql_derive_object_from_unit! {
-    /// Column of row titles.
-    /// Cells must contain `CellContent::RowTitle`.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct RowTitleColContent;
-}
+/// Column of row titles.
+/// Cells must contain `CellContent::RowTitle`.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct RowTitleColContent;
 
-graphql_derive_object_from_unit! {
-    /// Column of row numbers.
-    /// Cells must contain `CellContent::RowNumber`.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct RowNumberColContent;
-}
+/// Column of row numbers.
+/// Cells must contain `CellContent::RowNumber`.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct RowNumberColContent;
 
 /// Column of scores.
 /// Cells must contain `CellContent::Score` or `CellContent::Missing`.
@@ -98,47 +93,37 @@ pub struct ScoreColContent {
     pub range: award::ScoreRange,
 }
 
-graphql_derive_object_from_unit! {
-    /// Column of text messages.
-    /// Cells must contain `CellContent::Message` or `CellContent::Missing`.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct MessageColContent;
+/// Column of text messages.
+/// Cells must contain `CellContent::Message` or `CellContent::Missing`.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct MessageColContent;
+
+/// Column containing amounts of time used for computation.
+/// Cells must contain `CellContent::TimeUsage`.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct TimeUsageColContent;
+
+/// Column containing amounts of memory used for computation.
+/// Cells must contain `CellContent::MemoryUsage`.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct MemoryUsageColContent;
+
+/// Describes the kind of data shown in a cell.
+#[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum CellContent {
+    Missing(MissingCellContent),
+    RowTitle(RowTitleCellContent),
+    RowNumber(RowNumberCellContent),
+    Score(ScoreCellContent),
+    Message(MessageCellContent),
+    TimeUsage(TimeUsageCellContent),
+    MemoryUsage(MemoryUsageCellContent),
 }
 
-graphql_derive_object_from_unit! {
-    /// Column containing amounts of time used for computation.
-    /// Cells must contain `CellContent::TimeUsage`.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct TimeUsageColContent;
-}
-
-graphql_derive_object_from_unit! {
-    /// Column containing amounts of memory used for computation.
-    /// Cells must contain `CellContent::MemoryUsage`.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct MemoryUsageColContent;
-}
-
-graphql_derive_union_from_enum! {
-    /// Describes the kind of data shown in a cell.
-    #[derive(Serialize, Deserialize, Clone)]
-    #[serde(rename_all = "snake_case")]
-    pub enum CellContent {
-        Missing(MissingCellContent),
-        RowTitle(RowTitleCellContent),
-        RowNumber(RowNumberCellContent),
-        Score(ScoreCellContent),
-        Message(MessageCellContent),
-        TimeUsage(TimeUsageCellContent),
-        MemoryUsage(MemoryUsageCellContent),
-    }
-}
-
-graphql_derive_object_from_unit! {
-    /// Cell containing no value.
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct MissingCellContent;
-}
+/// Cell containing no value.
+#[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+pub struct MissingCellContent;
 
 /// Cell containing the name of the corresponding row,
 /// shown as row header (e.g., using `<th scope=col>` elements).

@@ -2,20 +2,17 @@
 
 extern crate juniper;
 
+use super::juniper_ext::*;
 use super::content::*;
 use serde::{Deserialize, Serialize};
 
-graphql_derive_newtype! {
-    /// Wraps a number that represents a score
-    #[derive(Serialize, Deserialize, Copy, Clone)]
-    pub struct Score(pub f64);
-}
+/// Wraps a number that represents a score
+#[derive(Serialize, Deserialize, Copy, Clone, GraphQLNewtype)]
+pub struct Score(pub f64);
 
-graphql_derive_newtype! {
-    /// Wraps a string that identifies an award
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct AwardName(pub String);
-}
+/// Wraps a string that identifies an award
+#[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+pub struct AwardName(pub String);
 
 /// Describes the possible values of a score.
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]
@@ -35,19 +32,15 @@ pub struct ScoreAwardContent {
     pub range: ScoreRange,
 }
 
-graphql_derive_object_from_unit! {
-    /// An award that has only two possible states (success or fail)
-    #[derive(Serialize, Deserialize, Copy, Clone)]
-    pub struct BadgeAwardContent;
-}
+/// An award that has only two possible states (success or fail)
+#[derive(Serialize, Deserialize, Copy, Clone, GraphQLObjectFromUnit)]
+pub struct BadgeAwardContent;
 
-graphql_derive_union_from_enum! {
-    /// Describes the nature of an award
-    #[derive(Serialize, Deserialize, Copy, Clone)]
-    pub enum AwardContent {
-        Score(ScoreAwardContent),
-        Badge(BadgeAwardContent),
-    }
+/// Describes the nature of an award
+#[derive(Serialize, Deserialize, Copy, Clone, GraphQLUnionFromEnum)]
+pub enum AwardContent {
+    Score(ScoreAwardContent),
+    Badge(BadgeAwardContent),
 }
 
 /// Describes an item to which a score can be assigned

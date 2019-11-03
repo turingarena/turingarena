@@ -3,6 +3,7 @@ use super::*;
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use schema::users;
+use turingarena::juniper_ext::*;
 
 #[derive(Debug, juniper::GraphQLInputObject)]
 pub struct UserInput {
@@ -30,11 +31,9 @@ pub struct User {
     token: String,
 }
 
-graphql_derive_newtype! {
-    /// Wraps a String that identifies a user
-    #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-    pub struct UserId(pub String);
-}
+/// Wraps a String that identifies a user
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, GraphQLNewtype)]
+pub struct UserId(pub String);
 
 #[juniper::object(Context = ApiContext)]
 impl User {
