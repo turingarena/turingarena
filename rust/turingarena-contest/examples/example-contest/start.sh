@@ -4,6 +4,7 @@ set -ex
 cargo build
 for d in easy*/ ; do
     ( cd $d/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
+    ( cd $d/ && rm -rf .task-maker-files/ )
 done
 rm database.sqlite3
 cargo run --package turingarena-contest-cli -- --problems-dir $PWD init-db
