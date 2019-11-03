@@ -5,13 +5,17 @@ extern crate juniper;
 use super::content::*;
 use serde::{Deserialize, Serialize};
 
-/// Wraps a number that represents a score
-#[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLScalarValue)]
-pub struct Score(pub f64);
+graphql_derive_newtype! {
+    /// Wraps a number that represents a score
+    #[derive(Serialize, Deserialize, Copy, Clone)]
+    pub struct Score(pub f64);
+}
 
-/// Wraps a string that identifies an award
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-pub struct AwardName(pub String);
+graphql_derive_newtype! {
+    /// Wraps a string that identifies an award
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct AwardName(pub String);
+}
 
 /// Describes the possible values of a score.
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]

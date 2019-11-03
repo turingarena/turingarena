@@ -4,20 +4,26 @@ extern crate serde;
 
 use serde::{Deserialize, Serialize};
 
-/// Wraps a language tag string, as defined in
-/// https://tools.ietf.org/html/bcp47
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-pub struct LanguageTag(pub String);
+graphql_derive_newtype! {
+    /// Wraps a language tag string, as defined in
+    /// https://tools.ietf.org/html/bcp47
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct LanguageTag(pub String);
+}
 
-/// Wraps a media type string, as defined in
-/// https://tools.ietf.org/html/rfc7231#section-3.1.1.1
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-pub struct MediaType(pub String);
+graphql_derive_newtype! {
+    /// Wraps a media type string, as defined in
+    /// https://tools.ietf.org/html/rfc7231#section-3.1.1.1
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct MediaType(pub String);
+}
 
-/// Wraps a sanitized file name.
-/// Allows extensions, but no path components.
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-pub struct FileName(pub String);
+graphql_derive_newtype! {
+    /// Wraps a sanitized file name.
+    /// Allows extensions, but no path components.
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct FileName(pub String);
+}
 
 mod file;
 pub use file::FileContent;

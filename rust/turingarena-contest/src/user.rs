@@ -30,9 +30,11 @@ pub struct User {
     token: String,
 }
 
-/// Wraps a String that identifies a user
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, juniper::GraphQLScalarValue)]
-pub struct UserId(pub String);
+graphql_derive_newtype! {
+    /// Wraps a String that identifies a user
+    #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+    pub struct UserId(pub String);
+}
 
 #[juniper::object(Context = ApiContext)]
 impl User {

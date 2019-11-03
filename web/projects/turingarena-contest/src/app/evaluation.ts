@@ -1,5 +1,7 @@
 import gql from 'graphql-tag';
 
+import { rusageFragment } from './rusage';
+
 export const evaluationFragment = gql`
   fragment TextValueFragment on TextValue {
     text {
@@ -12,11 +14,11 @@ export const evaluationFragment = gql`
   }
 
   fragment TimeUsageValueFragment on TimeUsageValue {
-    timeUsage
+    timeUsage { ...TimeUsageFragment }
   }
 
   fragment MemoryUsageValueFragment on MemoryUsageValue {
-    memoryUsage
+    memoryUsage { ...MemoryUsageFragment }
   }
 
   fragment ValenceValueFragment on ValenceValue {
@@ -47,4 +49,6 @@ export const evaluationFragment = gql`
   fragment SubmissionEvaluationFragment on Submission {
     evaluationEvents { ...EvaluationEventFragment }
   }
+
+  ${rusageFragment}
 `;

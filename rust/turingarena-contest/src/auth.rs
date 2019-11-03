@@ -5,9 +5,10 @@ use juniper::FieldResult;
 use jwt::{decode, encode, Header, Validation};
 use user::UserId;
 
-/// Wraps a JWT User token
-#[derive(juniper::GraphQLScalarValue)]
-pub struct JwtToken(pub String);
+graphql_derive_newtype! {
+    /// Wraps a JWT User token
+    pub struct JwtToken(pub String);
+}
 
 /// Structure that will be encoded in the JWT
 #[derive(Debug, Serialize, Deserialize, Clone)]

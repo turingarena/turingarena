@@ -77,10 +77,10 @@
                         <td class="cell-memory-usage cell-valence"
                           [ngClass]="getValence(record[cell.content.valenceKey])">
                           <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ value.memoryUsage | filesize }}
+                            {{ value.memoryUsage.bytes | filesize }}
                           </ng-container>
                           <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
-                            {{ watermark | filesize }}
+                            {{ watermark.bytes | filesize }}
                           </small>
                         </td>
                       </ng-container>

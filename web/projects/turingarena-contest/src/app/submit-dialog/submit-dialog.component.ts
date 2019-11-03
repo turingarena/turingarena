@@ -95,7 +95,7 @@ export class SubmitDialogComponent {
 
     const { data, errors } = await this.apollo.mutate<SubmitMutation, SubmitMutationVariables>({
       mutation: gql`
-        mutation SubmitMutation($userId: UserId!, $problemName: ProblemName!, $files: [FileInput!]!) {
+        mutation SubmitMutation($userId: String!, $problemName: String!, $files: [FileInput!]!) {
           contestView(userId: $userId) {
             problem(name: $problemName) {
               tackling {

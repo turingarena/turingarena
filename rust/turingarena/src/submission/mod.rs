@@ -10,13 +10,17 @@ use serde::{Deserialize, Serialize};
 pub mod form {
     use super::*;
 
-    /// Wraps a string identifying a field in a submission
-    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-    pub struct FieldId(pub String);
+    graphql_derive_newtype! {
+        /// Wraps a string identifying a field in a submission
+        #[derive(Serialize, Deserialize, Clone)]
+        pub struct FieldId(pub String);
+    }
 
-    /// Wraps a string identifying a file type for a field in a submission
-    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-    pub struct FileTypeId(pub String);
+    graphql_derive_newtype! {
+        /// Wraps a string identifying a file type for a field in a submission
+        #[derive(Serialize, Deserialize, Clone)]
+        pub struct FileTypeId(pub String);
+    }
 
     /// Describes a field of a submission form
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
@@ -30,10 +34,12 @@ pub mod form {
         pub types: Vec<FileType>,
     }
 
-    /// Wraps a file extension.
-    /// Should start with a dot, followed by a non-empty ASCII alphanumeric string.
-    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-    pub struct FileTypeExtension(pub String);
+    graphql_derive_newtype! {
+        /// Wraps a file extension.
+        /// Should start with a dot, followed by a non-empty ASCII alphanumeric string.
+        #[derive(Serialize, Deserialize, Clone)]
+        pub struct FileTypeExtension(pub String);
+    }
 
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct FileType {

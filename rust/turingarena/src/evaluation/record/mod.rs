@@ -6,9 +6,11 @@ use crate::feedback::valence::Valence;
 use crate::{award, content, rusage};
 use serde::{Deserialize, Serialize};
 
-/// Wraps a string used to identify a value of a given kind
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLScalarValue)]
-pub struct Key(pub String);
+graphql_derive_newtype! {
+    /// Wraps a string used to identify a value of a given kind
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct Key(pub String);
+}
 
 graphql_derive_union_from_enum! {
     #[derive(Serialize, Deserialize, Clone)]

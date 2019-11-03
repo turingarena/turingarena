@@ -1,6 +1,8 @@
 #![feature(external_doc)]
 #![doc(include = "../README.md")]
 
+pub extern crate juniper;
+
 #[macro_use]
 mod juniper_ext;
 
@@ -18,8 +20,6 @@ pub mod make;
 pub mod problem;
 pub mod rusage;
 pub mod submission;
-
-extern crate juniper;
 
 #[cfg(test)]
 mod tests {

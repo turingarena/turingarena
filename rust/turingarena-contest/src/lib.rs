@@ -18,7 +18,10 @@ extern crate serde_yaml;
 extern crate structopt;
 #[cfg(test)]
 extern crate tempdir;
+
+#[macro_use]
 extern crate turingarena;
+
 extern crate uuid;
 
 #[cfg(feature = "web-content")]

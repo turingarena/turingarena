@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { fileFragment } from './file';
+import { rusageFragment } from './rusage';
 import { textFragment } from './text';
 
 export const problemMaterialFragment = gql`
@@ -72,15 +73,15 @@ export const problemMaterialFragment = gql`
   }
 
   fragment TimeUsageCellContentFragment on TimeUsageCellContent {
-    timeUsageMaxRelevant: maxRelevant
-    timeUsagePrimaryWatermark: primaryWatermark
+    timeUsageMaxRelevant: maxRelevant { ...TimeUsageFragment }
+    timeUsagePrimaryWatermark: primaryWatermark { ...TimeUsageFragment }
     key
     valenceKey
   }
 
   fragment MemoryUsageCellContentFragment on MemoryUsageCellContent {
-    memoryUsageMaxRelevant: maxRelevant
-    memoryUsagePrimaryWatermark: primaryWatermark
+    memoryUsageMaxRelevant: maxRelevant { ...MemoryUsageFragment }
+    memoryUsagePrimaryWatermark: primaryWatermark { ...MemoryUsageFragment }
     key
     valenceKey
   }
@@ -124,6 +125,7 @@ export const problemMaterialFragment = gql`
 
   ${textFragment}
   ${fileFragment}
+  ${rusageFragment}
 `;
 
 export const getAwardScoreRanges = (material: MaterialFragment) => material.awards.map(({ name, content }) => {

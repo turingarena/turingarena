@@ -14,6 +14,7 @@ import {
   SubmissionQueryVariables,
 } from '../__generated__/SubmissionQuery';
 import { TimeUsageCellContentFragment } from '../__generated__/TimeUsageCellContentFragment';
+import { TimeUsageFragment } from '../__generated__/TimeUsageFragment';
 import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
 import { ValueFragment } from '../__generated__/ValueFragment';
 import { evaluationFragment } from '../evaluation';
@@ -72,10 +73,10 @@ export class SubmissionDialogComponent implements OnInit {
     return record;
   }
 
-  displayTimeUsage(seconds: number, content: TimeUsageCellContentFragment) {
-    const maxRelevant = content.timeUsageMaxRelevant as number;
+  displayTimeUsage({ seconds }: TimeUsageFragment, content: TimeUsageCellContentFragment) {
+    const maxRelevant = content.timeUsageMaxRelevant;
     const extraPrecision = 3;
-    const fractionDigits = Math.max(Math.round(-Math.log10(maxRelevant) + extraPrecision), 0);
+    const fractionDigits = Math.max(Math.round(-Math.log10(maxRelevant.seconds) + extraPrecision), 0);
 
     const millisPrecision = 3;
 

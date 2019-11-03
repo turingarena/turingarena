@@ -109,7 +109,7 @@ export class ContestViewComponent implements OnInit {
   setQuery() {
     this.contestQuery = this.apollo.watchQuery<ContestQuery, ContestQueryVariables>({
       query: gql`
-        query ContestQuery($userId: UserId) {
+        query ContestQuery($userId: String) {
           serverTime
           contestView(userId: $userId) { ...ContestViewFragment }
         }
@@ -145,15 +145,18 @@ export class ContestViewComponent implements OnInit {
 
     if (data.auth === null) {
       this.logInInvalidToken = true;
-    } else {
-      this.logInInvalidToken = false;
-      const { token, userId } = data.auth;
 
-      await this.setAuth({ token, userId });
-      modal.close();
+      return;
     }
+
+    const { token, userId } = data.auth;
+
+    if (userId === null) {
+      throw new Error(`login successful but no userId!`);
+    }
+
+    await this.setAuth({ token, userId });
+    modal.close();
   }
-
-
 }
 
