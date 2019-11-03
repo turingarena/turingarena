@@ -19,6 +19,8 @@ use turingarena_contest::args::ContestArgs;
 use juniper::{InputValue, DefaultScalarValue};
 use std::collections::HashMap;
 use juniper::http::GraphQLRequest;
+use std::path::PathBuf;
+use std::fs::read;
 
 macro_rules! graphql_operations {
     (
@@ -44,6 +46,7 @@ graphql_operations! {
     DeleteUserMutation: "src/graphql/DeleteUserMutation.graphql",
     AddProblemMutation: "src/graphql/AddProblemMutation.graphql",
     DeleteProblemMutation: "src/graphql/DeleteProblemMutation.graphql",
+    ImportMutation: "src/graphql/ImportMutation.graphql",
 }
 
 #[derive(StructOpt, Debug)]
@@ -81,6 +84,11 @@ enum Command {
     DeleteProblem {
         name: String,
     },
+    ImportFile {
+        /// Path of the contest to import
+        path: PathBuf,
+    },
+
 }
 
 impl Command {
@@ -107,6 +115,16 @@ impl Command {
             DeleteProblem { name } => make_request(DeleteProblemMutation::build_query, delete_problem_mutation::Variables {
                 name
             }),
+            ImportFile { path } => {
+                let content = read(&path).unwrap();
+                make_request(ImportMutation::build_query, import_mutation::Variables {
+                    input: import_mutation::ImportInput {
+                        content_base64: base64::encode(&content),
+                        filename: Some(path.file_name().unwrap().to_string_lossy().to_string()),
+                        filetype: None,
+                    },
+                })
+            }
         }
     }
 }

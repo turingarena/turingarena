@@ -30,15 +30,5 @@ fn main() -> Result<()> {
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
         }
-        ImportContest {
-            path,
-            format,
-            force,
-        } => {
-            if force && context.database_url.exists() {
-                std::fs::remove_file(&context.database_url)?;
-            }
-            formats::import(&context, &path, &format)
-        }
     }
 }

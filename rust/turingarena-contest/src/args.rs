@@ -48,16 +48,4 @@ pub enum Command {
     },
     /// generate GraphQL schema
     GenerateSchema {},
-    ImportContest {
-        /// Path of the contest to import
-        path: PathBuf,
-
-        /// Import format
-        #[structopt(long, short, default_value = "italy_yaml")]
-        format: String,
-
-        /// Delete existing contest if already exists
-        #[structopt(long)]
-        force: bool,
-    },
 }

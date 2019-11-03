@@ -10,11 +10,13 @@ use crate::user;
 use crate::user::{UserId, UserInput};
 
 /// Italy YAML contest importation format
-use super::{Importer, ImporterResult};
+use super::{Importer, ImportResult};
+use std::error::Error;
+use crate::formats::ImportOperation;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
-struct ContestYaml {
+pub struct ContestYaml {
     name: String,
     description: String,
     start: Option<f64>,
@@ -33,35 +35,31 @@ struct ItalyYamlUser {
 }
 
 /// Importer for the Italy YAML contest format
-pub struct ItalyYamlImporter {
-    path: PathBuf,
-}
+pub struct ItalyYamlImporter;
 
 impl Importer for ItalyYamlImporter {
-    fn from_file(path: &Path) -> Self {
-        ItalyYamlImporter {
-            path: path.to_owned(),
-        }
+    type Operation = ContestYaml;
+    fn load(&self, content: &[u8], _filename: &Option<String>, _filetype: &Option<String>) -> Option<ContestYaml> {
+        serde_yaml::from_slice::<ContestYaml>(content).ok()
     }
+}
 
-    fn import(&self, context: &ApiContext) -> ImporterResult {
-        let content = std::fs::read(&self.path)?;
-        let contest_yaml = serde_yaml::from_slice::<ContestYaml>(&content)?;
-        context.init_db()?;
-        if let Some(start) = contest_yaml.start {
+impl ImportOperation for ContestYaml {
+    fn import_into(self, context: &ApiContext) -> ImportResult {
+        if let Some(start) = self.start {
             context.set_start_time(Local.timestamp(start as i64, 0))?;
         }
-        if let Some(end) = contest_yaml.stop {
+        if let Some(end) = self.stop {
             context.set_end_time(Local.timestamp(end as i64, 0))?;
         }
 
         let conn = context.connect_db()?;
 
-        for task in contest_yaml.tasks {
+        for task in self.tasks {
             problem::insert(&conn, ProblemName(task))?;
         }
 
-        for user in contest_yaml.users {
+        for user in self.users {
             user::insert(
                 &conn,
                 &UserInput {

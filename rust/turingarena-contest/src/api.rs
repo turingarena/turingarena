@@ -14,6 +14,7 @@ use crate::args::ContestArgs;
 use crate::submission;
 use crate::contest::{ContestView, UserToken};
 use crate::user::UserInput;
+use crate::formats::{import, ImportInput};
 
 embed_migrations!();
 
@@ -229,6 +230,12 @@ impl ApiContext {
     /// Delete a problem from the current contest
     pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
         problem::delete(&self.connect_db()?, ProblemName(name))?;
+        Ok(MutationOk)
+    }
+
+    /// Import a file
+    pub fn import(&self, input: ImportInput) -> FieldResult<MutationOk> {
+        import(&self, &input)?;
         Ok(MutationOk)
     }
 

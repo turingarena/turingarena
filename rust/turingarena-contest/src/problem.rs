@@ -76,7 +76,8 @@ pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
 /// Insert a problem in the database
 pub fn insert(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
     let problem = ProblemDataInput { name: &name.0 };
-    diesel::insert_into(schema::problems::table)
+    // FIXME: replace_into not supported by PostgreSQL
+    diesel::replace_into(schema::problems::table)
         .values(problem)
         .execute(conn)?;
     Ok(())

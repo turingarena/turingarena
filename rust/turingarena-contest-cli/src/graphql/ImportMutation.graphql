@@ -1,0 +1,5 @@
+mutation ImportMutation($input: ImportInput!) {
+    import(input: $input) {
+        ok
+    }
+}

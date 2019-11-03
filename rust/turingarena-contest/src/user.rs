@@ -67,7 +67,8 @@ pub fn insert(
         display_name: &input.display_name,
         token: &input.token,
     };
-    diesel::insert_into(users::table)
+    // FIXME: replace_into not supported by PostgreSQL
+    diesel::replace_into(users::table)
         .values(user)
         .execute(conn)?;
     Ok(())

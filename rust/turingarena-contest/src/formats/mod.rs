@@ -1,26 +1,39 @@
+use std::path::Path;
+
+use crate::api::ApiContext;
+use crate::formats::italy_yaml::ItalyYamlImporter;
+use crate::Result;
+
 /// Module of various importing formats for contest
 mod italy_yaml;
 
-use crate::api::ApiContext;
-use crate::Result;
-use std::path::Path;
-
 /// Result of an import
-pub type ImporterResult = Result<()>;
+pub type ImportResult = Result<()>;
 
-/// Trait that defines a contest importer
+#[derive(Debug, Clone, juniper::GraphQLInputObject)]
+pub struct ImportInput {
+    content_base64: String,
+    filename: Option<String>,
+    filetype: Option<String>,
+}
+
+/// Trait that defines an file importer
 trait Importer {
+    type Operation: ImportOperation;
     /// Constructs the importer from a file
-    fn from_file(path: &Path) -> Self;
+    fn load(&self, data: &[u8], filename: &Option<String>, filetype: &Option<String>) -> Option<Self::Operation>;
 
-    /// Import the contest in the specified Context
-    fn import(&self, context: &ApiContext) -> ImporterResult;
+    fn load_input(&self, input: &ImportInput) -> Option<Self::Operation> {
+        self.load(&base64::decode(&input.content_base64).ok()?, &input.filename, &input.filetype)
+    }
+}
+
+trait ImportOperation {
+    /// Apply this importer to the contest
+    fn import_into(self, context: &ApiContext) -> ImportResult;
 }
 
 /// Imports a contest in a Context
-pub fn import(context: &ApiContext, path: &Path, format: &str) -> ImporterResult {
-    match format {
-        "italy_yaml" => italy_yaml::ItalyYamlImporter::from_file(path).import(context),
-        _ => unimplemented!("Unsupported import format {}", format),
-    }
+pub fn import(context: &ApiContext, input: &ImportInput) -> ImportResult {
+    ItalyYamlImporter.load_input(input).ok_or("Format not recognized")?.import_into(context)
 }
