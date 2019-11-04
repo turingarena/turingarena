@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use chrono::{DateTime, Local};
 use diesel::{Connection, ConnectionResult, SqliteConnection};
-use juniper::{FieldResult, FieldError};
+use juniper::{FieldError, FieldResult};
 
 use auth::JwtData;
 use turingarena::problem::ProblemName;
@@ -11,10 +11,12 @@ use user::UserId;
 
 use crate::{auth, contest, problem, Result, user};
 use crate::args::ContestArgs;
-use crate::submission;
 use crate::contest::{ContestView, UserToken};
-use crate::user::UserInput;
+use crate::evaluation;
 use crate::formats::{import, ImportInput};
+use crate::problem::Problem;
+use crate::submission;
+use crate::user::UserInput;
 
 embed_migrations!();
 
@@ -27,7 +29,7 @@ impl MutationOk {
     }
 }
 
-pub type Schema = juniper::RootNode<'static, ApiContext, ApiContext>;
+pub type RootNode = juniper::RootNode<'static, Query, Mutation>;
 
 /// API entry point.
 /// The same struct is used as context, query and mutation type.
@@ -62,8 +64,8 @@ impl Default for ApiContext {
 }
 
 impl ApiContext {
-    pub fn root_node(&self) -> Schema {
-        Schema::new(self.clone(), self.clone())
+    pub fn root_node(&self) -> RootNode {
+        RootNode::new(Query, Mutation)
     }
 
     pub fn with_args(self, args: ContestArgs) -> ApiContext {
@@ -159,15 +161,12 @@ impl ApiContext {
     }
 }
 
-#[juniper::object(Context = ApiContext)]
-impl ApiContext {
-    /// Reset database
-    fn init_db(&self, ctx: &ApiContext) -> FieldResult<MutationOk> {
-        ctx.authorize_admin()?;
-        ctx.init_db()?;
-        Ok(MutationOk)
-    }
+impl juniper::Context for ApiContext {}
 
+pub struct Query;
+
+#[juniper::object(Context = ApiContext)]
+impl Query {
     /// Get the view of a contest
     fn contest_view(&self, ctx: &ApiContext, user_id: Option<UserId>) -> FieldResult<ContestView> {
         ctx.authorize_user(&user_id)?;
@@ -184,8 +183,25 @@ impl ApiContext {
         Ok(submission::query(&ctx.connect_db()?, &submission_id)?)
     }
 
+    /// Current time on the server as RFC3339 date
+    fn server_time(&self) -> String {
+        chrono::Local::now().to_rfc3339()
+    }
+}
+
+pub struct Mutation;
+
+#[juniper::object(Context = ApiContext)]
+impl Mutation {
+    /// Reset database
+    fn init_db(ctx: &ApiContext) -> FieldResult<MutationOk> {
+        ctx.authorize_admin()?;
+        ctx.init_db()?;
+        Ok(MutationOk)
+    }
+
     /// Authenticate a user, generating a JWT authentication token
-    fn auth(&self, ctx: &ApiContext, token: String) -> FieldResult<Option<UserToken>> {
+    fn auth(ctx: &ApiContext, token: String) -> FieldResult<Option<UserToken>> {
         Ok(auth::auth(
             &ctx.connect_db()?,
             &token,
@@ -196,16 +212,16 @@ impl ApiContext {
     }
 
     /// Current time on the server as RFC3339 date
-    fn server_time(&self) -> String {
+    fn server_time() -> String {
         chrono::Local::now().to_rfc3339()
     }
 
     /// Add a user to the current contest
-    pub fn add_user(&self, input: UserInput) -> FieldResult<MutationOk> {
-        self.authorize_admin()?;
+    pub fn add_user(ctx: &ApiContext, input: UserInput) -> FieldResult<MutationOk> {
+        ctx.authorize_admin()?;
 
         user::insert(
-            &self.connect_db()?,
+            &ctx.connect_db()?,
             &input,
         )?;
 
@@ -213,32 +229,54 @@ impl ApiContext {
     }
 
     /// Delete a user from the current contest
-    pub fn delete_user(&self, id: String) -> FieldResult<MutationOk> {
-        self.authorize_admin()?;
+    pub fn delete_user(ctx: &ApiContext, id: String) -> FieldResult<MutationOk> {
+        ctx.authorize_admin()?;
 
-        user::delete(&self.connect_db()?, UserId(id.to_owned()))?;
+        user::delete(&ctx.connect_db()?, UserId(id.to_owned()))?;
 
         Ok(MutationOk)
     }
 
     /// Add a problem to the current contest
-    pub fn add_problem(&self, name: String) -> FieldResult<MutationOk> {
-        problem::insert(&self.connect_db()?, ProblemName(name))?;
+    pub fn add_problem(ctx: &ApiContext, name: String) -> FieldResult<MutationOk> {
+        problem::insert(&ctx.connect_db()?, ProblemName(name))?;
         Ok(MutationOk)
     }
 
     /// Delete a problem from the current contest
-    pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
-        problem::delete(&self.connect_db()?, ProblemName(name))?;
+    pub fn delete_problem(ctx: &ApiContext, name: String) -> FieldResult<MutationOk> {
+        problem::delete(&ctx.connect_db()?, ProblemName(name))?;
         Ok(MutationOk)
     }
 
     /// Import a file
-    pub fn import(&self, input: ImportInput) -> FieldResult<MutationOk> {
-        import(&self, &input)?;
+    pub fn import(ctx: &ApiContext, input: ImportInput) -> FieldResult<MutationOk> {
+        import(&ctx, &input)?;
         Ok(MutationOk)
+    }
+
+    /// Submit a solution to the problem
+    fn submit(
+        ctx: &ApiContext,
+        user_id: UserId,
+        problem_name: ProblemName,
+        files: Vec<submission::FileInput>,
+    ) -> FieldResult<submission::Submission> {
+        let conn = ctx.connect_db()?;
+        let submission = submission::insert(
+            &conn,
+            &user_id.0,
+            &problem_name.0,
+            files,
+        )?;
+        let problem = Problem {
+            data: problem::by_name(&conn, problem_name)?,
+            user_id: Some(user_id),
+        };
+        evaluation::evaluate(problem.pack(ctx), &submission, conn)?;
+        Ok(submission)
     }
 
 }
 
-impl juniper::Context for ApiContext {}
+

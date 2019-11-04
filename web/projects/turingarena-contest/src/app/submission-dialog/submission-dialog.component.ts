@@ -5,20 +5,21 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Duration } from 'luxon';
 
-import { ProblemMaterialFragment } from '../__generated__/ProblemMaterialFragment';
+import { MaterialFragment } from '../__generated__/MaterialFragment';
 import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
 import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
 import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
-import {
-  SubmissionQuery,
-  SubmissionQueryVariables,
-} from '../__generated__/SubmissionQuery';
 import { TimeUsageCellContentFragment } from '../__generated__/TimeUsageCellContentFragment';
 import { TimeUsageFragment } from '../__generated__/TimeUsageFragment';
 import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
 import { ValueFragment } from '../__generated__/ValueFragment';
 import { evaluationFragment } from '../evaluation';
 import { submissionFragment } from '../submission';
+
+import {
+  SubmissionQuery,
+  SubmissionQueryVariables,
+} from './__generated__/SubmissionQuery';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -36,7 +37,7 @@ export class SubmissionDialogComponent implements OnInit {
   submissionId!: string;
 
   @Input()
-  problem!: ProblemMaterialFragment;
+  problem!: MaterialFragment;
 
   @Input()
   modal!: NgbActiveModal;

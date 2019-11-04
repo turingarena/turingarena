@@ -7,7 +7,8 @@ import { FileInput } from '../../../../../__generated__/globalTypes';
 import { FieldFragment } from '../__generated__/FieldFragment';
 import { FieldTypeFragment } from '../__generated__/FieldTypeFragment';
 import { ProblemFragment } from '../__generated__/ProblemFragment';
-import { SubmitMutation, SubmitMutationVariables } from '../__generated__/SubmitMutation';
+
+import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitMutation';
 
 class FieldState {
   file?: File;
@@ -96,14 +97,8 @@ export class SubmitDialogComponent {
     const { data, errors } = await this.apollo.mutate<SubmitMutation, SubmitMutationVariables>({
       mutation: gql`
         mutation SubmitMutation($userId: String!, $problemName: String!, $files: [FileInput!]!) {
-          contestView(userId: $userId) {
-            problem(name: $problemName) {
-              tackling {
-                submit(files: $files) {
-                  id
-                }
-              }
-            }
+          submit(userId: $userId, problemName: $problemName, files: $files) {
+            id
           }
         }
       `,
@@ -119,7 +114,7 @@ export class SubmitDialogComponent {
       throw new Error('error in submit');
     }
 
-    this.done.emit({ id: data.contestView.problem.tackling!.submit.id });
+    this.done.emit({ id: data.submit.id });
 
     this.modal.close();
   }

@@ -47,18 +47,22 @@ impl Problem {
 
     /// Material of this problem
     fn tackling(&self, ctx: &ApiContext) -> Option<ProblemTackling> {
-        self.user_id.as_ref().map(|_| ProblemTackling { problem: Box::new((*self).clone()) })
+        if self.user_id.is_some() {
+            Some(ProblemTackling { problem: Box::new((*self).clone()) })
+        } else {
+            None
+        }
     }
 }
 
 impl Problem {
     /// Path of the problem
-    fn path(&self, ctx: &ApiContext) -> PathBuf {
+    pub fn path(&self, ctx: &ApiContext) -> PathBuf {
         ctx.problems_dir.join(&self.data.name)
     }
 
     /// return the problem pack object
-    fn pack(&self, ctx: &ApiContext) -> ProblemPack {
+    pub fn pack(&self, ctx: &ApiContext) -> ProblemPack {
         ProblemPack(std::path::PathBuf::from(&self.path(ctx)))
     }
 }
@@ -133,22 +137,6 @@ impl ProblemTackling {
             &self.user_id().0,
             self.name(),
         )?)
-    }
-
-    /// Submit a solution to the problem
-    fn submit(
-        &self,
-        ctx: &ApiContext,
-        files: Vec<submission::FileInput>,
-    ) -> FieldResult<submission::Submission> {
-        let submission = submission::insert(
-            &ctx.connect_db()?,
-            &self.user_id().0,
-            self.name(),
-            files,
-        )?;
-        evaluation::evaluate(self.problem.pack(ctx), &submission, ctx.connect_db()?)?;
-        Ok(submission)
     }
 
     /// Indicates if the user can submit to this problem

@@ -14,7 +14,7 @@ use ::{
     rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
     turingarena_contest_web_content::WebContent,
 };
-use crate::api::Schema;
+use crate::api::RootNode;
 
 struct Authorization(Option<String>);
 
@@ -51,7 +51,6 @@ fn options_graphql<'a>() -> Response<'a> {
 #[rocket::post("/graphql", data = "<request>")]
 fn post_graphql_handler(
     request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>,
     auth: Authorization,
     context: State<ApiContext>,
 ) -> juniper_rocket::GraphQLResponse {
@@ -63,7 +62,7 @@ fn post_graphql_handler(
             })
     });
     let context = context.clone().with_jwt_data(claims);
-    request.execute(&schema, &context)
+    request.execute(&context.root_node(), &context)
 }
 
 #[rocket::get("/")]
@@ -119,7 +118,6 @@ pub fn run_server(host: String, port: u16, context: ApiContext) -> Result<()> {
         .finalize()?;
 
     rocket::custom(config)
-        .manage(context.root_node())
         .manage(context)
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);

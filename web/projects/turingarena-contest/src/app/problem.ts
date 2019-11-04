@@ -1,11 +1,10 @@
 import gql from 'graphql-tag';
-import { getAwardScoreRanges, getProblemScoreRange } from './material';
+
 import { AwardFragment } from './__generated__/AwardFragment';
 import { MaterialFragment } from './__generated__/MaterialFragment';
-import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
 import { ProblemFragment } from './__generated__/ProblemFragment';
-import { TacklingFragment } from './__generated__/TacklingFragment';
-
+import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
+import { getAwardScoreRanges, getProblemScoreRange } from './material';
 
 export const problemFragment = gql`
   fragment ProblemTacklingFragment on ProblemTackling {
@@ -23,19 +22,19 @@ export const problemFragment = gql`
   }
 `;
 
-export const getAwardScore = (awardName: string, tackling: TacklingFragment) => {
+export const getAwardScore = (awardName: string, tackling: ProblemTacklingFragment) => {
   const result = tackling.scores.find((s) => s.awardName === awardName);
 
-  return result !== undefined ? result.score as number : 0;
+  return result !== undefined ? result.score : 0;
 };
 
-export const getAwardBadge = (awardName: string, tackling: TacklingFragment) => {
+export const getAwardBadge = (awardName: string, tackling: ProblemTacklingFragment) => {
   const result = tackling.badges.find((s) => s.awardName === awardName);
 
   return result !== undefined ? result.badge : false;
 };
 
-export const getProblemScore = (material: MaterialFragment, tackling: TacklingFragment) =>
+export const getProblemScore = (material: MaterialFragment, tackling: ProblemTacklingFragment) =>
   getAwardScoreRanges(material)
     .map(({ name }) => getAwardScore(name, tackling))
     .reduce((a, b) => a + b, 0);
