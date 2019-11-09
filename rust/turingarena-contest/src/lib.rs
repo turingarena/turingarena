@@ -28,7 +28,6 @@ extern crate uuid;
 extern crate turingarena_contest_web_content;
 
 pub mod announcements;
-pub mod args;
 pub mod auth;
 pub mod config;
 pub mod contest;

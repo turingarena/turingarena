@@ -50,17 +50,26 @@ web-install:
 .PHONY: graphql-schema
 graphql-schema:
 	mkdir -p __generated__
-	( cd rust/turingarena-contest/ && cargo run -- generate-schema ) > __generated__/graphql-schema.json
+	( cd rust/turingarena-contest/ && cargo run --bin turingarena-graphql-schema ) > __generated__/graphql-schema.json
 
-	mkdir -p rust/turingarena-contest-cli/__generated__/
-	cat __generated__/graphql-schema.json > rust/turingarena-contest-cli/__generated__/graphql-schema.json
+	mkdir -p rust/turingarena-contest/__generated__/
+	cat __generated__/graphql-schema.json > rust/turingarena-contest/__generated__/graphql-schema.json
 
 	mkdir -p web/__generated__/
 	cat __generated__/graphql-schema.json > web/__generated__/graphql-schema.json
 
 .PHONY: clean
-clean:
-	rm -rf rust/target/
-	rm -rf web/dist/
-	find ./ -name __generated__ | xargs rm -r
+clean: clean-generated clean-rust clean-web
 	git clean -nxd
+
+.PHONY: clean-generated
+clean-generated:
+	find ./ -name __generated__ | xargs rm -rf
+
+.PHONY: clean-rust
+clean-rust:
+	rm -rf rust/target/
+
+.PHONY: clean-web
+clean-web:
+	rm -rf web/dist/

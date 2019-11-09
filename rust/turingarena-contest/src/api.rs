@@ -4,13 +4,13 @@ use std::path::PathBuf;
 use chrono::{DateTime, Local};
 use diesel::{Connection, ConnectionResult, SqliteConnection};
 use juniper::{FieldError, FieldResult};
+use structopt::StructOpt;
 
 use auth::JwtData;
 use turingarena::problem::ProblemName;
 use user::UserId;
 
 use crate::{auth, contest, problem, Result, user};
-use crate::args::ContestArgs;
 use crate::contest::{ContestView, UserToken};
 use crate::evaluation;
 use crate::formats::{import, ImportInput};
@@ -30,6 +30,17 @@ impl MutationOk {
 }
 
 pub type RootNode = juniper::RootNode<'static, Query, Mutation>;
+
+#[derive(StructOpt, Debug)]
+pub struct ContestArgs {
+    /// url of the database
+    #[structopt(long, env = "DATABASE_URL", default_value = "./database.sqlite3")]
+    pub database_url: PathBuf,
+
+    /// path of the directory in which are contained the problems
+    #[structopt(long, env = "PROBLEMS_DIR", default_value = "./")]
+    pub problems_dir: PathBuf,
+}
 
 /// API entry point.
 /// The same struct is used as context, query and mutation type.
