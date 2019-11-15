@@ -24,32 +24,7 @@ use turingarena_contest::server::run_server;
 use turingarena_contest::submission::SubmissionId;
 use turingarena_contest::user::{User, UserId};
 
-macro_rules! graphql_operations {
-    (
-        $( $name:ident : $file: literal ),*
-        $(,)?
-    ) => {
-        $(
-            #[derive(GraphQLQuery)]
-            #[graphql(
-                schema_path = "__generated__/graphql-schema.json",
-                query_path = $file,
-                response_derives = "Debug"
-            )]
-            struct $name;
-        )*
-    }
-}
-
-graphql_operations! {
-    InitDbMutation: "src/graphql/InitDbMutation.graphql",
-    ViewContestQuery: "src/graphql/ViewContestQuery.graphql",
-    AddUserMutation: "src/graphql/AddUserMutation.graphql",
-    DeleteUserMutation: "src/graphql/DeleteUserMutation.graphql",
-    AddProblemMutation: "src/graphql/AddProblemMutation.graphql",
-    DeleteProblemMutation: "src/graphql/DeleteProblemMutation.graphql",
-    ImportMutation: "src/graphql/ImportMutation.graphql",
-}
+include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -204,7 +179,7 @@ fn main() -> Result<()> {
                     .with_skip_auth(skip_auth)
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
-        },
+        }
         Admin { command } => {
             let context = context.with_skip_auth(true);
             let root_node = context.root_node();

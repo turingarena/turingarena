@@ -1,5 +1,0 @@
-mutation AddProblemMutation($name: String!) {
-    addProblem(name: $name) {
-        ok
-    }
-}

@@ -1,2 +1,6 @@
 [workspace]
 members = ["turingarena", "turingarena-*"]
+
+[patch.crates-io]
+# fix for https://github.com/graphql-rust/juniper/issues/455
+juniper = { git = "http://github.com/cairomassimo/juniper.git", branch = "fix-multiop-validation" }

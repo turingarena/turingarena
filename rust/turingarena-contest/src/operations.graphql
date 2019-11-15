@@ -1,0 +1,45 @@
+mutation AddProblemMutation($name: String!) {
+    addProblem(name: $name) {
+        ok
+    }
+}
+
+mutation AddUserMutation($input: UserInput!) {
+    addUser(input: $input) {
+        ok
+    }
+}
+
+mutation DeleteProblemMutation($name: String!) {
+    deleteProblem(name: $name) {
+        ok
+    }
+}
+
+mutation DeleteUserMutation($id: String!) {
+    deleteUser(id: $id) {
+        ok
+    }
+}
+
+mutation ImportMutation($input: ImportInput!) {
+    import(input: $input) {
+        ok
+    }
+}
+
+mutation InitDbMutation {
+    initDb {
+        ok
+    }
+}
+
+query ViewContestQuery {
+    contestView {
+        startTime
+        endTime
+        problems {
+            name
+        }
+    }
+}
