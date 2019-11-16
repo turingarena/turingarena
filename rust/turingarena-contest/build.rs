@@ -24,6 +24,7 @@ fn main() {
             "--root", out_path.to_str().unwrap(),
             "--force",
             "--debug",
+            "--offline",
             "--no-default-features",
         ])
         .env("CARGO_TARGET_DIR", out_path.join("graphql-schema-target").to_str().unwrap())
