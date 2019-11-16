@@ -324,7 +324,7 @@ fn do_evaluate(
     problem_pack: ProblemPack,
     submission: turingarena::submission::mem::Submission,
 ) -> turingarena::evaluation::mem::Evaluation {
-    use turingarena_task_maker::driver::IoiProblemDriver;
+    use turingarena_task_maker::task_maker::driver::IoiProblemDriver;
     IoiProblemDriver::evaluate(problem_pack, submission)
 }
 
