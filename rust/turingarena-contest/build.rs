@@ -16,6 +16,7 @@ fn main() {
         Command::new(env::var("CARGO").unwrap())
             .args(&[
                 "install",
+                "-vv",
                 "--path", src_dir.as_ref(),
                 "--bin", "turingarena-graphql-schema",
                 "--root", out_path.to_str().unwrap(),
@@ -38,6 +39,7 @@ fn main() {
         Command::new(env::var("CARGO").unwrap())
             .args(&[
                 "install",
+                "-vv",
                 "graphql_client_cli",
                 "--root", out_path.to_str().unwrap(),
                 "--force",
