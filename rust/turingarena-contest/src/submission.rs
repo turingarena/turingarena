@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
@@ -293,7 +293,7 @@ pub fn set_status(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::contest::Contest;
+    use contest::Contest;
 
     #[test]
     fn test_submission_insert() {

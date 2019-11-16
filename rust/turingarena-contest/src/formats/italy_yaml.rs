@@ -4,15 +4,16 @@ use chrono::{Local, TimeZone};
 
 use turingarena::problem::ProblemName;
 
-use crate::api::ApiContext;
-use crate::problem;
-use crate::user;
-use crate::user::{UserId, UserInput};
+use super::*;
+
+use api::ApiContext;
+use problem;
+use user;
+use user::{UserId, UserInput};
 
 /// Italy YAML contest importation format
-use super::{Importer, ImportResult};
 use std::error::Error;
-use crate::formats::ImportOperation;
+use formats::ImportOperation;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]

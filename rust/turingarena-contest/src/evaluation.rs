@@ -1,13 +1,16 @@
-use crate::schema::{badge_awards, evaluation_events, score_awards};
-use crate::submission::{self, Submission, SubmissionStatus};
+use std::error::Error;
+use std::thread;
+
 use diesel::prelude::*;
 use diesel::sql_types::{Bool, Double, Text};
 use juniper::FieldResult;
-use std::error::Error;
-use std::thread;
+
+use super::*;
+use schema::{badge_awards, evaluation_events, score_awards};
+use submission::{self, Submission, SubmissionStatus};
 use turingarena::award::{AwardName, Score};
-use turingarena::evaluation::mem::Evaluation;
 use turingarena::evaluation::Event;
+use turingarena::evaluation::mem::Evaluation;
 use turingarena::problem::driver::{ProblemDriver, ProblemPack};
 
 /// An evaluation event
@@ -186,7 +189,7 @@ fn insert_event(
     serial: i32,
     submission_id: &str,
     event: &Event,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<()> {
     if let Event::Score(score_event) = event {
         let score_award_input = ScoreAwardInput {
             award_name: &score_event.award_name.0,

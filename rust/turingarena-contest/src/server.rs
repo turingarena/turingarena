@@ -1,7 +1,7 @@
 extern crate rocket;
 extern crate juniper_rocket;
 
-use crate::*;
+use super::*;
 use api::ApiContext;
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
@@ -17,7 +17,7 @@ use ::{
     rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
     turingarena_contest_web_content::WebContent,
 };
-use crate::api::RootNode;
+use api::RootNode;
 
 struct Authorization(Option<String>);
 

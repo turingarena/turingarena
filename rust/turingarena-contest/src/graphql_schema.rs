@@ -1,8 +1,8 @@
 extern crate juniper;
 extern crate serde_json;
 
-use crate::*;
-use crate::api::ApiContext;
+use super::*;
+use api::ApiContext;
 
 pub fn generate_schema() {
     let context = ApiContext::default();

@@ -1,8 +1,9 @@
 use std::path::Path;
 
-use crate::api::ApiContext;
-use crate::formats::italy_yaml::ItalyYamlImporter;
-use crate::Result;
+use super::*;
+
+use api::ApiContext;
+use formats::italy_yaml::ItalyYamlImporter;
 
 /// Module of various importing formats for contest
 mod italy_yaml;

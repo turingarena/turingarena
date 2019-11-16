@@ -13,7 +13,7 @@ use turingarena::problem::ProblemName;
 use user::{User, UserId};
 use api::MutationOk;
 
-use crate::*;
+use super::*;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]

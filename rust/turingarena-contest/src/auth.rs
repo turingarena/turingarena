@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 use contest::UserToken;
 use diesel::SqliteConnection;
 use juniper::FieldResult;

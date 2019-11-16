@@ -6,17 +6,15 @@ use diesel::{Connection, ConnectionResult, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use structopt::StructOpt;
 
+use super::*;
+
 use auth::JwtData;
+use contest::{ContestView, UserToken};
+use formats::{import, ImportInput};
+use problem::Problem;
 use turingarena::problem::ProblemName;
 use user::UserId;
-
-use crate::{auth, contest, problem, Result, user};
-use crate::contest::{ContestView, UserToken};
-use crate::evaluation;
-use crate::formats::{import, ImportInput};
-use crate::problem::Problem;
-use crate::submission;
-use crate::user::UserInput;
+use user::UserInput;
 
 embed_migrations!();
 
