@@ -23,7 +23,7 @@ diesel_migrations = "1.4.0"
 rand = "0.7.2"
 chrono = "0.4.9"
 turingarena-contest-web-content = { path = "../turingarena-contest-web-content/", optional = true }
-turingarena-task-maker = { path = "../turingarena-task-maker/" }
+turingarena-task-maker = { path = "../turingarena-task-maker/", optional = true }
 turingarena = { path = "../turingarena/" }
 structopt = "0.3.3"
 jsonwebtoken = "5.0.1"

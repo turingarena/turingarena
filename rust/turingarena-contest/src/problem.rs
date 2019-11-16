@@ -41,8 +41,7 @@ impl Problem {
 
     /// Material of this problem
     fn material(&self, ctx: &ApiContext) -> FieldResult<Material> {
-        turingarena_task_maker::driver::IoiProblemDriver::gen_material(self.pack(ctx))
-            .map_err(FieldError::from)
+        get_problem_material(self.pack(ctx)).map_err(FieldError::from)
     }
 
     /// Material of this problem
@@ -54,6 +53,19 @@ impl Problem {
         }
     }
 }
+/// Material of this problem
+#[cfg(feature = "turingarena-task-maker")]
+fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
+    turingarena_task_maker::driver::IoiProblemDriver::gen_material(pack)
+        .map_err(FieldError::from)
+}
+
+/// Material of this problem
+#[cfg(not(feature = "turingarena-task-maker"))]
+fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
+    unreachable!("Enable feature 'turingarena-task-maker' to generate problem material")
+}
+
 
 impl Problem {
     /// Path of the problem
