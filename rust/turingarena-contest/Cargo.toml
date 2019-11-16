@@ -10,7 +10,7 @@ default-run = "turingarena-contest"
 
 [features]
 server = ["juniper_rocket", "rocket"]
-cli-admin = ["graphql_client"]
+cli-admin = ["graphql_client", "rpassword"]
 cli-admin-remote = ["reqwest"]
 web-content = ["turingarena-contest-web-content"]
 
@@ -32,10 +32,10 @@ serde_json = "1.0"
 serde_yaml = "0.8.11"
 uuid = { version = "0.8", features = ["v4"] }
 base64 = "0.10.1"
-rpassword = "4.0"
 dirs = "2.0.2"
 graphql_client = { version = "0.8.0", optional = true }
 reqwest = { version = "0.9.22", optional = true }
+rpassword = { version = "4.0", optional = true }
 
 [dev-dependencies]
 tempdir = "0.3"
