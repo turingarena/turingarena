@@ -25,6 +25,7 @@ fn main() {
                 "--offline",
                 "--no-default-features",
             ])
+            .env_remove("CARGO_FEATURE_CLI_ADMIN")
             .env("CARGO_TARGET_DIR", out_path.join("graphql-schema-target").to_str().unwrap())
             .status()
             .unwrap();
