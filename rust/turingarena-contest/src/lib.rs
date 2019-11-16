@@ -8,9 +8,7 @@ extern crate diesel;
 extern crate diesel_migrations;
 extern crate jsonwebtoken as jwt;
 extern crate juniper;
-extern crate juniper_rocket;
 extern crate rand;
-extern crate rocket;
 #[macro_use]
 extern crate serde;
 extern crate serde_json;
@@ -37,9 +35,13 @@ pub mod formats;
 pub mod problem;
 pub mod questions;
 pub mod schema;
+
+#[cfg(feature = "server")]
 pub mod server;
+
 pub mod submission;
 pub mod user;
+pub mod graphql_schema;
 
 /// Convenience Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;

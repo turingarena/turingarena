@@ -1,3 +1,6 @@
+extern crate rocket;
+extern crate juniper_rocket;
+
 use crate::*;
 use api::ApiContext;
 use rocket::fairing::AdHoc;
@@ -98,17 +101,6 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .header(content_type)
         .sized_body(Cursor::new(content))
         .ok()
-}
-
-pub fn generate_schema(context: ApiContext) -> Result<()> {
-    let (schema, _errors) = juniper::introspect(
-        &context.root_node(),
-        &context,
-        juniper::IntrospectionFormat::All,
-    )
-    .unwrap(); // TODO: GraphQLError doesn't yet implement Error trait... there is a PR open
-    println!("{}", serde_json::to_string_pretty(&schema)?);
-    Ok(())
 }
 
 pub fn run_server(host: String, port: u16, context: ApiContext) -> Result<()> {

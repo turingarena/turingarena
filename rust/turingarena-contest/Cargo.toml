@@ -9,14 +9,15 @@ edition = "2018"
 default-run = "turingarena-contest"
 
 [features]
+server = ["juniper_rocket", "rocket"]
 cli-admin = ["graphql_client"]
 cli-admin-remote = ["reqwest"]
 web-content = ["turingarena-contest-web-content"]
 
 [dependencies]
 juniper = "0.14.0"
-juniper_rocket = "0.5.0"
-rocket = "0.4.2"
+juniper_rocket = { version = "0.5.0", optional = true }
+rocket = { version = "0.4.2", optional = true }
 diesel = { version = "1.4.2", features = ["sqlite"] }
 diesel_migrations = "1.4.0"
 rand = "0.7.2"

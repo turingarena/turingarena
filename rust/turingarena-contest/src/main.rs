@@ -17,9 +17,9 @@ use turingarena::submission::form::FieldId;
 use turingarena_contest::*;
 use turingarena_contest::api::ApiContext;
 use turingarena_contest::api::ContestArgs;
-use turingarena_contest::server::run_server;
 use turingarena_contest::submission::SubmissionId;
 use turingarena_contest::user::{User, UserId};
+use turingarena_contest::graphql_schema::generate_schema;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -38,6 +38,7 @@ struct Args {
 #[derive(StructOpt, Debug)]
 enum Command {
     /// start a contest HTTP server
+    #[cfg(feature = "server")]
     Serve {
         /// host to bind the server to
         #[structopt(short = "H", long, default_value = "localhost")]
@@ -67,19 +68,23 @@ enum Command {
 fn main() -> Result<()> {
     use Command::*;
     use api::ApiContext;
-    use server::{generate_schema, run_server};
-
     let args = Args::from_args();
     let context = ApiContext::default().with_args(args.contest);
 
     match args.command {
-        GenerateSchema {} => generate_schema(context),
+        GenerateSchema {} => {
+            generate_schema();
+            Ok(())
+        },
+        #[cfg(feature = "server")]
         Serve {
             host,
             port,
             secret_key,
             skip_auth,
         } => {
+            use turingarena_contest::server::run_server;
+
             if skip_auth {
                 eprintln!("WARNING: authentication disabled");
             } else if secret_key == None {

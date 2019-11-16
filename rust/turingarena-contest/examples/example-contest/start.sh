@@ -1,12 +1,17 @@
 #!/bin/bash 
 
 set -ex
-cargo build
+
+rm -f database.sqlite3
+
+RUN="cargo run --package turingarena-contest --features server,cli-admin,web-content"
+
+$RUN -- --problems-dir $PWD admin init-db
+
 for d in easy*/ ; do
     ( cd $d/testo/ && rm -f testo.pdf && latexmk -pdf testo.tex )
     ( cd $d/ && rm -rf .task-maker-files/ )
 done
-rm -f database.sqlite3
-cargo run --package turingarena-contest -- --problems-dir $PWD admin init-db
-cargo run --package turingarena-contest -- --problems-dir $PWD admin import-file contest.yaml
-cargo run --features web-content -- --problems-dir $PWD serve --secret-key secret
+
+$RUN -- --problems-dir $PWD admin import-file contest.yaml
+$RUN -- --problems-dir $PWD serve --secret-key secret

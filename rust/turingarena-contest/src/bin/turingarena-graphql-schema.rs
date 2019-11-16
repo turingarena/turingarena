@@ -1,6 +1,6 @@
-use turingarena_contest::server::generate_schema;
 use turingarena_contest::api::ApiContext;
+use turingarena_contest::graphql_schema::generate_schema;
 
 fn main() {
-    generate_schema(ApiContext::default()).unwrap();
+    generate_schema();
 }
