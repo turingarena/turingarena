@@ -3,9 +3,6 @@ extern crate dirs;
 extern crate serde_json;
 extern crate structopt;
 
-#[cfg(feature = "cli-admin")]
-mod cli_admin;
-
 use std::collections::HashMap;
 use std::path::PathBuf;
 
