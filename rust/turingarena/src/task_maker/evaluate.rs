@@ -1,6 +1,8 @@
 extern crate serde_json;
 extern crate tempdir;
 
+use super::*;
+
 use std::path::PathBuf;
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
@@ -15,16 +17,16 @@ use task_maker_format::ui::{UIExecutionStatus, UIMessage};
 use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISender};
 use task_maker_store::*;
 
-use turingarena::award::{AwardName, Score};
-use turingarena::evaluation::{mem::*, record};
-use turingarena::submission::mem::Submission;
+use award::{AwardName, Score};
+use evaluation::{mem::*, record};
+use submission::mem::Submission;
 
 use task_maker_format::ioi::Task;
-use turingarena::content::TextVariant;
-use turingarena::evaluation::record::ValenceValue;
-use turingarena::evaluation::Event;
-use turingarena::feedback::valence::Valence;
-use turingarena::rusage::{MemoryUsage, TimeUsage};
+use content::TextVariant;
+use evaluation::record::ValenceValue;
+use evaluation::Event;
+use feedback::valence::Valence;
+use rusage::{MemoryUsage, TimeUsage};
 
 pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
     let (event_tx, event_rx) = channel();

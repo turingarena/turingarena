@@ -56,7 +56,7 @@ impl Problem {
 /// Material of this problem
 #[cfg(feature = "turingarena-task-maker")]
 fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    turingarena_task_maker::task_maker::driver::IoiProblemDriver::gen_material(pack)
+    turingarena::task_maker::driver::IoiProblemDriver::gen_material(pack)
         .map_err(FieldError::from)
 }
 

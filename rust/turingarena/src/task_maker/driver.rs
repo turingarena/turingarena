@@ -1,12 +1,13 @@
 extern crate failure;
 
-use task_maker_format::{ioi, EvaluationConfig};
-
-use turingarena::evaluation::mem::*;
-use turingarena::problem::{driver::*, material::*, *};
-use turingarena::submission::mem::*;
+use super::*;
 
 use failure::Error;
+use task_maker_format::{EvaluationConfig, ioi};
+
+use evaluation::mem::*;
+use problem::{*, driver::*, material::*};
+use submission::mem::*;
 
 pub struct IoiProblemDriver;
 

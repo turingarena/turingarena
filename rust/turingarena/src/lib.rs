@@ -8,6 +8,9 @@ extern crate turingarena_proc_macro;
 #[macro_use]
 pub mod juniper_ext;
 
+#[macro_use]
+extern crate log;
+
 pub mod autoio;
 pub mod award;
 pub mod batch;
@@ -22,6 +25,9 @@ pub mod make;
 pub mod problem;
 pub mod rusage;
 pub mod submission;
+
+#[cfg(feature = "task-maker")]
+pub mod task_maker;
 
 #[cfg(test)]
 mod tests {

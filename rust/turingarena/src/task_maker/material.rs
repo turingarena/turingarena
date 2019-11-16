@@ -5,13 +5,15 @@ use std::path::{Path, PathBuf};
 
 use task_maker_format::ioi;
 
-use turingarena::award::*;
-use turingarena::content::*;
-use turingarena::evaluation::record::*;
-use turingarena::feedback::{table::*, *};
-use turingarena::problem::material::*;
-use turingarena::rusage::{MemoryUsage, TimeUsage};
-use turingarena::submission::form::*;
+use super::*;
+
+use award::*;
+use content::*;
+use evaluation::record::*;
+use feedback::{*, table::*};
+use problem::material::*;
+use rusage::{MemoryUsage, TimeUsage};
+use submission::form::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
     let mut subtasks: Vec<_> = task.subtasks.values().collect();
@@ -201,7 +203,7 @@ fn row_of(task: &ioi::Task, _subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcas
     }
 }
 
-fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item=std::path::PathBuf> {
     std::fs::read_dir(dir_path)
         .expect("unable to read_dir")
         .map(|entry| entry.expect("unable to read_dir").path())
