@@ -4,8 +4,8 @@ use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use schema::{submission_files, submissions};
-use turingarena::submission::*;
-use turingarena::juniper_ext::*;
+use juniper_ext::*;
+use submission::*;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
@@ -157,24 +157,24 @@ impl Submission {
     }
 
     /// Scores of this submission
-    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::ScoreAward>> {
-        Ok(evaluation::query_score_awards(
+    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::ScoreAward>> {
+        Ok(contest_evaluation::query_score_awards(
             &ctx.connect_db()?,
             &self.id,
         )?)
     }
 
     /// Scores of this submission
-    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::BadgeAward>> {
-        Ok(evaluation::query_badge_awards(
+    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::BadgeAward>> {
+        Ok(contest_evaluation::query_badge_awards(
             &ctx.connect_db()?,
             &self.id,
         )?)
     }
 
     /// Evaluation events of this submission
-    fn evaluation_events(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::EvaluationEvent>> {
-        Ok(evaluation::query_events(&ctx.connect_db()?, &self.id)?)
+    fn evaluation_events(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
+        Ok(contest_evaluation::query_events(&ctx.connect_db()?, &self.id)?)
     }
 }
 

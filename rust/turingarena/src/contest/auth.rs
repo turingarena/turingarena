@@ -4,7 +4,7 @@ use diesel::SqliteConnection;
 use juniper::FieldResult;
 use jwt::{decode, encode, Header, Validation};
 use user::UserId;
-use turingarena::juniper_ext::*;
+use juniper_ext::*;
 
 /// Wraps a JWT User token
 #[derive(GraphQLNewtype)]

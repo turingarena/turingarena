@@ -1,9 +1,21 @@
+#![feature(decl_macro, proc_macro_hygiene)]
 #![feature(external_doc)]
 #![doc(include = "../README.md")]
 
 pub extern crate juniper;
 
 extern crate turingarena_proc_macro;
+
+#[cfg(feature = "diesel")]
+#[macro_use]
+extern crate diesel;
+
+#[cfg(feature = "diesel_migrations")]
+#[macro_use]
+extern crate diesel_migrations;
+
+#[macro_use]
+extern crate serde;
 
 #[macro_use]
 pub mod juniper_ext;
@@ -16,6 +28,10 @@ pub mod award;
 pub mod batch;
 pub mod bios;
 pub mod content;
+
+#[cfg(feature = "contest")]
+pub mod contest;
+
 pub mod dce;
 pub mod diff;
 pub mod evaluation;

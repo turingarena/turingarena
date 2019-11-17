@@ -3,7 +3,7 @@ use super::*;
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use schema::users;
-use turingarena::juniper_ext::*;
+use juniper_ext::*;
 
 #[derive(Debug, juniper::GraphQLInputObject)]
 pub struct UserInput {

@@ -11,8 +11,8 @@ use super::*;
 use auth::JwtData;
 use contest::{ContestView, UserToken};
 use formats::{import, ImportInput};
-use problem::Problem;
-use turingarena::problem::ProblemName;
+use contest_problem::Problem;
+use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
@@ -187,9 +187,9 @@ impl Query {
         &self,
         ctx: &ApiContext,
         submission_id: String,
-    ) -> FieldResult<submission::Submission> {
+    ) -> FieldResult<contest_submission::Submission> {
         // TODO: check privilage
-        Ok(submission::query(&ctx.connect_db()?, &submission_id)?)
+        Ok(contest_submission::query(&ctx.connect_db()?, &submission_id)?)
     }
 
     /// Current time on the server as RFC3339 date
@@ -248,13 +248,13 @@ impl Mutation {
 
     /// Add a problem to the current contest
     pub fn add_problem(ctx: &ApiContext, name: String) -> FieldResult<MutationOk> {
-        problem::insert(&ctx.connect_db()?, ProblemName(name))?;
+        contest_problem::insert(&ctx.connect_db()?, ProblemName(name))?;
         Ok(MutationOk)
     }
 
     /// Delete a problem from the current contest
     pub fn delete_problem(ctx: &ApiContext, name: String) -> FieldResult<MutationOk> {
-        problem::delete(&ctx.connect_db()?, ProblemName(name))?;
+        contest_problem::delete(&ctx.connect_db()?, ProblemName(name))?;
         Ok(MutationOk)
     }
 
@@ -269,20 +269,20 @@ impl Mutation {
         ctx: &ApiContext,
         user_id: UserId,
         problem_name: ProblemName,
-        files: Vec<submission::FileInput>,
-    ) -> FieldResult<submission::Submission> {
+        files: Vec<contest_submission::FileInput>,
+    ) -> FieldResult<contest_submission::Submission> {
         let conn = ctx.connect_db()?;
-        let submission = submission::insert(
+        let submission = contest_submission::insert(
             &conn,
             &user_id.0,
             &problem_name.0,
             files,
         )?;
         let problem = Problem {
-            data: problem::by_name(&conn, problem_name)?,
+            data: contest_problem::by_name(&conn, problem_name)?,
             user_id: Some(user_id),
         };
-        evaluation::evaluate(problem.pack(ctx), &submission, conn)?;
+        contest_evaluation::evaluate(problem.pack(ctx), &submission, conn)?;
         Ok(submission)
     }
 

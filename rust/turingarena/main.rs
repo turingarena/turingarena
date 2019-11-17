@@ -9,14 +9,14 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use turingarena::problem::ProblemName;
-use turingarena::submission::form::FieldId;
-use turingarena_contest::*;
-use turingarena_contest::api::ApiContext;
-use turingarena_contest::api::ContestArgs;
-use turingarena_contest::submission::SubmissionId;
-use turingarena_contest::user::{User, UserId};
-use turingarena_contest::graphql_schema::generate_schema;
+use problem::ProblemName;
+use submission::form::FieldId;
+use contest::*;
+use contest::api::ApiContext;
+use contest::api::ContestArgs;
+use contest::submission::SubmissionId;
+use contest::user::{User, UserId};
+use contest::graphql_schema::generate_schema;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -80,7 +80,7 @@ fn main() -> Result<()> {
             secret_key,
             skip_auth,
         } => {
-            use turingarena_contest::server::run_server;
+            use contest::server::run_server;
 
             if skip_auth {
                 eprintln!("WARNING: authentication disabled");

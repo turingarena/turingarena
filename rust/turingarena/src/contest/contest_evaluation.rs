@@ -7,11 +7,11 @@ use juniper::FieldResult;
 
 use super::*;
 use schema::{badge_awards, evaluation_events, score_awards};
-use submission::{self, Submission, SubmissionStatus};
-use turingarena::award::{AwardName, Score};
-use turingarena::evaluation::Event;
-use turingarena::evaluation::mem::Evaluation;
-use turingarena::problem::driver::{ProblemDriver, ProblemPack};
+use contest_submission::{self, Submission, SubmissionStatus};
+use award::{AwardName, Score};
+use evaluation::Event;
+use evaluation::mem::Evaluation;
+use problem::driver::{ProblemDriver, ProblemPack};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -314,24 +314,24 @@ pub fn evaluate(
         for (serial, event) in receiver.into_iter().enumerate() {
             insert_event(&db_connection, serial as i32, &submission_id, &event).unwrap();
         }
-        submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
+        contest_submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
     });
     Ok(())
 }
 
-#[cfg(feature = "turingarena-task-maker")]
+#[cfg(feature = "task-maker")]
 fn do_evaluate(
     problem_pack: ProblemPack,
-    submission: turingarena::submission::mem::Submission,
-) -> turingarena::evaluation::mem::Evaluation {
-    use turingarena::task_maker::driver::IoiProblemDriver;
+    submission: submission::mem::Submission,
+) -> evaluation::mem::Evaluation {
+    use task_maker::driver::IoiProblemDriver;
     IoiProblemDriver::evaluate(problem_pack, submission)
 }
 
-#[cfg(not(feature = "turingarena-task-maker"))]
+#[cfg(not(feature = "task-maker"))]
 fn do_evaluate(
     problem_pack: ProblemPack,
-    submission: turingarena::submission::mem::Submission,
-) -> turingarena::evaluation::mem::Evaluation {
-    unreachable!("Enable feature 'turingarena-task-maker' to evaluate solutions")
+    submission: submission::mem::Submission,
+) -> evaluation::mem::Evaluation {
+    unreachable!("Enable feature 'task-maker' to evaluate solutions")
 }

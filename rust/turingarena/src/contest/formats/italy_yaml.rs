@@ -2,12 +2,12 @@ use std::path::{Path, PathBuf};
 
 use chrono::{Local, TimeZone};
 
-use turingarena::problem::ProblemName;
+use problem::ProblemName;
 
 use super::*;
 
 use api::ApiContext;
-use problem;
+use contest_problem;
 use user;
 use user::{UserId, UserInput};
 
@@ -57,7 +57,7 @@ impl ImportOperation for ContestYaml {
         let conn = context.connect_db()?;
 
         for task in self.tasks {
-            problem::insert(&conn, ProblemName(task))?;
+            contest_problem::insert(&conn, ProblemName(task))?;
         }
 
         for user in self.users {

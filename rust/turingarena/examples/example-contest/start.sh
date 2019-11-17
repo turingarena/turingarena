@@ -4,7 +4,7 @@ set -ex
 
 rm -f database.sqlite3
 
-RUN="cargo run --package turingarena-contest --all-features"
+RUN="cargo run --package turingarena --all-features --offline"
 
 $RUN -- --problems-dir $PWD admin init-db
 

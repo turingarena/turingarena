@@ -3,17 +3,17 @@ use std::fs::read;
 use diesel::{ExpressionMethods, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 
+use super::*;
+
 use announcements::Announcement;
 use api::ApiContext;
-use problem::Problem;
+use contest_problem::Problem;
 use questions::{Question, QuestionInput};
 use schema::contest;
-use turingarena::content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
-use turingarena::problem::ProblemName;
+use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
+use problem::ProblemName;
 use user::{User, UserId};
 use api::MutationOk;
-
-use super::*;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -92,7 +92,7 @@ impl ContestView {
     /// A problem that the user can see
     fn problem(&self, ctx: &ApiContext, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
-        let data = problem::by_name(&ctx.connect_db()?, name)?;
+        let data = contest_problem::by_name(&ctx.connect_db()?, name)?;
         Ok(Problem {
             data,
             user_id: self.user_id.clone(),
@@ -102,7 +102,7 @@ impl ContestView {
     /// List of problems that the user can see
     fn problems(&self, ctx: &ApiContext) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
-        let problems = problem::all(&ctx.connect_db()?)?
+        let problems = contest_problem::all(&ctx.connect_db()?)?
             .into_iter()
             .map(|p| Problem {
                 data: p,

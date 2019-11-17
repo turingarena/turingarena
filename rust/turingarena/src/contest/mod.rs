@@ -10,7 +10,6 @@ extern crate structopt;
 #[cfg(test)]
 extern crate tempdir;
 
-
 extern crate uuid;
 
 #[cfg(feature = "web-content")]
@@ -24,18 +23,20 @@ pub mod auth;
 pub mod config;
 pub mod contest;
 pub mod api;
-pub mod evaluation;
+pub mod contest_evaluation;
 pub mod formats;
-pub mod problem;
+pub mod contest_problem;
 pub mod questions;
 pub mod schema;
 
 #[cfg(feature = "server")]
 pub mod server;
 
-pub mod submission;
+pub mod contest_submission;
 pub mod user;
 pub mod graphql_schema;
 
 /// Convenience Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+use super::*;

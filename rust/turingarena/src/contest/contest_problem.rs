@@ -5,9 +5,9 @@ use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use schema::problems;
 use std::path::PathBuf;
-use turingarena::problem::driver::{ProblemDriver, ProblemPack};
-use turingarena::problem::material::Material;
-use turingarena::problem::ProblemName;
+use problem::driver::{ProblemDriver, ProblemPack};
+use problem::material::Material;
+use problem::ProblemName;
 use user::UserId;
 
 #[derive(Insertable)]
@@ -54,16 +54,16 @@ impl Problem {
     }
 }
 /// Material of this problem
-#[cfg(feature = "turingarena-task-maker")]
+#[cfg(feature = "task-maker")]
 fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    turingarena::task_maker::driver::IoiProblemDriver::gen_material(pack)
+    task_maker::driver::IoiProblemDriver::gen_material(pack)
         .map_err(FieldError::from)
 }
 
 /// Material of this problem
-#[cfg(not(feature = "turingarena-task-maker"))]
+#[cfg(not(feature = "task-maker"))]
 fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    unreachable!("Enable feature 'turingarena-task-maker' to generate problem material")
+    unreachable!("Enable feature 'task-maker' to generate problem material")
 }
 
 
@@ -125,8 +125,8 @@ impl ProblemTackling {
 #[juniper::object(Context = ApiContext)]
 impl ProblemTackling {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::MaxScoreAward>> {
-        Ok(evaluation::query_score_awards_of_user_and_problem(
+    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::MaxScoreAward>> {
+        Ok(contest_evaluation::query_score_awards_of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
             self.name(),
@@ -134,8 +134,8 @@ impl ProblemTackling {
     }
 
     /// Badge awards of the current user (if to be shown)
-    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<evaluation::BestBadgeAward>> {
-        Ok(evaluation::query_badge_awards_of_user_and_problem(
+    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::BestBadgeAward>> {
+        Ok(contest_evaluation::query_badge_awards_of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
             self.name(),
@@ -143,8 +143,8 @@ impl ProblemTackling {
     }
 
     /// Submissions of the current user (if to be shown)
-    fn submissions(&self, ctx: &ApiContext) -> FieldResult<Vec<submission::Submission>> {
-        Ok(submission::of_user_and_problem(
+    fn submissions(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_submission::Submission>> {
+        Ok(contest_submission::of_user_and_problem(
             &ctx.connect_db()?,
             &self.user_id().0,
             self.name(),

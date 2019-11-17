@@ -1,12 +1,36 @@
 [package]
 name = "turingarena"
 version = "0.1.0"
-authors = ["Massimo Cairo <cairomassimo@gmail.com>"]
+authors = [
+    "Alessandro Righi <alerighi4@gmail.com>",
+    "Massimo Cairo <cairomassimo@gmail.com>",
+]
 edition = "2018"
+default-run = "turingarena"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "turingarena"
+required-features = ["contest"]
+
+[[bin]]
+name = "turingarena-graphql-schema"
+required-features = ["contest"]
 
 [features]
+server = ["juniper_rocket", "rocket", "contest"]
+cli-admin = ["graphql_client", "rpassword", "contest"]
+cli-admin-remote = ["reqwest", "cli-admin"]
+contest = [
+    "rand",
+    "chrono",
+    "structopt",
+    "jsonwebtoken",
+    "dirs",
+    "uuid",
+    "diesel",
+    "diesel_migrations"
+]
+web-content = ["turingarena-contest-web-content"]
 task-maker = [
     "glob",
     "mime_guess",
@@ -21,14 +45,37 @@ task-maker = [
 
 [dependencies]
 
-serde_json = "1.0.40"
 serde = { version = "1.0.101", features = ["derive"] }
+serde_json = "1.0.40"
+serde_yaml = "0.8.11"
+
 base64 = "0.10.1"
-juniper = "0.14.0"
+
 turingarena-proc-macro = { path = "../turingarena-proc-macro/" }
 
 log = "0.4.8"
 failure = "0.1.5"
+
+juniper = "0.14.0"
+juniper_rocket = { version = "0.5.0", optional = true }
+
+rocket = { version = "0.4.2", optional = true }
+diesel = { version = "1.4.2", features = ["sqlite"], optional = true }
+diesel_migrations = { version = "1.4.0", optional = true}
+
+turingarena-contest-web-content = { path = "../turingarena-contest-web-content/", optional = true }
+
+rand = { version = "0.7.2", optional = true }
+chrono = { version = "0.4.9", optional = true }
+structopt = { version = "0.3.3", optional = true }
+jsonwebtoken = { version = "5.0.1", optional = true }
+dirs = { version = "2.0.2", optional = true }
+
+uuid = { version = "0.8", features = ["v4"], optional = true }
+
+graphql_client = { version = "0.8.0", optional = true }
+reqwest = { version = "0.9.22", optional = true }
+rpassword = { version = "4.0", optional = true }
 
 tempdir = { version = "0.3.7", optional = true }
 num_cpus = { version = "1.10.1", optional = true }

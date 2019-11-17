@@ -24,6 +24,7 @@ fn main() {
                 "--debug",
                 "--offline",
                 "--no-default-features",
+                "--features", "contest",
             ])
             .env_remove("CARGO_FEATURE_CLI_ADMIN")
             .env("CARGO_TARGET_DIR", out_path.join("graphql-schema-target").to_str().unwrap())
@@ -44,6 +45,7 @@ fn main() {
                 "graphql_client_cli",
                 "--root", out_path.to_str().unwrap(),
                 "--force",
+                "--offline"
             ])
             .env("CARGO_TARGET_DIR", out_path.join("graphql-client-cli-target").to_str().unwrap())
             .status()
@@ -54,7 +56,7 @@ fn main() {
                 "generate",
                 "--output-directory", out_path.to_str().unwrap(),
                 "--schema-path", schema_path.to_str().unwrap(),
-                src_path.join("src").join("operations.graphql").to_str().unwrap(),
+                src_path.join("src").join("contest").join("operations.graphql").to_str().unwrap(),
             ])
             .status()
             .unwrap();
