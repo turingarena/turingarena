@@ -1,4 +1,4 @@
-#![doc(include = "README.md")]
+//! Data-types for submission forms and submissions.
 
 extern crate juniper;
 extern crate serde;

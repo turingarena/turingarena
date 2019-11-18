@@ -1,3 +1,5 @@
+//! Data types to represent the content of files
+
 extern crate base64;
 extern crate serde;
 

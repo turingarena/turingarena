@@ -1,9 +1,12 @@
-#![doc(include = "README.md")]
+//! Data-types for text and files associated with problems.
+//!
+//! Supports multiple variants for the same item, for localization and other forms of content negotiation.
 
 extern crate serde;
 
+use super::*;
 use serde::{Deserialize, Serialize};
-use super::juniper_ext::*;
+use juniper_ext::*;
 
 /// Wraps a language tag string, as defined in
 /// https://tools.ietf.org/html/bcp47
@@ -20,7 +23,6 @@ pub struct MediaType(pub String);
 #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
 pub struct FileName(pub String);
 
-mod file;
 pub use file::FileContent;
 
 /// A variant of a text (say, for a given locale).

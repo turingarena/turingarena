@@ -1,4 +1,4 @@
-#![doc(include = "README.md")]
+//! Data-types for scorable items and scores.
 
 extern crate juniper;
 

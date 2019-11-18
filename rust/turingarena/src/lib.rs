@@ -37,6 +37,7 @@ pub mod diff;
 pub mod evaluation;
 pub mod exitstatus;
 pub mod feedback;
+pub mod file;
 pub mod make;
 pub mod problem;
 pub mod rusage;

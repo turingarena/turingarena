@@ -1,4 +1,4 @@
-#![doc(include = "README.md")]
+/// Tabular feedback.
 
 use serde::{Deserialize, Serialize};
 

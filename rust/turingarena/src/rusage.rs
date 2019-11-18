@@ -1,4 +1,4 @@
-#![doc(include = "README.md")]
+//! Data-types for usage of computational resources.
 
 use serde::{Deserialize, Serialize};
 
