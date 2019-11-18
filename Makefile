@@ -1,22 +1,3 @@
-.PHONY: all
-all: rust-contest-web-content
-
-.PHONY: rust-contest
-rust-contest: graphql-schema
-	make just-rust-contest
-
-.PHONY: just-rust-contest
-just-rust-contest:
-	cd rust/turingarena-contest/ && cargo build
-
-.PHONY: rust-contest-web-content
-rust-contest-web-content: graphql-schema web-content
-	make just-rust-contest-web-content
-
-.PHONY: just-rust-contest-web-content
-just-rust-contest-web-content:
-	cd rust/turingarena-contest/ && cargo build --features web-content
-
 .PHONY: web-content
 web-content: web-build
 	make just-web-content
@@ -50,10 +31,7 @@ web-install:
 .PHONY: graphql-schema
 graphql-schema:
 	mkdir -p __generated__
-	( cd rust/turingarena-contest/ && cargo run --bin turingarena-graphql-schema ) > __generated__/graphql-schema.json
-
-	mkdir -p rust/turingarena-contest/__generated__/
-	cat __generated__/graphql-schema.json > rust/turingarena-contest/__generated__/graphql-schema.json
+	( cd rust/turingarena/ && cargo run --features contest --bin turingarena-graphql-schema ) > __generated__/graphql-schema.json
 
 	mkdir -p web/__generated__/
 	cat __generated__/graphql-schema.json > web/__generated__/graphql-schema.json
