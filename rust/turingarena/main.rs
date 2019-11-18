@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use problem::ProblemName;
-use submission::form::FieldId;
+use submission::FieldId;
 use contest::*;
 use contest::api::ApiContext;
 use contest::api::ContestArgs;

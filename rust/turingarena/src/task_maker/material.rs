@@ -13,7 +13,7 @@ use evaluation::record::*;
 use feedback::{table::*, *};
 use problem::material::*;
 use rusage::{MemoryUsage, TimeUsage};
-use submission::form::*;
+use submission::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
     let mut subtasks: Vec<_> = task.subtasks.values().collect();
