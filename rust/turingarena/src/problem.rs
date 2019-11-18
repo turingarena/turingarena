@@ -11,8 +11,8 @@
 //!
 //! Problems are meant to be used in contests, as well as in other context (e.g., a training website).
 
-use serde::{Deserialize, Serialize};
 use super::juniper_ext::*;
+use serde::{Deserialize, Serialize};
 
 /// Wraps a string representing the name of a problem.
 /// Used only to identify a problem. Should never be shown to (non-admin) users.

@@ -11,7 +11,6 @@ pub fn generate_schema() {
         &context,
         juniper::IntrospectionFormat::All,
     )
-        .unwrap(); // TODO: GraphQLError doesn't yet implement Error trait... there is a PR open
+    .unwrap(); // TODO: GraphQLError doesn't yet implement Error trait... there is a PR open
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }
-

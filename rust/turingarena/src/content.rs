@@ -5,8 +5,8 @@
 extern crate serde;
 
 use super::*;
-use serde::{Deserialize, Serialize};
 use juniper_ext::*;
+use serde::{Deserialize, Serialize};
 
 /// Wraps a language tag string, as defined in
 /// https://tools.ietf.org/html/bcp47

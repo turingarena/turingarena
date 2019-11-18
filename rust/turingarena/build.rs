@@ -17,17 +17,24 @@ fn main() {
             .args(&[
                 "install",
                 "-vv",
-                "--path", src_dir.as_ref(),
-                "--bin", "turingarena-graphql-schema",
-                "--root", out_path.to_str().unwrap(),
+                "--path",
+                src_dir.as_ref(),
+                "--bin",
+                "turingarena-graphql-schema",
+                "--root",
+                out_path.to_str().unwrap(),
                 "--force",
                 "--debug",
                 "--offline",
                 "--no-default-features",
-                "--features", "contest",
+                "--features",
+                "contest",
             ])
             .env_remove("CARGO_FEATURE_CLI_ADMIN")
-            .env("CARGO_TARGET_DIR", out_path.join("graphql-schema-target").to_str().unwrap())
+            .env(
+                "CARGO_TARGET_DIR",
+                out_path.join("graphql-schema-target").to_str().unwrap(),
+            )
             .status()
             .unwrap();
 
@@ -43,23 +50,33 @@ fn main() {
                 "install",
                 "-vv",
                 "graphql_client_cli",
-                "--root", out_path.to_str().unwrap(),
+                "--root",
+                out_path.to_str().unwrap(),
                 "--force",
-                "--offline"
+                "--offline",
             ])
-            .env("CARGO_TARGET_DIR", out_path.join("graphql-client-cli-target").to_str().unwrap())
+            .env(
+                "CARGO_TARGET_DIR",
+                out_path.join("graphql-client-cli-target").to_str().unwrap(),
+            )
             .status()
             .unwrap();
 
         Command::new(out_path.join("bin").join("graphql-client"))
             .args(&[
                 "generate",
-                "--output-directory", out_path.to_str().unwrap(),
-                "--schema-path", schema_path.to_str().unwrap(),
-                src_path.join("src").join("contest").join("operations.graphql").to_str().unwrap(),
+                "--output-directory",
+                out_path.to_str().unwrap(),
+                "--schema-path",
+                schema_path.to_str().unwrap(),
+                src_path
+                    .join("src")
+                    .join("contest")
+                    .join("operations.graphql")
+                    .to_str()
+                    .unwrap(),
             ])
             .status()
             .unwrap();
     }
-
 }

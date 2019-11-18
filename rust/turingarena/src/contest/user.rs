@@ -2,8 +2,8 @@ use super::*;
 
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
-use schema::users;
 use juniper_ext::*;
+use schema::users;
 
 #[derive(Debug, juniper::GraphQLInputObject)]
 pub struct UserInput {
@@ -59,10 +59,7 @@ pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
 }
 
 /// Insert a new user in the db
-pub fn insert(
-    conn: &SqliteConnection,
-    input: &UserInput,
-) -> QueryResult<()> {
+pub fn insert(conn: &SqliteConnection, input: &UserInput) -> QueryResult<()> {
     let user = UserInsertable {
         id: &input.id,
         display_name: &input.display_name,

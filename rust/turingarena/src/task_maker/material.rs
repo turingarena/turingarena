@@ -10,7 +10,7 @@ use super::*;
 use award::*;
 use content::*;
 use evaluation::record::*;
-use feedback::{*, table::*};
+use feedback::{table::*, *};
 use problem::material::*;
 use rusage::{MemoryUsage, TimeUsage};
 use submission::form::*;
@@ -203,7 +203,7 @@ fn row_of(task: &ioi::Task, _subtask: &ioi::SubtaskInfo, testcase: &ioi::Testcas
     }
 }
 
-fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item=std::path::PathBuf> {
+fn files_in_dir(dir_path: &std::path::PathBuf) -> impl Iterator<Item = std::path::PathBuf> {
     std::fs::read_dir(dir_path)
         .expect("unable to read_dir")
         .map(|entry| entry.expect("unable to read_dir").path())

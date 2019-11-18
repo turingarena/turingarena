@@ -11,9 +11,9 @@ use contest_problem;
 use user;
 use user::{UserId, UserInput};
 
+use formats::ImportOperation;
 /// Italy YAML contest importation format
 use std::error::Error;
-use formats::ImportOperation;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,7 +40,12 @@ pub struct ItalyYamlImporter;
 
 impl Importer for ItalyYamlImporter {
     type Operation = ContestYaml;
-    fn load(&self, content: &[u8], _filename: &Option<String>, _filetype: &Option<String>) -> Option<ContestYaml> {
+    fn load(
+        &self,
+        content: &[u8],
+        _filename: &Option<String>,
+        _filetype: &Option<String>,
+    ) -> Option<ContestYaml> {
         serde_yaml::from_slice::<ContestYaml>(content).ok()
     }
 }

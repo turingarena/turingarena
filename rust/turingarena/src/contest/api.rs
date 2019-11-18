@@ -10,8 +10,8 @@ use super::*;
 
 use auth::JwtData;
 use contest::{ContestView, UserToken};
-use formats::{import, ImportInput};
 use contest_problem::Problem;
+use formats::{import, ImportInput};
 use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
@@ -78,7 +78,8 @@ impl ApiContext {
     }
 
     pub fn with_args(self, args: ContestArgs) -> ApiContext {
-        self.with_database_url(args.database_url).with_problems_dir(args.problems_dir)
+        self.with_database_url(args.database_url)
+            .with_problems_dir(args.problems_dir)
     }
 
     /// Set the database URL
@@ -189,7 +190,10 @@ impl Query {
         submission_id: String,
     ) -> FieldResult<contest_submission::Submission> {
         // TODO: check privilage
-        Ok(contest_submission::query(&ctx.connect_db()?, &submission_id)?)
+        Ok(contest_submission::query(
+            &ctx.connect_db()?,
+            &submission_id,
+        )?)
     }
 
     /// Current time on the server as RFC3339 date
@@ -229,10 +233,7 @@ impl Mutation {
     pub fn add_user(ctx: &ApiContext, input: UserInput) -> FieldResult<MutationOk> {
         ctx.authorize_admin()?;
 
-        user::insert(
-            &ctx.connect_db()?,
-            &input,
-        )?;
+        user::insert(&ctx.connect_db()?, &input)?;
 
         Ok(MutationOk)
     }
@@ -272,12 +273,7 @@ impl Mutation {
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
         let conn = ctx.connect_db()?;
-        let submission = contest_submission::insert(
-            &conn,
-            &user_id.0,
-            &problem_name.0,
-            files,
-        )?;
+        let submission = contest_submission::insert(&conn, &user_id.0, &problem_name.0, files)?;
         let problem = Problem {
             data: contest_problem::by_name(&conn, problem_name)?,
             user_id: Some(user_id),
@@ -285,7 +281,4 @@ impl Mutation {
         contest_evaluation::evaluate(problem.pack(ctx), &submission, conn)?;
         Ok(submission)
     }
-
 }
-
-

@@ -1,10 +1,10 @@
-/// Data-types for feedback templates.
+//! Data-types for feedback templates.
 
 extern crate juniper;
 
+use crate::juniper_ext::*;
 use serde::{Deserialize, Serialize};
 use table::TableSection;
-use crate::juniper_ext::*;
 
 /// A feedback template, consisting of a list of sections.
 /// The template can be rendered to users before evaluation,
@@ -60,9 +60,9 @@ pub mod valence {
 pub mod table {
     use serde::{Deserialize, Serialize};
 
+    use crate::juniper_ext::*;
     use crate::rusage::{MemoryUsage, TimeUsage};
     use crate::{award, content::Text, evaluation::record::Key};
-    use crate::juniper_ext::*;
 
     /// Feedback section containing tabular data.
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]

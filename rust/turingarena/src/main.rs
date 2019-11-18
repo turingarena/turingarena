@@ -14,17 +14,17 @@ use turingarena::{contest, problem, submission};
 use problem::ProblemName;
 use submission::form::FieldId;
 
-use contest::*;
 use contest::api::ApiContext;
 use contest::api::ContestArgs;
 use contest::contest_submission::SubmissionId;
-use contest::user::{User, UserId};
 use contest::graphql_schema::generate_schema;
+use contest::user::{User, UserId};
+use contest::*;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-name = "turingarena",
-about = "CLI to manage the turingarena contest server"
+    name = "turingarena",
+    about = "CLI to manage the turingarena contest server"
 )]
 struct Args {
     #[structopt(flatten)]
@@ -33,7 +33,6 @@ struct Args {
     #[structopt(subcommand)]
     command: Command,
 }
-
 
 #[derive(StructOpt, Debug)]
 enum Command {
@@ -66,8 +65,8 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    use Command::*;
     use api::ApiContext;
+    use Command::*;
     let args = Args::from_args();
     let context = ApiContext::default().with_args(args.contest);
 
@@ -75,7 +74,7 @@ fn main() -> Result<()> {
         GenerateSchema {} => {
             generate_schema();
             Ok(())
-        },
+        }
         #[cfg(feature = "server")]
         Serve {
             host,

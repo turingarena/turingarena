@@ -3,8 +3,8 @@ use super::*;
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
-use schema::{submission_files, submissions};
 use juniper_ext::*;
+use schema::{submission_files, submissions};
 use submission::*;
 
 /// Wraps a String that identifies a submission
@@ -173,8 +173,14 @@ impl Submission {
     }
 
     /// Evaluation events of this submission
-    fn evaluation_events(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
-        Ok(contest_evaluation::query_events(&ctx.connect_db()?, &self.id)?)
+    fn evaluation_events(
+        &self,
+        ctx: &ApiContext,
+    ) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
+        Ok(contest_evaluation::query_events(
+            &ctx.connect_db()?,
+            &self.id,
+        )?)
     }
 }
 

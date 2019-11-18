@@ -1,5 +1,5 @@
-extern crate rocket;
 extern crate juniper_rocket;
+extern crate rocket;
 
 use super::*;
 use api::ApiContext;
@@ -12,12 +12,12 @@ use rocket::response::Response;
 use rocket::State;
 use std::path::PathBuf;
 
+use api::RootNode;
 #[cfg(feature = "web-content")]
 use ::{
     rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
     turingarena_contest_web_content::WebContent,
 };
-use api::RootNode;
 
 struct Authorization(Option<String>);
 

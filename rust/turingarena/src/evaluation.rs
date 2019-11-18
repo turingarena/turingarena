@@ -3,8 +3,8 @@
 //! Evaluations are streams of (JSON-serializable) evaluation events.
 
 use crate::award;
-use serde::{Deserialize, Serialize};
 use crate::juniper_ext::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, GraphQLUnionFromEnum)]
 pub enum Event {
@@ -64,9 +64,9 @@ pub mod record {
 
     use serde::{Deserialize, Serialize};
 
-    use crate::{award, content, rusage};
     use crate::feedback::valence::Valence;
     use crate::juniper_ext::*;
+    use crate::{award, content, rusage};
 
     /// Wraps a string used to identify a value of a given kind
     #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]

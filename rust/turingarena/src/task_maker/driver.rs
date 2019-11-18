@@ -3,10 +3,10 @@ extern crate failure;
 use super::*;
 
 use failure::Error;
-use task_maker_format::{EvaluationConfig, ioi};
+use task_maker_format::{ioi, EvaluationConfig};
 
 use evaluation::mem::*;
-use problem::{*, driver::*, material::*};
+use problem::{driver::*, material::*, *};
 use submission::mem::*;
 
 pub struct IoiProblemDriver;

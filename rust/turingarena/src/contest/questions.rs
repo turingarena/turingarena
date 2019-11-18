@@ -2,8 +2,8 @@ use super::*;
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
-use schema::{answers, questions};
 use problem::ProblemName;
+use schema::{answers, questions};
 
 /// Represents a question from a user
 #[derive(Queryable, Clone, Debug)]

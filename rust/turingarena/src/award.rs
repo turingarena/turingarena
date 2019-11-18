@@ -2,8 +2,8 @@
 
 extern crate juniper;
 
-use super::juniper_ext::*;
 use super::content::*;
+use super::juniper_ext::*;
 use serde::{Deserialize, Serialize};
 
 /// Wraps a number that represents a score

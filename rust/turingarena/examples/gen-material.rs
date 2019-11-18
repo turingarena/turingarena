@@ -1,6 +1,6 @@
+use problem::driver::*;
 use serde_json;
 use std::env;
-use problem::driver::*;
 use turingarena_task_maker::driver::*;
 
 use std::path::PathBuf;

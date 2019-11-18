@@ -2,9 +2,9 @@ use super::*;
 use contest::UserToken;
 use diesel::SqliteConnection;
 use juniper::FieldResult;
+use juniper_ext::*;
 use jwt::{decode, encode, Header, Validation};
 use user::UserId;
-use juniper_ext::*;
 
 /// Wraps a JWT User token
 #[derive(GraphQLNewtype)]

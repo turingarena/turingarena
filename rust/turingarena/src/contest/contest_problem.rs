@@ -3,11 +3,11 @@ use super::*;
 use api::ApiContext;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
-use schema::problems;
-use std::path::PathBuf;
 use problem::driver::{ProblemDriver, ProblemPack};
 use problem::material::Material;
 use problem::ProblemName;
+use schema::problems;
+use std::path::PathBuf;
 use user::UserId;
 
 #[derive(Insertable)]
@@ -47,7 +47,9 @@ impl Problem {
     /// Material of this problem
     fn tackling(&self, ctx: &ApiContext) -> Option<ProblemTackling> {
         if self.user_id.is_some() {
-            Some(ProblemTackling { problem: Box::new((*self).clone()) })
+            Some(ProblemTackling {
+                problem: Box::new((*self).clone()),
+            })
         } else {
             None
         }
@@ -56,8 +58,7 @@ impl Problem {
 /// Material of this problem
 #[cfg(feature = "task-maker")]
 fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    task_maker::driver::IoiProblemDriver::gen_material(pack)
-        .map_err(FieldError::from)
+    task_maker::driver::IoiProblemDriver::gen_material(pack).map_err(FieldError::from)
 }
 
 /// Material of this problem
@@ -65,7 +66,6 @@ fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
 fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
     unreachable!("Enable feature 'task-maker' to generate problem material")
 }
-
 
 impl Problem {
     /// Path of the problem

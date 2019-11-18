@@ -7,13 +7,13 @@ use super::*;
 
 use announcements::Announcement;
 use api::ApiContext;
+use api::MutationOk;
+use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
 use contest_problem::Problem;
+use problem::ProblemName;
 use questions::{Question, QuestionInput};
 use schema::contest;
-use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
-use problem::ProblemName;
 use user::{User, UserId};
-use api::MutationOk;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -45,48 +45,70 @@ impl ContestView {
 
     /// The user for this contest view, if any
     fn home(&self, ctx: &ApiContext) -> File {
-        ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
-            let entry = result.unwrap();
-            if entry.file_type().unwrap().is_dir() { return None; }
+        ctx.problems_dir
+            .read_dir()
+            .unwrap()
+            .flat_map(|result| {
+                let entry = result.unwrap();
+                if entry.file_type().unwrap().is_dir() {
+                    return None;
+                }
 
-            if let (Some(stem), Some(extension)) = (entry.path().file_stem(), entry.path().extension()) {
-                if stem != "home" { return None; }
+                if let (Some(stem), Some(extension)) =
+                    (entry.path().file_stem(), entry.path().extension())
+                {
+                    if stem != "home" {
+                        return None;
+                    }
 
-                return Some(FileVariant {
-                    attributes: vec![],
-                    name: Some(FileName(entry.file_name().to_str().unwrap().to_owned())),
-                    content: FileContent(read(entry.path()).unwrap()),
-                    r#type: match extension.to_str().unwrap() {
-                        "pdf" => Some(MediaType("application/pdf".to_owned())),
-                        "md" => Some(MediaType("text/markdown".to_owned())),
-                        "html" => Some(MediaType("text/html".to_owned())),
-                        _ => None
-                    },
-                });
-            }
-            None
-        }).collect()
+                    return Some(FileVariant {
+                        attributes: vec![],
+                        name: Some(FileName(entry.file_name().to_str().unwrap().to_owned())),
+                        content: FileContent(read(entry.path()).unwrap()),
+                        r#type: match extension.to_str().unwrap() {
+                            "pdf" => Some(MediaType("application/pdf".to_owned())),
+                            "md" => Some(MediaType("text/markdown".to_owned())),
+                            "html" => Some(MediaType("text/html".to_owned())),
+                            _ => None,
+                        },
+                    });
+                }
+                None
+            })
+            .collect()
     }
 
     /// Title of the contest, as shown to the user
     fn title(&self, ctx: &ApiContext) -> Text {
-        ctx.problems_dir.read_dir().unwrap().flat_map(|result| {
-            let entry = result.unwrap();
-            if entry.file_type().unwrap().is_dir() { return None; }
+        ctx.problems_dir
+            .read_dir()
+            .unwrap()
+            .flat_map(|result| {
+                let entry = result.unwrap();
+                if entry.file_type().unwrap().is_dir() {
+                    return None;
+                }
 
-            if let (Some(stem), Some(extension)) = (entry.path().file_stem(), entry.path().extension()) {
-                if extension.to_str() != Some("txt") { return None; }
-                if stem.to_str() != Some("title") { return None; }
+                if let (Some(stem), Some(extension)) =
+                    (entry.path().file_stem(), entry.path().extension())
+                {
+                    if extension.to_str() != Some("txt") {
+                        return None;
+                    }
+                    if stem.to_str() != Some("title") {
+                        return None;
+                    }
 
-                // TODO: handle multiple languages
+                    // TODO: handle multiple languages
 
-                return Some(TextVariant {
-                    attributes: vec![],
-                    value: String::from_utf8(read(entry.path()).unwrap()).unwrap(),
-                });
-            }
-            None
-        }).collect()
+                    return Some(TextVariant {
+                        attributes: vec![],
+                        value: String::from_utf8(read(entry.path()).unwrap()).unwrap(),
+                    });
+                }
+                None
+            })
+            .collect()
     }
 
     /// A problem that the user can see

@@ -22,10 +22,19 @@ pub struct ImportInput {
 trait Importer {
     type Operation: ImportOperation;
     /// Constructs the importer from a file
-    fn load(&self, data: &[u8], filename: &Option<String>, filetype: &Option<String>) -> Option<Self::Operation>;
+    fn load(
+        &self,
+        data: &[u8],
+        filename: &Option<String>,
+        filetype: &Option<String>,
+    ) -> Option<Self::Operation>;
 
     fn load_input(&self, input: &ImportInput) -> Option<Self::Operation> {
-        self.load(&base64::decode(&input.content_base64).ok()?, &input.filename, &input.filetype)
+        self.load(
+            &base64::decode(&input.content_base64).ok()?,
+            &input.filename,
+            &input.filetype,
+        )
     }
 }
 
@@ -36,5 +45,8 @@ trait ImportOperation {
 
 /// Imports a contest in a Context
 pub fn import(context: &ApiContext, input: &ImportInput) -> ImportResult {
-    ItalyYamlImporter.load_input(input).ok_or("Format not recognized")?.import_into(context)
+    ItalyYamlImporter
+        .load_input(input)
+        .ok_or("Format not recognized")?
+        .import_into(context)
 }

@@ -6,12 +6,12 @@ use diesel::sql_types::{Bool, Double, Text};
 use juniper::FieldResult;
 
 use super::*;
-use schema::{badge_awards, evaluation_events, score_awards};
-use contest_submission::{self, Submission, SubmissionStatus};
 use award::{AwardName, Score};
-use evaluation::Event;
+use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::mem::Evaluation;
+use evaluation::Event;
 use problem::driver::{ProblemDriver, ProblemPack};
+use schema::{badge_awards, evaluation_events, score_awards};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -314,7 +314,8 @@ pub fn evaluate(
         for (serial, event) in receiver.into_iter().enumerate() {
             insert_event(&db_connection, serial as i32, &submission_id, &event).unwrap();
         }
-        contest_submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success).unwrap();
+        contest_submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success)
+            .unwrap();
     });
     Ok(())
 }

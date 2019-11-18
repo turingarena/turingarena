@@ -21,12 +21,12 @@ use award::{AwardName, Score};
 use evaluation::{mem::*, record};
 use submission::mem::Submission;
 
-use task_maker_format::ioi::Task;
 use content::TextVariant;
 use evaluation::record::ValenceValue;
 use evaluation::Event;
 use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
+use task_maker_format::ioi::Task;
 
 pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
     let (event_tx, event_rx) = channel();
@@ -169,9 +169,7 @@ fn ui_message_to_events(
             }))?;
         }
         UIMessage::IOIEvaluation {
-            testcase,
-            status,
-            ..
+            testcase, status, ..
         } => {
             if let UIExecutionStatus::Done { result } = status {
                 let time_usage = result.resources.cpu_time;

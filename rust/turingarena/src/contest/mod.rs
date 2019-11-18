@@ -19,13 +19,13 @@ extern crate turingarena_contest_web_content;
 pub mod cli_admin;
 
 pub mod announcements;
+pub mod api;
 pub mod auth;
 pub mod config;
 pub mod contest;
-pub mod api;
 pub mod contest_evaluation;
-pub mod formats;
 pub mod contest_problem;
+pub mod formats;
 pub mod questions;
 pub mod schema;
 
@@ -33,8 +33,8 @@ pub mod schema;
 pub mod server;
 
 pub mod contest_submission;
-pub mod user;
 pub mod graphql_schema;
+pub mod user;
 
 /// Convenience Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
