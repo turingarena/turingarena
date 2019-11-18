@@ -84,6 +84,6 @@ pub mod driver {
         fn evaluate(
             pack: ProblemPack,
             submission: submission::mem::Submission,
-        ) -> evaluation::mem::Evaluation;
+        ) -> evaluation::Evaluation;
     }
 }

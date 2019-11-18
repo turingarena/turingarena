@@ -5,7 +5,7 @@ use super::*;
 use failure::Error;
 use task_maker_format::{ioi, EvaluationConfig};
 
-use evaluation::mem::*;
+use evaluation::*;
 use problem::{driver::*, material::*, *};
 use submission::mem::*;
 

@@ -8,8 +8,7 @@ use juniper::FieldResult;
 use super::*;
 use award::{AwardName, Score};
 use contest_submission::{self, Submission, SubmissionStatus};
-use evaluation::mem::Evaluation;
-use evaluation::Event;
+use evaluation::{Evaluation, Event};
 use problem::driver::{ProblemDriver, ProblemPack};
 use schema::{badge_awards, evaluation_events, score_awards};
 
@@ -324,7 +323,7 @@ pub fn evaluate(
 fn do_evaluate(
     problem_pack: ProblemPack,
     submission: submission::mem::Submission,
-) -> evaluation::mem::Evaluation {
+) -> evaluation::Evaluation {
     use task_maker::driver::IoiProblemDriver;
     IoiProblemDriver::evaluate(problem_pack, submission)
 }
@@ -333,6 +332,6 @@ fn do_evaluate(
 fn do_evaluate(
     problem_pack: ProblemPack,
     submission: submission::mem::Submission,
-) -> evaluation::mem::Evaluation {
+) -> evaluation::Evaluation {
     unreachable!("Enable feature 'task-maker' to evaluate solutions")
 }

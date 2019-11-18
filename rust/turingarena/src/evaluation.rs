@@ -5,6 +5,10 @@
 use crate::award;
 use crate::juniper_ext::*;
 use serde::{Deserialize, Serialize};
+use std::sync::mpsc::Receiver;
+
+// FIXME: should we use futures (async) or std::sync (theaded) `Receiver`s?
+pub struct Evaluation(pub Receiver<Event>);
 
 #[derive(Serialize, Deserialize, GraphQLUnionFromEnum)]
 pub enum Event {
@@ -41,13 +45,6 @@ pub struct BadgeEvent {
 
     /// value of the record
     pub badge: bool,
-}
-
-pub mod mem {
-    pub use super::*;
-    use std::sync::mpsc::Receiver;
-    // FIXME: should we use futures (async) or std::sync (theaded) `Receiver`s?
-    pub struct Evaluation(pub Receiver<Event>);
 }
 
 #[cfg(test)]
