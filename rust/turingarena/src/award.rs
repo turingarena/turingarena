@@ -1,4 +1,4 @@
-//! Data-types for scorable items and scores.
+//! Data-types for scores and awards.
 
 extern crate juniper;
 

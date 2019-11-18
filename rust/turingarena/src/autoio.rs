@@ -1,4 +1,4 @@
-//! Automatization of generation/parsing of input/output streams.
+//! Automation of generation/parsing of input/output streams.
 //!
 //! Used for automatic validation, documentation, and code generation.
 //!
