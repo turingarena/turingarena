@@ -88,3 +88,7 @@ task-maker-dag = { git = "https://github.com/edomora97/task-maker-rust.git", opt
 task-maker-exec = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
 task-maker-format = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
 task-maker-store = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
+
+[build-dependencies]
+
+graphql_client_cli = "0.8.0"
