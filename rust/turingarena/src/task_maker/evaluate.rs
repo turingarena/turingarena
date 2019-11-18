@@ -18,8 +18,8 @@ use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISen
 use task_maker_store::*;
 
 use award::{AwardName, Score};
-use evaluation::{mem::*, record};
-use submission::mem::Submission;
+use evaluation::*;
+use submission::Submission;
 
 use content::TextVariant;
 use evaluation::record::ValenceValue;

@@ -7,7 +7,7 @@ use task_maker_format::{ioi, EvaluationConfig};
 
 use evaluation::*;
 use problem::{driver::*, material::*, *};
-use submission::mem::*;
+use submission::*;
 
 pub struct IoiProblemDriver;
 

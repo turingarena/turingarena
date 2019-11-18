@@ -322,7 +322,7 @@ pub fn evaluate(
 #[cfg(feature = "task-maker")]
 fn do_evaluate(
     problem_pack: ProblemPack,
-    submission: submission::mem::Submission,
+    submission: submission::Submission,
 ) -> evaluation::Evaluation {
     use task_maker::driver::IoiProblemDriver;
     IoiProblemDriver::evaluate(problem_pack, submission)
@@ -331,7 +331,7 @@ fn do_evaluate(
 #[cfg(not(feature = "task-maker"))]
 fn do_evaluate(
     problem_pack: ProblemPack,
-    submission: submission::mem::Submission,
+    submission: submission::Submission,
 ) -> evaluation::Evaluation {
     unreachable!("Enable feature 'task-maker' to evaluate solutions")
 }

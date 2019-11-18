@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use problem::driver::*;
-use submission::{form::*, mem::*};
+use submission::*;
 use turingarena_task_maker::driver::*;
 
 fn main() {

@@ -12,7 +12,7 @@ use structopt::StructOpt;
 use turingarena::{contest, problem, submission};
 
 use problem::ProblemName;
-use submission::form::FieldId;
+use submission::FieldId;
 
 use contest::api::ApiContext;
 use contest::api::ContestArgs;

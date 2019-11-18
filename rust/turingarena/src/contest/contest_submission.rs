@@ -5,7 +5,6 @@ use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnec
 use juniper::FieldResult;
 use juniper_ext::*;
 use schema::{submission_files, submissions};
-use submission::*;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
@@ -108,19 +107,22 @@ pub struct Submission {
 
 impl Submission {
     /// converts this submission to a TuringArena submission
-    pub fn to_mem_submission(&self, conn: &SqliteConnection) -> QueryResult<mem::Submission> {
+    pub fn to_mem_submission(
+        &self,
+        conn: &SqliteConnection,
+    ) -> QueryResult<submission::Submission> {
         let mut field_values = Vec::new();
         let files = submission_files(conn, &self.id)?;
         for file in files {
-            field_values.push(FieldValue {
-                field: form::FieldId(file.field_id.clone()),
-                file: mem::File {
-                    name: mem::FileName(file.name.clone()),
+            field_values.push(submission::FieldValue {
+                field: submission::FieldId(file.field_id.clone()),
+                file: submission::File {
+                    name: submission::FileName(file.name.clone()),
                     content: file.content.clone(),
                 },
             })
         }
-        Ok(mem::Submission { field_values })
+        Ok(submission::Submission { field_values })
     }
 }
 

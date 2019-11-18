@@ -54,7 +54,7 @@ pub mod material {
         /// A collection of zero or more attachments for this problem.
         pub attachments: Vec<Attachment>,
         /// Form to show to users, for submitting solutions.
-        pub submission_form: submission::form::Form,
+        pub submission_form: submission::Form,
         /// Awards that this problem can assign to submissions.
         pub awards: Vec<award::Award>,
         /// Template of the feedback to show to users, for a submitted solution.
@@ -83,7 +83,7 @@ pub mod driver {
         fn gen_material(pack: ProblemPack) -> Result<material::Material, Self::Error>;
         fn evaluate(
             pack: ProblemPack,
-            submission: submission::mem::Submission,
+            submission: submission::Submission,
         ) -> evaluation::Evaluation;
     }
 }
