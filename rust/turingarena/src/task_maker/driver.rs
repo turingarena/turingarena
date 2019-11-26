@@ -18,6 +18,7 @@ fn load_task(pack: ProblemPack) -> Result<ioi::Task, Error> {
             solution_filter: vec![],
             booklet_solutions: false,
             solution_paths: vec![],
+            no_statement: true,
         },
     )
 }

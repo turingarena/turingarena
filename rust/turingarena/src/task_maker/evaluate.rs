@@ -69,6 +69,7 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
                 solution_filter: vec![],
                 booklet_solutions: false,
                 solution_paths: vec![solution_path.to_owned()],
+                no_statement: true,
             };
 
             let task = ioi::Task::new(task_path, &eval_config).expect("Invalid task");
