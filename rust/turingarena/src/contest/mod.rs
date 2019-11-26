@@ -12,9 +12,6 @@ extern crate tempdir;
 
 extern crate uuid;
 
-#[cfg(feature = "web-content")]
-extern crate turingarena_contest_web_content;
-
 #[cfg(feature = "cli-admin")]
 pub mod cli_admin;
 
@@ -35,6 +32,9 @@ pub mod server;
 pub mod contest_submission;
 pub mod graphql_schema;
 pub mod user;
+
+#[cfg(feature = "web")]
+mod web_client;
 
 /// Convenience Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;

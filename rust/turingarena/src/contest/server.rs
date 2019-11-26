@@ -13,11 +13,13 @@ use rocket::State;
 use std::path::PathBuf;
 
 use api::RootNode;
-#[cfg(feature = "web-content")]
-use ::{
-    rocket::http::ContentType, std::ffi::OsStr, std::io::Cursor,
-    turingarena_contest_web_content::WebContent,
-};
+
+#[cfg(feature = "web")]
+use web_client::WebContent;
+
+use rocket::http::ContentType;
+use std::ffi::OsStr;
+use std::io::Cursor;
 
 struct Authorization(Option<String>);
 
@@ -73,16 +75,16 @@ fn index<'r>() -> rocket::response::Result<'r> {
     dist(Some(PathBuf::from("index.html")))
 }
 
-#[cfg(not(feature = "web-content"))]
+#[cfg(not(feature = "web"))]
 #[rocket::get("/<_file_option..>")]
 fn dist<'r>(_file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
     Err(Status::new(
         404,
-        "Static files not embedded. Enable feature `web-content`",
+        "Static files not embedded. Enable feature `web`",
     ))
 }
 
-#[cfg(feature = "web-content")]
+#[cfg(feature = "web")]
 #[rocket::get("/<file_option..>")]
 fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
     let file = file_option.unwrap_or(PathBuf::new());
