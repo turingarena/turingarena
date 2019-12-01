@@ -8,7 +8,7 @@ pub fn generate_schema() {
     let context = ApiContext::default();
     let (schema, _errors) = juniper::introspect(
         &context.root_node(),
-        &context,
+        &(),
         juniper::IntrospectionFormat::All,
     )
     .unwrap(); // TODO: GraphQLError doesn't yet implement Error trait... there is a PR open

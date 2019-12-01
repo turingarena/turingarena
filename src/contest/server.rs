@@ -67,7 +67,7 @@ fn post_graphql_handler(
             })
     });
     let context = context.clone().with_jwt_data(claims);
-    request.execute(&context.root_node(), &context)
+    request.execute(&context.root_node(), &())
 }
 
 #[rocket::get("/")]

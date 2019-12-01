@@ -9,7 +9,7 @@ pub struct Announcement {
     text: String,
 }
 
-#[juniper::object(Context = ApiContext)]
+#[juniper_ext::graphql]
 impl Announcement {
     /// Text of the announcement
     fn text(&self) -> &String {

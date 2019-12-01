@@ -306,7 +306,7 @@ pub fn evaluate(
     submission: &Submission,
     db_connection: SqliteConnection,
 ) -> QueryResult<()> {
-    let submission_id = submission.id.clone();
+    let submission_id = submission.data.id.clone();
     let submission = submission.to_mem_submission(&db_connection)?;
     thread::spawn(move || {
         let Evaluation(receiver) = do_evaluate(problem_pack, submission);

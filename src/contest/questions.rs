@@ -7,7 +7,7 @@ use schema::{answers, questions};
 
 /// Represents a question from a user
 #[derive(Queryable, Clone, Debug)]
-pub struct Question {
+pub struct QuestionData {
     id: i32,
     user_id: String,
     problem_name: Option<String>,
@@ -15,26 +15,31 @@ pub struct Question {
     text: String,
 }
 
-#[juniper::object(Context = ApiContext)]
-impl Question {
+pub struct Question<'a> {
+    pub context: &'a ApiContext,
+    pub data: QuestionData,
+}
+
+#[juniper_ext::graphql]
+impl Question<'_> {
     /// Time at which the question was inserted
     fn time(&self) -> &String {
-        &self.time
+        &self.data.time
     }
 
     /// Text of the question
     fn text(&self) -> &String {
-        &self.text
+        &self.data.text
     }
 
     /// Answer to the question, if answered
-    fn answer(&self, ctx: &ApiContext) -> FieldResult<Option<Answer>> {
-        Ok(answer_to(&ctx.connect_db()?, self.id)?)
+    fn answer(&self) -> FieldResult<Option<Answer>> {
+        Ok(answer_to(&self.context.connect_db()?, self.data.id)?)
     }
 
     /// Optionally the problem which the question refers to
     fn problem_name(&self) -> Option<ProblemName> {
-        self.problem_name.clone().map(ProblemName)
+        self.data.problem_name.clone().map(ProblemName)
     }
 }
 
@@ -67,7 +72,7 @@ impl Answer {
 pub fn question_of_user(
     conn: &SqliteConnection,
     user_id: &user::UserId,
-) -> QueryResult<Vec<Question>> {
+) -> QueryResult<Vec<QuestionData>> {
     questions::table
         .filter(questions::dsl::user_id.eq(&user_id.0))
         .load(conn)

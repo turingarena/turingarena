@@ -25,27 +25,28 @@ pub struct UserToken {
 }
 
 /// A ContestView structure
-pub struct ContestView {
+pub struct ContestView<'a> {
+    pub context: &'a ApiContext,
     /// User of the current contest view
     pub user_id: Option<UserId>,
 }
 
 /// A user
-#[juniper::object(Context = ApiContext)]
-impl ContestView {
+#[juniper_ext::graphql]
+impl ContestView<'_> {
     /// The user for this contest view, if any
-    fn user(&self, ctx: &ApiContext) -> FieldResult<Option<User>> {
+    fn user(&self) -> FieldResult<Option<User>> {
         let result = if let Some(user_id) = &self.user_id {
-            Some(user::by_id(&ctx.connect_db()?, user_id.clone())?)
+            Some(user::by_id(&self.context.connect_db()?, user_id.clone())?)
         } else {
             None
         };
         Ok(result)
     }
 
-    /// The user for this contest view, if any
-    fn home(&self, ctx: &ApiContext) -> File {
-        ctx.problems_dir
+    /// The contest home page
+    fn home(&self) -> File {
+        self.context.problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -79,8 +80,8 @@ impl ContestView {
     }
 
     /// Title of the contest, as shown to the user
-    fn title(&self, ctx: &ApiContext) -> Text {
-        ctx.problems_dir
+    fn title(&self) -> Text {
+        self.context.problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -112,57 +113,61 @@ impl ContestView {
     }
 
     /// A problem that the user can see
-    fn problem(&self, ctx: &ApiContext, name: ProblemName) -> FieldResult<Problem> {
+    fn problem(&self, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
-        let data = contest_problem::by_name(&ctx.connect_db()?, name)?;
+
+        let data = contest_problem::by_name(&self.context.connect_db()?, name)?;
         Ok(Problem {
             data,
-            user_id: self.user_id.clone(),
+            contest_view: &self,
         })
     }
 
     /// List of problems that the user can see
-    fn problems(&self, ctx: &ApiContext) -> FieldResult<Option<Vec<Problem>>> {
+    fn problems(&self) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
-        let problems = contest_problem::all(&ctx.connect_db()?)?
+        let problems = contest_problem::all(&self.context.connect_db()?)?
             .into_iter()
             .map(|p| Problem {
                 data: p,
-                user_id: self.user_id.clone(),
+                contest_view: &self,
             })
             .collect();
         Ok(Some(problems))
     }
 
     /// Start time of the user participation, as RFC3339 date
-    fn start_time(&self, ctx: &ApiContext) -> FieldResult<String> {
-        Ok(current_contest(&ctx.connect_db()?)?.start_time)
+    fn start_time(&self) -> FieldResult<String> {
+        Ok(current_contest(&self.context.connect_db()?)?.start_time)
     }
 
     /// End time of the user participation, as RFC3339 date
-    fn end_time(&self, ctx: &ApiContext) -> FieldResult<String> {
-        Ok(current_contest(&ctx.connect_db()?)?.end_time)
+    fn end_time(&self) -> FieldResult<String> {
+        Ok(current_contest(&self.context.connect_db()?)?.end_time)
     }
 
     /// Questions made by the current user
-    fn questions(&self, ctx: &ApiContext) -> FieldResult<Option<Vec<Question>>> {
+    fn questions(&self) -> FieldResult<Option<Vec<Question>>> {
         if let Some(user_id) = &self.user_id {
             Ok(Some(questions::question_of_user(
-                &ctx.connect_db()?,
+                &self.context.connect_db()?,
                 user_id,
-            )?))
+            )?.into_iter().map(|data| Question {
+                context: self.context,
+                data,
+            }).collect()))
         } else {
             Ok(None)
         }
     }
 
-    fn make_question(&self, ctx: &ApiContext, question: QuestionInput) -> FieldResult<MutationOk> {
+    fn make_question(&self, question: QuestionInput) -> FieldResult<MutationOk> {
         unimplemented!()
     }
 
     /// Return a list of announcements
-    fn announcements(&self, ctx: &ApiContext) -> FieldResult<Vec<Announcement>> {
-        Ok(announcements::query_all(&ctx.connect_db()?)?)
+    fn announcements(&self) -> FieldResult<Vec<Announcement>> {
+        Ok(announcements::query_all(&self.context.connect_db()?)?)
     }
 }
 

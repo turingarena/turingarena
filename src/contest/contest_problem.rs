@@ -9,6 +9,7 @@ use problem::ProblemName;
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
+use crate::contest::contest::ContestView;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
@@ -23,32 +24,31 @@ pub struct ProblemData {
 
 /// A problem in the contest
 #[derive(Clone)]
-pub struct Problem {
+pub struct Problem<'a> {
+    pub contest_view: &'a ContestView<'a>,
+
     /// Raw database data of the contest
     pub data: ProblemData,
-
-    /// Id of the user (if specified)
-    pub user_id: Option<UserId>,
 }
 
 /// A problem in a contest
-#[juniper::object(Context = ApiContext)]
-impl Problem {
+#[juniper_ext::graphql]
+impl Problem<'_> {
     /// Name of this problem. Unique in the current contest.
     fn name(&self) -> ProblemName {
         ProblemName(self.data.name.clone())
     }
 
     /// Material of this problem
-    fn material(&self, ctx: &ApiContext) -> FieldResult<Material> {
-        get_problem_material(self.pack(ctx)).map_err(FieldError::from)
+    fn material(&self) -> FieldResult<Material> {
+        get_problem_material(self.pack()).map_err(FieldError::from)
     }
 
     /// Material of this problem
-    fn tackling(&self, ctx: &ApiContext) -> Option<ProblemTackling> {
-        if self.user_id.is_some() {
+    fn tackling(&self) -> Option<ProblemTackling> {
+        if self.contest_view.user_id.is_some() {
             Some(ProblemTackling {
-                problem: Box::new((*self).clone()),
+                problem: &self,
             })
         } else {
             None
@@ -67,15 +67,15 @@ fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
     unreachable!("Enable feature 'task-maker' to generate problem material")
 }
 
-impl Problem {
+impl Problem<'_> {
     /// Path of the problem
-    pub fn path(&self, ctx: &ApiContext) -> PathBuf {
-        ctx.problems_dir.join(&self.data.name)
+    pub fn path(&self) -> PathBuf {
+        self.contest_view.context.problems_dir.join(&self.data.name)
     }
 
     /// return the problem pack object
-    pub fn pack(&self, ctx: &ApiContext) -> ProblemPack {
-        ProblemPack(std::path::PathBuf::from(&self.path(ctx)))
+    pub fn pack(&self) -> ProblemPack {
+        ProblemPack(std::path::PathBuf::from(&self.path()))
     }
 }
 
@@ -106,14 +106,14 @@ pub fn delete(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
 }
 
 /// Attempts at solving a problem by a user in the contest
-pub struct ProblemTackling {
+pub struct ProblemTackling<'a> {
     /// The problem
-    pub problem: Box<Problem>,
+    pub problem: &'a Problem<'a>,
 }
 
-impl ProblemTackling {
+impl ProblemTackling<'_> {
     fn user_id(&self) -> UserId {
-        self.problem.user_id.clone().unwrap()
+        self.problem.contest_view.user_id.clone().unwrap()
     }
 
     fn name(&self) -> &str {
@@ -122,33 +122,36 @@ impl ProblemTackling {
 }
 
 /// Attempts at solving a problem by a user in the contest
-#[juniper::object(Context = ApiContext)]
-impl ProblemTackling {
+#[juniper_ext::graphql]
+impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::MaxScoreAward>> {
+    fn scores(&self) -> FieldResult<Vec<contest_evaluation::MaxScoreAward>> {
         Ok(contest_evaluation::query_score_awards_of_user_and_problem(
-            &ctx.connect_db()?,
+            &self.problem.contest_view.context.connect_db()?,
             &self.user_id().0,
             self.name(),
         )?)
     }
 
     /// Badge awards of the current user (if to be shown)
-    fn badges(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_evaluation::BestBadgeAward>> {
+    fn badges(&self) -> FieldResult<Vec<contest_evaluation::BestBadgeAward>> {
         Ok(contest_evaluation::query_badge_awards_of_user_and_problem(
-            &ctx.connect_db()?,
+            &self.problem.contest_view.context.connect_db()?,
             &self.user_id().0,
             self.name(),
         )?)
     }
 
     /// Submissions of the current user (if to be shown)
-    fn submissions(&self, ctx: &ApiContext) -> FieldResult<Vec<contest_submission::Submission>> {
+    fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
         Ok(contest_submission::of_user_and_problem(
-            &ctx.connect_db()?,
+            &self.problem.contest_view.context.connect_db()?,
             &self.user_id().0,
             self.name(),
-        )?)
+        )?.into_iter().map(|data| contest_submission::Submission {
+            context: self.problem.contest_view.context,
+            data,
+        }).collect())
     }
 
     /// Indicates if the user can submit to this problem
