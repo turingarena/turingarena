@@ -31,6 +31,18 @@ pub fn union_from_enum_derive(input: TokenStream) -> TokenStream {
     derive_using_macro(input, quote!(graphql_union_from_enum))
 }
 
+#[proc_macro_attribute]
+pub fn graphql(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    let input: syn::Item = syn::parse(input).expect("Invalid syntax");
+    let output = quote!(
+        #input
+
+        #[juniper::object]
+        #input
+    );
+    output.into()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

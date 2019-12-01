@@ -25,7 +25,7 @@ pub struct UserInsertable<'a> {
 
 #[derive(Queryable)]
 pub struct User {
-    pub id: String,
+    id: String,
     display_name: String,
     #[allow(dead_code)]
     token: String,
@@ -35,15 +35,15 @@ pub struct User {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, GraphQLNewtype)]
 pub struct UserId(pub String);
 
-#[juniper::object(Context = ApiContext)]
+#[graphql]
 impl User {
     /// Id of the user
-    fn id(&self) -> UserId {
+    pub fn id(&self) -> UserId {
         UserId(self.id.clone())
     }
 
     /// Display name of the user, i.e. the full name
-    fn display_name(&self) -> &String {
+    pub fn display_name(&self) -> &String {
         &self.display_name
     }
 }
