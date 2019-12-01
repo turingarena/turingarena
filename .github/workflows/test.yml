@@ -10,9 +10,9 @@ jobs:
     - name: Install Rust nightly toolchain
       run: rustup default nightly
     - name: Build Rust
-      run: cd rust/ && cargo build --all-features
+      run: cargo build --all-features
     - name: Build Rust doc
-      run: cd rust/ && cargo doc --no-deps
+      run: cargo doc --no-deps
     - name: Deploy documentation to GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1
       with:
@@ -21,9 +21,9 @@ jobs:
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
     - name: Check rust formatting
-      run: cd rust/ && rustup component add rustfmt && cargo fmt -- --check
+      run: rustup component add rustfmt && cargo fmt -- --check
     - name: Run Rust tests
-      run: cd rust/ && cargo test --no-fail-fast
+      run: cargo test --no-fail-fast
     - name: Lint Web
       run: cd web/ && npm run lint
     - name: Run Web tests
