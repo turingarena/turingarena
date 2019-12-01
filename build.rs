@@ -71,7 +71,8 @@ fn main() {
                 "--root",
                 out_path.to_str().unwrap(),
                 "--force",
-                "--offline",
+                // FIXME: should be offline
+                // "--offline",
             ])
             .env(
                 "CARGO_TARGET_DIR",
