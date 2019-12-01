@@ -32,11 +32,19 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
     let (event_tx, event_rx) = channel();
 
     let store_path = task_path.join(".task-maker-files");
-    let file_store =
-        Arc::new(FileStore::new(store_path.join("store")).expect("Cannot create the file store"));
 
-    let (tx, rx_remote) = channel();
-    let (tx_remote, rx) = channel();
+    let min_store_size = 256 * 1024 * 1024;
+    let max_store_size = 2 * min_store_size;
+
+    let file_store =
+        Arc::new(FileStore::new(
+            store_path.join("store"),
+            max_store_size,
+            min_store_size,
+        ).expect("Cannot create the file store"));
+
+    let (tx, rx_remote) = task_maker_exec::new_local_channel();
+    let (tx_remote, rx) = task_maker_exec::new_local_channel();
 
     let server_file_store = file_store.clone();
     thread::Builder::new()
