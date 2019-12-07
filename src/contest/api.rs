@@ -175,8 +175,6 @@ impl ApiContext {
     }
 }
 
-impl juniper::Context for ApiContext {}
-
 pub struct Query<'a> {
     pub context: &'a ApiContext
 }

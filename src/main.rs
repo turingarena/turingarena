@@ -104,7 +104,7 @@ fn main() -> Result<()> {
             let root_node = context.root_node();
 
             let request = command.to_graphql_request();
-            let response = request.execute(&root_node, &context);
+            let response = request.execute(&root_node, &());
 
             println!("{}", serde_json::to_string_pretty(&response).unwrap());
 
