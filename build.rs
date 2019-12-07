@@ -70,7 +70,10 @@ fn main() {
             .join("src")
             .join("contest")
             .join("operations.graphql");
-        println!("cargo:rerun-if-changed={}", operations_path.to_str().unwrap());
+        println!(
+            "cargo:rerun-if-changed={}",
+            operations_path.to_str().unwrap()
+        );
 
         Command::new(env::var("CARGO").unwrap())
             .args(&[
@@ -108,11 +111,21 @@ fn main() {
 
         let initial_contest_path = src_path.join("initial-contest");
 
-        let mut file = OpenOptions::new().write(true).create(true).open(out_path.join("initial-contest.tar.xz")).expect("Unable to open archive file");
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(out_path.join("initial-contest.tar.xz"))
+            .expect("Unable to open archive file");
 
         let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut file, 5));
-        builder.append_dir_all(".", initial_contest_path).expect("Unable to add dir to archive");
-        builder.into_inner().expect("Unable to build archive").finish().expect("Unable to build archive");
+        builder
+            .append_dir_all(".", initial_contest_path)
+            .expect("Unable to add dir to archive");
+        builder
+            .into_inner()
+            .expect("Unable to build archive")
+            .finish()
+            .expect("Unable to build archive");
     }
 
     if env::var_os("CARGO_FEATURE_WEB").is_some() {

@@ -3,15 +3,15 @@ use super::*;
 use super::contest::ContestView;
 use api::ApiContext;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
+use file::FileContentInput;
 use juniper::{FieldError, FieldResult};
 use problem::driver::ProblemDriver;
 use problem::material::Material;
 use problem::ProblemName;
+use rand::Rng;
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
-use rand::Rng;
-use file::FileContentInput;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
@@ -66,13 +66,16 @@ impl Problem<'_> {
 
 impl Problem<'_> {
     pub fn unpack(&self) -> PathBuf {
-        self.contest_view.context.unpack_archive(&self.data.archive_content, "problem")
+        self.contest_view
+            .context
+            .unpack_archive(&self.data.archive_content, "problem")
     }
 
     /// Material of this problem
     #[cfg(feature = "task-maker")]
     fn get_problem_material(&self) -> FieldResult<Material> {
-        task_maker::driver::IoiProblemDriver::generate_material(self.unpack()).map_err(FieldError::from)
+        task_maker::driver::IoiProblemDriver::generate_material(self.unpack())
+            .map_err(FieldError::from)
     }
 
     /// Material of this problem
@@ -93,7 +96,10 @@ pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
 }
 
 /// Insert a problem in the database
-pub fn insert<T: IntoIterator<Item = ProblemInput>>(conn: &SqliteConnection, inputs: T) -> juniper::FieldResult<()> {
+pub fn insert<T: IntoIterator<Item = ProblemInput>>(
+    conn: &SqliteConnection,
+    inputs: T,
+) -> juniper::FieldResult<()> {
     for input in inputs.into_iter() {
         diesel::replace_into(problems::table)
             .values(ProblemInsertable {

@@ -52,17 +52,17 @@ impl Importer for ItalyYamlImporter {
 
 impl ImportOperation for ContestYaml {
     fn import_into(self, context: &ApiContext) -> ImportResult {
-//        if let Some(start) = self.start {
-//            context.set_start_time(Local.timestamp(start as i64, 0))?;
-//        }
-//        if let Some(end) = self.stop {
-//            context.set_end_time(Local.timestamp(end as i64, 0))?;
-//        }
+        //        if let Some(start) = self.start {
+        //            context.set_start_time(Local.timestamp(start as i64, 0))?;
+        //        }
+        //        if let Some(end) = self.stop {
+        //            context.set_end_time(Local.timestamp(end as i64, 0))?;
+        //        }
 
-//        contest_problem::insert(&context.database, self.tasks.iter().map(|name| ProblemInput {
-//            name: name.to_owned(),
-//            archive_content: unreachable!("TODO"),
-//        }))?;
+        //        contest_problem::insert(&context.database, self.tasks.iter().map(|name| ProblemInput {
+        //            name: name.to_owned(),
+        //            archive_content: unreachable!("TODO"),
+        //        }))?;
 
         user::insert(
             &context.database,

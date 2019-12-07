@@ -64,7 +64,10 @@ pub fn list(conn: &SqliteConnection) -> QueryResult<Vec<User>> {
 }
 
 /// Insert a new user in the db
-pub fn insert<T: IntoIterator<Item = UserInput>>(conn: &SqliteConnection, inputs: T) -> QueryResult<()> {
+pub fn insert<T: IntoIterator<Item = UserInput>>(
+    conn: &SqliteConnection,
+    inputs: T,
+) -> QueryResult<()> {
     // FIXME: replace_into not supported by PostgreSQL
     for input in inputs.into_iter() {
         diesel::replace_into(users::table)
@@ -80,6 +83,8 @@ pub fn insert<T: IntoIterator<Item = UserInput>>(conn: &SqliteConnection, inputs
 
 /// Delete a user from the db
 pub fn delete<T: IntoIterator<Item = String>>(conn: &SqliteConnection, ids: T) -> QueryResult<()> {
-    diesel::delete(users::table).filter(users::dsl::id.eq_any(ids)).execute(conn)?;
+    diesel::delete(users::table)
+        .filter(users::dsl::id.eq_any(ids))
+        .execute(conn)?;
     Ok(())
 }

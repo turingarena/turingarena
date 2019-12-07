@@ -15,7 +15,7 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
-use crate::contest::contest::{ContestDataInput, ContestUpdateInput, current_contest};
+use crate::contest::contest::{current_contest, ContestDataInput, ContestUpdateInput};
 use crate::contest::contest_problem::ProblemInput;
 use crate::contest::user::User;
 
@@ -128,11 +128,7 @@ impl ApiContext<'_> {
     pub fn unpack_archive<T: AsRef<[u8]>>(&self, content: T, prefix: &str) -> PathBuf {
         let workspace_path = &self.workspace_path().to_owned();
 
-        archive::unpack_archive(
-            workspace_path,
-            content,
-            prefix,
-        )
+        archive::unpack_archive(workspace_path, content, prefix)
     }
 
     /// Authorize admin operations
@@ -253,33 +249,36 @@ impl Mutation<'_> {
         self.context.authorize_admin()?;
 
         match input.archive_content {
-            Some(content) =>
-                {
-                    diesel::update(schema::contest::table).set(
-                        schema::contest::dsl::archive_content.eq(&content.decode()?)
-                    ).execute(&self.context.database)?;
-                },
-            None => {},
+            Some(content) => {
+                diesel::update(schema::contest::table)
+                    .set(schema::contest::dsl::archive_content.eq(&content.decode()?))
+                    .execute(&self.context.database)?;
+            }
+            None => {}
         }
 
         match input.start_time {
-            Some(time) =>
-                {
-                    diesel::update(schema::contest::table).set(
-                        schema::contest::dsl::start_time.eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339())
-                    ).execute(&self.context.database)?;
-                },
-            None => {},
+            Some(time) => {
+                diesel::update(schema::contest::table)
+                    .set(
+                        schema::contest::dsl::start_time
+                            .eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
+                    )
+                    .execute(&self.context.database)?;
+            }
+            None => {}
         }
 
         match input.end_time {
-            Some(time) =>
-                {
-                    diesel::update(schema::contest::table).set(
-                        schema::contest::dsl::end_time.eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339())
-                    ).execute(&self.context.database)?;
-                },
-            None => {},
+            Some(time) => {
+                diesel::update(schema::contest::table)
+                    .set(
+                        schema::contest::dsl::end_time
+                            .eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
+                    )
+                    .execute(&self.context.database)?;
+            }
+            None => {}
         }
 
         Ok(MutationOk)

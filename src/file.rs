@@ -4,8 +4,8 @@ extern crate base64;
 extern crate serde;
 
 use super::*;
-use serde::{Deserialize, Serialize};
 use juniper::FieldResult;
+use serde::{Deserialize, Serialize};
 
 /// Wraps the content of a file, as array of bytes.
 #[derive(Serialize, Deserialize, Clone)]

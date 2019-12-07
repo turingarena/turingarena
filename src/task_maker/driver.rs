@@ -5,15 +5,15 @@ use super::*;
 use failure::Error;
 use task_maker_format::{ioi, EvaluationConfig};
 
+use crate::evaluation::Evaluation;
+use crate::problem::driver::ProblemDriver;
+use crate::problem::material::Material;
+use crate::problem::ProblemName;
+use crate::submission::Submission;
 use evaluation::*;
 use problem::{driver::*, material::*, *};
+use std::path::{Path, PathBuf};
 use submission::*;
-use crate::problem::driver::ProblemDriver;
-use crate::problem::ProblemName;
-use crate::problem::material::Material;
-use crate::submission::Submission;
-use crate::evaluation::Evaluation;
-use std::path::{PathBuf, Path};
 
 pub struct IoiProblemDriver;
 
@@ -32,9 +32,7 @@ fn load_task<P: AsRef<Path>>(path: P) -> Result<ioi::Task, Error> {
 impl ProblemDriver for IoiProblemDriver {
     type Error = failure::Error;
 
-    fn generate_material<P: AsRef<Path>>(
-        task_path: P,
-    ) -> Result<Material, Self::Error> {
+    fn generate_material<P: AsRef<Path>>(task_path: P) -> Result<Material, Self::Error> {
         let task = load_task(task_path)?;
         Ok(super::material::generate_material(&task))
     }

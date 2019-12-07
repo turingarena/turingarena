@@ -5,6 +5,7 @@ use juniper::{FieldError, FieldResult};
 
 use super::*;
 
+use crate::file::FileContentInput;
 use announcements::Announcement;
 use api::ApiContext;
 use api::MutationOk;
@@ -13,9 +14,8 @@ use contest_problem::Problem;
 use problem::ProblemName;
 use questions::{Question, QuestionInput};
 use schema::contest;
-use user::{User, UserId};
 use std::path::PathBuf;
-use crate::file::FileContentInput;
+use user::{User, UserId};
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -44,7 +44,8 @@ pub struct ContestView<'a> {
 
 impl ContestView<'_> {
     fn contest_path(&self) -> PathBuf {
-        self.context.unpack_archive(&self.data.archive_content, "contest")
+        self.context
+            .unpack_archive(&self.data.archive_content, "contest")
     }
 }
 

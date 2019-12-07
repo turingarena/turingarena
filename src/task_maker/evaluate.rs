@@ -3,7 +3,7 @@ extern crate tempdir;
 
 use super::*;
 
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
     Arc,

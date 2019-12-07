@@ -3,11 +3,15 @@ extern crate ssri;
 extern crate tar;
 extern crate xz2;
 
-use std::path::{PathBuf, Path};
 use self::rand::Rng;
+use std::path::{Path, PathBuf};
 
 /// Unpacks an archive atomically.
-pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(workspace_path: P, content: T, prefix: &str) -> PathBuf {
+pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(
+    workspace_path: P,
+    content: T,
+    prefix: &str,
+) -> PathBuf {
     let workspace_path = workspace_path.as_ref().to_owned();
     let integrity = ssri::Integrity::from(content.as_ref());
     let id = integrity.to_hex().1;
@@ -37,8 +41,14 @@ pub fn pack_archive<P: AsRef<Path>>(path: P) -> Vec<u8> {
     let mut archive_content = Vec::<u8>::new();
 
     let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut archive_content, 5));
-    builder.append_dir_all(".", path).expect("Unable to add dir to archive");
-    builder.into_inner().expect("Unable to build archive").finish().expect("Unable to build archive");
+    builder
+        .append_dir_all(".", path)
+        .expect("Unable to add dir to archive");
+    builder
+        .into_inner()
+        .expect("Unable to build archive")
+        .finish()
+        .expect("Unable to build archive");
 
     archive_content
 }

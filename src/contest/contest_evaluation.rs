@@ -7,13 +7,13 @@ use juniper::FieldResult;
 
 use super::*;
 use crate::contest::api::{ApiConfig, ApiContext};
+use crate::contest::contest_problem::ProblemData;
 use crate::contest::contest_submission::{submission_files, SubmissionData};
 use award::{AwardName, Score};
 use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
 use problem::driver::ProblemDriver;
 use schema::{badge_awards, evaluation_events, score_awards};
-use crate::contest::contest_problem::ProblemData;
 use std::path::{Path, PathBuf};
 
 /// An evaluation event

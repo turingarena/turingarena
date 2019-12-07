@@ -8,6 +8,7 @@ extern crate xz2;
 
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
+use crate::archive::pack_archive;
 use graphql_client::{GraphQLQuery, QueryBody};
 use juniper::http::GraphQLRequest;
 use juniper::{DefaultScalarValue, InputValue};
@@ -15,7 +16,6 @@ use serde::Serialize;
 use std::fs::read;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use crate::archive::pack_archive;
 
 #[derive(StructOpt, Debug)]
 pub enum AdminCommand {
@@ -73,20 +73,17 @@ impl AdminCommand {
                 UpdateContestMutation::build_query,
                 update_contest_mutation::Variables {
                     input: update_contest_mutation::ContestUpdateInput {
-                        archive_content: path.map(|path| update_contest_mutation::FileContentInput {
-                            base64: base64::encode(&pack_archive(path))
+                        archive_content: path.map(|path| {
+                            update_contest_mutation::FileContentInput {
+                                base64: base64::encode(&pack_archive(path)),
+                            }
                         }),
                         start_time,
                         end_time,
-                    }
+                    },
                 },
             ),
-            ListUsers => make_request(
-                ListUsersQuery::build_query,
-                list_users_query::Variables {
-
-                }
-            ),
+            ListUsers => make_request(ListUsersQuery::build_query, list_users_query::Variables {}),
             AddUser {
                 id,
                 display_name,
@@ -105,19 +102,17 @@ impl AdminCommand {
                 DeleteUserMutation::build_query,
                 delete_user_mutation::Variables { id },
             ),
-            AddProblem { name, path } => {
-                make_request(
-                    AddProblemMutation::build_query,
-                    add_problem_mutation::Variables {
-                        input: add_problem_mutation::ProblemInput {
-                            name,
-                            archive_content: add_problem_mutation::FileContentInput {
-                                base64: base64::encode(&pack_archive(path))
-                            },
-                        }
+            AddProblem { name, path } => make_request(
+                AddProblemMutation::build_query,
+                add_problem_mutation::Variables {
+                    input: add_problem_mutation::ProblemInput {
+                        name,
+                        archive_content: add_problem_mutation::FileContentInput {
+                            base64: base64::encode(&pack_archive(path)),
+                        },
                     },
-                )
-            },
+                },
+            ),
             DeleteProblem { name } => make_request(
                 DeleteProblemMutation::build_query,
                 delete_problem_mutation::Variables { name },
