@@ -15,11 +15,20 @@ use serde::Serialize;
 use std::fs::read;
 use std::path::PathBuf;
 use structopt::StructOpt;
+use crate::archive::pack_archive;
 
 #[derive(StructOpt, Debug)]
 pub enum AdminCommand {
     ViewContest,
     InitDb,
+    UpdateContest {
+        #[structopt(long)]
+        path: Option<String>,
+        #[structopt(long)]
+        start_time: Option<String>,
+        #[structopt(long)]
+        end_time: Option<String>,
+    },
     ListUsers,
     AddUser {
         #[structopt(long)]
@@ -56,6 +65,22 @@ impl AdminCommand {
                 view_contest_query::Variables {},
             ),
             InitDb => make_request(InitDbMutation::build_query, init_db_mutation::Variables {}),
+            UpdateContest {
+                path,
+                start_time,
+                end_time,
+            } => make_request(
+                UpdateContestMutation::build_query,
+                update_contest_mutation::Variables {
+                    input: update_contest_mutation::ContestUpdateInput {
+                        archive_content: path.map(|path| update_contest_mutation::FileContentInput {
+                            base64: base64::encode(&pack_archive(path))
+                        }),
+                        start_time,
+                        end_time,
+                    }
+                },
+            ),
             ListUsers => make_request(
                 ListUsersQuery::build_query,
                 list_users_query::Variables {
@@ -81,21 +106,13 @@ impl AdminCommand {
                 delete_user_mutation::Variables { id },
             ),
             AddProblem { name, path } => {
-                let mut archive_content = Vec::<u8>::new();
-
-                {
-                    let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut archive_content, 5));
-                    builder.append_dir_all(".", path).expect("Unable to pack problem dir");
-                    builder.into_inner().expect("Unable to build archive").finish().expect("Unable to build archive")
-                };
-
                 make_request(
                     AddProblemMutation::build_query,
                     add_problem_mutation::Variables {
                         input: add_problem_mutation::ProblemInput {
                             name,
                             archive_content: add_problem_mutation::FileContentInput {
-                                base64: base64::encode(&archive_content)
+                                base64: base64::encode(&pack_archive(path))
                             },
                         }
                     },

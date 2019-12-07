@@ -10,10 +10,6 @@ extern crate structopt;
 #[cfg(test)]
 extern crate tempdir;
 
-extern crate ssri;
-extern crate tar;
-extern crate xz2;
-
 extern crate uuid;
 
 #[cfg(feature = "cli-admin")]

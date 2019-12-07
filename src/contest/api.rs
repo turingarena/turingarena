@@ -1,8 +1,9 @@
 use std::default::Default;
-use std::path::{PathBuf, Path};
+use std::env::temp_dir;
+use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Local};
-use diesel::{Connection, ConnectionResult, SqliteConnection};
+use diesel::{Connection, ConnectionResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use structopt::StructOpt;
 
@@ -14,10 +15,11 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
-use super::*;
-use crate::contest::user::User;
-use std::env::temp_dir;
+use crate::contest::contest::{ContestDataInput, ContestUpdateInput, current_contest};
 use crate::contest::contest_problem::ProblemInput;
+use crate::contest::user::User;
+
+use super::*;
 
 embed_migrations!();
 
@@ -123,6 +125,16 @@ impl ApiContext<'_> {
         &self.workspace_path
     }
 
+    pub fn unpack_archive<T: AsRef<[u8]>>(&self, content: T, prefix: &str) -> PathBuf {
+        let workspace_path = &self.workspace_path().to_owned();
+
+        archive::unpack_archive(
+            workspace_path,
+            content,
+            prefix,
+        )
+    }
+
     /// Authorize admin operations
     #[must_use = "Error means forbidden"]
     pub fn authorize_admin(&self) -> juniper::FieldResult<()> {
@@ -152,27 +164,6 @@ impl ApiContext<'_> {
         }
         Ok(())
     }
-
-    // TODO: move the following methods in a more appropriate location
-
-    /// Initialize the database
-    pub fn init_db(&self) -> Result<()> {
-        embedded_migrations::run_with_output(&self.database, &mut std::io::stdout())?;
-        contest::create_config(&self.database)?;
-        Ok(())
-    }
-
-    /// Set the start time of the current contest
-    pub fn set_start_time(&self, time: DateTime<Local>) -> Result<()> {
-        contest::set_start_time(&self.database, time)?;
-        Ok(())
-    }
-
-    /// Set the end time of the current contest
-    pub fn set_end_time(&self, time: DateTime<Local>) -> Result<()> {
-        contest::set_end_time(&self.database, time)?;
-        Ok(())
-    }
 }
 
 pub struct Query<'a> {
@@ -187,6 +178,7 @@ impl Query<'_> {
 
         Ok(ContestView {
             context: self.context,
+            data: current_contest(&self.context.database)?,
             user_id,
         })
     }
@@ -222,7 +214,18 @@ impl Mutation<'_> {
     /// Reset database
     fn init_db(&self) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-        self.context.init_db()?;
+
+        embedded_migrations::run_with_output(&self.context.database, &mut std::io::stdout())?;
+        let now = chrono::Local::now();
+        let configuration = ContestDataInput {
+            archive_content: include_bytes!(concat!(env!("OUT_DIR"), "/initial-contest.tar.xz")),
+            start_time: &now.to_rfc3339(),
+            end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
+        };
+        diesel::insert_into(schema::contest::table)
+            .values(configuration)
+            .execute(&self.context.database)?;
+
         Ok(MutationOk)
     }
 
@@ -242,6 +245,44 @@ impl Mutation<'_> {
     /// Current time on the server as RFC3339 date
     fn server_time() -> String {
         chrono::Local::now().to_rfc3339()
+    }
+
+    /// Add a user to the current contest
+    pub fn update_contest(&self, input: ContestUpdateInput) -> FieldResult<MutationOk> {
+        use diesel::ExpressionMethods;
+        self.context.authorize_admin()?;
+
+        match input.archive_content {
+            Some(content) =>
+                {
+                    diesel::update(schema::contest::table).set(
+                        schema::contest::dsl::archive_content.eq(&content.decode()?)
+                    ).execute(&self.context.database)?;
+                },
+            None => {},
+        }
+
+        match input.start_time {
+            Some(time) =>
+                {
+                    diesel::update(schema::contest::table).set(
+                        schema::contest::dsl::start_time.eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339())
+                    ).execute(&self.context.database)?;
+                },
+            None => {},
+        }
+
+        match input.end_time {
+            Some(time) =>
+                {
+                    diesel::update(schema::contest::table).set(
+                        schema::contest::dsl::end_time.eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339())
+                    ).execute(&self.context.database)?;
+                },
+            None => {},
+        }
+
+        Ok(MutationOk)
     }
 
     /// Add a user to the current contest
@@ -293,6 +334,7 @@ impl Mutation<'_> {
             data: contest_problem::by_name(&conn, problem_name)?,
             contest_view: &ContestView {
                 context: self.context,
+                data: current_contest(&self.context.database)?,
                 user_id: Some(user_id),
             },
         };

@@ -15,6 +15,7 @@ use questions::{Question, QuestionInput};
 use schema::contest;
 use user::{User, UserId};
 use std::path::PathBuf;
+use crate::file::FileContentInput;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -25,11 +26,26 @@ pub struct UserToken {
     pub user_id: Option<UserId>,
 }
 
+/// A user authorization token
+#[derive(juniper::GraphQLInputObject)]
+pub struct ContestUpdateInput {
+    pub archive_content: Option<FileContentInput>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+}
+
 /// A ContestView structure
 pub struct ContestView<'a> {
     pub context: &'a ApiContext<'a>,
     /// User of the current contest view
     pub user_id: Option<UserId>,
+    pub data: ContestData,
+}
+
+impl ContestView<'_> {
+    fn contest_path(&self) -> PathBuf {
+        self.context.unpack_archive(&self.data.archive_content, "contest")
+    }
 }
 
 /// A user
@@ -47,8 +63,7 @@ impl ContestView<'_> {
 
     /// The contest home page
     fn home(&self) -> File {
-        // FIXME: using current dir
-        PathBuf::from(".")
+        self.contest_path()
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -83,8 +98,7 @@ impl ContestView<'_> {
 
     /// Title of the contest, as shown to the user
     fn title(&self) -> Text {
-        // FIXME: using current dir
-        PathBuf::from(".")
+        self.contest_path()
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -182,6 +196,8 @@ pub struct ContestData {
     /// Primary key of the table. Should be *always* 0!
     pub id: i32,
 
+    pub archive_content: Vec<u8>,
+
     /// Starting time of the contest, as RFC3339 date
     pub start_time: String,
 
@@ -196,42 +212,8 @@ pub fn current_contest(conn: &SqliteConnection) -> QueryResult<ContestData> {
 
 #[derive(Insertable)]
 #[table_name = "contest"]
-struct ContestDataInput<'a> {
-    start_time: &'a str,
-    end_time: &'a str,
-}
-
-/// Create a defualt configuration
-pub fn create_config(conn: &SqliteConnection) -> QueryResult<()> {
-    let now = chrono::Local::now();
-    let configuration = ContestDataInput {
-        start_time: &now.to_rfc3339(),
-        end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
-    };
-    diesel::insert_into(contest::table)
-        .values(configuration)
-        .execute(conn)?;
-    Ok(())
-}
-
-/// Set the contest start date
-pub fn set_start_time(
-    conn: &SqliteConnection,
-    start: chrono::DateTime<chrono::Local>,
-) -> QueryResult<()> {
-    diesel::update(contest::table)
-        .set(contest::dsl::start_time.eq(start.to_rfc3339()))
-        .execute(conn)?;
-    Ok(())
-}
-
-/// Set the contest end date
-pub fn set_end_time(
-    conn: &SqliteConnection,
-    end: chrono::DateTime<chrono::Local>,
-) -> QueryResult<()> {
-    diesel::update(contest::table)
-        .set(contest::dsl::end_time.eq(end.to_rfc3339()))
-        .execute(conn)?;
-    Ok(())
+pub struct ContestDataInput<'a> {
+    pub archive_content: &'a [u8],
+    pub start_time: &'a str,
+    pub end_time: &'a str,
 }

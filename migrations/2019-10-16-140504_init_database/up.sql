@@ -49,6 +49,7 @@ CREATE TABLE score_awards(
 
 CREATE TABLE contest(
     id              INT  NOT NULL PRIMARY KEY DEFAULT 0 CHECK (id = 0), -- to ensure this table has a single row
+    archive_content BLOB NOT NULL,
     start_time      TEXT NOT NULL,
     end_time        TEXT NOT NULL
 );

@@ -27,10 +27,17 @@ cli-admin = [
     "graphql_client",
     "rpassword",
     "contest",
+    "archive",
 ]
 cli-admin-remote = ["reqwest", "cli-admin"]
-contest = [
+archive = [
     "rand",
+    "ssri",
+    "tar",
+    "xz2",
+]
+contest = [
+    "archive",
     "chrono",
     "structopt",
     "jsonwebtoken",
@@ -39,9 +46,6 @@ contest = [
     "diesel",
     "diesel_migrations",
     "rand",
-    "ssri",
-    "tar",
-    "xz2",
 ]
 web = [
     "graphql-schema",
@@ -113,6 +117,9 @@ xz2 = { version = "0.1.6", optional = true }
 
 graphql_client_cli = "0.8.0"
 fs_extra = "1.1.0"
+ssri = "5.0.0"
+tar = "0.4.26"
+xz2 = "0.1.6"
 
 [patch.crates-io]
 # fix for https://github.com/graphql-rust/juniper/issues/455

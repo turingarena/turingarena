@@ -66,28 +66,7 @@ impl Problem<'_> {
 
 impl Problem<'_> {
     pub fn unpack(&self) -> PathBuf {
-        let integrity = ssri::Integrity::from(&self.data.archive_content);
-
-        let workspace_path = &self.contest_view.context.workspace_path().to_owned();
-
-        let task_path = workspace_path.join(integrity.to_hex().1);
-
-        if !task_path.exists() {
-            let temp_name_len = 8;
-            let temp_name: String = std::iter::repeat(())
-                .take(temp_name_len)
-                .map(|()| rand::thread_rng().sample(rand::distributions::Alphanumeric))
-                .collect();
-
-            let temp_path = workspace_path.join(format!("{}.{}.part", integrity.to_hex().1, temp_name));
-
-            let mut archive = tar::Archive::new(xz2::read::XzDecoder::new(&self.data.archive_content[..]));
-            archive.unpack(&temp_path).expect("Cannot extract problem archive");
-
-            std::fs::rename(&temp_path, &task_path).expect("Cannot move extracted problem archive");
-        }
-
-        task_path
+        self.contest_view.context.unpack_archive(&self.data.archive_content, "problem")
     }
 
     /// Material of this problem

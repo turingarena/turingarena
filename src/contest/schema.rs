@@ -23,6 +23,7 @@ table! {
 table! {
     contest (id) {
         id -> Integer,
+        archive_content -> Binary,
         start_time -> Text,
         end_time -> Text,
     }

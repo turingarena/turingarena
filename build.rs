@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::path::Path;
 use std::process::Command;
 
@@ -99,6 +99,20 @@ fn main() {
                 operations_path.to_str().unwrap(),
             ])
             .check();
+    }
+
+    if env::var_os("CARGO_FEATURE_CONTEST").is_some() {
+        extern crate ssri;
+        extern crate tar;
+        extern crate xz2;
+
+        let initial_contest_path = src_path.join("initial-contest");
+
+        let mut file = OpenOptions::new().write(true).create(true).open(out_path.join("initial-contest.tar.xz")).expect("Unable to open archive file");
+
+        let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut file, 5));
+        builder.append_dir_all(".", initial_contest_path).expect("Unable to add dir to archive");
+        builder.into_inner().expect("Unable to build archive").finish().expect("Unable to build archive");
     }
 
     if env::var_os("CARGO_FEATURE_WEB").is_some() {

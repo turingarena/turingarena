@@ -46,6 +46,9 @@ pub mod submission;
 #[cfg(feature = "task-maker")]
 pub mod task_maker;
 
+#[cfg(feature = "archive")]
+mod archive;
+
 #[cfg(test)]
 mod tests {
     #[test]
