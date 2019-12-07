@@ -66,6 +66,12 @@ fn main() {
     }
 
     if env::var_os("CARGO_FEATURE_CLI_ADMIN").is_some() {
+        let operations_path = src_path
+            .join("src")
+            .join("contest")
+            .join("operations.graphql");
+        println!("cargo:rerun-if-changed={}", operations_path.to_str().unwrap());
+
         Command::new(env::var("CARGO").unwrap())
             .args(&[
                 "install",
@@ -90,12 +96,7 @@ fn main() {
                 out_path.to_str().unwrap(),
                 "--schema-path",
                 schema_path.to_str().unwrap(),
-                src_path
-                    .join("src")
-                    .join("contest")
-                    .join("operations.graphql")
-                    .to_str()
-                    .unwrap(),
+                operations_path.to_str().unwrap(),
             ])
             .check();
     }
