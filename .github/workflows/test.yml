@@ -17,7 +17,7 @@ jobs:
       uses: crazy-max/ghaction-github-pages@v1
       with:
         target_branch: gh-pages
-        build_dir: rust/target/doc/
+        build_dir: target/doc/
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
     - name: Check rust formatting
