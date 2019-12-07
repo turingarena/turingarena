@@ -6,13 +6,13 @@ use diesel::sql_types::{Bool, Double, Text};
 use juniper::FieldResult;
 
 use super::*;
+use crate::contest::api::{ApiConfig, ApiContext};
+use crate::contest::contest_submission::{submission_files, SubmissionData};
 use award::{AwardName, Score};
 use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
 use problem::driver::{ProblemDriver, ProblemPack};
 use schema::{badge_awards, evaluation_events, score_awards};
-use crate::contest::api::{ApiContext, ApiConfig};
-use crate::contest::contest_submission::{SubmissionData, submission_files};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -314,7 +314,8 @@ pub fn evaluate(
         let context = config.create_context(None);
 
         let mut field_values = Vec::new();
-        let files = submission_files(&context.database, &submission_data.id).expect("Unable to load submission files");
+        let files = submission_files(&context.database, &submission_data.id)
+            .expect("Unable to load submission files");
         for file in files {
             field_values.push(submission::FieldValue {
                 field: submission::FieldId(file.field_id.clone()),
@@ -329,10 +330,20 @@ pub fn evaluate(
 
         let Evaluation(receiver) = do_evaluate(problem_pack, submission);
         for (serial, event) in receiver.into_iter().enumerate() {
-            insert_event(&context.database, serial as i32, &submission_data.id, &event).unwrap();
-        }
-        contest_submission::set_status(&context.database, &submission_data.id, SubmissionStatus::Success)
+            insert_event(
+                &context.database,
+                serial as i32,
+                &submission_data.id,
+                &event,
+            )
             .unwrap();
+        }
+        contest_submission::set_status(
+            &context.database,
+            &submission_data.id,
+            SubmissionStatus::Success,
+        )
+        .unwrap();
     });
     Ok(())
 }

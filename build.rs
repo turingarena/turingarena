@@ -48,7 +48,10 @@ fn main() {
                 "contest",
             ])
             .env_clear()
-            .envs(std::env::vars_os().filter(|(k, _)| !k.to_string_lossy().starts_with("CARGO_FEATURE_")))
+            .envs(
+                std::env::vars_os()
+                    .filter(|(k, _)| !k.to_string_lossy().starts_with("CARGO_FEATURE_")),
+            )
             .env(
                 "CARGO_TARGET_DIR",
                 out_path.join("graphql-schema-target").to_str().unwrap(),
@@ -101,46 +104,34 @@ fn main() {
         {
             let mut options = fs_extra::dir::CopyOptions::new();
             options.overwrite = true;
-            fs_extra::dir::copy(
-                src_path.join("web"),
-                out_path,
-                &options,
-            ).unwrap();
+            fs_extra::dir::copy(src_path.join("web"), out_path, &options).unwrap();
         }
 
         let out_web_path = out_path.join("web");
 
         Command::new("npm")
             .current_dir(&out_web_path)
-            .args(&[
-                "ci",
-                "--ignore-scripts",
-            ])
+            .args(&["ci", "--ignore-scripts"])
             .check();
 
-        std::fs::create_dir_all(
-            &out_web_path.join("__generated__"),
-        ).unwrap();
+        std::fs::create_dir_all(&out_web_path.join("__generated__")).unwrap();
 
         std::fs::copy(
             &schema_path,
-            &out_web_path.join("__generated__").join("graphql-schema.json"),
-        ).unwrap();
+            &out_web_path
+                .join("__generated__")
+                .join("graphql-schema.json"),
+        )
+        .unwrap();
 
         Command::new("npm")
             .current_dir(&out_web_path)
-            .args(&[
-                "run",
-                "prepare",
-            ])
+            .args(&["run", "prepare"])
             .check();
 
         Command::new("npm")
             .current_dir(&out_web_path)
-            .args(&[
-                "run",
-                "build",
-            ])
+            .args(&["run", "build"])
             .check();
     }
 }

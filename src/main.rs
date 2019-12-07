@@ -66,7 +66,7 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    use api::{ApiContext, ApiConfig};
+    use api::{ApiConfig, ApiContext};
     use Command::*;
     let args = Args::from_args();
     let config = ApiConfig::default().with_args(args.contest);

@@ -1,5 +1,6 @@
 use super::*;
 
+use crate::contest::contest::ContestView;
 use api::ApiContext;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
@@ -9,7 +10,6 @@ use problem::ProblemName;
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
-use crate::contest::contest::ContestView;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
@@ -47,9 +47,7 @@ impl Problem<'_> {
     /// Material of this problem
     fn tackling(&self) -> Option<ProblemTackling> {
         if self.contest_view.user_id.is_some() {
-            Some(ProblemTackling {
-                problem: &self,
-            })
+            Some(ProblemTackling { problem: &self })
         } else {
             None
         }
@@ -70,7 +68,11 @@ fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
 impl Problem<'_> {
     /// Path of the problem
     pub fn path(&self) -> PathBuf {
-        self.contest_view.context.config.problems_dir.join(&self.data.name)
+        self.contest_view
+            .context
+            .config
+            .problems_dir
+            .join(&self.data.name)
     }
 
     /// return the problem pack object
@@ -148,10 +150,13 @@ impl ProblemTackling<'_> {
             &self.problem.contest_view.context.database,
             &self.user_id().0,
             self.name(),
-        )?.into_iter().map(|data| contest_submission::Submission {
+        )?
+        .into_iter()
+        .map(|data| contest_submission::Submission {
             context: self.problem.contest_view.context,
             data,
-        }).collect())
+        })
+        .collect())
     }
 
     /// Indicates if the user can submit to this problem

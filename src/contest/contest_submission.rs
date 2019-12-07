@@ -1,11 +1,11 @@
 use super::*;
 
+use crate::contest::contest::ContestView;
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use juniper_ext::*;
 use schema::{submission_files, submissions};
-use crate::contest::contest::ContestView;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]

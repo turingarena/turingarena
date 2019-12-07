@@ -46,7 +46,9 @@ impl ContestView<'_> {
 
     /// The contest home page
     fn home(&self) -> File {
-        self.context.config.problems_dir
+        self.context
+            .config
+            .problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -81,7 +83,9 @@ impl ContestView<'_> {
 
     /// Title of the contest, as shown to the user
     fn title(&self) -> Text {
-        self.context.config.problems_dir
+        self.context
+            .config
+            .problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -149,13 +153,15 @@ impl ContestView<'_> {
     /// Questions made by the current user
     fn questions(&self) -> FieldResult<Option<Vec<Question>>> {
         if let Some(user_id) = &self.user_id {
-            Ok(Some(questions::question_of_user(
-                &self.context.database,
-                user_id,
-            )?.into_iter().map(|data| Question {
-                context: self.context,
-                data,
-            }).collect()))
+            Ok(Some(
+                questions::question_of_user(&self.context.database, user_id)?
+                    .into_iter()
+                    .map(|data| Question {
+                        context: self.context,
+                        data,
+                    })
+                    .collect(),
+            ))
         } else {
             Ok(None)
         }

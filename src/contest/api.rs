@@ -83,7 +83,8 @@ impl ApiConfig {
     }
 
     fn connect_db(&self) -> SqliteConnection {
-        let conn = SqliteConnection::establish(self.database_url.to_str().unwrap()).expect("Unable to establish connection");
+        let conn = SqliteConnection::establish(self.database_url.to_str().unwrap())
+            .expect("Unable to establish connection");
         conn.execute("PRAGMA busy_timeout = 5000;")
             .expect("Unable to set `busy_timeout`");
         conn
@@ -123,11 +124,7 @@ impl ApiConfig {
 
 impl ApiContext<'_> {
     pub fn root_node(&self) -> RootNode {
-        RootNode::new(Query {
-            context: &self,
-        }, Mutation {
-            context: &self,
-        })
+        RootNode::new(Query { context: &self }, Mutation { context: &self })
     }
 
     /// Authorize admin operations
@@ -181,7 +178,7 @@ impl ApiContext<'_> {
 }
 
 pub struct Query<'a> {
-    pub context: &'a ApiContext<'a>
+    pub context: &'a ApiContext<'a>,
 }
 
 #[juniper_ext::graphql]
@@ -197,15 +194,9 @@ impl Query<'_> {
     }
 
     /// Get the submission with the specified id
-    fn submission(
-        &self,
-        submission_id: String,
-    ) -> FieldResult<contest_submission::Submission> {
+    fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
         // TODO: check privilage
-        let data = contest_submission::query(
-            &self.context.database,
-            &submission_id,
-        )?;
+        let data = contest_submission::query(&self.context.database, &submission_id)?;
         Ok(contest_submission::Submission {
             context: self.context,
             data,
@@ -236,7 +227,9 @@ impl Mutation<'_> {
         Ok(auth::auth(
             &self.context.database,
             &token,
-            self.context.config.secret
+            self.context
+                .config
+                .secret
                 .as_ref()
                 .ok_or_else(|| FieldError::from("Authentication disabled"))?,
         )?)

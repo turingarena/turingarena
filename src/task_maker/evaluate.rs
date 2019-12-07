@@ -36,12 +36,10 @@ pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Ev
     let min_store_size = 256 * 1024 * 1024;
     let max_store_size = 2 * min_store_size;
 
-    let file_store =
-        Arc::new(FileStore::new(
-            store_path.join("store"),
-            max_store_size,
-            min_store_size,
-        ).expect("Cannot create the file store"));
+    let file_store = Arc::new(
+        FileStore::new(store_path.join("store"), max_store_size, min_store_size)
+            .expect("Cannot create the file store"),
+    );
 
     let (tx, rx_remote) = task_maker_exec::new_local_channel();
     let (tx_remote, rx) = task_maker_exec::new_local_channel();

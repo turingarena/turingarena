@@ -17,10 +17,10 @@ use api::RootNode;
 #[cfg(feature = "web")]
 use web_client::WebContent;
 
+use crate::contest::api::ApiConfig;
 use rocket::http::ContentType;
 use std::ffi::OsStr;
 use std::io::Cursor;
-use crate::contest::api::ApiConfig;
 
 struct Authorization(Option<String>);
 
