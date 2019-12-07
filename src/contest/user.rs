@@ -58,22 +58,28 @@ pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
     users::table.find(user_id.0).first(conn)
 }
 
+/// List all users
+pub fn list(conn: &SqliteConnection) -> QueryResult<Vec<User>> {
+    Ok(users::table.load(conn)?)
+}
+
 /// Insert a new user in the db
-pub fn insert(conn: &SqliteConnection, input: &UserInput) -> QueryResult<()> {
-    let user = UserInsertable {
-        id: &input.id,
-        display_name: &input.display_name,
-        token: &input.token,
-    };
+pub fn insert<T: IntoIterator<Item = UserInput>>(conn: &SqliteConnection, inputs: T) -> QueryResult<()> {
     // FIXME: replace_into not supported by PostgreSQL
-    diesel::replace_into(users::table)
-        .values(user)
-        .execute(conn)?;
+    for input in inputs.into_iter() {
+        diesel::replace_into(users::table)
+            .values(UserInsertable {
+                id: &input.id,
+                display_name: &input.display_name,
+                token: &input.token,
+            })
+            .execute(conn)?;
+    }
     Ok(())
 }
 
 /// Delete a user from the db
-pub fn delete(conn: &SqliteConnection, user_id: UserId) -> QueryResult<()> {
-    diesel::delete(users::table.find(user_id.0)).execute(conn)?;
+pub fn delete<T: IntoIterator<Item = String>>(conn: &SqliteConnection, ids: T) -> QueryResult<()> {
+    diesel::delete(users::table).filter(users::dsl::id.eq_any(ids)).execute(conn)?;
     Ok(())
 }

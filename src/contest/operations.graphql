@@ -1,23 +1,30 @@
+query ListUsersQuery {
+    users {
+        id
+        displayName
+    }
+}
+
+mutation AddUserMutation($input: UserInput!) {
+    addUsers(inputs: [$input]) {
+        ok
+    }
+}
+
+mutation DeleteUserMutation($id: String!) {
+    deleteUsers(ids: [$id]) {
+        ok
+    }
+}
+
 mutation AddProblemMutation($name: String!) {
     addProblem(name: $name) {
         ok
     }
 }
 
-mutation AddUserMutation($input: UserInput!) {
-    addUser(input: $input) {
-        ok
-    }
-}
-
 mutation DeleteProblemMutation($name: String!) {
     deleteProblem(name: $name) {
-        ok
-    }
-}
-
-mutation DeleteUserMutation($id: String!) {
-    deleteUser(id: $id) {
         ok
     }
 }

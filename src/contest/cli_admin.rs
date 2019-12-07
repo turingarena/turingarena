@@ -17,6 +17,7 @@ use structopt::StructOpt;
 pub enum AdminCommand {
     ViewContest,
     InitDb,
+    ListUsers,
     AddUser {
         #[structopt(long)]
         id: String,
@@ -50,6 +51,12 @@ impl AdminCommand {
                 view_contest_query::Variables {},
             ),
             InitDb => make_request(InitDbMutation::build_query, init_db_mutation::Variables {}),
+            ListUsers => make_request(
+                ListUsersQuery::build_query,
+                list_users_query::Variables {
+
+                }
+            ),
             AddUser {
                 id,
                 display_name,

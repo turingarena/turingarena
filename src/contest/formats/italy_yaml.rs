@@ -1,19 +1,17 @@
+/// Italy YAML contest importation format
+use std::error::Error;
 use std::path::{Path, PathBuf};
 
 use chrono::{Local, TimeZone};
 
-use problem::ProblemName;
-
-use super::*;
-
 use api::ApiContext;
 use contest_problem;
+use formats::ImportOperation;
+use problem::ProblemName;
 use user;
 use user::{UserId, UserInput};
 
-use formats::ImportOperation;
-/// Italy YAML contest importation format
-use std::error::Error;
+use super::*;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
@@ -63,16 +61,14 @@ impl ImportOperation for ContestYaml {
             contest_problem::insert(&context.database, ProblemName(task))?;
         }
 
-        for user in self.users {
-            user::insert(
-                &context.database,
-                &UserInput {
-                    id: user.username,
-                    display_name: format!("{} {}", user.first_name, user.last_name),
-                    token: user.password,
-                },
-            )?;
-        }
+        user::insert(
+            &context.database,
+            self.users.into_iter().map(|user| UserInput {
+                id: user.username,
+                display_name: format!("{} {}", user.first_name, user.last_name),
+                token: user.password,
+            }),
+        )?;
         Ok(())
     }
 }

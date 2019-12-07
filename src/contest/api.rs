@@ -15,6 +15,7 @@ use user::UserId;
 use user::UserInput;
 
 use super::*;
+use crate::contest::user::User;
 
 embed_migrations!();
 
@@ -128,6 +129,7 @@ impl ApiContext<'_> {
     }
 
     /// Authorize admin operations
+    #[must_use = "Error means forbidden"]
     pub fn authorize_admin(&self) -> juniper::FieldResult<()> {
         if self.config.skip_auth {
             return Ok(());
@@ -136,6 +138,7 @@ impl ApiContext<'_> {
     }
 
     /// Authenticate user
+    #[must_use = "Error means forbidden"]
     pub fn authorize_user(&self, user_id: &Option<UserId>) -> juniper::FieldResult<()> {
         if self.config.skip_auth {
             return Ok(());
@@ -193,6 +196,12 @@ impl Query<'_> {
         })
     }
 
+    fn users(&self) -> FieldResult<Vec<User>> {
+        self.context.authorize_admin()?;
+
+        Ok(user::list(&self.context.database)?)
+    }
+
     /// Get the submission with the specified id
     fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
         // TODO: check privilage
@@ -241,19 +250,19 @@ impl Mutation<'_> {
     }
 
     /// Add a user to the current contest
-    pub fn add_user(&self, input: UserInput) -> FieldResult<MutationOk> {
+    pub fn add_users(&self, inputs: Vec<UserInput>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
 
-        user::insert(&self.context.database, &input)?;
+        user::insert(&self.context.database, inputs)?;
 
         Ok(MutationOk)
     }
 
     /// Delete a user from the current contest
-    pub fn delete_user(&self, id: String) -> FieldResult<MutationOk> {
+    pub fn delete_users(&self, ids: Vec<String>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
 
-        user::delete(&self.context.database, UserId(id.to_owned()))?;
+        user::delete(&self.context.database, ids)?;
 
         Ok(MutationOk)
     }
