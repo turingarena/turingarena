@@ -196,7 +196,7 @@ fn ui_message_to_events(
                             .map(|limit| time_usage < limit * warning_watermark)
                             .unwrap_or(true)
                         {
-                            Valence::Success
+                            Valence::Nominal
                         } else if task
                             .time_limit
                             .map(|limit| time_usage < limit)
@@ -224,7 +224,7 @@ fn ui_message_to_events(
                             .map(|limit| memory_usage_bytes < limit * warning_watermark)
                             .unwrap_or(true)
                         {
-                            Valence::Success
+                            Valence::Nominal
                         } else if memory_limit_bytes
                             .map(|limit| memory_usage_bytes < limit)
                             .unwrap_or(true)
