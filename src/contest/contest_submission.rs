@@ -49,19 +49,19 @@ impl SubmissionStatus {
 #[allow(dead_code)]
 pub struct SubmissionFile {
     /// id of the submmission
-    submission_id: String,
+    pub submission_id: String,
 
     /// id of the field in the sumbission form
-    field_id: String,
+    pub field_id: String,
 
     /// type of the file (e.g MIME text/plain)
-    type_id: String,
+    pub type_id: String,
 
     /// name of the file, as uploaded by the user (ex. solution.cpp)
-    name: String,
+    pub name: String,
 
     /// content of the file as bytes
-    content: Vec<u8>,
+    pub content: Vec<u8>,
 }
 
 #[juniper::object]
@@ -88,7 +88,7 @@ impl SubmissionFile {
 }
 
 /// A submission in the database
-#[derive(Queryable)]
+#[derive(Queryable, Clone)]
 pub struct SubmissionData {
     /// id of the submission, that is a random generated UUID
     pub id: String,
@@ -107,29 +107,8 @@ pub struct SubmissionData {
 }
 
 pub struct Submission<'a> {
-    pub context: &'a ApiContext,
+    pub context: &'a ApiContext<'a>,
     pub data: SubmissionData,
-}
-
-impl Submission<'_> {
-    /// converts this submission to a TuringArena submission
-    pub fn to_mem_submission(
-        &self,
-        conn: &SqliteConnection,
-    ) -> QueryResult<submission::Submission> {
-        let mut field_values = Vec::new();
-        let files = submission_files(conn, &self.data.id)?;
-        for file in files {
-            field_values.push(submission::FieldValue {
-                field: submission::FieldId(file.field_id.clone()),
-                file: submission::File {
-                    name: submission::FileName(file.name.clone()),
-                    content: file.content.clone(),
-                },
-            })
-        }
-        Ok(submission::Submission { field_values })
-    }
 }
 
 #[juniper_ext::graphql]
@@ -156,7 +135,7 @@ impl Submission<'_> {
 
     /// List of files of this submission
     fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
-        Ok(submission_files(&self.context.connect_db()?, &self.data.id)?)
+        Ok(submission_files(&self.context.database, &self.data.id)?)
     }
 
     /// Submission status
@@ -167,7 +146,7 @@ impl Submission<'_> {
     /// Scores of this submission
     fn scores(&self) -> FieldResult<Vec<contest_evaluation::ScoreAward>> {
         Ok(contest_evaluation::query_score_awards(
-            &self.context.connect_db()?,
+            &self.context.database,
             &self.data.id,
         )?)
     }
@@ -175,7 +154,7 @@ impl Submission<'_> {
     /// Scores of this submission
     fn badges(&self) -> FieldResult<Vec<contest_evaluation::BadgeAward>> {
         Ok(contest_evaluation::query_badge_awards(
-            &self.context.connect_db()?,
+            &self.context.database,
             &self.data.id,
         )?)
     }
@@ -183,7 +162,7 @@ impl Submission<'_> {
     /// Evaluation events of this submission
     fn evaluation_events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
         Ok(contest_evaluation::query_events(
-            &self.context.connect_db()?,
+            &self.context.database,
             &self.data.id,
         )?)
     }
@@ -260,7 +239,7 @@ pub fn insert(
 }
 
 /// Gets the files of a submission
-fn submission_files(
+pub fn submission_files(
     conn: &SqliteConnection,
     submission_id: &str,
 ) -> QueryResult<Vec<SubmissionFile>> {

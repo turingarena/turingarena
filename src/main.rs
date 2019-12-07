@@ -20,6 +20,7 @@ use contest::contest_submission::SubmissionId;
 use contest::graphql_schema::generate_schema;
 use contest::user::{User, UserId};
 use contest::*;
+use turingarena::contest::api::ApiConfig;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -65,10 +66,10 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    use api::ApiContext;
+    use api::{ApiContext, ApiConfig};
     use Command::*;
     let args = Args::from_args();
-    let context = ApiContext::default().with_args(args.contest);
+    let config = ApiConfig::default().with_args(args.contest);
 
     match args.command {
         GenerateSchema {} => {
@@ -93,14 +94,15 @@ fn main() -> Result<()> {
             run_server(
                 host,
                 port,
-                context
+                config
                     .with_skip_auth(skip_auth)
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
         }
         #[cfg(feature = "cli-admin")]
         Admin { command } => {
-            let context = context.with_skip_auth(true);
+            let config = config.with_skip_auth(true);
+            let context = config.create_context(None);
             let root_node = context.root_node();
 
             let request = command.to_graphql_request();

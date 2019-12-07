@@ -3,9 +3,11 @@ extern crate serde_json;
 
 use super::*;
 use api::ApiContext;
+use crate::contest::api::ApiConfig;
 
 pub fn generate_schema() {
-    let context = ApiContext::default();
+    let config = ApiConfig::default();
+    let context = config.create_context(None);
     let (schema, _errors) = juniper::introspect(
         &context.root_node(),
         &(),

@@ -70,7 +70,7 @@ fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
 impl Problem<'_> {
     /// Path of the problem
     pub fn path(&self) -> PathBuf {
-        self.contest_view.context.problems_dir.join(&self.data.name)
+        self.contest_view.context.config.problems_dir.join(&self.data.name)
     }
 
     /// return the problem pack object
@@ -127,7 +127,7 @@ impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn scores(&self) -> FieldResult<Vec<contest_evaluation::MaxScoreAward>> {
         Ok(contest_evaluation::query_score_awards_of_user_and_problem(
-            &self.problem.contest_view.context.connect_db()?,
+            &self.problem.contest_view.context.database,
             &self.user_id().0,
             self.name(),
         )?)
@@ -136,7 +136,7 @@ impl ProblemTackling<'_> {
     /// Badge awards of the current user (if to be shown)
     fn badges(&self) -> FieldResult<Vec<contest_evaluation::BestBadgeAward>> {
         Ok(contest_evaluation::query_badge_awards_of_user_and_problem(
-            &self.problem.contest_view.context.connect_db()?,
+            &self.problem.contest_view.context.database,
             &self.user_id().0,
             self.name(),
         )?)
@@ -145,7 +145,7 @@ impl ProblemTackling<'_> {
     /// Submissions of the current user (if to be shown)
     fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
         Ok(contest_submission::of_user_and_problem(
-            &self.problem.contest_view.context.connect_db()?,
+            &self.problem.contest_view.context.database,
             &self.user_id().0,
             self.name(),
         )?.into_iter().map(|data| contest_submission::Submission {

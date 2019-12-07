@@ -16,7 +16,7 @@ pub struct QuestionData {
 }
 
 pub struct Question<'a> {
-    pub context: &'a ApiContext,
+    pub context: &'a ApiContext<'a>,
     pub data: QuestionData,
 }
 
@@ -34,7 +34,7 @@ impl Question<'_> {
 
     /// Answer to the question, if answered
     fn answer(&self) -> FieldResult<Option<Answer>> {
-        Ok(answer_to(&self.context.connect_db()?, self.data.id)?)
+        Ok(answer_to(&self.context.database, self.data.id)?)
     }
 
     /// Optionally the problem which the question refers to

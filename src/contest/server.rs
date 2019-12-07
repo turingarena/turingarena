@@ -20,6 +20,7 @@ use web_client::WebContent;
 use rocket::http::ContentType;
 use std::ffi::OsStr;
 use std::io::Cursor;
+use crate::contest::api::ApiConfig;
 
 struct Authorization(Option<String>);
 
@@ -57,16 +58,16 @@ fn options_graphql<'a>() -> Response<'a> {
 fn post_graphql_handler(
     request: juniper_rocket::GraphQLRequest,
     auth: Authorization,
-    context: State<ApiContext>,
+    config: State<ApiConfig>,
 ) -> juniper_rocket::GraphQLResponse {
-    let claims = context.secret.as_ref().and_then(|secret| {
+    let claims = config.secret.as_ref().and_then(|secret| {
         auth.0
             .and_then(|token| match auth::validate(&token, secret) {
                 Ok(claims) => Some(claims),
                 Err(_) => panic!("Invalid token"),
             })
     });
-    let context = context.clone().with_jwt_data(claims);
+    let context = config.create_context(claims);
     request.execute(&context.root_node(), &())
 }
 
@@ -105,14 +106,14 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-pub fn run_server(host: String, port: u16, context: ApiContext) -> Result<()> {
+pub fn run_server(host: String, port: u16, api_config: ApiConfig) -> Result<()> {
     let config = rocket::Config::build(rocket::config::Environment::active()?)
         .port(port)
         .address(host)
         .finalize()?;
 
     rocket::custom(config)
-        .manage(context)
+        .manage(api_config)
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);
         }))

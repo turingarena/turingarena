@@ -59,15 +59,13 @@ impl ImportOperation for ContestYaml {
             context.set_end_time(Local.timestamp(end as i64, 0))?;
         }
 
-        let conn = context.connect_db()?;
-
         for task in self.tasks {
-            contest_problem::insert(&conn, ProblemName(task))?;
+            contest_problem::insert(&context.database, ProblemName(task))?;
         }
 
         for user in self.users {
             user::insert(
-                &conn,
+                &context.database,
                 &UserInput {
                     id: user.username,
                     display_name: format!("{} {}", user.first_name, user.last_name),

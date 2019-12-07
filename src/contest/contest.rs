@@ -26,7 +26,7 @@ pub struct UserToken {
 
 /// A ContestView structure
 pub struct ContestView<'a> {
-    pub context: &'a ApiContext,
+    pub context: &'a ApiContext<'a>,
     /// User of the current contest view
     pub user_id: Option<UserId>,
 }
@@ -37,7 +37,7 @@ impl ContestView<'_> {
     /// The user for this contest view, if any
     fn user(&self) -> FieldResult<Option<User>> {
         let result = if let Some(user_id) = &self.user_id {
-            Some(user::by_id(&self.context.connect_db()?, user_id.clone())?)
+            Some(user::by_id(&self.context.database, user_id.clone())?)
         } else {
             None
         };
@@ -46,7 +46,7 @@ impl ContestView<'_> {
 
     /// The contest home page
     fn home(&self) -> File {
-        self.context.problems_dir
+        self.context.config.problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -81,7 +81,7 @@ impl ContestView<'_> {
 
     /// Title of the contest, as shown to the user
     fn title(&self) -> Text {
-        self.context.problems_dir
+        self.context.config.problems_dir
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -116,7 +116,7 @@ impl ContestView<'_> {
     fn problem(&self, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
 
-        let data = contest_problem::by_name(&self.context.connect_db()?, name)?;
+        let data = contest_problem::by_name(&self.context.database, name)?;
         Ok(Problem {
             data,
             contest_view: &self,
@@ -126,7 +126,7 @@ impl ContestView<'_> {
     /// List of problems that the user can see
     fn problems(&self) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
-        let problems = contest_problem::all(&self.context.connect_db()?)?
+        let problems = contest_problem::all(&self.context.database)?
             .into_iter()
             .map(|p| Problem {
                 data: p,
@@ -138,19 +138,19 @@ impl ContestView<'_> {
 
     /// Start time of the user participation, as RFC3339 date
     fn start_time(&self) -> FieldResult<String> {
-        Ok(current_contest(&self.context.connect_db()?)?.start_time)
+        Ok(current_contest(&self.context.database)?.start_time)
     }
 
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self) -> FieldResult<String> {
-        Ok(current_contest(&self.context.connect_db()?)?.end_time)
+        Ok(current_contest(&self.context.database)?.end_time)
     }
 
     /// Questions made by the current user
     fn questions(&self) -> FieldResult<Option<Vec<Question>>> {
         if let Some(user_id) = &self.user_id {
             Ok(Some(questions::question_of_user(
-                &self.context.connect_db()?,
+                &self.context.database,
                 user_id,
             )?.into_iter().map(|data| Question {
                 context: self.context,
@@ -167,7 +167,7 @@ impl ContestView<'_> {
 
     /// Return a list of announcements
     fn announcements(&self) -> FieldResult<Vec<Announcement>> {
-        Ok(announcements::query_all(&self.context.connect_db()?)?)
+        Ok(announcements::query_all(&self.context.database)?)
     }
 }
 

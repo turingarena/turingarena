@@ -6,8 +6,6 @@ use diesel::{Connection, ConnectionResult, SqliteConnection};
 use juniper::{FieldError, FieldResult};
 use structopt::StructOpt;
 
-use super::*;
-
 use auth::JwtData;
 use contest::{ContestView, UserToken};
 use contest_problem::Problem;
@@ -15,6 +13,8 @@ use formats::{import, ImportInput};
 use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
+
+use super::*;
 
 embed_migrations!();
 
@@ -40,18 +40,13 @@ pub struct ContestArgs {
     pub problems_dir: PathBuf,
 }
 
-/// API entry point.
-/// The same struct is used as context, query and mutation type.
 #[derive(Debug, Clone)]
-pub struct ApiContext {
+pub struct ApiConfig {
     /// Skip all authentication
     skip_auth: bool,
 
     /// Secret code to use for authenticating a JWT token.
     pub secret: Option<Vec<u8>>,
-
-    /// JWT data of the token submitted to the server (if any)
-    jwt_data: Option<JwtData>,
 
     /// Path of the database on the filesystem
     pub database_url: PathBuf,
@@ -60,19 +55,73 @@ pub struct ApiContext {
     pub problems_dir: PathBuf,
 }
 
-impl Default for ApiContext {
-    fn default() -> ApiContext {
-        ApiContext {
+pub struct ApiContext<'a> {
+    pub config: &'a ApiConfig,
+    /// JWT data of the token submitted to the server (if any)
+    pub jwt_data: Option<JwtData>,
+    pub database: SqliteConnection,
+}
+
+impl Default for ApiConfig {
+    fn default() -> ApiConfig {
+        ApiConfig {
             skip_auth: false,
             secret: None,
-            jwt_data: None,
             database_url: PathBuf::default(),
             problems_dir: PathBuf::default(),
         }
     }
 }
 
-impl ApiContext {
+impl ApiConfig {
+    pub fn create_context(&self, jwt_data: Option<JwtData>) -> ApiContext {
+        ApiContext {
+            config: &self,
+            database: self.connect_db(),
+            jwt_data,
+        }
+    }
+
+    fn connect_db(&self) -> SqliteConnection {
+        let conn = SqliteConnection::establish(self.database_url.to_str().unwrap()).expect("Unable to establish connection");
+        conn.execute("PRAGMA busy_timeout = 5000;")
+            .expect("Unable to set `busy_timeout`");
+        conn
+    }
+
+    pub fn with_args(self, args: ContestArgs) -> ApiConfig {
+        self.with_database_url(args.database_url)
+            .with_problems_dir(args.problems_dir)
+    }
+
+    /// Set the database URL
+    pub fn with_database_url(self, database_url: PathBuf) -> ApiConfig {
+        ApiConfig {
+            database_url,
+            ..self
+        }
+    }
+
+    /// Set the problems directory
+    pub fn with_problems_dir(self, problems_dir: PathBuf) -> ApiConfig {
+        ApiConfig {
+            problems_dir,
+            ..self
+        }
+    }
+
+    /// Sets a secret
+    pub fn with_secret(self, secret: Option<Vec<u8>>) -> ApiConfig {
+        ApiConfig { secret, ..self }
+    }
+
+    /// Sets if to skip authentication
+    pub fn with_skip_auth(self, skip_auth: bool) -> ApiConfig {
+        ApiConfig { skip_auth, ..self }
+    }
+}
+
+impl ApiContext<'_> {
     pub fn root_node(&self) -> RootNode {
         RootNode::new(Query {
             context: &self,
@@ -81,45 +130,9 @@ impl ApiContext {
         })
     }
 
-    pub fn with_args(self, args: ContestArgs) -> ApiContext {
-        self.with_database_url(args.database_url)
-            .with_problems_dir(args.problems_dir)
-    }
-
-    /// Set the database URL
-    pub fn with_database_url(self, database_url: PathBuf) -> ApiContext {
-        ApiContext {
-            database_url,
-            ..self
-        }
-    }
-
-    /// Set the problems directory
-    pub fn with_problems_dir(self, problems_dir: PathBuf) -> ApiContext {
-        ApiContext {
-            problems_dir,
-            ..self
-        }
-    }
-
-    /// Sets a JWT data
-    pub fn with_jwt_data(self, jwt_data: Option<JwtData>) -> ApiContext {
-        ApiContext { jwt_data, ..self }
-    }
-
-    /// Sets a secret
-    pub fn with_secret(self, secret: Option<Vec<u8>>) -> ApiContext {
-        ApiContext { secret, ..self }
-    }
-
-    /// Sets if to skip authentication
-    pub fn with_skip_auth(self, skip_auth: bool) -> ApiContext {
-        ApiContext { skip_auth, ..self }
-    }
-
     /// Authorize admin operations
     pub fn authorize_admin(&self) -> juniper::FieldResult<()> {
-        if self.skip_auth {
+        if self.config.skip_auth {
             return Ok(());
         }
         return Err(juniper::FieldError::from("Forbidden"));
@@ -127,12 +140,12 @@ impl ApiContext {
 
     /// Authenticate user
     pub fn authorize_user(&self, user_id: &Option<UserId>) -> juniper::FieldResult<()> {
-        if self.skip_auth {
+        if self.config.skip_auth {
             return Ok(());
         }
 
         if let Some(id) = user_id {
-            if self.secret != None {
+            if self.config.secret != None {
                 if let Some(data) = &self.jwt_data {
                     if data.user != id.0 {
                         return Err(juniper::FieldError::from("Forbidden for the given user id"));
@@ -145,38 +158,30 @@ impl ApiContext {
         Ok(())
     }
 
-    /// Open a connection to the database
-    pub fn connect_db(&self) -> ConnectionResult<SqliteConnection> {
-        let conn = SqliteConnection::establish(self.database_url.to_str().unwrap())?;
-        conn.execute("PRAGMA busy_timeout = 5000;")
-            .expect("Unable to set `busy_timeout`");
-        Ok(conn)
-    }
-
     // TODO: move the following methods in a more appropriate location
 
     /// Initialize the database
     pub fn init_db(&self) -> Result<()> {
-        embedded_migrations::run_with_output(&self.connect_db()?, &mut std::io::stdout())?;
-        contest::create_config(&self.connect_db()?)?;
+        embedded_migrations::run_with_output(&self.database, &mut std::io::stdout())?;
+        contest::create_config(&self.database)?;
         Ok(())
     }
 
     /// Set the start time of the current contest
     pub fn set_start_time(&self, time: DateTime<Local>) -> Result<()> {
-        contest::set_start_time(&self.connect_db()?, time)?;
+        contest::set_start_time(&self.database, time)?;
         Ok(())
     }
 
     /// Set the end time of the current contest
     pub fn set_end_time(&self, time: DateTime<Local>) -> Result<()> {
-        contest::set_end_time(&self.connect_db()?, time)?;
+        contest::set_end_time(&self.database, time)?;
         Ok(())
     }
 }
 
 pub struct Query<'a> {
-    pub context: &'a ApiContext
+    pub context: &'a ApiContext<'a>
 }
 
 #[juniper_ext::graphql]
@@ -187,7 +192,7 @@ impl Query<'_> {
 
         Ok(ContestView {
             context: self.context,
-            user_id
+            user_id,
         })
     }
 
@@ -198,7 +203,7 @@ impl Query<'_> {
     ) -> FieldResult<contest_submission::Submission> {
         // TODO: check privilage
         let data = contest_submission::query(
-            &self.context.connect_db()?,
+            &self.context.database,
             &submission_id,
         )?;
         Ok(contest_submission::Submission {
@@ -214,7 +219,7 @@ impl Query<'_> {
 }
 
 pub struct Mutation<'a> {
-    pub context: &'a ApiContext,
+    pub context: &'a ApiContext<'a>,
 }
 
 #[juniper_ext::graphql]
@@ -229,9 +234,9 @@ impl Mutation<'_> {
     /// Authenticate a user, generating a JWT authentication token
     fn auth(&self, token: String) -> FieldResult<Option<UserToken>> {
         Ok(auth::auth(
-            &self.context.connect_db()?,
+            &self.context.database,
             &token,
-            self.context.secret
+            self.context.config.secret
                 .as_ref()
                 .ok_or_else(|| FieldError::from("Authentication disabled"))?,
         )?)
@@ -246,7 +251,7 @@ impl Mutation<'_> {
     pub fn add_user(&self, input: UserInput) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
 
-        user::insert(&self.context.connect_db()?, &input)?;
+        user::insert(&self.context.database, &input)?;
 
         Ok(MutationOk)
     }
@@ -255,20 +260,20 @@ impl Mutation<'_> {
     pub fn delete_user(&self, id: String) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
 
-        user::delete(&self.context.connect_db()?, UserId(id.to_owned()))?;
+        user::delete(&self.context.database, UserId(id.to_owned()))?;
 
         Ok(MutationOk)
     }
 
     /// Add a problem to the current contest
     pub fn add_problem(&self, name: String) -> FieldResult<MutationOk> {
-        contest_problem::insert(&self.context.connect_db()?, ProblemName(name))?;
+        contest_problem::insert(&self.context.database, ProblemName(name))?;
         Ok(MutationOk)
     }
 
     /// Delete a problem from the current contest
     pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
-        contest_problem::delete(&self.context.connect_db()?, ProblemName(name))?;
+        contest_problem::delete(&self.context.database, ProblemName(name))?;
         Ok(MutationOk)
     }
 
@@ -285,7 +290,7 @@ impl Mutation<'_> {
         problem_name: ProblemName,
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
-        let conn = self.context.connect_db()?;
+        let conn = &self.context.database;
         let data = contest_submission::insert(&conn, &user_id.0, &problem_name.0, files)?;
         let problem = Problem {
             data: contest_problem::by_name(&conn, problem_name)?,
@@ -296,9 +301,9 @@ impl Mutation<'_> {
         };
         let submission = contest_submission::Submission {
             context: self.context,
-            data,
+            data: data.clone(),
         };
-        contest_evaluation::evaluate(problem.pack(), &submission, conn)?;
+        contest_evaluation::evaluate(problem.pack(), &data, &self.context.config)?;
         Ok(submission)
     }
 }

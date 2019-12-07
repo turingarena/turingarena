@@ -11,6 +11,8 @@ use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
 use problem::driver::{ProblemDriver, ProblemPack};
 use schema::{badge_awards, evaluation_events, score_awards};
+use crate::contest::api::{ApiContext, ApiConfig};
+use crate::contest::contest_submission::{SubmissionData, submission_files};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -303,17 +305,33 @@ pub fn query_badge_awards(
 /// start the evaluation thread
 pub fn evaluate(
     problem_pack: ProblemPack,
-    submission: &Submission,
-    db_connection: SqliteConnection,
+    submission_data: &SubmissionData,
+    config: &ApiConfig,
 ) -> QueryResult<()> {
-    let submission_id = submission.data.id.clone();
-    let submission = submission.to_mem_submission(&db_connection)?;
+    let config = config.clone();
+    let submission_data = submission_data.clone();
     thread::spawn(move || {
+        let context = config.create_context(None);
+
+        let mut field_values = Vec::new();
+        let files = submission_files(&context.database, &submission_data.id).expect("Unable to load submission files");
+        for file in files {
+            field_values.push(submission::FieldValue {
+                field: submission::FieldId(file.field_id.clone()),
+                file: submission::File {
+                    name: submission::FileName(file.name.clone()),
+                    content: file.content.clone(),
+                },
+            })
+        }
+
+        let submission = submission::Submission { field_values };
+
         let Evaluation(receiver) = do_evaluate(problem_pack, submission);
         for (serial, event) in receiver.into_iter().enumerate() {
-            insert_event(&db_connection, serial as i32, &submission_id, &event).unwrap();
+            insert_event(&context.database, serial as i32, &submission_data.id, &event).unwrap();
         }
-        contest_submission::set_status(&db_connection, &submission_id, SubmissionStatus::Success)
+        contest_submission::set_status(&context.database, &submission_data.id, SubmissionStatus::Success)
             .unwrap();
     });
     Ok(())
