@@ -8,12 +8,18 @@ use task_maker_format::{ioi, EvaluationConfig};
 use evaluation::*;
 use problem::{driver::*, material::*, *};
 use submission::*;
+use crate::problem::driver::ProblemDriver;
+use crate::problem::ProblemName;
+use crate::problem::material::Material;
+use crate::submission::Submission;
+use crate::evaluation::Evaluation;
+use std::path::{PathBuf, Path};
 
 pub struct IoiProblemDriver;
 
-fn load_task(pack: ProblemPack) -> Result<ioi::Task, Error> {
+fn load_task<P: AsRef<Path>>(path: P) -> Result<ioi::Task, Error> {
     ioi::Task::new(
-        pack.0,
+        path,
         &EvaluationConfig {
             solution_filter: vec![],
             booklet_solutions: false,
@@ -25,21 +31,18 @@ fn load_task(pack: ProblemPack) -> Result<ioi::Task, Error> {
 
 impl ProblemDriver for IoiProblemDriver {
     type Error = failure::Error;
-    type StatError = Self::Error;
 
-    fn stat(pack: ProblemPack) -> Result<ProblemStat, Self::Error> {
-        let task = load_task(pack)?;
-        Ok(ProblemStat {
-            name: ProblemName(task.name),
-        })
+    fn generate_material<P: AsRef<Path>>(
+        task_path: P,
+    ) -> Result<Material, Self::Error> {
+        let task = load_task(task_path)?;
+        Ok(super::material::generate_material(&task))
     }
 
-    fn gen_material(pack: ProblemPack) -> Result<Material, Self::Error> {
-        let task = load_task(pack)?;
-        Ok(super::material::gen_material(&task))
-    }
-
-    fn evaluate(pack: ProblemPack, submission: Submission) -> Evaluation {
-        Evaluation(super::evaluate::run_evaluation(pack.0, submission))
+    fn evaluate<P: AsRef<Path>>(
+        task_path: P,
+        submission: submission::Submission,
+    ) -> evaluation::Evaluation {
+        Evaluation(super::evaluate::run_evaluation(task_path, submission))
     }
 }

@@ -3,7 +3,9 @@
 extern crate base64;
 extern crate serde;
 
+use super::*;
 use serde::{Deserialize, Serialize};
+use juniper::FieldResult;
 
 /// Wraps the content of a file, as array of bytes.
 #[derive(Serialize, Deserialize, Clone)]
@@ -20,3 +22,15 @@ juniper::graphql_object!(FileContent: () where Scalar = <S> |&self| {
         String::from_utf8(self.0.clone()).ok()
     }
 });
+
+/// Wraps the content of a file, as array of bytes.
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLInputObject)]
+pub struct FileContentInput {
+    base64: String,
+}
+
+impl FileContentInput {
+    pub fn decode(&self) -> FieldResult<Vec<u8>> {
+        Ok(base64::decode(&self.base64)?)
+    }
+}

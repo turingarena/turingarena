@@ -11,8 +11,10 @@ use crate::contest::contest_submission::{submission_files, SubmissionData};
 use award::{AwardName, Score};
 use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
-use problem::driver::{ProblemDriver, ProblemPack};
+use problem::driver::ProblemDriver;
 use schema::{badge_awards, evaluation_events, score_awards};
+use crate::contest::contest_problem::ProblemData;
+use std::path::{Path, PathBuf};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -303,13 +305,14 @@ pub fn query_badge_awards(
 }
 
 /// start the evaluation thread
-pub fn evaluate(
-    problem_pack: ProblemPack,
+pub fn evaluate<P: AsRef<Path>>(
+    problem_path: P,
     submission_data: &SubmissionData,
     config: &ApiConfig,
 ) -> QueryResult<()> {
     let config = config.clone();
     let submission_data = submission_data.clone();
+    let problem_path = problem_path.as_ref().to_owned();
     thread::spawn(move || {
         let context = config.create_context(None);
 
@@ -328,7 +331,7 @@ pub fn evaluate(
 
         let submission = submission::Submission { field_values };
 
-        let Evaluation(receiver) = do_evaluate(problem_pack, submission);
+        let Evaluation(receiver) = do_evaluate(problem_path, submission);
         for (serial, event) in receiver.into_iter().enumerate() {
             insert_event(
                 &context.database,
@@ -349,17 +352,17 @@ pub fn evaluate(
 }
 
 #[cfg(feature = "task-maker")]
-fn do_evaluate(
-    problem_pack: ProblemPack,
+fn do_evaluate<P: AsRef<Path>>(
+    problem_path: P,
     submission: submission::Submission,
 ) -> evaluation::Evaluation {
     use task_maker::driver::IoiProblemDriver;
-    IoiProblemDriver::evaluate(problem_pack, submission)
+    IoiProblemDriver::evaluate(problem_path, submission)
 }
 
 #[cfg(not(feature = "task-maker"))]
-fn do_evaluate(
-    problem_pack: ProblemPack,
+fn do_evaluate<P: AsRef<Path>>(
+    problem_path: P,
     submission: submission::Submission,
 ) -> evaluation::Evaluation {
     unreachable!("Enable feature 'task-maker' to evaluate solutions")

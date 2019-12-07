@@ -5,7 +5,7 @@ extern crate task_maker_format;
 extern crate task_maker_store;
 
 pub mod driver;
-pub(crate) mod evaluate;
-pub(crate) mod material;
+pub mod evaluate;
+pub mod material;
 
 use super::*;

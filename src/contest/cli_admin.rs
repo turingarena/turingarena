@@ -3,6 +3,9 @@ extern crate graphql_client;
 extern crate reqwest;
 extern crate rpassword;
 
+extern crate tar;
+extern crate xz2;
+
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
 use graphql_client::{GraphQLQuery, QueryBody};
@@ -32,6 +35,8 @@ pub enum AdminCommand {
     AddProblem {
         #[structopt(long)]
         name: String,
+        #[structopt(long)]
+        path: String,
     },
     DeleteProblem {
         name: String,
@@ -75,10 +80,27 @@ impl AdminCommand {
                 DeleteUserMutation::build_query,
                 delete_user_mutation::Variables { id },
             ),
-            AddProblem { name } => make_request(
-                AddProblemMutation::build_query,
-                add_problem_mutation::Variables { name },
-            ),
+            AddProblem { name, path } => {
+                let mut archive_content = Vec::<u8>::new();
+
+                {
+                    let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut archive_content, 5));
+                    builder.append_dir_all(".", path).expect("Unable to pack problem dir");
+                    builder.into_inner().expect("Unable to build archive").finish().expect("Unable to build archive")
+                };
+
+                make_request(
+                    AddProblemMutation::build_query,
+                    add_problem_mutation::Variables {
+                        input: add_problem_mutation::ProblemInput {
+                            name,
+                            archive_content: add_problem_mutation::FileContentInput {
+                                base64: base64::encode(&archive_content)
+                            },
+                        }
+                    },
+                )
+            },
             DeleteProblem { name } => make_request(
                 DeleteProblemMutation::build_query,
                 delete_problem_mutation::Variables { name },

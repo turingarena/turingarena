@@ -39,6 +39,7 @@ table! {
 table! {
     problems (name) {
         name -> Text,
+        archive_content -> Binary,
     }
 }
 

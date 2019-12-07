@@ -1,5 +1,5 @@
 use std::default::Default;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 use chrono::{DateTime, Local};
 use diesel::{Connection, ConnectionResult, SqliteConnection};
@@ -16,6 +16,8 @@ use user::UserInput;
 
 use super::*;
 use crate::contest::user::User;
+use std::env::temp_dir;
+use crate::contest::contest_problem::ProblemInput;
 
 embed_migrations!();
 
@@ -35,10 +37,6 @@ pub struct ContestArgs {
     /// url of the database
     #[structopt(long, env = "DATABASE_URL", default_value = "./database.sqlite3")]
     pub database_url: PathBuf,
-
-    /// path of the directory in which are contained the problems
-    #[structopt(long, env = "PROBLEMS_DIR", default_value = "./")]
-    pub problems_dir: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -51,9 +49,6 @@ pub struct ApiConfig {
 
     /// Path of the database on the filesystem
     pub database_url: PathBuf,
-
-    /// Path of the problems directory on the filesystem
-    pub problems_dir: PathBuf,
 }
 
 pub struct ApiContext<'a> {
@@ -61,6 +56,7 @@ pub struct ApiContext<'a> {
     /// JWT data of the token submitted to the server (if any)
     pub jwt_data: Option<JwtData>,
     pub database: SqliteConnection,
+    pub workspace_path: PathBuf,
 }
 
 impl Default for ApiConfig {
@@ -69,17 +65,21 @@ impl Default for ApiConfig {
             skip_auth: false,
             secret: None,
             database_url: PathBuf::default(),
-            problems_dir: PathBuf::default(),
         }
     }
 }
 
 impl ApiConfig {
     pub fn create_context(&self, jwt_data: Option<JwtData>) -> ApiContext {
+        // FIXME: should not create directory here
+        let workspace_path = temp_dir().join("turingarena");
+        std::fs::create_dir_all(&workspace_path).expect("Unable to create workspace dir");
+
         ApiContext {
             config: &self,
             database: self.connect_db(),
             jwt_data,
+            workspace_path,
         }
     }
 
@@ -93,21 +93,12 @@ impl ApiConfig {
 
     pub fn with_args(self, args: ContestArgs) -> ApiConfig {
         self.with_database_url(args.database_url)
-            .with_problems_dir(args.problems_dir)
     }
 
     /// Set the database URL
     pub fn with_database_url(self, database_url: PathBuf) -> ApiConfig {
         ApiConfig {
             database_url,
-            ..self
-        }
-    }
-
-    /// Set the problems directory
-    pub fn with_problems_dir(self, problems_dir: PathBuf) -> ApiConfig {
-        ApiConfig {
-            problems_dir,
             ..self
         }
     }
@@ -126,6 +117,10 @@ impl ApiConfig {
 impl ApiContext<'_> {
     pub fn root_node(&self) -> RootNode {
         RootNode::new(Query { context: &self }, Mutation { context: &self })
+    }
+
+    pub fn workspace_path(&self) -> &Path {
+        &self.workspace_path
     }
 
     /// Authorize admin operations
@@ -268,8 +263,8 @@ impl Mutation<'_> {
     }
 
     /// Add a problem to the current contest
-    pub fn add_problem(&self, name: String) -> FieldResult<MutationOk> {
-        contest_problem::insert(&self.context.database, ProblemName(name))?;
+    pub fn add_problems(&self, inputs: Vec<ProblemInput>) -> FieldResult<MutationOk> {
+        contest_problem::insert(&self.context.database, inputs)?;
         Ok(MutationOk)
     }
 
@@ -305,7 +300,7 @@ impl Mutation<'_> {
             context: self.context,
             data: data.clone(),
         };
-        contest_evaluation::evaluate(problem.pack(), &data, &self.context.config)?;
+        contest_evaluation::evaluate(problem.unpack(), &data, &self.context.config)?;
         Ok(submission)
     }
 }

@@ -293,7 +293,6 @@ mod tests {
         std::fs::create_dir(&pp);
         let contest = Contest {
             database_url: db.to_owned(),
-            problems_dir: tmp.path().to_owned(),
         };
         contest.init_db();
         contest.add_user("user", "x", "x");

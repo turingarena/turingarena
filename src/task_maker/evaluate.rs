@@ -3,7 +3,7 @@ extern crate tempdir;
 
 use super::*;
 
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
     Arc,
@@ -28,7 +28,8 @@ use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
 use task_maker_format::ioi::Task;
 
-pub fn run_evaluation(task_path: PathBuf, submission: Submission) -> Receiver<Event> {
+pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Receiver<Event> {
+    let task_path = task_path.as_ref().to_owned();
     let (event_tx, event_rx) = channel();
 
     let store_path = task_path.join(".task-maker-files");

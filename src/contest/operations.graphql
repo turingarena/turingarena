@@ -17,8 +17,8 @@ mutation DeleteUserMutation($id: String!) {
     }
 }
 
-mutation AddProblemMutation($name: String!) {
-    addProblem(name: $name) {
+mutation AddProblemMutation($input: ProblemInput!) {
+    addProblems(inputs: [$input]) {
         ok
     }
 }

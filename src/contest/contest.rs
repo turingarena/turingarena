@@ -14,6 +14,7 @@ use problem::ProblemName;
 use questions::{Question, QuestionInput};
 use schema::contest;
 use user::{User, UserId};
+use std::path::PathBuf;
 
 /// A user authorization token
 #[derive(juniper::GraphQLObject)]
@@ -46,9 +47,8 @@ impl ContestView<'_> {
 
     /// The contest home page
     fn home(&self) -> File {
-        self.context
-            .config
-            .problems_dir
+        // FIXME: using current dir
+        PathBuf::from(".")
             .read_dir()
             .unwrap()
             .flat_map(|result| {
@@ -83,9 +83,8 @@ impl ContestView<'_> {
 
     /// Title of the contest, as shown to the user
     fn title(&self) -> Text {
-        self.context
-            .config
-            .problems_dir
+        // FIXME: using current dir
+        PathBuf::from(".")
             .read_dir()
             .unwrap()
             .flat_map(|result| {

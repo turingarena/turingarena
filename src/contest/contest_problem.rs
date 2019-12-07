@@ -1,25 +1,35 @@
 use super::*;
 
-use crate::contest::contest::ContestView;
+use super::contest::ContestView;
 use api::ApiContext;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::{FieldError, FieldResult};
-use problem::driver::{ProblemDriver, ProblemPack};
+use problem::driver::ProblemDriver;
 use problem::material::Material;
 use problem::ProblemName;
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
+use rand::Rng;
+use file::FileContentInput;
 
 #[derive(Insertable)]
 #[table_name = "problems"]
-struct ProblemDataInput<'a> {
+struct ProblemInsertable<'a> {
     name: &'a str,
+    archive_content: &'a [u8],
 }
 
-#[derive(Queryable, Clone)]
+#[derive(juniper::GraphQLInputObject)]
+pub struct ProblemInput {
+    name: String,
+    archive_content: FileContentInput,
+}
+
+#[derive(Queryable, Clone, Debug)]
 pub struct ProblemData {
     name: String,
+    archive_content: Vec<u8>,
 }
 
 /// A problem in the contest
@@ -41,7 +51,7 @@ impl Problem<'_> {
 
     /// Material of this problem
     fn material(&self) -> FieldResult<Material> {
-        get_problem_material(self.pack()).map_err(FieldError::from)
+        self.get_problem_material().map_err(FieldError::from)
     }
 
     /// Material of this problem
@@ -53,31 +63,43 @@ impl Problem<'_> {
         }
     }
 }
-/// Material of this problem
-#[cfg(feature = "task-maker")]
-fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    task_maker::driver::IoiProblemDriver::gen_material(pack).map_err(FieldError::from)
-}
-
-/// Material of this problem
-#[cfg(not(feature = "task-maker"))]
-fn get_problem_material(pack: ProblemPack) -> FieldResult<Material> {
-    unreachable!("Enable feature 'task-maker' to generate problem material")
-}
 
 impl Problem<'_> {
-    /// Path of the problem
-    pub fn path(&self) -> PathBuf {
-        self.contest_view
-            .context
-            .config
-            .problems_dir
-            .join(&self.data.name)
+    pub fn unpack(&self) -> PathBuf {
+        let integrity = ssri::Integrity::from(&self.data.archive_content);
+
+        let workspace_path = &self.contest_view.context.workspace_path().to_owned();
+
+        let task_path = workspace_path.join(integrity.to_hex().1);
+
+        if !task_path.exists() {
+            let temp_name_len = 8;
+            let temp_name: String = std::iter::repeat(())
+                .take(temp_name_len)
+                .map(|()| rand::thread_rng().sample(rand::distributions::Alphanumeric))
+                .collect();
+
+            let temp_path = workspace_path.join(format!("{}.{}.part", integrity.to_hex().1, temp_name));
+
+            let mut archive = tar::Archive::new(xz2::read::XzDecoder::new(&self.data.archive_content[..]));
+            archive.unpack(&temp_path).expect("Cannot extract problem archive");
+
+            std::fs::rename(&temp_path, &task_path).expect("Cannot move extracted problem archive");
+        }
+
+        task_path
     }
 
-    /// return the problem pack object
-    pub fn pack(&self) -> ProblemPack {
-        ProblemPack(std::path::PathBuf::from(&self.path()))
+    /// Material of this problem
+    #[cfg(feature = "task-maker")]
+    fn get_problem_material(&self) -> FieldResult<Material> {
+        task_maker::driver::IoiProblemDriver::generate_material(self.unpack()).map_err(FieldError::from)
+    }
+
+    /// Material of this problem
+    #[cfg(not(feature = "task-maker"))]
+    fn get_problem_material(&self) -> FieldResult<Material> {
+        unreachable!("Enable feature 'task-maker' to generate problem material")
     }
 }
 
@@ -92,12 +114,15 @@ pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
 }
 
 /// Insert a problem in the database
-pub fn insert(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
-    let problem = ProblemDataInput { name: &name.0 };
-    // FIXME: replace_into not supported by PostgreSQL
-    diesel::replace_into(schema::problems::table)
-        .values(problem)
-        .execute(conn)?;
+pub fn insert<T: IntoIterator<Item = ProblemInput>>(conn: &SqliteConnection, inputs: T) -> juniper::FieldResult<()> {
+    for input in inputs.into_iter() {
+        diesel::replace_into(problems::table)
+            .values(ProblemInsertable {
+                name: &input.name,
+                archive_content: &input.archive_content.decode()?,
+            })
+            .execute(conn)?;
+    }
     Ok(())
 }
 

@@ -68,21 +68,16 @@ pub mod driver {
 
     use super::*;
     use crate::*;
-
-    pub struct ProblemStat {
-        pub name: ProblemName,
-    }
-
-    pub struct ProblemPack(pub path::PathBuf);
+    use std::path::Path;
 
     pub trait ProblemDriver {
-        type StatError;
         type Error;
 
-        fn stat(pack: ProblemPack) -> Result<ProblemStat, Self::StatError>;
-        fn gen_material(pack: ProblemPack) -> Result<material::Material, Self::Error>;
-        fn evaluate(
-            pack: ProblemPack,
+        fn generate_material<P: AsRef<Path>>(
+            task_path: P,
+        ) -> Result<material::Material, Self::Error>;
+        fn evaluate<P: AsRef<Path>>(
+            task_path: P,
             submission: submission::Submission,
         ) -> evaluation::Evaluation;
     }

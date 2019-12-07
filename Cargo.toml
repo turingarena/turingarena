@@ -37,7 +37,11 @@ contest = [
     "dirs",
     "uuid",
     "diesel",
-    "diesel_migrations"
+    "diesel_migrations",
+    "rand",
+    "ssri",
+    "tar",
+    "xz2",
 ]
 web = [
     "graphql-schema",
@@ -100,6 +104,10 @@ task-maker-dag = { git = "https://github.com/edomora97/task-maker-rust.git", opt
 task-maker-exec = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
 task-maker-format = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
 task-maker-store = { git = "https://github.com/edomora97/task-maker-rust.git", optional = true }
+
+ssri = { version = "5.0.0", optional = true }
+tar = { version = "0.4.26", optional = true }
+xz2 = { version = "0.1.6", optional = true }
 
 [build-dependencies]
 

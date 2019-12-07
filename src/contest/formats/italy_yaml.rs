@@ -12,6 +12,8 @@ use user;
 use user::{UserId, UserInput};
 
 use super::*;
+use crate::contest::contest_problem::ProblemInput;
+use crate::file::FileContentInput;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
@@ -57,9 +59,10 @@ impl ImportOperation for ContestYaml {
             context.set_end_time(Local.timestamp(end as i64, 0))?;
         }
 
-        for task in self.tasks {
-            contest_problem::insert(&context.database, ProblemName(task))?;
-        }
+//        contest_problem::insert(&context.database, self.tasks.iter().map(|name| ProblemInput {
+//            name: name.to_owned(),
+//            archive_content: unreachable!("TODO"),
+//        }))?;
 
         user::insert(
             &context.database,

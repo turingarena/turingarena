@@ -298,7 +298,7 @@ fn statements_of(task_dir: &Path) -> Vec<FileVariant> {
     result
 }
 
-pub fn gen_material(task: &ioi::Task) -> Material {
+pub fn generate_material(task: &ioi::Task) -> Material {
     Material {
         title: vec![
             TextVariant {

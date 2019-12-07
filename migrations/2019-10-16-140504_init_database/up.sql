@@ -1,5 +1,6 @@
 CREATE TABLE problems(
-    name            TEXT NOT NULL PRIMARY KEY
+    name            TEXT NOT NULL PRIMARY KEY,
+    archive_content BLOB NOT NULL
 );
 
 CREATE TABLE users(
