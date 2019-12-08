@@ -1,6 +1,6 @@
-/// Modules to help creating a problem.
-///
-/// TODO
+//! Modules to help creating a problem.
+//!
+//! TODO
 
 pub mod autoio;
 pub mod batch;
