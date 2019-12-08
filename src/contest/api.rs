@@ -181,18 +181,13 @@ impl Query<'_> {
 
     fn users(&self) -> FieldResult<Vec<User>> {
         self.context.authorize_admin()?;
-
-        Ok(user::list(&self.context.database)?)
+        User::list(&self.context)
     }
 
     /// Get the submission with the specified id
     fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
-        // TODO: check privilage
-        let data = contest_submission::query(&self.context.database, &submission_id)?;
-        Ok(contest_submission::Submission {
-            context: self.context,
-            data,
-        })
+        // TODO: check authorization
+        contest_submission::Submission::by_id(&self.context, &submission_id)
     }
 
     /// Current time on the server as RFC3339 date
@@ -227,15 +222,7 @@ impl Mutation<'_> {
 
     /// Authenticate a user, generating a JWT authentication token
     fn auth(&self, token: String) -> FieldResult<Option<UserToken>> {
-        Ok(auth::auth(
-            &self.context.database,
-            &token,
-            self.context
-                .config
-                .secret
-                .as_ref()
-                .ok_or_else(|| FieldError::from("Authentication disabled"))?,
-        )?)
+        Ok(auth::auth(&self.context, &token)?)
     }
 
     /// Current time on the server as RFC3339 date
@@ -287,35 +274,34 @@ impl Mutation<'_> {
     /// Add a user to the current contest
     pub fn add_users(&self, inputs: Vec<UserInput>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-
-        user::insert(&self.context.database, inputs)?;
-
+        User::insert(&self.context, inputs)?;
         Ok(MutationOk)
     }
 
     /// Delete a user from the current contest
     pub fn delete_users(&self, ids: Vec<String>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-
-        user::delete(&self.context.database, ids)?;
-
+        User::delete(&self.context, ids)?;
         Ok(MutationOk)
     }
 
     /// Add a problem to the current contest
     pub fn add_problems(&self, inputs: Vec<ProblemInput>) -> FieldResult<MutationOk> {
-        contest_problem::insert(&self.context.database, inputs)?;
+        self.context.authorize_admin()?;
+        Problem::insert(&self.context, inputs)?;
         Ok(MutationOk)
     }
 
     /// Delete a problem from the current contest
     pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
-        contest_problem::delete(&self.context.database, ProblemName(name))?;
+        self.context.authorize_admin()?;
+        Problem::delete(&self.context, ProblemName(name))?;
         Ok(MutationOk)
     }
 
     /// Import a file
     pub fn import(&self, input: ImportInput) -> FieldResult<MutationOk> {
+        self.context.authorize_admin()?;
         import(&self.context, &input)?;
         Ok(MutationOk)
     }
@@ -327,21 +313,19 @@ impl Mutation<'_> {
         problem_name: ProblemName,
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
-        let conn = &self.context.database;
-        let data = contest_submission::insert(&conn, &user_id.0, &problem_name.0, files)?;
-        let problem = Problem {
-            data: contest_problem::by_name(&conn, problem_name)?,
-            contest_view: &ContestView {
-                context: self.context,
-                data: current_contest(&self.context.database)?,
-                user_id: Some(user_id),
-            },
-        };
-        let submission = contest_submission::Submission {
+        let submission = contest_submission::Submission::insert(
+            &self.context,
+            &user_id.0,
+            &problem_name.0,
+            files,
+        )?;
+        let contest_view = ContestView {
             context: self.context,
-            data: data.clone(),
+            data: current_contest(&self.context.database)?,
+            user_id: Some(user_id),
         };
-        contest_evaluation::evaluate(problem.unpack(), &data, &self.context.config)?;
+        let problem = Problem::by_name(&contest_view, problem_name)?;
+        contest_evaluation::evaluate(problem.unpack(), &submission, &self.context.config)?;
         Ok(submission)
     }
 }

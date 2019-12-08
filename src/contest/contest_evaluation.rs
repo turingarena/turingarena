@@ -10,7 +10,7 @@ use super::*;
 use crate::contest::api::{ApiConfig, ApiContext};
 use crate::contest::award::AwardInput;
 use crate::contest::contest_problem::ProblemData;
-use crate::contest::contest_submission::{submission_files, SubmissionData};
+use crate::contest::contest_submission::SubmissionData;
 use award::*;
 use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
@@ -111,17 +111,17 @@ pub fn query_events(
 /// start the evaluation thread
 pub fn evaluate<P: AsRef<Path>>(
     problem_path: P,
-    submission_data: &SubmissionData,
+    submission: &Submission,
     config: &ApiConfig,
 ) -> QueryResult<()> {
     let config = config.clone();
-    let submission_data = submission_data.clone();
+    let submission_data = submission.data.clone();
     let problem_path = problem_path.as_ref().to_owned();
     thread::spawn(move || {
         let context = config.create_context(None);
 
         let mut field_values = Vec::new();
-        let files = submission_files(&context.database, &submission_data.id)
+        let files = Submission::submission_files(&context, &submission_data.id)
             .expect("Unable to load submission files");
         for file in files {
             field_values.push(submission::FieldValue {
@@ -145,7 +145,7 @@ pub fn evaluate<P: AsRef<Path>>(
             )
             .unwrap();
         }
-        contest_submission::set_status(
+        Submission::set_status(
             &context.database,
             &submission_data.id,
             SubmissionStatus::Success,

@@ -108,8 +108,90 @@ pub struct SubmissionData {
 }
 
 pub struct Submission<'a> {
-    pub context: &'a ApiContext<'a>,
+    context: &'a ApiContext<'a>,
     pub data: SubmissionData,
+}
+
+impl Submission<'_> {
+    /// Gets the submission with the specified id from the database
+    pub fn by_id<'a>(context: &'a ApiContext, submission_id: &str) -> FieldResult<Submission<'a>> {
+        let data = submissions::table
+            .filter(submissions::dsl::id.eq(submission_id))
+            .first::<SubmissionData>(&context.database)?;
+        Ok(Submission { context, data })
+    }
+
+    /// Insert a new submission into the database, returning a submission object
+    pub fn insert<'a>(
+        context: &'a ApiContext,
+        user_id: &str,
+        problem_name: &str,
+        files: Vec<FileInput>,
+    ) -> FieldResult<Submission<'a>> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let created_at = chrono::Local::now().to_rfc3339();
+        let submission = SubmissionTableInput {
+            id: &id,
+            user_id,
+            problem_name,
+            status: &SubmissionStatus::Pending.to_string(),
+            created_at: &created_at,
+        };
+        diesel::insert_into(submissions::table)
+            .values(submission)
+            .execute(&context.database)?;
+        for file in files {
+            let submission_file = SubmissionFileTableInput {
+                submission_id: &id,
+                field_id: &file.field_id,
+                type_id: &file.type_id,
+                name: &file.name,
+                content: &base64::decode(&file.content_base64)?,
+            };
+            diesel::insert_into(submission_files::table)
+                .values(submission_file)
+                .execute(&context.database)?;
+        }
+        Ok(Self::by_id(context, &id)?)
+    }
+
+    /// Gets the files of a submission
+    pub fn submission_files(
+        context: &ApiContext,
+        submission_id: &str,
+    ) -> FieldResult<Vec<SubmissionFile>> {
+        Ok(submission_files::table
+            .filter(submission_files::dsl::submission_id.eq(submission_id))
+            .load::<SubmissionFile>(&context.database)?)
+    }
+
+    /// Gets all the submissions of the specified user
+    pub fn by_user_and_problem<'a>(
+        context: &'a ApiContext,
+        user_id: &str,
+        problem_name: &str,
+    ) -> FieldResult<Vec<Submission<'a>>> {
+        Ok(submissions::table
+            .filter(submissions::dsl::user_id.eq(user_id))
+            .filter(submissions::dsl::problem_name.eq(problem_name))
+            .load::<SubmissionData>(&context.database)?
+            .into_iter()
+            .map(|data| contest_submission::Submission { context, data })
+            .collect())
+    }
+
+    /// Sets the submission status
+    pub fn set_status(
+        conn: &SqliteConnection,
+        submission_id: &str,
+        status: SubmissionStatus,
+    ) -> QueryResult<()> {
+        diesel::update(submissions::table)
+            .filter(submissions::dsl::id.eq(submission_id))
+            .set(submissions::dsl::status.eq(status.to_string()))
+            .execute(conn)?;
+        Ok(())
+    }
 }
 
 #[juniper_ext::graphql]
@@ -136,7 +218,7 @@ impl Submission<'_> {
 
     /// List of files of this submission
     fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
-        Ok(submission_files(&self.context.database, &self.data.id)?)
+        Ok(Self::submission_files(&self.context, &self.data.id)?)
     }
 
     /// Submission status
@@ -207,82 +289,6 @@ struct SubmissionFileTableInput<'a> {
     type_id: &'a str,
     name: &'a str,
     content: &'a [u8],
-}
-
-/// Insert a new submission into the database, returning a submission object
-pub fn insert(
-    conn: &SqliteConnection,
-    user_id: &str,
-    problem_name: &str,
-    files: Vec<FileInput>,
-) -> Result<SubmissionData> {
-    let id = uuid::Uuid::new_v4().to_string();
-    let created_at = chrono::Local::now().to_rfc3339();
-    let submission = SubmissionTableInput {
-        id: &id,
-        user_id,
-        problem_name,
-        status: &SubmissionStatus::Pending.to_string(),
-        created_at: &created_at,
-    };
-    diesel::insert_into(submissions::table)
-        .values(submission)
-        .execute(conn)?;
-    for file in files {
-        let submission_file = SubmissionFileTableInput {
-            submission_id: &id,
-            field_id: &file.field_id,
-            type_id: &file.type_id,
-            name: &file.name,
-            content: &base64::decode(&file.content_base64)?,
-        };
-        diesel::insert_into(submission_files::table)
-            .values(submission_file)
-            .execute(conn)?;
-    }
-    Ok(query(conn, &id)?)
-}
-
-/// Gets the files of a submission
-pub fn submission_files(
-    conn: &SqliteConnection,
-    submission_id: &str,
-) -> QueryResult<Vec<SubmissionFile>> {
-    submission_files::table
-        .filter(submission_files::dsl::submission_id.eq(submission_id))
-        .load::<SubmissionFile>(conn)
-}
-
-/// Gets the submission with the specified id from the database
-pub fn query<'a>(conn: &SqliteConnection, id: &str) -> QueryResult<SubmissionData> {
-    submissions::table
-        .filter(submissions::dsl::id.eq(id))
-        .first::<SubmissionData>(conn)
-}
-
-/// Gets all the submissions of the specified user
-pub fn of_user_and_problem(
-    conn: &SqliteConnection,
-    user_id: &str,
-    problem_name: &str,
-) -> QueryResult<Vec<SubmissionData>> {
-    submissions::table
-        .filter(submissions::dsl::user_id.eq(user_id))
-        .filter(submissions::dsl::problem_name.eq(problem_name))
-        .load::<SubmissionData>(conn)
-}
-
-/// Sets the submission status
-pub fn set_status(
-    conn: &SqliteConnection,
-    submission_id: &str,
-    status: SubmissionStatus,
-) -> QueryResult<()> {
-    let target = submissions::dsl::submissions.find(submission_id);
-    diesel::update(target)
-        .set(submissions::dsl::status.eq(status.to_string()))
-        .execute(conn)?;
-    Ok(())
 }
 
 #[cfg(test)]

@@ -2,6 +2,7 @@ use super::*;
 
 use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
+use juniper::FieldResult;
 use juniper_ext::*;
 use schema::users;
 
@@ -35,6 +36,51 @@ pub struct User {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, GraphQLNewtype)]
 pub struct UserId(pub String);
 
+impl User {
+    /// Find a user from his token
+    pub fn by_token(context: &ApiContext, token: &str) -> FieldResult<User> {
+        Ok(users::table
+            .filter(users::dsl::token.eq(token))
+            .first(&context.database)?)
+    }
+
+    /// Find a user from his ID
+    pub fn by_id(context: &ApiContext, user_id: UserId) -> FieldResult<User> {
+        Ok(users::table.find(user_id.0).first(&context.database)?)
+    }
+
+    /// List all users
+    pub fn list(context: &ApiContext) -> FieldResult<Vec<User>> {
+        Ok(users::table.load(&context.database)?)
+    }
+
+    /// Insert a new user in the db
+    pub fn insert<T: IntoIterator<Item = UserInput>>(
+        context: &ApiContext,
+        inputs: T,
+    ) -> QueryResult<()> {
+        for input in inputs.into_iter() {
+            // FIXME: replace_into not supported by PostgreSQL
+            diesel::replace_into(users::table)
+                .values(UserInsertable {
+                    id: &input.id,
+                    display_name: &input.display_name,
+                    token: &input.token,
+                })
+                .execute(&context.database)?;
+        }
+        Ok(())
+    }
+
+    /// Delete a user from the db
+    pub fn delete<T: IntoIterator<Item = String>>(context: &ApiContext, ids: T) -> QueryResult<()> {
+        diesel::delete(users::table)
+            .filter(users::dsl::id.eq_any(ids))
+            .execute(&context.database)?;
+        Ok(())
+    }
+}
+
 #[graphql]
 impl User {
     /// Id of the user
@@ -46,45 +92,4 @@ impl User {
     pub fn display_name(&self) -> &String {
         &self.display_name
     }
-}
-
-/// Find a user from his token
-pub fn by_token(conn: &SqliteConnection, token: &str) -> QueryResult<User> {
-    users::table.filter(users::dsl::token.eq(token)).first(conn)
-}
-
-/// Find a user from his ID
-pub fn by_id(conn: &SqliteConnection, user_id: UserId) -> QueryResult<User> {
-    users::table.find(user_id.0).first(conn)
-}
-
-/// List all users
-pub fn list(conn: &SqliteConnection) -> QueryResult<Vec<User>> {
-    Ok(users::table.load(conn)?)
-}
-
-/// Insert a new user in the db
-pub fn insert<T: IntoIterator<Item = UserInput>>(
-    conn: &SqliteConnection,
-    inputs: T,
-) -> QueryResult<()> {
-    // FIXME: replace_into not supported by PostgreSQL
-    for input in inputs.into_iter() {
-        diesel::replace_into(users::table)
-            .values(UserInsertable {
-                id: &input.id,
-                display_name: &input.display_name,
-                token: &input.token,
-            })
-            .execute(conn)?;
-    }
-    Ok(())
-}
-
-/// Delete a user from the db
-pub fn delete<T: IntoIterator<Item = String>>(conn: &SqliteConnection, ids: T) -> QueryResult<()> {
-    diesel::delete(users::table)
-        .filter(users::dsl::id.eq_any(ids))
-        .execute(conn)?;
-    Ok(())
 }

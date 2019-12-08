@@ -13,6 +13,7 @@ use user::{UserId, UserInput};
 
 use super::*;
 use crate::contest::contest_problem::ProblemInput;
+use crate::contest::user::User;
 use crate::file::FileContentInput;
 
 /// The Italy YAML contest.yaml file
@@ -64,8 +65,8 @@ impl ImportOperation for ContestYaml {
         //            archive_content: unreachable!("TODO"),
         //        }))?;
 
-        user::insert(
-            &context.database,
+        User::insert(
+            context,
             self.users.into_iter().map(|user| UserInput {
                 id: user.username,
                 display_name: format!("{} {}", user.first_name, user.last_name),

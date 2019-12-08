@@ -1,7 +1,9 @@
 use super::*;
+use crate::contest::api::ApiContext;
+use crate::contest::user::User;
 use contest::UserToken;
 use diesel::SqliteConnection;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 use juniper_ext::*;
 use jwt::{decode, encode, Header, Validation};
 use user::UserId;
@@ -21,15 +23,20 @@ pub struct JwtData {
 }
 
 /// Auth the user, generating a JWT token. Returns None if the token is not valid.
-pub fn auth(conn: &SqliteConnection, token: &str, secret: &[u8]) -> FieldResult<Option<UserToken>> {
-    let user = user::by_token(conn, token);
+pub fn auth(context: &ApiContext, token: &str) -> FieldResult<Option<UserToken>> {
+    let secret = context
+        .config
+        .secret
+        .as_ref()
+        .ok_or_else(|| FieldError::from("Authentication disabled"))?;
+    let user = User::by_token(context, token);
     let result = if let Ok(user) = user {
         let claims = JwtData {
             user: user.id().0,
             exp: 100_000_000_000_000, // TODO: generate this number as current_time + X seconds
         };
         Some(UserToken {
-            token: encode(&Header::default(), &claims, &secret)?,
+            token: encode(&Header::default(), &claims, &secret[..])?,
             user_id: Some(user.id()),
         })
     } else {

@@ -55,7 +55,7 @@ impl ContestView<'_> {
     /// The user for this contest view, if any
     fn user(&self) -> FieldResult<Option<User>> {
         let result = if let Some(user_id) = &self.user_id {
-            Some(user::by_id(&self.context.database, user_id.clone())?)
+            Some(User::by_id(&self.context, user_id.clone())?)
         } else {
             None
         };
@@ -134,24 +134,13 @@ impl ContestView<'_> {
     fn problem(&self, name: ProblemName) -> FieldResult<Problem> {
         // TODO: check permissions
 
-        let data = contest_problem::by_name(&self.context.database, name)?;
-        Ok(Problem {
-            data,
-            contest_view: &self,
-        })
+        Problem::by_name(&self, name)
     }
 
     /// List of problems that the user can see
     fn problems(&self) -> FieldResult<Option<Vec<Problem>>> {
         // TODO: return only the problems that only the user can access
-        let problems = contest_problem::all(&self.context.database)?
-            .into_iter()
-            .map(|p| Problem {
-                data: p,
-                contest_view: &self,
-            })
-            .collect();
-        Ok(Some(problems))
+        Ok(Some(Problem::all(&self)?))
     }
 
     /// Start time of the user participation, as RFC3339 date

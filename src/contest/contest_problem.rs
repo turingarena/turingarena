@@ -66,6 +66,50 @@ impl Problem<'_> {
 }
 
 impl Problem<'_> {
+    /// Get a problem data by its name
+    pub fn by_name<'a>(
+        contest_view: &'a ContestView<'a>,
+        name: ProblemName,
+    ) -> FieldResult<Problem> {
+        let data = problems::table
+            .find(name.0)
+            .first(&contest_view.context.database)?;
+        Ok(Problem { contest_view, data })
+    }
+
+    /// Get all the problems data in the database
+    pub fn all<'a>(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Problem>> {
+        Ok(problems::table
+            .load::<ProblemData>(&contest_view.context.database)?
+            .into_iter()
+            .map(|data| Problem { contest_view, data })
+            .collect())
+    }
+
+    /// Insert a problem in the database
+    pub fn insert<T: IntoIterator<Item = ProblemInput>>(
+        context: &ApiContext,
+        inputs: T,
+    ) -> FieldResult<()> {
+        for input in inputs.into_iter() {
+            diesel::replace_into(problems::table)
+                .values(ProblemInsertable {
+                    name: &input.name,
+                    archive_content: &input.archive_content.decode()?,
+                })
+                .execute(&context.database)?;
+        }
+        Ok(())
+    }
+
+    /// Delete a problem from the database
+    pub fn delete(context: &ApiContext, name: ProblemName) -> FieldResult<()> {
+        diesel::delete(problems::table.find(name.0)).execute(&context.database)?;
+        Ok(())
+    }
+}
+
+impl Problem<'_> {
     pub fn unpack(&self) -> PathBuf {
         self.contest_view
             .context
@@ -84,38 +128,6 @@ impl Problem<'_> {
     fn get_problem_material(&self) -> FieldResult<Material> {
         unreachable!("Enable feature 'task-maker' to generate problem material")
     }
-}
-
-/// Get a problem data by its name
-pub fn by_name(conn: &SqliteConnection, name: ProblemName) -> QueryResult<ProblemData> {
-    problems::table.find(name.0).first(conn)
-}
-
-/// Get all the problems data in the database
-pub fn all(conn: &SqliteConnection) -> QueryResult<Vec<ProblemData>> {
-    problems::table.load(conn)
-}
-
-/// Insert a problem in the database
-pub fn insert<T: IntoIterator<Item = ProblemInput>>(
-    conn: &SqliteConnection,
-    inputs: T,
-) -> juniper::FieldResult<()> {
-    for input in inputs.into_iter() {
-        diesel::replace_into(problems::table)
-            .values(ProblemInsertable {
-                name: &input.name,
-                archive_content: &input.archive_content.decode()?,
-            })
-            .execute(conn)?;
-    }
-    Ok(())
-}
-
-/// Delete a problem from the database
-pub fn delete(conn: &SqliteConnection, name: ProblemName) -> QueryResult<()> {
-    diesel::delete(problems::table.find(name.0)).execute(conn)?;
-    Ok(())
 }
 
 /// Attempts at solving a problem by a user in the contest
@@ -165,17 +177,11 @@ impl ProblemTackling<'_> {
 
     /// Submissions of the current user (if to be shown)
     fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
-        Ok(contest_submission::of_user_and_problem(
-            &self.problem.contest_view.context.database,
+        Ok(contest_submission::Submission::by_user_and_problem(
+            &self.problem.contest_view.context,
             &self.user_id().0,
             self.name(),
-        )?
-        .into_iter()
-        .map(|data| contest_submission::Submission {
-            context: self.problem.contest_view.context,
-            data,
-        })
-        .collect())
+        )?)
     }
 
     /// Indicates if the user can submit to this problem
