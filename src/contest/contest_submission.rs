@@ -1,5 +1,6 @@
 use super::*;
 
+use crate::contest::award::SubmissionAward;
 use crate::contest::contest::ContestView;
 use api::ApiContext;
 use award::*;
@@ -227,23 +228,8 @@ impl Submission<'_> {
     }
 
     /// Scores of this submission
-    fn scores(&self) -> FieldResult<Vec<ScoreAward>> {
-        Ok(
-            query_awards(&self.context.database, "SCORE", &self.data.id)?
-                .into_iter()
-                .map(|data| ScoreAward { data })
-                .collect(),
-        )
-    }
-
-    /// Scores of this submission
-    fn badges(&self) -> FieldResult<Vec<BadgeAward>> {
-        Ok(
-            query_awards(&self.context.database, "BADGE", &self.data.id)?
-                .into_iter()
-                .map(|data| BadgeAward { data })
-                .collect(),
-        )
+    fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
+        query_awards(&self.context.database, &self.data.id)
     }
 
     /// Evaluation events of this submission

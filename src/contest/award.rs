@@ -4,6 +4,7 @@ use super::*;
 use diesel::prelude::*;
 use diesel::sql_types::{Bool, Double, Text};
 
+use juniper::FieldResult;
 use schema::awards;
 
 #[derive(Insertable)]
@@ -34,58 +35,58 @@ pub struct AwardData {
     value: f64,
 }
 
-pub struct ScoreAward {
+pub struct SubmissionAward {
     pub data: AwardData,
 }
 
-pub struct BadgeAward {
-    pub data: AwardData,
-}
-
-#[juniper::object]
-impl ScoreAward {
+#[juniper_ext::graphql]
+impl SubmissionAward {
     /// Id of the most recent submission that made the max score
     fn submission_id(&self) -> &String {
         &self.data.submission_id
-    }
-
-    /// The score
-    fn score(&self) -> Score {
-        Score(self.data.value)
     }
 
     /// Name of the award
     fn award_name(&self) -> AwardName {
         AwardName(self.data.award_name.clone())
     }
+
+    fn value(&self) -> AwardValue {
+        match self.data.kind.as_ref() {
+            "SCORE" => AwardValue::Score(ScoreAwardValue {
+                score: Score(self.data.value),
+            }),
+            "BADGE" => AwardValue::Badge(BadgeAwardValue {
+                badge: self.data.value == 1f64,
+            }),
+            _ => unreachable!(),
+        }
+    }
 }
 
-#[juniper::object]
-impl BadgeAward {
-    /// Id of the most recent submission that made the max score
-    fn submission_id(&self) -> &String {
-        &self.data.submission_id
-    }
+#[derive(juniper_ext::GraphQLUnionFromEnum)]
+pub enum AwardValue {
+    Score(ScoreAwardValue),
+    Badge(BadgeAwardValue),
+}
 
-    /// The badge
-    fn badge(&self) -> bool {
-        self.data.value == 1f64
-    }
+#[derive(juniper::GraphQLObject)]
+pub struct ScoreAwardValue {
+    pub score: Score,
+}
 
-    /// Name of the award
-    fn award_name(&self) -> AwardName {
-        AwardName(self.data.award_name.clone())
-    }
+#[derive(juniper::GraphQLObject)]
+pub struct BadgeAwardValue {
+    pub badge: bool,
 }
 
 /// Get the best score award for (user, problem)
 pub fn query_awards_of_user_and_problem(
     conn: &SqliteConnection,
-    kind: &str,
     user_id: &str,
     problem_name: &str,
-) -> QueryResult<Vec<AwardData>> {
-    diesel::sql_query(
+) -> FieldResult<Vec<SubmissionAward>> {
+    Ok(diesel::sql_query(
         "
         SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
             SELECT s.id
@@ -95,24 +96,27 @@ pub fn query_awards_of_user_and_problem(
             LIMIT 1
         ) as submission_id
         FROM awards sc JOIN submissions s ON sc.submission_id = s.id
-        WHERE sc.kind = ? AND s.problem_name = ? AND s.user_id = ?
+        WHERE s.problem_name = ? AND s.user_id = ?
         GROUP BY sc.award_name
     ",
     )
-    .bind::<Text, _>(kind)
     .bind::<Text, _>(problem_name)
     .bind::<Text, _>(user_id)
-    .load::<AwardData>(conn)
+    .load::<AwardData>(conn)?
+    .into_iter()
+    .map(|data| SubmissionAward { data })
+    .collect())
 }
 
 /// Get the awards of (user, problem, submission)
 pub fn query_awards(
     conn: &SqliteConnection,
-    kind: &str,
     submission_id: &str,
-) -> QueryResult<Vec<AwardData>> {
-    awards::table
-        .filter(awards::dsl::kind.eq(kind))
+) -> FieldResult<Vec<SubmissionAward>> {
+    Ok(awards::table
         .filter(awards::dsl::submission_id.eq(submission_id))
-        .load(conn)
+        .load(conn)?
+        .into_iter()
+        .map(|data| SubmissionAward { data })
+        .collect())
 }

@@ -4,34 +4,34 @@ import { AwardFragment } from './__generated__/AwardFragment';
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { ProblemFragment } from './__generated__/ProblemFragment';
 import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
+import { SubmissionAwardFragment } from './__generated__/SubmissionAwardFragment';
+import { submissionAwardFragment } from './awards';
 import { getAwardScoreRanges, getProblemScoreRange } from './material';
 
 export const problemFragment = gql`
   fragment ProblemTacklingFragment on ProblemTackling {
-    scores {
-      awardName
-      score
-      submissionId
-    }
-    badges {
-      awardName
-      badge
+    awards {
+      ...SubmissionAwardFragment
       submissionId
     }
     canSubmit
   }
+  ${submissionAwardFragment}
 `;
 
-export const getAwardScore = (awardName: string, tackling: ProblemTacklingFragment) => {
-  const result = tackling.scores.find((s) => s.awardName === awardName);
+const getAwardValue = (awardName: string, tackling: ProblemTacklingFragment) =>
+  tackling.awards.find((s) => s.awardName === awardName);
 
-  return result !== undefined ? result.score : 0;
+export const getAwardScore = (awardName: string, tackling: ProblemTacklingFragment) => {
+  const result = getAwardValue(awardName, tackling);
+
+  return result !== undefined && result.value.__typename === 'ScoreAwardValue' ? result.value.score : 0;
 };
 
 export const getAwardBadge = (awardName: string, tackling: ProblemTacklingFragment) => {
-  const result = tackling.badges.find((s) => s.awardName === awardName);
+  const result = getAwardValue(awardName, tackling);
 
-  return result !== undefined ? result.badge : false;
+  return result !== undefined && result.value.__typename === 'BadgeAwardValue' ? result.value.badge : false;
 };
 
 export const getProblemScore = (material: MaterialFragment, tackling: ProblemTacklingFragment) =>

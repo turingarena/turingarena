@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { AwardFragment } from './__generated__/AwardFragment';
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { SubmissionFragment } from './__generated__/SubmissionFragment';
+import { submissionAwardFragment } from './awards';
 import { getProblemScoreRange } from './material';
 
 export const submissionFragment = gql`
@@ -16,28 +17,23 @@ export const submissionFragment = gql`
       contentBase64
     }
     status
-    scores {
-      awardName
-      score
-    }
-    badges {
-      awardName
-      badge
+    awards {
+      ...SubmissionAwardFragment
     }
   }
+  ${submissionAwardFragment}
 `;
 
 export const getSubmissionState = (material: MaterialFragment, submission: SubmissionFragment) => ({
   score: material.awards
-    .map((award) => submission.scores.find((s) => s.awardName === award.name))
-    .map((state) => state !== undefined ? state.score as number : 0)
+    .map((award) => submission.awards.find((s) => s.awardName === award.name))
+    .map((state) => state !== undefined && state.value.__typename === 'ScoreAwardValue' ? state.value.score : 0)
     .reduce((a, b) => a + b, 0),
   range: getProblemScoreRange(material),
   award: ({ name, content }: AwardFragment) => ({
     score: 0,
     badge: false,
-    ...submission.scores.find((s) => s.awardName === name),
-    ...submission.badges.find((s) => s.awardName === name),
+    ...submission.awards.filter((s) => s.awardName === name).map((s) => s.value).find(() => true),
     ...content.__typename === 'ScoreAwardContent' ? {
       range: content.range,
     } : {},

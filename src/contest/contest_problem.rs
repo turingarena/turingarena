@@ -150,29 +150,12 @@ impl ProblemTackling<'_> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self) -> FieldResult<Vec<ScoreAward>> {
+    fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
         Ok(query_awards_of_user_and_problem(
             &self.problem.contest_view.context.database,
-            "SCORE",
             &self.user_id().0,
             self.name(),
-        )?
-        .into_iter()
-        .map(|data| ScoreAward { data })
-        .collect())
-    }
-
-    /// Badge awards of the current user (if to be shown)
-    fn badges(&self) -> FieldResult<Vec<BadgeAward>> {
-        Ok(query_awards_of_user_and_problem(
-            &self.problem.contest_view.context.database,
-            "BADGE",
-            &self.user_id().0,
-            self.name(),
-        )?
-        .into_iter()
-        .map(|data| BadgeAward { data })
-        .collect())
+        )?)
     }
 
     /// Submissions of the current user (if to be shown)
