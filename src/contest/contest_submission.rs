@@ -2,6 +2,7 @@ use super::*;
 
 use crate::contest::contest::ContestView;
 use api::ApiContext;
+use award::*;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use juniper_ext::*;
@@ -144,21 +145,21 @@ impl Submission<'_> {
     }
 
     /// Scores of this submission
-    fn scores(&self) -> FieldResult<Vec<contest_evaluation::ScoreAward>> {
+    fn scores(&self) -> FieldResult<Vec<ScoreAward>> {
         Ok(
-            contest_evaluation::query_awards(&self.context.database, "SCORE", &self.data.id)?
+            query_awards(&self.context.database, "SCORE", &self.data.id)?
                 .into_iter()
-                .map(|data| contest_evaluation::ScoreAward { data })
+                .map(|data| ScoreAward { data })
                 .collect(),
         )
     }
 
     /// Scores of this submission
-    fn badges(&self) -> FieldResult<Vec<contest_evaluation::BadgeAward>> {
+    fn badges(&self) -> FieldResult<Vec<BadgeAward>> {
         Ok(
-            contest_evaluation::query_awards(&self.context.database, "BADGE", &self.data.id)?
+            query_awards(&self.context.database, "BADGE", &self.data.id)?
                 .into_iter()
-                .map(|data| contest_evaluation::BadgeAward { data })
+                .map(|data| BadgeAward { data })
                 .collect(),
         )
     }

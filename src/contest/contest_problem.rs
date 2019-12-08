@@ -1,8 +1,8 @@
 use super::*;
 
 use super::contest::ContestView;
-use crate::contest::contest_evaluation::{BestBadgeAward, MaxScoreAward};
 use api::ApiContext;
+use award::*;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use file::FileContentInput;
 use juniper::{FieldError, FieldResult};
@@ -138,28 +138,28 @@ impl ProblemTackling<'_> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self) -> FieldResult<Vec<contest_evaluation::MaxScoreAward>> {
-        Ok(contest_evaluation::query_awards_of_user_and_problem(
+    fn scores(&self) -> FieldResult<Vec<MaxScoreAward>> {
+        Ok(query_awards_of_user_and_problem(
             &self.problem.contest_view.context.database,
             "SCORE",
             &self.user_id().0,
             self.name(),
         )?
         .into_iter()
-        .map(|data| contest_evaluation::MaxScoreAward { data })
+        .map(|data| MaxScoreAward { data })
         .collect())
     }
 
     /// Badge awards of the current user (if to be shown)
-    fn badges(&self) -> FieldResult<Vec<contest_evaluation::BestBadgeAward>> {
-        Ok(contest_evaluation::query_awards_of_user_and_problem(
+    fn badges(&self) -> FieldResult<Vec<BestBadgeAward>> {
+        Ok(query_awards_of_user_and_problem(
             &self.problem.contest_view.context.database,
             "BADGE",
             &self.user_id().0,
             self.name(),
         )?
         .into_iter()
-        .map(|data| contest_evaluation::BestBadgeAward { data })
+        .map(|data| BestBadgeAward { data })
         .collect())
     }
 

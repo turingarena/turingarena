@@ -18,6 +18,7 @@ pub mod cli_admin;
 pub mod announcements;
 pub mod api;
 pub mod auth;
+pub mod award;
 pub mod config;
 pub mod contest;
 pub mod contest_evaluation;
