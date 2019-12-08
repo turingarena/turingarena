@@ -23,22 +23,17 @@ pub mod juniper_ext;
 #[macro_use]
 extern crate log;
 
-pub mod autoio;
 pub mod award;
-pub mod batch;
-pub mod bios;
 pub mod content;
 
 #[cfg(feature = "contest")]
 pub mod contest;
 
-pub mod dce;
-pub mod diff;
+pub mod evallib;
 pub mod evaluation;
 pub mod exitstatus;
 pub mod feedback;
 pub mod file;
-pub mod make;
 pub mod problem;
 pub mod rusage;
 pub mod submission;
