@@ -37,7 +37,7 @@ pub struct AwardData {
 }
 
 pub struct SubmissionAward {
-    pub data: AwardData,
+    data: AwardData,
 }
 
 impl SubmissionAward {

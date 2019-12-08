@@ -34,12 +34,11 @@ pub struct ContestUpdateInput {
     pub end_time: Option<String>,
 }
 
-/// A ContestView structure
+/// Information visible to a contestant
 pub struct ContestView<'a> {
-    pub context: &'a ApiContext<'a>,
-    /// User of the current contest view
-    pub user_id: Option<UserId>,
-    pub data: ContestData,
+    context: &'a ApiContext<'a>,
+    user_id: Option<UserId>,
+    data: ContestData,
 }
 
 impl ContestView<'_> {
@@ -54,13 +53,20 @@ impl ContestView<'_> {
         })
     }
 
+    pub fn context(&self) -> &ApiContext {
+        &self.context
+    }
+
+    pub fn user_id(&self) -> &Option<UserId> {
+        &self.user_id
+    }
+
     fn contest_path(&self) -> PathBuf {
         self.context
             .unpack_archive(&self.data.archive_content, "contest")
     }
 }
 
-/// A user
 #[juniper_ext::graphql]
 impl ContestView<'_> {
     /// The user for this contest view, if any
@@ -195,15 +201,15 @@ impl ContestView<'_> {
 #[derive(Queryable)]
 pub struct ContestData {
     /// Primary key of the table. Should be *always* 0!
-    pub id: i32,
+    id: i32,
 
-    pub archive_content: Vec<u8>,
+    archive_content: Vec<u8>,
 
     /// Starting time of the contest, as RFC3339 date
-    pub start_time: String,
+    start_time: String,
 
     /// End time of the contest, as RFC3339 date
-    pub end_time: String,
+    end_time: String,
 }
 
 #[derive(Insertable)]

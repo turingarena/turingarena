@@ -58,7 +58,7 @@ impl Problem<'_> {
 
     /// Material of this problem
     fn tackling(&self) -> Option<ProblemTackling> {
-        if self.contest_view.user_id.is_some() {
+        if self.contest_view.user_id().is_some() {
             Some(ProblemTackling { problem: &self })
         } else {
             None
@@ -74,14 +74,14 @@ impl Problem<'_> {
     ) -> FieldResult<Problem> {
         let data = problems::table
             .find(name.0)
-            .first(&contest_view.context.database)?;
+            .first(&contest_view.context().database)?;
         Ok(Problem { contest_view, data })
     }
 
     /// Get all the problems data in the database
     pub fn all<'a>(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Problem>> {
         Ok(problems::table
-            .load::<ProblemData>(&contest_view.context.database)?
+            .load::<ProblemData>(&contest_view.context().database)?
             .into_iter()
             .map(|data| Problem { contest_view, data })
             .collect())
@@ -113,7 +113,7 @@ impl Problem<'_> {
 impl Problem<'_> {
     pub fn unpack(&self) -> PathBuf {
         self.contest_view
-            .context
+            .context()
             .unpack_archive(&self.data.archive_content, "problem")
     }
 
@@ -139,7 +139,7 @@ pub struct ProblemTackling<'a> {
 
 impl ProblemTackling<'_> {
     fn user_id(&self) -> UserId {
-        self.problem.contest_view.user_id.clone().unwrap()
+        self.problem.contest_view.user_id().clone().unwrap()
     }
 
     fn name(&self) -> &str {
@@ -153,7 +153,7 @@ impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
         Ok(SubmissionAward::by_user_and_problem(
-            &self.problem.contest_view.context,
+            &self.problem.contest_view.context(),
             &self.user_id().0,
             self.name(),
         )?)
@@ -162,7 +162,7 @@ impl ProblemTackling<'_> {
     /// Submissions of the current user (if to be shown)
     fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
         Ok(contest_submission::Submission::by_user_and_problem(
-            &self.problem.contest_view.context,
+            &self.problem.contest_view.context(),
             &self.user_id().0,
             self.name(),
         )?)

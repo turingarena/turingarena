@@ -139,7 +139,7 @@ pub fn evaluate<P: AsRef<Path>>(
         let Evaluation(receiver) =
             do_evaluate(problem_path, submission::Submission { field_values });
         for (serial, event) in receiver.into_iter().enumerate() {
-            EvaluationEvent::insert(&context, serial as i32, &submission.data.id, &event).unwrap();
+            EvaluationEvent::insert(&context, serial as i32, &submission.id().0, &event).unwrap();
         }
         submission.set_status(SubmissionStatus::Success).unwrap();
     });

@@ -94,7 +94,7 @@ impl SubmissionFile {
 #[derive(Queryable, Clone)]
 pub struct SubmissionData {
     /// id of the submission, that is a random generated UUID
-    pub id: String,
+    id: String,
 
     /// id of user who made submission
     user_id: String,
