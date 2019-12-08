@@ -4,6 +4,7 @@ use super::*;
 use diesel::prelude::*;
 use diesel::sql_types::{Bool, Double, Text};
 
+use crate::contest::api::ApiContext;
 use juniper::FieldResult;
 use schema::awards;
 
@@ -37,6 +38,47 @@ pub struct AwardData {
 
 pub struct SubmissionAward {
     pub data: AwardData,
+}
+
+impl SubmissionAward {
+    /// Get the best score award for (user, problem)
+    pub fn by_user_and_problem(
+        context: &ApiContext,
+        user_id: &str,
+        problem_name: &str,
+    ) -> FieldResult<Vec<SubmissionAward>> {
+        Ok(diesel::sql_query("
+                SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
+                    SELECT s.id
+                    FROM submissions s JOIN awards sci ON s.id = sci.submission_id
+                    WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
+                    ORDER BY s.created_at DESC
+                    LIMIT 1
+                ) as submission_id
+                FROM awards sc JOIN submissions s ON sc.submission_id = s.id
+                WHERE s.problem_name = ? AND s.user_id = ?
+                GROUP BY sc.award_name
+            ")
+            .bind::<Text, _>(problem_name)
+            .bind::<Text, _>(user_id)
+            .load::<AwardData>(&context.database)?
+            .into_iter()
+            .map(|data| SubmissionAward { data })
+            .collect())
+    }
+
+    /// Get the awards of (user, problem, submission)
+    pub fn of_submission(
+        context: &ApiContext,
+        submission_id: &str,
+    ) -> FieldResult<Vec<SubmissionAward>> {
+        Ok(awards::table
+            .filter(awards::dsl::submission_id.eq(submission_id))
+            .load(&context.database)?
+            .into_iter()
+            .map(|data| SubmissionAward { data })
+            .collect())
+    }
 }
 
 #[juniper_ext::graphql]
@@ -78,45 +120,4 @@ pub struct ScoreAwardValue {
 #[derive(juniper::GraphQLObject)]
 pub struct BadgeAwardValue {
     pub badge: bool,
-}
-
-/// Get the best score award for (user, problem)
-pub fn query_awards_of_user_and_problem(
-    conn: &SqliteConnection,
-    user_id: &str,
-    problem_name: &str,
-) -> FieldResult<Vec<SubmissionAward>> {
-    Ok(diesel::sql_query(
-        "
-        SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
-            SELECT s.id
-            FROM submissions s JOIN awards sci ON s.id = sci.submission_id
-            WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
-            ORDER BY s.created_at DESC
-            LIMIT 1
-        ) as submission_id
-        FROM awards sc JOIN submissions s ON sc.submission_id = s.id
-        WHERE s.problem_name = ? AND s.user_id = ?
-        GROUP BY sc.award_name
-    ",
-    )
-    .bind::<Text, _>(problem_name)
-    .bind::<Text, _>(user_id)
-    .load::<AwardData>(conn)?
-    .into_iter()
-    .map(|data| SubmissionAward { data })
-    .collect())
-}
-
-/// Get the awards of (user, problem, submission)
-pub fn query_awards(
-    conn: &SqliteConnection,
-    submission_id: &str,
-) -> FieldResult<Vec<SubmissionAward>> {
-    Ok(awards::table
-        .filter(awards::dsl::submission_id.eq(submission_id))
-        .load(conn)?
-        .into_iter()
-        .map(|data| SubmissionAward { data })
-        .collect())
 }

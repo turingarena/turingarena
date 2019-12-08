@@ -43,6 +43,17 @@ pub struct ContestView<'a> {
 }
 
 impl ContestView<'_> {
+    pub fn new<'a>(
+        context: &'a ApiContext,
+        user_id: Option<UserId>,
+    ) -> FieldResult<ContestView<'a>> {
+        Ok(ContestView {
+            context,
+            data: contest::table.first(&context.database)?,
+            user_id,
+        })
+    }
+
     fn contest_path(&self) -> PathBuf {
         self.context
             .unpack_archive(&self.data.archive_content, "contest")
@@ -145,12 +156,12 @@ impl ContestView<'_> {
 
     /// Start time of the user participation, as RFC3339 date
     fn start_time(&self) -> FieldResult<String> {
-        Ok(current_contest(&self.context.database)?.start_time)
+        Ok(self.data.start_time.clone())
     }
 
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self) -> FieldResult<String> {
-        Ok(current_contest(&self.context.database)?.end_time)
+        Ok(self.data.end_time.clone())
     }
 
     /// Questions made by the current user
@@ -193,11 +204,6 @@ pub struct ContestData {
 
     /// End time of the contest, as RFC3339 date
     pub end_time: String,
-}
-
-/// Get the current configuration
-pub fn current_contest(conn: &SqliteConnection) -> QueryResult<ContestData> {
-    contest::table.first(conn)
 }
 
 #[derive(Insertable)]

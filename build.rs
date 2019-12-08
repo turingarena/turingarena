@@ -129,6 +129,8 @@ fn main() {
     }
 
     if env::var_os("CARGO_FEATURE_WEB").is_some() {
+        println!("cargo:rerun-if-changed=web/");
+
         {
             let mut options = fs_extra::dir::CopyOptions::new();
             options.overwrite = true;

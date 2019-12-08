@@ -2,6 +2,7 @@ use super::*;
 
 use crate::contest::award::SubmissionAward;
 use crate::contest::contest::ContestView;
+use crate::contest::user::UserId;
 use api::ApiContext;
 use award::*;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
@@ -114,6 +115,14 @@ pub struct Submission<'a> {
 }
 
 impl Submission<'_> {
+    pub fn new<'a>(context: &'a ApiContext, data: SubmissionData) -> Submission<'a> {
+        Submission { context, data }
+    }
+
+    pub fn data(&self) -> &SubmissionData {
+        &self.data
+    }
+
     /// Gets the submission with the specified id from the database
     pub fn by_id<'a>(context: &'a ApiContext, submission_id: &str) -> FieldResult<Submission<'a>> {
         let data = submissions::table
@@ -156,16 +165,6 @@ impl Submission<'_> {
         Ok(Self::by_id(context, &id)?)
     }
 
-    /// Gets the files of a submission
-    pub fn submission_files(
-        context: &ApiContext,
-        submission_id: &str,
-    ) -> FieldResult<Vec<SubmissionFile>> {
-        Ok(submission_files::table
-            .filter(submission_files::dsl::submission_id.eq(submission_id))
-            .load::<SubmissionFile>(&context.database)?)
-    }
-
     /// Gets all the submissions of the specified user
     pub fn by_user_and_problem<'a>(
         context: &'a ApiContext,
@@ -182,15 +181,11 @@ impl Submission<'_> {
     }
 
     /// Sets the submission status
-    pub fn set_status(
-        conn: &SqliteConnection,
-        submission_id: &str,
-        status: SubmissionStatus,
-    ) -> QueryResult<()> {
+    pub fn set_status(&self, status: SubmissionStatus) -> QueryResult<()> {
         diesel::update(submissions::table)
-            .filter(submissions::dsl::id.eq(submission_id))
+            .filter(submissions::dsl::id.eq(&self.data.id))
             .set(submissions::dsl::status.eq(status.to_string()))
-            .execute(conn)?;
+            .execute(&self.context.database)?;
         Ok(())
     }
 }
@@ -198,46 +193,45 @@ impl Submission<'_> {
 #[juniper_ext::graphql]
 impl Submission<'_> {
     /// UUID of the submission
-    fn id(&self) -> SubmissionId {
+    pub fn id(&self) -> SubmissionId {
         SubmissionId(self.data.id.clone())
     }
 
     /// Id of the user who made the submission
-    fn user_id(&self) -> &String {
-        &self.data.user_id
+    pub fn user_id(&self) -> UserId {
+        UserId(self.data.user_id.clone())
     }
 
     /// Name of the problem wich the submission refers to
-    fn problem_name(&self) -> &String {
+    pub fn problem_name(&self) -> &String {
         &self.data.problem_name
     }
 
     /// Time at wich the submission was created
-    fn created_at(&self) -> &String {
+    pub fn created_at(&self) -> &String {
         &self.data.created_at
     }
 
     /// List of files of this submission
-    fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
-        Ok(Self::submission_files(&self.context, &self.data.id)?)
+    pub fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
+        Ok(submission_files::table
+            .filter(submission_files::dsl::submission_id.eq(&self.data.id))
+            .load::<SubmissionFile>(&self.context.database)?)
     }
 
     /// Submission status
-    fn status(&self) -> SubmissionStatus {
+    pub fn status(&self) -> SubmissionStatus {
         SubmissionStatus::from(&self.data.status)
     }
 
     /// Scores of this submission
-    fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
-        query_awards(&self.context.database, &self.data.id)
+    pub fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
+        SubmissionAward::of_submission(&self.context, &self.data.id)
     }
 
     /// Evaluation events of this submission
-    fn evaluation_events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
-        Ok(contest_evaluation::query_events(
-            &self.context.database,
-            &self.data.id,
-        )?)
+    pub fn evaluation_events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
+        contest_evaluation::EvaluationEvent::of_submission(&self.context, &self.data.id)
     }
 }
 

@@ -1,6 +1,7 @@
 use super::*;
 
 use super::contest::ContestView;
+use crate::contest::award::SubmissionAward;
 use api::ApiContext;
 use award::*;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
@@ -151,8 +152,8 @@ impl ProblemTackling<'_> {
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
-        Ok(query_awards_of_user_and_problem(
-            &self.problem.contest_view.context.database,
+        Ok(SubmissionAward::by_user_and_problem(
+            &self.problem.contest_view.context,
             &self.user_id().0,
             self.name(),
         )?)

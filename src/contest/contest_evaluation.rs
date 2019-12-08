@@ -51,61 +51,63 @@ impl EvaluationEvent {
     }
 }
 
+impl EvaluationEvent {
+    pub fn insert(
+        context: &ApiContext,
+        serial: i32,
+        submission_id: &str,
+        event: &Event,
+    ) -> FieldResult<()> {
+        if let Event::Score(score_event) = event {
+            let score_award_input = AwardInput {
+                kind: "SCORE",
+                award_name: &score_event.award_name.0,
+                value: score_event.score.0,
+                submission_id,
+            };
+            diesel::insert_into(awards::table)
+                .values(&score_award_input)
+                .execute(&context.database)?;
+        }
+        if let Event::Badge(badge_event) = event {
+            let badge_award_input = AwardInput {
+                kind: "BADGE",
+                award_name: &badge_event.award_name.0,
+                value: if badge_event.badge { 1f64 } else { 0f64 },
+                submission_id,
+            };
+            diesel::insert_into(awards::table)
+                .values(&badge_award_input)
+                .execute(&context.database)?;
+        }
+        let event_input = EvaluationEventInput {
+            serial,
+            submission_id,
+            event_json: serde_json::to_string(event)?,
+        };
+        diesel::insert_into(evaluation_events::table)
+            .values(&event_input)
+            .execute(&context.database)?;
+        Ok(())
+    }
+
+    /// return a list of evaluation events for the specified evaluation
+    pub fn of_submission(
+        context: &ApiContext,
+        submission_id: &str,
+    ) -> FieldResult<Vec<EvaluationEvent>> {
+        Ok(evaluation_events::table
+            .filter(evaluation_events::dsl::submission_id.eq(submission_id))
+            .load(&context.database)?)
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "evaluation_events"]
 struct EvaluationEventInput<'a> {
     submission_id: &'a str,
     serial: i32,
     event_json: String,
-}
-
-fn insert_event(
-    conn: &SqliteConnection,
-    serial: i32,
-    submission_id: &str,
-    event: &Event,
-) -> Result<()> {
-    if let Event::Score(score_event) = event {
-        let score_award_input = AwardInput {
-            kind: "SCORE",
-            award_name: &score_event.award_name.0,
-            value: score_event.score.0,
-            submission_id,
-        };
-        diesel::insert_into(awards::table)
-            .values(&score_award_input)
-            .execute(conn)?;
-    }
-    if let Event::Badge(badge_event) = event {
-        let badge_award_input = AwardInput {
-            kind: "BADGE",
-            award_name: &badge_event.award_name.0,
-            value: if badge_event.badge { 1f64 } else { 0f64 },
-            submission_id,
-        };
-        diesel::insert_into(awards::table)
-            .values(&badge_award_input)
-            .execute(conn)?;
-    }
-    let event_input = EvaluationEventInput {
-        serial,
-        submission_id,
-        event_json: serde_json::to_string(event)?,
-    };
-    diesel::insert_into(evaluation_events::table)
-        .values(&event_input)
-        .execute(conn)?;
-    Ok(())
-}
-
-/// return a list of evaluation events for the specified evaluation
-pub fn query_events(
-    conn: &SqliteConnection,
-    submission_id: &str,
-) -> QueryResult<Vec<EvaluationEvent>> {
-    evaluation_events::table
-        .filter(evaluation_events::dsl::submission_id.eq(submission_id))
-        .load(conn)
 }
 
 /// start the evaluation thread
@@ -115,14 +117,15 @@ pub fn evaluate<P: AsRef<Path>>(
     config: &ApiConfig,
 ) -> QueryResult<()> {
     let config = config.clone();
-    let submission_data = submission.data.clone();
+    let submission_data = submission.data().clone();
     let problem_path = problem_path.as_ref().to_owned();
+
     thread::spawn(move || {
         let context = config.create_context(None);
+        let submission = Submission::new(&context, submission_data);
 
         let mut field_values = Vec::new();
-        let files = Submission::submission_files(&context, &submission_data.id)
-            .expect("Unable to load submission files");
+        let files = submission.files().expect("Unable to load submission files");
         for file in files {
             field_values.push(submission::FieldValue {
                 field: submission::FieldId(file.field_id.clone()),
@@ -133,24 +136,12 @@ pub fn evaluate<P: AsRef<Path>>(
             })
         }
 
-        let submission = submission::Submission { field_values };
-
-        let Evaluation(receiver) = do_evaluate(problem_path, submission);
+        let Evaluation(receiver) =
+            do_evaluate(problem_path, submission::Submission { field_values });
         for (serial, event) in receiver.into_iter().enumerate() {
-            insert_event(
-                &context.database,
-                serial as i32,
-                &submission_data.id,
-                &event,
-            )
-            .unwrap();
+            EvaluationEvent::insert(&context, serial as i32, &submission.data.id, &event).unwrap();
         }
-        Submission::set_status(
-            &context.database,
-            &submission_data.id,
-            SubmissionStatus::Success,
-        )
-        .unwrap();
+        submission.set_status(SubmissionStatus::Success).unwrap();
     });
     Ok(())
 }

@@ -15,7 +15,7 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
-use crate::contest::contest::{current_contest, ContestDataInput, ContestUpdateInput};
+use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
 use crate::contest::contest_problem::ProblemInput;
 use crate::contest::user::User;
 
@@ -171,12 +171,7 @@ impl Query<'_> {
     /// Get the view of a contest
     fn contest_view(&self, user_id: Option<UserId>) -> FieldResult<ContestView> {
         self.context.authorize_user(&user_id)?;
-
-        Ok(ContestView {
-            context: self.context,
-            data: current_contest(&self.context.database)?,
-            user_id,
-        })
+        ContestView::new(&self.context, user_id)
     }
 
     fn users(&self) -> FieldResult<Vec<User>> {
@@ -186,8 +181,9 @@ impl Query<'_> {
 
     /// Get the submission with the specified id
     fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
-        // TODO: check authorization
-        contest_submission::Submission::by_id(&self.context, &submission_id)
+        let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;
+        self.context.authorize_user(&Some(submission.user_id()))?;
+        Ok(submission)
     }
 
     /// Current time on the server as RFC3339 date
@@ -319,11 +315,7 @@ impl Mutation<'_> {
             &problem_name.0,
             files,
         )?;
-        let contest_view = ContestView {
-            context: self.context,
-            data: current_contest(&self.context.database)?,
-            user_id: Some(user_id),
-        };
+        let contest_view = ContestView::new(&self.context, Some(user_id))?;
         let problem = Problem::by_name(&contest_view, problem_name)?;
         contest_evaluation::evaluate(problem.unpack(), &submission, &self.context.config)?;
         Ok(submission)
