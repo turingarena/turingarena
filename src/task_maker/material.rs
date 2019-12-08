@@ -52,8 +52,13 @@ fn submission_form() -> Form {
 }
 
 fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
+    let has_positive_score = subtask.max_score > 0.0;
     Award {
-        name: AwardName(format!("subtask.{}", subtask.id)),
+        name: AwardName(format!(
+            "subtask.{}.{}",
+            subtask.id,
+            if has_positive_score { "score" } else { "badge" }
+        )),
         title: vec![
             TextVariant {
                 attributes: vec![],
@@ -67,7 +72,7 @@ fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
                 value: format!("ST {}", subtask.id),
             },
         ],
-        content: if subtask.max_score > 0.0 {
+        content: if has_positive_score {
             AwardContent::Score(ScoreAwardContent {
                 range: ScoreRange {
                     // TODO: determine actual precision (may depend on the task)

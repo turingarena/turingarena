@@ -168,11 +168,11 @@ fn ui_message_to_events(
                 }),
             }))?;
             tx.send(Event::Score(ScoreEvent {
-                award_name: AwardName(format!("subtask.{}", subtask)),
+                award_name: AwardName(format!("subtask.{}.score", subtask)),
                 score: Score(score),
             }))?;
             tx.send(Event::Badge(BadgeEvent {
-                award_name: AwardName(format!("subtask.{}", subtask)),
+                award_name: AwardName(format!("subtask.{}.badge", subtask)),
                 badge: normalized_score > 0.0,
             }))?;
         }
