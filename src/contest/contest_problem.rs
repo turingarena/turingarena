@@ -138,7 +138,7 @@ impl ProblemTackling<'_> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
-    fn scores(&self) -> FieldResult<Vec<MaxScoreAward>> {
+    fn scores(&self) -> FieldResult<Vec<ScoreAward>> {
         Ok(query_awards_of_user_and_problem(
             &self.problem.contest_view.context.database,
             "SCORE",
@@ -146,12 +146,12 @@ impl ProblemTackling<'_> {
             self.name(),
         )?
         .into_iter()
-        .map(|data| MaxScoreAward { data })
+        .map(|data| ScoreAward { data })
         .collect())
     }
 
     /// Badge awards of the current user (if to be shown)
-    fn badges(&self) -> FieldResult<Vec<BestBadgeAward>> {
+    fn badges(&self) -> FieldResult<Vec<BadgeAward>> {
         Ok(query_awards_of_user_and_problem(
             &self.problem.contest_view.context.database,
             "BADGE",
@@ -159,7 +159,7 @@ impl ProblemTackling<'_> {
             self.name(),
         )?
         .into_iter()
-        .map(|data| BestBadgeAward { data })
+        .map(|data| BadgeAward { data })
         .collect())
     }
 

@@ -44,6 +44,11 @@ pub struct BadgeAward {
 
 #[juniper::object]
 impl ScoreAward {
+    /// Id of the most recent submission that made the max score
+    fn submission_id(&self) -> &String {
+        &self.data.submission_id
+    }
+
     /// The score
     fn score(&self) -> Score {
         Score(self.data.value)
@@ -57,6 +62,11 @@ impl ScoreAward {
 
 #[juniper::object]
 impl BadgeAward {
+    /// Id of the most recent submission that made the max score
+    fn submission_id(&self) -> &String {
+        &self.data.submission_id
+    }
+
     /// The badge
     fn badge(&self) -> bool {
         self.data.value == 1f64
@@ -65,52 +75,6 @@ impl BadgeAward {
     /// Name of the award
     fn award_name(&self) -> AwardName {
         AwardName(self.data.award_name.clone())
-    }
-}
-
-pub struct MaxScoreAward {
-    pub data: AwardData,
-}
-
-/// Maximum score award
-#[juniper::object]
-impl MaxScoreAward {
-    /// Id of the most recent submission that made the max score
-    fn submission_id(&self) -> &String {
-        &self.data.submission_id
-    }
-
-    /// The score
-    fn score(&self) -> Score {
-        Score(self.data.value)
-    }
-
-    /// Name of the award
-    fn award_name(&self) -> &String {
-        &self.data.award_name
-    }
-}
-
-pub struct BestBadgeAward {
-    pub data: AwardData,
-}
-
-/// Beste badge award
-#[juniper::object]
-impl BestBadgeAward {
-    /// Id of the most recent submission that made the max score
-    fn submission_id(&self) -> &String {
-        &self.data.submission_id
-    }
-
-    /// The score
-    fn badge(&self) -> bool {
-        self.data.value == 1f64
-    }
-
-    /// Name of the award
-    fn award_name(&self) -> &String {
-        &self.data.award_name
     }
 }
 
