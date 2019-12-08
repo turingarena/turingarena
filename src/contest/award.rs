@@ -15,18 +15,22 @@ pub struct AwardInput<'a> {
     pub value: f64,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, QueryableByName)]
 pub struct AwardData {
     #[allow(dead_code)]
+    #[sql_type = "Text"]
     kind: String,
 
     /// Id of the submission
     #[allow(dead_code)]
+    #[sql_type = "Text"]
     submission_id: String,
 
     /// Name of the award
+    #[sql_type = "Text"]
     award_name: String,
 
+    #[sql_type = "Double"]
     value: f64,
 }
 
@@ -64,20 +68,8 @@ impl BadgeAward {
     }
 }
 
-#[derive(QueryableByName)]
-pub struct MaxAwardData {
-    #[sql_type = "Text"]
-    award_name: String,
-
-    #[sql_type = "Double"]
-    value: f64,
-
-    #[sql_type = "Text"]
-    submission_id: String,
-}
-
 pub struct MaxScoreAward {
-    pub data: MaxAwardData,
+    pub data: AwardData,
 }
 
 /// Maximum score award
@@ -100,7 +92,7 @@ impl MaxScoreAward {
 }
 
 pub struct BestBadgeAward {
-    pub data: MaxAwardData,
+    pub data: AwardData,
 }
 
 /// Beste badge award
@@ -128,10 +120,10 @@ pub fn query_awards_of_user_and_problem(
     kind: &str,
     user_id: &str,
     problem_name: &str,
-) -> QueryResult<Vec<MaxAwardData>> {
+) -> QueryResult<Vec<AwardData>> {
     diesel::sql_query(
         "
-        SELECT sc.award_name, MAX(sc.value) as value, (
+        SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
             SELECT s.id
             FROM submissions s JOIN awards sci ON s.id = sci.submission_id
             WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
@@ -146,7 +138,7 @@ pub fn query_awards_of_user_and_problem(
     .bind::<Text, _>(kind)
     .bind::<Text, _>(problem_name)
     .bind::<Text, _>(user_id)
-    .load::<MaxAwardData>(conn)
+    .load::<AwardData>(conn)
 }
 
 /// Get the awards of (user, problem, submission)
