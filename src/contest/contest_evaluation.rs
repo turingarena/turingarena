@@ -13,7 +13,7 @@ use award::{AwardName, Score};
 use contest_submission::{self, Submission, SubmissionStatus};
 use evaluation::{Evaluation, Event};
 use problem::driver::ProblemDriver;
-use schema::{badge_awards, evaluation_events, score_awards};
+use schema::{awards, evaluation_events};
 use std::path::{Path, PathBuf};
 
 /// An evaluation event
@@ -58,36 +58,19 @@ struct EvaluationEventInput<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name = "score_awards"]
-struct ScoreAwardInput<'a> {
+#[table_name = "awards"]
+struct AwardInput<'a> {
+    kind: &'a str,
     submission_id: &'a str,
     award_name: &'a str,
-    score: f64,
-}
-
-#[derive(Insertable)]
-#[table_name = "badge_awards"]
-struct BadgeAwardInput<'a> {
-    submission_id: &'a str,
-    award_name: &'a str,
-    badge: bool,
+    value: f64,
 }
 
 #[derive(Queryable)]
-pub struct ScoreAward {
-    /// Id of the submission  
+pub struct AwardData {
     #[allow(dead_code)]
-    submission_id: String,
+    kind: String,
 
-    /// Name of the award
-    award_name: String,
-
-    /// Score of the submission
-    score: f64,
-}
-
-#[derive(Queryable)]
-pub struct BadgeAward {
     /// Id of the submission
     #[allow(dead_code)]
     submission_id: String,
@@ -95,20 +78,27 @@ pub struct BadgeAward {
     /// Name of the award
     award_name: String,
 
-    /// Score of the submission
-    badge: bool,
+    value: f64,
+}
+
+pub struct ScoreAward {
+    pub data: AwardData,
+}
+
+pub struct BadgeAward {
+    pub data: AwardData,
 }
 
 #[juniper::object]
 impl ScoreAward {
     /// The score
     fn score(&self) -> Score {
-        Score(self.score)
+        Score(self.data.value)
     }
 
     /// Name of the award
     fn award_name(&self) -> AwardName {
-        AwardName(self.award_name.clone())
+        AwardName(self.data.award_name.clone())
     }
 }
 
@@ -116,37 +106,29 @@ impl ScoreAward {
 impl BadgeAward {
     /// The badge
     fn badge(&self) -> bool {
-        self.badge
+        self.data.value == 1f64
     }
 
     /// Name of the award
     fn award_name(&self) -> AwardName {
-        AwardName(self.award_name.clone())
+        AwardName(self.data.award_name.clone())
     }
 }
 
 #[derive(QueryableByName)]
-pub struct MaxScoreAward {
+pub struct MaxAwardData {
     #[sql_type = "Text"]
     award_name: String,
 
     #[sql_type = "Double"]
-    score: f64,
+    value: f64,
 
     #[sql_type = "Text"]
     submission_id: String,
 }
 
-#[derive(QueryableByName)]
-pub struct BestBadgeAward {
-    #[sql_type = "Text"]
-    award_name: String,
-
-    #[sql_type = "Bool"]
-    badge: bool,
-
-    #[sql_type = "Text"]
-    submission_id: String,
+pub struct MaxScoreAward {
+    pub data: MaxAwardData,
 }
 
 /// Maximum score award
@@ -154,18 +136,22 @@ pub struct BestBadgeAward {
 impl MaxScoreAward {
     /// Id of the most recent submission that made the max score
     fn submission_id(&self) -> &String {
-        &self.submission_id
+        &self.data.submission_id
     }
 
     /// The score
     fn score(&self) -> Score {
-        Score(self.score)
+        Score(self.data.value)
     }
 
     /// Name of the award
     fn award_name(&self) -> &String {
-        &self.award_name
+        &self.data.award_name
     }
+}
+
+pub struct BestBadgeAward {
+    pub data: MaxAwardData,
 }
 
 /// Beste badge award
@@ -173,17 +159,17 @@ impl MaxScoreAward {
 impl BestBadgeAward {
     /// Id of the most recent submission that made the max score
     fn submission_id(&self) -> &String {
-        &self.submission_id
+        &self.data.submission_id
     }
 
     /// The score
     fn badge(&self) -> bool {
-        self.badge
+        self.data.value == 1f64
     }
 
     /// Name of the award
     fn award_name(&self) -> &String {
-        &self.award_name
+        &self.data.award_name
     }
 }
 
@@ -194,22 +180,24 @@ fn insert_event(
     event: &Event,
 ) -> Result<()> {
     if let Event::Score(score_event) = event {
-        let score_award_input = ScoreAwardInput {
+        let score_award_input = AwardInput {
+            kind: "SCORE",
             award_name: &score_event.award_name.0,
-            score: score_event.score.0,
+            value: score_event.score.0,
             submission_id,
         };
-        diesel::insert_into(score_awards::table)
+        diesel::insert_into(awards::table)
             .values(&score_award_input)
             .execute(conn)?;
     }
     if let Event::Badge(badge_event) = event {
-        let badge_award_input = BadgeAwardInput {
+        let badge_award_input = AwardInput {
+            kind: "BADGE",
             award_name: &badge_event.award_name.0,
-            badge: badge_event.badge,
+            value: if badge_event.badge { 1f64 } else { 0f64 },
             submission_id,
         };
-        diesel::insert_into(badge_awards::table)
+        diesel::insert_into(awards::table)
             .values(&badge_award_input)
             .execute(conn)?;
     }
@@ -235,72 +223,41 @@ pub fn query_events(
 }
 
 /// Get the best score award for (user, problem)
-pub fn query_score_awards_of_user_and_problem(
+pub fn query_awards_of_user_and_problem(
     conn: &SqliteConnection,
+    kind: &str,
     user_id: &str,
     problem_name: &str,
-) -> QueryResult<Vec<MaxScoreAward>> {
+) -> QueryResult<Vec<MaxAwardData>> {
     diesel::sql_query(
         "
-        SELECT sc.award_name, MAX(sc.score) as score, (
+        SELECT sc.award_name, MAX(sc.value) as value, (
             SELECT s.id
-            FROM submissions s JOIN score_awards sci ON s.id = sci.submission_id
-            WHERE sci.score = score AND sci.award_name = sc.award_name
+            FROM submissions s JOIN awards sci ON s.id = sci.submission_id
+            WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
             ORDER BY s.created_at DESC
             LIMIT 1
         ) as submission_id
-        FROM score_awards sc JOIN submissions s ON sc.submission_id = s.id
-        WHERE s.problem_name = ? AND s.user_id = ?
+        FROM awards sc JOIN submissions s ON sc.submission_id = s.id
+        WHERE sc.kind = ? AND s.problem_name = ? AND s.user_id = ?
         GROUP BY sc.award_name
     ",
     )
+    .bind::<Text, _>(kind)
     .bind::<Text, _>(problem_name)
     .bind::<Text, _>(user_id)
-    .load::<MaxScoreAward>(conn)
+    .load::<MaxAwardData>(conn)
 }
 
-/// Get the best award badge for (user, problem)
-pub fn query_badge_awards_of_user_and_problem(
+/// Get the awards of (user, problem, submission)
+pub fn query_awards(
     conn: &SqliteConnection,
-    user_id: &str,
-    problem_name: &str,
-) -> QueryResult<Vec<BestBadgeAward>> {
-    diesel::sql_query(
-        "
-        SELECT sc.award_name, MAX(sc.badge) as badge, (
-            SELECT s.id
-            FROM submissions s JOIN badge_awards sci ON s.id = sci.submission_id
-            WHERE sci.badge = badge AND sci.award_name = sc.award_name
-            ORDER BY s.created_at DESC
-            LIMIT 1
-        ) as submission_id
-        FROM badge_awards sc JOIN submissions s ON sc.submission_id = s.id
-        WHERE s.problem_name = ? AND s.user_id = ?
-        GROUP BY sc.award_name
-    ",
-    )
-    .bind::<Text, _>(problem_name)
-    .bind::<Text, _>(user_id)
-    .load::<BestBadgeAward>(conn)
-}
-
-/// Get the score awards of (user, problem, submission)
-pub fn query_score_awards(
-    conn: &SqliteConnection,
+    kind: &str,
     submission_id: &str,
-) -> QueryResult<Vec<ScoreAward>> {
-    score_awards::table
-        .filter(score_awards::dsl::submission_id.eq(submission_id))
-        .load(conn)
-}
-
-/// Get the badge awards of (user, problem, submission)
-pub fn query_badge_awards(
-    conn: &SqliteConnection,
-    submission_id: &str,
-) -> QueryResult<Vec<BadgeAward>> {
-    badge_awards::table
-        .filter(badge_awards::dsl::submission_id.eq(submission_id))
+) -> QueryResult<Vec<AwardData>> {
+    awards::table
+        .filter(awards::dsl::kind.eq(kind))
+        .filter(awards::dsl::submission_id.eq(submission_id))
         .load(conn)
 }
 

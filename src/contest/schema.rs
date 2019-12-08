@@ -13,10 +13,11 @@ table! {
 }
 
 table! {
-    badge_awards (submission_id, award_name) {
+    awards (submission_id, award_name) {
+        kind -> Text,
         submission_id -> Text,
         award_name -> Text,
-        badge -> Bool,
+        value -> Double,
     }
 }
 
@@ -55,14 +56,6 @@ table! {
 }
 
 table! {
-    score_awards (submission_id, award_name) {
-        submission_id -> Text,
-        award_name -> Text,
-        score -> Double,
-    }
-}
-
-table! {
     submission_files (submission_id, field_id) {
         submission_id -> Text,
         field_id -> Text,
@@ -91,11 +84,10 @@ table! {
 }
 
 joinable!(answers -> questions (question_id));
-joinable!(badge_awards -> submissions (submission_id));
+joinable!(awards -> submissions (submission_id));
 joinable!(evaluation_events -> submissions (submission_id));
 joinable!(questions -> problems (problem_name));
 joinable!(questions -> users (user_id));
-joinable!(score_awards -> submissions (submission_id));
 joinable!(submission_files -> submissions (submission_id));
 joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
@@ -103,12 +95,11 @@ joinable!(submissions -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     announcements,
     answers,
-    badge_awards,
+    awards,
     contest,
     evaluation_events,
     problems,
     questions,
-    score_awards,
     submission_files,
     submissions,
     users,

@@ -145,18 +145,22 @@ impl Submission<'_> {
 
     /// Scores of this submission
     fn scores(&self) -> FieldResult<Vec<contest_evaluation::ScoreAward>> {
-        Ok(contest_evaluation::query_score_awards(
-            &self.context.database,
-            &self.data.id,
-        )?)
+        Ok(
+            contest_evaluation::query_awards(&self.context.database, "SCORE", &self.data.id)?
+                .into_iter()
+                .map(|data| contest_evaluation::ScoreAward { data })
+                .collect(),
+        )
     }
 
     /// Scores of this submission
     fn badges(&self) -> FieldResult<Vec<contest_evaluation::BadgeAward>> {
-        Ok(contest_evaluation::query_badge_awards(
-            &self.context.database,
-            &self.data.id,
-        )?)
+        Ok(
+            contest_evaluation::query_awards(&self.context.database, "BADGE", &self.data.id)?
+                .into_iter()
+                .map(|data| contest_evaluation::BadgeAward { data })
+                .collect(),
+        )
     }
 
     /// Evaluation events of this submission

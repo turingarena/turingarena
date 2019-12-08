@@ -33,18 +33,12 @@ CREATE TABLE evaluation_events(
     PRIMARY KEY (submission_id, serial)
 );
 
-CREATE TABLE badge_awards(
+CREATE TABLE awards(
+    kind            TEXT   NOT NULL CHECK (kind IN ('SCORE', 'BADGE')),
     submission_id   TEXT   NOT NULL REFERENCES submissions(id),
     award_name      TEXT   NOT NULL,
-    badge           BOOLEAN NOT NULL,
-    PRIMARY KEY (submission_id, award_name)
-);
-
-CREATE TABLE score_awards(
-    submission_id   TEXT   NOT NULL REFERENCES submissions(id),
-    award_name      TEXT   NOT NULL,
-    score           DOUBLE NOT NULL,
-    PRIMARY KEY (submission_id, award_name)
+    value           DOUBLE NOT NULL,
+    PRIMARY KEY (kind, submission_id, award_name)
 );
 
 CREATE TABLE contest(
