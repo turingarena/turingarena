@@ -35,10 +35,8 @@ pub struct ProblemData {
 }
 
 /// A problem in the contest
-#[derive(Clone)]
 pub struct Problem<'a> {
-    pub contest_view: &'a ContestView<'a>,
-
+    pub context: &'a ApiContext<'a>,
     /// Raw database data of the contest
     pub data: ProblemData,
 }
@@ -55,35 +53,26 @@ impl Problem<'_> {
     fn material(&self) -> FieldResult<Material> {
         self.get_problem_material().map_err(FieldError::from)
     }
-
-    /// Material of this problem
-    fn tackling(&self) -> Option<ProblemTackling> {
-        if self.contest_view.user_id().is_some() {
-            Some(ProblemTackling { problem: &self })
-        } else {
-            None
-        }
-    }
 }
 
 impl Problem<'_> {
     /// Get a problem data by its name
     pub fn by_name<'a>(
-        contest_view: &'a ContestView<'a>,
+        context: &'a ApiContext<'a>,
         name: ProblemName,
     ) -> FieldResult<Problem> {
         let data = problems::table
             .find(name.0)
-            .first(&contest_view.context().database)?;
-        Ok(Problem { contest_view, data })
+            .first(&context.database)?;
+        Ok(Problem { context, data })
     }
 
     /// Get all the problems data in the database
-    pub fn all<'a>(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Problem>> {
+    pub fn all<'a>(context: &'a ApiContext<'a>) -> FieldResult<Vec<Problem>> {
         Ok(problems::table
-            .load::<ProblemData>(&contest_view.context().database)?
+            .load::<ProblemData>(&context.database)?
             .into_iter()
-            .map(|data| Problem { contest_view, data })
+            .map(|data| Problem { context, data })
             .collect())
     }
 
@@ -108,12 +97,10 @@ impl Problem<'_> {
         diesel::delete(problems::table.find(name.0)).execute(&context.database)?;
         Ok(())
     }
-}
 
-impl Problem<'_> {
+
     pub fn unpack(&self) -> PathBuf {
-        self.contest_view
-            .context()
+        self.context
             .unpack_archive(&self.data.archive_content, "problem")
     }
 
@@ -131,10 +118,58 @@ impl Problem<'_> {
     }
 }
 
+/// A problem in the contest as seen by contestants
+pub struct ProblemView<'a> {
+    pub contest_view: &'a ContestView<'a>,
+    pub problem: Problem<'a>,
+}
+
+/// A problem in a contest
+#[juniper_ext::graphql]
+impl ProblemView<'_> {
+    /// Name of this problem. Unique in the current contest.
+    fn name(&self) -> ProblemName {
+        self.problem.name()
+    }
+
+    /// Material of this problem
+    fn material(&self) -> FieldResult<Material> {
+        self.problem.material()
+    }
+
+    /// Material of this problem
+    fn tackling(&self) -> Option<ProblemTackling> {
+        if self.contest_view.user_id().is_some() {
+            Some(ProblemTackling { problem: &self })
+        } else {
+            None
+        }
+    }
+}
+
+impl ProblemView<'_> {
+    pub fn by_name<'a>(
+        contest_view: &'a ContestView<'a>,
+        name: ProblemName,
+    ) -> FieldResult<ProblemView> {
+        let problem = Problem::by_name(contest_view.context(), name)?;
+        Ok(ProblemView { contest_view, problem })
+    }
+
+    /// Get all the problems data in the database
+    pub fn all<'a>(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<ProblemView>> {
+        let problems = Problem::all(contest_view.context())?;
+        Ok(problems
+            .into_iter()
+            .map(|problem| ProblemView { contest_view, problem })
+            .collect())
+    }
+}
+
 /// Attempts at solving a problem by a user in the contest
 pub struct ProblemTackling<'a> {
     /// The problem
-    pub problem: &'a Problem<'a>,
+    pub problem: &'a ProblemView<'a>,
 }
 
 impl ProblemTackling<'_> {
@@ -142,8 +177,8 @@ impl ProblemTackling<'_> {
         self.problem.contest_view.user_id().clone().unwrap()
     }
 
-    fn name(&self) -> &str {
-        &self.problem.data.name
+    fn name(&self) -> String {
+        self.problem.name().0
     }
 }
 
@@ -155,7 +190,7 @@ impl ProblemTackling<'_> {
         Ok(SubmissionAward::by_user_and_problem(
             &self.problem.contest_view.context(),
             &self.user_id().0,
-            self.name(),
+            &self.name(),
         )?)
     }
 
@@ -164,7 +199,7 @@ impl ProblemTackling<'_> {
         Ok(contest_submission::Submission::by_user_and_problem(
             &self.problem.contest_view.context(),
             &self.user_id().0,
-            self.name(),
+            &self.name(),
         )?)
     }
 

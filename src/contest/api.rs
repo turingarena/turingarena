@@ -9,14 +9,14 @@ use structopt::StructOpt;
 
 use auth::JwtData;
 use contest::{ContestView, UserToken};
-use contest_problem::Problem;
+use contest_problem::ProblemView;
 use formats::{import, ImportInput};
 use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
 use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
-use crate::contest::contest_problem::ProblemInput;
+use crate::contest::contest_problem::{ProblemInput, Problem};
 use crate::contest::user::User;
 
 use super::*;
@@ -180,6 +180,11 @@ impl Query<'_> {
         User::list(&self.context)
     }
 
+    fn problems(&self) -> FieldResult<Vec<Problem>> {
+        self.context.authorize_admin()?;
+        Problem::all(&self.context)
+    }
+
     fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
         self.context.authorize_admin()?;
         SubmissionAward::list_by_user_and_problem(&self.context)
@@ -321,8 +326,7 @@ impl Mutation<'_> {
             &problem_name.0,
             files,
         )?;
-        let contest_view = ContestView::new(&self.context, Some(user_id))?;
-        let problem = Problem::by_name(&contest_view, problem_name)?;
+        let problem = Problem::by_name(&self.context, problem_name)?;
         contest_evaluation::evaluate(problem.unpack(), &submission, &self.context.config)?;
         Ok(submission)
     }

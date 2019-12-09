@@ -10,7 +10,7 @@ use announcements::Announcement;
 use api::ApiContext;
 use api::MutationOk;
 use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
-use contest_problem::Problem;
+use contest_problem::ProblemView;
 use problem::ProblemName;
 use questions::{Question, QuestionInput};
 use schema::contest;
@@ -148,16 +148,16 @@ impl ContestView<'_> {
     }
 
     /// A problem that the user can see
-    fn problem(&self, name: ProblemName) -> FieldResult<Problem> {
+    fn problem(&self, name: ProblemName) -> FieldResult<ProblemView> {
         // TODO: check permissions
 
-        Problem::by_name(&self, name)
+        ProblemView::by_name(&self, name)
     }
 
     /// List of problems that the user can see
-    fn problems(&self) -> FieldResult<Option<Vec<Problem>>> {
+    fn problems(&self) -> FieldResult<Option<Vec<ProblemView>>> {
         // TODO: return only the problems that only the user can access
-        Ok(Some(Problem::all(&self)?))
+        Ok(Some(ProblemView::all(&self)?))
     }
 
     /// Start time of the user participation, as RFC3339 date
