@@ -1,0 +1,5 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.user-table {
+  @extend .table, .table-sm, .table-bordered;
+}

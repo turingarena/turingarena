@@ -25,7 +25,7 @@ export const contestViewFragment = gql`
     displayName
   }
 
-  fragment ProblemFragment on Problem {
+  fragment ProblemFragment on ProblemView {
     name
     tackling {
       ...ProblemTacklingFragment
@@ -49,7 +49,7 @@ export const getContestState = (contestView: ContestViewFragment) => {
     hasScore: problems !== null && problems.some(({ tackling }) => tackling !== null),
     score: problemStates.map(({ score = 0 }) => score).reduce((a, b) => a + b, 0),
     range: {
-      max: problemStates.map(({ range: { max } }) => max as number).reduce((a, b) => a + b, 0),
+      max: problemStates.map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
       precision: problemStates.map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b), 0),
     },
     // tslint:disable-next-line: no-magic-numbers

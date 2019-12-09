@@ -8,6 +8,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 
+import { AdminComponent } from './admin/admin.component';
 import { AppComponent } from './app.component';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { ContestViewComponent } from './contest-view/contest-view.component';
@@ -34,6 +35,10 @@ const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'admin',
+    component: AdminComponent,
+  },
 ];
 
 @NgModule({
@@ -47,6 +52,7 @@ const routes: Routes = [
     ContestViewComponent,
     FileVariantPipe,
     EmptyComponent,
+    AdminComponent,
   ],
   imports: [
     BrowserModule,
