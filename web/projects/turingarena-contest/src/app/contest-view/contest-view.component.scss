@@ -1,5 +1,11 @@
 @import "node_modules/bootstrap/scss/bootstrap";
 
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .topbar {
   display: flex;
   background-color: #0275d8;
