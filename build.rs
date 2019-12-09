@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::{File, OpenOptions};
+use std::fs::{DirEntry, File, OpenOptions};
 use std::path::Path;
 use std::process::Command;
 
@@ -11,6 +11,16 @@ impl CheckedCommand for Command {
     fn check(&mut self) {
         if !self.status().unwrap().success() {
             panic!("command {:?} failed", self)
+        }
+    }
+}
+
+fn traverse_dir<P: AsRef<Path>, F: Fn(&DirEntry) -> () + Copy>(p: P, f: F) {
+    for x in std::fs::read_dir(p).unwrap() {
+        let x = x.unwrap();
+        f(&x);
+        if x.file_type().unwrap().is_dir() {
+            traverse_dir(x.path(), f)
         }
     }
 }
@@ -129,7 +139,9 @@ fn main() {
     }
 
     if env::var_os("CARGO_FEATURE_WEB").is_some() {
-        println!("cargo:rerun-if-changed=web/");
+        traverse_dir(src_path.join("web").join("projects"), |x| {
+            println!("cargo:rerun-if-changed={}", x.path().to_str().unwrap());
+        });
 
         {
             let mut options = fs_extra::dir::CopyOptions::new();
