@@ -44,15 +44,16 @@ pub struct SubmissionAward<'a> {
 
 impl SubmissionAward<'_> {
     const BY_USER_AND_PROBLEM_SQL: &'static str = "
-        SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
+        SELECT a.kind, a.award_name, MAX(a.value) as value, (
             SELECT s.id
-            FROM submissions s JOIN awards sci ON s.id = sci.submission_id
-            WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
-            ORDER BY s.created_at DESC
+            FROM submissions s2 JOIN awards a2 ON s2.id = a2.submission_id
+            WHERE a2.value = value AND a2.kind = a.kind AND a2.award_name = a.award_name
+                AND s2.problem_name = s.problem_name AND s2.user_id = s.user_id
+            ORDER BY s2.created_at DESC
             LIMIT 1
         ) as submission_id
-        FROM awards sc JOIN submissions s ON sc.submission_id = s.id
-        GROUP BY s.problem_name, sc.award_name, s.user_id
+        FROM awards a JOIN submissions s ON a.submission_id = s.id
+        GROUP BY s.problem_name, a.award_name, s.user_id
     ";
 
     pub fn list_by_user_and_problem<'a>(
