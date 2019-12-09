@@ -5,6 +5,7 @@ use diesel::prelude::*;
 use diesel::sql_types::{Bool, Double, Text};
 
 use crate::contest::api::ApiContext;
+use crate::contest::contest_submission::Submission;
 use juniper::FieldResult;
 use schema::awards;
 
@@ -36,56 +37,77 @@ pub struct AwardData {
     value: f64,
 }
 
-pub struct SubmissionAward {
+pub struct SubmissionAward<'a> {
+    context: &'a ApiContext<'a>,
     data: AwardData,
 }
 
-impl SubmissionAward {
-    /// Get the best score award for (user, problem)
-    pub fn by_user_and_problem(
-        context: &ApiContext,
-        user_id: &str,
-        problem_name: &str,
-    ) -> FieldResult<Vec<SubmissionAward>> {
-        Ok(diesel::sql_query("
-                SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
-                    SELECT s.id
-                    FROM submissions s JOIN awards sci ON s.id = sci.submission_id
-                    WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
-                    ORDER BY s.created_at DESC
-                    LIMIT 1
-                ) as submission_id
-                FROM awards sc JOIN submissions s ON sc.submission_id = s.id
-                WHERE s.problem_name = ? AND s.user_id = ?
-                GROUP BY sc.award_name
-            ")
-            .bind::<Text, _>(problem_name)
-            .bind::<Text, _>(user_id)
+impl SubmissionAward<'_> {
+    const BY_USER_AND_PROBLEM_SQL: &'static str = "
+        SELECT sc.kind, sc.award_name, MAX(sc.value) as value, (
+            SELECT s.id
+            FROM submissions s JOIN awards sci ON s.id = sci.submission_id
+            WHERE sci.value = value AND sci.kind = sc.kind AND sci.award_name = sc.award_name
+            ORDER BY s.created_at DESC
+            LIMIT 1
+        ) as submission_id
+        FROM awards sc JOIN submissions s ON sc.submission_id = s.id
+        GROUP BY s.problem_name, sc.award_name, s.user_id
+    ";
+
+    pub fn list_by_user_and_problem<'a>(
+        context: &'a ApiContext,
+    ) -> FieldResult<Vec<SubmissionAward<'a>>> {
+        Ok(diesel::sql_query(Self::BY_USER_AND_PROBLEM_SQL)
             .load::<AwardData>(&context.database)?
             .into_iter()
-            .map(|data| SubmissionAward { data })
+            .map(|data| SubmissionAward { context, data })
             .collect())
     }
 
+    /// Get the best score award for (user, problem)
+    pub fn by_user_and_problem<'a>(
+        context: &'a ApiContext,
+        user_id: &str,
+        problem_name: &str,
+    ) -> FieldResult<Vec<SubmissionAward<'a>>> {
+        Ok(diesel::sql_query(format!(
+            "
+                {}
+                HAVING s.problem_name = ? AND s.user_id = ?
+            ",
+            Self::BY_USER_AND_PROBLEM_SQL
+        ))
+        .bind::<Text, _>(problem_name)
+        .bind::<Text, _>(user_id)
+        .load::<AwardData>(&context.database)?
+        .into_iter()
+        .map(|data| SubmissionAward { context, data })
+        .collect())
+    }
+
     /// Get the awards of (user, problem, submission)
-    pub fn of_submission(
-        context: &ApiContext,
+    pub fn of_submission<'a>(
+        context: &'a ApiContext,
         submission_id: &str,
-    ) -> FieldResult<Vec<SubmissionAward>> {
+    ) -> FieldResult<Vec<SubmissionAward<'a>>> {
         Ok(awards::table
             .filter(awards::dsl::submission_id.eq(submission_id))
             .load(&context.database)?
             .into_iter()
-            .map(|data| SubmissionAward { data })
+            .map(|data| SubmissionAward { context, data })
             .collect())
+    }
+
+    pub fn submission_id(&self) -> &String {
+        &self.data.submission_id
     }
 }
 
 #[juniper_ext::graphql]
-impl SubmissionAward {
-    /// Id of the most recent submission that made the max score
-    fn submission_id(&self) -> &String {
-        &self.data.submission_id
+impl SubmissionAward<'_> {
+    fn submission(&self) -> FieldResult<Submission> {
+        Submission::by_id(&self.context, &self.data.submission_id)
     }
 
     /// Name of the award

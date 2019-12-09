@@ -4,7 +4,6 @@ import { AwardFragment } from './__generated__/AwardFragment';
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { ProblemFragment } from './__generated__/ProblemFragment';
 import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
-import { SubmissionAwardFragment } from './__generated__/SubmissionAwardFragment';
 import { submissionAwardFragment } from './awards';
 import { getAwardScoreRanges, getProblemScoreRange } from './material';
 
@@ -12,7 +11,9 @@ export const problemFragment = gql`
   fragment ProblemTacklingFragment on ProblemTackling {
     awards {
       ...SubmissionAwardFragment
-      submissionId
+      submission {
+        id
+      }
     }
     canSubmit
   }
