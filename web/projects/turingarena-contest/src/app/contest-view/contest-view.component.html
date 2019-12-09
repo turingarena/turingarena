@@ -2,7 +2,7 @@
   <ng-container *ngIf="contestResult.data as data">
     <ng-container *ngIf="getContestState(data.contestView) as state">
       <nav class="topbar">
-        <a href="#" class="contest-home" (click)="selectedProblemName = undefined; $event.preventDefault()">
+        <a routerLink="/" class="contest-home">
           <h1 class="contest-title">
             <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.title | textVariant}}
           </h1>
@@ -48,11 +48,12 @@
               <h2 class="contest-problem-list-title">Problems</h2>
               <div class="contest-problem-list">
                 <ng-container *ngFor="let problem of data.contestView.problems; index as index">
-                  <a class="contest-problem" href="#" [title]="problem.material.title | textVariant"
-                    [class.active]="problem.name === selectedProblemName"
-                    (click)="selectedProblemName = problem.name; $event.preventDefault()">
+                  <a class="contest-problem" [routerLink]="['/problem', problem.name]"
+                    [title]="problem.material.title | textVariant"
+                    routerLinkActive="active">
                     {{ problem.material.title | textVariant:'short' }}
-                    <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
+                    <span class="contest-problem-score"
+                      [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
                       <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem)">
                       </ng-container>
                     </span>
@@ -62,7 +63,7 @@
             </ng-container>
           </aside>
           <ng-container *ngFor="let problem of data.contestView.problems; index as index">
-            <aside class="problem-aside" [hidden]="selectedProblemName !== problem.name">
+            <aside class="problem-aside" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
               <div class="problem-submission-panel" *ngIf="problem.tackling as tackling">
                 <ng-container *ngIf="tackling.canSubmit">
                   <ng-template #newSubmissionDialog let-modal>
@@ -137,7 +138,8 @@
                             </tr>
                           </thead>
                           <tbody class="submission-table-body">
-                            <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
+                            <tr class="submission-row"
+                              *ngFor="let _ of tackling.submissions; index as submissionIndex">
                               <ng-container
                                 *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
                                 <ng-template #submissionDialog let-modal>
@@ -244,14 +246,14 @@
           </ng-container>
         </aside>
 
-        <main class="contest-home-content" [hidden]="selectedProblemName !== undefined">
+        <main class="contest-home-content" [hidden]="(route.firstChild!.paramMap | async).has('problemName')">
           <ng-container *ngIf="data.contestView.home | fileVariant as file">
             <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
           </ng-container>
         </main>
 
         <ng-container *ngFor="let problem of data.contestView.problems">
-          <main class="problem-statement" [hidden]="selectedProblemName !== problem.name">
+          <main class="problem-statement" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
             <ng-container *ngIf="problem.material.statement | fileVariant as file">
               <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
             </ng-container>
@@ -309,3 +311,5 @@
     </div>
   </form>
 </ng-template>
+
+<router-outlet></router-outlet>

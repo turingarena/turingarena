@@ -11,6 +11,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { AppComponent } from './app.component';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { ContestViewComponent } from './contest-view/contest-view.component';
+import { EmptyComponent } from './empty.component';
 import { FileVariantPipe } from './file-variant.pipe';
 import { GraphQLModule } from './graphql.module';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
@@ -22,6 +23,16 @@ const routes: Routes = [
   {
     path: '',
     component: ContestViewComponent,
+    children: [
+      {
+        path: '',
+        component: EmptyComponent,
+      },
+      {
+        path: 'problem/:problemName',
+        component: EmptyComponent,
+      },
+    ],
   },
 ];
 
@@ -35,6 +46,7 @@ const routes: Routes = [
     TextVariantPipe,
     ContestViewComponent,
     FileVariantPipe,
+    EmptyComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,7 +56,11 @@ const routes: Routes = [
     NgbModule,
     FontAwesomeModule,
     MarkdownModule.forRoot(),
-    RouterModule.forRoot(routes),
+    RouterModule.forRoot(routes, {
+      enableTracing: true,
+      anchorScrolling: 'enabled',
+      scrollPositionRestoration: 'enabled',
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent],

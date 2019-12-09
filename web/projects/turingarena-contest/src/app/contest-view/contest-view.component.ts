@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   faAward,
   faCheck,
@@ -42,6 +43,7 @@ export class ContestViewComponent implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly apollo: Apollo,
+    readonly route: ActivatedRoute,
     readonly modalService: NgbModal,
   ) { }
 
@@ -49,22 +51,6 @@ export class ContestViewComponent implements OnInit {
     const auth = this.authService.getAuth();
 
     return auth !== undefined ? auth.userId : undefined;
-  }
-
-  get selectedProblemName() {
-    try {
-      const selectedProblemNameJson = localStorage.getItem('selectedProblemName');
-
-      if (selectedProblemNameJson === null) { return undefined; }
-
-      return JSON.parse(selectedProblemNameJson) as string;
-    } catch (e) {
-      localStorage.removeItem('selectedProblemName');
-    }
-  }
-
-  set selectedProblemName(name: string | undefined) {
-    localStorage.setItem('selectedProblemName', JSON.stringify(name));
   }
 
   faHome = faHome;
