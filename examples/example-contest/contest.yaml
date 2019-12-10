@@ -11,4 +11,11 @@ users:
     last_name: Test
     username: test
     password: test
-
+  - first_name: Test1
+    last_name: Test1
+    username: test1
+    password: test1
+  - first_name: Test2
+    last_name: Test2
+    username: test2
+    password: test2
