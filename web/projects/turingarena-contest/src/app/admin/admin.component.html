@@ -1,6 +1,6 @@
 <label>Filter</label>
 <input [(ngModel)]="quickFilterText" />
-<ag-grid-angular class="user-table ag-theme-balham" [defaultColDef]="defaultColDef"
-  [rowData]="rowData | async" [columnDefs]="columnDefs | async" rowSelection="multiple"
+<ag-grid-angular #grid class="user-table ag-theme-balham" [defaultColDef]="defaultColDef" [animateRows]="true"
+  [rowData]="rowData | async" [columnDefs]="columnDefs | async" [context]="context | async" rowSelection="multiple"
   [quickFilterText]="quickFilterText">
 </ag-grid-angular>

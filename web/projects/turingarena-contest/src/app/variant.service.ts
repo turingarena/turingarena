@@ -1,5 +1,6 @@
 import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 
+import { TextFragment } from './__generated__/TextFragment';
 import { VariantAttributeFragment } from './__generated__/VariantAttributeFragment';
 
 @Injectable({
@@ -26,5 +27,12 @@ export class VariantService {
     });
 
     return sortedVariants[0];
+  }
+
+
+  selectTextVariant(variants: TextFragment[], style?: string): string | undefined {
+    const variant = this.selectVariant(variants, style);
+
+    return variant !== undefined ? variant.value : '';
   }
 }

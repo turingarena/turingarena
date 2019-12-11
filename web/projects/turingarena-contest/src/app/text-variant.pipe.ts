@@ -15,8 +15,6 @@ export class TextVariantPipe implements PipeTransform {
   constructor(readonly variantService: VariantService) { }
 
   transform(variants: TextFragment[], style?: string) {
-    const variant = this.variantService.selectVariant(variants, style);
-
-    return variant !== undefined ? variant.value : '';
+    return this.variantService.selectTextVariant(variants, style);
   }
 }

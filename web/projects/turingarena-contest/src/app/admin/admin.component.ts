@@ -1,13 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { first, map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 
 import { AwardFragment } from '../__generated__/AwardFragment';
+import { AwardOutcomeFragment } from '../__generated__/AwardOutcomeFragment';
 import { awardOutcomeFragment } from '../awards';
 import { problemMaterialFragment } from '../material';
+import { VariantService } from '../variant.service';
 
 import { AdminProblemFragment } from './__generated__/AdminProblemFragment';
 import { AdminQuery } from './__generated__/AdminQuery';
@@ -23,8 +26,12 @@ export class AdminComponent {
 
   constructor(
     private readonly apollo: Apollo,
+    private readonly variantService: VariantService,
     readonly route: ActivatedRoute,
   ) { }
+
+  @ViewChild('grid', { static: false })
+  grid!: AgGridAngular;
 
   quickFilterText = '';
 
@@ -66,7 +73,7 @@ export class AdminComponent {
       ${problemMaterialFragment}
     `,
     variables: {},
-    pollInterval: 10000,
+    pollInterval: 3000,
   });
 
   defaultColDef: ColDef = {
@@ -74,18 +81,14 @@ export class AdminComponent {
     filter: 'agNumberColumnFilter',
     resizable: true,
     lockPinned: true,
+    width: 100,
+    enableCellChangeFlash: true,
   };
 
   columnDefs = this.adminQuery.valueChanges.pipe(
     map(({ data }): (ColDef | ColGroupDef)[] => {
-      const scoreMap = new Map(
-        data.awards.map(({ awardName, submission: { problemName, userId }, value }) => [
-          `${userId}/${problemName}/${awardName}`,
-          value,
-        ]),
-      );
-
-      const awardGetter = ({ user, problem, award }: {
+      const awardGetter = ({ scoreMap, user, problem, award }: {
+        scoreMap: Map<string, AwardOutcomeFragment['value']>;
         user: AdminUserFragment;
         problem: AdminProblemFragment;
         award: AwardFragment;
@@ -102,12 +105,16 @@ export class AdminComponent {
           checkboxSelection: true,
           pinned: true,
           filter: 'agTextColumnFilter',
+          width: 100,
+          enableCellChangeFlash: true,
         },
         {
           headerName: 'Name',
           field: 'displayName',
           filter: 'agTextColumnFilter',
           editable: true,
+          width: 200,
+          enableCellChangeFlash: true,
           valueSetter: ({ newValue, node: { data: user } }) => {
             this.apollo.mutate<UpdateUserMutation, UpdateUserMutationVariables>({
               mutation: gql`
@@ -131,16 +138,18 @@ export class AdminComponent {
         },
         {
           headerName: 'Score',
+          openByDefault: true,
           children: [
             ...data.problems.map((problem): ColGroupDef => ({
-              headerName: problem.name,
+              headerName: this.variantService.selectTextVariant(problem.material.title),
               columnGroupShow: 'open',
               children: [
                 ...problem.material.awards.map((award): ColDef => ({
-                  headerName: award.name,
-                  valueGetter: ({ node: { data: user } }) => awardGetter({ user, problem, award })[
+                  headerName: this.variantService.selectTextVariant(award.title),
+                  valueGetter: ({ node: { data: user }, context: { scoreMap } }) =>
+                    awardGetter({ scoreMap, user, problem, award })[
                     award.content.__typename === 'ScoreAwardContent' ? 'score' : 'badge'
-                  ],
+                    ],
                   valueFormatter:
                     award.content.__typename === 'ScoreAwardContent'
                       ? ({ value }) => value
@@ -149,18 +158,18 @@ export class AdminComponent {
                   columnGroupShow: 'open',
                 })),
                 {
-                  headerName: 'Problem total',
-                  valueGetter: ({ node: { data: user } }) => problem.material.awards
-                    .map((award) => awardGetter({ user, problem, award }).score)
+                  headerName: 'Problem',
+                  valueGetter: ({ node: { data: user }, context: { scoreMap } }) => problem.material.awards
+                    .map((award) => awardGetter({ scoreMap, user, problem, award }).score)
                     .reduce((a, b) => a + b, 0),
                 },
               ],
             })),
             {
               headerName: 'Total',
-              valueGetter: ({ node: { data: user } }) => data.problems.map((problem) =>
+              valueGetter: ({ node: { data: user }, context: { scoreMap } }) => data.problems.map((problem) =>
                 problem.material.awards
-                  .map((award) => awardGetter({ user, problem, award }).score)
+                  .map((award) => awardGetter({ scoreMap, user, problem, award }).score)
                   .reduce((a, b) => a + b, 0),
               ).reduce((a, b) => a + b, 0),
             },
@@ -173,6 +182,21 @@ export class AdminComponent {
 
   rowData = this.adminQuery.valueChanges.pipe(
     map(({ data }) => data.users),
+  );
+
+  context = this.adminQuery.valueChanges.pipe(
+    map(({ data }) => ({
+      scoreMap: new Map(
+        data.awards.map(({ awardName, submission: { problemName, userId }, value }) => [
+          `${userId}/${problemName}/${awardName}`,
+          value,
+        ]),
+      ),
+    })),
+    tap(() => {
+      this.grid.api.refreshCells();
+      this.grid.api.onSortChanged();
+    }),
   );
 
 }
