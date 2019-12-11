@@ -55,6 +55,22 @@ pub struct Award {
     pub content: AwardContent,
 }
 
+#[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
+pub enum AwardValue {
+    Score(ScoreAwardValue),
+    Badge(BadgeAwardValue),
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ScoreAwardValue {
+    pub score: Score,
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct BadgeAwardValue {
+    pub badge: bool,
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

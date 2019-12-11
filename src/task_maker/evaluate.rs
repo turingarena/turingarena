@@ -27,6 +27,8 @@ use evaluation::Event;
 use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
 use task_maker_format::ioi::Task;
+use crate::evaluation::AwardEvent;
+use crate::award::{AwardValue, ScoreAwardValue, BadgeAwardValue};
 
 pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Receiver<Event> {
     let task_path = task_path.as_ref().to_owned();
@@ -167,13 +169,17 @@ fn ui_message_to_events(
                     score: Score(score),
                 }),
             }))?;
-            tx.send(Event::Score(ScoreEvent {
+            tx.send(Event::Award(AwardEvent {
                 award_name: AwardName(format!("subtask.{}.score", subtask)),
-                score: Score(score),
+                value: AwardValue::Score(ScoreAwardValue {
+                    score: Score(score),
+                }),
             }))?;
-            tx.send(Event::Badge(BadgeEvent {
+            tx.send(Event::Award(AwardEvent {
                 award_name: AwardName(format!("subtask.{}.badge", subtask)),
-                badge: normalized_score > 0.0,
+                value: AwardValue::Badge(BadgeAwardValue {
+                    badge: normalized_score > 0.0,
+                }),
             }))?;
         }
         UIMessage::IOIEvaluation {

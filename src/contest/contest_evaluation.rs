@@ -19,6 +19,8 @@ use schema::{evaluation_awards, evaluation_events, evaluations};
 use super::super::award::{AwardName, Score};
 use super::submission::FieldValue;
 use super::*;
+use crate::evaluation::AwardEvent;
+use crate::award::{AwardValue, ScoreAwardValue, BadgeAwardValue};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -174,26 +176,21 @@ impl<'a> Evaluation<'a> {
     }
 
     fn save_awards(&self, event: &Event) -> FieldResult<()> {
-        if let Event::Score(score_event) = event {
+        if let Event::Award(AwardEvent { award_name, value }) = event {
             let score_award_input = AwardInput {
-                kind: "SCORE",
-                award_name: &score_event.award_name.0,
-                value: score_event.score.0,
+                kind: match value {
+                    AwardValue::Score(_) => "SCORE",
+                    AwardValue::Badge(_) => "BADGE",
+                },
+                award_name: &award_name.0,
+                value: match value {
+                    AwardValue::Score(ScoreAwardValue { score }) => score.0,
+                    AwardValue::Badge(BadgeAwardValue { badge }) => if *badge { 1f64 } else { 0f64 },
+                } ,
                 evaluation_id: &self.data.id,
             };
             diesel::insert_into(evaluation_awards::table)
                 .values(&score_award_input)
-                .execute(&self.context.database)?;
-        }
-        if let Event::Badge(badge_event) = event {
-            let badge_award_input = AwardInput {
-                kind: "BADGE",
-                award_name: &badge_event.award_name.0,
-                value: if badge_event.badge { 1f64 } else { 0f64 },
-                evaluation_id: &self.data.id,
-            };
-            diesel::insert_into(evaluation_awards::table)
-                .values(&badge_award_input)
                 .execute(&self.context.database)?;
         }
         Ok(())

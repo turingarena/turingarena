@@ -134,19 +134,3 @@ impl AwardOutcome<'_> {
         }
     }
 }
-
-#[derive(juniper_ext::GraphQLUnionFromEnum)]
-pub enum AwardValue {
-    Score(ScoreAwardValue),
-    Badge(BadgeAwardValue),
-}
-
-#[derive(juniper::GraphQLObject)]
-pub struct ScoreAwardValue {
-    pub score: Score,
-}
-
-#[derive(juniper::GraphQLObject)]
-pub struct BadgeAwardValue {
-    pub badge: bool,
-}

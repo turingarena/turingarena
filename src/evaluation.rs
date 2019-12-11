@@ -13,11 +13,10 @@ pub struct Evaluation(pub Receiver<Event>);
 #[derive(Serialize, Deserialize, GraphQLUnionFromEnum)]
 pub enum Event {
     Value(ValueEvent),
-    Score(ScoreEvent),
-    Badge(BadgeEvent),
+    Award(AwardEvent),
 }
 
-/// Rappresents a key/value record type
+/// Event meaning that settles the value for a given key
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct ValueEvent {
     /// key of the record
@@ -27,24 +26,14 @@ pub struct ValueEvent {
     pub value: record::Value,
 }
 
-/// Rappresents a key/value record type
+/// Event meaning that an award is... awarded
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct ScoreEvent {
-    /// key of the record
+pub struct AwardEvent {
+    /// Name of the awarded... award
     pub award_name: award::AwardName,
 
-    /// value of the record
-    pub score: award::Score,
-}
-
-/// Rappresents a key/value record type
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-pub struct BadgeEvent {
-    /// key of the record
-    pub award_name: award::AwardName,
-
-    /// value of the record
-    pub badge: bool,
+    /// Awarded value
+    pub value: award::AwardValue,
 }
 
 #[cfg(test)]
