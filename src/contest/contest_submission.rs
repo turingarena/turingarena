@@ -4,13 +4,13 @@ use crate::contest::award::AwardOutcome;
 use crate::contest::contest::ContestView;
 use crate::contest::contest_evaluation::EvaluationStatus;
 use crate::contest::user::UserId;
+use crate::evaluation::Event;
 use api::ApiContext;
 use award::*;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use juniper_ext::*;
 use schema::{submission_files, submissions};
-use crate::evaluation::Event;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]

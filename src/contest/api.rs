@@ -15,12 +15,13 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
+use crate::contest::award::AwardOutcome;
 use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
+use crate::contest::contest_evaluation::Evaluation;
 use crate::contest::contest_problem::{Problem, ProblemInput};
 use crate::contest::user::User;
 
 use super::*;
-use crate::contest::award::AwardOutcome;
 
 embed_migrations!();
 
@@ -326,8 +327,7 @@ impl Mutation<'_> {
             &problem_name.0,
             files,
         )?;
-        let problem = Problem::by_name(&self.context, problem_name)?;
-        contest_evaluation::evaluate(problem.unpack(), &submission, &self.context.config)?;
+        Evaluation::evaluate(&submission, &self.context.config)?;
         Ok(submission)
     }
 }

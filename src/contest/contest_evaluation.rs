@@ -1,22 +1,24 @@
 use std::error::Error;
+use std::path::{Path, PathBuf};
 use std::thread;
 
 use diesel::prelude::*;
 use diesel::sql_types::{Bool, Double, Text};
 use juniper::FieldResult;
 
-use super::super::award::{AwardName, Score};
-use super::*;
-use crate::contest::api::{ApiConfig, ApiContext};
-use crate::contest::award::{AwardInput, AwardOutcome};
-use crate::contest::contest_problem::ProblemData;
-use crate::contest::contest_submission::SubmissionData;
+use api::{ApiConfig, ApiContext};
 use award::*;
+use award::{AwardInput, AwardOutcome};
+use contest_problem::{Problem, ProblemData};
 use contest_submission::{self, Submission};
+use contest_submission::{SubmissionData, SubmissionId};
 use evaluation::Event;
 use problem::driver::ProblemDriver;
 use schema::{evaluation_awards, evaluation_events, evaluations};
-use std::path::{Path, PathBuf};
+
+use super::super::award::{AwardName, Score};
+use super::submission::FieldValue;
+use super::*;
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -63,8 +65,7 @@ impl<'a> Evaluation<'a> {
             .load::<String>(&self.context.database)?
             .into_iter()
             .map(|json| serde_json::from_str(&json))
-            .collect::<std::result::Result<_, _>>()?
-        )
+            .collect::<std::result::Result<_, _>>()?)
     }
 
     /// Gets the evaluation with the specified id from the database
@@ -86,8 +87,73 @@ impl<'a> Evaluation<'a> {
         Ok(Evaluation { context, data })
     }
 
-    /// Sets the submission status
-    pub fn set_status(&self, status: EvaluationStatus) -> QueryResult<()> {
+    /// start the evaluation thread
+    pub fn evaluate(submission: &Submission, config: &ApiConfig) -> QueryResult<()> {
+        let config = config.clone();
+        let submission_id = submission.id();
+
+        thread::spawn(move || {
+            let context = config.create_context(None);
+            let evaluation = Evaluation::create(&context, submission_id);
+            evaluation.run();
+        });
+        Ok(())
+    }
+
+    fn create(context: &'a ApiContext, submission_id: SubmissionId) -> Self {
+        let id = uuid::Uuid::new_v4().to_string();
+        let created_at = chrono::Local::now().to_rfc3339();
+
+        diesel::insert_into(evaluations::table)
+            .values(&EvaluationInsertable {
+                id: &id,
+                submission_id: &submission_id.0,
+                created_at: &created_at,
+                status: &EvaluationStatus::Pending.to_string(),
+            })
+            .execute(&context.database)
+            .expect("Unable to insert evaluation");
+        Evaluation::by_id(&context, &id).unwrap()
+    }
+
+    fn run(&self) {
+        let field_values = self.load_submission_field_values();
+        let problem_path = self.load_problem_path();
+
+        let evaluation::Evaluation(receiver) =
+            Self::do_evaluate(problem_path, submission::Submission { field_values });
+
+        for (serial, event) in receiver.into_iter().enumerate() {
+            self.save_awards(&event).unwrap();
+            self.save_event(serial as i32, &event).unwrap();
+        }
+
+        self.set_status(EvaluationStatus::Success).unwrap();
+    }
+
+    fn load_submission_field_values(&self) -> Vec<FieldValue> {
+        let submission = self.submission().unwrap();
+        submission
+            .files()
+            .expect("Unable to load submission files")
+            .into_iter()
+            .map(|file| submission::FieldValue {
+                field: submission::FieldId(file.field_id.clone()),
+                file: submission::File {
+                    name: submission::FileName(file.name.clone()),
+                    content: file.content.clone(),
+                },
+            })
+            .collect::<Vec<_>>()
+    }
+
+    fn load_problem_path(&self) -> PathBuf {
+        let submission = self.submission().unwrap();
+        let problem = Problem::by_name(&self.context, submission.problem_name()).unwrap();
+        problem.unpack()
+    }
+
+    fn set_status(&self, status: EvaluationStatus) -> FieldResult<()> {
         diesel::update(evaluations::table)
             .filter(evaluations::dsl::id.eq(&self.data.id))
             .set(evaluations::dsl::status.eq(status.to_string()))
@@ -95,7 +161,19 @@ impl<'a> Evaluation<'a> {
         Ok(())
     }
 
-    pub fn insert_event(&self, serial: i32, event: &Event) -> FieldResult<()> {
+    fn save_event(&self, serial: i32, event: &Event) -> FieldResult<()> {
+        let event_input = EvaluationEventInput {
+            serial,
+            evaluation_id: &self.data.id,
+            event_json: serde_json::to_string(event)?,
+        };
+        diesel::insert_into(evaluation_events::table)
+            .values(&event_input)
+            .execute(&self.context.database)?;
+        Ok(())
+    }
+
+    fn save_awards(&self, event: &Event) -> FieldResult<()> {
         if let Event::Score(score_event) = event {
             let score_award_input = AwardInput {
                 kind: "SCORE",
@@ -118,15 +196,24 @@ impl<'a> Evaluation<'a> {
                 .values(&badge_award_input)
                 .execute(&self.context.database)?;
         }
-        let event_input = EvaluationEventInput {
-            serial,
-            evaluation_id: &self.data.id,
-            event_json: serde_json::to_string(event)?,
-        };
-        diesel::insert_into(evaluation_events::table)
-            .values(&event_input)
-            .execute(&self.context.database)?;
         Ok(())
+    }
+
+    #[cfg(feature = "task-maker")]
+    fn do_evaluate<P: AsRef<Path>>(
+        problem_path: P,
+        submission: submission::Submission,
+    ) -> evaluation::Evaluation {
+        use task_maker::driver::IoiProblemDriver;
+        IoiProblemDriver::evaluate(problem_path, submission)
+    }
+
+    #[cfg(not(feature = "task-maker"))]
+    fn do_evaluate<P: AsRef<Path>>(
+        problem_path: P,
+        submission: submission::Submission,
+    ) -> evaluation::Evaluation {
+        unreachable!("Enable feature 'task-maker' to evaluate solutions")
     }
 }
 
@@ -185,72 +272,4 @@ impl EvaluationStatus {
         }
         .to_owned()
     }
-}
-
-/// start the evaluation thread
-pub fn evaluate<P: AsRef<Path>>(
-    problem_path: P,
-    submission: &Submission,
-    config: &ApiConfig,
-) -> QueryResult<()> {
-    let config = config.clone();
-    let submission_data = submission.data().clone();
-    let problem_path = problem_path.as_ref().to_owned();
-
-    thread::spawn(move || {
-        let context = config.create_context(None);
-        let submission = Submission::new(&context, submission_data);
-
-        let id = uuid::Uuid::new_v4().to_string();
-        let created_at = chrono::Local::now().to_rfc3339();
-
-        diesel::insert_into(evaluations::table)
-            .values(&EvaluationInsertable {
-                id: &id,
-                submission_id: &submission.id().0,
-                created_at: &created_at,
-                status: &EvaluationStatus::Pending.to_string(),
-            })
-            .execute(&context.database)
-            .expect("Unable to insert evaluation");
-
-        let evaluation = Evaluation::by_id(&context, &id).unwrap();
-
-        let mut field_values = Vec::new();
-        let files = submission.files().expect("Unable to load submission files");
-        for file in files {
-            field_values.push(submission::FieldValue {
-                field: submission::FieldId(file.field_id.clone()),
-                file: submission::File {
-                    name: submission::FileName(file.name.clone()),
-                    content: file.content.clone(),
-                },
-            })
-        }
-
-        let evaluation::Evaluation(receiver) =
-            do_evaluate(problem_path, submission::Submission { field_values });
-        for (serial, event) in receiver.into_iter().enumerate() {
-            evaluation.insert_event(serial as i32, &event).unwrap();
-        }
-        evaluation.set_status(EvaluationStatus::Success).unwrap();
-    });
-    Ok(())
-}
-
-#[cfg(feature = "task-maker")]
-fn do_evaluate<P: AsRef<Path>>(
-    problem_path: P,
-    submission: submission::Submission,
-) -> evaluation::Evaluation {
-    use task_maker::driver::IoiProblemDriver;
-    IoiProblemDriver::evaluate(problem_path, submission)
-}
-
-#[cfg(not(feature = "task-maker"))]
-fn do_evaluate<P: AsRef<Path>>(
-    problem_path: P,
-    submission: submission::Submission,
-) -> evaluation::Evaluation {
-    unreachable!("Enable feature 'task-maker' to evaluate solutions")
 }

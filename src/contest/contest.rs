@@ -148,10 +148,10 @@ impl ContestView<'_> {
     }
 
     /// A problem that the user can see
-    fn problem(&self, name: ProblemName) -> FieldResult<ProblemView> {
+    fn problem(&self, name: String) -> FieldResult<ProblemView> {
         // TODO: check permissions
 
-        ProblemView::by_name(&self, name)
+        ProblemView::by_name(&self, &name)
     }
 
     /// List of problems that the user can see

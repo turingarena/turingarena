@@ -57,8 +57,8 @@ impl Problem<'_> {
 
 impl Problem<'_> {
     /// Get a problem data by its name
-    pub fn by_name<'a>(context: &'a ApiContext<'a>, name: ProblemName) -> FieldResult<Problem> {
-        let data = problems::table.find(name.0).first(&context.database)?;
+    pub fn by_name<'a>(context: &'a ApiContext<'a>, name: &str) -> FieldResult<Problem<'a>> {
+        let data = problems::table.find(name).first(&context.database)?;
         Ok(Problem { context, data })
     }
 
@@ -141,11 +141,8 @@ impl ProblemView<'_> {
     }
 }
 
-impl ProblemView<'_> {
-    pub fn by_name<'a>(
-        contest_view: &'a ContestView<'a>,
-        name: ProblemName,
-    ) -> FieldResult<ProblemView> {
+impl<'a> ProblemView<'a> {
+    pub fn by_name(contest_view: &'a ContestView<'a>, name: &str) -> FieldResult<Self> {
         let problem = Problem::by_name(contest_view.context(), name)?;
         Ok(ProblemView {
             contest_view,
@@ -154,7 +151,7 @@ impl ProblemView<'_> {
     }
 
     /// Get all the problems data in the database
-    pub fn all<'a>(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<ProblemView>> {
+    pub fn all(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Self>> {
         let problems = Problem::all(contest_view.context())?;
         Ok(problems
             .into_iter()
