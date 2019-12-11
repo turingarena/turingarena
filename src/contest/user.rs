@@ -1,10 +1,11 @@
-use super::*;
-
-use api::ApiContext;
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
+
+use api::ApiContext;
 use juniper_ext::*;
 use schema::users;
+
+use super::*;
 
 #[derive(Debug, juniper::GraphQLInputObject)]
 pub struct UserInput {
@@ -18,40 +19,55 @@ pub struct UserInput {
 
 #[derive(Insertable)]
 #[table_name = "users"]
-pub struct UserInsertable<'a> {
+struct UserInsertable<'a> {
     id: &'a str,
     display_name: &'a str,
     token: &'a str,
 }
 
 #[derive(Queryable)]
-pub struct User {
+struct UserData {
     id: String,
     display_name: String,
     #[allow(dead_code)]
     token: String,
 }
 
+pub struct User<'a> {
+    context: &'a ApiContext<'a>,
+    data: UserData,
+}
+
 /// Wraps a String that identifies a user
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, GraphQLNewtype)]
 pub struct UserId(pub String);
 
-impl User {
+impl<'a> User<'a> {
     /// Find a user from his token
-    pub fn by_token(context: &ApiContext, token: &str) -> FieldResult<User> {
-        Ok(users::table
-            .filter(users::dsl::token.eq(token))
-            .first(&context.database)?)
+    pub fn by_token(context: &'a ApiContext, token: &str) -> FieldResult<Self> {
+        Ok(Self {
+            context,
+            data: users::table
+                .filter(users::dsl::token.eq(token))
+                .first(&context.database)?,
+        })
     }
 
     /// Find a user from his ID
-    pub fn by_id(context: &ApiContext, user_id: UserId) -> FieldResult<User> {
-        Ok(users::table.find(user_id.0).first(&context.database)?)
+    pub fn by_id(context: &'a ApiContext, user_id: UserId) -> FieldResult<Self> {
+        Ok(Self {
+            context,
+            data: users::table.find(user_id.0).first(&context.database)?,
+        })
     }
 
     /// List all users
-    pub fn list(context: &ApiContext) -> FieldResult<Vec<User>> {
-        Ok(users::table.load(&context.database)?)
+    pub fn list(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
+        Ok(users::table
+            .load(&context.database)?
+            .into_iter()
+            .map(|data| Self { context, data })
+            .collect())
     }
 
     /// Insert a new user in the db
@@ -82,14 +98,14 @@ impl User {
 }
 
 #[graphql]
-impl User {
+impl User<'_> {
     /// Id of the user
     pub fn id(&self) -> UserId {
-        UserId(self.id.clone())
+        UserId(self.data.id.clone())
     }
 
     /// Display name of the user, i.e. the full name
     pub fn display_name(&self) -> &String {
-        &self.display_name
+        &self.data.display_name
     }
 }

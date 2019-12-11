@@ -9,18 +9,19 @@ use juniper::FieldResult;
 use api::{ApiConfig, ApiContext};
 use award::*;
 use award::{AwardInput, AwardOutcome};
-use contest_problem::{Problem, ProblemData};
+use contest_problem::Problem;
+use contest_submission::SubmissionId;
 use contest_submission::{self, Submission};
-use contest_submission::{SubmissionData, SubmissionId};
 use evaluation::Event;
 use problem::driver::ProblemDriver;
 use schema::{evaluation_awards, evaluation_events, evaluations};
 
+use crate::award::{AwardValue, BadgeAwardValue, ScoreAwardValue};
+use crate::evaluation::AwardEvent;
+
 use super::super::award::{AwardName, Score};
 use super::submission::FieldValue;
 use super::*;
-use crate::evaluation::AwardEvent;
-use crate::award::{AwardValue, ScoreAwardValue, BadgeAwardValue};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -136,17 +137,8 @@ impl<'a> Evaluation<'a> {
     fn load_submission_field_values(&self) -> Vec<FieldValue> {
         let submission = self.submission().unwrap();
         submission
-            .files()
+            .field_values()
             .expect("Unable to load submission files")
-            .into_iter()
-            .map(|file| submission::FieldValue {
-                field: submission::FieldId(file.field_id.clone()),
-                file: submission::File {
-                    name: submission::FileName(file.name.clone()),
-                    content: file.content.clone(),
-                },
-            })
-            .collect::<Vec<_>>()
     }
 
     fn load_problem_path(&self) -> PathBuf {
@@ -185,8 +177,14 @@ impl<'a> Evaluation<'a> {
                 award_name: &award_name.0,
                 value: match value {
                     AwardValue::Score(ScoreAwardValue { score }) => score.0,
-                    AwardValue::Badge(BadgeAwardValue { badge }) => if *badge { 1f64 } else { 0f64 },
-                } ,
+                    AwardValue::Badge(BadgeAwardValue { badge }) => {
+                        if *badge {
+                            1f64
+                        } else {
+                            0f64
+                        }
+                    }
+                },
                 evaluation_id: &self.data.id,
             };
             diesel::insert_into(evaluation_awards::table)

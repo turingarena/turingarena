@@ -21,14 +21,14 @@ use award::{AwardName, Score};
 use evaluation::*;
 use submission::Submission;
 
+use crate::award::{AwardValue, BadgeAwardValue, ScoreAwardValue};
+use crate::evaluation::AwardEvent;
 use content::TextVariant;
 use evaluation::record::ValenceValue;
 use evaluation::Event;
 use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
 use task_maker_format::ioi::Task;
-use crate::evaluation::AwardEvent;
-use crate::award::{AwardValue, ScoreAwardValue, BadgeAwardValue};
 
 pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Receiver<Event> {
     let task_path = task_path.as_ref().to_owned();

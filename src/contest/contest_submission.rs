@@ -1,16 +1,20 @@
-use super::*;
+use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
+use juniper::FieldResult;
+
+use api::ApiContext;
+use award::*;
+use juniper_ext::*;
+use schema::{submission_files, submissions};
+use submission::FieldValue;
 
 use crate::contest::award::AwardOutcome;
 use crate::contest::contest::ContestView;
 use crate::contest::contest_evaluation::EvaluationStatus;
 use crate::contest::user::UserId;
 use crate::evaluation::Event;
-use api::ApiContext;
-use award::*;
-use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
-use juniper::FieldResult;
-use juniper_ext::*;
-use schema::{submission_files, submissions};
+use crate::file::FileContent;
+
+use super::*;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
@@ -20,48 +24,51 @@ pub struct SubmissionId(pub String);
 #[derive(Queryable)]
 #[allow(dead_code)]
 pub struct SubmissionFile {
-    /// id of the submmission
-    pub submission_id: String,
+    submission_id: String,
+    field_id: String,
+    type_id: String,
+    name: String,
+    content: Vec<u8>,
+}
 
-    /// id of the field in the sumbission form
-    pub field_id: String,
-
-    /// type of the file (e.g MIME text/plain)
-    pub type_id: String,
-
-    /// name of the file, as uploaded by the user (ex. solution.cpp)
-    pub name: String,
-
-    /// content of the file as bytes
-    pub content: Vec<u8>,
+impl SubmissionFile {
+    pub fn into_field_value(self) -> FieldValue {
+        FieldValue {
+            field: submission::FieldId(self.field_id),
+            file: submission::File {
+                name: submission::FileName(self.name),
+                content: self.content,
+            },
+        }
+    }
 }
 
 #[juniper::object]
 impl SubmissionFile {
-    /// id of the submission
+    /// ID the field
     fn field_id(&self) -> &String {
         &self.field_id
     }
 
-    /// type of the file
+    /// ID of the type of the file for the field
     fn type_id(&self) -> &String {
         &self.type_id
     }
 
-    /// name of the file
+    /// File name
     fn name(&self) -> &String {
         &self.name
     }
 
-    /// content of the file in base64 format
-    fn content_base64(&self) -> String {
-        base64::encode(&self.content)
+    /// File content
+    fn content(&self) -> FileContent {
+        FileContent(self.content.clone())
     }
 }
 
 /// A submission in the database
 #[derive(Queryable, Clone)]
-pub struct SubmissionData {
+struct SubmissionData {
     /// id of the submission, that is a random generated UUID
     id: String,
 
@@ -77,20 +84,21 @@ pub struct SubmissionData {
 
 pub struct Submission<'a> {
     context: &'a ApiContext<'a>,
-    pub data: SubmissionData,
+    data: SubmissionData,
 }
 
 impl Submission<'_> {
-    pub fn new<'a>(context: &'a ApiContext, data: SubmissionData) -> Submission<'a> {
-        Submission { context, data }
-    }
-
-    pub fn data(&self) -> &SubmissionData {
-        &self.data
-    }
-
     pub fn evaluation(&self) -> FieldResult<contest_evaluation::Evaluation> {
         contest_evaluation::Evaluation::of_submission(self.context, &self.data.id)
+    }
+
+    pub fn field_values(&self) -> FieldResult<Vec<FieldValue>> {
+        Ok(submission_files::table
+            .filter(submission_files::dsl::submission_id.eq(&self.data.id))
+            .load::<SubmissionFile>(&self.context.database)?
+            .into_iter()
+            .map(|f| f.into_field_value())
+            .collect())
     }
 
     /// Gets the submission with the specified id from the database
@@ -232,8 +240,9 @@ struct SubmissionFileTableInput<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use contest::Contest;
+
+    use super::*;
 
     #[test]
     fn test_submission_insert() {

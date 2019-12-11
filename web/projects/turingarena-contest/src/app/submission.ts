@@ -14,7 +14,9 @@ export const submissionFragment = gql`
       fieldId
       typeId
       name
-      contentBase64
+      content {
+        base64
+      }
     }
     status
     awards {

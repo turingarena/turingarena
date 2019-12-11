@@ -29,19 +29,17 @@ pub struct ProblemInput {
 }
 
 #[derive(Queryable, Clone, Debug)]
-pub struct ProblemData {
+struct ProblemData {
     name: String,
     archive_content: Vec<u8>,
 }
 
 /// A problem in the contest
 pub struct Problem<'a> {
-    pub context: &'a ApiContext<'a>,
-    /// Raw database data of the contest
-    pub data: ProblemData,
+    context: &'a ApiContext<'a>,
+    data: ProblemData,
 }
 
-/// A problem in a contest
 #[juniper_ext::graphql]
 impl Problem<'_> {
     /// Name of this problem. Unique in the current contest.
@@ -114,8 +112,8 @@ impl Problem<'_> {
 
 /// A problem in the contest as seen by contestants
 pub struct ProblemView<'a> {
-    pub contest_view: &'a ContestView<'a>,
-    pub problem: Problem<'a>,
+    contest_view: &'a ContestView<'a>,
+    problem: Problem<'a>,
 }
 
 /// A problem in a contest
@@ -166,7 +164,7 @@ impl<'a> ProblemView<'a> {
 /// Attempts at solving a problem by a user in the contest
 pub struct ProblemTackling<'a> {
     /// The problem
-    pub problem: &'a ProblemView<'a>,
+    problem: &'a ProblemView<'a>,
 }
 
 impl ProblemTackling<'_> {
