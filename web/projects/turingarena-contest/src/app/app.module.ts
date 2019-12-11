@@ -1,10 +1,12 @@
 // tslint:disable-next-line: no-submodule-imports
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 
@@ -56,6 +58,7 @@ const routes: Routes = [
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     GraphQLModule,
     HttpClientModule,
     NgxFilesizeModule,
@@ -67,6 +70,7 @@ const routes: Routes = [
       anchorScrolling: 'enabled',
       scrollPositionRestoration: 'enabled',
     }),
+    AgGridModule.withComponents([]),
   ],
   providers: [],
   bootstrap: [AppComponent],

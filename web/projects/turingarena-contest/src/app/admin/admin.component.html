@@ -1,44 +1,6 @@
-<ng-container *ngIf="adminQuery.valueChanges | async as result">
-  <ng-container *ngIf="result.data as data">
-    <table class="user-table">
-      <thead>
-        <tr>
-          <th rowspan="2">Scores</th>
-          <ng-container *ngFor="let problem of data.problems">
-            <th [colSpan]="problem.material.awards.length">{{problem.material.title | textVariant:'short'}}</th>
-          </ng-container>
-        </tr>
-        <tr>
-          <ng-container *ngFor="let problem of data.problems">
-            <ng-container *ngFor="let award of problem.material.awards">
-              <th>{{award.title | textVariant:'short'}}</th>
-            </ng-container>
-          </ng-container>
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container *ngIf="getScores(data) as scores">
-          <ng-container *ngFor="let user of data.users">
-            <tr>
-              <th>{{user.displayName}}</th>
-              <ng-container *ngFor="let problem of data.problems">
-                <ng-container *ngFor="let award of problem.material.awards">
-                  <td>
-                    <ng-container [ngSwitch]="award.content.__typename">
-                      <ng-container *ngSwitchCase="'BadgeAwardContent'">
-                        {{scores.getBadge(user.id, problem.name, award.name)}}
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'ScoreAwardContent'">
-                        {{scores.getScore(user.id, problem.name, award.name)}}
-                      </ng-container>
-                    </ng-container>
-                  </td>
-                </ng-container>
-              </ng-container>
-            </tr>
-          </ng-container>
-        </ng-container>
-      </tbody>
-    </table>
-  </ng-container>
-</ng-container>
+<label>Filter</label>
+<input [(ngModel)]="quickFilterText" />
+<ag-grid-angular class="user-table ag-theme-balham" [defaultColDef]="defaultColDef"
+  [rowData]="rowData | async" [columnDefs]="columnDefs | async" rowSelection="multiple"
+  [quickFilterText]="quickFilterText">
+</ag-grid-angular>
