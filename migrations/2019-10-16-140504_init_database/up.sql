@@ -13,8 +13,7 @@ CREATE TABLE submissions(
     id              TEXT NOT NULL PRIMARY KEY,
     user_id         TEXT NOT NULL REFERENCES users(id),
     problem_name    TEXT NOT NULL REFERENCES problems(name),
-    created_at      TEXT NOT NULL, 
-    status          TEXT NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED'))
+    created_at      TEXT NOT NULL
 );
 
 CREATE TABLE submission_files(
@@ -26,19 +25,26 @@ CREATE TABLE submission_files(
     PRIMARY KEY (submission_id, field_id)
 );
 
-CREATE TABLE evaluation_events(
+CREATE TABLE evaluations(
+    id              TEXT NOT NULL PRIMARY KEY,
     submission_id   TEXT NOT NULL REFERENCES submissions(id),
-    serial          INT  NOT NULL,
-    event_json      TEXT NOT NULL,
-    PRIMARY KEY (submission_id, serial)
+    created_at      TEXT NOT NULL,
+    status          TEXT NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED'))
 );
 
-CREATE TABLE awards(
-    kind            TEXT   NOT NULL CHECK (kind IN ('SCORE', 'BADGE')),
-    submission_id   TEXT   NOT NULL REFERENCES submissions(id),
+CREATE TABLE evaluation_events(
+    evaluation_id   TEXT NOT NULL REFERENCES evaluations(id),
+    serial          INT  NOT NULL,
+    event_json      TEXT NOT NULL,
+    PRIMARY KEY (evaluation_id, serial)
+);
+
+CREATE TABLE evaluation_awards(
+    evaluation_id   TEXT   NOT NULL REFERENCES evaluations(id),
     award_name      TEXT   NOT NULL,
+    kind            TEXT   NOT NULL CHECK (kind IN ('SCORE', 'BADGE')),
     value           DOUBLE NOT NULL,
-    PRIMARY KEY (kind, submission_id, award_name)
+    PRIMARY KEY (evaluation_id, award_name)
 );
 
 CREATE TABLE contest(

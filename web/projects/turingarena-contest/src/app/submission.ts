@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 import { AwardFragment } from './__generated__/AwardFragment';
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { SubmissionFragment } from './__generated__/SubmissionFragment';
-import { submissionAwardFragment } from './awards';
+import { awardOutcomeFragment } from './awards';
 import { getProblemScoreRange } from './material';
 
 export const submissionFragment = gql`
@@ -18,10 +18,10 @@ export const submissionFragment = gql`
     }
     status
     awards {
-      ...SubmissionAwardFragment
+      ...AwardOutcomeFragment
     }
   }
-  ${submissionAwardFragment}
+  ${awardOutcomeFragment}
 `;
 
 export const getSubmissionState = (material: MaterialFragment, submission: SubmissionFragment) => ({

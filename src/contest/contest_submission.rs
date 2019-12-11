@@ -1,7 +1,8 @@
 use super::*;
 
-use crate::contest::award::SubmissionAward;
+use crate::contest::award::AwardOutcome;
 use crate::contest::contest::ContestView;
+use crate::contest::contest_evaluation::EvaluationStatus;
 use crate::contest::user::UserId;
 use api::ApiContext;
 use award::*;
@@ -13,39 +14,6 @@ use schema::{submission_files, submissions};
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
 pub struct SubmissionId(pub String);
-
-/// Status of a submission
-#[derive(Copy, Clone, juniper::GraphQLEnum)]
-pub enum SubmissionStatus {
-    /// The submission is in the process of evaluation by the server
-    Pending,
-
-    /// The evaluation process terminated correctly
-    Success,
-
-    /// The evaluation process crashed with an error
-    Failed,
-}
-
-impl SubmissionStatus {
-    fn from(value: &str) -> Self {
-        match value {
-            "PENDING" => SubmissionStatus::Pending,
-            "SUCCESS" => SubmissionStatus::Success,
-            "FAILED" => SubmissionStatus::Failed,
-            _ => unreachable!("Corrupted db"),
-        }
-    }
-
-    fn to_string(self) -> String {
-        match self {
-            SubmissionStatus::Pending => "PENDING",
-            SubmissionStatus::Success => "SUCCESS",
-            SubmissionStatus::Failed => "FAILED",
-        }
-        .to_owned()
-    }
-}
 
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
@@ -104,9 +72,6 @@ pub struct SubmissionData {
 
     /// time in wich the submission was created, saved as a RFC3339 date
     created_at: String,
-
-    /// Submission status
-    status: String,
 }
 
 pub struct Submission<'a> {
@@ -121,6 +86,10 @@ impl Submission<'_> {
 
     pub fn data(&self) -> &SubmissionData {
         &self.data
+    }
+
+    pub fn evaluation(&self) -> FieldResult<contest_evaluation::Evaluation> {
+        contest_evaluation::Evaluation::of_submission(self.context, &self.data.id)
     }
 
     /// Gets the submission with the specified id from the database
@@ -144,7 +113,6 @@ impl Submission<'_> {
             id: &id,
             user_id,
             problem_name,
-            status: &SubmissionStatus::Pending.to_string(),
             created_at: &created_at,
         };
         diesel::insert_into(submissions::table)
@@ -179,15 +147,6 @@ impl Submission<'_> {
             .map(|data| contest_submission::Submission { context, data })
             .collect())
     }
-
-    /// Sets the submission status
-    pub fn set_status(&self, status: SubmissionStatus) -> QueryResult<()> {
-        diesel::update(submissions::table)
-            .filter(submissions::dsl::id.eq(&self.data.id))
-            .set(submissions::dsl::status.eq(status.to_string()))
-            .execute(&self.context.database)?;
-        Ok(())
-    }
 }
 
 #[juniper_ext::graphql]
@@ -220,18 +179,18 @@ impl Submission<'_> {
     }
 
     /// Submission status
-    pub fn status(&self) -> SubmissionStatus {
-        SubmissionStatus::from(&self.data.status)
+    pub fn status(&self) -> FieldResult<EvaluationStatus> {
+        Ok(self.evaluation()?.status())
     }
 
     /// Scores of this submission
-    pub fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
-        SubmissionAward::of_submission(&self.context, &self.data.id)
+    pub fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
+        self.evaluation()?.awards()
     }
 
     /// Evaluation events of this submission
     pub fn evaluation_events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
-        contest_evaluation::EvaluationEvent::of_submission(&self.context, &self.data.id)
+        self.evaluation()?.events()
     }
 }
 
@@ -258,7 +217,6 @@ struct SubmissionTableInput<'a> {
     user_id: &'a str,
     problem_name: &'a str,
     created_at: &'a str,
-    status: &'a str,
 }
 
 #[derive(Insertable)]

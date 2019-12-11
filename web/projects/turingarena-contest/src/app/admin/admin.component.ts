@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
-import { submissionAwardFragment } from '../awards';
+import { awardOutcomeFragment } from '../awards';
 import { problemMaterialFragment } from '../material';
 
 import { AdminQuery } from './__generated__/AdminQuery';
@@ -35,14 +35,14 @@ export class AdminComponent {
           displayName
         }
         awards {
-          ...SubmissionAwardFragment
+          ...AwardOutcomeFragment
           submission {
             problemName
             userId
           }
         }
       }
-      ${submissionAwardFragment}
+      ${awardOutcomeFragment}
       ${problemMaterialFragment}
     `,
     variables: {},

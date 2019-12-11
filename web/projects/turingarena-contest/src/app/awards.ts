@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
-export const submissionAwardFragment = gql`
-  fragment SubmissionAwardFragment on SubmissionAward {
+export const awardOutcomeFragment = gql`
+  fragment AwardOutcomeFragment on AwardOutcome {
     awardName
     value {
       ... on BadgeAwardValue {

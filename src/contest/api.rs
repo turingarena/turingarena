@@ -16,11 +16,11 @@ use user::UserId;
 use user::UserInput;
 
 use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
-use crate::contest::contest_problem::{ProblemInput, Problem};
+use crate::contest::contest_problem::{Problem, ProblemInput};
 use crate::contest::user::User;
 
 use super::*;
-use crate::contest::award::SubmissionAward;
+use crate::contest::award::AwardOutcome;
 
 embed_migrations!();
 
@@ -185,9 +185,9 @@ impl Query<'_> {
         Problem::all(&self.context)
     }
 
-    fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
+    fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
         self.context.authorize_admin()?;
-        SubmissionAward::list_by_user_and_problem(&self.context)
+        AwardOutcome::list_by_user_and_problem(&self.context)
     }
 
     /// Get the submission with the specified id

@@ -1,7 +1,7 @@
 use super::*;
 
 use super::contest::ContestView;
-use crate::contest::award::SubmissionAward;
+use crate::contest::award::AwardOutcome;
 use api::ApiContext;
 use award::*;
 use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
@@ -57,13 +57,8 @@ impl Problem<'_> {
 
 impl Problem<'_> {
     /// Get a problem data by its name
-    pub fn by_name<'a>(
-        context: &'a ApiContext<'a>,
-        name: ProblemName,
-    ) -> FieldResult<Problem> {
-        let data = problems::table
-            .find(name.0)
-            .first(&context.database)?;
+    pub fn by_name<'a>(context: &'a ApiContext<'a>, name: ProblemName) -> FieldResult<Problem> {
+        let data = problems::table.find(name.0).first(&context.database)?;
         Ok(Problem { context, data })
     }
 
@@ -97,7 +92,6 @@ impl Problem<'_> {
         diesel::delete(problems::table.find(name.0)).execute(&context.database)?;
         Ok(())
     }
-
 
     pub fn unpack(&self) -> PathBuf {
         self.context
@@ -153,7 +147,10 @@ impl ProblemView<'_> {
         name: ProblemName,
     ) -> FieldResult<ProblemView> {
         let problem = Problem::by_name(contest_view.context(), name)?;
-        Ok(ProblemView { contest_view, problem })
+        Ok(ProblemView {
+            contest_view,
+            problem,
+        })
     }
 
     /// Get all the problems data in the database
@@ -161,7 +158,10 @@ impl ProblemView<'_> {
         let problems = Problem::all(contest_view.context())?;
         Ok(problems
             .into_iter()
-            .map(|problem| ProblemView { contest_view, problem })
+            .map(|problem| ProblemView {
+                contest_view,
+                problem,
+            })
             .collect())
     }
 }
@@ -186,8 +186,8 @@ impl ProblemTackling<'_> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
-    fn awards(&self) -> FieldResult<Vec<SubmissionAward>> {
-        Ok(SubmissionAward::by_user_and_problem(
+    fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
+        Ok(AwardOutcome::by_user_and_problem(
             &self.problem.contest_view.context(),
             &self.user_id().0,
             &self.name(),
