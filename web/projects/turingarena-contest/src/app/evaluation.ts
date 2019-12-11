@@ -34,7 +34,7 @@ export const evaluationFragment = gql`
     ... on ValenceValue { ...ValenceValueFragment }
   }
 
-  fragment ValueEventFragment on ValueEvent {
+  fragment EventFragment on Event {
     __typename
     ... on ValueEvent {
       key
@@ -42,12 +42,8 @@ export const evaluationFragment = gql`
     }
   }
 
-  fragment EvaluationEventFragment on EvaluationEvent {
-    event { ...ValueEventFragment }
-  }
-
   fragment SubmissionEvaluationFragment on Submission {
-    evaluationEvents { ...EvaluationEventFragment }
+    evaluationEvents { ...EventFragment }
   }
 
   ${rusageFragment}

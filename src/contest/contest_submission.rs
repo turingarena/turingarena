@@ -10,6 +10,7 @@ use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnec
 use juniper::FieldResult;
 use juniper_ext::*;
 use schema::{submission_files, submissions};
+use crate::evaluation::Event;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
@@ -189,7 +190,7 @@ impl Submission<'_> {
     }
 
     /// Evaluation events of this submission
-    pub fn evaluation_events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
+    pub fn evaluation_events(&self) -> FieldResult<Vec<Event>> {
         self.evaluation()?.events()
     }
 }

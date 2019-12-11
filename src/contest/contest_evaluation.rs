@@ -20,86 +20,9 @@ use std::path::{Path, PathBuf};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
-pub struct EvaluationEvent {
-    /// id of the submission
-    submission_id: String,
-
-    /// serial number of the event
-    serial: i32,
-
-    /// value of the event, serialized
-    event_json: String,
-}
-
-#[juniper::object]
-impl EvaluationEvent {
-    /// serial number of the event
-    fn serial(&self) -> i32 {
-        self.serial
-    }
-
-    /// value of this evaluation event
-    fn event(&self) -> FieldResult<Event> {
-        Ok(serde_json::from_str(&self.event_json)?)
-    }
-
-    /// events as JSON format
-    /// This is currently provided only as a woraround the fact that
-    /// events doesn't work, and should be removed in the future!
-    fn event_json(&self) -> &String {
-        &self.event_json
-    }
-}
-
-impl EvaluationEvent {
-    pub fn insert(
-        context: &ApiContext,
-        serial: i32,
-        evaluation_id: &str,
-        event: &Event,
-    ) -> FieldResult<()> {
-        if let Event::Score(score_event) = event {
-            let score_award_input = AwardInput {
-                kind: "SCORE",
-                award_name: &score_event.award_name.0,
-                value: score_event.score.0,
-                evaluation_id,
-            };
-            diesel::insert_into(evaluation_awards::table)
-                .values(&score_award_input)
-                .execute(&context.database)?;
-        }
-        if let Event::Badge(badge_event) = event {
-            let badge_award_input = AwardInput {
-                kind: "BADGE",
-                award_name: &badge_event.award_name.0,
-                value: if badge_event.badge { 1f64 } else { 0f64 },
-                evaluation_id,
-            };
-            diesel::insert_into(evaluation_awards::table)
-                .values(&badge_award_input)
-                .execute(&context.database)?;
-        }
-        let event_input = EvaluationEventInput {
-            serial,
-            evaluation_id,
-            event_json: serde_json::to_string(event)?,
-        };
-        diesel::insert_into(evaluation_events::table)
-            .values(&event_input)
-            .execute(&context.database)?;
-        Ok(())
-    }
-
-    /// return a list of evaluation events for the specified evaluation
-    pub fn of_evaluation(
-        context: &ApiContext,
-        evaluation_id: &str,
-    ) -> FieldResult<Vec<EvaluationEvent>> {
-        Ok(evaluation_events::table
-            .filter(evaluation_events::dsl::evaluation_id.eq(evaluation_id))
-            .load(&context.database)?)
-    }
+struct EvaluationEvent {
+    /// Value of the event, serialized
+    pub event_json: String,
 }
 
 #[derive(Insertable)]
@@ -132,8 +55,16 @@ impl<'a> Evaluation<'a> {
     }
 
     /// Evaluation events of this submission
-    pub fn events(&self) -> FieldResult<Vec<contest_evaluation::EvaluationEvent>> {
-        EvaluationEvent::of_evaluation(&self.context, &self.data.id)
+    pub fn events(&self) -> FieldResult<Vec<Event>> {
+        Ok(evaluation_events::table
+            .select(evaluation_events::dsl::event_json)
+            .filter(evaluation_events::dsl::evaluation_id.eq(&self.data.id))
+            .order(evaluation_events::dsl::serial)
+            .load::<String>(&self.context.database)?
+            .into_iter()
+            .map(|json| serde_json::from_str(&json))
+            .collect::<std::result::Result<_, _>>()?
+        )
     }
 
     /// Gets the evaluation with the specified id from the database
@@ -160,6 +91,40 @@ impl<'a> Evaluation<'a> {
         diesel::update(evaluations::table)
             .filter(evaluations::dsl::id.eq(&self.data.id))
             .set(evaluations::dsl::status.eq(status.to_string()))
+            .execute(&self.context.database)?;
+        Ok(())
+    }
+
+    pub fn insert_event(&self, serial: i32, event: &Event) -> FieldResult<()> {
+        if let Event::Score(score_event) = event {
+            let score_award_input = AwardInput {
+                kind: "SCORE",
+                award_name: &score_event.award_name.0,
+                value: score_event.score.0,
+                evaluation_id: &self.data.id,
+            };
+            diesel::insert_into(evaluation_awards::table)
+                .values(&score_award_input)
+                .execute(&self.context.database)?;
+        }
+        if let Event::Badge(badge_event) = event {
+            let badge_award_input = AwardInput {
+                kind: "BADGE",
+                award_name: &badge_event.award_name.0,
+                value: if badge_event.badge { 1f64 } else { 0f64 },
+                evaluation_id: &self.data.id,
+            };
+            diesel::insert_into(evaluation_awards::table)
+                .values(&badge_award_input)
+                .execute(&self.context.database)?;
+        }
+        let event_input = EvaluationEventInput {
+            serial,
+            evaluation_id: &self.data.id,
+            event_json: serde_json::to_string(event)?,
+        };
+        diesel::insert_into(evaluation_events::table)
+            .values(&event_input)
             .execute(&self.context.database)?;
         Ok(())
     }
@@ -266,7 +231,7 @@ pub fn evaluate<P: AsRef<Path>>(
         let evaluation::Evaluation(receiver) =
             do_evaluate(problem_path, submission::Submission { field_values });
         for (serial, event) in receiver.into_iter().enumerate() {
-            EvaluationEvent::insert(&context, serial as i32, &id, &event).unwrap();
+            evaluation.insert_event(serial as i32, &event).unwrap();
         }
         evaluation.set_status(EvaluationStatus::Success).unwrap();
     });
