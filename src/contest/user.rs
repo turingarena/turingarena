@@ -7,7 +7,8 @@ use schema::users;
 
 use super::*;
 
-#[derive(Debug, juniper::GraphQLInputObject)]
+#[derive(Debug, juniper::GraphQLInputObject, Insertable)]
+#[table_name = "users"]
 pub struct UserInput {
     /// Id of the user
     pub id: String,
@@ -17,12 +18,12 @@ pub struct UserInput {
     pub token: String,
 }
 
-#[derive(Insertable)]
+#[derive(Debug, juniper::GraphQLInputObject, AsChangeset)]
 #[table_name = "users"]
-struct UserInsertable<'a> {
-    id: &'a str,
-    display_name: &'a str,
-    token: &'a str,
+pub struct UserUpdateInput {
+    pub id: String,
+    pub display_name: Option<String>,
+    pub token: Option<String>,
 }
 
 #[derive(Queryable)]
@@ -76,13 +77,21 @@ impl<'a> User<'a> {
         inputs: T,
     ) -> QueryResult<()> {
         for input in inputs.into_iter() {
-            // FIXME: replace_into not supported by PostgreSQL
-            diesel::replace_into(users::table)
-                .values(UserInsertable {
-                    id: &input.id,
-                    display_name: &input.display_name,
-                    token: &input.token,
-                })
+            diesel::insert_into(users::table)
+                .values(input)
+                .execute(&context.database)?;
+        }
+        Ok(())
+    }
+
+    pub fn update<T: IntoIterator<Item = UserUpdateInput>>(
+        context: &ApiContext,
+        inputs: T,
+    ) -> QueryResult<()> {
+        for input in inputs.into_iter() {
+            diesel::update(users::table)
+                .filter(users::dsl::id.eq(&input.id))
+                .set(&input)
                 .execute(&context.database)?;
         }
         Ok(())

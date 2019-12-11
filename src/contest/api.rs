@@ -19,7 +19,7 @@ use crate::contest::award::AwardOutcome;
 use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
 use crate::contest::contest_evaluation::Evaluation;
 use crate::contest::contest_problem::{Problem, ProblemInput};
-use crate::contest::user::User;
+use crate::contest::user::{User, UserUpdateInput};
 
 use super::*;
 
@@ -283,6 +283,12 @@ impl Mutation<'_> {
     pub fn add_users(&self, inputs: Vec<UserInput>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
         User::insert(&self.context, inputs)?;
+        Ok(MutationOk)
+    }
+
+    pub fn update_users(&self, inputs: Vec<UserUpdateInput>) -> FieldResult<MutationOk> {
+        self.context.authorize_admin()?;
+        User::update(&self.context, inputs)?;
         Ok(MutationOk)
     }
 
