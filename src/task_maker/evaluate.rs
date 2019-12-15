@@ -3,7 +3,7 @@ extern crate tempdir;
 
 use super::*;
 
-use std::path::{Path};
+use std::path::{Path, PathBuf};
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
 };
@@ -24,7 +24,41 @@ use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
 use std::process::{Command, Stdio};
 use std::io::{BufReader, BufRead};
+use std::env;
 
+/// Searches for an executable in `PATH`
+fn find_in_path(exe: &str) -> Option<PathBuf> {
+    let path = env::var("PATH").unwrap();
+
+    for dir in env::split_paths(&path) {
+        let exe = dir.join(exe);
+        if exe.exists() {
+            return Some(exe);
+        }
+    }
+    None
+}
+
+/// Searches the task-maker executable in the following locations:
+/// - env variable `TASK_MAKER_EXE`
+/// - executable `task-maker-rust` in `PATH`
+/// - executable `task-maker` in `PATH`
+fn find_task_maker() -> Result<PathBuf, failure::Error> {
+    if let Ok(task_maker) = env::var("TASK_MAKER_EXE") {
+        let path = PathBuf::from(task_maker);
+        if path.exists() {
+            return Ok(path);
+        }
+    }
+
+    for name in &["task-maker-rust", "task-maker"] {
+        if let Some(exe) = find_in_path(name) {
+            return Ok(exe)
+        }
+    }
+
+    Err(failure::err_msg("task-maker executable not found"))
+}
 
 pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Result<Receiver<Event>, failure::Error> {
     let task_path = task_path.as_ref().to_owned();
@@ -38,17 +72,24 @@ pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> R
 
     let mut ioi_task: Option<Task> = None;
 
-    let mut task_maker = Command::new("task-maker-rust")
+    let mut task_maker = Command::new(find_task_maker()?);
+    task_maker
         .arg("--dry-run")
         .arg("--no-statement")
         .arg("--ui=json")
         .arg("--task-dir").arg(task_path)
-        .arg("--solution").arg(solution_path)
+        .arg("--solution").arg(solution_path);
+
+    if let Ok(args) = env::var("TASK_MAKER_ARGS") {
+        task_maker.args(args.split(' '));
+    }
+
+    let mut child = task_maker
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .spawn()?;
 
-    let stdout_reader = BufReader::new(task_maker.stdout.as_mut().unwrap());
+    let stdout_reader = BufReader::new(child.stdout.as_mut().unwrap());
     for line in stdout_reader.lines() {
         let message = serde_json::from_str::<UIMessage>(&line?)?;
 
@@ -60,7 +101,7 @@ pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> R
         }
     }
 
-    task_maker.wait()?;
+    child.wait()?;
 
     Ok(event_rx)
 }
