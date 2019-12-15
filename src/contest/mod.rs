@@ -1,17 +1,3 @@
-#![warn()]
-
-extern crate base64;
-extern crate jsonwebtoken as jwt;
-extern crate juniper;
-extern crate rand;
-extern crate serde_json;
-extern crate serde_yaml;
-extern crate structopt;
-#[cfg(test)]
-extern crate tempdir;
-
-extern crate uuid;
-
 #[cfg(feature = "cli-admin")]
 pub mod cli_admin;
 

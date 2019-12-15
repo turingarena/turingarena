@@ -5,7 +5,7 @@ use contest::UserToken;
 use diesel::SqliteConnection;
 use juniper::{FieldError, FieldResult};
 use juniper_ext::*;
-use jwt::{decode, encode, Header, Validation};
+use jsonwebtoken::{decode, encode, Header, Validation};
 use user::UserId;
 
 /// Wraps a JWT User token

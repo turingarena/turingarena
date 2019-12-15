@@ -1,8 +1,5 @@
 //! Data types to represent the content of files
 
-extern crate base64;
-extern crate serde;
-
 use super::*;
 use juniper::FieldResult;
 use serde::{Deserialize, Serialize};

@@ -1,7 +1,5 @@
 //! Data-types for feedback templates.
 
-extern crate juniper;
-
 use crate::juniper_ext::*;
 use serde::{Deserialize, Serialize};
 use table::TableSection;
@@ -247,13 +245,5 @@ pub mod table {
         pub key: Key,
         /// Valence associated with this cell, if any (reference).
         pub valence_key: Option<Key>,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

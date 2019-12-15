@@ -1,9 +1,4 @@
-extern crate rand;
-extern crate ssri;
-extern crate tar;
-extern crate xz2;
-
-use self::rand::Rng;
+use rand::Rng;
 use std::path::{Path, PathBuf};
 
 /// Unpacks an archive atomically.

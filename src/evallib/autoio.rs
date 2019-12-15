@@ -12,11 +12,3 @@
 //! This skeleton is defined in abstract language,
 //! it is analyzed statically,
 //! and is used to generate concrete skeletons in various programming languages.
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

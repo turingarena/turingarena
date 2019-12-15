@@ -1,6 +1,3 @@
-extern crate serde_json;
-extern crate tempdir;
-
 use super::*;
 
 use std::path::{Path, PathBuf};

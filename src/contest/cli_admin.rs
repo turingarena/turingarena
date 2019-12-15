@@ -1,11 +1,3 @@
-extern crate graphql_client;
-#[cfg(feature = "cli-admin-remote")]
-extern crate reqwest;
-extern crate rpassword;
-
-extern crate tar;
-extern crate xz2;
-
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
 use crate::archive::pack_archive;

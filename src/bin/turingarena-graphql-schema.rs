@@ -1,5 +1,3 @@
-extern crate turingarena;
-
 use turingarena::*;
 
 use contest::api::ApiContext;

@@ -2,8 +2,6 @@
 //!
 //! Supports multiple variants for the same item, for localization and other forms of content negotiation.
 
-extern crate serde;
-
 use super::*;
 use juniper_ext::*;
 use serde::{Deserialize, Serialize};
@@ -65,11 +63,3 @@ pub struct FileVariant {
 
 /// A file, expressed as a collection of variants (for content negotiation).
 pub type File = Vec<FileVariant>;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

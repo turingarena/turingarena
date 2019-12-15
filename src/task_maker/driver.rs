@@ -1,5 +1,3 @@
-extern crate failure;
-
 use super::*;
 
 use failure::Error;

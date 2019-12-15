@@ -1,7 +1,5 @@
 //! Data-types for scores and awards.
 
-extern crate juniper;
-
 use super::content::*;
 use super::juniper_ext::*;
 use serde::{Deserialize, Serialize};
@@ -69,12 +67,4 @@ pub struct ScoreAwardValue {
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct BadgeAwardValue {
     pub badge: bool,
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }

@@ -1,6 +1,3 @@
-extern crate juniper;
-extern crate serde_json;
-
 use super::*;
 use crate::contest::api::ApiConfig;
 use api::ApiContext;

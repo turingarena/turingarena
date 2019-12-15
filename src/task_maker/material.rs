@@ -1,5 +1,3 @@
-extern crate mime_guess;
-
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 

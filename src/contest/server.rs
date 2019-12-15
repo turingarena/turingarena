@@ -1,6 +1,3 @@
-extern crate juniper_rocket;
-extern crate rocket;
-
 use super::*;
 use api::ApiContext;
 use rocket::fairing::AdHoc;

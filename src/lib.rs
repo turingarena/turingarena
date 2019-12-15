@@ -2,10 +2,6 @@
 #![feature(external_doc)]
 #![doc(include = "../README.md")]
 
-pub extern crate juniper;
-
-extern crate turingarena_proc_macro;
-
 #[cfg(feature = "diesel")]
 #[macro_use]
 extern crate diesel;
@@ -43,11 +39,3 @@ pub mod task_maker;
 
 #[cfg(feature = "archive")]
 mod archive;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

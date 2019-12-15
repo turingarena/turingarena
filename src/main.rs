@@ -1,8 +1,3 @@
-extern crate dirs;
-
-extern crate serde_json;
-extern crate structopt;
-
 use std::collections::HashMap;
 use std::path::PathBuf;
 

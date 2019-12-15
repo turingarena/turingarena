@@ -1,8 +1,3 @@
-//! Data-types for submission forms and submissions.
-
-extern crate juniper;
-extern crate serde;
-
 use serde::{Deserialize, Serialize};
 
 use crate::content::*;
@@ -81,12 +76,4 @@ pub struct File {
     pub name: FileName,
     /// Byte content of the submitted file.
     pub content: Vec<u8>,
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
