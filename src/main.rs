@@ -1,99 +1,40 @@
 use structopt::StructOpt;
-
-use turingarena_core::contest;
-
-use contest::api::ContestArgs;
-
-use contest::graphql_schema::generate_schema;
-
-use contest::*;
 use std::error::Error;
+
+use turingarena_core::contest::graphql_schema::generate_schema;
+use turingarena_web_server::{ServerArgs, run_server};
+use turingarena_cli_client::{CliArgs, run_command};
 
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "turingarena",
     about = "CLI to manage the turingarena contest server"
 )]
-struct Args {
-    #[structopt(flatten)]
-    contest: ContestArgs,
-
-    #[structopt(subcommand)]
-    command: Command,
-}
-
-#[derive(StructOpt, Debug)]
-enum Command {
+enum Args {
     /// start a contest HTTP server
     Serve {
-        /// host to bind the server to
-        #[structopt(short = "H", long, default_value = "localhost")]
-        host: String,
-
-        /// port for the server to listen
-        #[structopt(short, long, default_value = "8080")]
-        port: u16,
-
-        /// secret key for the webserver
-        #[structopt(long, short, env = "SECRET")]
-        secret_key: Option<String>,
-
-        /// skip authentication (DANGEROUS: only for debug!)
-        #[structopt(long, env = "SKIP_AUTH")]
-        skip_auth: bool,
+        #[structopt(flatten)]
+        args: ServerArgs
     },
     /// generate GraphQL schema
     GenerateSchema {},
+    /// Administrate a turingarena contest
     Admin {
-        #[structopt(subcommand)]
-        command: turingarena_cli_client::AdminCommand,
+        #[structopt(flatten)]
+        args: CliArgs,
     },
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    use api::ApiConfig;
-    use Command::*;
-    let args = Args::from_args();
-    let config = ApiConfig::default().with_args(args.contest);
-
-    match args.command {
-        GenerateSchema {} => {
-            println!("{}", generate_schema());
-            Ok(())
+    match Args::from_args() {
+        Args::GenerateSchema {} => {
+            generate_schema()
         }
-        Serve {
-            host,
-            port,
-            secret_key,
-            skip_auth,
-        } => {
-            use turingarena_web_server::run_server;
-
-            if skip_auth {
-                eprintln!("WARNING: authentication disabled");
-            } else if secret_key == None {
-                eprintln!("ERROR: provide a secret OR set skip-auth");
-                return Err("Secret not provided".to_owned().into());
-            }
-            run_server(
-                host,
-                port,
-                config
-                    .with_skip_auth(skip_auth)
-                    .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
-            )
+        Args::Serve { args } => {
+            run_server(args)
         }
-        Admin { command } => {
-            let config = config.with_skip_auth(true);
-            let context = config.create_context(None);
-            let root_node = context.root_node();
-
-            let request = command.into_graphql_request();
-            let response = request.execute(&root_node, &());
-
-            println!("{}", serde_json::to_string_pretty(&response).unwrap());
-
-            Ok(())
+        Args::Admin { args } => {
+            run_command(args)
         }
     }
 }

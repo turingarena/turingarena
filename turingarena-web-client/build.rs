@@ -54,7 +54,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Command::new("npm")
         .current_dir(&out_web_path)
         .args(&["ci", "--ignore-scripts"])
-        .check();
+        .check()?;
 
     std::fs::create_dir_all(&out_web_path.join("__generated__"))?;
 

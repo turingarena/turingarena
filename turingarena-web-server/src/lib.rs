@@ -16,6 +16,36 @@ use rocket::http::ContentType;
 use std::ffi::OsStr;
 use std::io::Cursor;
 use std::error::Error;
+use structopt::StructOpt;
+use turingarena_core::contest::api::ContestArgs;
+
+/// Args for the server
+#[derive(StructOpt, Debug)]
+#[structopt(
+    name = "turingarena-serve",
+    about = "CLI to start a turingarena server"
+)]
+
+pub struct ServerArgs {
+    #[structopt(flatten)]
+    contest: ContestArgs,
+
+    /// host to bind the server to
+    #[structopt(short = "H", long, default_value = "localhost")]
+    host: String,
+
+    /// port for the server to listen
+    #[structopt(short, long, default_value = "8080")]
+    port: u16,
+
+    /// secret key for the webserver
+    #[structopt(long, short, env = "SECRET")]
+    secret_key: Option<String>,
+
+    /// skip authentication (DANGEROUS: only for debug!)
+    #[structopt(long, env = "SKIP_AUTH")]
+    skip_auth: bool,
+}
 
 struct Authorization(Option<String>);
 
@@ -91,10 +121,22 @@ fn dist<'r>(file_option: Option<PathBuf>) -> rocket::response::Result<'r> {
         .ok()
 }
 
-pub fn run_server(host: String, port: u16, api_config: ApiConfig) -> Result<(), Box<dyn Error>> {
+/// Run the server
+pub fn run_server(args: ServerArgs) -> Result<(), Box<dyn Error>> {
+    if args.skip_auth {
+        eprintln!("WARNING: authentication disabled");
+    } else if args.secret_key == None {
+        eprintln!("ERROR: provide a secret OR set skip-auth");
+        return Err("Secret not provided".to_owned().into());
+    }
+
+    let api_config = ApiConfig::default().with_args(args.contest)
+        .with_skip_auth(args.skip_auth)
+        .with_secret(args.secret_key.map(|s| s.as_bytes().to_owned()));
+
     let config = rocket::Config::build(rocket::config::Environment::active()?)
-        .port(port)
-        .address(host)
+        .port(args.port)
+        .address(args.host)
         .finalize()?;
 
     rocket::custom(config)

@@ -8,9 +8,24 @@ use serde::Serialize;
 use std::fs::read;
 use std::path::PathBuf;
 use structopt::StructOpt;
+use turingarena_core::contest::api::{ApiConfig, ContestArgs};
 
 #[derive(StructOpt, Debug)]
-pub enum AdminCommand {
+#[structopt(
+    name = "turingarena-cli",
+    about = "CLI to administrate a turingarena contest"
+)]
+pub struct CliArgs {
+    #[structopt(flatten)]
+    contest: ContestArgs,
+
+    /// Command to execute
+    #[structopt(subcommand)]
+    command: AdminCommand,
+}
+
+#[derive(StructOpt, Debug)]
+enum AdminCommand {
     ViewContest,
     InitDb,
     UpdateContest {
@@ -126,6 +141,7 @@ impl AdminCommand {
     }
 }
 
+
 fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
     where
         B: FnOnce(V) -> QueryBody<V>,
@@ -141,4 +157,20 @@ fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
         Some(query_body.operation_name.to_owned()),
         Some(variables),
     )
+}
+
+
+pub fn run_command(args: CliArgs) -> Result<(), Box<dyn std::error::Error>> {
+    let config = ApiConfig::default()
+        .with_args(args.contest)
+        .with_skip_auth(true);
+
+    let context = config.create_context(None);
+    let root_node = context.root_node();
+
+    let request = args.command.into_graphql_request();
+    let response = request.execute(&root_node, &());
+
+    println!("{}", serde_json::to_string_pretty(&response)?);
+    Ok(())
 }

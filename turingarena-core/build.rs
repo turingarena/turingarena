@@ -1,11 +1,7 @@
 use std::env;
-use std::fs::{DirEntry, File, OpenOptions};
+use std::fs::OpenOptions;
 use std::path::Path;
-use std::process::Command;
 
-extern crate ssri;
-extern crate tar;
-extern crate xz2;
 
 fn main() {
     // Unless otherwise specified, do not re-run this script

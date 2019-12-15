@@ -3,26 +3,24 @@ members = ["turingarena-*"]
 
 [package]
 name = "turingarena"
+description = "a collection of libraries and tools to create programming challenges and competitions"
 version = "0.1.0"
 authors = [
     "Alessandro Righi <alerighi4@gmail.com>",
     "Massimo Cairo <cairomassimo@gmail.com>",
 ]
+license = "MPL-2.0"
+documentation = "https://turingarena.github.io/turingarena/turingarena/"
+repository = "https://github.com/turingarena/turingarena"
 edition = "2018"
 default-run = "turingarena"
 
 [dependencies]
-
 turingarena-core = { path = "turingarena-core/" }
 turingarena-cli-client = { path = "turingarena-cli-client/" }
 turingarena-web-server = { path = "turingarena-web-server/" }
 
-serde = "1.0.103"
-serde_json = "1.0.44"
-structopt = "0.3.3"
-ssri = "5.0.0"
-tar = "0.4.26"
-xz2 = "0.1.6"
+structopt = "0.3"
 
 [patch.crates-io]
 # fix for https://github.com/graphql-rust/juniper/issues/455
