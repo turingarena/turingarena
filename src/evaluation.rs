@@ -36,14 +36,6 @@ pub struct AwardEvent {
     pub value: award::AwardValue,
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
-
 /// A library to manage evaluations records, i.e., collection of key-value pairs computed during evaluation.
 pub mod record {
     extern crate juniper;

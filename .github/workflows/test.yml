@@ -6,9 +6,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: sudo apt update && sudo apt install libsqlite3-dev
+      run: sudo apt update && sudo apt install libsqlite3-dev libseccomp-dev
     - name: Install Rust nightly toolchain
       run: rustup default nightly
+    - name: Update path
+      run: export PATH="$HOME/.cargo/bin:$PATH" && echo $PATH
+    - name: Install task-maker-rust
+      run: cargo install --git https://github.com/edomora97/task-maker-rust.git
     - name: Build Rust
       run: cargo build --all-features
     - name: Build Rust doc
