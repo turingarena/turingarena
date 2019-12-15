@@ -1,6 +1,6 @@
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
-use crate::archive::pack_archive;
+use turingarena_core::archive::pack_archive;
 use graphql_client::{GraphQLQuery, QueryBody};
 use juniper::http::GraphQLRequest;
 use juniper::InputValue;
@@ -49,7 +49,7 @@ pub enum AdminCommand {
 }
 
 impl AdminCommand {
-    pub fn to_graphql_request(self) -> GraphQLRequest {
+    pub fn into_graphql_request(self) -> GraphQLRequest {
         use AdminCommand::*;
         match self {
             ViewContest => make_request(
@@ -127,9 +127,9 @@ impl AdminCommand {
 }
 
 fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
-where
-    B: FnOnce(V) -> QueryBody<V>,
-    V: Serialize,
+    where
+        B: FnOnce(V) -> QueryBody<V>,
+        V: Serialize,
 {
     let query_body = query_builder(variables);
 

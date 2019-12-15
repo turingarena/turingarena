@@ -1,12 +1,13 @@
 use structopt::StructOpt;
 
-use turingarena::contest;
+use turingarena_core::contest;
 
 use contest::api::ContestArgs;
 
 use contest::graphql_schema::generate_schema;
 
 use contest::*;
+use std::error::Error;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -24,7 +25,6 @@ struct Args {
 #[derive(StructOpt, Debug)]
 enum Command {
     /// start a contest HTTP server
-    #[cfg(feature = "server")]
     Serve {
         /// host to bind the server to
         #[structopt(short = "H", long, default_value = "localhost")]
@@ -44,14 +44,13 @@ enum Command {
     },
     /// generate GraphQL schema
     GenerateSchema {},
-    #[cfg(feature = "cli-admin")]
     Admin {
         #[structopt(subcommand)]
-        command: cli_admin::AdminCommand,
+        command: turingarena_cli_client::AdminCommand,
     },
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<dyn Error>> {
     use api::ApiConfig;
     use Command::*;
     let args = Args::from_args();
@@ -59,17 +58,16 @@ fn main() -> Result<()> {
 
     match args.command {
         GenerateSchema {} => {
-            generate_schema();
+            println!("{}", generate_schema());
             Ok(())
         }
-        #[cfg(feature = "server")]
         Serve {
             host,
             port,
             secret_key,
             skip_auth,
         } => {
-            use contest::server::run_server;
+            use turingarena_web_server::run_server;
 
             if skip_auth {
                 eprintln!("WARNING: authentication disabled");
@@ -85,13 +83,12 @@ fn main() -> Result<()> {
                     .with_secret(secret_key.map(|s| s.as_bytes().to_owned())),
             )
         }
-        #[cfg(feature = "cli-admin")]
         Admin { command } => {
             let config = config.with_skip_auth(true);
             let context = config.create_context(None);
             let root_node = context.root_node();
 
-            let request = command.to_graphql_request();
+            let request = command.into_graphql_request();
             let response = request.execute(&root_node, &());
 
             println!("{}", serde_json::to_string_pretty(&response).unwrap());

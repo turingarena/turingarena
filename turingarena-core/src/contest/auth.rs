@@ -45,6 +45,6 @@ pub fn auth(context: &ApiContext, token: &str) -> FieldResult<Option<UserToken>>
 }
 
 /// Validates a JWT token
-pub fn validate(token: &str, secret: &[u8]) -> Result<JwtData> {
+pub fn validate(token: &str, secret: &[u8]) -> Result<JwtData, failure::Error> {
     Ok(decode(token, &secret, &Validation::default())?.claims)
 }

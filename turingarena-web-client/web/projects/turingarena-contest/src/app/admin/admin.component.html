@@ -1,0 +1,11 @@
+<label>Filter</label>
+<input [(ngModel)]="quickFilterText" />
+<ag-grid-angular #usersGrid class="users-grid ag-theme-balham" [defaultColDef]="defaultColDef" [animateRows]="true"
+  [rowData]="usersRowData | async" [columnDefs]="usersColumnDefs | async" [context]="usersContext | async"
+  rowSelection="multiple" [quickFilterText]="quickFilterText">
+</ag-grid-angular>
+
+<ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham" [defaultColDef]="defaultColDef" [animateRows]="true"
+  [rowData]="submissionsRowData | async" [columnDefs]="submissionsColumnDefs | async" [context]="submissionsContext | async"
+  rowSelection="multiple" [quickFilterText]="quickFilterText">
+</ag-grid-angular>

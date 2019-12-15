@@ -97,16 +97,9 @@ impl Problem<'_> {
     }
 
     /// Material of this problem
-    #[cfg(feature = "task-maker")]
     fn get_problem_material(&self) -> FieldResult<Material> {
         task_maker::driver::IoiProblemDriver::generate_material(self.unpack())
             .map_err(FieldError::from)
-    }
-
-    /// Material of this problem
-    #[cfg(not(feature = "task-maker"))]
-    fn get_problem_material(&self) -> FieldResult<Material> {
-        unreachable!("Enable feature 'task-maker' to generate problem material")
     }
 }
 

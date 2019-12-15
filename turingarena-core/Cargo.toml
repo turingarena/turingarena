@@ -1,0 +1,40 @@
+[package]
+name = "turingarena-core"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+
+turingarena-proc-macro = { version = "0.1.0", path = "../turingarena-proc-macro/" }
+task-maker-format = { git = "https://github.com/edomora97/task-maker-rust.git" }
+
+serde = { version = "1.0.101", features = ["derive"] }
+serde_json = "1.0.40"
+serde_yaml = "0.8.11"
+base64 = "0.10.1"
+ssri = "5.0.0"
+tar = "0.4.26"
+xz2 = "0.1.6"
+log = "0.4.8"
+failure = "0.1.5"
+juniper = "0.14.0"
+diesel = { version = "1.4.2", features = ["sqlite"] }
+diesel_migrations = "1.4.0"
+rand = "0.7.2"
+chrono = "0.4.9"
+structopt = "0.3.3"
+jsonwebtoken = "5.0.1"
+dirs = "2.0.2"
+uuid = { version = "0.8", features = ["v4"] }
+graphql_client = "0.8.0"
+reqwest = "0.9.22"
+rpassword = "4.0"
+tempdir = "0.3.7"
+num_cpus = "1.10.1"
+glob = "0.2"
+mime_guess = "2.0.1"
+
+[build-dependencies]
+ssri = "5.0.0"
+tar = "0.4.26"
+xz2 = "0.1.6"

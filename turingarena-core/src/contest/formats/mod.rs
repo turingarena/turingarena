@@ -2,12 +2,13 @@ use super::*;
 
 use api::ApiContext;
 use formats::italy_yaml::ItalyYamlImporter;
+use std::error::Error;
 
 /// Module of various importing formats for contest
 mod italy_yaml;
 
 /// Result of an import
-pub type ImportResult = Result<()>;
+pub type ImportResult = Result<(), Box<dyn Error>>;
 
 #[derive(Debug, Clone, juniper::GraphQLInputObject)]
 pub struct ImportInput {

@@ -1,0 +1,14 @@
+[package]
+name = "turingarena-web-client"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+
+rust-embed = { version = "5.1.0", features = ["interpolate-folder-path"] }
+
+[build-dependencies]
+
+turingarena-core = { path = "../turingarena-core" }
+
+fs_extra = "1.1.0"

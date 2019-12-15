@@ -192,21 +192,12 @@ impl<'a> Evaluation<'a> {
         Ok(())
     }
 
-    #[cfg(feature = "task-maker")]
     fn do_evaluate<P: AsRef<Path>>(
         problem_path: P,
         submission: submission::Submission,
     ) -> evaluation::Evaluation {
         use task_maker::driver::IoiProblemDriver;
         IoiProblemDriver::evaluate(problem_path, submission)
-    }
-
-    #[cfg(not(feature = "task-maker"))]
-    fn do_evaluate<P: AsRef<Path>>(
-        problem_path: P,
-        submission: submission::Submission,
-    ) -> evaluation::Evaluation {
-        unreachable!("Enable feature 'task-maker' to evaluate solutions")
     }
 }
 
