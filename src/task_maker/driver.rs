@@ -11,13 +11,12 @@ use crate::problem::material::Material;
 use crate::problem::ProblemName;
 use crate::submission::Submission;
 use evaluation::*;
-use problem::{driver::*, material::*, *};
-use std::path::{Path, PathBuf};
-use submission::*;
+use std::path::{Path};
 
 pub struct IoiProblemDriver;
 
 fn load_task<P: AsRef<Path>>(path: P) -> Result<ioi::Task, Error> {
+    // TODO: add option --task-info to task-maker-rust and call it here
     ioi::Task::new(
         path,
         &EvaluationConfig {
@@ -41,6 +40,7 @@ impl ProblemDriver for IoiProblemDriver {
         task_path: P,
         submission: submission::Submission,
     ) -> evaluation::Evaluation {
-        Evaluation(super::evaluate::run_evaluation(task_path, submission))
+        Evaluation(super::evaluate::run_evaluation(task_path, submission)
+            .expect("task-maker evaluation failed"))
     }
 }

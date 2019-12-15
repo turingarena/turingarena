@@ -3,19 +3,13 @@ extern crate tempdir;
 
 use super::*;
 
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
-    Arc,
 };
-use std::thread;
 
-use task_maker_cache::Cache;
-use task_maker_dag::CacheMode;
-use task_maker_exec::{executors::LocalExecutor, ExecutorClient};
 use task_maker_format::ui::{UIExecutionStatus, UIMessage};
-use task_maker_format::{ioi, EvaluationConfig, EvaluationData, TaskFormat, UISender};
-use task_maker_store::*;
+use task_maker_format::ioi::Task;
 
 use award::{AwardName, Score};
 use evaluation::*;
@@ -28,93 +22,47 @@ use evaluation::record::ValenceValue;
 use evaluation::Event;
 use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
-use task_maker_format::ioi::Task;
+use std::process::{Command, Stdio};
+use std::io::{BufReader, BufRead};
 
-pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Receiver<Event> {
+
+pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Result<Receiver<Event>, failure::Error> {
     let task_path = task_path.as_ref().to_owned();
     let (event_tx, event_rx) = channel();
 
-    let store_path = task_path.join(".task-maker-files");
+    // write solution to file
+    let dir = tempdir::TempDir::new("evaluation")?;
+    let solution_file = &submission.field_values[0].file;
+    let solution_path = dir.path().join(&solution_file.name.0);
+    std::fs::write(&solution_path, &solution_file.content)?;
 
-    let min_store_size = 256 * 1024 * 1024;
-    let max_store_size = 2 * min_store_size;
+    let mut ioi_task: Option<Task> = None;
 
-    let file_store = Arc::new(
-        FileStore::new(store_path.join("store"), max_store_size, min_store_size)
-            .expect("Cannot create the file store"),
-    );
+    let mut task_maker = Command::new("task-maker-rust")
+        .arg("--dry-run")
+        .arg("--no-statement")
+        .arg("--ui=json")
+        .arg("--task-dir").arg(task_path)
+        .arg("--solution").arg(solution_path)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .spawn()?;
 
-    let (tx, rx_remote) = task_maker_exec::new_local_channel();
-    let (tx_remote, rx) = task_maker_exec::new_local_channel();
+    let stdout_reader = BufReader::new(task_maker.stdout.as_mut().unwrap());
+    for line in stdout_reader.lines() {
+        let message = serde_json::from_str::<UIMessage>(&line?)?;
 
-    let server_file_store = file_store.clone();
-    thread::Builder::new()
-        .name("Executor thread".into())
-        .spawn(move || {
-            let num_cores = num_cpus::get();
-            let sandbox_path = store_path.join("sandboxes");
-            let cache = Cache::new(store_path.join("cache")).expect("Cannot create the cache");
-            let executor = LocalExecutor::new(server_file_store, num_cores, sandbox_path);
+        // As the first message task-maker-rust sends us the task... nice!
+        if let UIMessage::IOITask { task} = message {
+            ioi_task = Some(task);
+        } else {
+            ui_message_to_events(&ioi_task.as_ref().unwrap(), message, &event_tx);
+        }
+    }
 
-            executor.evaluate(tx_remote, rx_remote, cache).unwrap();
-        })
-        .expect("Failed to spawn the executor thread");
+    task_maker.wait()?;
 
-    thread::Builder::new()
-        .name("Client thread".into())
-        .spawn(move || {
-            let dir = tempdir::TempDir::new("evaluation").unwrap();
-            let solution_file = &submission.field_values[0].file;
-            let solution_path = dir.path().join(&solution_file.name.0);
-            std::fs::write(&solution_path, &solution_file.content)
-                .expect("Unable to write solution file");
-            println!("=={:?} start", solution_path);
-
-            let (mut eval, receiver) = EvaluationData::new();
-
-            let config = eval.dag.config_mut();
-
-            let eval_config = EvaluationConfig {
-                solution_filter: vec![],
-                booklet_solutions: false,
-                solution_paths: vec![solution_path.to_owned()],
-                no_statement: true,
-            };
-
-            let task = ioi::Task::new(task_path, &eval_config).expect("Invalid task");
-
-            // FIXME: is there a more idiomatic way to do it?
-            let task2 = task.clone();
-
-            thread::Builder::new()
-                .name("Forwarder thread".into())
-                .spawn(move || {
-                    for m in receiver.iter() {
-                        ui_message_to_events(&task2, m, &event_tx).expect("Failed to send event");
-                    }
-                })
-                .expect("Failed to spawn the forwarder thread");
-
-            config
-                .keep_sandboxes(false)
-                .dry_run(true)
-                .cache_mode(CacheMode::Everything)
-                .copy_exe(false)
-                .extra_time(0.0);
-
-            task.execute(&mut eval, &eval_config)
-                .expect("Failed to build the DAG");
-
-            trace!("The DAG is: {:#?}", eval.dag);
-
-            let ui_sender = eval.sender.clone();
-            ExecutorClient::evaluate(eval.dag, tx, &rx, file_store, move |status| {
-                ui_sender.send(UIMessage::ServerStatus { status })
-            })
-            .expect("Client failed");
-        })
-        .expect("Failed to spawn the executor thread");
-    event_rx
+    Ok(event_rx)
 }
 
 fn ui_message_to_events(
