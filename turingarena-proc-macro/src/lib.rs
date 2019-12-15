@@ -4,7 +4,6 @@ extern crate syn;
 
 use crate::proc_macro::TokenStream;
 use quote::quote;
-use syn::token::Token;
 
 fn derive_using_macro(input: TokenStream, macro_name: proc_macro2::TokenStream) -> TokenStream {
     let input: syn::Item = syn::parse(input).expect("Invalid syntax");

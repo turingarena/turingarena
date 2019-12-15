@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use super::*;
 
 use api::ApiContext;

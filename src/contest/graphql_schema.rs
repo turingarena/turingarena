@@ -1,6 +1,4 @@
-use super::*;
 use crate::contest::api::ApiConfig;
-use api::ApiContext;
 
 pub fn generate_schema() {
     let config = ApiConfig::default();

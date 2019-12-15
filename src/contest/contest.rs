@@ -1,7 +1,7 @@
 use std::fs::read;
 
-use diesel::{ExpressionMethods, QueryResult, RunQueryDsl, SqliteConnection};
-use juniper::{FieldError, FieldResult};
+use diesel::RunQueryDsl;
+use juniper::FieldResult;
 
 use super::*;
 
@@ -11,7 +11,7 @@ use api::ApiContext;
 use api::MutationOk;
 use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
 use contest_problem::ProblemView;
-use problem::ProblemName;
+
 use questions::{Question, QuestionInput};
 use schema::contest;
 use std::path::PathBuf;
@@ -68,6 +68,7 @@ impl ContestView<'_> {
 }
 
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl ContestView<'_> {
     /// The user for this contest view, if any
     fn user(&self) -> FieldResult<Option<User>> {
@@ -187,7 +188,7 @@ impl ContestView<'_> {
         }
     }
 
-    fn make_question(&self, question: QuestionInput) -> FieldResult<MutationOk> {
+    fn make_question(&self, _question: QuestionInput) -> FieldResult<MutationOk> {
         unimplemented!()
     }
 
@@ -201,6 +202,7 @@ impl ContestView<'_> {
 #[derive(Queryable)]
 pub struct ContestData {
     /// Primary key of the table. Should be *always* 0!
+    #[allow(dead_code)]
     id: i32,
 
     archive_content: Vec<u8>,

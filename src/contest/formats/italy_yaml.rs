@@ -1,20 +1,13 @@
 /// Italy YAML contest importation format
-use std::error::Error;
-use std::path::{Path, PathBuf};
-
-use chrono::{Local, TimeZone};
-
 use api::ApiContext;
-use contest_problem;
 use formats::ImportOperation;
-use problem::ProblemName;
+
 use user;
-use user::{UserId, UserInput};
+use user::UserInput;
 
 use super::*;
-use crate::contest::contest_problem::ProblemInput;
+
 use crate::contest::user::User;
-use crate::file::FileContentInput;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]

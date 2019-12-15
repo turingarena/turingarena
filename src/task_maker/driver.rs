@@ -6,10 +6,8 @@ use task_maker_format::{ioi, EvaluationConfig};
 use crate::evaluation::Evaluation;
 use crate::problem::driver::ProblemDriver;
 use crate::problem::material::Material;
-use crate::problem::ProblemName;
-use crate::submission::Submission;
-use evaluation::*;
-use std::path::{Path};
+
+use std::path::Path;
 
 pub struct IoiProblemDriver;
 
@@ -38,7 +36,9 @@ impl ProblemDriver for IoiProblemDriver {
         task_path: P,
         submission: submission::Submission,
     ) -> evaluation::Evaluation {
-        Evaluation(super::evaluate::run_evaluation(task_path, submission)
-            .expect("task-maker evaluation failed"))
+        Evaluation(
+            super::evaluate::run_evaluation(task_path, submission)
+                .expect("task-maker evaluation failed"),
+        )
     }
 }

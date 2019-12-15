@@ -1,4 +1,4 @@
-use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
+use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
 use juniper::FieldResult;
 
 use api::ApiContext;
@@ -35,6 +35,7 @@ struct UserData {
 }
 
 pub struct User<'a> {
+    #[allow(dead_code)]
     context: &'a ApiContext<'a>,
     data: UserData,
 }

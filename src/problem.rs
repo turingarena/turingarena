@@ -64,7 +64,6 @@ pub mod material {
 
 /// Contains a trait to implement to support a problem format.
 pub mod driver {
-    use std::path;
 
     use super::*;
     use crate::*;

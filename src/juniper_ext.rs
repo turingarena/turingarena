@@ -75,8 +75,7 @@ macro_rules! graphql_newtype {
                 field_name: &str,
                 arguments: &juniper::Arguments<S>,
                 executor: &juniper::Executor<Self::Context, S>,
-            ) -> ::std::result::Result<juniper::Value<S>, juniper::FieldError<S>>
-            {
+            ) -> ::std::result::Result<juniper::Value<S>, juniper::FieldError<S>> {
                 <$inner as juniper::GraphQLType<S>>::resolve_field(
                     &self.0, info, field_name, arguments, executor,
                 )
@@ -88,8 +87,7 @@ macro_rules! graphql_newtype {
                 type_name: &str,
                 selection_set: Option<&[juniper::Selection<S>]>,
                 executor: &juniper::Executor<Self::Context, S>,
-            ) -> ::std::result::Result<juniper::Value<S>, juniper::FieldError<S>>
-            {
+            ) -> ::std::result::Result<juniper::Value<S>, juniper::FieldError<S>> {
                 <$inner as juniper::GraphQLType<S>>::resolve_into_type(
                     &self.0,
                     info,
@@ -100,9 +98,7 @@ macro_rules! graphql_newtype {
             }
 
             fn concrete_type_name(&self, context: &Self::Context, info: &Self::TypeInfo) -> String {
-                <$inner as juniper::GraphQLType<S>>::concrete_type_name(
-                    &self.0, context, info,
-                )
+                <$inner as juniper::GraphQLType<S>>::concrete_type_name(&self.0, context, info)
             }
 
             fn resolve(
@@ -111,12 +107,7 @@ macro_rules! graphql_newtype {
                 selection_set: Option<&[juniper::Selection<S>]>,
                 executor: &juniper::Executor<Self::Context, S>,
             ) -> juniper::Value<S> {
-                <$inner as juniper::GraphQLType<S>>::resolve(
-                    &self.0,
-                    info,
-                    selection_set,
-                    executor,
-                )
+                <$inner as juniper::GraphQLType<S>>::resolve(&self.0, info, selection_set, executor)
             }
         }
 

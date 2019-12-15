@@ -1,21 +1,12 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
-
-use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use turingarena::{contest, problem, submission};
+use turingarena::contest;
 
-use problem::ProblemName;
-use submission::FieldId;
-
-use contest::api::ApiContext;
 use contest::api::ContestArgs;
-use contest::contest_submission::SubmissionId;
+
 use contest::graphql_schema::generate_schema;
-use contest::user::{User, UserId};
+
 use contest::*;
-use turingarena::contest::api::ApiConfig;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -61,7 +52,7 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    use api::{ApiConfig, ApiContext};
+    use api::ApiConfig;
     use Command::*;
     let args = Args::from_args();
     let config = ApiConfig::default().with_args(args.contest);

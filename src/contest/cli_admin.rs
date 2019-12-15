@@ -3,7 +3,7 @@ include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 use crate::archive::pack_archive;
 use graphql_client::{GraphQLQuery, QueryBody};
 use juniper::http::GraphQLRequest;
-use juniper::{DefaultScalarValue, InputValue};
+use juniper::InputValue;
 use serde::Serialize;
 use std::fs::read;
 use std::path::PathBuf;

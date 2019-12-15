@@ -3,14 +3,14 @@ use super::*;
 use super::contest::ContestView;
 use crate::contest::award::AwardOutcome;
 use api::ApiContext;
-use award::*;
-use diesel::{QueryDsl, QueryResult, RunQueryDsl, SqliteConnection};
+
+use diesel::{QueryDsl, RunQueryDsl};
 use file::FileContentInput;
 use juniper::{FieldError, FieldResult};
 use problem::driver::ProblemDriver;
 use problem::material::Material;
 use problem::ProblemName;
-use rand::Rng;
+
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
@@ -118,6 +118,7 @@ pub struct ProblemView<'a> {
 
 /// A problem in a contest
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl ProblemView<'_> {
     /// Name of this problem. Unique in the current contest.
     fn name(&self) -> ProblemName {
@@ -179,6 +180,7 @@ impl ProblemTackling<'_> {
 
 /// Attempts at solving a problem by a user in the contest
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {

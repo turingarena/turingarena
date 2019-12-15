@@ -1,13 +1,12 @@
-use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::thread;
 
 use diesel::prelude::*;
-use diesel::sql_types::{Bool, Double, Text};
+
 use juniper::FieldResult;
 
 use api::{ApiConfig, ApiContext};
-use award::*;
+
 use award::{AwardInput, AwardOutcome};
 use contest_problem::Problem;
 use contest_submission::SubmissionId;
@@ -19,7 +18,6 @@ use schema::{evaluation_awards, evaluation_events, evaluations};
 use crate::award::{AwardValue, BadgeAwardValue, ScoreAwardValue};
 use crate::evaluation::AwardEvent;
 
-use super::super::award::{AwardName, Score};
 use super::submission::FieldValue;
 use super::*;
 

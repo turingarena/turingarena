@@ -2,11 +2,10 @@ use super::*;
 use crate::contest::api::ApiContext;
 use crate::contest::user::User;
 use contest::UserToken;
-use diesel::SqliteConnection;
+
+use jsonwebtoken::{decode, encode, Header, Validation};
 use juniper::{FieldError, FieldResult};
 use juniper_ext::*;
-use jsonwebtoken::{decode, encode, Header, Validation};
-use user::UserId;
 
 /// Wraps a JWT User token
 #[derive(GraphQLNewtype)]

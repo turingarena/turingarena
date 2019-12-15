@@ -1,5 +1,5 @@
 use super::*;
-use api::ApiContext;
+
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
 use rocket::http::Status;
@@ -8,8 +8,6 @@ use rocket::response::content;
 use rocket::response::Response;
 use rocket::State;
 use std::path::PathBuf;
-
-use api::RootNode;
 
 #[cfg(feature = "web")]
 use web_client::WebContent;

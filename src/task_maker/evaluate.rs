@@ -1,12 +1,10 @@
 use super::*;
 
 use std::path::{Path, PathBuf};
-use std::sync::{
-    mpsc::{channel, Receiver, Sender},
-};
+use std::sync::mpsc::{channel, Receiver, Sender};
 
-use task_maker_format::ui::{UIExecutionStatus, UIMessage};
 use task_maker_format::ioi::Task;
+use task_maker_format::ui::{UIExecutionStatus, UIMessage};
 
 use award::{AwardName, Score};
 use evaluation::*;
@@ -19,9 +17,9 @@ use evaluation::record::ValenceValue;
 use evaluation::Event;
 use feedback::valence::Valence;
 use rusage::{MemoryUsage, TimeUsage};
-use std::process::{Command, Stdio};
-use std::io::{BufReader, BufRead};
 use std::env;
+use std::io::{BufRead, BufReader};
+use std::process::{Command, Stdio};
 
 /// Searches for an executable in `PATH`
 fn find_in_path(exe: &str) -> Option<PathBuf> {
@@ -50,14 +48,17 @@ fn find_task_maker() -> Result<PathBuf, failure::Error> {
 
     for name in &["task-maker-rust", "task-maker"] {
         if let Some(exe) = find_in_path(name) {
-            return Ok(exe)
+            return Ok(exe);
         }
     }
 
     Err(failure::err_msg("task-maker executable not found"))
 }
 
-pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> Result<Receiver<Event>, failure::Error> {
+pub fn run_evaluation<P: AsRef<Path>>(
+    task_path: P,
+    submission: Submission,
+) -> Result<Receiver<Event>, failure::Error> {
     let task_path = task_path.as_ref().to_owned();
     let (event_tx, event_rx) = channel();
 
@@ -74,8 +75,10 @@ pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> R
         .arg("--dry-run")
         .arg("--no-statement")
         .arg("--ui=json")
-        .arg("--task-dir").arg(task_path)
-        .arg("--solution").arg(solution_path);
+        .arg("--task-dir")
+        .arg(task_path)
+        .arg("--solution")
+        .arg(solution_path);
 
     if let Ok(args) = env::var("TASK_MAKER_ARGS") {
         task_maker.args(args.split(' '));
@@ -91,10 +94,10 @@ pub fn run_evaluation<P: AsRef<Path>>(task_path: P, submission: Submission) -> R
         let message = serde_json::from_str::<UIMessage>(&line?)?;
 
         // As the first message task-maker-rust sends us the task... nice!
-        if let UIMessage::IOITask { task} = message {
+        if let UIMessage::IOITask { task } = message {
             ioi_task = Some(task);
         } else {
-            ui_message_to_events(&ioi_task.as_ref().unwrap(), message, &event_tx);
+            ui_message_to_events(&ioi_task.as_ref().unwrap(), message, &event_tx)?;
         }
     }
 

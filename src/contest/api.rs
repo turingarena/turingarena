@@ -2,14 +2,13 @@ use std::default::Default;
 use std::env::temp_dir;
 use std::path::{Path, PathBuf};
 
-use chrono::{DateTime, Local};
-use diesel::{Connection, ConnectionResult, RunQueryDsl, SqliteConnection};
-use juniper::{FieldError, FieldResult};
+use diesel::{Connection, RunQueryDsl, SqliteConnection};
+use juniper::FieldResult;
 use structopt::StructOpt;
 
 use auth::JwtData;
 use contest::{ContestView, UserToken};
-use contest_problem::ProblemView;
+
 use formats::{import, ImportInput};
 use problem::ProblemName;
 use user::UserId;
@@ -169,6 +168,7 @@ pub struct Query<'a> {
 }
 
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl Query<'_> {
     /// Get the view of a contest
     fn contest_view(&self, user_id: Option<UserId>) -> FieldResult<ContestView> {
@@ -214,6 +214,7 @@ pub struct Mutation<'a> {
 }
 
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl Mutation<'_> {
     /// Reset database
     fn init_db(&self) -> FieldResult<MutationOk> {

@@ -1,5 +1,5 @@
 use super::*;
-use api::ApiContext;
+
 use diesel::{QueryResult, RunQueryDsl, SqliteConnection};
 use schema::announcements;
 
@@ -12,6 +12,7 @@ pub struct Announcement {
 #[juniper_ext::graphql]
 impl Announcement {
     /// Text of the announcement
+    #[allow(dead_code)]
     fn text(&self) -> &String {
         &self.text
     }

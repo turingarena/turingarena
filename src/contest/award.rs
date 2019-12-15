@@ -2,7 +2,7 @@ use super::super::award::*;
 use super::*;
 
 use diesel::prelude::*;
-use diesel::sql_types::{Bool, Double, Text};
+use diesel::sql_types::{Double, Text};
 
 use crate::contest::api::ApiContext;
 use crate::contest::contest_submission::Submission;
@@ -112,6 +112,7 @@ impl AwardOutcome<'_> {
 }
 
 #[juniper_ext::graphql]
+#[allow(dead_code)]
 impl AwardOutcome<'_> {
     fn submission(&self) -> FieldResult<Submission> {
         Submission::by_id(&self.context, &self.data.submission_id)
