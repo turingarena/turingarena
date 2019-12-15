@@ -109,6 +109,14 @@ impl Submission<'_> {
         Ok(Submission { context, data })
     }
 
+    pub fn list<'a>(context: &'a ApiContext) -> FieldResult<Vec<Submission<'a>>> {
+        Ok(submissions::table
+            .load::<SubmissionData>(&context.database)?
+            .into_iter()
+            .map(|data| Submission { context, data })
+            .collect())
+    }
+
     /// Insert a new submission into the database, returning a submission object
     pub fn insert<'a>(
         context: &'a ApiContext,
