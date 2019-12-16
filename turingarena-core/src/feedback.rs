@@ -142,7 +142,7 @@ pub mod table {
     pub struct RowNumberColContent;
 
     /// Column of scores.
-    /// Cells must contain `CellContent::Score` or `CellContent::Missing`.
+    /// Cells must contain `CellContent::Score` or `CellContent::NotAvailable`.
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct ScoreColContent {
         /// Score range that applies to all column cells.
@@ -150,7 +150,7 @@ pub mod table {
     }
 
     /// Column of text messages.
-    /// Cells must contain `CellContent::Message` or `CellContent::Missing`.
+    /// Cells must contain `CellContent::Message` or `CellContent::NotAvailable`.
     #[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
     pub struct MessageColContent;
 
@@ -168,7 +168,7 @@ pub mod table {
     #[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
     #[serde(rename_all = "snake_case")]
     pub enum CellContent {
-        Missing(MissingCellContent),
+        NotAvailable(NotAvailableCellContent),
         RowTitle(RowTitleCellContent),
         RowNumber(RowNumberCellContent),
         Score(ScoreCellContent),
@@ -179,7 +179,7 @@ pub mod table {
 
     /// Cell containing no value.
     #[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
-    pub struct MissingCellContent;
+    pub struct NotAvailableCellContent;
 
     /// Cell containing the name of the corresponding row,
     /// shown as row header (e.g., using `<th scope=col>` elements).
