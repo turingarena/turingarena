@@ -1,6 +1,5 @@
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
-use turingarena_core::archive::pack_archive;
 use graphql_client::{GraphQLQuery, QueryBody};
 use juniper::http::GraphQLRequest;
 use juniper::InputValue;
@@ -8,6 +7,7 @@ use serde::Serialize;
 use std::fs::read;
 use std::path::PathBuf;
 use structopt::StructOpt;
+use turingarena_core::archive::pack_archive;
 use turingarena_core::contest::api::{ApiConfig, ContestArgs};
 
 #[derive(StructOpt, Debug)]
@@ -141,11 +141,10 @@ impl AdminCommand {
     }
 }
 
-
 fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
-    where
-        B: FnOnce(V) -> QueryBody<V>,
-        V: Serialize,
+where
+    B: FnOnce(V) -> QueryBody<V>,
+    V: Serialize,
 {
     let query_body = query_builder(variables);
 
@@ -158,7 +157,6 @@ fn make_request<V, B>(query_builder: B, variables: V) -> GraphQLRequest
         Some(variables),
     )
 }
-
 
 pub fn run_command(args: CliArgs) -> Result<(), Box<dyn std::error::Error>> {
     let config = ApiConfig::default()

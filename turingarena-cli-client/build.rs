@@ -5,7 +5,9 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
-use graphql_client_codegen::{CodegenMode, generate_module_token_stream, GraphQLClientCodegenOptions};
+use graphql_client_codegen::{
+    generate_module_token_stream, CodegenMode, GraphQLClientCodegenOptions,
+};
 
 use turingarena_core::contest::graphql_schema::generate_schema;
 
@@ -16,7 +18,7 @@ trait CheckedCommand {
 impl CheckedCommand for Command {
     fn check(&mut self) -> Result<(), Box<dyn Error>> {
         if !self.status().unwrap().success() {
-            return Err(format!("command {:?} failed", self).into())
+            return Err(format!("command {:?} failed", self).into());
         }
         Ok(())
     }
@@ -40,19 +42,21 @@ fn main() -> Result<(), Box<dyn Error>> {
     let client_path = out_path.join("operations.rs");
     let mut client_file = File::create(&client_path)?;
 
-    let operations_path = src_path
-        .join("src")
-        .join("operations.graphql");
+    let operations_path = src_path.join("src").join("operations.graphql");
     println!(
         "cargo:rerun-if-changed={}",
         operations_path.to_str().unwrap()
     );
 
-    write!(client_file, "{}", generate_module_token_stream(
-        operations_path,
-        &schema_path,
-        GraphQLClientCodegenOptions::new(CodegenMode::Cli),
-    )?)?;
+    write!(
+        client_file,
+        "{}",
+        generate_module_token_stream(
+            operations_path,
+            &schema_path,
+            GraphQLClientCodegenOptions::new(CodegenMode::Cli),
+        )?
+    )?;
 
     Ok(())
 }

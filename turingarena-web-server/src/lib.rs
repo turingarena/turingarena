@@ -1,4 +1,4 @@
-#![feature(proc_macro_hygiene,decl_macro)]
+#![feature(proc_macro_hygiene, decl_macro)]
 
 use rocket::fairing::AdHoc;
 use rocket::http::hyper::header::AccessControlAllowOrigin;
@@ -11,13 +11,13 @@ use std::path::PathBuf;
 
 use turingarena_web_client::WebContent;
 
-use turingarena_core::contest::{auth, api::ApiConfig};
 use rocket::http::ContentType;
+use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Cursor;
-use std::error::Error;
 use structopt::StructOpt;
 use turingarena_core::contest::api::ContestArgs;
+use turingarena_core::contest::{api::ApiConfig, auth};
 
 /// Args for the server
 #[derive(StructOpt, Debug)]
@@ -130,7 +130,8 @@ pub fn run_server(args: ServerArgs) -> Result<(), Box<dyn Error>> {
         return Err("Secret not provided".to_owned().into());
     }
 
-    let api_config = ApiConfig::default().with_args(args.contest)
+    let api_config = ApiConfig::default()
+        .with_args(args.contest)
         .with_skip_auth(args.skip_auth)
         .with_secret(args.secret_key.map(|s| s.as_bytes().to_owned()));
 

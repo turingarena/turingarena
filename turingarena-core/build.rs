@@ -2,7 +2,6 @@ use std::env;
 use std::fs::OpenOptions;
 use std::path::Path;
 
-
 fn main() {
     // Unless otherwise specified, do not re-run this script
     println!("cargo:rerun-if-changed=build.rs");

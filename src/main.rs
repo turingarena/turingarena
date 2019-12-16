@@ -1,9 +1,9 @@
-use structopt::StructOpt;
 use std::error::Error;
+use structopt::StructOpt;
 
+use turingarena_cli_client::{run_command, CliArgs};
 use turingarena_core::contest::graphql_schema::run_generate_schema;
-use turingarena_web_server::{ServerArgs, run_server};
-use turingarena_cli_client::{CliArgs, run_command};
+use turingarena_web_server::{run_server, ServerArgs};
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -14,7 +14,7 @@ enum Args {
     /// start a contest HTTP server
     Serve {
         #[structopt(flatten)]
-        args: ServerArgs
+        args: ServerArgs,
     },
     /// generate GraphQL schema
     GenerateSchema {},
@@ -27,14 +27,8 @@ enum Args {
 
 fn main() -> Result<(), Box<dyn Error>> {
     match Args::from_args() {
-        Args::GenerateSchema {} => {
-            run_generate_schema()
-        }
-        Args::Serve { args } => {
-            run_server(args)
-        }
-        Args::Admin { args } => {
-            run_command(args)
-        }
+        Args::GenerateSchema {} => run_generate_schema(),
+        Args::Serve { args } => run_server(args),
+        Args::Admin { args } => run_command(args),
     }
 }
