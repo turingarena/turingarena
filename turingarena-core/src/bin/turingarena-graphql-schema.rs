@@ -1,5 +1,5 @@
-use turingarena_core::contest::graphql_schema::generate_schema;
+use turingarena_core::contest::graphql_schema::run_generate_schema;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    generate_schema()
+    run_generate_schema()
 }

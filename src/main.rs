@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 use std::error::Error;
 
-use turingarena_core::contest::graphql_schema::generate_schema;
+use turingarena_core::contest::graphql_schema::run_generate_schema;
 use turingarena_web_server::{ServerArgs, run_server};
 use turingarena_cli_client::{CliArgs, run_command};
 
@@ -28,7 +28,7 @@ enum Args {
 fn main() -> Result<(), Box<dyn Error>> {
     match Args::from_args() {
         Args::GenerateSchema {} => {
-            generate_schema()
+            run_generate_schema()
         }
         Args::Serve { args } => {
             run_server(args)
