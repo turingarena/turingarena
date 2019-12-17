@@ -48,7 +48,7 @@ impl Problem<'_> {
 
     /// Material of this problem
     fn material(&self) -> FieldResult<Material> {
-        self.get_problem_material().map_err(FieldError::from)
+        Ok(self.get_problem_material()?)
     }
 }
 
@@ -97,8 +97,7 @@ impl Problem<'_> {
 
     /// Material of this problem
     fn get_problem_material(&self) -> FieldResult<Material> {
-        task_maker::generate_material(self.unpack())
-            .map_err(FieldError::from)
+        Ok(task_maker::generate_material(self.unpack())?)
     }
 }
 

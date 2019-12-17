@@ -9,7 +9,7 @@ use submission::FieldValue;
 
 use crate::contest::award::AwardOutcome;
 
-use crate::contest::contest_evaluation::EvaluationStatus;
+use crate::contest::contest_evaluation::{Evaluation, EvaluationStatus};
 use crate::contest::user::UserId;
 use crate::evaluation::Event;
 use crate::file::FileContent;
@@ -88,8 +88,8 @@ pub struct Submission<'a> {
 }
 
 impl Submission<'_> {
-    pub fn evaluation(&self) -> FieldResult<contest_evaluation::Evaluation> {
-        contest_evaluation::Evaluation::of_submission(self.context, &self.data.id)
+    pub fn evaluation(&self) -> FieldResult<Evaluation> {
+        Evaluation::of_submission(self.context, &self.data.id)
     }
 
     pub fn field_values(&self) -> FieldResult<Vec<FieldValue>> {

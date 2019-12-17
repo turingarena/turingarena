@@ -1,12 +1,13 @@
 use std::path::Path;
 
 use failure::Error;
-use task_maker_format::{EvaluationConfig, ioi};
+use task_maker_format::{ioi, EvaluationConfig};
 
-use crate::evaluation::Evaluation;
+use crate::evaluation::Event;
 use crate::problem::material::Material;
 
 use super::*;
+use std::sync::mpsc::Receiver;
 
 mod evaluate;
 mod material;
@@ -32,9 +33,6 @@ pub fn generate_material<P: AsRef<Path>>(task_path: P) -> Result<Material, Error
 pub fn evaluate<P: AsRef<Path>>(
     task_path: P,
     submission: submission::Submission,
-) -> evaluation::Evaluation {
-    Evaluation(
-        evaluate::run_evaluation(task_path, submission)
-            .expect("task-maker evaluation failed"),
-    )
+) -> Result<Receiver<Event>, failure::Error> {
+    evaluate::run_evaluation(task_path, submission)
 }

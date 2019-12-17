@@ -94,13 +94,14 @@ impl<'a> Evaluation<'a> {
 
         thread::spawn(move || {
             let context = config.create_context(None);
-            let evaluation = Evaluation::create(&context, submission_id);
-            evaluation.run();
+            let evaluation =
+                Evaluation::create(&context, submission_id).expect("Unable to create evaluation");
+            evaluation.run().expect("Unable to run evaluation");
         });
         Ok(())
     }
 
-    fn create(context: &'a ApiContext, submission_id: SubmissionId) -> Self {
+    fn create(context: &'a ApiContext, submission_id: SubmissionId) -> FieldResult<Self> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = chrono::Local::now().to_rfc3339();
 
@@ -113,35 +114,35 @@ impl<'a> Evaluation<'a> {
             })
             .execute(&context.database)
             .expect("Unable to insert evaluation");
-        Evaluation::by_id(&context, &id).unwrap()
+        Ok(Evaluation::by_id(&context, &id)?)
     }
 
-    fn run(&self) {
-        let field_values = self.load_submission_field_values();
-        let problem_path = self.load_problem_path();
+    fn run(&self) -> FieldResult<()> {
+        let field_values = self.load_submission_field_values()?;
+        let problem_path = self.load_problem_path()?;
 
-        let evaluation::Evaluation(receiver) =
-            Self::do_evaluate(problem_path, submission::Submission { field_values });
+        let submission = submission::Submission { field_values };
+        let receiver = task_maker::evaluate(problem_path, submission)?;
 
         for (serial, event) in receiver.into_iter().enumerate() {
-            self.save_awards(&event).unwrap();
-            self.save_event(serial as i32, &event).unwrap();
+            self.save_awards(&event)?;
+            self.save_event(serial as i32, &event)?;
         }
 
-        self.set_status(EvaluationStatus::Success).unwrap();
+        self.set_status(EvaluationStatus::Success)?;
+
+        Ok(())
     }
 
-    fn load_submission_field_values(&self) -> Vec<FieldValue> {
-        let submission = self.submission().unwrap();
-        submission
-            .field_values()
-            .expect("Unable to load submission files")
+    fn load_submission_field_values(&self) -> FieldResult<Vec<FieldValue>> {
+        let submission = self.submission()?;
+        Ok(submission.field_values()?)
     }
 
-    fn load_problem_path(&self) -> PathBuf {
-        let submission = self.submission().unwrap();
-        let problem = Problem::by_name(&self.context, submission.problem_name()).unwrap();
-        problem.unpack()
+    fn load_problem_path(&self) -> FieldResult<PathBuf> {
+        let submission = self.submission()?;
+        let problem = Problem::by_name(&self.context, submission.problem_name())?;
+        Ok(problem.unpack())
     }
 
     fn set_status(&self, status: EvaluationStatus) -> FieldResult<()> {
@@ -189,13 +190,6 @@ impl<'a> Evaluation<'a> {
                 .execute(&self.context.database)?;
         }
         Ok(())
-    }
-
-    fn do_evaluate<P: AsRef<Path>>(
-        problem_path: P,
-        submission: submission::Submission,
-    ) -> evaluation::Evaluation {
-        task_maker::evaluate(problem_path, submission)
     }
 }
 
