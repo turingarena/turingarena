@@ -7,7 +7,6 @@ use api::ApiContext;
 use diesel::{QueryDsl, RunQueryDsl};
 use file::FileContentInput;
 use juniper::{FieldError, FieldResult};
-use problem::driver::ProblemDriver;
 use problem::material::Material;
 use problem::ProblemName;
 
@@ -98,7 +97,7 @@ impl Problem<'_> {
 
     /// Material of this problem
     fn get_problem_material(&self) -> FieldResult<Material> {
-        task_maker::driver::IoiProblemDriver::generate_material(self.unpack())
+        task_maker::generate_material(self.unpack())
             .map_err(FieldError::from)
     }
 }

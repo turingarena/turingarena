@@ -12,7 +12,6 @@ use contest_problem::Problem;
 use contest_submission::SubmissionId;
 use contest_submission::{self, Submission};
 use evaluation::Event;
-use problem::driver::ProblemDriver;
 use schema::{evaluation_awards, evaluation_events, evaluations};
 
 use crate::award::{AwardValue, BadgeAwardValue, ScoreAwardValue};
@@ -196,8 +195,7 @@ impl<'a> Evaluation<'a> {
         problem_path: P,
         submission: submission::Submission,
     ) -> evaluation::Evaluation {
-        use task_maker::driver::IoiProblemDriver;
-        IoiProblemDriver::evaluate(problem_path, submission)
+        task_maker::evaluate(problem_path, submission)
     }
 }
 

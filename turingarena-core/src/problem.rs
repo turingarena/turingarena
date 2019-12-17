@@ -61,23 +61,3 @@ pub mod material {
         pub feedback: feedback::Template,
     }
 }
-
-/// Contains a trait to implement to support a problem format.
-pub mod driver {
-
-    use super::*;
-    use crate::*;
-    use std::path::Path;
-
-    pub trait ProblemDriver {
-        type Error;
-
-        fn generate_material<P: AsRef<Path>>(
-            task_path: P,
-        ) -> Result<material::Material, Self::Error>;
-        fn evaluate<P: AsRef<Path>>(
-            task_path: P,
-            submission: submission::Submission,
-        ) -> evaluation::Evaluation;
-    }
-}
