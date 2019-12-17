@@ -14,11 +14,11 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
-use crate::contest::award::AwardOutcome;
-use crate::contest::contest::{ContestDataInput, ContestUpdateInput};
-use crate::contest::contest_evaluation::Evaluation;
-use crate::contest::contest_problem::{Problem, ProblemInput};
-use crate::contest::user::{User, UserUpdateInput};
+use crate::api::award::AwardOutcome;
+use crate::api::contest::{ContestDataInput, ContestUpdateInput};
+use crate::api::contest_evaluation::Evaluation;
+use crate::api::contest_problem::{Problem, ProblemInput};
+use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
 

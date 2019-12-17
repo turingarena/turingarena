@@ -1,13 +1,13 @@
-/// Italy YAML contest importation format
-use api::ApiContext;
 use formats::ImportOperation;
+/// Italy YAML contest importation format
+use root::ApiContext;
 
 use user;
 use user::UserInput;
 
 use super::*;
 
-use crate::contest::user::User;
+use crate::api::user::User;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]

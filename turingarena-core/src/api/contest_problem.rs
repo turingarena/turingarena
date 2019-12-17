@@ -1,8 +1,8 @@
 use super::*;
 
 use super::contest::ContestView;
-use crate::contest::award::AwardOutcome;
-use api::ApiContext;
+use crate::api::award::AwardOutcome;
+use root::ApiContext;
 
 use diesel::{QueryDsl, RunQueryDsl};
 use file::FileContentInput;

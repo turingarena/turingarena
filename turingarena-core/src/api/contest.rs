@@ -7,10 +7,10 @@ use super::*;
 
 use crate::file::FileContentInput;
 use announcements::Announcement;
-use api::ApiContext;
-use api::MutationOk;
 use content::{File, FileContent, FileName, FileVariant, MediaType, Text, TextVariant};
 use contest_problem::ProblemView;
+use root::ApiContext;
+use root::MutationOk;
 
 use questions::{Question, QuestionInput};
 use schema::contest;

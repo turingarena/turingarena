@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
-use turingarena_core::contest::graphql_schema::generate_schema;
+use turingarena_core::api::graphql_schema::generate_schema;
 
 trait CheckedCommand {
     fn check(&mut self) -> Result<(), Box<dyn Error>>;

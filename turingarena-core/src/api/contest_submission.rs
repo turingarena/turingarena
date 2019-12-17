@@ -1,16 +1,16 @@
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use juniper::FieldResult;
 
-use api::ApiContext;
+use root::ApiContext;
 
 use juniper_ext::*;
 use schema::{submission_files, submissions};
 use submission::FieldValue;
 
-use crate::contest::award::AwardOutcome;
+use crate::api::award::AwardOutcome;
 
-use crate::contest::contest_evaluation::{Evaluation, EvaluationStatus};
-use crate::contest::user::UserId;
+use crate::api::contest_evaluation::{Evaluation, EvaluationStatus};
+use crate::api::user::UserId;
 use crate::evaluation::Event;
 use crate::file::FileContent;
 

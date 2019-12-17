@@ -4,8 +4,8 @@ use super::*;
 use diesel::prelude::*;
 use diesel::sql_types::{Double, Text};
 
-use crate::contest::api::ApiContext;
-use crate::contest::contest_submission::Submission;
+use crate::api::contest_submission::Submission;
+use crate::api::root::ApiContext;
 use juniper::FieldResult;
 use schema::evaluation_awards;
 

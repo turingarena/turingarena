@@ -16,8 +16,8 @@ use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Cursor;
 use structopt::StructOpt;
-use turingarena_core::contest::api::ContestArgs;
-use turingarena_core::contest::{api::ApiConfig, auth};
+use turingarena_core::api::root::ContestArgs;
+use turingarena_core::api::{auth, root::ApiConfig};
 
 /// Args for the server
 #[derive(StructOpt, Debug)]

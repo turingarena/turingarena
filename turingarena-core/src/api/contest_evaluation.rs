@@ -5,7 +5,7 @@ use diesel::prelude::*;
 
 use juniper::FieldResult;
 
-use api::{ApiConfig, ApiContext};
+use root::{ApiConfig, ApiContext};
 
 use award::{AwardInput, AwardOutcome};
 use contest_problem::Problem;

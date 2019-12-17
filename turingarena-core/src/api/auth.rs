@@ -1,6 +1,6 @@
 use super::*;
-use crate::contest::api::ApiContext;
-use crate::contest::user::User;
+use crate::api::root::ApiContext;
+use crate::api::user::User;
 use contest::UserToken;
 
 use jsonwebtoken::{decode, encode, Header, Validation};

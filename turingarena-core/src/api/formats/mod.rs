@@ -1,7 +1,7 @@
 use super::*;
 
-use api::ApiContext;
 use formats::italy_yaml::ItalyYamlImporter;
+use root::ApiContext;
 use std::error::Error;
 
 /// Module of various importing formats for contest

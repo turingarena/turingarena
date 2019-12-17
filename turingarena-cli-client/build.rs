@@ -9,7 +9,7 @@ use graphql_client_codegen::{
     generate_module_token_stream, CodegenMode, GraphQLClientCodegenOptions,
 };
 
-use turingarena_core::contest::graphql_schema::generate_schema;
+use turingarena_core::api::graphql_schema::generate_schema;
 
 trait CheckedCommand {
     fn check(&mut self) -> Result<(), Box<dyn Error>>;

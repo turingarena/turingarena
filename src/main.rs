@@ -2,7 +2,7 @@ use std::error::Error;
 use structopt::StructOpt;
 
 use turingarena_cli_client::{run_command, CliArgs};
-use turingarena_core::contest::graphql_schema::run_generate_schema;
+use turingarena_core::api::graphql_schema::run_generate_schema;
 use turingarena_web_server::{run_server, ServerArgs};
 
 #[derive(StructOpt, Debug)]

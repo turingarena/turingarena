@@ -1,8 +1,8 @@
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
 use juniper::FieldResult;
 
-use api::ApiContext;
 use juniper_ext::*;
+use root::ApiContext;
 use schema::users;
 
 use super::*;
