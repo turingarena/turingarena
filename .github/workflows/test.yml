@@ -11,8 +11,10 @@ jobs:
       run: rustup default nightly
     - name: Update path
       run: export PATH="$HOME/.cargo/bin:$PATH" && echo $PATH
-    - name: Install task-maker-rust
-      run: cargo install task-maker-rust --git https://github.com/edomora97/task-maker-rust.git
+    # 2019-12-26
+    # Task-maker installation commented because installation failed     
+    # - name: Install task-maker-rust
+    #  run: cargo install task-maker-rust --git https://github.com/edomora97/task-maker-rust.git
     - name: Build Rust
       run: cargo build --all-features
     - name: Build Rust doc
