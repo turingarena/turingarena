@@ -51,6 +51,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
 
         {
+            std::fs::remove_dir_all(&out_web_path)?;
             let mut options = fs_extra::dir::CopyOptions::new();
             options.overwrite = true;
             fs_extra::dir::copy(src_path.join("web"), out_path, &options)?;
