@@ -168,7 +168,7 @@ impl ApiContext<'_> {
 }
 
 pub struct Query<'a> {
-    pub context: &'a ApiContext<'a>,
+    context: &'a ApiContext<'a>,
 }
 
 #[juniper_ext::graphql]
@@ -214,7 +214,7 @@ impl Query<'_> {
 }
 
 pub struct Mutation<'a> {
-    pub context: &'a ApiContext<'a>,
+    context: &'a ApiContext<'a>,
 }
 
 #[juniper_ext::graphql]
@@ -243,7 +243,7 @@ impl Mutation<'_> {
     /// Add a user to the current contest
     pub fn update_contest(&self, input: ContestUpdateInput) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-        self.context.default_contest().update(input);
+        self.context.default_contest().update(input)?;
 
         Ok(MutationOk)
     }
