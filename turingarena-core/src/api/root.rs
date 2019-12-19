@@ -15,7 +15,7 @@ use user::UserId;
 use user::UserInput;
 
 use crate::api::award::AwardOutcome;
-use crate::api::contest::{ContestDataInput, ContestUpdateInput};
+use crate::api::contest::{Contest, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::{Problem, ProblemInput};
 use crate::api::user::{User, UserUpdateInput};
@@ -132,6 +132,10 @@ impl ApiContext<'_> {
         archive::unpack_archive(workspace_path, content, prefix)
     }
 
+    pub fn default_contest(&self) -> Contest {
+        Contest::new(&self)
+    }
+
     /// Authorize admin operations
     #[must_use = "Error means forbidden"]
     pub fn authorize_admin(&self) -> juniper::FieldResult<()> {
@@ -221,15 +225,7 @@ impl Mutation<'_> {
         self.context.authorize_admin()?;
 
         embedded_migrations::run_with_output(&self.context.database, &mut std::io::stdout())?;
-        let now = chrono::Local::now();
-        let configuration = ContestDataInput {
-            archive_content: include_bytes!(concat!(env!("OUT_DIR"), "/initial-contest.tar.xz")),
-            start_time: &now.to_rfc3339(),
-            end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
-        };
-        diesel::insert_into(schema::contest::table)
-            .values(configuration)
-            .execute(&self.context.database)?;
+        self.context.default_contest().init()?;
 
         Ok(MutationOk)
     }
@@ -246,41 +242,8 @@ impl Mutation<'_> {
 
     /// Add a user to the current contest
     pub fn update_contest(&self, input: ContestUpdateInput) -> FieldResult<MutationOk> {
-        use diesel::ExpressionMethods;
         self.context.authorize_admin()?;
-
-        match input.archive_content {
-            Some(content) => {
-                diesel::update(schema::contest::table)
-                    .set(schema::contest::dsl::archive_content.eq(&content.decode()?))
-                    .execute(&self.context.database)?;
-            }
-            None => {}
-        }
-
-        match input.start_time {
-            Some(time) => {
-                diesel::update(schema::contest::table)
-                    .set(
-                        schema::contest::dsl::start_time
-                            .eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
-                    )
-                    .execute(&self.context.database)?;
-            }
-            None => {}
-        }
-
-        match input.end_time {
-            Some(time) => {
-                diesel::update(schema::contest::table)
-                    .set(
-                        schema::contest::dsl::end_time
-                            .eq(&chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
-                    )
-                    .execute(&self.context.database)?;
-            }
-            None => {}
-        }
+        self.context.default_contest().update(input);
 
         Ok(MutationOk)
     }

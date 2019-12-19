@@ -26,12 +26,52 @@ pub struct UserToken {
     pub user_id: Option<UserId>,
 }
 
-/// A user authorization token
 #[derive(juniper::GraphQLInputObject)]
 pub struct ContestUpdateInput {
     pub archive_content: Option<FileContentInput>,
     pub start_time: Option<String>,
     pub end_time: Option<String>,
+}
+
+pub struct Contest<'a> {
+    context: &'a ApiContext<'a>,
+}
+
+impl<'a> Contest<'a> {
+    pub fn new(context: &'a ApiContext<'a>) -> Self {
+        Contest { context }
+    }
+
+    pub fn init(&self) -> FieldResult<()> {
+        let now = chrono::Local::now();
+        let configuration = ContestDataInput {
+            archive_content: include_bytes!(concat!(env!("OUT_DIR"), "/initial-contest.tar.xz")),
+            start_time: &now.to_rfc3339(),
+            end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
+        };
+        diesel::insert_into(schema::contest::table)
+            .values(configuration)
+            .execute(&self.context.database)?;
+        Ok(())
+    }
+
+    pub fn update(&self, input: ContestUpdateInput) -> FieldResult<()> {
+        let changeset = ContestChangeset {
+            archive_content: if let Some(ref content) = input.archive_content {
+                Some(content.decode()?)
+            } else {
+                None
+            },
+            start_time: input.start_time,
+            end_time: input.end_time,
+        };
+
+        diesel::update(schema::contest::table)
+            .set(changeset)
+            .execute(&self.context.database)?;
+
+        Ok(())
+    }
 }
 
 /// Information visible to a contestant
@@ -216,8 +256,16 @@ pub struct ContestData {
 
 #[derive(Insertable)]
 #[table_name = "contest"]
-pub struct ContestDataInput<'a> {
+struct ContestDataInput<'a> {
     pub archive_content: &'a [u8],
     pub start_time: &'a str,
     pub end_time: &'a str,
+}
+
+#[derive(AsChangeset)]
+#[table_name = "contest"]
+struct ContestChangeset {
+    pub archive_content: Option<Vec<u8>>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
 }
