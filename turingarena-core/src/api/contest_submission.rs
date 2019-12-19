@@ -23,7 +23,7 @@ pub struct SubmissionId(pub String);
 /// File of a submission. (submission_id, field_id) is the primary key
 #[derive(Queryable)]
 #[allow(dead_code)]
-pub struct SubmissionFile {
+struct SubmissionFile {
     submission_id: String,
     field_id: String,
     type_id: String,
@@ -189,7 +189,7 @@ impl Submission<'_> {
     }
 
     /// List of files of this submission
-    pub fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
+    fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
         Ok(submission_files::table
             .filter(submission_files::dsl::submission_id.eq(&self.data.id))
             .load::<SubmissionFile>(&self.context.database)?)

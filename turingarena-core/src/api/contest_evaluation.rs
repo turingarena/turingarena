@@ -203,7 +203,7 @@ struct EvaluationInsertable<'a> {
 }
 
 #[derive(Queryable, Clone)]
-pub struct EvaluationData {
+struct EvaluationData {
     /// ID of the evaluation, that is a random generated UUID
     id: String,
 
