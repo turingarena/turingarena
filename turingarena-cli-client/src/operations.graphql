@@ -30,7 +30,7 @@ mutation AddProblemMutation($input: ProblemInput!) {
 }
 
 mutation DeleteProblemMutation($name: String!) {
-    deleteProblem(name: $name) {
+    deleteProblems(names: [$name]) {
         ok
     }
 }

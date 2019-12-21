@@ -275,10 +275,10 @@ impl Mutation<'_> {
         Ok(MutationOk)
     }
 
-    /// Delete a problem from the current contest
-    pub fn delete_problem(&self, name: String) -> FieldResult<MutationOk> {
+    /// Delete problems from the current contest
+    pub fn delete_problems(&self, names: Vec<String>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-        Problem::delete(&self.context, ProblemName(name))?;
+        Problem::delete(&self.context, names)?;
         Ok(MutationOk)
     }
 

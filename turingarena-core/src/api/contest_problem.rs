@@ -85,8 +85,11 @@ impl Problem<'_> {
     }
 
     /// Delete a problem from the database
-    pub fn delete(context: &ApiContext, name: ProblemName) -> FieldResult<()> {
-        diesel::delete(problems::table.find(name.0)).execute(&context.database)?;
+    pub fn delete(context: &ApiContext, names: Vec<String>) -> FieldResult<()> {
+        use crate::diesel::ExpressionMethods;
+        diesel::delete(problems::table)
+            .filter(problems::dsl::name.eq_any(names))
+            .execute(&context.database)?;
         Ok(())
     }
 
