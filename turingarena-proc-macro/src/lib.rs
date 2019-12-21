@@ -34,6 +34,7 @@ pub fn union_from_enum_derive(input: TokenStream) -> TokenStream {
 pub fn graphql(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let input: syn::Item = syn::parse(input).expect("Invalid syntax");
     let output = quote!(
+        #[allow(dead_code)]
         #input
 
         #[juniper::object]
