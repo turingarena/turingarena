@@ -40,6 +40,43 @@ const routes: Routes = [
   {
     path: 'admin',
     component: AdminComponent,
+    children: [
+      {
+        path: '',
+        component: EmptyComponent,
+        data: {
+          adminSection: '',
+        },
+      },
+      {
+        path: 'contestants',
+        component: EmptyComponent,
+        data: {
+          adminSection: 'contestants',
+        },
+      },
+      {
+        path: 'problems',
+        component: EmptyComponent,
+        data: {
+          adminSection: 'problems',
+        },
+      },
+      {
+        path: 'submissions',
+        component: EmptyComponent,
+        data: {
+          adminSection: 'submissions',
+        },
+      },
+      {
+        path: 'evaluations',
+        component: EmptyComponent,
+        data: {
+          adminSection: 'evaluations',
+        },
+      },
+    ],
   },
 ];
 
