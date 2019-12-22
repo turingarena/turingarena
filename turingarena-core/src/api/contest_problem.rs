@@ -71,15 +71,10 @@ impl Problem<'_> {
     }
 
     /// Insert a problem in the database
-    pub fn insert<T: IntoIterator<Item = ProblemInput>>(
-        context: &ApiContext,
-        inputs: T,
-    ) -> FieldResult<()> {
-        for input in inputs.into_iter() {
-            diesel::replace_into(problems::table)
-                .values(input)
-                .execute(&context.database)?;
-        }
+    pub fn insert(context: &ApiContext, inputs: Vec<ProblemInput>) -> FieldResult<()> {
+        diesel::insert_into(problems::table)
+            .values(inputs)
+            .execute(&context.database)?;
         Ok(())
     }
 
