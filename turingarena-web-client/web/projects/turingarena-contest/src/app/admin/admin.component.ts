@@ -49,4 +49,9 @@ export class AdminComponent {
   contestantsGridModel = this.contestantsService.createGridModel(() => this.contestantsGrid, this.adminQuery);
   submissionsGridModel = this.submissionsService.createGridModel(() => this.submissionsGrid, this.adminQuery);
   problemsGridModel = this.problemsService.createGridModel(() => this.problemsGrid, this.adminQuery);
+
+  columnGroupState: {
+    groupId: string;
+    open: boolean;
+  }[] = [];
 }

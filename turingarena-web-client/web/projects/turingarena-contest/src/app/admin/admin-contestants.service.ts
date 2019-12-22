@@ -3,7 +3,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef, RowNode } from 'ag-grid-community';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { first, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 import { AdminQuery } from './__generated__/AdminQuery';
 import { DeleteUsersMutation, DeleteUsersMutationVariables } from './__generated__/DeleteUsersMutation';
@@ -30,6 +30,7 @@ export class AdminContestantGridModel {
   columnDefs = this.adminQuery.valueChanges.pipe(
     map(({ data }): (ColDef | ColGroupDef)[] => [
       {
+        colId: 'id',
         headerName: 'ID',
         field: 'id',
         headerCheckboxSelection: true,
@@ -41,6 +42,7 @@ export class AdminContestantGridModel {
         flex: 1,
       },
       {
+        colId: 'displayName',
         headerName: 'Name',
         field: 'displayName',
         filter: 'agTextColumnFilter',
@@ -83,7 +85,7 @@ export class AdminContestantGridModel {
         }),
       }),
     ]),
-    first(),
+    distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
   );
 
   rowData = this.adminQuery.valueChanges.pipe(

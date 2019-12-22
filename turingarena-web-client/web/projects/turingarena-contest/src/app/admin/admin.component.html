@@ -10,6 +10,9 @@
 
     <div class="admin-main">
       <aside class="admin-aside">
+        <button class="admin-create-button" (click)="modalService.open(createDialog)">
+          Set up contest
+        </button>
         <a class="admin-section-link" routerLink="/admin/problems" routerLinkActive="active">
           Problems
         </a>
@@ -19,9 +22,6 @@
         <a class="admin-section-link" routerLink="/admin/submissions" routerLinkActive="active">
           Submissions
         </a>
-        <button class="admin-create-button" (click)="modalService.open(createDialog)">
-          Create
-        </button>
       </aside>
 
       <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
@@ -48,6 +48,7 @@
       <main class="admin-problems" [hidden]="(route.firstChild!.data | async).adminSection !== 'problems'">
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
+        <button (click)="problemsGridModel.deleteSelected()">Delete selected</button>
         <ag-grid-angular #problemsGrid class="problems-grid ag-theme-balham" [rowDragManaged]="true"
           [defaultColDef]="problemsGridModel.defaultColDef" [animateRows]="true"
           [rowData]="problemsGridModel.rowData | async" [columnDefs]="problemsGridModel.columnDefs | async"

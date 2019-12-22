@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { QueryRef } from 'apollo-angular';
-import { first, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 import { AdminQuery } from './__generated__/AdminQuery';
 import { AdminAwardColumnsService } from './admin-award-columns.service';
@@ -29,6 +29,7 @@ export class AdminSubmissionsService {
       columnDefs: adminQuery.valueChanges.pipe(
         map(({ data }): (ColDef | ColGroupDef)[] => [
           {
+            colId: 'id',
             headerName: 'ID',
             field: 'id',
             cellClass: 'grid-cell-id',
@@ -39,6 +40,7 @@ export class AdminSubmissionsService {
             flex: 1,
           },
           {
+            colId: 'userId',
             headerName: 'Contestant',
             cellClass: 'grid-cell-id',
             field: 'userId',
@@ -59,7 +61,7 @@ export class AdminSubmissionsService {
             }),
           }),
         ]),
-        first(),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
       ),
       rowData: adminQuery.valueChanges.pipe(
         map(({ data }) => data.submissions),

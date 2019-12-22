@@ -157,7 +157,7 @@ export class AdminCreateDialogComponent {
         }
       `,
       variables: {
-        contestantInputs: this.getRowData(),
+        contestantInputs: this.getRowData().map(({ id, displayName, token }) => ({ id, displayName, token })),
       },
       refetchQueries: ['AdminQuery'],
     }).toPromise();

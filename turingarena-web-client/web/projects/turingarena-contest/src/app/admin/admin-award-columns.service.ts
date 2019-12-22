@@ -37,19 +37,23 @@ export class AdminAwardColumnsService {
     private readonly variantService: VariantService,
   ) { }
 
-  getAwardColumns({ data, badgeGetter, scoreGetter }: AwardColumnsParams): (ColDef | ColGroupDef)[] {
+  getAwardColumns({ data, badgeGetter, scoreGetter }: AwardColumnsParams): ColGroupDef[] {
     return [
       {
         headerName: 'Awards',
         openByDefault: true,
+        groupId: `awards`,
         children: [
           ...data.problems.map((problem): ColGroupDef => ({
             headerName: problem.name,
             headerTooltip: this.variantService.selectTextVariant(problem.material.title),
             columnGroupShow: 'open',
+            groupId: `awards/problem/${problem.name}`,
             children: [
               ...problem.material.awards.map((award): ColDef => ({
+                colId: `awards/problem/${problem.name}/award/${award.name}`,
                 headerName: this.variantService.selectTextVariant(award.title),
+                type: 'numericColumn',
                 cellClass: ({ value }) => [
                   'grid-cell-valence',
                   award.content.__typename === 'ScoreAwardContent'
@@ -71,6 +75,8 @@ export class AdminAwardColumnsService {
               })),
               {
                 headerName: 'Score',
+                colId: `awards/problem/${problem.name}/score`,
+                type: 'numericColumn',
                 valueGetter: (valueGetterParams) => problem.material.awards
                   .map(
                     (award) => award.content.__typename === 'ScoreAwardContent'
@@ -89,7 +95,9 @@ export class AdminAwardColumnsService {
             ],
           })),
           {
+            colId: `awards/total-score`,
             headerName: 'Total score',
+            type: 'numericColumn',
             valueGetter: (valueGetterParams) => data.problems.map((problem) =>
               problem.material.awards
                 .map(
