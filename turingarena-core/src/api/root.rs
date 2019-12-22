@@ -17,7 +17,7 @@ use user::UserInput;
 use crate::api::award::AwardOutcome;
 use crate::api::contest::{Contest, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
-use crate::api::contest_problem::{Problem, ProblemInput};
+use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
@@ -268,10 +268,17 @@ impl Mutation<'_> {
         Ok(MutationOk)
     }
 
-    /// Add a problem to the current contest
+    /// Add problems to the current contest
     pub fn add_problems(&self, inputs: Vec<ProblemInput>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
         Problem::insert(&self.context, inputs)?;
+        Ok(MutationOk)
+    }
+
+    /// Update problems in the current contest
+    pub fn update_problems(&self, inputs: Vec<ProblemUpdateInput>) -> FieldResult<MutationOk> {
+        self.context.authorize_admin()?;
+        Problem::update(&self.context, inputs)?;
         Ok(MutationOk)
     }
 

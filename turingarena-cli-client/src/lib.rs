@@ -54,6 +54,12 @@ enum AdminCommand {
         #[structopt(long)]
         path: String,
     },
+    UpdateProblem {
+        #[structopt(long)]
+        name: String,
+        #[structopt(long)]
+        path: Option<String>,
+    },
     DeleteProblem {
         name: String,
     },
@@ -117,6 +123,19 @@ impl AdminCommand {
                         archive_content: add_problem_mutation::FileContentInput {
                             base64: base64::encode(&pack_archive(path)),
                         },
+                    },
+                },
+            ),
+            UpdateProblem { name, path } => make_request(
+                UpdateProblemMutation::build_query,
+                update_problem_mutation::Variables {
+                    input: update_problem_mutation::ProblemUpdateInput {
+                        name,
+                        archive_content: path.map(|path| {
+                            update_problem_mutation::FileContentInput {
+                                base64: base64::encode(&pack_archive(path)),
+                            }
+                        }),
                     },
                 },
             ),

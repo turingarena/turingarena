@@ -29,6 +29,12 @@ mutation AddProblemMutation($input: ProblemInput!) {
     }
 }
 
+mutation UpdateProblemMutation($input: ProblemUpdateInput!) {
+    updateProblems(inputs: [$input]) {
+        ok
+    }
+}
+
 mutation DeleteProblemMutation($name: String!) {
     deleteProblems(names: [$name]) {
         ok
