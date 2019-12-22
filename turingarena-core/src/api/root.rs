@@ -9,7 +9,7 @@ use structopt::StructOpt;
 use auth::JwtData;
 use contest::{ContestView, UserToken};
 
-use formats::{import, ImportInput};
+use formats::ImportFileInput;
 use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
@@ -21,6 +21,7 @@ use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
+use crate::api::formats::Import;
 
 embed_migrations!();
 
@@ -295,10 +296,19 @@ impl Mutation<'_> {
     }
 
     /// Import a file
-    pub fn import(&self, input: ImportInput) -> FieldResult<MutationOk> {
+    pub fn import(
+        &self,
+        inputs: Vec<ImportFileInput>,
+        dry_run: Option<bool>,
+    ) -> FieldResult<Import> {
         self.context.authorize_admin()?;
-        import(&self.context, &input)?;
-        Ok(MutationOk)
+        let import = Import::load(inputs)?;
+        if dry_run.is_some() && dry_run.unwrap() {
+            // no-op
+        } else {
+            import.apply(&self.context)?;
+        }
+        Ok(import)
     }
 
     /// Submit a solution to the problem

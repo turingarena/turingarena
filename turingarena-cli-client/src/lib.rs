@@ -70,6 +70,9 @@ enum AdminCommand {
     ImportFile {
         /// Path of the contest to import
         path: PathBuf,
+        /// Show operations without applying them
+        #[structopt(long)]
+        dry_run: bool,
     },
 }
 
@@ -155,16 +158,19 @@ impl AdminCommand {
                 StartNewEvaluationMutation::build_query,
                 start_new_evaluation_mutation::Variables { submission_id },
             ),
-            ImportFile { path } => {
+            ImportFile { path, dry_run } => {
                 let content = read(&path).unwrap();
                 make_request(
                     ImportMutation::build_query,
                     import_mutation::Variables {
-                        input: import_mutation::ImportInput {
-                            content_base64: base64::encode(&content),
-                            filename: Some(path.file_name().unwrap().to_string_lossy().to_string()),
+                        input: import_mutation::ImportFileInput {
+                            content: import_mutation::FileContentInput {
+                                base64: base64::encode(&content),
+                            },
+                            name: Some(path.file_name().unwrap().to_string_lossy().to_string()),
                             filetype: None,
                         },
+                        dry_run,
                     },
                 )
             }

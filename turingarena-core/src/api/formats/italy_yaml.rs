@@ -1,5 +1,3 @@
-use formats::ImportOperation;
-/// Italy YAML contest importation format
 use root::ApiContext;
 
 use user;
@@ -20,6 +18,22 @@ pub struct ContestYaml {
     users: Vec<ItalyYamlUser>,
 }
 
+impl Into<Import> for ContestYaml {
+    fn into(self) -> Import {
+        Import {
+            users: self
+                .users
+                .into_iter()
+                .map(|user| ImportUser {
+                    id: user.username,
+                    display_name: format!("{} {}", user.first_name, user.last_name),
+                    token: user.password,
+                })
+                .collect(),
+        }
+    }
+}
+
 /// A user as in the Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
 struct ItalyYamlUser {
@@ -29,43 +43,31 @@ struct ItalyYamlUser {
     password: String,
 }
 
-/// Importer for the Italy YAML contest format
-pub struct ItalyYamlImporter;
-
-impl Importer for ItalyYamlImporter {
-    type Operation = ContestYaml;
-    fn load(
-        &self,
-        content: &[u8],
-        _filename: &Option<String>,
-        _filetype: &Option<String>,
-    ) -> Option<ContestYaml> {
-        serde_yaml::from_slice::<ContestYaml>(content).ok()
-    }
-}
-
-impl ImportOperation for ContestYaml {
-    fn import_into(self, context: &ApiContext) -> ImportResult {
-        //        if let Some(start) = self.start {
-        //            context.set_start_time(Local.timestamp(start as i64, 0))?;
-        //        }
-        //        if let Some(end) = self.stop {
-        //            context.set_end_time(Local.timestamp(end as i64, 0))?;
-        //        }
-
-        //        contest_problem::insert(&context.database, self.tasks.iter().map(|name| ProblemInput {
-        //            name: name.to_owned(),
-        //            archive_content: unreachable!("TODO"),
-        //        }))?;
-
-        User::insert(
-            context,
-            self.users.into_iter().map(|user| UserInput {
-                id: user.username,
-                display_name: format!("{} {}", user.first_name, user.last_name),
-                token: user.password,
-            }),
-        )?;
-        Ok(())
-    }
-}
+//impl ImportOperation for ContestYaml {
+//    fn import_into(self, context: &ApiContext) -> ImportResult {
+//        if let Some(start) = self.start {
+//            context.set_start_time(Local.timestamp(start as i64, 0))?;
+//        }
+//        if let Some(end) = self.stop {
+//            context.set_end_time(Local.timestamp(end as i64, 0))?;
+//        }
+//
+//        contest_problem::insert(
+//            &context.database,
+//            self.tasks.iter().map(|name| ProblemInput {
+//                name: name.to_owned(),
+//                archive_content: unreachable!("TODO"),
+//            }),
+//        )?;
+//
+//        User::insert(
+//            context,
+//            self.users.into_iter().map(|user| UserInput {
+//                id: user.username,
+//                display_name: format!("{} {}", user.first_name, user.last_name),
+//                token: user.password,
+//            }),
+//        )?;
+//        Ok(())
+//    }
+//}

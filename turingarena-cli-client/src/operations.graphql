@@ -70,9 +70,12 @@ mutation StartNewEvaluationMutation($submissionId: String!) {
     }
 }
 
-mutation ImportMutation($input: ImportInput!) {
-    import(input: $input) {
-        ok
+mutation ImportMutation($input: ImportFileInput!, $dryRun: Boolean!) {
+    import(inputs: [$input], dryRun: $dryRun) {
+        users {
+            id
+            displayName
+        }
     }
 }
 
