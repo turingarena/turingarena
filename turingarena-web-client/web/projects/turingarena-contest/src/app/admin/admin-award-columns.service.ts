@@ -65,9 +65,9 @@ export class AdminAwardColumnsService {
                     ? ({ value }) => value
                     : ({ value }) => value ? 'yes' : 'no'
                 ,
-                flex: 0.6,
                 columnGroupShow: 'open',
                 sortingOrder,
+                flex: 1,
               })),
               {
                 headerName: 'Score',
@@ -82,8 +82,9 @@ export class AdminAwardColumnsService {
                   'grid-cell-valence',
                   getScoreValence({ score: value, range: getProblemScoreRange(problem.material) })!.toLowerCase(),
                 ],
-                flex: 0.8,
+                columnGroupShow: 'closed',
                 sortingOrder,
+                flex: 1,
               },
             ],
           })),
@@ -108,7 +109,7 @@ export class AdminAwardColumnsService {
                 },
               })!.toLowerCase(),
             ],
-            flex: 1,
+            flex: 1.2,
             sortingOrder,
           },
         ],
