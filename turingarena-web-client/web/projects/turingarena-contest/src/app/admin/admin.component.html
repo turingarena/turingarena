@@ -34,9 +34,20 @@
       <main class="admin-submissions" [hidden]="(route.firstChild!.data | async).adminSection !== 'submissions'">
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
-        <ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham" [defaultColDef]="submissionsGridModel.defaultColDef"
-          [animateRows]="true" [rowData]="submissionsGridModel.rowData | async" [columnDefs]="submissionsGridModel.columnDefs | async"
+        <ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham"
+          [defaultColDef]="submissionsGridModel.defaultColDef" [animateRows]="true"
+          [rowData]="submissionsGridModel.rowData | async" [columnDefs]="submissionsGridModel.columnDefs | async"
           [context]="submissionsGridModel.context | async" rowSelection="multiple" [quickFilterText]="quickFilterText">
+        </ag-grid-angular>
+      </main>
+
+      <main class="admin-problems" [hidden]="(route.firstChild!.data | async).adminSection !== 'problems'">
+        <label>Filter</label>
+        <input [(ngModel)]="quickFilterText" />
+        <ag-grid-angular #problemsGrid class="problems-grid ag-theme-balham" [rowDragManaged]="true"
+          [defaultColDef]="problemsGridModel.defaultColDef" [animateRows]="true"
+          [rowData]="problemsGridModel.rowData | async" [columnDefs]="problemsGridModel.columnDefs | async"
+          [context]="problemsGridModel.context | async" rowSelection="multiple" [quickFilterText]="quickFilterText">
         </ag-grid-angular>
       </main>
     </div>

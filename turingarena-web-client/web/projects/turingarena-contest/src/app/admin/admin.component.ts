@@ -6,6 +6,7 @@ import { Apollo } from 'apollo-angular';
 
 import { AdminQuery } from './__generated__/AdminQuery';
 import { AdminContestantsService } from './admin-contestants.service';
+import { AdminProblemsService } from './admin-problems.service';
 import { adminQuery } from './admin-query';
 import { AdminSubmissionsService } from './admin-submissions.service';
 
@@ -20,6 +21,7 @@ export class AdminComponent {
     private readonly apollo: Apollo,
     private readonly contestantsService: AdminContestantsService,
     private readonly submissionsService: AdminSubmissionsService,
+    private readonly problemsService: AdminProblemsService,
     readonly route: ActivatedRoute,
   ) { }
 
@@ -31,6 +33,9 @@ export class AdminComponent {
   @ViewChild('submissionsGrid', { static: false })
   submissionsGrid!: AgGridAngular;
 
+  @ViewChild('problemsGrid', { static: false })
+  problemsGrid!: AgGridAngular;
+
   quickFilterText = '';
 
   adminQuery = this.apollo.watchQuery<AdminQuery>({
@@ -41,4 +46,5 @@ export class AdminComponent {
 
   contestantsGridModel = this.contestantsService.createGridModel(() => this.contestantsGrid, this.adminQuery);
   submissionsGridModel = this.submissionsService.createGridModel(() => this.submissionsGrid, this.adminQuery);
+  problemsGridModel = this.problemsService.createGridModel(() => this.problemsGrid, this.adminQuery);
 }

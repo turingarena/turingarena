@@ -31,13 +31,33 @@ export class AdminSubmissionsService {
           {
             headerName: 'ID',
             field: 'id',
+            cellClass: 'grid-cell-id',
             checkboxSelection: true,
             pinned: true,
             filter: 'agTextColumnFilter',
-            width: 100,
-            enableCellChangeFlash: true,
+            sortable: false,
+            flex: 1,
           },
-          ...this.awardColumnService.getAwardColumns(data),
+          {
+            headerName: 'Contestant',
+            cellClass: 'grid-cell-id',
+            field: 'userId',
+            filter: 'agTextColumnFilter',
+            flex: 1,
+          },
+          ...this.awardColumnService.getAwardColumns({
+            data,
+            scoreGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: submission } }, problem, award }) => ({
+              score: 0,
+              badge: false,
+              ...scoreMap.get(`${submission.id}/${problem.name}/${award.name}`),
+            }),
+            badgeGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: submission } }, problem, award }) => ({
+              score: 0,
+              badge: false,
+              ...scoreMap.get(`${submission.id}/${problem.name}/${award.name}`),
+            }),
+          }),
         ]),
         first(),
       ),
@@ -47,8 +67,8 @@ export class AdminSubmissionsService {
       context: adminQuery.valueChanges.pipe(
         map(({ data }) => ({
           scoreMap: new Map(
-            data.awards.map(({ awardName, submission: { problemName, userId }, value }) => [
-              `${userId}/${problemName}/${awardName}`,
+            data.awards.map(({ awardName, submission: { problemName, id: submissionId }, value }) => [
+              `${submissionId}/${problemName}/${awardName}`,
               value,
             ]),
           ),

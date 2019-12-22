@@ -10,7 +10,9 @@ export enum ScoreTier {
 
 export interface ScoreState {
   score: number | undefined;
-  range: ScoreRangeFragment;
+  range: {
+    max: number;
+  };
 }
 
 export const getScoreTier = ({ score, range: { max } }: ScoreState) => {

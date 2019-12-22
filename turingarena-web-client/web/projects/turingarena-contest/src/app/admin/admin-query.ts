@@ -19,6 +19,7 @@ export const adminQuery = gql`
 
   fragment AdminAwardFragment on AwardOutcome {
     submission {
+      id
       problemName
       userId
     }

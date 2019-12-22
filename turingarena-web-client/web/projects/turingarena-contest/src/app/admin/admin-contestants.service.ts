@@ -28,6 +28,7 @@ export class AdminContestantsService {
         lockPinned: true,
         width: 100,
         enableCellChangeFlash: true,
+        flex: 1,
       },
       columnDefs: adminQuery.valueChanges.pipe(
         map(({ data }): (ColDef | ColGroupDef)[] => [
@@ -39,6 +40,7 @@ export class AdminContestantsService {
             filter: 'agTextColumnFilter',
             width: 100,
             enableCellChangeFlash: true,
+            flex: 1,
           },
           {
             headerName: 'Name',
@@ -46,6 +48,7 @@ export class AdminContestantsService {
             filter: 'agTextColumnFilter',
             editable: true,
             width: 200,
+            flex: 2,
             enableCellChangeFlash: true,
             valueSetter: ({ newValue, node: { data: user } }) => {
               this.apollo.mutate<UpdateUserMutation, UpdateUserMutationVariables>({
@@ -68,7 +71,19 @@ export class AdminContestantsService {
               return true;
             },
           },
-          ...this.awardColumnService.getAwardColumns(data),
+          ...this.awardColumnService.getAwardColumns({
+            data,
+            scoreGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: user } }, problem, award }) => ({
+              score: 0,
+              badge: false,
+              ...scoreMap.get(`${user.id}/${problem.name}/${award.name}`),
+            }),
+            badgeGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: user } }, problem, award }) => ({
+              score: 0,
+              badge: false,
+              ...scoreMap.get(`${user.id}/${problem.name}/${award.name}`),
+            }),
+          }),
         ]),
         first(),
       ),

@@ -103,3 +103,22 @@ body {
 .login_token_input {
   @extend .form-control;
 }
+
+.grid-cell-id {
+  @extend samp;
+}
+
+.grid-cell-valence {
+  &.failure {
+    @extend .table-danger;
+  }
+  &.warning {
+    @extend .table-warning;
+  }
+  &.partial {
+    @extend .table-warning;
+  }
+  &.success {
+    @extend .table-success;
+  }
+}

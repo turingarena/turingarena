@@ -4,12 +4,24 @@ export const awardOutcomeFragment = gql`
   fragment AwardOutcomeFragment on AwardOutcome {
     awardName
     value {
-      ... on BadgeAwardValue {
-        badge
-      }
-      ... on ScoreAwardValue {
-        score
-      }
+      ... AwardValueFragment
     }
+  }
+
+  fragment AwardValueFragment on AwardValue {
+    ... on BadgeAwardValue {
+      ... BadgeAwardValueFragment
+    }
+    ... on ScoreAwardValue {
+      ... ScoreAwardValueFragment
+    }
+  }
+
+  fragment BadgeAwardValueFragment on BadgeAwardValue {
+    badge
+  }
+
+  fragment ScoreAwardValueFragment on ScoreAwardValue {
+    score
   }
 `;
