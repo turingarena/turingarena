@@ -6,8 +6,10 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { UserInput } from '../../../../../../__generated__/globalTypes';
+import { FileLoadService } from '../../file-load.service';
 
 import { AdminCreateMutation, AdminCreateMutationVariables } from './__generated__/AdminCreateMutation';
+import { DryImportMutation, DryImportMutationVariables } from './__generated__/DryImportMutation';
 
 const valueFormatter = ({ value, colDef }: ValueFormatterParams) => value ? value : `<${colDef.headerName}>`;
 
@@ -20,6 +22,7 @@ export class AdminCreateDialogComponent {
 
   constructor(
     private readonly apollo: Apollo,
+    private readonly fileLoadService: FileLoadService,
   ) { }
 
   @Input()
@@ -107,6 +110,41 @@ export class AdminCreateDialogComponent {
     });
 
     return rowData;
+  }
+
+  async importFile(event: Event) {
+    const el = event.target as HTMLInputElement;
+    const file = el.files![0];
+    el.value = '';
+
+    const content = await this.fileLoadService.loadFileContent(file);
+    const result = await this.apollo.mutate<DryImportMutation, DryImportMutationVariables>({
+      mutation: gql`
+        mutation DryImportMutation($input: ImportFileInput!) {
+          import(inputs: [$input], dryRun: true) {
+            users {
+              id
+              displayName
+              token
+            }
+          }
+        }
+      `,
+      variables: {
+        input: {
+          content,
+          name: file.name,
+          filetype: file.type,
+        },
+      },
+      refetchQueries: ['AdminQuery'],
+    }).toPromise();
+
+    const { data } = result;
+    if (data !== null && data !== undefined) {
+      const t = this.contestantsGrid.api.updateRowData({ add: data.import.users, addIndex: 0 });
+      t.add.forEach((node) => { node.setSelected(true); });
+    }
   }
 
   async submit() {

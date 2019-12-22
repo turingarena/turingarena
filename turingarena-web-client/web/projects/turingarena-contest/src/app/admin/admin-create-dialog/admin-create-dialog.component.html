@@ -1,4 +1,6 @@
 <form class="create-form" (ngSubmit)="submit()">
+  <label>Import from file</label>
+  <input type="file" (change)="importFile($event); $event.preventDefault()" />
   <div class="create-dialog-body">
     <ag-grid-angular class="create-contestants-grid ag-theme-balham" #contestantsGrid [animateRows]="true"
       [columnDefs]="contestantsColumnDefs" [rowData]="contestantInputs" rowSelection="multiple"
