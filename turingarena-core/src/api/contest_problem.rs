@@ -6,7 +6,7 @@ use root::ApiContext;
 
 use diesel::{QueryDsl, RunQueryDsl};
 use file::FileContentInput;
-use juniper::{FieldError, FieldResult};
+use juniper::FieldResult;
 use problem::material::Material;
 use problem::ProblemName;
 

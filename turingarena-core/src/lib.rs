@@ -4,8 +4,7 @@
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
-#[macro_use]
-extern crate log;
+
 #[macro_use]
 extern crate serde;
 

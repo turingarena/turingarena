@@ -2,7 +2,7 @@ use std::default::Default;
 use std::env::temp_dir;
 use std::path::{Path, PathBuf};
 
-use diesel::{Connection, RunQueryDsl, SqliteConnection};
+use diesel::{Connection, SqliteConnection};
 use juniper::FieldResult;
 use structopt::StructOpt;
 
