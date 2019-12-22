@@ -1,13 +1,15 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { AgGridAngular } from 'ag-grid-angular';
+import { ColDef, RowEvent, RowNode, ValueFormatterParams } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { UserInput } from '../../../../../../__generated__/globalTypes';
 
 import { AdminCreateMutation, AdminCreateMutationVariables } from './__generated__/AdminCreateMutation';
-import { ColDef, CellEditingStartedEvent, CellEditingStoppedEvent, CellValueChangedEvent, CellEvent, RowEvent, RowNode, ICellRendererParams, ValueFormatterParams } from 'ag-grid-community';
-import { AgGridAngular } from 'ag-grid-angular';
+
+const valueFormatter = ({ value, colDef }: ValueFormatterParams) => value ? value : `<${colDef.headerName}>`;
 
 @Component({
   selector: 'app-admin-create-dialog',
@@ -44,7 +46,7 @@ export class AdminCreateDialogComponent {
       editable: true,
       flex: 1,
       singleClickEdit: true,
-      valueFormatter: ({ value, colDef }: ValueFormatterParams) => value ? value : `<add ${colDef.headerName}>`,
+      valueFormatter,
     },
     {
       headerName: 'Display name',
@@ -52,6 +54,7 @@ export class AdminCreateDialogComponent {
       editable: true,
       flex: 1,
       singleClickEdit: true,
+      valueFormatter,
     },
     {
       headerName: 'Log-in token',
@@ -59,6 +62,7 @@ export class AdminCreateDialogComponent {
       editable: true,
       flex: 1,
       singleClickEdit: true,
+      valueFormatter: ({ value, colDef }) => value ? `*`.repeat(value.length) : `<${colDef.headerName}>`,
     },
   ];
 
@@ -117,6 +121,7 @@ export class AdminCreateDialogComponent {
       variables: {
         contestantInputs: this.getRowData(),
       },
+      refetchQueries: ['AdminQuery'],
     }).toPromise();
     this.modal.close();
   }

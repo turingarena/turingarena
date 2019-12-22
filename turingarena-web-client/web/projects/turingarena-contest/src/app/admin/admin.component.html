@@ -27,6 +27,7 @@
       <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
+        <button (click)="contestantsGridModel.deleteSelected()">Delete selected</button>
         <ag-grid-angular #contestantsGrid class="contestants-grid ag-theme-balham"
           [defaultColDef]="contestantsGridModel.defaultColDef" [animateRows]="true"
           [rowData]="contestantsGridModel.rowData | async" [columnDefs]="contestantsGridModel.columnDefs | async"
