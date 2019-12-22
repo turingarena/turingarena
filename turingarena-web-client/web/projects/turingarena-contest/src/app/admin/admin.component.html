@@ -19,6 +19,9 @@
         <a class="admin-section-link" routerLink="/admin/submissions" routerLinkActive="active">
           Submissions
         </a>
+        <button class="admin-create-button" (click)="modalService.open(createDialog)">
+          Create
+        </button>
       </aside>
 
       <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
@@ -53,5 +56,10 @@
     </div>
   </ng-container>
 </ng-container>
+
+
+<ng-template #createDialog let-modal>
+  <app-admin-create-dialog [modal]="modal"></app-admin-create-dialog>
+</ng-template>
 
 <router-outlet></router-outlet>

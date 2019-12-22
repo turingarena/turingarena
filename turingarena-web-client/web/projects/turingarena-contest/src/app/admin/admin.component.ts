@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { faTools } from '@fortawesome/free-solid-svg-icons';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridAngular } from 'ag-grid-angular';
 import { Apollo } from 'apollo-angular';
 
@@ -23,6 +24,7 @@ export class AdminComponent {
     private readonly submissionsService: AdminSubmissionsService,
     private readonly problemsService: AdminProblemsService,
     readonly route: ActivatedRoute,
+    readonly modalService: NgbModal,
   ) { }
 
   faTools = faTools;

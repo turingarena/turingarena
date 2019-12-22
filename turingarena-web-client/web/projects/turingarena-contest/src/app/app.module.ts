@@ -10,6 +10,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 
+import { AdminCreateDialogComponent } from './admin/admin-create-dialog/admin-create-dialog.component';
 import { AdminComponent } from './admin/admin.component';
 import { AppComponent } from './app.component';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
@@ -92,6 +93,7 @@ const routes: Routes = [
     FileVariantPipe,
     EmptyComponent,
     AdminComponent,
+    AdminCreateDialogComponent,
   ],
   imports: [
     BrowserModule,
