@@ -63,6 +63,9 @@ enum AdminCommand {
     DeleteProblem {
         name: String,
     },
+    StartNewEvaluation {
+        submission_id: String,
+    },
     ImportFile {
         /// Path of the contest to import
         path: PathBuf,
@@ -142,6 +145,10 @@ impl AdminCommand {
             DeleteProblem { name } => make_request(
                 DeleteProblemMutation::build_query,
                 delete_problem_mutation::Variables { name },
+            ),
+            StartNewEvaluation { submission_id } => make_request(
+                StartNewEvaluationMutation::build_query,
+                start_new_evaluation_mutation::Variables { submission_id },
             ),
             ImportFile { path } => {
                 let content = read(&path).unwrap();

@@ -309,7 +309,14 @@ impl Mutation<'_> {
             &problem_name.0,
             files,
         )?;
-        Evaluation::evaluate(&submission, &self.context.config)?;
+        Evaluation::start_new(&submission, &self.context.config)?;
         Ok(submission)
+    }
+
+    fn start_new_evaluation(&self, submission_id: String) -> FieldResult<MutationOk> {
+        self.context.authorize_admin()?;
+        let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;
+        Evaluation::start_new(&submission, &self.context.config)?;
+        Ok(MutationOk)
     }
 }

@@ -88,7 +88,7 @@ impl<'a> Evaluation<'a> {
     }
 
     /// start the evaluation thread
-    pub fn evaluate(submission: &Submission, config: &ApiConfig) -> QueryResult<()> {
+    pub fn start_new(submission: &Submission, config: &ApiConfig) -> QueryResult<()> {
         let config = config.clone();
         let submission_id = submission.id();
 

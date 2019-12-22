@@ -41,6 +41,12 @@ mutation DeleteProblemMutation($name: String!) {
     }
 }
 
+mutation StartNewEvaluationMutation($submissionId: String!) {
+    startNewEvaluation(submissionId: $submissionId) {
+        ok
+    }
+}
+
 mutation ImportMutation($input: ImportInput!) {
     import(input: $input) {
         ok
