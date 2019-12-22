@@ -5,6 +5,29 @@ query ListUsersQuery {
     }
 }
 
+query ListEvaluationsQuery {
+    evaluations {
+        id
+        awards {
+            awardName
+            value {
+                __typename
+                ... on ScoreAwardValue {
+                    score
+                }
+                ... on BadgeAwardValue {
+                    badge
+                }
+            }
+        }
+        submission {
+            id
+            userId
+            problemName
+        }
+    }
+}
+
 mutation UpdateContestMutation($input: ContestUpdateInput!) {
     updateContest(input: $input) {
         ok

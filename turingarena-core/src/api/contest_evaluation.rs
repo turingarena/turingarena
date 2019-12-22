@@ -42,6 +42,10 @@ pub struct Evaluation<'a> {
 
 #[juniper_ext::graphql]
 impl<'a> Evaluation<'a> {
+    pub fn id(&self) -> &str {
+        &self.data.id
+    }
+
     /// Evaluated submission
     pub fn submission(&self) -> FieldResult<Submission<'a>> {
         Submission::by_id(self.context, &self.data.submission_id)
@@ -71,15 +75,21 @@ impl<'a> Evaluation<'a> {
 }
 
 impl<'a> Evaluation<'a> {
-    /// Gets the evaluation with the specified id from the database
-    pub fn by_id<'b>(context: &'b ApiContext, id: &str) -> FieldResult<Evaluation<'b>> {
+    pub fn by_id(context: &'a ApiContext, id: &str) -> FieldResult<Self> {
         let data = evaluations::table
             .filter(evaluations::dsl::id.eq(id))
             .first::<EvaluationData>(&context.database)?;
         Ok(Evaluation { context, data })
     }
 
-    /// Gets the evaluation with the specified id from the database
+    pub fn list(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
+        Ok(evaluations::table
+            .load::<EvaluationData>(&context.database)?
+            .into_iter()
+            .map(|data| Evaluation { context, data })
+            .collect())
+    }
+
     pub fn of_submission<'b>(
         context: &'b ApiContext,
         submission_id: &str,

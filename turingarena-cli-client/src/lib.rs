@@ -63,6 +63,7 @@ enum AdminCommand {
     DeleteProblem {
         name: String,
     },
+    ListEvaluations {},
     StartNewEvaluation {
         submission_id: String,
     },
@@ -145,6 +146,10 @@ impl AdminCommand {
             DeleteProblem { name } => make_request(
                 DeleteProblemMutation::build_query,
                 delete_problem_mutation::Variables { name },
+            ),
+            ListEvaluations {} => make_request(
+                ListEvaluationsQuery::build_query,
+                list_evaluations_query::Variables {},
             ),
             StartNewEvaluation { submission_id } => make_request(
                 StartNewEvaluationMutation::build_query,

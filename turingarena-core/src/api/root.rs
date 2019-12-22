@@ -200,6 +200,11 @@ impl Query<'_> {
         contest_submission::Submission::list(&self.context)
     }
 
+    fn evaluations(&self) -> FieldResult<Vec<Evaluation>> {
+        self.context.authorize_admin()?;
+        Evaluation::list(&self.context)
+    }
+
     /// Get the submission with the specified id
     fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
         let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;

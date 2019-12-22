@@ -7,11 +7,8 @@ use juniper_ext::*;
 use schema::{submission_files, submissions};
 use submission::FieldValue;
 
-use crate::api::award::AwardOutcome;
-
-use crate::api::contest_evaluation::{Evaluation, EvaluationStatus};
+use crate::api::contest_evaluation::Evaluation;
 use crate::api::user::UserId;
-use crate::evaluation::Event;
 use crate::file::FileContent;
 
 use super::*;
