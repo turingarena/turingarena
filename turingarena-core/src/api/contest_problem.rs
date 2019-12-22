@@ -10,27 +10,29 @@ use juniper::{FieldError, FieldResult};
 use problem::material::Material;
 use problem::ProblemName;
 
+use crate::data::file::FileContent;
 use schema::problems;
 use std::path::PathBuf;
 use user::UserId;
 
-#[derive(Insertable)]
+#[derive(juniper::GraphQLInputObject, Insertable)]
 #[table_name = "problems"]
-struct ProblemInsertable<'a> {
-    name: &'a str,
-    archive_content: &'a [u8],
-}
-
-#[derive(juniper::GraphQLInputObject)]
 pub struct ProblemInput {
     name: String,
     archive_content: FileContentInput,
 }
 
+#[derive(juniper::GraphQLInputObject, AsChangeset)]
+#[table_name = "problems"]
+pub struct ProblemUpdateInput {
+    name: String,
+    archive_content: Option<FileContentInput>,
+}
+
 #[derive(Queryable, Clone, Debug)]
 struct ProblemData {
     name: String,
-    archive_content: Vec<u8>,
+    archive_content: FileContent,
 }
 
 /// A problem in the contest
@@ -75,10 +77,7 @@ impl Problem<'_> {
     ) -> FieldResult<()> {
         for input in inputs.into_iter() {
             diesel::replace_into(problems::table)
-                .values(ProblemInsertable {
-                    name: &input.name,
-                    archive_content: &input.archive_content.decode()?,
-                })
+                .values(input)
                 .execute(&context.database)?;
         }
         Ok(())
@@ -93,9 +92,21 @@ impl Problem<'_> {
         Ok(())
     }
 
+    /// Update a problem in the database
+    pub fn update(context: &ApiContext, inputs: Vec<ProblemUpdateInput>) -> FieldResult<()> {
+        use crate::diesel::ExpressionMethods;
+        for input in inputs {
+            diesel::update(problems::table)
+                .filter(problems::dsl::name.eq(&input.name))
+                .set(&input)
+                .execute(&context.database)?;
+        }
+        Ok(())
+    }
+
     pub fn unpack(&self) -> PathBuf {
         self.context
-            .unpack_archive(&self.data.archive_content, "problem")
+            .unpack_archive(&self.data.archive_content.0, "problem")
     }
 
     /// Material of this problem
