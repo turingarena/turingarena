@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ColDef, ColGroupDef, ValueGetterParams } from 'ag-grid-community';
+import { ColDef, ColGroupDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 
+import { Valence } from '../../../../../__generated__/globalTypes';
 import { AwardFragment } from '../__generated__/AwardFragment';
 import { BadgeAwardValueFragment } from '../__generated__/BadgeAwardValueFragment';
 import { MaterialFragment } from '../__generated__/MaterialFragment';
@@ -28,6 +29,17 @@ export interface AwardColumnsParams {
 
 const sortingOrder = ['desc', 'asc'];
 
+const makeValenceClassRules = (valenceGetter: (params: ValueFormatterParams) => Valence) => {
+  const rules: Record<string, (params: ValueFormatterParams) => boolean> = {};
+
+  rules['grid-cell-valence'] = () => true;
+  Object.keys(Valence).forEach((valence) => {
+    rules[valence.toLowerCase()] = (params) => valenceGetter(params) === valence;
+  });
+
+  return rules;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -54,12 +66,10 @@ export class AdminAwardColumnsService {
                 colId: `awards/problem/${problem.name}/award/${award.name}`,
                 headerName: this.variantService.selectTextVariant(award.title),
                 type: 'numericColumn',
-                cellClass: ({ value }) => [
-                  'grid-cell-valence',
-                  award.content.__typename === 'ScoreAwardContent'
-                    ? getScoreValence({ score: value, range: award.content.range })!.toLowerCase()
-                    : getBadgeValence(value).toLowerCase(),
-                ],
+                cellClassRules: makeValenceClassRules(({ value }) => award.content.__typename === 'ScoreAwardContent'
+                  ? getScoreValence({ score: value, range: award.content.range })!
+                  : getBadgeValence(value),
+                ),
                 valueGetter: (valueGetterParams) =>
                   award.content.__typename === 'ScoreAwardContent'
                     ? scoreGetter({ valueGetterParams, problem, award }).score
@@ -84,10 +94,8 @@ export class AdminAwardColumnsService {
                       : 0,
                   )
                   .reduce((a, b) => a + b, 0),
-                cellClass: ({ value }) => [
-                  'grid-cell-valence',
-                  getScoreValence({ score: value, range: getProblemScoreRange(problem.material) })!.toLowerCase(),
-                ],
+                cellClassRules: makeValenceClassRules(({ value }) =>
+                  getScoreValence({ score: value, range: getProblemScoreRange(problem.material) })!),
                 columnGroupShow: 'closed',
                 sortingOrder,
                 flex: 1,
@@ -107,16 +115,14 @@ export class AdminAwardColumnsService {
                 )
                 .reduce((a, b) => a + b, 0),
             ).reduce((a, b) => a + b, 0),
-            cellClass: ({ value }) => [
-              'grid-cell-valence',
+            cellClassRules: makeValenceClassRules(({ value }) =>
               getScoreValence({
                 score: value,
                 range: {
                   max: data.problems.map((problem) => getProblemScoreRange(problem.material).max)
                     .reduce((a, b) => a + b, 0),
                 },
-              })!.toLowerCase(),
-            ],
+              })!),
             flex: 1.2,
             sortingOrder,
           },
