@@ -15,6 +15,7 @@ use crate::evaluation::Event;
 use crate::file::FileContent;
 
 use super::*;
+use crate::data::file::FileContentInput;
 
 /// Wraps a String that identifies a submission
 #[derive(GraphQLNewtype)]
@@ -141,7 +142,7 @@ impl Submission<'_> {
                 field_id: &file.field_id,
                 type_id: &file.type_id,
                 name: &file.name,
-                content: &base64::decode(&file.content_base64)?,
+                content: &file.content.decode()?,
             };
             diesel::insert_into(submission_files::table)
                 .values(submission_file)
@@ -223,8 +224,8 @@ pub struct FileInput {
     /// filename as uploaded by the user
     name: String,
 
-    /// content of the file codified in base64
-    content_base64: String,
+    /// Content of the file
+    content: FileContentInput,
 }
 
 #[derive(Insertable)]

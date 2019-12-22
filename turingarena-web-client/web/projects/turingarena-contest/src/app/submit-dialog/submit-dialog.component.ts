@@ -126,7 +126,9 @@ export class SubmitDialogComponent {
       fieldId: field.id,
       typeId: formData.get(`${field.id}.type`) as string,
       name: file.name,
-      contentBase64: await this.toBase64(file),
+      content: {
+        base64: await this.toBase64(file),
+      },
     };
   }
 
