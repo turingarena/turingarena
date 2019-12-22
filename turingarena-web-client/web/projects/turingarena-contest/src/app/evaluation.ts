@@ -43,7 +43,9 @@ export const evaluationFragment = gql`
   }
 
   fragment SubmissionEvaluationFragment on Submission {
-    evaluationEvents { ...EventFragment }
+    evaluation {
+      events { ...EventFragment }
+    }
   }
 
   ${rusageFragment}

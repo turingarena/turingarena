@@ -64,7 +64,7 @@ export class SubmissionDialogComponent implements OnInit {
 
   getEvaluationRecord(submission: SubmissionEvaluationFragment) {
     const record: Record<string, ValueFragment> = {};
-    for (const event of submission.evaluationEvents) {
+    for (const event of submission.evaluation.events) {
       if (event.__typename === 'ValueEvent') {
         const { key, value } = event;
         record[key] = value;

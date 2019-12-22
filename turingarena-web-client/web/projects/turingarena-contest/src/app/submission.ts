@@ -18,9 +18,11 @@ export const submissionFragment = gql`
         base64
       }
     }
-    status
-    awards {
-      ...AwardOutcomeFragment
+    evaluation {
+      status
+      awards {
+        ...AwardOutcomeFragment
+      }
     }
   }
   ${awardOutcomeFragment}
@@ -28,14 +30,14 @@ export const submissionFragment = gql`
 
 export const getSubmissionState = (material: MaterialFragment, submission: SubmissionFragment) => ({
   score: material.awards
-    .map((award) => submission.awards.find((s) => s.awardName === award.name))
+    .map((award) => submission.evaluation.awards.find((s) => s.awardName === award.name))
     .map((state) => state !== undefined && state.value.__typename === 'ScoreAwardValue' ? state.value.score : 0)
     .reduce((a, b) => a + b, 0),
   range: getProblemScoreRange(material),
   award: ({ name, content }: AwardFragment) => ({
     score: 0,
     badge: false,
-    ...submission.awards.filter((s) => s.awardName === name).map((s) => s.value).find(() => true),
+    ...submission.evaluation.awards.filter((s) => s.awardName === name).map((s) => s.value).find(() => true),
     ...content.__typename === 'ScoreAwardContent' ? {
       range: content.range,
     } : {},

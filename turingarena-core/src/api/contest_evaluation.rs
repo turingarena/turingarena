@@ -40,6 +40,7 @@ pub struct Evaluation<'a> {
     data: EvaluationData,
 }
 
+#[juniper_ext::graphql]
 impl<'a> Evaluation<'a> {
     /// Evaluated submission
     pub fn submission(&self) -> FieldResult<Submission<'a>> {
@@ -67,7 +68,9 @@ impl<'a> Evaluation<'a> {
             .map(|json| serde_json::from_str(&json))
             .collect::<std::result::Result<_, _>>()?)
     }
+}
 
+impl<'a> Evaluation<'a> {
     /// Gets the evaluation with the specified id from the database
     pub fn by_id<'b>(context: &'b ApiContext, id: &str) -> FieldResult<Evaluation<'b>> {
         let data = evaluations::table

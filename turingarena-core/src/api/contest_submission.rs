@@ -89,10 +89,6 @@ pub struct Submission<'a> {
 }
 
 impl Submission<'_> {
-    pub fn evaluation(&self) -> FieldResult<Evaluation> {
-        Evaluation::of_submission(self.context, &self.data.id)
-    }
-
     pub fn field_values(&self) -> FieldResult<Vec<FieldValue>> {
         Ok(submission_files::table
             .filter(submission_files::dsl::submission_id.eq(&self.data.id))
@@ -127,7 +123,7 @@ impl Submission<'_> {
     ) -> FieldResult<Submission<'a>> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = chrono::Local::now().to_rfc3339();
-        let submission = SubmissionTableInput {
+        let submission = SubmissionInsertable {
             id: &id,
             user_id,
             problem_name,
@@ -137,7 +133,7 @@ impl Submission<'_> {
             .values(submission)
             .execute(&context.database)?;
         for file in files {
-            let submission_file = SubmissionFileTableInput {
+            let submission_file = SubmissionFileInsertable {
                 submission_id: &id,
                 field_id: &file.field_id,
                 type_id: &file.type_id,
@@ -196,19 +192,8 @@ impl Submission<'_> {
             .load::<SubmissionFile>(&self.context.database)?)
     }
 
-    /// Submission status
-    pub fn status(&self) -> FieldResult<EvaluationStatus> {
-        Ok(self.evaluation()?.status())
-    }
-
-    /// Scores of this submission
-    pub fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
-        self.evaluation()?.awards()
-    }
-
-    /// Evaluation events of this submission
-    pub fn evaluation_events(&self) -> FieldResult<Vec<Event>> {
-        self.evaluation()?.events()
+    pub fn evaluation(&self) -> FieldResult<Evaluation> {
+        Evaluation::of_submission(self.context, &self.data.id)
     }
 }
 
@@ -230,7 +215,7 @@ pub struct FileInput {
 
 #[derive(Insertable)]
 #[table_name = "submissions"]
-struct SubmissionTableInput<'a> {
+struct SubmissionInsertable<'a> {
     id: &'a str,
     user_id: &'a str,
     problem_name: &'a str,
@@ -239,7 +224,7 @@ struct SubmissionTableInput<'a> {
 
 #[derive(Insertable)]
 #[table_name = "submission_files"]
-struct SubmissionFileTableInput<'a> {
+struct SubmissionFileInsertable<'a> {
     submission_id: &'a str,
     field_id: &'a str,
     type_id: &'a str,
