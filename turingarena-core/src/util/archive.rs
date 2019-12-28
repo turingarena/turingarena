@@ -22,7 +22,7 @@ pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(
 
         let temp_path = workspace_path.join(format!("{}-{}-{}.part", prefix, id, temp_name));
 
-        let mut archive = tar::Archive::new(xz2::read::XzDecoder::new(content.as_ref()));
+        let mut archive = tar::Archive::new(content.as_ref());
         archive.unpack(&temp_path).expect("Cannot extract archive");
 
         std::fs::rename(&temp_path, &out_path).expect("Cannot move extracted archive");
@@ -35,15 +35,11 @@ pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(
 pub fn pack_archive<P: AsRef<Path>>(path: P) -> Vec<u8> {
     let mut archive_content = Vec::<u8>::new();
 
-    let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut archive_content, 5));
+    let mut builder = tar::Builder::new(&mut archive_content);
     builder
         .append_dir_all(".", path)
         .expect("Unable to add dir to archive");
-    builder
-        .into_inner()
-        .expect("Unable to build archive")
-        .finish()
-        .expect("Unable to build archive");
+    builder.into_inner().expect("Unable to build archive");
 
     archive_content
 }

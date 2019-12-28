@@ -20,13 +20,9 @@ fn main() {
         .open(out_path.join("initial-contest.tar.xz"))
         .expect("Unable to open archive file");
 
-    let mut builder = tar::Builder::new(xz2::write::XzEncoder::new(&mut file, 5));
+    let mut builder = tar::Builder::new(&mut file);
     builder
         .append_dir_all(".", initial_contest_path)
         .expect("Unable to add dir to archive");
-    builder
-        .into_inner()
-        .expect("Unable to build archive")
-        .finish()
-        .expect("Unable to build archive");
+    builder.into_inner().expect("Unable to build archive");
 }
