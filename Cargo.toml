@@ -21,7 +21,3 @@ turingarena-cli-client = { path = "turingarena-cli-client/" }
 turingarena-web-server = { path = "turingarena-web-server/" }
 
 structopt = "0.3"
-
-[patch.crates-io]
-# fix for https://github.com/graphql-rust/juniper/issues/455
-juniper = { git = "http://github.com/cairomassimo/juniper.git", branch = "fix-multiop-validation" }
