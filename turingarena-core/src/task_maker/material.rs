@@ -1,17 +1,23 @@
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 
+use crate::data::award::{
+    Award, AwardContent, AwardName, BadgeAwardContent, Score, ScoreAwardContent, ScoreRange,
+};
+use crate::data::content::{FileName, FileVariant, MediaType, Text, TextVariant, VariantAttribute};
+use crate::data::evaluation::record::Key;
+use crate::data::feedback::table::{
+    AwardReferenceCellContent, AwardReferenceColContent, Cell, CellContent, Col, ColContent,
+    MemoryUsageCellContent, MemoryUsageColContent, MessageCellContent, MessageColContent, Row,
+    RowNumberCellContent, RowNumberColContent, ScoreCellContent, ScoreColContent, TableSection,
+    TimeUsageCellContent, TimeUsageColContent,
+};
+use crate::data::feedback::Section;
+use crate::data::file::FileContent;
+use crate::data::problem::material::{Attachment, Material};
+use crate::data::rusage::{MemoryUsage, TimeUsage};
+use crate::data::submission::{Field, FieldId, FileType, FileTypeExtension, FileTypeId, Form};
 use task_maker_format::ioi;
-
-use super::*;
-
-use award::*;
-use content::*;
-use evaluation::record::*;
-use feedback::{table::*, *};
-use problem::material::*;
-use rusage::{MemoryUsage, TimeUsage};
-use submission::*;
 
 fn subtasks_of(task: &ioi::Task) -> Vec<&ioi::SubtaskInfo> {
     let mut subtasks: Vec<_> = task.subtasks.values().collect();
@@ -91,9 +97,16 @@ fn cols() -> Vec<Col> {
         Col {
             title: vec![TextVariant {
                 attributes: vec![],
+                value: "Subtask".to_owned(),
+            }],
+            content: ColContent::AwardReference(AwardReferenceColContent),
+        },
+        Col {
+            title: vec![TextVariant {
+                attributes: vec![],
                 value: "Case".to_owned(),
             }],
-            content: ColContent::RowNumber(RowNumberColContent {}),
+            content: ColContent::RowNumber(RowNumberColContent),
         },
         Col {
             title: vec![TextVariant {
@@ -141,23 +154,14 @@ fn caption() -> Text {
     }]
 }
 
-fn row_group_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo) -> RowGroup {
-    RowGroup {
-        title: vec![TextVariant {
-            attributes: vec![],
-            value: format!("Subtask {}", subtask.id),
-        }],
-        rows: testcases_of(subtask)
-            .into_iter()
-            .map(|testcase| row_of(task, subtask, testcase))
-            .collect(),
-    }
-}
-
-fn row_of(task: &ioi::Task, _subtask: &ioi::SubtaskInfo, testcase: &ioi::TestcaseInfo) -> Row {
+fn row_of(task: &ioi::Task, subtask: &ioi::SubtaskInfo, testcase: &ioi::TestcaseInfo) -> Row {
     Row {
-        content: RowContent::Data,
         cells: vec![
+            Cell {
+                content: CellContent::AwardReference(AwardReferenceCellContent {
+                    award_name: award_of(subtask).name,
+                }),
+            },
             Cell {
                 content: CellContent::RowNumber(RowNumberCellContent {
                     number: testcase.id.try_into().expect("Testcase ID too large"),
@@ -325,9 +329,14 @@ pub fn generate_material(task: &ioi::Task) -> Material {
         feedback: vec![Section::Table(TableSection {
             caption: caption(),
             cols: cols(),
-            row_groups: subtasks_of(task)
+            rows: subtasks_of(task)
                 .into_iter()
-                .map(|subtask| row_group_of(task, subtask))
+                .flat_map(|subtask| {
+                    testcases_of(subtask)
+                        .into_iter()
+                        .map(|testcase| row_of(task, subtask, testcase))
+                        .collect::<Vec<_>>()
+                })
                 .collect(),
         })],
     }

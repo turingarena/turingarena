@@ -58,6 +58,7 @@ pub mod valence {
 pub mod table {
     use serde::{Deserialize, Serialize};
 
+    use crate::data::award::AwardName;
     use crate::juniper_ext::*;
     use crate::rusage::{MemoryUsage, TimeUsage};
     use crate::{award, content::Text, evaluation::record::Key};
@@ -69,8 +70,8 @@ pub mod table {
         pub caption: Text,
         /// Columns of this table.
         pub cols: Vec<Col>,
-        /// Row groups of this table.
-        pub row_groups: Vec<RowGroup>,
+        /// Rows of this table.
+        pub rows: Vec<Row>,
     }
 
     /// A table column. Roughly corresponding to `<col>` HTML element.
@@ -82,20 +83,9 @@ pub mod table {
         pub content: ColContent,
     }
 
-    /// A table row group. Roughly corresponding to `<tbody>` HTML element.
-    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
-    pub struct RowGroup {
-        /// Name of this row group, shown in an header.
-        pub title: Text,
-        /// Rows in this group.
-        pub rows: Vec<Row>,
-    }
-
     /// A table row. Roughly corresponding to `<tr>` HTML element.
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct Row {
-        /// Kind of data shown in this row.
-        pub content: RowContent,
         /// Cells in this row.
         pub cells: Vec<Cell>,
     }
@@ -108,23 +98,13 @@ pub mod table {
         pub content: CellContent,
     }
 
-    /// Describes the kind of data shown in a row.
-    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLEnum)]
-    #[serde(rename_all = "snake_case")]
-    pub enum RowContent {
-        /// Regular data.
-        Data,
-        /// Summary data for the whole row group.
-        /// E.g., the total score, maximum resource usage, etc.
-        GroupSummary,
-    }
-
     /// Describes the kind of data shown in a column.
     #[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
     #[serde(rename_all = "snake_case")]
     pub enum ColContent {
         RowTitle(RowTitleColContent),
         RowNumber(RowNumberColContent),
+        AwardReference(AwardReferenceColContent),
         Score(ScoreColContent),
         Message(MessageColContent),
         TimeUsage(TimeUsageColContent),
@@ -140,6 +120,11 @@ pub mod table {
     /// Cells must contain `CellContent::RowNumber`.
     #[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
     pub struct RowNumberColContent;
+
+    /// Column of references to awards.
+    /// Cells must contain `CellContent::AwardReference`.
+    #[derive(Serialize, Deserialize, Clone, GraphQLObjectFromUnit)]
+    pub struct AwardReferenceColContent;
 
     /// Column of scores.
     /// Cells must contain `CellContent::Score` or `CellContent::NotAvailable`.
@@ -171,6 +156,7 @@ pub mod table {
         NotAvailable(NotAvailableCellContent),
         RowTitle(RowTitleCellContent),
         RowNumber(RowNumberCellContent),
+        AwardReference(AwardReferenceCellContent),
         Score(ScoreCellContent),
         Message(MessageCellContent),
         TimeUsage(TimeUsageCellContent),
@@ -193,6 +179,12 @@ pub mod table {
     #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
     pub struct RowNumberCellContent {
         pub number: i32,
+    }
+
+    /// Cell containing a reference to a problem award.
+    #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+    pub struct AwardReferenceCellContent {
+        pub award_name: AwardName,
     }
 
     /// Cell containing a score.

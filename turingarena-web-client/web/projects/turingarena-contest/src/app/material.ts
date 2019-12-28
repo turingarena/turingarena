@@ -42,16 +42,36 @@ export const problemMaterialFragment = gql`
 
   fragment TableSectionFragment on TableSection {
     caption { ...TextFragment }
-    cols {
-      title { ...TextFragment }
-      content {
-        __typename
-        ... on ScoreColContent {
-          range { ...ScoreRangeFragment }
-        }
+    cols { ...ColFragment }
+    rows { ...RowFragment }
+  }
+
+  fragment ColFragment on Col {
+    title { ...TextFragment }
+    content {
+      __typename
+      ... on ScoreColContent {
+        range { ...ScoreRangeFragment }
       }
     }
-    rowGroups { ...RowGroupFragment }
+  }
+
+  fragment RowFragment on Row {
+    cells { ...CellFragment }
+  }
+
+  fragment CellFragment on Cell {
+    content { ...CellContentFragment }
+  }
+
+  fragment CellContentFragment on CellContent {
+    __typename
+    ... on RowNumberCellContent { ...RowNumberCellContentFragment }
+    ... on RowTitleCellContent { ...RowTitleCellContentFragment }
+    ... on ScoreCellContent { ...ScoreCellContentFragment }
+    ... on MessageCellContent { ...MessageCellContentFragment }
+    ... on TimeUsageCellContent { ...TimeUsageCellContentFragment }
+    ... on MemoryUsageCellContent { ...MemoryUsageCellContentFragment }
   }
 
   fragment RowNumberCellContentFragment on RowNumberCellContent {
@@ -89,24 +109,6 @@ export const problemMaterialFragment = gql`
   fragment ScoreRangeFragment on ScoreRange {
     max
     precision
-  }
-
-  fragment RowGroupFragment on RowGroup {
-    title { ...TextFragment }
-    rows {
-      content
-      cells {
-        content {
-          __typename
-          ... on RowNumberCellContent { ...RowNumberCellContentFragment }
-          ... on RowTitleCellContent { ...RowTitleCellContentFragment }
-          ... on ScoreCellContent { ...ScoreCellContentFragment }
-          ... on MessageCellContent { ...MessageCellContentFragment }
-          ... on TimeUsageCellContent { ...TimeUsageCellContentFragment }
-          ... on MemoryUsageCellContent { ...MemoryUsageCellContentFragment }
-        }
-      }
-    }
   }
 
   fragment FeedbackSectionFragment on Section {

@@ -38,10 +38,6 @@
   text-align: center;
 }
 
-.feedback-row-group {
-  @extend .thead-light;
-}
-
 .cell-valence {
   &.failure {
     @extend .table-danger;

@@ -20,12 +20,7 @@
                   </th>
                 </tr>
               </thead>
-              <tbody *ngFor="let group of section.rowGroups; index as i" class="feedback-row-group">
-                <tr>
-                  <th [colSpan]="section.cols.length">
-                    {{ group.title | textVariant }}
-                  </th>
-                </tr>
+              <tbody>
                 <tr>
                   <ng-container *ngFor="let col of section.cols; index as i">
                     <ng-container [ngSwitch]="col.content.__typename">
@@ -35,7 +30,7 @@
                     </ng-container>
                   </ng-container>
                 </tr>
-                <tr *ngFor="let row of group.rows">
+                <tr *ngFor="let row of section.rows">
                   <ng-container *ngFor="let col of section.cols; index as i">
                     <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
                       <th *ngSwitchCase="'RowNumberCellContent'">
