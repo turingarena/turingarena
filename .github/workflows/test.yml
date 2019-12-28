@@ -31,6 +31,8 @@ jobs:
     - name: Run Rust tests
       run: cargo test --no-fail-fast
     - name: Lint Web
-      run: cd web/ && npm run lint
+      run: cd turingarena-web-client/web/ && npm run lint
     - name: Run Web tests
-      run: cd web/ && npm run test
+      run: cd turingarena-web-client/web/ && npm run test -- --no-watch --no-progress --browsers=ChromeHeadless
+    - name: Run Web e2e tests
+      run: cd turingarena-web-client/web/ && npm run e2e
