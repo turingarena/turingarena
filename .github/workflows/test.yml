@@ -32,6 +32,8 @@ jobs:
       run: cargo test --no-fail-fast
     - name: Install Web
       run: cd turingarena-web-client/web/ && npm ci
+    - name: Prepare Web
+      run: cd turingarena-web-client/web/ && ./prepare.sh
     - name: Lint Web
       run: cd turingarena-web-client/web/ && npm run lint
     - name: Run Web tests
