@@ -30,6 +30,8 @@ jobs:
       run: rustup component add rustfmt && cargo fmt -- --check
     - name: Run Rust tests
       run: cargo test --no-fail-fast
+    - name: Install Web
+      run: cd turingarena-web-client/web/ && npm ci
     - name: Lint Web
       run: cd turingarena-web-client/web/ && npm run lint
     - name: Run Web tests
