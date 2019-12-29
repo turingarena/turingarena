@@ -4,7 +4,7 @@ DROP TABLE submissions;
 DROP TABLE submission_files;
 DROP TABLE evaluations;
 DROP TABLE evaluation_events;
-DROP TABLE evaluation_awards;
+DROP TABLE awards;
 DROP TABLE contest;
 DROP TABLE questions;
 DROP TABLE answers;

@@ -39,7 +39,7 @@ CREATE TABLE evaluation_events(
     PRIMARY KEY (evaluation_id, serial)
 );
 
-CREATE TABLE evaluation_awards(
+CREATE TABLE awards(
     evaluation_id   TEXT   NOT NULL REFERENCES evaluations(id),
     award_name      TEXT   NOT NULL,
     kind            TEXT   NOT NULL CHECK (kind IN ('SCORE', 'BADGE')),

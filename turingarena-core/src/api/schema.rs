@@ -22,7 +22,7 @@ table! {
 }
 
 table! {
-    evaluation_awards (evaluation_id, award_name) {
+    awards (evaluation_id, award_name) {
         evaluation_id -> Text,
         award_name -> Text,
         kind -> Text,
@@ -92,7 +92,7 @@ table! {
 }
 
 joinable!(answers -> questions (question_id));
-joinable!(evaluation_awards -> evaluations (evaluation_id));
+joinable!(awards -> evaluations (evaluation_id));
 joinable!(evaluation_events -> evaluations (evaluation_id));
 joinable!(evaluations -> submissions (submission_id));
 joinable!(questions -> problems (problem_name));
@@ -105,7 +105,7 @@ allow_tables_to_appear_in_same_query!(
     announcements,
     answers,
     contest,
-    evaluation_awards,
+    awards,
     evaluation_events,
     evaluations,
     problems,

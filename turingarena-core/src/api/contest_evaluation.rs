@@ -12,7 +12,7 @@ use contest_problem::Problem;
 use contest_submission::SubmissionId;
 use contest_submission::{self, Submission};
 use evaluation::Event;
-use schema::{evaluation_awards, evaluation_events, evaluations};
+use schema::{awards, evaluation_events, evaluations};
 
 use crate::award::{AwardValue, BadgeAwardValue, ScoreAwardValue};
 use crate::evaluation::AwardEvent;
@@ -199,7 +199,7 @@ impl<'a> Evaluation<'a> {
                 },
                 evaluation_id: &self.data.id,
             };
-            diesel::insert_into(evaluation_awards::table)
+            diesel::insert_into(awards::table)
                 .values(&score_award_input)
                 .execute(&self.context.database)?;
         }

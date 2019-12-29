@@ -7,10 +7,10 @@ use diesel::sql_types::{Double, Text};
 use crate::api::contest_submission::Submission;
 use crate::api::root::ApiContext;
 use juniper::FieldResult;
-use schema::evaluation_awards;
+use schema::awards;
 
 #[derive(Insertable)]
-#[table_name = "evaluation_awards"]
+#[table_name = "awards"]
 pub struct AwardInput<'a> {
     pub evaluation_id: &'a str,
     pub award_name: &'a str,
@@ -46,13 +46,13 @@ impl AwardOutcome<'_> {
     const BY_USER_AND_PROBLEM_SQL: &'static str = "
         SELECT a.kind, a.award_name, MAX(a.value) as value, (
             SELECT s2.id
-            FROM evaluation_awards a2 JOIN evaluations e2 ON a2.evaluation_id = e2.id JOIN submissions s2 ON e2.submission_id = s2.id
+            FROM awards a2 JOIN evaluations e2 ON a2.evaluation_id = e2.id JOIN submissions s2 ON e2.submission_id = s2.id
             WHERE a2.value = value AND a2.kind = a.kind AND a2.award_name = a.award_name
                 AND s2.problem_name = s.problem_name AND s2.user_id = s.user_id
             ORDER BY s2.created_at DESC
             LIMIT 1
         ) as submission_id
-        FROM evaluation_awards a JOIN evaluations e ON a.evaluation_id = e.id JOIN submissions s ON e.submission_id = s.id
+        FROM awards a JOIN evaluations e ON a.evaluation_id = e.id JOIN submissions s ON e.submission_id = s.id
         GROUP BY s.problem_name, a.kind, a.award_name, s.user_id
     ";
 
@@ -95,7 +95,7 @@ impl AwardOutcome<'_> {
         Ok(diesel::sql_query(
             "
                 SELECT a.kind, a.award_name, a.value, e.submission_id
-                FROM evaluation_awards a JOIN evaluations e ON a.evaluation_id = e.id
+                FROM awards a JOIN evaluations e ON a.evaluation_id = e.id
                 WHERE e.id = ?
             ",
         )
