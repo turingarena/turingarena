@@ -48,11 +48,13 @@ export const problemMaterialFragment = gql`
 
   fragment ColFragment on Col {
     title { ...TextFragment }
-    content {
-      __typename
-      ... on ScoreColContent {
-        range { ...ScoreRangeFragment }
-      }
+    content { ...ColContentFragment }
+  }
+
+  fragment ColContentFragment on ColContent {
+    __typename
+    ... on ScoreColContent {
+      range { ...ScoreRangeFragment }
     }
   }
 
@@ -68,6 +70,7 @@ export const problemMaterialFragment = gql`
     __typename
     ... on RowNumberCellContent { ...RowNumberCellContentFragment }
     ... on RowTitleCellContent { ...RowTitleCellContentFragment }
+    ... on AwardReferenceCellContent { ...AwardReferenceCellContentFragment }
     ... on ScoreCellContent { ...ScoreCellContentFragment }
     ... on MessageCellContent { ...MessageCellContentFragment }
     ... on TimeUsageCellContent { ...TimeUsageCellContentFragment }
@@ -80,6 +83,10 @@ export const problemMaterialFragment = gql`
 
   fragment RowTitleCellContentFragment on RowTitleCellContent {
     title { ...TextFragment }
+  }
+
+  fragment AwardReferenceCellContentFragment on AwardReferenceCellContent {
+    awardName
   }
 
   fragment ScoreCellContentFragment on ScoreCellContent {
