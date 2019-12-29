@@ -96,6 +96,7 @@ impl<'a> Evaluation<'a> {
     ) -> FieldResult<Evaluation<'b>> {
         let data = evaluations::table
             .filter(evaluations::dsl::submission_id.eq(submission_id))
+            .order_by(evaluations::dsl::created_at.desc())
             .first::<EvaluationData>(&context.database)?;
         Ok(Evaluation { context, data })
     }

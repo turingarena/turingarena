@@ -328,10 +328,12 @@ impl Mutation<'_> {
         Ok(submission)
     }
 
-    fn start_new_evaluation(&self, submission_id: String) -> FieldResult<MutationOk> {
+    fn evaluate(&self, submission_ids: Vec<String>) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-        let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;
-        Evaluation::start_new(&submission, &self.context.config)?;
+        for id in submission_ids {
+            let submission = contest_submission::Submission::by_id(&self.context, &id)?;
+            Evaluation::start_new(&submission, &self.context.config)?;
+        }
         Ok(MutationOk)
     }
 }

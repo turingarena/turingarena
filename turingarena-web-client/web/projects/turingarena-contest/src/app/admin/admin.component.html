@@ -38,6 +38,7 @@
       <main class="admin-submissions" [hidden]="(route.firstChild!.data | async).adminSection !== 'submissions'">
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
+        <button (click)="submissionsGridModel.reevaluateSelected()">Reevaluate selected</button>
         <ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham"
           [defaultColDef]="submissionsGridModel.defaultColDef" [animateRows]="true"
           [rowData]="submissionsGridModel.rowData | async" [columnDefs]="submissionsGridModel.columnDefs | async"

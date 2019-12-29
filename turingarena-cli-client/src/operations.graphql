@@ -65,7 +65,7 @@ mutation DeleteProblemMutation($name: String!) {
 }
 
 mutation StartNewEvaluationMutation($submissionId: String!) {
-    startNewEvaluation(submissionId: $submissionId) {
+    evaluate(submissionIds: [$submissionId]) {
         ok
     }
 }
