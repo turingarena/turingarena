@@ -1,19 +1,20 @@
-use super::*;
-
-use super::contest::ContestView;
-use crate::api::award::AwardOutcome;
-use root::ApiContext;
+use std::path::PathBuf;
 
 use diesel::{QueryDsl, RunQueryDsl};
-use file::FileContentInput;
 use juniper::FieldResult;
+
+use file::FileContentInput;
 use problem::material::Material;
 use problem::ProblemName;
-
-use crate::data::file::FileContent;
+use root::ApiContext;
 use schema::problems;
-use std::path::PathBuf;
 use user::UserId;
+
+use crate::api::award::AwardOutcome;
+use crate::data::file::FileContent;
+
+use super::contest::ContestView;
+use super::*;
 
 #[derive(juniper::GraphQLInputObject, Insertable)]
 #[table_name = "problems"]
@@ -39,6 +40,7 @@ struct ProblemData {
 pub struct Problem<'a> {
     context: &'a ApiContext<'a>,
     data: ProblemData,
+    material: Material,
 }
 
 #[juniper_ext::graphql]
@@ -49,25 +51,34 @@ impl Problem<'_> {
     }
 
     /// Material of this problem
-    fn material(&self) -> FieldResult<Material> {
-        Ok(self.get_problem_material()?)
+    fn material(&self) -> &Material {
+        &self.material
     }
 }
 
-impl Problem<'_> {
+impl<'a> Problem<'a> {
+    fn new(context: &'a ApiContext<'a>, data: ProblemData) -> FieldResult<Self> {
+        let material = Self::get_problem_material(&data, context)?;
+        Ok(Problem {
+            context,
+            data,
+            material,
+        })
+    }
+
     /// Get a problem data by its name
-    pub fn by_name<'a>(context: &'a ApiContext<'a>, name: &str) -> FieldResult<Problem<'a>> {
+    pub fn by_name(context: &'a ApiContext<'a>, name: &str) -> FieldResult<Self> {
         let data = problems::table.find(name).first(&context.database)?;
-        Ok(Problem { context, data })
+        Ok(Self::new(context, data)?)
     }
 
     /// Get all the problems data in the database
-    pub fn all<'a>(context: &'a ApiContext<'a>) -> FieldResult<Vec<Problem>> {
+    pub fn all(context: &'a ApiContext<'a>) -> FieldResult<Vec<Self>> {
         Ok(problems::table
             .load::<ProblemData>(&context.database)?
             .into_iter()
-            .map(|data| Problem { context, data })
-            .collect())
+            .map(|data| Self::new(context, data))
+            .collect::<Result<Vec<_>, _>>()?)
     }
 
     /// Insert a problem in the database
@@ -100,13 +111,18 @@ impl Problem<'_> {
     }
 
     pub fn unpack(&self) -> PathBuf {
-        self.context
-            .unpack_archive(&self.data.archive_content.0, "problem")
+        Self::unpack_data(&self.data, &self.context)
+    }
+
+    fn unpack_data(data: &ProblemData, context: &ApiContext) -> PathBuf {
+        context.unpack_archive(&data.archive_content.0, "problem")
     }
 
     /// Material of this problem
-    fn get_problem_material(&self) -> FieldResult<Material> {
-        Ok(task_maker::generate_material(self.unpack())?)
+    fn get_problem_material(data: &ProblemData, context: &ApiContext) -> FieldResult<Material> {
+        Ok(task_maker::generate_material(Self::unpack_data(
+            data, context,
+        ))?)
     }
 }
 
@@ -126,7 +142,7 @@ impl ProblemView<'_> {
     }
 
     /// Material of this problem
-    fn material(&self) -> FieldResult<Material> {
+    fn material(&self) -> &Material {
         self.problem.material()
     }
 
