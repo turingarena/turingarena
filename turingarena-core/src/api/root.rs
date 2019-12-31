@@ -173,7 +173,6 @@ pub struct Query<'a> {
 }
 
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl Query<'_> {
     /// Get the view of a contest
     fn contest_view(&self, user_id: Option<UserId>) -> FieldResult<ContestView> {
@@ -224,7 +223,6 @@ pub struct Mutation<'a> {
 }
 
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl Mutation<'_> {
     /// Reset database
     fn init_db(&self) -> FieldResult<MutationOk> {

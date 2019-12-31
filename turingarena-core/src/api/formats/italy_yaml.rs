@@ -1,11 +1,4 @@
-use root::ApiContext;
-
-use user;
-use user::UserInput;
-
 use super::*;
-
-use crate::api::user::User;
 
 /// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]

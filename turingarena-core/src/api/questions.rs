@@ -21,7 +21,6 @@ pub struct Question<'a> {
 }
 
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl Question<'_> {
     /// Time at which the question was inserted
     fn time(&self) -> &String {

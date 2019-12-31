@@ -112,7 +112,6 @@ impl AwardOutcome<'_> {
 }
 
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl AwardOutcome<'_> {
     fn submission(&self) -> FieldResult<Submission> {
         Submission::by_id(&self.context, &self.data.submission_id)

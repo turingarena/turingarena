@@ -134,7 +134,6 @@ pub struct ProblemView<'a> {
 
 /// A problem in a contest
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl ProblemView<'_> {
     /// Name of this problem. Unique in the current contest.
     fn name(&self) -> ProblemName {
@@ -196,7 +195,6 @@ impl ProblemTackling<'_> {
 
 /// Attempts at solving a problem by a user in the contest
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {

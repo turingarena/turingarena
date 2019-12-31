@@ -12,7 +12,6 @@ pub struct Announcement {
 #[juniper_ext::graphql]
 impl Announcement {
     /// Text of the announcement
-    #[allow(dead_code)]
     fn text(&self) -> &String {
         &self.text
     }

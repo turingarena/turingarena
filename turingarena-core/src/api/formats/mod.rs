@@ -5,7 +5,6 @@ use crate::api::user::{User, UserInput};
 use crate::data::file::FileContentInput;
 use juniper::FieldResult;
 use root::ApiContext;
-use std::error::Error;
 
 /// Module of various importing formats for contest
 mod italy_yaml;

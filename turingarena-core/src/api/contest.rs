@@ -108,7 +108,6 @@ impl ContestView<'_> {
 }
 
 #[juniper_ext::graphql]
-#[allow(dead_code)]
 impl ContestView<'_> {
     /// The user for this contest view, if any
     fn user(&self) -> FieldResult<Option<User>> {
