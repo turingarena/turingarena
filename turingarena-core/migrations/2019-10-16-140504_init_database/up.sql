@@ -51,7 +51,7 @@ CREATE TABLE awards
     award_name    TEXT   NOT NULL,
     kind          TEXT   NOT NULL CHECK (kind IN ('SCORE', 'BADGE')),
     value         DOUBLE NOT NULL,
-    PRIMARY KEY (evaluation_id, award_name)
+    PRIMARY KEY (evaluation_id, award_name, kind)
 );
 
 CREATE TABLE contest
@@ -82,3 +82,43 @@ CREATE TABLE announcements
     id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     text TEXT    NOT NULL
 );
+
+CREATE VIEW user_awards_view AS
+    WITH successful_evaluations AS (
+        SELECT e.*
+        FROM evaluations e
+        WHERE e.status = 'SUCCESS'
+    ),
+         official_evaluations AS (
+             SELECT e.*
+             FROM successful_evaluations e
+             WHERE e.id = (
+                 SELECT e2.id
+                 FROM successful_evaluations e2
+                 WHERE e2.submission_id = e.submission_id
+                 ORDER BY e2.created_at DESC
+                 LIMIT 1
+             )),
+         submission_awards AS (
+             SELECT a.*, s.id as submission_id, s.user_id, s.problem_name, s.created_at
+             FROM awards a
+                      JOIN official_evaluations e ON a.evaluation_id = e.id
+                      JOIN submissions s ON e.submission_id = s.id
+         )
+    SELECT a.user_id,
+           a.problem_name,
+           a.award_name,
+           a.kind,
+           a.value,
+           a.evaluation_id
+    FROM submission_awards a
+    WHERE a.submission_id = (
+        SELECT a2.submission_id
+        FROM submission_awards a2
+        WHERE a2.user_id = a.user_id
+          AND a2.problem_name = a.problem_name
+          AND a2.award_name = a.award_name
+          AND a2.kind = a.kind
+        ORDER BY a2.value DESC, a2.created_at
+        LIMIT 1
+    );

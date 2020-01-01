@@ -13,20 +13,20 @@ table! {
 }
 
 table! {
+    awards (evaluation_id, award_name, kind) {
+        evaluation_id -> Text,
+        award_name -> Text,
+        kind -> Text,
+        value -> Double,
+    }
+}
+
+table! {
     contest (id) {
         id -> Integer,
         archive_content -> Binary,
         start_time -> Text,
         end_time -> Text,
-    }
-}
-
-table! {
-    awards (evaluation_id, award_name) {
-        evaluation_id -> Text,
-        award_name -> Text,
-        kind -> Text,
-        value -> Double,
     }
 }
 
@@ -104,8 +104,8 @@ joinable!(submissions -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     announcements,
     answers,
-    contest,
     awards,
+    contest,
     evaluation_events,
     evaluations,
     problems,

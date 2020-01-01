@@ -14,4 +14,5 @@ pub mod graphql_schema;
 pub mod questions;
 pub mod root;
 pub mod schema;
+pub mod schema_views;
 pub mod user;

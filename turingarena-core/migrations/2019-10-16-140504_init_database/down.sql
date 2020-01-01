@@ -9,3 +9,5 @@ DROP TABLE contest;
 DROP TABLE questions;
 DROP TABLE answers;
 DROP TABLE announcements;
+
+DROP VIEW user_awards_view;
