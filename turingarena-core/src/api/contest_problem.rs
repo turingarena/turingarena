@@ -11,9 +11,7 @@ use schema::problems;
 use user::UserId;
 
 use crate::api::award::AwardOutcome;
-use crate::data::award::{
-    AwardContent, AwardValue, Score, ScoreAwardContent, ScoreAwardValue, ScoreRange,
-};
+use crate::data::award::{AwardContent, Score, ScoreAwardContent, ScoreRange};
 use crate::data::file::FileContent;
 
 use super::*;

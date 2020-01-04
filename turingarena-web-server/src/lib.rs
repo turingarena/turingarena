@@ -31,11 +31,11 @@ pub struct ServerArgs {
     contest: ContestArgs,
 
     /// host to bind the server to
-    #[structopt(short = "H", long, default_value = "localhost")]
+    #[structopt(short = "H", long, env = "HOST", default_value = "localhost")]
     host: String,
 
     /// port for the server to listen
-    #[structopt(short, long, default_value = "8080")]
+    #[structopt(short, long, env = "PORT", default_value = "8080")]
     port: u16,
 
     /// secret key for the webserver
