@@ -36,30 +36,3 @@ export const contestMaterialFragment = gql`
   ${textFragment}
   ${fileFragment}
 `;
-
-export const contestViewFragment = gql`
-  fragment ContestViewFragment on ContestView {
-    user {
-      ...UserFragment
-    }
-    material {
-      ...ContestMaterialFragment
-    }
-    problems {
-      ...ProblemViewFragment
-    }
-    totalScoreRange {
-      ...ScoreRangeFragment
-    }
-    totalScore
-  }
-
-  fragment UserFragment on User {
-    id
-    displayName
-  }
-
-  ${contestMaterialFragment}
-  ${problemViewFragment}
-  ${scoreRangeFragment}
-`;

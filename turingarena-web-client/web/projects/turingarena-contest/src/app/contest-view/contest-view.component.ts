@@ -26,9 +26,9 @@ import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { Auth, AuthService } from '../auth.service';
-import { ContestViewFragment } from '../fragments/__generated__/ContestViewFragment';
-import { contestViewFragment } from '../fragments/contest';
-import { getScoreTier } from '../fragments/score';
+import { contestMaterialFragment } from '../fragments/contest';
+import { problemViewFragment } from '../fragments/problem';
+import { getScoreTier, scoreRangeFragment } from '../fragments/score';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
@@ -91,7 +91,7 @@ export class ContestViewComponent implements OnInit {
     this.setQuery();
   }
 
-  getContestClock = ({ material: { startTime, endTime } }: ContestViewFragment) =>
+  getContestClock = ({ contest: { material: { startTime, endTime } } }: ContestQuery) =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
       map(() => {
@@ -121,9 +121,32 @@ export class ContestViewComponent implements OnInit {
       query: gql`
         query ContestQuery($userId: String) {
           serverTime
-          contestView(userId: $userId) { ...ContestViewFragment }
+          contest {
+            material {
+              ...ContestMaterialFragment
+            }
+            view(userId: $userId) {
+              user {
+                id
+                displayName
+              }
+              problemSet {
+                problems {
+                  ...ProblemViewFragment
+                }
+                totalScoreRange {
+                  ...ScoreRangeFragment
+                }
+                view {
+                  totalScore
+                }
+              }
+            }
+          }
         }
-        ${contestViewFragment}
+        ${contestMaterialFragment}
+        ${problemViewFragment}
+        ${scoreRangeFragment}
       `,
       variables: { userId: this.userId },
       pollInterval,

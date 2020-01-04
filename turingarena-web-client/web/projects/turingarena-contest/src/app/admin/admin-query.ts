@@ -19,21 +19,6 @@ export const adminQuery = gql`
   fragment AdminUserFragment on User {
     id
     displayName
-    contestView {
-      totalScore
-      totalScoreRange {
-        ...ScoreRangeFragment
-      }
-      problems {
-        name
-        tackling {
-          totalScore
-          awards {
-            ...AwardOutcomeFragment
-          }
-        }
-      }
-    }
   }
 
   fragment AdminSubmissionFragment on Submission {
@@ -44,22 +29,22 @@ export const adminQuery = gql`
 
   query AdminQuery {
     serverTime
-    contestView {
+    contest {
       material {
         ...ContestMaterialFragment
+      }
+      problems {
+      ...AdminProblemFragment
+      }
+      users {
+        ...AdminUserFragment
+      }
+      submissions {
+        ...AdminSubmissionFragment
       }
       totalScoreRange {
         ...ScoreRangeFragment
       }
-    }
-    problems {
-      ...AdminProblemFragment
-    }
-    users {
-      ...AdminUserFragment
-    }
-    submissions {
-      ...AdminSubmissionFragment
     }
   }
   ${contestMaterialFragment}

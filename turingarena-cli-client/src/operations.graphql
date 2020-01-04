@@ -1,31 +1,35 @@
 query ListUsersQuery {
-    users {
-        id
-        displayName
+    contest {
+        users {
+            id
+            displayName
+        }
     }
 }
 
 query ListEvaluationsQuery {
-    evaluations {
-        id
-        awards {
-            award {
-                name
-            }
-            value {
-                __typename
-                ... on ScoreAwardValue {
-                    score
-                }
-                ... on BadgeAwardValue {
-                    badge
-                }
-            }
-        }
-        submission {
+    contest {
+        evaluations {
             id
-            userId
-            problemName
+            awards {
+                award {
+                    name
+                }
+                value {
+                    __typename
+                    ... on ScoreAwardValue {
+                        score
+                    }
+                    ... on BadgeAwardValue {
+                        badge
+                    }
+                }
+            }
+            submission {
+                id
+                userId
+                problemName
+            }
         }
     }
 }
@@ -88,7 +92,7 @@ mutation InitDbMutation {
 }
 
 query ViewContestQuery {
-    contestView {
+    contest {
         material {
             startTime
             endTime

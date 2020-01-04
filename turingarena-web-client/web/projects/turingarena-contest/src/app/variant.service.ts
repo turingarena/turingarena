@@ -11,7 +11,7 @@ export class VariantService {
     @Inject(LOCALE_ID) readonly locale: string,
   ) { }
 
-  selectVariant<T extends { attributes: VariantAttributeFragment[] }>(variants: T[], style?: string): T | undefined {
+  selectVariant<T extends { attributes: VariantAttributeFragment[] }>(variants: T[], style?: string): T {
     const styleScore = 10;
     const languageScore = 5;
     const sortedVariants = variants.slice();

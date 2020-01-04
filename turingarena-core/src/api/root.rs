@@ -173,30 +173,8 @@ pub struct Query<'a> {
 
 #[juniper_ext::graphql]
 impl Query<'_> {
-    /// Get the view of a contest
-    fn contest_view(&self, user_id: Option<UserId>) -> FieldResult<ContestView> {
-        self.context.authorize_user(&user_id)?;
-        ContestView::new(&self.context, user_id)
-    }
-
-    fn users(&self) -> FieldResult<Vec<User>> {
-        self.context.authorize_admin()?;
-        User::list(&self.context)
-    }
-
-    fn problems(&self) -> FieldResult<Vec<Problem>> {
-        self.context.authorize_admin()?;
-        Problem::all(&self.context)
-    }
-
-    fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
-        self.context.authorize_admin()?;
-        contest_submission::Submission::list(&self.context)
-    }
-
-    fn evaluations(&self) -> FieldResult<Vec<Evaluation>> {
-        self.context.authorize_admin()?;
-        Evaluation::list(&self.context)
+    fn contest(&self) -> FieldResult<Contest> {
+        Contest::new(&self.context)
     }
 
     /// Get the submission with the specified id
