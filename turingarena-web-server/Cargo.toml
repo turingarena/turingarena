@@ -3,10 +3,13 @@ name = "turingarena-web-server"
 version = "0.1.0"
 edition = "2018"
 
-[dependencies]
+[features]
+default = ["embed"]
+embed = ["turingarena-web-client"]
 
+[dependencies]
 turingarena-core = { path = "../turingarena-core/" }
-turingarena-web-client = { path = "../turingarena-web-client/" }
+turingarena-web-client = { path = "../turingarena-web-client/", optional = true }
 
 rocket = "0.4"
 juniper_rocket = "0.5"
