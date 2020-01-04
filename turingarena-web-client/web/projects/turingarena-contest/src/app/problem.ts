@@ -1,13 +1,24 @@
 import gql from 'graphql-tag';
 
 import { AwardFragment } from './__generated__/AwardFragment';
-import { MaterialFragment } from './__generated__/MaterialFragment';
-import { ProblemFragment } from './__generated__/ProblemFragment';
 import { ProblemTacklingFragment } from './__generated__/ProblemTacklingFragment';
+import { ProblemViewFragment } from './__generated__/ProblemViewFragment';
 import { awardOutcomeFragment } from './awards';
-import { getAwardScoreRanges, getProblemScoreRange } from './material';
+import { problemMaterialFragment } from './material';
+import { scoreRangeFragment } from './score';
+import { submissionFragment } from './submission';
 
-export const problemFragment = gql`
+export const problemViewFragment = gql`
+  fragment ProblemViewFragment on ProblemView {
+    name
+    tackling {
+      ...ProblemTacklingFragment
+      submissions { ...SubmissionFragment }
+    }
+    material { ...MaterialFragment }
+    totalScoreRange { ...ScoreRangeFragment }
+  }
+
   fragment ProblemTacklingFragment on ProblemTackling {
     awards {
       ...AwardOutcomeFragment
@@ -15,37 +26,37 @@ export const problemFragment = gql`
         id
       }
     }
+    totalScore
     canSubmit
   }
+
+  ${problemMaterialFragment}
+  ${submissionFragment}
   ${awardOutcomeFragment}
+  ${scoreRangeFragment}
 `;
 
 const getAwardValue = (awardName: string, tackling: ProblemTacklingFragment) =>
   tackling.awards.find((s) => s.awardName === awardName);
 
-export const getAwardScore = (awardName: string, tackling: ProblemTacklingFragment) => {
+const getAwardScore = (awardName: string, tackling: ProblemTacklingFragment) => {
   const result = getAwardValue(awardName, tackling);
 
   return result !== undefined && result.value.__typename === 'ScoreAwardValue' ? result.value.score : 0;
 };
 
-export const getAwardBadge = (awardName: string, tackling: ProblemTacklingFragment) => {
+const getAwardBadge = (awardName: string, tackling: ProblemTacklingFragment) => {
   const result = getAwardValue(awardName, tackling);
 
   return result !== undefined && result.value.__typename === 'BadgeAwardValue' ? result.value.badge : false;
 };
 
-export const getProblemScore = (material: MaterialFragment, tackling: ProblemTacklingFragment) =>
-  getAwardScoreRanges(material)
-    .map(({ name }) => getAwardScore(name, tackling))
-    .reduce((a, b) => a + b, 0);
-
-export const getProblemState = ({ material, tackling }: ProblemFragment) => ({
+export const getProblemState = (problem: ProblemViewFragment) => ({
   award: ({ name, content }: AwardFragment) => ({
-    score: tackling !== null ? getAwardScore(name, tackling) : undefined,
-    badge: tackling !== null ? getAwardBadge(name, tackling) : undefined,
+    score: problem.tackling !== null ? getAwardScore(name, problem.tackling) : undefined,
+    badge: problem.tackling !== null ? getAwardBadge(name, problem.tackling) : undefined,
     range: content.__typename === 'ScoreAwardContent' ? content.range : undefined,
   }),
-  range: getProblemScoreRange(material),
-  score: tackling !== null ? getProblemScore(material, tackling) : undefined,
+  range: problem.totalScoreRange,
+  score: problem.tackling !== null ? problem.tackling.totalScore : undefined,
 });

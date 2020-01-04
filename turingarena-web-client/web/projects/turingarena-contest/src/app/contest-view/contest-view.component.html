@@ -49,11 +49,9 @@
               <div class="contest-problem-list">
                 <ng-container *ngFor="let problem of data.contestView.problems; index as index">
                   <a class="contest-problem-link" [routerLink]="['/problem', problem.name]"
-                    [title]="problem.material.title | textVariant"
-                    routerLinkActive="active">
+                    [title]="problem.material.title | textVariant" routerLinkActive="active">
                     {{ problem.material.title | textVariant:'short' }}
-                    <span class="contest-problem-score"
-                      [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
+                    <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
                       <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem)">
                       </ng-container>
                     </span>
@@ -63,7 +61,8 @@
             </ng-container>
           </aside>
           <ng-container *ngFor="let problem of data.contestView.problems; index as index">
-            <aside class="problem-aside" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+            <aside class="problem-aside"
+              [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
               <div class="problem-submission-panel" *ngIf="problem.tackling as tackling">
                 <ng-container *ngIf="tackling.canSubmit">
                   <ng-template #newSubmissionDialog let-modal>
@@ -138,8 +137,7 @@
                             </tr>
                           </thead>
                           <tbody class="submission-table-body">
-                            <tr class="submission-row"
-                              *ngFor="let _ of tackling.submissions; index as submissionIndex">
+                            <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
                               <ng-container
                                 *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
                                 <ng-template #submissionDialog let-modal>
@@ -155,9 +153,8 @@
                                     details
                                   </a>
                                 </td>
-                                <ng-container *ngIf="submission.status === 'SUCCESS'">
-                                  <ng-container
-                                    *ngIf="getSubmissionState(problem.material, submission) as submissionState">
+                                <ng-container *ngIf="submission.evaluation.status === 'SUCCESS'">
+                                  <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
                                     <ng-container *ngFor="let award of problem.material.awards"
                                       [ngSwitch]="award.content.__typename">
                                       <ng-container *ngIf="submissionState.award(award) as state">
@@ -231,15 +228,13 @@
                     </ng-container>
                   </div>
                 </ng-container>
-                <ng-container *ngIf="problem.material.statement.length > 0">
+                <ng-container *ngIf="problem.material.statement | fileVariant as statement">
                   <h2 class="problem-download-statement-title">Statement file</h2>
-                  <ng-container *ngIf="problem.material.statement | fileVariant as statement">
-                    <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
-                      [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
-                      <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
-                      {{statement.name}}
-                    </a>
-                  </ng-container>
+                  <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
+                    [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
+                    <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
+                    {{statement.name}}
+                  </a>
                 </ng-container>
               </div>
             </aside>
@@ -253,7 +248,8 @@
         </main>
 
         <ng-container *ngFor="let problem of data.contestView.problems">
-          <main class="problem-statement" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+          <main class="problem-statement"
+            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
             <ng-container *ngIf="problem.material.statement | fileVariant as file">
               <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
             </ng-container>

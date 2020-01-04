@@ -5,12 +5,12 @@ use juniper::FieldResult;
 use schema::awards;
 use schema_views::user_awards_view;
 
+use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_submission::Submission;
 use crate::api::root::ApiContext;
 
 use super::super::award::*;
 use super::*;
-use crate::api::contest_evaluation::Evaluation;
 
 #[derive(Insertable)]
 #[table_name = "awards"]
@@ -99,6 +99,20 @@ impl AwardOutcome<'_> {
     pub fn evaluation_id(&self) -> &String {
         &self.data.evaluation_id
     }
+
+    pub fn total_score(awards: &Vec<Self>) -> Score {
+        Score(
+            awards
+                .iter()
+                .filter_map(|award| match award.value() {
+                    AwardValue::Score(ScoreAwardValue {
+                        score: Score(score),
+                    }) => Some(score),
+                    _ => None,
+                })
+                .sum(),
+        )
+    }
 }
 
 #[juniper_ext::graphql]
@@ -116,7 +130,7 @@ impl AwardOutcome<'_> {
         AwardName(self.data.award_name.clone())
     }
 
-    fn value(&self) -> AwardValue {
+    pub fn value(&self) -> AwardValue {
         match self.data.kind.as_ref() {
             "SCORE" => AwardValue::Score(ScoreAwardValue {
                 score: Score(self.data.value),

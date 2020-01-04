@@ -5,7 +5,7 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
-import { ProblemFragment } from '../__generated__/ProblemFragment';
+import { ProblemViewFragment } from '../__generated__/ProblemViewFragment';
 import { VariantService } from '../variant.service';
 
 import { AdminQuery } from './__generated__/AdminQuery';
@@ -46,7 +46,7 @@ export class AdminProblemGridModel {
         filter: 'agTextColumnFilter',
         width: 200,
         valueGetter: ({ node: { data: problem } }) =>
-          this.service.variantService.selectTextVariant((problem as ProblemFragment).material.title),
+          this.service.variantService.selectTextVariant((problem as ProblemViewFragment).material.title),
       },
     ]),
     distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),

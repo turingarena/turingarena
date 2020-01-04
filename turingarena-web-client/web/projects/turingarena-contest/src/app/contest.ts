@@ -5,9 +5,8 @@ import { map, startWith } from 'rxjs/operators';
 
 import { ContestViewFragment } from './__generated__/ContestViewFragment';
 import { fileFragment } from './file';
-import { problemMaterialFragment } from './material';
-import { getProblemState, problemFragment } from './problem';
-import { submissionFragment } from './submission';
+import { problemViewFragment } from './problem';
+import { scoreRangeFragment } from './score';
 import { textFragment } from './text';
 
 export const contestViewFragment = gql`
@@ -17,7 +16,9 @@ export const contestViewFragment = gql`
     title { ...TextFragment }
     startTime
     endTime
-    problems { ...ProblemFragment }
+    problems { ...ProblemViewFragment }
+    totalScoreRange { ...ScoreRangeFragment }
+    totalScore
   }
 
   fragment UserFragment on User {
@@ -25,56 +26,38 @@ export const contestViewFragment = gql`
     displayName
   }
 
-  fragment ProblemFragment on ProblemView {
-    name
-    tackling {
-      ...ProblemTacklingFragment
-      submissions { ...SubmissionFragment }
-    }
-    material { ...MaterialFragment }
-  }
-
-  ${problemFragment}
-  ${problemMaterialFragment}
-  ${submissionFragment}
+  ${problemViewFragment}
   ${textFragment}
   ${fileFragment}
+  ${scoreRangeFragment}
 `;
 
-export const getContestState = (contestView: ContestViewFragment) => {
-  const { startTime, endTime, problems } = contestView;
-  const problemStates = problems !== null ? problems.map(getProblemState) : [];
+export const getContestState = ({ startTime, endTime, totalScoreRange, totalScore }: ContestViewFragment) => ({
+  hasScore: totalScore !== null,
+  score: totalScore,
+  range: totalScoreRange,
+  // tslint:disable-next-line: no-magic-numbers
+  clock: interval(1000).pipe(
+    startWith(0),
+    map(() => {
+      const now = DateTime.local();
+      const start = DateTime.fromISO(startTime);
+      const end = DateTime.fromISO(endTime);
 
-  return {
-    hasScore: problems !== null && problems.some(({ tackling }) => tackling !== null),
-    score: problemStates.map(({ score = 0 }) => score).reduce((a, b) => a + b, 0),
-    range: {
-      max: problemStates.map(({ range: { max } }) => max).reduce((a, b) => a + b, 0),
-      precision: problemStates.map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b), 0),
-    },
-    // tslint:disable-next-line: no-magic-numbers
-    clock: interval(1000).pipe(
-      startWith(0),
-      map(() => {
-        const now = DateTime.local();
-        const start = DateTime.fromISO(startTime);
-        const end = DateTime.fromISO(endTime);
-
-        return now < start
+      return now < start
+        ? {
+          status: 'startingIn',
+          value: start.diff(now),
+        }
+        : now < end
           ? {
-            status: 'startingIn',
-            value: start.diff(now),
+            status: 'endingIn',
+            value: end.diff(now),
           }
-          : now < end
-            ? {
-              status: 'endingIn',
-              value: end.diff(now),
-            }
-            : {
-              status: 'endedBy',
-              value: now.diff(end),
-            };
-      }),
-    ),
-  };
-};
+          : {
+            status: 'endedBy',
+            value: now.diff(end),
+          };
+    }),
+  ),
+});

@@ -12,6 +12,7 @@ use contest_problem::ProblemView;
 use root::ApiContext;
 use root::MutationOk;
 
+use crate::data::award::{Score, ScoreRange};
 use questions::{Question, QuestionInput};
 use schema::contest;
 use std::path::PathBuf;
@@ -208,6 +209,28 @@ impl ContestView<'_> {
     /// End time of the user participation, as RFC3339 date
     fn end_time(&self) -> FieldResult<String> {
         Ok(self.data.end_time.clone())
+    }
+
+    /// Range of the total score, obtained as the sum of score range of each problem
+    fn total_score_range(&self) -> FieldResult<Option<ScoreRange>> {
+        Ok(self.problems()?.map(|problems| {
+            ScoreRange::merge(problems.iter().map(|problem| problem.total_score_range()))
+        }))
+    }
+
+    /// Range of the total score, obtained as the sum of score range of each problem
+    fn total_score(&self) -> FieldResult<Option<Score>> {
+        let problems = self.problems()?;
+        Ok(match problems {
+            Some(problems) => problems
+                .iter()
+                .filter_map(|problem| problem.tackling())
+                .map(|tackling| tackling.total_score())
+                .fold(Ok(None), |a, b| -> FieldResult<_> {
+                    Ok(Some(Score(a?.unwrap_or(Score(0f64)).0 + b?.0)))
+                })?,
+            None => None,
+        })
     }
 
     /// Questions made by the current user

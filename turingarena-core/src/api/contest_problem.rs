@@ -11,10 +11,13 @@ use schema::problems;
 use user::UserId;
 
 use crate::api::award::AwardOutcome;
+use crate::data::award::{
+    AwardContent, AwardValue, Score, ScoreAwardContent, ScoreAwardValue, ScoreRange,
+};
 use crate::data::file::FileContent;
 
-use super::contest::ContestView;
 use super::*;
+use crate::api::contest::ContestView;
 
 #[derive(juniper::GraphQLInputObject, Insertable)]
 #[table_name = "problems"]
@@ -53,6 +56,19 @@ impl Problem<'_> {
     /// Material of this problem
     fn material(&self) -> &Material {
         &self.material
+    }
+
+    /// Range of the total score, obtained as the sum of all the score awards
+    fn total_score_range(&self) -> ScoreRange {
+        ScoreRange::merge(
+            self.material
+                .awards
+                .iter()
+                .filter_map(|award| match award.content {
+                    AwardContent::Score(ScoreAwardContent { range }) => Some(range),
+                    _ => None,
+                }),
+        )
     }
 }
 
@@ -145,8 +161,11 @@ impl ProblemView<'_> {
         self.problem.material()
     }
 
-    /// Material of this problem
-    fn tackling(&self) -> Option<ProblemTackling> {
+    pub fn total_score_range(&self) -> ScoreRange {
+        self.problem.total_score_range()
+    }
+
+    pub fn tackling(&self) -> Option<ProblemTackling> {
         if self.contest_view.user_id().is_some() {
             Some(ProblemTackling { problem: &self })
         } else {
@@ -203,6 +222,11 @@ impl ProblemTackling<'_> {
             &self.user_id().0,
             &self.name(),
         )?)
+    }
+
+    /// Sum of the score awards
+    pub fn total_score(&self) -> FieldResult<Score> {
+        Ok(AwardOutcome::total_score(&self.awards()?))
     }
 
     /// Submissions of the current user (if to be shown)

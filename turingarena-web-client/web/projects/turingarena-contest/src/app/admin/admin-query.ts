@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 
 import { awardOutcomeFragment } from '../awards';
 import { problemMaterialFragment } from '../material';
+import { scoreRangeFragment } from '../score';
 import { textFragment } from '../text';
 
 export const adminQuery = gql`
@@ -9,6 +10,9 @@ export const adminQuery = gql`
     name
     material {
       ...MaterialFragment
+    }
+    totalScoreRange {
+      ...ScoreRangeFragment
     }
   }
 
@@ -38,6 +42,9 @@ export const adminQuery = gql`
       title { ...TextFragment }
       startTime
       endTime
+      totalScoreRange {
+        ...ScoreRangeFragment
+      }
     }
     problems {
       ...AdminProblemFragment
@@ -54,5 +61,6 @@ export const adminQuery = gql`
   }
   ${awardOutcomeFragment}
   ${problemMaterialFragment}
+  ${scoreRangeFragment}
   ${textFragment}
 `;

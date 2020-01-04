@@ -1,10 +1,9 @@
 import gql from 'graphql-tag';
 
 import { AwardFragment } from './__generated__/AwardFragment';
-import { MaterialFragment } from './__generated__/MaterialFragment';
+import { ProblemViewFragment } from './__generated__/ProblemViewFragment';
 import { SubmissionFragment } from './__generated__/SubmissionFragment';
 import { awardOutcomeFragment } from './awards';
-import { getProblemScoreRange } from './material';
 
 export const submissionFragment = gql`
   fragment SubmissionFragment on Submission {
@@ -23,17 +22,15 @@ export const submissionFragment = gql`
       awards {
         ...AwardOutcomeFragment
       }
+      totalScore
     }
   }
   ${awardOutcomeFragment}
 `;
 
-export const getSubmissionState = (material: MaterialFragment, submission: SubmissionFragment) => ({
-  score: material.awards
-    .map((award) => submission.evaluation.awards.find((s) => s.awardName === award.name))
-    .map((state) => state !== undefined && state.value.__typename === 'ScoreAwardValue' ? state.value.score : 0)
-    .reduce((a, b) => a + b, 0),
-  range: getProblemScoreRange(material),
+export const getSubmissionState = (problem: ProblemViewFragment, submission: SubmissionFragment) => ({
+  score: submission.evaluation.totalScore,
+  range: problem.totalScoreRange,
   award: ({ name, content }: AwardFragment) => ({
     score: 0,
     badge: false,

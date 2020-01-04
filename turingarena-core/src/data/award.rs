@@ -24,6 +24,23 @@ pub struct ScoreRange {
     pub allow_partial: bool,
 }
 
+impl ScoreRange {
+    pub fn merge<I: IntoIterator<Item = Self>>(ranges: I) -> Self {
+        ranges.into_iter().fold(
+            Self {
+                max: Score(0f64),
+                allow_partial: true,
+                precision: 0,
+            },
+            |a, b| Self {
+                max: Score(a.max.0 + b.max.0),
+                precision: std::cmp::max(a.precision, b.precision),
+                ..a
+            },
+        )
+    }
+}
+
 /// An award that has a numerical score
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]
 pub struct ScoreAwardContent {

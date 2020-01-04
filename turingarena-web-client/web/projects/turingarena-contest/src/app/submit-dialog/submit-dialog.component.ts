@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { FileInput } from '../../../../../__generated__/globalTypes';
 import { FieldFragment } from '../__generated__/FieldFragment';
 import { FieldTypeFragment } from '../__generated__/FieldTypeFragment';
-import { ProblemFragment } from '../__generated__/ProblemFragment';
+import { ProblemViewFragment } from '../__generated__/ProblemViewFragment';
 import { FileLoadService } from '../file-load.service';
 
 import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitMutation';
@@ -58,7 +58,7 @@ export class SubmitDialogComponent {
   ) { }
 
   @Input()
-  problem!: ProblemFragment;
+  problem!: ProblemViewFragment;
 
   @Input()
   userId!: string;

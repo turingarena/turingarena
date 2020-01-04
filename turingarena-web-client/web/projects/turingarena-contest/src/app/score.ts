@@ -1,6 +1,13 @@
+import gql from 'graphql-tag';
+
 import { Valence } from '../../../../__generated__/globalTypes';
 
-import { ScoreRangeFragment } from './__generated__/ScoreRangeFragment';
+export const scoreRangeFragment = gql`
+  fragment ScoreRangeFragment on ScoreRange {
+    max
+    precision
+  }
+`;
 
 export enum ScoreTier {
   ZERO = 'ZERO',

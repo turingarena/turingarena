@@ -6,7 +6,6 @@ import { AwardFragment } from '../__generated__/AwardFragment';
 import { BadgeAwardValueFragment } from '../__generated__/BadgeAwardValueFragment';
 import { MaterialFragment } from '../__generated__/MaterialFragment';
 import { ScoreAwardValueFragment } from '../__generated__/ScoreAwardValueFragment';
-import { getProblemScoreRange } from '../material';
 import { getBadgeValence, getScoreValence } from '../score';
 import { VariantService } from '../variant.service';
 
@@ -95,7 +94,7 @@ export class AdminAwardColumnsService {
                   )
                   .reduce((a, b) => a + b, 0),
                 cellClassRules: makeValenceClassRules(({ value }) =>
-                  getScoreValence({ score: value, range: getProblemScoreRange(problem.material) })!),
+                  getScoreValence({ score: value, range: problem.totalScoreRange })!),
                 columnGroupShow: 'closed',
                 sortingOrder,
                 flex: 1,
@@ -119,7 +118,7 @@ export class AdminAwardColumnsService {
               getScoreValence({
                 score: value,
                 range: {
-                  max: data.problems.map((problem) => getProblemScoreRange(problem.material).max)
+                  max: data.problems.map((problem) => problem.totalScoreRange.max)
                     .reduce((a, b) => a + b, 0),
                 },
               })!),

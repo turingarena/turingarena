@@ -19,6 +19,7 @@ use crate::evaluation::AwardEvent;
 
 use super::submission::FieldValue;
 use super::*;
+use crate::data::award::Score;
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -59,6 +60,11 @@ impl<'a> Evaluation<'a> {
     /// Evaluation awards
     pub fn awards(&self) -> FieldResult<Vec<AwardOutcome<'a>>> {
         AwardOutcome::of_evaluation(&self.context, &self.data.id)
+    }
+
+    /// Sum of the score awards
+    pub fn total_score(&self) -> FieldResult<Score> {
+        Ok(AwardOutcome::total_score(&self.awards()?))
     }
 
     /// Evaluation events of this submission

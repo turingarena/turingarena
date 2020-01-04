@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { MaterialFragment } from './__generated__/MaterialFragment';
 import { fileFragment } from './file';
 import { rusageFragment } from './rusage';
+import { scoreRangeFragment } from './score';
 import { textFragment } from './text';
 
 export const problemMaterialFragment = gql`
@@ -113,11 +114,6 @@ export const problemMaterialFragment = gql`
     valenceKey
   }
 
-  fragment ScoreRangeFragment on ScoreRange {
-    max
-    precision
-  }
-
   fragment FeedbackSectionFragment on Section {
     __typename
     ... on TableSection { ...TableSectionFragment }
@@ -135,18 +131,5 @@ export const problemMaterialFragment = gql`
   ${textFragment}
   ${fileFragment}
   ${rusageFragment}
+  ${scoreRangeFragment}
 `;
-
-export const getAwardScoreRanges = (material: MaterialFragment) => material.awards.map(({ name, content }) => {
-  if (content.__typename === 'ScoreAwardContent') {
-    return { name, range: content.range };
-  } else {
-    return { name, range: { precision: 0, max: 0 } };
-  }
-});
-
-export const getProblemScoreRange = (material: MaterialFragment) => ({
-  max: getAwardScoreRanges(material).map(({ range: { max } }) => max).reduce((a: number, b: number) => a + b, 0),
-  precision: getAwardScoreRanges(material).map(({ range: { precision } }) => precision).reduce((a, b) => Math.max(a, b)),
-});
-
