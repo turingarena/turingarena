@@ -56,9 +56,9 @@ impl AwardOutcome<'_> {
         user_id: &str,
         problem_name: &str,
     ) -> FieldResult<AwardOutcome<'a>> {
-        let kind = match award.content {
-            AwardContent::Score(_) => "SCORE",
-            AwardContent::Badge(_) => "BADGE",
+        let kind = match award.material.domain {
+            AwardDomain::Score(_) => "SCORE",
+            AwardDomain::Badge(_) => "BADGE",
         };
         let data = user_awards_view::table
             .find((user_id, problem_name, &award.name.0, &kind))
@@ -89,9 +89,9 @@ impl AwardOutcome<'_> {
         award: &Award,
         evaluation_id: &str,
     ) -> FieldResult<AwardOutcome<'a>> {
-        let kind = match award.content {
-            AwardContent::Score(_) => "SCORE",
-            AwardContent::Badge(_) => "BADGE",
+        let kind = match award.material.domain {
+            AwardDomain::Score(_) => "SCORE",
+            AwardDomain::Badge(_) => "BADGE",
         };
         let data = awards::table
             .find((evaluation_id, &award.name.0, &kind))
@@ -147,8 +147,12 @@ impl AwardOutcome<'_> {
         })
     }
 
-    pub fn award(&self) -> &Award {
-        &self.award
+    pub fn name(&self) -> &AwardName {
+        &self.award.name
+    }
+
+    pub fn material(&self) -> &AwardMaterial {
+        &self.award.material
     }
 
     pub fn value(&self) -> AwardValue {
@@ -180,8 +184,12 @@ impl<'a> AwardView<'a> {
         })
     }
 
-    pub fn award(&self) -> &Award {
-        &self.award
+    pub fn name(&self) -> &AwardName {
+        &self.award.name
+    }
+
+    pub fn material(&self) -> &AwardMaterial {
+        &self.award.material
     }
 }
 

@@ -43,31 +43,38 @@ impl ScoreRange {
 
 /// An award that has a numerical score
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]
-pub struct ScoreAwardContent {
+pub struct ScoreAwardDomain {
     pub range: ScoreRange,
 }
 
 /// An award that has only two possible states (success or fail)
 #[derive(Serialize, Deserialize, Copy, Clone, GraphQLObjectFromUnit)]
-pub struct BadgeAwardContent;
+pub struct BadgeAwardDomain;
 
 /// Describes the nature of an award
 #[derive(Serialize, Deserialize, Copy, Clone, GraphQLUnionFromEnum)]
-pub enum AwardContent {
-    Score(ScoreAwardContent),
-    Badge(BadgeAwardContent),
+pub enum AwardDomain {
+    Score(ScoreAwardDomain),
+    Badge(BadgeAwardDomain),
 }
 
-/// Describes an item to which a score can be assigned
+/// Describes an award
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct AwardMaterial {
+    /// Name of this award, as shown to users.
+    pub title: Text,
+    /// Domain of values that can be won in this award.
+    pub domain: AwardDomain,
+}
+
+/// Describes an award (i.e., score or badge) that can be won
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct Award {
     /// Name of this award, used to identify it.
     /// Should never be shown to (non-admin) users.
     pub name: AwardName,
-    /// Name of this award, as shown to users.
-    pub title: Text,
-    /// Content of this award.
-    pub content: AwardContent,
+    /// Material describing this award.
+    pub material: AwardMaterial,
 }
 
 #[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]

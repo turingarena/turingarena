@@ -11,7 +11,7 @@ use schema::problems;
 use user::UserId;
 
 use crate::api::award::{AwardOutcome, AwardView};
-use crate::data::award::{AwardContent, Score, ScoreAwardContent, ScoreRange};
+use crate::data::award::{AwardDomain, Score, ScoreAwardDomain, ScoreRange};
 use crate::data::file::FileContent;
 
 use super::*;
@@ -64,15 +64,12 @@ impl Problem<'_> {
 
     /// Range of the total score, obtained as the sum of all the score awards
     pub fn total_score_range(&self) -> ScoreRange {
-        ScoreRange::merge(
-            self.material
-                .awards
-                .iter()
-                .filter_map(|award| match award.content {
-                    AwardContent::Score(ScoreAwardContent { range }) => Some(range),
-                    _ => None,
-                }),
-        )
+        ScoreRange::merge(self.material.awards.iter().filter_map(
+            |award| match award.material.domain {
+                AwardDomain::Score(ScoreAwardDomain { range }) => Some(range),
+                _ => None,
+            },
+        ))
     }
 
     pub fn view(&self, user_id: Option<UserId>) -> ProblemView {

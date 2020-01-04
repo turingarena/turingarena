@@ -116,20 +116,20 @@
                             <tr>
                               <th scope="col" rowspan="2">Submission time</th>
                               <th *ngFor="let award of problem.material.awards">
-                                {{ award.title | textVariant:'short' }}
+                                {{ award.material.title | textVariant:'short' }}
                               </th>
                               <th scope="col">Total score</th>
                             </tr>
                             <tr>
                               <ng-container *ngFor="let awardView of problem.view.awards"
-                                [ngSwitch]="awardView.award.content.__typename">
-                                <th *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
-                                  [attr.data-score-tier]="getScoreTier({ range: awardView.award.content.range, score: awardView.tackling?.bestOutcome?.value?.score })">
+                                [ngSwitch]="awardView.material.domain.__typename">
+                                <th *ngSwitchCase="'ScoreAwardDomain'" class="score-cell"
+                                  [attr.data-score-tier]="getScoreTier({ range: awardView.material.domain.range, score: awardView.tackling?.bestOutcome?.value?.score })">
                                   <ng-container
-                                    *ngTemplateOutlet="scoreTemplate; context: { range: awardView.award.content.range, score: awardView.tackling?.bestOutcome?.value?.score }">
+                                    *ngTemplateOutlet="scoreTemplate; context: { range: awardView.material.domain.range, score: awardView.tackling?.bestOutcome?.value?.score }">
                                   </ng-container>
                                 </th>
-                                <th *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
+                                <th *ngSwitchCase="'BadgeAwardDomain'" class="badge-cell"
                                   [attr.data-badge]="awardView.tackling?.bestOutcome?.value?.badge">
                                   <ng-container
                                     *ngTemplateOutlet="badgeTemplate; context: { badge: awardView.tackling?.bestOutcome?.value?.badge }">
@@ -162,18 +162,18 @@
                                   </a>
                                 </td>
                                 <ng-container *ngIf="submission.evaluation.status === 'SUCCESS'">
-                                  <ng-container *ngFor="let awardOutcome of submission.evaluation.awards"
-                                    [ngSwitch]="awardOutcome.award.content.__typename">
-                                    <td *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
-                                      [attr.data-score-tier]="getScoreTier({ range: awardOutcome.award.content.range, score: awardOutcome.value.score })">
+                                  <ng-container *ngFor="let award of submission.evaluation.awards"
+                                    [ngSwitch]="award.material.domain.__typename">
+                                    <td *ngSwitchCase="'ScoreAwardDomain'" class="score-cell"
+                                      [attr.data-score-tier]="getScoreTier({ range: award.material.domain.range, score: award.value.score })">
                                       <ng-container
-                                        *ngTemplateOutlet="scoreTemplate; context: { range: awardOutcome.award.content.range, score: awardOutcome.value.score }">
+                                        *ngTemplateOutlet="scoreTemplate; context: { range: award.material.domain.range, score: award.value.score }">
                                       </ng-container>
                                     </td>
-                                    <td *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
-                                      [attr.data-badge]="awardOutcome.value.badge">
+                                    <td *ngSwitchCase="'BadgeAwardDomain'" class="badge-cell"
+                                      [attr.data-badge]="award.value.badge">
                                       <ng-container
-                                        *ngTemplateOutlet="badgeTemplate; context: { badge: awardOutcome.value.badge }">
+                                        *ngTemplateOutlet="badgeTemplate; context: { badge: award.value.badge }">
                                       </ng-container>
                                     </td>
                                   </ng-container>
@@ -204,16 +204,16 @@
                   <h3 class="problem-award-list-title">Awards</h3>
                   <div class="problem-award-list">
                     <ng-container *ngFor="let awardView of problem.view.awards"
-                      [ngSwitch]="awardView.award.content.__typename">
-                      <div class="problem-award" [title]="awardView.award.title | textVariant">
-                        {{awardView.award.title | textVariant}}
-                        <span *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
-                          [attr.data-score-tier]="getScoreTier({ range: awardView.award.content.range, score: awardView.tackling?.bestOutcome?.value?.score })">
+                      [ngSwitch]="awardView.material.domain.__typename">
+                      <div class="problem-award" [title]="awardView.material.title | textVariant">
+                        {{awardView.material.title | textVariant}}
+                        <span *ngSwitchCase="'ScoreAwardDomain'" class="problem-award-score"
+                          [attr.data-score-tier]="getScoreTier({ range: awardView.material.domain.range, score: awardView.tackling?.bestOutcome?.value?.score })">
                           <ng-container
-                            *ngTemplateOutlet="scoreTemplate; context: { range: awardView.award.content.range, score: awardView.tackling?.bestOutcome?.value?.score }">
+                            *ngTemplateOutlet="scoreTemplate; context: { range: awardView.material.domain.range, score: awardView.tackling?.bestOutcome?.value?.score }">
                           </ng-container>
                         </span>
-                        <span *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
+                        <span *ngSwitchCase="'BadgeAwardDomain'" class="problem-award-badge"
                           [attr.data-badge]="awardView.tackling?.bestOutcome?.value?.badge">
                           <ng-container
                             *ngTemplateOutlet="badgeTemplate; context: { badge: awardView.tackling?.bestOutcome?.value?.badge }">

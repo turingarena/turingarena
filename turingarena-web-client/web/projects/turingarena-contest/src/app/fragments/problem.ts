@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-import { awardFragment, awardOutcomeFragment } from './awards';
+import { awardMaterialFragment, awardOutcomeFragment } from './awards';
 import { problemMaterialFragment } from './material';
 import { scoreRangeFragment } from './score';
 import { submissionFragment } from './submission';
@@ -23,8 +23,9 @@ export const problemFragment = gql`
 export const problemViewFragment = gql`
   fragment ProblemViewFragment on ProblemView {
     awards {
-      award {
-        ...AwardFragment
+      name
+      material {
+        ...AwardMaterialFragment
       }
       tackling {
         bestOutcome {
@@ -47,6 +48,6 @@ export const problemViewFragment = gql`
   }
 
   ${submissionFragment}
-  ${awardFragment}
+  ${awardMaterialFragment}
   ${awardOutcomeFragment}
 `;

@@ -63,18 +63,18 @@ export class AdminAwardColumnsService {
             children: [
               ...problem.material.awards.map((award): ColDef => ({
                 colId: `awards/problem/${problem.name}/award/${award.name}`,
-                headerName: this.variantService.selectTextVariant(award.title),
+                headerName: this.variantService.selectTextVariant(award.material.title),
                 type: 'numericColumn',
-                cellClassRules: makeValenceClassRules(({ value }) => award.content.__typename === 'ScoreAwardContent'
-                  ? getScoreValence({ score: value, range: award.content.range })!
+                cellClassRules: makeValenceClassRules(({ value }) => award.material.domain.__typename === 'ScoreAwardDomain'
+                  ? getScoreValence({ score: value, range: award.material.domain.range })!
                   : getBadgeValence(value),
                 ),
                 valueGetter: (valueGetterParams) =>
-                  award.content.__typename === 'ScoreAwardContent'
+                  award.material.domain.__typename === 'ScoreAwardDomain'
                     ? scoreGetter({ valueGetterParams, problem, award }).score
                     : badgeGetter({ valueGetterParams, problem, award }).badge,
                 valueFormatter:
-                  award.content.__typename === 'ScoreAwardContent'
+                  award.material.domain.__typename === 'ScoreAwardDomain'
                     ? ({ value }) => value
                     : ({ value }) => value ? 'yes' : 'no'
                 ,
@@ -88,7 +88,7 @@ export class AdminAwardColumnsService {
                 type: 'numericColumn',
                 valueGetter: (valueGetterParams) => problem.material.awards
                   .map(
-                    (award) => award.content.__typename === 'ScoreAwardContent'
+                    (award) => award.material.domain.__typename === 'ScoreAwardDomain'
                       ? scoreGetter({ valueGetterParams, problem, award }).score
                       : 0,
                   )
@@ -108,7 +108,7 @@ export class AdminAwardColumnsService {
             valueGetter: (valueGetterParams) => data.problems.map((problem) =>
               problem.material.awards
                 .map(
-                  (award) => award.content.__typename === 'ScoreAwardContent'
+                  (award) => award.material.domain.__typename === 'ScoreAwardDomain'
                     ? scoreGetter({ valueGetterParams, problem, award }).score
                     : 0,
                 )

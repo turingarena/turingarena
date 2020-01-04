@@ -2,7 +2,8 @@ use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 
 use crate::data::award::{
-    Award, AwardContent, AwardName, BadgeAwardContent, Score, ScoreAwardContent, ScoreRange,
+    Award, AwardDomain, AwardMaterial, AwardName, BadgeAwardDomain, Score, ScoreAwardDomain,
+    ScoreRange,
 };
 use crate::data::content::{FileName, FileVariant, MediaType, Text, TextVariant, VariantAttribute};
 use crate::data::evaluation::record::Key;
@@ -63,31 +64,33 @@ fn award_of(subtask: &ioi::SubtaskInfo) -> Award {
             subtask.id,
             if has_positive_score { "score" } else { "badge" }
         )),
-        title: vec![
-            TextVariant {
-                attributes: vec![],
-                value: format!("Subtask {}", subtask.id),
-            },
-            TextVariant {
-                attributes: vec![VariantAttribute {
-                    key: "style".to_owned(),
-                    value: "short".to_owned(),
-                }],
-                value: format!("ST {}", subtask.id),
-            },
-        ],
-        content: if has_positive_score {
-            AwardContent::Score(ScoreAwardContent {
-                range: ScoreRange {
-                    // TODO: determine actual precision (may depend on the task)
-                    precision: 0,
-                    max: Score(subtask.max_score),
-                    // TODO: determine whether partial scores are allowed (may depend on the task)
-                    allow_partial: true,
+        material: AwardMaterial {
+            title: vec![
+                TextVariant {
+                    attributes: vec![],
+                    value: format!("Subtask {}", subtask.id),
                 },
-            })
-        } else {
-            AwardContent::Badge(BadgeAwardContent)
+                TextVariant {
+                    attributes: vec![VariantAttribute {
+                        key: "style".to_owned(),
+                        value: "short".to_owned(),
+                    }],
+                    value: format!("ST {}", subtask.id),
+                },
+            ],
+            domain: if has_positive_score {
+                AwardDomain::Score(ScoreAwardDomain {
+                    range: ScoreRange {
+                        // TODO: determine actual precision (may depend on the task)
+                        precision: 0,
+                        max: Score(subtask.max_score),
+                        // TODO: determine whether partial scores are allowed (may depend on the task)
+                        allow_partial: true,
+                    },
+                })
+            } else {
+                AwardDomain::Badge(BadgeAwardDomain)
+            },
         },
     }
 }
