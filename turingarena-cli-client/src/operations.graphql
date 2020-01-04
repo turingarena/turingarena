@@ -89,8 +89,10 @@ mutation InitDbMutation {
 
 query ViewContestQuery {
     contestView {
-        startTime
-        endTime
+        material {
+            startTime
+            endTime
+        }
         problems {
             name
         }

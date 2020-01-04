@@ -8,23 +8,23 @@ use serde::{Deserialize, Serialize};
 
 /// Wraps a language tag string, as defined in
 /// https://tools.ietf.org/html/bcp47
-#[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+#[derive(Serialize, Deserialize, Clone, Debug, GraphQLNewtype)]
 pub struct LanguageTag(pub String);
 
 /// Wraps a media type string, as defined in
 /// https://tools.ietf.org/html/rfc7231#section-3.1.1.1
-#[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+#[derive(Serialize, Deserialize, Clone, Debug, GraphQLNewtype)]
 pub struct MediaType(pub String);
 
 /// Wraps a sanitized file name.
 /// Allows extensions, but no path components.
-#[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
+#[derive(Serialize, Deserialize, Clone, Debug, GraphQLNewtype)]
 pub struct FileName(pub String);
 
 pub use file::FileContent;
 
 /// A variant of a text (say, for a given locale).
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+#[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLObject)]
 pub struct TextVariant {
     /// Attributes of this variant, used for content negotiation
     #[serde(default)]
@@ -35,7 +35,7 @@ pub struct TextVariant {
 }
 
 /// An attribute of a variant, used for content negotiation
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+#[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLObject)]
 pub struct VariantAttribute {
     pub key: String,
     pub value: String,
@@ -45,7 +45,7 @@ pub struct VariantAttribute {
 pub type Text = Vec<TextVariant>;
 
 /// A variant of a file (say, for a given locale).
-#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+#[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLObject)]
 pub struct FileVariant {
     /// Attributes of this variant, used for content negotiation
     #[serde(default)]

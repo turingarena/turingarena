@@ -132,7 +132,7 @@ impl ApiContext<'_> {
         archive::unpack_archive(workspace_path, content, prefix)
     }
 
-    pub fn default_contest(&self) -> Contest {
+    pub fn default_contest(&self) -> FieldResult<Contest> {
         Contest::new(&self)
     }
 
@@ -223,7 +223,8 @@ impl Mutation<'_> {
         self.context.authorize_admin()?;
 
         embedded_migrations::run_with_output(&self.context.database, &mut std::io::stdout())?;
-        self.context.default_contest().init()?;
+
+        Contest::init(&self.context)?;
 
         Ok(MutationOk)
     }
@@ -241,7 +242,7 @@ impl Mutation<'_> {
     /// Add a user to the current contest
     pub fn update_contest(&self, input: ContestUpdateInput) -> FieldResult<MutationOk> {
         self.context.authorize_admin()?;
-        self.context.default_contest().update(input)?;
+        self.context.default_contest()?.update(input)?;
 
         Ok(MutationOk)
     }

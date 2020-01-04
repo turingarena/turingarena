@@ -73,12 +73,12 @@ export class AdminContestantGridModel {
       },
       ...this.service.awardColumnService.getAwardColumns({
         data,
-        scoreGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: user } }, problem, award }) => ({
+        scoreGetter: ({ valueGetterParams: { node: { data: user } }, problem, award }) => ({
           score: 0,
           badge: false,
           ...scoreMap.get(`${user.id}/${problem.name}/${award.name}`),
         }),
-        badgeGetter: ({ valueGetterParams: { context: { scoreMap }, node: { data: user } }, problem, award }) => ({
+        badgeGetter: ({ valueGetterParams: { node: { data: user } }, problem, award }) => ({
           score: 0,
           badge: false,
           ...scoreMap.get(`${user.id}/${problem.name}/${award.name}`),
@@ -90,21 +90,6 @@ export class AdminContestantGridModel {
 
   rowData = this.adminQuery.valueChanges.pipe(
     map(({ data }) => data.users),
-  );
-
-  context = this.adminQuery.valueChanges.pipe(
-    map(({ data }) => ({
-      scoreMap: new Map(
-        data.awards.map(({ awardName, submission: { problemName, userId }, value }) => [
-          `${userId}/${problemName}/${awardName}`,
-          value,
-        ]),
-      ),
-    })),
-    tap(() => {
-      this.gridProvider().api.refreshCells();
-      this.gridProvider().api.onSortChanged();
-    }),
   );
 
   async deleteSelected() {

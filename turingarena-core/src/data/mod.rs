@@ -4,6 +4,7 @@ use super::*;
 
 pub mod award;
 pub mod content;
+pub mod contest;
 pub mod evaluation;
 pub mod exitstatus;
 pub mod feedback;

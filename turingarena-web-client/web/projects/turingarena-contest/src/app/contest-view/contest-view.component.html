@@ -3,7 +3,7 @@
     <nav class="topbar">
       <a routerLink="/" class="contest-home">
         <h1 class="contest-title">
-          <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.title | textVariant}}
+          <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.material.title | textVariant}}
         </h1>
       </a>
       <ng-container *ngIf="data.contestView.user as user">
@@ -252,7 +252,7 @@
       </aside>
 
       <main class="contest-home-content" [hidden]="(route.firstChild!.paramMap | async).has('problemName')">
-        <ng-container *ngIf="data.contestView.home | fileVariant as file">
+        <ng-container *ngIf="data.contestView.material.description | fileVariant as file">
           <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
         </ng-container>
       </main>

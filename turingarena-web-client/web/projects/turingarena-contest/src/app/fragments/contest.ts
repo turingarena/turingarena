@@ -5,15 +5,52 @@ import { problemViewFragment } from './problem';
 import { scoreRangeFragment } from './score';
 import { textFragment } from './text';
 
-export const contestViewFragment = gql`
-  fragment ContestViewFragment on ContestView {
-    user { ...UserFragment }
-    home { ...FileFragment }
-    title { ...TextFragment }
+export const contestMaterialFragment = gql`
+  fragment ContestMaterialFragment on ContestMaterial {
+    title {
+      ...TextFragment
+    }
+    description {
+      ...FileFragment
+    }
+    attachments {
+      title {
+        ...TextFragment
+      }
+      file {
+        ...FileFragment
+      }
+    }
+    resources {
+      title {
+        ...TextFragment
+      }
+      file {
+        ...FileFragment
+      }
+    }
     startTime
     endTime
-    problems { ...ProblemViewFragment }
-    totalScoreRange { ...ScoreRangeFragment }
+  }
+
+  ${textFragment}
+  ${fileFragment}
+`;
+
+export const contestViewFragment = gql`
+  fragment ContestViewFragment on ContestView {
+    user {
+      ...UserFragment
+    }
+    material {
+      ...ContestMaterialFragment
+    }
+    problems {
+      ...ProblemViewFragment
+    }
+    totalScoreRange {
+      ...ScoreRangeFragment
+    }
     totalScore
   }
 
@@ -22,8 +59,7 @@ export const contestViewFragment = gql`
     displayName
   }
 
+  ${contestMaterialFragment}
   ${problemViewFragment}
-  ${textFragment}
-  ${fileFragment}
   ${scoreRangeFragment}
 `;
