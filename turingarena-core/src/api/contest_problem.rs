@@ -68,6 +68,13 @@ impl Problem<'_> {
                 }),
         )
     }
+
+    pub fn view(&self, user_id: Option<UserId>) -> ProblemView {
+        ProblemView {
+            problem: &self,
+            user_id,
+        }
+    }
 }
 
 impl<'a> Problem<'a> {
@@ -142,64 +149,26 @@ impl<'a> Problem<'a> {
 
 /// A problem in the contest as seen by contestants
 pub struct ProblemView<'a> {
-    contest_view: &'a ContestView<'a>,
-    problem: Problem<'a>,
+    problem: &'a Problem<'a>,
+    user_id: Option<UserId>,
 }
 
 /// A problem in a contest
 #[juniper_ext::graphql]
 impl<'a> ProblemView<'a> {
-    /// Name of this problem. Unique in the current contest.
-    fn name(&self) -> ProblemName {
-        self.problem.name()
-    }
-
-    /// Material of this problem
-    fn material(&self) -> &Material {
-        self.problem.material()
-    }
-
-    pub fn total_score_range(&self) -> ScoreRange {
-        self.problem.total_score_range()
-    }
-
-    pub fn tackling(&self) -> Option<ProblemTackling> {
-        if self.contest_view.user_id().is_some() {
-            Some(ProblemTackling { problem: &self })
-        } else {
-            None
-        }
+    pub fn tackling(&self) -> Option<ProblemTackling<'a>> {
+        // TODO: return `None` if user is not participating in the contest
+        self.user_id.as_ref().map(|user_id| ProblemTackling {
+            problem: &self.problem,
+            user_id: (*user_id).clone(),
+        })
     }
 }
 
-impl<'a> ProblemView<'a> {
-    /// Get all the problems data in the database
-    pub fn all(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Self>> {
-        let problems = Problem::all(contest_view.context())?;
-        Ok(problems
-            .into_iter()
-            .map(|problem| ProblemView {
-                contest_view,
-                problem,
-            })
-            .collect())
-    }
-}
-
-/// Attempts at solving a problem by a user in the contest
+/// Progress at solving a problem by a user in the contest
 pub struct ProblemTackling<'a> {
-    /// The problem
-    problem: &'a ProblemView<'a>,
-}
-
-impl ProblemTackling<'_> {
-    fn user_id(&self) -> UserId {
-        self.problem.contest_view.user_id().clone().unwrap()
-    }
-
-    fn name(&self) -> String {
-        self.problem.name().0
-    }
+    problem: &'a Problem<'a>,
+    user_id: UserId,
 }
 
 /// Attempts at solving a problem by a user in the contest
@@ -214,10 +183,10 @@ impl ProblemTackling<'_> {
             .iter()
             .map(|award| {
                 AwardOutcome::find_best(
-                    &self.problem.problem.context,
+                    &self.problem.context,
                     award,
-                    &self.user_id().0,
-                    &self.name(),
+                    &self.user_id.0,
+                    &self.problem.name().0,
                 )
             })
             .collect::<FieldResult<Vec<_>>>()?)
@@ -231,9 +200,9 @@ impl ProblemTackling<'_> {
     /// Submissions of the current user (if to be shown)
     fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
         Ok(contest_submission::Submission::by_user_and_problem(
-            &self.problem.contest_view.context(),
-            &self.user_id().0,
-            &self.name(),
+            &self.problem.context,
+            &self.user_id.0,
+            &self.problem.name().0,
         )?)
     }
 

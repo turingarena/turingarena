@@ -5,15 +5,27 @@ import { problemMaterialFragment } from './material';
 import { scoreRangeFragment } from './score';
 import { submissionFragment } from './submission';
 
+export const problemFragment = gql`
+  fragment ProblemFragment on Problem {
+    name
+    material {
+      ...MaterialFragment
+    }
+    totalScoreRange {
+      ...ScoreRangeFragment
+    }
+  }
+
+  ${problemMaterialFragment}
+  ${scoreRangeFragment}
+`;
+
 export const problemViewFragment = gql`
   fragment ProblemViewFragment on ProblemView {
-    name
     tackling {
       ...ProblemTacklingFragment
       submissions { ...SubmissionFragment }
     }
-    material { ...MaterialFragment }
-    totalScoreRange { ...ScoreRangeFragment }
   }
 
   fragment ProblemTacklingFragment on ProblemTackling {
@@ -27,8 +39,6 @@ export const problemViewFragment = gql`
     canSubmit
   }
 
-  ${problemMaterialFragment}
   ${submissionFragment}
   ${awardOutcomeFragment}
-  ${scoreRangeFragment}
 `;

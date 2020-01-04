@@ -55,9 +55,9 @@
                   [title]="problem.material.title | textVariant" routerLinkActive="active">
                   {{ problem.material.title | textVariant:'short' }}
                   <span class="contest-problem-score"
-                    [attr.data-score-tier]="getScoreTier({ score: problem.tackling.totalScore, range: problem.totalScoreRange })">
+                    [attr.data-score-tier]="getScoreTier({ score: problem.view.tackling.totalScore, range: problem.totalScoreRange })">
                     <ng-container
-                      *ngTemplateOutlet="scoreTemplate; context: { score: problem.tackling.totalScore, range: problem.totalScoreRange }">
+                      *ngTemplateOutlet="scoreTemplate; context: { score: problem.view.tackling.totalScore, range: problem.totalScoreRange }">
                     </ng-container>
                   </span>
                 </a>
@@ -69,7 +69,7 @@
           <ng-container *ngFor="let problem of problemSet.problems; index as index">
             <aside class="problem-aside"
               [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
-              <div class="problem-submission-panel" *ngIf="problem.tackling! as tackling">
+              <div class="problem-submission-panel" *ngIf="problem.view.tackling! as tackling">
                 <ng-container *ngIf="tackling.canSubmit">
                   <ng-template #newSubmissionDialog let-modal>
                     <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
@@ -106,7 +106,7 @@
                     All submissions
                   </button>
                   <ng-template #submissionListDialog let-modal>
-                    <ng-container *ngIf="problem.tackling! as tackling">
+                    <ng-container *ngIf="problem.view.tackling! as tackling">
                       <div class="submission-list-dialog-header">
                         <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
                       </div>
@@ -137,9 +137,9 @@
                                 </th>
                               </ng-container>
                               <th class="score-cell"
-                                [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: problem.tackling.totalScore })">
+                                [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: problem.view.tackling.totalScore })">
                                 <ng-container
-                                  *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: problem.tackling.totalScore }">
+                                  *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: problem.view.tackling.totalScore }">
                                 </ng-container>
                               </th>
                             </tr>
@@ -207,7 +207,7 @@
                       [ngSwitch]="award.content.__typename">
                       <div class="problem-award" [title]="award.title | textVariant">
                         {{award.title | textVariant}}
-                        <ng-container *ngIf="problem.tackling! as tackling">
+                        <ng-container *ngIf="problem.view.tackling! as tackling">
                           <ng-container *ngIf="tackling.awards[awardIndex] as awardOutcome">
                             <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
                               [attr.data-score-tier]="getScoreTier({ range: award.content.range, score: awardOutcome.value.score })">

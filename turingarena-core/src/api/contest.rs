@@ -223,15 +223,16 @@ impl ContestView<'_> {
 }
 
 pub struct ProblemSet<'a> {
-    contest_view: &'a ContestView<'a>,
+    contest: &'a Contest<'a>,
 }
 
+/// Set of problems currently active
 #[juniper_ext::graphql]
 impl ProblemSet<'_> {
-    /// List of problems that the user can see
-    fn problems(&self) -> FieldResult<Vec<ProblemView>> {
+    /// The list of problems
+    fn problems(&self) -> FieldResult<Vec<Problem>> {
         // TODO: return only the problems that only the user can access
-        Ok(ProblemView::all(&self.contest_view)?)
+        Ok(Problem::all(&self.contest.context)?)
     }
 
     /// Range of the total score, obtained as the sum of score range of each problem
@@ -245,18 +246,22 @@ impl ProblemSet<'_> {
 
     /// Information about this problem set visible to a user
     fn view(&self, user_id: Option<UserId>) -> ProblemSetView {
-        ProblemSetView { problem_set: &self }
+        ProblemSetView {
+            problem_set: &self,
+            user_id,
+        }
     }
 }
 
 pub struct ProblemSetView<'a> {
     problem_set: &'a ProblemSet<'a>,
+    user_id: Option<UserId>,
 }
 
 #[juniper_ext::graphql]
 impl ProblemSetView<'_> {
     /// Current progress of user in solving the problems in this problem set
-    fn tackling(&self, user_id: Option<UserId>) -> Option<ProblemSetTackling> {
+    fn tackling(&self) -> Option<ProblemSetTackling> {
         // TODO: return `None` if user is not participating in the contest
         Some(ProblemSetTackling {
             problem_set_view: &self,
@@ -277,7 +282,11 @@ impl ProblemSetTackling<'_> {
             .problem_set
             .problems()?
             .iter()
-            .filter_map(|problem| problem.tackling())
+            .filter_map(|problem| {
+                problem
+                    .view(self.problem_set_view.user_id.clone())
+                    .tackling()
+            })
             .map(|tackling| tackling.total_score())
             .fold(Ok(None), |a, b| -> FieldResult<_> {
                 Ok(Some(Score(a?.unwrap_or(Score(0f64)).0 + b?.0)))
@@ -300,7 +309,7 @@ impl ContestView<'_> {
     fn problem_set(&self) -> Option<ProblemSet> {
         // TODO: return `None` if contest has not started yet
         Some(ProblemSet {
-            contest_view: &self,
+            contest: &self.contest,
         })
     }
 

@@ -34,7 +34,7 @@ export const adminQuery = gql`
         ...ContestMaterialFragment
       }
       problems {
-      ...AdminProblemFragment
+        ...AdminProblemFragment
       }
       users {
         ...AdminUserFragment

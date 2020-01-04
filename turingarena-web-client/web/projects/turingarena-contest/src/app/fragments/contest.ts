@@ -1,8 +1,6 @@
 import gql from 'graphql-tag';
 
 import { fileFragment } from './file';
-import { problemViewFragment } from './problem';
-import { scoreRangeFragment } from './score';
 import { textFragment } from './text';
 
 export const contestMaterialFragment = gql`

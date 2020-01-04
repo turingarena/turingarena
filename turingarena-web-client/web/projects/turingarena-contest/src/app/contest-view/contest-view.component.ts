@@ -27,7 +27,7 @@ import { map, startWith } from 'rxjs/operators';
 
 import { Auth, AuthService } from '../auth.service';
 import { contestMaterialFragment } from '../fragments/contest';
-import { problemViewFragment } from '../fragments/problem';
+import { problemFragment, problemViewFragment } from '../fragments/problem';
 import { getScoreTier, scoreRangeFragment } from '../fragments/score';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
@@ -132,7 +132,10 @@ export class ContestViewComponent implements OnInit {
               }
               problemSet {
                 problems {
-                  ...ProblemViewFragment
+                  ...ProblemFragment
+                  view(userId: $userId) {
+                    ...ProblemViewFragment
+                  }
                 }
                 totalScoreRange {
                   ...ScoreRangeFragment
@@ -147,6 +150,7 @@ export class ContestViewComponent implements OnInit {
           }
         }
         ${contestMaterialFragment}
+        ${problemFragment}
         ${problemViewFragment}
         ${scoreRangeFragment}
       `,

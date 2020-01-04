@@ -5,9 +5,9 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
-import { ProblemViewFragment } from '../fragments/__generated__/ProblemViewFragment';
 import { VariantService } from '../variant.service';
 
+import { AdminProblemFragment } from './__generated__/AdminProblemFragment';
 import { AdminQuery } from './__generated__/AdminQuery';
 import { DeleteProblemsMutation, DeleteProblemsMutationVariables } from './__generated__/DeleteProblemsMutation';
 
@@ -46,14 +46,14 @@ export class AdminProblemGridModel {
         filter: 'agTextColumnFilter',
         width: 200,
         valueGetter: ({ node: { data: problem } }) =>
-          this.service.variantService.selectTextVariant((problem as ProblemViewFragment).material.title),
+          this.service.variantService.selectTextVariant((problem as AdminProblemFragment).material.title),
       },
     ]),
     distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
   );
 
   rowData = this.adminQuery.valueChanges.pipe(
-    map(({ data }) => data.problems),
+    map(({ data }) => data.contest.problems),
   );
 
   context = this.adminQuery.valueChanges.pipe(
