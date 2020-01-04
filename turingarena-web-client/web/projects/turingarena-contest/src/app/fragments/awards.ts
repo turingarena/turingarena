@@ -24,7 +24,7 @@ export const awardFragment = gql`
 export const awardOutcomeFragment = gql`
   fragment AwardOutcomeFragment on AwardOutcome {
     award {
-      ... AwardFragment
+      ...AwardFragment
     }
     value {
       ... AwardValueFragment

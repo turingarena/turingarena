@@ -263,34 +263,30 @@ impl ProblemSetView<'_> {
     /// Current progress of user in solving the problems in this problem set
     fn tackling(&self) -> Option<ProblemSetTackling> {
         // TODO: return `None` if user is not participating in the contest
-        Some(ProblemSetTackling {
-            problem_set_view: &self,
+        self.user_id.as_ref().map(|user_id| ProblemSetTackling {
+            problem_set: &self.problem_set,
+            user_id: (*user_id).clone(),
         })
     }
 }
 
 pub struct ProblemSetTackling<'a> {
-    problem_set_view: &'a ProblemSetView<'a>,
+    problem_set: &'a ProblemSet<'a>,
+    user_id: UserId,
 }
 
 #[juniper_ext::graphql]
 impl ProblemSetTackling<'_> {
     /// Range of the total score, obtained as the sum of score range of each problem
-    fn total_score(&self) -> FieldResult<Option<Score>> {
-        Ok(self
-            .problem_set_view
-            .problem_set
-            .problems()?
-            .iter()
-            .filter_map(|problem| {
-                problem
-                    .view(self.problem_set_view.user_id.clone())
-                    .tackling()
-            })
-            .map(|tackling| tackling.total_score())
-            .fold(Ok(None), |a, b| -> FieldResult<_> {
-                Ok(Some(Score(a?.unwrap_or(Score(0f64)).0 + b?.0)))
-            })?)
+    fn total_score(&self) -> FieldResult<Score> {
+        Ok(Score(
+            self.problem_set
+                .problems()?
+                .iter()
+                .filter_map(|problem| problem.view(Some(self.user_id.clone())).tackling())
+                .map(|tackling| tackling.total_score())
+                .fold(Ok(0f64), |a, b| -> FieldResult<_> { Ok(a? + b?.0) })?,
+        ))
     }
 }
 

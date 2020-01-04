@@ -10,7 +10,7 @@ use root::ApiContext;
 use schema::problems;
 use user::UserId;
 
-use crate::api::award::AwardOutcome;
+use crate::api::award::{AwardOutcome, AwardView};
 use crate::data::award::{AwardContent, Score, ScoreAwardContent, ScoreRange};
 use crate::data::file::FileContent;
 
@@ -42,6 +42,12 @@ pub struct Problem<'a> {
     context: &'a ApiContext<'a>,
     data: ProblemData,
     material: Material,
+}
+
+impl<'a> Problem<'a> {
+    pub fn context(&self) -> &ApiContext {
+        self.context
+    }
 }
 
 #[juniper_ext::graphql]
@@ -155,6 +161,19 @@ pub struct ProblemView<'a> {
 
 #[juniper_ext::graphql]
 impl<'a> ProblemView<'a> {
+    pub fn awards(&self) -> Vec<AwardView> {
+        self.problem
+            .material()
+            .awards
+            .iter()
+            .map(|award| AwardView {
+                user_id: self.user_id.clone(),
+                award: (*award).clone(),
+                problem: self.problem,
+            })
+            .collect()
+    }
+
     pub fn tackling(&self) -> Option<ProblemTackling<'a>> {
         // TODO: return `None` if user is not participating in the contest
         self.user_id.as_ref().map(|user_id| ProblemTackling {
@@ -173,27 +192,18 @@ pub struct ProblemTackling<'a> {
 /// Attempts at solving a problem by a user in the contest
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
-    /// Score awards of the current user (if to be shown)
-    fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
-        Ok(self
-            .problem
-            .material()
-            .awards
-            .iter()
-            .map(|award| {
-                AwardOutcome::find_best(
-                    &self.problem.context,
-                    award,
-                    &self.user_id.0,
-                    &self.problem.name().0,
-                )
-            })
-            .collect::<FieldResult<Vec<_>>>()?)
-    }
-
     /// Sum of the score awards
     pub fn total_score(&self) -> FieldResult<Score> {
-        Ok(AwardOutcome::total_score(&self.awards()?))
+        Ok(AwardOutcome::total_score(
+            &self
+                .problem
+                .view(Some(self.user_id.clone()))
+                .awards()
+                .iter()
+                .filter_map(|award_view| award_view.tackling())
+                .map(|award_tackling| award_tackling.best_outcome())
+                .collect::<FieldResult<Vec<_>>>()?,
+        ))
     }
 
     /// Submissions of the current user (if to be shown)

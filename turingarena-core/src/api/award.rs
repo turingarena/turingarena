@@ -11,6 +11,8 @@ use crate::api::root::ApiContext;
 
 use super::super::award::*;
 use super::*;
+use crate::api::contest_problem::Problem;
+use crate::api::user::UserId;
 
 #[derive(Insertable)]
 #[table_name = "awards"]
@@ -159,5 +161,44 @@ impl AwardOutcome<'_> {
             }),
             _ => unreachable!(),
         }
+    }
+}
+
+pub struct AwardView<'a> {
+    pub problem: &'a Problem<'a>,
+    pub award: Award,
+    pub user_id: Option<UserId>,
+}
+
+#[juniper_ext::graphql]
+impl<'a> AwardView<'a> {
+    pub fn tackling(&self) -> Option<AwardTackling<'a>> {
+        self.user_id.as_ref().map(|user_id| AwardTackling {
+            problem: self.problem,
+            award: self.award.clone(),
+            user_id: (*user_id).clone(),
+        })
+    }
+
+    pub fn award(&self) -> &Award {
+        &self.award
+    }
+}
+
+pub struct AwardTackling<'a> {
+    pub problem: &'a Problem<'a>,
+    pub award: Award,
+    pub user_id: UserId,
+}
+
+#[juniper_ext::graphql]
+impl<'a> AwardTackling<'a> {
+    pub fn best_outcome(&self) -> FieldResult<AwardOutcome<'a>> {
+        Ok(AwardOutcome::find_best(
+            &self.problem.context(),
+            &self.award,
+            &self.user_id.0,
+            &self.problem.name().0,
+        )?)
     }
 }
