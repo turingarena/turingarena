@@ -177,6 +177,14 @@ impl Query<'_> {
         Contest::new(&self.context)
     }
 
+    fn user(&self, user_id: Option<UserId>) -> FieldResult<Option<User>> {
+        Ok(if let Some(user_id) = user_id {
+            Some(User::by_id(&self.context, user_id.clone())?)
+        } else {
+            None
+        })
+    }
+
     /// Get the submission with the specified id
     fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
         let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;

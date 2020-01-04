@@ -153,7 +153,6 @@ pub struct ProblemView<'a> {
     user_id: Option<UserId>,
 }
 
-/// A problem in a contest
 #[juniper_ext::graphql]
 impl<'a> ProblemView<'a> {
     pub fn tackling(&self) -> Option<ProblemTackling<'a>> {

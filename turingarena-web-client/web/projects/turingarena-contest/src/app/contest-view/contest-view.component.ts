@@ -121,15 +121,15 @@ export class ContestViewComponent implements OnInit {
       query: gql`
         query ContestQuery($userId: String) {
           serverTime
+          user(userId: $userId) {
+            id
+            displayName
+          }
           contest {
             material {
               ...ContestMaterialFragment
             }
             view(userId: $userId) {
-              user {
-                id
-                displayName
-              }
               problemSet {
                 problems {
                   ...ProblemFragment

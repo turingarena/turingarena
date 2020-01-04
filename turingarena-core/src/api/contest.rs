@@ -296,16 +296,6 @@ impl ProblemSetTackling<'_> {
 
 #[juniper_ext::graphql]
 impl ContestView<'_> {
-    /// The user for this contest view, if any
-    fn user(&self) -> FieldResult<Option<User>> {
-        let result = if let Some(user_id) = &self.user_id {
-            Some(User::by_id(self.context(), user_id.clone())?)
-        } else {
-            None
-        };
-        Ok(result)
-    }
-
     fn problem_set(&self) -> Option<ProblemSet> {
         // TODO: return `None` if contest has not started yet
         Some(ProblemSet {

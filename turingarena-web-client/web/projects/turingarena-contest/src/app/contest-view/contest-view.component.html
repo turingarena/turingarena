@@ -6,14 +6,14 @@
           <fa-icon [icon]="faHome"></fa-icon> {{data.contest.material.title | textVariant}}
         </h1>
       </a>
-      <ng-container *ngIf="data.contest.view.user! as user">
+      <ng-container *ngIf="data.user! as user">
         <span class="user-display-name">{{user.displayName}}</span>
         <button class="user-logout" (click)="setAuth(undefined)">
           <fa-icon [icon]="faSignOutAlt"></fa-icon>
           Logout
         </button>
       </ng-container>
-      <ng-container *ngIf="!data.contest.view.user">
+      <ng-container *ngIf="!data.user">
         <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
           <fa-icon [icon]="faSignInAlt"></fa-icon>
           Login
@@ -76,7 +76,7 @@
                     </app-submission-dialog>
                   </ng-template>
                   <ng-template #submitDialog let-modal>
-                    <app-submit-dialog [problem]="problem" [userId]="data.contest.view.user!.id" [modal]="modal"
+                    <app-submit-dialog [problem]="problem" [userId]="data.user!.id" [modal]="modal"
                       (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
                     </app-submit-dialog>
                   </ng-template>
