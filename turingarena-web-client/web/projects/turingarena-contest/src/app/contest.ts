@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -31,33 +31,3 @@ export const contestViewFragment = gql`
   ${fileFragment}
   ${scoreRangeFragment}
 `;
-
-export const getContestState = ({ startTime, endTime, totalScoreRange, totalScore }: ContestViewFragment) => ({
-  hasScore: totalScore !== null,
-  score: totalScore,
-  range: totalScoreRange,
-  // tslint:disable-next-line: no-magic-numbers
-  clock: interval(1000).pipe(
-    startWith(0),
-    map(() => {
-      const now = DateTime.local();
-      const start = DateTime.fromISO(startTime);
-      const end = DateTime.fromISO(endTime);
-
-      return now < start
-        ? {
-          status: 'startingIn',
-          value: start.diff(now),
-        }
-        : now < end
-          ? {
-            status: 'endingIn',
-            value: end.diff(now),
-          }
-          : {
-            status: 'endedBy',
-            value: now.diff(end),
-          };
-    }),
-  ),
-});

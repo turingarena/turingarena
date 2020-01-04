@@ -14,7 +14,6 @@ use problem::ProblemName;
 use user::UserId;
 use user::UserInput;
 
-use crate::api::award::AwardOutcome;
 use crate::api::contest::{Contest, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
@@ -188,11 +187,6 @@ impl Query<'_> {
     fn problems(&self) -> FieldResult<Vec<Problem>> {
         self.context.authorize_admin()?;
         Problem::all(&self.context)
-    }
-
-    fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
-        self.context.authorize_admin()?;
-        AwardOutcome::list_by_user_and_problem(&self.context)
     }
 
     fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {

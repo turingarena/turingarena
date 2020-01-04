@@ -26,9 +26,9 @@ pub struct AwardOutcomeData {
     /// Id of the evaluation
     #[allow(dead_code)]
     #[sql_type = "Text"]
-    evaluation_id: String,
+    evaluation_id: Option<String>,
 
-    /// Name of the award
+    #[allow(dead_code)]
     #[sql_type = "Text"]
     award_name: String,
 
@@ -42,62 +42,76 @@ pub struct AwardOutcomeData {
 
 pub struct AwardOutcome<'a> {
     context: &'a ApiContext<'a>,
+    award: Award,
     data: AwardOutcomeData,
 }
 
 impl AwardOutcome<'_> {
-    pub fn list_by_user_and_problem<'a>(
-        context: &'a ApiContext,
-    ) -> FieldResult<Vec<AwardOutcome<'a>>> {
-        Ok(user_awards_view::table
-            .select((
-                user_awards_view::evaluation_id,
-                user_awards_view::award_name,
-                user_awards_view::kind,
-                user_awards_view::value,
-            ))
-            .load::<AwardOutcomeData>(&context.database)?
-            .into_iter()
-            .map(|data| AwardOutcome { context, data })
-            .collect())
-    }
-
     /// Get the best score award for (user, problem)
-    pub fn by_user_and_problem<'a>(
-        context: &'a ApiContext,
+    pub fn find_best<'a>(
+        context: &'a ApiContext<'a>,
+        award: &Award,
         user_id: &str,
         problem_name: &str,
-    ) -> FieldResult<Vec<AwardOutcome<'a>>> {
-        Ok(user_awards_view::table
-            .filter(user_awards_view::user_id.eq(user_id))
-            .filter(user_awards_view::problem_name.eq(problem_name))
+    ) -> FieldResult<AwardOutcome<'a>> {
+        let kind = match award.content {
+            AwardContent::Score(_) => "SCORE",
+            AwardContent::Badge(_) => "BADGE",
+        };
+        let data = user_awards_view::table
+            .find((user_id, problem_name, &award.name.0, &kind))
             .select((
-                user_awards_view::evaluation_id,
+                user_awards_view::evaluation_id.nullable(),
                 user_awards_view::award_name,
                 user_awards_view::kind,
                 user_awards_view::value,
             ))
-            .load::<AwardOutcomeData>(&context.database)?
-            .into_iter()
-            .map(|data| AwardOutcome { context, data })
-            .collect())
+            .first(&context.database)
+            .optional()?
+            .unwrap_or(AwardOutcomeData {
+                evaluation_id: None,
+                award_name: award.name.0.to_owned(),
+                value: 0f64,
+                kind: kind.to_owned(),
+            });
+        Ok(AwardOutcome {
+            award: (*award).clone(),
+            context,
+            data,
+        })
     }
 
-    /// Get the awards of (user, problem, submission)
-    pub fn of_evaluation<'a>(
+    /// Find the outcome of an award in a given evaluation
+    pub fn find<'a>(
         context: &'a ApiContext<'a>,
+        award: &Award,
         evaluation_id: &str,
-    ) -> FieldResult<Vec<AwardOutcome<'a>>> {
-        Ok(awards::table
-            .filter(awards::evaluation_id.eq(evaluation_id))
-            .load(&context.database)?
-            .into_iter()
-            .map(|data| AwardOutcome { context, data })
-            .collect())
-    }
-
-    pub fn evaluation_id(&self) -> &String {
-        &self.data.evaluation_id
+    ) -> FieldResult<AwardOutcome<'a>> {
+        let kind = match award.content {
+            AwardContent::Score(_) => "SCORE",
+            AwardContent::Badge(_) => "BADGE",
+        };
+        let data = awards::table
+            .find((evaluation_id, &award.name.0, &kind))
+            .select((
+                awards::evaluation_id.nullable(),
+                awards::award_name,
+                awards::kind,
+                awards::value,
+            ))
+            .first(&context.database)
+            .optional()?
+            .unwrap_or(AwardOutcomeData {
+                evaluation_id: Some(evaluation_id.to_owned()),
+                award_name: award.name.0.to_owned(),
+                value: 0f64,
+                kind: kind.to_owned(),
+            });
+        Ok(AwardOutcome {
+            award: (*award).clone(),
+            context,
+            data,
+        })
     }
 
     pub fn total_score(awards: &Vec<Self>) -> Score {
@@ -117,17 +131,22 @@ impl AwardOutcome<'_> {
 
 #[juniper_ext::graphql]
 impl AwardOutcome<'_> {
-    fn evaluation(&self) -> FieldResult<Evaluation> {
-        Evaluation::by_id(&self.context, &self.data.evaluation_id)
+    fn evaluation(&self) -> FieldResult<Option<Evaluation>> {
+        Ok(match &self.data.evaluation_id {
+            Some(id) => Some(Evaluation::by_id(&self.context, id)?),
+            None => None,
+        })
     }
 
-    fn submission(&self) -> FieldResult<Submission> {
-        Ok(self.evaluation()?.submission()?)
+    fn submission(&self) -> FieldResult<Option<Submission>> {
+        Ok(match self.evaluation()? {
+            Some(evaluation) => Some(evaluation.submission()?),
+            None => None,
+        })
     }
 
-    /// Name of the award
-    fn award_name(&self) -> AwardName {
-        AwardName(self.data.award_name.clone())
+    pub fn award(&self) -> &Award {
+        &self.award
     }
 
     pub fn value(&self) -> AwardValue {

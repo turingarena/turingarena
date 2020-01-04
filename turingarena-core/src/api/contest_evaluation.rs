@@ -59,7 +59,14 @@ impl<'a> Evaluation<'a> {
 
     /// Evaluation awards
     pub fn awards(&self) -> FieldResult<Vec<AwardOutcome<'a>>> {
-        AwardOutcome::of_evaluation(&self.context, &self.data.id)
+        let problem = Problem::by_name(self.context, self.submission()?.problem_name())?;
+
+        problem
+            .material()
+            .awards
+            .iter()
+            .map(|award| AwardOutcome::find(&self.context, award, self.id()))
+            .collect::<FieldResult<Vec<_>>>()
     }
 
     /// Sum of the score awards

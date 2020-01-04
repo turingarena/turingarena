@@ -19,15 +19,21 @@ export const adminQuery = gql`
   fragment AdminUserFragment on User {
     id
     displayName
-  }
-
-  fragment AdminAwardFragment on AwardOutcome {
-    submission {
-      id
-      problemName
-      userId
+    contestView {
+      totalScore
+      totalScoreRange {
+        ...ScoreRangeFragment
+      }
+      problems {
+        name
+        tackling {
+          totalScore
+          awards {
+            ...AwardOutcomeFragment
+          }
+        }
+      }
     }
-    ...AwardOutcomeFragment
   }
 
   fragment AdminSubmissionFragment on Submission {
@@ -51,9 +57,6 @@ export const adminQuery = gql`
     }
     users {
       ...AdminUserFragment
-    }
-    awards {
-      ...AdminAwardFragment
     }
     submissions {
       ...AdminSubmissionFragment

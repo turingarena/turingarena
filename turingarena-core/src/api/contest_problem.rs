@@ -11,9 +11,7 @@ use schema::problems;
 use user::UserId;
 
 use crate::api::award::AwardOutcome;
-use crate::data::award::{
-    AwardContent, AwardValue, Score, ScoreAwardContent, ScoreAwardValue, ScoreRange,
-};
+use crate::data::award::{AwardContent, Score, ScoreAwardContent, ScoreRange};
 use crate::data::file::FileContent;
 
 use super::*;
@@ -49,17 +47,17 @@ pub struct Problem<'a> {
 #[juniper_ext::graphql]
 impl Problem<'_> {
     /// Name of this problem. Unique in the current contest.
-    fn name(&self) -> ProblemName {
+    pub fn name(&self) -> ProblemName {
         ProblemName(self.data.name.clone())
     }
 
     /// Material of this problem
-    fn material(&self) -> &Material {
+    pub fn material(&self) -> &Material {
         &self.material
     }
 
     /// Range of the total score, obtained as the sum of all the score awards
-    fn total_score_range(&self) -> ScoreRange {
+    pub fn total_score_range(&self) -> ScoreRange {
         ScoreRange::merge(
             self.material
                 .awards
@@ -150,7 +148,7 @@ pub struct ProblemView<'a> {
 
 /// A problem in a contest
 #[juniper_ext::graphql]
-impl ProblemView<'_> {
+impl<'a> ProblemView<'a> {
     /// Name of this problem. Unique in the current contest.
     fn name(&self) -> ProblemName {
         self.problem.name()
@@ -217,11 +215,20 @@ impl ProblemTackling<'_> {
 impl ProblemTackling<'_> {
     /// Score awards of the current user (if to be shown)
     fn awards(&self) -> FieldResult<Vec<AwardOutcome>> {
-        Ok(AwardOutcome::by_user_and_problem(
-            &self.problem.contest_view.context(),
-            &self.user_id().0,
-            &self.name(),
-        )?)
+        Ok(self
+            .problem
+            .material()
+            .awards
+            .iter()
+            .map(|award| {
+                AwardOutcome::find_best(
+                    &self.problem.problem.context,
+                    award,
+                    &self.user_id().0,
+                    &self.name(),
+                )
+            })
+            .collect::<FieldResult<Vec<_>>>()?)
     }
 
     /// Sum of the score awards

@@ -9,7 +9,9 @@ query ListEvaluationsQuery {
     evaluations {
         id
         awards {
-            awardName
+            award {
+                name
+            }
             value {
                 __typename
                 ... on ScoreAwardValue {

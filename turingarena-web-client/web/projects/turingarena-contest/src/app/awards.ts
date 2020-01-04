@@ -1,8 +1,31 @@
 import gql from 'graphql-tag';
 
+import { scoreRangeFragment } from './score';
+import { textFragment } from './text';
+
+export const awardFragment = gql`
+  fragment AwardFragment on Award {
+    name
+    title { ...TextFragment }
+    content {
+      __typename
+      ... on ScoreAwardContent {
+        range {
+          ...ScoreRangeFragment
+        }
+      }
+    }
+  }
+
+  ${textFragment}
+  ${scoreRangeFragment}
+`;
+
 export const awardOutcomeFragment = gql`
   fragment AwardOutcomeFragment on AwardOutcome {
-    awardName
+    award {
+      ... AwardFragment
+    }
     value {
       ... AwardValueFragment
     }
@@ -24,4 +47,6 @@ export const awardOutcomeFragment = gql`
   fragment ScoreAwardValueFragment on ScoreAwardValue {
     score
   }
+
+  ${awardFragment}
 `;

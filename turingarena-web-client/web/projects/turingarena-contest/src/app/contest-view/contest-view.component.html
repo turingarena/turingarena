@@ -1,263 +1,272 @@
 <ng-container *ngIf="contestQuery.valueChanges | async as contestResult">
   <ng-container *ngIf="contestResult.data as data">
-    <ng-container *ngIf="getContestState(data.contestView) as state">
-      <nav class="topbar">
-        <a routerLink="/" class="contest-home">
-          <h1 class="contest-title">
-            <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.title | textVariant}}
-          </h1>
-        </a>
-        <ng-container *ngIf="data.contestView.user as user">
-          <span class="user-display-name">{{user.displayName}}</span>
-          <button class="user-logout" (click)="setAuth(undefined)">
-            <fa-icon [icon]="faSignOutAlt"></fa-icon>
-            Logout
-          </button>
-        </ng-container>
-        <ng-container *ngIf="!data.contestView.user">
-          <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
-            <fa-icon [icon]="faSignInAlt"></fa-icon>
-            Login
-          </button>
-        </ng-container>
-      </nav>
-      <div class="contest-main">
-        <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
-          <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
-        </aside>
+    <nav class="topbar">
+      <a routerLink="/" class="contest-home">
+        <h1 class="contest-title">
+          <fa-icon [icon]="faHome"></fa-icon> {{data.contestView.title | textVariant}}
+        </h1>
+      </a>
+      <ng-container *ngIf="data.contestView.user as user">
+        <span class="user-display-name">{{user.displayName}}</span>
+        <button class="user-logout" (click)="setAuth(undefined)">
+          <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          Logout
+        </button>
+      </ng-container>
+      <ng-container *ngIf="!data.contestView.user">
+        <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
+          <fa-icon [icon]="faSignInAlt"></fa-icon>
+          Login
+        </button>
+      </ng-container>
+    </nav>
+    <div class="contest-main">
+      <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
+        <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
+      </aside>
 
-        <aside class="contest-view-aside" [hidden]="focusMode">
-          <aside class="contest-aside">
-            <ng-container *ngIf="state.hasScore">
-              <h2 class="contest-score-title">Score</h2>
-              <div class="contest-score">
-                <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="state.clock | async as clock">
-              <h2 class="contest-clock-title" [ngSwitch]="clock.status">
-                <ng-container *ngSwitchCase="'startingIn'">Starting In</ng-container>
-                <ng-container *ngSwitchCase="'endingIn'">Remaining Time</ng-container>
-                <ng-container *ngSwitchCase="'endedBy'">Ended</ng-container>
-              </h2>
-              <div class="contest-clock" [attr.data-clock-status]="clock.status">
-                {{ clock.value.toFormat('hh:mm:ss') }}
-              </div>
-            </ng-container>
-            <ng-container *ngIf="data.contestView.problems.length > 0">
-              <h2 class="contest-problem-list-title">Problems</h2>
-              <div class="contest-problem-list">
-                <ng-container *ngFor="let problem of data.contestView.problems; index as index">
-                  <a class="contest-problem-link" [routerLink]="['/problem', problem.name]"
-                    [title]="problem.material.title | textVariant" routerLinkActive="active">
-                    {{ problem.material.title | textVariant:'short' }}
-                    <span class="contest-problem-score" [attr.data-score-tier]="getScoreTier(getProblemState(problem))">
-                      <ng-container *ngTemplateOutlet="scoreTemplate; context: getProblemState(problem)">
-                      </ng-container>
-                    </span>
-                  </a>
-                </ng-container>
-              </div>
-            </ng-container>
-          </aside>
-          <ng-container *ngFor="let problem of data.contestView.problems; index as index">
-            <aside class="problem-aside"
-              [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
-              <div class="problem-submission-panel" *ngIf="problem.tackling as tackling">
-                <ng-container *ngIf="tackling.canSubmit">
-                  <ng-template #newSubmissionDialog let-modal>
-                    <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
-                    </app-submission-dialog>
-                  </ng-template>
-                  <ng-template #submitDialog let-modal>
-                    <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
-                      (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
-                    </app-submit-dialog>
-                  </ng-template>
-                  <button class="problem-submit" (click)="modalService.open(submitDialog)">
-                    <fa-icon [icon]="faPaperPlane"></fa-icon>
-                    Submit a solution
-                  </button>
-                </ng-container>
-
-                <ng-container *ngIf="tackling.submissions[tackling.submissions.length - 1] as lastSubmission">
-                  <button class="problem-last-submission"
-                    (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-                    <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory">
-                    </fa-icon>
-                    <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
-                    </fa-icon>
-                    Last submission
-                  </button>
-                  <ng-template #lastSubmissionDialog let-modal>
-                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
-                    </app-submission-dialog>
-                  </ng-template>
-
-                  <button class="problem-submission-list"
-                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-                    <fa-icon [icon]="faList"></fa-icon>
-                    All submissions
-                  </button>
-                  <ng-template #submissionListDialog let-modal>
-                    <ng-container *ngIf="getProblemState(problem) as problemState">
-                      <div class="submission-list-dialog-header">
-                        <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
-                      </div>
-                      <div class="submission-list-dialog-body">
-                        <table class="submission-table">
-                          <thead class="submission-table-header">
-                            <tr>
-                              <th scope="col" rowspan="2">Submission time</th>
-                              <th *ngFor="let award of problem.material.awards">
-                                {{ award.title | textVariant:'short' }}
-                              </th>
-                              <th scope="col">Total score</th>
-                            </tr>
-                            <tr>
-                              <ng-container *ngFor="let award of problem.material.awards"
-                                [ngSwitch]="award.content.__typename">
-                                <ng-container *ngIf="problemState.award(award) as state">
-                                  <th *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
-                                    [attr.data-score-tier]="getScoreTier(state)">
-                                    <ng-container *ngTemplateOutlet="scoreTemplate; context: state">
-                                    </ng-container>
-                                  </th>
-                                  <th *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
-                                    [attr.data-badge]="state.badge">
-                                    <ng-container *ngTemplateOutlet="badgeTemplate; context: state">
-                                    </ng-container>
-                                  </th>
-                                </ng-container>
-                              </ng-container>
-                              <th class="score-cell" [attr.data-score-tier]="getScoreTier(problemState)">
-                                <ng-container *ngTemplateOutlet="scoreTemplate; context: problemState">
-                                </ng-container>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody class="submission-table-body">
-                            <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
-                              <ng-container
-                                *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
-                                <ng-template #submissionDialog let-modal>
-                                  <app-submission-dialog [problem]="problem" [submissionId]="submission.id"
-                                    [modal]="modal">
-                                  </app-submission-dialog>
-                                </ng-template>
-                                <td>
-                                  <app-relative-time [time]="submission.createdAt"></app-relative-time>
-                                  <br />
-                                  <a href="#"
-                                    (click)="modalService.open(submissionDialog, { size: 'lg' }); $event.preventDefault()">
-                                    details
-                                  </a>
-                                </td>
-                                <ng-container *ngIf="submission.evaluation.status === 'SUCCESS'">
-                                  <ng-container *ngIf="getSubmissionState(problem, submission) as submissionState">
-                                    <ng-container *ngFor="let award of problem.material.awards"
-                                      [ngSwitch]="award.content.__typename">
-                                      <ng-container *ngIf="submissionState.award(award) as state">
-                                        <td *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
-                                          [attr.data-score-tier]="getScoreTier(state)">
-                                          <ng-container *ngTemplateOutlet="scoreTemplate; context: state">
-                                          </ng-container>
-                                        </td>
-                                        <td *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
-                                          [attr.data-badge]="state.badge">
-                                          <ng-container *ngTemplateOutlet="badgeTemplate; context: state">
-                                          </ng-container>
-                                        </td>
-                                      </ng-container>
-                                    </ng-container>
-                                    <td class="score-cell" [attr.data-score-tier]="getScoreTier(submissionState)">
-                                      <ng-container *ngTemplateOutlet="scoreTemplate; context: submissionState">
-                                      </ng-container>
-                                    </td>
-                                  </ng-container>
-                                </ng-container>
-                                <ng-container *ngIf="submission.status === 'PENDING'">
-                                  <td [colSpan]="problem.material.awards.length + 1">Evaluating...</td>
-                                </ng-container>
-                              </ng-container>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="submission-list-dialog-footer">
-                        <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
-                      </div>
+      <aside class="contest-view-aside" [hidden]="focusMode">
+        <aside class="contest-aside">
+          <ng-container *ngIf="data.contestView.totalScore !== null">
+            <h2 class="contest-score-title">Score</h2>
+            <div class="contest-score">
+              <ng-container
+                *ngTemplateOutlet="scoreTemplate; context: { range: data.contestView.totalScoreRange, score: data.contestView.totalScore }">
+              </ng-container>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="getContestClock(data.contestView) | async as clock">
+            <h2 class="contest-clock-title" [ngSwitch]="clock.status">
+              <ng-container *ngSwitchCase="'startingIn'">Starting In</ng-container>
+              <ng-container *ngSwitchCase="'endingIn'">Remaining Time</ng-container>
+              <ng-container *ngSwitchCase="'endedBy'">Ended</ng-container>
+            </h2>
+            <div class="contest-clock" [attr.data-clock-status]="clock.status">
+              {{ clock.value.toFormat('hh:mm:ss') }}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="data.contestView.problems.length > 0">
+            <h2 class="contest-problem-list-title">Problems</h2>
+            <div class="contest-problem-list">
+              <ng-container *ngFor="let problem of data.contestView.problems; index as index">
+                <a class="contest-problem-link" [routerLink]="['/problem', problem.name]"
+                  [title]="problem.material.title | textVariant" routerLinkActive="active">
+                  {{ problem.material.title | textVariant:'short' }}
+                  <span class="contest-problem-score"
+                    [attr.data-score-tier]="getScoreTier({ score: problem.tackling.totalScore, range: problem.totalScoreRange })">
+                    <ng-container
+                      *ngTemplateOutlet="scoreTemplate; context: { score: problem.tackling.totalScore, range: problem.totalScoreRange }">
                     </ng-container>
-                  </ng-template>
-                </ng-container>
-              </div>
-              <div class="problem-info">
-                <ng-container *ngIf="problem.material.awards.length > 0">
-                  <h3 class="problem-award-list-title">Awards</h3>
-                  <div class="problem-award-list">
-                    <ng-container *ngFor="let award of problem.material.awards" [ngSwitch]="award.content.__typename">
-                      <div class="problem-award" [title]="award.title | textVariant">
-                        {{award.title | textVariant}}
-                        <ng-container *ngIf="getProblemState(problem) as problemState">
-                          <ng-container *ngIf="problemState.award(award) as state">
-                            <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
-                              [attr.data-score-tier]="getScoreTier(state)">
-                              <ng-container *ngTemplateOutlet="scoreTemplate; context: state"></ng-container>
-                            </th>
-                            <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
-                              [attr.data-badge]="state.badge">
-                              <ng-container *ngTemplateOutlet="badgeTemplate; context: state"></ng-container>
-                            </th>
-                          </ng-container>
-                        </ng-container>
-                      </div>
-                    </ng-container>
-                  </div>
-                </ng-container>
-                <ng-container *ngIf="problem.material.attachments.length > 0">
-                  <h3 class="problem-attachment-list-title">Attachments</h3>
-                  <div class="problem-attachment-list">
-                    <ng-container *ngFor="let attachment of problem.material.attachments">
-                      <ng-container *ngIf="attachment.file | fileVariant as file">
-                        <a class="problem-attachment" [title]="attachment.title | textVariant" [download]="file.name"
-                          [href]="'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64 | bypassSanitizer:'Url'">
-                          <fa-icon [icon]="mimeTypeIcons[file.type] || faFile"></fa-icon>
-                          {{attachment.title | textVariant}}
-                        </a>
-                      </ng-container>
-                    </ng-container>
-                  </div>
-                </ng-container>
-                <ng-container *ngIf="problem.material.statement | fileVariant as statement">
-                  <h2 class="problem-download-statement-title">Statement file</h2>
-                  <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
-                    [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
-                    <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
-                    {{statement.name}}
-                  </a>
-                </ng-container>
-              </div>
-            </aside>
+                  </span>
+                </a>
+              </ng-container>
+            </div>
           </ng-container>
         </aside>
+        <ng-container *ngFor="let problem of data.contestView.problems; index as index">
+          <aside class="problem-aside"
+            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+            <div class="problem-submission-panel" *ngIf="problem.tackling as tackling">
+              <ng-container *ngIf="tackling.canSubmit">
+                <ng-template #newSubmissionDialog let-modal>
+                  <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
+                  </app-submission-dialog>
+                </ng-template>
+                <ng-template #submitDialog let-modal>
+                  <app-submit-dialog [problem]="problem" [userId]="data.contestView.user.id" [modal]="modal"
+                    (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
+                  </app-submit-dialog>
+                </ng-template>
+                <button class="problem-submit" (click)="modalService.open(submitDialog)">
+                  <fa-icon [icon]="faPaperPlane"></fa-icon>
+                  Submit a solution
+                </button>
+              </ng-container>
 
-        <main class="contest-home-content" [hidden]="(route.firstChild!.paramMap | async).has('problemName')">
-          <ng-container *ngIf="data.contestView.home | fileVariant as file">
+              <ng-container *ngIf="tackling.submissions[tackling.submissions.length - 1] as lastSubmission">
+                <button class="problem-last-submission"
+                  (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
+                  <fa-icon *ngIf="lastSubmission.status !== 'PENDING'" [icon]="faHistory">
+                  </fa-icon>
+                  <fa-icon *ngIf="lastSubmission.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
+                  </fa-icon>
+                  Last submission
+                </button>
+                <ng-template #lastSubmissionDialog let-modal>
+                  <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                  </app-submission-dialog>
+                </ng-template>
+
+                <button class="problem-submission-list"
+                  (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+                  <fa-icon [icon]="faList"></fa-icon>
+                  All submissions
+                </button>
+                <ng-template #submissionListDialog let-modal>
+                  <ng-container *ngIf="problem.tackling as tackling">
+                    <div class="submission-list-dialog-header">
+                      <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
+                    </div>
+                    <div class="submission-list-dialog-body">
+                      <table class="submission-table">
+                        <thead class="submission-table-header">
+                          <tr>
+                            <th scope="col" rowspan="2">Submission time</th>
+                            <th *ngFor="let award of problem.material.awards">
+                              {{ award.title | textVariant:'short' }}
+                            </th>
+                            <th scope="col">Total score</th>
+                          </tr>
+                          <tr>
+                            <ng-container *ngFor="let awardOutcome of tackling.awards"
+                              [ngSwitch]="awardOutcome.award.content.__typename">
+                              <th *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
+                                [attr.data-score-tier]="getScoreTier({ range: awardOutcome.award.content.range, score: awardOutcome.value.score })">
+                                <ng-container
+                                  *ngTemplateOutlet="scoreTemplate; context: { range: awardOutcome.award.content.range, score: awardOutcome.value.score }">
+                                </ng-container>
+                              </th>
+                              <th *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
+                                [attr.data-badge]="awardOutcome.badge">
+                                <ng-container
+                                  *ngTemplateOutlet="badgeTemplate; context: { badge: awardOutcome.value.badge }">
+                                </ng-container>
+                              </th>
+                            </ng-container>
+                            <th class="score-cell"
+                              [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: problem.totalScore })">
+                              <ng-container
+                                *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: problem.totalScore }">
+                              </ng-container>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="submission-table-body">
+                          <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
+                            <ng-container
+                              *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
+                              <ng-template #submissionDialog let-modal>
+                                <app-submission-dialog [problem]="problem" [submissionId]="submission.id"
+                                  [modal]="modal">
+                                </app-submission-dialog>
+                              </ng-template>
+                              <td>
+                                <app-relative-time [time]="submission.createdAt"></app-relative-time>
+                                <br />
+                                <a href="#"
+                                  (click)="modalService.open(submissionDialog, { size: 'lg' }); $event.preventDefault()">
+                                  details
+                                </a>
+                              </td>
+                              <ng-container *ngIf="submission.evaluation.status === 'SUCCESS'">
+                                <ng-container *ngFor="let awardOutcome of submission.evaluation.awards"
+                                  [ngSwitch]="awardOutcome.award.content.__typename">
+                                  <td *ngSwitchCase="'ScoreAwardContent'" class="score-cell"
+                                    [attr.data-score-tier]="getScoreTier({ range: awardOutcome.award.content.range, score: awardOutcome.value.score })">
+                                    <ng-container
+                                      *ngTemplateOutlet="scoreTemplate; context: { range: awardOutcome.award.content.range, score: awardOutcome.value.score }">
+                                    </ng-container>
+                                  </td>
+                                  <td *ngSwitchCase="'BadgeAwardContent'" class="badge-cell"
+                                    [attr.data-badge]="awardOutcome.value.badge">
+                                    <ng-container
+                                      *ngTemplateOutlet="badgeTemplate; context: { badge: awardOutcome.value.badge }">
+                                    </ng-container>
+                                  </td>
+                                </ng-container>
+                                <td class="score-cell"
+                                  [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: submission.evaluation.totalScore })">
+                                  <ng-container
+                                    *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: submission.evaluation.totalScore }">
+                                  </ng-container>
+                                </td>
+                              </ng-container>
+                              <ng-container *ngIf="submission.status === 'PENDING'">
+                                <td [colSpan]="problem.material.awards.length + 1">Evaluating...</td>
+                              </ng-container>
+                            </ng-container>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="submission-list-dialog-footer">
+                      <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
+                    </div>
+                  </ng-container>
+                </ng-template>
+              </ng-container>
+            </div>
+            <div class="problem-info">
+              <ng-container *ngIf="problem.material.awards.length > 0">
+                <h3 class="problem-award-list-title">Awards</h3>
+                <div class="problem-award-list">
+                  <ng-container *ngFor="let award of problem.material.awards; index as awardIndex"
+                    [ngSwitch]="award.content.__typename">
+                    <div class="problem-award" [title]="award.title | textVariant">
+                      {{award.title | textVariant}}
+                      <ng-container *ngIf="problem.tackling as tackling">
+                        <ng-container *ngIf="tackling.awards[awardIndex] as awardOutcome">
+                          <th *ngSwitchCase="'ScoreAwardContent'" class="problem-award-score"
+                            [attr.data-score-tier]="getScoreTier({ range: award.content.range, score: awardOutcome.value.score })">
+                            <ng-container
+                              *ngTemplateOutlet="scoreTemplate; context: { range: award.content.range, score: awardOutcome.value.score }">
+                            </ng-container>
+                          </th>
+                          <th *ngSwitchCase="'BadgeAwardContent'" class="problem-award-badge"
+                            [attr.data-badge]="awardOutcome.value.badge">
+                            <ng-container
+                              *ngTemplateOutlet="badgeTemplate; context: { badge: awardOutcome.value.badge }">
+                            </ng-container>
+                          </th>
+                        </ng-container>
+                      </ng-container>
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="problem.material.attachments.length > 0">
+                <h3 class="problem-attachment-list-title">Attachments</h3>
+                <div class="problem-attachment-list">
+                  <ng-container *ngFor="let attachment of problem.material.attachments">
+                    <ng-container *ngIf="attachment.file | fileVariant as file">
+                      <a class="problem-attachment" [title]="attachment.title | textVariant" [download]="file.name"
+                        [href]="'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64 | bypassSanitizer:'Url'">
+                        <fa-icon [icon]="mimeTypeIcons[file.type] || faFile"></fa-icon>
+                        {{attachment.title | textVariant}}
+                      </a>
+                    </ng-container>
+                  </ng-container>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="problem.material.statement | fileVariant as statement">
+                <h2 class="problem-download-statement-title">Statement file</h2>
+                <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
+                  [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
+                  <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
+                  {{statement.name}}
+                </a>
+              </ng-container>
+            </div>
+          </aside>
+        </ng-container>
+      </aside>
+
+      <main class="contest-home-content" [hidden]="(route.firstChild!.paramMap | async).has('problemName')">
+        <ng-container *ngIf="data.contestView.home | fileVariant as file">
+          <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
+        </ng-container>
+      </main>
+
+      <ng-container *ngFor="let problem of data.contestView.problems">
+        <main class="problem-statement"
+          [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+          <ng-container *ngIf="problem.material.statement | fileVariant as file">
             <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
           </ng-container>
         </main>
+      </ng-container>
 
-        <ng-container *ngFor="let problem of data.contestView.problems">
-          <main class="problem-statement"
-            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
-            <ng-container *ngIf="problem.material.statement | fileVariant as file">
-              <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
-            </ng-container>
-          </main>
-        </ng-container>
-
-      </div>
-    </ng-container>
+    </div>
   </ng-container>
 </ng-container>
 

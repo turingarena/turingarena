@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-import { MaterialFragment } from './__generated__/MaterialFragment';
+import { awardFragment } from './awards';
 import { fileFragment } from './file';
 import { rusageFragment } from './rusage';
 import { scoreRangeFragment } from './score';
@@ -26,19 +26,6 @@ export const problemMaterialFragment = gql`
 
   fragment FormFragment on Form {
     fields { ...FieldFragment }
-  }
-
-  fragment AwardFragment on Award {
-    name
-    title { ...TextFragment }
-    content {
-      __typename
-      ... on ScoreAwardContent {
-        range {
-          ...ScoreRangeFragment
-        }
-      }
-    }
   }
 
   fragment TableSectionFragment on TableSection {
@@ -132,4 +119,5 @@ export const problemMaterialFragment = gql`
   ${fileFragment}
   ${rusageFragment}
   ${scoreRangeFragment}
+  ${awardFragment}
 `;

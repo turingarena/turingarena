@@ -119,4 +119,8 @@ impl User<'_> {
     pub fn display_name(&self) -> &String {
         &self.data.display_name
     }
+
+    pub fn contest_view(&self) -> FieldResult<ContestView> {
+        ContestView::new(&self.context, Some(self.id()))
+    }
 }

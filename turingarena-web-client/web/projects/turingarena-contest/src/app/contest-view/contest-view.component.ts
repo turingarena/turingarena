@@ -21,12 +21,14 @@ import {
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
+import { DateTime, Duration } from 'luxon';
+import { interval } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
+import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 import { Auth, AuthService } from '../auth.service';
-import { contestViewFragment, getContestState } from '../contest';
-import { getProblemState } from '../problem';
+import { contestViewFragment } from '../contest';
 import { getScoreTier } from '../score';
-import { getSubmissionState } from '../submission';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
@@ -83,14 +85,36 @@ export class ContestViewComponent implements OnInit {
 
   contestQuery!: QueryRef<ContestQuery, ContestQueryVariables>;
 
-  getContestState = getContestState;
-  getProblemState = getProblemState;
-  getSubmissionState = getSubmissionState;
   getScoreTier = getScoreTier;
 
   ngOnInit() {
     this.setQuery();
   }
+
+  getContestClock = ({ startTime, endTime }: ContestViewFragment) =>
+    interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
+      startWith(0),
+      map(() => {
+        const now = DateTime.local();
+        const start = DateTime.fromISO(startTime);
+        const end = DateTime.fromISO(endTime);
+
+        return now < start
+          ? {
+            status: 'startingIn',
+            value: start.diff(now),
+          }
+          : now < end
+            ? {
+              status: 'endingIn',
+              value: end.diff(now),
+            }
+            : {
+              status: 'endedBy',
+              value: now.diff(end),
+            };
+      }),
+    )
 
   setQuery() {
     this.contestQuery = this.apollo.watchQuery<ContestQuery, ContestQueryVariables>({
