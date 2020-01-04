@@ -198,13 +198,6 @@ impl ContestView<'_> {
         self.contest.material()
     }
 
-    /// A problem that the user can see
-    fn problem(&self, name: String) -> FieldResult<ProblemView> {
-        // TODO: check permissions
-
-        ProblemView::by_name(&self, &name)
-    }
-
     /// List of problems that the user can see
     fn problems(&self) -> FieldResult<Option<Vec<ProblemView>>> {
         // TODO: return only the problems that only the user can access

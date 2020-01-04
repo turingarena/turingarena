@@ -173,14 +173,6 @@ impl<'a> ProblemView<'a> {
 }
 
 impl<'a> ProblemView<'a> {
-    pub fn by_name(contest_view: &'a ContestView<'a>, name: &str) -> FieldResult<Self> {
-        let problem = Problem::by_name(contest_view.context(), name)?;
-        Ok(ProblemView {
-            contest_view,
-            problem,
-        })
-    }
-
     /// Get all the problems data in the database
     pub fn all(contest_view: &'a ContestView<'a>) -> FieldResult<Vec<Self>> {
         let problems = Problem::all(contest_view.context())?;
