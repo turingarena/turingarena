@@ -137,8 +137,10 @@ export class ContestViewComponent implements OnInit {
                 totalScoreRange {
                   ...ScoreRangeFragment
                 }
-                view {
-                  totalScore
+                view(userId: $userId) {
+                  tackling {
+                    totalScore
+                  }
                 }
               }
             }

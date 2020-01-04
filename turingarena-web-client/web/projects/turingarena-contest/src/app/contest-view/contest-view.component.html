@@ -28,11 +28,11 @@
       <aside class="contest-view-aside" [hidden]="focusMode">
         <aside class="contest-aside">
           <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
-            <ng-container *ngIf="problemSet.view.totalScore !== null">
+            <ng-container *ngIf="problemSet.view.tackling! as tackling">
               <h2 class="contest-score-title">Score</h2>
               <div class="contest-score">
                 <ng-container
-                  *ngTemplateOutlet="scoreTemplate; context: { range: problemSet.totalScoreRange, score: problemSet.view.totalScore }">
+                  *ngTemplateOutlet="scoreTemplate; context: { range: problemSet.totalScoreRange, score: tackling.totalScore }">
                 </ng-container>
               </div>
             </ng-container>
@@ -137,9 +137,9 @@
                                 </th>
                               </ng-container>
                               <th class="score-cell"
-                                [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: problem.view.totalScore })">
+                                [attr.data-score-tier]="getScoreTier({ range: problem.totalScoreRange, score: problem.tackling.totalScore })">
                                 <ng-container
-                                  *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: problem.view.totalScore }">
+                                  *ngTemplateOutlet="scoreTemplate; context: { range: problem.totalScoreRange, score: problem.tackling.totalScore }">
                                 </ng-container>
                               </th>
                             </tr>

@@ -244,7 +244,7 @@ impl ProblemSet<'_> {
     }
 
     /// Information about this problem set visible to a user
-    fn view(&self, _user_id: Option<UserId>) -> ProblemSetView {
+    fn view(&self, user_id: Option<UserId>) -> ProblemSetView {
         ProblemSetView { problem_set: &self }
     }
 }
@@ -255,9 +255,25 @@ pub struct ProblemSetView<'a> {
 
 #[juniper_ext::graphql]
 impl ProblemSetView<'_> {
+    /// Current progress of user in solving the problems in this problem set
+    fn tackling(&self, user_id: Option<UserId>) -> Option<ProblemSetTackling> {
+        // TODO: return `None` if user is not participating in the contest
+        Some(ProblemSetTackling {
+            problem_set_view: &self,
+        })
+    }
+}
+
+pub struct ProblemSetTackling<'a> {
+    problem_set_view: &'a ProblemSetView<'a>,
+}
+
+#[juniper_ext::graphql]
+impl ProblemSetTackling<'_> {
     /// Range of the total score, obtained as the sum of score range of each problem
     fn total_score(&self) -> FieldResult<Option<Score>> {
         Ok(self
+            .problem_set_view
             .problem_set
             .problems()?
             .iter()
