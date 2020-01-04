@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { ColDef, ColGroupDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 
 import { Valence } from '../../../../../__generated__/globalTypes';
-import { AwardFragment } from '../__generated__/AwardFragment';
-import { BadgeAwardValueFragment } from '../__generated__/BadgeAwardValueFragment';
-import { MaterialFragment } from '../__generated__/MaterialFragment';
-import { ScoreAwardValueFragment } from '../__generated__/ScoreAwardValueFragment';
-import { getBadgeValence, getScoreValence } from '../score';
+import { AwardFragment } from '../fragments/__generated__/AwardFragment';
+import { BadgeAwardValueFragment } from '../fragments/__generated__/BadgeAwardValueFragment';
+import { MaterialFragment } from '../fragments/__generated__/MaterialFragment';
+import { ScoreAwardValueFragment } from '../fragments/__generated__/ScoreAwardValueFragment';
+import { getBadgeValence, getScoreValence } from '../fragments/score';
 import { VariantService } from '../variant.service';
 
 import { AdminQuery } from './__generated__/AdminQuery';

@@ -5,7 +5,7 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
-import { ProblemViewFragment } from '../__generated__/ProblemViewFragment';
+import { ProblemViewFragment } from '../fragments/__generated__/ProblemViewFragment';
 import { VariantService } from '../variant.service';
 
 import { AdminQuery } from './__generated__/AdminQuery';

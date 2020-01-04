@@ -1,7 +1,7 @@
 import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 
-import { TextFragment } from './__generated__/TextFragment';
-import { VariantAttributeFragment } from './__generated__/VariantAttributeFragment';
+import { TextFragment } from './fragments/__generated__/TextFragment';
+import { VariantAttributeFragment } from './fragments/__generated__/VariantAttributeFragment';
 
 @Injectable({
   providedIn: 'root',

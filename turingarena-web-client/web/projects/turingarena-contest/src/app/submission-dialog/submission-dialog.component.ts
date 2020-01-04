@@ -5,16 +5,16 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Duration } from 'luxon';
 
-import { MaterialFragment } from '../__generated__/MaterialFragment';
-import { ScoreRangeFragment } from '../__generated__/ScoreRangeFragment';
-import { ScoreValueFragment } from '../__generated__/ScoreValueFragment';
-import { SubmissionEvaluationFragment } from '../__generated__/SubmissionEvaluationFragment';
-import { TimeUsageCellContentFragment } from '../__generated__/TimeUsageCellContentFragment';
-import { TimeUsageFragment } from '../__generated__/TimeUsageFragment';
-import { ValenceValueFragment } from '../__generated__/ValenceValueFragment';
-import { ValueFragment } from '../__generated__/ValueFragment';
-import { evaluationFragment } from '../evaluation';
-import { submissionFragment } from '../submission';
+import { MaterialFragment } from '../fragments/__generated__/MaterialFragment';
+import { ScoreRangeFragment } from '../fragments/__generated__/ScoreRangeFragment';
+import { ScoreValueFragment } from '../fragments/__generated__/ScoreValueFragment';
+import { SubmissionEvaluationFragment } from '../fragments/__generated__/SubmissionEvaluationFragment';
+import { TimeUsageCellContentFragment } from '../fragments/__generated__/TimeUsageCellContentFragment';
+import { TimeUsageFragment } from '../fragments/__generated__/TimeUsageFragment';
+import { ValenceValueFragment } from '../fragments/__generated__/ValenceValueFragment';
+import { ValueFragment } from '../fragments/__generated__/ValueFragment';
+import { evaluationFragment } from '../fragments/evaluation';
+import { submissionFragment } from '../fragments/submission';
 
 import {
   SubmissionQuery,

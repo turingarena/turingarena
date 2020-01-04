@@ -4,10 +4,10 @@ import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 
 import { FileInput } from '../../../../../__generated__/globalTypes';
-import { FieldFragment } from '../__generated__/FieldFragment';
-import { FieldTypeFragment } from '../__generated__/FieldTypeFragment';
-import { ProblemViewFragment } from '../__generated__/ProblemViewFragment';
 import { FileLoadService } from '../file-load.service';
+import { FieldFragment } from '../fragments/__generated__/FieldFragment';
+import { FieldTypeFragment } from '../fragments/__generated__/FieldTypeFragment';
+import { ProblemViewFragment } from '../fragments/__generated__/ProblemViewFragment';
 
 import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitMutation';
 

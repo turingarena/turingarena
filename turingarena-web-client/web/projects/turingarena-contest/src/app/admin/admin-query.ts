@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 
-import { awardOutcomeFragment } from '../awards';
-import { problemMaterialFragment } from '../material';
-import { scoreRangeFragment } from '../score';
-import { textFragment } from '../text';
+import { awardOutcomeFragment } from '../fragments/awards';
+import { problemMaterialFragment } from '../fragments/material';
+import { scoreRangeFragment } from '../fragments/score';
+import { textFragment } from '../fragments/text';
 
 export const adminQuery = gql`
   fragment AdminProblemFragment on Problem {

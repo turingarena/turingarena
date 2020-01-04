@@ -25,10 +25,10 @@ import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ContestViewFragment } from '../__generated__/ContestViewFragment';
 import { Auth, AuthService } from '../auth.service';
-import { contestViewFragment } from '../contest';
-import { getScoreTier } from '../score';
+import { ContestViewFragment } from '../fragments/__generated__/ContestViewFragment';
+import { contestViewFragment } from '../fragments/contest';
+import { getScoreTier } from '../fragments/score';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';

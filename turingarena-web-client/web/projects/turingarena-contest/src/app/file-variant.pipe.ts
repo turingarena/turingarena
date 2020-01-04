@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { FileFragment } from './__generated__/FileFragment';
+import { FileFragment } from './fragments/__generated__/FileFragment';
 import { VariantService } from './variant.service';
 
 @Pipe({
