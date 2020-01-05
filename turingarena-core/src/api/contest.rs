@@ -13,7 +13,7 @@ use root::ApiContext;
 
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::Problem;
-use crate::data::award::{Score, ScoreRange};
+use crate::data::award::{Score, ScoreAwardGrade, ScoreRange};
 use crate::data::contest::ContestMaterial;
 use questions::{Question, QuestionInput};
 use schema::contest;
@@ -172,7 +172,7 @@ impl<'a> Contest<'a> {
 
     pub fn total_score_range(&self) -> FieldResult<ScoreRange> {
         self.context.authorize_admin()?;
-        Ok(ScoreRange::merge(
+        Ok(ScoreRange::total(
             self.problems()?
                 .iter()
                 .map(|problem| problem.total_score_range()),
@@ -237,7 +237,7 @@ impl ProblemSet<'_> {
 
     /// Range of the total score, obtained as the sum of score range of each problem
     fn total_score_range(&self) -> FieldResult<ScoreRange> {
-        Ok(ScoreRange::merge(
+        Ok(ScoreRange::total(
             self.problems()?
                 .iter()
                 .map(|problem| problem.total_score_range()),
@@ -278,14 +278,14 @@ pub struct ProblemSetTackling<'a> {
 #[juniper_ext::graphql]
 impl ProblemSetTackling<'_> {
     /// Range of the total score, obtained as the sum of score range of each problem
-    fn total_score(&self) -> FieldResult<Score> {
-        Ok(Score(
+    fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade::total(
             self.problem_set
                 .problems()?
                 .iter()
                 .filter_map(|problem| problem.view(Some(self.user_id.clone())).tackling())
                 .map(|tackling| tackling.total_score())
-                .fold(Ok(0f64), |a, b| -> FieldResult<_> { Ok(a? + b?.0) })?,
+                .collect::<FieldResult<Vec<_>>>()?,
         ))
     }
 }

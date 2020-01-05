@@ -11,23 +11,6 @@ query ListEvaluationsQuery {
     contest {
         evaluations {
             id
-            awards {
-                name
-                value {
-                    __typename
-                    ... on ScoreAwardValue {
-                        score
-                    }
-                    ... on BadgeAwardValue {
-                        badge
-                    }
-                }
-            }
-            submission {
-                id
-                userId
-                problemName
-            }
         }
     }
 }
