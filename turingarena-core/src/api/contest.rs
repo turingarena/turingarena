@@ -11,9 +11,10 @@ use content::{FileContent, FileName, FileVariant, MediaType, TextVariant};
 use contest_problem::ProblemView;
 use root::ApiContext;
 
+use crate::api::award::ScoreAwardGrading;
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::Problem;
-use crate::data::award::{Score, ScoreAwardGrade, ScoreRange};
+use crate::data::award::{ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange};
 use crate::data::contest::ContestMaterial;
 use questions::{Question, QuestionInput};
 use schema::contest;
@@ -170,13 +171,17 @@ impl<'a> Contest<'a> {
         ContestView::new(&self, user_id)
     }
 
-    pub fn total_score_range(&self) -> FieldResult<ScoreRange> {
-        self.context.authorize_admin()?;
+    pub fn score_range(&self) -> FieldResult<ScoreRange> {
         Ok(ScoreRange::total(
-            self.problems()?
-                .iter()
-                .map(|problem| problem.total_score_range()),
+            self.problems()?.iter().map(|problem| problem.score_range()),
         ))
+    }
+
+    pub fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
+        self.context.authorize_admin()?;
+        Ok(ScoreAwardDomain {
+            range: self.score_range()?,
+        })
     }
 
     fn users(&self) -> FieldResult<Vec<User>> {
@@ -236,12 +241,16 @@ impl ProblemSet<'_> {
     }
 
     /// Range of the total score, obtained as the sum of score range of each problem
-    fn total_score_range(&self) -> FieldResult<ScoreRange> {
+    fn score_range(&self) -> FieldResult<ScoreRange> {
         Ok(ScoreRange::total(
-            self.problems()?
-                .iter()
-                .map(|problem| problem.total_score_range()),
+            self.problems()?.iter().map(|problem| problem.score_range()),
         ))
+    }
+
+    fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
+        Ok(ScoreAwardDomain {
+            range: self.score_range()?,
+        })
     }
 
     /// Information about this problem set visible to a user
@@ -260,6 +269,16 @@ pub struct ProblemSetView<'a> {
 
 #[juniper_ext::graphql]
 impl ProblemSetView<'_> {
+    fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+        Ok(ScoreAwardGrading {
+            domain: self.problem_set.score_domain()?,
+            grade: match self.tackling() {
+                Some(t) => Some(t.grade()?),
+                None => None,
+            },
+        })
+    }
+
     /// Current progress of user in solving the problems in this problem set
     fn tackling(&self) -> Option<ProblemSetTackling> {
         // TODO: return `None` if user is not participating in the contest
@@ -277,16 +296,23 @@ pub struct ProblemSetTackling<'a> {
 
 #[juniper_ext::graphql]
 impl ProblemSetTackling<'_> {
-    /// Range of the total score, obtained as the sum of score range of each problem
-    fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
-        Ok(ScoreAwardGrade::total(
+    /// Total score, obtained as the sum of score of each problem
+    fn score(&self) -> FieldResult<ScoreAwardValue> {
+        Ok(ScoreAwardValue::total(
             self.problem_set
                 .problems()?
                 .iter()
                 .filter_map(|problem| problem.view(Some(self.user_id.clone())).tackling())
-                .map(|tackling| tackling.total_score())
+                .map(|tackling| tackling.score())
                 .collect::<FieldResult<Vec<_>>>()?,
         ))
+    }
+
+    fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade {
+            domain: self.problem_set.score_domain()?,
+            value: self.score()?,
+        })
     }
 }
 

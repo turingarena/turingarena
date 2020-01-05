@@ -12,6 +12,7 @@ use crate::api::user::UserId;
 use crate::file::FileContent;
 
 use super::*;
+use crate::api::contest_problem::Problem;
 use crate::data::file::FileContentInput;
 
 /// Wraps a String that identifies a submission
@@ -86,6 +87,11 @@ pub struct Submission<'a> {
 }
 
 impl Submission<'_> {
+    /// Name of the problem wich the submission refers to
+    pub fn problem_name(&self) -> &String {
+        &self.data.problem_name
+    }
+
     pub fn field_values(&self) -> FieldResult<Vec<FieldValue>> {
         Ok(submission_files::table
             .filter(submission_files::dsl::submission_id.eq(&self.data.id))
@@ -172,9 +178,8 @@ impl Submission<'_> {
         UserId(self.data.user_id.clone())
     }
 
-    /// Name of the problem wich the submission refers to
-    pub fn problem_name(&self) -> &String {
-        &self.data.problem_name
+    pub fn problem(&self) -> FieldResult<Problem> {
+        Ok(Problem::by_name(&self.context, self.problem_name())?)
     }
 
     /// Time at wich the submission was created

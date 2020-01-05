@@ -10,9 +10,9 @@ use root::ApiContext;
 use schema::problems;
 use user::UserId;
 
-use crate::api::award::{AwardAchievement, AwardView};
+use crate::api::award::{AwardView, ScoreAwardGrading};
 use crate::data::award::{
-    AwardDomain, AwardGrade, Score, ScoreAwardDomain, ScoreAwardGrade, ScoreRange,
+    AwardDomain, AwardValue, ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange,
 };
 use crate::data::file::FileContent;
 
@@ -65,13 +65,19 @@ impl Problem<'_> {
     }
 
     /// Range of the total score, obtained as the sum of all the score awards
-    pub fn total_score_range(&self) -> ScoreRange {
+    pub fn score_range(&self) -> ScoreRange {
         ScoreRange::total(self.material.awards.iter().filter_map(
             |award| match award.material.domain {
                 AwardDomain::Score(ScoreAwardDomain { range }) => Some(range),
                 _ => None,
             },
         ))
+    }
+
+    pub fn score_domain(&self) -> ScoreAwardDomain {
+        ScoreAwardDomain {
+            range: self.score_range(),
+        }
     }
 
     pub fn view(&self, user_id: Option<UserId>) -> ProblemView {
@@ -173,6 +179,16 @@ impl<'a> ProblemView<'a> {
             .collect()
     }
 
+    pub fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+        Ok(ScoreAwardGrading {
+            domain: self.problem.score_domain(),
+            grade: match self.tackling() {
+                Some(t) => Some(t.grade()?),
+                None => None,
+            },
+        })
+    }
+
     pub fn tackling(&self) -> Option<ProblemTackling<'a>> {
         // TODO: return `None` if user is not participating in the contest
         self.user_id.as_ref().map(|user_id| ProblemTackling {
@@ -192,8 +208,8 @@ pub struct ProblemTackling<'a> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Sum of the score awards
-    pub fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
-        Ok(ScoreAwardGrade::total(
+    pub fn score(&self) -> FieldResult<ScoreAwardValue> {
+        Ok(ScoreAwardValue::total(
             self.problem
                 .view(Some(self.user_id.clone()))
                 .awards()
@@ -204,9 +220,9 @@ impl ProblemTackling<'_> {
                             .tackling()
                             .ok_or(FieldError::from("problem tackling without award tackling"))?
                             .best_achievement()?
-                            .grade()
+                            .value()
                         {
-                            AwardGrade::Score(grade) => Some(grade),
+                            AwardValue::Score(value) => Some(value),
                             _ => None,
                         },
                     )
@@ -218,6 +234,13 @@ impl ProblemTackling<'_> {
                 })
                 .collect::<FieldResult<Vec<_>>>()?,
         ))
+    }
+
+    fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade {
+            domain: self.problem.score_domain(),
+            value: self.score()?,
+        })
     }
 
     /// Submissions of the current user (if to be shown)

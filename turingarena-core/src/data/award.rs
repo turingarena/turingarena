@@ -116,6 +116,7 @@ pub struct BadgeAwardValue {
 }
 
 /// Describes how well an award is achieved.
+/// Contains the `value`, and its `domain`, for context.
 #[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
 pub enum AwardGrade {
     Score(ScoreAwardGrade),
@@ -126,19 +127,6 @@ pub enum AwardGrade {
 pub struct ScoreAwardGrade {
     pub domain: ScoreAwardDomain,
     pub value: ScoreAwardValue,
-}
-
-impl ScoreAwardGrade {
-    pub fn total<I: Clone + IntoIterator<Item = Self>>(values: I) -> Self {
-        ScoreAwardGrade {
-            domain: ScoreAwardDomain::total(
-                values.clone().into_iter().map(|Self { domain, .. }| domain),
-            ),
-            value: ScoreAwardValue::total(
-                values.clone().into_iter().map(|Self { value, .. }| value),
-            ),
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]

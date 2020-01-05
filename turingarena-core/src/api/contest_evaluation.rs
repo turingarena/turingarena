@@ -19,7 +19,7 @@ use crate::evaluation::AwardEvent;
 
 use super::submission::FieldValue;
 use super::*;
-use crate::data::award::{AwardGrade, Score, ScoreAwardGrade};
+use crate::data::award::{Score, ScoreAwardGrade};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -57,30 +57,12 @@ impl<'a> Evaluation<'a> {
         EvaluationStatus::from(&self.data.status)
     }
 
-    /// Award achievement of this evaluation
-    pub fn achievements(&self) -> FieldResult<Vec<AwardAchievement<'a>>> {
-        let problem = Problem::by_name(self.context, self.submission()?.problem_name())?;
-
-        problem
-            .material()
-            .awards
-            .iter()
-            .map(|award| AwardAchievement::find(&self.context, award, self.id()))
-            .collect::<FieldResult<Vec<_>>>()
-    }
-
-    /// Sum of the score awards
-    pub fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
-        Ok(ScoreAwardGrade::total(
-            self.achievements()?
-                .into_iter()
-                .map(|achievement| achievement.grade())
-                .filter_map(|grade| match grade {
-                    AwardGrade::Score(grade) => Some(grade),
-                    _ => None,
-                })
-                .collect::<Vec<_>>(),
-        ))
+    /// Evaluation result (achievements, scores, etc.)
+    pub fn result(&self) -> Option<EvaluationResult> {
+        match self.status() {
+            EvaluationStatus::Success => Some(EvaluationResult { evaluation: &self }),
+            _ => None,
+        }
     }
 
     /// Evaluation events of this submission
@@ -283,5 +265,47 @@ impl EvaluationStatus {
             EvaluationStatus::Failed => "FAILED",
         }
         .to_owned()
+    }
+}
+
+pub struct EvaluationResult<'a> {
+    pub evaluation: &'a Evaluation<'a>,
+}
+
+#[juniper_ext::graphql]
+impl EvaluationResult<'_> {
+    /// Award achievement of this evaluation
+    pub fn achievements(&self) -> FieldResult<Vec<AwardAchievement>> {
+        self.evaluation
+            .submission()?
+            .problem()?
+            .material()
+            .awards
+            .iter()
+            .map(|award| {
+                AwardAchievement::find(&self.evaluation.context, award, self.evaluation.id())
+            })
+            .collect::<FieldResult<Vec<_>>>()
+    }
+
+    /// Sum of the score awards
+    pub fn score(&self) -> FieldResult<ScoreAwardValue> {
+        Ok(ScoreAwardValue::total(
+            self.achievements()?
+                .into_iter()
+                .map(|achievement| achievement.value())
+                .filter_map(|value| match value {
+                    AwardValue::Score(value) => Some(value),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+        ))
+    }
+
+    pub fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade {
+            domain: self.evaluation.submission()?.problem()?.score_domain(),
+            value: self.score()?,
+        })
     }
 }

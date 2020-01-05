@@ -137,22 +137,47 @@ impl AwardAchievement<'_> {
         &self.award
     }
 
-    pub fn grade(&self) -> AwardGrade {
-        match self.award.material.domain.clone() {
-            AwardDomain::Score(domain) => AwardGrade::Score(ScoreAwardGrade {
-                domain,
-                value: ScoreAwardValue {
-                    score: Score(self.data.value),
-                },
+    pub fn value(&self) -> AwardValue {
+        match self.award.material.domain {
+            AwardDomain::Score(_) => AwardValue::Score(ScoreAwardValue {
+                score: Score(self.data.value),
             }),
-            AwardDomain::Badge(domain) => AwardGrade::Badge(BadgeAwardGrade {
-                domain,
-                value: BadgeAwardValue {
-                    badge: self.data.value == 1f64,
-                },
+            AwardDomain::Badge(_) => AwardValue::Badge(BadgeAwardValue {
+                badge: self.data.value == 1f64,
             }),
         }
     }
+
+    pub fn grade(&self) -> AwardGrade {
+        match (self.award.material.domain.clone(), self.value()) {
+            (AwardDomain::Score(domain), AwardValue::Score(value)) => {
+                AwardGrade::Score(ScoreAwardGrade { domain, value })
+            }
+            (AwardDomain::Badge(domain), AwardValue::Badge(value)) => {
+                AwardGrade::Badge(BadgeAwardGrade { domain, value })
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+/// Describes an award domain and optionally a grade.
+#[derive(Serialize, Deserialize, Clone, juniper_ext::GraphQLUnionFromEnum)]
+pub enum AwardGrading {
+    Score(ScoreAwardGrading),
+    Badge(BadgeAwardGrading),
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ScoreAwardGrading {
+    pub domain: ScoreAwardDomain,
+    pub grade: Option<ScoreAwardGrade>,
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct BadgeAwardGrading {
+    pub domain: BadgeAwardDomain,
+    pub grade: Option<BadgeAwardGrade>,
 }
 
 pub struct AwardView<'a> {
