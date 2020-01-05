@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use diesel::{QueryDsl, RunQueryDsl};
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 use file::FileContentInput;
 use problem::material::Material;
@@ -10,8 +10,10 @@ use root::ApiContext;
 use schema::problems;
 use user::UserId;
 
-use crate::api::award::{AwardOutcome, AwardView};
-use crate::data::award::{AwardDomain, Score, ScoreAwardDomain, ScoreRange};
+use crate::api::award::{AwardAchievement, AwardView};
+use crate::data::award::{
+    AwardDomain, AwardGrade, Score, ScoreAwardDomain, ScoreAwardGrade, ScoreRange,
+};
 use crate::data::file::FileContent;
 
 use super::*;
@@ -64,7 +66,7 @@ impl Problem<'_> {
 
     /// Range of the total score, obtained as the sum of all the score awards
     pub fn total_score_range(&self) -> ScoreRange {
-        ScoreRange::merge(self.material.awards.iter().filter_map(
+        ScoreRange::total(self.material.awards.iter().filter_map(
             |award| match award.material.domain {
                 AwardDomain::Score(ScoreAwardDomain { range }) => Some(range),
                 _ => None,
@@ -190,15 +192,30 @@ pub struct ProblemTackling<'a> {
 #[juniper_ext::graphql]
 impl ProblemTackling<'_> {
     /// Sum of the score awards
-    pub fn total_score(&self) -> FieldResult<Score> {
-        Ok(AwardOutcome::total_score(
-            &self
-                .problem
+    pub fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade::total(
+            self.problem
                 .view(Some(self.user_id.clone()))
                 .awards()
-                .iter()
-                .filter_map(|award_view| award_view.tackling())
-                .map(|award_tackling| award_tackling.best_outcome())
+                .into_iter()
+                .map(|award_view: AwardView| -> FieldResult<_> {
+                    Ok(
+                        match award_view
+                            .tackling()
+                            .ok_or(FieldError::from("problem tackling without award tackling"))?
+                            .best_achievement()?
+                            .grade()
+                        {
+                            AwardGrade::Score(grade) => Some(grade),
+                            _ => None,
+                        },
+                    )
+                })
+                .filter_map(|x| match x {
+                    Ok(None) => None,
+                    Ok(Some(x)) => Some(Ok(x)),
+                    Err(x) => Some(Err(x)),
+                })
                 .collect::<FieldResult<Vec<_>>>()?,
         ))
     }

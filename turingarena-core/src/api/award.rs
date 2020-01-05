@@ -24,7 +24,7 @@ pub struct AwardInput<'a> {
 }
 
 #[derive(Queryable, QueryableByName)]
-pub struct AwardOutcomeData {
+pub struct AwardAchievementData {
     /// Id of the evaluation
     #[allow(dead_code)]
     #[sql_type = "Text"]
@@ -42,20 +42,20 @@ pub struct AwardOutcomeData {
     value: f64,
 }
 
-pub struct AwardOutcome<'a> {
+pub struct AwardAchievement<'a> {
     context: &'a ApiContext<'a>,
     award: Award,
-    data: AwardOutcomeData,
+    data: AwardAchievementData,
 }
 
-impl AwardOutcome<'_> {
+impl AwardAchievement<'_> {
     /// Get the best score award for (user, problem)
     pub fn find_best<'a>(
         context: &'a ApiContext<'a>,
         award: &Award,
         user_id: &str,
         problem_name: &str,
-    ) -> FieldResult<AwardOutcome<'a>> {
+    ) -> FieldResult<AwardAchievement<'a>> {
         let kind = match award.material.domain {
             AwardDomain::Score(_) => "SCORE",
             AwardDomain::Badge(_) => "BADGE",
@@ -70,13 +70,13 @@ impl AwardOutcome<'_> {
             ))
             .first(&context.database)
             .optional()?
-            .unwrap_or(AwardOutcomeData {
+            .unwrap_or(AwardAchievementData {
                 evaluation_id: None,
                 award_name: award.name.0.to_owned(),
                 value: 0f64,
                 kind: kind.to_owned(),
             });
-        Ok(AwardOutcome {
+        Ok(AwardAchievement {
             award: (*award).clone(),
             context,
             data,
@@ -88,7 +88,7 @@ impl AwardOutcome<'_> {
         context: &'a ApiContext<'a>,
         award: &Award,
         evaluation_id: &str,
-    ) -> FieldResult<AwardOutcome<'a>> {
+    ) -> FieldResult<AwardAchievement<'a>> {
         let kind = match award.material.domain {
             AwardDomain::Score(_) => "SCORE",
             AwardDomain::Badge(_) => "BADGE",
@@ -103,36 +103,22 @@ impl AwardOutcome<'_> {
             ))
             .first(&context.database)
             .optional()?
-            .unwrap_or(AwardOutcomeData {
+            .unwrap_or(AwardAchievementData {
                 evaluation_id: Some(evaluation_id.to_owned()),
                 award_name: award.name.0.to_owned(),
                 value: 0f64,
                 kind: kind.to_owned(),
             });
-        Ok(AwardOutcome {
+        Ok(AwardAchievement {
             award: (*award).clone(),
             context,
             data,
         })
     }
-
-    pub fn total_score(awards: &Vec<Self>) -> Score {
-        Score(
-            awards
-                .iter()
-                .filter_map(|award| match award.value() {
-                    AwardValue::Score(ScoreAwardValue {
-                        score: Score(score),
-                    }) => Some(score),
-                    _ => None,
-                })
-                .sum(),
-        )
-    }
 }
 
 #[juniper_ext::graphql]
-impl AwardOutcome<'_> {
+impl AwardAchievement<'_> {
     fn evaluation(&self) -> FieldResult<Option<Evaluation>> {
         Ok(match &self.data.evaluation_id {
             Some(id) => Some(Evaluation::by_id(&self.context, id)?),
@@ -147,23 +133,24 @@ impl AwardOutcome<'_> {
         })
     }
 
-    pub fn name(&self) -> &AwardName {
-        &self.award.name
+    pub fn award(&self) -> &Award {
+        &self.award
     }
 
-    pub fn material(&self) -> &AwardMaterial {
-        &self.award.material
-    }
-
-    pub fn value(&self) -> AwardValue {
-        match self.data.kind.as_ref() {
-            "SCORE" => AwardValue::Score(ScoreAwardValue {
-                score: Score(self.data.value),
+    pub fn grade(&self) -> AwardGrade {
+        match self.award.material.domain.clone() {
+            AwardDomain::Score(domain) => AwardGrade::Score(ScoreAwardGrade {
+                domain,
+                value: ScoreAwardValue {
+                    score: Score(self.data.value),
+                },
             }),
-            "BADGE" => AwardValue::Badge(BadgeAwardValue {
-                badge: self.data.value == 1f64,
+            AwardDomain::Badge(domain) => AwardGrade::Badge(BadgeAwardGrade {
+                domain,
+                value: BadgeAwardValue {
+                    badge: self.data.value == 1f64,
+                },
             }),
-            _ => unreachable!(),
         }
     }
 }
@@ -201,8 +188,8 @@ pub struct AwardTackling<'a> {
 
 #[juniper_ext::graphql]
 impl<'a> AwardTackling<'a> {
-    pub fn best_outcome(&self) -> FieldResult<AwardOutcome<'a>> {
-        Ok(AwardOutcome::find_best(
+    pub fn best_achievement(&self) -> FieldResult<AwardAchievement<'a>> {
+        Ok(AwardAchievement::find_best(
             &self.problem.context(),
             &self.award,
             &self.user_id.0,

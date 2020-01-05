@@ -7,7 +7,7 @@ use juniper::FieldResult;
 
 use root::{ApiConfig, ApiContext};
 
-use award::{AwardInput, AwardOutcome};
+use award::{AwardAchievement, AwardInput};
 use contest_problem::Problem;
 use contest_submission::SubmissionId;
 use contest_submission::{self, Submission};
@@ -19,7 +19,7 @@ use crate::evaluation::AwardEvent;
 
 use super::submission::FieldValue;
 use super::*;
-use crate::data::award::Score;
+use crate::data::award::{AwardGrade, Score, ScoreAwardGrade};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -57,21 +57,30 @@ impl<'a> Evaluation<'a> {
         EvaluationStatus::from(&self.data.status)
     }
 
-    /// Evaluation awards
-    pub fn awards(&self) -> FieldResult<Vec<AwardOutcome<'a>>> {
+    /// Award achievement of this evaluation
+    pub fn achievements(&self) -> FieldResult<Vec<AwardAchievement<'a>>> {
         let problem = Problem::by_name(self.context, self.submission()?.problem_name())?;
 
         problem
             .material()
             .awards
             .iter()
-            .map(|award| AwardOutcome::find(&self.context, award, self.id()))
+            .map(|award| AwardAchievement::find(&self.context, award, self.id()))
             .collect::<FieldResult<Vec<_>>>()
     }
 
     /// Sum of the score awards
-    pub fn total_score(&self) -> FieldResult<Score> {
-        Ok(AwardOutcome::total_score(&self.awards()?))
+    pub fn total_score(&self) -> FieldResult<ScoreAwardGrade> {
+        Ok(ScoreAwardGrade::total(
+            self.achievements()?
+                .into_iter()
+                .map(|achievement| achievement.grade())
+                .filter_map(|grade| match grade {
+                    AwardGrade::Score(grade) => Some(grade),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+        ))
     }
 
     /// Evaluation events of this submission

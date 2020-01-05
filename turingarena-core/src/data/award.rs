@@ -8,6 +8,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Copy, Clone, GraphQLNewtype)]
 pub struct Score(pub f64);
 
+impl Score {
+    pub fn total<I: IntoIterator<Item = Self>>(values: I) -> Self {
+        Self(values.into_iter().map(|Self(score)| score).sum())
+    }
+}
+
 /// Wraps a string that identifies an award
 #[derive(Serialize, Deserialize, Clone, GraphQLNewtype)]
 pub struct AwardName(pub String);
@@ -25,7 +31,7 @@ pub struct ScoreRange {
 }
 
 impl ScoreRange {
-    pub fn merge<I: IntoIterator<Item = Self>>(ranges: I) -> Self {
+    pub fn total<I: IntoIterator<Item = Self>>(ranges: I) -> Self {
         ranges.into_iter().fold(
             Self {
                 max: Score(0f64),
@@ -45,6 +51,14 @@ impl ScoreRange {
 #[derive(Serialize, Deserialize, Copy, Clone, juniper::GraphQLObject)]
 pub struct ScoreAwardDomain {
     pub range: ScoreRange,
+}
+
+impl ScoreAwardDomain {
+    pub fn total<I: IntoIterator<Item = Self>>(values: I) -> Self {
+        ScoreAwardDomain {
+            range: ScoreRange::total(values.into_iter().map(|Self { range }| range)),
+        }
+    }
 }
 
 /// An award that has only two possible states (success or fail)
@@ -88,7 +102,47 @@ pub struct ScoreAwardValue {
     pub score: Score,
 }
 
+impl ScoreAwardValue {
+    pub fn total<I: IntoIterator<Item = Self>>(values: I) -> Self {
+        ScoreAwardValue {
+            score: Score::total(values.into_iter().map(|ScoreAwardValue { score }| score)),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct BadgeAwardValue {
     pub badge: bool,
+}
+
+/// Describes how well an award is achieved.
+#[derive(Serialize, Deserialize, Clone, GraphQLUnionFromEnum)]
+pub enum AwardGrade {
+    Score(ScoreAwardGrade),
+    Badge(BadgeAwardGrade),
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct ScoreAwardGrade {
+    pub domain: ScoreAwardDomain,
+    pub value: ScoreAwardValue,
+}
+
+impl ScoreAwardGrade {
+    pub fn total<I: Clone + IntoIterator<Item = Self>>(values: I) -> Self {
+        ScoreAwardGrade {
+            domain: ScoreAwardDomain::total(
+                values.clone().into_iter().map(|Self { domain, .. }| domain),
+            ),
+            value: ScoreAwardValue::total(
+                values.clone().into_iter().map(|Self { value, .. }| value),
+            ),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
+pub struct BadgeAwardGrade {
+    pub domain: BadgeAwardDomain,
+    pub value: BadgeAwardValue,
 }
