@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-import { awardOutcomeFragment } from '../fragments/awards';
+import { awardAchievementFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { problemMaterialFragment } from '../fragments/material';
 import { scoreRangeFragment } from '../fragments/score';
@@ -48,7 +48,7 @@ export const adminQuery = gql`
     }
   }
   ${contestMaterialFragment}
-  ${awardOutcomeFragment}
+  ${awardAchievementFragment}
   ${problemMaterialFragment}
   ${scoreRangeFragment}
 `;

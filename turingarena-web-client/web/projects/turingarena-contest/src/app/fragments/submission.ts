@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-import { awardOutcomeFragment } from './awards';
+import { awardAchievementFragment, scoreAwardDomainFragment, scoreAwardGradeFragment } from './awards';
 
 export const submissionFragment = gql`
   fragment SubmissionFragment on Submission {
@@ -16,11 +16,15 @@ export const submissionFragment = gql`
     }
     evaluation {
       status
-      awards {
-        ...AwardOutcomeFragment
+      achievements {
+        ...AwardAchievementFragment
       }
-      totalScore
+      totalScore {
+        ...ScoreAwardGradeFragment
+      }
     }
   }
-  ${awardOutcomeFragment}
+
+  ${awardAchievementFragment}
+  ${scoreAwardGradeFragment}
 `;

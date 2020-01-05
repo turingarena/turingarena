@@ -26,6 +26,7 @@ import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { Auth, AuthService } from '../auth.service';
+import { scoreAwardGradeFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
 import { getScoreTier, scoreRangeFragment } from '../fragments/score';
@@ -142,7 +143,9 @@ export class ContestViewComponent implements OnInit {
                 }
                 view(userId: $userId) {
                   tackling {
-                    totalScore
+                    totalScore {
+                      ...ScoreAwardGradeFragment
+                    }
                   }
                 }
               }
@@ -153,6 +156,7 @@ export class ContestViewComponent implements OnInit {
         ${problemFragment}
         ${problemViewFragment}
         ${scoreRangeFragment}
+        ${scoreAwardGradeFragment}
       `,
       variables: { userId: this.userId },
       pollInterval,

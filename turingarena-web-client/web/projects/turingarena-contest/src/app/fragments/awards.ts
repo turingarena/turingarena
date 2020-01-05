@@ -3,23 +3,40 @@ import gql from 'graphql-tag';
 import { scoreRangeFragment } from './score';
 import { textFragment } from './text';
 
+export const scoreAwardDomainFragment = gql`
+  fragment ScoreAwardDomainFragment on ScoreAwardDomain {
+    range {
+      ...ScoreRangeFragment
+    }
+  }
+
+  ${scoreRangeFragment}
+`;
+
+
+export const awardDomainFragment = gql`
+  fragment AwardDomainFragment on AwardDomain {
+    __typename
+    ... on ScoreAwardDomain {
+      ...ScoreAwardDomainFragment
+    }
+  }
+
+  ${scoreAwardDomainFragment}
+`;
+
 export const awardMaterialFragment = gql`
   fragment AwardMaterialFragment on AwardMaterial {
     title {
       ...TextFragment
     }
     domain {
-      __typename
-      ... on ScoreAwardDomain {
-        range {
-          ...ScoreRangeFragment
-        }
-      }
+      ...AwardDomainFragment
     }
   }
 
   ${textFragment}
-  ${scoreRangeFragment}
+  ${awardDomainFragment}
 `;
 
 export const awardFragment = gql`
@@ -33,33 +50,77 @@ export const awardFragment = gql`
   ${awardMaterialFragment}
 `;
 
-export const awardOutcomeFragment = gql`
-  fragment AwardOutcomeFragment on AwardOutcome {
-    name
-    material {
-      ...AwardMaterialFragment
-    }
-    value {
-      ... AwardValueFragment
-    }
-  }
-
-  fragment AwardValueFragment on AwardValue {
-    ... on BadgeAwardValue {
-      ... BadgeAwardValueFragment
-    }
-    ... on ScoreAwardValue {
-      ... ScoreAwardValueFragment
-    }
-  }
-
-  fragment BadgeAwardValueFragment on BadgeAwardValue {
-    badge
-  }
-
+export const scoreAwardValueFragment = gql`
   fragment ScoreAwardValueFragment on ScoreAwardValue {
     score
   }
+`;
 
-  ${awardMaterialFragment}
+export const badgeAwardValueFragment = gql`
+  fragment BadgeAwardValueFragment on BadgeAwardValue {
+    badge
+  }
+`;
+
+export const awardValueFragment = gql`
+  fragment AwardValueFragment on AwardValue {
+    ... on BadgeAwardValue {
+      ...BadgeAwardValueFragment
+    }
+    ... on ScoreAwardValue {
+      ...ScoreAwardValueFragment
+    }
+  }
+
+  ${scoreAwardValueFragment}
+  ${badgeAwardValueFragment}
+`;
+
+export const scoreAwardGradeFragment = gql`
+  fragment ScoreAwardGradeFragment on ScoreAwardGrade {
+    domain {
+      ...ScoreAwardDomainFragment
+    }
+    value {
+      ...ScoreAwardValueFragment
+    }
+  }
+
+  ${scoreAwardDomainFragment}
+  ${scoreAwardValueFragment}
+`;
+
+export const awardGradeFragment = gql`
+  fragment AwardGradeFragment on AwardGrade {
+    __typename
+    ... on ScoreAwardGrade {
+      ...ScoreAwardGradeFragment
+    }
+    ... on BadgeAwardGrade {
+      domain {
+        __typename
+      }
+      value {
+        ...BadgeAwardValueFragment
+      }
+    }
+  }
+
+  ${scoreAwardDomainFragment}
+  ${scoreAwardGradeFragment}
+  ${badgeAwardValueFragment}
+`;
+
+export const awardAchievementFragment = gql`
+  fragment AwardAchievementFragment on AwardAchievement {
+    award {
+      ...AwardFragment
+    }
+    grade {
+      ...AwardGradeFragment
+    }
+  }
+
+  ${awardFragment}
+  ${awardGradeFragment}
 `;
