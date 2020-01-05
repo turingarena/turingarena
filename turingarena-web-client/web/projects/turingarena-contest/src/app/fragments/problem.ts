@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-import { awardAchievementFragment, awardMaterialFragment, scoreAwardGradeFragment } from './awards';
+import { awardAchievementFragment, awardGradingFragment, awardMaterialFragment, scoreAwardGradingFragment } from './awards';
 import { problemMaterialFragment } from './material';
 import { scoreRangeFragment } from './score';
 import { submissionFragment } from './submission';
@@ -10,9 +10,6 @@ export const problemFragment = gql`
     name
     material {
       ...MaterialFragment
-    }
-    totalScoreRange {
-      ...ScoreRangeFragment
     }
   }
 
@@ -27,6 +24,9 @@ export const problemViewFragment = gql`
       material {
         ...AwardMaterialFragment
       }
+      grading {
+        ...AwardGradingFragment
+      }
       tackling {
         bestAchievement {
           ...AwardAchievementFragment
@@ -36,21 +36,18 @@ export const problemViewFragment = gql`
         }
       }
     }
+    grading {
+      ...ScoreAwardGradingFragment,
+    }
     tackling {
-      ...ProblemTacklingFragment
+      canSubmit
       submissions { ...SubmissionFragment }
     }
   }
 
-  fragment ProblemTacklingFragment on ProblemTackling {
-    totalScore {
-      ...ScoreAwardGradeFragment
-    }
-    canSubmit
-  }
-
   ${submissionFragment}
-  ${scoreAwardGradeFragment}
+  ${scoreAwardGradingFragment}
+  ${awardGradingFragment}
   ${awardMaterialFragment}
   ${awardAchievementFragment}
 `;

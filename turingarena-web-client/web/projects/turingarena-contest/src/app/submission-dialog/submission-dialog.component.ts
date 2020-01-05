@@ -51,7 +51,9 @@ export class SubmissionDialogComponent implements OnInit {
         query SubmissionQuery($submissionId: String!) {
           submission(submissionId: $submissionId) {
             ...SubmissionFragment
-            ...SubmissionEvaluationFragment
+            evaluation {
+              ...EvaluationFragment
+            }
           }
         }
         ${submissionFragment}

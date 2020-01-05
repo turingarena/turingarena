@@ -11,7 +11,7 @@ export const adminQuery = gql`
     material {
       ...MaterialFragment
     }
-    totalScoreRange {
+    scoreRange {
       ...ScoreRangeFragment
     }
   }
@@ -23,7 +23,9 @@ export const adminQuery = gql`
 
   fragment AdminSubmissionFragment on Submission {
     id
-    problemName
+    problem {
+      name
+    }
     userId
   }
 
@@ -42,7 +44,7 @@ export const adminQuery = gql`
       submissions {
         ...AdminSubmissionFragment
       }
-      totalScoreRange {
+      scoreRange {
         ...ScoreRangeFragment
       }
     }

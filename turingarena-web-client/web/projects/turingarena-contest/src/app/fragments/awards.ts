@@ -90,6 +90,16 @@ export const scoreAwardGradeFragment = gql`
   ${scoreAwardValueFragment}
 `;
 
+export const badgeAwardGradeFragment = gql`
+  fragment BadgeAwardGradeFragment on BadgeAwardGrade {
+    value {
+      ...BadgeAwardValueFragment
+    }
+  }
+
+  ${badgeAwardValueFragment}
+`;
+
 export const awardGradeFragment = gql`
   fragment AwardGradeFragment on AwardGrade {
     __typename
@@ -123,4 +133,46 @@ export const awardAchievementFragment = gql`
 
   ${awardFragment}
   ${awardGradeFragment}
+`;
+
+
+export const scoreAwardGradingFragment = gql`
+  fragment ScoreAwardGradingFragment on ScoreAwardGrading {
+    domain {
+      ...ScoreAwardDomainFragment
+    }
+    grade {
+      ...ScoreAwardGradeFragment
+    }
+  }
+
+  ${scoreAwardDomainFragment}
+  ${scoreAwardGradeFragment}
+`;
+
+export const badgeAwardGradingFragment = gql`
+  fragment BadgeAwardGradingFragment on BadgeAwardGrading {
+    domain {
+      __typename
+    }
+    grade {
+      ...BadgeAwardGradeFragment
+    }
+  }
+
+  ${badgeAwardGradeFragment}
+`;
+
+export const awardGradingFragment = gql`
+  fragment AwardGradingFragment on AwardGrading {
+    ... on ScoreAwardGrading {
+      ...ScoreAwardGradingFragment
+    }
+    ... on BadgeAwardGrading {
+      ...BadgeAwardGradingFragment
+    }
+  }
+
+  ${badgeAwardGradingFragment}
+  ${scoreAwardGradingFragment}
 `;

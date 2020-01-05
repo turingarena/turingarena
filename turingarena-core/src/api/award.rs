@@ -168,6 +168,34 @@ pub enum AwardGrading {
     Badge(BadgeAwardGrading),
 }
 
+impl AwardGrading {
+    pub fn from(domain: AwardDomain, grade: Option<AwardGrade>) -> Self {
+        match (domain, grade) {
+            (AwardDomain::Score(domain), Some(AwardGrade::Score(grade))) => {
+                AwardGrading::Score(ScoreAwardGrading {
+                    domain,
+                    grade: Some(grade),
+                })
+            }
+            (AwardDomain::Score(domain), None) => AwardGrading::Score(ScoreAwardGrading {
+                domain,
+                grade: None,
+            }),
+            (AwardDomain::Badge(domain), Some(AwardGrade::Badge(grade))) => {
+                AwardGrading::Badge(BadgeAwardGrading {
+                    domain,
+                    grade: Some(grade),
+                })
+            }
+            (AwardDomain::Badge(domain), None) => AwardGrading::Badge(BadgeAwardGrading {
+                domain,
+                grade: None,
+            }),
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, juniper::GraphQLObject)]
 pub struct ScoreAwardGrading {
     pub domain: ScoreAwardDomain,
@@ -194,6 +222,18 @@ impl<'a> AwardView<'a> {
             award: self.award.clone(),
             user_id: (*user_id).clone(),
         })
+    }
+
+    pub fn grading(&self) -> FieldResult<AwardGrading> {
+        let grade = match self.tackling() {
+            Some(t) => Some(t.best_achievement()?.grade()),
+            None => None,
+        };
+
+        Ok(AwardGrading::from(
+            self.award.material.domain.clone(),
+            grade,
+        ))
     }
 
     pub fn name(&self) -> &AwardName {

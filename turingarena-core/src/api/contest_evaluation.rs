@@ -19,7 +19,8 @@ use crate::evaluation::AwardEvent;
 
 use super::submission::FieldValue;
 use super::*;
-use crate::data::award::{Score, ScoreAwardGrade};
+use crate::api::award::{AwardGrading, ScoreAwardGrading};
+use crate::data::award::{Award, Score, ScoreAwardDomain, ScoreAwardGrade};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -63,6 +64,45 @@ impl<'a> Evaluation<'a> {
             EvaluationStatus::Success => Some(EvaluationResult { evaluation: &self }),
             _ => None,
         }
+    }
+
+    pub fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
+        Ok(self.submission()?.problem()?.score_domain())
+    }
+
+    pub fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+        let grade = match self.result() {
+            Some(result) => Some(result.grade()?),
+            None => None,
+        };
+        Ok(ScoreAwardGrading {
+            domain: self.score_domain()?,
+            grade,
+        })
+    }
+
+    pub fn awards(&self) -> FieldResult<Vec<EvaluationAward>> {
+        let result = self.result();
+
+        self.submission()?
+            .problem()?
+            .material()
+            .awards
+            .iter()
+            .map(|award| -> FieldResult<_> {
+                // FIXME: logic is quite ugly here, refactor
+                let achievement = if result.is_some() {
+                    Some(AwardAchievement::find(&self.context, award, self.id())?)
+                } else {
+                    None
+                };
+                Ok(EvaluationAward {
+                    award: (*award).clone(),
+                    evaluation: &self,
+                    achievement,
+                })
+            })
+            .collect::<FieldResult<Vec<_>>>()
     }
 
     /// Evaluation events of this submission
@@ -265,6 +305,22 @@ impl EvaluationStatus {
             EvaluationStatus::Failed => "FAILED",
         }
         .to_owned()
+    }
+}
+
+pub struct EvaluationAward<'a> {
+    pub evaluation: &'a Evaluation<'a>,
+    pub achievement: Option<AwardAchievement<'a>>,
+    pub award: Award,
+}
+
+#[juniper_ext::graphql]
+impl EvaluationAward<'_> {
+    pub fn grading(&self) -> FieldResult<AwardGrading> {
+        Ok(AwardGrading::from(
+            self.award.material.domain.clone(),
+            self.achievement.as_ref().map(|a| a.grade()),
+        ))
     }
 }
 
