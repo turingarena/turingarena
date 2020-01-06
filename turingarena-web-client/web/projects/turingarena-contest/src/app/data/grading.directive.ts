@@ -1,33 +1,37 @@
-import { Directive, HostBinding, Input } from '@angular/core';
+import { ComponentRef, Directive, ElementRef, Host, Input, OnChanges, Renderer2 } from '@angular/core';
 
 import { AwardGradingFragment } from '../fragments/__generated__/AwardGradingFragment';
-import { getScoreTier, ScoreTier } from '../fragments/score';
+
+import { gradingAttributes } from './grading-attributes';
 
 @Directive({
   selector: '[appGrading]',
 })
-export class GradingDirective {
+export class GradingDirective implements OnChanges {
   @Input()
   appGrading!: AwardGradingFragment;
 
-  @HostBinding('attr.data-grading-typename')
-  get dataGradingType() {
-    return this.appGrading.__typename;
-  }
+  @Host()
+  host!: ComponentRef<unknown>;
 
-  @HostBinding('attr.data-score-tier')
-  get dataScoreTier(): ScoreTier | undefined {
-    if (this.appGrading.__typename === 'ScoreAwardGrading') {
-      return getScoreTier(this.appGrading);
+  @Input()
+  appGradingNativeElement?: HTMLElement;
+
+  constructor(
+    private readonly elementRef: ElementRef,
+    private readonly renderer: Renderer2,
+  ) { }
+
+  ngOnChanges() {
+    const nativeElement = this.appGradingNativeElement !== undefined ? this.appGradingNativeElement : this.elementRef.nativeElement;
+    for (const [attr, c] of gradingAttributes) {
+      const value = c(this.appGrading);
+      if (value !== undefined) {
+        this.renderer.setAttribute(nativeElement, attr, value);
+      } else {
+        this.renderer.removeAttribute(nativeElement, attr);
+      }
     }
   }
 
-  @HostBinding('attr.data-badge')
-  get dataBadge(): boolean | undefined {
-    if (this.appGrading.__typename === 'BadgeAwardGrading') {
-      const { grade } = this.appGrading;
-
-      return grade !== null ? grade.value.badge : undefined;
-    }
-  }
 }

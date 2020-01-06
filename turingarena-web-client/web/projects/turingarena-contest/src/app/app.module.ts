@@ -13,6 +13,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { AdminCreateDialogComponent } from './admin/admin-create-dialog/admin-create-dialog.component';
 import { AdminComponent } from './admin/admin.component';
 import { AppComponent } from './app.component';
+import { ApplyPurePipe } from './apply-pure.pipe';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { ContestViewComponent } from './contest-view/contest-view.component';
 import { GradingDirective } from './data/grading.directive';
@@ -20,9 +21,11 @@ import { GradingComponent } from './data/grading/grading.component';
 import { EmptyComponent } from './empty.component';
 import { FileVariantPipe } from './file-variant.pipe';
 import { GraphQLModule } from './graphql.module';
+import { GridOptionsPipe } from './grid-options.pipe';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
+import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 import { TextVariantPipe } from './text-variant.pipe';
 
 const routes: Routes = [
@@ -98,6 +101,9 @@ const routes: Routes = [
     AdminCreateDialogComponent,
     GradingComponent,
     GradingDirective,
+    ApplyPurePipe,
+    TemplateCellRendererComponent,
+    GridOptionsPipe,
   ],
   imports: [
     BrowserModule,
@@ -113,9 +119,12 @@ const routes: Routes = [
       anchorScrolling: 'enabled',
       scrollPositionRestoration: 'enabled',
     }),
-    AgGridModule.withComponents([]),
+    AgGridModule.withComponents([
+      TemplateCellRendererComponent,
+    ]),
   ],
   providers: [],
   bootstrap: [AppComponent],
+  entryComponents: [TemplateCellRendererComponent],
 })
 export class AppModule { }

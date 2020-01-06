@@ -19,7 +19,6 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
@@ -27,9 +26,6 @@ import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { Auth, AuthService } from '../auth.service';
-import { RelativeTimeCellRendererComponent } from '../cell-renderer/relative-time-cell-renderer/relative-time-cell-renderer.component';
-import { ScoreAwardGradingFragment } from '../fragments/__generated__/ScoreAwardGradingFragment';
-import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
 import { scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
@@ -138,9 +134,6 @@ export class ContestViewComponent implements OnInit {
               problemSet {
                 problems {
                   ...ProblemFragment
-                  view(userId: $userId) {
-                    ...ProblemViewFragment
-                  }
                 }
                 view(userId: $userId) {
                   grading {

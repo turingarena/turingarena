@@ -2,6 +2,8 @@
 @import "~ag-grid-community/dist/styles/ag-grid.css";
 @import "~ag-grid-community/dist/styles/ag-theme-balham.css";
 
+@import "app/contest-view/contest-view.styles.scss";
+
 * {
   box-sizing: border-box;
 }
@@ -106,6 +108,41 @@ body {
 
 .grid-cell-id {
   @extend samp;
+}
+
+.grid-cell-grading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  opacity: 0.8;
+  .ag-row-hover > & {
+    opacity: 1;
+  }
+
+  &[data-grading-typename="BadgeAwardGrading"] {
+    text-align: center;
+  }
+
+  &[data-grading-typename="ScoreAwardGrading"] {
+    text-align: end;
+  }
+
+  &[data-badge="true"] {
+    @extend .table-success;
+  }
+  &[data-badge="false"] {
+    @extend .table-danger;
+  }
+  &[data-score-tier="zero"] {
+    @extend .table-danger;
+  }
+  &[data-score-tier="partial"] {
+    @extend .table-warning;
+  }
+  &[data-score-tier="full"] {
+    @extend .table-success;
+  }
 }
 
 .grid-cell-valence {

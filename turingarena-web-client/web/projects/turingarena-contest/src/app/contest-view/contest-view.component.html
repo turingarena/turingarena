@@ -106,60 +106,39 @@
                         <h4>Submissions for: <strong>{{ problem.material.title[0].value }}</strong></h4>
                       </div>
                       <div class="submission-list-dialog-body">
-                        <table class="submission-table">
-                          <thead class="submission-table-header">
-                            <tr>
-                              <th scope="col" rowspan="2">Submission time</th>
-                              <th *ngFor="let award of problem.material.awards">
-                                {{ award.material.title | textVariant:'short' }}
-                              </th>
-                              <th scope="col">Total score</th>
-                            </tr>
-                            <tr>
-                              <ng-container *ngFor="let awardView of problem.view.awards">
-                                <th class="grading-cell" [appGrading]="awardView.grading">
-                                  <app-grading [grading]="awardView.grading"></app-grading>
-                                </th>
-                              </ng-container>
-                              <th class="grading-cell" [appGrading]="problem.view.grading">
-                                <app-grading [grading]="problem.view.grading"></app-grading>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody class="submission-table-body">
-                            <tr class="submission-row" *ngFor="let _ of tackling.submissions; index as submissionIndex">
-                              <ng-container
-                                *ngIf="tackling.submissions[tackling.submissions.length-submissionIndex-1] as submission">
-                                <ng-template #submissionDialog let-modal>
-                                  <app-submission-dialog [problem]="problem" [submissionId]="submission.id"
-                                    [modal]="modal">
-                                  </app-submission-dialog>
-                                </ng-template>
-                                <td>
-                                  <app-relative-time [time]="submission.createdAt"></app-relative-time>
-                                  <br />
-                                  <a href="#"
-                                    (click)="modalService.open(submissionDialog, { size: 'lg' }); $event.preventDefault()">
-                                    details
-                                    <ng-container [ngSwitch]="submission.evaluation.status">
-                                      <span *ngSwitchCase="'PENDING'">(evaluating...)</span>
-                                      <span *ngSwitchCase="'SUCCESS'"></span>
-                                      <span *ngSwitchCase="'FAILED'"> - Evaluation failed!</span>
-                                    </ng-container>
-                                  </a>
-                                </td>
-                                <ng-container *ngFor="let award of submission.evaluation.awards">
-                                  <td [appGrading]="award.grading" class="grading-cell">
-                                    <app-grading [grading]="award.grading"></app-grading>
-                                  </td>
-                                </ng-container>
-                                <td [appGrading]="submission.evaluation.grading" class="grading-cell">
-                                  <app-grading [grading]="submission.evaluation.grading"></app-grading>
-                                </td>
-                              </ng-container>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <ng-template #submissionDialog let-modal>
+                          <app-submission-dialog [problem]="problem" [submissionId]="openSubmission.id" [modal]="modal">
+                          </app-submission-dialog>
+                        </ng-template>
+                        <ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="tackling.submissions"
+                          [gridOptions]="{} | gridOptions" rowClass="submission-grid-row"
+                          (rowClicked)="openSubmission = $event.node.data; modalService.open(submissionDialog, { size: 'lg' })">
+                          <ng-template #createdAt let-submission="data">
+                            <app-relative-time [time]="submission.createdAt"></app-relative-time>
+                            <ng-container [ngSwitch]="submission.evaluation.status">
+                              <span *ngSwitchCase="'PENDING'">(evaluating...)</span>
+                              <span *ngSwitchCase="'SUCCESS'"></span>
+                              <span *ngSwitchCase="'FAILED'"> - Evaluation failed!</span>
+                            </ng-container>
+                          </ng-template>
+                          <ag-grid-column [autoHeight]="true" field="createdAt" cellRenderer="templateCellRenderer"
+                            [cellRendererParams]="{ template: createdAt }" [flex]="5" headerName="Submission Time"
+                            sort="desc">
+                          </ag-grid-column>
+                          <ng-template #grading let-value="value" let-eGridCell="eGridCell">
+                            <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value">
+                            </app-grading>
+                          </ng-template>
+                          <ag-grid-column *ngFor="let award of problem.material.awards; index as i"
+                            field="evaluation.awards.{{i}}.grading" cellClass="grid-cell-grading"
+                            cellRenderer="templateCellRenderer" [cellRendererParams]="{ template: grading }" [flex]="1"
+                            [headerName]="award.material.title | textVariant">
+                          </ag-grid-column>
+                          <ag-grid-column field="evaluation.grading" cellClass="grid-cell-grading"
+                            cellRenderer="templateCellRenderer" [cellRendererParams]="{ template: grading }" [flex]="1"
+                            headerName="Total">
+                          </ag-grid-column>
+                        </ag-grid-angular>
                       </div>
                       <div class="submission-list-dialog-footer">
                         <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>

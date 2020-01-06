@@ -5,18 +5,6 @@ import { problemMaterialFragment } from './material';
 import { scoreRangeFragment } from './score';
 import { submissionFragment } from './submission';
 
-export const problemFragment = gql`
-  fragment ProblemFragment on Problem {
-    name
-    material {
-      ...MaterialFragment
-    }
-  }
-
-  ${problemMaterialFragment}
-  ${scoreRangeFragment}
-`;
-
 export const problemViewFragment = gql`
   fragment ProblemViewFragment on ProblemView {
     awards {
@@ -50,4 +38,20 @@ export const problemViewFragment = gql`
   ${awardGradingFragment}
   ${awardMaterialFragment}
   ${awardAchievementFragment}
+`;
+
+export const problemFragment = gql`
+  fragment ProblemFragment on Problem {
+    name
+    material {
+      ...MaterialFragment
+    }
+    view(userId: $userId) {
+      ...ProblemViewFragment
+    }
+  }
+
+  ${problemMaterialFragment}
+  ${problemViewFragment}
+  ${scoreRangeFragment}
 `;
