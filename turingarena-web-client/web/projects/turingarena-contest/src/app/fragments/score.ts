@@ -11,18 +11,18 @@ export const scoreRangeFragment = gql`
   }
 `;
 
-export enum ScoreTier {
-  ZERO = 'ZERO',
-  PARTIAL = 'PARTIAL',
-  FULL = 'FULL',
-}
+export type ScoreTier =
+  | 'zero'
+  | 'partial'
+  | 'full'
+  ;
 
-export const getScoreTier = ({ grade, domain: { range: { max } } }: ScoreAwardGradingFragment) => {
+export const getScoreTier = ({ grade, domain: { range: { max } } }: ScoreAwardGradingFragment): ScoreTier | undefined => {
   if (grade === null) { return undefined; }
   const { value: { score } } = grade;
-  if (score <= 0) { return ScoreTier.ZERO; }
-  if (score >= max) { return ScoreTier.FULL; }
-  if (true) { return ScoreTier.PARTIAL; }
+  if (score <= 0) { return 'zero'; }
+  if (score >= max) { return 'full'; }
+  if (true) { return 'partial'; }
 };
 
 export const getScoreValence = (grading: ScoreAwardGradingFragment) => {
@@ -30,9 +30,9 @@ export const getScoreValence = (grading: ScoreAwardGradingFragment) => {
   if (tier === undefined) { return undefined; }
 
   return {
-    [ScoreTier.ZERO]: Valence.FAILURE,
-    [ScoreTier.PARTIAL]: Valence.PARTIAL,
-    [ScoreTier.FULL]: Valence.SUCCESS,
+    zero: Valence.FAILURE,
+    partial: Valence.PARTIAL,
+    full: Valence.SUCCESS,
   }[tier];
 };
 

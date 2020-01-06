@@ -19,6 +19,7 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
@@ -26,10 +27,13 @@ import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { Auth, AuthService } from '../auth.service';
-import { scoreAwardGradeFragment, scoreAwardGradingFragment } from '../fragments/awards';
+import { RelativeTimeCellRendererComponent } from '../cell-renderer/relative-time-cell-renderer/relative-time-cell-renderer.component';
+import { ScoreAwardGradingFragment } from '../fragments/__generated__/ScoreAwardGradingFragment';
+import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
+import { scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
-import { getScoreTier, scoreRangeFragment } from '../fragments/score';
+import { getScoreTier } from '../fragments/score';
 
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';

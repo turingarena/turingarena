@@ -168,18 +168,18 @@
   float: right;
 
   &:not([data-score-tier]):not([data-badge]),
-  &[data-score-tier="ZERO"],
+  &[data-score-tier="zero"],
   &[data-badge="false"] {
     @extend .badge-light;
     border: 1px solid #ccc;
   }
 
-  &[data-score-tier="FULL"],
+  &[data-score-tier="full"],
   &[data-badge="true"] {
     @extend .badge-success;
   }
 
-  &[data-score-tier="PARTIAL"] {
+  &[data-score-tier="partial"] {
     @extend .badge-warning;
   }
 }
@@ -240,8 +240,7 @@
   }
 }
 
-.problem-award-badge,
-.problem-award-score {
+.problem-award-grading {
   @extend %score-badge;
 }
 
@@ -337,9 +336,16 @@
   @extend .thead-light;
 }
 
-.submission-table .badge-cell {
-  text-align: center;
+.submission-table .grading-cell {
   vertical-align: middle;
+
+  &[data-grading-typename="BadgeAwardGrading"] {
+    text-align: center;
+  }
+
+  &[data-grading-typename="ScoreAwardGrading"] {
+    text-align: end;
+  }
 
   &[data-badge="true"] {
     @extend .table-success;
@@ -347,19 +353,13 @@
   &[data-badge="false"] {
     @extend .table-danger;
   }
-}
-
-.submission-table .score-cell {
-  text-align: end;
-  vertical-align: middle;
-
-  &[data-score-tier="ZERO"] {
+  &[data-score-tier="zero"] {
     @extend .table-danger;
   }
-  &[data-score-tier="PARTIAL"] {
+  &[data-score-tier="partial"] {
     @extend .table-warning;
   }
-  &[data-score-tier="FULL"] {
+  &[data-score-tier="full"] {
     @extend .table-success;
   }
 }
