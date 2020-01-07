@@ -1,7 +1,7 @@
 CREATE TABLE problems
 (
-    name            TEXT NOT NULL PRIMARY KEY,
-    archive_content BLOB NOT NULL
+    name              TEXT NOT NULL PRIMARY KEY,
+    archive_integrity TEXT NOT NULL
 );
 
 CREATE TABLE users
@@ -56,10 +56,10 @@ CREATE TABLE awards
 
 CREATE TABLE contest
 (
-    id              INT  NOT NULL PRIMARY KEY DEFAULT 0 CHECK (id = 0), -- to ensure this table has a single row
-    archive_content BLOB NOT NULL,
-    start_time      TEXT NOT NULL,
-    end_time        TEXT NOT NULL
+    id                INT  NOT NULL PRIMARY KEY DEFAULT 0 CHECK (id = 0), -- to ensure this table has a single row
+    archive_integrity TEXT NOT NULL,
+    start_time        TEXT NOT NULL,
+    end_time          TEXT NOT NULL
 );
 
 CREATE TABLE questions
@@ -81,6 +81,12 @@ CREATE TABLE announcements
 (
     id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     text TEXT    NOT NULL
+);
+
+CREATE TABLE blobs
+(
+    integrity TEXT NOT NULL PRIMARY KEY,
+    content   BLOB NOT NULL
 );
 
 CREATE VIEW user_awards_view AS

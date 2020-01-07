@@ -19,24 +19,35 @@ use crate::data::file::FileContent;
 use super::*;
 use crate::api::contest::ContestView;
 
-#[derive(juniper::GraphQLInputObject, Insertable)]
-#[table_name = "problems"]
+#[derive(juniper::GraphQLInputObject)]
 pub struct ProblemInput {
     name: String,
     archive_content: FileContentInput,
 }
 
-#[derive(juniper::GraphQLInputObject, AsChangeset)]
+#[derive(Insertable)]
 #[table_name = "problems"]
+pub struct ProblemInsertable {
+    name: String,
+    archive_integrity: String,
+}
+
+#[derive(juniper::GraphQLInputObject)]
 pub struct ProblemUpdateInput {
     name: String,
     archive_content: Option<FileContentInput>,
 }
 
+#[derive(AsChangeset)]
+#[table_name = "problems"]
+pub struct ProblemChangeset {
+    archive_integrity: Option<String>,
+}
+
 #[derive(Queryable, Clone, Debug)]
 struct ProblemData {
     name: String,
-    archive_content: FileContent,
+    archive_integrity: String,
 }
 
 /// A problem in the contest
@@ -115,9 +126,18 @@ impl<'a> Problem<'a> {
 
     /// Insert a problem in the database
     pub fn insert(context: &ApiContext, inputs: Vec<ProblemInput>) -> FieldResult<()> {
-        diesel::insert_into(problems::table)
-            .values(inputs)
-            .execute(&context.database)?;
+        for ProblemInput {
+            name,
+            archive_content,
+        } in inputs
+        {
+            diesel::insert_into(problems::table)
+                .values(ProblemInsertable {
+                    name,
+                    archive_integrity: context.create_blob(&archive_content.decode()?)?,
+                })
+                .execute(&context.database)?;
+        }
         Ok(())
     }
 
@@ -136,25 +156,31 @@ impl<'a> Problem<'a> {
         for input in inputs {
             diesel::update(problems::table)
                 .filter(problems::dsl::name.eq(&input.name))
-                .set(&input)
+                .set(&ProblemChangeset {
+                    archive_integrity: if let Some(content) = input.archive_content {
+                        Some(context.create_blob(&content.decode()?)?)
+                    } else {
+                        None
+                    },
+                })
                 .execute(&context.database)?;
         }
         Ok(())
     }
 
-    pub fn unpack(&self) -> PathBuf {
+    pub fn unpack(&self) -> FieldResult<PathBuf> {
         Self::unpack_data(&self.data, &self.context)
     }
 
-    fn unpack_data(data: &ProblemData, context: &ApiContext) -> PathBuf {
-        context.unpack_archive(&data.archive_content.0, "problem")
+    fn unpack_data(data: &ProblemData, context: &ApiContext) -> FieldResult<PathBuf> {
+        context.unpack_archive(&data.archive_integrity, "problem")
     }
 
     /// Material of this problem
     fn get_problem_material(data: &ProblemData, context: &ApiContext) -> FieldResult<Material> {
         Ok(task_maker::generate_material(Self::unpack_data(
             data, context,
-        ))?)
+        )?)?)
     }
 }
 

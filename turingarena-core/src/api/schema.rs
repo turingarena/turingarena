@@ -22,9 +22,16 @@ table! {
 }
 
 table! {
+    blobs (integrity) {
+        integrity -> Text,
+        content -> Binary,
+    }
+}
+
+table! {
     contest (id) {
         id -> Integer,
-        archive_content -> Binary,
+        archive_integrity -> Text,
         start_time -> Text,
         end_time -> Text,
     }
@@ -50,7 +57,7 @@ table! {
 table! {
     problems (name) {
         name -> Text,
-        archive_content -> Binary,
+        archive_integrity -> Text,
     }
 }
 
@@ -105,6 +112,7 @@ allow_tables_to_appear_in_same_query!(
     announcements,
     answers,
     awards,
+    blobs,
     contest,
     evaluation_events,
     evaluations,

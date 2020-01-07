@@ -2,25 +2,25 @@ use std::default::Default;
 use std::env::temp_dir;
 use std::path::{Path, PathBuf};
 
-use diesel::{Connection, SqliteConnection};
+use diesel::{Connection, RunQueryDsl, SqliteConnection};
 use juniper::FieldResult;
 use structopt::StructOpt;
 
 use auth::JwtData;
 use contest::{ContestView, UserToken};
-
 use formats::ImportFileInput;
 use problem::ProblemName;
+use schema::blobs;
 use user::UserId;
 use user::UserInput;
 
 use crate::api::contest::{Contest, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
+use crate::api::formats::Import;
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
-use crate::api::formats::Import;
 
 embed_migrations!();
 
@@ -126,10 +126,28 @@ impl ApiContext<'_> {
         &self.workspace_path
     }
 
-    pub fn unpack_archive<T: AsRef<[u8]>>(&self, content: T, prefix: &str) -> PathBuf {
+    pub fn create_blob(&self, content: &[u8]) -> FieldResult<String> {
+        use diesel::ExpressionMethods;
+        let integrity = archive::compute_integrity(content);
+        diesel::insert_into(blobs::table)
+            .values((
+                blobs::dsl::integrity.eq(&integrity),
+                blobs::dsl::content.eq(content),
+            ))
+            .execute(&self.database)?;
+        Ok(integrity)
+    }
+
+    pub fn unpack_archive(&self, integrity: &str, prefix: &str) -> FieldResult<PathBuf> {
+        use diesel::QueryDsl;
         let workspace_path = &self.workspace_path().to_owned();
 
-        archive::unpack_archive(workspace_path, content, prefix)
+        archive::unpack_archive(workspace_path, prefix, integrity, || {
+            Ok(blobs::table
+                .find(integrity)
+                .select(blobs::content)
+                .first::<Vec<u8>>(&self.database)?)
+        })
     }
 
     pub fn default_contest(&self) -> FieldResult<Contest> {

@@ -1,17 +1,16 @@
+use juniper::FieldResult;
 use rand::Rng;
 use std::path::{Path, PathBuf};
 
 /// Unpacks an archive atomically.
-pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(
+pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>, F: FnOnce() -> FieldResult<T>>(
     workspace_path: P,
-    content: T,
     prefix: &str,
-) -> PathBuf {
+    integrity: &str,
+    content_provider: F,
+) -> FieldResult<PathBuf> {
     let workspace_path = workspace_path.as_ref().to_owned();
-    let integrity = ssri::Integrity::from(content.as_ref());
-    let id = integrity.to_hex().1;
-
-    let out_path = workspace_path.join(format!("{}-{}", prefix, id));
+    let out_path = workspace_path.join(format!("{}-{}", prefix, integrity));
 
     if !out_path.exists() {
         let temp_name_len = 8;
@@ -20,15 +19,21 @@ pub fn unpack_archive<P: AsRef<Path>, T: AsRef<[u8]>>(
             .map(|()| rand::thread_rng().sample(rand::distributions::Alphanumeric))
             .collect();
 
-        let temp_path = workspace_path.join(format!("{}-{}-{}.part", prefix, id, temp_name));
+        let temp_path = workspace_path.join(format!("{}-{}-{}.part", prefix, integrity, temp_name));
+
+        let content = content_provider()?;
+
+        if compute_integrity(content.as_ref()) != integrity {
+            return Err("Integrity do not match".into());
+        }
 
         let mut archive = tar::Archive::new(content.as_ref());
-        archive.unpack(&temp_path).expect("Cannot extract archive");
+        archive.unpack(&temp_path)?;
 
-        std::fs::rename(&temp_path, &out_path).expect("Cannot move extracted archive");
+        std::fs::rename(&temp_path, &out_path)?;
     }
 
-    out_path
+    Ok(out_path)
 }
 
 /// Creates an archive.
@@ -42,4 +47,9 @@ pub fn pack_archive<P: AsRef<Path>>(path: P) -> Vec<u8> {
     builder.into_inner().expect("Unable to build archive");
 
     archive_content
+}
+
+pub fn compute_integrity(content: &[u8]) -> String {
+    let integrity = ssri::Integrity::from(content.as_ref());
+    integrity.to_hex().1
 }

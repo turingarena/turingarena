@@ -121,7 +121,7 @@ impl<'a> Evaluation<'a> {
 impl<'a> Evaluation<'a> {
     pub fn by_id(context: &'a ApiContext, id: &str) -> FieldResult<Self> {
         let data = evaluations::table
-            .filter(evaluations::dsl::id.eq(id))
+            .find(id)
             .first::<EvaluationData>(&context.database)?;
         Ok(Evaluation { context, data })
     }
@@ -200,7 +200,7 @@ impl<'a> Evaluation<'a> {
     fn load_problem_path(&self) -> FieldResult<PathBuf> {
         let submission = self.submission()?;
         let problem = Problem::by_name(&self.context, submission.problem_name())?;
-        Ok(problem.unpack())
+        Ok(problem.unpack()?)
     }
 
     fn set_status(&self, status: EvaluationStatus) -> FieldResult<()> {

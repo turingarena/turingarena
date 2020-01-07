@@ -51,7 +51,10 @@ impl<'a> Contest<'a> {
     pub fn init(context: &'a ApiContext<'a>) -> FieldResult<()> {
         let now = chrono::Local::now();
         let configuration = ContestDataInput {
-            archive_content: include_bytes!(concat!(env!("OUT_DIR"), "/initial-contest.tar.xz")),
+            archive_integrity: &context.create_blob(include_bytes!(concat!(
+                env!("OUT_DIR"),
+                "/initial-contest.tar.xz"
+            )))?,
             start_time: &now.to_rfc3339(),
             end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
         };
@@ -63,8 +66,8 @@ impl<'a> Contest<'a> {
 
     pub fn update(&self, input: ContestUpdateInput) -> FieldResult<()> {
         let changeset = ContestChangeset {
-            archive_content: if let Some(ref content) = input.archive_content {
-                Some(content.decode()?)
+            archive_integrity: if let Some(ref content) = input.archive_content {
+                Some(self.context.create_blob(&content.decode()?)?)
             } else {
                 None
             },
@@ -79,16 +82,16 @@ impl<'a> Contest<'a> {
         Ok(())
     }
 
-    fn contest_path(&self) -> PathBuf {
+    fn contest_path(&self) -> FieldResult<PathBuf> {
         self.context
-            .unpack_archive(&self.data.archive_content, "contest")
+            .unpack_archive(&self.data.archive_integrity, "contest")
     }
 }
 
 #[juniper_ext::graphql]
 impl<'a> Contest<'a> {
     pub fn material(&self) -> FieldResult<ContestMaterial> {
-        let contest_path = self.contest_path();
+        let contest_path = self.contest_path()?;
 
         Ok(ContestMaterial {
             title: contest_path
@@ -355,7 +358,7 @@ pub struct ContestData {
     #[allow(dead_code)]
     id: i32,
 
-    archive_content: Vec<u8>,
+    archive_integrity: String,
 
     /// Starting time of the contest, as RFC3339 date
     start_time: String,
@@ -367,7 +370,7 @@ pub struct ContestData {
 #[derive(Insertable)]
 #[table_name = "contest"]
 struct ContestDataInput<'a> {
-    pub archive_content: &'a [u8],
+    pub archive_integrity: &'a str,
     pub start_time: &'a str,
     pub end_time: &'a str,
 }
@@ -375,7 +378,7 @@ struct ContestDataInput<'a> {
 #[derive(AsChangeset)]
 #[table_name = "contest"]
 struct ContestChangeset {
-    pub archive_content: Option<Vec<u8>>,
+    pub archive_integrity: Option<String>,
     pub start_time: Option<String>,
     pub end_time: Option<String>,
 }
