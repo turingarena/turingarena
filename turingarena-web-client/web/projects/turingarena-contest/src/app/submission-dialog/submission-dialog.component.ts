@@ -14,14 +14,13 @@ import { MaterialFragment } from '../fragments/__generated__/MaterialFragment';
 import { MemoryUsageValueFragment } from '../fragments/__generated__/MemoryUsageValueFragment';
 import { ScoreRangeFragment } from '../fragments/__generated__/ScoreRangeFragment';
 import { ScoreValueFragment } from '../fragments/__generated__/ScoreValueFragment';
-import { SubmissionEvaluationFragment } from '../fragments/__generated__/SubmissionEvaluationFragment';
 import { TableSectionFragment } from '../fragments/__generated__/TableSectionFragment';
 import { TextValueFragment } from '../fragments/__generated__/TextValueFragment';
 import { TimeUsageCellContentFragment } from '../fragments/__generated__/TimeUsageCellContentFragment';
 import { TimeUsageValueFragment } from '../fragments/__generated__/TimeUsageValueFragment';
 import { ValenceValueFragment } from '../fragments/__generated__/ValenceValueFragment';
 import { ValueFragment } from '../fragments/__generated__/ValueFragment';
-import { evaluationFragment } from '../fragments/evaluation';
+import { evaluationFragment, evaluationEventFragment } from '../fragments/evaluation';
 import { submissionFragment } from '../fragments/submission';
 import { VariantService } from '../variant.service';
 
@@ -29,6 +28,7 @@ import {
   SubmissionQuery,
   SubmissionQueryVariables,
 } from './__generated__/SubmissionQuery';
+import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -72,18 +72,22 @@ export class SubmissionDialogComponent implements OnInit {
             ...SubmissionFragment
             evaluation {
               ...EvaluationFragment
+              events {
+                ...EventFragment
+              }
             }
           }
         }
         ${submissionFragment}
         ${evaluationFragment}
+        ${evaluationEventFragment}
       `,
       variables: { submissionId },
       pollInterval: 1000,
     });
   }
 
-  getEvaluationRecord(submission: SubmissionEvaluationFragment) {
+  getEvaluationRecord(submission: SubmissionFragment) {
     const record: Record<string, ValueFragment> = {};
     for (const event of submission.evaluation.events) {
       if (event.__typename === 'ValueEvent') {

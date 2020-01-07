@@ -50,7 +50,6 @@ export const adminQuery = gql`
     }
   }
   ${contestMaterialFragment}
-  ${awardAchievementFragment}
   ${problemMaterialFragment}
   ${scoreRangeFragment}
 `;

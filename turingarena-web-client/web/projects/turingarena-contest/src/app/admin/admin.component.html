@@ -3,7 +3,7 @@
     <nav class="topbar">
       <a routerLink="/admin" class="admin-home-link">
         <h1 class="admin-title">
-          <fa-icon [icon]="faTools"></fa-icon> [Admin] {{data.contestView.title | textVariant}}
+          <fa-icon [icon]="faTools"></fa-icon> [Admin] {{data.contest.material.title | textVariant}}
         </h1>
       </a>
     </nav>
@@ -28,10 +28,8 @@
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
         <button (click)="contestantsGridModel.deleteSelected()">Delete selected</button>
-        <ag-grid-angular #contestantsGrid class="contestants-grid ag-theme-balham"
-          [defaultColDef]="contestantsGridModel.defaultColDef" [animateRows]="true"
-          [rowData]="contestantsGridModel.rowData | async" [columnDefs]="contestantsGridModel.columnDefs | async"
-          [context]="contestantsGridModel.context | async" rowSelection="multiple" [quickFilterText]="quickFilterText">
+        <ag-grid-angular #contestantsGrid class="contestants-grid ag-theme-balham" [animateRows]="true"
+          rowSelection="multiple" [quickFilterText]="quickFilterText">
         </ag-grid-angular>
       </main>
 
@@ -39,10 +37,8 @@
         <label>Filter</label>
         <input [(ngModel)]="quickFilterText" />
         <button (click)="submissionsGridModel.reevaluateSelected()">Reevaluate selected</button>
-        <ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham"
-          [defaultColDef]="submissionsGridModel.defaultColDef" [animateRows]="true"
-          [rowData]="submissionsGridModel.rowData | async" [columnDefs]="submissionsGridModel.columnDefs | async"
-          [context]="submissionsGridModel.context | async" rowSelection="multiple" [quickFilterText]="quickFilterText">
+        <ag-grid-angular #submissionsGrid class="submissions-grid ag-theme-balham" [animateRows]="true"
+          rowSelection="multiple" [quickFilterText]="quickFilterText">
         </ag-grid-angular>
       </main>
 
@@ -51,9 +47,7 @@
         <input [(ngModel)]="quickFilterText" />
         <button (click)="problemsGridModel.deleteSelected()">Delete selected</button>
         <ag-grid-angular #problemsGrid class="problems-grid ag-theme-balham" [rowDragManaged]="true"
-          [defaultColDef]="problemsGridModel.defaultColDef" [animateRows]="true"
-          [rowData]="problemsGridModel.rowData | async" [columnDefs]="problemsGridModel.columnDefs | async"
-          [context]="problemsGridModel.context | async" rowSelection="multiple" [quickFilterText]="quickFilterText">
+          [animateRows]="true" rowSelection="multiple" [quickFilterText]="quickFilterText">
         </ag-grid-angular>
       </main>
     </div>

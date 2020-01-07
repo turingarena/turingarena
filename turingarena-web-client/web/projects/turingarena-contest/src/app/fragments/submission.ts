@@ -10,9 +10,6 @@ export const submissionFragment = gql`
       fieldId
       typeId
       name
-      content {
-        base64
-      }
     }
     evaluation {
       status

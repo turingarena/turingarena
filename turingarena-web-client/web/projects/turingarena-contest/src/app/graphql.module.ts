@@ -9,8 +9,9 @@ import { setContext } from 'apollo-link-context';
 import schema from '../../../../__generated__/graphql-schema.json';
 
 import { AuthService } from './auth.service.js';
+import { ApolloClientOptions } from 'apollo-client';
 
-const createApollo = (httpLink: HttpLink, authService: AuthService) => {
+const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClientOptions<unknown> => {
   const authContext = setContext((operation, context) => {
     const auth = authService.getAuth();
 
@@ -29,6 +30,8 @@ const createApollo = (httpLink: HttpLink, authService: AuthService) => {
       fragmentMatcher: new IntrospectionFragmentMatcher({
         introspectionQueryResultData: schema,
       }),
+      freezeResults: true,
+      dataIdFromObject: () => undefined,
     }),
   };
 };

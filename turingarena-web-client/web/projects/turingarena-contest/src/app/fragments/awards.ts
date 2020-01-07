@@ -64,6 +64,7 @@ export const badgeAwardValueFragment = gql`
 
 export const awardValueFragment = gql`
   fragment AwardValueFragment on AwardValue {
+    __typename
     ... on BadgeAwardValue {
       ...BadgeAwardValueFragment
     }
@@ -78,9 +79,6 @@ export const awardValueFragment = gql`
 
 export const scoreAwardGradeFragment = gql`
   fragment ScoreAwardGradeFragment on ScoreAwardGrade {
-    domain {
-      ...ScoreAwardDomainFragment
-    }
     value {
       ...ScoreAwardValueFragment
     }
@@ -165,6 +163,7 @@ export const badgeAwardGradingFragment = gql`
 
 export const awardGradingFragment = gql`
   fragment AwardGradingFragment on AwardGrading {
+    __typename
     ... on ScoreAwardGrading {
       ...ScoreAwardGradingFragment
     }

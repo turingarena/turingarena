@@ -4,7 +4,7 @@ import { awardGradingFragment, scoreAwardGradingFragment } from './awards';
 import { rusageFragment } from './rusage';
 import { textFragment } from './text';
 
-export const evaluationFragment = gql`
+export const evaluationEventFragment = gql`
   fragment TextValueFragment on TextValue {
     text { ...TextFragment }
   }
@@ -42,8 +42,12 @@ export const evaluationFragment = gql`
     }
   }
 
+  ${rusageFragment}
+  ${textFragment}
+`;
+
+export const evaluationFragment = gql`
   fragment EvaluationFragment on Evaluation {
-    events { ...EventFragment }
     status
     grading {
       ...ScoreAwardGradingFragment
@@ -55,8 +59,6 @@ export const evaluationFragment = gql`
     }
   }
 
-  ${rusageFragment}
   ${scoreAwardGradingFragment}
   ${awardGradingFragment}
-  ${textFragment}
 `;
