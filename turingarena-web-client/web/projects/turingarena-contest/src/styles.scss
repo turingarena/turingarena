@@ -3,6 +3,7 @@
 @import "~ag-grid-community/dist/styles/ag-theme-balham.css";
 
 @import "app/contest-view/contest-view.styles.scss";
+@import "app/submission-dialog/submission-dialog.styles.scss";
 
 * {
   box-sizing: border-box;
@@ -141,21 +142,6 @@ body {
     @extend .table-warning;
   }
   &[data-score-tier="full"] {
-    @extend .table-success;
-  }
-}
-
-.grid-cell-valence {
-  &.failure {
-    @extend .table-danger;
-  }
-  &.warning {
-    @extend .table-warning;
-  }
-  &.partial {
-    @extend .table-warning;
-  }
-  &.success {
     @extend .table-success;
   }
 }

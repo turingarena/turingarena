@@ -18,6 +18,7 @@ import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { ContestViewComponent } from './contest-view/contest-view.component';
 import { GradingDirective } from './data/grading.directive';
 import { GradingComponent } from './data/grading/grading.component';
+import { ValenceDirective } from './data/valence.directive';
 import { EmptyComponent } from './empty.component';
 import { FileVariantPipe } from './file-variant.pipe';
 import { GraphQLModule } from './graphql.module';
@@ -101,6 +102,7 @@ const routes: Routes = [
     AdminCreateDialogComponent,
     GradingComponent,
     GradingDirective,
+    ValenceDirective,
     ApplyPurePipe,
     TemplateCellRendererComponent,
     GridOptionsPipe,

@@ -9,9 +9,9 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: true,
 })
 export class ApplyPurePipe implements PipeTransform {
-  transform<T, U>(value: T, f: (arg: T) => U): U {
+  transform<T, U, X extends unknown[]>(value: T, f: (arg: T, ...rest: X) => U, ...rest: X): U {
     console.log(`applyPure`, f, value);
 
-    return f(value);
+    return f(value, ...rest);
   }
 }

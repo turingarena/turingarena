@@ -30,9 +30,7 @@ export class VariantService {
   }
 
 
-  selectTextVariant(variants: TextFragment[], style?: string): string | undefined {
-    const variant = this.selectVariant(variants, style);
-
-    return variant !== undefined ? variant.value : '';
+  selectTextVariant(variants: TextFragment[], style?: string) {
+    return this.selectVariant(variants, style).value;
   }
 }

@@ -5,94 +5,61 @@
         Submission for: <strong>{{problem.material.title | textVariant}}</strong>
       </h5>
     </div>
-    <div class="submission-pending" *ngIf="submission.status === 'PENDING'">
+    <div class="submission-pending" *ngIf="submission.evaluation.status === 'PENDING'">
       <fa-icon [icon]="faSpinner" [pulse]="true"></fa-icon> Evaluating...
     </div>
     <div class="submission-dialog-body">
-      <ng-container *ngIf="getEvaluationRecord(submission) as record">
+      <ng-container *ngIf="submission | applyPure:getEvaluationRecord as record">
         <ng-container *ngFor="let section of problem.material.feedback">
           <ng-container [ngSwitch]="section.__typename">
-            <table *ngSwitchCase="'TableSection'" class="feedback-table">
-              <thead class="feedback-table-header">
-                <tr>
-                  <th [colSpan]="section.cols.length">
-                    {{ section.caption | textVariant }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <ng-container *ngFor="let col of section.cols; index as i">
-                    <ng-container [ngSwitch]="col.content.__typename">
-                      <th *ngSwitchDefault="">
-                        {{ col.title | textVariant }}
-                      </th>
-                    </ng-container>
-                  </ng-container>
-                </tr>
-                <tr *ngFor="let row of section.rows">
-                  <ng-container *ngFor="let col of section.cols; index as i">
-                    <ng-container *ngIf="row.cells[i] as cell" [ngSwitch]="cell.content.__typename">
-                      <th *ngSwitchCase="'RowNumberCellContent'">
-                        {{ cell.content.number }}
-                      </th>
-                      <th *ngSwitchCase="'RowTitleCellContent'">
-                        {{ cell.content.title | textVariant }}
-                      </th>
-                      <ng-container *ngSwitchCase="'ScoreCellContent'">
-                        <td class="cell-score cell-valence"
-                          [ngClass]="getScoreValence(record[cell.content.key], cell.content.range)">
-                          <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ value.score.toFixed(cell.content.range.precision) }}
-                          </ng-container>
-                          <small> /
-                            {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
-                          </small>
-                        </td>
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'MessageCellContent'">
-                        <td class="cell-valence" [ngClass]="getValence(record[cell.content.valenceKey])">
-                          <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ value.text | textVariant }}
-                          </ng-container>
-                        </td>
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'TimeUsageCellContent'">
-                        <td class="cell-time-usage cell-valence"
-                          [ngClass]="getValence(record[cell.content.valenceKey])">
-                          <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ displayTimeUsage(value.timeUsage, cell.content) }}
-                          </ng-container>
-                          <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
-                            {{ displayTimeUsage(watermark, cell.content) }}
-                          </small>
-                        </td>
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'MemoryUsageCellContent'">
-                        <td class="cell-memory-usage cell-valence"
-                          [ngClass]="getValence(record[cell.content.valenceKey])">
-                          <ng-container *ngIf="record[cell.content.key] as value">
-                            {{ value.memoryUsage.bytes | filesize }}
-                          </ng-container>
-                          <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
-                            {{ watermark.bytes | filesize }}
-                          </small>
-                        </td>
-                      </ng-container>
-                      <td *ngSwitchDefault="">
-                        ?
-                      </td>
-                    </ng-container>
-                  </ng-container>
-                </tr>
-              </tbody>
-            </table>
+            {{ section.caption | textVariant }}
+            <ag-grid-angular *ngSwitchCase="'TableSection'" class="ag-theme-balham feedback-table"
+              [suppressCellSelection]="true" [suppressChangeDetection]="true" [suppressRowHoverHighlight]="true"
+              domLayout="autoHeight" [rowData]="section.rows" [gridOptions]="{} | gridOptions"
+              rowClass="feedback-table-row" [columnDefs]="record | applyPure:getColumnDefs:section"
+              [context]="{ problem: problem, record: record }">
+            </ag-grid-angular>
           </ng-container>
         </ng-container>
       </ng-container>
     </div>
-    <div class="submission-dialog-footer">
-      <button (click)="modal.close()" class="submission-dialog-close">Close</button>
-    </div>
   </ng-container>
+  <div class="submission-dialog-footer">
+    <button (click)="modal.close()" class="submission-dialog-close">Close</button>
+  </div>
 </ng-container>
+
+<ng-template #scoreCell let-cell="cell" let-value="value" let-valence="valence" let-eGridCell="eGridCell">
+  <ng-container [appValence]="valence" [appValenceNativeElement]="eGridCell"></ng-container>
+  <ng-container *ngIf="value !== undefined">
+    {{ value.toFixed(cell.content.range.precision) }}
+  </ng-container>
+  <small> /
+    {{ cell.content.range.max.toFixed(cell.content.range.precision) }}
+  </small>
+</ng-template>
+
+<ng-template #timeUsageCell let-cell="cell" let-value="value" let-valence="valence" let-eGridCell="eGridCell">
+  <ng-container [appValence]="valence" [appValenceNativeElement]="eGridCell"></ng-container>
+  <ng-container *ngIf="value !== undefined">
+    {{ displayTimeUsageSeconds(value, cell.content) }}
+  </ng-container>
+  <small *ngIf="cell.content.timeUsagePrimaryWatermark as watermark"> /
+    {{ displayTimeUsageSeconds(watermark.seconds, cell.content) }}
+  </small>
+</ng-template>
+
+<ng-template #memoryUsageCell let-cell="cell" let-value="value" let-valence="valence" let-eGridCell="eGridCell">
+  <ng-container [appValence]="valence" [appValenceNativeElement]="eGridCell"></ng-container>
+  <ng-container *ngIf="value !== undefined">
+    {{ value | filesize }}
+  </ng-container>
+  <small *ngIf="cell.content.memoryUsagePrimaryWatermark as watermark"> /
+    {{ watermark.bytes | filesize }}
+  </small>
+</ng-template>
+
+<ng-template #messageCell let-cell="cell" let-value="value" let-valence="valence" let-eGridCell="eGridCell">
+  <ng-container [appValence]="valence" [appValenceNativeElement]="eGridCell"></ng-container>
+  {{ value }}
+</ng-template>

@@ -24,31 +24,6 @@
   @extend .btn, .btn-primary;
 }
 
-.cell-score,
-.cell-time-usage,
-.cell-memory-usage {
-  text-align: right;
-}
-
 .feedback-table {
-  @extend .table, .table-sm;
-}
-
-.feedback-table-header {
-  text-align: center;
-}
-
-.cell-valence {
-  &.failure {
-    @extend .table-danger;
-  }
-  &.warning {
-    @extend .table-warning;
-  }
-  &.partial {
-    @extend .table-warning;
-  }
-  &.success {
-    @extend .table-success;
-  }
+  @extend .table;
 }

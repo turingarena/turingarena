@@ -2,12 +2,11 @@ import gql from 'graphql-tag';
 
 import { awardGradingFragment, scoreAwardGradingFragment } from './awards';
 import { rusageFragment } from './rusage';
+import { textFragment } from './text';
 
 export const evaluationFragment = gql`
   fragment TextValueFragment on TextValue {
-    text {
-      value
-    }
+    text { ...TextFragment }
   }
 
   fragment ScoreValueFragment on ScoreValue {
@@ -59,4 +58,5 @@ export const evaluationFragment = gql`
   ${rusageFragment}
   ${scoreAwardGradingFragment}
   ${awardGradingFragment}
+  ${textFragment}
 `;
