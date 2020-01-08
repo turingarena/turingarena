@@ -22,8 +22,8 @@ use crate::api::contest_submission::{FileInput, Submission};
 
 #[derive(juniper::GraphQLInputObject)]
 pub struct ProblemInput {
-    name: String,
-    archive_content: FileContentInput,
+    pub name: String,
+    pub archive_content: FileContentInput,
 }
 
 #[derive(Insertable)]

@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 use turingarena_core::api::root::{ApiConfig, ContestArgs};
 use turingarena_core::archive::pack_archive;
+use std::env;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -67,9 +68,10 @@ enum AdminCommand {
     StartNewEvaluation {
         submission_id: String,
     },
-    ImportFile {
+    /// Import a contest to TuringArena
+    Import {
         /// Path of the contest to import
-        path: PathBuf,
+        path: Option<PathBuf>,
         /// Show operations without applying them
         #[structopt(long)]
         dry_run: bool,
@@ -158,14 +160,16 @@ impl AdminCommand {
                 StartNewEvaluationMutation::build_query,
                 start_new_evaluation_mutation::Variables { submission_id },
             ),
-            ImportFile { path, dry_run } => {
-                let content = read(&path).unwrap();
+            Import { path, dry_run } => {
+                let path = path.unwrap_or(env::current_dir().unwrap());
+                let archive = pack_archive(path);
+
                 make_request(
                     ImportMutation::build_query,
                     import_mutation::Variables {
                         input: import_mutation::ImportFileInput {
                             content: import_mutation::FileContentInput {
-                                base64: base64::encode(&content),
+                                base64: base64::encode(&archive),
                             },
                             name: Some(path.file_name().unwrap().to_string_lossy().to_string()),
                             filetype: None,

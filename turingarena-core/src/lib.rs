@@ -1,6 +1,8 @@
 #![feature(decl_macro, proc_macro_hygiene)]
 
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
