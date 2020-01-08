@@ -34,9 +34,7 @@ struct UserData {
     token: String,
 }
 
-pub struct User<'a> {
-    #[allow(dead_code)]
-    context: &'a ApiContext,
+pub struct User {
     data: UserData,
 }
 
@@ -44,11 +42,10 @@ pub struct User<'a> {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, juniper_ext::GraphQLNewtype)]
 pub struct UserId(pub String);
 
-impl<'a> User<'a> {
+impl User {
     /// Find a user from his token
-    pub fn by_token(context: &'a ApiContext, token: &str) -> FieldResult<Self> {
+    pub fn by_token(context: &ApiContext, token: &str) -> FieldResult<Self> {
         Ok(Self {
-            context,
             data: users::table
                 .filter(users::dsl::token.eq(token))
                 .first(&context.database)?,
@@ -56,19 +53,18 @@ impl<'a> User<'a> {
     }
 
     /// Find a user from his ID
-    pub fn by_id(context: &'a ApiContext, user_id: UserId) -> FieldResult<Self> {
+    pub fn by_id(context: &ApiContext, user_id: UserId) -> FieldResult<Self> {
         Ok(Self {
-            context,
             data: users::table.find(user_id.0).first(&context.database)?,
         })
     }
 
     /// List all users
-    pub fn list(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
+    pub fn list(context: &ApiContext) -> FieldResult<Vec<Self>> {
         Ok(users::table
             .load(&context.database)?
             .into_iter()
-            .map(|data| Self { context, data })
+            .map(|data| Self { data })
             .collect())
     }
 
@@ -108,7 +104,7 @@ impl<'a> User<'a> {
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl User<'_> {
+impl User {
     /// Id of the user
     pub fn id(&self) -> UserId {
         UserId(self.data.id.clone())

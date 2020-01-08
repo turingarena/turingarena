@@ -14,7 +14,6 @@ use crate::api::award::{AwardView, ScoreAwardGrading};
 use crate::data::award::{
     AwardDomain, AwardValue, ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange,
 };
-use crate::data::file::FileContent;
 
 use super::*;
 use crate::api::contest::ContestView;
@@ -51,20 +50,13 @@ struct ProblemData {
 }
 
 /// A problem in the contest
-pub struct Problem<'a> {
-    context: &'a ApiContext,
+pub struct Problem {
     data: ProblemData,
     material: Material,
 }
 
-impl<'a> Problem<'a> {
-    pub fn context(&self) -> &ApiContext {
-        self.context
-    }
-}
-
 #[juniper_ext::graphql(Context = ApiContext)]
-impl Problem<'_> {
+impl Problem {
     /// Name of this problem. Unique in the current contest.
     pub fn name(&self) -> ProblemName {
         ProblemName(self.data.name.clone())
@@ -99,24 +91,20 @@ impl Problem<'_> {
     }
 }
 
-impl<'a> Problem<'a> {
-    fn new(context: &'a ApiContext, data: ProblemData) -> FieldResult<Self> {
+impl Problem {
+    fn new(context: &ApiContext, data: ProblemData) -> FieldResult<Self> {
         let material = Self::get_problem_material(&data, context)?;
-        Ok(Problem {
-            context,
-            data,
-            material,
-        })
+        Ok(Problem { data, material })
     }
 
     /// Get a problem data by its name
-    pub fn by_name(context: &'a ApiContext, name: &str) -> FieldResult<Self> {
+    pub fn by_name(context: &ApiContext, name: &str) -> FieldResult<Self> {
         let data = problems::table.find(name).first(&context.database)?;
         Ok(Self::new(context, data)?)
     }
 
     /// Get all the problems data in the database
-    pub fn all(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
+    pub fn all(context: &ApiContext) -> FieldResult<Vec<Self>> {
         Ok(problems::table
             .load::<ProblemData>(&context.database)?
             .into_iter()
@@ -168,8 +156,8 @@ impl<'a> Problem<'a> {
         Ok(())
     }
 
-    pub fn unpack(&self) -> FieldResult<PathBuf> {
-        Self::unpack_data(&self.data, &self.context)
+    pub fn unpack(&self, context: &ApiContext) -> FieldResult<PathBuf> {
+        Self::unpack_data(&self.data, context)
     }
 
     fn unpack_data(data: &ProblemData, context: &ApiContext) -> FieldResult<PathBuf> {
@@ -186,7 +174,7 @@ impl<'a> Problem<'a> {
 
 /// A problem in the contest as seen by contestants
 pub struct ProblemView<'a> {
-    problem: &'a Problem<'a>,
+    problem: &'a Problem,
     user_id: Option<UserId>,
 }
 
@@ -205,11 +193,11 @@ impl<'a> ProblemView<'a> {
             .collect()
     }
 
-    pub fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+    pub fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
         Ok(ScoreAwardGrading {
             domain: self.problem.score_domain(),
             grade: match self.tackling() {
-                Some(t) => Some(t.grade()?),
+                Some(t) => Some(t.grade(context)?),
                 None => None,
             },
         })
@@ -226,7 +214,7 @@ impl<'a> ProblemView<'a> {
 
 /// Progress at solving a problem by a user in the contest
 pub struct ProblemTackling<'a> {
-    problem: &'a Problem<'a>,
+    problem: &'a Problem,
     user_id: UserId,
 }
 
@@ -234,7 +222,7 @@ pub struct ProblemTackling<'a> {
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemTackling<'_> {
     /// Sum of the score awards
-    pub fn score(&self) -> FieldResult<ScoreAwardValue> {
+    pub fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
             self.problem
                 .view(Some(self.user_id.clone()))
@@ -245,7 +233,7 @@ impl ProblemTackling<'_> {
                         match award_view
                             .tackling()
                             .ok_or(FieldError::from("problem tackling without award tackling"))?
-                            .best_achievement()?
+                            .best_achievement(context)?
                             .value()
                         {
                             AwardValue::Score(value) => Some(value),
@@ -262,17 +250,20 @@ impl ProblemTackling<'_> {
         ))
     }
 
-    fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+    fn grade(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrade> {
         Ok(ScoreAwardGrade {
             domain: self.problem.score_domain(),
-            value: self.score()?,
+            value: self.score(context)?,
         })
     }
 
     /// Submissions of the current user (if to be shown)
-    fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
+    fn submissions(
+        &self,
+        context: &ApiContext,
+    ) -> FieldResult<Vec<contest_submission::Submission>> {
         Ok(contest_submission::Submission::by_user_and_problem(
-            &self.problem.context,
+            context,
             &self.user_id.0,
             &self.problem.name().0,
         )?)

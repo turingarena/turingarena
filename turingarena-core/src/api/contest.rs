@@ -37,18 +37,17 @@ pub struct ContestUpdateInput {
     pub end_time: Option<String>,
 }
 
-pub struct Contest<'a> {
-    context: &'a ApiContext,
+pub struct Contest {
     data: ContestData,
 }
 
-impl<'a> Contest<'a> {
-    pub fn new(context: &'a ApiContext) -> FieldResult<Self> {
+impl Contest {
+    pub fn new(context: &ApiContext) -> FieldResult<Self> {
         let data = contest::table.first(&context.database)?;
-        Ok(Contest { context, data })
+        Ok(Contest { data })
     }
 
-    pub fn init(context: &'a ApiContext) -> FieldResult<()> {
+    pub fn init(context: &ApiContext) -> FieldResult<()> {
         let now = chrono::Local::now();
         let configuration = ContestDataInput {
             archive_integrity: &context.create_blob(include_bytes!(concat!(
@@ -64,10 +63,10 @@ impl<'a> Contest<'a> {
         Ok(())
     }
 
-    pub fn update(&self, input: ContestUpdateInput) -> FieldResult<()> {
+    pub fn update(&self, context: &ApiContext, input: ContestUpdateInput) -> FieldResult<()> {
         let changeset = ContestChangeset {
             archive_integrity: if let Some(ref content) = input.archive_content {
-                Some(self.context.create_blob(&content.decode()?)?)
+                Some(context.create_blob(&content.decode()?)?)
             } else {
                 None
             },
@@ -77,21 +76,20 @@ impl<'a> Contest<'a> {
 
         diesel::update(schema::contest::table)
             .set(changeset)
-            .execute(&self.context.database)?;
+            .execute(&context.database)?;
 
         Ok(())
     }
 
-    fn contest_path(&self) -> FieldResult<PathBuf> {
-        self.context
-            .unpack_archive(&self.data.archive_integrity, "contest")
+    fn contest_path(&self, context: &ApiContext) -> FieldResult<PathBuf> {
+        context.unpack_archive(&self.data.archive_integrity, "contest")
     }
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl<'a> Contest<'a> {
-    pub fn material(&self) -> FieldResult<ContestMaterial> {
-        let contest_path = self.contest_path()?;
+impl Contest {
+    pub fn material(&self, context: &ApiContext) -> FieldResult<ContestMaterial> {
+        let contest_path = self.contest_path(context)?;
 
         Ok(ContestMaterial {
             title: contest_path
@@ -162,63 +160,61 @@ impl<'a> Contest<'a> {
     }
 
     /// All the problems
-    fn problems(&self) -> FieldResult<Vec<Problem>> {
+    fn problems(&self, context: &ApiContext) -> FieldResult<Vec<Problem>> {
         // Contestants can see problems only through `view`
-        self.context.authorize_admin()?;
-        Problem::all(&self.context)
+        context.authorize_admin()?;
+        Problem::all(context)
     }
 
     /// Get the information about this contest visible to a user
-    fn view(&self, user_id: Option<UserId>) -> FieldResult<ContestView> {
-        self.context.authorize_user(&user_id)?;
+    fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ContestView> {
+        context.authorize_user(&user_id)?;
         ContestView::new(&self, user_id)
     }
 
-    pub fn score_range(&self) -> FieldResult<ScoreRange> {
+    pub fn score_range(&self, context: &ApiContext) -> FieldResult<ScoreRange> {
         Ok(ScoreRange::total(
-            self.problems()?.iter().map(|problem| problem.score_range()),
+            self.problems(context)?
+                .iter()
+                .map(|problem| problem.score_range()),
         ))
     }
 
-    pub fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
-        self.context.authorize_admin()?;
+    pub fn score_domain(&self, context: &ApiContext) -> FieldResult<ScoreAwardDomain> {
+        context.authorize_admin()?;
         Ok(ScoreAwardDomain {
-            range: self.score_range()?,
+            range: self.score_range(context)?,
         })
     }
 
-    fn users(&self) -> FieldResult<Vec<User>> {
-        self.context.authorize_admin()?;
-        User::list(&self.context)
+    fn users(&self, context: &ApiContext) -> FieldResult<Vec<User>> {
+        context.authorize_admin()?;
+        User::list(context)
     }
 
-    fn submissions(&self) -> FieldResult<Vec<contest_submission::Submission>> {
-        self.context.authorize_admin()?;
-        contest_submission::Submission::list(&self.context)
+    fn submissions(
+        &self,
+        context: &ApiContext,
+    ) -> FieldResult<Vec<contest_submission::Submission>> {
+        context.authorize_admin()?;
+        contest_submission::Submission::list(context)
     }
 
-    fn evaluations(&self) -> FieldResult<Vec<Evaluation>> {
-        self.context.authorize_admin()?;
-        Evaluation::list(&self.context)
+    fn evaluations(&self, context: &ApiContext) -> FieldResult<Vec<Evaluation>> {
+        context.authorize_admin()?;
+        Evaluation::list(context)
     }
 }
 
 /// Information visible to a contestant
 pub struct ContestView<'a> {
-    contest: &'a Contest<'a>,
+    contest: &'a Contest,
     user_id: Option<UserId>,
 }
 
-impl ContestView<'_> {
-    pub fn new<'a>(
-        contest: &'a Contest<'a>,
-        user_id: Option<UserId>,
-    ) -> FieldResult<ContestView<'a>> {
-        Ok(ContestView { contest, user_id })
-    }
-
-    pub fn context(&self) -> &ApiContext {
-        &self.contest.context
+impl<'a> ContestView<'a> {
+    pub fn new(contest: &'a Contest, user_id: Option<UserId>) -> FieldResult<Self> {
+        Ok(Self { contest, user_id })
     }
 
     pub fn user_id(&self) -> &Option<UserId> {
@@ -231,28 +227,31 @@ impl ContestView<'_> {
 }
 
 pub struct ProblemSet<'a> {
-    contest: &'a Contest<'a>,
+    #[allow(dead_code)]
+    contest: &'a Contest,
 }
 
 /// Set of problems currently active
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSet<'_> {
     /// The list of problems
-    fn problems(&self) -> FieldResult<Vec<Problem>> {
+    fn problems(&self, context: &ApiContext) -> FieldResult<Vec<Problem>> {
         // TODO: return only the problems that only the user can access
-        Ok(Problem::all(&self.contest.context)?)
+        Ok(Problem::all(context)?)
     }
 
     /// Range of the total score, obtained as the sum of score range of each problem
-    fn score_range(&self) -> FieldResult<ScoreRange> {
+    fn score_range(&self, context: &ApiContext) -> FieldResult<ScoreRange> {
         Ok(ScoreRange::total(
-            self.problems()?.iter().map(|problem| problem.score_range()),
+            self.problems(context)?
+                .iter()
+                .map(|problem| problem.score_range()),
         ))
     }
 
-    fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
+    fn score_domain(&self, context: &ApiContext) -> FieldResult<ScoreAwardDomain> {
         Ok(ScoreAwardDomain {
-            range: self.score_range()?,
+            range: self.score_range(context)?,
         })
     }
 
@@ -272,11 +271,11 @@ pub struct ProblemSetView<'a> {
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSetView<'_> {
-    fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+    fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
         Ok(ScoreAwardGrading {
-            domain: self.problem_set.score_domain()?,
+            domain: self.problem_set.score_domain(context)?,
             grade: match self.tackling() {
-                Some(t) => Some(t.grade()?),
+                Some(t) => Some(t.grade(context)?),
                 None => None,
             },
         })
@@ -300,21 +299,21 @@ pub struct ProblemSetTackling<'a> {
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSetTackling<'_> {
     /// Total score, obtained as the sum of score of each problem
-    fn score(&self) -> FieldResult<ScoreAwardValue> {
+    fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
             self.problem_set
-                .problems()?
+                .problems(context)?
                 .iter()
                 .filter_map(|problem| problem.view(Some(self.user_id.clone())).tackling())
-                .map(|tackling| tackling.score())
+                .map(|tackling| tackling.score(context))
                 .collect::<FieldResult<Vec<_>>>()?,
         ))
     }
 
-    fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+    fn grade(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrade> {
         Ok(ScoreAwardGrade {
-            domain: self.problem_set.score_domain()?,
-            value: self.score()?,
+            domain: self.problem_set.score_domain(context)?,
+            value: self.score(context)?,
         })
     }
 }
@@ -329,15 +328,12 @@ impl ContestView<'_> {
     }
 
     /// Questions made by the current user
-    fn questions(&self) -> FieldResult<Option<Vec<Question>>> {
+    fn questions(&self, context: &ApiContext) -> FieldResult<Option<Vec<Question>>> {
         if let Some(user_id) = &self.user_id {
             Ok(Some(
-                questions::question_of_user(&self.context().database, user_id)?
+                questions::question_of_user(&context.database, user_id)?
                     .into_iter()
-                    .map(|data| Question {
-                        context: self.context(),
-                        data,
-                    })
+                    .map(|data| Question { data })
                     .collect(),
             ))
         } else {
@@ -346,8 +342,8 @@ impl ContestView<'_> {
     }
 
     /// Return a list of announcements
-    fn announcements(&self) -> FieldResult<Vec<Announcement>> {
-        Ok(announcements::query_all(&self.context().database)?)
+    fn announcements(&self, context: &ApiContext) -> FieldResult<Vec<Announcement>> {
+        Ok(announcements::query_all(&context.database)?)
     }
 }
 

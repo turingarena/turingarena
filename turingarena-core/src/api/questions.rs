@@ -15,13 +15,12 @@ pub struct QuestionData {
     text: String,
 }
 
-pub struct Question<'a> {
-    pub context: &'a ApiContext,
+pub struct Question {
     pub data: QuestionData,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl Question<'_> {
+impl Question {
     /// Time at which the question was inserted
     fn time(&self) -> &String {
         &self.data.time
@@ -33,8 +32,8 @@ impl Question<'_> {
     }
 
     /// Answer to the question, if answered
-    fn answer(&self) -> FieldResult<Option<Answer>> {
-        Ok(answer_to(&self.context.database, self.data.id)?)
+    fn answer(&self, context: &ApiContext) -> FieldResult<Option<Answer>> {
+        Ok(answer_to(&context.database, self.data.id)?)
     }
 
     /// Optionally the problem which the question refers to

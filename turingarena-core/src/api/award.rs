@@ -42,20 +42,19 @@ pub struct AwardAchievementData {
     value: f64,
 }
 
-pub struct AwardAchievement<'a> {
-    context: &'a ApiContext,
+pub struct AwardAchievement {
     award: Award,
     data: AwardAchievementData,
 }
 
-impl AwardAchievement<'_> {
+impl AwardAchievement {
     /// Get the best score award for (user, problem)
-    pub fn find_best<'a>(
-        context: &'a ApiContext,
+    pub fn find_best(
+        context: &ApiContext,
         award: &Award,
         user_id: &str,
         problem_name: &str,
-    ) -> FieldResult<AwardAchievement<'a>> {
+    ) -> FieldResult<Self> {
         let kind = match award.material.domain {
             AwardDomain::Score(_) => "SCORE",
             AwardDomain::Badge(_) => "BADGE",
@@ -78,7 +77,6 @@ impl AwardAchievement<'_> {
             });
         Ok(AwardAchievement {
             award: (*award).clone(),
-            context,
             data,
         })
     }
@@ -88,7 +86,7 @@ impl AwardAchievement<'_> {
         context: &'a ApiContext,
         award: &Award,
         evaluation_id: &str,
-    ) -> FieldResult<AwardAchievement<'a>> {
+    ) -> FieldResult<Self> {
         let kind = match award.material.domain {
             AwardDomain::Score(_) => "SCORE",
             AwardDomain::Badge(_) => "BADGE",
@@ -111,24 +109,23 @@ impl AwardAchievement<'_> {
             });
         Ok(AwardAchievement {
             award: (*award).clone(),
-            context,
             data,
         })
     }
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl AwardAchievement<'_> {
-    fn evaluation(&self) -> FieldResult<Option<Evaluation>> {
+impl AwardAchievement {
+    fn evaluation(&self, context: &ApiContext) -> FieldResult<Option<Evaluation>> {
         Ok(match &self.data.evaluation_id {
-            Some(id) => Some(Evaluation::by_id(&self.context, id)?),
+            Some(id) => Some(Evaluation::by_id(context, id)?),
             None => None,
         })
     }
 
-    fn submission(&self) -> FieldResult<Option<Submission>> {
-        Ok(match self.evaluation()? {
-            Some(evaluation) => Some(evaluation.submission()?),
+    fn submission(&self, context: &ApiContext) -> FieldResult<Option<Submission>> {
+        Ok(match self.evaluation(context)? {
+            Some(evaluation) => Some(evaluation.submission(context)?),
             None => None,
         })
     }
@@ -209,7 +206,7 @@ pub struct BadgeAwardGrading {
 }
 
 pub struct AwardView<'a> {
-    pub problem: &'a Problem<'a>,
+    pub problem: &'a Problem,
     pub award: Award,
     pub user_id: Option<UserId>,
 }
@@ -224,9 +221,9 @@ impl<'a> AwardView<'a> {
         })
     }
 
-    pub fn grading(&self) -> FieldResult<AwardGrading> {
+    pub fn grading(&self, context: &ApiContext) -> FieldResult<AwardGrading> {
         let grade = match self.tackling() {
-            Some(t) => Some(t.best_achievement()?.grade()),
+            Some(t) => Some(t.best_achievement(context)?.grade()),
             None => None,
         };
 
@@ -246,16 +243,16 @@ impl<'a> AwardView<'a> {
 }
 
 pub struct AwardTackling<'a> {
-    pub problem: &'a Problem<'a>,
+    pub problem: &'a Problem,
     pub award: Award,
     pub user_id: UserId,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> AwardTackling<'a> {
-    pub fn best_achievement(&self) -> FieldResult<AwardAchievement<'a>> {
+    pub fn best_achievement(&self, context: &ApiContext) -> FieldResult<AwardAchievement> {
         Ok(AwardAchievement::find_best(
-            &self.problem.context(),
+            context,
             &self.award,
             &self.user_id.0,
             &self.problem.name().0,

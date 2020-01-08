@@ -5,7 +5,7 @@ use diesel::prelude::*;
 
 use juniper::FieldResult;
 
-use root::{ApiConfig, ApiContext};
+use root::ApiContext;
 
 use award::{AwardAchievement, AwardInput};
 use contest_problem::Problem;
@@ -20,7 +20,7 @@ use crate::evaluation::AwardEvent;
 use super::submission::FieldValue;
 use super::*;
 use crate::api::award::{AwardGrading, ScoreAwardGrading};
-use crate::data::award::{Award, Score, ScoreAwardDomain, ScoreAwardGrade};
+use crate::data::award::{Award, ScoreAwardDomain, ScoreAwardGrade};
 
 /// An evaluation event
 #[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
@@ -37,20 +37,19 @@ struct EvaluationEventInput<'a> {
     event_json: String,
 }
 
-pub struct Evaluation<'a> {
-    context: &'a ApiContext,
+pub struct Evaluation {
     data: EvaluationData,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl<'a> Evaluation<'a> {
+impl Evaluation {
     pub fn id(&self) -> &str {
         &self.data.id
     }
 
     /// Evaluated submission
-    pub fn submission(&self) -> FieldResult<Submission<'a>> {
-        Submission::by_id(self.context, &self.data.submission_id)
+    pub fn submission(&self, context: &ApiContext) -> FieldResult<Submission> {
+        Submission::by_id(context, &self.data.submission_id)
     }
 
     /// Evaluation status
@@ -66,33 +65,33 @@ impl<'a> Evaluation<'a> {
         }
     }
 
-    pub fn score_domain(&self) -> FieldResult<ScoreAwardDomain> {
-        Ok(self.submission()?.problem()?.score_domain())
+    pub fn score_domain(&self, context: &ApiContext) -> FieldResult<ScoreAwardDomain> {
+        Ok(self.submission(context)?.problem(context)?.score_domain())
     }
 
-    pub fn grading(&self) -> FieldResult<ScoreAwardGrading> {
+    pub fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
         let grade = match self.result() {
-            Some(result) => Some(result.grade()?),
+            Some(result) => Some(result.grade(context)?),
             None => None,
         };
         Ok(ScoreAwardGrading {
-            domain: self.score_domain()?,
+            domain: self.score_domain(context)?,
             grade,
         })
     }
 
-    pub fn awards(&self) -> FieldResult<Vec<EvaluationAward>> {
+    pub fn awards(&self, context: &ApiContext) -> FieldResult<Vec<EvaluationAward>> {
         let result = self.result();
 
-        self.submission()?
-            .problem()?
+        self.submission(context)?
+            .problem(context)?
             .material()
             .awards
             .iter()
             .map(|award| -> FieldResult<_> {
                 // FIXME: logic is quite ugly here, refactor
                 let achievement = if result.is_some() {
-                    Some(AwardAchievement::find(&self.context, award, self.id())?)
+                    Some(AwardAchievement::find(context, award, self.id())?)
                 } else {
                     None
                 };
@@ -106,60 +105,57 @@ impl<'a> Evaluation<'a> {
     }
 
     /// Evaluation events of this submission
-    pub fn events(&self) -> FieldResult<Vec<Event>> {
+    pub fn events(&self, context: &ApiContext) -> FieldResult<Vec<Event>> {
         Ok(evaluation_events::table
             .select(evaluation_events::dsl::event_json)
             .filter(evaluation_events::dsl::evaluation_id.eq(&self.data.id))
             .order(evaluation_events::dsl::serial)
-            .load::<String>(&self.context.database)?
+            .load::<String>(&context.database)?
             .into_iter()
             .map(|json| serde_json::from_str(&json))
             .collect::<std::result::Result<_, _>>()?)
     }
 }
 
-impl<'a> Evaluation<'a> {
-    pub fn by_id(context: &'a ApiContext, id: &str) -> FieldResult<Self> {
+impl Evaluation {
+    pub fn by_id(context: &ApiContext, id: &str) -> FieldResult<Self> {
         let data = evaluations::table
             .find(id)
             .first::<EvaluationData>(&context.database)?;
-        Ok(Evaluation { context, data })
+        Ok(Evaluation { data })
     }
 
-    pub fn list(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
+    pub fn list(context: &ApiContext) -> FieldResult<Vec<Self>> {
         Ok(evaluations::table
             .load::<EvaluationData>(&context.database)?
             .into_iter()
-            .map(|data| Evaluation { context, data })
+            .map(|data| Evaluation { data })
             .collect())
     }
 
-    pub fn of_submission<'b>(
-        context: &'b ApiContext,
-        submission_id: &str,
-    ) -> FieldResult<Evaluation<'b>> {
+    pub fn of_submission(context: &ApiContext, submission_id: &str) -> FieldResult<Self> {
         let data = evaluations::table
             .filter(evaluations::dsl::submission_id.eq(submission_id))
             .order_by(evaluations::dsl::created_at.desc())
             .first::<EvaluationData>(&context.database)?;
-        Ok(Evaluation { context, data })
+        Ok(Evaluation { data })
     }
 
     /// start the evaluation thread
-    pub fn start_new(submission: &Submission, config: &ApiConfig) -> QueryResult<()> {
-        let config = config.clone();
+    pub fn start_new(submission: &Submission, context: &ApiContext) -> QueryResult<()> {
+        let config = context.config.clone();
         let submission_id = submission.id();
 
         thread::spawn(move || {
             let context = config.create_context(None);
             let evaluation =
                 Evaluation::create(&context, submission_id).expect("Unable to create evaluation");
-            evaluation.run().expect("Unable to run evaluation");
+            evaluation.run(&context).expect("Unable to run evaluation");
         });
         Ok(())
     }
 
-    fn create(context: &'a ApiContext, submission_id: SubmissionId) -> FieldResult<Self> {
+    fn create(context: &ApiContext, submission_id: SubmissionId) -> FieldResult<Self> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = chrono::Local::now().to_rfc3339();
 
@@ -175,43 +171,43 @@ impl<'a> Evaluation<'a> {
         Ok(Evaluation::by_id(&context, &id)?)
     }
 
-    fn run(&self) -> FieldResult<()> {
-        let field_values = self.load_submission_field_values()?;
-        let problem_path = self.load_problem_path()?;
+    fn run(&self, context: &ApiContext) -> FieldResult<()> {
+        let field_values = self.load_submission_field_values(context)?;
+        let problem_path = self.load_problem_path(context)?;
 
         let submission = submission::Submission { field_values };
         let receiver = task_maker::evaluate(problem_path, submission)?;
 
         for (serial, event) in receiver.into_iter().enumerate() {
-            self.save_awards(&event)?;
-            self.save_event(serial as i32, &event)?;
+            self.save_awards(context, &event)?;
+            self.save_event(context, serial as i32, &event)?;
         }
 
-        self.set_status(EvaluationStatus::Success)?;
+        self.set_status(context, EvaluationStatus::Success)?;
 
         Ok(())
     }
 
-    fn load_submission_field_values(&self) -> FieldResult<Vec<FieldValue>> {
-        let submission = self.submission()?;
-        Ok(submission.field_values()?)
+    fn load_submission_field_values(&self, context: &ApiContext) -> FieldResult<Vec<FieldValue>> {
+        let submission = self.submission(context)?;
+        Ok(submission.field_values(context)?)
     }
 
-    fn load_problem_path(&self) -> FieldResult<PathBuf> {
-        let submission = self.submission()?;
-        let problem = Problem::by_name(&self.context, submission.problem_name())?;
-        Ok(problem.unpack()?)
+    fn load_problem_path(&self, context: &ApiContext) -> FieldResult<PathBuf> {
+        let submission = self.submission(context)?;
+        let problem = Problem::by_name(&context, submission.problem_name())?;
+        Ok(problem.unpack(context)?)
     }
 
-    fn set_status(&self, status: EvaluationStatus) -> FieldResult<()> {
+    fn set_status(&self, context: &ApiContext, status: EvaluationStatus) -> FieldResult<()> {
         diesel::update(evaluations::table)
             .filter(evaluations::dsl::id.eq(&self.data.id))
             .set(evaluations::dsl::status.eq(status.to_string()))
-            .execute(&self.context.database)?;
+            .execute(&context.database)?;
         Ok(())
     }
 
-    fn save_event(&self, serial: i32, event: &Event) -> FieldResult<()> {
+    fn save_event(&self, context: &ApiContext, serial: i32, event: &Event) -> FieldResult<()> {
         let event_input = EvaluationEventInput {
             serial,
             evaluation_id: &self.data.id,
@@ -219,11 +215,11 @@ impl<'a> Evaluation<'a> {
         };
         diesel::insert_into(evaluation_events::table)
             .values(&event_input)
-            .execute(&self.context.database)?;
+            .execute(&context.database)?;
         Ok(())
     }
 
-    fn save_awards(&self, event: &Event) -> FieldResult<()> {
+    fn save_awards(&self, context: &ApiContext, event: &Event) -> FieldResult<()> {
         if let Event::Award(AwardEvent { award_name, value }) = event {
             let score_award_input = AwardInput {
                 kind: match value {
@@ -245,7 +241,7 @@ impl<'a> Evaluation<'a> {
             };
             diesel::insert_into(awards::table)
                 .values(&score_award_input)
-                .execute(&self.context.database)?;
+                .execute(&context.database)?;
         }
         Ok(())
     }
@@ -309,8 +305,8 @@ impl EvaluationStatus {
 }
 
 pub struct EvaluationAward<'a> {
-    pub evaluation: &'a Evaluation<'a>,
-    pub achievement: Option<AwardAchievement<'a>>,
+    pub evaluation: &'a Evaluation,
+    pub achievement: Option<AwardAchievement>,
     pub award: Award,
 }
 
@@ -325,29 +321,27 @@ impl EvaluationAward<'_> {
 }
 
 pub struct EvaluationResult<'a> {
-    pub evaluation: &'a Evaluation<'a>,
+    pub evaluation: &'a Evaluation,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl EvaluationResult<'_> {
     /// Award achievement of this evaluation
-    pub fn achievements(&self) -> FieldResult<Vec<AwardAchievement>> {
+    pub fn achievements(&self, context: &ApiContext) -> FieldResult<Vec<AwardAchievement>> {
         self.evaluation
-            .submission()?
-            .problem()?
+            .submission(context)?
+            .problem(context)?
             .material()
             .awards
             .iter()
-            .map(|award| {
-                AwardAchievement::find(&self.evaluation.context, award, self.evaluation.id())
-            })
+            .map(|award| AwardAchievement::find(context, award, self.evaluation.id()))
             .collect::<FieldResult<Vec<_>>>()
     }
 
     /// Sum of the score awards
-    pub fn score(&self) -> FieldResult<ScoreAwardValue> {
+    pub fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
-            self.achievements()?
+            self.achievements(context)?
                 .into_iter()
                 .map(|achievement| achievement.value())
                 .filter_map(|value| match value {
@@ -358,10 +352,14 @@ impl EvaluationResult<'_> {
         ))
     }
 
-    pub fn grade(&self) -> FieldResult<ScoreAwardGrade> {
+    pub fn grade(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrade> {
         Ok(ScoreAwardGrade {
-            domain: self.evaluation.submission()?.problem()?.score_domain(),
-            value: self.score()?,
+            domain: self
+                .evaluation
+                .submission(context)?
+                .problem(context)?
+                .score_domain(),
+            value: self.score(context)?,
         })
     }
 }

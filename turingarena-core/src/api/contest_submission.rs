@@ -81,39 +81,38 @@ struct SubmissionData {
     created_at: String,
 }
 
-pub struct Submission<'a> {
-    context: &'a ApiContext,
+pub struct Submission {
     data: SubmissionData,
 }
 
-impl Submission<'_> {
+impl Submission {
     /// Name of the problem wich the submission refers to
     pub fn problem_name(&self) -> &String {
         &self.data.problem_name
     }
 
-    pub fn field_values(&self) -> FieldResult<Vec<FieldValue>> {
+    pub fn field_values(&self, context: &ApiContext) -> FieldResult<Vec<FieldValue>> {
         Ok(submission_files::table
             .filter(submission_files::dsl::submission_id.eq(&self.data.id))
-            .load::<SubmissionFile>(&self.context.database)?
+            .load::<SubmissionFile>(&context.database)?
             .into_iter()
             .map(|f| f.into_field_value())
             .collect())
     }
 
     /// Gets the submission with the specified id from the database
-    pub fn by_id<'a>(context: &'a ApiContext, submission_id: &str) -> FieldResult<Submission<'a>> {
+    pub fn by_id(context: &ApiContext, submission_id: &str) -> FieldResult<Self> {
         let data = submissions::table
             .filter(submissions::dsl::id.eq(submission_id))
             .first::<SubmissionData>(&context.database)?;
-        Ok(Submission { context, data })
+        Ok(Submission { data })
     }
 
-    pub fn list<'a>(context: &'a ApiContext) -> FieldResult<Vec<Submission<'a>>> {
+    pub fn list(context: &ApiContext) -> FieldResult<Vec<Self>> {
         Ok(submissions::table
             .load::<SubmissionData>(&context.database)?
             .into_iter()
-            .map(|data| Submission { context, data })
+            .map(|data| Submission { data })
             .collect())
     }
 
@@ -123,7 +122,7 @@ impl Submission<'_> {
         user_id: &str,
         problem_name: &str,
         files: Vec<FileInput>,
-    ) -> FieldResult<Submission<'a>> {
+    ) -> FieldResult<Self> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = chrono::Local::now().to_rfc3339();
         let submission = SubmissionInsertable {
@@ -155,19 +154,19 @@ impl Submission<'_> {
         context: &'a ApiContext,
         user_id: &str,
         problem_name: &str,
-    ) -> FieldResult<Vec<Submission<'a>>> {
+    ) -> FieldResult<Vec<Self>> {
         Ok(submissions::table
             .filter(submissions::dsl::user_id.eq(user_id))
             .filter(submissions::dsl::problem_name.eq(problem_name))
             .load::<SubmissionData>(&context.database)?
             .into_iter()
-            .map(|data| contest_submission::Submission { context, data })
+            .map(|data| contest_submission::Submission { data })
             .collect())
     }
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl Submission<'_> {
+impl Submission {
     /// UUID of the submission
     pub fn id(&self) -> SubmissionId {
         SubmissionId(self.data.id.clone())
@@ -178,8 +177,8 @@ impl Submission<'_> {
         UserId(self.data.user_id.clone())
     }
 
-    pub fn problem(&self) -> FieldResult<Problem> {
-        Ok(Problem::by_name(&self.context, self.problem_name())?)
+    pub fn problem(&self, context: &ApiContext) -> FieldResult<Problem> {
+        Ok(Problem::by_name(context, self.problem_name())?)
     }
 
     /// Time at wich the submission was created
@@ -188,14 +187,14 @@ impl Submission<'_> {
     }
 
     /// List of files of this submission
-    fn files(&self) -> FieldResult<Vec<SubmissionFile>> {
+    fn files(&self, context: &ApiContext) -> FieldResult<Vec<SubmissionFile>> {
         Ok(submission_files::table
             .filter(submission_files::dsl::submission_id.eq(&self.data.id))
-            .load::<SubmissionFile>(&self.context.database)?)
+            .load::<SubmissionFile>(&context.database)?)
     }
 
-    pub fn evaluation(&self) -> FieldResult<Evaluation> {
-        Evaluation::of_submission(self.context, &self.data.id)
+    pub fn evaluation(&self, context: &ApiContext) -> FieldResult<Evaluation> {
+        Evaluation::of_submission(context, &self.data.id)
     }
 }
 

@@ -7,7 +7,7 @@ use juniper::FieldResult;
 use structopt::StructOpt;
 
 use auth::JwtData;
-use contest::{ContestView, UserToken};
+use contest::UserToken;
 use formats::ImportFileInput;
 use problem::ProblemName;
 use schema::blobs;
@@ -250,7 +250,7 @@ impl Mutation {
         input: ContestUpdateInput,
     ) -> FieldResult<MutationOk> {
         context.authorize_admin()?;
-        context.default_contest()?.update(input)?;
+        context.default_contest()?.update(context, input)?;
 
         Ok(MutationOk)
     }
@@ -330,7 +330,7 @@ impl Mutation {
     ) -> FieldResult<contest_submission::Submission> {
         let submission =
             contest_submission::Submission::insert(&context, &user_id.0, &problem_name.0, files)?;
-        Evaluation::start_new(&submission, &context.config)?;
+        Evaluation::start_new(&submission, context)?;
         Ok(submission)
     }
 
@@ -338,7 +338,7 @@ impl Mutation {
         context.authorize_admin()?;
         for id in submission_ids {
             let submission = contest_submission::Submission::by_id(&context, &id)?;
-            Evaluation::start_new(&submission, &context.config)?;
+            Evaluation::start_new(&submission, context)?;
         }
         Ok(MutationOk)
     }
