@@ -25,6 +25,7 @@ import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { ContestStatus } from '../../../../../__generated__/globalTypes';
 import { Auth, AuthService } from '../auth.service';
 import { scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
@@ -92,7 +93,7 @@ export class ContestViewComponent implements OnInit {
     this.setQuery();
   }
 
-  getContestClock = ({ contest: { startTime, endTime } }: ContestQuery) =>
+  getContestClock = ({ contest: { status, startTime, endTime } }: ContestQuery) =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
       map(() => {
@@ -100,20 +101,19 @@ export class ContestViewComponent implements OnInit {
         const start = DateTime.fromISO(startTime);
         const end = DateTime.fromISO(endTime);
 
-        return now < start
-          ? {
-            status: 'startingIn',
-            value: start.diff(now),
-          }
-          : now < end
-            ? {
-              status: 'endingIn',
-              value: end.diff(now),
-            }
-            : {
-              status: 'endedBy',
-              value: now.diff(end),
-            };
+        switch (status) {
+          case ContestStatus.NOT_STARTED: return start.diff(now);
+          case ContestStatus.RUNNING: return end.diff(now);
+          case ContestStatus.ENDED: return now.diff(end);
+          default: throw new Error();
+        }
+      }),
+      map((duration) => duration.valueOf() >= 0 ? {
+        duration,
+        negated: false,
+      } : {
+        duration: duration.negate(),
+        negated: true,
       }),
     )
 
@@ -129,6 +129,7 @@ export class ContestViewComponent implements OnInit {
           contest {
             startTime
             endTime
+            status
             material {
               ...ContestMaterialFragment
             }

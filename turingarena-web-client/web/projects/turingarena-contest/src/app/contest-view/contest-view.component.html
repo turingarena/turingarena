@@ -36,13 +36,13 @@
             </ng-container>
           </ng-container>
           <ng-container *ngIf="getContestClock(data) | async as clock">
-            <h2 class="contest-clock-title" [ngSwitch]="clock.status">
-              <ng-container *ngSwitchCase="'startingIn'">Starting In</ng-container>
-              <ng-container *ngSwitchCase="'endingIn'">Remaining Time</ng-container>
-              <ng-container *ngSwitchCase="'endedBy'">Ended</ng-container>
+            <h2 class="contest-clock-title" [ngSwitch]="data.contest.status">
+              <ng-container *ngSwitchCase="'NOT_STARTED'">Starting In</ng-container>
+              <ng-container *ngSwitchCase="'RUNNING'">Remaining Time</ng-container>
+              <ng-container *ngSwitchCase="'ENDED'">Ended</ng-container>
             </h2>
-            <div class="contest-clock" [attr.data-clock-status]="clock.status">
-              {{ clock.value.toFormat('hh:mm:ss') }}
+            <div class="contest-clock" [attr.data-clock-status]="data.contest.status">
+              {{clock.negated ? '-' : ''}}{{ clock.duration.toFormat('hh:mm:ss') }}
             </div>
           </ng-container>
           <ng-container *ngIf="data.contest.view.problemSet! as problemSet">

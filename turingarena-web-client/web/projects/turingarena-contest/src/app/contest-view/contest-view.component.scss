@@ -139,7 +139,7 @@
   text-align: right;
   margin-bottom: 16px;
 
-  &[data-clock-status="endedBy"] {
+  &[data-clock-status="ENDED"] {
     @extend .text-danger;
   }
 }
