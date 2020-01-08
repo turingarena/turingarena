@@ -33,7 +33,7 @@ impl MutationOk {
     }
 }
 
-pub type RootNode<'a> = juniper::RootNode<'static, Query<'a>, Mutation<'a>>;
+pub type RootNode<'a> = juniper::RootNode<'static, Query, Mutation>;
 
 #[derive(StructOpt, Debug)]
 pub struct ContestArgs {
@@ -121,7 +121,7 @@ impl ApiConfig {
 
 impl ApiContext {
     pub fn root_node(&self) -> RootNode {
-        RootNode::new(Query { context: &self }, Mutation { context: &self })
+        RootNode::new(Query, Mutation)
     }
 
     pub fn workspace_path(&self) -> &Path {
@@ -187,57 +187,56 @@ impl ApiContext {
     }
 }
 
-pub struct Query<'a> {
-    context: &'a ApiContext,
-}
+pub struct Query;
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl Query<'_> {
-    fn contest(&self) -> FieldResult<Contest> {
-        Contest::new(&self.context)
+impl Query {
+    fn contest(context: &ApiContext) -> FieldResult<Contest> {
+        Contest::new(context)
     }
 
-    fn user(&self, user_id: Option<UserId>) -> FieldResult<Option<User>> {
+    fn user(context: &ApiContext, user_id: Option<UserId>) -> FieldResult<Option<User>> {
         Ok(if let Some(user_id) = user_id {
-            Some(User::by_id(&self.context, user_id.clone())?)
+            Some(User::by_id(context, user_id.clone())?)
         } else {
             None
         })
     }
 
     /// Get the submission with the specified id
-    fn submission(&self, submission_id: String) -> FieldResult<contest_submission::Submission> {
-        let submission = contest_submission::Submission::by_id(&self.context, &submission_id)?;
-        self.context.authorize_user(&Some(submission.user_id()))?;
+    fn submission(
+        context: &ApiContext,
+        submission_id: String,
+    ) -> FieldResult<contest_submission::Submission> {
+        let submission = contest_submission::Submission::by_id(context, &submission_id)?;
+        context.authorize_user(&Some(submission.user_id()))?;
         Ok(submission)
     }
 
     /// Current time on the server as RFC3339 date
-    fn server_time(&self) -> String {
+    fn server_time() -> String {
         chrono::Local::now().to_rfc3339()
     }
 }
 
-pub struct Mutation<'a> {
-    context: &'a ApiContext,
-}
+pub struct Mutation;
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl Mutation<'_> {
+impl Mutation {
     /// Reset database
-    fn init_db(&self) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
+    fn init_db(context: &ApiContext) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
 
-        embedded_migrations::run_with_output(&self.context.database, &mut std::io::stdout())?;
+        embedded_migrations::run_with_output(&context.database, &mut std::io::stdout())?;
 
-        Contest::init(&self.context)?;
+        Contest::init(context)?;
 
         Ok(MutationOk)
     }
 
     /// Authenticate a user, generating a JWT authentication token
-    fn auth(&self, token: String) -> FieldResult<Option<UserToken>> {
-        Ok(auth::auth(&self.context, &token)?)
+    fn auth(context: &ApiContext, token: String) -> FieldResult<Option<UserToken>> {
+        Ok(auth::auth(context, &token)?)
     }
 
     /// Current time on the server as RFC3339 date
@@ -246,92 +245,100 @@ impl Mutation<'_> {
     }
 
     /// Add a user to the current contest
-    pub fn update_contest(&self, input: ContestUpdateInput) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        self.context.default_contest()?.update(input)?;
+    pub fn update_contest(
+        context: &ApiContext,
+        input: ContestUpdateInput,
+    ) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        context.default_contest()?.update(input)?;
 
         Ok(MutationOk)
     }
 
     /// Add a user to the current contest
-    pub fn add_users(&self, inputs: Vec<UserInput>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        User::insert(&self.context, inputs)?;
+    pub fn add_users(context: &ApiContext, inputs: Vec<UserInput>) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        User::insert(context, inputs)?;
         Ok(MutationOk)
     }
 
-    pub fn update_users(&self, inputs: Vec<UserUpdateInput>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        User::update(&self.context, inputs)?;
+    pub fn update_users(
+        context: &ApiContext,
+        inputs: Vec<UserUpdateInput>,
+    ) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        User::update(context, inputs)?;
         Ok(MutationOk)
     }
 
     /// Delete a user from the current contest
-    pub fn delete_users(&self, ids: Vec<String>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        User::delete(&self.context, ids)?;
+    pub fn delete_users(context: &ApiContext, ids: Vec<String>) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        User::delete(&context, ids)?;
         Ok(MutationOk)
     }
 
     /// Add problems to the current contest
-    pub fn add_problems(&self, inputs: Vec<ProblemInput>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        Problem::insert(&self.context, inputs)?;
+    pub fn add_problems(
+        context: &ApiContext,
+        inputs: Vec<ProblemInput>,
+    ) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Problem::insert(&context, inputs)?;
         Ok(MutationOk)
     }
 
     /// Update problems in the current contest
-    pub fn update_problems(&self, inputs: Vec<ProblemUpdateInput>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        Problem::update(&self.context, inputs)?;
+    pub fn update_problems(
+        context: &ApiContext,
+        inputs: Vec<ProblemUpdateInput>,
+    ) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Problem::update(&context, inputs)?;
         Ok(MutationOk)
     }
 
     /// Delete problems from the current contest
-    pub fn delete_problems(&self, names: Vec<String>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
-        Problem::delete(&self.context, names)?;
+    pub fn delete_problems(context: &ApiContext, names: Vec<String>) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Problem::delete(&context, names)?;
         Ok(MutationOk)
     }
 
     /// Import a file
     pub fn import(
-        &self,
+        context: &ApiContext,
         inputs: Vec<ImportFileInput>,
         dry_run: Option<bool>,
     ) -> FieldResult<Import> {
-        self.context.authorize_admin()?;
+        context.authorize_admin()?;
         let import = Import::load(inputs)?;
         if dry_run.is_some() && dry_run.unwrap() {
             // no-op
         } else {
-            import.apply(&self.context)?;
+            import.apply(&context)?;
         }
         Ok(import)
     }
 
     /// Submit a solution to the problem
     fn submit(
-        &self,
+        context: &ApiContext,
         user_id: UserId,
         problem_name: ProblemName,
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
-        let submission = contest_submission::Submission::insert(
-            &self.context,
-            &user_id.0,
-            &problem_name.0,
-            files,
-        )?;
-        Evaluation::start_new(&submission, &self.context.config)?;
+        let submission =
+            contest_submission::Submission::insert(&context, &user_id.0, &problem_name.0, files)?;
+        Evaluation::start_new(&submission, &context.config)?;
         Ok(submission)
     }
 
-    fn evaluate(&self, submission_ids: Vec<String>) -> FieldResult<MutationOk> {
-        self.context.authorize_admin()?;
+    fn evaluate(context: &ApiContext, submission_ids: Vec<String>) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
         for id in submission_ids {
-            let submission = contest_submission::Submission::by_id(&self.context, &id)?;
-            Evaluation::start_new(&submission, &self.context.config)?;
+            let submission = contest_submission::Submission::by_id(&context, &id)?;
+            Evaluation::start_new(&submission, &context.config)?;
         }
         Ok(MutationOk)
     }
