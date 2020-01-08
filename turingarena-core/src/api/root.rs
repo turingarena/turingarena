@@ -328,10 +328,11 @@ impl Mutation {
         problem_name: ProblemName,
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
-        let submission =
-            contest_submission::Submission::insert(&context, &user_id.0, &problem_name.0, files)?;
-        Evaluation::start_new(&submission, context)?;
-        Ok(submission)
+        Ok(Problem::by_name(context, &problem_name.0)?
+            .view(Some(user_id))
+            .tackling()
+            .ok_or("Cannot submit now")?
+            .submit(context, files)?)
     }
 
     fn evaluate(context: &ApiContext, submission_ids: Vec<String>) -> FieldResult<MutationOk> {

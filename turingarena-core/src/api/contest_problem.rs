@@ -17,6 +17,8 @@ use crate::data::award::{
 
 use super::*;
 use crate::api::contest::{Contest, ContestStatus, ContestView};
+use crate::api::contest_evaluation::Evaluation;
+use crate::api::contest_submission::{FileInput, Submission};
 
 #[derive(juniper::GraphQLInputObject)]
 pub struct ProblemInput {
@@ -227,6 +229,19 @@ impl<'a> ProblemView<'a> {
 pub struct ProblemTackling<'a> {
     problem: &'a Problem,
     user_id: UserId,
+}
+
+impl ProblemTackling<'_> {
+    pub fn submit(&self, context: &ApiContext, files: Vec<FileInput>) -> FieldResult<Submission> {
+        if self.can_submit() {
+            return Err("cannot submit now".into());
+        }
+
+        let submission =
+            Submission::insert(&context, &self.user_id.0, &self.problem.name().0, files)?;
+        Evaluation::start_new(&submission, context)?;
+        Ok(submission)
+    }
 }
 
 /// Attempts at solving a problem by a user in the contest
