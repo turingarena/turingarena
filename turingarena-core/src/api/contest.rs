@@ -14,8 +14,10 @@ use root::ApiContext;
 use crate::api::award::ScoreAwardGrading;
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::Problem;
+use crate::api::root::Query;
 use crate::data::award::{ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange};
 use crate::data::contest::ContestMaterial;
+use chrono::DateTime;
 use questions::{Question, QuestionInput};
 use schema::contest;
 use std::path::PathBuf;
@@ -42,7 +44,7 @@ pub struct Contest {
 }
 
 impl Contest {
-    pub fn new(context: &ApiContext) -> FieldResult<Self> {
+    pub fn current(context: &ApiContext) -> FieldResult<Self> {
         let data = contest::table.first(&context.database)?;
         Ok(Contest { data })
     }
@@ -70,8 +72,14 @@ impl Contest {
             } else {
                 None
             },
-            start_time: input.start_time,
-            end_time: input.end_time,
+            start_time: match input.start_time {
+                Some(time) => Some(chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
+                None => None,
+            },
+            end_time: match input.end_time {
+                Some(time) => Some(chrono::DateTime::parse_from_rfc3339(&time)?.to_rfc3339()),
+                None => None,
+            },
         };
 
         diesel::update(schema::contest::table)
@@ -86,8 +94,43 @@ impl Contest {
     }
 }
 
+#[derive(juniper::GraphQLEnum)]
+pub enum ContestStatus {
+    NotStarted,
+    Running,
+    Ended,
+}
+
 #[juniper_ext::graphql(Context = ApiContext)]
 impl Contest {
+    /// Start time of the contest, as RFC3339 date
+    ///
+    /// Used only for display, e.g., of the elapsed time
+    pub fn start_time(&self) -> &str {
+        &self.data.start_time
+    }
+
+    /// End time of the contest, as RFC3339 date
+    ///
+    /// Used only for display, e.g., of the elapsed time
+    pub fn end_time(&self) -> &str {
+        &self.data.end_time
+    }
+
+    pub fn status(&self) -> ContestStatus {
+        let now = DateTime::parse_from_rfc3339(&Query::server_time()).unwrap();
+        let start = DateTime::parse_from_rfc3339(self.start_time()).unwrap();
+        let end = DateTime::parse_from_rfc3339(self.end_time()).unwrap();
+
+        if now < start {
+            ContestStatus::NotStarted
+        } else if now < end {
+            ContestStatus::Running
+        } else {
+            ContestStatus::Ended
+        }
+    }
+
     pub fn material(&self, context: &ApiContext) -> FieldResult<ContestMaterial> {
         let contest_path = self.contest_path(context)?;
 
@@ -154,8 +197,6 @@ impl Contest {
                 .collect(),
             resources: vec![],   // TODO
             attachments: vec![], // TODO
-            start_time: self.data.start_time.clone(),
-            end_time: self.data.end_time.clone(),
         })
     }
 
@@ -219,10 +260,6 @@ impl<'a> ContestView<'a> {
 
     pub fn user_id(&self) -> &Option<UserId> {
         &self.user_id
-    }
-
-    pub fn can_view_problems() -> bool {
-        true
     }
 }
 
@@ -321,10 +358,12 @@ impl ProblemSetTackling<'_> {
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ContestView<'_> {
     fn problem_set(&self) -> Option<ProblemSet> {
-        // TODO: return `None` if contest has not started yet
-        Some(ProblemSet {
-            contest: &self.contest,
-        })
+        match self.contest.status() {
+            ContestStatus::NotStarted => None,
+            ContestStatus::Running | ContestStatus::Ended => Some(ProblemSet {
+                contest: &self.contest,
+            }),
+        }
     }
 
     /// Questions made by the current user

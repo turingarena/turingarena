@@ -92,7 +92,7 @@ export class ContestViewComponent implements OnInit {
     this.setQuery();
   }
 
-  getContestClock = ({ contest: { material: { startTime, endTime } } }: ContestQuery) =>
+  getContestClock = ({ contest: { startTime, endTime } }: ContestQuery) =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
       map(() => {
@@ -127,6 +127,8 @@ export class ContestViewComponent implements OnInit {
             displayName
           }
           contest {
+            startTime
+            endTime
             material {
               ...ContestMaterialFragment
             }

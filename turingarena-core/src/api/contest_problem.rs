@@ -16,7 +16,7 @@ use crate::data::award::{
 };
 
 use super::*;
-use crate::api::contest::ContestView;
+use crate::api::contest::{Contest, ContestStatus, ContestView};
 
 #[derive(juniper::GraphQLInputObject)]
 pub struct ProblemInput {
@@ -51,12 +51,18 @@ struct ProblemData {
 
 /// A problem in the contest
 pub struct Problem {
+    contest: Contest,
     data: ProblemData,
     material: Material,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl Problem {
+    /// The contest this problem belongs to.
+    pub fn contest(&self) -> &Contest {
+        &self.contest
+    }
+
     /// Name of this problem. Unique in the current contest.
     pub fn name(&self) -> ProblemName {
         ProblemName(self.data.name.clone())
@@ -94,7 +100,12 @@ impl Problem {
 impl Problem {
     fn new(context: &ApiContext, data: ProblemData) -> FieldResult<Self> {
         let material = Self::get_problem_material(&data, context)?;
-        Ok(Problem { data, material })
+        let contest = Contest::current(context)?;
+        Ok(Problem {
+            contest,
+            data,
+            material,
+        })
     }
 
     /// Get a problem data by its name
@@ -271,6 +282,9 @@ impl ProblemTackling<'_> {
 
     /// Indicates if the user can submit to this problem
     fn can_submit(&self) -> bool {
-        true
+        match self.problem.contest.status() {
+            ContestStatus::Running => true,
+            _ => false,
+        }
     }
 }

@@ -153,7 +153,7 @@ impl ApiContext {
     }
 
     pub fn default_contest(&self) -> FieldResult<Contest> {
-        Contest::new(&self)
+        Contest::current(&self)
     }
 
     /// Authorize admin operations
@@ -191,11 +191,11 @@ pub struct Query;
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl Query {
-    fn contest(context: &ApiContext) -> FieldResult<Contest> {
-        Contest::new(context)
+    pub fn contest(context: &ApiContext) -> FieldResult<Contest> {
+        Contest::current(context)
     }
 
-    fn user(context: &ApiContext, user_id: Option<UserId>) -> FieldResult<Option<User>> {
+    pub fn user(context: &ApiContext, user_id: Option<UserId>) -> FieldResult<Option<User>> {
         Ok(if let Some(user_id) = user_id {
             Some(User::by_id(context, user_id.clone())?)
         } else {
@@ -204,7 +204,7 @@ impl Query {
     }
 
     /// Get the submission with the specified id
-    fn submission(
+    pub fn submission(
         context: &ApiContext,
         submission_id: String,
     ) -> FieldResult<contest_submission::Submission> {
@@ -214,7 +214,7 @@ impl Query {
     }
 
     /// Current time on the server as RFC3339 date
-    fn server_time() -> String {
+    pub fn server_time() -> String {
         chrono::Local::now().to_rfc3339()
     }
 }

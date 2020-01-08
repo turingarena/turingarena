@@ -27,8 +27,6 @@ export const contestMaterialFragment = gql`
         ...FileFragment
       }
     }
-    startTime
-    endTime
   }
 
   ${textFragment}

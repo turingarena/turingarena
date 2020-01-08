@@ -34,14 +34,4 @@ pub struct ContestMaterial {
 
     /// A collection of zero or more attachments for this contest.
     pub attachments: Vec<ContestAttachment>,
-
-    /// Start time of the contest, as RFC3339 date
-    ///
-    /// Used only for display, e.g., of the elapsed time
-    pub start_time: String,
-
-    /// End time of the contest, as RFC3339 date
-    ///
-    /// Used only for display, e.g., of the elapsed time
-    pub end_time: String,
 }
