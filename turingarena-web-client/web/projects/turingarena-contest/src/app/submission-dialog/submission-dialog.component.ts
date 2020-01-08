@@ -10,8 +10,8 @@ import { Valence } from '../../../../../__generated__/globalTypes';
 import { AwardFragment } from '../fragments/__generated__/AwardFragment';
 import { CellFragment } from '../fragments/__generated__/CellFragment';
 import { ColFragment } from '../fragments/__generated__/ColFragment';
-import { MaterialFragment } from '../fragments/__generated__/MaterialFragment';
 import { MemoryUsageValueFragment } from '../fragments/__generated__/MemoryUsageValueFragment';
+import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
 import { ScoreRangeFragment } from '../fragments/__generated__/ScoreRangeFragment';
 import { ScoreValueFragment } from '../fragments/__generated__/ScoreValueFragment';
 import { TableSectionFragment } from '../fragments/__generated__/TableSectionFragment';
@@ -20,7 +20,7 @@ import { TimeUsageCellContentFragment } from '../fragments/__generated__/TimeUsa
 import { TimeUsageValueFragment } from '../fragments/__generated__/TimeUsageValueFragment';
 import { ValenceValueFragment } from '../fragments/__generated__/ValenceValueFragment';
 import { ValueFragment } from '../fragments/__generated__/ValueFragment';
-import { evaluationFragment, evaluationEventFragment } from '../fragments/evaluation';
+import { evaluationEventFragment, evaluationFragment } from '../fragments/evaluation';
 import { submissionFragment } from '../fragments/submission';
 import { VariantService } from '../variant.service';
 
@@ -28,7 +28,6 @@ import {
   SubmissionQuery,
   SubmissionQueryVariables,
 } from './__generated__/SubmissionQuery';
-import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
 
 @Component({
   selector: 'app-submission-dialog',
@@ -47,7 +46,7 @@ export class SubmissionDialogComponent implements OnInit {
   submissionId!: string;
 
   @Input()
-  problem!: MaterialFragment;
+  problem!: ProblemFragment;
 
   @Input()
   modal!: NgbActiveModal;
@@ -87,9 +86,9 @@ export class SubmissionDialogComponent implements OnInit {
     });
   }
 
-  getEvaluationRecord(submission: SubmissionFragment) {
+  getEvaluationRecord(query: SubmissionQuery) {
     const record: Record<string, ValueFragment> = {};
-    for (const event of submission.evaluation.events) {
+    for (const event of query.submission.evaluation.events) {
       if (event.__typename === 'ValueEvent') {
         const { key, value } = event;
         record[key] = value;

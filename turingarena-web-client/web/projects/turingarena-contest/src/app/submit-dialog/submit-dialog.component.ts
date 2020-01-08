@@ -7,7 +7,7 @@ import { FileInput } from '../../../../../__generated__/globalTypes';
 import { FileLoadService } from '../file-load.service';
 import { FieldFragment } from '../fragments/__generated__/FieldFragment';
 import { FieldTypeFragment } from '../fragments/__generated__/FieldTypeFragment';
-import { ProblemViewFragment } from '../fragments/__generated__/ProblemViewFragment';
+import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
 
 import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitMutation';
 
@@ -58,7 +58,7 @@ export class SubmitDialogComponent {
   ) { }
 
   @Input()
-  problem!: ProblemViewFragment;
+  problem!: ProblemFragment;
 
   @Input()
   userId!: string;

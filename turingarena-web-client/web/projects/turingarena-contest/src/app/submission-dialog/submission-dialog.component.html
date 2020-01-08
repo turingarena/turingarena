@@ -9,7 +9,7 @@
       <fa-icon [icon]="faSpinner" [pulse]="true"></fa-icon> Evaluating...
     </div>
     <div class="submission-dialog-body">
-      <ng-container *ngIf="submission | applyPure:getEvaluationRecord as record">
+      <ng-container *ngIf="submissionResult.data | applyPure:getEvaluationRecord as record">
         <ng-container *ngFor="let section of problem.material.feedback">
           <ng-container [ngSwitch]="section.__typename">
             {{ section.caption | textVariant }}
