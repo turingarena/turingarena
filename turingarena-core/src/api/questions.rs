@@ -16,11 +16,11 @@ pub struct QuestionData {
 }
 
 pub struct Question<'a> {
-    pub context: &'a ApiContext<'a>,
+    pub context: &'a ApiContext,
     pub data: QuestionData,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Question<'_> {
     /// Time at which the question was inserted
     fn time(&self) -> &String {

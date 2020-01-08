@@ -31,13 +31,14 @@ pub fn union_from_enum_derive(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn graphql(_attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn graphql(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input: syn::Item = syn::parse(input).expect("Invalid syntax");
+    let attr: proc_macro2::TokenStream = attr.into();
     let output = quote!(
         #[allow(dead_code)]
         #input
 
-        #[juniper::object]
+        #[juniper::object(#attr)]
         #input
     );
     output.into()

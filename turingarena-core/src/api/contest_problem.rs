@@ -52,7 +52,7 @@ struct ProblemData {
 
 /// A problem in the contest
 pub struct Problem<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     data: ProblemData,
     material: Material,
 }
@@ -63,7 +63,7 @@ impl<'a> Problem<'a> {
     }
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Problem<'_> {
     /// Name of this problem. Unique in the current contest.
     pub fn name(&self) -> ProblemName {
@@ -100,7 +100,7 @@ impl Problem<'_> {
 }
 
 impl<'a> Problem<'a> {
-    fn new(context: &'a ApiContext<'a>, data: ProblemData) -> FieldResult<Self> {
+    fn new(context: &'a ApiContext, data: ProblemData) -> FieldResult<Self> {
         let material = Self::get_problem_material(&data, context)?;
         Ok(Problem {
             context,
@@ -110,13 +110,13 @@ impl<'a> Problem<'a> {
     }
 
     /// Get a problem data by its name
-    pub fn by_name(context: &'a ApiContext<'a>, name: &str) -> FieldResult<Self> {
+    pub fn by_name(context: &'a ApiContext, name: &str) -> FieldResult<Self> {
         let data = problems::table.find(name).first(&context.database)?;
         Ok(Self::new(context, data)?)
     }
 
     /// Get all the problems data in the database
-    pub fn all(context: &'a ApiContext<'a>) -> FieldResult<Vec<Self>> {
+    pub fn all(context: &'a ApiContext) -> FieldResult<Vec<Self>> {
         Ok(problems::table
             .load::<ProblemData>(&context.database)?
             .into_iter()
@@ -190,7 +190,7 @@ pub struct ProblemView<'a> {
     user_id: Option<UserId>,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> ProblemView<'a> {
     pub fn awards(&self) -> Vec<AwardView> {
         self.problem
@@ -231,7 +231,7 @@ pub struct ProblemTackling<'a> {
 }
 
 /// Attempts at solving a problem by a user in the contest
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemTackling<'_> {
     /// Sum of the score awards
     pub fn score(&self) -> FieldResult<ScoreAwardValue> {

@@ -204,7 +204,7 @@ pub fn run_command(args: CliArgs) -> Result<(), Box<dyn std::error::Error>> {
     let root_node = context.root_node();
 
     let request = args.command.into_graphql_request();
-    let response = request.execute(&root_node, &());
+    let response = request.execute(&root_node, &context);
 
     println!("{}", serde_json::to_string_pretty(&response)?);
     Ok(())

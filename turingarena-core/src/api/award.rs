@@ -43,7 +43,7 @@ pub struct AwardAchievementData {
 }
 
 pub struct AwardAchievement<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     award: Award,
     data: AwardAchievementData,
 }
@@ -51,7 +51,7 @@ pub struct AwardAchievement<'a> {
 impl AwardAchievement<'_> {
     /// Get the best score award for (user, problem)
     pub fn find_best<'a>(
-        context: &'a ApiContext<'a>,
+        context: &'a ApiContext,
         award: &Award,
         user_id: &str,
         problem_name: &str,
@@ -85,7 +85,7 @@ impl AwardAchievement<'_> {
 
     /// Find the outcome of an award in a given evaluation
     pub fn find<'a>(
-        context: &'a ApiContext<'a>,
+        context: &'a ApiContext,
         award: &Award,
         evaluation_id: &str,
     ) -> FieldResult<AwardAchievement<'a>> {
@@ -117,7 +117,7 @@ impl AwardAchievement<'_> {
     }
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl AwardAchievement<'_> {
     fn evaluation(&self) -> FieldResult<Option<Evaluation>> {
         Ok(match &self.data.evaluation_id {
@@ -214,7 +214,7 @@ pub struct AwardView<'a> {
     pub user_id: Option<UserId>,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> AwardView<'a> {
     pub fn tackling(&self) -> Option<AwardTackling<'a>> {
         self.user_id.as_ref().map(|user_id| AwardTackling {
@@ -251,7 +251,7 @@ pub struct AwardTackling<'a> {
     pub user_id: UserId,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> AwardTackling<'a> {
     pub fn best_achievement(&self) -> FieldResult<AwardAchievement<'a>> {
         Ok(AwardAchievement::find_best(

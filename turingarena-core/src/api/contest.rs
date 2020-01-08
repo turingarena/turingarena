@@ -38,17 +38,17 @@ pub struct ContestUpdateInput {
 }
 
 pub struct Contest<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     data: ContestData,
 }
 
 impl<'a> Contest<'a> {
-    pub fn new(context: &'a ApiContext<'a>) -> FieldResult<Self> {
+    pub fn new(context: &'a ApiContext) -> FieldResult<Self> {
         let data = contest::table.first(&context.database)?;
         Ok(Contest { context, data })
     }
 
-    pub fn init(context: &'a ApiContext<'a>) -> FieldResult<()> {
+    pub fn init(context: &'a ApiContext) -> FieldResult<()> {
         let now = chrono::Local::now();
         let configuration = ContestDataInput {
             archive_integrity: &context.create_blob(include_bytes!(concat!(
@@ -88,7 +88,7 @@ impl<'a> Contest<'a> {
     }
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> Contest<'a> {
     pub fn material(&self) -> FieldResult<ContestMaterial> {
         let contest_path = self.contest_path()?;
@@ -235,7 +235,7 @@ pub struct ProblemSet<'a> {
 }
 
 /// Set of problems currently active
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSet<'_> {
     /// The list of problems
     fn problems(&self) -> FieldResult<Vec<Problem>> {
@@ -270,7 +270,7 @@ pub struct ProblemSetView<'a> {
     user_id: Option<UserId>,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSetView<'_> {
     fn grading(&self) -> FieldResult<ScoreAwardGrading> {
         Ok(ScoreAwardGrading {
@@ -297,7 +297,7 @@ pub struct ProblemSetTackling<'a> {
     user_id: UserId,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemSetTackling<'_> {
     /// Total score, obtained as the sum of score of each problem
     fn score(&self) -> FieldResult<ScoreAwardValue> {
@@ -319,7 +319,7 @@ impl ProblemSetTackling<'_> {
     }
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl ContestView<'_> {
     fn problem_set(&self) -> Option<ProblemSet> {
         // TODO: return `None` if contest has not started yet

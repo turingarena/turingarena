@@ -7,7 +7,7 @@ use rocket::request::{self, FromRequest, Request};
 use rocket::response::content;
 use rocket::response::Response;
 use rocket::State;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
 #[cfg(feature = "embed")]
 use turingarena_web_client::WebContent;
@@ -94,7 +94,7 @@ fn post_graphql_handler(
             })
     });
     let context = config.create_context(claims);
-    request.execute(&context.root_node(), &())
+    request.execute(&context.root_node(), &context)
 }
 
 #[rocket::get("/")]
@@ -120,8 +120,11 @@ fn dist<'r>(file: PathBuf) -> rocket::response::Result<'r> {
 #[cfg(feature = "embed")]
 fn get_content(file: &Path) -> Vec<u8> {
     let filename = file.display().to_string();
-    Vec::from(WebContent::get(&filename)
-        .or(WebContent::get("index.html")).unwrap())
+    Vec::from(
+        WebContent::get(&filename)
+            .or(WebContent::get("index.html"))
+            .unwrap(),
+    )
 }
 
 #[cfg(not(feature = "embed"))]

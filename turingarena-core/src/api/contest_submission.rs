@@ -82,7 +82,7 @@ struct SubmissionData {
 }
 
 pub struct Submission<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     data: SubmissionData,
 }
 
@@ -166,7 +166,7 @@ impl Submission<'_> {
     }
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Submission<'_> {
     /// UUID of the submission
     pub fn id(&self) -> SubmissionId {

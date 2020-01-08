@@ -54,13 +54,15 @@ pub struct ApiConfig {
     pub database_url: PathBuf,
 }
 
-pub struct ApiContext<'a> {
-    pub config: &'a ApiConfig,
+pub struct ApiContext {
+    pub config: ApiConfig,
     /// JWT data of the token submitted to the server (if any)
     pub jwt_data: Option<JwtData>,
     pub database: SqliteConnection,
     pub workspace_path: PathBuf,
 }
+
+impl juniper::Context for ApiContext {}
 
 impl Default for ApiConfig {
     fn default() -> ApiConfig {
@@ -79,7 +81,7 @@ impl ApiConfig {
         std::fs::create_dir_all(&workspace_path).expect("Unable to create workspace dir");
 
         ApiContext {
-            config: &self,
+            config: self.clone(),
             database: self.connect_db(),
             jwt_data,
             workspace_path,
@@ -117,7 +119,7 @@ impl ApiConfig {
     }
 }
 
-impl ApiContext<'_> {
+impl ApiContext {
     pub fn root_node(&self) -> RootNode {
         RootNode::new(Query { context: &self }, Mutation { context: &self })
     }
@@ -186,10 +188,10 @@ impl ApiContext<'_> {
 }
 
 pub struct Query<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Query<'_> {
     fn contest(&self) -> FieldResult<Contest> {
         Contest::new(&self.context)
@@ -217,10 +219,10 @@ impl Query<'_> {
 }
 
 pub struct Mutation<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Mutation<'_> {
     /// Reset database
     fn init_db(&self) -> FieldResult<MutationOk> {

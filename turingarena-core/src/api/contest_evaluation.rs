@@ -38,11 +38,11 @@ struct EvaluationEventInput<'a> {
 }
 
 pub struct Evaluation<'a> {
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     data: EvaluationData,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl<'a> Evaluation<'a> {
     pub fn id(&self) -> &str {
         &self.data.id
@@ -314,7 +314,7 @@ pub struct EvaluationAward<'a> {
     pub award: Award,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl EvaluationAward<'_> {
     pub fn grading(&self) -> FieldResult<AwardGrading> {
         Ok(AwardGrading::from(
@@ -328,7 +328,7 @@ pub struct EvaluationResult<'a> {
     pub evaluation: &'a Evaluation<'a>,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl EvaluationResult<'_> {
     /// Award achievement of this evaluation
     pub fn achievements(&self) -> FieldResult<Vec<AwardAchievement>> {

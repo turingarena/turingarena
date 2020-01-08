@@ -1,7 +1,6 @@
 use diesel::{ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
 use juniper::FieldResult;
 
-use juniper_ext::*;
 use root::ApiContext;
 use schema::users;
 
@@ -37,12 +36,12 @@ struct UserData {
 
 pub struct User<'a> {
     #[allow(dead_code)]
-    context: &'a ApiContext<'a>,
+    context: &'a ApiContext,
     data: UserData,
 }
 
 /// Wraps a String that identifies a user
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, GraphQLNewtype)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, juniper_ext::GraphQLNewtype)]
 pub struct UserId(pub String);
 
 impl<'a> User<'a> {
@@ -108,7 +107,7 @@ impl<'a> User<'a> {
     }
 }
 
-#[graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl User<'_> {
     /// Id of the user
     pub fn id(&self) -> UserId {

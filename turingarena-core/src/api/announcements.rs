@@ -1,5 +1,6 @@
 use super::*;
 
+use crate::api::root::ApiContext;
 use diesel::{QueryResult, RunQueryDsl, SqliteConnection};
 use schema::announcements;
 
@@ -9,7 +10,7 @@ pub struct Announcement {
     text: String,
 }
 
-#[juniper_ext::graphql]
+#[juniper_ext::graphql(Context = ApiContext)]
 impl Announcement {
     /// Text of the announcement
     fn text(&self) -> &String {
