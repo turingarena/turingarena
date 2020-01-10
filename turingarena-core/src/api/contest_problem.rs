@@ -234,7 +234,7 @@ pub struct ProblemTackling<'a> {
 
 impl ProblemTackling<'_> {
     pub fn submit(&self, context: &ApiContext, files: Vec<FileInput>) -> FieldResult<Submission> {
-        if self.can_submit() {
+        if !self.can_submit() {
             return Err("cannot submit now".into());
         }
 
