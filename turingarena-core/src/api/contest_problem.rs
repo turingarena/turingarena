@@ -16,7 +16,7 @@ use crate::data::award::{
 };
 
 use super::*;
-use crate::api::contest::{Contest, ContestStatus, ContestView};
+use crate::api::contest::{Contest, ContestStatus};
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_submission::{FileInput, Submission};
 
@@ -91,11 +91,12 @@ impl Problem {
         }
     }
 
-    pub fn view(&self, user_id: Option<UserId>) -> ProblemView {
-        ProblemView {
+    pub fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ProblemView> {
+        context.authorize_user(&user_id)?;
+        Ok(ProblemView {
             problem: &self,
             user_id,
-        }
+        })
     }
 }
 
@@ -233,7 +234,7 @@ pub struct ProblemTackling<'a> {
 
 impl ProblemTackling<'_> {
     pub fn submit(&self, context: &ApiContext, files: Vec<FileInput>) -> FieldResult<Submission> {
-        if self.can_submit() {
+        if !self.can_submit() {
             return Err("cannot submit now".into());
         }
 
@@ -251,7 +252,7 @@ impl ProblemTackling<'_> {
     pub fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
             self.problem
-                .view(Some(self.user_id.clone()))
+                .view(context, Some(self.user_id.clone()))?
                 .awards()
                 .into_iter()
                 .map(|award_view: AwardView| -> FieldResult<_> {

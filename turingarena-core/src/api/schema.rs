@@ -1,18 +1,4 @@
 table! {
-    announcements (id) {
-        id -> Integer,
-        text -> Text,
-    }
-}
-
-table! {
-    answers (question_id) {
-        question_id -> Integer,
-        text -> Text,
-    }
-}
-
-table! {
     awards (evaluation_id, award_name, kind) {
         evaluation_id -> Text,
         award_name -> Text,
@@ -55,19 +41,29 @@ table! {
 }
 
 table! {
-    problems (name) {
-        name -> Text,
-        archive_integrity -> Text,
+    message_engagements (message_id, user_id, engagement) {
+        message_id -> Text,
+        user_id -> Text,
+        engagement -> Text,
+        created_at -> Text,
     }
 }
 
 table! {
-    questions (id) {
-        id -> Integer,
-        user_id -> Text,
+    messages (id) {
+        id -> Text,
+        created_at -> Text,
+        kind -> Text,
+        user_id -> Nullable<Text>,
         problem_name -> Nullable<Text>,
-        time -> Text,
         text -> Text,
+    }
+}
+
+table! {
+    problems (name) {
+        name -> Text,
+        archive_integrity -> Text,
     }
 }
 
@@ -98,26 +94,25 @@ table! {
     }
 }
 
-joinable!(answers -> questions (question_id));
 joinable!(awards -> evaluations (evaluation_id));
 joinable!(evaluation_events -> evaluations (evaluation_id));
 joinable!(evaluations -> submissions (submission_id));
-joinable!(questions -> problems (problem_name));
-joinable!(questions -> users (user_id));
+joinable!(message_engagements -> messages (message_id));
+joinable!(messages -> problems (problem_name));
+joinable!(messages -> users (user_id));
 joinable!(submission_files -> submissions (submission_id));
 joinable!(submissions -> problems (problem_name));
 joinable!(submissions -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
-    announcements,
-    answers,
     awards,
     blobs,
     contest,
     evaluation_events,
     evaluations,
+    message_engagements,
+    messages,
     problems,
-    questions,
     submission_files,
     submissions,
     users,

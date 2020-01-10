@@ -5,6 +5,7 @@ import {
   faCheck,
   faChevronLeft,
   faChevronRight,
+  faComments,
   faFile,
   faFileAlt,
   faFileArchive,
@@ -29,6 +30,7 @@ import { ContestStatus } from '../../../../../__generated__/globalTypes';
 import { Auth, AuthService } from '../auth.service';
 import { scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
+import { messageFragment } from '../fragments/messages';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
 import { getScoreTier } from '../fragments/score';
 
@@ -70,6 +72,7 @@ export class ContestViewComponent implements OnInit {
   faChevronRight = faChevronRight;
   faHourglassHalf = faHourglassHalf;
   faAward = faAward;
+  faComments = faComments;
 
   mimeTypeIcons = {
     'application/pdf': faFilePdf,
@@ -144,6 +147,10 @@ export class ContestViewComponent implements OnInit {
                   }
                 }
               }
+              messages {
+                ...MessageFragment
+              }
+              canSendMessage
             }
           }
         }
@@ -151,6 +158,7 @@ export class ContestViewComponent implements OnInit {
         ${problemFragment}
         ${problemViewFragment}
         ${scoreAwardGradingFragment}
+        ${messageFragment}
       `,
       variables: { userId: this.userId },
       pollInterval,

@@ -1,4 +1,4 @@
-<form class="submit-dialog" (submit)="$event.preventDefault(); submit($event)">
+<form class="submit-dialog" (ngSubmit)="$event.preventDefault(); submit($event)">
   <div class="submit-dialog-header">
     <h4>Solution of: <strong>{{problem.material.title | textVariant}}</strong></h4>
   </div>

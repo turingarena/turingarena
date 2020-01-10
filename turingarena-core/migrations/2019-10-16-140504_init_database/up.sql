@@ -62,25 +62,31 @@ CREATE TABLE contest
     end_time          TEXT NOT NULL
 );
 
-CREATE TABLE questions
+CREATE TABLE messages
 (
-    id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    user_id      TEXT    NOT NULL REFERENCES users (id),
-    problem_name TEXT REFERENCES problems (name),
-    time         TEXT    NOT NULL,
-    text         TEXT    NOT NULL
+    id           TEXT NOT NULL PRIMARY KEY,
+    created_at   TEXT NOT NULL,
+    kind         TEXT NOT NULL,
+    user_id      TEXT NULL REFERENCES users (id),
+    problem_name TEXT NULL REFERENCES problems (name),
+    text         TEXT NOT NULL,
+    CHECK (
+        CASE kind
+            WHEN 'FROM_USER' THEN user_id IS NOT NULL
+            WHEN 'TO_USER' THEN user_id IS NOT NULL
+            WHEN 'ANNOUNCEMENT' THEN user_id IS NULL
+            ELSE 0
+            END
+        )
 );
 
-CREATE TABLE answers
+CREATE TABLE message_engagements
 (
-    question_id INT  NOT NULL PRIMARY KEY REFERENCES questions (id),
-    text        TEXT NOT NULL
-);
-
-CREATE TABLE announcements
-(
-    id   INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    text TEXT    NOT NULL
+    message_id TEXT NOT NULL REFERENCES messages (id),
+    user_id    TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind in ('NOTIFICATION_SHOWN', 'NOTIFICATION_DISMISSED', 'READ')),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (message_id, user_id, kind)
 );
 
 CREATE TABLE blobs

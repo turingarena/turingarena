@@ -6,9 +6,8 @@ DROP TABLE evaluations;
 DROP TABLE evaluation_events;
 DROP TABLE awards;
 DROP TABLE contest;
-DROP TABLE questions;
-DROP TABLE answers;
-DROP TABLE announcements;
+DROP TABLE messages;
+DROP TABLE message_engagements;
 DROP TABLE blobs;
 
 DROP VIEW user_awards_view;
