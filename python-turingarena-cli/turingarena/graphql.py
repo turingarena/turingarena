@@ -3,6 +3,9 @@ import sys
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from requests import HTTPError
+from typing import List
+
+from turingarena.submission import SubmissionFile
 
 
 class GraphQlClient:
@@ -37,6 +40,10 @@ class GraphQlClient:
                problems {
                   name
                },
+               users {
+                  id,
+                  displayName,
+                }
             }
         }
         """))
@@ -54,4 +61,43 @@ class GraphQlClient:
                 ok
             }
         }
+        """), args)
+
+    def submissions(self):
+        return self.execute(gql("""
+        contest {
+            submissions {
+                id,
+                userId,
+                evaluation {
+                    id,
+                    result {
+                        score {
+                            score
+                        }
+                    },
+                },
+                files {
+                    fieldId,
+                    typeId,
+                    name,
+                    content {
+                        base64
+                    },
+                }
+            }
+        """))
+
+    def submit(self, user: str, problem: str, files: List[SubmissionFile]):
+        args = dict(
+            user=user,
+            problem=problem,
+            files=list(map(lambda f: f.to_graphql(), files))
+        )
+        return self.execute(gql("""
+        mutation ($user: String!, $problem: String!, $files: [FileInput!]!) {
+            submit(userId: $user,problemName: $problem,files: $files){
+                id
+            }
+        }        
         """), args)
