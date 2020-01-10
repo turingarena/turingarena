@@ -4,7 +4,7 @@ import yaml
 from os import path
 from turingarena.contest import Contest
 from turingarena.graphql import GraphQlClient
-from turingarena.submission import SubmissionFile
+from turingarena.submission import SubmissionFile, Submission
 
 DEFAULT_SERVER = "http://localhost:8080"
 
@@ -62,8 +62,8 @@ class TuringArena:
         print(self.client.show_contest())
 
     def run_export(self):
-        submissions = map(lambda s: s.from_graphql(), self.client.submissions())
-        for submission in submissions:
+        submissions = self.client.submissions()["contest"]["submissions"]
+        for submission in map(lambda s: Submission.from_graphql(s), submissions):
             submission.write(path.join(self.path, "submissions"))
 
     def run_convert(self):
@@ -72,11 +72,11 @@ class TuringArena:
             yaml.safe_dump(contest.to_turingarena_yaml(), f)
 
     def run_submit(self):
-        self.client.submit(
+        print(self.client.submit(
             user=self.args.user,
             problem=self.args.problem,
             files=[SubmissionFile.from_file(self.args.file)]
-        )
+        ))
 
     def run(self):
         getattr(self, "run_" + self.args.command.replace("-", "_"))()

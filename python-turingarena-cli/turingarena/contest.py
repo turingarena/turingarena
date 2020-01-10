@@ -46,7 +46,7 @@ class User:
             id=data["id"],
             name=data["name"],
             token=data["token"],
-            role=getattr(data, "role", "user"),
+            role=data.get("role", "user"),
         )
 
     @staticmethod
@@ -66,6 +66,7 @@ class User:
             id=self.id,
             displayName=self.name,
             token=self.token,
+            admin=self.role == "admin"
         )
 
 
@@ -142,7 +143,7 @@ class Contest:
 
     def to_graphql(self) -> dict:
         return dict(
-            startTime=self.start.isoformat() + "Z",
-            endTime=self.end.isoformat() + "Z",
+            startTime=self.start.isoformat(),
+            endTime=self.end.isoformat(),
             archiveContent=self.archive.to_graphql(),
         )

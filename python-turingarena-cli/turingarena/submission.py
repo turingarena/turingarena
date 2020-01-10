@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 
-from os import path
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List
@@ -20,9 +20,9 @@ class SubmissionFile:
     def from_graphql(data: dict) -> SubmissionFile:
         return SubmissionFile(
             name=data["name"],
-            field_id=data["file_id"],
-            type_id=data["type_id"],
-            content=base64.b64decode(data["content"]["base64"]),
+            field_id=data["fieldId"],
+            type_id=data["typeId"],
+            content=base64.standard_b64decode(data["content"]["base64"]),
         )
 
     @staticmethod
@@ -31,7 +31,7 @@ class SubmissionFile:
             content = f.read()
 
         return SubmissionFile(
-            name=path.basename(file_path),
+            name=os.path.basename(file_path),
             type_id="cpp",  # TODO: identify correct file type
             field_id="solution",
             content=content,
@@ -42,11 +42,11 @@ class SubmissionFile:
             name=self.name,
             fieldId=self.field_id,
             typeId=self.type_id,
-            content=dict(base64=base64.encodebytes(self.content).decode("utf-8")),
+            content=dict(base64=base64.standard_b64encode(self.content).decode("utf-8")),
         )
 
     def write(self, directory: str):
-        with open(path.join(directory, self.name), "wb") as f:
+        with open(os.path.join(directory, self.name), "wb") as f:
             f.write(self.content)
 
 
@@ -70,7 +70,7 @@ class Evaluation:
         )
 
     def write(self, directory: str):
-        with open(path.join(directory, "evaluation.json"), "w") as f:
+        with open(os.path.join(directory, "evaluation.json"), "w") as f:
             json.dump(self.to_dict(), f)
 
 
@@ -88,17 +88,18 @@ class Submission:
         return Submission(
             id=data["id"],
             user=data["userId"],
-            created_at=data["createdAt"],
-            problem=data["problem"],
+            created_at=datetime.strptime(data["createdAt"].split(".")[0], "%Y-%m-%dT%H:%M:%S"), # TODO: Rust output strange dates...
+            problem=data["problem"]["name"],
             files=list(map(lambda f: SubmissionFile.from_graphql(f), data["files"])),
             evaluation=Evaluation.from_graphql(data["evaluation"])
         )
 
     def path(self, base):
-        return path.join(base, self.problem, self.user, self.created_at.isoformat())
+        return os.path.join(base, self.problem, self.user, self.created_at.isoformat())
 
     def write(self, base: str):
         directory = self.path(base)
+        os.makedirs(directory, exist_ok=True)
         self.evaluation.write(directory)
         for file in self.files:
             file.write(directory)

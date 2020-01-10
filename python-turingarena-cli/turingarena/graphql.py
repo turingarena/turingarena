@@ -43,6 +43,7 @@ class GraphQlClient:
                users {
                   id,
                   displayName,
+                  isAdmin,
                 }
             }
         }
@@ -65,27 +66,30 @@ class GraphQlClient:
 
     def submissions(self):
         return self.execute(gql("""
-        contest {
-            submissions {
-                id,
-                userId,
-                evaluation {
+        query {
+            contest {
+                submissions {
                     id,
-                    result {
-                        score {
-                            score
-                        }
+                    userId,
+                    createdAt,
+                    problem {
+                        name
                     },
-                },
-                files {
-                    fieldId,
-                    typeId,
-                    name,
-                    content {
-                        base64
+                    evaluation {
+                        id,
+                        status,
                     },
+                    files {
+                        fieldId,
+                        typeId,
+                        name,
+                        content {
+                            base64
+                        },
+                    }
                 }
             }
+        }
         """))
 
     def submit(self, user: str, problem: str, files: List[SubmissionFile]):
