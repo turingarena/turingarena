@@ -21,6 +21,7 @@ use crate::api::formats::Import;
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
+use crate::api::messages::{Message, MessageInput, MessageKind};
 
 embed_migrations!();
 
@@ -329,7 +330,7 @@ impl Mutation {
         files: Vec<contest_submission::FileInput>,
     ) -> FieldResult<contest_submission::Submission> {
         Ok(Problem::by_name(context, &problem_name.0)?
-            .view(Some(user_id))
+            .view(context, Some(user_id))?
             .tackling()
             .ok_or("Cannot submit now")?
             .submit(context, files)?)
@@ -341,6 +342,31 @@ impl Mutation {
             let submission = contest_submission::Submission::by_id(&context, &id)?;
             Evaluation::start_new(&submission, context)?;
         }
+        Ok(MutationOk)
+    }
+
+    fn add_messages(context: &ApiContext, inputs: Vec<MessageInput>) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Message::send(context, inputs)?;
+        Ok(MutationOk)
+    }
+
+    fn send_message(
+        context: &ApiContext,
+        user_id: UserId,
+        problem_name: Option<String>,
+        text: String,
+    ) -> FieldResult<MutationOk> {
+        context.authorize_user(&Some(user_id.clone()))?;
+        Message::send(
+            context,
+            vec![MessageInput {
+                user_id: Some(user_id.0.clone()),
+                kind: MessageKind::FromUser,
+                problem_name,
+                text,
+            }],
+        )?;
         Ok(MutationOk)
     }
 }

@@ -5,7 +5,6 @@ use root::ApiContext;
 use schema::users;
 
 use super::*;
-use crate::api::contest::ContestView;
 
 #[derive(Debug, juniper::GraphQLInputObject, Insertable)]
 #[table_name = "users"]

@@ -6,19 +6,17 @@ use juniper::FieldResult;
 use super::*;
 
 use crate::file::FileContentInput;
-use announcements::Announcement;
 use content::{FileContent, FileName, FileVariant, MediaType, TextVariant};
-use contest_problem::ProblemView;
 use root::ApiContext;
 
 use crate::api::award::ScoreAwardGrading;
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::Problem;
+use crate::api::messages::Message;
 use crate::api::root::Query;
 use crate::data::award::{ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange};
 use crate::data::contest::ContestMaterial;
 use chrono::DateTime;
-use questions::{Question, QuestionInput};
 use schema::contest;
 use std::path::PathBuf;
 use user::{User, UserId};
@@ -245,6 +243,11 @@ impl Contest {
         context.authorize_admin()?;
         Evaluation::list(context)
     }
+
+    fn messages(&self, context: &ApiContext) -> FieldResult<Vec<Message>> {
+        context.authorize_admin()?;
+        Message::list(context)
+    }
 }
 
 /// Information visible to a contestant
@@ -293,11 +296,12 @@ impl ProblemSet<'_> {
     }
 
     /// Information about this problem set visible to a user
-    fn view(&self, user_id: Option<UserId>) -> ProblemSetView {
-        ProblemSetView {
+    fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ProblemSetView> {
+        context.authorize_user(&user_id)?;
+        Ok(ProblemSetView {
             problem_set: &self,
             user_id,
-        }
+        })
     }
 }
 
@@ -341,7 +345,10 @@ impl ProblemSetTackling<'_> {
             self.problem_set
                 .problems(context)?
                 .iter()
-                .filter_map(|problem| problem.view(Some(self.user_id.clone())).tackling())
+                .map(|problem| problem.view(context, Some(self.user_id.clone())))
+                .collect::<FieldResult<Vec<_>>>()?
+                .iter()
+                .filter_map(|view| view.tackling())
                 .map(|tackling| tackling.score(context))
                 .collect::<FieldResult<Vec<_>>>()?,
         ))
@@ -366,23 +373,9 @@ impl ContestView<'_> {
         }
     }
 
-    /// Questions made by the current user
-    fn questions(&self, context: &ApiContext) -> FieldResult<Option<Vec<Question>>> {
-        if let Some(user_id) = &self.user_id {
-            Ok(Some(
-                questions::question_of_user(&context.database, user_id)?
-                    .into_iter()
-                    .map(|data| Question { data })
-                    .collect(),
-            ))
-        } else {
-            Ok(None)
-        }
-    }
-
-    /// Return a list of announcements
-    fn announcements(&self, context: &ApiContext) -> FieldResult<Vec<Announcement>> {
-        Ok(announcements::query_all(&context.database)?)
+    /// Messages visible by the current user
+    fn messages(&self, context: &ApiContext) -> FieldResult<Vec<Message>> {
+        Message::for_user(context, &self.user_id)
     }
 }
 
