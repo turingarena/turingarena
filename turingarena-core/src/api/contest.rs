@@ -377,6 +377,10 @@ impl ContestView<'_> {
     fn messages(&self, context: &ApiContext) -> FieldResult<Vec<Message>> {
         Message::for_user(context, &self.user_id)
     }
+
+    pub fn can_send_message(&self) -> bool {
+        self.user_id.is_some()
+    }
 }
 
 /// The configuration of a contest
