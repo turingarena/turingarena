@@ -307,22 +307,3 @@
     opacity: 0.8;
   }
 }
-
-.submission-list-dialog-header {
-  @extend .modal-header;
-}
-
-.submission-list-dialog-body {
-  @extend .modal-body;
-  padding: 0;
-  max-height: calc(100vh - 260px);
-  overflow-y: auto;
-}
-
-.submission-list-dialog-footer {
-  @extend .modal-footer;
-}
-
-.submission-list-dialog-close {
-  @extend .btn, .btn-primary;
-}

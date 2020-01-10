@@ -28,6 +28,7 @@ import { SubmissionDialogComponent } from './submission-dialog/submission-dialog
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 import { TextVariantPipe } from './text-variant.pipe';
+import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 
 const routes: Routes = [
   {
@@ -106,6 +107,7 @@ const routes: Routes = [
     ApplyPurePipe,
     TemplateCellRendererComponent,
     GridOptionsPipe,
+    SubmissionListDialogComponent,
   ],
   imports: [
     BrowserModule,
