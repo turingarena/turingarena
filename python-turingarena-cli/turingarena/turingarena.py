@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-# TuringArena CLI in python
-
 import argparse
-import json
+import yaml
 
-from gql import Client
-
+from os import path
 from turingarena.contest import Contest
 from turingarena.graphql import GraphQlClient
 
@@ -41,11 +37,15 @@ class TuringArena:
         self.args = parser.parse_args()
         self.client = GraphQlClient(self.args.server)
 
+    @property
+    def path(self) -> str:
+        return path.abspath(self.args.path)
+
     def run_init_db(self):
         print(self.client.init_db())
 
     def run_import(self):
-        contest = Contest.from_directory(self.args.path)
+        contest = Contest.from_directory(self.path)
         print(self.client.create_contest(dict(
             contest=contest.to_graphql(),
             problems=list(map(lambda p: p.to_graphql(), contest.problems)),
@@ -58,8 +58,10 @@ class TuringArena:
     def run_export(args):
         pass
 
-    def run_convert(args):
-        pass
+    def run_convert(self):
+        contest = Contest.from_italy_yaml(self.path)
+        with open(path.join(self.path, "turingarena.yaml"), "w") as f:
+            yaml.safe_dump(contest.to_turingarena_yaml(), f)
 
     def run(self):
         getattr(self, "run_" + self.args.command.replace("-", "_"))()

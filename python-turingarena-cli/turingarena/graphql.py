@@ -20,7 +20,7 @@ class GraphQlClient:
             raise e
 
     def init_db(self):
-        self.execute(gql("""
+        return self.execute(gql("""
             mutation {
                initDb {
                   ok
@@ -29,7 +29,7 @@ class GraphQlClient:
         """))
 
     def show_contest(self):
-        self.execute(gql("""
+        return self.execute(gql("""
         query {
             contest {
                startTime
@@ -42,7 +42,7 @@ class GraphQlClient:
         """))
 
     def create_contest(self, args: dict):
-        self.execute(gql("""
+        return self.execute(gql("""
         mutation($contest: ContestUpdateInput!, $users: [UserInput!]!, $problems: [ProblemInput!]!) {
             updateContest(input: $contest) {
                 ok
