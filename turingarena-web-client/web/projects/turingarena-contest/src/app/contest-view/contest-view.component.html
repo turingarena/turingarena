@@ -8,6 +8,16 @@
       </a>
       <ng-container *ngIf="data.user! as user">
         <span class="user-display-name">{{user.displayName}}</span>
+      </ng-container>
+      <button class="messages-button" (click)="modalService.open(messagesDialog, { size: 'xl' })">
+        <fa-icon [icon]="faComments"></fa-icon>
+        Messages
+        <ng-template #messagesDialog let-modal>
+          <app-message-list-dialog [modal]="modal" [data]="data" [userId]="data.user?.id">
+          </app-message-list-dialog>
+        </ng-template>
+      </button>
+      <ng-container *ngIf="data.user! as user">
         <button class="user-logout" (click)="setAuth(undefined)">
           <fa-icon [icon]="faSignOutAlt"></fa-icon>
           Logout
@@ -180,7 +190,7 @@
 </ng-template>
 
 <ng-template #loginDialog let-modal>
-  <form class="login-form" (submit)="$event.preventDefault(); logIn($event, modal)">
+  <form class="login-form" (ngSubmit)="$event.preventDefault(); logIn($event, modal)">
     <div class="login-dialog-body">
       <label class="login-token-label" for="token">Token</label>
       <input class="login-token-input" id="token" name="token" type="password" [class.is-invalid]="logInInvalidToken" />
