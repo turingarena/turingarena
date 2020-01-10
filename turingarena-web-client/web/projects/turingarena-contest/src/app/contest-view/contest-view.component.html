@@ -18,6 +18,12 @@
         </ng-template>
       </button>
       <ng-container *ngIf="data.user! as user">
+        <ng-container *ngIf="user.isAdmin">
+          <a routerLink="/admin" class="admin-button">
+            <fa-icon [icon]="faTools"></fa-icon>
+            Admin
+          </a>
+        </ng-container>
         <button class="user-logout" (click)="setAuth(undefined)">
           <fa-icon [icon]="faSignOutAlt"></fa-icon>
           Logout

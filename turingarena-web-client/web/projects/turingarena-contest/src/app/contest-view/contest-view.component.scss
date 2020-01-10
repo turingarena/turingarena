@@ -41,16 +41,18 @@
   white-space: nowrap;
 }
 
+.user-login,
+.user-logout,
 .user-display-name,
 .messages-button,
-.login,
-.logout {
+.admin-button {
   margin-right: 1em;
 }
 
 .user-login,
 .user-logout,
-.messages-button {
+.messages-button,
+.admin-button {
   @extend .btn, .btn-sm, .btn-light;
 }
 

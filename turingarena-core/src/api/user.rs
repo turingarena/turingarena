@@ -15,6 +15,7 @@ pub struct UserInput {
     pub display_name: String,
     /// Login token of the user
     pub token: String,
+    pub admin: bool,
 }
 
 #[derive(Debug, juniper::GraphQLInputObject, AsChangeset)]
@@ -31,6 +32,7 @@ struct UserData {
     display_name: String,
     #[allow(dead_code)]
     token: String,
+    admin: bool,
 }
 
 pub struct User {
@@ -112,5 +114,9 @@ impl User {
     /// Display name of the user, i.e. the full name
     pub fn display_name(&self) -> &String {
         &self.data.display_name
+    }
+
+    pub fn is_admin(&self) -> bool {
+        self.data.admin
     }
 }
