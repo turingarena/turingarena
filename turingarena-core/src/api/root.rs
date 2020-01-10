@@ -229,6 +229,8 @@ impl Mutation {
 
         embedded_migrations::run_with_output(&context.database, &mut std::io::stdout())?;
 
+        Contest::init(context)?;
+
         Ok(MutationOk)
     }
 
