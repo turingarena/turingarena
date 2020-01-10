@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Apollo } from 'apollo-angular';
 
 import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
+import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
 
 @Component({
   selector: 'app-submission-list-dialog',
@@ -12,7 +12,6 @@ import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
 export class SubmissionListDialogComponent  {
 
   constructor(
-    private readonly apollo: Apollo,
     readonly modalService: NgbModal,
   ) { }
 
@@ -21,5 +20,7 @@ export class SubmissionListDialogComponent  {
 
   @Input()
   problem!: ProblemFragment;
+
+  openSubmission!: SubmissionFragment;
 
 }
