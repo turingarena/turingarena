@@ -109,6 +109,7 @@ export class SubmitDialogComponent {
         userId: this.userId,
         files,
       },
+      refetchQueries: ['ContestQuery'],
     })
       .toPromise();
 
