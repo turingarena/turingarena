@@ -18,6 +18,7 @@ import {
   faSignInAlt,
   faSignOutAlt,
   faSpinner,
+  faTools,
 } from '@fortawesome/free-solid-svg-icons';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo, QueryRef } from 'apollo-angular';
@@ -73,6 +74,7 @@ export class ContestViewComponent implements OnInit {
   faHourglassHalf = faHourglassHalf;
   faAward = faAward;
   faComments = faComments;
+  faTools = faTools;
 
   mimeTypeIcons = {
     'application/pdf': faFilePdf,
@@ -128,6 +130,7 @@ export class ContestViewComponent implements OnInit {
           user(userId: $userId) {
             id
             displayName
+            isAdmin
           }
           contest {
             startTime

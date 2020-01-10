@@ -29,12 +29,17 @@ export class AuthService {
   }
 
   setAuth = async (auth: Auth | undefined) => {
+    const client = this.apollo.getClient();
+
+    client.stop();
+
     if (auth === undefined) {
       localStorage.removeItem('auth');
     } else {
       localStorage.setItem('auth', JSON.stringify(auth));
     }
 
-    await this.apollo.getClient().resetStore();
+    await client.resetStore();
+    await client.reFetchObservableQueries();
   }
 }

@@ -8,7 +8,8 @@ CREATE TABLE users
 (
     id           TEXT NOT NULL PRIMARY KEY,
     display_name TEXT NOT NULL,
-    token        TEXT NOT NULL UNIQUE
+    token        TEXT NOT NULL UNIQUE,
+    admin        BOOLEAN NOT NULL
 );
 
 CREATE TABLE submissions

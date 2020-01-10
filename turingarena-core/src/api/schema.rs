@@ -91,6 +91,7 @@ table! {
         id -> Text,
         display_name -> Text,
         token -> Text,
+        admin -> Bool,
     }
 }
 

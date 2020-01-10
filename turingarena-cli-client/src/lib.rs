@@ -50,6 +50,8 @@ enum AdminCommand {
         display_name: String,
         #[structopt(long)]
         token: String,
+        #[structopt(long)]
+        admin: bool,
     },
     DeleteUser {
         id: String,
@@ -112,6 +114,7 @@ impl AdminCommand {
                 id,
                 display_name,
                 token,
+                admin,
             } => make_request(
                 AddUserMutation::build_query,
                 add_user_mutation::Variables {
@@ -119,6 +122,7 @@ impl AdminCommand {
                         id,
                         display_name,
                         token,
+                        admin,
                     },
                 },
             ),

@@ -29,6 +29,7 @@ impl Into<UserInput> for ImportUser {
             id: self.id,
             display_name: self.display_name,
             token: self.token,
+            admin: false,
         }
     }
 }

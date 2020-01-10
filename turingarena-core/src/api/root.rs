@@ -163,6 +163,13 @@ impl ApiContext {
         if self.config.skip_auth {
             return Ok(());
         }
+
+        if let Some(data) = &self.jwt_data {
+            if User::by_id(self, UserId(data.user.clone()))?.is_admin() {
+                return Ok(());
+            }
+        }
+
         return Err(juniper::FieldError::from("Forbidden"));
     }
 
