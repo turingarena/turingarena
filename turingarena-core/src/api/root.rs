@@ -8,16 +8,16 @@ use structopt::StructOpt;
 
 use auth::JwtData;
 use contest::UserToken;
-use formats::ImportFileInput;
+//use formats::ImportFileInput;
 use problem::ProblemName;
 use schema::blobs;
 use user::UserId;
 use user::UserInput;
 
-use crate::api::contest::{Contest, ContestUpdateInput};
+use crate::api::contest::{Contest, ContestInput, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
-use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
-use crate::api::formats::Import;
+use crate::api::contest_problem::{Problem, ProblemInput, ProblemInsertable, ProblemUpdateInput};
+//use crate::api::formats::Import;
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
@@ -229,8 +229,13 @@ impl Mutation {
 
         embedded_migrations::run_with_output(&context.database, &mut std::io::stdout())?;
 
-        Contest::init(context)?;
+        Ok(MutationOk)
+    }
 
+    /// Initializes a new contest
+    fn init_contest(context: &ApiContext, contest: ContestInput) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Contest::insert(context, contest)?;
         Ok(MutationOk)
     }
 
@@ -284,7 +289,7 @@ impl Mutation {
         inputs: Vec<ProblemInput>,
     ) -> FieldResult<MutationOk> {
         context.authorize_admin()?;
-        Problem::insert(&context, inputs)?;
+        Problem::insert(context, inputs);
         Ok(MutationOk)
     }
 
@@ -305,21 +310,21 @@ impl Mutation {
         Ok(MutationOk)
     }
 
-    /// Import a file
-    pub fn import(
-        context: &ApiContext,
-        inputs: Vec<ImportFileInput>,
-        dry_run: Option<bool>,
-    ) -> FieldResult<Import> {
-        context.authorize_admin()?;
-        let import = Import::load(inputs)?;
-        if dry_run.is_some() && dry_run.unwrap() {
-            // no-op
-        } else {
-            import.apply(&context)?;
-        }
-        Ok(import)
-    }
+    //    /// Import a file
+    //    pub fn import(
+    //        context: &ApiContext,
+    //        inputs: Vec<ImportFileInput>,
+    //        dry_run: Option<bool>,
+    //    ) -> FieldResult<Import> {
+    //        context.authorize_admin()?;
+    //        let import = Import::load(inputs)?;
+    //        if dry_run.is_some() && dry_run.unwrap() {
+    //            // no-op
+    //        } else {
+    //            import.apply(&context)?;
+    //        }
+    //        Ok(import)
+    //    }
 
     /// Submit a solution to the problem
     fn submit(

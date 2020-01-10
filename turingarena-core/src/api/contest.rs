@@ -39,6 +39,13 @@ pub struct ContestUpdateInput {
     pub end_time: Option<String>,
 }
 
+#[derive(juniper::GraphQLInputObject)]
+pub struct ContestInput {
+    pub archive_content: FileContentInput,
+    pub start_time: String,
+    pub end_time: String,
+}
+
 pub struct Contest {
     data: ContestData,
 }
@@ -52,15 +59,28 @@ impl Contest {
     pub fn init(context: &ApiContext) -> FieldResult<()> {
         let now = chrono::Local::now();
         let configuration = ContestDataInput {
-            archive_integrity: &context.create_blob(include_bytes!(concat!(
+            archive_integrity: context.create_blob(include_bytes!(concat!(
                 env!("OUT_DIR"),
                 "/initial-contest.tar.xz"
             )))?,
-            start_time: &now.to_rfc3339(),
-            end_time: &(now + chrono::Duration::hours(4)).to_rfc3339(),
+            start_time: now.to_rfc3339(),
+            end_time: (now + chrono::Duration::hours(4)).to_rfc3339(),
         };
         diesel::insert_into(schema::contest::table)
             .values(configuration)
+            .execute(&context.database)?;
+        Ok(())
+    }
+
+    /// Initializes a new contest with a specified configuration
+    pub fn insert(context: &ApiContext, contest: ContestInput) -> FieldResult<()> {
+        let contest = ContestDataInput {
+            archive_integrity: context.create_blob(&contest.archive_content.decode()?)?,
+            start_time: contest.start_time,
+            end_time: contest.end_time,
+        };
+        diesel::insert_into(schema::contest::table)
+            .values(contest)
             .execute(&context.database)?;
         Ok(())
     }
@@ -404,10 +424,10 @@ pub struct ContestData {
 
 #[derive(Insertable)]
 #[table_name = "contest"]
-struct ContestDataInput<'a> {
-    pub archive_integrity: &'a str,
-    pub start_time: &'a str,
-    pub end_time: &'a str,
+pub struct ContestDataInput {
+    pub archive_integrity: String,
+    pub start_time: String,
+    pub end_time: String,
 }
 
 #[derive(AsChangeset)]

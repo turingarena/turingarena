@@ -16,3 +16,7 @@ users:
   - id: user2
     token: user2
     name: Mr. User 2
+problems:
+  - easy1
+  - easy2
+  - easy3
