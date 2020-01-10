@@ -32,8 +32,8 @@ class SubmissionFile:
 
         return SubmissionFile(
             name=path.basename(file_path),
-            type_id="text/plain",  # TODO: identify correct MIME type
-            field_id="main",
+            type_id="cpp",  # TODO: identify correct file type
+            field_id="solution",
             content=content,
         )
 

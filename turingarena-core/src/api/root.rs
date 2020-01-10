@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 use auth::JwtData;
 use contest::UserToken;
-//use formats::ImportFileInput;
+use formats::ImportFileInput;
 use problem::ProblemName;
 use schema::blobs;
 use user::UserId;
@@ -17,7 +17,7 @@ use user::UserInput;
 use crate::api::contest::{Contest, ContestInput, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
 use crate::api::contest_problem::{Problem, ProblemInput, ProblemInsertable, ProblemUpdateInput};
-//use crate::api::formats::Import;
+use crate::api::formats::Import;
 use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
@@ -313,21 +313,21 @@ impl Mutation {
         Ok(MutationOk)
     }
 
-    //    /// Import a file
-    //    pub fn import(
-    //        context: &ApiContext,
-    //        inputs: Vec<ImportFileInput>,
-    //        dry_run: Option<bool>,
-    //    ) -> FieldResult<Import> {
-    //        context.authorize_admin()?;
-    //        let import = Import::load(inputs)?;
-    //        if dry_run.is_some() && dry_run.unwrap() {
-    //            // no-op
-    //        } else {
-    //            import.apply(&context)?;
-    //        }
-    //        Ok(import)
-    //    }
+        /// Import a file
+        pub fn import(
+            context: &ApiContext,
+            inputs: Vec<ImportFileInput>,
+            dry_run: Option<bool>,
+        ) -> FieldResult<Import> {
+            context.authorize_admin()?;
+            let import = Import::load(inputs)?;
+            if dry_run.is_some() && dry_run.unwrap() {
+                // no-op
+            } else {
+                import.apply(&context)?;
+            }
+            Ok(import)
+        }
 
     /// Submit a solution to the problem
     fn submit(

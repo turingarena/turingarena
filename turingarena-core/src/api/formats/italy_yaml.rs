@@ -1,6 +1,6 @@
 use super::*;
 
-/// The Italy YAML turingarena.yaml file
+/// The Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ContestYaml {
     name: String,
@@ -27,7 +27,7 @@ impl Into<Import> for ContestYaml {
     }
 }
 
-/// A user as in the Italy YAML turingarena.yaml file
+/// A user as in the Italy YAML contest.yaml file
 #[derive(Debug, Serialize, Deserialize)]
 struct ItalyYamlUser {
     first_name: String,

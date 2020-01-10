@@ -8,7 +8,7 @@ pub mod contest;
 pub mod contest_evaluation;
 pub mod contest_problem;
 pub mod contest_submission;
-//pub mod formats;
+pub mod formats;
 pub mod graphql_schema;
 pub mod messages;
 pub mod root;

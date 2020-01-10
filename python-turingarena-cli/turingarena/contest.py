@@ -116,7 +116,7 @@ class Contest:
         # Write contest title in title.txt
         # TODO: change that
         with open(path.join(directory, "files", "title.txt"), "w") as f:
-            print(data["title"], file=f)
+            f.write(data["title"])
 
         return Contest(
             title=data["title"],
