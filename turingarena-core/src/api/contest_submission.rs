@@ -8,7 +8,7 @@ use schema::{submission_files, submissions};
 use submission::FieldValue;
 
 use crate::api::contest_evaluation::Evaluation;
-use crate::api::user::UserId;
+use crate::api::user::{User, UserId};
 use crate::file::FileContent;
 
 use super::*;
@@ -89,6 +89,11 @@ impl Submission {
     /// Name of the problem wich the submission refers to
     pub fn problem_name(&self) -> &String {
         &self.data.problem_name
+    }
+
+    /// Id of the user who made the submission
+    pub fn user_id(&self) -> UserId {
+        UserId(self.data.user_id.clone())
     }
 
     pub fn field_values(&self, context: &ApiContext) -> FieldResult<Vec<FieldValue>> {
@@ -172,9 +177,9 @@ impl Submission {
         SubmissionId(self.data.id.clone())
     }
 
-    /// Id of the user who made the submission
-    pub fn user_id(&self) -> UserId {
-        UserId(self.data.user_id.clone())
+    /// User who made the submission
+    pub fn user(&self, context: &ApiContext) -> FieldResult<User> {
+        User::by_id(context, self.user_id())
     }
 
     pub fn problem(&self, context: &ApiContext) -> FieldResult<Problem> {

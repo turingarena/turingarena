@@ -4,6 +4,7 @@ import { awardAchievementFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { problemMaterialFragment } from '../fragments/material';
 import { scoreRangeFragment } from '../fragments/score';
+import { submissionFragment } from '../fragments/submission';
 
 export const adminQuery = gql`
   fragment AdminProblemFragment on Problem {
@@ -21,14 +22,6 @@ export const adminQuery = gql`
     displayName
   }
 
-  fragment AdminSubmissionFragment on Submission {
-    id
-    problem {
-      name
-    }
-    userId
-  }
-
   query AdminQuery {
     serverTime
     contest {
@@ -42,7 +35,14 @@ export const adminQuery = gql`
         ...AdminUserFragment
       }
       submissions {
-        ...AdminSubmissionFragment
+        problem {
+          name
+        }
+        user {
+          id
+          displayName
+        }
+        ...SubmissionFragment
       }
       scoreRange {
         ...ScoreRangeFragment
@@ -52,4 +52,5 @@ export const adminQuery = gql`
   ${contestMaterialFragment}
   ${problemMaterialFragment}
   ${scoreRangeFragment}
+  ${submissionFragment}
 `;

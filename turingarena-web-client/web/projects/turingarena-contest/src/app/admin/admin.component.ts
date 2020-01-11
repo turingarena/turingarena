@@ -23,15 +23,6 @@ export class AdminComponent {
 
   faTools = faTools;
 
-  @ViewChild('contestantsGrid', { static: false })
-  contestantsGrid!: AgGridAngular;
-
-  @ViewChild('submissionsGrid', { static: false })
-  submissionsGrid!: AgGridAngular;
-
-  @ViewChild('problemsGrid', { static: false })
-  problemsGrid!: AgGridAngular;
-
   quickFilterText = '';
 
   adminQuery = this.apollo.watchQuery<AdminQuery>({
@@ -40,8 +31,4 @@ export class AdminComponent {
     pollInterval: 3000,
   });
 
-  columnGroupState: {
-    groupId: string;
-    open: boolean;
-  }[] = [];
 }

@@ -11,6 +11,7 @@ import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 
 import { AdminCreateDialogComponent } from './admin/admin-create-dialog/admin-create-dialog.component';
+import { AdminSubmissionsComponent } from './admin/admin-submissions/admin-submissions.component';
 import { AdminComponent } from './admin/admin.component';
 import { AppComponent } from './app.component';
 import { ApplyPurePipe } from './apply-pure.pipe';
@@ -21,16 +22,18 @@ import { GradingComponent } from './data/grading/grading.component';
 import { ValenceDirective } from './data/valence.directive';
 import { EmptyComponent } from './empty.component';
 import { FileVariantPipe } from './file-variant.pipe';
+import { FromJsonPipe } from './from-json.pipe';
 import { GraphQLModule } from './graphql.module';
 import { GridOptionsPipe } from './grid-options.pipe';
+import { JsonPurePipe } from './json-pure.pipe';
+import { MessageListDialogComponent } from './message-list-dialog/message-list-dialog.component';
+import { MessageListComponent } from './message-list/message-list.component';
 import { RelativeTimeComponent } from './relative-time/relative-time.component';
 import { SubmissionDialogComponent } from './submission-dialog/submission-dialog.component';
+import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 import { TextVariantPipe } from './text-variant.pipe';
-import { SubmissionListDialogComponent } from './submission-list-dialog/submission-list-dialog.component';
-import { MessageListComponent } from './message-list/message-list.component';
-import { MessageListDialogComponent } from './message-list-dialog/message-list-dialog.component';
 
 const routes: Routes = [
   {
@@ -112,6 +115,9 @@ const routes: Routes = [
     SubmissionListDialogComponent,
     MessageListComponent,
     MessageListDialogComponent,
+    AdminSubmissionsComponent,
+    FromJsonPipe,
+    JsonPurePipe,
   ],
   imports: [
     BrowserModule,
