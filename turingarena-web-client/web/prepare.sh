@@ -1,4 +1,5 @@
 #!/bin/sh
-mkdir -p __generated__ &&
-cargo run --package turingarena-core --bin turingarena-graphql-schema  > __generated__/graphql-schema.json &&
+
+cargo run --package turingarena-core --bin turingarena-graphql-schema  > graphql-schema.json
 npm run codegen
+

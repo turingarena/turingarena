@@ -9,7 +9,7 @@ const config = {
       name: "turingarena-contest",
       localSchemaFile: path.resolve(
         __dirname,
-        "__generated__/graphql-schema.json"
+        "graphql-schema.json"
       )
     }
   }
