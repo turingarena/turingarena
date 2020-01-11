@@ -96,6 +96,7 @@ export class AdminCreateDialogComponent {
   private makeNewContestantInput(): UserInput {
     return {
       id: '',
+      admin: false,
       displayName: '',
       token: '',
     };
@@ -126,6 +127,7 @@ export class AdminCreateDialogComponent {
               id
               displayName
               token
+	      admin
             }
           }
         }
@@ -157,7 +159,7 @@ export class AdminCreateDialogComponent {
         }
       `,
       variables: {
-        contestantInputs: this.getRowData().map(({ id, displayName, token }) => ({ id, displayName, token })),
+        contestantInputs: this.getRowData().map(({ id, displayName, token, admin }) => ({ id, displayName, token, admin })),
       },
       refetchQueries: ['AdminQuery'],
     }).toPromise();
