@@ -36,7 +36,7 @@ impl MutationOk {
 
 pub type RootNode<'a> = juniper::RootNode<'static, Query, Mutation>;
 
-#[derive(StructOpt, Debug)]
+#[derive(StructOpt, Clone, Debug)]
 pub struct ContestArgs {
     /// url of the database
     #[structopt(long, env = "DATABASE", default_value = "./database.sqlite3")]
