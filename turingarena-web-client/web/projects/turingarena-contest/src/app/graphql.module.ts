@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
 import { HttpLink, HttpLinkModule } from 'apollo-angular-link-http';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import { ApolloClientOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 
@@ -9,7 +10,6 @@ import { setContext } from 'apollo-link-context';
 import schema from '../../../../__generated__/graphql-schema.json';
 
 import { AuthService } from './auth.service.js';
-import { ApolloClientOptions } from 'apollo-client';
 
 const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClientOptions<unknown> => {
   const authContext = setContext((operation, context) => {
