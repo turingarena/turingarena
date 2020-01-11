@@ -127,7 +127,6 @@ export class AdminCreateDialogComponent {
               id
               displayName
               token
-	      admin
             }
           }
         }
