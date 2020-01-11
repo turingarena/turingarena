@@ -6,7 +6,7 @@ import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 
 // tslint:disable-next-line: no-default-import
-import schema from '../../../../__generated__/graphql-schema.json';
+import schema from '../../../../graphql-schema.json';
 
 import { AuthService } from './auth.service.js';
 import { ApolloClientOptions } from 'apollo-client';
