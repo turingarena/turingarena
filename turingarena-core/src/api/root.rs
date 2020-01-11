@@ -320,21 +320,21 @@ impl Mutation {
         Ok(MutationOk)
     }
 
-        /// Import a file
-        pub fn import(
-            context: &ApiContext,
-            inputs: Vec<ImportFileInput>,
-            dry_run: Option<bool>,
-        ) -> FieldResult<Import> {
-            context.authorize_admin()?;
-            let import = Import::load(inputs)?;
-            if dry_run.is_some() && dry_run.unwrap() {
-                // no-op
-            } else {
-                import.apply(&context)?;
-            }
-            Ok(import)
+    /// Import a file
+    pub fn import(
+        context: &ApiContext,
+        inputs: Vec<ImportFileInput>,
+        dry_run: Option<bool>,
+    ) -> FieldResult<Import> {
+        context.authorize_admin()?;
+        let import = Import::load(inputs)?;
+        if dry_run.is_some() && dry_run.unwrap() {
+            // no-op
+        } else {
+            import.apply(&context)?;
         }
+        Ok(import)
+    }
 
     /// Submit a solution to the problem
     fn submit(
