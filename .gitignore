@@ -13,3 +13,4 @@ build/
 dist/
 turing/
 *.egg-info/
+/.turingarena_venv/
