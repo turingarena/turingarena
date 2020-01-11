@@ -20,4 +20,4 @@ for p in easy1 easy2 easy3 ; do
     $RUN -- admin add-problem --name $p --path $p/
 done
 
-$RUN -- serve --skip-auth 1 --secret-key secret
+$RUN -- serve --enable-dmz --secret-key secret
