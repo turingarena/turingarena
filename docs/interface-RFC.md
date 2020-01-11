@@ -17,14 +17,14 @@ The backend should output to the standard output the description of the task in 
     "memory": 256
   },
   "scoring": {
-    "max-score": 100,
+    "max_score": 100,
     "subtasks": [
       {
-        "max-score": 10,
+        "max_score": 10,
         "testcases": 2,
       },
       {
-        "max-score": 90,
+        "max_score": 90,
         "testcases": 10,
       }
     ]
@@ -33,19 +33,19 @@ The backend should output to the standard output the description of the task in 
     {
       "language": "it_IT",
       "path": "statement/italian.pdf",
-      "content-type": "application/pdf"
+      "content_type": "application/pdf"
     },
     {
       "language": "en_US",
       "path": "statement/english.md",
-      "content-type": "text/markdown"
+      "content_type": "text/markdown"
     }
   ],
   "attachements": [
     {
       "name": "input0.txt",
       "description": "Example of input",
-      "content-type": "text/plain",
+      "content_type": "text/plain",
       "path": "att/input0.txt"
     }
   ]
