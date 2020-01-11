@@ -92,6 +92,10 @@ impl Importer {
                 id: user.id.clone(),
                 token: user.token.clone(),
                 display_name: user.name.clone(),
+                admin: match user.role.as_ref() {
+                    Some(role) => role == "admin",
+                    _ => false,
+                },
             });
         }
 
