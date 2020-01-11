@@ -95,7 +95,7 @@ class Contest:
         return Contest(
             title=data["description"],
             start=datetime.fromtimestamp(data["start"]) if "start" in data else datetime.now(),
-            end=datetime.fromtimestamp(data["stop"]) if "stop" in data else datetime(2050, 0, 0, 0, 0, 0),
+            end=datetime.fromtimestamp(data["stop"]) if "stop" in data else datetime(2050, 1, 1),
             path=directory,
             problems=problems,
             users=users,
@@ -122,7 +122,7 @@ class Contest:
         return Contest(
             title=data["title"],
             start=data.get("start", datetime.now()),
-            end=data.get("end", datetime(2050, 0, 0, 0, 0, 0)),
+            end=data.get("end", datetime(2050, 1, 1)),
             path=directory,
             problems=problems,
             users=users,
