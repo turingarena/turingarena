@@ -46,6 +46,10 @@ pub struct ServerArgs {
     /// skip authentication (DANGEROUS: only for debug!)
     #[structopt(long, env = "SKIP_AUTH")]
     skip_auth: bool,
+
+    /// Skip authentication on endpoint `/dmz/graphql` (DANGEROUS: only use if under a proxy!)
+    #[structopt(long)]
+    enable_dmz: bool,
 }
 
 struct Authorization(Option<String>);
@@ -68,17 +72,8 @@ fn graphiql() -> content::Html<String> {
     juniper_rocket::graphiql_source("/graphql")
 }
 
-#[rocket::options("/graphql")]
-fn options_graphql<'a>() -> Response<'a> {
-    Response::build()
-        .raw_header("Access-Control-Allow-Origin", "*")
-        .raw_header("Access-Control-Allow-Methods", "OPTIONS, POST")
-        .raw_header(
-            "Access-Control-Allow-Headers",
-            "Content-Type, Authorization",
-        )
-        .finalize()
-}
+#[rocket::options("/<_path..>")]
+fn options_all(_path: PathBuf) {}
 
 #[rocket::post("/graphql", data = "<request>")]
 fn post_graphql_handler(
@@ -95,6 +90,20 @@ fn post_graphql_handler(
     });
     let context = config.create_context(claims);
     request.execute(&context.root_node(), &context)
+}
+
+#[rocket::post("/dmz/graphql", data = "<request>")]
+fn post_graphql_dmz_handler(
+    request: juniper_rocket::GraphQLRequest,
+    config: State<ApiConfig>,
+    args: State<ServerArgs>,
+) -> juniper_rocket::GraphQLResponse {
+    if args.enable_dmz {
+        let context = config.clone().with_skip_auth(true).create_context(None);
+        request.execute(&context.root_node(), &context)
+    } else {
+        juniper_rocket::GraphQLResponse::error("DMZ not enabled".into())
+    }
 }
 
 #[rocket::get("/")]
@@ -145,23 +154,36 @@ pub fn run_server(args: ServerArgs) -> Result<(), Box<dyn Error>> {
     }
 
     let api_config = ApiConfig::default()
-        .with_args(args.contest)
+        .with_args(args.contest.clone())
         .with_skip_auth(args.skip_auth)
-        .with_secret(args.secret_key.map(|s| s.as_bytes().to_owned()));
+        .with_secret(args.secret_key.as_ref().map(|s| s.as_bytes().to_owned()));
 
     let config = rocket::Config::build(rocket::config::Environment::active()?)
         .port(args.port)
-        .address(args.host)
+        .address(&args.host)
         .finalize()?;
 
     rocket::custom(config)
         .manage(api_config)
+        .manage(args)
         .attach(AdHoc::on_response("Cors header", |_, res| {
             res.set_header(AccessControlAllowOrigin::Any);
+            res.set_raw_header("Access-Control-Allow-Methods", "OPTIONS, POST");
+            res.set_raw_header(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Authorization",
+            );
         }))
         .mount(
             "/",
-            rocket::routes![graphiql, options_graphql, post_graphql_handler, index, dist],
+            rocket::routes![
+                graphiql,
+                options_all,
+                post_graphql_handler,
+                post_graphql_dmz_handler,
+                index,
+                dist
+            ],
         )
         .launch();
     Ok(())
