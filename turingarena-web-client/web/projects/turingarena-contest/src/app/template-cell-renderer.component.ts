@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
+
+export type TemplateCellRendererParams = ICellRendererParams & { template: TemplateRef<unknown> };
 
 /**
  * An ag-grid cell renderer that uses an Angular template.
@@ -10,13 +12,13 @@ import { ICellRendererParams } from 'ag-grid-community';
   template: '<ng-container *ngTemplateOutlet="params.template; context: params"></ng-container>',
 })
 export class TemplateCellRendererComponent implements ICellRendererAngularComp {
-  params!: ICellRendererParams;
+  params!: TemplateCellRendererParams;
 
-  agInit(params: ICellRendererParams): void {
+  agInit(params: TemplateCellRendererParams): void {
     this.refresh(params);
   }
 
-  refresh(params: ICellRendererParams): boolean {
+  refresh(params: TemplateCellRendererParams): boolean {
     this.params = params;
 
     return true;

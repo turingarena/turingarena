@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 
@@ -6,6 +6,8 @@ import { ProblemFragment } from '../../fragments/__generated__/ProblemFragment';
 import { SubmissionFragment } from '../../fragments/__generated__/SubmissionFragment';
 import { VariantService } from '../../variant.service';
 import { AdminQuery } from '../__generated__/AdminQuery';
+
+type TemplateName = 'grading' | 'createdAt';
 
 @Component({
   selector: 'app-admin-submissions',
@@ -22,7 +24,7 @@ export class AdminSubmissionsComponent {
   @Input()
   data!: AdminQuery;
 
-  getColumnDefs = (problems: ProblemFragment[]): Array<ColDef | ColGroupDef> => [
+  getColumnDefs = (problems: ProblemFragment[], templates: Record<TemplateName, TemplateRef<unknown>>): Array<ColDef | ColGroupDef> => [
     {
       colId: 'id',
       field: 'id',
@@ -60,7 +62,11 @@ export class AdminSubmissionsComponent {
       colId: 'createdAt',
       field: 'createdAt',
       headerName: 'Submission Time',
-      flex: 2,
+      flex: 1,
+      cellRenderer: 'templateCellRenderer',
+      cellRendererParams: {
+        template: templates.createdAt,
+      },
     },
     {
       colId: 'evaluation.status',
@@ -88,6 +94,10 @@ export class AdminSubmissionsComponent {
                 return submission.evaluation.awards[i].grading;
               },
               columnGroupShow: 'open',
+              cellRenderer: 'templateCellRenderer',
+              cellRendererParams: {
+                template: templates.grading,
+              },
             })),
             {
               colId: `problem/${problem.name}/evaluation.grading`,
@@ -99,6 +109,10 @@ export class AdminSubmissionsComponent {
               },
               columnGroupShow: 'open',
               flex: 1,
+              cellRenderer: 'templateCellRenderer',
+              cellRendererParams: {
+                template: templates.grading,
+              },
             },
           ],
         })),
@@ -108,6 +122,10 @@ export class AdminSubmissionsComponent {
           headerName: 'Total',
           flex: 1,
           columnGroupShow: 'closed',
+          cellRenderer: 'templateCellRenderer',
+          cellRendererParams: {
+            template: templates.grading,
+          },
         },
       ],
     },
