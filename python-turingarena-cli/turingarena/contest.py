@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import yaml
+import os
 
-from os import path
 from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime
@@ -19,7 +19,7 @@ class Problem:
     def from_data(name: str, directory: str) -> Problem:
         return Problem(
             name=name,
-            path=path.join(directory, name)
+            path=os.path.join(directory, name)
         )
 
     @property
@@ -81,9 +81,9 @@ class Contest:
 
     @staticmethod
     def from_italy_yaml(directory: str) -> Contest:
-        manifest = path.join(directory, "contest.yaml")
+        manifest = os.path.join(directory, "contest.yaml")
 
-        if not path.exists(manifest):
+        if not os.path.exists(manifest):
             raise RuntimeError("Not a Italy YAML contest directory")
 
         with open(manifest) as f:
@@ -103,9 +103,9 @@ class Contest:
 
     @staticmethod
     def from_directory(directory: str) -> Contest:
-        manifest = path.join(directory, "turingarena.yaml")
+        manifest = os.path.join(directory, "turingarena.yaml")
 
-        if not path.exists(manifest):
+        if not os.path.exists(manifest):
             raise RuntimeError("Not a TuringArena contest directory")
 
         with open(manifest) as f:
@@ -116,13 +116,13 @@ class Contest:
 
         # Write contest title in title.txt
         # TODO: change that
-        with open(path.join(directory, "files", "title.txt"), "w") as f:
+        with open(os.path.join(directory, "files", "title.txt"), "w") as f:
             f.write(data["title"])
 
         return Contest(
             title=data["title"],
-            start=data["start"] if "start" in data else datetime.now(),
-            end=data["end"] if "end" in data else datetime(2050, 0, 0, 0, 0, 0),
+            start=data.get("start", datetime.now()),
+            end=data.get("end", datetime(2050, 0, 0, 0, 0, 0)),
             path=directory,
             problems=problems,
             users=users,
@@ -139,11 +139,11 @@ class Contest:
 
     @property
     def archive(self) -> Archive:
-        return Archive.create(path.join(self.path, "files"))
+        return Archive.create(os.path.join(self.path, "files"))
 
     def to_graphql(self) -> dict:
         return dict(
-            startTime=self.start.isoformat(),
-            endTime=self.end.isoformat(),
+            startTime=self.start.astimezone().isoformat(),
+            endTime=self.end.astimezone().isoformat(),
             archiveContent=self.archive.to_graphql(),
         )
