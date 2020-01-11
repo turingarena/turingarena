@@ -6,7 +6,7 @@ from turingarena.contest import Contest
 from turingarena.graphql import GraphQlClient
 from turingarena.submission import SubmissionFile, Submission
 
-DEFAULT_SERVER = "http://localhost:8080"
+DEFAULT_SERVER = "http://localhost:8080/dmz/graphql"
 
 parser = argparse.ArgumentParser(description="TuringArena CLI administration client")
 parser.add_argument("-s", "--server", help="address of TuringArena", default=DEFAULT_SERVER)

@@ -12,7 +12,7 @@ class GraphQlClient:
     client: Client
 
     def __init__(self, endpoint: str):
-        transport = RequestsHTTPTransport(endpoint + "/graphql", use_json=True)
+        transport = RequestsHTTPTransport(endpoint, use_json=True)
         self.client = Client(transport=transport)
 
     def execute(self, query, *args, **kwargs):
