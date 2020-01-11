@@ -21,6 +21,18 @@ mutation UpdateContestMutation($input: ContestUpdateInput!) {
     }
 }
 
+mutation ImportContestMutation($contest: ContestInput!, $users: [UserInput!]!, $problems: [ProblemInput!]!) {
+    initContest(contest: $contest) {
+        ok
+    },
+    addUsers(inputs: $users) {
+        ok
+    },
+    addProblems(inputs: $problems) {
+        ok
+    },
+}
+
 mutation AddUserMutation($input: UserInput!) {
     addUsers(inputs: [$input]) {
         ok
@@ -54,15 +66,6 @@ mutation DeleteProblemMutation($name: String!) {
 mutation StartNewEvaluationMutation($submissionId: String!) {
     evaluate(submissionIds: [$submissionId]) {
         ok
-    }
-}
-
-mutation ImportMutation($input: ImportFileInput!, $dryRun: Boolean!) {
-    import(inputs: [$input], dryRun: $dryRun) {
-        users {
-            id
-            displayName
-        }
     }
 }
 

@@ -1,9 +1,15 @@
 include!(concat!(env!("OUT_DIR"), "/operations.rs"));
 
+mod import;
+
+use crate::import::Importer;
 use graphql_client::{GraphQLQuery, QueryBody};
 use juniper::http::GraphQLRequest;
 use juniper::InputValue;
 use serde::Serialize;
+use std::convert::TryInto;
+use std::env;
+use std::env::current_dir;
 use std::fs::read;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -69,12 +75,10 @@ enum AdminCommand {
     StartNewEvaluation {
         submission_id: String,
     },
-    ImportFile {
+    /// Import a contest to TuringArena
+    Import {
         /// Path of the contest to import
-        path: PathBuf,
-        /// Show operations without applying them
-        #[structopt(long)]
-        dry_run: bool,
+        path: Option<PathBuf>,
     },
 }
 
@@ -162,21 +166,10 @@ impl AdminCommand {
                 StartNewEvaluationMutation::build_query,
                 start_new_evaluation_mutation::Variables { submission_id },
             ),
-            ImportFile { path, dry_run } => {
-                let content = read(&path).unwrap();
-                make_request(
-                    ImportMutation::build_query,
-                    import_mutation::Variables {
-                        input: import_mutation::ImportFileInput {
-                            content: import_mutation::FileContentInput {
-                                base64: base64::encode(&content),
-                            },
-                            name: Some(path.file_name().unwrap().to_string_lossy().to_string()),
-                            filetype: None,
-                        },
-                        dry_run,
-                    },
-                )
+            Import { path } => {
+                let path = path.unwrap_or(current_dir().unwrap());
+                let importer = Importer::new(path).unwrap();
+                importer.try_into().unwrap()
             }
         }
     }

@@ -14,9 +14,9 @@ use schema::blobs;
 use user::UserId;
 use user::UserInput;
 
-use crate::api::contest::{Contest, ContestUpdateInput};
+use crate::api::contest::{Contest, ContestInput, ContestUpdateInput};
 use crate::api::contest_evaluation::Evaluation;
-use crate::api::contest_problem::{Problem, ProblemInput, ProblemUpdateInput};
+use crate::api::contest_problem::{Problem, ProblemInput, ProblemInsertable, ProblemUpdateInput};
 use crate::api::formats::Import;
 use crate::api::user::{User, UserUpdateInput};
 
@@ -242,6 +242,13 @@ impl Mutation {
         Ok(MutationOk)
     }
 
+    /// Initializes a new contest
+    fn init_contest(context: &ApiContext, contest: ContestInput) -> FieldResult<MutationOk> {
+        context.authorize_admin()?;
+        Contest::insert(context, contest)?;
+        Ok(MutationOk)
+    }
+
     /// Authenticate a user, generating a JWT authentication token
     fn auth(context: &ApiContext, token: String) -> FieldResult<Option<UserToken>> {
         Ok(auth::auth(context, &token)?)
@@ -292,7 +299,7 @@ impl Mutation {
         inputs: Vec<ProblemInput>,
     ) -> FieldResult<MutationOk> {
         context.authorize_admin()?;
-        Problem::insert(&context, inputs)?;
+        Problem::insert(context, inputs);
         Ok(MutationOk)
     }
 

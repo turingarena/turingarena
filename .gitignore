@@ -8,3 +8,8 @@ Cargo.lock
 *.fdb_latexmk
 *.fls
 *.log
+.idea/
+build/
+dist/
+turing/
+*.egg-info/

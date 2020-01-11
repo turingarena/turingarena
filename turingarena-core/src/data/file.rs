@@ -41,7 +41,7 @@ where
 #[derive(Serialize, Deserialize, Clone, Debug, juniper::GraphQLInputObject, AsExpression)]
 #[sql_type = "Binary"]
 pub struct FileContentInput {
-    base64: String,
+    pub base64: String,
 }
 
 impl FileContentInput {

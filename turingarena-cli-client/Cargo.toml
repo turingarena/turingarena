@@ -17,9 +17,12 @@ turingarena-core = { path = "../turingarena-core" }
 juniper = "0.14"
 serde = "1.0"
 serde_json = "1.0"
+serde_yaml = "0.8"
 structopt = "0.3"
 graphql_client = "0.8"
 base64 = "0.11"
+failure = "0.1"
+tar = "0.4"
 
 [build-dependencies]
 turingarena-core = { path = "../turingarena-core" }
