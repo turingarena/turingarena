@@ -14,3 +14,4 @@ dist/
 turing/
 *.egg-info/
 /.turingarena_venv/
+__pycache__
