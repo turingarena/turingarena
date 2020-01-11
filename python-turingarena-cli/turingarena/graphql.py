@@ -1,38 +1,37 @@
-import sys
+import requests
 
-from gql import Client, gql
-from gql.transport.requests import RequestsHTTPTransport
-from requests import HTTPError
 from typing import List
 
 from turingarena.submission import SubmissionFile
 
 
 class GraphQlClient:
-    client: Client
+    endpoint: str
 
     def __init__(self, endpoint: str):
-        transport = RequestsHTTPTransport(endpoint, use_json=True)
-        self.client = Client(transport=transport)
+        self.endpoint = endpoint
 
-    def execute(self, query, *args, **kwargs):
-        try:
-            return self.client.execute(query, *args, **kwargs)
-        except HTTPError as e:
-            print(e.response.json(), file=sys.stderr)
-            raise e
+    def query(self, query: str, variables=()):
+        request = dict(
+            query=query,
+            variables=variables,
+        )
+
+        response = requests.post(self.endpoint, json=request)
+
+        return response.json()
 
     def init_db(self):
-        return self.execute(gql("""
+        return self.query("""
             mutation {
                initDb {
                   ok
                }
             }
-        """))
+        """)
 
     def show_contest(self):
-        return self.execute(gql("""
+        return self.query("""
         query {
             contest {
                startTime
@@ -47,10 +46,10 @@ class GraphQlClient:
                 }
             }
         }
-        """))
+        """)
 
     def create_contest(self, args: dict):
-        return self.execute(gql("""
+        return self.query("""
         mutation($contest: ContestUpdateInput!, $users: [UserInput!]!, $problems: [ProblemInput!]!) {
             updateContest(input: $contest) {
                 ok
@@ -62,10 +61,10 @@ class GraphQlClient:
                 ok
             }
         }
-        """), args)
+        """, args)
 
     def submissions(self):
-        return self.execute(gql("""
+        return self.query("""
         query {
             contest {
                 submissions {
@@ -90,7 +89,7 @@ class GraphQlClient:
                 }
             }
         }
-        """))
+        """)
 
     def submit(self, user: str, problem: str, files: List[SubmissionFile]):
         args = dict(
@@ -98,10 +97,10 @@ class GraphQlClient:
             problem=problem,
             files=list(map(lambda f: f.to_graphql(), files))
         )
-        return self.execute(gql("""
+        return self.query("""
         mutation ($user: String!, $problem: String!, $files: [FileInput!]!) {
             submit(userId: $user,problemName: $problem,files: $files){
                 id
             }
         }        
-        """), args)
+        """, args)

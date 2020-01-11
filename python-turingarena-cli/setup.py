@@ -9,7 +9,7 @@ setup(
     author_email="alerighi4@gmail.com",
     url="http://github.com/turingarena/turingarena/",
     packages=['turingarena'],
-    install_requires=["gql", "pyyaml"],
+    install_requires=["requests", "pyyaml"],
     entry_points={
         'console_scripts': [
             'turingarena = turingarena.turingarena:main',

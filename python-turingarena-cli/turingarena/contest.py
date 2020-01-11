@@ -122,7 +122,7 @@ class Contest:
         return Contest(
             title=data["title"],
             start=data.get("start", datetime.now()),
-            end=data.get("end", datetime(2050, 0, 0, 0, 0, 0)),
+            end=data.get("end", datetime(2050, 1, 1, 0, 0, 0)),
             path=directory,
             problems=problems,
             users=users,
