@@ -1,0 +1,35 @@
+{
+  "extends": "tslint:all",
+  "rules": {
+    "deprecation": {
+      "severity": "warning"
+    },
+    "import-blacklist": [true, "rxjs/Rx", "graphql-tag"],
+    "interface-name": false,
+    "max-classes-per-file": false,
+    "no-console": [true, "debug", "info", "time", "timeEnd", "trace"],
+    "no-empty": false,
+    "no-inferrable-types": [true, "ignore-params"],
+    "no-non-null-assertion": false,
+    "no-var-requires": false,
+    "object-literal-key-quotes": [true, "as-needed"],
+    "object-literal-sort-keys": false,
+    "quotemark": [true, "single"],
+    "completed-docs": false,
+    "typedef": false,
+    "file-name-casing": [false, "kebab-case"],
+    "unnecessary-else": false,
+    "prefer-function-over-method": false,
+    "no-unsafe-any": false,
+    "no-parameter-properties": false,
+    "newline-per-chained-call": false,
+    "no-this-assignment": [
+      true,
+      {
+        "allow-destructuring": true
+      }
+    ],
+    "no-submodule-imports": [true, "rxjs/operators"],
+    "strict-string-expressions": false
+  }
+}

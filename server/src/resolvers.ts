@@ -6,5 +6,5 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     b: () => 'another string',
-  }
-}
+  },
+};
