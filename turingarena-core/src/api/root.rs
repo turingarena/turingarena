@@ -22,6 +22,9 @@ use crate::api::user::{User, UserUpdateInput};
 
 use super::*;
 use crate::api::messages::{Message, MessageInput, MessageKind};
+use crate::data::problem::material::Material;
+use failure::_core::cell::RefCell;
+use std::collections::HashMap;
 
 embed_migrations!();
 
@@ -61,6 +64,8 @@ pub struct ApiContext {
     pub jwt_data: Option<JwtData>,
     pub database: SqliteConnection,
     pub workspace_path: PathBuf,
+
+    pub material_cache: RefCell<HashMap<String, Material>>,
 }
 
 impl juniper::Context for ApiContext {}
@@ -86,6 +91,7 @@ impl ApiConfig {
             database: self.connect_db(),
             jwt_data,
             workspace_path,
+            material_cache: RefCell::new(HashMap::new()),
         }
     }
 

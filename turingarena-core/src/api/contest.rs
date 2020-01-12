@@ -243,7 +243,8 @@ impl Contest {
         Ok(ScoreRange::total(
             self.problems(context)?
                 .iter()
-                .map(|problem| problem.score_range()),
+                .map(|problem| problem.score_range(context))
+                .collect::<FieldResult<Vec<_>>>()?,
         ))
     }
 
@@ -314,7 +315,8 @@ impl ProblemSet {
         Ok(ScoreRange::total(
             self.problems(context)?
                 .iter()
-                .map(|problem| problem.score_range()),
+                .map(|problem| problem.score_range(context))
+                .collect::<FieldResult<Vec<_>>>()?,
         ))
     }
 

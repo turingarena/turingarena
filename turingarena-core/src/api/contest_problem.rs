@@ -56,7 +56,6 @@ struct ProblemData {
 pub struct Problem {
     contest: Contest,
     data: ProblemData,
-    material: Material,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
@@ -72,24 +71,37 @@ impl Problem {
     }
 
     /// Material of this problem
-    pub fn material(&self) -> &Material {
-        &self.material
+    pub fn material(&self, context: &ApiContext) -> FieldResult<Material> {
+        let mut cache = context.material_cache.borrow_mut();
+
+        let key = &self.data.archive_integrity;
+        if !cache.contains_key(key) {
+            (*cache).insert(
+                key.to_owned(),
+                task_maker::generate_material(self.unpack(context)?)?,
+            );
+        }
+
+        Ok((*cache.get(key).unwrap()).clone())
     }
 
     /// Range of the total score, obtained as the sum of all the score awards
-    pub fn score_range(&self) -> ScoreRange {
-        ScoreRange::total(self.material.awards.iter().filter_map(
-            |award| match award.material.domain {
-                AwardDomain::Score(ScoreAwardDomain { range }) => Some(range),
-                _ => None,
-            },
+    pub fn score_range(&self, context: &ApiContext) -> FieldResult<ScoreRange> {
+        Ok(ScoreRange::total(
+            self.material(context)?
+                .awards
+                .iter()
+                .filter_map(|award| match award.material.domain {
+                    AwardDomain::Score(ScoreAwardDomain { range }) => Some(range),
+                    _ => None,
+                }),
         ))
     }
 
-    pub fn score_domain(&self) -> ScoreAwardDomain {
-        ScoreAwardDomain {
-            range: self.score_range(),
-        }
+    pub fn score_domain(&self, context: &ApiContext) -> FieldResult<ScoreAwardDomain> {
+        Ok(ScoreAwardDomain {
+            range: self.score_range(context)?,
+        })
     }
 
     pub fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ProblemView> {
@@ -103,13 +115,8 @@ impl Problem {
 
 impl Problem {
     fn new(context: &ApiContext, data: ProblemData) -> FieldResult<Self> {
-        let material = Self::get_problem_material(&data, context)?;
         let contest = Contest::current(context)?;
-        Ok(Problem {
-            contest,
-            data,
-            material,
-        })
+        Ok(Problem { contest, data })
     }
 
     /// Get a problem data by its name
@@ -172,18 +179,7 @@ impl Problem {
     }
 
     pub fn unpack(&self, context: &ApiContext) -> FieldResult<PathBuf> {
-        Self::unpack_data(&self.data, context)
-    }
-
-    fn unpack_data(data: &ProblemData, context: &ApiContext) -> FieldResult<PathBuf> {
-        context.unpack_archive(&data.archive_integrity, "problem")
-    }
-
-    /// Material of this problem
-    fn get_problem_material(data: &ProblemData, context: &ApiContext) -> FieldResult<Material> {
-        Ok(task_maker::generate_material(Self::unpack_data(
-            data, context,
-        )?)?)
+        context.unpack_archive(&self.data.archive_integrity, "problem")
     }
 }
 
@@ -196,9 +192,10 @@ pub struct ProblemView {
 
 #[juniper_ext::graphql(Context = ApiContext)]
 impl ProblemView {
-    pub fn awards(&self) -> Vec<AwardView> {
-        self.problem
-            .material()
+    pub fn awards(&self, context: &ApiContext) -> FieldResult<Vec<AwardView>> {
+        Ok(self
+            .problem
+            .material(context)?
             .awards
             .iter()
             .map(|award| AwardView {
@@ -206,12 +203,12 @@ impl ProblemView {
                 award: (*award).clone(),
                 problem: self.problem.clone(),
             })
-            .collect()
+            .collect())
     }
 
     pub fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
         Ok(ScoreAwardGrading {
-            domain: self.problem.score_domain(),
+            domain: self.problem.score_domain(context)?,
             grade: match self.tackling() {
                 Some(t) => Some(t.grade(context)?),
                 None => None,
@@ -255,7 +252,7 @@ impl ProblemTackling {
         Ok(ScoreAwardValue::total(
             self.problem
                 .view(context, Some(self.user_id.clone()))?
-                .awards()
+                .awards(context)?
                 .into_iter()
                 .map(|award_view: AwardView| -> FieldResult<_> {
                     Ok(
@@ -281,7 +278,7 @@ impl ProblemTackling {
 
     fn grade(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrade> {
         Ok(ScoreAwardGrade {
-            domain: self.problem.score_domain(),
+            domain: self.problem.score_domain(context)?,
             value: self.score(context)?,
         })
     }

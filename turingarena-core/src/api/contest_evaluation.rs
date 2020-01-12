@@ -70,7 +70,10 @@ impl Evaluation {
     }
 
     pub fn score_domain(&self, context: &ApiContext) -> FieldResult<ScoreAwardDomain> {
-        Ok(self.submission(context)?.problem(context)?.score_domain())
+        Ok(self
+            .submission(context)?
+            .problem(context)?
+            .score_domain(context)?)
     }
 
     pub fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
@@ -89,7 +92,7 @@ impl Evaluation {
 
         self.submission(context)?
             .problem(context)?
-            .material()
+            .material(context)?
             .awards
             .iter()
             .map(|award| -> FieldResult<_> {
@@ -335,7 +338,7 @@ impl EvaluationResult<'_> {
         self.evaluation
             .submission(context)?
             .problem(context)?
-            .material()
+            .material(context)?
             .awards
             .iter()
             .map(|award| AwardAchievement::find(context, award, self.evaluation.id()))
@@ -362,7 +365,7 @@ impl EvaluationResult<'_> {
                 .evaluation
                 .submission(context)?
                 .problem(context)?
-                .score_domain(),
+                .score_domain(context)?,
             value: self.score(context)?,
         })
     }
