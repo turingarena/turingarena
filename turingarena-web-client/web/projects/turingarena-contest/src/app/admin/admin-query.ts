@@ -1,7 +1,8 @@
 import gql from 'graphql-tag';
 
-import { awardAchievementFragment } from '../fragments/awards';
+import { awardAchievementFragment, awardGradingFragment, scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
+import { evaluationFragment } from '../fragments/evaluation';
 import { problemMaterialFragment } from '../fragments/material';
 import { scoreRangeFragment } from '../fragments/score';
 import { submissionFragment } from '../fragments/submission';
@@ -20,6 +21,28 @@ export const adminQuery = gql`
   fragment AdminUserFragment on User {
     id
     displayName
+    problemSetView {
+      grading {
+        ...ScoreAwardGradingFragment
+      }
+      problemViews {
+        grading {
+          ...ScoreAwardGradingFragment
+        }
+        awards {
+          grading {
+            ...AwardGradingFragment
+          }
+        }
+      }
+    }
+  }
+
+  fragment AdminEvaluationFragment on Evaluation {
+    ...EvaluationFragment
+    submission {
+      ...SubmissionFragment
+    }
   }
 
   query AdminQuery {
@@ -44,6 +67,14 @@ export const adminQuery = gql`
         }
         ...SubmissionFragment
       }
+      evaluations {
+        ...AdminEvaluationFragment
+        submission {
+          problem {
+            name
+          }
+        }
+      }
       scoreRange {
         ...ScoreRangeFragment
       }
@@ -53,4 +84,7 @@ export const adminQuery = gql`
   ${problemMaterialFragment}
   ${scoreRangeFragment}
   ${submissionFragment}
+  ${scoreAwardGradingFragment}
+  ${awardGradingFragment}
+  ${evaluationFragment}
 `;

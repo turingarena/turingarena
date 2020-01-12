@@ -48,6 +48,8 @@ export const evaluationEventFragment = gql`
 
 export const evaluationFragment = gql`
   fragment EvaluationFragment on Evaluation {
+    id
+    createdAt
     status
     grading {
       ...ScoreAwardGradingFragment

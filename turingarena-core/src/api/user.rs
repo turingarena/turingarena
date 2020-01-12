@@ -5,6 +5,7 @@ use root::ApiContext;
 use schema::users;
 
 use super::*;
+use crate::api::contest::{Contest, ProblemSetView};
 
 #[derive(Debug, juniper::GraphQLInputObject, Insertable)]
 #[table_name = "users"]
@@ -118,5 +119,12 @@ impl User {
 
     pub fn is_admin(&self) -> bool {
         self.data.admin
+    }
+
+    pub fn problem_set_view(&self, context: &ApiContext) -> FieldResult<ProblemSetView> {
+        context.authorize_admin()?;
+        Contest::current(context)?
+            .problem_set(context)?
+            .view(context, Some(self.id()))
     }
 }

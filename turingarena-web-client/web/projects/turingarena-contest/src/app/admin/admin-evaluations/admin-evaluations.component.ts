@@ -1,27 +1,23 @@
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
-import { AgGridAngular } from 'ag-grid-angular';
+import { Component, Input, TemplateRef } from '@angular/core';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
-import { Apollo } from 'apollo-angular';
-import gql from 'graphql-tag';
 
 import { ProblemFragment } from '../../fragments/__generated__/ProblemFragment';
-import { SubmissionFragment } from '../../fragments/__generated__/SubmissionFragment';
 import { VariantService } from '../../variant.service';
+import { AdminEvaluationFragment } from '../__generated__/AdminEvaluationFragment';
 import { AdminQuery } from '../__generated__/AdminQuery';
 
-import { ReevaluateMutation, ReevaluateMutationVariables } from './__generated__/ReevaluateMutation';
-
-type TemplateName = 'grading' | 'createdAt';
+export type TemplateName = 'grading' | 'createdAt';
 
 @Component({
-  selector: 'app-admin-submissions',
-  templateUrl: './admin-submissions.component.html',
-  styleUrls: ['./admin-submissions.component.scss'],
+  selector: 'app-admin-evaluations',
+  templateUrl: './admin-evaluations.component.html',
+  styleUrls: ['./admin-evaluations.component.scss'],
 })
-export class AdminSubmissionsComponent {
+export class AdminEvaluationsComponent {
+
+  // FIXME: a lot of copy'n'paste here!
 
   constructor(
-    private readonly apollo: Apollo,
     private readonly variantService: VariantService,
   ) { }
 
@@ -49,27 +45,14 @@ export class AdminSubmissionsComponent {
       filter: true,
     },
     {
-      groupId: 'user',
-      headerName: 'User',
-      children: [
-        {
-          colId: 'user.id',
-          field: 'user.id',
-          headerName: 'ID',
-          sortable: true,
-          filter: true,
-        },
-        {
-          colId: 'user.displayName',
-          field: 'user.displayName',
-          headerName: 'Name',
-          columnGroupShow: 'open',
-        },
-      ],
+      colId: 'submission.id',
+      field: 'submission.id',
+      headerName: 'Submission',
+      filter: true,
     },
     {
-      colId: 'problem.name',
-      field: 'problem.name',
+      colId: 'submission.problem.name',
+      field: 'submission.problem.name',
       headerName: 'Problem',
       sortable: true,
       filter: true,
@@ -78,7 +61,7 @@ export class AdminSubmissionsComponent {
       colId: 'createdAt',
       field: 'createdAt',
       cellClass: 'grid-cell-grading',
-      headerName: 'Submission Time',
+      headerName: 'Evaluation Time',
       cellRenderer: 'templateCellRenderer',
       cellRendererParams: {
         template: templates.createdAt,
@@ -87,9 +70,9 @@ export class AdminSubmissionsComponent {
       sort: 'desc',
     },
     {
-      colId: 'evaluation.status',
-      field: 'evaluation.status',
-      headerName: 'Evaluation Status',
+      colId: 'status',
+      field: 'status',
+      headerName: 'Status',
       sortable: true,
       filter: true,
     },
@@ -105,11 +88,11 @@ export class AdminSubmissionsComponent {
             ...problem.material.awards.map((award, i): ColDef => ({
               colId: `problem/${problem.name}/award/${award.name}`,
               headerName: this.variantService.selectTextVariant(award.material.title),
-              valueGetter: ({ data: submissionData }) => {
-                if (submissionData.problem.name !== problem.name) { return undefined; }
-                const submission = submissionData as SubmissionFragment;
+              valueGetter: ({ data: evaluationData }) => {
+                const evaluation = evaluationData as AdminEvaluationFragment;
+                if (evaluationData.submission.problem.name !== problem.name) { return undefined; }
 
-                return submission.evaluation.awards[i].grading;
+                return evaluation.awards[i].grading;
               },
               cellClass: 'grid-cell-grading',
               columnGroupShow: 'open',
@@ -120,11 +103,11 @@ export class AdminSubmissionsComponent {
             })),
             {
               colId: `problem/${problem.name}/evaluation.grading`,
-              valueGetter: ({ data: submissionData }) => {
-                if (submissionData.problem.name !== problem.name) { return undefined; }
-                const submission = submissionData as SubmissionFragment;
+              valueGetter: ({ data: evaluationData }) => {
+                const evaluation = evaluationData as AdminEvaluationFragment;
+                if (evaluationData.submission.problem.name !== problem.name) { return undefined; }
 
-                return submission.evaluation.grading;
+                return evaluation.grading;
               },
               headerName: 'Total',
               cellClass: 'grid-cell-grading',
@@ -138,7 +121,7 @@ export class AdminSubmissionsComponent {
         })),
         {
           colId: 'evaluation',
-          field: 'evaluation.grading',
+          field: 'grading',
           headerName: 'Total',
           cellClass: 'grid-cell-grading',
           columnGroupShow: 'closed',
@@ -151,24 +134,4 @@ export class AdminSubmissionsComponent {
     },
   ]
 
-  async reevaluateSelected(grid: AgGridAngular) {
-    const submissionIds: string[] = [];
-
-    grid.api.getSelectedNodes().forEach(({ data }) => { submissionIds.push(data.id); });
-
-    await this.apollo.mutate<ReevaluateMutation, ReevaluateMutationVariables>({
-      mutation: gql`
-        mutation ReevaluateMutation($submissionIds: [String!]!) {
-          evaluate(submissionIds: $submissionIds) {
-            ok
-          }
-        }
-      `,
-      variables: {
-        submissionIds,
-      },
-      refetchQueries: ['AdminQuery'],
-      awaitRefetchQueries: true,
-    }).toPromise();
-  }
 }

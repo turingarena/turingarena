@@ -22,31 +22,27 @@
         <a class="admin-section-link" routerLink="/admin/submissions" routerLinkActive="active">
           Submissions
         </a>
+        <a class="admin-section-link" routerLink="/admin/evaluations" routerLinkActive="active">
+          Evaluations
+        </a>
       </aside>
 
+      <main class="admin-problems" [hidden]="(route.firstChild!.data | async).adminSection !== 'problems'">
+        <app-admin-problems [data]="data"></app-admin-problems>
+      </main>
+
       <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
-        <label>Filter</label>
-        <input [(ngModel)]="quickFilterText" />
-        <button (click)="contestantsGridModel.deleteSelected()">Delete selected</button>
-        <ag-grid-angular class="contestants-grid ag-theme-balham" [animateRows]="true" rowSelection="multiple"
-          [quickFilterText]="quickFilterText">
-        </ag-grid-angular>
+        <app-admin-contestants [data]="data"></app-admin-contestants>
       </main>
 
       <main class="admin-submissions" [hidden]="(route.firstChild!.data | async).adminSection !== 'submissions'">
-        <label>Filter</label>
-        <input [(ngModel)]="quickFilterText" />
         <app-admin-submissions [data]="data"></app-admin-submissions>
       </main>
 
-      <main class="admin-problems" [hidden]="(route.firstChild!.data | async).adminSection !== 'problems'">
-        <label>Filter</label>
-        <input [(ngModel)]="quickFilterText" />
-        <button (click)="problemsGridModel.deleteSelected()">Delete selected</button>
-        <ag-grid-angular class="problems-grid ag-theme-balham" [rowDragManaged]="true" [animateRows]="true"
-          rowSelection="multiple" [quickFilterText]="quickFilterText">
-        </ag-grid-angular>
+      <main class="admin-evaluations" [hidden]="(route.firstChild!.data | async).adminSection !== 'evaluations'">
+        <app-admin-evaluations [data]="data"></app-admin-evaluations>
       </main>
+
     </div>
   </ng-container>
 </ng-container>

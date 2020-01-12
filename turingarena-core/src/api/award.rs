@@ -205,17 +205,17 @@ pub struct BadgeAwardGrading {
     pub grade: Option<BadgeAwardGrade>,
 }
 
-pub struct AwardView<'a> {
-    pub problem: &'a Problem,
+pub struct AwardView {
+    pub problem: Problem,
     pub award: Award,
     pub user_id: Option<UserId>,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl<'a> AwardView<'a> {
-    pub fn tackling(&self) -> Option<AwardTackling<'a>> {
+impl AwardView {
+    pub fn tackling(&self) -> Option<AwardTackling> {
         self.user_id.as_ref().map(|user_id| AwardTackling {
-            problem: self.problem,
+            problem: self.problem.clone(),
             award: self.award.clone(),
             user_id: (*user_id).clone(),
         })
@@ -242,14 +242,14 @@ impl<'a> AwardView<'a> {
     }
 }
 
-pub struct AwardTackling<'a> {
-    pub problem: &'a Problem,
+pub struct AwardTackling {
+    pub problem: Problem,
     pub award: Award,
     pub user_id: UserId,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl<'a> AwardTackling<'a> {
+impl AwardTackling {
     pub fn best_achievement(&self, context: &ApiContext) -> FieldResult<AwardAchievement> {
         Ok(AwardAchievement::find_best(
             context,

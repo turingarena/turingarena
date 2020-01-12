@@ -176,7 +176,7 @@ impl ApiContext {
     /// Authenticate user
     #[must_use = "Error means forbidden"]
     pub fn authorize_user(&self, user_id: &Option<UserId>) -> juniper::FieldResult<()> {
-        if self.config.skip_auth {
+        if self.authorize_admin().is_ok() {
             return Ok(());
         }
 

@@ -47,6 +47,10 @@ impl Evaluation {
         &self.data.id
     }
 
+    pub fn created_at(&self) -> &str {
+        &self.data.created_at
+    }
+
     /// Evaluated submission
     pub fn submission(&self, context: &ApiContext) -> FieldResult<Submission> {
         Submission::by_id(context, &self.data.submission_id)

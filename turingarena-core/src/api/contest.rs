@@ -11,7 +11,7 @@ use root::ApiContext;
 
 use crate::api::award::ScoreAwardGrading;
 use crate::api::contest_evaluation::Evaluation;
-use crate::api::contest_problem::Problem;
+use crate::api::contest_problem::{Problem, ProblemView};
 use crate::api::messages::Message;
 use crate::api::root::Query;
 use crate::data::award::{ScoreAwardDomain, ScoreAwardGrade, ScoreAwardValue, ScoreRange};
@@ -44,6 +44,7 @@ pub struct ContestInput {
     pub end_time: String,
 }
 
+#[derive(Clone)]
 pub struct Contest {
     data: ContestData,
 }
@@ -225,10 +226,17 @@ impl Contest {
         Problem::all(context)
     }
 
+    pub fn problem_set(&self, context: &ApiContext) -> FieldResult<ProblemSet> {
+        context.authorize_admin()?;
+        Ok(ProblemSet {
+            contest: (*self).clone(),
+        })
+    }
+
     /// Get the information about this contest visible to a user
     fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ContestView> {
         context.authorize_user(&user_id)?;
-        ContestView::new(&self, user_id)
+        ContestView::new((*self).clone(), user_id)
     }
 
     pub fn score_range(&self, context: &ApiContext) -> FieldResult<ScoreRange> {
@@ -271,13 +279,13 @@ impl Contest {
 }
 
 /// Information visible to a contestant
-pub struct ContestView<'a> {
-    contest: &'a Contest,
+pub struct ContestView {
+    contest: Contest,
     user_id: Option<UserId>,
 }
 
-impl<'a> ContestView<'a> {
-    pub fn new(contest: &'a Contest, user_id: Option<UserId>) -> FieldResult<Self> {
+impl ContestView {
+    pub fn new(contest: Contest, user_id: Option<UserId>) -> FieldResult<Self> {
         Ok(Self { contest, user_id })
     }
 
@@ -286,14 +294,15 @@ impl<'a> ContestView<'a> {
     }
 }
 
-pub struct ProblemSet<'a> {
+#[derive(Clone)]
+pub struct ProblemSet {
     #[allow(dead_code)]
-    contest: &'a Contest,
+    contest: Contest,
 }
 
 /// Set of problems currently active
 #[juniper_ext::graphql(Context = ApiContext)]
-impl ProblemSet<'_> {
+impl ProblemSet {
     /// The list of problems
     fn problems(&self, context: &ApiContext) -> FieldResult<Vec<Problem>> {
         // TODO: return only the problems that only the user can access
@@ -316,22 +325,26 @@ impl ProblemSet<'_> {
     }
 
     /// Information about this problem set visible to a user
-    fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ProblemSetView> {
+    pub fn view(
+        &self,
+        context: &ApiContext,
+        user_id: Option<UserId>,
+    ) -> FieldResult<ProblemSetView> {
         context.authorize_user(&user_id)?;
         Ok(ProblemSetView {
-            problem_set: &self,
+            problem_set: (*self).clone(),
             user_id,
         })
     }
 }
 
-pub struct ProblemSetView<'a> {
-    problem_set: &'a ProblemSet<'a>,
+pub struct ProblemSetView {
+    problem_set: ProblemSet,
     user_id: Option<UserId>,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl ProblemSetView<'_> {
+impl ProblemSetView {
     fn grading(&self, context: &ApiContext) -> FieldResult<ScoreAwardGrading> {
         Ok(ScoreAwardGrading {
             domain: self.problem_set.score_domain(context)?,
@@ -346,19 +359,28 @@ impl ProblemSetView<'_> {
     fn tackling(&self) -> Option<ProblemSetTackling> {
         // TODO: return `None` if user is not participating in the contest
         self.user_id.as_ref().map(|user_id| ProblemSetTackling {
-            problem_set: &self.problem_set,
+            problem_set: self.problem_set.clone(),
             user_id: (*user_id).clone(),
         })
     }
+
+    fn problem_views(&self, context: &ApiContext) -> FieldResult<Vec<ProblemView>> {
+        Ok(self
+            .problem_set
+            .problems(context)?
+            .into_iter()
+            .map(|problem| problem.view(context, self.user_id.clone()))
+            .collect::<FieldResult<Vec<_>>>()?)
+    }
 }
 
-pub struct ProblemSetTackling<'a> {
-    problem_set: &'a ProblemSet<'a>,
+pub struct ProblemSetTackling {
+    problem_set: ProblemSet,
     user_id: UserId,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl ProblemSetTackling<'_> {
+impl ProblemSetTackling {
     /// Total score, obtained as the sum of score of each problem
     fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
@@ -383,12 +405,12 @@ impl ProblemSetTackling<'_> {
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl ContestView<'_> {
+impl ContestView {
     fn problem_set(&self) -> Option<ProblemSet> {
         match self.contest.status() {
             ContestStatus::NotStarted => None,
             ContestStatus::Running | ContestStatus::Ended => Some(ProblemSet {
-                contest: &self.contest,
+                contest: self.contest.clone(),
             }),
         }
     }
@@ -404,7 +426,7 @@ impl ContestView<'_> {
 }
 
 /// The configuration of a contest
-#[derive(Queryable)]
+#[derive(Queryable, Clone)]
 pub struct ContestData {
     /// Primary key of the table. Should be *always* 0!
     #[allow(dead_code)]

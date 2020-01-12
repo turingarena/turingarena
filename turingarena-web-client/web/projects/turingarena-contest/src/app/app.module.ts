@@ -34,6 +34,9 @@ import { SubmissionListDialogComponent } from './submission-list-dialog/submissi
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 import { TextVariantPipe } from './text-variant.pipe';
+import { AdminContestantsComponent } from './admin/admin-contestants/admin-contestants.component';
+import { AdminProblemsComponent } from './admin/admin-problems/admin-problems.component';
+import { AdminEvaluationsComponent } from './admin/admin-evaluations/admin-evaluations.component';
 
 const routes: Routes = [
   {
@@ -118,6 +121,9 @@ const routes: Routes = [
     AdminSubmissionsComponent,
     FromJsonPipe,
     JsonPurePipe,
+    AdminContestantsComponent,
+    AdminProblemsComponent,
+    AdminEvaluationsComponent,
   ],
   imports: [
     BrowserModule,

@@ -52,6 +52,7 @@ struct ProblemData {
 }
 
 /// A problem in the contest
+#[derive(Clone)]
 pub struct Problem {
     contest: Contest,
     data: ProblemData,
@@ -94,7 +95,7 @@ impl Problem {
     pub fn view(&self, context: &ApiContext, user_id: Option<UserId>) -> FieldResult<ProblemView> {
         context.authorize_user(&user_id)?;
         Ok(ProblemView {
-            problem: &self,
+            problem: (*self).clone(),
             user_id,
         })
     }
@@ -187,13 +188,14 @@ impl Problem {
 }
 
 /// A problem in the contest as seen by contestants
-pub struct ProblemView<'a> {
-    problem: &'a Problem,
+#[derive(Clone)]
+pub struct ProblemView {
+    problem: Problem,
     user_id: Option<UserId>,
 }
 
 #[juniper_ext::graphql(Context = ApiContext)]
-impl<'a> ProblemView<'a> {
+impl ProblemView {
     pub fn awards(&self) -> Vec<AwardView> {
         self.problem
             .material()
@@ -202,7 +204,7 @@ impl<'a> ProblemView<'a> {
             .map(|award| AwardView {
                 user_id: self.user_id.clone(),
                 award: (*award).clone(),
-                problem: self.problem,
+                problem: self.problem.clone(),
             })
             .collect()
     }
@@ -217,22 +219,22 @@ impl<'a> ProblemView<'a> {
         })
     }
 
-    pub fn tackling(&self) -> Option<ProblemTackling<'a>> {
+    pub fn tackling(&self) -> Option<ProblemTackling> {
         // TODO: return `None` if user is not participating in the contest
         self.user_id.as_ref().map(|user_id| ProblemTackling {
-            problem: &self.problem,
+            problem: self.problem.clone(),
             user_id: (*user_id).clone(),
         })
     }
 }
 
 /// Progress at solving a problem by a user in the contest
-pub struct ProblemTackling<'a> {
-    problem: &'a Problem,
+pub struct ProblemTackling {
+    problem: Problem,
     user_id: UserId,
 }
 
-impl ProblemTackling<'_> {
+impl ProblemTackling {
     pub fn submit(&self, context: &ApiContext, files: Vec<FileInput>) -> FieldResult<Submission> {
         if !self.can_submit() {
             return Err("cannot submit now".into());
@@ -247,7 +249,7 @@ impl ProblemTackling<'_> {
 
 /// Attempts at solving a problem by a user in the contest
 #[juniper_ext::graphql(Context = ApiContext)]
-impl ProblemTackling<'_> {
+impl ProblemTackling {
     /// Sum of the score awards
     pub fn score(&self, context: &ApiContext) -> FieldResult<ScoreAwardValue> {
         Ok(ScoreAwardValue::total(
