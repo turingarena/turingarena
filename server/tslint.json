@@ -30,6 +30,9 @@
       }
     ],
     "no-submodule-imports": [true, "rxjs/operators"],
-    "strict-string-expressions": false
+    "strict-string-expressions": false,
+    "member-access": false,
+    "comment-format": false,
+    "await-promise": [true, "Bluebird"]
   }
 }
