@@ -1,4 +1,4 @@
-<button (click)="reevaluateSelected(grid)">Reevaluate selected</button>
+<button class="reevaluate-button" (click)="reevaluateSelected(grid)">Reevaluate selected</button>
 <ag-grid-angular #grid class="submissions-grid ag-theme-balham" [animateRows]="true" rowSelection="multiple"
   [rowData]="data.contest.submissions"
   [columnDefs]="data.contest.problems | jsonPure | fromJson | applyPure:getColumnDefs:{ createdAt: createdAt, grading: grading }"

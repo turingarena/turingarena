@@ -19,7 +19,7 @@ export class AdminProblemsComponent {
   data!: AdminQuery;
 
   gridOptions: GridOptions = {
-    getRowNodeId: (data) => data.id,
+    getRowNodeId: (data) => data.name,
     defaultColDef: {
       resizable: true,
       flex: 1,

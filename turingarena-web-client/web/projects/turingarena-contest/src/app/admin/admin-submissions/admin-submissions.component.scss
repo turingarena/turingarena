@@ -1,7 +1,6 @@
-:host,
-.submissions-grid {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 100%;
-  width: 100%;
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.reevaluate-button {
+  @extend .btn, .btn-warning;
+  margin: 16px;
 }
