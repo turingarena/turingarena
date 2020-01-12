@@ -1,22 +1,15 @@
 import * as express from 'express';
-import * as bodyParser from 'body-parser';
-import { ApolloServer, makeExecutableSchema, gql } from 'apollo-server-express';
+import { ApolloServer, makeExecutableSchema, gql, IResolvers } from 'apollo-server-express';
+import { typeDefs } from './graphql';
+import { resolvers } from './resolvers';
 
 const PORT = 3000;
 
 const app = express();
 
 const schema = makeExecutableSchema({
-  typeDefs: gql`
-    type Query {
-      a: String!
-    }
-  `,
-  resolvers: {
-    Query: {
-      a: () => `a string`,
-    },
-  },
+  typeDefs,
+  resolvers: resolvers as IResolvers,
 })
 
 const server = new ApolloServer({
