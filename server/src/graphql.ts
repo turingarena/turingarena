@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 
-import { mutationSchema } from './mutation';
-import { querySchema } from './query';
+import { mutationSchema } from './mutation/graphql';
+import { querySchema } from './query/graphql';
 
 export const typeDefs = gql`
   ${querySchema}
