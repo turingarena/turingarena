@@ -34,5 +34,8 @@
     "member-access": false,
     "comment-format": false,
     "await-promise": [true, "Bluebird"]
+  },
+  "linterOptions": {
+    "exclude": ["**/__generated__/**"]
   }
 }
