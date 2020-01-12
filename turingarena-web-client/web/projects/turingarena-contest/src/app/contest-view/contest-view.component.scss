@@ -130,7 +130,7 @@
   font-size: 2rem;
   margin-bottom: 16px;
 
-  & > .score-value {
+  & ::ng-deep .score-value {
     font-size: 4rem;
   }
 }
