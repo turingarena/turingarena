@@ -16,6 +16,9 @@
         <a class="admin-section-link" routerLink="/admin/contestants" routerLinkActive="active">
           Contestants
         </a>
+        <a class="admin-section-link" routerLink="/admin/messages" routerLinkActive="active">
+          Messages
+        </a>
         <a class="admin-section-link" routerLink="/admin/submissions" routerLinkActive="active">
           Submissions
         </a>
@@ -30,6 +33,10 @@
 
       <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
         <app-admin-contestants [data]="data"></app-admin-contestants>
+      </main>
+
+      <main class="admin-messages" [hidden]="(route.firstChild!.data | async).adminSection !== 'messages'">
+        <app-admin-messages [data]="data"></app-admin-messages>
       </main>
 
       <main class="admin-submissions" [hidden]="(route.firstChild!.data | async).adminSection !== 'submissions'">

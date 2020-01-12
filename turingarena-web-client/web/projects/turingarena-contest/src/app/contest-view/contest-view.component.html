@@ -11,7 +11,7 @@
       </ng-container>
       <button class="messages-button" (click)="modalService.open(messagesDialog, { size: 'xl' })">
         <fa-icon [icon]="faComments"></fa-icon>
-        Messages
+        Messages <span class="message-count-badge" [hidden]="data.contest.view.messages.length === 0">{{data.contest.view.messages.length}}</span>
         <ng-template #messagesDialog let-modal>
           <app-message-list-dialog [modal]="modal" [data]="data" [userId]="data.user?.id">
           </app-message-list-dialog>

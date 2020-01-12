@@ -56,6 +56,10 @@
   @extend .btn, .btn-sm, .btn-light;
 }
 
+.message-count-badge {
+  @extend .badge, .badge-primary;
+}
+
 .login-dialog-body {
   @extend .modal-body;
 }

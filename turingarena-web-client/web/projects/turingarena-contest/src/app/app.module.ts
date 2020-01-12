@@ -10,7 +10,11 @@ import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 
+import { AdminContestantsComponent } from './admin/admin-contestants/admin-contestants.component';
 import { AdminCreateDialogComponent } from './admin/admin-create-dialog/admin-create-dialog.component';
+import { AdminEvaluationsComponent } from './admin/admin-evaluations/admin-evaluations.component';
+import { AdminMessagesComponent } from './admin/admin-messages/admin-messages.component';
+import { AdminProblemsComponent } from './admin/admin-problems/admin-problems.component';
 import { AdminSubmissionsComponent } from './admin/admin-submissions/admin-submissions.component';
 import { AdminComponent } from './admin/admin.component';
 import { AppComponent } from './app.component';
@@ -34,9 +38,6 @@ import { SubmissionListDialogComponent } from './submission-list-dialog/submissi
 import { SubmitDialogComponent } from './submit-dialog/submit-dialog.component';
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 import { TextVariantPipe } from './text-variant.pipe';
-import { AdminContestantsComponent } from './admin/admin-contestants/admin-contestants.component';
-import { AdminProblemsComponent } from './admin/admin-problems/admin-problems.component';
-import { AdminEvaluationsComponent } from './admin/admin-evaluations/admin-evaluations.component';
 
 const routes: Routes = [
   {
@@ -65,6 +66,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'problems',
+        component: EmptyComponent,
+        data: {
+          adminSection: 'problems',
+        },
+      },
+      {
         path: 'contestants',
         component: EmptyComponent,
         data: {
@@ -72,10 +80,10 @@ const routes: Routes = [
         },
       },
       {
-        path: 'problems',
+        path: 'messages',
         component: EmptyComponent,
         data: {
-          adminSection: 'problems',
+          adminSection: 'messages',
         },
       },
       {
@@ -124,6 +132,7 @@ const routes: Routes = [
     AdminContestantsComponent,
     AdminProblemsComponent,
     AdminEvaluationsComponent,
+    AdminMessagesComponent,
   ],
   imports: [
     BrowserModule,

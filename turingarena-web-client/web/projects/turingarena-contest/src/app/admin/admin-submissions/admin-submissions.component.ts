@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';

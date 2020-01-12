@@ -78,6 +78,15 @@ export const adminQuery = gql`
       scoreRange {
         ...ScoreRangeFragment
       }
+      messages {
+        id
+        createdAt
+        kind
+        user {
+          ...AdminUserFragment
+        }
+        text
+      }
     }
   }
   ${contestMaterialFragment}
