@@ -28,7 +28,7 @@ export class AdminComponent {
   adminQuery = this.apollo.watchQuery<AdminQuery>({
     query: adminQuery,
     variables: {},
-    pollInterval: 3000,
+    pollInterval: 10000,
   });
 
 }

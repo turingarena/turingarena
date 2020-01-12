@@ -38,7 +38,7 @@ import { getScoreTier } from '../fragments/score';
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 
-const pollInterval = 5000;
+const pollInterval = 10000;
 
 @Component({
   selector: 'app-contest-view',
