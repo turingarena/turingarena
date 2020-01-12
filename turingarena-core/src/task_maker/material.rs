@@ -246,13 +246,6 @@ fn attachment_at_path(file_path: std::path::PathBuf) -> Attachment {
     }
 }
 
-/// Mapping (extension, MIME type)
-const STATEMENT_FORMATS: [(&str, &str); 3] = [
-    ("pdf", "application/pdf"),
-    ("html", "text/html"),
-    ("md", "application/markdown"),
-];
-
 /// Find the statements directory, as in the italy_yaml task format
 /// Searches the paths $task_dir/statement and $task_dir/testo
 fn statements_dir(task_dir: &Path) -> Option<PathBuf> {
@@ -265,43 +258,35 @@ fn statements_dir(task_dir: &Path) -> Option<PathBuf> {
     None
 }
 
-/// Tries to match the filename, returning the mimetype of the
-/// matched item, if any
-fn match_statement(path: &Path) -> Option<(String, FileName, MediaType)> {
-    let ext = path.extension().unwrap().to_str().unwrap();
-    let filename = path.file_name().unwrap().to_str().unwrap();
-    let language = path.file_stem().unwrap().to_str().unwrap();
-    for &(extension, mime_type) in &STATEMENT_FORMATS {
-        if ext == extension {
-            return Some((
-                language.to_owned(),
-                FileName(filename.to_owned()),
-                MediaType(mime_type.to_owned()),
-            ));
-        }
-    }
-    None
-}
-
 /// find all the statements in the directory
 fn statements_of(task_dir: &Path) -> Vec<FileVariant> {
     let mut result = Vec::new();
-    let dir = statements_dir(task_dir);
-    if let Some(dir) = dir {
-        for file in dir.read_dir().unwrap() {
-            let file = file.unwrap().path();
-            if let Some((language, filename, mime_type)) = match_statement(&file) {
-                result.push(FileVariant {
-                    attributes: vec![VariantAttribute {
-                        key: "language_name".to_owned(),
-                        value: language,
-                    }],
-                    name: Some(filename),
-                    r#type: Some(mime_type),
-                    content: FileContent(
-                        std::fs::read(file).expect("Unable to read statement file"),
-                    ),
-                });
+
+    if let Some(dir) = statements_dir(task_dir) {
+        for entry in dir.read_dir().unwrap() {
+            let path = entry.unwrap().path();
+            let ext = path.extension().unwrap().to_str().unwrap();
+            let name = path.file_name().unwrap().to_str().unwrap();
+            let stem = path.file_stem().unwrap().to_str().unwrap();
+
+            if let "statement" | "testo" = stem {
+                let mime_type = match ext {
+                    "pdf" => Some("application/pdf"),
+                    "html" => Some("text/html"),
+                    "md" => Some("application/markdown"),
+                    _ => None,
+                };
+
+                if let Some(mime_type) = mime_type {
+                    result.push(FileVariant {
+                        attributes: vec![],
+                        name: Some(FileName(name.to_owned())),
+                        r#type: Some(MediaType(mime_type.to_owned())),
+                        content: FileContent(
+                            std::fs::read(path).expect("Unable to read statement file"),
+                        ),
+                    });
+                }
             }
         }
     }
