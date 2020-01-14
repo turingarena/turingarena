@@ -1,19 +1,19 @@
 overwrite: true
-schema: "api/index.ts"
+schema: 'api/index.ts'
 documents: null
 generates:
-  generated/graphql-types.ts:
-    plugins:
-      - typescript
-      - typescript-resolvers
-      - add: /* tslint:disable */
-    config:
-      defaultMapper: Partial<{T}>
-  generated/graphql.schema.json:
-    plugins:
-      - introspection
-  generated/graphql.schema.graphql:
-    plugins:
-      - schema-ast
+    generated/graphql-types.ts:
+        plugins:
+            - typescript
+            - typescript-resolvers
+            - add: /* tslint:disable */
+        config:
+            defaultMapper: Partial<{T}>
+    generated/graphql.schema.json:
+        plugins:
+            - introspection
+    generated/graphql.schema.graphql:
+        plugins:
+            - schema-ast
 require:
-  - "ts-node/register/transpile-only"
+    - 'ts-node/register/transpile-only'

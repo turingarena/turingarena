@@ -5,14 +5,14 @@ import { queryResolvers, querySchema } from './query';
 import { userSchema } from './user';
 
 export const schema = gql`
-  ${querySchema}
-  ${mutationSchema}
-  ${userSchema}
+    ${querySchema}
+    ${mutationSchema}
+    ${userSchema}
 `;
 
 export const resolvers: Resolvers = {
-  ...queryResolvers,
-  ...mutationResolvers,
+    ...queryResolvers,
+    ...mutationResolvers,
 };
 
 // tslint:disable-next-line: no-default-export

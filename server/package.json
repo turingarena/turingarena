@@ -1,41 +1,47 @@
 {
-  "private": true,
-  "scripts": {
-    "prepare": "npm run graphql-codegen",
-    "start": "ts-node-dev --transpileOnly index.ts",
-    "debug:start": "ts-node-dev --inspect-brk --transpileOnly index.ts",
-    "graphql-codegen": "graphql-codegen --config codegen.yml",
-    "watch:prepare": "npm run watch:graphql-codegen",
-    "watch:graphql-codegen": "graphql-codegen --config codegen.yml --watch"
-  },
-  "dependencies": {
-    "apollo-server-core": "^2.9.16",
-    "apollo-server-express": "^2.9.16",
-    "express": "^4.17.1",
-    "graphql": "^14.5.8",
-    "graphql-tools": "^4.0.6",
-    "reflect-metadata": "^0.1.13",
-    "sequelize": "^5.21.3",
-    "sequelize-typescript": "^1.1.0",
-    "sqlite3": "^4.1.1",
-    "uuid": "^3.3.3",
-    "which": "^2.0.2"
-  },
-  "devDependencies": {
-    "@graphql-codegen/add": "^1.11.2",
-    "@graphql-codegen/cli": "^1.11.2",
-    "@graphql-codegen/introspection": "1.11.2",
-    "@graphql-codegen/schema-ast": "^1.11.2",
-    "@graphql-codegen/typescript": "1.11.2",
-    "@graphql-codegen/typescript-resolvers": "1.11.2",
-    "@types/bluebird": "^3.5.29",
-    "@types/node": "^13.1.6",
-    "@types/uuid": "^3.4.6",
-    "@types/validator": "^12.0.1",
-    "@types/which": "^1.3.2",
-    "ts-node": "^8.6.1",
-    "ts-node-dev": "^1.0.0-pre.44",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
-  }
+    "private": true,
+    "scripts": {
+        "prepare": "npm run graphql-codegen",
+        "start": "ts-node-dev --transpileOnly index.ts",
+        "debug:start": "ts-node-dev --inspect-brk --transpileOnly index.ts",
+        "graphql-codegen": "graphql-codegen --config codegen.yml",
+        "watch:prepare": "npm run watch:graphql-codegen",
+        "watch:graphql-codegen": "graphql-codegen --config codegen.yml --watch",
+        "lint": "tslint --project .",
+        "fix:lint": "tslint --fix --project .",
+        "format": "prettier --check **",
+        "fix:format": "prettier --write **"
+    },
+    "dependencies": {
+        "apollo-server-core": "^2.9.16",
+        "apollo-server-express": "^2.9.16",
+        "express": "^4.17.1",
+        "graphql": "^14.5.8",
+        "graphql-tools": "^4.0.6",
+        "luxon": "^1.21.3",
+        "reflect-metadata": "^0.1.13",
+        "sequelize": "^5.21.3",
+        "sequelize-typescript": "^1.1.0",
+        "sqlite3": "^4.1.1",
+        "uuid": "^3.3.3",
+        "which": "^2.0.2"
+    },
+    "devDependencies": {
+        "@graphql-codegen/add": "^1.11.2",
+        "@graphql-codegen/cli": "^1.11.2",
+        "@graphql-codegen/introspection": "1.11.2",
+        "@graphql-codegen/schema-ast": "^1.11.2",
+        "@graphql-codegen/typescript": "1.11.2",
+        "@graphql-codegen/typescript-resolvers": "1.11.2",
+        "@types/bluebird": "^3.5.29",
+        "@types/node": "^13.1.6",
+        "@types/uuid": "^3.4.6",
+        "@types/validator": "^12.0.1",
+        "@types/which": "^1.3.2",
+        "prettier": "^1.19.1",
+        "ts-node": "^8.6.1",
+        "ts-node-dev": "^1.0.0-pre.44",
+        "tslint": "^5.20.1",
+        "typescript": "^3.7.4"
+    }
 }
