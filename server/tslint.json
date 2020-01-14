@@ -33,7 +33,14 @@
     "strict-string-expressions": false,
     "member-access": false,
     "comment-format": false,
-    "await-promise": [true, "Bluebird"]
+    "await-promise": [true, "Bluebird"],
+    "ordered-imports": [
+      true,
+      {
+        "grouped-imports": true,
+        "groups": []
+      }
+    ]
   },
   "linterOptions": {
     "exclude": ["**/__generated__/**"]

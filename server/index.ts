@@ -1,20 +1,16 @@
 import { ApolloServer, IResolvers, makeExecutableSchema } from 'apollo-server-express';
 import * as express from 'express';
-
-import { typeDefs } from './graphql';
-import { resolvers } from './resolvers';
+import { resolvers, schema } from './api';
 
 const PORT = 3000;
 
 const app = express();
 
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers: resolvers as IResolvers,
-});
-
 const server = new ApolloServer({
-  schema,
+  schema: makeExecutableSchema({
+    typeDefs: schema,
+    resolvers: resolvers as IResolvers,
+  }),
   playground: true,
 });
 

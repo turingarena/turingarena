@@ -2,9 +2,11 @@
   "private": true,
   "scripts": {
     "prepare": "npm run graphql-codegen",
-    "start": "ts-node-dev --transpileOnly src/index.ts",
+    "start": "ts-node-dev --transpileOnly index.ts",
+    "debug:start": "ts-node-dev --inspect-brk --transpileOnly index.ts",
     "graphql-codegen": "graphql-codegen --config codegen.yml",
-    "print-graphql-schema": "ts-node scripts/print-graphql-schema.ts"
+    "watch:prepare": "npm run watch:graphql-codegen",
+    "watch:graphql-codegen": "graphql-codegen --config codegen.yml --watch"
   },
   "dependencies": {
     "apollo-server-core": "^2.9.16",
@@ -15,17 +17,19 @@
     "reflect-metadata": "^0.1.13",
     "sequelize": "^5.21.3",
     "sequelize-typescript": "^1.1.0",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^4.1.1",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^1.11.2",
     "@graphql-codegen/cli": "^1.11.2",
     "@graphql-codegen/introspection": "1.11.2",
+    "@graphql-codegen/schema-ast": "^1.11.2",
     "@graphql-codegen/typescript": "1.11.2",
-    "@graphql-codegen/typescript-document-nodes": "1.11.2",
     "@graphql-codegen/typescript-resolvers": "1.11.2",
     "@types/bluebird": "^3.5.29",
     "@types/node": "^13.1.6",
+    "@types/uuid": "^3.4.6",
     "@types/validator": "^12.0.1",
     "ts-node": "^8.6.1",
     "ts-node-dev": "^1.0.0-pre.44",
