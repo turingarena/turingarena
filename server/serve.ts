@@ -6,9 +6,11 @@ const PORT = 3000;
 
 const app = express();
 
+const context = new ApiContext();
+
 const server = new ApolloServer({
     typeDefs: schema,
-    executor: (req) => new ApiContext().execute(req),
+    executor: (req) => context.execute(req),
     playground: true,
 });
 
