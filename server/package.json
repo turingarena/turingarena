@@ -6,7 +6,7 @@
         "watch:serve": "ts-node-dev --transpileOnly index.ts",
         "debug:serve": "ts-node-dev --inspect-brk --transpileOnly index.ts",
         "graphql-codegen": "graphql-codegen --config codegen.yml",
-        "watch:graphql-codegen": "graphql-codegen --config codegen.yml --watch",
+        "watch:graphql-codegen": "npm-watch graphql-codegen",
         "check:lint": "tslint --project .",
         "fix:lint": "tslint --fix --project .",
         "check:format": "prettier --check **",
@@ -20,6 +20,12 @@
     },
     "watch": {
         "check": {
+            "patterns": [
+                "."
+            ],
+            "extensions": "ts,js,graphql"
+        },
+        "graphql-codegen": {
             "patterns": [
                 "."
             ],
@@ -49,6 +55,7 @@
         "@graphql-codegen/typescript-resolvers": "1.11.2",
         "@types/bluebird": "^3.5.29",
         "@types/jest": "^24.0.25",
+        "@types/luxon": "^1.21.0",
         "@types/node": "^13.1.6",
         "@types/uuid": "^3.4.6",
         "@types/validator": "^12.0.1",

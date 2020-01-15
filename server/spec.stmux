@@ -2,31 +2,32 @@
 
     [
         --focus
-        --title "Run Test Suite"
+        --title "Test Suite"
+        --error "\d failed"
         --restart
         --delay 3000
         "
-            timeout --foreground -k 10 300 npm run watch:test ;
+            timeout --foreground -k 5 60 npm run watch:test ;
             clear ; echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
 
         ..
 
-        --title "Check code style"
+        --title "Code Style"
         --restart
         --delay 3000
         "
-            timeout -k 10 300 npm run watch:check ;
+            timeout --foreground -k 5 60 npm run watch:check ;
             echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
 
         ..
 
-        --title "Generate GraphQL Types"
+        --title "GraphQL Types"
         --restart
         --delay 3000
         "
-            timeout -k 10 300 npm run watch:graphql-codegen ;
+            timeout -k 5 60 npm run watch:graphql-codegen ;
             echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
     ]
@@ -40,18 +41,18 @@
         --delay 3000
         "
             echo '$ npm run fix     # to fix style' ;
-            timeout --foreground -k 10 300 $SHELL ;
+            timeout --foreground -k 5 300 $SHELL ;
             clear ; echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
 
         ..
 
-        --size 2/3
-        --title "Run Server"
+        --size 1/3
+        --title "Server"
         --restart
         --delay 3000
         "
-            timeout -k 10 300 npm run watch:serve ;
+            timeout --foreground -k 5 300 npm run watch:serve ;
             echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
     ]
