@@ -2,9 +2,9 @@
     "private": true,
     "scripts": {
         "prepare": "npm run graphql-codegen",
-        "serve": "ts-node --transpileOnly index.ts",
-        "watch:serve": "ts-node-dev --clear --transpileOnly index.ts",
-        "debug:serve": "ts-node-dev --inspect-brk --transpileOnly index.ts",
+        "serve": "ts-node --transpileOnly serve.ts",
+        "watch:serve": "ts-node-dev --clear --transpileOnly serve.ts",
+        "debug:serve": "ts-node-dev --inspect-brk --transpileOnly serve.ts",
         "graphql-codegen": "graphql-codegen --config codegen.yml",
         "watch:graphql-codegen": "npm-watch graphql-codegen",
         "lint:ts": "tslint --project .",

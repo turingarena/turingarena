@@ -1,13 +1,14 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { executableSchema } from './api';
+import { ApiContext, schema } from './api';
 
 const PORT = 3000;
 
 const app = express();
 
 const server = new ApolloServer({
-    schema: executableSchema,
+    typeDefs: schema,
+    executor: (req) => new ApiContext().execute(req),
     playground: true,
 });
 

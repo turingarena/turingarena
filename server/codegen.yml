@@ -9,7 +9,8 @@ generates:
             - typescript-operations
             - add: /* tslint:disable */
         config:
-            defaultMapper: Partial<{T}>
+            defaultMapper: any
+            contextType: ../api/index#ApiContext
     generated/graphql.schema.json:
         plugins:
             - introspection

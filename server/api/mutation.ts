@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { sequelize } from '../db';
 import { Resolvers } from '../generated/graphql-types';
 
 export const mutationSchema = gql`
@@ -10,8 +9,8 @@ export const mutationSchema = gql`
 
 export const mutationResolvers: Resolvers = {
     Mutation: {
-        init: async () => {
-            await sequelize.sync();
+        init: async ({}, {}, ctx) => {
+            await ctx.sequelize.sync();
 
             return {};
         },
