@@ -1,20 +1,13 @@
-import {
-    ApolloServer,
-    IResolvers,
-    makeExecutableSchema,
-} from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { resolvers, schema } from './api';
+import { executableSchema } from './api';
 
 const PORT = 3000;
 
 const app = express();
 
 const server = new ApolloServer({
-    schema: makeExecutableSchema({
-        typeDefs: schema,
-        resolvers: resolvers as IResolvers,
-    }),
+    schema: executableSchema,
     playground: true,
 });
 
