@@ -41,7 +41,8 @@
                 "groups": []
             }
         ],
-        "member-ordering": false
+        "member-ordering": false,
+        "no-use-before-declare": false
     },
     "linterOptions": {
         "exclude": ["**/__generated__/**"]
