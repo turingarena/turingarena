@@ -1,11 +1,12 @@
 overwrite: true
 schema: 'api/index.ts'
-documents: null
+documents: '**/*.spec.ts'
 generates:
     generated/graphql-types.ts:
         plugins:
             - typescript
             - typescript-resolvers
+            - typescript-operations
             - add: /* tslint:disable */
         config:
             defaultMapper: Partial<{T}>
