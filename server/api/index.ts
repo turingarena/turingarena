@@ -27,8 +27,8 @@ export const resolvers: Resolvers = {
 // Definitions related to models, their classes, and their repositories.
 
 export const modelConstructors = {
-    users: User,
-    contests: Contest,
+    User,
+    Contest,
 } as const;
 
 export type ModelConstructorRecord = typeof modelConstructors;
