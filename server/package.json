@@ -3,7 +3,7 @@
     "scripts": {
         "prepare": "npm run graphql-codegen",
         "serve": "ts-node --transpileOnly index.ts",
-        "watch:serve": "ts-node-dev --transpileOnly index.ts",
+        "watch:serve": "ts-node-dev --clear --transpileOnly index.ts",
         "debug:serve": "ts-node-dev --inspect-brk --transpileOnly index.ts",
         "graphql-codegen": "graphql-codegen --config codegen.yml",
         "watch:graphql-codegen": "npm-watch graphql-codegen",
@@ -23,13 +23,18 @@
             "patterns": [
                 "."
             ],
-            "extensions": "ts,js,graphql"
+            "extensions": "ts,js,graphql",
+            "delay": 2000,
+            "runOnChangeOnly": true,
+            "clearBuffer": true
         },
         "graphql-codegen": {
             "patterns": [
                 "."
             ],
-            "extensions": "ts,js,graphql"
+            "extensions": "ts,js,graphql",
+            "delay": 2000,
+            "clearBuffer": true
         }
     },
     "dependencies": {

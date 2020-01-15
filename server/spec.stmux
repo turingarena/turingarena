@@ -14,6 +14,7 @@
         ..
 
         --title "Code Style"
+        --error "app crashed"
         --restart
         --delay 3000
         "
@@ -24,6 +25,7 @@
         ..
 
         --title "GraphQL Types"
+        --error "app crashed"
         --restart
         --delay 3000
         "
