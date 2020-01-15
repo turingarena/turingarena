@@ -18,7 +18,7 @@
         --restart
         --delay 3000
         "
-            timeout --foreground -k 5 60 npm run watch:check ;
+            timeout --foreground -k 5 60 npm run watch:lint ;
             echo TO EXIT PRESS -- Ctrl-A K -- ;
         "
 

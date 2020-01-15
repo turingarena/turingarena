@@ -7,19 +7,20 @@
         "debug:serve": "ts-node-dev --inspect-brk --transpileOnly index.ts",
         "graphql-codegen": "graphql-codegen --config codegen.yml",
         "watch:graphql-codegen": "npm-watch graphql-codegen",
-        "check:lint": "tslint --project .",
-        "fix:lint": "tslint --fix --project .",
-        "check:format": "prettier --check **",
+        "lint:ts": "tslint --project .",
+        "fix:ts": "tslint --fix --project .",
+        "lint:format": "prettier --check **",
         "fix:format": "prettier --write **",
-        "check": "npm-run-all --sequential check:lint check:format",
-        "watch:check": "npm-watch check",
-        "fix": "npm-run-all --sequential fix:lint fix:format",
+        "lint": "npm-run-all --sequential lint:ts lint:format",
+        "watch:lint": "npm-watch lint",
+        "fix": "npm-run-all --sequential fix:ts fix:format",
         "test": "jest",
         "watch:test": "jest --watch",
+        "check": "npm-run-all --sequential lint test",
         "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux"
     },
     "watch": {
-        "check": {
+        "lint": {
             "patterns": [
                 "."
             ],
