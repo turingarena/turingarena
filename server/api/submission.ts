@@ -1,3 +1,4 @@
+import { DataTypes } from 'sequelize';
 import {
     AutoIncrement,
     BelongsToMany,
@@ -27,9 +28,6 @@ export class SubmissionFile extends Model<SubmissionFile> {
     @PrimaryKey
     @Column
     fieldId!: string;
-
-    @Column
-    type!: string;
 }
 
 @Table
@@ -68,6 +66,9 @@ export class Evaluation extends Model<Evaluation> {
     @ForeignKey(() => Submission)
     @Column
     submissionId!: number;
+
+    @HasMany(() => EvaluationEvent)
+    events!: EvaluationEvent[];
 }
 
 @Table
@@ -81,6 +82,6 @@ export class EvaluationEvent extends Model<EvaluationEvent> {
     @Column
     createdAt!: Date;
 
-    @Column
-    data!: string;
+    @Column(DataTypes.JSON)
+    data!: object;
 }

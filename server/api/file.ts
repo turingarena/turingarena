@@ -4,11 +4,15 @@ import { AutoIncrement, Column, Index, Model, NotNull, PrimaryKey, Table, Unique
 export const fileSchema = gql`
     type File {
         hash: ID!
+        fileName: String!
+        type: String!
         contentBase64: String!
     }
 
     input FileInput {
         hash: ID!
+        fileName: String!
+        type: String!
         contentBase64: String!
     }
 `;
@@ -24,6 +28,9 @@ export class File extends Model<File> {
     @Index
     @Column
     hash!: string;
+
+    @Column
+    type!: string;
 
     @Column
     fileName!: string;
