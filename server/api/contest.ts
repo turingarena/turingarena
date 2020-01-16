@@ -38,7 +38,7 @@ export const contestSchema = gql`
     }
 `;
 
-@Table
+@Table({timestamps: false})
 export class Participation extends Model<Participation> {
     @ForeignKey(() => User)
     @PrimaryKey
@@ -51,7 +51,7 @@ export class Participation extends Model<Participation> {
     contestId!: number;
 }
 
-@Table
+@Table({timestamps: false})
 export class ContestProblem extends Model<ContestProblem> {
     @ForeignKey(() => Problem)
     @PrimaryKey
@@ -96,7 +96,17 @@ export const contestResolvers: Resolvers = {
         // TODO: resolver for start and end to return in correct ISO format
     },
     ContestMutations: {
-        addProblem: async ({name: contestName}, {name}, ctx) => {
+        addProblem: async ({contest}, {name}, ctx) => {
+            const problem = await ctx.db.Problem.findOne({ where: { name } });
+            await contest.addProblem(problem);
+
+            return true;
+        },
+        addUser: async ({contest}, {username}, ctx) => {
+            const user = await ctx.db.User.findOne({ where: { username }});
+            await contest.addUser(user);
+
+            return true;
         },
     },
 };

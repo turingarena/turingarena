@@ -74,7 +74,9 @@ export const mutationResolvers: Resolvers = {
                                              }})
         },
         contest: async ({}, {name}, ctx) => {
-            return {name};
+            const contest = await ctx.db.Contest.findOne({where:{name}});
+
+            return {contest};
         },
     },
 };
