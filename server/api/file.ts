@@ -10,7 +10,6 @@ export const fileSchema = gql`
     }
 
     input FileInput {
-        hash: ID!
         fileName: String!
         type: String!
         contentBase64: String!
@@ -33,3 +32,5 @@ export class File extends Model<File> {
     @Column
     content!: Buffer;
 }
+
+// TODO: resolvers to add and retrieve files

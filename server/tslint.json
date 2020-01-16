@@ -32,6 +32,7 @@
                 "allow-destructuring": true
             }
         ],
+        "no-magic-numbers": false,
         "no-submodule-imports": [true, "rxjs/operators"],
         "strict-string-expressions": false,
         "member-access": false,

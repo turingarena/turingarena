@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import {
-    AutoIncrement,
     BelongsToMany,
     Column,
     ForeignKey,
