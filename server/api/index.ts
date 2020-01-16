@@ -8,7 +8,7 @@ import { File, fileSchema } from './file';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Problem, ProblemFile, problemSchema } from './problem';
 import { queryResolvers, querySchema } from './query';
-import { Evaluation, EvaluationEvent, Submission, SubmissionFile } from './submission';
+import { Evaluation, EvaluationEvent, Submission, SubmissionFile, submissionSchema } from './submission';
 import { User, userResolvers, userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
@@ -19,6 +19,7 @@ export const schema = gql`
     ${contestSchema}
     ${problemSchema}
     ${fileSchema}
+    ${submissionSchema}
 `;
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */

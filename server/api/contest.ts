@@ -1,11 +1,10 @@
 import { gql } from 'apollo-server-core';
 import {
-    AutoIncrement,
+    AllowNull,
     BelongsToMany,
     Column,
     ForeignKey,
-    HasMany, Index,
-    IsUUID,
+    Index,
     Model,
     PrimaryKey,
     Table,
@@ -29,6 +28,7 @@ export const contestSchema = gql`
         removeProblem(name: ID!): Boolean
         addUser(username: ID!): Boolean
         removeUser(username: ID!): Boolean
+        submit(username: ID!, problemName: ID!, submission: SubmissionInput!): Boolean
     }
 
     input ContestInput {
@@ -39,7 +39,7 @@ export const contestSchema = gql`
     }
 `;
 
-@Table({timestamps: false})
+@Table({ timestamps: false })
 export class Participation extends Model<Participation> {
     @ForeignKey(() => User)
     @PrimaryKey
@@ -50,9 +50,13 @@ export class Participation extends Model<Participation> {
     @PrimaryKey
     @Column
     contestId!: number;
+
+    @AllowNull
+    @Column
+    extraTime: Date;
 }
 
-@Table({timestamps: false})
+@Table({ timestamps: false })
 export class ContestProblem extends Model<ContestProblem> {
     @ForeignKey(() => Problem)
     @PrimaryKey
@@ -80,11 +84,6 @@ export class ContestFile extends Model<ContestFile> {
 
 @Table
 export class Contest extends Model<Contest> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
     @Unique
     @Index
     @Column

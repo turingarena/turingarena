@@ -1,18 +1,88 @@
+import { gql } from 'apollo-server-core';
 import { DataTypes } from 'sequelize';
 import {
-    AutoIncrement,
-    BelongsToMany,
+    BelongsTo,
     Column,
     ForeignKey,
     HasMany,
     Model,
     PrimaryKey,
-    Table
+    Table,
 } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { File } from './file';
 import { Problem } from './problem';
 import { User } from './user';
+
+export const submissionSchema = gql`
+    type Submission {
+        id: ID!
+        problem: Problem!
+        user: User!
+        contest: Contest!
+        files: [SubmissionFile!]!
+        createdAt: String!
+        officialEvaluation: Evaluation!
+        evaluations: [Evaluation!]!
+    }
+
+    type SubmissionFile {
+        fieldId: ID!
+        file: File!
+    }
+
+    input SubmissionInput {
+        problemName: ID!
+        contestName: ID!
+        username: ID!
+        files: [SubmissionFileInput!]!
+    }
+
+    input SubmissionFileInput {
+        fieldId: ID!
+        file: FileInput!
+    }
+
+    type Evaluation {
+        submission: Submission!
+        events: [EvaluationEvent!]!
+    }
+
+    type EvaluationEvent {
+        evaluation: Evaluation!
+        data: String!
+    }
+`;
+
+@Table({ updatedAt: false })
+export class Submission extends Model<Submission> {
+    @ForeignKey(() => Problem)
+    @Column
+    problemId!: number;
+
+    @ForeignKey(() => Contest)
+    @Column
+    contestId!: number;
+
+    @ForeignKey(() => User)
+    @Column
+    userId!: number;
+
+    @HasMany(() => SubmissionFile)
+    files: SubmissionFile[];
+
+    @HasMany(() => Evaluation)
+    evaluations: Evaluation[];
+
+    @BelongsTo(() => Contest, 'contestId')
+    contest: Contest;
+
+    @BelongsTo(() => Problem, 'problemId')
+    problem: Problem;
+
+    @BelongsTo(() => User, 'userId')
+    user: User;
+}
 
 @Table({ timestamps: false })
 export class SubmissionFile extends Model<SubmissionFile> {
@@ -28,59 +98,44 @@ export class SubmissionFile extends Model<SubmissionFile> {
     @PrimaryKey
     @Column
     fieldId!: string;
-}
 
-@Table
-export class Submission extends Model<Submission> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
-    @ForeignKey(() => Problem)
-    @Column
-    problemId!: number;
-
-    @ForeignKey(() => Contest)
-    @Column
-    contestId!: number;
-
-    @ForeignKey(() => User)
-    @Column
-    userId!: number;
-
-    @BelongsToMany(() => File, () => SubmissionFile)
-    files: File[];
-
-    @HasMany(() => Evaluation)
-    evaluations: Evaluation[];
+    @BelongsTo(() => Submission, 'submissionId')
+    submission: Submission;
 }
 
 @Table
 export class Evaluation extends Model<Evaluation> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
     @ForeignKey(() => Submission)
     @Column
     submissionId!: number;
+
+    @Column
+    status!: EvaluationStatus;
+
+    @Column
+    isOfficial!: boolean;
+
+    @BelongsTo(() => Submission, 'submissionId')
+    submission!: Submission;
 
     @HasMany(() => EvaluationEvent)
     events!: EvaluationEvent[];
 }
 
-@Table
+export enum EvaluationStatus {
+    PENDING,
+    SUCCESS,
+    ERROR,
+}
+
+@Table({ updatedAt: false })
 export class EvaluationEvent extends Model<EvaluationEvent> {
     @ForeignKey(() => Evaluation)
-    @PrimaryKey
     @Column
     evaluationId!: number;
 
-    @PrimaryKey
-    @Column
-    createdAt!: Date;
+    @BelongsTo(() => Evaluation, 'evaluationId')
+    evaluation: Evaluation;
 
     @Column(DataTypes.JSON)
     data!: object;

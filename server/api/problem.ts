@@ -42,19 +42,12 @@ export class ProblemFile extends Model<ProblemFile> {
 }
 
 @Table
+@BelongsToMany(() => Contest, () => ContestProblem)
 export class Problem extends Model<Problem> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
     @Unique
     @Column
     @Index
     name!: string;
-
-    @BelongsToMany(() => Contest, () => ContestProblem)
-    problems: Contest[];
 
     @BelongsToMany(() => File, () => ProblemFile)
     files: ProblemFile;

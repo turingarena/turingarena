@@ -17,13 +17,8 @@ export const fileSchema = gql`
     }
 `;
 
-@Table
+@Table({ updatedAt: false })
 export class File extends Model<File> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    fileId!: number;
-
     @Unique
     @Index
     @Column
