@@ -7,7 +7,7 @@ import {
     Model,
     PrimaryKey,
     Table,
-    Unique
+    Unique,
 } from 'sequelize-typescript';
 import { Contest, ContestProblem } from './contest';
 import { File } from './file';

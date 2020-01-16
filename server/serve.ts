@@ -1,18 +1,20 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { ApiContext, schema } from './api';
-
-const PORT = 3000;
+import { loadConfig } from './config';
 
 const app = express();
+const config = loadConfig();
 
-const context = new ApiContext();
+console.log(config);
+
+const context = new ApiContext(config);
 
 context.sequelize.sync().then(() => {
     context.db.File.create({
         content: 'ciao',
         fileName: 'ciao.txt',
-        type: 'text/plain'
+        type: 'text/plain',
     }).then(console.log);
 });
 
@@ -21,7 +23,6 @@ const server = new ApolloServer({
     executor: (req) => context.execute(req),
     playground: true,
 });
-
 server.applyMiddleware({ app });
 
 /**
@@ -44,8 +45,8 @@ app.post('/files/:name', async (req, res) => {
     // TODO
 });
 
-app.listen(PORT, () => {
+app.listen(config.port, () => {
     console.log(
-        `Server ready at: http://localhost:${PORT}${server.graphqlPath}`,
+        `Server ready at: http://localhost:${config.port}${server.graphqlPath}`,
     );
 });

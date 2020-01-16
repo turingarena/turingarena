@@ -1,0 +1,6 @@
+{
+    "dbPath": "db.sqlite3",
+    "dbDialect": "sqlite",
+    "host": "localhost",
+    "port": 3000
+}

@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
+import { Config } from '../config';
 import { Resolvers } from '../generated/graphql-types';
 import { Contest, ContestFile, ContestProblem, contestResolvers, contestSchema, Participation } from './contest';
 import { File, fileSchema } from './file';
@@ -67,28 +68,34 @@ export interface OperationRequest<V> {
  * Allows for accessing configuration and database, check authentication, and more.
  */
 export class ApiContext {
+    /** Instance of Sequelize to use in this API operation. */
+    readonly sequelize: Sequelize;
+
+    /** Contains an entry for each available repository of models. */
+    readonly db: ModelRepositoryRecord;
+
+    constructor(config?: Config) {
+        this.sequelize = new Sequelize({
+            dialect: config?.dbDialect || 'sqlite',
+            storage: config?.dbPath || ':memory:',
+            models: Object.values(modelConstructors),
+            benchmark: true,
+            logQueryParameters: true,
+            repositoryMode: true,
+        });
+
+        this.db = Object.fromEntries(
+            Object.entries(modelConstructors).map(([key, modelConstructor]) =>
+                [key, this.sequelize.getRepository<Model>(modelConstructor)],
+            ),
+        ) as ModelRepositoryRecord;
+    }
+
     /** Executable schema, obtained combining full GraphQL schema and resolvers. */
     readonly executableSchema = makeExecutableSchema({
         typeDefs: schema,
         resolvers: resolvers as IResolvers,
     });
-
-    /** Instance of Sequelize to use in this API operation. */
-    readonly sequelize = new Sequelize({
-        dialect: 'sqlite',
-        storage: ':memory:',
-        models: Object.values(modelConstructors),
-        benchmark: true,
-        logQueryParameters: true,
-        repositoryMode: true,
-    });
-
-    /** Contains an entry for each available repository of models. */
-    readonly db = Object.fromEntries(
-        Object.entries(modelConstructors).map(([key, modelConstructor]) =>
-            [key, this.sequelize.getRepository<Model>(modelConstructor)],
-        ),
-    ) as ModelRepositoryRecord;
 
     /** Run a GraphQL operation in this context. */
     async execute<T = unknown, V = {}>({ document, operationName, variableValues }: OperationRequest<V>) {

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { createHash } from 'crypto';
-import { AutoIncrement, Column, Index, Model, NotNull, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { Column, Index, Model, Table, Unique } from 'sequelize-typescript';
 
 export const fileSchema = gql`
     type File {
@@ -33,13 +33,13 @@ export class File extends Model<File> {
     @Column
     content!: Buffer;
 
-    static create(file): Promise<File> {
+    static create(file) {
         const hash = createHash('sha1').update(file.content).digest('hex');
 
         // https://github.com/RobinBuschmann/sequelize-typescript/issues/291
-        return super.create.call(this, {
+        return super.create.call(File, {
             content: file.content,
-            filename: file.fileName,
+            fileName: file.fileName,
             type: file.type,
             hash,
         });
