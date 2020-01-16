@@ -1,27 +1,102 @@
 import { gql } from 'apollo-server-core';
-import { Column, IsUUID, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import {
+    AutoIncrement,
+    BelongsToMany,
+    Column,
+    ForeignKey,
+    HasMany,
+    IsUUID,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique
+} from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
+import { Problem } from './problem';
+import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
-        id: ID!
-        name: String!
+        name: ID!
+        title: String!
+        start: String!
+        end: String!
+    }
+
+    type ContestMutations {
+        addProblem(name: ID!): Boolean
+        removeProblem(name: ID!): Boolean
+        addUser(username: ID!): Boolean
+        removeUser(username: ID!): Boolean
+    }
+
+    input ContestInput {
+        name: ID!
+        title: String!
+        start: String!
+        end: String!
     }
 `;
 
 @Table
-export class Contest extends Model<Contest> {
-    @IsUUID('4')
+export class Participation extends Model<Participation> {
+    @ForeignKey(() => User)
     @PrimaryKey
     @Column
-    id!: string;
+    userId!: number;
+
+    @ForeignKey(() => Contest)
+    @PrimaryKey
+    @Column
+    contestId!: number;
+}
+
+@Table
+export class ContestProblem extends Model<ContestProblem> {
+    @ForeignKey(() => Problem)
+    @PrimaryKey
+    @Column
+    problemId!: number;
+
+    @ForeignKey(() => Contest)
+    @PrimaryKey
+    @Column
+    contestId!: number;
+}
+
+@Table
+export class Contest extends Model<Contest> {
+    @PrimaryKey
+    @AutoIncrement
+    @Column
+    id!: number;
+
+    @Unique
+    @Column
+    name!: string;
 
     @Column
     title!: string;
+
+    @Column
+    start!: Date;
+
+    @Column
+    end!: Date;
+
+    @BelongsToMany(() => Problem, () => ContestProblem)
+    problems!: Problem[];
+
+    @BelongsToMany(() => User, () => Participation)
+    users!: User[];
 }
 
 export const contestResolvers: Resolvers = {
     Contest: {
-        id: (contest) => contest.id,
+        // TODO: resolver for start and end to return in correct ISO format
+    },
+    ContestMutations: {
+        addProblem: async ({name: contestName}, {name}, ctx) => {
+        },
     },
 };

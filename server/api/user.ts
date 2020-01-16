@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { Column, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { BelongsToMany, Column, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
+import { Contest, Participation } from './contest';
 
 export const userSchema = gql`
     type User {
@@ -32,6 +33,9 @@ export class User extends Model<User> {
 
     @Column
     isAdmin!: boolean;
+
+    @BelongsToMany(() => Contest, () => Participation)
+    contests!: Contest[];
 }
 
 export const userResolvers: Resolvers = {

@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "strict": true,
+        "strict": false,
         "allowUnusedLabels": false,
         "allowUnreachableCode": false,
         "noFallthroughCasesInSwitch": true,

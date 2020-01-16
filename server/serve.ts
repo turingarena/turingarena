@@ -6,7 +6,9 @@ const PORT = 3000;
 
 const app = express();
 
-export const context = new ApiContext();
+const context = new ApiContext();
+
+context.sequelize.sync();
 
 const server = new ApolloServer({
     typeDefs: schema,

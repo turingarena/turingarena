@@ -20,6 +20,7 @@
         "file-name-casing": [false, "kebab-case"],
         "unnecessary-else": false,
         "prefer-function-over-method": false,
+        "no-trailing-whitespace": false,
         "no-unsafe-any": false,
         "no-parameter-properties": false,
         "newline-per-chained-call": false,

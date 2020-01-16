@@ -3,8 +3,9 @@ import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
-import { Contest, contestResolvers, contestSchema } from './contest';
+import { Contest, ContestProblem, contestResolvers, contestSchema, Participation } from './contest';
 import { mutationResolvers, mutationSchema } from './mutation';
+import { Problem, problemSchema } from './problem';
 import { queryResolvers, querySchema } from './query';
 import { User, userResolvers, userSchema } from './user';
 
@@ -14,6 +15,7 @@ export const schema = gql`
     ${mutationSchema}
     ${userSchema}
     ${contestSchema}
+    ${problemSchema}
 `;
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
@@ -29,6 +31,9 @@ export const resolvers: Resolvers = {
 export const modelConstructors = {
     User,
     Contest,
+    Problem,
+    ContestProblem,
+    Participation,
 } as const;
 
 export type ModelConstructorRecord = typeof modelConstructors;
