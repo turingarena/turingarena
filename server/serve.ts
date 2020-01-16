@@ -8,7 +8,9 @@ const app = express();
 
 const context = new ApiContext();
 
-context.sequelize.sync();
+context.sequelize.sync().then(() => {
+    context.db.File.create('ciao', 'ciao.txt', 'text/plain').then(console.log);
+});
 
 const server = new ApolloServer({
     typeDefs: schema,
@@ -29,6 +31,13 @@ app.get('/files/:hash/*', async (req, res, next) => {
    }
    res.contentType(file.type);
    res.send(file.content);
+});
+
+/**
+ * Add a file to the server
+ */
+app.post('/files/:name', async (req, res) => {
+    // TODO
 });
 
 app.listen(PORT, () => {

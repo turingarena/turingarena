@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { createHash } from 'crypto';
 import { AutoIncrement, Column, Index, Model, NotNull, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 
 export const fileSchema = gql`
@@ -31,6 +32,19 @@ export class File extends Model<File> {
 
     @Column
     content!: Buffer;
+
+    static async create(content: Buffer, fileName: string, type: string): Promise<string> {
+        const hash = createHash('sha1').update(content).digest('hex');
+
+        await super.create({
+            content,
+            fileName,
+            type,
+            hash,
+        });
+
+        return hash;
+    }
 }
 
 // TODO: resolvers to add and retrieve files
