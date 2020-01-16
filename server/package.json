@@ -5,7 +5,7 @@
         "serve": "ts-node --transpileOnly serve.ts",
         "watch:serve": "ts-node-dev --clear --transpileOnly serve.ts",
         "debug:serve": "ts-node-dev --inspect-brk --transpileOnly serve.ts",
-        "graphql-codegen": "ts-node graphql-codegen.ts",
+        "graphql-codegen": "ts-node-dev --transpileOnly graphql-codegen.ts",
         "watch:graphql-codegen": "npm-watch graphql-codegen",
         "lint:ts": "tslint --project .",
         "fix:ts": "tslint --fix --project .",

@@ -6,7 +6,7 @@ const PORT = 3000;
 
 const app = express();
 
-const context = new ApiContext();
+export const context = new ApiContext();
 
 const server = new ApolloServer({
     typeDefs: schema,

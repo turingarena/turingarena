@@ -6,9 +6,7 @@ it('should init', async () => {
     const response = await new ApiContext().execute<InitMutation, InitMutationVariables>({
         document: gql`
             mutation Init {
-                init {
-                    __typename
-                }
+                init
             }
         `,
     });
