@@ -1,5 +1,15 @@
 import { gql } from 'apollo-server-core';
-import { BelongsToMany, Column, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import {
+    AutoIncrement,
+    BelongsToMany,
+    Column,
+    HasMany,
+    Index,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique
+} from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
 import { Contest, Participation } from './contest';
 
@@ -19,15 +29,21 @@ export const userSchema = gql`
 
 @Table
 export class User extends Model<User> {
-    @Column({ primaryKey: true, autoIncrement: true })
+    @PrimaryKey
+    @AutoIncrement
+    @Column
     id!: number;
 
-    @Column({ unique: true })
+    @Unique
+    @Index
+    @Column
     username!: string;
 
     @Column
     name!: string;
 
+    @Unique
+    @Index
     @Column
     token!: string;
 

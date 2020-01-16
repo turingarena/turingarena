@@ -19,6 +19,8 @@
         "typedef": false,
         "file-name-casing": [false, "kebab-case"],
         "unnecessary-else": false,
+        "max-line-length": false,
+        "arrow-return-shorthand": false,
         "prefer-function-over-method": false,
         "no-trailing-whitespace": false,
         "no-unsafe-any": false,
@@ -46,6 +48,6 @@
         "no-use-before-declare": false
     },
     "linterOptions": {
-        "exclude": ["**/__generated__/**"]
+        "exclude": ["**/generated/**"]
     }
 }

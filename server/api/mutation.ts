@@ -14,6 +14,8 @@ export const mutationSchema = gql`
         createContest(contest: ContestInput!): Boolean!
         updateContest(contest: ContestInput!): Boolean!
         deleteContest(contest: ID!): Boolean!
+        createFile(file: FileInput!): Boolean!
+        deleteFile(hash: ID!): Boolean!
     }
 `;
 
@@ -71,10 +73,10 @@ export const mutationResolvers: Resolvers = {
             await ctx.db.Contest.destroy({
                                              where: {
                                                  name,
-                                             }})
+                                             }});
         },
         contest: async ({}, {name}, ctx) => {
-            const contest = await ctx.db.Contest.findOne({where:{name}});
+            const contest = await ctx.db.Contest.findOne({where: {name}});
 
             return {contest};
         },

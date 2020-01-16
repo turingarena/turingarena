@@ -1,25 +1,61 @@
 import { gql } from 'apollo-server-core';
-import { BelongsToMany, Column, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+    AutoIncrement,
+    BelongsToMany,
+    Column,
+    ForeignKey,
+    Index,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique
+} from 'sequelize-typescript';
 import { Contest, ContestProblem } from './contest';
+import { File } from './file';
 
 export const problemSchema = gql`
     type Problem {
         name: ID!
+        files: [File!]!
     }
 
     input ProblemInput {
         name: ID!
+        files: [ID!]!
     }
 `;
 
+@Table({ timestamps: false })
+export class ProblemFile extends Model<ProblemFile> {
+    @PrimaryKey
+    @ForeignKey(() => Problem)
+    @Column
+    problemId!: number;
+
+    @PrimaryKey
+    @ForeignKey(() => File)
+    @Column
+    fileId!: number;
+
+    @Column
+    path!: string;
+}
+
 @Table
 export class Problem extends Model<Problem> {
-    @Column({ primaryKey: true, autoIncrement: true })
+    @PrimaryKey
+    @AutoIncrement
+    @Column
     id!: number;
 
-    @Column({unique: true})
+    @Unique
+    @Column
+    @Index
     name!: string;
 
     @BelongsToMany(() => Contest, () => ContestProblem)
     problems: Contest[];
+
+    @BelongsToMany(() => File, () => ProblemFile)
+    files: ProblemFile;
 }

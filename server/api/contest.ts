@@ -4,14 +4,15 @@ import {
     BelongsToMany,
     Column,
     ForeignKey,
-    HasMany,
+    HasMany, Index,
     IsUUID,
     Model,
     PrimaryKey,
     Table,
-    Unique
+    Unique,
 } from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
+import { File } from './file';
 import { Problem } from './problem';
 import { User } from './user';
 
@@ -64,6 +65,19 @@ export class ContestProblem extends Model<ContestProblem> {
     contestId!: number;
 }
 
+@Table({ timestamps: false })
+export class ContestFile extends Model<ContestFile> {
+    @ForeignKey(() => Contest)
+    @PrimaryKey
+    @Column
+    contestId!: number;
+
+    @ForeignKey(() => File)
+    @PrimaryKey
+    @Column
+    fileId!: number;
+}
+
 @Table
 export class Contest extends Model<Contest> {
     @PrimaryKey
@@ -72,6 +86,7 @@ export class Contest extends Model<Contest> {
     id!: number;
 
     @Unique
+    @Index
     @Column
     name!: string;
 
@@ -89,6 +104,9 @@ export class Contest extends Model<Contest> {
 
     @BelongsToMany(() => User, () => Participation)
     users!: User[];
+
+    @BelongsToMany(() => File, () => ContestFile)
+    files!: File[];
 }
 
 export const contestResolvers: Resolvers = {
