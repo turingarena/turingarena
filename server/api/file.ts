@@ -33,17 +33,16 @@ export class File extends Model<File> {
     @Column
     content!: Buffer;
 
-    static async create(content: Buffer, fileName: string, type: string): Promise<string> {
-        const hash = createHash('sha1').update(content).digest('hex');
+    static create(file): Promise<File> {
+        const hash = createHash('sha1').update(file.content).digest('hex');
 
-        await super.create({
-            content,
-            fileName,
-            type,
+        // https://github.com/RobinBuschmann/sequelize-typescript/issues/291
+        return super.create.call(this, {
+            content: file.content,
+            filename: file.fileName,
+            type: file.type,
             hash,
         });
-
-        return hash;
     }
 }
 

@@ -9,7 +9,11 @@ const app = express();
 const context = new ApiContext();
 
 context.sequelize.sync().then(() => {
-    context.db.File.create('ciao', 'ciao.txt', 'text/plain').then(console.log);
+    context.db.File.create({
+        content: 'ciao',
+        fileName: 'ciao.txt',
+        type: 'text/plain'
+    }).then(console.log);
 });
 
 const server = new ApolloServer({
