@@ -1,5 +1,5 @@
 {
-    "dbPath": "db.sqlite3",
+    "dbPath": ":memory:",
     "dbDialect": "sqlite",
     "host": "localhost",
     "port": 3000

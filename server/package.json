@@ -17,7 +17,8 @@
         "test": "jest",
         "watch:test": "jest --watch",
         "check": "npm-run-all --sequential lint test",
-        "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux"
+        "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux",
+        "cli": "ts-node -T cli/index.ts"
     },
     "watch": {
         "lint": {
@@ -38,8 +39,10 @@
         }
     },
     "dependencies": {
+        "@types/commander": "^2.12.2",
         "apollo-server-core": "^2.9.16",
         "apollo-server-express": "^2.9.16",
+        "commander": "^4.1.0",
         "express": "^4.17.1",
         "graphql": "^14.5.8",
         "graphql-tools": "^4.0.6",
@@ -49,7 +52,8 @@
         "sequelize-typescript": "^1.1.0",
         "sqlite3": "^4.1.1",
         "uuid": "^3.3.3",
-        "which": "^2.0.2"
+        "which": "^2.0.2",
+        "yaml": "^1.7.2"
     },
     "devDependencies": {
         "@graphql-codegen/add": "^1.11.2",

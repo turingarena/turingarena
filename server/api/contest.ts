@@ -1,19 +1,5 @@
 import { gql } from 'apollo-server-core';
-import {
-    AllowNull,
-    BelongsToMany,
-    Column,
-    ForeignKey,
-    Index,
-    Model,
-    PrimaryKey,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
 import { Resolvers } from '../generated/graphql-types';
-import { File } from './file';
-import { Problem } from './problem';
-import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
@@ -38,75 +24,6 @@ export const contestSchema = gql`
         end: String!
     }
 `;
-
-@Table({ timestamps: false })
-export class Participation extends Model<Participation> {
-    @ForeignKey(() => User)
-    @PrimaryKey
-    @Column
-    userId!: number;
-
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-
-    @AllowNull
-    @Column
-    extraTime: Date;
-}
-
-@Table({ timestamps: false })
-export class ContestProblem extends Model<ContestProblem> {
-    @ForeignKey(() => Problem)
-    @PrimaryKey
-    @Column
-    problemId!: number;
-
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-}
-
-@Table({ timestamps: false })
-export class ContestFile extends Model<ContestFile> {
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-
-    @ForeignKey(() => File)
-    @PrimaryKey
-    @Column
-    fileId!: number;
-}
-
-@Table
-export class Contest extends Model<Contest> {
-    @Unique
-    @Index
-    @Column
-    name!: string;
-
-    @Column
-    title!: string;
-
-    @Column
-    start!: Date;
-
-    @Column
-    end!: Date;
-
-    @BelongsToMany(() => Problem, () => ContestProblem)
-    problems!: Problem[];
-
-    @BelongsToMany(() => User, () => Participation)
-    users!: User[];
-
-    @BelongsToMany(() => File, () => ContestFile)
-    files!: File[];
-}
 
 export const contestResolvers: Resolvers = {
     Contest: {

@@ -4,6 +4,7 @@ import { ApiContext, schema } from './api';
 import { loadConfig } from './config';
 
 const app = express();
+
 const config = loadConfig();
 
 console.log(config);
@@ -29,13 +30,13 @@ server.applyMiddleware({ app });
  * Serve static files directly from the database.
  */
 app.get('/files/:hash/*', async (req, res, next) => {
-   const hash = req.params.hash;
-   const file = await context.db.File.findOne({ where: { hash }});
-   if (file === null) {
-       return next();
-   }
-   res.contentType(file.type);
-   res.send(file.content);
+    const hash = req.params.hash;
+    const file = await context.db.File.findOne({ where: { hash } });
+    if (file === null) {
+        return next();
+    }
+    res.contentType(file.type);
+    res.send(file.content);
 });
 
 /**

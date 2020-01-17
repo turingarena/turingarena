@@ -4,13 +4,19 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
 import { Config } from '../config';
 import { Resolvers } from '../generated/graphql-types';
-import { Contest, ContestFile, ContestProblem, contestResolvers, contestSchema, Participation } from './contest';
-import { File, fileSchema } from './file';
+import { Contest, ContestFile, ContestProblem, Participation } from '../model/contest';
+import { Evaluation, EvaluationEvent } from '../model/evaluation';
+import { File } from '../model/file';
+import { Problem, ProblemFile } from '../model/problem';
+import { Submission, SubmissionFile } from '../model/submission';
+import { User } from '../model/user';
+import { contestResolvers, contestSchema } from './contest';
+import { fileSchema } from './file';
 import { mutationResolvers, mutationSchema } from './mutation';
-import { Problem, ProblemFile, problemSchema } from './problem';
+import { problemSchema } from './problem';
 import { queryResolvers, querySchema } from './query';
-import { Evaluation, EvaluationEvent, Submission, SubmissionFile, submissionSchema } from './submission';
-import { User, userResolvers, userSchema } from './user';
+import { submissionSchema } from './submission';
+import { userResolvers, userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
