@@ -2,10 +2,10 @@
     "private": true,
     "scripts": {
         "prepare": "npm run graphql-codegen",
-        "serve": "ts-node --transpileOnly serve.ts",
-        "watch:serve": "ts-node-dev --clear --transpileOnly serve.ts",
-        "debug:serve": "ts-node-dev --inspect-brk --transpileOnly serve.ts",
-        "graphql-codegen": "ts-node-dev --transpileOnly graphql-codegen.ts",
+        "serve": "ts-node --transpile-only src/serve.ts",
+        "watch:serve": "ts-node-dev --clear --transpileOnly src/serve.ts",
+        "debug:serve": "ts-node-dev --inspect-brk --transpileOnly src/serve.ts",
+        "graphql-codegen": "ts-node-dev --transpileOnly src/graphql-codegen.ts",
         "watch:graphql-codegen": "npm-watch graphql-codegen",
         "lint:ts": "tslint --project .",
         "fix:ts": "tslint --fix --project .",
@@ -18,7 +18,7 @@
         "watch:test": "jest --watch",
         "check": "npm-run-all --sequential lint test",
         "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux",
-        "cli": "ts-node -T cli/index.ts"
+        "cli": "ts-node -T src/cli/index.ts"
     },
     "watch": {
         "lint": {

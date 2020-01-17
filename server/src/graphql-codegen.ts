@@ -9,11 +9,11 @@ const mappers = Object.fromEntries(
 );
 
 const config: CodegenConfig = {
-    schema: `api/index.ts`,
-    documents: `api/*.ts`,
+    schema: `src/api/index.ts`,
+    documents: `src/api/*.ts`,
     overwrite: true,
     generates: {
-        'generated/graphql-types.ts': {
+        'src/generated/graphql-types.ts': {
             plugins: [
                 'typescript',
                 'typescript-resolvers',
@@ -31,10 +31,10 @@ const config: CodegenConfig = {
                 contextType: '../api/index#ApiContext',
             },
         },
-        'generated/graphql.schema.json': {
+        'src/generated/graphql.schema.json': {
             plugins: ['introspection'],
         },
-        'generated/graphql.schema.graphql': {
+        'src/generated/graphql.schema.graphql': {
             plugins: ['schema-ast'],
         },
     },
