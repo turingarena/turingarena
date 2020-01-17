@@ -12,20 +12,22 @@ import { UserPrivilege } from '../model/user';
  * @param base directory to walk
  * @param ctx API context
  */
-async function addFiles(fileList: object[], base: string, dir: string = '') {
+async function addFiles(ctx, fileList, base: string, dir: string = '') {
     const files = fs.readdirSync(path.join(base, dir));
     for (const file of files) {
         const relPath = path.join(dir, file);
         if (fs.statSync(path.join(base, relPath)).isDirectory()) {
-            await addFiles(fileList, base, relPath);
+            await addFiles(ctx, fileList, base, relPath);
         } else {
             const content = fs.readFileSync(path.join(base, relPath));
             const type = mime.lookup(file);
-            fileList.push({
+            await fileList.addProblemFile(await ctx.db.ProblemFile.create({
                 path: relPath,
-                type: type !== false ? type : 'unknown',
-                content,
-            });
+                file: {
+                    type: type !== false ? type : 'unknown',
+                    content,
+                },
+            }, { include: [ctx.db.File] }));
         }
     }
 }
@@ -43,32 +45,27 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
         throw Error('Invalid contest directory');
 
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
-    const contest = yaml.parse(turingarenaYAML);
+    const metadata = yaml.parse(turingarenaYAML);
 
-    contest.files = [];
-    await addFiles(contest.files, path.join(dir, 'files'));
+    const contest = await ctx.db.Contest.create(metadata);
 
-    // tslint:disable-next-line: no-any
-    const contestTable: any = await ctx.db.Contest.create(contest, { include: [ctx.db.File] });
+    //await addFiles(ctx, contest, path.join(dir, 'files'));
 
-    for (const user of contest.users) {
-        const userTable = await ctx.db.User.create({
+    for (const user of metadata.users) {
+        await contest.createUser({
             ...user,
             privilege: user.role === 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
         });
-        await contestTable.addUser(userTable);
     }
 
-    for (const problem of contest.problems) {
-        const toInsert = {
-            name: problem,
-            files: [],
-        };
+    for (const name of metadata.problems) {
+        const problem = await ctx.db.Problem.create({
+            name,
+        });
 
-        await addFiles(toInsert.files, path.join(dir, problem));
-        const problemTable = await ctx.db.Problem.create(toInsert, { include: [ctx.db.File] });
-        await contestTable.addProblem(problemTable);
+        await addFiles(ctx, problem, path.join(dir, name));
+        await contest.addProblem(problem);
 
-        await problemTable.extract('/tmp/prob1');
+        await problem.extract(ctx, '/tmp/prob1');
     }
 }

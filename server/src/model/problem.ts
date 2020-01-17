@@ -1,22 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique, HasOne, BelongsTo, HasMany } from 'sequelize-typescript';
 import { Contest, ContestProblem } from './contest';
 import { File } from './file';
+import { ApiContext } from '../api';
 
-/** Problem to File N-N relation. */
-@Table({ timestamps: false })
-export class ProblemFile extends Model<ProblemFile> {
-    @PrimaryKey
-    @ForeignKey(() => Problem)
-    @Column
-    problemId!: number;
-
-    @PrimaryKey
-    @ForeignKey(() => File)
-    @Column
-    fileId!: number;
-}
 
 /** A problem in TuringArena. */
 @Table
@@ -32,8 +20,8 @@ export class Problem extends Model<Problem> {
     contests: Contest[];
 
     /** Files that belongs to this problem. */
-    @BelongsToMany(() => File, () => ProblemFile)
-    files: File[];
+    @HasMany(() => ProblemFile)
+    files: ProblemFile[];
 
     /**
      * Extract the files of this problem in the specified base dir.
@@ -43,23 +31,48 @@ export class Problem extends Model<Problem> {
      *
      * @param base base directory
      */
-    async extract(base: string) {
+    async extract(ctx: ApiContext, base: string) {
         const problemDir = path.join(base, this.updatedAt.getTime().toString());
 
         try {
             if ((await fs.promises.stat(problemDir)).isDirectory())
-                return;
+                return problemDir;
         } catch {
             // Directory doesn't exist and thus stat fails
         }
 
-        await fs.promises.mkdir(problemDir, { recursive: true });
-
         // @ts-ignore
-        const files = await this.getFiles();
+        const files = await this.getFiles({ include: [ctx.db.ProblemFile] });
 
         for (const file of files) {
-            await file.extract(problemDir);
+            const filePath = path.join(base, file.SubmissionFile.path);
+            console.debug('x', filePath);
+            await file.extract(filePath);
         }
+
+        return problemDir;
     }
+}
+
+/** Problem to File N-N relation. */
+@Table({ timestamps: false })
+export class ProblemFile extends Model<ProblemFile> {
+    @PrimaryKey
+    @ForeignKey(() => Problem)
+    @Column({ unique: 'problem_path_unique' })
+    problemId!: number;
+
+    @PrimaryKey
+    @ForeignKey(() => File)
+    @Column
+    fileId!: number;
+
+    @Column({ unique: 'problem_path_unique' })
+    path!: string;
+
+    @BelongsTo(() => ProblemFile, 'problemId')
+    problem: Problem;
+
+    @HasOne(() => File, 'fileId')
+    file: File;
 }

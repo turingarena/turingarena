@@ -4,6 +4,7 @@
         "deprecation": {
             "severity": "warning"
         },
+        "align": false,
         "ban-ts-ignore": false,
         "curly": false,
         "arrow-parens": false,

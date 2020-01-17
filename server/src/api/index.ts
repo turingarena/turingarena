@@ -61,13 +61,17 @@ export class ApiContext {
     readonly db: ModelRepositoryRecord;
 
     constructor(config?: Config) {
+        const models = Object.values(modelConstructors);
+
         this.sequelize = new Sequelize({
             dialect: config?.dbDialect ?? 'sqlite',
             storage: config?.dbPath ?? ':memory:',
-            models: Object.values(modelConstructors),
+            models,
             benchmark: true,
             repositoryMode: true,
         });
+
+        console.log(this.sequelize.models.ProblemFile.associations.file);
 
         this.db = Object.fromEntries(
             Object.entries(modelConstructors).map(([key, modelConstructor]) =>

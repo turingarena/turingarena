@@ -36,13 +36,17 @@ export class ContestProblem extends Model<ContestProblem> {
 export class ContestFile extends Model<ContestFile> {
     @ForeignKey(() => Contest)
     @PrimaryKey
-    @Column
+    @Column({ unique: 'contest_path_unique' })
     contestId!: number;
 
     @ForeignKey(() => File)
     @PrimaryKey
     @Column
     fileId!: number;
+
+    /** Path of this file in the contest, e.g. home.md */
+    @Column({ unique: 'contest_path_unique' })
+    path!: string;
 }
 
 /** A contest in TuringArena */

@@ -1,4 +1,6 @@
-import { BelongsTo, Column, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import * as fs from 'fs';
+import * as path from 'path';
+import { BelongsTo, Column, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table, BelongsToMany } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
 import { File } from './file';
@@ -20,9 +22,8 @@ export class Submission extends Model<Submission> {
     @Column
     userId!: number;
 
-    /** Files that belongs to this submission */
-    @HasMany(() => SubmissionFile)
-    files: SubmissionFile[];
+    @BelongsToMany(() => File, () => SubmissionFile)
+    files: File[];
 
     /** Evaluations of this submission */
     @HasMany(() => Evaluation)
@@ -39,6 +40,21 @@ export class Submission extends Model<Submission> {
     /** User that made this submission */
     @BelongsTo(() => User, 'userId')
     user: User;
+
+    /**
+     * Extract the files of this submission in the specified base dir.
+     * It extract files as: `${base}/${file.fieldId}/${file.path}.
+     *
+     * @param base base directory
+     */
+    async extract(base: string) {
+        // @ts-ignore
+        const files = await this.getFiles();
+
+        for (const file of files) {
+            await file.extract(base);
+        }
+    }
 }
 
 /** File in a submission */
@@ -50,19 +66,7 @@ export class SubmissionFile extends Model<SubmissionFile> {
     submissionId!: number;
 
     @ForeignKey(() => File)
-    @Column
-    fileId!: number;
-
-    /** Identifier of the field, e.g. solution */
     @PrimaryKey
     @Column
-    fieldId!: string;
-
-    /** Submission to which this file belongs to */
-    @BelongsTo(() => Submission, 'submissionId')
-    submission: Submission;
-
-    /** File of this SubmissionFile */
-    @HasOne(() => File, 'fileId')
-    file: File;
+    fileId!: number;
 }
