@@ -12,4 +12,5 @@ turing/
 *.egg-info/
 /.turingarena_venv/
 __pycache__
-.vscode/
+node_modules/
+generated/
