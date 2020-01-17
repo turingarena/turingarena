@@ -18,4 +18,4 @@ export const modelConstructors = {
     SubmissionFile,
     Evaluation,
     EvaluationEvent,
-} as const;
+};

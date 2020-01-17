@@ -1,6 +1,4 @@
-import { gql } from 'apollo-server-core';
-import { AllowNull, BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
-import { Resolvers } from '../generated/graphql-types';
+import { BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { File } from './file';
 import { Problem } from './problem';
 import { User } from './user';
@@ -17,10 +15,6 @@ export class Participation extends Model<Participation> {
     @PrimaryKey
     @Column
     contestId!: number;
-
-    @AllowNull
-    @Column
-    extraTime: Date;
 }
 
 /** Contest to Problem N-N relation */

@@ -47,13 +47,16 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
 
     contest.files = [];
     await addFiles(contest.files, path.join(dir, 'files'));
-    await ctx.db.Contest.create(contest, { include: [ctx.db.File] });
+
+    // tslint:disable-next-line: no-any
+    const contestTable: any = await ctx.db.Contest.create(contest, { include: [ctx.db.File] });
 
     for (const user of contest.users) {
-        await ctx.db.User.create({
+        const userTable = await ctx.db.User.create({
             ...user,
             privilege: user.role === 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
         });
+        await contestTable.addUser(userTable);
     }
 
     for (const problem of contest.problems) {
@@ -63,6 +66,9 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
         };
 
         await addFiles(toInsert.files, path.join(dir, problem));
-        await ctx.db.Problem.create(toInsert, { include: [ctx.db.File] });
+        const problemTable = await ctx.db.Problem.create(toInsert, { include: [ctx.db.File] });
+        await contestTable.addProblem(problemTable);
+
+        await problemTable.extract('/tmp/prob1');
     }
 }

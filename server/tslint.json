@@ -4,7 +4,9 @@
         "deprecation": {
             "severity": "warning"
         },
+        "ban-ts-ignore": false,
         "curly": false,
+        "arrow-parens": false,
         "only-arrow-functions": false,
         "import-blacklist": [true, "rxjs/Rx", "graphql-tag"],
         "interface-name": false,

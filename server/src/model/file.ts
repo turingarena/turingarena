@@ -1,4 +1,6 @@
 import { createHash } from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Column, Index, Model, Table, Unique } from 'sequelize-typescript';
 
 /** A generic file in TuringArena. */
@@ -38,5 +40,19 @@ export class File extends Model<File> {
     // tslint:disable-next-line: no-any
     static update(file): any {
         throw new Error('Modifying files is forbiddend!');
+    }
+
+    /**
+     * Extract the path ${base}/${file.path}
+     *
+     * @param base base path
+     */
+    async extract(base: string) {
+        const filePath = path.join(base, this.path);
+        const dir = path.dirname(filePath);
+
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        return fs.promises.writeFile(filePath, this.content);
     }
 }
