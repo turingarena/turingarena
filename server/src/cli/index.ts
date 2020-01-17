@@ -1,5 +1,7 @@
 import * as commander from 'commander';
-import { _import } from './import';
+import { ApiContext } from '../api';
+import { loadConfig } from '../config';
+import { importContest } from './import';
 
 const program = new commander.Command();
 
@@ -14,9 +16,16 @@ function show() {
 
 }
 
+async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
+    const config = loadConfig(configFile);
+    const context = new ApiContext(config);
+    await context.sequelize.sync();
+
+    return context;
+}
+
 program
     .name('turingarena')
-    .option('-c, --config', 'configuration file')
     .version('1.0');
 
 program
@@ -27,7 +36,8 @@ program
 program
     .command('import [dir]')
     .description('import a contest')
-    .action(_import);
+    .option('-c, --config <path>', 'configuration file')
+    .action(async (dir, opts) => importContest((await ctxFromConfig(opts.config)), dir));
 
 program
     .command('export')

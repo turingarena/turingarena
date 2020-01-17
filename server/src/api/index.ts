@@ -66,7 +66,6 @@ export class ApiContext {
             storage: config?.dbPath ?? ':memory:',
             models: Object.values(modelConstructors),
             benchmark: true,
-            logQueryParameters: false,
             repositoryMode: true,
         });
 

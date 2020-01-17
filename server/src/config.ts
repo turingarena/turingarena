@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { Dialect } from 'sequelize/types';
+import { Dialect } from 'sequelize';
 
 export interface Config {
     dbPath: string;
@@ -17,10 +17,15 @@ const defaultConfig: Config = {
     host: 'localhost',
 };
 
-export function loadConfig(): Config {
+export function loadConfig(path?: string): Config {
+    if (path === undefined) {
+        return defaultConfig;
+    }
     try {
-        return JSON.parse(readFileSync(configFilePath).toString());
+        return JSON.parse(readFileSync(path ?? configFilePath).toString());
     } catch {
+        console.warn('Cannot read config file: using defualt config');
+
         return defaultConfig;
     }
 }

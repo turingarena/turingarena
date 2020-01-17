@@ -1,0 +1,13 @@
+nome_breve: "easy2"
+nome: "Trova la somma pari massima"
+timeout: 1
+memlimit: 256
+diff: 1
+correttore: ""
+risultati: ""
+auxiliary: {}
+token_initial: null
+max_submission_number: 64
+min_submission_interval: 60
+everything_public: true
+

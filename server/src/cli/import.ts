@@ -33,13 +33,10 @@ async function addFiles(fileList: object[], base: string, dir: string = '') {
 /**
  * Import a contest in the database
  *
+ * @param ctx the API context
  * @param dir base directoyr of the contest
  */
-export async function _import(dir = process.cwd()) {
-    const ctx = new ApiContext();
-
-    await ctx.sequelize.sync();
-
+export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     const turingarenaYAMLPath = path.join(dir, 'turingarena.yaml');
 
     if (!fs.existsSync(turingarenaYAMLPath))
@@ -54,9 +51,7 @@ export async function _import(dir = process.cwd()) {
 
     for (const user of contest.users) {
         await ctx.db.User.create({
-            username: user.username,
-            name: user.name,
-            token: user.token,
+            ...user,
             privilege: user.role === 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
         });
     }
