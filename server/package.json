@@ -44,7 +44,6 @@
         "apollo-server-express": "^2.9.16",
         "commander": "^4.1.0",
         "express": "^4.17.1",
-        "file-type": "^13.1.0",
         "graphql": "^14.5.8",
         "graphql-tools": "^4.0.6",
         "luxon": "^1.21.3",

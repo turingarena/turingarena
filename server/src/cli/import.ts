@@ -1,7 +1,7 @@
 import * as fs from 'fs';
+import * as mime from 'mime-types';
 import * as path from 'path';
 import * as yaml from 'yaml';
-import * as mime from 'mime-types';
 import { ApiContext } from '../api/index';
 import { UserPrivilege } from '../model/user';
 
@@ -50,9 +50,6 @@ export async function _import(dir = process.cwd()) {
 
     contest.files = [];
     await addFiles(contest.files, path.join(dir, 'files'));
-
-    console.info('Importing contest', contest);
-
     await ctx.db.Contest.create(contest, { include: [ctx.db.File] });
 
     for (const user of contest.users) {
@@ -68,10 +65,9 @@ export async function _import(dir = process.cwd()) {
         const toInsert = {
             name: problem,
             files: [],
-        }
+        };
 
         await addFiles(toInsert.files, path.join(dir, problem));
-
         await ctx.db.Problem.create(toInsert, { include: [ctx.db.File] });
     }
 }
