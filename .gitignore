@@ -1,7 +1,4 @@
-/target
 __generated__
-**/*.rs.bk
-Cargo.lock
 *.sqlite3
 .task-maker-files/
 *.aux
