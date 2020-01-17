@@ -27,17 +27,16 @@ program
 program
     .command('import [dir]')
     .description('import a contest')
-    .action(_import)
+    .action(_import);
 
 program
     .command('export')
     .description('export a contest')
-    .action(_export)
+    .action(_export);
 
 program
     .command('show')
     .description('show information about a contest')
-    .action(show)
+    .action(show);
 
 program.parse(process.argv);
-
