@@ -4,6 +4,7 @@
         "deprecation": {
             "severity": "warning"
         },
+        "only-arrow-functions": false,
         "import-blacklist": [true, "rxjs/Rx", "graphql-tag"],
         "interface-name": false,
         "max-classes-per-file": false,

@@ -66,4 +66,3 @@ export class SubmissionFile extends Model<SubmissionFile> {
     @HasOne(() => File, 'fileId')
     file: File;
 }
-

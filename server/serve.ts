@@ -16,7 +16,7 @@ context.sequelize.sync().then(() => {
         content: 'ciao',
         fileName: 'ciao.txt',
         type: 'text/plain',
-    }).then(console.log);
+    });
 });
 
 const server = new ApolloServer({
@@ -33,16 +33,17 @@ app.get('/files/:hash/*', async (req, res, next) => {
     const hash = req.params.hash;
     const file = await context.db.File.findOne({ where: { hash } });
     if (file === null) {
-        return next();
+        next();
+    } else {
+        res.contentType(file.type);
+        res.send(file.content);
     }
-    res.contentType(file.type);
-    res.send(file.content);
 });
 
 /**
  * Add a file to the server
  */
-app.post('/files/:name', async (req, res) => {
+app.post('/files/:name', (req, res) => {
     // TODO
 });
 

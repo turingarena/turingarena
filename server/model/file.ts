@@ -26,6 +26,7 @@ export class File extends Model<File> {
         const hash = createHash('sha1').update(file.content).digest('hex');
 
         // https://github.com/RobinBuschmann/sequelize-typescript/issues/291
+        // tslint:disable-next-line: static-this
         return super.create.call(this, {
             content: file.content,
             fileName: file.fileName,
@@ -34,8 +35,8 @@ export class File extends Model<File> {
         });
     }
 
+    // tslint:disable-next-line: no-any
     static update(file): any {
         throw new Error('Modifying files is forbiddend!');
     }
 }
-

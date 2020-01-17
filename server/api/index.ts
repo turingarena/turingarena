@@ -4,12 +4,7 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
 import { Config } from '../config';
 import { Resolvers } from '../generated/graphql-types';
-import { Contest, ContestFile, ContestProblem, Participation } from '../model/contest';
-import { Evaluation, EvaluationEvent } from '../model/evaluation';
-import { File } from '../model/file';
-import { Problem, ProblemFile } from '../model/problem';
-import { Submission, SubmissionFile } from '../model/submission';
-import { User } from '../model/user';
+import { modelConstructors } from '../model';
 import { contestResolvers, contestSchema } from './contest';
 import { fileSchema } from './file';
 import { mutationResolvers, mutationSchema } from './mutation';
@@ -39,21 +34,6 @@ export const resolvers: Resolvers = {
 
 // Definitions related to models, their classes, and their repositories.
 
-export const modelConstructors = {
-    User,
-    Contest,
-    Problem,
-    ContestProblem,
-    Participation,
-    File,
-    ProblemFile,
-    ContestFile,
-    Submission,
-    SubmissionFile,
-    Evaluation,
-    EvaluationEvent,
-} as const;
-
 export type ModelConstructorRecord = typeof modelConstructors;
 export type ModelName = keyof ModelConstructorRecord;
 export type ModelRecord = {
@@ -82,8 +62,8 @@ export class ApiContext {
 
     constructor(config?: Config) {
         this.sequelize = new Sequelize({
-            dialect: config?.dbDialect || 'sqlite',
-            storage: config?.dbPath || ':memory:',
+            dialect: config?.dbDialect ?? 'sqlite',
+            storage: config?.dbPath ?? ':memory:',
             models: Object.values(modelConstructors),
             benchmark: true,
             logQueryParameters: true,

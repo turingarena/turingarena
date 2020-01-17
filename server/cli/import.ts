@@ -4,7 +4,6 @@ import * as yaml from 'yaml';
 import { ApiContext } from '../api/index';
 import { UserPrivilege } from '../model/user';
 
-
 export async function _import(dir = process.cwd()) {
     const ctx = new ApiContext();
 
@@ -26,7 +25,7 @@ export async function _import(dir = process.cwd()) {
             username: user.username,
             name: user.name,
             token: user.token,
-            privilege: user.role == 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
+            privilege: user.role === 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
         });
     }
 
