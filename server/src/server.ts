@@ -22,6 +22,11 @@ export function serve(config: Config) {
         typeDefs: schema,
         executor: req => context.execute(req),
         playground: true,
+        formatError: err => {
+            console.warn(err);
+
+            return err;
+        },
     });
     server.applyMiddleware({ app });
 

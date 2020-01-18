@@ -11,7 +11,7 @@ it('test user add and delete', async () => {
                         name: "Alessandro Righi"
                         username: "alerighi"
                         token: "alerighi"
-                        isAdmin: true
+                        role: ADMIN
                     }
                 )
                 updateUser(
@@ -19,7 +19,7 @@ it('test user add and delete', async () => {
                         name: "Alessandro Righi"
                         username: "alerighi"
                         token: "alerighi2"
-                        isAdmin: false
+                        role: USER
                     }
                 )
                 deleteUser(user: "alerighi")
@@ -27,11 +27,5 @@ it('test user add and delete', async () => {
         `,
     });
 
-    console.log(response);
-    expect(response.data).toEqual({
-        init: true,
-        createUser: true,
-        updateUser: true,
-        deleteUser: true,
-    });
+    expect(response.errors).toBeUndefined();
 });

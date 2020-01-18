@@ -26,6 +26,10 @@ export async function createSubmission(
         where: { name: contestName },
     });
 
+    if (contest === null) throw new Error(`contest does not exist`);
+    if (user === null) throw new Error(`user does not exist`);
+    if (problem === null) throw new Error(`problem does not exist`);
+
     const file = await File.createFromPath(ctx, solutionPath);
     const submission = await ctx.db.Submission.create({
         userId: user.id,

@@ -1,12 +1,23 @@
 {
     "compilerOptions": {
-        "strict": false,
-        "allowUnusedLabels": false,
-        "allowUnreachableCode": false,
-        "noFallthroughCasesInSwitch": true,
+        "noEmit": true,
+        "target": "ES6",
+        "moduleResolution": "node",
+
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "target": "ES6",
-        "moduleResolution": "node"
+        "allowSyntheticDefaultImports": true,
+
+        "strict": false,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false,
+
+        "allowJs": true,
+        "checkJs": true
     }
 }

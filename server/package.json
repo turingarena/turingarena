@@ -2,42 +2,24 @@
     "name": "turingarena-server",
     "private": true,
     "scripts": {
-        "prepare": "npm run graphql-codegen",
+        "prepare": "npm-run-all --sequential prepare:*",
+        "check": "npm-run-all --sequential check:*",
+        "fix": "npm-run-all --sequential fix:*",
         "serve": "ts-node --transpile-only scripts/serve.ts",
         "watch:serve": "ts-node-dev --clear --transpileOnly scripts/serve.ts",
         "debug:serve": "ts-node-dev --inspect-brk --transpileOnly scripts/serve.ts",
-        "graphql-codegen": "ts-node-dev --transpileOnly scripts/graphql-codegen.ts",
-        "watch:graphql-codegen": "npm-watch graphql-codegen",
-        "lint:ts": "tslint --project .",
-        "fix:ts": "tslint --fix --project .",
-        "lint:format": "prettier --check '**'",
-        "fix:format": "prettier --write '**'",
-        "lint": "npm-run-all --sequential lint:ts lint:format",
-        "watch:lint": "npm-watch lint",
-        "fix": "npm-run-all --sequential fix:ts fix:format",
-        "test": "jest",
-        "watch:test": "jest --watch",
-        "check": "npm-run-all --sequential lint test",
+        "prepare:graphql-codegen": "ts-node --transpile-only scripts/graphql-codegen.ts",
+        "watch:prepare:graphql-codegen": "ts-node --transpile-only scripts/graphql-codegen.ts --watch",
+        "check:prepare": "npm-run-all --sequential prepare",
+        "check:tsc": "tsc",
+        "watch:check:tsc": "tsc --watch",
+        "check:tslint": "tslint --project .",
+        "watch:check:tslint": "onchange '**/*.ts' -- tslint --project . {{changed}}",
+        "fix:tslint": "tslint --fix --project .",
+        "check:test": "jest",
+        "watch:check:test": "jest --watch",
         "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux",
         "cli": "ts-node -T src/cli/index.ts"
-    },
-    "watch": {
-        "lint": {
-            "patterns": [
-                "."
-            ],
-            "extensions": "ts,js,graphql",
-            "delay": 2000,
-            "clearBuffer": true
-        },
-        "graphql-codegen": {
-            "patterns": [
-                "."
-            ],
-            "extensions": "ts,js,graphql",
-            "delay": 2000,
-            "clearBuffer": true
-        }
     },
     "dependencies": {
         "@types/commander": "^2.12.2",
@@ -77,11 +59,14 @@
         "jest": "^24.9.0",
         "npm-run-all": "^4.1.5",
         "npm-watch": "^0.6.0",
+        "onchange": "^6.1.0",
         "prettier": "^1.19.1",
         "ts-jest": "^24.3.0",
         "ts-node": "^8.6.2",
         "ts-node-dev": "^1.0.0-pre.44",
         "tslint": "^5.20.1",
+        "tslint-config-prettier": "^1.18.0",
+        "tslint-plugin-prettier": "^2.1.0",
         "typescript": "^3.7.5"
     }
 }

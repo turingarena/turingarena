@@ -41,18 +41,14 @@ export class File extends Model<File> {
             .update(fileContent)
             .digest('hex');
 
-        try {
-            return await ctx.db.File.create({
+        return (
+            (await ctx.db.File.findOne({ where: { hash } })) ??
+            (await ctx.db.File.create({
                 content: fileContent,
                 type: contentType,
                 hash,
-            });
-        } catch {
-            // Probably already exists. Try to query it.
-            return ctx.db.File.findOne({
-                where: { hash },
-            });
-        }
+            }))
+        );
     }
 
     static async createFromPath(ctx: ApiContext, filePath: string) {

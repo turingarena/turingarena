@@ -12,6 +12,7 @@ const config: CodegenConfig = {
     schema: `src/api/index.ts`,
     documents: `src/api/*.ts`,
     overwrite: true,
+    watch: process.argv[2] === '--watch',
     generates: {
         'src/generated/graphql-types.ts': {
             plugins: [

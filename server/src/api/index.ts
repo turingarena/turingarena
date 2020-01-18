@@ -99,6 +99,11 @@ export class ApiContext {
             rootValue: {},
         });
     }
+
+    /** Convenience method to fail a request. */
+    fail(message?: string): never {
+        throw new Error(message);
+    }
 }
 
 // tslint:disable-next-line: no-default-export

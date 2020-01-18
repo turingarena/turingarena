@@ -11,7 +11,12 @@ export const userSchema = gql`
         username: ID!
         name: String!
         token: String!
-        isAdmin: Boolean!
+        role: UserRole!
+    }
+
+    enum UserRole {
+        USER
+        ADMIN
     }
 `;
 

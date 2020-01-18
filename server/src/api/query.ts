@@ -18,23 +18,23 @@ export const queryResolvers: Resolvers = {
         users: async ({}, {}, ctx) =>
             ctx.db.User.findAll({ include: [ctx.db.Contest] }),
         user: async ({}, { username }, ctx) =>
-            ctx.db.User.findOne({
+            (await ctx.db.User.findOne({
                 where: { username },
                 include: [ctx.db.Contest],
-            }),
+            })) ?? ctx.fail(`no such user: ${username}`),
         contests: async ({}, {}, ctx) =>
             ctx.db.Contest.findAll({ include: [ctx.db.User, ctx.db.Problem] }),
         contest: async ({}, { name }, ctx) =>
-            ctx.db.Contest.findOne({
+            (await ctx.db.Contest.findOne({
                 where: { name },
                 include: [ctx.db.User, ctx.db.Problem],
-            }),
+            })) ?? ctx.fail(`no such contest: ${name}`),
         problems: async ({}, {}, ctx) =>
             ctx.db.Problem.findAll({ include: [ctx.db.Contest] }),
         problem: async ({}, { name }, ctx) =>
-            ctx.db.Problem.findOne({
+            (await ctx.db.Problem.findOne({
                 where: { name },
                 include: [ctx.db.Contest],
-            }),
+            })) ?? ctx.fail(`no such problem: ${name}`),
     },
 };

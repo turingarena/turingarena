@@ -105,12 +105,16 @@ export class Problem extends Model<Problem> {
     }
 
     async metadata(ctx: ApiContext): Promise<ProblemMetadata> {
+        const metadataPath = '.task-info.json';
         const metadataProblemFile = await ctx.db.ProblemFile.findOne({
             where: {
                 problemId: this.id,
-                path: '.task-info.json',
+                path: metadataPath,
             },
         });
+
+        if (metadataProblemFile === null)
+            throw new Error(`Problem is missing metadata file ${metadataPath}`);
 
         const metadataFile = await metadataProblemFile.getFile();
 
