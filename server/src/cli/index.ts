@@ -1,11 +1,10 @@
 import * as commander from 'commander';
 import { ApiContext } from '../api';
 import { loadConfig } from '../config';
+import { serve } from '../server';
 import { importContest } from './import';
 
 const program = new commander.Command();
-
-function serve() { }
 
 function _export() { }
 
@@ -24,7 +23,9 @@ program.name('turingarena').version('1.0');
 program
     .command('serve')
     .description('start TuringArena server')
-    .action(serve);
+    .action(opts => {
+        serve(loadConfig(opts.config));
+    });
 
 program
     .command('import [dir]')
