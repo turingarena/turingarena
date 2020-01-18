@@ -64,8 +64,7 @@ export class ApiContext {
         const models = Object.values(modelConstructors);
 
         this.sequelize = new Sequelize({
-            dialect: config?.dbDialect ?? 'sqlite',
-            storage: config?.dbPath ?? ':memory:',
+            ...config.db,
             models,
             benchmark: true,
             repositoryMode: true,

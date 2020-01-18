@@ -1,9 +1,8 @@
 import { readFileSync } from 'fs';
-import { Dialect } from 'sequelize';
+import { Options } from 'sequelize';
 
 export interface Config {
-    dbPath: string;
-    dbDialect: Dialect;
+    db: Options;
     port: number;
     host: string;
 }
@@ -11,8 +10,10 @@ export interface Config {
 const configFilePath = 'turingarena.config.json';
 
 const defaultConfig: Config = {
-    dbPath: ':memory:',
-    dbDialect: 'sqlite',
+    db: {
+        storage: ':memory:',
+        dialect: 'sqlite',
+    },
     port: 3000,
     host: 'localhost',
 };
