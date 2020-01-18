@@ -33,7 +33,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
                         ? UserRole.ADMIN
                         : UserRole.USER,
             },
-        },  {
+        }, {
             include: [ctx.db.User],
         });
     }
@@ -48,5 +48,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
             contestId: contest.id,
             problemId: problem.id,
         });
+
+        console.log((await problem.metadata(ctx)));
     }
 }

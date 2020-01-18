@@ -24,6 +24,7 @@ export class Problem extends Model<Problem> {
     @HasMany(() => ProblemFile)
     problemFiles: ProblemFile[];
     getProblemFiles: (options: object) => Promise<ProblemFile[]>;
+    findProblemFile: (options: object) => Promise<ProblemFile>;
     createProblemFile: (problemFile: object, options?: object) => Promise<ProblemFile>;
 
     /**
@@ -78,6 +79,19 @@ export class Problem extends Model<Problem> {
             }
         }
     }
+
+    async metadata(ctx: ApiContext): Promise<ProblemMetadata> {
+        const metadataProblemFile = await ctx.db.ProblemFile.findOne({
+            where: {
+                problemId: this.id,
+                path: '.task-info.json',
+            },
+        });
+
+        const metadataFile = await metadataProblemFile.getFile();
+
+        return JSON.parse(metadataFile.content.toString());
+    }
 }
 
 /** Problem to File N-N relation. */
@@ -102,4 +116,34 @@ export class ProblemFile extends Model<ProblemFile> {
 
     @BelongsTo(() => File)
     file: File;
+    getFile: (options?: object) => Promise<File>;
+}
+
+/** Generic problem metadata */
+interface ProblemMetadata {
+    version: number;
+    task_type: string;
+    name: string;
+    title: string;
+    limits: {
+        time: number;
+        memory: number;
+    };
+    scoring: {
+        max_score: number;
+        subtasks: Array<{
+            max_score: number;
+            testcases: number;
+        }>;
+    };
+    statements: Array<{
+        language: string;
+        content_type: string;
+        path: string;
+    }>;
+    attachments: Array<{
+        name: string;
+        content_type: string;
+        path: string;
+    }>;
 }

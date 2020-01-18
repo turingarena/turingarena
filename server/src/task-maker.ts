@@ -1,34 +1,6 @@
 import { spawn } from 'child_process';
 import * as which from 'which';
 
-interface TaskMetadata {
-    version: number;
-    task_type: string;
-    name: string;
-    title: string;
-    limits: {
-        time: number;
-        memory: number;
-    };
-    scoring: {
-        max_score: number;
-        subtasks: Array<{
-            max_score: number;
-            testcases: number;
-        }>;
-    };
-    statements: Array<{
-        language: string;
-        content_type: string;
-        path: string;
-    }>;
-    attachments: Array<{
-        name: string;
-        content_type: string;
-        path: string;
-    }>;
-}
-
 /**
  * Searches for the task-maker executable in the following locations:
  * - TASK_MAKER_EXE variable
