@@ -31,16 +31,23 @@ it('test submission files', async () => {
             user,
             contest,
             problem,
-            files: [{
-                content: Buffer.from('ciao ciao'),
-                type: 'text/plain',
-                path: 'solution::solution.cpp',
-            }],
+            submissionFiles: [
+                {
+                    fieldId: 'solution',
+                    file: {
+                        content: Buffer.from('ciao ciao'),
+                        type: 'text/plain',
+                        // path: 'solution::solution.cpp',
+                    },
+                },
+            ],
         },
         {
-            include: [ctx.db.File],
+            include: [ctx.db.SubmissionFile],
         },
     );
+
+    console.log(submission);
 
     await submission.extract(await fs.promises.mkdtemp('tatest'));
 

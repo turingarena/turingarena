@@ -9,7 +9,7 @@ import { User } from './user';
 
 /** A Submission in the system */
 @Table({ updatedAt: false })
-export class Submission extends Model<Submission> {
+export abstract class Submission extends Model<Submission> {
     @ForeignKey(() => Problem)
     @Column
     problemId!: number;
@@ -22,8 +22,10 @@ export class Submission extends Model<Submission> {
     @Column
     userId!: number;
 
-    @BelongsToMany(() => File, () => SubmissionFile)
-    files: File[];
+    /** Files of this submission */
+    @HasMany(() => SubmissionFile)
+    submissionFiles: SubmissionFile[];
+    abstract getSubmissionFiles(): Promise<SubmissionFile[]>;
 
     /** Evaluations of this submission */
     @HasMany(() => Evaluation)
@@ -48,25 +50,36 @@ export class Submission extends Model<Submission> {
      * @param base base directory
      */
     async extract(base: string) {
-        // @ts-ignore
-        const files = await this.getFiles();
+        const files = await this.getSubmissionFiles();
 
         for (const file of files) {
-            await file.extract(base);
+            const content = await file.getFile();
+            console.log(`${base}/${file.fieldId}: ${content}`);
+            await content.extract(`${base}/${file.fieldId}`);
         }
     }
 }
 
 /** File in a submission */
 @Table({ timestamps: false })
-export class SubmissionFile extends Model<SubmissionFile> {
+export abstract class SubmissionFile extends Model<SubmissionFile> {
     @ForeignKey(() => Submission)
     @PrimaryKey
     @Column
     submissionId!: number;
 
-    @ForeignKey(() => File)
     @PrimaryKey
     @Column
+    fieldId!: string;
+
+    @ForeignKey(() => File)
+    @Column
     fileId!: number;
+
+    @BelongsTo(() => Submission, 'submissionId')
+    submission: Submission;
+
+    @BelongsTo(() => File, 'fileId')
+    file: File;
+    abstract getFile(): Promise<File>;
 }
