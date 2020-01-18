@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { DateTime } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import { BelongsTo, Column, ForeignKey, HasMany, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
@@ -36,7 +37,7 @@ export class Problem extends Model<Problem> {
      * @param base Base directory
      */
     async extract(ctx: ApiContext, base: string) {
-        const problemDir = path.join(base, this.name, this.updatedAt.getTime().toString());
+        const problemDir = path.join(base, this.name, DateTime.fromJSDate(this.updatedAt).toFormat('x--yyyy-MM-dd--hh-mm-ss'));
 
         try {
             if ((await fs.promises.stat(problemDir)).isDirectory())
