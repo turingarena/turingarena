@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique, HasOne, BelongsTo, HasMany } from 'sequelize-typescript';
+import { BelongsTo, BelongsToMany, Column, ForeignKey, HasMany, HasOne, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { ApiContext } from '../api';
 import { Contest, ContestProblem } from './contest';
 import { File } from './file';
-import { ApiContext } from '../api';
-
 
 /** A problem in TuringArena. */
 @Table

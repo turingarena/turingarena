@@ -1,6 +1,5 @@
-import { ApiContext } from "../api";
-import { submissionSchema } from "../api/submission";
-import * as fs from "fs";
+import * as fs from 'fs';
+import { ApiContext } from '../api';
 
 it('test submission files', async () => {
     const ctx = new ApiContext();
