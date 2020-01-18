@@ -1,16 +1,5 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import {
-    BelongsTo,
-    BelongsToMany,
-    Column,
-    ForeignKey,
-    HasMany,
-    HasOne,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
 import { File } from './file';
@@ -21,14 +10,17 @@ import { User } from './user';
 @Table({ updatedAt: false })
 export class Submission extends Model<Submission> {
     @ForeignKey(() => Problem)
+    @AllowNull(false)
     @Column
     problemId!: number;
 
     @ForeignKey(() => Contest)
+    @AllowNull(false)
     @Column
     contestId!: number;
 
     @ForeignKey(() => User)
+    @AllowNull(false)
     @Column
     userId!: number;
 
@@ -60,12 +52,12 @@ export class Submission extends Model<Submission> {
      * @param base base directory
      */
     async extract(base: string) {
-        const files = await this.getSubmissionFiles();
+        const submissionFiles = await this.getSubmissionFiles();
 
-        for (const file of files) {
-            const content = await file.getFile();
-            console.log(`${base}/${file.fieldId}: ${content}`);
-            await content.extract(`${base}/${file.fieldId}`);
+        for (const submissionFile of submissionFiles) {
+            const content = await submissionFile.getFile();
+            const filePath = path.join(base, submissionFile.fieldId, submissionFile.fileName)
+            await content.extract(filePath);
         }
     }
 }
@@ -83,13 +75,18 @@ export class SubmissionFile extends Model<SubmissionFile> {
     fieldId!: string;
 
     @ForeignKey(() => File)
+    @AllowNull(false)
     @Column
     fileId!: number;
 
-    @BelongsTo(() => Submission, 'submissionId')
+    @AllowNull(false)
+    @Column
+    fileName!: string;
+
+    @BelongsTo(() => Submission)
     submission: Submission;
 
-    @BelongsTo(() => File, 'fileId')
+    @BelongsTo(() => File)
     file: File;
     getFile: () => Promise<File>;
 }

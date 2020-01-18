@@ -24,8 +24,8 @@ export function loadConfig(path?: string): Config {
     }
     try {
         return JSON.parse(readFileSync(path ?? configFilePath).toString());
-    } catch {
-        console.warn('Cannot read config file: using defualt config');
+    } catch (e) {
+        console.warn(`Cannot read config file ${path}: ${e} using defualt config`);
 
         return defaultConfig;
     }

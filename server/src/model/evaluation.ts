@@ -1,26 +1,22 @@
 import { DataTypes } from 'sequelize';
-import {
-    BelongsTo,
-    Column,
-    ForeignKey,
-    HasMany,
-    Model,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { Submission } from './submission';
 
 /** An evaluation of a submission */
 @Table
 export class Evaluation extends Model<Evaluation> {
     @ForeignKey(() => Submission)
+    @AllowNull(false)
     @Column
     submissionId!: number;
 
     /** Status of this evaluation */
+    @AllowNull(false)
     @Column
     status!: EvaluationStatus;
 
     /** True if the evaluation should be considered official for ranking purposes */
+    @AllowNull(false)
     @Column
     isOfficial!: boolean;
 
@@ -49,6 +45,7 @@ export enum EvaluationStatus {
 @Table({ updatedAt: false })
 export class EvaluationEvent extends Model<EvaluationEvent> {
     @ForeignKey(() => Evaluation)
+    @AllowNull(false)
     @Column
     evaluationId!: number;
 
@@ -57,6 +54,7 @@ export class EvaluationEvent extends Model<EvaluationEvent> {
     evaluation: Evaluation;
 
     /** Data of this event, in a backend-specific format */
+    @AllowNull(false)
     @Column(DataTypes.JSON)
     data!: object;
 }

@@ -1,6 +1,6 @@
 {
     "db": {
-        "path": ":memory:",
+        "storage": "db.sqlite3",
         "dialect": "sqlite"
     },
     "host": "localhost",

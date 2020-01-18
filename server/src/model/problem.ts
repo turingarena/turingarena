@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
-import { BelongsTo, Column, ForeignKey, HasMany, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { ApiContext } from '../api';
 import { ContestProblem } from './contest';
 import { File } from './file';
@@ -24,7 +24,7 @@ export class Problem extends Model<Problem> {
     @HasMany(() => ProblemFile)
     problemFiles: ProblemFile[];
     getProblemFiles: (options: object) => Promise<ProblemFile[]>;
-    createProblemFile: (problemFile: object, options: object) => Promise<ProblemFile>;
+    createProblemFile: (problemFile: object, options?: object) => Promise<ProblemFile>;
 
     /**
      * Extract the files of this problem in the specified base dir:
@@ -70,34 +70,27 @@ export class Problem extends Model<Problem> {
             if (fs.statSync(path.join(base, relPath)).isDirectory()) {
                 await this.addFiles(ctx, base, relPath);
             } else {
-                const content = fs.readFileSync(path.join(base, relPath));
-                const type = mime.lookup(file);
-                await this.createProblemFile(
-                    {
-                        path: relPath,
-                        file: {
-                            type: type !== false ? type : 'unknown',
-                            content,
-                        },
-                    },
-                    { include: [ctx.db.File] },
-                );
+                const fileRow = await File.createFromPath(ctx, path.join(base, relPath));
+                await this.createProblemFile({
+                    path: relPath,
+                    fileId: fileRow.id,
+                });
             }
         }
     }
-
 }
 
 /** Problem to File N-N relation. */
 @Table({ timestamps: false })
 export class ProblemFile extends Model<ProblemFile> {
-    @PrimaryKey
     @ForeignKey(() => Problem)
+    @PrimaryKey
     @Column
     problemId!: number;
 
     @ForeignKey(() => File)
-    @Column({ allowNull: false })
+    @AllowNull(false)
+    @Column
     fileId!: number;
 
     @PrimaryKey

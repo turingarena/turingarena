@@ -70,8 +70,6 @@ export class ApiContext {
             repositoryMode: true,
         });
 
-        console.log(this.sequelize.models.ProblemFile.associations.file);
-
         this.db = Object.fromEntries(
             Object.entries(modelConstructors).map(([key, modelConstructor]) => [
                 key,

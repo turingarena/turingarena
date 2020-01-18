@@ -1,50 +1,55 @@
 import { createHash } from 'crypto';
 import * as fs from 'fs';
+import * as mime from 'mime-types';
 import * as path from 'path';
-import { Column, Index, Model, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, Index, Model, Table, Unique } from 'sequelize-typescript';
+import { ApiContext } from '../api';
 
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
 export class File extends Model<File> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @Unique
+    @AllowNull(false)
     @Index
     @Column
     hash!: string;
 
     /** MIME type of the file, e.g. text/plain, application/pdf, etc. */
+    @AllowNull(false)
     @Column
     type!: string;
 
     /** Content in bytes of the file. */
+    @AllowNull(false)
     @Column
     content!: Buffer;
 
-    static create(file) {
+    static async createFromContent(ctx: ApiContext, fileContent: Buffer, contentType: string) {
         const hash = createHash('sha1')
-            .update(file.content)
+            .update(fileContent)
             .digest('hex');
 
-        // https://github.com/RobinBuschmann/sequelize-typescript/issues/291
-        // tslint:disable: static-this
         try {
-            return super.create.call(this, {
-                content: file.content,
-                fileName: file.fileName,
-                type: file.type,
+            return await ctx.db.File.create({
+                content: fileContent,
+                type: contentType,
                 hash,
             });
         } catch {
             // Probably already exists. Try to query it.
-            return this.findOne({
+            return ctx.db.File.findOne({
                 where: { hash },
             });
         }
     }
 
-    // tslint:disable-next-line: no-any
-    static update(file): any {
-        throw new Error('Modifying files is forbiddend!');
+    static async createFromPath(ctx: ApiContext, filePath: string) {
+        const content = fs.readFileSync(filePath);
+        const lookup = mime.lookup(filePath);
+        const type =  lookup !== false ? lookup : 'unknown';
+
+        return File.createFromContent(ctx, content, type);
     }
 
     /**

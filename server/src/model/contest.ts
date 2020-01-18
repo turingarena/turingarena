@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
-import { BelongsTo, Column, ForeignKey, HasMany, HasOne, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { File } from './file';
 import { Problem } from './problem';
 import { User } from './user';
+import { ApiContext } from '../api';
 
 /** A contest in TuringArena */
 @Table
@@ -12,18 +13,22 @@ export class Contest extends Model<Contest> {
     /** Name of the contest, must be a valid identifier, e.g. ioi */
     @Unique
     @Index
+    @AllowNull(false)
     @Column
     name!: string;
 
     /** Title of the contest, as a string, e.g. 'International Olimpics in Informatics' */
+    @AllowNull(false)
     @Column
     title!: string;
 
     /** When the contest will start */
+    @AllowNull(false)
     @Column
     start!: Date;
 
     /** When the contest will end */
+    @AllowNull(false)
     @Column
     end!: Date;
 
@@ -42,7 +47,7 @@ export class Contest extends Model<Contest> {
     @HasMany(() => ContestFile)
     contestFiles: ContestFile[];
     getContestFiles: (options: object) => Promise<ContestFile[]>;
-    createContestFile: (contestFile: object, options: object) => Promise<ContestFile>;
+    createContestFile: (contestFile: object, options?: object) => Promise<ContestFile>;
 
     /**
      * Add files to this contest
@@ -51,25 +56,18 @@ export class Contest extends Model<Contest> {
      * @param base Base directory to add
      * @param dir  Relative directory in recursive call
      */
-    async addFiles(ctx, base: string, dir: string = '') {
+    async addFiles(ctx: ApiContext, base: string, dir: string = '') {
         const files = fs.readdirSync(path.join(base, dir));
         for (const file of files) {
             const relPath = path.join(dir, file);
             if (fs.statSync(path.join(base, relPath)).isDirectory()) {
                 await this.addFiles(ctx, base, relPath);
             } else {
-                const content = fs.readFileSync(path.join(base, relPath));
-                const type = mime.lookup(file);
-                await this.createContestFile(
-                    {
-                        path: relPath,
-                        file: {
-                            type: type !== false ? type : 'unknown',
-                            content,
-                        },
-                    },
-                    { include: [ctx.db.File] },
-                );
+                const fileRow = await File.createFromPath(ctx, path.join(base, relPath));
+                await this.createContestFile({
+                    path: relPath,
+                    fileId: fileRow.id,
+                });
             }
         }
     }
@@ -84,6 +82,7 @@ export class ContestFile extends Model<ContestFile> {
     contestId!: number;
 
     @ForeignKey(() => File)
+    @AllowNull(false)
     @Column
     fileId!: number;
 
