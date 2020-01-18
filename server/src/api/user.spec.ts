@@ -18,7 +18,9 @@ it('test user add and delete', async () => {
                 token: "alerighi2",
                 isAdmin: false,
             })
-            deleteUser(user: "alerighi")
+            deleteUser(user: "alerighi") {
+                __typename
+            }
         }`,
     });
 
@@ -27,6 +29,6 @@ it('test user add and delete', async () => {
         init: true,
         createUser: true,
         updateUser: true,
-        removeUser: true,
+        deleteUser: true,
     });
 });
