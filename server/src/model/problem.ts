@@ -7,7 +7,7 @@ import { File } from './file';
 
 /** A problem in TuringArena. */
 @Table
-export class Problem extends Model<Problem> {
+export abstract class Problem extends Model<Problem> {
     /** Name of the problem, must be a valid identifier. */
     @Unique
     @Column
@@ -21,6 +21,7 @@ export class Problem extends Model<Problem> {
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)
     files: ProblemFile[];
+    abstract getFiles(options: object): Promise<ProblemFile[]>;
 
     /**
      * Extract the files of this problem in the specified base dir.
@@ -40,13 +41,12 @@ export class Problem extends Model<Problem> {
             // Directory doesn't exist and thus stat fails
         }
 
-        // @ts-ignore
         const files = await this.getFiles({ include: [ctx.db.ProblemFile] });
 
         for (const file of files) {
-            const filePath = path.join(base, file.SubmissionFile.path);
+            const filePath = path.join(base, file.path);
             console.debug('x', filePath);
-            await file.extract(filePath);
+            await file.file.extract(filePath);
         }
 
         return problemDir;
