@@ -9,7 +9,7 @@ import { User } from './user';
 
 /** A Submission in the system */
 @Table({ updatedAt: false })
-export abstract class Submission extends Model<Submission> {
+export class Submission extends Model<Submission> {
     @ForeignKey(() => Problem)
     @Column
     problemId!: number;
@@ -25,7 +25,7 @@ export abstract class Submission extends Model<Submission> {
     /** Files of this submission */
     @HasMany(() => SubmissionFile)
     submissionFiles: SubmissionFile[];
-    abstract getSubmissionFiles(): Promise<SubmissionFile[]>;
+    getSubmissionFiles: () => Promise<SubmissionFile[]>;
 
     /** Evaluations of this submission */
     @HasMany(() => Evaluation)
@@ -62,7 +62,7 @@ export abstract class Submission extends Model<Submission> {
 
 /** File in a submission */
 @Table({ timestamps: false })
-export abstract class SubmissionFile extends Model<SubmissionFile> {
+export class SubmissionFile extends Model<SubmissionFile> {
     @ForeignKey(() => Submission)
     @PrimaryKey
     @Column
@@ -81,5 +81,5 @@ export abstract class SubmissionFile extends Model<SubmissionFile> {
 
     @BelongsTo(() => File, 'fileId')
     file: File;
-    abstract getFile(): Promise<File>;
+    getFile: () => Promise<File>;
 }

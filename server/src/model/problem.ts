@@ -7,7 +7,7 @@ import { File } from './file';
 
 /** A problem in TuringArena. */
 @Table
-export abstract class Problem extends Model<Problem> {
+export class Problem extends Model<Problem> {
     /** Name of the problem, must be a valid identifier. */
     @Unique
     @Column
@@ -21,7 +21,7 @@ export abstract class Problem extends Model<Problem> {
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)
     files: ProblemFile[];
-    abstract getFiles(options: object): Promise<ProblemFile[]>;
+    getFiles: (options: object) => Promise<ProblemFile[]>;
 
     /**
      * Extract the files of this problem in the specified base dir.
