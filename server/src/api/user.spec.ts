@@ -18,9 +18,7 @@ it('test user add and delete', async () => {
                 token: "alerighi2",
                 isAdmin: false,
             })
-            deleteUser(user: "alerighi") {
-                __typename
-            }
+            deleteUser(user: "alerighi")
         }`,
     });
 
