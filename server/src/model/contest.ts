@@ -1,4 +1,13 @@
-import { BelongsToMany, Column, ForeignKey, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import {
+    BelongsToMany,
+    Column,
+    ForeignKey,
+    Index,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { File } from './file';
 import { Problem } from './problem';
 import { User } from './user';
@@ -71,14 +80,23 @@ export class Contest extends Model<Contest> {
     end!: Date;
 
     /** The list of problems in this contest */
-    @BelongsToMany(() => Problem, () => ContestProblem)
+    @BelongsToMany(
+        () => Problem,
+        () => ContestProblem,
+    )
     problems!: Problem[];
 
     /** The list of users in this contest */
-    @BelongsToMany(() => User, () => Participation)
+    @BelongsToMany(
+        () => User,
+        () => Participation,
+    )
     users!: User[];
 
     /** The list of files in this contest */
-    @BelongsToMany(() => File, () => ContestFile)
+    @BelongsToMany(
+        () => File,
+        () => ContestFile,
+    )
     files!: File[];
 }

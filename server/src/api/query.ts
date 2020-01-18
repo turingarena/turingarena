@@ -15,11 +15,26 @@ export const querySchema = gql`
 
 export const queryResolvers: Resolvers = {
     Query: {
-        users: async ({}, {}, ctx) => ctx.db.User.findAll({ include: [ctx.db.Contest] }),
-        user: async ({}, {username}, ctx) => ctx.db.User.findOne({ where: { username }, include: [ctx.db.Contest] }),
-        contests: async ({}, {}, ctx) => ctx.db.Contest.findAll({include: [ctx.db.User, ctx.db.Problem]}),
-        contest: async ({}, {name}, ctx) => ctx.db.Contest.findOne({ where: { name }, include: [ctx.db.User, ctx.db.Problem]}),
-        problems: async ({}, {}, ctx) => ctx.db.Problem.findAll({ include: [ctx.db.Contest] }),
-        problem: async ({}, {name}, ctx) => ctx.db.Problem.findOne({ where: {name}, include: [ctx.db.Contest] }),
+        users: async ({}, {}, ctx) =>
+            ctx.db.User.findAll({ include: [ctx.db.Contest] }),
+        user: async ({}, { username }, ctx) =>
+            ctx.db.User.findOne({
+                where: { username },
+                include: [ctx.db.Contest],
+            }),
+        contests: async ({}, {}, ctx) =>
+            ctx.db.Contest.findAll({ include: [ctx.db.User, ctx.db.Problem] }),
+        contest: async ({}, { name }, ctx) =>
+            ctx.db.Contest.findOne({
+                where: { name },
+                include: [ctx.db.User, ctx.db.Problem],
+            }),
+        problems: async ({}, {}, ctx) =>
+            ctx.db.Problem.findAll({ include: [ctx.db.Contest] }),
+        problem: async ({}, { name }, ctx) =>
+            ctx.db.Problem.findOne({
+                where: { name },
+                include: [ctx.db.Contest],
+            }),
     },
 };

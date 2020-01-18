@@ -26,59 +26,62 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        updateUser: async ({}, {user}, ctx) => {
+        updateUser: async ({}, { user }, ctx) => {
             // TODO
             return true;
         },
-        createUser: async ({}, {user}, ctx) => {
+        createUser: async ({}, { user }, ctx) => {
             await ctx.db.User.create(user);
 
             return true;
         },
-        deleteUser: async ({}, {user}, ctx) => {
+        deleteUser: async ({}, { user }, ctx) => {
             await ctx.db.User.destroy({
                 where: {
                     username: user,
-                } });
+                },
+            });
 
             return true;
         },
-        createProblem: async ({}, {problem}, ctx) => {
+        createProblem: async ({}, { problem }, ctx) => {
             await ctx.db.Problem.create(problem);
 
             return true;
         },
-        updateProblem: async ({}, {problem}, ctx) => {
+        updateProblem: async ({}, { problem }, ctx) => {
             // TODO
 
             return true;
         },
-        deleteProblem: async ({}, {problem}, ctx) => {
+        deleteProblem: async ({}, { problem }, ctx) => {
             await ctx.db.Problem.destroy({
                 where: {
                     name: problem,
-                }});
+                },
+            });
         },
-        createContest: async ({}, {contest}, ctx) => {
+        createContest: async ({}, { contest }, ctx) => {
             await ctx.db.Contest.create(contest);
 
             return true;
         },
-        updateContest: async ({}, {contest}, ctx) => {
+        updateContest: async ({}, { contest }, ctx) => {
             // TODO
 
             return true;
         },
-        deleteContest: async ({}, {contest}, ctx) => {
+        deleteContest: async ({}, { contest }, ctx) => {
             await ctx.db.Contest.destroy({
-                                             where: {
-                                                 name,
-                                             }});
+                where: {
+                    name,
+                },
+            });
         },
-        contest: async ({}, {name}, ctx) => {
-            const contest = await ctx.db.Contest.findOne({where: {name}});
+        contest: async ({}, { name }, ctx) => {
+            const contest = await ctx.db.Contest.findOne({ where: { name } });
 
-            return {contest};
+            return { contest };
         },
     },
 };

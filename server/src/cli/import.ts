@@ -21,13 +21,18 @@ async function addFiles(ctx, fileList, base: string, dir: string = '') {
         } else {
             const content = fs.readFileSync(path.join(base, relPath));
             const type = mime.lookup(file);
-            await fileList.addProblemFile(await ctx.db.ProblemFile.create({
-                path: relPath,
-                file: {
-                    type: type !== false ? type : 'unknown',
-                    content,
-                },
-            }, { include: [ctx.db.File] }));
+            await fileList.addProblemFile(
+                await ctx.db.ProblemFile.create(
+                    {
+                        path: relPath,
+                        file: {
+                            type: type !== false ? type : 'unknown',
+                            content,
+                        },
+                    },
+                    { include: [ctx.db.File] },
+                ),
+            );
         }
     }
 }
@@ -54,7 +59,10 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     for (const user of metadata.users) {
         await contest.createUser({
             ...user,
-            privilege: user.role === 'admin' ? UserPrivilege.ADMIN : UserPrivilege.USER,
+            privilege:
+                user.role === 'admin'
+                    ? UserPrivilege.ADMIN
+                    : UserPrivilege.USER,
         });
     }
 

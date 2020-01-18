@@ -50,5 +50,4 @@ it('test submission files', async () => {
     console.log(submission);
 
     await submission.extract(await fs.promises.mkdtemp('tatest'));
-
 });

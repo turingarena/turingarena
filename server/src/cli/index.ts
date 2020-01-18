@@ -5,16 +5,11 @@ import { importContest } from './import';
 
 const program = new commander.Command();
 
-function serve() {
-}
+function serve() {}
 
-function _export() {
+function _export() {}
 
-}
-
-function show() {
-
-}
+function show() {}
 
 async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
@@ -24,9 +19,7 @@ async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     return context;
 }
 
-program
-    .name('turingarena')
-    .version('1.0');
+program.name('turingarena').version('1.0');
 
 program
     .command('serve')
@@ -37,7 +30,9 @@ program
     .command('import [dir]')
     .description('import a contest')
     .option('-c, --config <path>', 'configuration file')
-    .action(async (dir, opts) => importContest((await ctxFromConfig(opts.config)), dir));
+    .action(async (dir, opts) =>
+        importContest(await ctxFromConfig(opts.config), dir),
+    );
 
 program
     .command('export')

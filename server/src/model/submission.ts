@@ -1,6 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BelongsTo, BelongsToMany, Column, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import {
+    BelongsTo,
+    BelongsToMany,
+    Column,
+    ForeignKey,
+    HasMany,
+    HasOne,
+    Model,
+    PrimaryKey,
+    Table,
+} from 'sequelize-typescript';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
 import { File } from './file';

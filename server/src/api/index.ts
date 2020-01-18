@@ -73,9 +73,10 @@ export class ApiContext {
         console.log(this.sequelize.models.ProblemFile.associations.file);
 
         this.db = Object.fromEntries(
-            Object.entries(modelConstructors).map(([key, modelConstructor]) =>
-                [key, this.sequelize.getRepository<Model>(modelConstructor)],
-            ),
+            Object.entries(modelConstructors).map(([key, modelConstructor]) => [
+                key,
+                this.sequelize.getRepository<Model>(modelConstructor),
+            ]),
         ) as ModelRepositoryRecord;
     }
 
@@ -86,7 +87,11 @@ export class ApiContext {
     });
 
     /** Run a GraphQL operation in this context. */
-    async execute<T = unknown, V = {}>({ document, operationName, variableValues }: OperationRequest<V>) {
+    async execute<T = unknown, V = {}>({
+        document,
+        operationName,
+        variableValues,
+    }: OperationRequest<V>) {
         return execute<T>({
             document,
             operationName,

@@ -1,5 +1,12 @@
 import { DataTypes } from 'sequelize';
-import { BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+    BelongsTo,
+    Column,
+    ForeignKey,
+    HasMany,
+    Model,
+    Table,
+} from 'sequelize-typescript';
 import { Submission } from './submission';
 
 /** An evaluation of a submission */

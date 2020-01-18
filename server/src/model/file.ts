@@ -21,7 +21,9 @@ export class File extends Model<File> {
     content!: Buffer;
 
     static create(file) {
-        const hash = createHash('sha1').update(file.content).digest('hex');
+        const hash = createHash('sha1')
+            .update(file.content)
+            .digest('hex');
 
         // https://github.com/RobinBuschmann/sequelize-typescript/issues/291
         // tslint:disable: static-this

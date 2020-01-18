@@ -14,7 +14,11 @@ export const contestSchema = gql`
         removeProblem(name: ID!): Boolean
         addUser(username: ID!): Boolean
         removeUser(username: ID!): Boolean
-        submit(username: ID!, problemName: ID!, submission: SubmissionInput!): Boolean
+        submit(
+            username: ID!
+            problemName: ID!
+            submission: SubmissionInput!
+        ): Boolean
     }
 
     input ContestInput {
@@ -30,14 +34,14 @@ export const contestResolvers: Resolvers = {
         // TODO: resolver for start and end to return in correct ISO format
     },
     ContestMutations: {
-        addProblem: async ({contest}, {name}, ctx) => {
+        addProblem: async ({ contest }, { name }, ctx) => {
             const problem = await ctx.db.Problem.findOne({ where: { name } });
             await contest.addProblem(problem);
 
             return true;
         },
-        addUser: async ({contest}, {username}, ctx) => {
-            const user = await ctx.db.User.findOne({ where: { username }});
+        addUser: async ({ contest }, { username }, ctx) => {
+            const user = await ctx.db.User.findOne({ where: { username } });
             await contest.addUser(user);
 
             return true;

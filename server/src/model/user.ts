@@ -1,4 +1,11 @@
-import { BelongsToMany, Column, Index, Model, Table, Unique } from 'sequelize-typescript';
+import {
+    BelongsToMany,
+    Column,
+    Index,
+    Model,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { Contest, Participation } from './contest';
 
 /** A user in TuringArena */
@@ -25,7 +32,10 @@ export class User extends Model<User> {
     privilege!: UserPrivilege;
 
     /** Contest wich the user belongs to */
-    @BelongsToMany(() => Contest, () => Participation)
+    @BelongsToMany(
+        () => Contest,
+        () => Participation,
+    )
     contests!: Contest[];
 }
 

@@ -1,6 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BelongsTo, BelongsToMany, Column, ForeignKey, HasMany, HasOne, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import {
+    BelongsTo,
+    BelongsToMany,
+    Column,
+    ForeignKey,
+    HasMany,
+    HasOne,
+    Index,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { ApiContext } from '../api';
 import { Contest, ContestProblem } from './contest';
 import { File } from './file';
@@ -15,7 +27,10 @@ export class Problem extends Model<Problem> {
     name!: string;
 
     /** Contests that contains this problem */
-    @BelongsToMany(() => Contest, () => ContestProblem)
+    @BelongsToMany(
+        () => Contest,
+        () => ContestProblem,
+    )
     contests: Contest[];
 
     /** Files that belongs to this problem. */
