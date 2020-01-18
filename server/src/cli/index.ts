@@ -1,16 +1,15 @@
 import * as commander from 'commander';
 import { ApiContext } from '../api';
 import { loadConfig } from '../config';
+import { serve } from '../server';
 import { importContest } from './import';
 import { createSubmission } from './submit';
 
 const program = new commander.Command();
 
-function serve() {}
+function _export() { }
 
-function _export() {}
-
-function show() {}
+function show() { }
 
 async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
@@ -26,7 +25,9 @@ program.name('turingarena').version('1.0');
 program
     .command('serve')
     .description('start TuringArena server')
-    .action(serve);
+    .action(opts => {
+        serve(loadConfig(opts.config));
+    });
 
 program
     .command('import [dir]')
@@ -53,4 +54,6 @@ program
     .description('show information about a contest')
     .action(show);
 
-program.parse(process.argv);
+program.parseAsync(process.argv).catch((e) => {
+    process.emit('uncaughtException', e);
+});
