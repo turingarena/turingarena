@@ -1,3 +1,6 @@
+node_modules/
 generated/
-/package-lock.json
+package-lock.json
 spec.stmux
+.prettierignore
+.editorconfig
