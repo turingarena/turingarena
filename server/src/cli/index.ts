@@ -5,11 +5,11 @@ import { importContest } from './import';
 
 const program = new commander.Command();
 
-function serve() {}
+function serve() { }
 
-function _export() {}
+function _export() { }
 
-function show() {}
+function show() { }
 
 async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
@@ -44,4 +44,6 @@ program
     .description('show information about a contest')
     .action(show);
 
-program.parse(process.argv);
+program.parseAsync(process.argv).catch((e) => {
+    process.emit('uncaughtException', e);
+});
