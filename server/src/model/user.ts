@@ -1,12 +1,5 @@
-import {
-    BelongsToMany,
-    Column,
-    Index,
-    Model,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
-import { Contest, Participation } from './contest';
+import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
+import { Participation } from './contest';
 
 /** A user in TuringArena */
 @Table
@@ -29,18 +22,15 @@ export class User extends Model<User> {
 
     /** Privilege of the user */
     @Column
-    privilege!: UserPrivilege;
+    role!: UserRole;
 
     /** Contest wich the user belongs to */
-    @BelongsToMany(
-        () => Contest,
-        () => Participation,
-    )
-    contests!: Contest[];
+    @HasMany(() => Participation)
+    partitipations: Participation[];
 }
 
 /** Privilege of a user */
-export enum UserPrivilege {
+export enum UserRole {
     /** Normal user, can take part in a contest */
     USER,
     /** Admin user, can do everything */

@@ -9,7 +9,7 @@ export interface Config {
 
 const configFilePath = 'turingarena.config.json';
 
-const defaultConfig: Config = {
+export const defaultConfig: Config = {
     db: {
         storage: ':memory:',
         dialect: 'sqlite',

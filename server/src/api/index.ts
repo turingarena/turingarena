@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
-import { Config } from '../config';
+import { Config, defaultConfig } from '../config';
 import { Resolvers } from '../generated/graphql-types';
 import { modelConstructors } from '../model';
 import { contestResolvers, contestSchema } from './contest';
@@ -60,7 +60,7 @@ export class ApiContext {
     /** Contains an entry for each available repository of models. */
     readonly db: ModelRepositoryRecord;
 
-    constructor(config?: Config) {
+    constructor(config: Config = defaultConfig) {
         const models = Object.values(modelConstructors);
 
         this.sequelize = new Sequelize({
