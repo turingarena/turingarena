@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers, UserInput } from '../generated/graphql-types';
+import { Resolvers } from '../generated/graphql-types';
 
 export const mutationSchema = gql`
     type Mutation {

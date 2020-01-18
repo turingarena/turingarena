@@ -5,7 +5,7 @@ type CodegenConfig = Parameters<typeof generate>[0];
 
 const modelNames = ['User', 'Contest'];
 const mappers = Object.fromEntries(
-    modelNames.map((name) => [name, `ModelRecord['${name}']`]),
+    modelNames.map(name => [name, `ModelRecord['${name}']`]),
 );
 
 const config: CodegenConfig = {
@@ -41,6 +41,6 @@ const config: CodegenConfig = {
     require: 'ts-node/register/transpile-only',
 };
 
-generate(config).catch((e) => {
+generate(config).catch(e => {
     console.error(e);
 });

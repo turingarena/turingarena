@@ -17,7 +17,7 @@ export const userSchema = gql`
 
 export const userResolvers: Resolvers = {
     User: {
-        username: (user) => user.username,
-        name: (user) => user.name,
+        username: user => user.username,
+        name: user => user.name,
     },
 };

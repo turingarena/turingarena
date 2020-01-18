@@ -19,13 +19,14 @@ export const defaultConfig: Config = {
 };
 
 export function loadConfig(path?: string): Config {
-    if (path === undefined) {
-        return defaultConfig;
-    }
+    if (path === undefined) return defaultConfig;
+
     try {
         return JSON.parse(readFileSync(path ?? configFilePath).toString());
     } catch (e) {
-        console.warn(`Cannot read config file ${path}: ${e} using defualt config`);
+        console.warn(
+            `Cannot read config file ${path}: ${e} using defualt config`,
+        );
 
         return defaultConfig;
     }

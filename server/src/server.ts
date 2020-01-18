@@ -31,8 +31,7 @@ export function serve(config: Config) {
     app.get('/files/:hash/*', async (req, res, next) => {
         const hash = req.params.hash;
         const file = await context.db.File.findOne({ where: { hash } });
-        if (file === null)
-            next();
+        if (file === null) next();
         else {
             res.contentType(file.type);
             res.send(file.content);

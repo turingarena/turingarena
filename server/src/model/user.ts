@@ -1,4 +1,12 @@
-import { AllowNull, Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
+import {
+    AllowNull,
+    Column,
+    HasMany,
+    Index,
+    Model,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { Participation } from './contest';
 
 /** A user in TuringArena */

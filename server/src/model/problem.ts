@@ -1,8 +1,18 @@
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
-import * as mime from 'mime-types';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Index, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import {
+    AllowNull,
+    BelongsTo,
+    Column,
+    ForeignKey,
+    HasMany,
+    Index,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { ApiContext } from '../api';
 import { ContestProblem } from './contest';
 import { File } from './file';
@@ -25,7 +35,10 @@ export class Problem extends Model<Problem> {
     problemFiles: ProblemFile[];
     getProblemFiles: (options: object) => Promise<ProblemFile[]>;
     findProblemFile: (options: object) => Promise<ProblemFile>;
-    createProblemFile: (problemFile: object, options?: object) => Promise<ProblemFile>;
+    createProblemFile: (
+        problemFile: object,
+        options?: object,
+    ) => Promise<ProblemFile>;
 
     /**
      * Extract the files of this problem in the specified base dir:
@@ -38,7 +51,13 @@ export class Problem extends Model<Problem> {
      * @param base Base directory
      */
     async extract(ctx: ApiContext, base: string) {
-        const problemDir = path.join(base, this.name, DateTime.fromJSDate(this.updatedAt).toFormat('x--yyyy-MM-dd--hh-mm-ss'));
+        const problemDir = path.join(
+            base,
+            this.name,
+            DateTime.fromJSDate(this.updatedAt).toFormat(
+                'x--yyyy-MM-dd--hh-mm-ss',
+            ),
+        );
 
         try {
             if ((await fs.promises.stat(problemDir)).isDirectory())
@@ -47,7 +66,9 @@ export class Problem extends Model<Problem> {
             // Directory doesn't exist and thus stat fails
         }
 
-        const problemFiles = await this.getProblemFiles({ include: [ctx.db.File] });
+        const problemFiles = await this.getProblemFiles({
+            include: [ctx.db.File],
+        });
 
         for (const problemFile of problemFiles) {
             const filePath = path.join(problemDir, problemFile.path);
@@ -68,10 +89,13 @@ export class Problem extends Model<Problem> {
         const files = fs.readdirSync(path.join(base, dir));
         for (const file of files) {
             const relPath = path.join(dir, file);
-            if (fs.statSync(path.join(base, relPath)).isDirectory()) {
+            if (fs.statSync(path.join(base, relPath)).isDirectory())
                 await this.addFiles(ctx, base, relPath);
-            } else {
-                const fileRow = await File.createFromPath(ctx, path.join(base, relPath));
+            else {
+                const fileRow = await File.createFromPath(
+                    ctx,
+                    path.join(base, relPath),
+                );
                 await this.createProblemFile({
                     path: relPath,
                     fileId: fileRow.id,

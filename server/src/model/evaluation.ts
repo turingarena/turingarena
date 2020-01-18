@@ -1,5 +1,13 @@
 import { DataTypes } from 'sequelize';
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+    AllowNull,
+    BelongsTo,
+    Column,
+    ForeignKey,
+    HasMany,
+    Model,
+    Table,
+} from 'sequelize-typescript';
 import { Submission } from './submission';
 
 /** An evaluation of a submission */

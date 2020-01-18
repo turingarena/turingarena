@@ -2,7 +2,14 @@ import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
-import { AllowNull, Column, Index, Model, Table, Unique } from 'sequelize-typescript';
+import {
+    AllowNull,
+    Column,
+    Index,
+    Model,
+    Table,
+    Unique,
+} from 'sequelize-typescript';
 import { ApiContext } from '../api';
 
 /** A generic file in TuringArena. */
@@ -25,7 +32,11 @@ export class File extends Model<File> {
     @Column
     content!: Buffer;
 
-    static async createFromContent(ctx: ApiContext, fileContent: Buffer, contentType: string) {
+    static async createFromContent(
+        ctx: ApiContext,
+        fileContent: Buffer,
+        contentType: string,
+    ) {
         const hash = createHash('sha1')
             .update(fileContent)
             .digest('hex');
@@ -47,7 +58,7 @@ export class File extends Model<File> {
     static async createFromPath(ctx: ApiContext, filePath: string) {
         const content = fs.readFileSync(filePath);
         const lookup = mime.lookup(filePath);
-        const type =  lookup !== false ? lookup : 'unknown';
+        const type = lookup !== false ? lookup : 'unknown';
 
         return File.createFromContent(ctx, content, type);
     }

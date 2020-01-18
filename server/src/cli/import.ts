@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as mime from 'mime-types';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { ApiContext } from '../api/index';
@@ -24,19 +23,19 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
 
     await contest.addFiles(ctx, path.join(dir, 'files'));
 
-    for (const user of metadata.users) {
-        await contest.createParticipation({
-            user: {
-                ...user,
-                role:
-                    user.role === 'admin'
-                        ? UserRole.ADMIN
-                        : UserRole.USER,
+    for (const user of metadata.users)
+        await contest.createParticipation(
+            {
+                user: {
+                    ...user,
+                    role:
+                        user.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
+                },
             },
-        }, {
-            include: [ctx.db.User],
-        });
-    }
+            {
+                include: [ctx.db.User],
+            },
+        );
 
     for (const name of metadata.problems) {
         const problem = await ctx.db.Problem.create({
@@ -49,6 +48,6 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
             problemId: problem.id,
         });
 
-        console.log((await problem.metadata(ctx)));
+        console.log(await problem.metadata(ctx));
     }
 }

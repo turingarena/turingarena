@@ -7,9 +7,9 @@ import { createSubmission } from './submit';
 
 const program = new commander.Command();
 
-function _export() { }
+function _export() {}
 
-function show() { }
+function show() {}
 
 async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
@@ -42,7 +42,14 @@ program
     .description('create a submission')
     .option('-c, --config <path>', 'configuration file')
     .action(async (user, contest, problem, solution, opts) =>
-        createSubmission(await ctxFromConfig(opts.config), user, contest, problem, solution));
+        createSubmission(
+            await ctxFromConfig(opts.config),
+            user,
+            contest,
+            problem,
+            solution,
+        ),
+    );
 
 program
     .command('export')
@@ -54,6 +61,6 @@ program
     .description('show information about a contest')
     .action(show);
 
-program.parseAsync(process.argv).catch((e) => {
+program.parseAsync(process.argv).catch(e => {
     process.emit('uncaughtException', e);
 });
