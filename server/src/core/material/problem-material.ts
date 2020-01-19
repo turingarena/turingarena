@@ -1,5 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../generated/graphql-types';
+import { ResolversWithModels } from '../../main/resolver-types';
+import { Media } from './media';
+import { Text } from './text';
 
 export const problemMaterialSchema = gql`
     """
@@ -17,4 +19,19 @@ export const problemMaterialSchema = gql`
     }
 `;
 
-export const problemMaterialResolvers: Resolvers = {};
+export interface ProblemMaterial {
+    title: Text;
+    statement: Media;
+    attachments: ProblemAttachment[];
+}
+
+export interface ProblemAttachment {
+    title: Text;
+    media: Media;
+}
+
+export const problemMaterialResolvers: ResolversWithModels<{
+    ProblemMaterial: ProblemMaterial;
+}> = {
+    ProblemMaterial: {},
+};

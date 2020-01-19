@@ -13,9 +13,7 @@ export const textSchema = gql`
     }
 `;
 
-export interface Text {
-    variants: TextVariant[];
-}
+export type Text = TextVariant[];
 
 export interface TextVariant {
     language?: string;
@@ -26,6 +24,6 @@ export const textResolvers: ResolversWithModels<{
     Text: Text;
 }> = {
     Text: {
-        variant: text => text.variants[0].value,
+        variant: text => text[0].value,
     },
 };
