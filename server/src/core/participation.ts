@@ -5,13 +5,15 @@ import { User } from './user';
 /** User participation N-N relation */
 @Table({ timestamps: false })
 export class Participation extends Model<Participation> {
-    @ForeignKey(() => User)
-    @Column({ unique: 'participation_user_contest_unique' })
-    userId!: number;
-
     @ForeignKey(() => Contest)
-    @Column({ unique: 'participation_user_contest_unique' })
+    @PrimaryKey
+    @Column
     contestId!: number;
+
+    @ForeignKey(() => User)
+    @PrimaryKey
+    @Column
+    userId!: number;
 
     @BelongsTo(() => Contest)
     contest!: Contest;

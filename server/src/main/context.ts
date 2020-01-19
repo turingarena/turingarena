@@ -3,6 +3,8 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
 import { modelConstructors, resolvers, schema } from '../core/index';
 import { Config, defaultConfig } from './config';
+import { Submission } from '../core/submission';
+import { SyncOptions } from 'sequelize';
 
 // Definitions related to models, their classes, and their repositories.
 
@@ -53,6 +55,10 @@ export class ApiContext {
                 this.sequelize.getRepository<Model>(modelConstructor),
             ]),
         ) as ModelRepositoryRecord;
+
+        this.db.Submission.afterSync('create foreign key', () => {
+            this.sequelize.query('ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY KEY(userId, contestId) REFERENCES Participations(userId, contestId)');
+        });
     }
 
     /** Executable schema, obtained combining full GraphQL schema and resolvers. */
