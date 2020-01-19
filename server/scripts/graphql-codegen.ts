@@ -9,8 +9,8 @@ const mappers = Object.fromEntries(
 );
 
 const config: CodegenConfig = {
-    schema: `src/api/index.ts`,
-    documents: `src/api/*.ts`,
+    schema: `scripts/graphql-schema.ts`,
+    documents: `src/core/*.ts`,
     overwrite: true,
     watch: process.argv[2] === '--watch',
     generates: {
@@ -23,13 +23,13 @@ const config: CodegenConfig = {
                     add: '/* tslint:disable */',
                 },
                 {
-                    add: `import { ModelRecord } from '../api/index';`,
+                    add: `import { ModelRecord } from '../core/index';`,
                 },
             ],
             config: {
                 defaultMapper: 'any',
                 mappers,
-                contextType: '../api/index#ApiContext',
+                contextType: '../main/context#ApiContext',
             },
         },
         'src/generated/graphql.schema.json': {
