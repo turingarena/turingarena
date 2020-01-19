@@ -15,7 +15,7 @@ import { ApiContext } from '../main/context';
 
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
-export class File extends Model<File> {
+export class FileContent extends Model<FileContent> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @Unique
     @AllowNull(false)
@@ -43,8 +43,8 @@ export class File extends Model<File> {
             .digest('hex');
 
         return (
-            (await ctx.db.File.findOne({ where: { hash } })) ??
-            (await ctx.db.File.create({
+            (await ctx.db.FileContent.findOne({ where: { hash } })) ??
+            (await ctx.db.FileContent.create({
                 content: fileContent,
                 type: contentType,
                 hash,
@@ -57,7 +57,7 @@ export class File extends Model<File> {
         const lookup = mime.lookup(filePath);
         const type = lookup !== false ? lookup : 'unknown';
 
-        return File.createFromContent(ctx, content, type);
+        return FileContent.createFromContent(ctx, content, type);
     }
 
     /**
@@ -74,16 +74,12 @@ export class File extends Model<File> {
 }
 
 export const fileSchema = gql`
-    type File {
+    type FileContent {
         hash: ID!
-        fileName: String!
-        type: String!
-        contentBase64: String!
+        base64: String!
     }
 
     input FileInput {
-        fileName: String!
-        type: String!
         contentBase64: String!
     }
 `;

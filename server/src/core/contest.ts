@@ -14,7 +14,7 @@ import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ContestFile } from './contest-file';
 import { ContestProblem } from './contest-problem';
-import { File } from './file';
+import { FileContent } from './file-content';
 import { Participation } from './participation';
 
 export const contestSchema = gql`
@@ -110,7 +110,7 @@ export class Contest extends Model<Contest> {
             if (fs.statSync(path.join(base, relPath)).isDirectory())
                 await this.addFiles(ctx, base, relPath);
             else {
-                const fileRow = await File.createFromPath(
+                const fileRow = await FileContent.createFromPath(
                     ctx,
                     path.join(base, relPath),
                 );

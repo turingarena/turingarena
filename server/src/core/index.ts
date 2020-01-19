@@ -4,7 +4,7 @@ import { Contest, contestResolvers, contestSchema } from './contest';
 import { ContestFile } from './contest-file';
 import { ContestProblem } from './contest-problem';
 import { Evaluation, EvaluationEvent } from './evaluation';
-import { File, fileSchema } from './file';
+import { FileContent, fileSchema } from './file-content';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
 import { Problem, problemSchema } from './problem';
@@ -36,7 +36,7 @@ export const modelConstructors = {
     Problem,
     ContestProblem,
     Participation,
-    File,
+    FileContent,
     ProblemFile,
     ContestFile,
     Submission,

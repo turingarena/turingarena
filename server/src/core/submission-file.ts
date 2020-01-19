@@ -7,7 +7,7 @@ import {
     PrimaryKey,
     Table,
 } from 'sequelize-typescript';
-import { File } from './file';
+import { FileContent } from './file-content';
 import { Submission } from './submission';
 
 /** File in a submission */
@@ -22,7 +22,7 @@ export class SubmissionFile extends Model<SubmissionFile> {
     @Column
     fieldId!: string;
 
-    @ForeignKey(() => File)
+    @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
     fileId!: number;
@@ -34,7 +34,7 @@ export class SubmissionFile extends Model<SubmissionFile> {
     @BelongsTo(() => Submission)
     submission: Submission;
 
-    @BelongsTo(() => File)
-    file: File;
-    getFile: () => Promise<File>;
+    @BelongsTo(() => FileContent)
+    file: FileContent;
+    getFile: () => Promise<FileContent>;
 }

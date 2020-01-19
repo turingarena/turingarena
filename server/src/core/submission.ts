@@ -29,7 +29,7 @@ export const submissionSchema = gql`
 
     type SubmissionFile {
         fieldId: ID!
-        file: File!
+        content: FileContent!
     }
 
     input SubmissionInput {

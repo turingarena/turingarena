@@ -7,7 +7,7 @@ import {
     PrimaryKey,
     Table,
 } from 'sequelize-typescript';
-import { File } from './file';
+import { FileContent } from './file-content';
 import { Problem } from './problem';
 
 /** Problem to File N-N relation. */
@@ -18,7 +18,7 @@ export class ProblemFile extends Model<ProblemFile> {
     @Column
     problemId!: number;
 
-    @ForeignKey(() => File)
+    @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
     fileId!: number;
@@ -30,7 +30,7 @@ export class ProblemFile extends Model<ProblemFile> {
     @BelongsTo(() => Problem)
     problem: Problem;
 
-    @BelongsTo(() => File)
-    file: File;
-    getFile: (options?: object) => Promise<File>;
+    @BelongsTo(() => FileContent)
+    file: FileContent;
+    getFile: (options?: object) => Promise<FileContent>;
 }

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { File } from '../core/file';
+import { FileContent } from '../core/file-content';
 import { ApiContext } from '../main/context';
 
 /**
@@ -30,7 +30,7 @@ export async function createSubmission(
     if (user === null) throw new Error(`user does not exist`);
     if (problem === null) throw new Error(`problem does not exist`);
 
-    const file = await File.createFromPath(ctx, solutionPath);
+    const file = await FileContent.createFromPath(ctx, solutionPath);
     const submission = await ctx.db.Submission.create({
         userId: user.id,
         contestId: contest.id,

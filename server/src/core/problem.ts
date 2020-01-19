@@ -13,13 +13,13 @@ import {
 import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ContestProblem } from './contest-problem';
-import { File } from './file';
+import { FileContent } from './file-content';
 import { ProblemFile } from './problem-file';
 
 export const problemSchema = gql`
     type Problem {
         name: ID!
-        files: [File!]!
+        # files: [ProblemFile!]!
     }
 
     input ProblemInput {
@@ -78,7 +78,7 @@ export class Problem extends Model<Problem> {
         }
 
         const problemFiles = await this.getProblemFiles({
-            include: [ctx.db.File],
+            include: [ctx.db.FileContent],
         });
 
         for (const problemFile of problemFiles) {
@@ -103,7 +103,7 @@ export class Problem extends Model<Problem> {
             if (fs.statSync(path.join(base, relPath)).isDirectory())
                 await this.addFiles(ctx, base, relPath);
             else {
-                const fileRow = await File.createFromPath(
+                const fileRow = await FileContent.createFromPath(
                     ctx,
                     path.join(base, relPath),
                 );

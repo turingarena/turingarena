@@ -8,7 +8,7 @@ import {
     Table,
 } from 'sequelize-typescript';
 import { Contest } from './contest';
-import { File } from './file';
+import { FileContent } from './file-content';
 
 /** Contest to File N-N relation */
 @Table({ timestamps: false })
@@ -18,7 +18,7 @@ export class ContestFile extends Model<ContestFile> {
     @Column
     contestId!: number;
 
-    @ForeignKey(() => File)
+    @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
     fileId!: number;
@@ -28,8 +28,8 @@ export class ContestFile extends Model<ContestFile> {
     @Column
     path!: string;
 
-    @BelongsTo(() => File)
-    file: File;
+    @BelongsTo(() => FileContent)
+    file: FileContent;
 
     @BelongsTo(() => Contest)
     contest: Contest;
