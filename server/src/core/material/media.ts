@@ -24,20 +24,18 @@ export const mediaSchema = gql`
     }
 `;
 
-export interface Media {
-    variants: MediaVariant[];
-}
+export type Media = MediaVariant[];
 
 export interface MediaVariant {
     language?: string;
 
-    name?: string;
-    type?: string;
+    name: string;
+    type: string;
     content: FileContent;
 }
 
 export const mediaResolvers: ResolversWithModels<{ Media: Media }> = {
     Media: {
-        variant: media => media.variants[0],
+        variant: media => media[0],
     },
 };

@@ -3,6 +3,7 @@ import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescri
 import { FindOptions } from 'sequelize/types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblem } from './contest-problem';
+import { getProblemMaterial } from './material/problem-material-generate';
 import { ProblemFile } from './problem-file';
 
 export const problemSchema = gql`
@@ -44,5 +45,6 @@ export const problemResolvers: ResolversWithModels<{
 }> = {
     Problem: {
         files: problem => problem.getFiles(),
+        material: (problem, {}, ctx) => getProblemMaterial(ctx, problem),
     },
 };
