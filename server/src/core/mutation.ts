@@ -26,10 +26,7 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        updateUser: async ({}, { user }, ctx) => {
-            // TODO
-            return true;
-        },
+        updateUser: async ({}, { user }, ctx) => true, // TODO
         createUser: async ({}, { user }, ctx) => {
             await ctx.db.User.create(user);
 
@@ -49,11 +46,7 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        updateProblem: async ({}, { problem }, ctx) => {
-            // TODO
-
-            return true;
-        },
+        updateProblem: async ({}, { problem }, ctx) => true, // TODO
         deleteProblem: async ({}, { problem }, ctx) => {
             await ctx.db.Problem.destroy({
                 where: {
@@ -66,11 +59,7 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        updateContest: async ({}, { contest }, ctx) => {
-            // TODO
-
-            return true;
-        },
+        updateContest: async ({}, { contest }, ctx) => true, // TODO
         deleteContest: async ({}, { contest }, ctx) => {
             await ctx.db.Contest.destroy({
                 where: {

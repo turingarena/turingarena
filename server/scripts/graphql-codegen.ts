@@ -12,7 +12,7 @@ const config: CodegenConfig = {
     schema: `scripts/graphql-schema.ts`,
     documents: `src/core/*.ts`,
     overwrite: true,
-    watch: process.argv[2] === '--watch',
+    watch: process.argv.includes('--watch'),
     generates: {
         'src/generated/graphql-types.ts': {
             plugins: [
