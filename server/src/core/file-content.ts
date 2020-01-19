@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
@@ -11,6 +10,7 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
+import * as ssri from 'ssri';
 import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 
@@ -50,9 +50,7 @@ export class FileContent extends Model<FileContent> {
         content: Buffer,
         type: string,
     ) {
-        const hash = createHash('sha1')
-            .update(content)
-            .digest('hex');
+        const hash = ssri.fromData(content).toString();
 
         return (
             (await ctx.db.FileContent.findOne({ where: { hash } })) ??
