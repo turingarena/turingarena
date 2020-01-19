@@ -6,9 +6,7 @@ export type ResolversWithModels<
     }
 > = {
     [KType in keyof T & keyof Resolvers]: {
-        [KField in keyof Required<Resolvers>[KType]]: Required<
-            Required<Resolvers>[KType]
-        >[KField] extends Resolver<
+        [KField in keyof Required<Resolvers>[KType]]: Required<Required<Resolvers>[KType]>[KField] extends Resolver<
             infer TResult,
             infer TParent,
             infer TContext,

@@ -1,14 +1,6 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    HasMany,
-    Model,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
 import { Problem } from './problem';
@@ -105,11 +97,7 @@ export class Submission extends Model<Submission> {
 
         for (const submissionFile of submissionFiles) {
             const content = await submissionFile.getFile();
-            const filePath = path.join(
-                base,
-                submissionFile.fieldId,
-                submissionFile.fileName,
-            );
+            const filePath = path.join(base, submissionFile.fieldId, submissionFile.fileName);
             await content.extract(filePath);
         }
     }

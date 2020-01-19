@@ -57,11 +57,7 @@ export class ApiContext {
     });
 
     /** Run a GraphQL operation in this context. */
-    async execute<T = unknown, V = {}>({
-        document,
-        operationName,
-        variableValues,
-    }: OperationRequest<V>) {
+    async execute<T = unknown, V = {}>({ document, operationName, variableValues }: OperationRequest<V>) {
         return execute<T>({
             document,
             operationName,

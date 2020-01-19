@@ -47,7 +47,7 @@
         "member-ordering": false,
         "no-use-before-declare": false,
         "arrow-parens": [true, "ban-single-arg-parens"],
-        "curly": [true, "as-needed"],
+        "curly": [true, "ignore-same-line"],
         "only-arrow-functions": [true, "allow-declarations"]
     },
     "linterOptions": {

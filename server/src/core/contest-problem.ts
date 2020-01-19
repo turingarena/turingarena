@@ -1,12 +1,5 @@
 import { gql } from 'apollo-server-core';
-import {
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';

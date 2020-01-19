@@ -44,8 +44,6 @@ export function serve(config: Config) {
     });
 
     app.listen(config.port, () => {
-        console.log(
-            `Server ready at: http://localhost:${config.port}${server.graphqlPath}`,
-        );
+        console.log(`Server ready at: http://localhost:${config.port}${server.graphqlPath}`);
     });
 }

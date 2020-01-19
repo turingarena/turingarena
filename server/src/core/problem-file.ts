@@ -1,13 +1,5 @@
 import { gql } from 'apollo-server-core';
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { FileContent } from './file-content';

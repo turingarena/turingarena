@@ -6,22 +6,8 @@ it('test user add and delete', async () => {
         document: gql`
             mutation UserSpec {
                 init
-                createUser(
-                    user: {
-                        name: "Alessandro Righi"
-                        username: "alerighi"
-                        token: "alerighi"
-                        role: ADMIN
-                    }
-                )
-                updateUser(
-                    user: {
-                        name: "Alessandro Righi"
-                        username: "alerighi"
-                        token: "alerighi2"
-                        role: USER
-                    }
-                )
+                createUser(user: { name: "Alessandro Righi", username: "alerighi", token: "alerighi", role: ADMIN })
+                updateUser(user: { name: "Alessandro Righi", username: "alerighi", token: "alerighi2", role: USER })
                 deleteUser(user: "alerighi")
             }
         `,

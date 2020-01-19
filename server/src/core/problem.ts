@@ -1,12 +1,5 @@
 import { gql } from 'apollo-server-core';
-import {
-    Column,
-    HasMany,
-    Index,
-    Model,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
+import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblem } from './contest-problem';

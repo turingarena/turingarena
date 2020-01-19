@@ -2,16 +2,7 @@ import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
-import {
-    AllowNull,
-    Column,
-    DefaultScope,
-    Index,
-    Model,
-    Scopes,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
+import { AllowNull, Column, DefaultScope, Index, Model, Scopes, Table, Unique } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
@@ -55,11 +46,7 @@ export class FileContent extends Model<FileContent> {
     @Column
     content!: Buffer;
 
-    static async createFromContent(
-        ctx: ApiContext,
-        content: Buffer,
-        type: string,
-    ) {
+    static async createFromContent(ctx: ApiContext, content: Buffer, type: string) {
         const hash = ssri.fromData(content).toString();
 
         return (
@@ -93,9 +80,6 @@ export const fileContentResolvers: ResolversWithModels<{
     FileContent: FileContent;
 }> = {
     FileContent: {
-        base64: async content =>
-            (
-                await content.reload({ attributes: ['id', 'content'] })
-            ).content.toString('base64'),
+        base64: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('base64'),
     },
 };

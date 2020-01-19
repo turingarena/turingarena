@@ -28,8 +28,7 @@ export interface ContestMetadata {
 export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     const turingarenaYAMLPath = path.join(dir, 'turingarena.yaml');
 
-    if (!fs.existsSync(turingarenaYAMLPath))
-        throw Error('Invalid contest directory');
+    if (!fs.existsSync(turingarenaYAMLPath)) throw Error('Invalid contest directory');
 
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
     const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
@@ -38,19 +37,19 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
 
     await contest.loadFiles(ctx, path.join(dir, 'files'));
 
-    for (const user of metadata.users)
+    for (const user of metadata.users) {
         await contest.createParticipation(
             {
                 user: {
                     ...user,
-                    role:
-                        user.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
+                    role: user.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
                 },
             },
             {
                 include: [ctx.db.User],
             },
         );
+    }
 
     for (const name of metadata.problems) {
         const problem = await ctx.db.Problem.create({

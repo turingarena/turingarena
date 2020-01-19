@@ -1,12 +1,4 @@
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { FileContent } from './file-content';
 import { Submission } from './submission';
 

@@ -2,15 +2,7 @@ import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
-import {
-    AllowNull,
-    Column,
-    HasMany,
-    Index,
-    Model,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
+import { AllowNull, Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
 import { MutationResolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
@@ -64,30 +56,21 @@ export class Contest extends Model<Contest> {
     /** The list of problems in this contest */
     @HasMany(() => ContestProblem)
     problems!: ContestProblem[];
-    createProblem!: (
-        problem: object,
-        options?: object,
-    ) => Promise<ContestProblem>;
+    createProblem!: (problem: object, options?: object) => Promise<ContestProblem>;
     getProblems!: () => Promise<ContestProblem[]>;
 
     /** The list of users in this contest */
     @HasMany(() => Participation)
     participations!: Participation[];
     getParticipations!: (options: object) => Promise<Participation[]>;
-    createParticipation!: (
-        participation: object,
-        options: object,
-    ) => Promise<Participation>;
+    createParticipation!: (participation: object, options: object) => Promise<Participation>;
     addParticipation!: (options: object) => Promise<unknown>;
 
     /** The list of files in this contest */
     @HasMany(() => ContestFile)
     files!: ContestFile[];
     getFiles!: (options: object) => Promise<ContestFile[]>;
-    createFile!: (
-        contestFile: object,
-        options?: object,
-    ) => Promise<ContestFile>;
+    createFile!: (contestFile: object, options?: object) => Promise<ContestFile>;
 
     /**
      * Add files to this contest
@@ -100,13 +83,9 @@ export class Contest extends Model<Contest> {
         const files = fs.readdirSync(path.join(base, dir));
         for (const file of files) {
             const relPath = path.join(dir, file);
-            if (fs.statSync(path.join(base, relPath)).isDirectory())
-                await this.loadFiles(ctx, base, relPath);
+            if (fs.statSync(path.join(base, relPath)).isDirectory()) await this.loadFiles(ctx, base, relPath);
             else {
-                const fileRow = await FileContent.createFromPath(
-                    ctx,
-                    path.join(base, relPath),
-                );
+                const fileRow = await FileContent.createFromPath(ctx, path.join(base, relPath));
                 await this.createFile({
                     path: relPath,
                     fileId: fileRow.id,
@@ -122,9 +101,7 @@ export const contestMutationResolvers: MutationResolvers = {
             (await ctx.db.Contest.findOne({
                 where: { name: contestName },
             })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const problem =
-            (await ctx.db.Problem.findOne({ where: { name } })) ??
-            ctx.fail(`no such problem '${name}'`);
+        const problem = (await ctx.db.Problem.findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
         await contest.createProblem({
             problem,
         });
@@ -136,9 +113,7 @@ export const contestMutationResolvers: MutationResolvers = {
             (await ctx.db.Contest.findOne({
                 where: { name: contestName },
             })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const user =
-            (await ctx.db.User.findOne({ where: { username } })) ??
-            ctx.fail(`no such user '${username}'`);
+        const user = (await ctx.db.User.findOne({ where: { username } })) ?? ctx.fail(`no such user '${username}'`);
         await contest.addParticipation(user);
 
         return true;

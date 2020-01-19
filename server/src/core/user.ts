@@ -1,13 +1,5 @@
 import { gql } from 'apollo-server-core';
-import {
-    AllowNull,
-    Column,
-    HasMany,
-    Index,
-    Model,
-    Table,
-    Unique,
-} from 'sequelize-typescript';
+import { AllowNull, Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Participation } from './participation';
 
