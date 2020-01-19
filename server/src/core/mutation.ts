@@ -1,6 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
-import { contestMutationResolvers } from './contest';
+import { Contest, contestMutationResolvers } from './contest';
+import { Problem } from './problem';
+import { User } from './user';
 
 export const mutationSchema = gql`
     type Mutation {
@@ -34,12 +36,12 @@ export const mutationResolvers: Resolvers = {
         },
         updateUser: async ({}, { user }, ctx) => true, // TODO
         createUser: async ({}, { user }, ctx) => {
-            await ctx.db.User.create(user);
+            await ctx.table(User).create(user);
 
             return true;
         },
         deleteUser: async ({}, { user }, ctx) => {
-            await ctx.db.User.destroy({
+            await ctx.table(User).destroy({
                 where: {
                     username: user,
                 },
@@ -48,26 +50,26 @@ export const mutationResolvers: Resolvers = {
             return true;
         },
         createProblem: async ({}, { problem }, ctx) => {
-            await ctx.db.Problem.create(problem);
+            await ctx.table(Problem).create(problem);
 
             return true;
         },
         updateProblem: async ({}, { problem }, ctx) => true, // TODO
         deleteProblem: async ({}, { problem }, ctx) => {
-            await ctx.db.Problem.destroy({
+            await ctx.table(Problem).destroy({
                 where: {
                     name: problem,
                 },
             });
         },
         createContest: async ({}, { contest }, ctx) => {
-            await ctx.db.Contest.create(contest);
+            await ctx.table(Contest).create(contest);
 
             return true;
         },
         updateContest: async ({}, { contest }, ctx) => true, // TODO
         deleteContest: async ({}, { contest }, ctx) => {
-            await ctx.db.Contest.destroy({
+            await ctx.table(Contest).destroy({
                 where: {
                     name,
                 },

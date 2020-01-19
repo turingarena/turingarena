@@ -1,5 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
+import { Contest } from './contest';
+import { Problem } from './problem';
+import { User } from './user';
 
 export const querySchema = gql`
     type Query {
@@ -15,14 +18,14 @@ export const querySchema = gql`
 
 export const queryResolvers: Resolvers = {
     Query: {
-        users: async ({}, {}, ctx) => ctx.db.User.findAll({ include: [ctx.db.Contest] }),
+        users: async ({}, {}, ctx) => ctx.table(User).findAll({ include: [ctx.table(Contest)] }),
         user: async ({}, { username }, ctx) =>
-            (await ctx.db.User.findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`),
-        contests: async ({}, {}, ctx) => ctx.db.Contest.findAll(),
+            (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`),
+        contests: async ({}, {}, ctx) => ctx.table(Contest).findAll(),
         contest: async ({}, { name }, ctx) =>
-            (await ctx.db.Contest.findOne({ where: { name } })) ?? ctx.fail(`no such contest: ${name}`),
-        problems: async ({}, {}, ctx) => ctx.db.Problem.findAll(),
+            (await ctx.table(Contest).findOne({ where: { name } })) ?? ctx.fail(`no such contest: ${name}`),
+        problems: async ({}, {}, ctx) => ctx.table(Problem).findAll(),
         problem: async ({}, { name }, ctx) =>
-            (await ctx.db.Problem.findOne({ where: { name } })) ?? ctx.fail(`no such problem: ${name}`),
+            (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem: ${name}`),
     },
 };

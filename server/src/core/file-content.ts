@@ -50,8 +50,8 @@ export class FileContent extends Model<FileContent> {
         const hash = ssri.fromData(content).toString();
 
         return (
-            (await ctx.db.FileContent.findOne({ where: { hash } })) ??
-            (await ctx.db.FileContent.create({ content, type, hash }))
+            (await ctx.table(FileContent).findOne({ where: { hash } })) ??
+            (await ctx.table(FileContent).create({ content, type, hash }))
         );
     }
 

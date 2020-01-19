@@ -79,16 +79,6 @@ export class Submission extends Model<Submission> {
     problem!: Problem;
     getProblem!: (options?: object) => Promise<Problem>;
 
-    /** User that made this submission */
-    @BelongsTo(() => User)
-    participation!: User;
-    getUser!: (options?: object) => Promise<User>;
-
-    /** Contest to which this submission belongs to */
-    @BelongsTo(() => Contest)
-    contest!: Contest;
-    getContest!: (options?: object) => Promise<Contest>;
-
     /**
      * Extract the files of this submission in the specified base dir.
      * It extract files as: `${base}/${submissionId}/${fieldId}/${fileName}.
@@ -100,7 +90,7 @@ export class Submission extends Model<Submission> {
 
         for (const submissionFile of submissionFiles) {
             const content = await submissionFile.getFile();
-            const filePath = path.join(base, this.id.toString(), submissionFile.fieldId, submissionFile.fileName);
+            const filePath = path.join(base, this.id as string, submissionFile.fieldId, submissionFile.fileName);
             await content.extract(filePath);
         }
     }

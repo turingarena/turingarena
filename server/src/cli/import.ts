@@ -1,8 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
+import { Contest } from '../core/contest';
+import { ContestProblem } from '../core/contest-problem';
+import { Problem } from '../core/problem';
 import { getProblemMetadata, importProblemFiles } from '../core/problem-util';
-import { UserRole } from '../core/user';
+import { User, UserRole } from '../core/user';
 import { ApiContext } from '../main/context';
 
 export interface ContestMetadata {
@@ -33,7 +36,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
     const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
-    const contest = await ctx.db.Contest.create(metadata);
+    const contest = await ctx.table(Contest).create(metadata);
 
     await contest.loadFiles(ctx, path.join(dir, 'files'));
 
@@ -46,19 +49,19 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
                 },
             },
             {
-                include: [ctx.db.User],
+                include: [ctx.table(User)],
             },
         );
     }
 
     for (const name of metadata.problems) {
-        const problem = await ctx.db.Problem.create({
+        const problem = await ctx.table(Problem).create({
             name,
         });
 
         await importProblemFiles(ctx, problem, path.join(dir, name));
 
-        await ctx.db.ContestProblem.create({
+        await ctx.table(ContestProblem).create({
             contestId: contest.id,
             problemId: problem.id,
         });

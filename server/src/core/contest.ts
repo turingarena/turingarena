@@ -10,6 +10,8 @@ import { ContestFile } from './contest-file';
 import { ContestProblem } from './contest-problem';
 import { FileContent } from './file-content';
 import { Participation } from './participation';
+import { Problem } from './problem';
+import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
@@ -98,10 +100,11 @@ export class Contest extends Model<Contest> {
 export const contestMutationResolvers: MutationResolvers = {
     addProblem: async ({}, { contestName, name }, ctx) => {
         const contest =
-            (await ctx.db.Contest.findOne({
+            (await ctx.table(Contest).findOne({
                 where: { name: contestName },
             })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const problem = (await ctx.db.Problem.findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
+        const problem =
+            (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
         await contest.createProblem({
             problem,
         });
@@ -110,10 +113,10 @@ export const contestMutationResolvers: MutationResolvers = {
     },
     addUser: async ({}, { contestName, username }, ctx) => {
         const contest =
-            (await ctx.db.Contest.findOne({
+            (await ctx.table(Contest).findOne({
                 where: { name: contestName },
             })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const user = (await ctx.db.User.findOne({ where: { username } })) ?? ctx.fail(`no such user '${username}'`);
+        const user = (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user '${username}'`);
         await contest.addParticipation(user);
 
         return true;

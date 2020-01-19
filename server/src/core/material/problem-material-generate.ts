@@ -1,17 +1,19 @@
 import { ApiContext } from '../../main/context';
+import { FileContent } from '../file-content';
 import { Problem } from '../problem';
+import { ProblemFile } from '../problem-file';
 import { getProblemMetadata } from '../problem-util';
 import { MediaVariant } from './media';
 import { ProblemAttachment, ProblemMaterial } from './problem-material';
 
 async function loadContent(ctx: ApiContext, problem: Problem, path: string) {
     return (
-        (await ctx.db.ProblemFile.findOne({
+        (await ctx.table(ProblemFile).findOne({
             where: {
                 problemId: problem.id as string,
                 path,
             },
-            include: [ctx.db.FileContent],
+            include: [ctx.table(FileContent)],
         })) ?? ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`)
     ).content;
 }

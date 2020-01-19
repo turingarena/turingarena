@@ -1,21 +1,11 @@
 import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
-import { Model, Repository, Sequelize } from 'sequelize-typescript';
+import { Model, Sequelize } from 'sequelize-typescript';
 import { modelConstructors, resolvers, schema } from '../core/index';
-import { Config, defaultConfig } from './config';
 import { Submission } from '../core/submission';
-import { SyncOptions } from 'sequelize';
+import { Config, defaultConfig } from './config';
 
 // Definitions related to models, their classes, and their repositories.
-
-export type ModelConstructorRecord = typeof modelConstructors;
-export type ModelName = keyof ModelConstructorRecord;
-export type ModelRecord = {
-    [K in ModelName]: InstanceType<ModelConstructorRecord[K]>;
-};
-export type ModelRepositoryRecord = {
-    [K in ModelName]: Repository<ModelRecord[K]>;
-};
 
 export interface OperationRequest<V> {
     document: DocumentNode;
@@ -31,11 +21,13 @@ export class ApiContext {
     /** Instance of Sequelize to use in this API operation. */
     readonly sequelize: Sequelize;
 
-    /** Contains an entry for each available repository of models. */
-    readonly db: ModelRepositoryRecord;
-
     /** Current server configuration */
     readonly config: Config;
+
+    /** Shortcut for `this.sequelize.getRepository(modelClass)`. */
+    table<M extends Model>(modelClass: new () => M) {
+        return this.sequelize.getRepository(modelClass);
+    }
 
     constructor(config: Config = defaultConfig) {
         this.config = config;
@@ -49,15 +41,10 @@ export class ApiContext {
             repositoryMode: true,
         });
 
-        this.db = Object.fromEntries(
-            Object.entries(modelConstructors).map(([key, modelConstructor]) => [
-                key,
-                this.sequelize.getRepository<Model>(modelConstructor),
-            ]),
-        ) as ModelRepositoryRecord;
-
-        this.db.Submission.afterSync('create foreign key', () => {
-            this.sequelize.query('ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY KEY(userId, contestId) REFERENCES Participations(userId, contestId)');
+        this.table(Submission).afterSync('create foreign key', () => {
+            this.sequelize.query(
+                'ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY KEY(userId, contestId) REFERENCES Participations(userId, contestId)',
+            );
         });
     }
 

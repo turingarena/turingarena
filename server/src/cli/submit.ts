@@ -1,6 +1,11 @@
 import * as path from 'path';
+import { Contest } from '../core/contest';
 import { evaluate } from '../core/evaluate';
 import { FileContent } from '../core/file-content';
+import { Problem } from '../core/problem';
+import { Submission } from '../core/submission';
+import { SubmissionFile } from '../core/submission-file';
+import { User } from '../core/user';
 import { ApiContext } from '../main/context';
 
 /**
@@ -19,11 +24,11 @@ export async function createSubmission(
     problemName: string,
     solutionPath: string,
 ) {
-    const user = await ctx.db.User.findOne({ where: { username: userName } });
-    const problem = await ctx.db.Problem.findOne({
+    const user = await ctx.table(User).findOne({ where: { username: userName } });
+    const problem = await ctx.table(Problem).findOne({
         where: { name: problemName },
     });
-    const contest = await ctx.db.Contest.findOne({
+    const contest = await ctx.table(Contest).findOne({
         where: { name: contestName },
     });
 
@@ -32,13 +37,13 @@ export async function createSubmission(
     if (problem === null) throw new Error(`problem does not exist`);
 
     const file = await FileContent.createFromPath(ctx, solutionPath);
-    const submission = await ctx.db.Submission.create({
+    const submission = await ctx.table(Submission).create({
         contestId: contest.id,
         problemId: problem.id,
         userId: user.id,
     });
 
-    await ctx.db.SubmissionFile.create({
+    await ctx.table(SubmissionFile).create({
         fieldId: 'solution',
         fileName: path.basename(solutionPath),
         submissionId: submission.id,

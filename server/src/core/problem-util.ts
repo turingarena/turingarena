@@ -4,6 +4,7 @@ import * as path from 'path';
 import { ApiContext } from '../main/context';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
+import { ProblemFile } from './problem-file';
 
 /** Generic problem metadata */
 export interface ProblemMetadata {
@@ -36,13 +37,13 @@ export interface ProblemMetadata {
 
 export async function getProblemMetadata(ctx: ApiContext, problem: Problem): Promise<ProblemMetadata> {
     const metadataPath = '.task-info.json';
-    const metadataProblemFile = await ctx.db.ProblemFile.findOne({
+    const metadataProblemFile = await ctx.table(ProblemFile).findOne({
         where: {
             // FIXME: fix typing of .id in some BaseModel
             problemId: problem.id as string,
             path: metadataPath,
         },
-        include: [ctx.db.FileContent.scope('withData')],
+        include: [ctx.table(FileContent).scope('withData')],
     });
 
     if (metadataProblemFile === null) {
@@ -77,7 +78,7 @@ export async function extractProblemFiles(ctx: ApiContext, problem: Problem, bas
     }
 
     const problemFiles = await problem.getFiles({
-        include: [ctx.db.FileContent.scope('withData')],
+        include: [ctx.table(FileContent).scope('withData')],
     });
 
     for (const problemFile of problemFiles) {

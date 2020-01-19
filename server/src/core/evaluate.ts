@@ -2,7 +2,8 @@ import { spawn } from 'child_process';
 import * as path from 'path';
 import * as readline from 'readline';
 import { ApiContext } from '../main/context';
-import { EvaluationStatus } from './evaluation';
+import { Evaluation, EvaluationStatus } from './evaluation';
+import { EvaluationEvent } from './evaluation-event';
 import { extractProblemFiles } from './problem-util';
 import { Submission } from './submission';
 
@@ -15,7 +16,7 @@ import { Submission } from './submission';
 export async function evaluate(ctx: ApiContext, submission: Submission) {
     console.log(`Evaluating submission ${submission.id}`);
 
-    const evaluation = await ctx.db.Evaluation.create({
+    const evaluation = await ctx.table(Evaluation).create({
         submissionId: submission.id,
         status: EvaluationStatus.EVALUATING,
         isOfficial: false,
@@ -37,7 +38,7 @@ export async function evaluate(ctx: ApiContext, submission: Submission) {
 
     stdoutLineReader.on('line', async event => {
         console.log(`Received task-maker event ${event}`);
-        await ctx.db.EvaluationEvent.create({
+        await ctx.table(EvaluationEvent).create({
             evaluationId: evaluation.id,
             data: event,
         });
