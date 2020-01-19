@@ -1,6 +1,7 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { schema } from '../core';
+import { FileContent } from '../core/file-content';
 import { Config } from './config';
 import { ApiContext } from './context';
 
@@ -9,11 +10,11 @@ export function serve(config: Config) {
 
     console.log(config);
 
-    const context = new ApiContext(config);
+    const ctx = new ApiContext(config);
 
     const server = new ApolloServer({
         typeDefs: schema,
-        executor: req => context.execute(req),
+        executor: req => ctx.execute(req),
         playground: true,
         formatError: err => {
             console.warn(err);
@@ -28,7 +29,7 @@ export function serve(config: Config) {
      */
     app.get('/files/:hash/*', async (req, res, next) => {
         const hash = req.params.hash;
-        const file = await context.db.FileContent.findOne({ where: { hash } });
+        const file = await ctx.table(FileContent).findOne({ where: { hash } });
         if (file === null) next();
         else {
             res.contentType(file.type);
