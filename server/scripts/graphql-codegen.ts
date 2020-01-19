@@ -3,7 +3,7 @@ import { generate } from '@graphql-codegen/cli';
 
 type CodegenConfig = Parameters<typeof generate>[0];
 
-const modelNames = ['User', 'Contest'];
+const modelNames = ['User', 'Contest', 'FileContent'];
 const mappers = Object.fromEntries(
     modelNames.map(name => [name, `ModelRecord['${name}']`]),
 );
@@ -23,7 +23,7 @@ const config: CodegenConfig = {
                     add: '/* tslint:disable */',
                 },
                 {
-                    add: `import { ModelRecord } from '../core/index';`,
+                    add: `import { ModelRecord } from '../main/context';`,
                 },
             ],
             config: {
