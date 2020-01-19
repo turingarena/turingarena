@@ -10,14 +10,6 @@ export function serve(config: Config) {
 
     const context = new ApiContext(config);
 
-    context.sequelize.sync().then(() => {
-        context.db.File.create({
-            content: 'ciao',
-            fileName: 'ciao.txt',
-            type: 'text/plain',
-        });
-    });
-
     const server = new ApolloServer({
         typeDefs: schema,
         executor: req => context.execute(req),

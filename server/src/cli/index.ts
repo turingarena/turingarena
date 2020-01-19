@@ -20,30 +20,35 @@ async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     return context;
 }
 
-program.name('turingarena').version('1.0');
+program
+    .name('turingarena')
+    .version('1.0')
+    .option(
+        '-c, --config <path>',
+        'configuration file',
+        'turingarena.config.json',
+    );
 
 program
     .command('serve')
     .description('start TuringArena server')
     .action(opts => {
-        serve(loadConfig(opts.config));
+        serve(loadConfig(opts.parent.config));
     });
 
 program
     .command('import [dir]')
     .description('import a contest')
-    .option('-c, --config <path>', 'configuration file')
     .action(async (dir, opts) =>
-        importContest(await ctxFromConfig(opts.config), dir),
+        importContest(await ctxFromConfig(opts.parent.config), dir),
     );
 
 program
     .command('submit <user> <contest> <problem> <solution>')
     .description('create a submission')
-    .option('-c, --config <path>', 'configuration file')
     .action(async (user, contest, problem, solution, opts) =>
         createSubmission(
-            await ctxFromConfig(opts.config),
+            await ctxFromConfig(opts.parent.config),
             user,
             contest,
             problem,

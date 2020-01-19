@@ -7,8 +7,6 @@ export interface Config {
     host: string;
 }
 
-const configFilePath = 'turingarena.config.json';
-
 export const defaultConfig: Config = {
     db: {
         storage: ':memory:',
@@ -21,13 +19,5 @@ export const defaultConfig: Config = {
 export function loadConfig(path?: string): Config {
     if (path === undefined) return defaultConfig;
 
-    try {
-        return JSON.parse(readFileSync(path ?? configFilePath).toString());
-    } catch (e) {
-        console.warn(
-            `Cannot read config file ${path}: ${e} using defualt config`,
-        );
-
-        return defaultConfig;
-    }
+    return JSON.parse(readFileSync(path).toString());
 }
