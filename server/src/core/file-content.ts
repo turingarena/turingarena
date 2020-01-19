@@ -5,6 +5,7 @@ import * as path from 'path';
 import {
     AllowNull,
     Column,
+    DefaultScope,
     Index,
     Model,
     Table,
@@ -26,6 +27,9 @@ export const fileContentSchema = gql`
 `;
 
 /** A generic file in TuringArena. */
+@DefaultScope(() => ({
+    attributes: ['id', 'hash', 'type'],
+}))
 @Table({ updatedAt: false })
 export class FileContent extends Model<FileContent> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
@@ -81,6 +85,9 @@ export class FileContent extends Model<FileContent> {
 
 export const fileContentResolvers: Resolvers = {
     FileContent: {
-        base64: content => content.content.toString('base64'),
+        base64: async content =>
+            (
+                await content.reload({ attributes: ['id', 'content'] })
+            ).content.toString('base64'),
     },
 };

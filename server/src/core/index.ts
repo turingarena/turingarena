@@ -8,7 +8,11 @@ import {
     contestProblemSchema,
 } from './contest-problem';
 import { Evaluation, EvaluationEvent } from './evaluation';
-import { FileContent, fileContentSchema } from './file-content';
+import {
+    FileContent,
+    fileContentResolvers,
+    fileContentSchema,
+} from './file-content';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
 import { Problem, problemResolvers, problemSchema } from './problem';
@@ -64,4 +68,5 @@ export const resolvers: Resolvers = {
     ...problemResolvers,
     ...problemFileResolvers,
     ...contestProblemResolvers,
+    ...fileContentResolvers,
 };
