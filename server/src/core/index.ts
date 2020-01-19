@@ -3,6 +3,7 @@ import { Resolvers } from '../generated/graphql-types';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { ContestFile } from './contest-file';
 import { ContestProblem, contestProblemResolvers, contestProblemSchema } from './contest-problem';
+import { contestViewSchema } from './contest-view';
 import { Evaluation } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { valenceSchema } from './feedback/valence';
@@ -35,6 +36,8 @@ export const schema = gql`
     ${problemFileSchema}
     ${fileContentSchema}
     ${submissionSchema}
+
+    ${contestViewSchema}
 
     ${textSchema}
     ${mediaSchema}
