@@ -13,6 +13,12 @@ import {
     fileContentResolvers,
     fileContentSchema,
 } from './file-content';
+import { mediaResolvers, mediaSchema } from './material/media';
+import {
+    problemMaterialResolvers,
+    problemMaterialSchema,
+} from './material/problem-material';
+import { textResolvers, textSchema } from './material/text';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
 import { Problem, problemResolvers, problemSchema } from './problem';
@@ -37,6 +43,10 @@ export const schema = gql`
     ${problemFileSchema}
     ${fileContentSchema}
     ${submissionSchema}
+
+    ${textSchema}
+    ${mediaSchema}
+    ${problemMaterialSchema}
 
     enum Ok {
         OK
@@ -69,4 +79,8 @@ export const resolvers: Resolvers = {
     ...problemFileResolvers,
     ...contestProblemResolvers,
     ...fileContentResolvers,
+
+    ...textResolvers,
+    ...mediaResolvers,
+    ...problemMaterialResolvers,
 };

@@ -16,6 +16,7 @@ export const problemSchema = gql`
     type Problem {
         name: ID!
         files: [ProblemFile!]!
+        material: ProblemMaterial!
     }
 
     input ProblemInput {
