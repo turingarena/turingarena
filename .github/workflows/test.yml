@@ -5,38 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install dependencies
-      run: sudo apt update && sudo apt install libsqlite3-dev libseccomp-dev
-    - name: Install Rust nightly toolchain
-      run: rustup default nightly
-    - name: Update path
-      run: export PATH="$HOME/.cargo/bin:$PATH" && echo $PATH
-    # 2019-12-26
-    # Task-maker installation commented because installation failed     
-    # - name: Install task-maker-rust
-    #  run: cargo install task-maker-rust --git https://github.com/edomora97/task-maker-rust.git
-    - name: Build Rust
-      run: cargo build --all-features
-    - name: Build Rust doc
-      run: cargo doc --no-deps
-    - name: Deploy documentation to GitHub Pages
-      uses: crazy-max/ghaction-github-pages@v1
-      with:
-        target_branch: gh-pages
-        build_dir: target/doc/
-      env:
-        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
-    - name: Check rust formatting
-      run: rustup component add rustfmt && cargo fmt -- --check
-    - name: Run Rust tests
-      run: cargo test --no-fail-fast
-    - name: Install Web
-      run: cd turingarena-web-client/web/ && npm ci
-    - name: Prepare Web
-      run: cd turingarena-web-client/web/ && ./prepare.sh
-    - name: Lint Web
-      run: cd turingarena-web-client/web/ && npm run lint
-    - name: Run Web tests
-      run: cd turingarena-web-client/web/ && npm run test -- --no-watch --no-progress --browsers=ChromeHeadless
-    - name: Run Web e2e tests
-      run: cd turingarena-web-client/web/ && npm run e2e
+    - name: npm ci
+      run: cd server/ && npm ci
+    - name: npm run check
+      run: cd server/ && npm run check
