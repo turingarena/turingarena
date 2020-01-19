@@ -2,9 +2,13 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { ContestFile } from './contest-file';
-import { ContestProblem } from './contest-problem';
+import {
+    ContestProblem,
+    contestProblemResolvers,
+    contestProblemSchema,
+} from './contest-problem';
 import { Evaluation, EvaluationEvent } from './evaluation';
-import { FileContent, fileSchema } from './file-content';
+import { FileContent, fileContentSchema } from './file-content';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
 import { Problem, problemResolvers, problemSchema } from './problem';
@@ -24,9 +28,10 @@ export const schema = gql`
     ${mutationSchema}
     ${userSchema}
     ${contestSchema}
+    ${contestProblemSchema}
     ${problemSchema}
     ${problemFileSchema}
-    ${fileSchema}
+    ${fileContentSchema}
     ${submissionSchema}
 
     enum Ok {
@@ -58,4 +63,5 @@ export const resolvers: Resolvers = {
     ...contestResolvers,
     ...problemResolvers,
     ...problemFileResolvers,
+    ...contestProblemResolvers,
 };

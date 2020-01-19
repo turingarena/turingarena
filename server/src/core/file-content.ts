@@ -14,7 +14,7 @@ import * as ssri from 'ssri';
 import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 
-export const fileSchema = gql`
+export const fileContentSchema = gql`
     type FileContent {
         hash: ID!
         base64: String!

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
+import { DateTime } from 'luxon';
 import * as path from 'path';
 import {
     AllowNull,
@@ -23,6 +24,7 @@ export const contestSchema = gql`
         title: String!
         start: String!
         end: String!
+        problems: [ContestProblem!]!
     }
 
     type ContestMutations {
@@ -72,11 +74,12 @@ export class Contest extends Model<Contest> {
 
     /** The list of problems in this contest */
     @HasMany(() => ContestProblem)
-    contestProblems: ContestProblem[];
-    createContestProblem: (
-        contestProblem: object,
+    problems: ContestProblem[];
+    createProblem: (
+        problem: object,
         options?: object,
     ) => Promise<ContestProblem>;
+    getProblems: () => Promise<ContestProblem[]>;
 
     /** The list of users in this contest */
     @HasMany(() => Participation)
@@ -89,12 +92,9 @@ export class Contest extends Model<Contest> {
 
     /** The list of files in this contest */
     @HasMany(() => ContestFile)
-    contestFiles: ContestFile[];
-    getContestFiles: (options: object) => Promise<ContestFile[]>;
-    createContestFile: (
-        contestFile: object,
-        options?: object,
-    ) => Promise<ContestFile>;
+    files: ContestFile[];
+    getFiles: (options: object) => Promise<ContestFile[]>;
+    createFile: (contestFile: object, options?: object) => Promise<ContestFile>;
 
     /**
      * Add files to this contest
@@ -103,18 +103,18 @@ export class Contest extends Model<Contest> {
      * @param base Base directory to add
      * @param dir  Relative directory in recursive call
      */
-    async addFiles(ctx: ApiContext, base: string, dir: string = '') {
+    async loadFiles(ctx: ApiContext, base: string, dir: string = '') {
         const files = fs.readdirSync(path.join(base, dir));
         for (const file of files) {
             const relPath = path.join(dir, file);
             if (fs.statSync(path.join(base, relPath)).isDirectory())
-                await this.addFiles(ctx, base, relPath);
+                await this.loadFiles(ctx, base, relPath);
             else {
                 const fileRow = await FileContent.createFromPath(
                     ctx,
                     path.join(base, relPath),
                 );
-                await this.createContestFile({
+                await this.createFile({
                     path: relPath,
                     fileId: fileRow.id,
                 });
@@ -125,7 +125,9 @@ export class Contest extends Model<Contest> {
 
 export const contestResolvers: Resolvers = {
     Contest: {
-        // TODO: resolver for start and end to return in correct ISO format
+        start: contest => DateTime.fromJSDate(contest.start).toISO(),
+        end: contest => DateTime.fromJSDate(contest.end).toISO(),
+        problems: contest => contest.getProblems(),
     },
     ContestMutations: {
         addProblem: async ({ contest }, { name }, ctx) => {
