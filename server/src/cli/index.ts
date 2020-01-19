@@ -20,6 +20,8 @@ async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     return context;
 }
 
+// tslint:disable:no-unsafe-any
+
 program
     .name('turingarena')
     .version('1.0')

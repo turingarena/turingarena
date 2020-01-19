@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../generated/graphql-types';
+import { ResolversWithModels } from '../../main/resolver-types';
 import { FileContent } from '../file-content';
 
 export const mediaSchema = gql`
@@ -36,7 +36,7 @@ export interface MediaVariant {
     content: FileContent;
 }
 
-export const mediaResolvers: Resolvers = {
+export const mediaResolvers: ResolversWithModels<{ Media: Media }> = {
     Media: {
         variant: media => media.variants[0],
     },

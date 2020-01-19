@@ -11,8 +11,9 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { MutationResolvers, Resolvers } from '../generated/graphql-types';
+import { MutationResolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
+import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
 import { ContestProblem } from './contest-problem';
 import { FileContent } from './file-content';
@@ -144,10 +145,12 @@ export const contestMutationResolvers: MutationResolvers = {
     },
 };
 
-export const contestResolvers: Resolvers = {
+export const contestResolvers: ResolversWithModels<{
+    Contest: Contest;
+}> = {
     Contest: {
-        start: (contest: Contest) => DateTime.fromJSDate(contest.start).toISO(),
-        end: (contest: Contest) => DateTime.fromJSDate(contest.end).toISO(),
-        problems: (contest: Contest) => contest.getProblems(),
+        start: contest => DateTime.fromJSDate(contest.start).toISO(),
+        end: contest => DateTime.fromJSDate(contest.end).toISO(),
+        problems: contest => contest.getProblems(),
     },
 };

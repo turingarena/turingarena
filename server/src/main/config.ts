@@ -16,8 +16,8 @@ export const defaultConfig: Config = {
     host: 'localhost',
 };
 
-export function loadConfig(path?: string): Config {
+export function loadConfig(path?: string) {
     if (path === undefined) return defaultConfig;
 
-    return JSON.parse(readFileSync(path).toString());
+    return JSON.parse(readFileSync(path).toString()) as Config;
 }

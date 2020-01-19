@@ -41,7 +41,8 @@ export async function getProblemMetadata(
     const metadataPath = '.task-info.json';
     const metadataProblemFile = await ctx.db.ProblemFile.findOne({
         where: {
-            problemId: problem.id,
+            // FIXME: fix typing of .id in some BaseModel
+            problemId: problem.id as string,
             path: metadataPath,
         },
         include: [ctx.db.FileContent.scope('withData')],
@@ -52,7 +53,9 @@ export async function getProblemMetadata(
             `Problem ${problem.name} is missing metadata file ${metadataPath}`,
         );
 
-    return JSON.parse(metadataProblemFile.content.content.toString());
+    return JSON.parse(
+        metadataProblemFile.content.content.toString(),
+    ) as ProblemMetadata;
 }
 
 /**
@@ -73,7 +76,8 @@ export async function extractProblemFiles(
     const problemDir = path.join(
         base,
         problem.name,
-        DateTime.fromJSDate(problem.updatedAt).toFormat(
+        // FIXME: make updatedAt be correctly typed in some BaseModel
+        DateTime.fromJSDate(problem.updatedAt as Date).toFormat(
             'x--yyyy-MM-dd--hh-mm-ss',
         ),
     );

@@ -5,6 +5,20 @@ import { getProblemMetadata, importProblemFiles } from '../core/problem-util';
 import { UserRole } from '../core/user';
 import { ApiContext } from '../main/context';
 
+export interface ContestMetadata {
+    name: string;
+    title: string;
+    start: string;
+    end: string;
+    users: Array<{
+        username: string;
+        token: string;
+        name: string;
+        role?: 'user' | 'admin';
+    }>;
+    problems: string[];
+}
+
 /**
  * Import a contest in the database
  *
@@ -18,7 +32,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
         throw Error('Invalid contest directory');
 
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
-    const metadata = yaml.parse(turingarenaYAML);
+    const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
     const contest = await ctx.db.Contest.create(metadata);
 

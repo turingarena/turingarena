@@ -8,7 +8,7 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { Resolvers } from '../generated/graphql-types';
+import { ResolversWithModels } from '../main/resolver-types';
 import { Participation } from './participation';
 
 export const userSchema = gql`
@@ -70,9 +70,11 @@ export enum UserRole {
     ADMIN,
 }
 
-export const userResolvers: Resolvers = {
+export const userResolvers: ResolversWithModels<{
+    User: User;
+}> = {
     User: {
-        username: (user: User) => user.username,
-        name: (user: User) => user.name,
+        username: user => user.username,
+        name: user => user.name,
     },
 };

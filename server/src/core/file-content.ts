@@ -13,8 +13,8 @@ import {
     Unique,
 } from 'sequelize-typescript';
 import * as ssri from 'ssri';
-import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
+import { ResolversWithModels } from '../main/resolver-types';
 
 export const fileContentSchema = gql`
     type FileContent {
@@ -89,7 +89,9 @@ export class FileContent extends Model<FileContent> {
     }
 }
 
-export const fileContentResolvers: Resolvers = {
+export const fileContentResolvers: ResolversWithModels<{
+    FileContent: FileContent;
+}> = {
     FileContent: {
         base64: async content =>
             (

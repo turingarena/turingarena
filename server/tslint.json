@@ -24,7 +24,6 @@
         "unnecessary-else": false,
         "max-line-length": false,
         "prefer-function-over-method": false,
-        "no-unsafe-any": false,
         "no-parameter-properties": false,
         "newline-per-chained-call": false,
         "no-this-assignment": [

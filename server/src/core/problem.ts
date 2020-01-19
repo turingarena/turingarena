@@ -8,7 +8,7 @@ import {
     Unique,
 } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
-import { Resolvers } from '../generated/graphql-types';
+import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblem } from './contest-problem';
 import { ProblemFile } from './problem-file';
 
@@ -46,8 +46,10 @@ export class Problem extends Model<Problem> {
     createFile!: (file: object, options?: object) => Promise<ProblemFile>;
 }
 
-export const problemResolvers: Resolvers = {
+export const problemResolvers: ResolversWithModels<{
+    Problem: Problem;
+}> = {
     Problem: {
-        files: (problem: Problem) => problem.getFiles(),
+        files: problem => problem.getFiles(),
     },
 };
