@@ -23,7 +23,7 @@ export async function evaluate(ctx: ApiContext, submission: Submission) {
 
     console.log(ctx.config);
 
-    const problem = await (await submission.getContestProblem()).getProblem();
+    const problem = await submission.getProblem();
     const problemDir = await extractProblemFiles(ctx, problem, path.join(ctx.config.cachePath, 'problem'));
 
     const solutionPath = path.join(ctx.config.cachePath, 'submission');

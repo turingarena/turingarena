@@ -14,11 +14,13 @@ export const contestProblemSchema = gql`
 @Table({ timestamps: false })
 export class ContestProblem extends Model<ContestProblem> {
     @ForeignKey(() => Problem)
-    @Column({ unique: 'contest_problem_unique' })
+    @PrimaryKey
+    @Column
     problemId!: number;
 
     @ForeignKey(() => Contest)
-    @Column({ unique: 'contest_problem_unique' })
+    @PrimaryKey
+    @Column
     contestId!: number;
 
     @BelongsTo(() => Contest)
