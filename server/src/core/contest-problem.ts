@@ -32,6 +32,7 @@ export class ContestProblem extends Model<ContestProblem> {
 
     @BelongsTo(() => Contest)
     contest!: Contest;
+    getContest!: () => Promise<Contest>;
 
     @BelongsTo(() => Problem)
     problem!: Problem;

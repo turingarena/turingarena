@@ -1,15 +1,8 @@
-import {
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { User } from './user';
 
-/** User participation relation */
+/** User participation N-N relation */
 @Table({ timestamps: false })
 export class Participation extends Model<Participation> {
     @ForeignKey(() => User)
@@ -24,7 +17,9 @@ export class Participation extends Model<Participation> {
 
     @BelongsTo(() => Contest)
     contest!: Contest;
+    getContest!: (options: object) => Promise<Contest>;
 
     @BelongsTo(() => User)
     user!: User;
+    getUser!: (options: object) => Promise<User>;
 }

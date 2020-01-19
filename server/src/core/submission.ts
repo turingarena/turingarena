@@ -1,19 +1,12 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    HasMany,
-    Model,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 import { Contest } from './contest';
+import { ContestProblem } from './contest-problem';
 import { Evaluation } from './evaluation';
+import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFile } from './submission-file';
-import { User } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -61,17 +54,12 @@ export class Submission extends Model<Submission> {
     @ForeignKey(() => Problem)
     @AllowNull(false)
     @Column
-    problemId!: number;
+    contestProblemId!: number;
 
-    @ForeignKey(() => Contest)
+    @ForeignKey(() => Participation)
     @AllowNull(false)
     @Column
-    contestId!: number;
-
-    @ForeignKey(() => User)
-    @AllowNull(false)
-    @Column
-    userId!: number;
+    participationId!: number;
 
     /** Files of this submission */
     @HasMany(() => SubmissionFile)
@@ -82,17 +70,15 @@ export class Submission extends Model<Submission> {
     @HasMany(() => Evaluation)
     evaluations!: Evaluation[];
 
-    /** Contest to which this submission belongs to */
-    @BelongsTo(() => Contest, 'contestId')
-    contest!: Contest;
-
-    /** Problem to which this submission is */
-    @BelongsTo(() => Problem, 'problemId')
-    problem!: Problem;
+    /** ContestProblem to which this submission belongs to */
+    @BelongsTo(() => ContestProblem, 'contestProblemId')
+    contestProblem!: ContestProblem;
+    getContestProblem!: (options?: object) => Promise<ContestProblem>;
 
     /** User that made this submission */
-    @BelongsTo(() => User, 'userId')
-    user!: User;
+    @BelongsTo(() => Participation, 'participationId')
+    participation!: Participation;
+    getParticipation!: (options?: object) => Promise<Participation>;
 
     /**
      * Extract the files of this submission in the specified base dir.

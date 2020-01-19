@@ -32,7 +32,12 @@ export class ApiContext {
     /** Contains an entry for each available repository of models. */
     readonly db: ModelRepositoryRecord;
 
+    /** Current server configuration */
+    readonly config: Config;
+
     constructor(config: Config = defaultConfig) {
+        this.config = config;
+
         const models = Object.values(modelConstructors);
 
         this.sequelize = new Sequelize({
