@@ -23,8 +23,8 @@ export class Participation extends Model<Participation> {
     contestId!: number;
 
     @BelongsTo(() => Contest)
-    contest: Contest;
+    contest!: Contest;
 
     @BelongsTo(() => User)
-    user: User;
+    user!: User;
 }

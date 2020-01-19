@@ -29,8 +29,8 @@ export class ContestFile extends Model<ContestFile> {
     path!: string;
 
     @BelongsTo(() => FileContent)
-    file: FileContent;
+    file!: FileContent;
 
     @BelongsTo(() => Contest)
-    contest: Contest;
+    contest!: Contest;
 }

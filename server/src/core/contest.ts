@@ -11,7 +11,7 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { Resolvers } from '../generated/graphql-types';
+import { MutationResolvers, Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ContestFile } from './contest-file';
 import { ContestProblem } from './contest-problem';
@@ -25,18 +25,6 @@ export const contestSchema = gql`
         start: String!
         end: String!
         problems: [ContestProblem!]!
-    }
-
-    type ContestMutations {
-        addProblem(name: ID!): Boolean
-        removeProblem(name: ID!): Boolean
-        addUser(username: ID!): Boolean
-        removeUser(username: ID!): Boolean
-        submit(
-            username: ID!
-            problemName: ID!
-            submission: SubmissionInput!
-        ): Boolean
     }
 
     input ContestInput {
@@ -74,27 +62,31 @@ export class Contest extends Model<Contest> {
 
     /** The list of problems in this contest */
     @HasMany(() => ContestProblem)
-    problems: ContestProblem[];
-    createProblem: (
+    problems!: ContestProblem[];
+    createProblem!: (
         problem: object,
         options?: object,
     ) => Promise<ContestProblem>;
-    getProblems: () => Promise<ContestProblem[]>;
+    getProblems!: () => Promise<ContestProblem[]>;
 
     /** The list of users in this contest */
     @HasMany(() => Participation)
-    participations: Participation[];
-    getParticipations: (options: object) => Promise<Participation[]>;
-    createParticipation: (
+    participations!: Participation[];
+    getParticipations!: (options: object) => Promise<Participation[]>;
+    createParticipation!: (
         participation: object,
         options: object,
     ) => Promise<Participation>;
+    addParticipation!: (options: object) => Promise<unknown>;
 
     /** The list of files in this contest */
     @HasMany(() => ContestFile)
-    files: ContestFile[];
-    getFiles: (options: object) => Promise<ContestFile[]>;
-    createFile: (contestFile: object, options?: object) => Promise<ContestFile>;
+    files!: ContestFile[];
+    getFiles!: (options: object) => Promise<ContestFile[]>;
+    createFile!: (
+        contestFile: object,
+        options?: object,
+    ) => Promise<ContestFile>;
 
     /**
      * Add files to this contest
@@ -123,24 +115,39 @@ export class Contest extends Model<Contest> {
     }
 }
 
+export const contestMutationResolvers: MutationResolvers = {
+    addProblem: async ({}, { contestName, name }, ctx) => {
+        const contest =
+            (await ctx.db.Contest.findOne({
+                where: { name: contestName },
+            })) ?? ctx.fail(`no such contest '${contestName}'`);
+        const problem =
+            (await ctx.db.Problem.findOne({ where: { name } })) ??
+            ctx.fail(`no such problem '${name}'`);
+        await contest.createProblem({
+            problem,
+        });
+
+        return true;
+    },
+    addUser: async ({}, { contestName, username }, ctx) => {
+        const contest =
+            (await ctx.db.Contest.findOne({
+                where: { name: contestName },
+            })) ?? ctx.fail(`no such contest '${contestName}'`);
+        const user =
+            (await ctx.db.User.findOne({ where: { username } })) ??
+            ctx.fail(`no such user '${username}'`);
+        await contest.addParticipation(user);
+
+        return true;
+    },
+};
+
 export const contestResolvers: Resolvers = {
     Contest: {
-        start: contest => DateTime.fromJSDate(contest.start).toISO(),
-        end: contest => DateTime.fromJSDate(contest.end).toISO(),
-        problems: contest => contest.getProblems(),
-    },
-    ContestMutations: {
-        addProblem: async ({ contest }, { name }, ctx) => {
-            const problem = await ctx.db.Problem.findOne({ where: { name } });
-            await contest.addProblem(problem);
-
-            return true;
-        },
-        addUser: async ({ contest }, { username }, ctx) => {
-            const user = await ctx.db.User.findOne({ where: { username } });
-            await contest.addUser(user);
-
-            return true;
-        },
+        start: (contest: Contest) => DateTime.fromJSDate(contest.start).toISO(),
+        end: (contest: Contest) => DateTime.fromJSDate(contest.end).toISO(),
+        problems: (contest: Contest) => contest.getProblems(),
     },
 };

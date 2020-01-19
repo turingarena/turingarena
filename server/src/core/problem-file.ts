@@ -39,12 +39,12 @@ export class ProblemFile extends Model<ProblemFile> {
     path!: string;
 
     @BelongsTo(() => Problem)
-    problem: Problem;
-    getProblem: (options?: object) => Promise<Problem>;
+    problem!: Problem;
+    getProblem!: (options?: object) => Promise<Problem>;
 
     @BelongsTo(() => FileContent)
-    content: FileContent;
-    getContent: (options?: FindOptions) => Promise<FileContent>;
+    content!: FileContent;
+    getContent!: (options?: FindOptions) => Promise<FileContent>;
 }
 
 export const problemFileResolvers: Resolvers = {

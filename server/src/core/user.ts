@@ -43,7 +43,7 @@ export class User extends Model<User> {
     /** Full name of the user, e.g. Mario Rossi */
     @AllowNull(false)
     @Column
-    name: string;
+    name!: string;
 
     /** Login token of the user, must be unique for each user, e.g. fjdkah786 */
     @Unique
@@ -59,7 +59,7 @@ export class User extends Model<User> {
 
     /** Contest wich the user belongs to */
     @HasMany(() => Participation)
-    partitipations: Participation[];
+    partitipations!: Participation[];
 }
 
 /** Privilege of a user */
@@ -72,7 +72,7 @@ export enum UserRole {
 
 export const userResolvers: Resolvers = {
     User: {
-        username: user => user.username,
-        name: user => user.name,
+        username: (user: User) => user.username,
+        name: (user: User) => user.name,
     },
 };

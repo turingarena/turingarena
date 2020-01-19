@@ -32,9 +32,9 @@ export class SubmissionFile extends Model<SubmissionFile> {
     fileName!: string;
 
     @BelongsTo(() => Submission)
-    submission: Submission;
+    submission!: Submission;
 
     @BelongsTo(() => FileContent)
-    file: FileContent;
-    getFile: () => Promise<FileContent>;
+    file!: FileContent;
+    getFile!: () => Promise<FileContent>;
 }

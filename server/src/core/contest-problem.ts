@@ -31,15 +31,16 @@ export class ContestProblem extends Model<ContestProblem> {
     contestId!: number;
 
     @BelongsTo(() => Contest)
-    contest: Contest;
+    contest!: Contest;
 
     @BelongsTo(() => Problem)
-    problem: Problem;
-    getProblem: () => Promise<Problem>;
+    problem!: Problem;
+    getProblem!: () => Promise<Problem>;
 }
 
 export const contestProblemResolvers: Resolvers = {
     ContestProblem: {
-        problem: contestProblem => contestProblem.getProblem(),
+        problem: (contestProblem: ContestProblem) =>
+            contestProblem.getProblem(),
     },
 };

@@ -36,18 +36,18 @@ export class Problem extends Model<Problem> {
 
     /** Contests that contains this problem */
     @HasMany(() => ContestProblem)
-    contestProblems: ContestProblem[];
+    contestProblems!: ContestProblem[];
 
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)
-    files: ProblemFile[];
-    getFiles: (options: FindOptions) => Promise<ProblemFile[]>;
-    findFile: (options: object) => Promise<ProblemFile>;
-    createFile: (file: object, options?: object) => Promise<ProblemFile>;
+    files!: ProblemFile[];
+    getFiles!: (options?: FindOptions) => Promise<ProblemFile[]>;
+    findFile!: (options?: object) => Promise<ProblemFile>;
+    createFile!: (file: object, options?: object) => Promise<ProblemFile>;
 }
 
 export const problemResolvers: Resolvers = {
     Problem: {
-        files: problem => problem.getFiles(),
+        files: (problem: Problem) => problem.getFiles(),
     },
 };

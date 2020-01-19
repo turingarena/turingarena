@@ -8,7 +8,7 @@
         "emitDecoratorMetadata": true,
         "allowSyntheticDefaultImports": true,
 
-        "strict": false,
+        "strict": true,
         "strictFunctionTypes": true,
         "strictNullChecks": true,
         "noImplicitReturns": true,

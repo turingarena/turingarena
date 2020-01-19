@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
+import { contestMutationResolvers } from './contest';
 
 export const mutationSchema = gql`
     type Mutation {
         init: Boolean!
-        contest(name: ID!): ContestMutations!
         createUser(user: UserInput!): Boolean!
         updateUser(user: UserInput!): Boolean!
         deleteUser(user: ID!): Boolean!
@@ -16,6 +16,17 @@ export const mutationSchema = gql`
         deleteContest(contest: ID!): Boolean!
         createFile(file: FileInput!): Boolean!
         deleteFile(hash: ID!): Boolean!
+
+        addProblem(contestName: ID!, name: ID!): Boolean!
+        removeProblem(contestName: ID!, name: ID!): Boolean!
+        addUser(contestName: ID!, username: ID!): Boolean!
+        removeUser(contestName: ID!, username: ID!): Boolean!
+        submit(
+            contestName: ID!
+            username: ID!
+            problemName: ID!
+            submission: SubmissionInput!
+        ): Boolean!
     }
 `;
 
@@ -67,10 +78,6 @@ export const mutationResolvers: Resolvers = {
                 },
             });
         },
-        contest: async ({}, { name }, ctx) => {
-            const contest = await ctx.db.Contest.findOne({ where: { name } });
-
-            return { contest };
-        },
+        ...contestMutationResolvers,
     },
 };

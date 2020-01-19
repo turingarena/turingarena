@@ -13,10 +13,10 @@ import { ApiContext } from '../main/context';
  */
 export async function createSubmission(
     ctx: ApiContext,
-    userName,
-    contestName,
-    problemName,
-    solutionPath,
+    userName: string,
+    contestName: string,
+    problemName: string,
+    solutionPath: string,
 ) {
     const user = await ctx.db.User.findOne({ where: { username: userName } });
     const problem = await ctx.db.Problem.findOne({

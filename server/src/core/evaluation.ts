@@ -59,7 +59,7 @@ export class EvaluationEvent extends Model<EvaluationEvent> {
 
     /** Evaluation to which this event belongs to */
     @BelongsTo(() => Evaluation, 'evaluationId')
-    evaluation: Evaluation;
+    evaluation!: Evaluation;
 
     /** Data of this event, in a backend-specific format */
     @AllowNull(false)

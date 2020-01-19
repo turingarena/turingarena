@@ -75,24 +75,24 @@ export class Submission extends Model<Submission> {
 
     /** Files of this submission */
     @HasMany(() => SubmissionFile)
-    submissionFiles: SubmissionFile[];
-    getSubmissionFiles: () => Promise<SubmissionFile[]>;
+    submissionFiles!: SubmissionFile[];
+    getSubmissionFiles!: () => Promise<SubmissionFile[]>;
 
     /** Evaluations of this submission */
     @HasMany(() => Evaluation)
-    evaluations: Evaluation[];
+    evaluations!: Evaluation[];
 
     /** Contest to which this submission belongs to */
     @BelongsTo(() => Contest, 'contestId')
-    contest: Contest;
+    contest!: Contest;
 
     /** Problem to which this submission is */
     @BelongsTo(() => Problem, 'problemId')
-    problem: Problem;
+    problem!: Problem;
 
     /** User that made this submission */
     @BelongsTo(() => User, 'userId')
-    user: User;
+    user!: User;
 
     /**
      * Extract the files of this submission in the specified base dir.
