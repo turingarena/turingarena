@@ -7,8 +7,12 @@ import { Evaluation, EvaluationEvent } from './evaluation';
 import { FileContent, fileSchema } from './file-content';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
-import { Problem, problemSchema } from './problem';
-import { ProblemFile } from './problem-file';
+import { Problem, problemResolvers, problemSchema } from './problem';
+import {
+    ProblemFile,
+    problemFileResolvers,
+    problemFileSchema,
+} from './problem-file';
 import { queryResolvers, querySchema } from './query';
 import { Submission, submissionSchema } from './submission';
 import { SubmissionFile } from './submission-file';
@@ -21,6 +25,7 @@ export const schema = gql`
     ${userSchema}
     ${contestSchema}
     ${problemSchema}
+    ${problemFileSchema}
     ${fileSchema}
     ${submissionSchema}
 
@@ -51,7 +56,6 @@ export const resolvers: Resolvers = {
     ...mutationResolvers,
     ...userResolvers,
     ...contestResolvers,
+    ...problemResolvers,
+    ...problemFileResolvers,
 };
-
-// tslint:disable-next-line: no-default-export
-export default schema; // For graphql-codegen

@@ -42,7 +42,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
             name,
         });
 
-        await problem.addFiles(ctx, path.join(dir, name));
+        await problem.loadFiles(ctx, path.join(dir, name));
         await ctx.db.ContestProblem.create({
             contestId: contest.id,
             problemId: problem.id,

@@ -11,7 +11,19 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
+import { Resolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
+
+export const fileSchema = gql`
+    type FileContent {
+        hash: ID!
+        base64: String!
+    }
+
+    input FileInput {
+        contentBase64: String!
+    }
+`;
 
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
@@ -35,20 +47,16 @@ export class FileContent extends Model<FileContent> {
 
     static async createFromContent(
         ctx: ApiContext,
-        fileContent: Buffer,
-        contentType: string,
+        content: Buffer,
+        type: string,
     ) {
         const hash = createHash('sha1')
-            .update(fileContent)
+            .update(content)
             .digest('hex');
 
         return (
             (await ctx.db.FileContent.findOne({ where: { hash } })) ??
-            (await ctx.db.FileContent.create({
-                content: fileContent,
-                type: contentType,
-                hash,
-            }))
+            (await ctx.db.FileContent.create({ content, type, hash }))
         );
     }
 
@@ -73,15 +81,8 @@ export class FileContent extends Model<FileContent> {
     }
 }
 
-export const fileSchema = gql`
-    type FileContent {
-        hash: ID!
-        base64: String!
-    }
-
-    input FileInput {
-        contentBase64: String!
-    }
-`;
-
-// TODO: resolvers to add and retrieve files
+export const fileContentResolvers: Resolvers = {
+    FileContent: {
+        base64: content => content.content.toString('base64'),
+    },
+};

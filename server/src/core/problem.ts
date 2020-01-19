@@ -19,7 +19,7 @@ import { ProblemFile } from './problem-file';
 export const problemSchema = gql`
     type Problem {
         name: ID!
-        # files: [ProblemFile!]!
+        files: [ProblemFile!]!
     }
 
     input ProblemInput {
@@ -43,13 +43,10 @@ export class Problem extends Model<Problem> {
 
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)
-    problemFiles: ProblemFile[];
-    getProblemFiles: (options: object) => Promise<ProblemFile[]>;
-    findProblemFile: (options: object) => Promise<ProblemFile>;
-    createProblemFile: (
-        problemFile: object,
-        options?: object,
-    ) => Promise<ProblemFile>;
+    files: ProblemFile[];
+    getFiles: (options: object) => Promise<ProblemFile[]>;
+    findFile: (options: object) => Promise<ProblemFile>;
+    createFile: (file: object, options?: object) => Promise<ProblemFile>;
 
     /**
      * Extract the files of this problem in the specified base dir:
@@ -77,13 +74,13 @@ export class Problem extends Model<Problem> {
             // Directory doesn't exist and thus stat fails
         }
 
-        const problemFiles = await this.getProblemFiles({
+        const problemFiles = await this.getFiles({
             include: [ctx.db.FileContent],
         });
 
         for (const problemFile of problemFiles) {
             const filePath = path.join(problemDir, problemFile.path);
-            await problemFile.file.extract(filePath);
+            await problemFile.content.extract(filePath);
         }
 
         return problemDir;
@@ -96,20 +93,22 @@ export class Problem extends Model<Problem> {
      * @param base Base directory to add
      * @param dir  Current directory
      */
-    async addFiles(ctx, base: string, dir: string = '') {
+    async loadFiles(ctx, base: string, dir: string = '') {
         const files = fs.readdirSync(path.join(base, dir));
+        console.log('ADD FILES');
+        console.log({ base, dir, files });
         for (const file of files) {
             const relPath = path.join(dir, file);
             if (fs.statSync(path.join(base, relPath)).isDirectory())
-                await this.addFiles(ctx, base, relPath);
+                await this.loadFiles(ctx, base, relPath);
             else {
-                const fileRow = await FileContent.createFromPath(
+                const content = await FileContent.createFromPath(
                     ctx,
                     path.join(base, relPath),
                 );
-                await this.createProblemFile({
+                await this.createFile({
                     path: relPath,
-                    fileId: fileRow.id,
+                    contentId: content.id,
                 });
             }
         }
@@ -125,9 +124,11 @@ export class Problem extends Model<Problem> {
         });
 
         if (metadataProblemFile === null)
-            throw new Error(`Problem is missing metadata file ${metadataPath}`);
+            throw new Error(
+                `Problem ${this.name} is missing metadata file ${metadataPath}`,
+            );
 
-        const metadataFile = await metadataProblemFile.getFile();
+        const metadataFile = await metadataProblemFile.getContent();
 
         return JSON.parse(metadataFile.content.toString());
     }
