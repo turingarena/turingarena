@@ -8,6 +8,7 @@ import {
     DefaultScope,
     Index,
     Model,
+    Scopes,
     Table,
     Unique,
 } from 'sequelize-typescript';
@@ -29,6 +30,11 @@ export const fileContentSchema = gql`
 /** A generic file in TuringArena. */
 @DefaultScope(() => ({
     attributes: ['id', 'hash', 'type'],
+}))
+@Scopes(() => ({
+    withData: {
+        attributes: ['id', 'hash', 'type', 'content'],
+    },
 }))
 @Table({ updatedAt: false })
 export class FileContent extends Model<FileContent> {

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
+import { getProblemMetadata, importProblemFiles } from '../core/problem-util';
 import { UserRole } from '../core/user';
 import { ApiContext } from '../main/context';
 
@@ -21,7 +22,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
 
     const contest = await ctx.db.Contest.create(metadata);
 
-    await contest.addFiles(ctx, path.join(dir, 'files'));
+    await contest.loadFiles(ctx, path.join(dir, 'files'));
 
     for (const user of metadata.users)
         await contest.createParticipation(
@@ -42,12 +43,13 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
             name,
         });
 
-        await problem.loadFiles(ctx, path.join(dir, name));
+        await importProblemFiles(ctx, problem, path.join(dir, name));
+
         await ctx.db.ContestProblem.create({
             contestId: contest.id,
             problemId: problem.id,
         });
 
-        console.log(await problem.metadata(ctx));
+        console.log(await getProblemMetadata(ctx, problem));
     }
 }

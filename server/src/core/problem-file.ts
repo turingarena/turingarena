@@ -8,6 +8,7 @@ import {
     PrimaryKey,
     Table,
 } from 'sequelize-typescript';
+import { FindOptions } from 'sequelize/types';
 import { Resolvers } from '../generated/graphql-types';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
@@ -43,7 +44,7 @@ export class ProblemFile extends Model<ProblemFile> {
 
     @BelongsTo(() => FileContent)
     content: FileContent;
-    getContent: (options?: object) => Promise<FileContent>;
+    getContent: (options?: FindOptions) => Promise<FileContent>;
 }
 
 export const problemFileResolvers: Resolvers = {
