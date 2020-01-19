@@ -26,7 +26,6 @@ export async function evaluate(ctx: ApiContext, submission: Submission) {
     const problem = await (await submission.getContestProblem()).getProblem();
     const problemDir = await extractProblemFiles(ctx, problem, path.join(ctx.config.cachePath, 'problem'));
 
-
     const solutionPath = path.join(ctx.config.cachePath, 'submission');
     await submission.extract(solutionPath);
 
@@ -44,5 +43,15 @@ export async function evaluate(ctx: ApiContext, submission: Submission) {
         });
     });
 
-    return new Promise(resolve => process.on('close', resolve));
+    const statusCode: number = await new Promise(resolve => process.on('close', resolve));
+
+    if (statusCode === 0) {
+        await evaluation.update({
+            status: EvaluationStatus.SUCCESS,
+        });
+    } else {
+        await evaluation.update({
+            status: EvaluationStatus.ERROR,
+        });
+    }
 }
