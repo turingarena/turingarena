@@ -24,7 +24,6 @@
         "unnecessary-else": false,
         "max-line-length": false,
         "prefer-function-over-method": false,
-        "no-unsafe-any": false,
         "no-parameter-properties": false,
         "newline-per-chained-call": false,
         "no-this-assignment": [
@@ -48,7 +47,7 @@
         "member-ordering": false,
         "no-use-before-declare": false,
         "arrow-parens": [true, "ban-single-arg-parens"],
-        "curly": [true, "as-needed"],
+        "curly": [true, "ignore-same-line"],
         "only-arrow-functions": [true, "allow-declarations"]
     },
     "linterOptions": {

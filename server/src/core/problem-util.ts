@@ -34,25 +34,22 @@ export interface ProblemMetadata {
     }>;
 }
 
-export async function getProblemMetadata(
-    ctx: ApiContext,
-    problem: Problem,
-): Promise<ProblemMetadata> {
+export async function getProblemMetadata(ctx: ApiContext, problem: Problem): Promise<ProblemMetadata> {
     const metadataPath = '.task-info.json';
     const metadataProblemFile = await ctx.db.ProblemFile.findOne({
         where: {
-            problemId: problem.id,
+            // FIXME: fix typing of .id in some BaseModel
+            problemId: problem.id as string,
             path: metadataPath,
         },
         include: [ctx.db.FileContent.scope('withData')],
     });
 
-    if (metadataProblemFile === null)
-        throw new Error(
-            `Problem ${problem.name} is missing metadata file ${metadataPath}`,
-        );
+    if (metadataProblemFile === null) {
+        throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
+    }
 
-    return JSON.parse(metadataProblemFile.content.content.toString());
+    return JSON.parse(metadataProblemFile.content.content.toString()) as ProblemMetadata;
 }
 
 /**
@@ -65,22 +62,16 @@ export async function getProblemMetadata(
  * @param ctx Context to use
  * @param base Base directory
  */
-export async function extractProblemFiles(
-    ctx: ApiContext,
-    problem: Problem,
-    base: string,
-) {
+export async function extractProblemFiles(ctx: ApiContext, problem: Problem, base: string) {
     const problemDir = path.join(
         base,
         problem.name,
-        DateTime.fromJSDate(problem.updatedAt).toFormat(
-            'x--yyyy-MM-dd--hh-mm-ss',
-        ),
+        // FIXME: make updatedAt be correctly typed in some BaseModel
+        DateTime.fromJSDate(problem.updatedAt as Date).toFormat('x--yyyy-MM-dd--hh-mm-ss'),
     );
 
     try {
-        if ((await fs.promises.stat(problemDir)).isDirectory())
-            return problemDir;
+        if ((await fs.promises.stat(problemDir)).isDirectory()) return problemDir;
     } catch {
         // Directory doesn't exist and thus stat fails
     }
@@ -104,22 +95,14 @@ export async function extractProblemFiles(
  * @param base Base directory to add
  * @param dir  Current directory
  */
-export async function importProblemFiles(
-    ctx: ApiContext,
-    problem: Problem,
-    base: string,
-    dir: string = '',
-) {
+export async function importProblemFiles(ctx: ApiContext, problem: Problem, base: string, dir: string = '') {
     const files = fs.readdirSync(path.join(base, dir));
     for (const file of files) {
         const relPath = path.join(dir, file);
-        if (fs.statSync(path.join(base, relPath)).isDirectory())
+        if (fs.statSync(path.join(base, relPath)).isDirectory()) {
             await importProblemFiles(ctx, problem, base, relPath);
-        else {
-            const content = await FileContent.createFromPath(
-                ctx,
-                path.join(base, relPath),
-            );
+        } else {
+            const content = await FileContent.createFromPath(ctx, path.join(base, relPath));
             await problem.createFile({
                 path: relPath,
                 contentId: content.id,

@@ -1,13 +1,6 @@
 import { gql } from 'apollo-server-core';
-import {
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
-import { Resolvers } from '../generated/graphql-types';
+import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
 
@@ -39,9 +32,10 @@ export class ContestProblem extends Model<ContestProblem> {
     getProblem!: () => Promise<Problem>;
 }
 
-export const contestProblemResolvers: Resolvers = {
+export const contestProblemResolvers: ResolversWithModels<{
+    ContestProblem: ContestProblem;
+}> = {
     ContestProblem: {
-        problem: (contestProblem: ContestProblem) =>
-            contestProblem.getProblem(),
+        problem: contestProblem => contestProblem.getProblem(),
     },
 };

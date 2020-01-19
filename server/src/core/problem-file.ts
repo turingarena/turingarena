@@ -1,15 +1,7 @@
 import { gql } from 'apollo-server-core';
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
-import { Resolvers } from '../generated/graphql-types';
+import { ResolversWithModels } from '../main/resolver-types';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
 
@@ -47,13 +39,11 @@ export class ProblemFile extends Model<ProblemFile> {
     getContent!: (options?: FindOptions) => Promise<FileContent>;
 }
 
-export const problemFileResolvers: Resolvers = {
+export const problemFileResolvers: ResolversWithModels<{
+    ProblemFile: ProblemFile;
+}> = {
     ProblemFile: {
-        content: file => {
-            console.log(file);
-
-            return file.getContent();
-        },
+        content: file => file.getContent(),
         problem: file => file.getProblem(),
     },
 };

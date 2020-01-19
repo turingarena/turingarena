@@ -24,5 +24,5 @@ export const defaultConfig: Config = {
 export function loadConfig(configPath?: string): Config {
     if (configPath === undefined) return defaultConfig;
 
-    return JSON.parse(readFileSync(configPath).toString());
+    return JSON.parse(readFileSync(configPath).toString()) as Config;
 }

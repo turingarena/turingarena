@@ -91,11 +91,7 @@ export class Submission extends Model<Submission> {
 
         for (const submissionFile of submissionFiles) {
             const content = await submissionFile.getFile();
-            const filePath = path.join(
-                base,
-                submissionFile.fieldId,
-                submissionFile.fileName,
-            );
+            const filePath = path.join(base, submissionFile.fieldId, submissionFile.fileName);
             await content.extract(filePath);
         }
     }
