@@ -1,5 +1,5 @@
-import { DataTypes } from 'sequelize';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
 
 /** An evaluation of a submission */
@@ -39,22 +39,4 @@ export enum EvaluationStatus {
     SUCCESS,
     /** There was an error in this evaluation */
     ERROR,
-}
-
-/** Evant of an evaluation */
-@Table({ updatedAt: false })
-export class EvaluationEvent extends Model<EvaluationEvent> {
-    @ForeignKey(() => Evaluation)
-    @AllowNull(false)
-    @Column
-    evaluationId!: number;
-
-    /** Evaluation to which this event belongs to */
-    @BelongsTo(() => Evaluation, 'evaluationId')
-    evaluation!: Evaluation;
-
-    /** Data of this event, in a backend-specific format */
-    @AllowNull(false)
-    @Column(DataTypes.JSON)
-    data!: object;
 }
