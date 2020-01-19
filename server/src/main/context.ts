@@ -1,36 +1,8 @@
-import { gql } from 'apollo-server-core';
 import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Model, Repository, Sequelize } from 'sequelize-typescript';
-import { Config, defaultConfig } from '../config';
-import { Resolvers } from '../generated/graphql-types';
-import { modelConstructors } from '../model';
-import { contestResolvers, contestSchema } from './contest';
-import { fileSchema } from './file';
-import { mutationResolvers, mutationSchema } from './mutation';
-import { problemSchema } from './problem';
-import { queryResolvers, querySchema } from './query';
-import { submissionSchema } from './submission';
-import { userResolvers, userSchema } from './user';
-
-/** Full GraphQL schema document. Obtained combining schema parts from each components. */
-export const schema = gql`
-    ${querySchema}
-    ${mutationSchema}
-    ${userSchema}
-    ${contestSchema}
-    ${problemSchema}
-    ${fileSchema}
-    ${submissionSchema}
-`;
-
-/** All GraphQL resolvers. Obtained combining resolvers from each components. */
-export const resolvers: Resolvers = {
-    ...queryResolvers,
-    ...mutationResolvers,
-    ...userResolvers,
-    ...contestResolvers,
-};
+import { modelConstructors, resolvers, schema } from '../core/index';
+import { Config, defaultConfig } from './config';
 
 // Definitions related to models, their classes, and their repositories.
 
@@ -105,6 +77,3 @@ export class ApiContext {
         throw new Error(message);
     }
 }
-
-// tslint:disable-next-line: no-default-export
-export default schema; // For graphql-codegen

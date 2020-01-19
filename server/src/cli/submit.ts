@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { ApiContext } from '../api';
-import { File } from '../model/file';
+import { File } from '../core/file';
+import { ApiContext } from '../main/context';
 
 /**
  * Inserts a submission in the database

@@ -1,7 +1,7 @@
 import * as commander from 'commander';
-import { ApiContext } from '../api';
-import { loadConfig } from '../config';
-import { serve } from '../server';
+import { loadConfig } from '../main/config';
+import { ApiContext } from '../main/context';
+import { serve } from '../main/server';
 import { importContest } from './import';
 import { createSubmission } from './submit';
 

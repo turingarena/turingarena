@@ -1,3 +1,4 @@
+import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
@@ -9,10 +10,23 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { ApiContext } from '../api';
+import { Resolvers } from '../generated/graphql-types';
+import { ApiContext } from '../main/context';
 import { ContestProblem } from './contest-problem';
 import { File } from './file';
 import { ProblemFile } from './problem-file';
+
+export const problemSchema = gql`
+    type Problem {
+        name: ID!
+        files: [File!]!
+    }
+
+    input ProblemInput {
+        name: ID!
+        files: [ID!]!
+    }
+`;
 
 /** A problem in TuringArena. */
 @Table
@@ -147,3 +161,9 @@ interface ProblemMetadata {
         path: string;
     }>;
 }
+
+export const problemResolvers: Resolvers = {
+    Problem: {
+        files: problem => problem.getFiles(),
+    },
+};

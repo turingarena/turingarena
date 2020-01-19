@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
-import { ApiContext } from '../api/index';
-import { UserRole } from '../model/user';
+import { UserRole } from '../core/user';
+import { ApiContext } from '../main/context';
 
 /**
  * Import a contest in the database

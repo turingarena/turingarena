@@ -1,7 +1,8 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { ApiContext, schema } from './api';
+import { schema } from '../core';
 import { Config } from './config';
+import { ApiContext } from './context';
 
 export function serve(config: Config) {
     const app = express();

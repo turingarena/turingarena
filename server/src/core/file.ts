@@ -1,3 +1,4 @@
+import { gql } from 'apollo-server-core';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
@@ -10,7 +11,7 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { ApiContext } from '../api';
+import { ApiContext } from '../main/context';
 
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
@@ -71,3 +72,20 @@ export class File extends Model<File> {
         return fs.promises.writeFile(filePath, this.content);
     }
 }
+
+export const fileSchema = gql`
+    type File {
+        hash: ID!
+        fileName: String!
+        type: String!
+        contentBase64: String!
+    }
+
+    input FileInput {
+        fileName: String!
+        type: String!
+        contentBase64: String!
+    }
+`;
+
+// TODO: resolvers to add and retrieve files

@@ -1,3 +1,4 @@
+import { gql } from 'apollo-server-core';
 import {
     AllowNull,
     Column,
@@ -7,7 +8,27 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
+import { Resolvers } from '../generated/graphql-types';
 import { Participation } from './participation';
+
+export const userSchema = gql`
+    type User {
+        username: ID!
+        name: String!
+    }
+
+    input UserInput {
+        username: ID!
+        name: String!
+        token: String!
+        role: UserRole!
+    }
+
+    enum UserRole {
+        USER
+        ADMIN
+    }
+`;
 
 /** A user in TuringArena */
 @Table
@@ -48,3 +69,10 @@ export enum UserRole {
     /** Admin user, can do everything */
     ADMIN,
 }
+
+export const userResolvers: Resolvers = {
+    User: {
+        username: user => user.username,
+        name: user => user.name,
+    },
+};

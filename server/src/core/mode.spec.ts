@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ApiContext } from '../api';
+import { ApiContext } from '../main/context';
 
 it('test submission files', async () => {
     const ctx = new ApiContext();
