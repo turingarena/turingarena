@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { evaluate } from '../core/evaluate';
 import { FileContent } from '../core/file-content';
 import { ApiContext } from '../main/context';
 
@@ -30,24 +31,28 @@ export async function createSubmission(
     if (user === null) throw new Error(`user does not exist`);
     if (problem === null) throw new Error(`problem does not exist`);
 
-    const participation = await ctx.db.Participation.findOne({ where: {
-        userId: user.id,
-        contestId: contest.id,
-    }});
+    const participation = await ctx.db.Participation.findOne({
+        where: {
+            userId: user.id,
+            contestId: contest.id,
+        },
+    });
 
     if (participation === null) throw new Error(`user ${userName} not in contest ${contestName}`);
 
-    const contestProblem = await ctx.db.ContestProblem.findOne({ where: {
-        contestId: contest.id,
-        problemId: problem.id,
-    }});
+    const contestProblem = await ctx.db.ContestProblem.findOne({
+        where: {
+            contestId: contest.id,
+            problemId: problem.id,
+        },
+    });
 
     if (contestProblem === null) throw new Error(`problem ${problemName} not in contest ${contestName}`);
 
     const file = await FileContent.createFromPath(ctx, solutionPath);
     const submission = await ctx.db.Submission.create({
         participationId: participation.id,
-        contestProblem: contestProblem.id,
+        contestProblemId: contestProblem.id,
     });
 
     await ctx.db.SubmissionFile.create({
@@ -57,5 +62,5 @@ export async function createSubmission(
         fileId: file.id,
     });
 
-    await submission.extract('/tmp/xxx');
+    await evaluate(ctx, submission);
 }

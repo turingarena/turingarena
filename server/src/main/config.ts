@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import path from 'path';
+import * as path from 'path';
 import { Options } from 'sequelize';
 
 export interface Config {
@@ -24,5 +24,14 @@ export const defaultConfig: Config = {
 export function loadConfig(configPath?: string): Config {
     if (configPath === undefined) return defaultConfig;
 
-    return JSON.parse(readFileSync(configPath).toString()) as Config;
+    const config = JSON.parse(readFileSync(configPath).toString()) as Config;
+
+    // FIXME: is there a better way?
+    return {
+        db: config.db ?? defaultConfig.db,
+        port: config.port ?? defaultConfig.port,
+        host: config.host ?? defaultConfig.host,
+        taskMakerExecutable: config.taskMakerExecutable ?? defaultConfig.taskMakerExecutable,
+        cachePath: config.cachePath ?? defaultConfig.cachePath,
+    };
 }

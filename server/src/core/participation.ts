@@ -6,13 +6,11 @@ import { User } from './user';
 @Table({ timestamps: false })
 export class Participation extends Model<Participation> {
     @ForeignKey(() => User)
-    @PrimaryKey
-    @Column
+    @Column({ unique: 'participation_user_contest_unique' })
     userId!: number;
 
     @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
+    @Column({ unique: 'participation_user_contest_unique' })
     contestId!: number;
 
     @BelongsTo(() => Contest)
