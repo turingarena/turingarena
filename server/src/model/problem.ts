@@ -2,20 +2,17 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
 import {
-    AllowNull,
-    BelongsTo,
     Column,
-    ForeignKey,
     HasMany,
     Index,
     Model,
-    PrimaryKey,
     Table,
     Unique,
 } from 'sequelize-typescript';
 import { ApiContext } from '../api';
-import { ContestProblem } from './contest';
+import { ContestProblem } from './contest-problem';
 import { File } from './file';
+import { ProblemFile } from './problem-file';
 
 /** A problem in TuringArena. */
 @Table
@@ -120,31 +117,6 @@ export class Problem extends Model<Problem> {
 
         return JSON.parse(metadataFile.content.toString());
     }
-}
-
-/** Problem to File N-N relation. */
-@Table({ timestamps: false })
-export class ProblemFile extends Model<ProblemFile> {
-    @ForeignKey(() => Problem)
-    @PrimaryKey
-    @Column
-    problemId!: number;
-
-    @ForeignKey(() => File)
-    @AllowNull(false)
-    @Column
-    fileId!: number;
-
-    @PrimaryKey
-    @Column
-    path!: string;
-
-    @BelongsTo(() => Problem)
-    problem: Problem;
-
-    @BelongsTo(() => File)
-    file: File;
-    getFile: (options?: object) => Promise<File>;
 }
 
 /** Generic problem metadata */

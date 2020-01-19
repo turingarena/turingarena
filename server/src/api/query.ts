@@ -18,23 +18,15 @@ export const queryResolvers: Resolvers = {
         users: async ({}, {}, ctx) =>
             ctx.db.User.findAll({ include: [ctx.db.Contest] }),
         user: async ({}, { username }, ctx) =>
-            (await ctx.db.User.findOne({
-                where: { username },
-                include: [ctx.db.Contest],
-            })) ?? ctx.fail(`no such user: ${username}`),
-        contests: async ({}, {}, ctx) =>
-            ctx.db.Contest.findAll({ include: [ctx.db.User, ctx.db.Problem] }),
+            (await ctx.db.User.findOne({ where: { username } })) ??
+            ctx.fail(`no such user: ${username}`),
+        contests: async ({}, {}, ctx) => ctx.db.Contest.findAll(),
         contest: async ({}, { name }, ctx) =>
-            (await ctx.db.Contest.findOne({
-                where: { name },
-                include: [ctx.db.User, ctx.db.Problem],
-            })) ?? ctx.fail(`no such contest: ${name}`),
-        problems: async ({}, {}, ctx) =>
-            ctx.db.Problem.findAll({ include: [ctx.db.Contest] }),
+            (await ctx.db.Contest.findOne({ where: { name } })) ??
+            ctx.fail(`no such contest: ${name}`),
+        problems: async ({}, {}, ctx) => ctx.db.Problem.findAll(),
         problem: async ({}, { name }, ctx) =>
-            (await ctx.db.Problem.findOne({
-                where: { name },
-                include: [ctx.db.Contest],
-            })) ?? ctx.fail(`no such problem: ${name}`),
+            (await ctx.db.Problem.findOne({ where: { name } })) ??
+            ctx.fail(`no such problem: ${name}`),
     },
 };

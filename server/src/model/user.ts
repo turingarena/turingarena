@@ -7,7 +7,7 @@ import {
     Table,
     Unique,
 } from 'sequelize-typescript';
-import { Participation } from './contest';
+import { Participation } from './participation';
 
 /** A user in TuringArena */
 @Table

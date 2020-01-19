@@ -2,20 +2,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
     AllowNull,
-    BelongsTo,
     Column,
-    ForeignKey,
     HasMany,
     Index,
     Model,
-    PrimaryKey,
     Table,
     Unique,
 } from 'sequelize-typescript';
 import { ApiContext } from '../api';
+import { ContestFile } from './contest-file';
+import { ContestProblem } from './contest-problem';
 import { File } from './file';
-import { Problem } from './problem';
-import { User } from './user';
+import { Participation } from './participation';
 
 /** A contest in TuringArena */
 @Table
@@ -93,69 +91,4 @@ export class Contest extends Model<Contest> {
             }
         }
     }
-}
-
-/** Contest to File N-N relation */
-@Table({ timestamps: false })
-export class ContestFile extends Model<ContestFile> {
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-
-    @ForeignKey(() => File)
-    @AllowNull(false)
-    @Column
-    fileId!: number;
-
-    /** Path of this file in the contest, e.g. home.md */
-    @PrimaryKey
-    @Column
-    path!: string;
-
-    @BelongsTo(() => File)
-    file: File;
-
-    @BelongsTo(() => Contest)
-    contest: Contest;
-}
-
-/** User participation relation */
-@Table({ timestamps: false })
-export class Participation extends Model<Participation> {
-    @ForeignKey(() => User)
-    @PrimaryKey
-    @Column
-    userId!: number;
-
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-
-    @BelongsTo(() => Contest)
-    contest: Contest;
-
-    @BelongsTo(() => User)
-    user: User;
-}
-
-/** Contest to Problem N-N relation */
-@Table({ timestamps: false })
-export class ContestProblem extends Model<ContestProblem> {
-    @ForeignKey(() => Problem)
-    @PrimaryKey
-    @Column
-    problemId!: number;
-
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: number;
-
-    @BelongsTo(() => Contest)
-    contest: Contest;
-
-    @BelongsTo(() => Problem)
-    problem: Problem;
 }

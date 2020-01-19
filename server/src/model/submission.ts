@@ -6,13 +6,12 @@ import {
     ForeignKey,
     HasMany,
     Model,
-    PrimaryKey,
     Table,
 } from 'sequelize-typescript';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
-import { File } from './file';
 import { Problem } from './problem';
+import { SubmissionFile } from './submission-file';
 import { User } from './user';
 
 /** A Submission in the system */
@@ -73,33 +72,4 @@ export class Submission extends Model<Submission> {
             await content.extract(filePath);
         }
     }
-}
-
-/** File in a submission */
-@Table({ timestamps: false })
-export class SubmissionFile extends Model<SubmissionFile> {
-    @ForeignKey(() => Submission)
-    @PrimaryKey
-    @Column
-    submissionId!: number;
-
-    @PrimaryKey
-    @Column
-    fieldId!: string;
-
-    @ForeignKey(() => File)
-    @AllowNull(false)
-    @Column
-    fileId!: number;
-
-    @AllowNull(false)
-    @Column
-    fileName!: string;
-
-    @BelongsTo(() => Submission)
-    submission: Submission;
-
-    @BelongsTo(() => File)
-    file: File;
-    getFile: () => Promise<File>;
 }

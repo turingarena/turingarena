@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { Resolvers } from '../generated/graphql-types';
 
 export const problemSchema = gql`
     type Problem {
@@ -11,3 +12,9 @@ export const problemSchema = gql`
         files: [ID!]!
     }
 `;
+
+export const problemResolvers: Resolvers = {
+    Problem: {
+        files: problem => problem.getFiles(),
+    },
+};
