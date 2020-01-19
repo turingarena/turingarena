@@ -5,7 +5,13 @@ import { ContestFile } from './contest-file';
 import { ContestProblem, contestProblemResolvers, contestProblemSchema } from './contest-problem';
 import { Evaluation } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
+import { valenceSchema } from './feedback/valence';
 import { FileContent, fileContentResolvers, fileContentSchema } from './file-content';
+import { gradingSchema } from './grading/grading';
+import { booleanGradingSchema } from './grading/grading-boolean';
+import { genericGradingSchema } from './grading/grading-generic';
+import { numericGradingSchema } from './grading/grading-numeric';
+import { awardMaterialResolvers, awardMaterialSchema } from './material/award-material';
 import { mediaResolvers, mediaSchema } from './material/media';
 import { problemMaterialResolvers, problemMaterialSchema } from './material/problem-material';
 import { textResolvers, textSchema } from './material/text';
@@ -33,6 +39,14 @@ export const schema = gql`
     ${textSchema}
     ${mediaSchema}
     ${problemMaterialSchema}
+    ${awardMaterialSchema}
+
+    ${genericGradingSchema}
+    ${numericGradingSchema}
+    ${booleanGradingSchema}
+    ${gradingSchema}
+
+    ${valenceSchema}
 
     enum Ok {
         OK
@@ -69,4 +83,5 @@ export const resolvers: Resolvers = {
     ...textResolvers,
     ...mediaResolvers,
     ...problemMaterialResolvers,
+    ...awardMaterialResolvers,
 };
