@@ -12,6 +12,7 @@ import {
 import { contestViewSchema } from './contest-view';
 import { Evaluation } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
+import { feedbackSlotSchema } from './feedback/feedback-slot';
 import { valenceSchema } from './feedback/valence';
 import { FileContent, fileContentResolvers, fileContentSchema } from './file-content';
 import { gradingSchema } from './grading/grading';
@@ -57,6 +58,7 @@ export const schema = gql`
     ${booleanGradingSchema}
     ${gradingSchema}
 
+    ${feedbackSlotSchema}
     ${valenceSchema}
 
     enum Ok {
