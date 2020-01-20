@@ -3,6 +3,7 @@ import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
 import { getProblemMetadata } from '../problem-util';
+import { AwardMaterial } from './award-material';
 import { MediaVariant } from './media';
 import { ProblemAttachment, ProblemMaterial } from './problem-material';
 
@@ -19,7 +20,12 @@ async function loadContent(ctx: ApiContext, problem: Problem, path: string) {
 }
 
 export async function getProblemMaterial(ctx: ApiContext, problem: Problem): Promise<ProblemMaterial> {
-    const { title, attachments, statements } = await getProblemMetadata(ctx, problem);
+    const {
+        title,
+        attachments,
+        statements,
+        scoring: { subtasks },
+    } = await getProblemMetadata(ctx, problem);
 
     return {
         title: [
@@ -50,6 +56,28 @@ export async function getProblemMaterial(ctx: ApiContext, problem: Problem): Pro
                     ],
                 }),
             ),
+        ),
+        awards: subtasks.map(
+            ({ max_score }, i): AwardMaterial => ({
+                name: `subtask.${i}`,
+                title: [
+                    {
+                        value: `Subtask ${i}`,
+                    },
+                ],
+                gradeDomain:
+                    max_score > 0
+                        ? {
+                              __typename: 'NumericGradeDomain',
+                              max: max_score,
+                              allowPartial: true, // FIXME
+                              decimalPrecision: 0, // FIXME
+                          }
+                        : {
+                              __typename: 'BooleanGradeDomain',
+                              _: true,
+                          },
+            }),
         ),
     };
 }

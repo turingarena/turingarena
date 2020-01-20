@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { GradeDomain } from '../../generated/graphql-types';
 import { ResolversWithModels } from '../../main/resolver-types';
 import { Media } from './media';
 import { Text } from './text';
@@ -15,9 +16,9 @@ export const awardMaterialSchema = gql`
 `;
 
 export interface AwardMaterial {
+    name: string;
     title: Text;
-    statement: Media;
-    attachments: AwardAttachment[];
+    gradeDomain: GradeDomain;
 }
 
 export interface AwardAttachment {

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
+import { AwardMaterial } from './award-material';
 import { Media } from './media';
 import { Text } from './text';
 
@@ -11,6 +12,7 @@ export const problemMaterialSchema = gql`
         title: Text!
         statement: Media!
         attachments: [ProblemAttachment]!
+        awards: [AwardMaterial]!
     }
 
     type ProblemAttachment {
@@ -23,6 +25,7 @@ export interface ProblemMaterial {
     title: Text;
     statement: Media;
     attachments: ProblemAttachment[];
+    awards: AwardMaterial[];
 }
 
 export interface ProblemAttachment {
