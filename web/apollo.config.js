@@ -3,13 +3,13 @@ const path = require("path");
 /** @type { import('apollo').ApolloConfig } */
 const config = {
   client: {
-    includes: ["./projects/*/src/**/*.ts"],
+    includes: ["./src/**/*.ts"],
     excludes: [],
     service: {
-      name: "turingarena-contest",
+      name: "turingarena-server",
       localSchemaFile: path.resolve(
         __dirname,
-        "graphql-schema.json"
+        "../server/src/generated/graphql.schema.graphql",
       )
     }
   }

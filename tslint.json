@@ -1,0 +1,54 @@
+{
+    "extends": ["tslint:all", "tslint-plugin-prettier", "tslint-config-prettier"],
+    "rules": {
+        "prettier": true,
+        "deprecation": {
+            "severity": "warning"
+        },
+        "import-blacklist": [true, "rxjs/Rx", "graphql-tag"],
+        "interface-name": false,
+        "max-classes-per-file": false,
+        "no-console": false,
+        "no-empty": false,
+        "no-inferrable-types": [true, "ignore-params"],
+        "object-literal-key-quotes": [true, "as-needed"],
+        "object-literal-sort-keys": false,
+        "quotemark": [true, "single"],
+        "completed-docs": false,
+        "typedef": false,
+        "file-name-casing": [true, "kebab-case"],
+        "unnecessary-else": false,
+        "max-line-length": false,
+        "prefer-function-over-method": false,
+        "no-parameter-properties": false,
+        "newline-per-chained-call": false,
+        "no-this-assignment": [
+            true,
+            {
+                "allow-destructuring": true
+            }
+        ],
+        "no-submodule-imports": [true, "rxjs/operators", "sequelize/types"],
+        "strict-string-expressions": false,
+        "member-access": false,
+        "comment-format": false,
+        "await-promise": [true, "Bluebird"],
+        "ordered-imports": [
+            true,
+            {
+                "grouped-imports": true,
+                "groups": []
+            }
+        ],
+        "member-ordering": false,
+        "no-use-before-declare": false,
+        "arrow-parens": [true, "ban-single-arg-parens"],
+        "curly": [true, "ignore-same-line"],
+        "only-arrow-functions": [true, "allow-declarations"],
+        "no-non-null-assertion": false,
+        "no-any": false
+    },
+    "linterOptions": {
+        "exclude": ["**/generated/**", "**/*.js"]
+    }
+}
