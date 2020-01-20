@@ -18,10 +18,7 @@ export interface ProblemMetadata {
     };
     scoring: {
         max_score: number;
-        subtasks: Array<{
-            max_score: number;
-            testcases: number;
-        }>;
+        subtasks: SubtaskMetadata[];
     };
     statements: Array<{
         language: string;
@@ -33,6 +30,11 @@ export interface ProblemMetadata {
         content_type: string;
         path: string;
     }>;
+}
+
+export interface SubtaskMetadata {
+    max_score: number;
+    testcases: number;
 }
 
 export async function getProblemMetadata(ctx: ApiContext, problem: Problem): Promise<ProblemMetadata> {

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
+import { awardResolvers, awardSchema } from './award';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { ContestFile } from './contest-file';
 import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
@@ -40,6 +41,7 @@ export const schema = gql`
     ${contestProblemSetSchema}
     ${problemSchema}
     ${problemFileSchema}
+    ${awardSchema}
     ${fileContentSchema}
     ${submissionSchema}
 
@@ -86,6 +88,7 @@ export const resolvers: Resolvers = {
     ...contestResolvers,
     ...problemResolvers,
     ...problemFileResolvers,
+    ...awardResolvers,
     ...contestProblemSetItemResolvers,
     ...contestProblemSetResolvers,
     ...fileContentResolvers,

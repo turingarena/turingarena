@@ -26,6 +26,7 @@ const config: CodegenConfig = {
             config: {
                 defaultMapper: 'any',
                 contextType: '../main/context#ApiContext',
+                noSchemaStitching: true,
             },
         },
         'src/generated/graphql.schema.json': {
