@@ -1,4 +1,4 @@
-import { Inject, Injectable, LOCALE_ID } from '@angular/core';
+import { Injectable, Injector, LOCALE_ID } from '@angular/core';
 import { TextFragment } from './fragments/__generated__/TextFragment';
 import { VariantAttributeFragment } from './fragments/__generated__/VariantAttributeFragment';
 
@@ -6,7 +6,11 @@ import { VariantAttributeFragment } from './fragments/__generated__/VariantAttri
   providedIn: 'root',
 })
 export class VariantService {
-  constructor(@Inject(LOCALE_ID) readonly locale: string) {}
+  // FIXME: avoiding @Inject to make Babel happier
+  private readonly locale: string;
+  constructor(injector: Injector) {
+    this.locale = injector.get(LOCALE_ID);
+  }
 
   selectVariant<T extends { attributes: VariantAttributeFragment[] }>(variants: T[], style?: string): T {
     const styleScore = 10;

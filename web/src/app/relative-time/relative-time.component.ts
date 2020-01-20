@@ -1,4 +1,4 @@
-import { Component, Inject, Input, LOCALE_ID, OnChanges } from '@angular/core';
+import { Component, Injector, Input, LOCALE_ID, OnChanges } from '@angular/core';
 import { DateTime } from 'luxon';
 import { interval, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -10,7 +10,11 @@ import { map, startWith } from 'rxjs/operators';
   `,
 })
 export class RelativeTimeComponent implements OnChanges {
-  constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
+  // FIXME: avoiding @Inject to make Babel happier
+  private readonly locale: string;
+  constructor(injector: Injector) {
+    this.locale = injector.get(LOCALE_ID);
+  }
 
   @Input()
   time!: string;

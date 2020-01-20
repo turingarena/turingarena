@@ -10,7 +10,6 @@
         "allowUnreachableCode": false,
 
         "allowJs": true,
-        "checkJs": true
-    },
-    "include": []
+        "checkJs": true,
+    }
 }
