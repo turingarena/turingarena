@@ -1,4 +1,4 @@
-@import "node_modules/bootstrap/scss/bootstrap";
+@import 'node_modules/bootstrap/scss/bootstrap';
 
 :host {
   height: 100%;
@@ -144,7 +144,7 @@
   text-align: right;
   margin-bottom: 16px;
 
-  &[data-clock-status="ENDED"] {
+  &[data-clock-status='ENDED'] {
     @extend .text-danger;
   }
 }
@@ -173,18 +173,18 @@
   float: right;
 
   &:not([data-score-tier]):not([data-badge]),
-  &[data-score-tier="zero"],
-  &[data-badge="false"] {
+  &[data-score-tier='zero'],
+  &[data-badge='false'] {
     @extend .badge-light;
     border: 1px solid #ccc;
   }
 
-  &[data-score-tier="full"],
-  &[data-badge="true"] {
+  &[data-score-tier='full'],
+  &[data-badge='true'] {
     @extend .badge-success;
   }
 
-  &[data-score-tier="partial"] {
+  &[data-score-tier='partial'] {
     @extend .badge-warning;
   }
 }

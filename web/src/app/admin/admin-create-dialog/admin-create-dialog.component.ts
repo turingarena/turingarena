@@ -4,14 +4,12 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, RowEvent, RowNode, ValueFormatterParams } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-
 import { UserInput } from '../../../../../../__generated__/globalTypes';
 import { FileLoadService } from '../../file-load.service';
-
 import { AdminCreateMutation, AdminCreateMutationVariables } from './__generated__/AdminCreateMutation';
 import { DryImportMutation, DryImportMutationVariables } from './__generated__/DryImportMutation';
 
-const valueFormatter = ({ value, colDef }: ValueFormatterParams) => value ? value : `<${colDef.headerName}>`;
+const valueFormatter = ({ value, colDef }: ValueFormatterParams) => (value ? value : `<${colDef.headerName}>`);
 
 @Component({
   selector: 'app-admin-create-dialog',
@@ -19,11 +17,7 @@ const valueFormatter = ({ value, colDef }: ValueFormatterParams) => value ? valu
   styleUrls: ['./admin-create-dialog.component.scss'],
 })
 export class AdminCreateDialogComponent {
-
-  constructor(
-    private readonly apollo: Apollo,
-    private readonly fileLoadService: FileLoadService,
-  ) { }
+  constructor(private readonly apollo: Apollo, private readonly fileLoadService: FileLoadService) {}
 
   @Input()
   modal!: NgbActiveModal;
@@ -65,12 +59,12 @@ export class AdminCreateDialogComponent {
       editable: true,
       flex: 1,
       singleClickEdit: true,
-      valueFormatter: ({ value, colDef }) => value ? `*`.repeat(value.length) : `<${colDef.headerName}>`,
+      valueFormatter: ({ value, colDef }) => (value ? `*`.repeat(value.length) : `<${colDef.headerName}>`),
     },
   ];
 
   isRowEmpty(node: RowNode) {
-    return ['id', 'displayName', 'token'].every((key) => !node.data[key]);
+    return ['id', 'displayName', 'token'].every(key => !node.data[key]);
   }
 
   onRowEditingStarted(event: RowEvent) {
@@ -104,7 +98,7 @@ export class AdminCreateDialogComponent {
 
   private getRowData() {
     const rowData: UserInput[] = [];
-    this.contestantsGrid.api.forEachNode((node) => {
+    this.contestantsGrid.api.forEachNode(node => {
       if (node.isSelected()) {
         rowData.push(node.data);
       }
@@ -119,50 +113,60 @@ export class AdminCreateDialogComponent {
     el.value = '';
 
     const content = await this.fileLoadService.loadFileContent(file);
-    const result = await this.apollo.mutate<DryImportMutation, DryImportMutationVariables>({
-      mutation: gql`
-        mutation DryImportMutation($input: ImportFileInput!) {
-          import(inputs: [$input], dryRun: true) {
-            users {
-              id
-              displayName
-              token
+    const result = await this.apollo
+      .mutate<DryImportMutation, DryImportMutationVariables>({
+        mutation: gql`
+          mutation DryImportMutation($input: ImportFileInput!) {
+            import(inputs: [$input], dryRun: true) {
+              users {
+                id
+                displayName
+                token
+              }
             }
           }
-        }
-      `,
-      variables: {
-        input: {
-          content,
-          name: file.name,
-          filetype: file.type,
+        `,
+        variables: {
+          input: {
+            content,
+            name: file.name,
+            filetype: file.type,
+          },
         },
-      },
-      refetchQueries: ['AdminQuery'],
-    }).toPromise();
+        refetchQueries: ['AdminQuery'],
+      })
+      .toPromise();
 
     const { data } = result;
     if (data !== null && data !== undefined) {
       const t = this.contestantsGrid.api.updateRowData({ add: data.import.users, addIndex: 0 });
-      t.add.forEach((node) => { node.setSelected(true); });
+      t.add.forEach(node => {
+        node.setSelected(true);
+      });
     }
   }
 
   async submit() {
-    await this.apollo.mutate<AdminCreateMutation, AdminCreateMutationVariables>({
-      mutation: gql`
-        mutation AdminCreateMutation($contestantInputs: [UserInput!]!) {
-          addUsers(inputs: $contestantInputs) {
-            ok
+    await this.apollo
+      .mutate<AdminCreateMutation, AdminCreateMutationVariables>({
+        mutation: gql`
+          mutation AdminCreateMutation($contestantInputs: [UserInput!]!) {
+            addUsers(inputs: $contestantInputs) {
+              ok
+            }
           }
-        }
-      `,
-      variables: {
-        contestantInputs: this.getRowData().map(({ id, displayName, token, admin }) => ({ id, displayName, token, admin })),
-      },
-      refetchQueries: ['AdminQuery'],
-    }).toPromise();
+        `,
+        variables: {
+          contestantInputs: this.getRowData().map(({ id, displayName, token, admin }) => ({
+            id,
+            displayName,
+            token,
+            admin,
+          })),
+        },
+        refetchQueries: ['AdminQuery'],
+      })
+      .toPromise();
     this.modal.close();
   }
-
 }

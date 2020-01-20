@@ -4,7 +4,6 @@ import { faTools } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridAngular } from 'ag-grid-angular';
 import { Apollo } from 'apollo-angular';
-
 import { AdminQuery } from './__generated__/AdminQuery';
 import { adminQuery } from './admin-query';
 
@@ -14,12 +13,7 @@ import { adminQuery } from './admin-query';
   styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent {
-
-  constructor(
-    private readonly apollo: Apollo,
-    readonly route: ActivatedRoute,
-    readonly modalService: NgbModal,
-  ) { }
+  constructor(private readonly apollo: Apollo, readonly route: ActivatedRoute, readonly modalService: NgbModal) {}
 
   faTools = faTools;
 
@@ -30,5 +24,4 @@ export class AdminComponent {
     variables: {},
     pollInterval: 10000,
   });
-
 }

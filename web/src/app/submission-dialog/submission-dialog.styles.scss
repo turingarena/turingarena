@@ -6,16 +6,16 @@
 
 .grid-cell-valence {
   @extend .table-light;
-  &[data-valence="FAILURE"] {
+  &[data-valence='FAILURE'] {
     @extend .table-danger;
   }
-  &[data-valence="WARNING"] {
+  &[data-valence='WARNING'] {
     @extend .table-warning;
   }
-  &[data-valence="PARTIAL"] {
+  &[data-valence='PARTIAL'] {
     @extend .table-warning;
   }
-  &[data-valence="SUCCESS"] {
+  &[data-valence='SUCCESS'] {
     @extend .table-success;
   }
 }

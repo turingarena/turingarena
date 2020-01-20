@@ -12,4 +12,5 @@
         "allowJs": true,
         "checkJs": true
     },
+    "include": []
 }

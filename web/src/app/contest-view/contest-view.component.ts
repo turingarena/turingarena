@@ -26,7 +26,6 @@ import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-
 import { ContestStatus } from '../../../../../__generated__/globalTypes';
 import { Auth, AuthService } from '../auth.service';
 import { scoreAwardGradingFragment } from '../fragments/awards';
@@ -34,7 +33,6 @@ import { contestMaterialFragment } from '../fragments/contest';
 import { messageFragment } from '../fragments/messages';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
 import { getScoreTier } from '../fragments/score';
-
 import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
 import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 
@@ -46,13 +44,12 @@ const pollInterval = 10000;
   styleUrls: ['./contest-view.component.scss'],
 })
 export class ContestViewComponent implements OnInit {
-
   constructor(
     private readonly authService: AuthService,
     private readonly apollo: Apollo,
     readonly route: ActivatedRoute,
     readonly modalService: NgbModal,
-  ) { }
+  ) {}
 
   get userId() {
     const auth = this.authService.getAuth();
@@ -107,20 +104,28 @@ export class ContestViewComponent implements OnInit {
         const end = DateTime.fromISO(endTime);
 
         switch (status) {
-          case ContestStatus.NOT_STARTED: return start.diff(now);
-          case ContestStatus.RUNNING: return end.diff(now);
-          case ContestStatus.ENDED: return now.diff(end);
-          default: throw new Error();
+          case ContestStatus.NOT_STARTED:
+            return start.diff(now);
+          case ContestStatus.RUNNING:
+            return end.diff(now);
+          case ContestStatus.ENDED:
+            return now.diff(end);
+          default:
+            throw new Error();
         }
       }),
-      map((duration) => duration.valueOf() >= 0 ? {
-        duration,
-        negated: false,
-      } : {
-        duration: duration.negate(),
-        negated: true,
-      }),
-    )
+      map(duration =>
+        duration.valueOf() >= 0
+          ? {
+              duration,
+              negated: false,
+            }
+          : {
+              duration: duration.negate(),
+              negated: true,
+            },
+      ),
+    );
 
   setQuery() {
     this.contestQuery = this.apollo.watchQuery<ContestQuery, ContestQueryVariables>({
@@ -175,21 +180,25 @@ export class ContestViewComponent implements OnInit {
 
   async logIn(event: Event, modal: NgbActiveModal) {
     const formData = new FormData(event.target as HTMLFormElement);
-    const { data } = await this.apollo.mutate<LoginMutation, LoginMutationVariables>({
-      mutation: gql`
-        mutation LoginMutation($token: String!) {
-          auth(token: $token) {
-            token
-            userId
+    const { data } = await this.apollo
+      .mutate<LoginMutation, LoginMutationVariables>({
+        mutation: gql`
+          mutation LoginMutation($token: String!) {
+            auth(token: $token) {
+              token
+              userId
+            }
           }
-        }
-      `,
-      variables: {
-        token: formData.get('token') as string,
-      },
-    }).toPromise();
+        `,
+        variables: {
+          token: formData.get('token') as string,
+        },
+      })
+      .toPromise();
 
-    if (data === null || data === undefined) { throw Error('error during login'); }
+    if (data === null || data === undefined) {
+      throw Error('error during login');
+    }
 
     if (data.auth === null) {
       this.logInInvalidToken = true;
@@ -207,4 +216,3 @@ export class ContestViewComponent implements OnInit {
     modal.close();
   }
 }
-

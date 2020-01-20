@@ -1,7 +1,5 @@
 import { ComponentRef, Directive, ElementRef, Host, Input, OnChanges, Renderer2 } from '@angular/core';
-
 import { AwardGradingFragment } from '../fragments/__generated__/AwardGradingFragment';
-
 import { gradingAttributes } from './grading-attributes';
 
 @Directive({
@@ -17,13 +15,11 @@ export class GradingDirective implements OnChanges {
   @Input()
   appGradingNativeElement?: HTMLElement;
 
-  constructor(
-    private readonly elementRef: ElementRef,
-    private readonly renderer: Renderer2,
-  ) { }
+  constructor(private readonly elementRef: ElementRef, private readonly renderer: Renderer2) {}
 
   ngOnChanges() {
-    const nativeElement = this.appGradingNativeElement !== undefined ? this.appGradingNativeElement : this.elementRef.nativeElement;
+    const nativeElement =
+      this.appGradingNativeElement !== undefined ? this.appGradingNativeElement : this.elementRef.nativeElement;
     for (const [attr, c] of gradingAttributes) {
       const value = c(this.appGrading);
       if (value !== undefined) {
@@ -33,5 +29,4 @@ export class GradingDirective implements OnChanges {
       }
     }
   }
-
 }

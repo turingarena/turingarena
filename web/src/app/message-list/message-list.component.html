@@ -1,4 +1,4 @@
-<ng-container *ngFor="let message of (messages | applyPure:reverse)">
+<ng-container *ngFor="let message of messages | applyPure: reverse">
   <div class="message">
     <div class="message-header">
       <strong class="message-kind">
@@ -13,7 +13,7 @@
       </span>
     </div>
     <div class="message-body">
-      <p class="message-content">{{message.text}}</p>
+      <p class="message-content">{{ message.text }}</p>
     </div>
   </div>
 </ng-container>

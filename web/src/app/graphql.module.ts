@@ -5,10 +5,6 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClientOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
-
-// tslint:disable-next-line: no-default-import
-import schema from '../../../../__generated__/graphql-schema.json';
-
 import { AuthService } from './auth.service.js';
 
 const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClientOptions<unknown> => {
@@ -16,16 +12,24 @@ const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClien
     const auth = authService.getAuth();
 
     return {
-      headers: auth !== undefined ? {
-        Authorization: auth.token,
-      } : {},
+      headers:
+        auth !== undefined
+          ? {
+              Authorization: auth.token,
+            }
+          : {},
     };
   });
 
   return {
-    link: ApolloLink.from([authContext, httpLink.create({
-      uri: window.location.toString().startsWith('http://localhost:4200/') ? 'http://localhost:8080/graphql' : '/graphql',
-    })]),
+    link: ApolloLink.from([
+      authContext,
+      httpLink.create({
+        uri: window.location.toString().startsWith('http://localhost:4200/')
+          ? 'http://localhost:8080/graphql'
+          : '/graphql',
+      }),
+    ]),
     cache: new InMemoryCache({
       fragmentMatcher: new IntrospectionFragmentMatcher({
         introspectionQueryResultData: schema,
@@ -46,4 +50,4 @@ const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClien
     },
   ],
 })
-export class GraphQLModule { }
+export class GraphQLModule {}

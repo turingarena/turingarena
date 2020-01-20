@@ -3,12 +3,10 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-
 import { ProblemFragment } from '../../fragments/__generated__/ProblemFragment';
 import { SubmissionFragment } from '../../fragments/__generated__/SubmissionFragment';
 import { VariantService } from '../../variant.service';
 import { AdminQuery } from '../__generated__/AdminQuery';
-
 import { ReevaluateMutation, ReevaluateMutationVariables } from './__generated__/ReevaluateMutation';
 
 type TemplateName = 'grading' | 'createdAt';
@@ -19,17 +17,13 @@ type TemplateName = 'grading' | 'createdAt';
   styleUrls: ['./admin-submissions.component.scss'],
 })
 export class AdminSubmissionsComponent {
-
-  constructor(
-    private readonly apollo: Apollo,
-    private readonly variantService: VariantService,
-  ) { }
+  constructor(private readonly apollo: Apollo, private readonly variantService: VariantService) {}
 
   @Input()
   data!: AdminQuery;
 
   gridOptions: GridOptions = {
-    getRowNodeId: (data) => data.id,
+    getRowNodeId: data => data.id,
     defaultColDef: {
       resizable: true,
       flex: 1,
@@ -39,7 +33,10 @@ export class AdminSubmissionsComponent {
     enableCellChangeFlash: true,
   };
 
-  getColumnDefs = (problems: ProblemFragment[], templates: Record<TemplateName, TemplateRef<unknown>>): Array<ColDef | ColGroupDef> => [
+  getColumnDefs = (
+    problems: ProblemFragment[],
+    templates: Record<TemplateName, TemplateRef<unknown>>,
+  ): Array<ColDef | ColGroupDef> => [
     {
       colId: 'id',
       field: 'id',
@@ -97,45 +94,53 @@ export class AdminSubmissionsComponent {
       groupId: 'grading',
       headerName: 'Grading',
       children: [
-        ...problems.map((problem): ColGroupDef => ({
-          groupId: `problem/${problem.name}`,
-          headerName: this.variantService.selectTextVariant(problem.material.title),
-          columnGroupShow: 'open',
-          children: [
-            ...problem.material.awards.map((award, i): ColDef => ({
-              colId: `problem/${problem.name}/award/${award.name}`,
-              headerName: this.variantService.selectTextVariant(award.material.title),
-              valueGetter: ({ data: submissionData }) => {
-                if (submissionData.problem.name !== problem.name) { return undefined; }
-                const submission = submissionData as SubmissionFragment;
+        ...problems.map(
+          (problem): ColGroupDef => ({
+            groupId: `problem/${problem.name}`,
+            headerName: this.variantService.selectTextVariant(problem.material.title),
+            columnGroupShow: 'open',
+            children: [
+              ...problem.material.awards.map(
+                (award, i): ColDef => ({
+                  colId: `problem/${problem.name}/award/${award.name}`,
+                  headerName: this.variantService.selectTextVariant(award.material.title),
+                  valueGetter: ({ data: submissionData }) => {
+                    if (submissionData.problem.name !== problem.name) {
+                      return undefined;
+                    }
+                    const submission = submissionData as SubmissionFragment;
 
-                return submission.evaluation.awards[i].grading;
-              },
-              cellClass: 'grid-cell-grading',
-              columnGroupShow: 'open',
-              cellRenderer: 'templateCellRenderer',
-              cellRendererParams: {
-                template: templates.grading,
-              },
-            })),
-            {
-              colId: `problem/${problem.name}/evaluation.grading`,
-              valueGetter: ({ data: submissionData }) => {
-                if (submissionData.problem.name !== problem.name) { return undefined; }
-                const submission = submissionData as SubmissionFragment;
+                    return submission.evaluation.awards[i].grading;
+                  },
+                  cellClass: 'grid-cell-grading',
+                  columnGroupShow: 'open',
+                  cellRenderer: 'templateCellRenderer',
+                  cellRendererParams: {
+                    template: templates.grading,
+                  },
+                }),
+              ),
+              {
+                colId: `problem/${problem.name}/evaluation.grading`,
+                valueGetter: ({ data: submissionData }) => {
+                  if (submissionData.problem.name !== problem.name) {
+                    return undefined;
+                  }
+                  const submission = submissionData as SubmissionFragment;
 
-                return submission.evaluation.grading;
+                  return submission.evaluation.grading;
+                },
+                headerName: 'Total',
+                cellClass: 'grid-cell-grading',
+                columnGroupShow: 'open',
+                cellRenderer: 'templateCellRenderer',
+                cellRendererParams: {
+                  template: templates.grading,
+                },
               },
-              headerName: 'Total',
-              cellClass: 'grid-cell-grading',
-              columnGroupShow: 'open',
-              cellRenderer: 'templateCellRenderer',
-              cellRendererParams: {
-                template: templates.grading,
-              },
-            },
-          ],
-        })),
+            ],
+          }),
+        ),
         {
           colId: 'evaluation',
           field: 'evaluation.grading',
@@ -149,26 +154,30 @@ export class AdminSubmissionsComponent {
         },
       ],
     },
-  ]
+  ];
 
   async reevaluateSelected(grid: AgGridAngular) {
     const submissionIds: string[] = [];
 
-    grid.api.getSelectedNodes().forEach(({ data }) => { submissionIds.push(data.id); });
+    grid.api.getSelectedNodes().forEach(({ data }) => {
+      submissionIds.push(data.id);
+    });
 
-    await this.apollo.mutate<ReevaluateMutation, ReevaluateMutationVariables>({
-      mutation: gql`
-        mutation ReevaluateMutation($submissionIds: [String!]!) {
-          evaluate(submissionIds: $submissionIds) {
-            ok
+    await this.apollo
+      .mutate<ReevaluateMutation, ReevaluateMutationVariables>({
+        mutation: gql`
+          mutation ReevaluateMutation($submissionIds: [String!]!) {
+            evaluate(submissionIds: $submissionIds) {
+              ok
+            }
           }
-        }
-      `,
-      variables: {
-        submissionIds,
-      },
-      refetchQueries: ['AdminQuery'],
-      awaitRefetchQueries: true,
-    }).toPromise();
+        `,
+        variables: {
+          submissionIds,
+        },
+        refetchQueries: ['AdminQuery'],
+        awaitRefetchQueries: true,
+      })
+      .toPromise();
   }
 }

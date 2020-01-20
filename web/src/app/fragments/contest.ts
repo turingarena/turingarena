@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-
 import { fileFragment } from './file';
 import { textFragment } from './text';
 

@@ -3,7 +3,7 @@
     <nav class="topbar">
       <a routerLink="/admin" class="admin-home-link">
         <h1 class="admin-title">
-          <fa-icon [icon]="faTools"></fa-icon> [Admin] {{data.contest.material.title | textVariant}}
+          <fa-icon [icon]="faTools"></fa-icon> [Admin] {{ data.contest.material.title | textVariant }}
         </h1>
       </a>
     </nav>
@@ -46,11 +46,9 @@
       <main class="admin-evaluations" [hidden]="(route.firstChild!.data | async).adminSection !== 'evaluations'">
         <app-admin-evaluations [data]="data"></app-admin-evaluations>
       </main>
-
     </div>
   </ng-container>
 </ng-container>
-
 
 <ng-template #createDialog let-modal>
   <app-admin-create-dialog [modal]="modal"></app-admin-create-dialog>

@@ -1,4 +1,4 @@
-@import "node_modules/bootstrap/scss/bootstrap";
+@import 'node_modules/bootstrap/scss/bootstrap';
 
 :host {
   max-height: 100%;
@@ -31,4 +31,3 @@
 .message-content {
   @extend .blockquote;
 }
-

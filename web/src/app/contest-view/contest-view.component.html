@@ -3,18 +3,20 @@
     <nav class="topbar">
       <a routerLink="/" class="contest-home">
         <h1 class="contest-title">
-          <fa-icon [icon]="faHome"></fa-icon> {{data.contest.material.title | textVariant}}
+          <fa-icon [icon]="faHome"></fa-icon> {{ data.contest.material.title | textVariant }}
         </h1>
       </a>
       <ng-container *ngIf="data.user! as user">
-        <span class="user-display-name">{{user.displayName}}</span>
+        <span class="user-display-name">{{ user.displayName }}</span>
       </ng-container>
       <button class="messages-button" (click)="modalService.open(messagesDialog, { size: 'xl' })">
         <fa-icon [icon]="faComments"></fa-icon>
-        Messages <span class="message-count-badge" [hidden]="data.contest.view.messages.length === 0">{{data.contest.view.messages.length}}</span>
+        Messages
+        <span class="message-count-badge" [hidden]="data.contest.view.messages.length === 0">{{
+          data.contest.view.messages.length
+        }}</span>
         <ng-template #messagesDialog let-modal>
-          <app-message-list-dialog [modal]="modal" [data]="data" [userId]="data.user?.id">
-          </app-message-list-dialog>
+          <app-message-list-dialog [modal]="modal" [data]="data" [userId]="data.user?.id"> </app-message-list-dialog>
         </ng-template>
       </button>
       <ng-container *ngIf="data.user! as user">
@@ -58,16 +60,20 @@
               <ng-container *ngSwitchCase="'ENDED'">Ended</ng-container>
             </h2>
             <div class="contest-clock" [attr.data-clock-status]="data.contest.status">
-              {{clock.negated ? '-' : ''}}{{ clock.duration.toFormat('hh:mm:ss') }}
+              {{ clock.negated ? '-' : '' }}{{ clock.duration.toFormat('hh:mm:ss') }}
             </div>
           </ng-container>
           <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
             <h2 class="contest-problem-list-title">Problems</h2>
             <div class="contest-problem-list">
               <ng-container *ngFor="let problem of problemSet.problems; index as index">
-                <a class="contest-problem-link" [routerLink]="['/problem', problem.name]"
-                  [title]="problem.material.title | textVariant" routerLinkActive="active">
-                  {{ problem.material.title | textVariant:'short' }}
+                <a
+                  class="contest-problem-link"
+                  [routerLink]="['/problem', problem.name]"
+                  [title]="problem.material.title | textVariant"
+                  routerLinkActive="active"
+                >
+                  {{ problem.material.title | textVariant: 'short' }}
                   <span class="contest-problem-score" [appGrading]="problem.view.grading">
                     <app-grading [grading]="problem.view.grading"></app-grading>
                   </span>
@@ -78,8 +84,10 @@
         </aside>
         <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
           <ng-container *ngFor="let problem of problemSet.problems; index as index">
-            <aside class="problem-aside"
-              [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+            <aside
+              class="problem-aside"
+              [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name"
+            >
               <div class="problem-submission-panel" *ngIf="problem.view.tackling! as tackling">
                 <ng-container *ngIf="tackling.canSubmit">
                   <ng-template #newSubmissionDialog let-modal>
@@ -87,8 +95,16 @@
                     </app-submission-dialog>
                   </ng-template>
                   <ng-template #submitDialog let-modal>
-                    <app-submit-dialog [problem]="problem" [userId]="data.user!.id" [modal]="modal"
-                      (done)="newSubmissionId = $event.id; contestQuery.refetch(); modalService.open(newSubmissionDialog, { size: 'lg' })">
+                    <app-submit-dialog
+                      [problem]="problem"
+                      [userId]="data.user!.id"
+                      [modal]="modal"
+                      (done)="
+                        newSubmissionId = $event.id;
+                        contestQuery.refetch();
+                        modalService.open(newSubmissionDialog, { size: 'lg' })
+                      "
+                    >
                     </app-submit-dialog>
                   </ng-template>
                   <button class="problem-submit" (click)="modalService.open(submitDialog)">
@@ -98,10 +114,11 @@
                 </ng-container>
 
                 <ng-container *ngIf="tackling.submissions[tackling.submissions.length - 1] as lastSubmission">
-                  <button class="problem-last-submission"
-                    (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-                    <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" [icon]="faHistory">
-                    </fa-icon>
+                  <button
+                    class="problem-last-submission"
+                    (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })"
+                  >
+                    <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" [icon]="faHistory"> </fa-icon>
                     <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
                     </fa-icon>
                     Last submission
@@ -111,8 +128,10 @@
                     </app-submission-dialog>
                   </ng-template>
 
-                  <button class="problem-submission-list"
-                    (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+                  <button
+                    class="problem-submission-list"
+                    (click)="modalService.open(submissionListDialog, { size: 'xl' })"
+                  >
                     <fa-icon [icon]="faList"></fa-icon>
                     All submissions
                   </button>
@@ -127,7 +146,7 @@
                   <div class="problem-award-list">
                     <ng-container *ngFor="let awardView of problem.view.awards">
                       <div class="problem-award" [title]="awardView.material.title | textVariant">
-                        {{awardView.material.title | textVariant}}
+                        {{ awardView.material.title | textVariant }}
                         <span class="problem-award-grading" [appGrading]="awardView.grading">
                           <app-grading [grading]="awardView.grading"></app-grading>
                         </span>
@@ -140,10 +159,17 @@
                   <div class="problem-attachment-list">
                     <ng-container *ngFor="let attachment of problem.material.attachments">
                       <ng-container *ngIf="attachment.file | fileVariant as file">
-                        <a class="problem-attachment" [title]="attachment.title | textVariant" [download]="file.name"
-                          [href]="'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64 | bypassSanitizer:'Url'">
+                        <a
+                          class="problem-attachment"
+                          [title]="attachment.title | textVariant"
+                          [download]="file.name"
+                          [href]="
+                            'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64
+                              | bypassSanitizer: 'Url'
+                          "
+                        >
                           <fa-icon [icon]="mimeTypeIcons[file.type] || faFile"></fa-icon>
-                          {{attachment.title | textVariant}}
+                          {{ attachment.title | textVariant }}
                         </a>
                       </ng-container>
                     </ng-container>
@@ -151,10 +177,17 @@
                 </ng-container>
                 <ng-container *ngIf="problem.material.statement | fileVariant as statement">
                   <h2 class="problem-download-statement-title">Statement file</h2>
-                  <a class="problem-download-statement" [title]="statement.name" [download]="statement.name"
-                    [href]="'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64 | bypassSanitizer:'Url'">
+                  <a
+                    class="problem-download-statement"
+                    [title]="statement.name"
+                    [download]="statement.name"
+                    [href]="
+                      'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64
+                        | bypassSanitizer: 'Url'
+                    "
+                  >
                     <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
-                    {{statement.name}}
+                    {{ statement.name }}
                   </a>
                 </ng-container>
               </div>
@@ -171,15 +204,16 @@
 
       <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
         <ng-container *ngFor="let problem of problemSet.problems">
-          <main class="problem-statement"
-            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name">
+          <main
+            class="problem-statement"
+            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name"
+          >
             <ng-container *ngIf="problem.material.statement | fileVariant as file">
               <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
             </ng-container>
           </main>
         </ng-container>
       </ng-container>
-
     </div>
   </ng-container>
 </ng-container>
@@ -187,10 +221,13 @@
 <ng-template #inlineFileTemplate let-content="content" let-type="type">
   <ng-container [ngSwitch]="type">
     <markdown class="inline-file-markdown" *ngSwitchCase="'text/markdown'" katex>
-      {{content.text}}
+      {{ content.text }}
     </markdown>
-    <iframe *ngSwitchDefault class="inline-file-iframe"
-      [attr.src]="'data:' + type + ';base64,' + content.base64 | bypassSanitizer:'ResourceUrl'">
+    <iframe
+      *ngSwitchDefault
+      class="inline-file-iframe"
+      [attr.src]="'data:' + type + ';base64,' + content.base64 | bypassSanitizer: 'ResourceUrl'"
+    >
     </iframe>
   </ng-container>
 </ng-template>

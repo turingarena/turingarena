@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
 import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
 import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
 
@@ -9,11 +8,8 @@ import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragmen
   templateUrl: './submission-list-dialog.component.html',
   styleUrls: ['./submission-list-dialog.component.scss'],
 })
-export class SubmissionListDialogComponent  {
-
-  constructor(
-    readonly modalService: NgbModal,
-  ) { }
+export class SubmissionListDialogComponent {
+  constructor(readonly modalService: NgbModal) {}
 
   @Input()
   modal!: NgbActiveModal;
@@ -22,5 +18,4 @@ export class SubmissionListDialogComponent  {
   problem!: ProblemFragment;
 
   openSubmission!: SubmissionFragment;
-
 }

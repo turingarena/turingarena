@@ -10,15 +10,15 @@ export interface Auth {
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(
-    private readonly apollo: Apollo,
-  ) { }
+  constructor(private readonly apollo: Apollo) {}
 
   getAuth = (): Auth | undefined => {
     try {
       const authString = localStorage.getItem('auth');
 
-      if (authString === null) { return undefined; }
+      if (authString === null) {
+        return undefined;
+      }
 
       return JSON.parse(authString) as Auth;
     } catch (e) {
@@ -26,7 +26,7 @@ export class AuthService {
 
       return undefined;
     }
-  }
+  };
 
   setAuth = async (auth: Auth | undefined) => {
     const client = this.apollo.getClient();
@@ -41,5 +41,5 @@ export class AuthService {
 
     await client.resetStore();
     await client.reFetchObservableQueries();
-  }
+  };
 }

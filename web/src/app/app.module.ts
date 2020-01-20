@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-submodule-imports
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -9,7 +7,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
-
 import { AdminContestantsComponent } from './admin/admin-contestants/admin-contestants.component';
 import { AdminCreateDialogComponent } from './admin/admin-create-dialog/admin-create-dialog.component';
 import { AdminEvaluationsComponent } from './admin/admin-evaluations/admin-evaluations.component';
@@ -138,7 +135,6 @@ const routes: Routes = [
     BrowserModule,
     FormsModule,
     GraphQLModule,
-    HttpClientModule,
     NgxFilesizeModule,
     NgbModule,
     FontAwesomeModule,
@@ -148,12 +144,10 @@ const routes: Routes = [
       anchorScrolling: 'enabled',
       scrollPositionRestoration: 'enabled',
     }),
-    AgGridModule.withComponents([
-      TemplateCellRendererComponent,
-    ]),
+    AgGridModule.withComponents([TemplateCellRendererComponent]),
   ],
   providers: [],
   bootstrap: [AppComponent],
   entryComponents: [TemplateCellRendererComponent],
 })
-export class AppModule { }
+export class AppModule {}

@@ -7,5 +7,4 @@ import { Component } from '@angular/core';
   selector: 'app-empty',
   template: '',
 })
-export class EmptyComponent {
-}
+export class EmptyComponent {}

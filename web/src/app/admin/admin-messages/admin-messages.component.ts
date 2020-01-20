@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
-
 import { VariantService } from '../../variant.service';
 import { AdminQuery } from '../__generated__/AdminQuery';
 
@@ -10,16 +9,13 @@ import { AdminQuery } from '../__generated__/AdminQuery';
   styleUrls: ['./admin-messages.component.scss'],
 })
 export class AdminMessagesComponent {
-
-  constructor(
-    private readonly variantService: VariantService,
-  ) { }
+  constructor(private readonly variantService: VariantService) {}
 
   @Input()
   data!: AdminQuery;
 
   gridOptions: GridOptions = {
-    getRowNodeId: (data) => data.id,
+    getRowNodeId: data => data.id,
     defaultColDef: {
       resizable: true,
       flex: 1,
@@ -67,5 +63,4 @@ export class AdminMessagesComponent {
       filter: true,
     },
   ];
-
 }

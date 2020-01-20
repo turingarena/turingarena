@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { GridOptions } from 'ag-grid-community';
-
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
 
 /**
@@ -12,7 +11,6 @@ import { TemplateCellRendererComponent } from './template-cell-renderer.componen
   name: 'gridOptions',
 })
 export class GridOptionsPipe implements PipeTransform {
-
   transform(value: GridOptions): GridOptions {
     return {
       frameworkComponents: {
@@ -21,5 +19,4 @@ export class GridOptionsPipe implements PipeTransform {
       ...value,
     };
   }
-
 }

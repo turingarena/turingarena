@@ -1,11 +1,16 @@
-<ag-grid-angular #grid class="problems-grid ag-theme-balham" [animateRows]="true" rowSelection="multiple"
+<ag-grid-angular
+  #grid
+  class="problems-grid ag-theme-balham"
+  [animateRows]="true"
+  rowSelection="multiple"
   [rowData]="data.contest.problems"
   [columnDefs]="columnDefs"
-  [gridOptions]="gridOptions | gridOptions" (columnGroupOpened)="$event.api.sizeColumnsToFit()"
-  (gridSizeChanged)="$event.api.sizeColumnsToFit()">
+  [gridOptions]="gridOptions | gridOptions"
+  (columnGroupOpened)="$event.api.sizeColumnsToFit()"
+  (gridSizeChanged)="$event.api.sizeColumnsToFit()"
+>
 </ag-grid-angular>
 
 <ng-template #grading let-value="value" let-eGridCell="eGridCell">
-  <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value">
-  </app-grading>
+  <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value"> </app-grading>
 </ng-template>

@@ -3,9 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo } from 'apollo-angular';
 import { FetchResult } from 'apollo-link';
 import gql from 'graphql-tag';
-
 import { ContestQuery } from '../contest-view/__generated__/ContestQuery';
-
 import { SendMessageMutation, SendMessageMutationVariables } from './__generated__/SendMessageMutation';
 
 @Component({
@@ -14,10 +12,7 @@ import { SendMessageMutation, SendMessageMutationVariables } from './__generated
   styleUrls: ['./message-list-dialog.component.scss'],
 })
 export class MessageListDialogComponent {
-
-  constructor(
-    private readonly apollo: Apollo,
-  ) { }
+  constructor(private readonly apollo: Apollo) {}
 
   @Input()
   data!: ContestQuery[];
@@ -38,20 +33,22 @@ export class MessageListDialogComponent {
 
     console.log(event);
 
-    this.sendMutationResult = this.apollo.mutate<SendMessageMutation, SendMessageMutationVariables>({
-      mutation: gql`
-        mutation SendMessageMutation($userId: String!, $text: String!) {
-          sendMessage(userId: $userId, text: $text) {
-            ok
+    this.sendMutationResult = this.apollo
+      .mutate<SendMessageMutation, SendMessageMutationVariables>({
+        mutation: gql`
+          mutation SendMessageMutation($userId: String!, $text: String!) {
+            sendMessage(userId: $userId, text: $text) {
+              ok
+            }
           }
-        }
-      `,
-      variables: {
-        userId: this.userId!,
-        text: formData.get('text') as string,
-      },
-      refetchQueries: ['ContestQuery'],
-      awaitRefetchQueries: true,
-    }).toPromise();
+        `,
+        variables: {
+          userId: this.userId!,
+          text: formData.get('text') as string,
+        },
+        refetchQueries: ['ContestQuery'],
+        awaitRefetchQueries: true,
+      })
+      .toPromise();
   }
 }

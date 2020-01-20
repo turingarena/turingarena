@@ -5,10 +5,12 @@ import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-relative-time',
-  template: `<abbr [title]="time | date:'full'">{{ relativeTimeObservable | async }}</abbr>`,
+  template: `
+    <abbr [title]="time | date: 'full'">{{ relativeTimeObservable | async }}</abbr>
+  `,
 })
 export class RelativeTimeComponent implements OnChanges {
-  constructor(@Inject(LOCALE_ID) private readonly locale: string) { }
+  constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
 
   @Input()
   time!: string;
@@ -23,7 +25,7 @@ export class RelativeTimeComponent implements OnChanges {
 
     this.relativeTimeObservable = interval(refreshInterval).pipe(
       startWith(0),
-      map(() => time.diffNow().as('seconds') > -nowToleranceSeconds ? 'now' : time.toRelative()!),
+      map(() => (time.diffNow().as('seconds') > -nowToleranceSeconds ? 'now' : time.toRelative()!)),
     );
   }
 }

@@ -1,5 +1,4 @@
 import { ComponentRef, Directive, ElementRef, Host, Input, OnChanges, Renderer2 } from '@angular/core';
-
 import { Valence } from '../../../../../__generated__/globalTypes';
 
 @Directive({
@@ -15,13 +14,11 @@ export class ValenceDirective implements OnChanges {
   @Input()
   appValenceNativeElement?: HTMLElement;
 
-  constructor(
-    private readonly elementRef: ElementRef,
-    private readonly renderer: Renderer2,
-  ) { }
+  constructor(private readonly elementRef: ElementRef, private readonly renderer: Renderer2) {}
 
   ngOnChanges() {
-    const nativeElement = this.appValenceNativeElement !== undefined ? this.appValenceNativeElement : this.elementRef.nativeElement;
+    const nativeElement =
+      this.appValenceNativeElement !== undefined ? this.appValenceNativeElement : this.elementRef.nativeElement;
 
     const attr = 'data-valence';
     const value = this.appValence;

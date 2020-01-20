@@ -1,9 +1,17 @@
 <button class="reevaluate-button" (click)="reevaluateSelected(grid)">Reevaluate selected</button>
-<ag-grid-angular #grid class="submissions-grid ag-theme-balham" [animateRows]="true" rowSelection="multiple"
+<ag-grid-angular
+  #grid
+  class="submissions-grid ag-theme-balham"
+  [animateRows]="true"
+  rowSelection="multiple"
   [rowData]="data.contest.submissions"
-  [columnDefs]="data.contest.problems | jsonPure | fromJson | applyPure:getColumnDefs:{ createdAt: createdAt, grading: grading }"
-  [gridOptions]="gridOptions | gridOptions" (columnGroupOpened)="$event.api.sizeColumnsToFit()"
-  (gridSizeChanged)="$event.api.sizeColumnsToFit()">
+  [columnDefs]="
+    data.contest.problems | jsonPure | fromJson | applyPure: getColumnDefs:{ createdAt: createdAt, grading: grading }
+  "
+  [gridOptions]="gridOptions | gridOptions"
+  (columnGroupOpened)="$event.api.sizeColumnsToFit()"
+  (gridSizeChanged)="$event.api.sizeColumnsToFit()"
+>
 </ag-grid-angular>
 
 <ng-template #createdAt let-submission="data">
@@ -12,7 +20,6 @@
 
 <ng-template #grading let-value="value" let-eGridCell="eGridCell">
   <ng-container *ngIf="value !== undefined">
-    <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value">
-    </app-grading>
+    <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value"> </app-grading>
   </ng-container>
 </ng-template>

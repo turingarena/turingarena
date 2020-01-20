@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-
 import { awardAchievementFragment, awardGradingFragment, scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { evaluationFragment } from '../fragments/evaluation';

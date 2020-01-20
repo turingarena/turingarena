@@ -1,13 +1,21 @@
 <form class="submit-dialog" (ngSubmit)="$event.preventDefault(); submit($event)">
   <div class="submit-dialog-header">
-    <h4>Solution of: <strong>{{problem.material.title | textVariant}}</strong></h4>
+    <h4>
+      Solution of: <strong>{{ problem.material.title | textVariant }}</strong>
+    </h4>
   </div>
   <div class="submit-dialog-body">
     <ng-container *ngFor="let field of problem.material.submissionForm.fields" class="submission_file_field">
       <ng-container *ngIf="fieldState(field) as state">
         <label class="submit-field-label" [for]="field.id + '.file'">{{ field.title | textVariant }}</label>
-        <input #input class="submit-field-input" [id]="field.id + '.file'" [name]="field.id + '.file'" type="file"
-          (change)="fieldState(field).file = $event.target.files[0]" />
+        <input
+          #input
+          class="submit-field-input"
+          [id]="field.id + '.file'"
+          [name]="field.id + '.file'"
+          type="file"
+          (change)="fieldState(field).file = $event.target.files[0]"
+        />
         <button class="submit-field-choose" (click)="input.click(); $event.preventDefault()">Choose file</button>
         <dl *ngIf="state.file as file" class="submit-field-info">
           <dt>Name:</dt>
@@ -16,8 +24,9 @@
           <dd [ngSwitch]="state.typeChoices.type">
             <ng-container *ngSwitchCase="'oneRecommended'">
               {{ state.typeChoices.recommendedType!.title | textVariant }}
-              (<a href="#" class="submit-field-change-type"
-                (click)="state.moreTypes = true; $event.preventDefault()">change</a>)
+              (<a href="#" class="submit-field-change-type" (click)="state.moreTypes = true; $event.preventDefault()"
+                >change</a
+              >)
               <input type="hidden" [name]="field.id + '.type'" [value]="state.typeChoices.recommendedType!.id" />
             </ng-container>
             <ng-container *ngSwitchCase="'manyRecommended'">
@@ -25,12 +34,14 @@
                 <input type="radio" [name]="field.id + '.type'" [value]="type.id" />
                 {{ type.title | textVariant }}
               </label>
-              (<a href="#" class="submit-field-more-types"
-                (click)="state.moreTypes = true; $event.preventDefault()">more...</a>)
+              (<a href="#" class="submit-field-more-types" (click)="state.moreTypes = true; $event.preventDefault()"
+                >more...</a
+              >)
             </ng-container>
             <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submit-field-select-type">
               <option *ngFor="let type of state.typeChoices.allTypes" [value]="type.id">
-                {{ type.title | textVariant }}</option>
+                {{ type.title | textVariant }}</option
+              >
             </select>
           </dd>
           <dt>Size:</dt>

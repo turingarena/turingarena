@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-
 import { awardGradingFragment, scoreAwardGradingFragment } from './awards';
 
 export const submissionFragment = gql`

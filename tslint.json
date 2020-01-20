@@ -5,7 +5,6 @@
         "deprecation": {
             "severity": "warning"
         },
-        "import-blacklist": [true, "rxjs/Rx", "graphql-tag"],
         "interface-name": false,
         "max-classes-per-file": false,
         "no-console": false,
@@ -46,7 +45,8 @@
         "curly": [true, "ignore-same-line"],
         "only-arrow-functions": [true, "allow-declarations"],
         "no-non-null-assertion": false,
-        "no-any": false
+        "no-any": false,
+        "no-null-keyword": true
     },
     "linterOptions": {
         "exclude": ["**/generated/**", "**/*.js"]

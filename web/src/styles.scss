@@ -1,9 +1,9 @@
-@import "node_modules/bootstrap/scss/bootstrap";
-@import "~ag-grid-community/dist/styles/ag-grid.css";
-@import "~ag-grid-community/dist/styles/ag-theme-balham.css";
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import '~ag-grid-community/dist/styles/ag-grid.css';
+@import '~ag-grid-community/dist/styles/ag-theme-balham.css';
 
-@import "app/contest-view/contest-view.styles.scss";
-@import "app/submission-dialog/submission-dialog.styles.scss";
+@import 'app/contest-view/contest-view.styles.scss';
+@import 'app/submission-dialog/submission-dialog.styles.scss';
 
 * {
   box-sizing: border-box;
@@ -53,8 +53,7 @@ html {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-    Helvetica Neue, Arial, Noto Sans, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -121,27 +120,27 @@ body {
     opacity: 1;
   }
 
-  &[data-grading-typename="BadgeAwardGrading"] {
+  &[data-grading-typename='BadgeAwardGrading'] {
     text-align: center;
   }
 
-  &[data-grading-typename="ScoreAwardGrading"] {
+  &[data-grading-typename='ScoreAwardGrading'] {
     text-align: end;
   }
 
-  &[data-badge="true"] {
+  &[data-badge='true'] {
     @extend .table-success;
   }
-  &[data-badge="false"] {
+  &[data-badge='false'] {
     @extend .table-danger;
   }
-  &[data-score-tier="zero"] {
+  &[data-score-tier='zero'] {
     @extend .table-danger;
   }
-  &[data-score-tier="partial"] {
+  &[data-score-tier='partial'] {
     @extend .table-warning;
   }
-  &[data-score-tier="full"] {
+  &[data-score-tier='full'] {
     @extend .table-success;
   }
 }

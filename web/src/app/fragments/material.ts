@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-
 import { awardFragment } from './awards';
 import { fileFragment } from './file';
 import { rusageFragment } from './rusage';
@@ -8,61 +7,103 @@ import { textFragment } from './text';
 
 export const problemMaterialFragment = gql`
   fragment AttachmentFragment on Attachment {
-    title { ...TextFragment }
-    file { ...FileFragment }
+    title {
+      ...TextFragment
+    }
+    file {
+      ...FileFragment
+    }
   }
 
   fragment FieldTypeFragment on FileType {
     id
-    title { ...TextFragment }
+    title {
+      ...TextFragment
+    }
     extensions
   }
 
   fragment FieldFragment on Field {
     id
-    title { ...TextFragment }
-    types { ...FieldTypeFragment }
+    title {
+      ...TextFragment
+    }
+    types {
+      ...FieldTypeFragment
+    }
   }
 
   fragment FormFragment on Form {
-    fields { ...FieldFragment }
+    fields {
+      ...FieldFragment
+    }
   }
 
   fragment TableSectionFragment on TableSection {
-    caption { ...TextFragment }
-    cols { ...ColFragment }
-    rows { ...RowFragment }
+    caption {
+      ...TextFragment
+    }
+    cols {
+      ...ColFragment
+    }
+    rows {
+      ...RowFragment
+    }
   }
 
   fragment ColFragment on Col {
-    title { ...TextFragment }
-    content { ...ColContentFragment }
+    title {
+      ...TextFragment
+    }
+    content {
+      ...ColContentFragment
+    }
   }
 
   fragment ColContentFragment on ColContent {
     __typename
     ... on ScoreColContent {
-      range { ...ScoreRangeFragment }
+      range {
+        ...ScoreRangeFragment
+      }
     }
   }
 
   fragment RowFragment on Row {
-    cells { ...CellFragment }
+    cells {
+      ...CellFragment
+    }
   }
 
   fragment CellFragment on Cell {
-    content { ...CellContentFragment }
+    content {
+      ...CellContentFragment
+    }
   }
 
   fragment CellContentFragment on CellContent {
     __typename
-    ... on RowNumberCellContent { ...RowNumberCellContentFragment }
-    ... on RowTitleCellContent { ...RowTitleCellContentFragment }
-    ... on AwardReferenceCellContent { ...AwardReferenceCellContentFragment }
-    ... on ScoreCellContent { ...ScoreCellContentFragment }
-    ... on MessageCellContent { ...MessageCellContentFragment }
-    ... on TimeUsageCellContent { ...TimeUsageCellContentFragment }
-    ... on MemoryUsageCellContent { ...MemoryUsageCellContentFragment }
+    ... on RowNumberCellContent {
+      ...RowNumberCellContentFragment
+    }
+    ... on RowTitleCellContent {
+      ...RowTitleCellContentFragment
+    }
+    ... on AwardReferenceCellContent {
+      ...AwardReferenceCellContentFragment
+    }
+    ... on ScoreCellContent {
+      ...ScoreCellContentFragment
+    }
+    ... on MessageCellContent {
+      ...MessageCellContentFragment
+    }
+    ... on TimeUsageCellContent {
+      ...TimeUsageCellContentFragment
+    }
+    ... on MemoryUsageCellContent {
+      ...MemoryUsageCellContentFragment
+    }
   }
 
   fragment RowNumberCellContentFragment on RowNumberCellContent {
@@ -70,7 +111,9 @@ export const problemMaterialFragment = gql`
   }
 
   fragment RowTitleCellContentFragment on RowTitleCellContent {
-    title { ...TextFragment }
+    title {
+      ...TextFragment
+    }
   }
 
   fragment AwardReferenceCellContentFragment on AwardReferenceCellContent {
@@ -79,7 +122,9 @@ export const problemMaterialFragment = gql`
 
   fragment ScoreCellContentFragment on ScoreCellContent {
     key
-    range { ...ScoreRangeFragment }
+    range {
+      ...ScoreRangeFragment
+    }
   }
 
   fragment MessageCellContentFragment on MessageCellContent {
@@ -88,31 +133,53 @@ export const problemMaterialFragment = gql`
   }
 
   fragment TimeUsageCellContentFragment on TimeUsageCellContent {
-    timeUsageMaxRelevant: maxRelevant { ...TimeUsageFragment }
-    timeUsagePrimaryWatermark: primaryWatermark { ...TimeUsageFragment }
+    timeUsageMaxRelevant: maxRelevant {
+      ...TimeUsageFragment
+    }
+    timeUsagePrimaryWatermark: primaryWatermark {
+      ...TimeUsageFragment
+    }
     key
     valenceKey
   }
 
   fragment MemoryUsageCellContentFragment on MemoryUsageCellContent {
-    memoryUsageMaxRelevant: maxRelevant { ...MemoryUsageFragment }
-    memoryUsagePrimaryWatermark: primaryWatermark { ...MemoryUsageFragment }
+    memoryUsageMaxRelevant: maxRelevant {
+      ...MemoryUsageFragment
+    }
+    memoryUsagePrimaryWatermark: primaryWatermark {
+      ...MemoryUsageFragment
+    }
     key
     valenceKey
   }
 
   fragment FeedbackSectionFragment on Section {
     __typename
-    ... on TableSection { ...TableSectionFragment }
+    ... on TableSection {
+      ...TableSectionFragment
+    }
   }
 
   fragment MaterialFragment on Material {
-    title { ...TextFragment }
-    statement { ...FileFragment }
-    attachments { ...AttachmentFragment }
-    submissionForm { ...FormFragment }
-    awards { ...AwardFragment }
-    feedback { ...FeedbackSectionFragment }
+    title {
+      ...TextFragment
+    }
+    statement {
+      ...FileFragment
+    }
+    attachments {
+      ...AttachmentFragment
+    }
+    submissionForm {
+      ...FormFragment
+    }
+    awards {
+      ...AwardFragment
+    }
+    feedback {
+      ...FeedbackSectionFragment
+    }
   }
 
   ${textFragment}
