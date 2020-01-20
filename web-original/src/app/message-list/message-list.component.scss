@@ -1,0 +1,33 @@
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+:host {
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-flow: column-reverse;
+
+  padding: 16px;
+  padding-top: 0;
+}
+
+.message {
+  @extend .card;
+
+  margin-top: 16px;
+}
+
+.message-header {
+  @extend .card-header;
+}
+
+.message-time {
+  float: right;
+}
+
+.message-body {
+  @extend .card-body;
+}
+
+.message-content {
+  @extend .blockquote;
+}

@@ -1,0 +1,37 @@
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+.message-list-dialog-header {
+  @extend .modal-header;
+}
+
+.message-list-dialog-body {
+  @extend .modal-body;
+
+  padding: 0;
+}
+
+.message-list {
+  max-height: 60vh;
+}
+
+.message-list-empty {
+  margin: 32px;
+}
+
+.new-question-form {
+  padding: 16px;
+  @extend .border-top;
+}
+
+.new-question-text-group,
+.new-question-send-group {
+  @extend .form-group;
+}
+
+.new-question-text {
+  @extend .form-control;
+}
+
+.new-question-send {
+  @extend .btn, .btn-primary;
+}

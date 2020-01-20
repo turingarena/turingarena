@@ -1,0 +1,254 @@
+<ng-container *ngIf="contestQuery.valueChanges | async as contestResult">
+  <ng-container *ngIf="contestResult.data as data">
+    <nav class="topbar">
+      <a routerLink="/" class="contest-home">
+        <h1 class="contest-title">
+          <fa-icon [icon]="faHome"></fa-icon> {{ data.contest.material.title | textVariant }}
+        </h1>
+      </a>
+      <ng-container *ngIf="data.user! as user">
+        <span class="user-display-name">{{ user.displayName }}</span>
+      </ng-container>
+      <button class="messages-button" (click)="modalService.open(messagesDialog, { size: 'xl' })">
+        <fa-icon [icon]="faComments"></fa-icon>
+        Messages
+        <span class="message-count-badge" [hidden]="data.contest.view.messages.length === 0">{{
+          data.contest.view.messages.length
+        }}</span>
+        <ng-template #messagesDialog let-modal>
+          <app-message-list-dialog [modal]="modal" [data]="data" [userId]="data.user?.id"> </app-message-list-dialog>
+        </ng-template>
+      </button>
+      <ng-container *ngIf="data.user! as user">
+        <ng-container *ngIf="user.isAdmin">
+          <a routerLink="/admin" class="admin-button">
+            <fa-icon [icon]="faTools"></fa-icon>
+            Admin
+          </a>
+        </ng-container>
+        <button class="user-logout" (click)="setAuth(undefined)">
+          <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          Logout
+        </button>
+      </ng-container>
+      <ng-container *ngIf="!data.user">
+        <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
+          <fa-icon [icon]="faSignInAlt"></fa-icon>
+          Login
+        </button>
+      </ng-container>
+    </nav>
+    <div class="contest-main">
+      <aside class="focus-mode-toggler" (click)="focusMode = !focusMode">
+        <fa-icon [icon]="focusMode ? faChevronRight : faChevronLeft"></fa-icon>
+      </aside>
+
+      <aside class="contest-view-aside" [hidden]="focusMode">
+        <aside class="contest-aside">
+          <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
+            <ng-container *ngIf="problemSet.view.grading.grade">
+              <h2 class="contest-score-title">Score</h2>
+              <div class="contest-score">
+                <app-grading [grading]="problemSet.view.grading"></app-grading>
+              </div>
+            </ng-container>
+          </ng-container>
+          <ng-container *ngIf="getContestClock(data) | async as clock">
+            <h2 class="contest-clock-title" [ngSwitch]="data.contest.status">
+              <ng-container *ngSwitchCase="'NOT_STARTED'">Starting In</ng-container>
+              <ng-container *ngSwitchCase="'RUNNING'">Remaining Time</ng-container>
+              <ng-container *ngSwitchCase="'ENDED'">Ended</ng-container>
+            </h2>
+            <div class="contest-clock" [attr.data-clock-status]="data.contest.status">
+              {{ clock.negated ? '-' : '' }}{{ clock.duration.toFormat('hh:mm:ss') }}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
+            <h2 class="contest-problem-list-title">Problems</h2>
+            <div class="contest-problem-list">
+              <ng-container *ngFor="let problem of problemSet.problems; index as index">
+                <a
+                  class="contest-problem-link"
+                  [routerLink]="['/problem', problem.name]"
+                  [title]="problem.material.title | textVariant"
+                  routerLinkActive="active"
+                >
+                  {{ problem.material.title | textVariant: 'short' }}
+                  <span class="contest-problem-score" [appGrading]="problem.view.grading">
+                    <app-grading [grading]="problem.view.grading"></app-grading>
+                  </span>
+                </a>
+              </ng-container>
+            </div>
+          </ng-container>
+        </aside>
+        <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
+          <ng-container *ngFor="let problem of problemSet.problems; index as index">
+            <aside
+              class="problem-aside"
+              [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name"
+            >
+              <div class="problem-submission-panel" *ngIf="problem.view.tackling! as tackling">
+                <ng-container *ngIf="tackling.canSubmit">
+                  <ng-template #newSubmissionDialog let-modal>
+                    <app-submission-dialog [problem]="problem" [submissionId]="newSubmissionId" [modal]="modal">
+                    </app-submission-dialog>
+                  </ng-template>
+                  <ng-template #submitDialog let-modal>
+                    <app-submit-dialog
+                      [problem]="problem"
+                      [userId]="data.user!.id"
+                      [modal]="modal"
+                      (done)="
+                        newSubmissionId = $event.id;
+                        contestQuery.refetch();
+                        modalService.open(newSubmissionDialog, { size: 'lg' })
+                      "
+                    >
+                    </app-submit-dialog>
+                  </ng-template>
+                  <button class="problem-submit" (click)="modalService.open(submitDialog)">
+                    <fa-icon [icon]="faPaperPlane"></fa-icon>
+                    Submit a solution
+                  </button>
+                </ng-container>
+
+                <ng-container *ngIf="tackling.submissions[tackling.submissions.length - 1] as lastSubmission">
+                  <button
+                    class="problem-last-submission"
+                    (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })"
+                  >
+                    <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" [icon]="faHistory"> </fa-icon>
+                    <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" [icon]="faSpinner" [pulse]="true">
+                    </fa-icon>
+                    Last submission
+                  </button>
+                  <ng-template #lastSubmissionDialog let-modal>
+                    <app-submission-dialog [problem]="problem" [submissionId]="lastSubmission.id" [modal]="modal">
+                    </app-submission-dialog>
+                  </ng-template>
+
+                  <button
+                    class="problem-submission-list"
+                    (click)="modalService.open(submissionListDialog, { size: 'xl' })"
+                  >
+                    <fa-icon [icon]="faList"></fa-icon>
+                    All submissions
+                  </button>
+                  <ng-template #submissionListDialog let-modal>
+                    <app-submission-list-dialog [modal]="modal" [problem]="problem"></app-submission-list-dialog>
+                  </ng-template>
+                </ng-container>
+              </div>
+              <div class="problem-info">
+                <ng-container *ngIf="problem.material.awards.length > 0">
+                  <h3 class="problem-award-list-title">Awards</h3>
+                  <div class="problem-award-list">
+                    <ng-container *ngFor="let awardView of problem.view.awards">
+                      <div class="problem-award" [title]="awardView.material.title | textVariant">
+                        {{ awardView.material.title | textVariant }}
+                        <span class="problem-award-grading" [appGrading]="awardView.grading">
+                          <app-grading [grading]="awardView.grading"></app-grading>
+                        </span>
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="problem.material.attachments.length > 0">
+                  <h3 class="problem-attachment-list-title">Attachments</h3>
+                  <div class="problem-attachment-list">
+                    <ng-container *ngFor="let attachment of problem.material.attachments">
+                      <ng-container *ngIf="attachment.file | fileVariant as file">
+                        <a
+                          class="problem-attachment"
+                          [title]="attachment.title | textVariant"
+                          [download]="file.name"
+                          [href]="
+                            'data:' + (file.type || 'application/octet-stream') + ';base64,' + file.content.base64
+                              | bypassSanitizer: 'Url'
+                          "
+                        >
+                          <fa-icon [icon]="mimeTypeIcons[file.type] || faFile"></fa-icon>
+                          {{ attachment.title | textVariant }}
+                        </a>
+                      </ng-container>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="problem.material.statement | fileVariant as statement">
+                  <h2 class="problem-download-statement-title">Statement file</h2>
+                  <a
+                    class="problem-download-statement"
+                    [title]="statement.name"
+                    [download]="statement.name"
+                    [href]="
+                      'data:' + (statement.type || 'application/octet-stream') + ';base64,' + statement.content.base64
+                        | bypassSanitizer: 'Url'
+                    "
+                  >
+                    <fa-icon [icon]="mimeTypeIcons[statement.type] || faFile"></fa-icon>
+                    {{ statement.name }}
+                  </a>
+                </ng-container>
+              </div>
+            </aside>
+          </ng-container>
+        </ng-container>
+      </aside>
+
+      <main class="contest-home-content" [hidden]="(route.firstChild!.paramMap | async).has('problemName')">
+        <ng-container *ngIf="data.contest.material.description | fileVariant as file">
+          <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
+        </ng-container>
+      </main>
+
+      <ng-container *ngIf="data.contest.view.problemSet! as problemSet">
+        <ng-container *ngFor="let problem of problemSet.problems">
+          <main
+            class="problem-statement"
+            [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== problem.name"
+          >
+            <ng-container *ngIf="problem.material.statement | fileVariant as file">
+              <ng-container *ngTemplateOutlet="inlineFileTemplate; context: file"></ng-container>
+            </ng-container>
+          </main>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-container>
+
+<ng-template #inlineFileTemplate let-content="content" let-type="type">
+  <ng-container [ngSwitch]="type">
+    <markdown class="inline-file-markdown" *ngSwitchCase="'text/markdown'" katex>
+      {{ content.text }}
+    </markdown>
+    <iframe
+      *ngSwitchDefault
+      class="inline-file-iframe"
+      [attr.src]="'data:' + type + ';base64,' + content.base64 | bypassSanitizer: 'ResourceUrl'"
+    >
+    </iframe>
+  </ng-container>
+</ng-template>
+
+<ng-template #loginDialog let-modal>
+  <form class="login-form" (ngSubmit)="$event.preventDefault(); logIn($event, modal)">
+    <div class="login-dialog-body">
+      <label class="login-token-label" for="token">Token</label>
+      <input class="login-token-input" id="token" name="token" type="password" [class.is-invalid]="logInInvalidToken" />
+      <small class="login-token-suggestion" [hidden]="logInInvalidToken">
+        Insert the token or password provided to you. No username needed.
+      </small>
+      <small class="login-token-invalid">
+        Invalid token.
+      </small>
+    </div>
+    <div class="login-dialog-footer">
+      <button (click)="modal.close()" class="login-dialog-cancel" type="button">Cancel</button>
+      <button class="login-dialog-submit" type="submit">Log in</button>
+    </div>
+  </form>
+</ng-template>
+
+<router-outlet></router-outlet>

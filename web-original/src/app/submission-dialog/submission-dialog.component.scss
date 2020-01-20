@@ -1,0 +1,29 @@
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+.submission-dialog-header {
+  @extend .modal-header;
+}
+
+.submission-dialog-body {
+  @extend .modal-body;
+  padding: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.submission-pending {
+  background-color: rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.submission-dialog-footer {
+  @extend .modal-footer;
+}
+
+.submission-dialog-close {
+  @extend .btn, .btn-primary;
+}
+
+.feedback-table {
+  @extend .table;
+}

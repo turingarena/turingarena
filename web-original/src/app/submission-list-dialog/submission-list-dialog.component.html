@@ -1,0 +1,65 @@
+<ng-container *ngIf="problem.view.tackling! as tackling">
+  <div class="submission-list-dialog-header">
+    <h4>
+      Submissions for: <strong>{{ problem.material.title[0].value }}</strong>
+    </h4>
+  </div>
+  <div class="submission-list-dialog-body">
+    <ng-template #submissionDialog let-modal>
+      <app-submission-dialog [problem]="problem" [submissionId]="openSubmission.id" [modal]="modal">
+      </app-submission-dialog>
+    </ng-template>
+    <ag-grid-angular
+      class="ag-theme-balham"
+      domLayout="autoHeight"
+      [rowData]="tackling.submissions"
+      [gridOptions]="{} | gridOptions"
+      rowClass="submission-grid-row"
+      (rowClicked)="openSubmission = $event.node.data; modalService.open(submissionDialog, { size: 'lg' })"
+    >
+      <ng-template #createdAt let-submission="data">
+        <app-relative-time [time]="submission.createdAt"></app-relative-time>
+        <ng-container [ngSwitch]="submission.evaluation.status">
+          <span *ngSwitchCase="'PENDING'">(evaluating...)</span>
+          <span *ngSwitchCase="'SUCCESS'"></span>
+          <span *ngSwitchCase="'FAILED'"> - Evaluation failed!</span>
+        </ng-container>
+      </ng-template>
+      <ag-grid-column
+        [autoHeight]="true"
+        field="createdAt"
+        cellRenderer="templateCellRenderer"
+        [cellRendererParams]="{ template: createdAt }"
+        [flex]="5"
+        headerName="Submission Time"
+        sort="desc"
+      >
+      </ag-grid-column>
+      <ng-template #grading let-value="value" let-eGridCell="eGridCell">
+        <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value"> </app-grading>
+      </ng-template>
+      <ag-grid-column
+        *ngFor="let award of problem.material.awards; index as i"
+        field="evaluation.awards.{{ i }}.grading"
+        cellClass="grid-cell-grading"
+        cellRenderer="templateCellRenderer"
+        [cellRendererParams]="{ template: grading }"
+        [flex]="1"
+        [headerName]="award.material.title | textVariant"
+      >
+      </ag-grid-column>
+      <ag-grid-column
+        field="evaluation.grading"
+        cellClass="grid-cell-grading"
+        cellRenderer="templateCellRenderer"
+        [cellRendererParams]="{ template: grading }"
+        [flex]="1"
+        headerName="Total"
+      >
+      </ag-grid-column>
+    </ag-grid-angular>
+  </div>
+  <div class="submission-list-dialog-footer">
+    <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
+  </div>
+</ng-container>

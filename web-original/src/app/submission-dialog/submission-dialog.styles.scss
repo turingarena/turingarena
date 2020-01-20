@@ -1,0 +1,21 @@
+.grid-cell-score,
+.grid-cell-time-usage,
+.grid-cell-memory-usage {
+  text-align: right;
+}
+
+.grid-cell-valence {
+  @extend .table-light;
+  &[data-valence='FAILURE'] {
+    @extend .table-danger;
+  }
+  &[data-valence='WARNING'] {
+    @extend .table-warning;
+  }
+  &[data-valence='PARTIAL'] {
+    @extend .table-warning;
+  }
+  &[data-valence='SUCCESS'] {
+    @extend .table-success;
+  }
+}

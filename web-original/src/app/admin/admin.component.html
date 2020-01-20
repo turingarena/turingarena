@@ -1,0 +1,57 @@
+<ng-container *ngIf="adminQuery.valueChanges | async as result">
+  <ng-container *ngIf="result.data as data">
+    <nav class="topbar">
+      <a routerLink="/admin" class="admin-home-link">
+        <h1 class="admin-title">
+          <fa-icon [icon]="faTools"></fa-icon> [Admin] {{ data.contest.material.title | textVariant }}
+        </h1>
+      </a>
+    </nav>
+
+    <div class="admin-main">
+      <aside class="admin-aside">
+        <a class="admin-section-link" routerLink="/admin/problems" routerLinkActive="active">
+          Problems
+        </a>
+        <a class="admin-section-link" routerLink="/admin/contestants" routerLinkActive="active">
+          Contestants
+        </a>
+        <a class="admin-section-link" routerLink="/admin/messages" routerLinkActive="active">
+          Messages
+        </a>
+        <a class="admin-section-link" routerLink="/admin/submissions" routerLinkActive="active">
+          Submissions
+        </a>
+        <a class="admin-section-link" routerLink="/admin/evaluations" routerLinkActive="active">
+          Evaluations
+        </a>
+      </aside>
+
+      <main class="admin-problems" [hidden]="(route.firstChild!.data | async).adminSection !== 'problems'">
+        <app-admin-problems [data]="data"></app-admin-problems>
+      </main>
+
+      <main class="admin-contestants" [hidden]="(route.firstChild!.data | async).adminSection !== 'contestants'">
+        <app-admin-contestants [data]="data"></app-admin-contestants>
+      </main>
+
+      <main class="admin-messages" [hidden]="(route.firstChild!.data | async).adminSection !== 'messages'">
+        <app-admin-messages [data]="data"></app-admin-messages>
+      </main>
+
+      <main class="admin-submissions" [hidden]="(route.firstChild!.data | async).adminSection !== 'submissions'">
+        <app-admin-submissions [data]="data"></app-admin-submissions>
+      </main>
+
+      <main class="admin-evaluations" [hidden]="(route.firstChild!.data | async).adminSection !== 'evaluations'">
+        <app-admin-evaluations [data]="data"></app-admin-evaluations>
+      </main>
+    </div>
+  </ng-container>
+</ng-container>
+
+<ng-template #createDialog let-modal>
+  <app-admin-create-dialog [modal]="modal"></app-admin-create-dialog>
+</ng-template>
+
+<router-outlet></router-outlet>

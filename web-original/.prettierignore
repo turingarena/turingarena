@@ -1,0 +1,6 @@
+node_modules/
+generated/
+package-lock.json
+.prettierignore
+.editorconfig
+/dist/

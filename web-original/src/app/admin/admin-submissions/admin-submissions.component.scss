@@ -1,0 +1,6 @@
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+.reevaluate-button {
+  @extend .btn, .btn-warning;
+  margin: 16px;
+}

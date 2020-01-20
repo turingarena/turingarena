@@ -1,0 +1,19 @@
+<ng-container [ngSwitch]="grading.__typename">
+  <ng-container *ngSwitchCase="'ScoreAwardGrading'">
+    <ng-container *ngIf="!grading.grade">
+      <span class="score-max"> + {{ grading.domain.range.max.toFixed(grading.domain.range.precision) }}</span>
+    </ng-container>
+    <ng-container *ngIf="grading.grade! as grade">
+      <span class="score-value">{{ grade.value.score.toFixed(grading.domain.range.precision) }}</span>
+      <span class="score-max"> / {{ grading.domain.range.max.toFixed(grading.domain.range.precision) }}</span>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'BadgeAwardGrading'">
+    <ng-container [ngSwitch]="grading.grade?.value?.badge">
+      <ng-container *ngSwitchCase="null">+</ng-container>
+      <ng-container *ngSwitchCase="true">&#x2713;</ng-container>
+      <ng-container *ngSwitchCase="false">&#x2717;</ng-container>
+    </ng-container>
+  </ng-container>
+</ng-container>

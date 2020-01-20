@@ -1,0 +1,95 @@
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  background-color: #f0ad4e;
+  align-items: center;
+  padding: 8px 16px;
+  color: #fff;
+}
+
+// FIXME: duplicates contest view component SCSS
+
+.admin-home-link {
+  display: block;
+
+  margin: -8px 0;
+  padding: 8px 0;
+
+  color: white;
+  text-decoration: none;
+  background-color: transparent;
+
+  &:hover {
+    text-decoration: none;
+    color: white;
+  }
+}
+
+.admin-title {
+  display: block;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+
+  position: relative;
+}
+
+.admin-aside {
+  flex: 0 0 auto;
+  overflow-y: auto;
+
+  padding: 16px;
+  width: 16em;
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.admin-section-link {
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  display: block;
+  margin: 0 -16px;
+  padding: 0.5rem 16px;
+
+  &.active {
+    color: #fff;
+    background-color: #007bff;
+  }
+}
+
+.admin-home-content,
+.admin-problems,
+.admin-contestants,
+.admin-messages,
+.admin-submissions,
+.admin-evaluations {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  overflow: auto;
+}
+
+.contestants-grid,
+.submissions-grid,
+.problems-grid {
+  flex: 1 1 100%;
+}

@@ -1,0 +1,30 @@
+<div class="message-list-dialog-header">
+  Messages
+</div>
+<div class="message-list-dialog-body">
+  <ng-container [ngSwitch]="data.contest.view.messages.length">
+    <div *ngSwitchCase="0" class="message-list-empty">No message.</div>
+    <app-message-list *ngSwitchDefault class="message-list" [messages]="data.contest.view.messages"></app-message-list>
+  </ng-container>
+  <form class="new-question-form" (ngSubmit)="send($event)" [hidden]="!data.contest.view.canSendMessage">
+    <div class="new-question-text-group">
+      <label for="text"><strong>Your question</strong></label>
+      <textarea
+        id="text"
+        name="text"
+        type="text"
+        class="new-question-text"
+        [disabled]="sendMutationResult !== undefined && (sendMutationResult! | async) === null"
+      ></textarea>
+    </div>
+    <div class="new-question-send-group">
+      <button
+        type="submit"
+        class="new-question-send"
+        [disabled]="sendMutationResult !== undefined && (sendMutationResult! | async) === null"
+      >
+        Send
+      </button>
+    </div>
+  </form>
+</div>
