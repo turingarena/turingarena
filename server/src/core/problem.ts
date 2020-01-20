@@ -3,9 +3,8 @@ import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescri
 import { FindOptions } from 'sequelize/types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemSetItem } from './contest-problem-set-item';
-import { ProblemMaterial } from './material/problem-material';
+import { problemMaterialResolversExtensions } from './material/problem-material';
 import { ProblemFile } from './problem-file';
-import { getProblemMetadata } from './problem-util';
 
 export const problemSchema = gql`
     type Problem {
@@ -45,9 +44,6 @@ export const problemResolvers: ResolversWithModels<{
 }> = {
     Problem: {
         files: problem => problem.getFiles(),
-        material: async (problem, {}, ctx): Promise<ProblemMaterial> => ({
-            problem,
-            metadata: await getProblemMetadata(ctx, problem),
-        }),
+        ...problemMaterialResolversExtensions.Problem,
     },
 };

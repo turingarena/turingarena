@@ -20,7 +20,7 @@ import { genericGradingSchema } from './grading/grading-generic';
 import { numericGradingSchema } from './grading/grading-numeric';
 import { awardMaterialResolvers, awardMaterialSchema } from './material/award-material';
 import { mediaResolvers, mediaSchema } from './material/media';
-import { problemMaterialResolvers, problemMaterialSchema } from './material/problem-material';
+import { problemMaterialSchema } from './material/problem-material';
 import { textResolvers, textSchema } from './material/text';
 import { mutationResolvers, mutationSchema } from './mutation';
 import { Participation } from './participation';
@@ -95,6 +95,5 @@ export const resolvers: Resolvers = {
 
     ...textResolvers,
     ...mediaResolvers,
-    ...problemMaterialResolvers,
     ...awardMaterialResolvers,
 };

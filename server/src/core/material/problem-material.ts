@@ -41,7 +41,7 @@ function withProblemMetadata<TResult, TArgs>(
         resolver({ metadata: await getProblemMetadata(ctx, problem), problem }, args, ctx, info);
 }
 
-export const problemMaterialResolvers: ResolversWithModels<{
+export const problemMaterialResolversExtensions: ResolversWithModels<{
     Problem: Problem;
 }> = {
     Problem: {
