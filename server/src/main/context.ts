@@ -24,7 +24,7 @@ export class ApiContext {
     ) {
         this.table(Submission).afterSync('create foreign key', () => {
             this.sequelize.query(
-                'ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY KEY(userId, contestId) REFERENCES Participations(userId, contestId)',
+                'ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (userId, contestId) REFERENCES Participations(userId, contestId)',
             );
         });
     }

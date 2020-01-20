@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { ResolversWithModels } from '../main/resolver-types';
-import { ContestProblem } from './contest-problem';
+import { ContestProblemSetItem } from './contest-problem-set-item';
 import { getProblemMaterial } from './material/problem-material-generate';
 import { ProblemFile } from './problem-file';
 
@@ -29,8 +29,8 @@ export class Problem extends Model<Problem> {
     name!: string;
 
     /** Contests that contains this problem */
-    @HasMany(() => ContestProblem)
-    contestProblems!: ContestProblem[];
+    @HasMany(() => ContestProblemSetItem)
+    contestProblems!: ContestProblemSetItem[];
 
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)

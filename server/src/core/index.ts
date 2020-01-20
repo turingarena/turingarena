@@ -2,7 +2,12 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { ContestFile } from './contest-file';
-import { ContestProblem, contestProblemResolvers, contestProblemSchema } from './contest-problem';
+import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
+import {
+    ContestProblemSetItem,
+    contestProblemSetItemResolvers,
+    contestProblemSetItemSchema,
+} from './contest-problem-set-item';
 import { contestViewSchema } from './contest-view';
 import { Evaluation } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
@@ -31,7 +36,8 @@ export const schema = gql`
     ${mutationSchema}
     ${userSchema}
     ${contestSchema}
-    ${contestProblemSchema}
+    ${contestProblemSetItemSchema}
+    ${contestProblemSetSchema}
     ${problemSchema}
     ${problemFileSchema}
     ${fileContentSchema}
@@ -61,7 +67,7 @@ export const modelConstructors = {
     User,
     Contest,
     Problem,
-    ContestProblem,
+    ContestProblemSetItem,
     Participation,
     FileContent,
     ProblemFile,
@@ -80,7 +86,8 @@ export const resolvers: Resolvers = {
     ...contestResolvers,
     ...problemResolvers,
     ...problemFileResolvers,
-    ...contestProblemResolvers,
+    ...contestProblemSetItemResolvers,
+    ...contestProblemSetResolvers,
     ...fileContentResolvers,
 
     ...textResolvers,

@@ -7,7 +7,7 @@ import { MutationResolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
-import { ContestProblem } from './contest-problem';
+import { ContestProblemSetItem } from './contest-problem-set-item';
 import { FileContent } from './file-content';
 import { Participation } from './participation';
 import { Problem } from './problem';
@@ -19,7 +19,7 @@ export const contestSchema = gql`
         title: String!
         start: String!
         end: String!
-        problems: [ContestProblem!]!
+        problemSet: ContestProblemSet!
     }
 
     input ContestInput {
@@ -56,10 +56,10 @@ export class Contest extends Model<Contest> {
     end!: Date;
 
     /** The list of problems in this contest */
-    @HasMany(() => ContestProblem)
-    problems!: ContestProblem[];
-    createProblem!: (problem: object, options?: object) => Promise<ContestProblem>;
-    getProblems!: () => Promise<ContestProblem[]>;
+    @HasMany(() => ContestProblemSetItem)
+    problemSetItems!: ContestProblemSetItem[];
+    createProblemSetItem!: (problem: object, options?: object) => Promise<ContestProblemSetItem>;
+    getProblemSetItems!: () => Promise<ContestProblemSetItem[]>;
 
     /** The list of users in this contest */
     @HasMany(() => Participation)
@@ -105,7 +105,7 @@ export const contestMutationResolvers: MutationResolvers = {
             })) ?? ctx.fail(`no such contest '${contestName}'`);
         const problem =
             (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
-        await contest.createProblem({
+        await contest.createProblemSetItem({
             problem,
         });
 
@@ -129,6 +129,6 @@ export const contestResolvers: ResolversWithModels<{
     Contest: {
         start: contest => DateTime.fromJSDate(contest.start).toISO(),
         end: contest => DateTime.fromJSDate(contest.end).toISO(),
-        problems: contest => contest.getProblems(),
+        problemSet: contest => contest,
     },
 };

@@ -4,15 +4,16 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
 
-export const contestProblemSchema = gql`
-    type ContestProblem {
+export const contestProblemSetItemSchema = gql`
+    type ContestProblemSetItem {
+        contest: Contest!
         problem: Problem!
     }
 `;
 
 /** Contest to Problem N-N relation */
 @Table({ timestamps: false })
-export class ContestProblem extends Model<ContestProblem> {
+export class ContestProblemSetItem extends Model<ContestProblemSetItem> {
     @ForeignKey(() => Problem)
     @PrimaryKey
     @Column
@@ -23,6 +24,8 @@ export class ContestProblem extends Model<ContestProblem> {
     @Column
     contestId!: number;
 
+    // TODO: add index to make problem order deterministic
+
     @BelongsTo(() => Contest)
     contest!: Contest;
     getContest!: () => Promise<Contest>;
@@ -32,10 +35,11 @@ export class ContestProblem extends Model<ContestProblem> {
     getProblem!: () => Promise<Problem>;
 }
 
-export const contestProblemResolvers: ResolversWithModels<{
-    ContestProblem: ContestProblem;
+export const contestProblemSetItemResolvers: ResolversWithModels<{
+    ContestProblemSetItem: ContestProblemSetItem;
 }> = {
-    ContestProblem: {
-        problem: contestProblem => contestProblem.getProblem(),
+    ContestProblemSetItem: {
+        contest: item => item.getContest(),
+        problem: item => item.getProblem(),
     },
 };
