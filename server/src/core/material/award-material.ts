@@ -6,7 +6,7 @@ import { Text } from './text';
 
 export const awardMaterialSchema = gql`
     """
-    Static content associated to a problem.
+    Static content associated to an award.
     """
     type AwardMaterial {
         name: String!
