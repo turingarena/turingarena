@@ -4,10 +4,14 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, RowEvent, RowNode, ValueFormatterParams } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { UserInput } from '../../../../../../__generated__/globalTypes';
+import {
+  AdminCreateMutation,
+  AdminCreateMutationVariables,
+  DryImportMutation,
+  DryImportMutationVariables,
+  UserInput,
+} from '../../../generated/graphql-types';
 import { FileLoadService } from '../../file-load.service';
-import { AdminCreateMutation, AdminCreateMutationVariables } from './__generated__/AdminCreateMutation';
-import { DryImportMutation, DryImportMutationVariables } from './__generated__/DryImportMutation';
 
 const valueFormatter = ({ value, colDef }: ValueFormatterParams) => (value ? value : `<${colDef.headerName}>`);
 

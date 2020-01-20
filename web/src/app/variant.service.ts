@@ -1,6 +1,5 @@
 import { Injectable, Injector, LOCALE_ID } from '@angular/core';
-import { TextFragment } from './fragments/__generated__/TextFragment';
-import { VariantAttributeFragment } from './fragments/__generated__/VariantAttributeFragment';
+import { TextFragment, VariantAttributeFragment } from '../generated/graphql-types';
 
 @Injectable({
   providedIn: 'root',

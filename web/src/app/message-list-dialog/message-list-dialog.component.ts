@@ -3,8 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo } from 'apollo-angular';
 import { FetchResult } from 'apollo-link';
 import gql from 'graphql-tag';
-import { ContestQuery } from '../contest-view/__generated__/ContestQuery';
-import { SendMessageMutation, SendMessageMutationVariables } from './__generated__/SendMessageMutation';
+import { ContestQuery, SendMessageMutation, SendMessageMutationVariables } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-message-list-dialog',

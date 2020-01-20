@@ -5,24 +5,27 @@ import { ColDef, ValueGetterParams } from 'ag-grid-community';
 import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Duration } from 'luxon';
-import { Valence } from '../../../../../__generated__/globalTypes';
+import {
+  AwardFragment,
+  CellFragment,
+  ColFragment,
+  MemoryUsageValueFragment,
+  ProblemFragment,
+  ScoreRangeFragment,
+  ScoreValueFragment,
+  SubmissionQuery,
+  SubmissionQueryVariables,
+  TableSectionFragment,
+  TextValueFragment,
+  TimeUsageCellContentFragment,
+  TimeUsageValueFragment,
+  Valence,
+  ValenceValueFragment,
+  ValueFragment,
+} from '../../generated/graphql-types';
 import { evaluationEventFragment, evaluationFragment } from '../fragments/evaluation';
 import { submissionFragment } from '../fragments/submission';
-import { AwardFragment } from '../fragments/__generated__/AwardFragment';
-import { CellFragment } from '../fragments/__generated__/CellFragment';
-import { ColFragment } from '../fragments/__generated__/ColFragment';
-import { MemoryUsageValueFragment } from '../fragments/__generated__/MemoryUsageValueFragment';
-import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
-import { ScoreRangeFragment } from '../fragments/__generated__/ScoreRangeFragment';
-import { ScoreValueFragment } from '../fragments/__generated__/ScoreValueFragment';
-import { TableSectionFragment } from '../fragments/__generated__/TableSectionFragment';
-import { TextValueFragment } from '../fragments/__generated__/TextValueFragment';
-import { TimeUsageCellContentFragment } from '../fragments/__generated__/TimeUsageCellContentFragment';
-import { TimeUsageValueFragment } from '../fragments/__generated__/TimeUsageValueFragment';
-import { ValenceValueFragment } from '../fragments/__generated__/ValenceValueFragment';
-import { ValueFragment } from '../fragments/__generated__/ValueFragment';
 import { VariantService } from '../variant.service';
-import { SubmissionQuery, SubmissionQueryVariables } from './__generated__/SubmissionQuery';
 
 @Component({
   selector: 'app-submission-dialog',

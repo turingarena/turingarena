@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { MessageFragment } from '../fragments/__generated__/MessageFragment';
+import { MessageFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-message-list',

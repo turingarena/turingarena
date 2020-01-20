@@ -2,12 +2,15 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { FileInput } from '../../../../../__generated__/globalTypes';
+import {
+  FieldFragment,
+  FieldTypeFragment,
+  FileInput,
+  ProblemFragment,
+  SubmitMutation,
+  SubmitMutationVariables,
+} from '../../generated/graphql-types';
 import { FileLoadService } from '../file-load.service';
-import { FieldFragment } from '../fragments/__generated__/FieldFragment';
-import { FieldTypeFragment } from '../fragments/__generated__/FieldTypeFragment';
-import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
-import { SubmitMutation, SubmitMutationVariables } from './__generated__/SubmitMutation';
 
 class FieldState {
   file?: File;

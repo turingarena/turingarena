@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FileContentInput } from '../../../../__generated__/globalTypes';
+import { FileContentInput } from '../generated/graphql-types';
 
 @Injectable({
   providedIn: 'root',

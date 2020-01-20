@@ -3,11 +3,14 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { ProblemFragment } from '../../fragments/__generated__/ProblemFragment';
-import { SubmissionFragment } from '../../fragments/__generated__/SubmissionFragment';
+import {
+  AdminQuery,
+  ProblemFragment,
+  ReevaluateMutation,
+  ReevaluateMutationVariables,
+  SubmissionFragment,
+} from '../../../generated/graphql-types';
 import { VariantService } from '../../variant.service';
-import { AdminQuery } from '../__generated__/AdminQuery';
-import { ReevaluateMutation, ReevaluateMutationVariables } from './__generated__/ReevaluateMutation';
 
 type TemplateName = 'grading' | 'createdAt';
 

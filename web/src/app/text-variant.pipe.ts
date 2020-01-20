@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TextFragment } from './fragments/__generated__/TextFragment';
+import { TextFragment } from '../generated/graphql-types';
 import { VariantService } from './variant.service';
 
 export interface AttributeLookup {

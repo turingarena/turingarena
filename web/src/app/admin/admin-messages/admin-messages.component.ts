@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
+import { AdminQuery } from '../../../generated/graphql-types';
 import { VariantService } from '../../variant.service';
-import { AdminQuery } from '../__generated__/AdminQuery';
 
 @Component({
   selector: 'app-admin-messages',

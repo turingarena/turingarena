@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { AwardGradingFragment } from '../../fragments/__generated__/AwardGradingFragment';
+import { AwardGradingFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-grading',

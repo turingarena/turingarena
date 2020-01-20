@@ -9,7 +9,7 @@ const config: CodegenConfig = {
   overwrite: true,
   watch: process.argv.includes('--watch'),
   generates: {
-    'src/generated/graphql-types.ts': {
+    'src/generated/graphql-types': {
       plugins: [
         {
           typescript: {

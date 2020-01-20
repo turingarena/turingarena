@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ProblemFragment } from '../fragments/__generated__/ProblemFragment';
-import { SubmissionFragment } from '../fragments/__generated__/SubmissionFragment';
+import { ProblemFragment, SubmissionFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-submission-list-dialog',

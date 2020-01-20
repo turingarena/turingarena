@@ -1,4 +1,4 @@
-import { AwardGradingFragment } from '../fragments/__generated__/AwardGradingFragment';
+import { AwardGradingFragment } from '../../generated/graphql-types';
 import { getScoreTier } from '../fragments/score';
 
 export const gradingAttributes: Array<[string, (grading: AwardGradingFragment) => string | undefined]> = [

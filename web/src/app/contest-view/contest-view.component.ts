@@ -26,15 +26,19 @@ import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { ContestStatus } from '../../../../../__generated__/globalTypes';
+import {
+  ContestQuery,
+  ContestQueryVariables,
+  ContestStatus,
+  LoginMutation,
+  LoginMutationVariables,
+} from '../../generated/graphql-types';
 import { Auth, AuthService } from '../auth.service';
 import { scoreAwardGradingFragment } from '../fragments/awards';
 import { contestMaterialFragment } from '../fragments/contest';
 import { messageFragment } from '../fragments/messages';
 import { problemFragment, problemViewFragment } from '../fragments/problem';
 import { getScoreTier } from '../fragments/score';
-import { ContestQuery, ContestQueryVariables } from './__generated__/ContestQuery';
-import { LoginMutation, LoginMutationVariables } from './__generated__/LoginMutation';
 
 const pollInterval = 10000;
 

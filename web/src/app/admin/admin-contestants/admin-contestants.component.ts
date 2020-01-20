@@ -1,8 +1,7 @@
 import { Component, Input, TemplateRef } from '@angular/core';
 import { ColDef, ColGroupDef, GridOptions } from 'ag-grid-community';
-import { ProblemFragment } from '../../fragments/__generated__/ProblemFragment';
+import { AdminQuery, ProblemFragment } from '../../../generated/graphql-types';
 import { VariantService } from '../../variant.service';
-import { AdminQuery } from '../__generated__/AdminQuery';
 
 @Component({
   selector: 'app-admin-contestants',

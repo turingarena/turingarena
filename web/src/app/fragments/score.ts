@@ -1,6 +1,5 @@
 import gql from 'graphql-tag';
-import { Valence } from '../../../../../__generated__/globalTypes';
-import { ScoreAwardGradingFragment } from './__generated__/ScoreAwardGradingFragment';
+import { ScoreAwardGradingFragment, Valence } from '../../generated/graphql-types';
 
 export const scoreRangeFragment = gql`
   fragment ScoreRangeFragment on ScoreRange {

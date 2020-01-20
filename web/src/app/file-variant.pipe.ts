@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FileFragment } from './fragments/__generated__/FileFragment';
+import { FileFragment } from '../generated/graphql-types';
 import { VariantService } from './variant.service';
 
 @Pipe({

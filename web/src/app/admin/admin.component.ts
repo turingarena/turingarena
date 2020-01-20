@@ -4,7 +4,7 @@ import { faTools } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridAngular } from 'ag-grid-angular';
 import { Apollo } from 'apollo-angular';
-import { AdminQuery } from './__generated__/AdminQuery';
+import { AdminQuery } from '../../generated/graphql-types';
 import { adminQuery } from './admin-query';
 
 @Component({

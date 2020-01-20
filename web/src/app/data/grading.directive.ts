@@ -1,5 +1,5 @@
 import { ComponentRef, Directive, ElementRef, Host, Input, OnChanges, Renderer2 } from '@angular/core';
-import { AwardGradingFragment } from '../fragments/__generated__/AwardGradingFragment';
+import { AwardGradingFragment } from '../../generated/graphql-types';
 import { gradingAttributes } from './grading-attributes';
 
 @Directive({
