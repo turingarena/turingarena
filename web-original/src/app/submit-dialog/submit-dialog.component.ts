@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 import {
   FieldFragment,
   FieldTypeFragment,
-  FileInput,
+  SubmissionFileInput,
   ProblemFragment,
   SubmitMutation,
   SubmitMutationVariables,
@@ -101,7 +101,7 @@ export class SubmitDialogComponent {
     const { data, errors } = await this.apollo
       .mutate<SubmitMutation, SubmitMutationVariables>({
         mutation: gql`
-          mutation SubmitMutation($userId: String!, $problemName: String!, $files: [FileInput!]!) {
+          mutation SubmitMutation($userId: String!, $problemName: String!, $files: [SubmissionFileInput!]!) {
             submit(userId: $userId, problemName: $problemName, files: $files) {
               id
             }
@@ -125,7 +125,7 @@ export class SubmitDialogComponent {
     this.modal.close();
   }
 
-  private async getFileForField(field: FieldFragment, formData: FormData): Promise<FileInput> {
+  private async getFileForField(field: FieldFragment, formData: FormData): Promise<SubmissionFileInput> {
     const file = formData.get(`${field.id}.file`) as File;
 
     return {

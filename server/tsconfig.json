@@ -1,5 +1,4 @@
 {
-    "extends": "../tsconfig.json",
     "compilerOptions": {
         "noEmit": true,
         "target": "ES6",
@@ -8,6 +7,18 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "allowSyntheticDefaultImports": true,
+
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false,
+
+        "allowJs": true,
+        "checkJs": true
     },
     "exclude": ["node_modules"]
 }

@@ -5,6 +5,7 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClientOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
+import * as schema from '../../../server/src/generated/graphql.schema.json';
 import { AuthService } from './auth.service.js';
 
 const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClientOptions<unknown> => {

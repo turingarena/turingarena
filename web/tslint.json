@@ -20,5 +20,8 @@
     "use-pipe-transform-interface": true,
     "import-blacklist": [true, "rxjs/Rx"]
   },
-  "rulesDirectory": ["codelyzer"]
+  "rulesDirectory": ["codelyzer"],
+  "linterOptions": {
+    "exclude": ["src/**/*.spec.ts", "src/generated/**", "src/test.ts"]
+  }
 }

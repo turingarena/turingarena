@@ -7,11 +7,13 @@ export const feedbackSlotSchema = gql`
         domain: FeedbackSlotDomain!
     }
 
-    union FeedbackSlotValue = GradeValue | MessageValue
+    union FeedbackSlotValue = NumericGradeValue | BooleanGradeValue | Text
 
-    union FeedbackSlotDomain = GradeDomain | MessageDomain
+    union FeedbackSlotDomain = NumericGradeDomain | BooleanGradeDomain | MessageDomain
 
-    union MessageValue = Text
+    type MessageValue {
+        text: Text!
+    }
 
     type MessageDomain {
         _: Boolean

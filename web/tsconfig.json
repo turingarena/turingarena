@@ -1,5 +1,4 @@
 {
-  "extends": "../tsconfig.json",
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
@@ -14,11 +13,24 @@
     "importHelpers": true,
     "target": "es2015",
     "typeRoots": ["node_modules/@types"],
-    "lib": ["es2018", "dom"]
+    "lib": ["es2018", "dom"],
+    "resolveJsonModule": true,
+
+    "strict": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    "allowJs": true,
+    "checkJs": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src/"]
 }

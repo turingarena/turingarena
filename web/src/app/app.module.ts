@@ -10,27 +10,25 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ApplyPurePipe } from './apply-pure.pipe';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
+import { ContestViewComponent } from './contest-view/contest-view.component';
 import { EmptyComponent } from './empty.component';
-import { FileVariantPipe } from './file-variant.pipe';
 import { FromJsonPipe } from './from-json.pipe';
 import { GraphQLModule } from './graphql.module';
 import { GridOptionsPipe } from './grid-options.pipe';
 import { JsonPurePipe } from './json-pure.pipe';
 import { TemplateCellRendererComponent } from './template-cell-renderer.component';
-import { TextVariantPipe } from './text-variant.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     BypassSanitizerPipe,
-    TextVariantPipe,
-    FileVariantPipe,
     EmptyComponent,
     ApplyPurePipe,
     TemplateCellRendererComponent,
     GridOptionsPipe,
     FromJsonPipe,
     JsonPurePipe,
+    ContestViewComponent,
   ],
   imports: [
     BrowserModule,

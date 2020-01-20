@@ -13,8 +13,8 @@ export const fileContentSchema = gql`
         base64: String!
     }
 
-    input FileInput {
-        contentBase64: String!
+    input FileContentInput {
+        base64: String!
     }
 `;
 
