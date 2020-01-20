@@ -11,7 +11,7 @@ export const feedbackSlotSchema = gql`
 
     union FeedbackSlotDomain = GradeDomain | MessageDomain
 
-    union MessageValue = Text;
+    union MessageValue = Text
 
     type MessageDomain {
         _: Boolean
