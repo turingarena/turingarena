@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
 import { AllowNull, Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
-import { MutationResolvers } from '../generated/graphql-types';
+import { ContestStatus, MutationResolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
@@ -16,9 +16,10 @@ import { User } from './user';
 export const contestSchema = gql`
     type Contest {
         name: ID!
-        title: String!
+        title: Text!
         start: String!
         end: String!
+        status: ContestStatus!
         problemSet: ContestProblemSet!
     }
 
@@ -27,6 +28,12 @@ export const contestSchema = gql`
         title: String!
         start: String!
         end: String!
+    }
+
+    enum ContestStatus {
+        NOT_STARTED
+        RUNNING
+        ENDED
     }
 `;
 
@@ -95,6 +102,16 @@ export class Contest extends Model<Contest> {
             }
         }
     }
+
+    getStatus(): ContestStatus {
+        const start = DateTime.fromJSDate(this.start).valueOf();
+        const end = DateTime.fromJSDate(this.end).valueOf();
+        const now = DateTime.local().valueOf();
+
+        if (now < start) return 'NOT_STARTED';
+        else if (now < end) return 'RUNNING';
+        else return 'NOT_STARTED';
+    }
 }
 
 export const contestMutationResolvers: MutationResolvers = {
@@ -127,8 +144,10 @@ export const contestResolvers: ResolversWithModels<{
     Contest: Contest;
 }> = {
     Contest: {
+        title: contest => [{ value: contest.title }],
         start: contest => DateTime.fromJSDate(contest.start).toISO(),
         end: contest => DateTime.fromJSDate(contest.end).toISO(),
+        status: contest => contest.getStatus(),
         problemSet: contest => contest,
     },
 };

@@ -9,7 +9,9 @@ import {
     contestProblemSetItemResolvers,
     contestProblemSetItemSchema,
 } from './contest-problem-set-item';
-import { contestViewSchema } from './contest-view';
+import { contestProblemSetItemViewResolvers, contestProblemSetItemViewSchema } from './contest-problem-set-item-view';
+import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './contest-problem-set-view';
+import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { feedbackSlotSchema } from './feedback/feedback-slot';
@@ -49,6 +51,8 @@ export const schema = gql`
 
     ${mainViewSchema}
     ${contestViewSchema}
+    ${contestProblemSetViewSchema}
+    ${contestProblemSetItemViewSchema}
 
     ${textSchema}
     ${mediaSchema}
@@ -98,6 +102,9 @@ export const resolvers: Resolvers = {
     ...fileContentResolvers,
 
     ...mainViewResolvers,
+    ...contestViewResolvers,
+    ...contestProblemSetViewResolvers,
+    ...contestProblemSetItemViewResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

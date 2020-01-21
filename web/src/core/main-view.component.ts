@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import gql from 'graphql-tag';
 import { MainViewFragment } from '../generated/graphql-types';
+import { contestViewFragment } from './contest-view.component';
 
 @Component({
   selector: 'app-main-view',
@@ -15,7 +16,9 @@ export class MainViewComponent {
 export const mainViewFragment = gql`
   fragment MainView on MainView {
     contestView {
-      __typename
+      ...ContestView
     }
   }
+
+  ${contestViewFragment}
 `;

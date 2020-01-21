@@ -12,6 +12,7 @@ import { ContestProblemSetItemViewAsideComponent } from '../core/contest-problem
 import { ContestProblemSetItemViewSubmissionListModalComponent } from '../core/contest-problem-set-item-view-submission-list-modal.component';
 import { ContestProblemSetItemViewSubmissionListComponent } from '../core/contest-problem-set-item-view-submission-list.component';
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
+import { ContestViewComponent } from '../core/contest-view.component';
 import { FeedbackSectionComponent } from '../core/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback.component';
 import { GradingComponent } from '../core/grading.component';
@@ -52,6 +53,7 @@ import { GraphQLModule } from './graphql.module';
     MainViewMessageListModalComponent,
     MainViewMessageListComponent,
     MainViewSendMessageComponent,
+    ContestViewComponent,
     ContestViewAsideComponent,
     ContestProblemSetItemViewAsideComponent,
     ContestProblemSetItemViewSubmissionListModalComponent,

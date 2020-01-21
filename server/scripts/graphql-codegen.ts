@@ -15,6 +15,7 @@ const config: CodegenConfig = {
                     typescript: {
                         avoidOptionals: false,
                         nonOptionalTypename: true,
+                        enumsAsTypes: true,
                     },
                 },
                 'typescript-resolvers',

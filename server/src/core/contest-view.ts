@@ -8,13 +8,12 @@ export const contestViewSchema = gql`
         contest: Contest!
         user: User
 
-        # problemSet: ProblemSet
+        problemSetView: ContestProblemSetView
     }
 `;
 
-export interface ContestView {
-    contest: Contest;
-    user: User | null;
+export class ContestView {
+    constructor(readonly contest: Contest, readonly user: User | null) {}
 }
 
 export const contestViewResolvers: ResolversWithModels<{
@@ -23,5 +22,15 @@ export const contestViewResolvers: ResolversWithModels<{
     ContestView: {
         contest: ({ contest }) => contest,
         user: ({ user }) => user,
+        problemSetView: contestView => {
+            switch (contestView.contest.getStatus()) {
+                case 'RUNNING':
+                case 'ENDED':
+                    return contestView;
+                case 'NOT_STARTED':
+                default:
+                    return null;
+            }
+        },
     },
 };
