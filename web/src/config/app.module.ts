@@ -25,6 +25,7 @@ import { MainComponent } from '../core/main.component';
 import { MediaDownloadComponent } from '../core/media-download.component';
 import { MediaInlineComponent } from '../core/media-inline.component';
 import { SubmissionModalComponent } from '../core/submission-modal.component';
+import { TextPipe } from '../core/text.pipe';
 import { TopBarComponent } from '../core/top-bar.component';
 import { ApplyPurePipe } from '../util/apply-pure.pipe';
 import { BypassSanitizerPipe } from '../util/bypass-sanitizer.pipe';
@@ -64,6 +65,7 @@ import { GraphQLModule } from './graphql.module';
     MediaInlineComponent,
     MediaDownloadComponent,
     GradingComponent,
+    TextPipe,
   ],
   imports: [
     BrowserModule,

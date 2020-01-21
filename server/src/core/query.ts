@@ -21,12 +21,12 @@ export const querySchema = gql`
 
 export const queryResolvers: Resolvers = {
     Query: {
-        mainView: async ({}, { username }, ctx): Promise<MainView> => ({
-            user:
+        mainView: async ({}, { username }, ctx): Promise<MainView> =>
+            new MainView(
                 username !== null && username !== undefined
                     ? (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`)
                     : null,
-        }),
+            ),
         users: async ({}, {}, ctx) => ctx.table(User).findAll({ include: [ctx.table(Contest)] }),
         user: async ({}, { username }, ctx) =>
             (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`),
