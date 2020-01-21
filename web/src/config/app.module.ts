@@ -13,6 +13,7 @@ import { ContestProblemSetItemViewAsideComponent } from '../core/contest-problem
 import { ContestProblemSetItemViewSubmissionListModalComponent } from '../core/contest-problem-set-item-view-submission-list-modal.component';
 import { ContestProblemSetItemViewSubmissionListComponent } from '../core/contest-problem-set-item-view-submission-list.component';
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
+import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
 import { FeedbackSectionComponent } from '../core/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback.component';
@@ -69,6 +70,7 @@ import { GraphQLModule } from './graphql.module';
     GradingComponent,
     TextPipe,
     ValenceDirective,
+    ContestViewClockComponent,
   ],
   imports: [
     BrowserModule,

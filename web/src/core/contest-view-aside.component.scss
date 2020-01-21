@@ -42,18 +42,8 @@
   font-size: 2rem;
   margin-bottom: 16px;
 
-  & ::ng-deep .score-value {
+  & .score-value {
     font-size: 4rem;
-  }
-}
-
-.contest-clock {
-  font-size: 2rem;
-  text-align: right;
-  margin-bottom: 16px;
-
-  &[data-clock-status='ENDED'] {
-    @extend .text-danger;
   }
 }
 

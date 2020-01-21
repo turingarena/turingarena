@@ -2,3 +2,8 @@
 
 <app-contest-view-aside [data]="data"></app-contest-view-aside>
 
+<ng-container *ngIf="data.problemSetView! as problemSetView">
+  <ng-container *ngFor="let itemView of problemSetView.itemViews">
+    <app-contest-problem-set-item-view-aside [data]="itemView"></app-contest-problem-set-item-view-aside>
+  </ng-container>
+</ng-container>

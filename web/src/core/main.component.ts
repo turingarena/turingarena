@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { MainViewQuery, MainViewQueryVariables } from '../generated/graphql-types';
@@ -8,6 +8,7 @@ import { mainViewFragment } from './main-view.component';
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class MainComponent {
   constructor(private readonly apollo: Apollo) {}

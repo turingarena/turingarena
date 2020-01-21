@@ -1,13 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
-import { gradingStateFragment } from './grading.component';
+import { contestProblemSetItemViewAsideFragment } from './contest-problem-set-item-view-aside.component';
+import { contestViewAsideFragment } from './contest-view-aside.component';
 import { textFragment } from './text.pipe';
 
 @Component({
   selector: 'app-contest-view',
   templateUrl: './contest-view.component.html',
   styleUrls: ['./contest-view.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ContestViewComponent {
   @Input()
@@ -18,33 +20,20 @@ export const contestViewFragment = gql`
   fragment ContestView on ContestView {
     contest {
       title {
-        variant
+        ...Text
       }
-      start
-      end
-      status
     }
 
     problemSetView {
       itemViews {
-        item {
-          problem {
-            name
-            title {
-              ...Text
-            }
-          }
-        }
-        gradingState {
-          ...GradingState
-        }
-      }
-      gradingState {
-        ...GradingState
+        ...ContestProblemSetItemViewAside
       }
     }
+
+    ...ContestViewAside
   }
 
   ${textFragment}
-  ${gradingStateFragment}
+  ${contestViewAsideFragment}
+  ${contestProblemSetItemViewAsideFragment}
 `;
