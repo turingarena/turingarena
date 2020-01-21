@@ -1,0 +1,7 @@
+<ng-container *ngIf="!data.grade">
+  <span class="score-max"> + {{ data.domain.max.toFixed(data.domain.decimalPrecision) }}</span>
+</ng-container>
+<ng-container *ngIf="data.grade! as grade">
+  <span class="score-value">{{ grade.value.score.toFixed(data.domain.decimalPrecision) }}</span>
+  <span class="score-max"> / {{ data.domain.max.toFixed(data.domain.decimalPrecision) }}</span>
+</ng-container>

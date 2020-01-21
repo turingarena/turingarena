@@ -2,6 +2,8 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
 import { awardResolvers, awardSchema } from './award';
 import { Contest, contestResolvers, contestSchema } from './contest';
+import { contestAwardSetItemResolvers, contestAwardSetItemSchema } from './contest-award-set-item';
+import { contestAwardSetItemViewResolvers, contestAwardSetItemViewSchema } from './contest-award-set-item-view';
 import { ContestFile } from './contest-file';
 import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
 import {
@@ -41,18 +43,21 @@ export const schema = gql`
     ${mutationSchema}
     ${userSchema}
     ${contestSchema}
-    ${contestProblemSetItemSchema}
-    ${contestProblemSetSchema}
     ${problemSchema}
     ${problemFileSchema}
     ${awardSchema}
     ${fileContentSchema}
     ${submissionSchema}
 
+    ${contestProblemSetSchema}
+    ${contestProblemSetItemSchema}
+    ${contestAwardSetItemSchema}
+
     ${mainViewSchema}
     ${contestViewSchema}
     ${contestProblemSetViewSchema}
     ${contestProblemSetItemViewSchema}
+    ${contestAwardSetItemViewSchema}
 
     ${textSchema}
     ${mediaSchema}
@@ -97,14 +102,17 @@ export const resolvers: Resolvers = {
     ...problemResolvers,
     ...problemFileResolvers,
     ...awardResolvers,
+    ...fileContentResolvers,
+
     ...contestProblemSetItemResolvers,
     ...contestProblemSetResolvers,
-    ...fileContentResolvers,
+    ...contestAwardSetItemResolvers,
 
     ...mainViewResolvers,
     ...contestViewResolvers,
     ...contestProblemSetViewResolvers,
     ...contestProblemSetItemViewResolvers,
+    ...contestAwardSetItemViewResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

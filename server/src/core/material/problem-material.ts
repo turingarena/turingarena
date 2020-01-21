@@ -17,7 +17,7 @@ export const problemMaterialSchema = gql`
         "Statement of this problem"
         statement: Media!
         "List of attachments of this problem"
-        attachments: [ProblemAttachment]!
+        attachments: [ProblemAttachment!]!
         "List of awards of this problem"
         awards: [Award]!
     }

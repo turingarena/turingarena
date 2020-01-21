@@ -17,6 +17,8 @@ import { ContestViewClockComponent } from '../core/contest-view-clock.component'
 import { ContestViewComponent } from '../core/contest-view.component';
 import { FeedbackSectionComponent } from '../core/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback.component';
+import { GradingBooleanComponent } from '../core/grading-boolean.component';
+import { GradingNumericComponent } from '../core/grading-numeric.component';
 import { GradingComponent } from '../core/grading.component';
 import { LoginModalComponent } from '../core/login-modal.component';
 import { MainViewMessageListModalComponent } from '../core/main-view-message-list-modal.component';
@@ -71,6 +73,8 @@ import { GraphQLModule } from './graphql.module';
     TextPipe,
     ValenceDirective,
     ContestViewClockComponent,
+    GradingBooleanComponent,
+    GradingNumericComponent,
   ],
   imports: [
     BrowserModule,

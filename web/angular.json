@@ -11,6 +11,7 @@
           "path": "src",
           "spec": false,
           "flat": true,
+          "viewEncapsulation": "None",
           "module": "config/app"
         },
         "@schematics/angular:directive": {

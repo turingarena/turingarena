@@ -22,6 +22,20 @@ export const contestViewAsideFragment = gql`
       gradingState {
         ...GradingState
       }
+
+      itemViews {
+        item {
+          problem {
+            name
+            title {
+              ...Text
+            }
+          }
+        }
+        gradingState {
+          ...GradingState
+        }
+      }
     }
 
     ...ContestViewClock

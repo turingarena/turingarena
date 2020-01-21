@@ -1,0 +1,22 @@
+%grading-badge {
+  @extend .badge, .badge-pill;
+
+  margin-top: 0.2rem;
+  float: right;
+
+  &:not([data-score-tier]):not([data-badge]),
+  &[data-score-tier='zero'],
+  &[data-badge='false'] {
+    @extend .badge-light;
+    border: 1px solid #ccc;
+  }
+
+  &[data-score-tier='full'],
+  &[data-badge='true'] {
+    @extend .badge-success;
+  }
+
+  &[data-score-tier='partial'] {
+    @extend .badge-warning;
+  }
+}

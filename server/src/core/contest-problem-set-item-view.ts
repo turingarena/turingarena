@@ -1,7 +1,11 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
+import { Award } from './award';
+import { ContestAwardSetItem } from './contest-award-set-item';
+import { ContestAwardSetItemView } from './contest-award-set-item-view';
 import { ContestProblemSetItem } from './contest-problem-set-item';
 import { ContestView } from './contest-view';
+import { getProblemMetadata } from './problem-util';
 import { User } from './user';
 
 export const contestProblemSetItemViewSchema = gql`
@@ -9,7 +13,12 @@ export const contestProblemSetItemViewSchema = gql`
         item: ContestProblemSetItem!
         user: User
         problemSetView: ContestProblemSetView!
+
         gradingState: GradingState!
+        canSubmit: Boolean!
+        submissions: [Submission!]!
+
+        awardSetItemViews: [ContestAwardSetItemView!]!
     }
 `;
 
@@ -34,5 +43,20 @@ export const contestProblemSetItemViewResolvers: ResolversWithModels<{
                 decimalPrecision: 1,
             },
         }),
+        canSubmit: () => true, // TODO
+        submissions: () => [], // TODO
+        awardSetItemViews: async ({ item, user }, {}, ctx) => {
+            const problem = await item.getProblem();
+
+            // FIXME: duplicated code
+            const {
+                scoring: { subtasks },
+            } = await getProblemMetadata(ctx, problem);
+
+            return subtasks.map(
+                (subtask, index) =>
+                    new ContestAwardSetItemView(new ContestAwardSetItem(item, new Award(problem, index)), user),
+            );
+        },
     },
 };

@@ -4,6 +4,8 @@
 
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let itemView of problemSetView.itemViews">
-    <app-contest-problem-set-item-view-aside [data]="itemView"></app-contest-problem-set-item-view-aside>
+    <div [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
+      <app-contest-problem-set-item-view-aside [data]="itemView"></app-contest-problem-set-item-view-aside>
+    </div>
   </ng-container>
 </ng-container>

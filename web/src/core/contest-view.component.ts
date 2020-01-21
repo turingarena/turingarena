@@ -1,4 +1,5 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { contestProblemSetItemViewAsideFragment } from './contest-problem-set-item-view-aside.component';
@@ -14,6 +15,8 @@ import { textFragment } from './text.pipe';
 export class ContestViewComponent {
   @Input()
   data!: ContestViewFragment;
+
+  constructor(readonly route: ActivatedRoute) {}
 }
 
 export const contestViewFragment = gql`
@@ -26,6 +29,11 @@ export const contestViewFragment = gql`
 
     problemSetView {
       itemViews {
+        item {
+          problem {
+            name
+          }
+        }
         ...ContestProblemSetItemViewAside
       }
     }

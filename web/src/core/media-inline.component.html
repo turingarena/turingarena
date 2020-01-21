@@ -1,1 +1,8 @@
-<p>media-inline works!</p>
+<ng-container [ngSwitch]="data.variant.type">
+  <markdown class="inline-file-markdown" *ngSwitchCase="'text/markdown'" katex>
+    {{ data.variant.content.utf8 }}
+  </markdown>
+  <iframe *ngSwitchDefault class="inline-file-iframe"
+    [attr.src]="'data:' + data.variant.type + ';base64,' + data.variant.content.base64 | bypassSanitizer: 'ResourceUrl'">
+  </iframe>
+</ng-container>

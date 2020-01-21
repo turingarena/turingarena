@@ -13,9 +13,8 @@ export const awardSchema = gql`
     }
 `;
 
-export interface Award {
-    problem: Problem;
-    index: number;
+export class Award {
+    constructor(readonly problem: Problem, readonly index: number) {}
 }
 
 export const awardResolvers: ResolversWithModels<{

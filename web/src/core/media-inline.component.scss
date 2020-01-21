@@ -1,0 +1,12 @@
+.inline-file-markdown {
+  padding: 0.75rem;
+  max-width: 60rem;
+}
+
+.inline-file-markdown,
+.inline-file-iframe {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border: none;
+}

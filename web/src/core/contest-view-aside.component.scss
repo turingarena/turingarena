@@ -1,4 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
+@import './grading-badge.common';
 
 .contest-view-aside {
   flex: 0 0 auto;
@@ -62,4 +63,8 @@
     color: #fff;
     background-color: #007bff;
   }
+}
+
+.contest-problem-score {
+  @extend %grading-badge;
 }

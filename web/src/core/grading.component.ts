@@ -15,6 +15,7 @@ export class GradingComponent {
 
 export const gradingStateFragment = gql`
   fragment GradingState on GradingState {
+    __typename
     ... on GenericGradingState {
       valence
     }
