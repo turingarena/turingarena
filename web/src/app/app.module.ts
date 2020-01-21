@@ -12,6 +12,22 @@ import { AppComponent } from './app.component';
 import { ApplyPurePipe } from './apply-pure.pipe';
 import { BypassSanitizerPipe } from './bypass-sanitizer.pipe';
 import { ContestViewComponent } from './contest-view/contest-view.component';
+import { ContestProblemSetItemViewAsideComponent } from './core/contest-problem-set-item-view-aside.component';
+import { ContestProblemSetItemViewSubmissionListModalComponent } from './core/contest-problem-set-item-view-submission-list-modal.component';
+import { ContestProblemSetItemViewSubmissionListComponent } from './core/contest-problem-set-item-view-submission-list.component';
+import { ContestViewAsideComponent } from './core/contest-view-aside.component';
+import { FeedbackSectionComponent } from './core/feedback-section.component';
+import { FeedbackComponent } from './core/feedback.component';
+import { GradingComponent } from './core/grading.component';
+import { LoginModalComponent } from './core/login-modal.component';
+import { MainMessageListModalComponent } from './core/main-message-list-modal.component';
+import { MainMessageListComponent } from './core/main-message-list.component';
+import { MainSendMessageFormComponent } from './core/main-send-message-form.component';
+import { MainComponent } from './core/main.component';
+import { MediaDownloadComponent } from './core/media-download.component';
+import { MediaInlineComponent } from './core/media-inline.component';
+import { SubmissionModalComponent } from './core/submission-modal.component';
+import { TopBarComponent } from './core/top-bar.component';
 import { EmptyComponent } from './empty.component';
 import { FromJsonPipe } from './from-json.pipe';
 import { GraphQLModule } from './graphql.module';
@@ -30,6 +46,22 @@ import { TemplateCellRendererComponent } from './template-cell-renderer.componen
     FromJsonPipe,
     JsonPurePipe,
     ContestViewComponent,
+    TopBarComponent,
+    LoginModalComponent,
+    MainComponent,
+    MainMessageListModalComponent,
+    MainMessageListComponent,
+    MainSendMessageFormComponent,
+    ContestViewAsideComponent,
+    ContestProblemSetItemViewAsideComponent,
+    ContestProblemSetItemViewSubmissionListModalComponent,
+    ContestProblemSetItemViewSubmissionListComponent,
+    SubmissionModalComponent,
+    FeedbackComponent,
+    FeedbackSectionComponent,
+    MediaInlineComponent,
+    MediaDownloadComponent,
+    GradingComponent,
   ],
   imports: [
     BrowserModule,
