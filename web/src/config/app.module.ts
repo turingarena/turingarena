@@ -2,7 +2,8 @@ import { HttpClientModule } from '@angular/common/http'; // tslint:disable-line:
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
@@ -83,4 +84,8 @@ import { GraphQLModule } from './graphql.module';
   bootstrap: [AppComponent],
   entryComponents: [TemplateCellRendererComponent],
 })
-export class AppModule {}
+export class AppModule /* tslint:disable-line: no-unnecessary-class */ {
+  constructor(library: FaIconLibrary) {
+    library.addIconPacks(fas);
+  }
+}

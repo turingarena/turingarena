@@ -1,1 +1,35 @@
-<p>top-bar works!</p>
+<nav class="top-bar">
+  <a routerLink="/" class="top-bar-home">
+    <h1 class="top-bar-title">
+      <fa-icon icon="home"></fa-icon> {{ title | text }}
+    </h1>
+  </a>
+  <ng-container *ngIf="false && data.user! as user">
+    <span class="user-display-name">{{ user.displayName }}</span>
+  </ng-container>
+  <button class="messages-button">
+    <fa-icon icon="comments"></fa-icon>
+    Messages
+    <span class="message-count-badge" [hidden]="true || data.contest.view.messages.length === 0">{{
+      false && data.contest.view.messages.length
+    }}</span>
+  </button>
+  <ng-container *ngIf="false && data.user! as user">
+    <ng-container *ngIf="user.isAdmin">
+      <a routerLink="/admin" class="admin-button">
+        <fa-icon icon="tools"></fa-icon>
+        Admin
+      </a>
+    </ng-container>
+    <button class="user-logout" (click)="setAuth(undefined)">
+      <fa-icon icon="signOutAlt"></fa-icon>
+      Logout
+    </button>
+  </ng-container>
+  <ng-container *ngIf="false && !data.user">
+    <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
+      <fa-icon icon="signInAlt"></fa-icon>
+      Login
+    </button>
+  </ng-container>
+</nav>
