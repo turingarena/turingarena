@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
+import { MainComponent } from './core/main.component';
 import { EmptyComponent } from './util/empty.component';
 
 export const routes: Routes = [
   {
     path: '',
-    component: EmptyComponent,
+    component: MainComponent,
     children: [
       {
         path: '',
