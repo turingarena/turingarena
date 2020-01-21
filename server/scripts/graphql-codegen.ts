@@ -13,7 +13,7 @@ const config: CodegenConfig = {
             plugins: [
                 {
                     typescript: {
-                        avoidOptionals: true,
+                        avoidOptionals: false,
                         nonOptionalTypename: true,
                     },
                 },

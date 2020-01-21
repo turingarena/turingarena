@@ -17,15 +17,21 @@ const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClien
     };
   });
 
-  return {
-    link: ApolloLink.from([authContext, httpLink.create({ uri: '/graphql' })]),
-    cache: new InMemoryCache({
-      fragmentMatcher: new IntrospectionFragmentMatcher({
-        introspectionQueryResultData: schema,
-      }),
-      freezeResults: true,
-      dataIdFromObject: () => undefined,
+  const link = ApolloLink.from([authContext, httpLink.create({ uri: '/graphql' })]);
+  const cache = new InMemoryCache({
+    fragmentMatcher: new IntrospectionFragmentMatcher({
+      introspectionQueryResultData: schema,
     }),
+    freezeResults: true,
+    dataIdFromObject: () => undefined,
+  });
+
+  return {
+    link,
+    cache,
+    resolvers: {
+      Query: {},
+    },
   };
 };
 

@@ -6,7 +6,7 @@ import { User } from './user';
 export const contestViewSchema = gql`
     type ContestView {
         contest: Contest!
-        user: User!
+        user: User
 
         # problemSet: ProblemSet
     }
@@ -14,11 +14,14 @@ export const contestViewSchema = gql`
 
 export interface ContestView {
     contest: Contest;
-    user: User;
+    user: User | null;
 }
 
 export const contestViewResolvers: ResolversWithModels<{
     ContestView: ContestView;
 }> = {
-    ContestView: {},
+    ContestView: {
+        contest: ({ contest }) => contest,
+        user: ({ user }) => user,
+    },
 };

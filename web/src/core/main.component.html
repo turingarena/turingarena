@@ -1,1 +1,3 @@
-<p>main works!</p>
+<ng-container *ngIf="(queryRef.valueChanges | async)?.data as data">
+  <app-main-view [data]="data"></app-main-view>
+</ng-container>

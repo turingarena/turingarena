@@ -19,6 +19,7 @@ import { gradingSchema } from './grading/grading';
 import { booleanGradingSchema } from './grading/grading-boolean';
 import { genericGradingSchema } from './grading/grading-generic';
 import { numericGradingSchema } from './grading/grading-numeric';
+import { mainViewResolvers, mainViewSchema } from './main-view';
 import { awardMaterialResolvers, awardMaterialSchema } from './material/award-material';
 import { mediaResolvers, mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
@@ -46,6 +47,7 @@ export const schema = gql`
     ${fileContentSchema}
     ${submissionSchema}
 
+    ${mainViewSchema}
     ${contestViewSchema}
 
     ${textSchema}
@@ -94,6 +96,8 @@ export const resolvers: Resolvers = {
     ...contestProblemSetItemResolvers,
     ...contestProblemSetResolvers,
     ...fileContentResolvers,
+
+    ...mainViewResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

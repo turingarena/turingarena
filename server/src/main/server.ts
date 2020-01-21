@@ -15,6 +15,7 @@ export function serve(config: Config) {
     const server = new ApolloServer({
         typeDefs: schema,
         executor: req => ctx.execute(req),
+        debug: true,
         playground: true,
         formatError: err => {
             console.warn(err);
@@ -28,7 +29,7 @@ export function serve(config: Config) {
      * Serve static files directly from the database.
      */
     app.get('/files/:hash/*', async (req, res, next) => {
-        const hash = req.params.hash;
+        const hash = req.params.hash!;
         const file = await ctx.table(FileContent).findOne({ where: { hash } });
         if (file === null) next();
         else {

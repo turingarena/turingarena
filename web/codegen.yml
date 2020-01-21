@@ -1,8 +1,8 @@
 schema: ../server/src/generated/graphql.schema.graphql
-documents: ./src/app/**/*.ts
+documents: ./src/**/*.ts
 generates:
   ./src/generated/graphql-types.ts:
-    schema: src/app/client-schema.graphql
+    schema: src/client-schema.graphql
     plugins:
       - typescript
       - typescript-operations

@@ -16,9 +16,10 @@ import { FeedbackSectionComponent } from '../core/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback.component';
 import { GradingComponent } from '../core/grading.component';
 import { LoginModalComponent } from '../core/login-modal.component';
-import { MainMessageListModalComponent } from '../core/main-message-list-modal.component';
-import { MainMessageListComponent } from '../core/main-message-list.component';
-import { MainSendMessageFormComponent } from '../core/main-send-message-form.component';
+import { MainViewMessageListModalComponent } from '../core/main-view-message-list-modal.component';
+import { MainViewMessageListComponent } from '../core/main-view-message-list.component';
+import { MainViewSendMessageComponent } from '../core/main-view-send-message.component';
+import { MainViewComponent } from '../core/main-view.component';
 import { MainComponent } from '../core/main.component';
 import { MediaDownloadComponent } from '../core/media-download.component';
 import { MediaInlineComponent } from '../core/media-inline.component';
@@ -47,9 +48,10 @@ import { GraphQLModule } from './graphql.module';
     TopBarComponent,
     LoginModalComponent,
     MainComponent,
-    MainMessageListModalComponent,
-    MainMessageListComponent,
-    MainSendMessageFormComponent,
+    MainViewComponent,
+    MainViewMessageListModalComponent,
+    MainViewMessageListComponent,
+    MainViewSendMessageComponent,
     ContestViewAsideComponent,
     ContestProblemSetItemViewAsideComponent,
     ContestProblemSetItemViewSubmissionListModalComponent,

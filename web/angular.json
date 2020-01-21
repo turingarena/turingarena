@@ -7,7 +7,28 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "scss",
+          "path": "src",
+          "spec": false,
+          "flat": true,
+          "module": "config/app"
+        },
+        "@schematics/angular:directive": {
+          "path": "src",
+          "module": "config/app"
+        },
+        "@schematics/angular:module": {
+          "path": "src"
+        },
+        "@schematics/angular:service": {
+          "path": "src"
+        },
+        "@schematics/angular:pipe": {
+          "path": "src",
+          "module": "config/app"
+        },
+        "@schematics/angular:class": {
+          "path": "src"
         }
       },
       "root": "",
