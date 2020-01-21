@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 
 export const booleanGradingSchema = gql`
-    type BooleanGrading implements GenericGrading {
+    type BooleanGradingState implements GenericGradingState {
         domain: BooleanGradeDomain!
         grade: BooleanGrade
         valence: Valence

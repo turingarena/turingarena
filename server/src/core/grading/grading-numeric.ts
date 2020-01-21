@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 
 export const numericGradingSchema = gql`
-    type NumericGrading implements GenericGrading {
+    type NumericGradingState implements GenericGradingState {
         domain: NumericGradeDomain!
         grade: NumericGrade
         valence: Valence

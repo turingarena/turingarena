@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 
 export const genericGradingSchema = gql`
-    interface GenericGrading {
+    interface GenericGradingState {
         domain: GradeDomain!
         grade: GenericGrade
         valence: Valence
