@@ -1,0 +1,75 @@
+@import '~bootstrap/scss/bootstrap';
+
+.contest-view-aside {
+  flex: 0 0 auto;
+  overflow-y: auto;
+
+  padding: 16px;
+  width: 16em;
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contest-score-title,
+.contest-clock-title,
+.contest-problem-list-title {
+  text-transform: uppercase;
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.contest-aside {
+  flex: 0 0 auto;
+  overflow-y: auto;
+
+  padding: 16px;
+  width: 16em;
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contest-problem-list {
+  padding: 0;
+  list-style: none;
+}
+
+.contest-score {
+  white-space: nowrap;
+  text-align: right;
+
+  font-size: 2rem;
+  margin-bottom: 16px;
+
+  & ::ng-deep .score-value {
+    font-size: 4rem;
+  }
+}
+
+.contest-clock {
+  font-size: 2rem;
+  text-align: right;
+  margin-bottom: 16px;
+
+  &[data-clock-status='ENDED'] {
+    @extend .text-danger;
+  }
+}
+
+.contest-problem-link {
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  display: block;
+  margin: 0 -16px;
+  padding: 0.5rem 16px;
+
+  &.active {
+    color: #fff;
+    background-color: #007bff;
+  }
+}

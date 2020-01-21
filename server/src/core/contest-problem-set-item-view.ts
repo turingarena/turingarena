@@ -6,9 +6,10 @@ import { User } from './user';
 
 export const contestProblemSetItemViewSchema = gql`
     type ContestProblemSetItemView {
-        problemSetItem: ContestProblemSetItem!
+        item: ContestProblemSetItem!
         user: User
         problemSetView: ContestProblemSetView!
+        gradingState: GradingState!
     }
 `;
 
@@ -20,8 +21,18 @@ export const contestProblemSetItemViewResolvers: ResolversWithModels<{
     ContestProblemSetItemView: ContestProblemSetItemView;
 }> = {
     ContestProblemSetItemView: {
-        problemSetItem: ({ item }) => item,
+        item: ({ item }) => item,
         user: ({ user }) => user,
         problemSetView: async ({ item, user }) => new ContestView(await item.getContest(), user),
+        gradingState: async ({ item, user }) => ({
+            // TODO
+            __typename: 'NumericGradingState',
+            domain: {
+                __typename: 'NumericGradeDomain',
+                max: 100,
+                allowPartial: true,
+                decimalPrecision: 1,
+            },
+        }),
     },
 };

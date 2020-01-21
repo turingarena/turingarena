@@ -1,1 +1,36 @@
+<aside class="contest-view-aside">
+  <ng-container *ngIf="data.problemSetView! as problemSetView">
+    <ng-container *ngIf="problemSetView.gradingState.grade">
+      <h2 class="contest-score-title">Score</h2>
+      <div class="contest-score">
+        <app-grading [data]="problemSetView.gradingState"></app-grading>
+      </div>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngIf="getContestClock(data) | async as clock">
+    <h2 class="contest-clock-title" [ngSwitch]="data.contest.status">
+      <ng-container *ngSwitchCase="'NOT_STARTED'">Starting In</ng-container>
+      <ng-container *ngSwitchCase="'RUNNING'">Remaining Time</ng-container>
+      <ng-container *ngSwitchCase="'ENDED'">Ended</ng-container>
+    </h2>
+    <div class="contest-clock" [attr.data-clock-status]="data.contest.status">
+      {{ clock.negated ? '-' : '' }}{{ clock.duration.toFormat('hh:mm:ss') }}
+    </div>
+  </ng-container>
+  <ng-container *ngIf="data.problemSetView! as problemSetView">
+    <h2 class="contest-problem-list-title">Problems</h2>
+    <div class="contest-problem-list">
+      <ng-container *ngFor="let itemView of problemSetView.itemViews; index as index">
+        <a class="contest-problem-link" [routerLink]="['/problem', itemView.item.problem.name]"
+          [title]="itemView.item.problem.title | text" routerLinkActive="active">
+          {{ itemView.item.problem.title | text }}
+          <span class="contest-problem-score" [appValence]="itemView.gradingState.valence">
+            <app-grading [data]="itemView.gradingState"></app-grading>
+          </span>
+        </a>
+      </ng-container>
+    </div>
+  </ng-container>
+</aside>
+
 <p>contest-view-aside works!</p>

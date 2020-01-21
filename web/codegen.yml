@@ -6,3 +6,5 @@ generates:
     plugins:
       - typescript
       - typescript-operations
+    config:
+      enumsAsTypes: true

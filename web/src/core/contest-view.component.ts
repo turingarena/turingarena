@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
+import { gradingStateFragment } from './grading.component';
+import { textFragment } from './text.pipe';
 
 @Component({
   selector: 'app-contest-view',
@@ -25,12 +27,24 @@ export const contestViewFragment = gql`
 
     problemSetView {
       itemViews {
-        problemSetItem {
+        item {
           problem {
             name
+            title {
+              ...Text
+            }
           }
         }
+        gradingState {
+          ...GradingState
+        }
+      }
+      gradingState {
+        ...GradingState
       }
     }
   }
+
+  ${textFragment}
+  ${gradingStateFragment}
 `;
