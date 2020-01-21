@@ -7,7 +7,7 @@ import { ContestStatus, MutationResolvers } from '../generated/graphql-types';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
-import { ContestProblemSetItem } from './contest-problem-set-item';
+import { ContestProblemAssignment } from './contest-problem-assignment';
 import { FileContent } from './file-content';
 import { Participation } from './participation';
 import { Problem } from './problem';
@@ -63,10 +63,10 @@ export class Contest extends Model<Contest> {
     end!: Date;
 
     /** The list of problems in this contest */
-    @HasMany(() => ContestProblemSetItem)
-    problemSetItems!: ContestProblemSetItem[];
-    createProblemSetItem!: (problem: object, options?: object) => Promise<ContestProblemSetItem>;
-    getProblemSetItems!: () => Promise<ContestProblemSetItem[]>;
+    @HasMany(() => ContestProblemAssignment)
+    problemAssignments!: ContestProblemAssignment[];
+    createProblemAssignment!: (problem: object, options?: object) => Promise<ContestProblemAssignment>;
+    getProblemAssignments!: () => Promise<ContestProblemAssignment[]>;
 
     /** The list of users in this contest */
     @HasMany(() => Participation)
@@ -122,7 +122,7 @@ export const contestMutationResolvers: MutationResolvers = {
             })) ?? ctx.fail(`no such contest '${contestName}'`);
         const problem =
             (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
-        await contest.createProblemSetItem({
+        await contest.createProblemAssignment({
             problem,
         });
 

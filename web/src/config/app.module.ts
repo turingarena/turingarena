@@ -9,9 +9,9 @@ import { AgGridModule } from 'ag-grid-angular';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 import { AppComponent } from '../core/app.component';
-import { ContestProblemSetItemViewAsideComponent } from '../core/contest-problem-set-item-view-aside.component';
-import { ContestProblemSetItemViewSubmissionListModalComponent } from '../core/contest-problem-set-item-view-submission-list-modal.component';
-import { ContestProblemSetItemViewSubmissionListComponent } from '../core/contest-problem-set-item-view-submission-list.component';
+import { ContestProblemAssignmentViewAsideComponent } from '../core/contest-problem-assignment-view-aside.component';
+import { ContestProblemAssignmentViewSubmissionListModalComponent } from '../core/contest-problem-assignment-view-submission-list-modal.component';
+import { ContestProblemAssignmentViewSubmissionListComponent } from '../core/contest-problem-assignment-view-submission-list.component';
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
@@ -61,9 +61,9 @@ import { GraphQLModule } from './graphql.module';
     MainViewSendMessageComponent,
     ContestViewComponent,
     ContestViewAsideComponent,
-    ContestProblemSetItemViewAsideComponent,
-    ContestProblemSetItemViewSubmissionListModalComponent,
-    ContestProblemSetItemViewSubmissionListComponent,
+    ContestProblemAssignmentViewAsideComponent,
+    ContestProblemAssignmentViewSubmissionListModalComponent,
+    ContestProblemAssignmentViewSubmissionListComponent,
     SubmissionModalComponent,
     FeedbackComponent,
     FeedbackSectionComponent,

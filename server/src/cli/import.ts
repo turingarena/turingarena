@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { Contest } from '../core/contest';
-import { ContestProblemSetItem } from '../core/contest-problem-set-item';
+import { ContestProblemAssignment } from '../core/contest-problem-assignment';
 import { Problem } from '../core/problem';
 import { getProblemMetadata, importProblemFiles } from '../core/problem-util';
 import { User, UserRole } from '../core/user';
@@ -61,7 +61,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
 
         await importProblemFiles(ctx, problem, path.join(dir, name));
 
-        await ctx.table(ContestProblemSetItem).create({
+        await ctx.table(ContestProblemAssignment).create({
             contestId: contest.id,
             problemId: problem.id,
         });

@@ -2,16 +2,19 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
 import { awardResolvers, awardSchema } from './award';
 import { Contest, contestResolvers, contestSchema } from './contest';
-import { contestAwardSetItemResolvers, contestAwardSetItemSchema } from './contest-award-set-item';
-import { contestAwardSetItemViewResolvers, contestAwardSetItemViewSchema } from './contest-award-set-item-view';
+import { contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
+import { contestAwardAssignmentViewResolvers, contestAwardAssignmentViewSchema } from './contest-award-assignment-view';
 import { ContestFile } from './contest-file';
-import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
 import {
-    ContestProblemSetItem,
-    contestProblemSetItemResolvers,
-    contestProblemSetItemSchema,
-} from './contest-problem-set-item';
-import { contestProblemSetItemViewResolvers, contestProblemSetItemViewSchema } from './contest-problem-set-item-view';
+    ContestProblemAssignment,
+    contestProblemAssignmentResolvers,
+    contestProblemAssignmentSchema,
+} from './contest-problem-assignment';
+import {
+    contestProblemAssignmentViewResolvers,
+    contestProblemAssignmentViewSchema,
+} from './contest-problem-assignment-view';
+import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
 import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './contest-problem-set-view';
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation } from './evaluation';
@@ -50,14 +53,14 @@ export const schema = gql`
     ${submissionSchema}
 
     ${contestProblemSetSchema}
-    ${contestProblemSetItemSchema}
-    ${contestAwardSetItemSchema}
+    ${contestProblemAssignmentSchema}
+    ${contestAwardAssignmentSchema}
 
     ${mainViewSchema}
     ${contestViewSchema}
     ${contestProblemSetViewSchema}
-    ${contestProblemSetItemViewSchema}
-    ${contestAwardSetItemViewSchema}
+    ${contestProblemAssignmentViewSchema}
+    ${contestAwardAssignmentViewSchema}
 
     ${textSchema}
     ${mediaSchema}
@@ -82,7 +85,7 @@ export const modelConstructors = {
     User,
     Contest,
     Problem,
-    ContestProblemSetItem,
+    ContestProblemAssignment,
     Participation,
     FileContent,
     ProblemFile,
@@ -104,15 +107,15 @@ export const resolvers: Resolvers = {
     ...awardResolvers,
     ...fileContentResolvers,
 
-    ...contestProblemSetItemResolvers,
+    ...contestProblemAssignmentResolvers,
     ...contestProblemSetResolvers,
-    ...contestAwardSetItemResolvers,
+    ...contestAwardAssignmentResolvers,
 
     ...mainViewResolvers,
     ...contestViewResolvers,
     ...contestProblemSetViewResolvers,
-    ...contestProblemSetItemViewResolvers,
-    ...contestAwardSetItemViewResolvers,
+    ...contestProblemAssignmentViewResolvers,
+    ...contestAwardAssignmentViewResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

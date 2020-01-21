@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
-import { contestProblemSetItemViewAsideFragment } from './contest-problem-set-item-view-aside.component';
+import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside.component';
 import { contestViewAsideFragment } from './contest-view-aside.component';
 import { mediaInlineFragment } from './media-inline.component';
 import { textFragment } from './text.pipe';
@@ -29,8 +29,8 @@ export const contestViewFragment = gql`
     }
 
     problemSetView {
-      itemViews {
-        item {
+      assignmentViews {
+        assignment {
           problem {
             name
             statement {
@@ -38,7 +38,7 @@ export const contestViewFragment = gql`
             }
           }
         }
-        ...ContestProblemSetItemViewAside
+        ...ContestProblemAssignmentViewAside
       }
     }
 
@@ -48,5 +48,5 @@ export const contestViewFragment = gql`
   ${textFragment}
   ${mediaInlineFragment}
   ${contestViewAsideFragment}
-  ${contestProblemSetItemViewAsideFragment}
+  ${contestProblemAssignmentViewAsideFragment}
 `;

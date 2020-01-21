@@ -16,7 +16,7 @@ export const contestProblemSetSchema = gql`
         Items in this problem set.
         Each corresponds to a problem assigned in the contest.
         """
-        items: [ContestProblemSetItem]!
+        assignments: [ContestProblemAssignment]!
 
         # TODO: grade domain
     }
@@ -27,6 +27,6 @@ export const contestProblemSetResolvers: ResolversWithModels<{
 }> = {
     ContestProblemSet: {
         contest: contest => contest,
-        items: contest => contest.getProblemSetItems(),
+        assignments: contest => contest.getProblemAssignments(),
     },
 };

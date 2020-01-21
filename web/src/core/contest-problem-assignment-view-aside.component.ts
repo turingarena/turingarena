@@ -1,25 +1,25 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { ContestProblemSetItemViewAsideFragment } from '../generated/graphql-types';
+import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { gradingStateFragment } from './grading.component';
 import { mediaDownloadFragment } from './media-download.component';
 import { mediaInlineFragment } from './media-inline.component';
 import { textFragment } from './text.pipe';
 
 @Component({
-  selector: 'app-contest-problem-set-item-view-aside',
-  templateUrl: './contest-problem-set-item-view-aside.component.html',
-  styleUrls: ['./contest-problem-set-item-view-aside.component.scss'],
+  selector: 'app-contest-problem-assignment-view-aside',
+  templateUrl: './contest-problem-assignment-view-aside.component.html',
+  styleUrls: ['./contest-problem-assignment-view-aside.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ContestProblemSetItemViewAsideComponent {
+export class ContestProblemAssignmentViewAsideComponent {
   @Input()
-  data!: ContestProblemSetItemViewAsideFragment;
+  data!: ContestProblemAssignmentViewAsideFragment;
 }
 
-export const contestProblemSetItemViewAsideFragment = gql`
-  fragment ContestProblemSetItemViewAside on ContestProblemSetItemView {
-    item {
+export const contestProblemAssignmentViewAsideFragment = gql`
+  fragment ContestProblemAssignmentViewAside on ContestProblemAssignmentView {
+    assignment {
       problem {
         name
         title {
@@ -49,8 +49,8 @@ export const contestProblemSetItemViewAsideFragment = gql`
       ...GradingState
     }
 
-    awardSetItemViews {
-      item {
+    awardAssignmentViews {
+      assignment {
         award {
           name
           title {

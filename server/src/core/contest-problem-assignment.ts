@@ -4,8 +4,8 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
 
-export const contestProblemSetItemSchema = gql`
-    type ContestProblemSetItem {
+export const contestProblemAssignmentSchema = gql`
+    type ContestProblemAssignment {
         contest: Contest!
         problem: Problem!
     }
@@ -13,7 +13,7 @@ export const contestProblemSetItemSchema = gql`
 
 /** Contest to Problem N-N relation */
 @Table({ timestamps: false })
-export class ContestProblemSetItem extends Model<ContestProblemSetItem> {
+export class ContestProblemAssignment extends Model<ContestProblemAssignment> {
     @ForeignKey(() => Problem)
     @PrimaryKey
     @Column
@@ -35,11 +35,11 @@ export class ContestProblemSetItem extends Model<ContestProblemSetItem> {
     getProblem!: () => Promise<Problem>;
 }
 
-export const contestProblemSetItemResolvers: ResolversWithModels<{
-    ContestProblemSetItem: ContestProblemSetItem;
+export const contestProblemAssignmentResolvers: ResolversWithModels<{
+    ContestProblemAssignment: ContestProblemAssignment;
 }> = {
-    ContestProblemSetItem: {
-        contest: item => item.getContest(),
-        problem: item => item.getProblem(),
+    ContestProblemAssignment: {
+        contest: assignment => assignment.getContest(),
+        problem: assignment => assignment.getProblem(),
     },
 };

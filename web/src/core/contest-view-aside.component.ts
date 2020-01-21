@@ -23,8 +23,8 @@ export const contestViewAsideFragment = gql`
         ...GradingState
       }
 
-      itemViews {
-        item {
+      assignmentViews {
+        assignment {
           problem {
             name
             title {
