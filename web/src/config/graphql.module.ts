@@ -6,19 +6,14 @@ import { ApolloClientOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import schema from '../../../server/src/generated/graphql.schema.json'; // tslint:disable-line: no-default-import
-import { AuthService } from './auth.service.js';
+import { AuthService } from '../util/auth.service.js';
 
 const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClientOptions<unknown> => {
   const authContext = setContext((operation, context) => {
     const auth = authService.getAuth();
 
     return {
-      headers:
-        auth !== undefined
-          ? {
-              Authorization: auth.token,
-            }
-          : {},
+      headers: auth !== null ? { Authorization: auth.token } : {},
     };
   });
 
