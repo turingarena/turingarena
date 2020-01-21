@@ -1,21 +1,27 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    // Angular TypeScript compilation options
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
     "typeRoots": ["node_modules/@types"],
     "lib": ["es2018", "dom"],
-    "resolveJsonModule": true,
 
+    // Custom TypeScript compilation options
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+
+    // Custom TypeScript code-style options
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,

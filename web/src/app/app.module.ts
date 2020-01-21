@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http'; // tslint:disable-line: no-submodule-imports
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -33,6 +34,7 @@ import { TemplateCellRendererComponent } from './template-cell-renderer.componen
   imports: [
     BrowserModule,
     FormsModule,
+    HttpClientModule,
     GraphQLModule,
     AppRoutingModule,
     NgxFilesizeModule,
