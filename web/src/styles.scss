@@ -6,11 +6,6 @@
   box-sizing: border-box;
 }
 
-div {
-  margin: 0;
-  padding: 0;
-}
-
 a {
   color: #007bff;
   text-decoration: none;
@@ -44,8 +39,9 @@ html {
 app-root,
 body,
 html {
-  display: block;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 100%;
 }
 
 body {
@@ -57,87 +53,4 @@ body {
   color: #212529;
   text-align: left;
   background-color: #fff;
-}
-
-.tooltip.show {
-  opacity: 1;
-}
-
-.modal-body {
-  max-height: calc(100vh - 260px);
-  overflow-y: auto;
-}
-
-.evaluation_modal_header {
-  @extend .modal-header;
-}
-
-.login_modal_body,
-.evaluation_modal_body {
-  @extend .modal-body;
-  padding: 0;
-  max-height: calc(100vh - 260px);
-  overflow-y: auto;
-}
-
-.login_modal_footer,
-.evaluation_modal_footer {
-  @extend .modal-footer;
-}
-
-.login_modal_submit_button,
-.evaluation_modal_close_button {
-  @extend .btn, .btn-primary;
-}
-
-.login_modal_close_button {
-  @extend .btn, .btn-secondary;
-}
-
-.login_token_input_group {
-  @extend .form-group;
-  margin: 16px;
-}
-
-.login_token_input {
-  @extend .form-control;
-}
-
-.grid-cell-id {
-  @extend samp;
-}
-
-.grid-cell-grading {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  opacity: 0.8;
-  .ag-row-hover > & {
-    opacity: 1;
-  }
-
-  &[data-grading-typename='BadgeAwardGrading'] {
-    text-align: center;
-  }
-
-  &[data-grading-typename='ScoreAwardGrading'] {
-    text-align: end;
-  }
-
-  &[data-badge='true'] {
-    @extend .table-success;
-  }
-  &[data-badge='false'] {
-    @extend .table-danger;
-  }
-  &[data-score-tier='zero'] {
-    @extend .table-danger;
-  }
-  &[data-score-tier='partial'] {
-    @extend .table-warning;
-  }
-  &[data-score-tier='full'] {
-    @extend .table-success;
-  }
 }

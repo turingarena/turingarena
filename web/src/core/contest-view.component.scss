@@ -1,0 +1,16 @@
+app-contest-view {
+  flex: 1 0 100%;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.contest-problem-set-item-view-aside {
+  display: flex;
+  flex-direction: row;
+}
+
+.contest-problem-set-item-view-statement {
+  flex: 1;
+  display: flex;
+}

@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { contestProblemSetItemViewAsideFragment } from './contest-problem-set-item-view-aside.component';
 import { contestViewAsideFragment } from './contest-view-aside.component';
+import { mediaInlineFragment } from './media-inline.component';
 import { textFragment } from './text.pipe';
 
 @Component({
@@ -32,6 +33,9 @@ export const contestViewFragment = gql`
         item {
           problem {
             name
+            statement {
+              ...MediaInline
+            }
           }
         }
         ...ContestProblemSetItemViewAside
@@ -42,6 +46,7 @@ export const contestViewFragment = gql`
   }
 
   ${textFragment}
+  ${mediaInlineFragment}
   ${contestViewAsideFragment}
   ${contestProblemSetItemViewAsideFragment}
 `;

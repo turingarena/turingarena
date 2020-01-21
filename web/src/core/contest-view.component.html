@@ -1,11 +1,18 @@
-<p>contest-view works!</p>
-
 <app-contest-view-aside [data]="data"></app-contest-view-aside>
 
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let itemView of problemSetView.itemViews">
-    <div [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
+    <aside class="contest-problem-set-item-view-aside"
+      [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
       <app-contest-problem-set-item-view-aside [data]="itemView"></app-contest-problem-set-item-view-aside>
+    </aside>
+  </ng-container>
+</ng-container>
+
+<ng-container *ngIf="data.problemSetView! as problemSetView">
+  <ng-container *ngFor="let itemView of problemSetView.itemViews">
+    <div class="contest-problem-set-item-view-statement" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
+      <app-media-inline [data]="itemView.item.problem.statement"></app-media-inline>
     </div>
   </ng-container>
 </ng-container>

@@ -1,12 +1,12 @@
 @import '~bootstrap/scss/bootstrap';
 @import './grading-badge.common';
 
-.contest-view-aside {
+app-contest-view-aside {
   flex: 0 0 auto;
   overflow-y: auto;
 
-  padding: 16px;
   width: 16em;
+  padding: 16px;
   background-color: #f8f9fa;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 }

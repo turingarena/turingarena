@@ -1,0 +1,92 @@
+@import '~bootstrap/scss/bootstrap';
+@import './grading-badge.common';
+
+app-contest-problem-set-item-view-aside {
+  display: flex;
+  flex-direction: row;
+}
+
+.problem-aside {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 15em;
+  background-color: #f8f9fa;
+}
+
+.problem-submission-panel {
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.problem-info {
+  padding: 16px;
+  flex: 1 1 100%;
+  overflow-y: auto;
+}
+
+.problem-submit {
+  @extend .btn, .btn-block, .btn-success;
+}
+
+.problem-last-submission,
+.problem-submission-list {
+  @extend .btn, .btn-block, .btn-outline-dark;
+}
+
+.problem-award-list {
+  padding: 0;
+  list-style: none;
+
+  margin-bottom: 16px;
+}
+
+.problem-award {
+  margin: 0 -16px;
+  padding: 0 16px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.problem-award-grading {
+  @extend %grading-badge;
+}
+
+.problem-award-list-title,
+.problem-attachment-list-title,
+.problem-download-statement-title {
+  text-transform: uppercase;
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.problem-attachment-list {
+  margin-bottom: 16px;
+}
+
+.problem-attachment,
+.problem-download-statement {
+  display: block;
+  color: inherit;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
