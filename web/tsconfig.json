@@ -12,7 +12,10 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
-    "typeRoots": ["node_modules/@types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "./src/types"
+    ],
     "lib": ["es2018", "dom"],
 
     // Custom TypeScript compilation options

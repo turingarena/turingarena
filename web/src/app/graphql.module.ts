@@ -23,14 +23,7 @@ const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClien
   });
 
   return {
-    link: ApolloLink.from([
-      authContext,
-      httpLink.create({
-        uri: window.location.toString().startsWith('http://localhost:4200/')
-          ? 'http://localhost:8080/graphql'
-          : '/graphql',
-      }),
-    ]),
+    link: ApolloLink.from([authContext, httpLink.create({ uri: '/graphql' })]),
     cache: new InMemoryCache({
       fragmentMatcher: new IntrospectionFragmentMatcher({
         introspectionQueryResultData: schema,

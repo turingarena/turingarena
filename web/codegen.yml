@@ -2,6 +2,7 @@ schema: ../server/src/generated/graphql.schema.graphql
 documents: ./src/app/**/*.ts
 generates:
   ./src/generated/graphql-types.ts:
+    schema: src/app/client-schema.graphql
     plugins:
       - typescript
       - typescript-operations

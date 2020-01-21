@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
 import { ContestQuery, ContestQueryVariables } from '../../generated/graphql-types';
 
@@ -19,6 +18,6 @@ export class ContestViewComponent {
           name
         }
       }
-    ` as DocumentNode,
+    `,
   });
 }

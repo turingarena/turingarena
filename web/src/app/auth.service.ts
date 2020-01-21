@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
 
 export interface Auth {
   token: string;
@@ -12,34 +13,22 @@ export interface Auth {
 export class AuthService {
   constructor(private readonly apollo: Apollo) {}
 
-  getAuth = (): Auth | undefined => {
-    try {
-      const authString = localStorage.getItem('auth');
+  getAuth() {
+    return this.apollo.getClient().readQuery({ query });
+  }
 
-      if (authString === null) {
-        return undefined;
-      }
-
-      return JSON.parse(authString) as Auth;
-    } catch (e) {
-      localStorage.removeItem('userId');
-
-      return undefined;
-    }
-  };
-
-  setAuth = async (auth: Auth | undefined) => {
+  async setAuth(data: Auth | undefined) {
     const client = this.apollo.getClient();
-
     client.stop();
-
-    if (auth === undefined) {
-      localStorage.removeItem('auth');
-    } else {
-      localStorage.setItem('auth', JSON.stringify(auth));
-    }
-
     await client.resetStore();
+    client.writeQuery({ query, data });
     await client.reFetchObservableQueries();
-  };
+  }
 }
+
+const query = gql`
+  query Auth {
+    userId
+    token
+  }
+`;
