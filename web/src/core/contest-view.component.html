@@ -2,17 +2,15 @@
 
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let itemView of problemSetView.itemViews">
-    <aside class="contest-problem-set-item-view-aside"
-      [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
-      <app-contest-problem-set-item-view-aside [data]="itemView"></app-contest-problem-set-item-view-aside>
-    </aside>
+    <app-contest-problem-set-item-view-aside
+      [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name"
+      [data]="itemView"></app-contest-problem-set-item-view-aside>
   </ng-container>
 </ng-container>
 
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let itemView of problemSetView.itemViews">
-    <div class="contest-problem-set-item-view-statement" [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name">
-      <app-media-inline [data]="itemView.item.problem.statement"></app-media-inline>
-    </div>
+    <app-media-inline [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== itemView.item.problem.name"
+      [data]="itemView.item.problem.statement"></app-media-inline>
   </ng-container>
 </ng-container>

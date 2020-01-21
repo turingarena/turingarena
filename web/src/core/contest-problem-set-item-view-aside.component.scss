@@ -2,13 +2,6 @@
 @import './grading-badge.common';
 
 app-contest-problem-set-item-view-aside {
-  display: flex;
-  flex-direction: row;
-}
-
-.problem-aside {
-  display: flex;
-  flex-direction: column;
   flex: 0 0 auto;
   width: 15em;
   background-color: #f8f9fa;
@@ -89,4 +82,3 @@ app-contest-problem-set-item-view-aside {
     text-decoration: none;
   }
 }
-

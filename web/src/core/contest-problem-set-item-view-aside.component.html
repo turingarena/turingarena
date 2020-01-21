@@ -1,49 +1,47 @@
-<aside class="problem-aside">
-  <div class="problem-submission-panel">
-    <ng-container *ngIf="data.canSubmit">
-      <button class="problem-submit" (click)="modalService.open(submitDialog)">
-        <fa-icon icon="paperPlane"></fa-icon>
-        Submit a solution
-      </button>
-    </ng-container>
+<div class="problem-submission-panel">
+  <ng-container *ngIf="data.canSubmit">
+    <button class="problem-submit" (click)="modalService.open(submitDialog)">
+      <fa-icon icon="paperPlane"></fa-icon>
+      Submit a solution
+    </button>
+  </ng-container>
 
-    <ng-container *ngIf="data.submissions[data.submissions.length - 1] as lastSubmission">
-      <button class="problem-last-submission" (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-        <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" icon="history"> </fa-icon>
-        <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
-        </fa-icon>
-        Last submission
-      </button>
+  <ng-container *ngIf="data.submissions[data.submissions.length - 1] as lastSubmission">
+    <button class="problem-last-submission" (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
+      <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" icon="history"> </fa-icon>
+      <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
+      </fa-icon>
+      Last submission
+    </button>
 
-      <button class="problem-submission-list" (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-        <fa-icon icon="list"></fa-icon>
-        All submissions
-      </button>
-    </ng-container>
-  </div>
-  <div class="problem-info">
-    <ng-container *ngIf="data.awardSetItemViews.length > 0">
-      <h3 class="problem-award-list-title">Awards</h3>
-      <div class="problem-award-list">
-        <ng-container *ngFor="let awardSetItemView of data.awardSetItemViews">
-          <div class="problem-award" [title]="awardSetItemView.item.award.title | text">
-            {{ awardSetItemView.item.award.title | text }}
-            <span class="problem-award-grading" [appValence]="awardSetItemView.gradingState">
-              <app-grading [data]="awardSetItemView.gradingState"></app-grading>
-            </span>
-          </div>
-        </ng-container>
-      </div>
-    </ng-container>
-    <ng-container *ngIf="data.item.problem.attachments.length > 0">
-      <h3 class="problem-attachment-list-title">Attachments</h3>
-      <div class="problem-attachment-list">
-        <ng-container *ngFor="let attachment of data.item.problem.attachments">
-          <app-media-download [data]="attachment.media"></app-media-download>
-        </ng-container>
-      </div>
-    </ng-container>
-    <h2 class="problem-download-statement-title">Statement file</h2>
-    <app-media-download class="problem-download-statement" [data]="data.item.problem.statement"></app-media-download>
-  </div>
-</aside>
+    <button class="problem-submission-list" (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+      <fa-icon icon="list"></fa-icon>
+      All submissions
+    </button>
+  </ng-container>
+</div>
+<div class="problem-info">
+  <ng-container *ngIf="data.awardSetItemViews.length > 0">
+    <h3 class="problem-award-list-title">Awards</h3>
+    <div class="problem-award-list">
+      <ng-container *ngFor="let awardSetItemView of data.awardSetItemViews">
+        <div class="problem-award" [title]="awardSetItemView.item.award.title | text">
+          {{ awardSetItemView.item.award.title | text }}
+          <span class="problem-award-grading" [appValence]="awardSetItemView.gradingState">
+            <app-grading [data]="awardSetItemView.gradingState"></app-grading>
+          </span>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="data.item.problem.attachments.length > 0">
+    <h3 class="problem-attachment-list-title">Attachments</h3>
+    <div class="problem-attachment-list">
+      <ng-container *ngFor="let attachment of data.item.problem.attachments">
+        <app-media-download [data]="attachment.media"></app-media-download>
+      </ng-container>
+    </div>
+  </ng-container>
+  <h2 class="problem-download-statement-title">Statement file</h2>
+  <app-media-download class="problem-download-statement" [data]="data.item.problem.statement"></app-media-download>
+</div>
