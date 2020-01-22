@@ -1,0 +1,53 @@
+@import '~bootstrap/scss/bootstrap';
+
+.submit-modal-header {
+  @extend .modal-header;
+}
+
+.submit-modal-body {
+  @extend .modal-body;
+
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.submit-field-label {
+  display: block;
+}
+
+.submit-field-input {
+  display: none;
+}
+
+.submit-field-choose {
+  @extend .btn, .btn-primary;
+}
+
+.submit-field-info {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.submit-field-info > dt {
+  margin-bottom: 0px;
+  min-width: 6rem;
+}
+
+.submit-field-info > dd {
+  margin-bottom: 0px;
+  margin-left: -6rem;
+  padding-left: 8rem;
+  flex: 1 1 100%;
+}
+
+.submit-field-type-radio {
+  margin-right: 1rem;
+}
+
+.submit-modal-footer {
+  @extend .modal-footer;
+}
+
+.submit-modal-submit {
+  @extend .btn, .btn-success;
+}

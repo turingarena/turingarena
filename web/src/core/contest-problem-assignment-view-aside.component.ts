@@ -1,6 +1,8 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import gql from 'graphql-tag';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
+import { contestProblemAssignmentViewSubmitModalFragment } from './contest-problem-assignment-view-submit-modal.component';
 import { gradingStateFragment } from './grading.component';
 import { mediaDownloadFragment } from './media-download.component';
 import { mediaInlineFragment } from './media-inline.component';
@@ -13,6 +15,8 @@ import { textFragment } from './text.pipe';
   encapsulation: ViewEncapsulation.None,
 })
 export class ContestProblemAssignmentViewAsideComponent {
+  constructor(readonly modalService: NgbModal) {}
+
   @Input()
   data!: ContestProblemAssignmentViewAsideFragment;
 }
@@ -63,10 +67,13 @@ export const contestProblemAssignmentViewAsideFragment = gql`
         ...GradingState
       }
     }
+
+    ...ContestProblemAssignmentViewSubmitModal
   }
 
   ${textFragment}
   ${mediaInlineFragment}
   ${mediaDownloadFragment}
   ${gradingStateFragment}
+  ${contestProblemAssignmentViewSubmitModalFragment}
 `;

@@ -12,6 +12,7 @@ import { AppComponent } from '../core/app.component';
 import { ContestProblemAssignmentViewAsideComponent } from '../core/contest-problem-assignment-view-aside.component';
 import { ContestProblemAssignmentViewSubmissionListModalComponent } from '../core/contest-problem-assignment-view-submission-list-modal.component';
 import { ContestProblemAssignmentViewSubmissionListComponent } from '../core/contest-problem-assignment-view-submission-list.component';
+import { ContestProblemAssignmentViewSubmitModalComponent } from '../core/contest-problem-assignment-view-submit-modal.component';
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
@@ -75,6 +76,7 @@ import { GraphQLModule } from './graphql.module';
     ContestViewClockComponent,
     GradingBooleanComponent,
     GradingNumericComponent,
+    ContestProblemAssignmentViewSubmitModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,8 +1,11 @@
 <div class="problem-submission-panel">
   <ng-container *ngIf="data.canSubmit">
     <button class="problem-submit" (click)="modalService.open(submitDialog)">
-      <fa-icon icon="paperPlane"></fa-icon>
+      <fa-icon icon="paper-plane"></fa-icon>
       Submit a solution
+      <ng-template #submitDialog let-modal>
+        <app-contest-problem-assignment-view-submit-modal [data]="data" [modal]="modal"></app-contest-problem-assignment-view-submit-modal>
+      </ng-template>
     </button>
   </ng-container>
 

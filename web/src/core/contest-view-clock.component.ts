@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { DateTime, Duration } from 'luxon';
 import { interval } from 'rxjs';
@@ -9,6 +9,7 @@ import { ContestViewClockFragment } from '../generated/graphql-types';
   selector: 'app-contest-view-clock',
   templateUrl: './contest-view-clock.component.html',
   styleUrls: ['./contest-view-clock.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ContestViewClockComponent {
   @Input()

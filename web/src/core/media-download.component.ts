@@ -13,10 +13,10 @@ export class MediaDownloadComponent {
   data!: MediaDownloadFragment;
 
   mimeTypeIcons = {
-    'application/pdf': 'filePdf',
-    'text/plain': 'fileAlt',
-    'application/gzip': 'fileArchive',
-    'application/zip': 'fileArchive',
+    'application/pdf': 'file-pdf',
+    'text/plain': 'file-alt',
+    'application/gzip': 'file-archive',
+    'application/zip': 'file-archive',
   };
 }
 
