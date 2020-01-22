@@ -1,6 +1,8 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
 import * as readline from 'readline';
+import { fromEvent } from 'rxjs';
+import { bufferTime, concatMap, takeUntil, tap } from 'rxjs/operators';
 import { ModelRoot } from '../main/model-root';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
@@ -36,13 +38,27 @@ export async function evaluate(root: ModelRoot, submission: Submission) {
 
     const stdoutLineReader = readline.createInterface(process.stdout);
 
-    stdoutLineReader.on('line', async event => {
-        console.log(`Received task-maker event ${event}`);
-        await root.table(EvaluationEvent).create({
-            evaluationId: evaluation.id,
-            data: event,
-        });
-    });
+    const bufferTimeSpanMillis = 200;
+    const maxBufferSize = 20;
+
+    await fromEvent(stdoutLineReader, 'line')
+        .pipe(
+            takeUntil(fromEvent(stdoutLineReader, 'close')),
+            tap(event => {
+                console.log(`Received task-maker event ${event}`);
+            }),
+            bufferTime(bufferTimeSpanMillis, undefined, maxBufferSize),
+            concatMap(async events => {
+                console.log(`Inserting ${events.length} buffered events.`);
+                await root.table(EvaluationEvent).bulkCreate(
+                    events.map(data => ({
+                        evaluationId: evaluation.id,
+                        data,
+                    })),
+                );
+            }),
+        )
+        .toPromise();
 
     const statusCode: number = await new Promise(resolve => process.on('close', resolve));
 
