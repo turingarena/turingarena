@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { Contest } from './contest';
 import { Evaluation } from './evaluation';
 import { Problem } from './problem';
@@ -39,7 +40,7 @@ export const submissionSchema = gql`
 
 /** A Submission in the system */
 @Table({ updatedAt: false })
-export class Submission extends Model<Submission> {
+export class Submission extends BaseModel<Submission> {
     @ForeignKey(() => Problem)
     @AllowNull(false)
     @Column

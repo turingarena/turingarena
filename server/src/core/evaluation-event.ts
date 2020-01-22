@@ -1,10 +1,11 @@
 import { DataTypes } from 'sequelize';
-import { AllowNull, BelongsTo, Column, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { Evaluation } from './evaluation';
 
 /** Evant of an evaluation */
 @Table({ updatedAt: false })
-export class EvaluationEvent extends Model<EvaluationEvent> {
+export class EvaluationEvent extends BaseModel<EvaluationEvent> {
     @ForeignKey(() => Evaluation)
     @AllowNull(false)
     @Column

@@ -6,8 +6,8 @@ import { Award } from '../award';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
-import { getProblemMetadata, ProblemMetadata } from '../problem-util';
 import { Media, MediaVariant } from './media';
+import { ProblemTaskInfo } from './problem-task-info';
 import { Text } from './text';
 
 export const problemMaterialSchema = gql`
@@ -75,10 +75,10 @@ export interface ProblemAttachment {
 
 /** Transforms a resolver by loading problem metadata first */
 function withProblemMetadata<TResult, TArgs>(
-    resolver: ResolverFn<TResult, { metadata: ProblemMetadata; problem: Problem }, ApiContext, TArgs>,
+    resolver: ResolverFn<TResult, { metadata: ProblemTaskInfo; problem: Problem }, ApiContext, TArgs>,
 ): ResolverFn<TResult, Problem, ApiContext, TArgs> {
     return async (problem, args, ctx, info) =>
-        resolver({ metadata: await getProblemMetadata(ctx, problem), problem }, args, ctx, info);
+        resolver({ metadata: await problem.getTaskInfo(), problem }, args, ctx, info);
 }
 
 const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };

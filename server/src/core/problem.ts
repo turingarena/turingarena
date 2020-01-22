@@ -1,9 +1,11 @@
 import { gql } from 'apollo-server-core';
-import { Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
+import { Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
+import { BaseModel } from '../main/base-model';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { problemMaterialResolversExtensions } from './material/problem-material';
+import { getProblemTaskInfo, ProblemTaskInfo } from './material/problem-task-info';
 import { ProblemFile } from './problem-file';
 
 export const problemSchema = gql`
@@ -20,7 +22,7 @@ export const problemSchema = gql`
 
 /** A problem in TuringArena. */
 @Table
-export class Problem extends Model<Problem> {
+export class Problem extends BaseModel<Problem> {
     /** Name of the problem, must be a valid identifier. */
     @Unique
     @Column
@@ -29,7 +31,7 @@ export class Problem extends Model<Problem> {
 
     /** Contests that contains this problem */
     @HasMany(() => ContestProblemAssignment)
-    contestProblems!: ContestProblemAssignment[];
+    contestAssigments!: ContestProblemAssignment[];
 
     /** Files that belongs to this problem. */
     @HasMany(() => ProblemFile)
@@ -37,6 +39,11 @@ export class Problem extends Model<Problem> {
     getFiles!: (options?: FindOptions) => Promise<ProblemFile[]>;
     findFile!: (options?: object) => Promise<ProblemFile>;
     createFile!: (file: object, options?: object) => Promise<ProblemFile>;
+
+    taskInfoCache?: ProblemTaskInfo;
+    async getTaskInfo() {
+        return getProblemTaskInfo(this);
+    }
 }
 
 export const problemResolvers: ResolversWithModels<{

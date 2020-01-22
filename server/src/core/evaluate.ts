@@ -4,7 +4,7 @@ import * as readline from 'readline';
 import { ApiContext } from '../main/context';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
-import { extractProblemFiles } from './problem-util';
+import { extractProblemFiles } from './material/problem-task-info';
 import { Submission } from './submission';
 
 /**

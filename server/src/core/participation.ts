@@ -1,10 +1,11 @@
-import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { Contest } from './contest';
 import { User } from './user';
 
 /** User participation N-N relation */
 @Table({ timestamps: false })
-export class Participation extends Model<Participation> {
+export class Participation extends BaseModel<Participation> {
     @ForeignKey(() => Contest)
     @PrimaryKey
     @Column

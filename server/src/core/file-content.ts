@@ -2,8 +2,9 @@ import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
-import { AllowNull, Column, DefaultScope, Index, Model, Scopes, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, DefaultScope, Index, Scopes, Table, Unique } from 'sequelize-typescript';
 import * as ssri from 'ssri';
+import { BaseModel } from '../main/base-model';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
 
@@ -30,7 +31,7 @@ export const fileContentSchema = gql`
     },
 }))
 @Table({ updatedAt: false })
-export class FileContent extends Model<FileContent> {
+export class FileContent extends BaseModel<FileContent> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @Unique
     @AllowNull(false)

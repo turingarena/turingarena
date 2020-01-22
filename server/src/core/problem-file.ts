@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
+import { BaseModel } from '../main/base-model';
 import { ResolversWithModels } from '../main/resolver-types';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
@@ -15,7 +16,7 @@ export const problemFileSchema = gql`
 
 /** Problem to File N-N relation. */
 @Table({ timestamps: false })
-export class ProblemFile extends Model<ProblemFile> {
+export class ProblemFile extends BaseModel<ProblemFile> {
     @ForeignKey(() => Problem)
     @PrimaryKey
     @Column

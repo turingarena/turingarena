@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { FileContent } from './file-content';
 import { Submission } from './submission';
 
@@ -19,7 +20,7 @@ export const submissionFileSchema = gql`
 
 /** File in a submission */
 @Table({ timestamps: false })
-export class SubmissionFile extends Model<SubmissionFile> {
+export class SubmissionFile extends BaseModel<SubmissionFile> {
     @ForeignKey(() => Submission)
     @PrimaryKey
     @Column

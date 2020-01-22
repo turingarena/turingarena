@@ -13,6 +13,10 @@ export interface OperationRequest<V> {
     variableValues?: V;
 }
 
+export interface SequelizeWithContext extends Sequelize {
+    context: ApiContext;
+}
+
 /**
  * Context for the execution of an API operation.
  * Allows for accessing configuration and database, check authentication, and more.
@@ -27,6 +31,8 @@ export class ApiContext {
                 'ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (userId, contestId) REFERENCES Participations(userId, contestId)',
             );
         });
+
+        this.sequelize.context = this;
     }
 
     /** Instance of Sequelize to use in this API operation. */
@@ -35,7 +41,7 @@ export class ApiContext {
         models: Object.values(modelConstructors),
         benchmark: true,
         repositoryMode: true,
-    });
+    }) as SequelizeWithContext;
 
     /** Executable schema, obtained combining full GraphQL schema and resolvers. */
     readonly executableSchema = makeExecutableSchema({

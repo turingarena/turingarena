@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
 import { Award } from '../award';
-import { getProblemMetadata } from '../problem-util';
 
 export const awardMaterialSchema = gql`
     extend type Award {
@@ -23,7 +22,7 @@ export const awardMaterialResolvers: ResolversWithModels<{
         gradeDomain: async ({ problem, index }, {}, ctx) => {
             const {
                 scoring: { subtasks },
-            } = await getProblemMetadata(ctx, problem);
+            } = await problem.getTaskInfo();
             const { max_score: max } = subtasks[index];
 
             return max > 0

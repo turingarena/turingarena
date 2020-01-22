@@ -2,8 +2,9 @@ import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
-import { AllowNull, Column, HasMany, Index, Model, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { ContestStatus, MutationResolvers } from '../generated/graphql-types';
+import { BaseModel } from '../main/base-model';
 import { ApiContext } from '../main/context';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
@@ -39,7 +40,7 @@ export const contestSchema = gql`
 
 /** A contest in TuringArena */
 @Table
-export class Contest extends Model<Contest> {
+export class Contest extends BaseModel<Contest> {
     /** Name of the contest, must be a valid identifier, e.g. ioi */
     @Unique
     @Index

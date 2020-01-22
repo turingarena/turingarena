@@ -5,7 +5,6 @@ import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestView } from './contest-view';
-import { getProblemMetadata } from './problem-util';
 import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
@@ -51,7 +50,7 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
             // FIXME: duplicated code
             const {
                 scoring: { subtasks },
-            } = await getProblemMetadata(ctx, problem);
+            } = await problem.getTaskInfo();
 
             return subtasks.map(
                 (subtask, index) =>

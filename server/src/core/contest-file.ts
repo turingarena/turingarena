@@ -1,10 +1,11 @@
-import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { Contest } from './contest';
 import { FileContent } from './file-content';
 
 /** Contest to File N-N relation */
 @Table({ timestamps: false })
-export class ContestFile extends Model<ContestFile> {
+export class ContestFile extends BaseModel<ContestFile> {
     @ForeignKey(() => Contest)
     @PrimaryKey
     @Column

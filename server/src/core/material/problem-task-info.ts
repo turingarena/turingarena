@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
-import { ApiContext } from '../main/context';
-import { FileContent } from './file-content';
-import { Problem } from './problem';
-import { ProblemFile } from './problem-file';
+import { ApiContext } from '../../main/context';
+import { FileContent } from '../file-content';
+import { Problem } from '../problem';
+import { ProblemFile } from '../problem-file';
 
 /** Generic problem metadata */
-export interface ProblemMetadata {
+export interface ProblemTaskInfo {
     version: number;
     task_type: string;
     name: string;
@@ -18,7 +18,10 @@ export interface ProblemMetadata {
     };
     scoring: {
         max_score: number;
-        subtasks: SubtaskMetadata[];
+        subtasks: Array<{
+            max_score: number;
+            testcases: number;
+        }>;
     };
     statements: Array<{
         language: string;
@@ -32,12 +35,8 @@ export interface ProblemMetadata {
     }>;
 }
 
-export interface SubtaskMetadata {
-    max_score: number;
-    testcases: number;
-}
-
-export async function getProblemMetadata(ctx: ApiContext, problem: Problem): Promise<ProblemMetadata> {
+export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
+    const ctx = problem.context!;
     const metadataPath = '.task-info.json';
     const metadataProblemFile = await ctx.table(ProblemFile).findOne({
         where: {
@@ -52,7 +51,7 @@ export async function getProblemMetadata(ctx: ApiContext, problem: Problem): Pro
         throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
     }
 
-    return JSON.parse(metadataProblemFile.content.content.toString()) as ProblemMetadata;
+    return JSON.parse(metadataProblemFile.content.content.toString()) as ProblemTaskInfo;
 }
 
 /**

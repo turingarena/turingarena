@@ -3,8 +3,8 @@ import * as path from 'path';
 import * as yaml from 'yaml';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
+import { importProblemFiles } from '../core/material/problem-task-info';
 import { Problem } from '../core/problem';
-import { getProblemMetadata, importProblemFiles } from '../core/problem-util';
 import { User, UserRole } from '../core/user';
 import { ApiContext } from '../main/context';
 
@@ -66,6 +66,6 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
             problemId: problem.id,
         });
 
-        console.log(await getProblemMetadata(ctx, problem));
+        console.log(await problem.getTaskInfo());
     }
 }

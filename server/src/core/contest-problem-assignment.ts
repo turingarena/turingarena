@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
@@ -13,7 +14,7 @@ export const contestProblemAssignmentSchema = gql`
 
 /** Contest to Problem N-N relation */
 @Table({ timestamps: false })
-export class ContestProblemAssignment extends Model<ContestProblemAssignment> {
+export class ContestProblemAssignment extends BaseModel<ContestProblemAssignment> {
     @ForeignKey(() => Problem)
     @PrimaryKey
     @Column

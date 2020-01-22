@@ -1,10 +1,11 @@
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
+import { BaseModel } from '../main/base-model';
 import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
 
 /** An evaluation of a submission */
 @Table
-export class Evaluation extends Model<Evaluation> {
+export class Evaluation extends BaseModel<Evaluation> {
     @ForeignKey(() => Submission)
     @AllowNull(false)
     @Column
