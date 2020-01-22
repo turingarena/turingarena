@@ -5,45 +5,37 @@
     </h4>
   </div>
   <div class="submit-modal-body">
-    <ng-container *ngFor="let field of [] || data.assignment.problem.submissionForm.fields">
-      <ng-container *ngIf="fieldState(field) as state">
-        <label class="submit-field-label" [for]="field.id + '.file'">{{ field.title | text }}</label>
-        <input
-          #input
-          class="submit-field-input"
-          [id]="field.id + '.file'"
-          [name]="field.id + '.file'"
-          type="file"
-          (change)="fieldState(field).file = $event.target.files[0]"
-        />
+    <ng-container *ngFor="let field of data.assignment.problem.submissionFields">
+      <ng-container *ngIf="fieldStates[field.name] as state">
+        <label class="submit-field-label" [for]="field.name + '.file'">{{ field.title | text }}</label>
+        <input #input class="submit-field-input" [id]="field.name + '.file'" [name]="field.name + '.file'" type="file"
+          (change)="state.file = $event.target.files[0]" />
         <button class="submit-field-choose" (click)="input.click(); $event.preventDefault()">Choose file</button>
-        <dl *ngIf="state.file as file" class="submit-field-info">
+        <dl *ngIf="state.file! as file" class="submit-field-info">
           <dt>Name:</dt>
           <dd>{{ file.name }}</dd>
           <dt>Type:</dt>
-          <dd [ngSwitch]="state.typeChoices.type">
-            <ng-container *ngSwitchCase="'oneRecommended'">
-              {{ state.typeChoices.recommendedType!.title | text }}
-              (<a href="#" class="submit-field-change-type" (click)="state.moreTypes = true; $event.preventDefault()"
-                >change</a
-              >)
-              <input type="hidden" [name]="field.id + '.type'" [value]="state.typeChoices.recommendedType!.id" />
-            </ng-container>
-            <ng-container *ngSwitchCase="'manyRecommended'">
-              <label *ngFor="let type of state.typeChoices.recommendedTypes!" class="submit-field-type-radio">
-                <input type="radio" [name]="field.id + '.type'" [value]="type.id" />
-                {{ type.title | text }}
-              </label>
-              (<a href="#" class="submit-field-more-types" (click)="state.moreTypes = true; $event.preventDefault()"
-                >more...</a
-              >)
-            </ng-container>
-            <select *ngSwitchCase="'custom'" [name]="field.id + '.type'" class="submit-field-select-type">
-              <option *ngFor="let type of state.typeChoices.allTypes" [value]="type.id">
-                {{ type.title | text }}</option
-              >
-            </select>
-          </dd>
+
+          <ng-container *ngIf="getTypingRule(file, field) as typeRule">
+            <dd [ngSwitch]="state.overrideDefaultType ? null : typeRule.defaultType">
+              <ng-container *ngSwitchCase="null">
+                <select [name]="field.name + '.type'" class="submit-field-select-type">
+                  <ng-container *ngFor="let type of typeRule.recommendedTypes">
+                    <option [value]="type.name">{{ type.title | text }}</option>
+                  </ng-container>
+                  <ng-container *ngFor="let type of typeRule.otherTypes">
+                    <option [value]="type.name">{{ type.title | text }}</option>
+                  </ng-container>
+                </select>
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                {{ typeRule.defaultType!.title | text }}
+                (<button class="submit-field-change-type" (click)="state.overrideDefaultType = true">change</button>)
+                <input type="hidden" [name]="field.name + '.type'" [value]="typeRule.defaultType!.name" />
+              </ng-container>
+            </dd>
+          </ng-container>
+
           <dt>Size:</dt>
           <dd>{{ file.size | filesize }}</dd>
         </dl>

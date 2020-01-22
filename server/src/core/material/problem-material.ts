@@ -20,11 +20,51 @@ export const problemMaterialSchema = gql`
         attachments: [ProblemAttachment!]!
         "List of awards of this problem"
         awards: [Award]!
+        "List of fields that constitute a submission for this problem"
+        submissionFields: [SubmissionField!]!
+        "List of types that can be associated to files in a submission for this problem"
+        submissionFileTypes: [SubmissionFileType!]!
+        """
+        List of rules used to help users determine the type of a file submitted for a field.
+        The first rule that matches the selected field and filename should be used by clients.
+        This list should always include a catch-all rule.
+        """
+        submissionFileTypeRules: [SubmissionFileTypeRule!]!
     }
 
     type ProblemAttachment {
         title: Text!
         media: Media!
+    }
+
+    type SubmissionField {
+        name: String!
+        title: Text!
+    }
+
+    type SubmissionFileType {
+        name: String!
+        title: Text!
+    }
+
+    type SubmissionFileTypeRule {
+        """
+        Set of fields matched by this rule.
+        If null, matches all fields.
+        """
+        fields: [SubmissionField!]
+        """
+        Set of file extensions matched by this rule, including the initial dot.
+        If null, matches any extension.
+        """
+        extensions: [String!]
+
+        "Type tu use as default, if not null."
+        defaultType: SubmissionFileType
+        "List of recommended types the user can choose from. Should include the default type first, if any."
+        recommendedTypes: [SubmissionFileType!]!
+        "List of other types the user can choose from."
+        otherTypes: [SubmissionFileType!]!
     }
 `;
 
@@ -40,6 +80,8 @@ function withProblemMetadata<TResult, TArgs>(
     return async (problem, args, ctx, info) =>
         resolver({ metadata: await getProblemMetadata(ctx, problem), problem }, args, ctx, info);
 }
+
+const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };
 
 export const problemMaterialResolversExtensions: ResolversWithModels<{
     Problem: Problem;
@@ -73,6 +115,9 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
         awards: withProblemMetadata(({ problem, metadata: { scoring: { subtasks } } }) =>
             subtasks.map((subtask, index): Award => ({ problem, index })),
         ),
+        submissionFields: () => [{ name: 'solution', title: [{ value: 'Solution' }] }],
+        submissionFileTypes: () => [defaultType],
+        submissionFileTypeRules: () => [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }],
     },
 };
 
