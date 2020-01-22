@@ -1,0 +1,61 @@
+import * as path from 'path';
+import { SubmissionInput } from '../generated/graphql-types';
+import { ModelRoot } from '../main/model-root';
+import { Contest } from './contest';
+import { evaluate } from './evaluate';
+import { FileContent } from './file-content';
+import { Problem } from './problem';
+import { Submission } from './submission';
+import { SubmissionFile } from './submission-file';
+import { User } from './user';
+
+export async function submit(
+    root: ModelRoot,
+    { contestName, problemName, username, files }: SubmissionInput,
+    // Path of a local file to submit as solution (C++ only), used as a shortcut for the CLI
+    // FIXME: improve the CLI to support multiple fields/file-types
+    solutionPath?: string,
+) {
+    const user = (await root.table(User).findOne({ where: { username } })) ?? root.fail(`no such user`);
+    const problem =
+        (await root.table(Problem).findOne({ where: { name: problemName } })) ?? root.fail(`no such problem`);
+    const contest =
+        (await root.table(Contest).findOne({ where: { name: contestName } })) ?? root.fail(`no such contest`);
+
+    const submission = await root.table(Submission).create({
+        contestId: contest.id,
+        problemId: problem.id,
+        userId: user.id,
+    });
+
+    for (const { content, fieldName, fileName, fileTypeName } of files) {
+        await root.table(SubmissionFile).create({
+            fieldName,
+            fileName,
+            submissionId: submission.id,
+            fileTypeName,
+            contentId: (
+                await FileContent.createFromContent(
+                    root,
+                    Buffer.from(content.base64, 'base64'),
+                    'application/octet-stream', // FIXME: content-type should not be in file content table
+                )
+            ).id,
+        });
+    }
+
+    if (solutionPath !== undefined) {
+        await root.table(SubmissionFile).create({
+            submissionId: submission.id,
+            fieldName: 'solution',
+            fileTypeName: 'cpp',
+            fileName: path.basename(solutionPath),
+            contentId: (await FileContent.createFromPath(root, solutionPath)).id,
+        });
+    }
+
+    evaluate(root, submission).catch(e => {
+        console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
+        console.error(e);
+    });
+}

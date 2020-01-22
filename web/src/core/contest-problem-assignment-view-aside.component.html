@@ -1,28 +1,4 @@
-<div class="problem-submission-panel">
-  <ng-container *ngIf="data.canSubmit">
-    <button class="problem-submit" (click)="modalService.open(submitDialog)">
-      <fa-icon icon="paper-plane"></fa-icon>
-      Submit a solution
-      <ng-template #submitDialog let-modal>
-        <app-contest-problem-assignment-view-submit-modal [data]="data" [modal]="modal"></app-contest-problem-assignment-view-submit-modal>
-      </ng-template>
-    </button>
-  </ng-container>
-
-  <ng-container *ngIf="data.submissions[data.submissions.length - 1] as lastSubmission">
-    <button class="problem-last-submission" (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-      <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" icon="history"> </fa-icon>
-      <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
-      </fa-icon>
-      Last submission
-    </button>
-
-    <button class="problem-submission-list" (click)="modalService.open(submissionListDialog, { size: 'xl' })">
-      <fa-icon icon="list"></fa-icon>
-      All submissions
-    </button>
-  </ng-container>
-</div>
+<app-contest-problem-user-tackling-aside [data]="data.tackling"></app-contest-problem-user-tackling-aside>
 <div class="problem-info">
   <ng-container *ngIf="data.awardAssignmentViews.length > 0">
     <h3 class="problem-award-list-title">Awards</h3>

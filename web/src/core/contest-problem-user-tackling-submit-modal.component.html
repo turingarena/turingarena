@@ -1,11 +1,11 @@
 <form class="submit-modal" (ngSubmit)="submit($event)">
   <div class="submit-modal-header">
     <h4>
-      Solution of: <strong>{{ data.assignment.problem.title | text }}</strong>
+      Solution of: <strong>{{ data.assignmentView.assignment.problem.title | text }}</strong>
     </h4>
   </div>
   <div class="submit-modal-body">
-    <ng-container *ngFor="let field of data.assignment.problem.submissionFields">
+    <ng-container *ngFor="let field of data.assignmentView.assignment.problem.submissionFields">
       <ng-container *ngIf="fieldStates[field.name] as state">
         <label class="submit-field-label" [for]="field.name + '.file'">{{ field.title | text }}</label>
         <input #input class="submit-field-input" [id]="field.name + '.file'" [name]="field.name + '.file'" type="file"

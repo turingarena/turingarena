@@ -16,7 +16,7 @@ export class MainComponent {
   readonly queryRef = this.apollo.watchQuery<MainViewQuery, MainViewQueryVariables>({
     query: gql`
       query MainView {
-        mainView {
+        mainView(username: "user1") {
           ...MainView
         }
       }

@@ -3,8 +3,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import {
-  ContestProblemAssignmentViewSubmitModalFragment,
-  ContestProblemAssignmentViewSubmitModalSubmissionFieldFragment,
+  ContestProblemUserTacklingSubmitModalFragment,
+  ContestProblemUserTacklingSubmitModalSubmissionFieldFragment,
   SubmissionFileInput,
   SubmitMutation,
   SubmitMutationVariables,
@@ -13,19 +13,19 @@ import { FileLoadService } from '../util/file-load.service';
 import { textFragment } from './text.pipe';
 
 @Component({
-  selector: 'app-contest-problem-assignment-view-submit-modal',
-  templateUrl: './contest-problem-assignment-view-submit-modal.component.html',
-  styleUrls: ['./contest-problem-assignment-view-submit-modal.component.scss'],
+  selector: 'app-contest-problem-user-tackling-submit-modal',
+  templateUrl: './contest-problem-user-tackling-submit-modal.component.html',
+  styleUrls: ['./contest-problem-user-tackling-submit-modal.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit {
+export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
   constructor(private readonly apollo: Apollo, private readonly fileLoadService: FileLoadService) {}
 
   @Input()
   modal!: NgbActiveModal;
 
   @Input()
-  data!: ContestProblemAssignmentViewSubmitModalFragment;
+  data!: ContestProblemUserTacklingSubmitModalFragment;
 
   fieldStates: Record<
     string,
@@ -38,15 +38,15 @@ export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit 
   submitting = false;
 
   ngOnInit() {
-    for (const { name } of this.data.assignment.problem.submissionFields) {
+    for (const { name } of this.data.assignmentView.assignment.problem.submissionFields) {
       this.fieldStates[name] = {
         overrideDefaultType: false,
       };
     }
   }
 
-  getTypingRule(file: File, field: ContestProblemAssignmentViewSubmitModalSubmissionFieldFragment) {
-    for (const rule of this.data.assignment.problem.submissionFileTypeRules) {
+  getTypingRule(file: File, field: ContestProblemUserTacklingSubmitModalSubmissionFieldFragment) {
+    for (const rule of this.data.assignmentView.assignment.problem.submissionFileTypeRules) {
       const { fields = null, extensions = null } = rule;
       if (fields !== null && fields.find(f => f.name === field.name) === undefined) continue;
       if (extensions !== null && extensions.find(e => file.name.endsWith(e)) === undefined) continue;
@@ -63,7 +63,9 @@ export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit 
     this.submitting = true;
 
     const files = await Promise.all(
-      this.data.assignment.problem.submissionFields.map(async field => this.getFileForField(field, formData)),
+      this.data.assignmentView.assignment.problem.submissionFields.map(async field =>
+        this.getFileForField(field, formData),
+      ),
     );
 
     const { data, errors } = await this.apollo
@@ -75,10 +77,9 @@ export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit 
         `,
         variables: {
           submission: {
-            contestName: this.data.assignment.contest.name,
-            problemName: this.data.assignment.problem.name,
-            // FIXME: canSubmit can be replaced by some structure containing a non-null user.
-            username: this.data.user!.username,
+            contestName: this.data.assignmentView.assignment.contest.name,
+            problemName: this.data.assignmentView.assignment.problem.name,
+            username: this.data.user.username,
             files,
           },
         },
@@ -94,7 +95,7 @@ export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit 
   }
 
   private async getFileForField(
-    field: ContestProblemAssignmentViewSubmitModalSubmissionFieldFragment,
+    field: ContestProblemUserTacklingSubmitModalSubmissionFieldFragment,
     formData: FormData,
   ): Promise<SubmissionFileInput> {
     const file = formData.get(`${field.name}.file`) as File;
@@ -108,52 +109,54 @@ export class ContestProblemAssignmentViewSubmitModalComponent implements OnInit 
   }
 }
 
-export const contestProblemAssignmentViewSubmitModalFragment = gql`
-  fragment ContestProblemAssignmentViewSubmitModalSubmissionFileType on SubmissionFileType {
+export const contestProblemUserTacklingSubmitModalFragment = gql`
+  fragment ContestProblemUserTacklingSubmitModalSubmissionFileType on SubmissionFileType {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemAssignmentViewSubmitModalSubmissionField on SubmissionField {
+  fragment ContestProblemUserTacklingSubmitModalSubmissionField on SubmissionField {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemAssignmentViewSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
+  fragment ContestProblemUserTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
     fields {
       name
     }
     extensions
     defaultType {
-      ...ContestProblemAssignmentViewSubmitModalSubmissionFileType
+      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
     }
     recommendedTypes {
-      ...ContestProblemAssignmentViewSubmitModalSubmissionFileType
+      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
     }
     otherTypes {
-      ...ContestProblemAssignmentViewSubmitModalSubmissionFileType
+      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
     }
   }
 
-  fragment ContestProblemAssignmentViewSubmitModal on ContestProblemAssignmentView {
-    assignment {
-      contest {
-        name
-      }
-      problem {
-        name
-        title {
-          ...Text
+  fragment ContestProblemUserTacklingSubmitModal on ContestProblemUserTackling {
+    assignmentView {
+      assignment {
+        contest {
+          name
         }
-        submissionFields {
-          ...ContestProblemAssignmentViewSubmitModalSubmissionField
-        }
-        submissionFileTypeRules {
-          ...ContestProblemAssignmentViewSubmitModalSubmissionFileTypeRule
+        problem {
+          name
+          title {
+            ...Text
+          }
+          submissionFields {
+            ...ContestProblemUserTacklingSubmitModalSubmissionField
+          }
+          submissionFileTypeRules {
+            ...ContestProblemUserTacklingSubmitModalSubmissionFileTypeRule
+          }
         }
       }
     }

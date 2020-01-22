@@ -17,6 +17,7 @@ export const fileContentSchema = gql`
     }
 
     input FileContentInput {
+        "Base64-encoded content of the file"
         base64: String!
     }
 `;

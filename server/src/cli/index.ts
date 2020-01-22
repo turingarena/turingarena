@@ -3,7 +3,7 @@ import { loadConfig } from '../main/config';
 import { ModelRoot } from '../main/model-root';
 import { serve } from '../main/server';
 import { importContest } from './import';
-import { createSubmission } from './submit';
+import { submitLocalFile } from './submit';
 
 const program = new commander.Command();
 
@@ -43,7 +43,7 @@ program
     .command('submit <user> <contest> <problem> <solution>')
     .description('create a submission')
     .action(async (user, contest, problem, solution, opts) =>
-        createSubmission(await ctxFromConfig(opts.parent.config), user, contest, problem, solution),
+        submitLocalFile(await ctxFromConfig(opts.parent.config), user, contest, problem, solution),
     );
 
 program

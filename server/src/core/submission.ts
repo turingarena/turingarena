@@ -81,7 +81,12 @@ export class Submission extends BaseModel<Submission> {
 
         for (const submissionFile of submissionFiles) {
             const content = await submissionFile.getContent();
-            const filePath = path.join(base, this.id as string, submissionFile.fieldName, submissionFile.fileName);
+            const filePath = path.join(
+                base,
+                (this.id as number).toString(),
+                submissionFile.fieldName,
+                submissionFile.fileName,
+            );
             await content.extract(filePath);
         }
     }

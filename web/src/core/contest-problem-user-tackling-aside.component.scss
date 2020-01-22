@@ -1,0 +1,16 @@
+@import '~bootstrap/scss/bootstrap';
+
+app-contest-problem-user-tackling-aside {
+  display: block;
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.problem-submit {
+  @extend .btn, .btn-block, .btn-success;
+}
+
+.problem-last-submission,
+.problem-submission-list {
+  @extend .btn, .btn-block, .btn-outline-dark;
+}

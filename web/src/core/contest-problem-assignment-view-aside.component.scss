@@ -7,24 +7,10 @@ app-contest-problem-assignment-view-aside {
   background-color: #f8f9fa;
 }
 
-.problem-submission-panel {
-  padding: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
 .problem-info {
   padding: 16px;
   flex: 1 1 100%;
   overflow-y: auto;
-}
-
-.problem-submit {
-  @extend .btn, .btn-block, .btn-success;
-}
-
-.problem-last-submission,
-.problem-submission-list {
-  @extend .btn, .btn-block, .btn-outline-dark;
 }
 
 .problem-award-list {

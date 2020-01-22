@@ -10,9 +10,10 @@ import { NgxFilesizeModule } from 'ngx-filesize';
 import { MarkdownModule } from 'ngx-markdown';
 import { AppComponent } from '../core/app.component';
 import { ContestProblemAssignmentViewAsideComponent } from '../core/contest-problem-assignment-view-aside.component';
-import { ContestProblemAssignmentViewSubmissionListModalComponent } from '../core/contest-problem-assignment-view-submission-list-modal.component';
-import { ContestProblemAssignmentViewSubmissionListComponent } from '../core/contest-problem-assignment-view-submission-list.component';
-import { ContestProblemAssignmentViewSubmitModalComponent } from '../core/contest-problem-assignment-view-submit-modal.component';
+import { ContestProblemUserTacklingAsideComponent } from '../core/contest-problem-user-tackling-aside.component';
+import { ContestProblemUserTacklingSubmissionListModalComponent } from '../core/contest-problem-user-tackling-submission-list-modal.component';
+import { ContestProblemUserTacklingSubmissionListComponent } from '../core/contest-problem-user-tackling-submission-list.component';
+import { ContestProblemUserTacklingSubmitModalComponent } from '../core/contest-problem-user-tackling-submit-modal.component';
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
@@ -63,8 +64,8 @@ import { GraphQLModule } from './graphql.module';
     ContestViewComponent,
     ContestViewAsideComponent,
     ContestProblemAssignmentViewAsideComponent,
-    ContestProblemAssignmentViewSubmissionListModalComponent,
-    ContestProblemAssignmentViewSubmissionListComponent,
+    ContestProblemUserTacklingSubmissionListModalComponent,
+    ContestProblemUserTacklingSubmissionListComponent,
     SubmissionModalComponent,
     FeedbackComponent,
     FeedbackSectionComponent,
@@ -76,7 +77,8 @@ import { GraphQLModule } from './graphql.module';
     ContestViewClockComponent,
     GradingBooleanComponent,
     GradingNumericComponent,
-    ContestProblemAssignmentViewSubmitModalComponent,
+    ContestProblemUserTacklingSubmitModalComponent,
+    ContestProblemUserTacklingAsideComponent,
   ],
   imports: [
     BrowserModule,

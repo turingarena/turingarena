@@ -1,6 +1,5 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { schema } from '../core';
 import { FileContent } from '../core/file-content';
 import { ApiContext } from './api-context';
 import { Config } from './config';
@@ -15,8 +14,9 @@ export function serve(config: Config) {
     const api = new ApiContext(modelRoot);
 
     const server = new ApolloServer({
-        typeDefs: schema,
-        executor: req => api.execute(req),
+        schema: api.executableSchema,
+        context: api,
+        rootValue: api.modelRoot,
         debug: true,
         playground: true,
         formatError: err => {

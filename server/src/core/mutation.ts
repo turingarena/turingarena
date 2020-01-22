@@ -3,6 +3,7 @@ import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest, contestMutationResolvers } from './contest';
 import { Problem } from './problem';
+import { submit } from './submit';
 import { User } from './user';
 
 export const mutationSchema = gql`
@@ -78,6 +79,7 @@ export const mutationResolvers: ResolversWithModels<{
                 },
             });
         },
+        submit: (root, { submission }) => submit(root, submission).then(() => true),
         ...contestMutationResolvers.Mutation,
     },
 };
