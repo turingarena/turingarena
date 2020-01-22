@@ -16,7 +16,7 @@ import {
 import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
 import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './contest-problem-set-view';
 import { contestViewResolvers, contestViewSchema } from './contest-view';
-import { Evaluation } from './evaluation';
+import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { feedbackSlotSchema } from './feedback/feedback-slot';
 import { valenceSchema } from './feedback/valence';
@@ -31,11 +31,11 @@ import { mediaResolvers, mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
 import { textResolvers, textSchema } from './material/text';
 import { mutationResolvers, mutationSchema } from './mutation';
-import { Participation } from './participation';
+import { Participation, participationSchema } from './participation';
 import { Problem, problemResolvers, problemSchema } from './problem';
 import { ProblemFile, problemFileResolvers, problemFileSchema } from './problem-file';
 import { queryResolvers, querySchema } from './query';
-import { Submission, submissionSchema } from './submission';
+import { Submission, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { User, userResolvers, userSchema } from './user';
 
@@ -45,12 +45,14 @@ export const schema = gql`
     ${mutationSchema}
     ${userSchema}
     ${contestSchema}
+    ${participationSchema}
     ${problemSchema}
     ${problemFileSchema}
     ${awardSchema}
     ${fileContentSchema}
     ${submissionSchema}
     ${submissionFileSchema}
+    ${evaluationSchema}
 
     ${contestProblemSetSchema}
     ${contestProblemAssignmentSchema}
@@ -105,6 +107,7 @@ export const resolvers: Resolvers = {
     ...problemFileResolvers,
     ...awardResolvers,
     ...fileContentResolvers,
+    ...submissionResolvers,
 
     ...contestProblemAssignmentResolvers,
     ...contestProblemSetResolvers,

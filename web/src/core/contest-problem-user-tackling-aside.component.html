@@ -11,8 +11,8 @@
 
 <ng-container *ngIf="data.submissions[data.submissions.length - 1] as lastSubmission">
   <button class="problem-last-submission" (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-    <fa-icon *ngIf="lastSubmission.evaluation.status !== 'PENDING'" icon="history"> </fa-icon>
-    <fa-icon *ngIf="lastSubmission.evaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
+    <fa-icon *ngIf="lastSubmission.officialEvaluation.status !== 'PENDING'" icon="history"> </fa-icon>
+    <fa-icon *ngIf="lastSubmission.officialEvaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
     </fa-icon>
     Last submission
   </button>

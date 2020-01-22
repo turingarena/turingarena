@@ -1,7 +1,31 @@
+import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
 import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
+
+export const evaluationSchema = gql`
+    type Evaluation {
+        submission: Submission!
+        events: [EvaluationEvent!]!
+        status: EvaluationStatus!
+    }
+
+    type EvaluationEvent {
+        evaluation: Evaluation!
+        data: String!
+    }
+
+    "Status of an evaluation"
+    enum EvaluationStatus {
+        "The evaluation is not completed yet"
+        PENDING
+        "The evaluation terminated correctly"
+        SUCCESS
+        "There was an error in this evaluation"
+        ERROR
+    }
+`;
 
 /** An evaluation of a submission */
 @Table
@@ -32,12 +56,10 @@ export class Evaluation extends BaseModel<Evaluation> {
 
 /** Status of this submission */
 export enum EvaluationStatus {
-    /** The evaluation is received and ready to be evaluated */
-    PENDING,
-    /** The evaluation started */
-    EVALUATING,
+    /** The evaluation not completed yet */
+    PENDING = 'PENDING',
     /** The evaluation terminated correclty */
-    SUCCESS,
+    SUCCESS = 'SUCCESS',
     /** There was an error in this evaluation */
-    ERROR,
+    ERROR = 'ERROR',
 }

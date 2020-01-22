@@ -22,6 +22,9 @@ export const contestProblemUserTacklingAsideFragment = gql`
     canSubmit
     submissions {
       id
+      officialEvaluation {
+        status
+      }
     }
 
     ...ContestProblemUserTacklingSubmitModal

@@ -4,6 +4,7 @@ import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestView } from './contest-view';
+import { Submission } from './submission';
 import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
@@ -92,8 +93,9 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         },
     },
     ContestProblemUserTackling: {
-        canSubmit: () => true, // TODO
-        submissions: () => [], // TODO
+        canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
+        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, modelRoot } }) =>
+            modelRoot.table(Submission).findAll({ where: { problemId, contestId, userId } }),
         assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },

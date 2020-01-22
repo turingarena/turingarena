@@ -20,7 +20,7 @@ export async function evaluate(root: ModelRoot, submission: Submission) {
 
     const evaluation = await root.table(Evaluation).create({
         submissionId: submission.id,
-        status: EvaluationStatus.EVALUATING,
+        status: EvaluationStatus.PENDING,
         isOfficial: false,
     });
 
