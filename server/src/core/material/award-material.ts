@@ -19,7 +19,7 @@ export const awardMaterialResolvers: ResolversWithModels<{
     Award: {
         name: ({ index }) => `subtask.${index}`,
         title: ({ index }) => [{ value: `Subtask ${index}` }],
-        gradeDomain: async ({ problem, index }, {}, ctx) => {
+        gradeDomain: async ({ problem, index }) => {
             const {
                 scoring: { subtasks },
             } = await problem.getTaskInfo();

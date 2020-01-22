@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { Contest } from './contest';
 import { Problem } from './problem';
 import { Submission } from './submission';
@@ -7,22 +7,22 @@ import { SubmissionFile } from './submission-file';
 import { User } from './user';
 
 it('test submission files', async () => {
-    const ctx = new ApiContext();
-    await ctx.sequelize.sync();
+    const root = new ModelRoot();
+    await root.sequelize.sync();
 
-    const user = await ctx.table(User).create({
+    const user = await root.table(User).create({
         username: 'alerighi',
         name: '',
         token: '',
         privilege: 0,
     });
 
-    const problem = await ctx.table(Problem).create({
+    const problem = await root.table(Problem).create({
         name: 'problem',
         files: [],
     });
 
-    const contest = await ctx.table(Contest).create({
+    const contest = await root.table(Contest).create({
         name: 'contest',
         title: '',
         start: Date.now(),
@@ -31,7 +31,7 @@ it('test submission files', async () => {
         problems: [problem],
     });
 
-    const submission = await ctx.table(Submission).create(
+    const submission = await root.table(Submission).create(
         {
             user,
             contest,
@@ -48,7 +48,7 @@ it('test submission files', async () => {
             ],
         },
         {
-            include: [ctx.table(SubmissionFile)],
+            include: [root.table(SubmissionFile)],
         },
     );
 

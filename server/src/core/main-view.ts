@@ -1,9 +1,8 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestView } from './contest-view';
-import { Text } from './material/text';
 import { User } from './user';
 
 export const mainViewSchema = gql`
@@ -15,10 +14,12 @@ export const mainViewSchema = gql`
 `;
 
 export class MainView {
-    constructor(readonly user: User | null) {}
+    constructor(readonly root: ModelRoot, readonly user: User | null) {
+        console.log({ root, arguments });
+    }
 
-    async getContest(ctx: ApiContext) {
-        return ctx.table(Contest).findOne({ where: { name: 'default' } });
+    async getContest() {
+        return this.root.table(Contest).findOne({ where: { name: 'default' } });
     }
 }
 
@@ -27,13 +28,13 @@ export const mainViewResolvers: ResolversWithModels<{
 }> = {
     MainView: {
         user: ({ user }) => user,
-        title: async (mainView, {}, ctx): Promise<Text> => {
-            const contest = await mainView.getContest(ctx);
+        title: async mainView => {
+            const contest = await mainView.getContest();
 
             return [{ value: contest?.title ?? 'TuringArena' }];
         },
-        contestView: async (mainView, {}, ctx) => {
-            const contest = await mainView.getContest(ctx);
+        contestView: async mainView => {
+            const contest = await mainView.getContest();
             if (contest === null) return null;
 
             return new ContestView(contest, mainView.user);

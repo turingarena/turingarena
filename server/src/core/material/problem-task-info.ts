@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
-import { ApiContext } from '../../main/context';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
@@ -36,15 +35,15 @@ export interface ProblemTaskInfo {
 }
 
 export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-    const ctx = problem.context!;
+    const root = problem.modelRoot;
     const metadataPath = '.task-info.json';
-    const metadataProblemFile = await ctx.table(ProblemFile).findOne({
+    const metadataProblemFile = await root.table(ProblemFile).findOne({
         where: {
             // FIXME: fix typing of .id in some BaseModel
             problemId: problem.id as string,
             path: metadataPath,
         },
-        include: [ctx.table(FileContent).scope('withData')],
+        include: [root.table(FileContent).scope('withData')],
     });
 
     if (metadataProblemFile === null) {
@@ -61,10 +60,9 @@ export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskI
  * nothing is done if the directory already exists.
  * Creates all the directories if they don't exist.
  *
- * @param ctx Context to use
  * @param base Base directory
  */
-export async function extractProblemFiles(ctx: ApiContext, problem: Problem, base: string) {
+export async function extractProblemFiles(problem: Problem, base: string) {
     const problemDir = path.join(
         base,
         problem.name,
@@ -79,7 +77,7 @@ export async function extractProblemFiles(ctx: ApiContext, problem: Problem, bas
     }
 
     const problemFiles = await problem.getFiles({
-        include: [ctx.table(FileContent).scope('withData')],
+        include: [problem.modelRoot.table(FileContent).scope('withData')],
     });
 
     for (const problemFile of problemFiles) {
@@ -93,18 +91,19 @@ export async function extractProblemFiles(ctx: ApiContext, problem: Problem, bas
 /**
  * Import the problem files from the filesystem
  *
- * @param ctx  Context to use
+ * @param root Model root to use
  * @param base Base directory to add
  * @param dir  Current directory
  */
-export async function importProblemFiles(ctx: ApiContext, problem: Problem, base: string, dir: string = '') {
+export async function importProblemFiles(problem: Problem, base: string, dir: string = '') {
+    const root = problem.modelRoot;
     const files = fs.readdirSync(path.join(base, dir));
     for (const file of files) {
         const relPath = path.join(dir, file);
         if (fs.statSync(path.join(base, relPath)).isDirectory()) {
-            await importProblemFiles(ctx, problem, base, relPath);
+            await importProblemFiles(problem, base, relPath);
         } else {
-            const content = await FileContent.createFromPath(ctx, path.join(base, relPath));
+            const content = await FileContent.createFromPath(root, path.join(base, relPath));
             await problem.createFile({
                 path: relPath,
                 contentId: content.id,

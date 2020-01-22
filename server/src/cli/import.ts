@@ -6,7 +6,7 @@ import { ContestProblemAssignment } from '../core/contest-problem-assignment';
 import { importProblemFiles } from '../core/material/problem-task-info';
 import { Problem } from '../core/problem';
 import { User, UserRole } from '../core/user';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 
 export interface ContestMetadata {
     name: string;
@@ -25,10 +25,10 @@ export interface ContestMetadata {
 /**
  * Import a contest in the database
  *
- * @param ctx the API context
- * @param dir base directoyr of the contest
+ * @param root the model root
+ * @param dir base directory of the contest
  */
-export async function importContest(ctx: ApiContext, dir = process.cwd()) {
+export async function importContest(root: ModelRoot, dir = process.cwd()) {
     const turingarenaYAMLPath = path.join(dir, 'turingarena.yaml');
 
     if (!fs.existsSync(turingarenaYAMLPath)) throw Error('Invalid contest directory');
@@ -36,9 +36,9 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
     const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
-    const contest = await ctx.table(Contest).create(metadata);
+    const contest = await root.table(Contest).create(metadata);
 
-    await contest.loadFiles(ctx, path.join(dir, 'files'));
+    await contest.loadFiles(root, path.join(dir, 'files'));
 
     for (const user of metadata.users) {
         await contest.createParticipation(
@@ -49,19 +49,19 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
                 },
             },
             {
-                include: [ctx.table(User)],
+                include: [root.table(User)],
             },
         );
     }
 
     for (const name of metadata.problems) {
-        const problem = await ctx.table(Problem).create({
+        const problem = await root.table(Problem).create({
             name,
         });
 
-        await importProblemFiles(ctx, problem, path.join(dir, name));
+        await importProblemFiles(problem, path.join(dir, name));
 
-        await ctx.table(ContestProblemAssignment).create({
+        await root.table(ContestProblemAssignment).create({
             contestId: contest.id,
             problemId: problem.id,
         });

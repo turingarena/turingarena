@@ -2,19 +2,21 @@ import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { schema } from '../core';
 import { FileContent } from '../core/file-content';
+import { ApiContext } from './api-context';
 import { Config } from './config';
-import { ApiContext } from './context';
+import { ModelRoot } from './model-root';
 
 export function serve(config: Config) {
     const app = express();
 
     console.log(config);
 
-    const ctx = new ApiContext(config);
+    const modelRoot = new ModelRoot(config);
+    const api = new ApiContext(modelRoot);
 
     const server = new ApolloServer({
         typeDefs: schema,
-        executor: req => ctx.execute(req),
+        executor: req => api.execute(req),
         debug: true,
         playground: true,
         formatError: err => {
@@ -28,9 +30,8 @@ export function serve(config: Config) {
     /**
      * Serve static files directly from the database.
      */
-    app.get('/files/:hash/*', async (req, res, next) => {
-        const hash = req.params.hash!;
-        const file = await ctx.table(FileContent).findOne({ where: { hash } });
+    app.get('/files/:hash/*', async ({ params: { hash } }, res, next) => {
+        const file = await modelRoot.table(FileContent).findOne({ where: { hash } });
         if (file === null) next();
         else {
             res.contentType(file.type);

@@ -5,7 +5,7 @@ import * as path from 'path';
 import { AllowNull, Column, DefaultScope, Index, Scopes, Table, Unique } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { BaseModel } from '../main/base-model';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 
 export const fileContentSchema = gql`
@@ -49,21 +49,21 @@ export class FileContent extends BaseModel<FileContent> {
     @Column
     content!: Buffer;
 
-    static async createFromContent(ctx: ApiContext, content: Buffer, type: string) {
+    static async createFromContent(root: ModelRoot, content: Buffer, type: string) {
         const hash = ssri.fromData(content).toString();
 
         return (
-            (await ctx.table(FileContent).findOne({ where: { hash } })) ??
-            (await ctx.table(FileContent).create({ content, type, hash }))
+            (await root.table(FileContent).findOne({ where: { hash } })) ??
+            (await root.table(FileContent).create({ content, type, hash }))
         );
     }
 
-    static async createFromPath(ctx: ApiContext, filePath: string) {
+    static async createFromPath(root: ModelRoot, filePath: string) {
         const content = fs.readFileSync(filePath);
         const lookup = mime.lookup(filePath);
         const type = lookup !== false ? lookup : 'unknown';
 
-        return FileContent.createFromContent(ctx, content, type);
+        return FileContent.createFromContent(root, content, type);
     }
 
     /**

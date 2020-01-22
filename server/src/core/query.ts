@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../generated/graphql-types';
+import { ModelRoot } from '../main/model-root';
+import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { MainView } from './main-view';
 import { Problem } from './problem';
@@ -19,22 +20,26 @@ export const querySchema = gql`
     }
 `;
 
-export const queryResolvers: Resolvers = {
+export const queryResolvers: ResolversWithModels<{
+    Query: ModelRoot;
+}> = {
     Query: {
-        mainView: async ({}, { username }, ctx): Promise<MainView> =>
+        mainView: async (root, { username }): Promise<MainView> =>
             new MainView(
+                root,
                 username !== null && username !== undefined
-                    ? (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`)
+                    ? (await root.table(User).findOne({ where: { username } })) ??
+                      root.fail(`no such user: ${username}`)
                     : null,
             ),
-        users: async ({}, {}, ctx) => ctx.table(User).findAll({ include: [ctx.table(Contest)] }),
-        user: async ({}, { username }, ctx) =>
-            (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user: ${username}`),
-        contests: async ({}, {}, ctx) => ctx.table(Contest).findAll(),
-        contest: async ({}, { name }, ctx) =>
-            (await ctx.table(Contest).findOne({ where: { name } })) ?? ctx.fail(`no such contest: ${name}`),
-        problems: async ({}, {}, ctx) => ctx.table(Problem).findAll(),
-        problem: async ({}, { name }, ctx) =>
-            (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem: ${name}`),
+        users: async root => root.table(User).findAll({ include: [root.table(Contest)] }),
+        user: async (root, { username }) =>
+            (await root.table(User).findOne({ where: { username } })) ?? root.fail(`no such user: ${username}`),
+        contests: async root => root.table(Contest).findAll(),
+        contest: async (root, { name }) =>
+            (await root.table(Contest).findOne({ where: { name } })) ?? root.fail(`no such contest: ${name}`),
+        problems: async root => root.table(Problem).findAll(),
+        problem: async (root, { name }) =>
+            (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem: ${name}`),
     },
 };

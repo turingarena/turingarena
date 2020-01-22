@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../generated/graphql-types';
+import { ModelRoot } from '../main/model-root';
+import { ResolversWithModels } from '../main/resolver-types';
 import { Contest, contestMutationResolvers } from './contest';
 import { Problem } from './problem';
 import { User } from './user';
@@ -27,21 +28,23 @@ export const mutationSchema = gql`
     }
 `;
 
-export const mutationResolvers: Resolvers = {
+export const mutationResolvers: ResolversWithModels<{
+    Mutation: ModelRoot;
+}> = {
     Mutation: {
-        init: async ({}, {}, ctx) => {
-            await ctx.sequelize.sync();
+        init: async root => {
+            await root.sequelize.sync();
 
             return true;
         },
-        updateUser: async ({}, { user }, ctx) => true, // TODO
-        createUser: async ({}, { user }, ctx) => {
-            await ctx.table(User).create(user);
+        updateUser: async (root, { user }) => true, // TODO
+        createUser: async (root, { user }) => {
+            await root.table(User).create(user);
 
             return true;
         },
-        deleteUser: async ({}, { user }, ctx) => {
-            await ctx.table(User).destroy({
+        deleteUser: async (root, { user }) => {
+            await root.table(User).destroy({
                 where: {
                     username: user,
                 },
@@ -49,32 +52,32 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        createProblem: async ({}, { problem }, ctx) => {
-            await ctx.table(Problem).create(problem);
+        createProblem: async (root, { problem }) => {
+            await root.table(Problem).create(problem);
 
             return true;
         },
-        updateProblem: async ({}, { problem }, ctx) => true, // TODO
-        deleteProblem: async ({}, { problem }, ctx) => {
-            await ctx.table(Problem).destroy({
+        updateProblem: async (root, { problem }) => true, // TODO
+        deleteProblem: async (root, { problem }) => {
+            await root.table(Problem).destroy({
                 where: {
                     name: problem,
                 },
             });
         },
-        createContest: async ({}, { contest }, ctx) => {
-            await ctx.table(Contest).create(contest);
+        createContest: async (root, { contest }) => {
+            await root.table(Contest).create(contest);
 
             return true;
         },
-        updateContest: async ({}, { contest }, ctx) => true, // TODO
-        deleteContest: async ({}, { contest }, ctx) => {
-            await ctx.table(Contest).destroy({
+        updateContest: async (root, { contest }) => true, // TODO
+        deleteContest: async (root, { contest }) => {
+            await root.table(Contest).destroy({
                 where: {
                     name,
                 },
             });
         },
-        ...contestMutationResolvers,
+        ...contestMutationResolvers.Mutation,
     },
 };

@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
 import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
-import { ContestStatus, MutationResolvers } from '../generated/graphql-types';
+import { ContestStatus } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -85,17 +85,17 @@ export class Contest extends BaseModel<Contest> {
     /**
      * Add files to this contest
      *
-     * @param ctx  Context of the database
+     * @param root  Context of the database
      * @param base Base directory to add
      * @param dir  Relative directory in recursive call
      */
-    async loadFiles(ctx: ApiContext, base: string, dir: string = '') {
+    async loadFiles(root: ModelRoot, base: string, dir: string = '') {
         const files = fs.readdirSync(path.join(base, dir));
         for (const file of files) {
             const relPath = path.join(dir, file);
-            if (fs.statSync(path.join(base, relPath)).isDirectory()) await this.loadFiles(ctx, base, relPath);
+            if (fs.statSync(path.join(base, relPath)).isDirectory()) await this.loadFiles(root, base, relPath);
             else {
-                const fileRow = await FileContent.createFromPath(ctx, path.join(base, relPath));
+                const fileRow = await FileContent.createFromPath(root, path.join(base, relPath));
                 await this.createFile({
                     path: relPath,
                     fileId: fileRow.id,
@@ -115,29 +115,34 @@ export class Contest extends BaseModel<Contest> {
     }
 }
 
-export const contestMutationResolvers: MutationResolvers = {
-    addProblem: async ({}, { contestName, name }, ctx) => {
-        const contest =
-            (await ctx.table(Contest).findOne({
-                where: { name: contestName },
-            })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const problem =
-            (await ctx.table(Problem).findOne({ where: { name } })) ?? ctx.fail(`no such problem '${name}'`);
-        await contest.createProblemAssignment({
-            problem,
-        });
+export const contestMutationResolvers: ResolversWithModels<{
+    Mutation: ModelRoot;
+}> = {
+    Mutation: {
+        addProblem: async (root, { contestName, name }) => {
+            const contest =
+                (await root.table(Contest).findOne({
+                    where: { name: contestName },
+                })) ?? root.fail(`no such contest '${contestName}'`);
+            const problem =
+                (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
+            await contest.createProblemAssignment({
+                problem,
+            });
 
-        return true;
-    },
-    addUser: async ({}, { contestName, username }, ctx) => {
-        const contest =
-            (await ctx.table(Contest).findOne({
-                where: { name: contestName },
-            })) ?? ctx.fail(`no such contest '${contestName}'`);
-        const user = (await ctx.table(User).findOne({ where: { username } })) ?? ctx.fail(`no such user '${username}'`);
-        await contest.addParticipation(user);
+            return true;
+        },
+        addUser: async (root, { contestName, username }) => {
+            const contest =
+                (await root.table(Contest).findOne({
+                    where: { name: contestName },
+                })) ?? root.fail(`no such contest '${contestName}'`);
+            const user =
+                (await root.table(User).findOne({ where: { username } })) ?? root.fail(`no such user '${username}'`);
+            await contest.addParticipation(user);
 
-        return true;
+            return true;
+        },
     },
 };
 

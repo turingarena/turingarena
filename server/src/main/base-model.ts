@@ -1,6 +1,6 @@
 import { Model } from 'sequelize-typescript';
-import { SequelizeWithContext } from './context';
+import { ModelRootSequelize } from './model-root';
 
 export abstract class BaseModel<T> extends Model<T> {
-    context? = (this.sequelize as SequelizeWithContext).context;
+    modelRoot = (this.sequelize as ModelRootSequelize).modelRoot;
 }

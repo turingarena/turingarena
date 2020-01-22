@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
 import * as readline from 'readline';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { extractProblemFiles } from './material/problem-task-info';
@@ -10,35 +10,35 @@ import { Submission } from './submission';
 /**
  * Evaluate a new submission
  *
- * @param ctx ApiContext to use
+ * @param root model root
  * @param submission Submission to evaluate
  */
-export async function evaluate(ctx: ApiContext, submission: Submission) {
+export async function evaluate(root: ModelRoot, submission: Submission) {
     console.log(`Evaluating submission ${submission.id}`);
 
-    const evaluation = await ctx.table(Evaluation).create({
+    const evaluation = await root.table(Evaluation).create({
         submissionId: submission.id,
         status: EvaluationStatus.EVALUATING,
         isOfficial: false,
     });
 
-    console.log(ctx.config);
+    console.log(root.config);
 
     const problem = await submission.getProblem();
-    const problemDir = await extractProblemFiles(ctx, problem, path.join(ctx.config.cachePath, 'problem'));
+    const problemDir = await extractProblemFiles(problem, path.join(root.config.cachePath, 'problem'));
 
-    const solutionPath = path.join(ctx.config.cachePath, 'submission');
+    const solutionPath = path.join(root.config.cachePath, 'submission');
     await submission.extract(solutionPath);
 
     const taskMakerArgs = ['--ui=json', '--task-dir', problemDir, '--solution', solutionPath];
 
-    const process = spawn(ctx.config.taskMakerExecutable, taskMakerArgs);
+    const process = spawn(root.config.taskMakerExecutable, taskMakerArgs);
 
     const stdoutLineReader = readline.createInterface(process.stdout);
 
     stdoutLineReader.on('line', async event => {
         console.log(`Received task-maker event ${event}`);
-        await ctx.table(EvaluationEvent).create({
+        await root.table(EvaluationEvent).create({
             evaluationId: evaluation.id,
             data: event,
         });

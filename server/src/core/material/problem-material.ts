@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ResolverFn } from '../../generated/graphql-types';
-import { ApiContext } from '../../main/context';
+import { ApiContext } from '../../main/api-context';
 import { ResolversWithModels } from '../../main/resolver-types';
 import { Award } from '../award';
 import { FileContent } from '../file-content';
@@ -88,17 +88,17 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
 }> = {
     Problem: {
         title: withProblemMetadata(({ metadata: { title } }) => [{ value: title }]),
-        statement: withProblemMetadata(({ problem, metadata: { statements } }, {}, ctx) =>
+        statement: withProblemMetadata(({ problem, metadata: { statements } }) =>
             statements.map(
                 async ({ path, language, content_type: type }): Promise<MediaVariant> => ({
                     name: path.slice(path.lastIndexOf('/') + 1),
                     language,
                     type,
-                    content: await loadContent(ctx, problem, path),
+                    content: await loadContent(problem, path),
                 }),
             ),
         ),
-        attachments: withProblemMetadata(({ problem, metadata: { attachments } }, {}, ctx) =>
+        attachments: withProblemMetadata(({ problem, metadata: { attachments } }) =>
             attachments.map(
                 async ({ name, path, content_type: type }): Promise<ProblemAttachment> => ({
                     title: [{ value: name }],
@@ -106,7 +106,7 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
                         {
                             name,
                             type,
-                            content: await loadContent(ctx, problem, path),
+                            content: await loadContent(problem, path),
                         },
                     ],
                 }),
@@ -121,14 +121,16 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
     },
 };
 
-async function loadContent(ctx: ApiContext, problem: Problem, path: string) {
+async function loadContent(problem: Problem, path: string) {
+    const root = problem.modelRoot;
+
     return (
-        (await ctx.table(ProblemFile).findOne({
+        (await root.table(ProblemFile).findOne({
             where: {
                 problemId: problem.id as string,
                 path,
             },
-            include: [ctx.table(FileContent)],
-        })) ?? ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`)
+            include: [root.table(FileContent)],
+        })) ?? root.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`)
     ).content;
 }

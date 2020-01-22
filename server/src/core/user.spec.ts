@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../main/context';
+import { ApiContext } from '../main/api-context';
+import { ModelRoot } from '../main/model-root';
 
 it('test user add and delete', async () => {
-    const response = await new ApiContext().execute({
+    const response = await new ApiContext(new ModelRoot()).execute({
         document: gql`
             mutation UserSpec {
                 init

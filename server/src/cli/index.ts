@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 import { loadConfig } from '../main/config';
-import { ApiContext } from '../main/context';
+import { ModelRoot } from '../main/model-root';
 import { serve } from '../main/server';
 import { importContest } from './import';
 import { createSubmission } from './submit';
@@ -11,10 +11,10 @@ function _export() {}
 
 function show() {}
 
-async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
+async function ctxFromConfig(configFile?: string): Promise<ModelRoot> {
     const config = loadConfig(configFile);
     console.log(config);
-    const context = new ApiContext(config);
+    const context = new ModelRoot(config);
     await context.sequelize.sync();
 
     return context;

@@ -26,7 +26,8 @@ const config: CodegenConfig = {
             ],
             config: {
                 defaultMapper: 'any',
-                contextType: '../main/context#ApiContext',
+                contextType: '../main/api-context#ApiContext',
+                rootValueType: 'any',
                 noSchemaStitching: true,
             },
         },

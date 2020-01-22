@@ -44,7 +44,7 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         }),
         canSubmit: () => true, // TODO
         submissions: () => [], // TODO
-        awardAssignmentViews: async ({ assignment, user }, {}, ctx) => {
+        awardAssignmentViews: async ({ assignment, user }) => {
             const problem = await assignment.getProblem();
 
             // FIXME: duplicated code
