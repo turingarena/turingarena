@@ -46,7 +46,8 @@
         "only-arrow-functions": [true, "allow-declarations"],
         "no-non-null-assertion": false,
         "no-any": false,
-        "no-null-keyword": false
+        "no-null-keyword": false,
+        "prefer-method-signature": false
     },
     "linterOptions": {
         "exclude": ["**/generated/**", "**/*.js"]

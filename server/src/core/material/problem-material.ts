@@ -1,6 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ResolverFn } from '../../generated/graphql-types';
-import { ApiContext } from '../../main/api-context';
 import { ResolversWithModels } from '../../main/resolver-types';
 import { Award } from '../award';
 import { FileContent } from '../file-content';
@@ -73,12 +71,37 @@ export interface ProblemAttachment {
     media: Media;
 }
 
-/** Transforms a resolver by loading problem metadata first */
-function withProblemMetadata<TResult, TArgs>(
-    resolver: ResolverFn<TResult, { metadata: ProblemTaskInfo; problem: Problem }, ApiContext, TArgs>,
-): ResolverFn<TResult, Problem, ApiContext, TArgs> {
-    return async (problem, args, ctx, info) =>
-        resolver({ metadata: await problem.getTaskInfo(), problem }, args, ctx, info);
+export class ProblemMaterial {
+    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
+
+    title = [{ value: this.taskInfo.title }];
+    statement = this.taskInfo.statements.map(
+        ({ path, language, content_type: type }): MediaVariant => ({
+            name: path.slice(path.lastIndexOf('/') + 1),
+            language,
+            type,
+            content: () => loadContent(this.problem, path),
+        }),
+    );
+
+    attachments = this.taskInfo.attachments.map(
+        ({ name, path, content_type: type }): ProblemAttachment => ({
+            title: [{ value: name }],
+            media: [
+                {
+                    name,
+                    type,
+                    content: () => loadContent(this.problem, path),
+                },
+            ],
+        }),
+    );
+
+    awards = this.taskInfo.scoring.subtasks.map((subtask, index): Award => ({ problem: this.problem, index }));
+
+    submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
+    submissionFileTypes = [defaultType];
+    submissionFileTypeRules = [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }];
 }
 
 const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };
@@ -87,37 +110,13 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
     Problem: Problem;
 }> = {
     Problem: {
-        title: withProblemMetadata(({ metadata: { title } }) => [{ value: title }]),
-        statement: withProblemMetadata(({ problem, metadata: { statements } }) =>
-            statements.map(
-                async ({ path, language, content_type: type }): Promise<MediaVariant> => ({
-                    name: path.slice(path.lastIndexOf('/') + 1),
-                    language,
-                    type,
-                    content: await loadContent(problem, path),
-                }),
-            ),
-        ),
-        attachments: withProblemMetadata(({ problem, metadata: { attachments } }) =>
-            attachments.map(
-                async ({ name, path, content_type: type }): Promise<ProblemAttachment> => ({
-                    title: [{ value: name }],
-                    media: [
-                        {
-                            name,
-                            type,
-                            content: await loadContent(problem, path),
-                        },
-                    ],
-                }),
-            ),
-        ),
-        awards: withProblemMetadata(({ problem, metadata: { scoring: { subtasks } } }) =>
-            subtasks.map((subtask, index): Award => ({ problem, index })),
-        ),
-        submissionFields: () => [{ name: 'solution', title: [{ value: 'Solution' }] }],
-        submissionFileTypes: () => [defaultType],
-        submissionFileTypeRules: () => [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }],
+        title: async problem => (await problem.getMaterial()).title,
+        statement: async problem => (await problem.getMaterial()).statement,
+        attachments: async problem => (await problem.getMaterial()).attachments,
+        awards: async problem => (await problem.getMaterial()).awards,
+        submissionFields: async problem => (await problem.getMaterial()).submissionFields,
+        submissionFileTypes: async problem => (await problem.getMaterial()).submissionFileTypes,
+        submissionFileTypeRules: async problem => (await problem.getMaterial()).submissionFileTypeRules,
     },
 };
 

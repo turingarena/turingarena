@@ -4,8 +4,8 @@ import { FindOptions } from 'sequelize/types';
 import { BaseModel } from '../main/base-model';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { problemMaterialResolversExtensions } from './material/problem-material';
-import { getProblemTaskInfo, ProblemTaskInfo } from './material/problem-task-info';
+import { ProblemMaterial, problemMaterialResolversExtensions } from './material/problem-material';
+import { getProblemTaskInfo } from './material/problem-task-info';
 import { ProblemFile } from './problem-file';
 
 export const problemSchema = gql`
@@ -40,9 +40,14 @@ export class Problem extends BaseModel<Problem> {
     findFile!: (options?: object) => Promise<ProblemFile>;
     createFile!: (file: object, options?: object) => Promise<ProblemFile>;
 
-    taskInfoCache?: ProblemTaskInfo;
     async getTaskInfo() {
         return getProblemTaskInfo(this);
+    }
+
+    async getMaterial() {
+        const taskInfo = await this.getTaskInfo();
+
+        return new ProblemMaterial(this, taskInfo);
     }
 }
 

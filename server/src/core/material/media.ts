@@ -31,7 +31,7 @@ export interface MediaVariant {
 
     name: string;
     type: string;
-    content: FileContent;
+    content: () => Promise<FileContent>;
 }
 
 export const mediaResolvers: ResolversWithModels<{ Media: Media }> = {
