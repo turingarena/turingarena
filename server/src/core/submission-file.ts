@@ -1,6 +1,21 @@
+import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { FileContent } from './file-content';
 import { Submission } from './submission';
+
+export const submissionFileSchema = gql`
+    type SubmissionFile {
+        fieldId: ID!
+        content: FileContent!
+    }
+
+    input SubmissionFileInput {
+        fieldName: ID!
+        fileTypeName: ID!
+        fileName: String!
+        content: FileContentInput!
+    }
+`;
 
 /** File in a submission */
 @Table({ timestamps: false })
@@ -12,12 +27,15 @@ export class SubmissionFile extends Model<SubmissionFile> {
 
     @PrimaryKey
     @Column
-    fieldId!: string;
+    fieldName!: string;
+
+    @Column
+    fileTypeName!: string;
 
     @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
-    fileId!: number;
+    contentId!: number;
 
     @AllowNull(false)
     @Column
@@ -27,6 +45,6 @@ export class SubmissionFile extends Model<SubmissionFile> {
     submission!: Submission;
 
     @BelongsTo(() => FileContent)
-    file!: FileContent;
-    getFile!: () => Promise<FileContent>;
+    content!: FileContent;
+    getContent!: () => Promise<FileContent>;
 }

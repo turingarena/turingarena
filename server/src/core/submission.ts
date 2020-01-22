@@ -19,21 +19,11 @@ export const submissionSchema = gql`
         evaluations: [Evaluation!]!
     }
 
-    type SubmissionFile {
-        fieldId: ID!
-        content: FileContent!
-    }
-
     input SubmissionInput {
         problemName: ID!
         contestName: ID!
         username: ID!
         files: [SubmissionFileInput!]!
-    }
-
-    input SubmissionFileInput {
-        fieldId: ID!
-        content: FileContentInput!
     }
 
     type Evaluation {
@@ -89,8 +79,8 @@ export class Submission extends Model<Submission> {
         const submissionFiles = await this.getSubmissionFiles();
 
         for (const submissionFile of submissionFiles) {
-            const content = await submissionFile.getFile();
-            const filePath = path.join(base, this.id as string, submissionFile.fieldId, submissionFile.fileName);
+            const content = await submissionFile.getContent();
+            const filePath = path.join(base, this.id as string, submissionFile.fieldName, submissionFile.fileName);
             await content.extract(filePath);
         }
     }

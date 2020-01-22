@@ -37,7 +37,7 @@ import { Problem, problemResolvers, problemSchema } from './problem';
 import { ProblemFile, problemFileResolvers, problemFileSchema } from './problem-file';
 import { queryResolvers, querySchema } from './query';
 import { Submission, submissionSchema } from './submission';
-import { SubmissionFile } from './submission-file';
+import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { User, userResolvers, userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
@@ -51,6 +51,7 @@ export const schema = gql`
     ${awardSchema}
     ${fileContentSchema}
     ${submissionSchema}
+    ${submissionFileSchema}
 
     ${contestProblemSetSchema}
     ${contestProblemAssignmentSchema}

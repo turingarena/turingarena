@@ -1,4 +1,4 @@
-<form class="submit-modal" (ngSubmit)="$event.preventDefault(); submit($event)">
+<form class="submit-modal" (ngSubmit)="submit($event)">
   <div class="submit-modal-header">
     <h4>
       Solution of: <strong>{{ data.assignment.problem.title | text }}</strong>

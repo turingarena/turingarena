@@ -23,7 +23,7 @@ export const mutationSchema = gql`
         removeProblem(contestName: ID!, name: ID!): Boolean!
         addUser(contestName: ID!, username: ID!): Boolean!
         removeUser(contestName: ID!, username: ID!): Boolean!
-        submit(contestName: ID!, username: ID!, problemName: ID!, submission: SubmissionInput!): Boolean!
+        submit(submission: SubmissionInput!): Boolean!
     }
 `;
 
