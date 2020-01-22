@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
-import { Award } from '../award';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
+import { Award } from './award';
 import { Media, MediaVariant } from './media';
 import { ProblemTaskInfo } from './problem-task-info';
 import { Text } from './text';
@@ -97,7 +97,7 @@ export class ProblemMaterial {
         }),
     );
 
-    awards = this.taskInfo.scoring.subtasks.map((subtask, index): Award => ({ problem: this.problem, index }));
+    awards = this.taskInfo.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
     submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
     submissionFileTypes = [defaultType];

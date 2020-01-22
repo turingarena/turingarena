@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
-import { Award } from './award';
 import { ContestProblemAssignment } from './contest-problem-assignment';
+import { Award } from './material/award';
 
 export const contestAwardAssignmentSchema = gql`
     type ContestAwardAssignment {

@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
-import { Award } from './award';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -46,18 +45,10 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         submissions: () => [], // TODO
         awardAssignmentViews: async ({ assignment, user }) => {
             const problem = await assignment.getProblem();
+            const material = await problem.getMaterial();
 
-            // FIXME: duplicated code
-            const {
-                scoring: { subtasks },
-            } = await problem.getTaskInfo();
-
-            return subtasks.map(
-                (subtask, index) =>
-                    new ContestAwardAssignmentView(
-                        new ContestAwardAssignment(assignment, new Award(problem, index)),
-                        user,
-                    ),
+            return material.awards.map(
+                award => new ContestAwardAssignmentView(new ContestAwardAssignment(assignment, award), user),
             );
         },
     },

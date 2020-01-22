@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
-import { awardResolvers, awardSchema } from './award';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
 import { contestAwardAssignmentViewResolvers, contestAwardAssignmentViewSchema } from './contest-award-assignment-view';
@@ -27,7 +26,7 @@ import { booleanGradingSchema } from './grading/grading-boolean';
 import { genericGradingSchema } from './grading/grading-generic';
 import { numericGradingSchema } from './grading/grading-numeric';
 import { mainViewResolvers, mainViewSchema } from './main-view';
-import { awardMaterialResolvers, awardMaterialSchema } from './material/award-material';
+import { awardResolvers, awardSchema } from './material/award';
 import { mediaResolvers, mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
 import { textResolvers, textSchema } from './material/text';
@@ -66,7 +65,6 @@ export const schema = gql`
     ${textSchema}
     ${mediaSchema}
     ${problemMaterialSchema}
-    ${awardMaterialSchema}
 
     ${genericGradingSchema}
     ${numericGradingSchema}
@@ -120,5 +118,4 @@ export const resolvers: Resolvers = {
 
     ...textResolvers,
     ...mediaResolvers,
-    ...awardMaterialResolvers,
 };
