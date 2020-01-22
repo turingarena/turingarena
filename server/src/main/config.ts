@@ -26,12 +26,5 @@ export function loadConfig(configPath?: string): Config {
 
     const config = JSON.parse(readFileSync(configPath).toString()) as Config;
 
-    // FIXME: is there a better way?
-    return {
-        db: config.db ?? defaultConfig.db,
-        port: config.port ?? defaultConfig.port,
-        host: config.host ?? defaultConfig.host,
-        taskMakerExecutable: config.taskMakerExecutable ?? defaultConfig.taskMakerExecutable,
-        cachePath: config.cachePath ?? defaultConfig.cachePath,
-    };
+    return { ...defaultConfig, ...config };
 }
