@@ -34,13 +34,7 @@ export async function submit(
             fileName,
             submissionId: submission.id,
             fileTypeName,
-            contentId: (
-                await FileContent.createFromContent(
-                    root,
-                    Buffer.from(content.base64, 'base64'),
-                    'application/octet-stream', // FIXME: content-type should not be in file content table
-                )
-            ).id,
+            contentId: (await FileContent.createFromContent(root, Buffer.from(content.base64, 'base64'))).id,
         });
     }
 

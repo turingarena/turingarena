@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
-import * as mime from 'mime-types';
 import * as path from 'path';
 import { AllowNull, Column, DefaultScope, Index, Scopes, Table, Unique } from 'sequelize-typescript';
 import * as ssri from 'ssri';
@@ -40,31 +39,24 @@ export class FileContent extends BaseModel<FileContent> {
     @Column
     hash!: string;
 
-    /** MIME type of the file, e.g. text/plain, application/pdf, etc. */
-    @AllowNull(false)
-    @Column
-    type!: string;
-
     /** Content in bytes of the file. */
     @AllowNull(false)
     @Column
     content!: Buffer;
 
-    static async createFromContent(root: ModelRoot, content: Buffer, type: string) {
+    static async createFromContent(root: ModelRoot, content: Buffer) {
         const hash = ssri.fromData(content).toString();
 
         return (
             (await root.table(FileContent).findOne({ where: { hash } })) ??
-            (await root.table(FileContent).create({ content, type, hash }))
+            (await root.table(FileContent).create({ content, hash }))
         );
     }
 
     static async createFromPath(root: ModelRoot, filePath: string) {
         const content = fs.readFileSync(filePath);
-        const lookup = mime.lookup(filePath);
-        const type = lookup !== false ? lookup : 'unknown';
 
-        return FileContent.createFromContent(root, content, type);
+        return FileContent.createFromContent(root, content);
     }
 
     /**

@@ -1,5 +1,6 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
+import mime from 'mime-types';
 import { FileContent } from '../core/file-content';
 import { ApiContext } from './api-context';
 import { Config } from './config';
@@ -30,11 +31,14 @@ export function serve(config: Config) {
     /**
      * Serve static files directly from the database.
      */
-    app.get('/files/:hash/*', async ({ params: { hash } }, res, next) => {
+    app.get('/files/:hash/:filename', async ({ params: { hash, filename } }, res, next) => {
         const file = await modelRoot.table(FileContent).findOne({ where: { hash } });
-        if (file === null) next();
-        else {
-            res.contentType(file.type);
+        const contentType = mime.lookup(filename);
+
+        if (file === null) {
+            next();
+        } else {
+            res.contentType(contentType !== false ? contentType : 'text/plain');
             res.send(file.content);
         }
     });
