@@ -18,11 +18,7 @@ export const mediaInlineFragment = gql`
     variant {
       name
       type
-      content {
-        hash
-        base64
-        utf8
-      }
+      url
     }
   }
 `;

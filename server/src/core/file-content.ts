@@ -23,11 +23,11 @@ export const fileContentSchema = gql`
 
 /** A generic file in TuringArena. */
 @DefaultScope(() => ({
-    attributes: ['id', 'hash', 'type'],
+    attributes: ['id', 'hash'],
 }))
 @Scopes(() => ({
     withData: {
-        attributes: ['id', 'hash', 'type', 'content'],
+        attributes: ['id', 'hash', 'content'],
     },
 }))
 @Table({ updatedAt: false })
@@ -45,7 +45,7 @@ export class FileContent extends BaseModel<FileContent> {
     content!: Buffer;
 
     static async createFromContent(root: ModelRoot, content: Buffer) {
-        const hash = ssri.fromData(content).toString();
+        const hash = ssri.fromData(content).hexDigest();
 
         return (
             (await root.table(FileContent).findOne({ where: { hash } })) ??

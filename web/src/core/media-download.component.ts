@@ -25,11 +25,7 @@ export const mediaDownloadFragment = gql`
     variant {
       name
       type
-      content {
-        hash
-        base64
-        utf8
-      }
+      url
     }
   }
 `;

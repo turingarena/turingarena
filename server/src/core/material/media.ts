@@ -21,6 +21,12 @@ export const mediaSchema = gql`
         type: String!
         "Content of this file"
         content: FileContent!
+
+        "URL where this file can be downloaded"
+        # TODO: add a 'baseUrl' parameter, and make this URL absolute?
+        url: String!
+
+        # TODO: add integrity?
     }
 `;
 
@@ -34,8 +40,11 @@ export interface MediaVariant {
     content: () => Promise<FileContent>;
 }
 
-export const mediaResolvers: ResolversWithModels<{ Media: Media }> = {
+export const mediaResolvers: ResolversWithModels<{ Media: Media; MediaFile: MediaVariant }> = {
     Media: {
         variant: media => media[0],
+    },
+    MediaFile: {
+        url: async variant => `/files/${(await variant.content()).hash}/${variant.name}`,
     },
 };
