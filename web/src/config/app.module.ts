@@ -17,8 +17,8 @@ import { ContestProblemUserTacklingSubmitModalComponent } from '../core/contest-
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
-import { FeedbackSectionComponent } from '../core/feedback-section.component';
-import { FeedbackComponent } from '../core/feedback.component';
+import { FeedbackSectionComponent } from '../core/feedback/feedback-section.component';
+import { FeedbackComponent } from '../core/feedback/feedback.component';
 import { GradingBooleanComponent } from '../core/grading-boolean.component';
 import { GradingNumericComponent } from '../core/grading-numeric.component';
 import { GradingComponent } from '../core/grading.component';
