@@ -1,5 +1,5 @@
 import { ComponentRef, Directive, ElementRef, Host, Input, OnChanges, Renderer2 } from '@angular/core';
-import { Valence } from '../generated/graphql-types';
+import { Valence } from '../../generated/graphql-types';
 
 @Directive({
   selector: '[appValence]',
