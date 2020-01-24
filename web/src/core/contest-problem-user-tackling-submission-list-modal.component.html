@@ -1,1 +1,11 @@
-<p>contest-problem-user-tackling-submission-list-modal works!</p>
+<div class="submission-list-dialog-header">
+  <h4>
+    Submissions for: <strong>{{ data.assignmentView.assignment.problem.title | text }}</strong>
+  </h4>
+</div>
+<div class="submission-list-dialog-body">
+  <app-contest-problem-user-tackling-submission-list [data]="data"></app-contest-problem-user-tackling-submission-list>
+</div>
+<div class="submission-list-dialog-footer">
+  <button (click)="modal.close()" class="submission-list-dialog-close">Close</button>
+</div>

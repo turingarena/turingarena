@@ -10,15 +10,24 @@
 </ng-container>
 
 <ng-container *ngIf="data.submissions[data.submissions.length - 1] as lastSubmission">
-  <button class="problem-last-submission" (click)="modalService.open(lastSubmissionDialog, { size: 'lg' })">
-    <fa-icon *ngIf="lastSubmission.officialEvaluation.status !== 'PENDING'" icon="history"> </fa-icon>
-    <fa-icon *ngIf="lastSubmission.officialEvaluation.status === 'PENDING'" icon="spinner" [pulse]="true">
+  <button class="problem-last-submission" (click)="modalService.open(lastSubmissionModal, { size: 'lg' })">
+    <fa-icon *ngIf="lastSubmission.officialEvaluation?.status !== 'PENDING'" icon="history"></fa-icon>
+    <fa-icon *ngIf="lastSubmission.officialEvaluation?.status === 'PENDING'" icon="spinner" [pulse]="true">
     </fa-icon>
     Last submission
+    <ng-template #lastSubmissionModal let-modal>
+      <app-submission-modal [modal]="modal" [data]="lastSubmission">
+      </app-submission-modal>
+    </ng-template>
   </button>
 
-  <button class="problem-submission-list" (click)="modalService.open(submissionListDialog, { size: 'xl' })">
+  <button class="problem-submission-list" (click)="modalService.open(submissionListModal, { size: 'xl' })">
     <fa-icon icon="list"></fa-icon>
     All submissions
+    <ng-template #submissionListModal let-modal>
+      <app-contest-problem-user-tackling-submission-list-modal [modal]="modal" [data]="data">
+      </app-contest-problem-user-tackling-submission-list-modal>
+    </ng-template>
   </button>
+
 </ng-container>

@@ -2,7 +2,9 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import gql from 'graphql-tag';
 import { ContestProblemUserTacklingAsideFragment } from '../generated/graphql-types';
+import { contestProblemUserTacklingSubmissionListModalFragment } from './contest-problem-user-tackling-submission-list-modal.component';
 import { contestProblemUserTacklingSubmitModalFragment } from './contest-problem-user-tackling-submit-modal.component';
+import { submissionModalFragment } from './submission-modal.component';
 
 @Component({
   selector: 'app-contest-problem-user-tackling-aside',
@@ -25,10 +27,15 @@ export const contestProblemUserTacklingAsideFragment = gql`
       officialEvaluation {
         status
       }
+
+      ...SubmissionModal
     }
 
     ...ContestProblemUserTacklingSubmitModal
+    ...ContestProblemUserTacklingSubmissionListModal
   }
 
+  ${submissionModalFragment}
   ${contestProblemUserTacklingSubmitModalFragment}
+  ${contestProblemUserTacklingSubmissionListModalFragment}
 `;

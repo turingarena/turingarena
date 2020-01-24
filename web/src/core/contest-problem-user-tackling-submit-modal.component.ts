@@ -83,7 +83,7 @@ export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
             files,
           },
         },
-        refetchQueries: ['ContestQuery'],
+        refetchQueries: ['MainView'],
       })
       .toPromise();
 
