@@ -1,6 +1,6 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { BooleanGradingStateFragment } from '../generated/graphql-types';
+import { BooleanGradingStateFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-grading-boolean',

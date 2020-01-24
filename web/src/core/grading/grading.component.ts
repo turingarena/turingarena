@@ -1,6 +1,6 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { GradingStateFragment } from '../generated/graphql-types';
+import { GradingStateFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-grading',

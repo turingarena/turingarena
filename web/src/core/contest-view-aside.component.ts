@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { contestViewClockFragment } from './contest-view-clock.component';
-import { gradingStateFragment } from './grading.component';
+import { gradingStateFragment } from './grading/grading.component';
 import { textFragment } from './material/text.pipe';
 
 @Component({
