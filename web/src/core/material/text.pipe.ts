@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import gql from 'graphql-tag';
-import { TextFragment } from '../generated/graphql-types';
+import { TextFragment } from '../../generated/graphql-types';
 
 @Pipe({
   name: 'text',

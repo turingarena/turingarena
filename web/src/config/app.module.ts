@@ -28,10 +28,10 @@ import { MainViewMessageListComponent } from '../core/main-view-message-list.com
 import { MainViewSendMessageComponent } from '../core/main-view-send-message.component';
 import { MainViewComponent } from '../core/main-view.component';
 import { MainComponent } from '../core/main.component';
-import { MediaDownloadComponent } from '../core/media-download.component';
-import { MediaInlineComponent } from '../core/media-inline.component';
+import { MediaDownloadComponent } from '../core/material/media-download.component';
+import { MediaInlineComponent } from '../core/material/media-inline.component';
+import { TextPipe } from '../core/material/text.pipe';
 import { SubmissionModalComponent } from '../core/submission-modal.component';
-import { TextPipe } from '../core/text.pipe';
 import { TopBarComponent } from '../core/top-bar.component';
 import { ValenceDirective } from '../core/valence.directive';
 import { ApplyPurePipe } from '../util/apply-pure.pipe';

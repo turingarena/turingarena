@@ -4,8 +4,8 @@ import gql from 'graphql-tag';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside.component';
 import { contestViewAsideFragment } from './contest-view-aside.component';
-import { mediaInlineFragment } from './media-inline.component';
-import { textFragment } from './text.pipe';
+import { mediaInlineFragment } from './material/media-inline.component';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-contest-view',

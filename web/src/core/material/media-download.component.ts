@@ -1,6 +1,6 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { MediaDownloadFragment } from '../generated/graphql-types';
+import { MediaDownloadFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-media-download',

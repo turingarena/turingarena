@@ -3,7 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import gql from 'graphql-tag';
 import { ContestProblemUserTacklingSubmissionListModalFragment } from '../generated/graphql-types';
 import { contestProblemUserTacklingSubmissionListFragment } from './contest-problem-user-tackling-submission-list.component';
-import { textFragment } from './text.pipe';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-contest-problem-user-tackling-submission-list-modal',

@@ -10,7 +10,7 @@ import {
   SubmitMutationVariables,
 } from '../generated/graphql-types';
 import { FileLoadService } from '../util/file-load.service';
-import { textFragment } from './text.pipe';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-contest-problem-user-tackling-submit-modal',

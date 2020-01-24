@@ -3,9 +3,9 @@ import gql from 'graphql-tag';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { contestProblemUserTacklingAsideFragment } from './contest-problem-user-tackling-aside.component';
 import { gradingStateFragment } from './grading.component';
-import { mediaDownloadFragment } from './media-download.component';
-import { mediaInlineFragment } from './media-inline.component';
-import { textFragment } from './text.pipe';
+import { mediaDownloadFragment } from './material/media-download.component';
+import { mediaInlineFragment } from './material/media-inline.component';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-contest-problem-assignment-view-aside',

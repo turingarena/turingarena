@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import gql from 'graphql-tag';
 import { SubmissionModalFragment } from '../generated/graphql-types';
-import { textFragment } from './text.pipe';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-submission-modal',
