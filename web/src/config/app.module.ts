@@ -23,9 +23,9 @@ import { GradingBooleanComponent } from '../core/grading/grading-boolean.compone
 import { GradingNumericComponent } from '../core/grading/grading-numeric.component';
 import { GradingComponent } from '../core/grading/grading.component';
 import { LoginModalComponent } from '../core/login-modal.component';
-import { MainViewMessageListModalComponent } from '../core/main-view-message-list-modal.component';
-import { MainViewMessageListComponent } from '../core/main-view-message-list.component';
-import { MainViewSendMessageComponent } from '../core/main-view-send-message.component';
+import { MainViewMessageListModalComponent } from '../core/message/main-view-message-list-modal.component';
+import { MainViewMessageListComponent } from '../core/message/main-view-message-list.component';
+import { MainViewSendMessageComponent } from '../core/message/main-view-send-message.component';
 import { MainViewComponent } from '../core/main-view.component';
 import { MainComponent } from '../core/main.component';
 import { MediaDownloadComponent } from '../core/material/media-download.component';
