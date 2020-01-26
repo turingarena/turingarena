@@ -48,6 +48,7 @@ export class Evaluation extends BaseModel<Evaluation> {
     /** Submission to which this evaluation belongs to */
     @BelongsTo(() => Submission, 'submissionId')
     submission!: Submission;
+    getSubmission!: () => Promise<Submission>;
 
     /** Events of this submission */
     @HasMany(() => EvaluationEvent)

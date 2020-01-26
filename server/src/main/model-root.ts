@@ -17,7 +17,7 @@ export class ModelRoot {
     ) {
         this.table(Submission).afterSync('create foreign key', () => {
             this.sequelize.query(
-                'ALTER TABLE Submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (userId, contestId) REFERENCES Participations(userId, contestId)',
+                'ALTER TABLE submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (user_id, contest_id) REFERENCES participations(user_id, contest_id)',
             );
         });
 
@@ -30,7 +30,9 @@ export class ModelRoot {
         models: Object.values(modelConstructors),
         benchmark: true,
         repositoryMode: true,
-        logging: false,
+        define: {
+            underscored: true,
+        },
     }) as ModelRootSequelize;
 
     /** Shortcut for `this.sequelize.getRepository(modelClass)`. */

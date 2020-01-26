@@ -26,7 +26,7 @@ export class EvaluationEvent extends BaseModel<EvaluationEvent> {
             const { subtask, normalized_score, score } = this.data.IOISubtaskScore;
             await this.modelRoot.table(Achievement).create({
                 evaluationId: this.evaluationId,
-                subtaskIndex: subtask,
+                awardIndex: subtask,
                 // Store the normalized score if the max score is zero (FIXME: ugly hack)
                 grade: score === 0 ? normalized_score : score,
             });

@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { GradeVariable } from '../generated/graphql-types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
@@ -16,6 +17,43 @@ export const contestAwardAssignmentViewSchema = gql`
 
 export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
+
+    async getGradeVariable(): Promise<GradeVariable> {
+        const { gradeDomain: domain } = this.assignment.award;
+
+        switch (domain.__typename) {
+            case 'FulfillmentDomain':
+                return {
+                    __typename: 'FulfillmentVariable',
+                    domain,
+                    value:
+                        this.user !== null
+                            ? (await this.assignment.getBestAchievement(this.user))?.toFulfillmentValue(domain) ?? {
+                                  __typename: 'FulfillmentValue',
+                                  domain,
+                                  fulfilled: false,
+                                  valence: 'FAILURE',
+                              }
+                            : null,
+                };
+            case 'ScoreDomain':
+                return {
+                    __typename: 'ScoreVariable',
+                    domain,
+                    value:
+                        this.user !== null
+                            ? (await this.assignment.getBestAchievement(this.user))?.toScoreValue(domain) ?? {
+                                  __typename: 'ScoreValue',
+                                  domain,
+                                  score: 0,
+                                  valence: 'FAILURE',
+                              }
+                            : null,
+                };
+            default:
+                throw new Error();
+        }
+    }
 }
 
 export const contestAwardAssignmentViewResolvers: ResolversWithModels<{
@@ -26,16 +64,6 @@ export const contestAwardAssignmentViewResolvers: ResolversWithModels<{
         user: ({ user }) => user,
         problemAssignmentView: async ({ assignment, user }) =>
             new ContestProblemAssignmentView(assignment.problemAssignment, user),
-
-        gradeVariable: async ({ assignment, user }) => ({
-            // TODO
-            __typename: 'ScoreVariable',
-            domain: {
-                __typename: 'NumericGradeDomain',
-                max: 30,
-                allowPartial: true,
-                decimalDigits: 1,
-            },
-        }),
+        gradeVariable: view => view.getGradeVariable(),
     },
 };
