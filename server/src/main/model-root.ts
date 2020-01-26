@@ -30,6 +30,7 @@ export class ModelRoot {
         models: Object.values(modelConstructors),
         benchmark: true,
         repositoryMode: true,
+        logging: false,
     }) as ModelRootSequelize;
 
     /** Shortcut for `this.sequelize.getRepository(modelClass)`. */

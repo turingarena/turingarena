@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../generated/graphql-types';
+import { Achievement } from './achievement';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
 import { contestAwardAssignmentViewResolvers, contestAwardAssignmentViewSchema } from './contest-award-assignment-view';
@@ -98,6 +99,7 @@ export const modelConstructors = {
     SubmissionFile,
     Evaluation,
     EvaluationEvent,
+    Achievement,
 };
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */

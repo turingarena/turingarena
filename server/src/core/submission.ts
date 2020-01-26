@@ -112,18 +112,26 @@ export class Submission extends BaseModel<Submission> {
 
     /**
      * Extract the files of this submission in the specified base dir.
-     * It extract files as: `${base}/${submissionId}/${fieldId}/${fileName}.
+     * It extract files as: `${base}/${submissionId}/${fieldName}.${fileTypeName}${extension}`
      *
      * @param base base directory
      */
     async extract(base: string) {
         const submissionFiles = await this.getSubmissionFiles();
 
+        const submissionPath = path.join(base, this.id.toString());
+
         for (const submissionFile of submissionFiles) {
-            const content = await submissionFile.getContent();
-            const filePath = path.join(base, this.id.toString(), submissionFile.fieldName, submissionFile.fileName);
+            const content = await submissionFile.getContent({ attributes: ['id', 'content'] });
+            const { fieldName, fileTypeName } = submissionFile;
+
+            const extension = '.cpp'; // FIXME: determine extension from file type
+
+            const filePath = path.join(submissionPath, `${fieldName}.${fileTypeName}${extension}`);
             await content.extract(filePath);
         }
+
+        return submissionPath;
     }
 }
 

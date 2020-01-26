@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { AllowNull, BelongsTo, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
+import { Achievement } from './achievement';
 import { Evaluation } from './evaluation';
 
 /** Evant of an evaluation */
@@ -19,9 +20,21 @@ export class EvaluationEvent extends BaseModel<EvaluationEvent> {
     @AllowNull(false)
     @Column(DataTypes.JSON)
     data!: TaskMakerEvent;
+
+    async storeAchievements() {
+        if ('IOISubtaskScore' in this.data) {
+            const { subtask, normalized_score, score } = this.data.IOISubtaskScore;
+            await this.modelRoot.table(Achievement).create({
+                evaluationId: this.evaluationId,
+                subtaskIndex: subtask,
+                // Store the normalized score if the max score is zero (FIXME: ugly hack)
+                grade: score === 0 ? normalized_score : score,
+            });
+        }
+    }
 }
 
-type TaskMakerEvent =
+export type TaskMakerEvent =
     | TaskMakerIOISolutionEvent
     | TaskMakerIOISubtaskScoreEvent
     | TaskMakerIOITestCaseScoreEvent

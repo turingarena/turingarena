@@ -2,10 +2,10 @@ import { spawn } from 'child_process';
 import * as path from 'path';
 import * as readline from 'readline';
 import { fromEvent } from 'rxjs';
-import { bufferTime, concatMap, takeUntil, tap } from 'rxjs/operators';
+import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from 'rxjs/operators';
 import { ModelRoot } from '../main/model-root';
 import { Evaluation, EvaluationStatus } from './evaluation';
-import { EvaluationEvent } from './evaluation-event';
+import { EvaluationEvent, TaskMakerEvent } from './evaluation-event';
 import { extractProblemFiles } from './material/problem-task-info';
 import { Submission } from './submission';
 
@@ -29,10 +29,10 @@ export async function evaluate(root: ModelRoot, submission: Submission) {
     const problem = await submission.getProblem();
     const problemDir = await extractProblemFiles(problem, path.join(root.config.cachePath, 'problem'));
 
-    const solutionPath = path.join(root.config.cachePath, 'submission');
-    await submission.extract(solutionPath);
+    const submissionPath = await submission.extract(path.join(root.config.cachePath, 'submission'));
 
-    const taskMakerArgs = ['--ui=json', '--task-dir', problemDir, '--solution', solutionPath];
+    const solutionPath = path.join(submissionPath, 'solution.cpp.cpp');
+    const taskMakerArgs = ['--ui=json', '--no-statement', '--task-dir', problemDir, '--solution', solutionPath];
 
     const process = spawn(root.config.taskMakerExecutable, taskMakerArgs);
 
@@ -41,28 +41,35 @@ export async function evaluate(root: ModelRoot, submission: Submission) {
     const bufferTimeSpanMillis = 200;
     const maxBufferSize = 20;
 
-    await fromEvent(stdoutLineReader, 'line')
-        .pipe(
-            takeUntil(fromEvent(stdoutLineReader, 'close')),
-            tap(event => {
-                console.log(`Received task-maker event ${event}`);
-            }),
-            bufferTime(bufferTimeSpanMillis, undefined, maxBufferSize),
-            concatMap(async events => {
-                console.log(`Inserting ${events.length} buffered events.`);
-                await root.table(EvaluationEvent).bulkCreate(
-                    events.map(data => ({
-                        evaluationId: evaluation.id,
-                        data,
-                    })),
-                );
-            }),
-        )
-        .toPromise();
+    const [[statusCode], events] = await Promise.all([
+        fromEvent<[number, NodeJS.Signals]>(process, 'close')
+            .pipe(first())
+            .toPromise(),
+        fromEvent<string>(stdoutLineReader, 'line')
+            .pipe(
+                takeUntil(fromEvent(stdoutLineReader, 'close')),
+                map(data => JSON.parse(data) as TaskMakerEvent),
+                bufferTime(bufferTimeSpanMillis, undefined, maxBufferSize),
+                concatMap(async eventsData => {
+                    console.log(`Inserting ${eventsData.length} buffered events.`);
 
-    const statusCode: number = await new Promise(resolve => process.on('close', resolve));
+                    return root.table(EvaluationEvent).bulkCreate(
+                        eventsData.map(data => ({
+                            evaluationId: evaluation.id,
+                            data,
+                        })),
+                    );
+                }),
+                concatAll(),
+                toArray(),
+            )
+            .toPromise(),
+    ]);
 
     if (statusCode === 0) {
+        for (const event of events) {
+            await event.storeAchievements();
+        }
         await evaluation.update({
             status: EvaluationStatus.SUCCESS,
         });

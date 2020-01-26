@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { FindOptions } from 'sequelize/types';
 import { BaseModel } from '../main/base-model';
 import { FileContent } from './file-content';
 import { Submission } from './submission';
@@ -47,5 +48,5 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
 
     @BelongsTo(() => FileContent)
     content!: FileContent;
-    getContent!: () => Promise<FileContent>;
+    getContent!: (options?: FindOptions) => Promise<FileContent>;
 }
