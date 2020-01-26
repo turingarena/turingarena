@@ -42,13 +42,11 @@ export class Achievement extends BaseModel<Achievement> {
         return material.awards[this.awardIndex];
     }
 
-    toScoreValue(domain: ScoreDomain): ScoreValue {
-        const score = this.grade;
-
-        return new ScoreValue(domain, score);
+    getScoreValue(domain: ScoreDomain): ScoreValue {
+        return new ScoreValue(domain, this.grade);
     }
 
-    toFulfillmentValue(): boolean {
+    isFulfilled(): boolean {
         return this.grade === 1;
     }
 }

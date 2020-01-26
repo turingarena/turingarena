@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { contestProblemUserTacklingAsideFragment } from './contest-problem-user-tackling-aside.component';
 import { gradeVariableFragment } from './grading/grade-variable.component';
+import { scoreVariableFragment } from './grading/score-variable.component';
 import { mediaDownloadFragment } from './material/media-download.component';
 import { mediaInlineFragment } from './material/media-inline.component';
 import { textFragment } from './material/text.pipe';
@@ -41,8 +42,8 @@ export const contestProblemAssignmentViewAsideFragment = gql`
       }
     }
 
-    gradeVariable {
-      ...GradeVariable
+    totalScoreVariable {
+      ...ScoreVariable
     }
 
     awardAssignmentViews {
@@ -68,6 +69,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
   ${textFragment}
   ${mediaInlineFragment}
   ${mediaDownloadFragment}
+  ${scoreVariableFragment}
   ${gradeVariableFragment}
   ${contestProblemUserTacklingAsideFragment}
 `;

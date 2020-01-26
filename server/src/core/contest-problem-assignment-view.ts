@@ -3,14 +3,13 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemUserTackling } from './contest-problem-user-tackling';
 import { ContestView } from './contest-view';
-import { ScoreVariable } from './feedback/score';
-import { Submission } from './submission';
 import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
     """
-    Refers to a given problem assigned in a given contest as seen by a given user or anonymously.
+    Refers to a given problem, assigned in a given contest, as seen by a given user or anonymously.
     """
     type ContestProblemAssignmentView {
         "Same problem assigned in same contest"
@@ -28,60 +27,29 @@ export const contestProblemAssignmentViewSchema = gql`
         """
         tackling: ContestProblemUserTackling
 
-        "Current grading seen by the user for this problem in this contest."
-        gradeVariable: GradeVariable!
+        "Current score seen by the user for this problem in this contest."
+        totalScoreVariable: ScoreVariable!
 
         "Awards of this problem assigned in same contest as seen by same user (or anonymously)"
         awardAssignmentViews: [ContestAwardAssignmentView!]!
-    }
-
-    """
-    Refers to a given problem assigned in a given contest tackled by a given user.
-    Tackling means having a collection of submissions, and possibly submit a new one.
-    This is separate from ContestProblemAssignmentView since a ContestProblemUserTackling
-    is available only for non-anonymous users who are allowed to have submissions (e.g., only after the contest is started).
-    """
-    type ContestProblemUserTackling {
-        "Same problem assigned in same contest as seen by same user"
-        assignmentView: ContestProblemAssignmentView!
-
-        "User tackling the problem"
-        user: User!
-
-        "List of submissions for this problem in this contest from this user"
-        submissions: [Submission!]!
-
-        "Whether new submissions (see 'submissions') are accepted at the moment"
-        canSubmit: Boolean!
     }
 `;
 
 export class ContestProblemAssignmentView {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
 
-    async getScoreVariable() {
+    tackling = this.user !== null ? new ContestProblemUserTackling(this.assignment, this.user) : null;
+
+    async getTotalScoreVariable() {
         const problem = await this.assignment.getProblem();
-        const material = await problem.getMaterial();
-        const variables = await Promise.all(
-            material.awards.map(award =>
-                new ContestAwardAssignmentView(
-                    new ContestAwardAssignment(this.assignment, award),
-                    this.user,
-                ).getGradeVariable(),
-            ),
-        );
+        const { scoreDomain: domain } = await problem.getMaterial();
 
-        return ScoreVariable.total(variables.filter((v): v is ScoreVariable => v instanceof ScoreVariable));
+        return domain.variable((await this.tackling?.getScore()) ?? null);
     }
-}
-
-export class ContestProblemUserTackling {
-    constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
 }
 
 export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
     ContestProblemAssignmentView: ContestProblemAssignmentView;
-    ContestProblemUserTackling: ContestProblemUserTackling;
 }> = {
     ContestProblemAssignmentView: {
         assignment: ({ assignment }) => assignment,
@@ -89,7 +57,7 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         problemSetView: async ({ assignment, user }) => new ContestView(await assignment.getContest(), user),
         tackling: async ({ assignment, user }) =>
             user !== null ? new ContestProblemUserTackling(assignment, user) : null,
-        gradeVariable: async view => view.getScoreVariable(),
+        totalScoreVariable: async view => view.getTotalScoreVariable(),
         awardAssignmentViews: async ({ assignment, user }) => {
             const problem = await assignment.getProblem();
             const material = await problem.getMaterial();
@@ -98,12 +66,5 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
                 award => new ContestAwardAssignmentView(new ContestAwardAssignment(assignment, award), user),
             );
         },
-    },
-    ContestProblemUserTackling: {
-        canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
-        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, modelRoot } }) =>
-            modelRoot.table(Submission).findAll({ where: { problemId, contestId, userId } }),
-        assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
-        user: ({ user }) => user,
     },
 };

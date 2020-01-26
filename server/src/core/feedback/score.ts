@@ -3,9 +3,9 @@ import { Valence } from '../../generated/graphql-types';
 import { ResolversWithModels } from '../../main/resolver-types';
 
 export const scoreSchema = gql`
-    "Object containing a score, i.e., a number of points from zero to some maximum value."
+    "Object containing a score, i.e., a (possibly decimal) number of points from zero to some maximum value."
     type ScoreValue implements GenericGradeValue {
-        "Number of points."
+        "The number of points."
         score: Float!
         "Qualitative feeling (valence) associated with this score."
         valence: Valence!
@@ -37,7 +37,7 @@ export class ScoreDomain {
         return new ScoreValue(this, 0);
     }
 
-    createVariable(value: ScoreValue | null) {
+    variable(value: ScoreValue | null) {
         return new ScoreVariable(this, value);
     }
 
@@ -63,14 +63,6 @@ export class ScoreValue {
 
 export class ScoreVariable {
     constructor(readonly domain: ScoreDomain, readonly value: ScoreValue | null) {}
-
-    static total(variables: ScoreVariable[]) {
-        const domain = ScoreDomain.total(variables.map(v => v.domain));
-        const values = variables.map(v => v.value);
-        const value = values.some(v => v === null) ? null : ScoreValue.total(values as ScoreValue[]);
-
-        return new ScoreVariable(domain, value);
-    }
 }
 
 export const scoreResolvers: ResolversWithModels<{

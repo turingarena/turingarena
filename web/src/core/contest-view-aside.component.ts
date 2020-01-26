@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { contestViewClockFragment } from './contest-view-clock.component';
-import { gradeVariableFragment } from './grading/grade-variable.component';
+import { scoreVariableFragment } from './grading/score-variable.component';
 import { textFragment } from './material/text.pipe';
 
 @Component({
@@ -19,8 +19,8 @@ export class ContestViewAsideComponent {
 export const contestViewAsideFragment = gql`
   fragment ContestViewAside on ContestView {
     problemSetView {
-      gradeVariable {
-        ...GradeVariable
+      totalScoreVariable {
+        ...ScoreVariable
       }
 
       assignmentViews {
@@ -32,8 +32,8 @@ export const contestViewAsideFragment = gql`
             }
           }
         }
-        gradeVariable {
-          ...GradeVariable
+        totalScoreVariable {
+          ...ScoreVariable
         }
       }
     }
@@ -42,6 +42,6 @@ export const contestViewAsideFragment = gql`
   }
 
   ${textFragment}
-  ${gradeVariableFragment}
+  ${scoreVariableFragment}
   ${contestViewClockFragment}
 `;

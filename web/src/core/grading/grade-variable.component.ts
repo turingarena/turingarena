@@ -1,8 +1,8 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { GradeVariableFragment } from '../../generated/graphql-types';
-import { booleanGradeVariableFragment } from './fulfillment-variable.component';
-import { numericGradeVariableFragment } from './score-variable.component';
+import { fulfillmentVariableFragment } from './fulfillment-variable.component';
+import { scoreVariableFragment } from './score-variable.component';
 
 @Component({
   selector: 'app-grade-variable',
@@ -31,6 +31,6 @@ export const gradeVariableFragment = gql`
     }
   }
 
-  ${numericGradeVariableFragment}
-  ${booleanGradeVariableFragment}
+  ${scoreVariableFragment}
+  ${fulfillmentVariableFragment}
 `;

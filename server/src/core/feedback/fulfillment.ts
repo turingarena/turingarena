@@ -26,7 +26,7 @@ export const fulfillmentSchema = gql`
 `;
 
 export class FulfillmentDomain {
-    createVariable(fulfilled: boolean | null) {
+    variable(fulfilled: boolean | null) {
         return new FulfillmentVariable(fulfilled);
     }
 }

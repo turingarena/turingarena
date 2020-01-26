@@ -12,7 +12,7 @@ export class GradingNumericComponent {
   data!: ScoreVariableFragment;
 }
 
-export const numericGradeVariableFragment = gql`
+export const scoreVariableFragment = gql`
   fragment ScoreVariable on ScoreVariable {
     domain {
       max
@@ -21,6 +21,7 @@ export const numericGradeVariableFragment = gql`
     }
     value {
       score
+      valence
     }
   }
 `;

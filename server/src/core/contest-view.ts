@@ -1,19 +1,32 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
+import { ContestUserTackling } from './contest-user-tackling';
 import { User } from './user';
 
 export const contestViewSchema = gql`
+    """
+    A given contest, as seen by a given user or anonymously.
+    """
     type ContestView {
+        "The given contest."
         contest: Contest!
+        "The given user."
         user: User
 
+        "The problem-set of the given contest, as seen by the same user, if it is currently visible, and null otherwise."
         problemSetView: ContestProblemSetView
     }
 `;
 
 export class ContestView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
+
+    readonly tackling = this.user !== null ? new ContestUserTackling(this.contest, this.user) : null;
+
+    async getTotalScoreVariable() {
+        return (await this.contest.getScoreDomain()).variable((await this.tackling?.getScore()) ?? null);
+    }
 }
 
 export const contestViewResolvers: ResolversWithModels<{

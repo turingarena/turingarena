@@ -16,6 +16,8 @@ import {
 } from './contest-problem-assignment-view';
 import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
 import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './contest-problem-set-view';
+import { contestProblemUserTacklingResolvers, contestProblemUserTacklingSchema } from './contest-problem-user-tackling';
+import { contestUserTacklingResolvers, contestUserTacklingSchema } from './contest-user-tackling';
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
@@ -64,7 +66,9 @@ export const schema = gql`
     ${mainViewSchema}
     ${contestViewSchema}
     ${contestProblemSetViewSchema}
+    ${contestUserTacklingSchema}
     ${contestProblemAssignmentViewSchema}
+    ${contestProblemUserTacklingSchema}
     ${contestAwardAssignmentViewSchema}
 
     ${textSchema}
@@ -120,9 +124,11 @@ export const resolvers: Resolvers = {
 
     ...mainViewResolvers,
     ...contestViewResolvers,
+    ...contestUserTacklingResolvers,
     ...contestProblemSetViewResolvers,
     ...contestProblemAssignmentViewResolvers,
     ...contestAwardAssignmentViewResolvers,
+    ...contestProblemUserTacklingResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

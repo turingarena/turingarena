@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
+import { ScoreDomain } from '../feedback/score';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
@@ -28,6 +29,8 @@ export const problemMaterialSchema = gql`
         This list should always include a catch-all rule.
         """
         submissionFileTypeRules: [SubmissionFileTypeRule!]!
+
+        totalScoreDomain: ScoreDomain!
     }
 
     type ProblemAttachment {
@@ -102,6 +105,10 @@ export class ProblemMaterial {
     submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
     submissionFileTypes = [defaultType];
     submissionFileTypeRules = [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }];
+
+    scoreDomain = ScoreDomain.total(
+        this.awards.map(a => a.gradeDomain).filter((d): d is ScoreDomain => d instanceof ScoreDomain),
+    );
 }
 
 const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };

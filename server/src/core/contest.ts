@@ -9,7 +9,9 @@ import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
 import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ScoreDomain } from './feedback/score';
 import { FileContent } from './file-content';
+import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
 import { Problem } from './problem';
 import { User } from './user';
@@ -112,6 +114,14 @@ export class Contest extends BaseModel<Contest> {
         if (now < start) return 'NOT_STARTED';
         else if (now < end) return 'RUNNING';
         else return 'NOT_STARTED';
+    }
+
+    async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
+        return Promise.all((await this.getProblemAssignments()).map(async a => (await a.getProblem()).getMaterial()));
+    }
+
+    async getScoreDomain(): Promise<ScoreDomain> {
+        return ScoreDomain.total((await this.getProblemSetMaterial()).map(m => m.scoreDomain));
     }
 }
 
