@@ -10,7 +10,7 @@ app-contest-problem-user-tackling-aside {
   @extend .btn, .btn-block, .btn-success;
 }
 
-.problem-last-submission,
-.problem-submission-list {
+.problem-last-submission-button,
+.problem-submission-list-button {
   @extend .btn, .btn-block, .btn-outline-dark;
 }
