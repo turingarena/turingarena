@@ -20,6 +20,6 @@
 
 <ng-template #grading let-value="value" let-eGridCell="eGridCell">
   <ng-container *ngIf="value !== undefined">
-    <app-grading [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value"> </app-grading>
+    <app-grade-variable [appGrading]="value" [appGradingNativeElement]="eGridCell" [grading]="value"> </app-grade-variable>
   </ng-container>
 </ng-template>

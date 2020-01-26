@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { GradingState } from '../generated/graphql-types';
+import { GradeVariable } from '../generated/graphql-types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ContestView } from './contest-view';
@@ -11,7 +11,7 @@ export const contestProblemSetViewSchema = gql`
         contestView: ContestView!
         assignmentViews: [ContestProblemAssignmentView!]!
 
-        gradingState: GradingState!
+        gradeVariable: GradeVariable!
     }
 `;
 
@@ -24,14 +24,14 @@ export const contestProblemSetViewResolvers: ResolversWithModels<{
         contestView: contestView => contestView,
         assignmentViews: async ({ contest, user }) =>
             (await contest.getProblemAssignments()).map(item => new ContestProblemAssignmentView(item, user)),
-        gradingState: async ({ contest, user }): Promise<GradingState> => ({
+        gradeVariable: async ({ contest, user }): Promise<GradeVariable> => ({
             // TODO
-            __typename: 'NumericGradingState',
+            __typename: 'ScoreVariable',
             domain: {
                 __typename: 'NumericGradeDomain',
                 max: 300,
                 allowPartial: true,
-                decimalPrecision: 1,
+                decimalDigits: 1,
             },
         }),
     },

@@ -1,0 +1,6 @@
+<ng-container [ngSwitch]="data.__typename">
+  <app-score-variable *ngSwitchCase="'ScoreVariable'" [data]="data" [appValence]="data.value?.valence">
+  </app-score-variable>
+  <app-fulfillment-variable *ngSwitchCase="'FulfillmentVariable'" [data]="data" [appValence]="data.value?.valence">
+  </app-fulfillment-variable>
+</ng-container>

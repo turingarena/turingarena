@@ -34,7 +34,7 @@ export class Award {
                   __typename: 'NumericGradeDomain',
                   max: this.subtaskInfo.max_score,
                   allowPartial: true, // FIXME
-                  decimalPrecision: 0, // FIXME
+                  decimalDigits: 0, // FIXME
               }
             : {
                   __typename: 'BooleanGradeDomain',

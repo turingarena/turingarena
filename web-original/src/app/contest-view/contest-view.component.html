@@ -49,7 +49,7 @@
             <ng-container *ngIf="problemSet.view.grading.grade">
               <h2 class="contest-score-title">Score</h2>
               <div class="contest-score">
-                <app-grading [grading]="problemSet.view.grading"></app-grading>
+                <app-grade-variable [grading]="problemSet.view.grading"></app-grade-variable>
               </div>
             </ng-container>
           </ng-container>
@@ -75,7 +75,7 @@
                 >
                   {{ problem.material.title | textVariant: 'short' }}
                   <span class="contest-problem-score" [appGrading]="problem.view.grading">
-                    <app-grading [grading]="problem.view.grading"></app-grading>
+                    <app-grade-variable [grading]="problem.view.grading"></app-grade-variable>
                   </span>
                 </a>
               </ng-container>
@@ -148,7 +148,7 @@
                       <div class="problem-award" [title]="awardView.material.title | textVariant">
                         {{ awardView.material.title | textVariant }}
                         <span class="problem-award-grading" [appGrading]="awardView.grading">
-                          <app-grading [grading]="awardView.grading"></app-grading>
+                          <app-grade-variable [grading]="awardView.grading"></app-grade-variable>
                         </span>
                       </div>
                     </ng-container>

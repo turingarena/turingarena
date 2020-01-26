@@ -10,7 +10,7 @@ export const contestAwardAssignmentViewSchema = gql`
         user: User
         problemAssignmentView: ContestProblemAssignmentView!
 
-        gradingState: GradingState!
+        gradeVariable: GradeVariable!
     }
 `;
 
@@ -27,14 +27,14 @@ export const contestAwardAssignmentViewResolvers: ResolversWithModels<{
         problemAssignmentView: async ({ assignment, user }) =>
             new ContestProblemAssignmentView(assignment.problemAssignment, user),
 
-        gradingState: async ({ assignment, user }) => ({
+        gradeVariable: async ({ assignment, user }) => ({
             // TODO
-            __typename: 'NumericGradingState',
+            __typename: 'ScoreVariable',
             domain: {
                 __typename: 'NumericGradeDomain',
                 max: 30,
                 allowPartial: true,
-                decimalPrecision: 1,
+                decimalDigits: 1,
             },
         }),
     },

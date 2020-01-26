@@ -6,8 +6,8 @@
       <ng-container *ngFor="let awardAssignmentView of data.awardAssignmentViews">
         <div class="problem-award" [title]="awardAssignmentView.assignment.award.title | text">
           {{ awardAssignmentView.assignment.award.title | text }}
-          <span class="problem-award-grading" [appValence]="awardAssignmentView.gradingState">
-            <app-grading [data]="awardAssignmentView.gradingState"></app-grading>
+          <span class="problem-award-grading" [appValence]="awardAssignmentView.gradeVariable">
+            <app-grade-variable [data]="awardAssignmentView.gradeVariable"></app-grade-variable>
           </span>
         </div>
       </ng-container>

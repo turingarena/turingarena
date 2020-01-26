@@ -28,7 +28,7 @@ export const contestProblemAssignmentViewSchema = gql`
         tackling: ContestProblemUserTackling
 
         "Current grading seen by the user for this problem in this contest."
-        gradingState: GradingState!
+        gradeVariable: GradeVariable!
 
         "Awards of this problem assigned in same contest as seen by same user (or anonymously)"
         awardAssignmentViews: [ContestAwardAssignmentView!]!
@@ -73,14 +73,14 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         problemSetView: async ({ assignment, user }) => new ContestView(await assignment.getContest(), user),
         tackling: async ({ assignment, user }) =>
             user !== null ? new ContestProblemUserTackling(assignment, user) : null,
-        gradingState: async ({ assignment, user }) => ({
+        gradeVariable: async ({ assignment, user }) => ({
             // TODO
-            __typename: 'NumericGradingState',
+            __typename: 'ScoreVariable',
             domain: {
                 __typename: 'NumericGradeDomain',
                 max: 100,
                 allowPartial: true,
-                decimalPrecision: 1,
+                decimalDigits: 1,
             },
         }),
         awardAssignmentViews: async ({ assignment, user }) => {

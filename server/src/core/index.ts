@@ -18,13 +18,15 @@ import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './c
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
-import { feedbackSlotSchema } from './feedback/feedback-slot';
+import { fulfillmentSchema } from './feedback/fulfillment';
+import { gradeSchema } from './feedback/grade';
+import { memoryUsageSchema } from './feedback/memory-usage';
+import { messageSchema } from './feedback/message';
+import { scoreSchema } from './feedback/score';
+import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
+import { variableSchema } from './feedback/variable';
 import { FileContent, fileContentResolvers, fileContentSchema } from './file-content';
-import { gradingSchema } from './grading/grading';
-import { booleanGradingSchema } from './grading/grading-boolean';
-import { genericGradingSchema } from './grading/grading-generic';
-import { numericGradingSchema } from './grading/grading-numeric';
 import { mainViewResolvers, mainViewSchema } from './main-view';
 import { awardResolvers, awardSchema } from './material/award';
 import { mediaResolvers, mediaSchema } from './material/media';
@@ -68,13 +70,14 @@ export const schema = gql`
     ${mediaSchema}
     ${problemMaterialSchema}
 
-    ${genericGradingSchema}
-    ${numericGradingSchema}
-    ${booleanGradingSchema}
-    ${gradingSchema}
-
-    ${feedbackSlotSchema}
+    ${variableSchema}
+    ${gradeSchema}
+    ${scoreSchema}
+    ${fulfillmentSchema}
+    ${messageSchema}
     ${valenceSchema}
+    ${timeUsageSchema}
+    ${memoryUsageSchema}
 
     enum Ok {
         OK
