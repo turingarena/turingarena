@@ -19,11 +19,11 @@ import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './c
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
-import { fulfillmentSchema } from './feedback/fulfillment';
-import { gradeSchema } from './feedback/grade';
+import { fulfillmentResolvers, fulfillmentSchema } from './feedback/fulfillment';
+import { gradeResolvers, gradeSchema } from './feedback/grade';
 import { memoryUsageSchema } from './feedback/memory-usage';
 import { messageSchema } from './feedback/message';
-import { scoreSchema } from './feedback/score';
+import { scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
 import { variableSchema } from './feedback/variable';
@@ -126,4 +126,8 @@ export const resolvers: Resolvers = {
 
     ...textResolvers,
     ...mediaResolvers,
+
+    ...gradeResolvers,
+    ...scoreResolvers,
+    ...fulfillmentResolvers,
 };

@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
-import { FulfillmentDomain, FulfillmentValue, ScoreDomain, ScoreValue } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
 import { Evaluation } from './evaluation';
+import { ScoreDomain, ScoreValue } from './feedback/score';
 
 export const achievementSchema = gql`
     type Achievement {
@@ -45,22 +45,10 @@ export class Achievement extends BaseModel<Achievement> {
     toScoreValue(domain: ScoreDomain): ScoreValue {
         const score = this.grade;
 
-        return {
-            __typename: 'ScoreValue',
-            domain,
-            score,
-            valence: score >= domain.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'SUCCESS',
-        };
+        return new ScoreValue(domain, score);
     }
 
-    toFulfillmentValue(domain: FulfillmentDomain): FulfillmentValue {
-        const fulfilled = this.grade === 1;
-
-        return {
-            __typename: 'FulfillmentValue',
-            domain,
-            fulfilled,
-            valence: fulfilled ? 'SUCCESS' : 'FAILURE',
-        };
+    toFulfillmentValue(): boolean {
+        return this.grade === 1;
     }
 }

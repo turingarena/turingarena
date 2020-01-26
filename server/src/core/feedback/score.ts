@@ -1,4 +1,6 @@
 import { gql } from 'apollo-server-core';
+import { Valence } from '../../generated/graphql-types';
+import { ResolversWithModels } from '../../main/resolver-types';
 
 export const scoreSchema = gql`
     "Object containing a score, i.e., a number of points from zero to some maximum value."
@@ -27,3 +29,55 @@ export const scoreSchema = gql`
         value: ScoreValue
     }
 `;
+
+export class ScoreDomain {
+    constructor(readonly max: number, readonly decimalDigits: number, readonly allowPartial: boolean) {}
+
+    zero() {
+        return new ScoreValue(this, 0);
+    }
+
+    createVariable(value: ScoreValue | null) {
+        return new ScoreVariable(this, value);
+    }
+
+    static total(domains: ScoreDomain[]) {
+        return new ScoreDomain(
+            domains.map(d => d.max).reduce((a, b) => a + b),
+            domains.map(d => d.decimalDigits).reduce((a, b) => Math.max(a, b)),
+            true,
+        );
+    }
+}
+
+export class ScoreValue {
+    constructor(readonly domain: ScoreDomain, readonly score: number) {}
+
+    static total(values: ScoreValue[]) {
+        return new ScoreValue(
+            ScoreDomain.total(values.map(v => v.domain)),
+            values.map(v => v.score).reduce((a, b) => a + b),
+        );
+    }
+}
+
+export class ScoreVariable {
+    constructor(readonly domain: ScoreDomain, readonly value: ScoreValue | null) {}
+
+    static total(variables: ScoreVariable[]) {
+        const domain = ScoreDomain.total(variables.map(v => v.domain));
+        const values = variables.map(v => v.value);
+        const value = values.some(v => v === null) ? null : ScoreValue.total(values as ScoreValue[]);
+
+        return new ScoreVariable(domain, value);
+    }
+}
+
+export const scoreResolvers: ResolversWithModels<{
+    ScoreValue: ScoreValue;
+}> = {
+    ScoreValue: {
+        valence: ({ domain: { max }, score }): Valence =>
+            score >= max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE',
+    },
+};

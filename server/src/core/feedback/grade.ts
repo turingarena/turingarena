@@ -1,4 +1,7 @@
 import { gql } from 'apollo-server-core';
+import { ResolversWithModels } from '../../main/resolver-types';
+import { FulfillmentDomain, FulfillmentVariable } from './fulfillment';
+import { ScoreDomain, ScoreVariable } from './score';
 
 export const gradeSchema = gql`
     """
@@ -29,3 +32,23 @@ export const gradeSchema = gql`
         value: GenericGradeValue
     }
 `;
+
+export const gradeResolvers: ResolversWithModels<{
+    GradeDomain: ScoreDomain | FulfillmentDomain;
+    GradeVariable: ScoreVariable | FulfillmentVariable;
+}> = {
+    GradeDomain: {
+        __resolveType: domain => {
+            if (domain instanceof ScoreDomain) return 'ScoreDomain';
+            if (domain instanceof FulfillmentDomain) return 'FulfillmentDomain';
+            throw new Error(`Unknown grade domain ${domain}`);
+        },
+    },
+    GradeVariable: {
+        __resolveType: variable => {
+            if (variable instanceof ScoreVariable) return 'ScoreVariable';
+            if (variable instanceof FulfillmentVariable) return 'FulfillmentVariable';
+            throw new Error(`Unknown grade variable ${variable}`);
+        },
+    },
+};

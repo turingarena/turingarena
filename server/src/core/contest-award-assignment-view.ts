@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-core';
-import { GradeVariable } from '../generated/graphql-types';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
+import { FulfillmentDomain } from './feedback/fulfillment';
+import { ScoreDomain } from './feedback/score';
 import { User } from './user';
 
 export const contestAwardAssignmentViewSchema = gql`
@@ -18,41 +19,26 @@ export const contestAwardAssignmentViewSchema = gql`
 export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
 
-    async getGradeVariable(): Promise<GradeVariable> {
+    async getGradeVariable() {
         const { gradeDomain: domain } = this.assignment.award;
 
-        switch (domain.__typename) {
-            case 'FulfillmentDomain':
-                return {
-                    __typename: 'FulfillmentVariable',
-                    domain,
-                    value:
-                        this.user !== null
-                            ? (await this.assignment.getBestAchievement(this.user))?.toFulfillmentValue(domain) ?? {
-                                  __typename: 'FulfillmentValue',
-                                  domain,
-                                  fulfilled: false,
-                                  valence: 'FAILURE',
-                              }
-                            : null,
-                };
-            case 'ScoreDomain':
-                return {
-                    __typename: 'ScoreVariable',
-                    domain,
-                    value:
-                        this.user !== null
-                            ? (await this.assignment.getBestAchievement(this.user))?.toScoreValue(domain) ?? {
-                                  __typename: 'ScoreValue',
-                                  domain,
-                                  score: 0,
-                                  valence: 'FAILURE',
-                              }
-                            : null,
-                };
-            default:
-                throw new Error();
+        if (domain instanceof FulfillmentDomain) {
+            return domain.createVariable(
+                this.user !== null
+                    ? (await this.assignment.getBestAchievement(this.user))?.toFulfillmentValue() ?? false
+                    : null,
+            );
         }
+
+        if (domain instanceof ScoreDomain) {
+            return domain.createVariable(
+                this.user !== null
+                    ? (await this.assignment.getBestAchievement(this.user))?.toScoreValue(domain) ?? domain.zero()
+                    : null,
+            );
+        }
+
+        throw new Error(`unexpected grade domain ${domain}`);
     }
 }
 

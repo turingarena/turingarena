@@ -1,4 +1,6 @@
 import { gql } from 'apollo-server-core';
+import { Valence } from '../../generated/graphql-types';
+import { ResolversWithModels } from '../../main/resolver-types';
 
 export const fulfillmentSchema = gql`
     "Object containing whether something is fulfilled or not."
@@ -22,3 +24,31 @@ export const fulfillmentSchema = gql`
         value: FulfillmentValue
     }
 `;
+
+export class FulfillmentDomain {
+    createVariable(fulfilled: boolean | null) {
+        return new FulfillmentVariable(fulfilled);
+    }
+}
+
+export class FulfillmentVariable {
+    constructor(readonly value: boolean | null) {}
+}
+
+export const fulfillmentResolvers: ResolversWithModels<{
+    FulfillmentValue: boolean;
+    FulfillmentDomain: FulfillmentDomain;
+    FulfillmentVariable: FulfillmentVariable;
+}> = {
+    FulfillmentValue: {
+        fulfilled: fulfilled => fulfilled,
+        valence: (fulfilled): Valence => (fulfilled ? 'SUCCESS' : 'FAILURE'),
+        domain: () => ({}),
+    },
+    FulfillmentDomain: {
+        _: () => true,
+    },
+    FulfillmentVariable: {
+        domain: () => ({}),
+    },
+};
