@@ -5,8 +5,8 @@ import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestView } from './contest-view';
-import { User } from './user';
 import { ScoreField } from './feedback/score';
+import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
     """

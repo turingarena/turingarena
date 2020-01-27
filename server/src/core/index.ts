@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../generated/graphql-types';
+import { Resolvers } from '../main/resolver-types';
 import { Achievement } from './achievement';
 import { Contest, contestResolvers, contestSchema } from './contest';
 import { contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
@@ -42,14 +42,14 @@ import { awardResolvers, awardSchema } from './material/award';
 import { mediaResolvers, mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
 import { textResolvers, textSchema } from './material/text';
-import { mutationResolvers, mutationSchema } from './mutation';
+import { MutationMapperRecord, mutationResolvers, mutationSchema } from './mutation';
 import { Participation, participationSchema } from './participation';
 import { Problem, problemResolvers, problemSchema } from './problem';
 import { ProblemFile, problemFileResolvers, problemFileSchema } from './problem-file';
-import { queryResolvers, querySchema } from './query';
-import { Submission, submissionResolvers, submissionSchema } from './submission';
+import { QueryMapperRecord, queryResolvers, querySchema } from './query';
+import { Submission, SubmissionMapperRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
-import { User, userResolvers, userSchema } from './user';
+import { User, UserMapperRecord, userResolvers, userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
@@ -113,6 +113,8 @@ export const modelConstructors = {
     EvaluationEvent,
     Achievement,
 };
+
+export type MapperRecord = QueryMapperRecord & MutationMapperRecord & UserMapperRecord & SubmissionMapperRecord;
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {

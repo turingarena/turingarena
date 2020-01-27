@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, AutoIncrement, Column, HasMany, Index, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Participation } from './participation';
 
 export const userSchema = gql`
@@ -68,9 +68,11 @@ export enum UserRole {
     ADMIN,
 }
 
-export const userResolvers: ResolversWithModels<{
+export interface UserMapperRecord {
     User: User;
-}> = {
+}
+
+export const userResolvers: Resolvers = {
     User: {
         username: user => user.username,
         name: user => user.name,

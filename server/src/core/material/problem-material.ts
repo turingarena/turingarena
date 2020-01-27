@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Column } from '../../generated/graphql-types';
-import { ModelFor, ResolversWithModels } from '../../main/resolver-types';
+import { ResolversWithModels } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { FileContent } from '../file-content';
@@ -121,21 +120,19 @@ export class ProblemMaterial {
             .map(d => d.scoreRange),
     );
 
-    submissionListColumns: Array<ModelFor<Column>> = [
-        ...this.awards.map(
-            ({ title, gradeDomain }): ModelFor<Column> => {
-                if (gradeDomain instanceof ScoreGradeDomain) return { __typename: 'ScoreColumn', title };
-                if (gradeDomain instanceof FulfillmentGradeDomain) return { __typename: 'FulfillmentColumn', title };
-                throw new Error(`unexpected grade domain ${gradeDomain}`);
-            },
-        ),
+    submissionListColumns = [
+        ...this.awards.map(({ title, gradeDomain }) => {
+            if (gradeDomain instanceof ScoreGradeDomain) return { __typename: 'ScoreColumn', title };
+            if (gradeDomain instanceof FulfillmentGradeDomain) return { __typename: 'FulfillmentColumn', title };
+            throw new Error(`unexpected grade domain ${gradeDomain}`);
+        }),
         {
             __typename: 'ScoreColumn',
             title: [{ value: 'Total score' }],
         },
     ];
 
-    evaluationFeedbackColumns: Array<ModelFor<Column>> = [
+    evaluationFeedbackColumns = [
         {
             __typename: 'IndexHeaderColumn',
             title: [{ value: 'Subtask' }],

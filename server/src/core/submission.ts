@@ -11,9 +11,9 @@ import {
     Table,
 } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
-import { Field, Record } from '../generated/graphql-types';
+import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
-import { ModelFor, ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Evaluation } from './evaluation';
@@ -146,32 +146,30 @@ export class Submission extends BaseModel<Submission> {
         });
     }
 
-    async getSummaryRow(): Promise<ModelFor<Record>> {
+    async getSummaryRow() {
         const problem = await this.getProblem();
         const material = await problem.getMaterial();
         const evaluation = await this.getOfficialEvaluation();
         const achievements = (await evaluation?.getAchievements()) ?? [];
 
-        const fields: Array<ModelFor<Field>> = [
-            ...material.awards.map(
-                ({ title, gradeDomain }, awardIndex): ModelFor<Field> => {
-                    const achievement = achievements.find(a => a.awardIndex === awardIndex);
-                    if (gradeDomain instanceof ScoreGradeDomain) {
-                        return {
-                            __typename: 'ScoreField',
-                            score: achievement?.getScoreGrade(gradeDomain)?.score ?? null,
-                            scoreRange: gradeDomain.scoreRange,
-                        };
-                    }
-                    if (gradeDomain instanceof FulfillmentGradeDomain) {
-                        return {
-                            __typename: 'FulfillmentField',
-                            fulfilled: achievement?.getFulfillmentGrade()?.fulfilled ?? null,
-                        };
-                    }
-                    throw new Error(`unexpected grade domain ${gradeDomain}`);
-                },
-            ),
+        const fields = [
+            ...material.awards.map(({ title, gradeDomain }, awardIndex) => {
+                const achievement = achievements.find(a => a.awardIndex === awardIndex);
+                if (gradeDomain instanceof ScoreGradeDomain) {
+                    return {
+                        __typename: 'ScoreField',
+                        score: achievement?.getScoreGrade(gradeDomain)?.score ?? null,
+                        scoreRange: gradeDomain.scoreRange,
+                    };
+                }
+                if (gradeDomain instanceof FulfillmentGradeDomain) {
+                    return {
+                        __typename: 'FulfillmentField',
+                        fulfilled: achievement?.getFulfillmentGrade()?.fulfilled ?? null,
+                    };
+                }
+                throw new Error(`unexpected grade domain ${gradeDomain}`);
+            }),
             {
                 __typename: 'ScoreField',
                 score: 0, // TODO
@@ -183,9 +181,13 @@ export class Submission extends BaseModel<Submission> {
     }
 }
 
-export const submissionResolvers: ResolversWithModels<{
+export interface SubmissionMapperRecord {
     Submission: Submission;
-}> = {
+}
+
+export type SubmissionInput = __generated_SubmissionInput;
+
+export const submissionResolvers: Resolvers = {
     Submission: {
         contest: submission => submission.getContest(),
         user: submission => submission.getUser(),

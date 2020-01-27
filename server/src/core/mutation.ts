@@ -29,6 +29,10 @@ export const mutationSchema = gql`
     }
 `;
 
+export interface MutationMapperRecord {
+    Mutation: ModelRoot;
+}
+
 export const mutationResolvers: ResolversWithModels<{
     Mutation: ModelRoot;
 }> = {
@@ -65,6 +69,8 @@ export const mutationResolvers: ResolversWithModels<{
                     name: problem,
                 },
             });
+
+            return true;
         },
         createContest: async (root, { contest }) => {
             await root.table(Contest).create(contest);
@@ -78,6 +84,8 @@ export const mutationResolvers: ResolversWithModels<{
                     name,
                 },
             });
+
+            return true;
         },
         submit: (root, { submission }) => submit(root, submission).then(() => true),
         ...contestMutationResolvers.Mutation,

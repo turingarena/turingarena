@@ -20,6 +20,10 @@ export const querySchema = gql`
     }
 `;
 
+export interface QueryMapperRecord {
+    Query: ModelRoot;
+}
+
 export const queryResolvers: ResolversWithModels<{
     Query: ModelRoot;
 }> = {

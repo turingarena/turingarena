@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { __generated_Valence } from '../../generated/graphql-types';
 
 export const valenceSchema = gql`
     """
@@ -51,3 +52,5 @@ export const valenceSchema = gql`
         BLOCKED
     }
 `;
+
+export type Valence = __generated_Valence;

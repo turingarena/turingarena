@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
 import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
-import { ContestStatus } from '../generated/graphql-types';
+import { __generated_ContestStatus } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
@@ -119,6 +119,8 @@ export class Contest extends BaseModel<Contest> {
         return Promise.all((await this.getProblemAssignments()).map(async a => (await a.getProblem()).getMaterial()));
     }
 }
+
+export type ContestStatus = __generated_ContestStatus;
 
 export const contestMutationResolvers: ResolversWithModels<{
     Mutation: ModelRoot;

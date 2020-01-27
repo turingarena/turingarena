@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { Valence } from '../../generated/graphql-types';
 import { ResolversWithModels } from '../../main/resolver-types';
+import { Valence } from './valence';
 
 export const scoreSchema = gql`
     "Defines the possible values for a score."

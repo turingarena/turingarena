@@ -1,4 +1,6 @@
-import { ResolverFn, Resolvers, TypeResolveFn } from '../generated/graphql-types';
+import { ResolverFn, TypeResolveFn, __generated_Resolvers } from '../generated/graphql-types'; // tslint:disable-line
+
+export type Resolvers = __generated_Resolvers;
 
 export type ResolversWithModels<
     T extends {

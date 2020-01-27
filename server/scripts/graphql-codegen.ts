@@ -20,15 +20,15 @@ const config: CodegenConfig = {
                 },
                 'typescript-resolvers',
                 'typescript-operations',
-                {
-                    add: '/* tslint:disable */',
-                },
+                { add: '/* tslint:disable */' },
+                { add: `import { Mapper } from '../main/mapper'` },
             ],
             config: {
-                defaultMapper: 'any',
+                defaultMapper: 'Mapper<{T}>',
                 contextType: '../main/api-context#ApiContext',
                 rootValueType: 'any',
                 noSchemaStitching: true,
+                typesPrefix: '__generated_',
             },
         },
         'src/generated/graphql.schema.json': {

@@ -1,11 +1,10 @@
 import * as path from 'path';
-import { SubmissionInput } from '../generated/graphql-types';
 import { ModelRoot } from '../main/model-root';
 import { Contest } from './contest';
 import { evaluate } from './evaluate';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
-import { Submission } from './submission';
+import { Submission, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
 import { User } from './user';
 
