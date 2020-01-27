@@ -128,7 +128,7 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
 };
 
 async function loadContent(problem: Problem, path: string) {
-    const root = problem.modelRoot;
+    const root = problem.root;
 
     return (
         (await root.table(ProblemFile).findOne({

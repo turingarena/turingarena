@@ -35,7 +35,7 @@ export interface ProblemTaskInfo {
 }
 
 export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-    const root = problem.modelRoot;
+    const root = problem.root;
     const metadataPath = '.task-info.json';
     const metadataProblemFile = await root.table(ProblemFile).findOne({
         where: {
@@ -77,7 +77,7 @@ export async function extractProblemFiles(problem: Problem, base: string) {
     }
 
     const problemFiles = await problem.getFiles({
-        include: [problem.modelRoot.table(FileContent).scope('withData')],
+        include: [problem.root.table(FileContent).scope('withData')],
     });
 
     for (const problemFile of problemFiles) {
@@ -96,7 +96,7 @@ export async function extractProblemFiles(problem: Problem, base: string) {
  * @param dir  Current directory
  */
 export async function importProblemFiles(problem: Problem, base: string, dir: string = '') {
-    const root = problem.modelRoot;
+    const root = problem.root;
     const files = fs.readdirSync(path.join(base, dir));
     for (const file of files) {
         const relPath = path.join(dir, file);

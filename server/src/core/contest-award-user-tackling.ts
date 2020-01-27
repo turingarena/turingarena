@@ -9,7 +9,7 @@ export class ContestAwardUserTackling {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
 
     async getBestAchievement() {
-        const { sequelize, modelRoot } = this.assignment.problemAssignment;
+        const { sequelize, root } = this.assignment.problemAssignment;
 
         const achievements = await sequelize.query<Achievement>(
             `
@@ -63,7 +63,7 @@ export class ContestAwardUserTackling {
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
-                instance: modelRoot.table(Achievement).build(),
+                instance: root.table(Achievement).build(),
             },
         );
 

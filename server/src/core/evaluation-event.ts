@@ -24,7 +24,7 @@ export class EvaluationEvent extends BaseModel<EvaluationEvent> {
     async storeAchievements() {
         if ('IOISubtaskScore' in this.data) {
             const { subtask, normalized_score, score } = this.data.IOISubtaskScore;
-            await this.modelRoot.table(Achievement).create({
+            await this.root.table(Achievement).create({
                 evaluationId: this.evaluationId,
                 awardIndex: subtask,
                 // Store the normalized score if the max score is zero (FIXME: ugly hack)

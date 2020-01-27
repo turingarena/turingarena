@@ -14,7 +14,7 @@ export interface OperationRequest<V> {
  * Also, contains extra information associated with an API request (e.g., authentication data).
  */
 export class ApiContext {
-    constructor(readonly modelRoot: ModelRoot) {}
+    constructor(readonly root: ModelRoot) {}
 
     /** Executable schema, obtained combining full GraphQL schema and resolvers. */
     readonly executableSchema = makeExecutableSchema({
@@ -30,7 +30,7 @@ export class ApiContext {
             variableValues,
             schema: this.executableSchema,
             contextValue: this,
-            rootValue: this.modelRoot,
+            rootValue: this.root,
         });
     }
 }

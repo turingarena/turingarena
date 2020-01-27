@@ -4,7 +4,7 @@ import { Submission } from '../core/submission';
 import { Config, defaultConfig } from './config';
 
 export interface ModelRootSequelize extends Sequelize {
-    modelRoot: ModelRoot;
+    root: ModelRoot;
 }
 
 /**
@@ -21,7 +21,7 @@ export class ModelRoot {
             );
         });
 
-        this.sequelize.modelRoot = this;
+        this.sequelize.root = this;
     }
 
     /** Instance of Sequelize to use in this API operation. */

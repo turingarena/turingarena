@@ -55,8 +55,8 @@ export const contestProblemUserTacklingResolvers: ResolversWithModels<{
 }> = {
     ContestProblemUserTackling: {
         canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
-        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, modelRoot } }) =>
-            modelRoot.table(Submission).findAll({ where: { problemId, contestId, userId } }),
+        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, root } }) =>
+            root.table(Submission).findAll({ where: { problemId, contestId, userId } }),
         assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },

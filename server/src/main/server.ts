@@ -12,13 +12,13 @@ export function serve(config: Config) {
 
     console.log(config);
 
-    const modelRoot = new ModelRoot(config);
-    const api = new ApiContext(modelRoot);
+    const root = new ModelRoot(config);
+    const api = new ApiContext(root);
 
     const server = new ApolloServer({
         schema: api.executableSchema,
         context: api,
-        rootValue: api.modelRoot,
+        rootValue: api.root,
         debug: true,
         playground: true,
         formatError: err => {
@@ -35,7 +35,7 @@ export function serve(config: Config) {
     app.get('/files/:hash/:filename', async (req, res, next) => {
         try {
             const { hash, filename } = req.params;
-            const file = await modelRoot.table(FileContent).findOne({ where: { hash }, attributes: ['content'] });
+            const file = await root.table(FileContent).findOne({ where: { hash }, attributes: ['content'] });
             const contentType = mime.lookup(filename);
 
             if (file === null) {

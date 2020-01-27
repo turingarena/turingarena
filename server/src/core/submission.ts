@@ -96,17 +96,17 @@ export class Submission extends BaseModel<Submission> {
 
     async getContestProblemAssignment(): Promise<ContestProblemAssignment> {
         return (
-            (await this.modelRoot.table(ContestProblemAssignment).findOne({
+            (await this.root.table(ContestProblemAssignment).findOne({
                 where: { contestId: this.contestId, problemId: this.problemId },
-            })) ?? this.modelRoot.fail()
+            })) ?? this.root.fail()
         );
     }
 
     async getParticipation(): Promise<Participation> {
         return (
-            (await this.modelRoot.table(Participation).findOne({
+            (await this.root.table(Participation).findOne({
                 where: { contestId: this.contestId, userId: this.userId },
-            })) ?? this.modelRoot.fail()
+            })) ?? this.root.fail()
         );
     }
 
@@ -147,7 +147,7 @@ export const submissionResolvers: ResolversWithModels<{
         contestProblemAssigment: submission => submission.getContestProblemAssignment(),
 
         officialEvaluation: submission =>
-            submission.modelRoot.table(Evaluation).findOne({
+            submission.root.table(Evaluation).findOne({
                 where: { submissionId: submission.id },
                 order: [['createdAt', 'DESC']],
             }),
