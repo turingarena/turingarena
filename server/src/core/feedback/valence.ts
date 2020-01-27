@@ -50,23 +50,4 @@ export const valenceSchema = gql`
         """
         BLOCKED
     }
-
-    "Object containing a qualitative feeling (valence)."
-    type ValenceValue {
-        "The qualitative feeling."
-        valence: Boolean!
-        "Dummy object representing the domain of this value."
-        domain: ValenceDomain!
-    }
-
-    "Dummy type representing the possible values for a valence"
-    type ValenceDomain {
-        _: Boolean
-    }
-
-    "Variable containing a valence"
-    type ValenceVariable {
-        domain: ValenceDomain!
-        value: ValenceValue
-    }
 `;

@@ -18,7 +18,7 @@ export const fulfillmentSchema = gql`
     type FulfillmentField {
         "Value of this field: fulfilled (true), not fulfilled (false), or unknown (null)."
         fulfilled: Boolean
-        "Qualitative feeling (valence) associated with this score, if any."
+        "Qualitative feeling (valence) associated with this fulfillment, if any."
         valence: Valence
     }
 `;

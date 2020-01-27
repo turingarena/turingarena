@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 
 export const fieldSchema = gql`
-    union Field = ScoreField | FulfillmentField
+    "Container for values to show users af feedback."
+    union Field = ScoreField | FulfillmentField | MessageField | TimeUsageField | MemoryUsageField
 `;
