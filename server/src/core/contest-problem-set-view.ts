@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
-import { ContestUserTackling } from './contest-user-tackling';
+import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { ContestView } from './contest-view';
 
 export const contestProblemSetViewSchema = gql`
@@ -19,7 +19,7 @@ export const contestProblemSetViewSchema = gql`
         assignmentViews: [ContestProblemAssignmentView!]!
 
         "Same contest as tackled by the same user, or null if anonymous."
-        tackling: ContestUserTackling
+        tackling: ContestProblemSetUserTackling
 
         "Current total score visible to the given user."
         totalScoreVariable: ScoreVariable!
@@ -35,7 +35,7 @@ export const contestProblemSetViewResolvers: ResolversWithModels<{
         contestView: view => view,
         assignmentViews: async ({ contest, user }) =>
             (await contest.getProblemAssignments()).map(a => new ContestProblemAssignmentView(a, user)),
-        tackling: ({ contest, user }) => (user !== null ? new ContestUserTackling(contest, user) : null),
+        tackling: ({ contest, user }) => (user !== null ? new ContestProblemSetUserTackling(contest, user) : null),
         totalScoreVariable: async view => view.getTotalScoreVariable(),
     },
 };

@@ -5,7 +5,7 @@ import { FulfillmentDomain } from './feedback/fulfillment';
 import { ScoreDomain } from './feedback/score';
 import { User } from './user';
 
-export class ContestAwardUserTackling {
+export class ContestAwardAssignmentUserTackling {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
 
     async getBestAchievement() {

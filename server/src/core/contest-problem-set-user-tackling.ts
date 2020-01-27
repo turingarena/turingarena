@@ -1,46 +1,46 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
-import { ContestProblemUserTackling } from './contest-problem-user-tackling';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestView } from './contest-view';
 import { ScoreValue } from './feedback/score';
 import { User } from './user';
 
-export const contestUserTacklingSchema = gql`
+export const contestProblemSetUserTacklingSchema = gql`
     """
-    A given contest, tackled by a given user.
+    The problem set of a given contest, tackled by a given user.
     """
-    type ContestUserTackling {
+    type ContestProblemSetUserTackling {
         "The given contest."
         contest: Contest!
         "The given user."
         user: User!
 
-        "The problem-set of the given contest, as seen by the given user."
-        problemSetView: ContestProblemSetView!
+        "Same problem-set seen by same user."
+        view: ContestProblemSetView!
     }
 `;
 
-export class ContestUserTackling {
+export class ContestProblemSetUserTackling {
     constructor(readonly contest: Contest, readonly user: User) {}
 
     async getScore() {
         return ScoreValue.total(
             await Promise.all(
                 (await this.contest.getProblemAssignments()).map(async a =>
-                    new ContestProblemUserTackling(a, this.user).getScore(),
+                    new ContestProblemAssignmentUserTackling(a, this.user).getScore(),
                 ),
             ),
         );
     }
 }
 
-export const contestUserTacklingResolvers: ResolversWithModels<{
-    ContestUserTackling: ContestUserTackling;
+export const contestAssignmentUserTacklingResolvers: ResolversWithModels<{
+    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
 }> = {
-    ContestUserTackling: {
+    ContestProblemSetUserTackling: {
         contest: ({ contest }) => contest,
         user: ({ user }) => user,
-        problemSetView: ({ contest, user }) => new ContestView(contest, user),
+        view: ({ contest, user }) => new ContestView(contest, user),
     },
 };

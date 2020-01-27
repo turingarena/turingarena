@@ -11,13 +11,19 @@ import {
     contestProblemAssignmentSchema,
 } from './contest-problem-assignment';
 import {
+    contestProblemAssignmentUserTacklingResolvers,
+    contestProblemAssignmentUserTacklingSchema,
+} from './contest-problem-assignment-user-tackling';
+import {
     contestProblemAssignmentViewResolvers,
     contestProblemAssignmentViewSchema,
 } from './contest-problem-assignment-view';
 import { contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
+import {
+    contestAssignmentUserTacklingResolvers,
+    contestProblemSetUserTacklingSchema,
+} from './contest-problem-set-user-tackling';
 import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './contest-problem-set-view';
-import { contestProblemUserTacklingResolvers, contestProblemUserTacklingSchema } from './contest-problem-user-tackling';
-import { contestUserTacklingResolvers, contestUserTacklingSchema } from './contest-user-tackling';
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
@@ -66,9 +72,9 @@ export const schema = gql`
     ${mainViewSchema}
     ${contestViewSchema}
     ${contestProblemSetViewSchema}
-    ${contestUserTacklingSchema}
+    ${contestProblemSetUserTacklingSchema}
     ${contestProblemAssignmentViewSchema}
-    ${contestProblemUserTacklingSchema}
+    ${contestProblemAssignmentUserTacklingSchema}
     ${contestAwardAssignmentViewSchema}
 
     ${textSchema}
@@ -124,11 +130,11 @@ export const resolvers: Resolvers = {
 
     ...mainViewResolvers,
     ...contestViewResolvers,
-    ...contestUserTacklingResolvers,
+    ...contestAssignmentUserTacklingResolvers,
     ...contestProblemSetViewResolvers,
     ...contestProblemAssignmentViewResolvers,
     ...contestAwardAssignmentViewResolvers,
-    ...contestProblemUserTacklingResolvers,
+    ...contestProblemAssignmentUserTacklingResolvers,
 
     ...textResolvers,
     ...mediaResolvers,

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardUserTackling } from './contest-award-user-tackling';
+import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { FulfillmentDomain } from './feedback/fulfillment';
 import { ScoreDomain } from './feedback/score';
@@ -27,7 +27,7 @@ export const contestAwardAssignmentViewSchema = gql`
 export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
 
-    tackling = this.user !== null ? new ContestAwardUserTackling(this.assignment, this.user) : null;
+    tackling = this.user !== null ? new ContestAwardAssignmentUserTackling(this.assignment, this.user) : null;
 
     async getGradeVariable() {
         const { gradeDomain: domain } = this.assignment.award;

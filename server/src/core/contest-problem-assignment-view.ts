@@ -3,7 +3,7 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemUserTackling } from './contest-problem-user-tackling';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestView } from './contest-view';
 import { User } from './user';
 
@@ -25,7 +25,7 @@ export const contestProblemAssignmentViewSchema = gql`
         if the user is non-anonymous and allowed to have submissions for this problem in this contest,
         and null otherwise.
         """
-        tackling: ContestProblemUserTackling
+        tackling: ContestProblemAssignmentUserTackling
 
         "Current score seen by the user for this problem in this contest."
         totalScoreVariable: ScoreVariable!
@@ -38,7 +38,7 @@ export const contestProblemAssignmentViewSchema = gql`
 export class ContestProblemAssignmentView {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
 
-    tackling = this.user !== null ? new ContestProblemUserTackling(this.assignment, this.user) : null;
+    tackling = this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user) : null;
 
     async getTotalScoreVariable() {
         const problem = await this.assignment.getProblem();
@@ -56,7 +56,7 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         user: ({ user }) => user,
         problemSetView: async ({ assignment, user }) => new ContestView(await assignment.getContest(), user),
         tackling: async ({ assignment, user }) =>
-            user !== null ? new ContestProblemUserTackling(assignment, user) : null,
+            user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null,
         totalScoreVariable: async view => view.getTotalScoreVariable(),
         awardAssignmentViews: async ({ assignment, user }) => {
             const problem = await assignment.getProblem();

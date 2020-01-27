@@ -3,8 +3,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import {
-  ContestProblemUserTacklingSubmitModalFragment,
-  ContestProblemUserTacklingSubmitModalSubmissionFieldFragment,
+  ContestProblemAssignmentUserTacklingSubmitModalFragment,
+  ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
   SubmissionFileInput,
   SubmitMutation,
   SubmitMutationVariables,
@@ -13,19 +13,19 @@ import { FileLoadService } from '../util/file-load.service';
 import { textFragment } from './material/text.pipe';
 
 @Component({
-  selector: 'app-contest-problem-user-tackling-submit-modal',
-  templateUrl: './contest-problem-user-tackling-submit-modal.component.html',
-  styleUrls: ['./contest-problem-user-tackling-submit-modal.component.scss'],
+  selector: 'app-contest-problem-assignment-user-tackling-submit-modal',
+  templateUrl: './contest-problem-assignment-user-tackling-submit-modal.component.html',
+  styleUrls: ['./contest-problem-assignment-user-tackling-submit-modal.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
+export class ContestProblemAssignmentUserTacklingSubmitModalComponent implements OnInit {
   constructor(private readonly apollo: Apollo, private readonly fileLoadService: FileLoadService) {}
 
   @Input()
   modal!: NgbActiveModal;
 
   @Input()
-  data!: ContestProblemUserTacklingSubmitModalFragment;
+  data!: ContestProblemAssignmentUserTacklingSubmitModalFragment;
 
   fieldStates: Record<
     string,
@@ -45,7 +45,7 @@ export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
     }
   }
 
-  getTypingRule(file: File, field: ContestProblemUserTacklingSubmitModalSubmissionFieldFragment) {
+  getTypingRule(file: File, field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment) {
     for (const rule of this.data.assignmentView.assignment.problem.submissionFileTypeRules) {
       const { fields = null, extensions = null } = rule;
       if (fields !== null && fields.find(f => f.name === field.name) === undefined) continue;
@@ -95,7 +95,7 @@ export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
   }
 
   private async getFileForField(
-    field: ContestProblemUserTacklingSubmitModalSubmissionFieldFragment,
+    field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
     formData: FormData,
   ): Promise<SubmissionFileInput> {
     const file = formData.get(`${field.name}.file`) as File;
@@ -109,38 +109,38 @@ export class ContestProblemUserTacklingSubmitModalComponent implements OnInit {
   }
 }
 
-export const contestProblemUserTacklingSubmitModalFragment = gql`
-  fragment ContestProblemUserTacklingSubmitModalSubmissionFileType on SubmissionFileType {
+export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
+  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType on SubmissionFileType {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemUserTacklingSubmitModalSubmissionField on SubmissionField {
+  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionField on SubmissionField {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemUserTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
+  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
     fields {
       name
     }
     extensions
     defaultType {
-      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
+      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
     }
     recommendedTypes {
-      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
+      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
     }
     otherTypes {
-      ...ContestProblemUserTacklingSubmitModalSubmissionFileType
+      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
     }
   }
 
-  fragment ContestProblemUserTacklingSubmitModal on ContestProblemUserTackling {
+  fragment ContestProblemAssignmentUserTacklingSubmitModal on ContestProblemAssignmentUserTackling {
     assignmentView {
       assignment {
         contest {
@@ -152,10 +152,10 @@ export const contestProblemUserTacklingSubmitModalFragment = gql`
             ...Text
           }
           submissionFields {
-            ...ContestProblemUserTacklingSubmitModalSubmissionField
+            ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionField
           }
           submissionFileTypeRules {
-            ...ContestProblemUserTacklingSubmitModalSubmissionFileTypeRule
+            ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileTypeRule
           }
         }
       }

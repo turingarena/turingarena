@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
-import { ContestUserTackling } from './contest-user-tackling';
+import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { User } from './user';
 
 export const contestViewSchema = gql`
@@ -22,7 +22,7 @@ export const contestViewSchema = gql`
 export class ContestView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
 
-    readonly tackling = this.user !== null ? new ContestUserTackling(this.contest, this.user) : null;
+    readonly tackling = this.user !== null ? new ContestProblemSetUserTackling(this.contest, this.user) : null;
 
     async getTotalScoreVariable() {
         return (await this.contest.getScoreDomain()).variable((await this.tackling?.getScore()) ?? null);

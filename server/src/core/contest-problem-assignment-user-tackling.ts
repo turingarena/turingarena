@@ -1,21 +1,21 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardUserTackling } from './contest-award-user-tackling';
+import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ScoreValue } from './feedback/score';
 import { Submission } from './submission';
 import { User } from './user';
 
-export const contestProblemUserTacklingSchema = gql`
+export const contestProblemAssignmentUserTacklingSchema = gql`
     """
     Refers to a given problem, assigned in a given contest, tackled by a given user.
     Tackling means having a collection of submissions, and possibly submit a new one.
-    This is separate from ContestProblemAssignmentView since a ContestProblemUserTackling
+    This is separate from ContestProblemAssignmentView since a ContestProblemAssignmentUserTackling
     is available only for non-anonymous users who are allowed to have submissions (e.g., only after the contest is started).
     """
-    type ContestProblemUserTackling {
+    type ContestProblemAssignmentUserTackling {
         "Same problem assigned in same contest as seen by same user"
         assignmentView: ContestProblemAssignmentView!
 
@@ -30,7 +30,7 @@ export const contestProblemUserTacklingSchema = gql`
     }
 `;
 
-export class ContestProblemUserTackling {
+export class ContestProblemAssignmentUserTackling {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
 
     async getAwardTacklings() {
@@ -38,7 +38,8 @@ export class ContestProblemUserTackling {
         const material = await problem.getMaterial();
 
         return material.awards.map(
-            award => new ContestAwardUserTackling(new ContestAwardAssignment(this.assignment, award), this.user),
+            award =>
+                new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(this.assignment, award), this.user),
         );
     }
 
@@ -50,10 +51,10 @@ export class ContestProblemUserTackling {
     }
 }
 
-export const contestProblemUserTacklingResolvers: ResolversWithModels<{
-    ContestProblemUserTackling: ContestProblemUserTackling;
+export const contestProblemAssignmentUserTacklingResolvers: ResolversWithModels<{
+    ContestProblemAssignmentUserTackling: ContestProblemAssignmentUserTackling;
 }> = {
-    ContestProblemUserTackling: {
+    ContestProblemAssignmentUserTackling: {
         canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
         submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, root } }) =>
             root.table(Submission).findAll({ where: { problemId, contestId, userId } }),
