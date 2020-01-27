@@ -18,12 +18,6 @@ export const gradeSchema = gql`
     union GradeField = ScoreField | FulfillmentField
 `;
 
-export interface GradeModelRecord {
-    Grade: ScoreGrade | FulfillmentGrade;
-    GradeDomain: ScoreGradeDomain | FulfillmentGradeDomain;
-    GradeField: ScoreField | FulfillmentField;
-}
-
 export const gradeResolvers: Resolvers = {
     Grade: {
         __resolveType: grade => {

@@ -39,7 +39,9 @@ export class FulfillmentField {
 }
 
 export interface FulfillmentModelRecord {
-    FulfillmentGradeDomain: unknown;
+    FulfillmentGrade: FulfillmentGrade;
+    FulfillmentGradeDomain: FulfillmentGradeDomain;
+    FulfillmentField: FulfillmentField;
 }
 
 export const fulfillmentResolvers: Resolvers = {

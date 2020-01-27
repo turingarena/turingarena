@@ -75,6 +75,8 @@ export class ScoreField {
 }
 
 export interface ScoreModelRecord {
+    ScoreGrade: ScoreGrade;
+    ScoreGradeDomain: ScoreGradeDomain;
     ScoreField: ScoreField;
 }
 
