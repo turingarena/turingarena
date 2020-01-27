@@ -11,11 +11,14 @@ import {
     Table,
 } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
+import { Field, Record } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
-import { ResolversWithModels } from '../main/resolver-types';
+import { ModelFor, ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Evaluation } from './evaluation';
+import { FulfillmentGradeDomain } from './feedback/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFile } from './submission-file';
@@ -36,6 +39,8 @@ export const submissionSchema = gql`
         createdAt: String!
         officialEvaluation: Evaluation
         evaluations: [Evaluation!]!
+
+        summaryRow: Record!
     }
 
     input SubmissionInput {
@@ -133,6 +138,49 @@ export class Submission extends BaseModel<Submission> {
 
         return submissionPath;
     }
+
+    async getOfficialEvaluation() {
+        return this.root.table(Evaluation).findOne({
+            where: { submissionId: this.id },
+            order: [['createdAt', 'DESC']],
+        });
+    }
+
+    async getSummaryRow(): Promise<ModelFor<Record>> {
+        const problem = await this.getProblem();
+        const material = await problem.getMaterial();
+        const evaluation = await this.getOfficialEvaluation();
+        const achievements = (await evaluation?.getAchievements()) ?? [];
+
+        const fields: Array<ModelFor<Field>> = [
+            ...material.awards.map(
+                ({ title, gradeDomain }, awardIndex): ModelFor<Field> => {
+                    const achievement = achievements.find(a => a.awardIndex === awardIndex);
+                    if (gradeDomain instanceof ScoreGradeDomain) {
+                        return {
+                            __typename: 'ScoreField',
+                            score: achievement?.getScoreGrade(gradeDomain)?.score ?? null,
+                            scoreRange: gradeDomain.scoreRange,
+                        };
+                    }
+                    if (gradeDomain instanceof FulfillmentGradeDomain) {
+                        return {
+                            __typename: 'FulfillmentField',
+                            fulfilled: achievement?.getFulfillmentGrade()?.fulfilled ?? null,
+                        };
+                    }
+                    throw new Error(`unexpected grade domain ${gradeDomain}`);
+                },
+            ),
+            {
+                __typename: 'ScoreField',
+                score: 0, // TODO
+                scoreRange: ScoreRange.total([]),
+            },
+        ];
+
+        return { __typename: 'Record', fields };
+    }
 }
 
 export const submissionResolvers: ResolversWithModels<{
@@ -146,10 +194,7 @@ export const submissionResolvers: ResolversWithModels<{
         participation: submission => submission.getParticipation(),
         contestProblemAssigment: submission => submission.getContestProblemAssignment(),
 
-        officialEvaluation: submission =>
-            submission.root.table(Evaluation).findOne({
-                where: { submissionId: submission.id },
-                order: [['createdAt', 'DESC']],
-            }),
+        officialEvaluation: submission => submission.getOfficialEvaluation(),
+        summaryRow: submission => submission.getSummaryRow(),
     },
 };

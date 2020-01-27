@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
+import { Achievement } from './achievement';
 import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
 
@@ -53,6 +54,12 @@ export class Evaluation extends BaseModel<Evaluation> {
     /** Events of this submission */
     @HasMany(() => EvaluationEvent)
     events!: EvaluationEvent[];
+    getEvents!: () => Promise<EvaluationEvent[]>;
+
+    /** Achievements of this submission */
+    @HasMany(() => Achievement)
+    achievements!: Achievement[];
+    getAchievements!: () => Promise<Achievement[]>;
 }
 
 /** Status of this submission */

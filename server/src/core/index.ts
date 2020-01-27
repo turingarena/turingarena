@@ -27,14 +27,15 @@ import { contestProblemSetViewResolvers, contestProblemSetViewSchema } from './c
 import { contestViewResolvers, contestViewSchema } from './contest-view';
 import { Evaluation, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
+import { fieldSchema } from './feedback/field';
 import { fulfillmentResolvers, fulfillmentSchema } from './feedback/fulfillment';
 import { gradeResolvers, gradeSchema } from './feedback/grade';
+import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
 import { messageSchema } from './feedback/message';
 import { scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { fieldSchema } from './feedback/field';
 import { FileContent, fileContentResolvers, fileContentSchema } from './file-content';
 import { mainViewResolvers, mainViewSchema } from './main-view';
 import { awardResolvers, awardSchema } from './material/award';
@@ -89,6 +90,7 @@ export const schema = gql`
     ${valenceSchema}
     ${timeUsageSchema}
     ${memoryUsageSchema}
+    ${headerSchema}
 
     enum Ok {
         OK

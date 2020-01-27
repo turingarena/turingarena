@@ -16,4 +16,9 @@ export const memoryUsageSchema = gql`
         "Main upper limit on this memory usage to show users, if any."
         memoryUsagePrimaryWatermark: MemoryUsage
     }
+
+    "Column containing memory usages."
+    type MemoryUsageColumn implements TitledColumn {
+        title: Text!
+    }
 `;

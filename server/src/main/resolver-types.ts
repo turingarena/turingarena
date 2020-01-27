@@ -20,3 +20,7 @@ export type ResolversWithModels<
             : never;
     };
 };
+
+export type ModelFor<T> = {
+    [K in keyof T]?: K extends '__typename' ? T[K] : T[K] | any;
+};

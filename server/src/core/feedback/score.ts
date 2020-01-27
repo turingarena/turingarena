@@ -27,7 +27,7 @@ export const scoreSchema = gql`
         scoreRange: ScoreRange!
     }
 
-    "Field containing a score, i.e., a (possibly decimal) number of points from zero to some maximum value."
+    "Field containing a score."
     type ScoreField {
         "The number of points, if known."
         score: Float
@@ -35,6 +35,11 @@ export const scoreSchema = gql`
         valence: Valence
         "Defines the possible values for 'score'."
         scoreRange: ScoreRange!
+    }
+
+    "Column containing scores."
+    type ScoreColumn implements TitledColumn {
+        title: Text!
     }
 `;
 

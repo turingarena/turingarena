@@ -21,6 +21,11 @@ export const fulfillmentSchema = gql`
         "Qualitative feeling (valence) associated with this fulfillment, if any."
         valence: Valence
     }
+
+    "Column containing boolean values indicating whether something is fulfilled or not."
+    type FulfillmentColumn implements TitledColumn {
+        title: Text!
+    }
 `;
 
 export class FulfillmentGrade {

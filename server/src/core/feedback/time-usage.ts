@@ -16,4 +16,9 @@ export const timeUsageSchema = gql`
         "Main upper limit on this time usage to show users, if any."
         timeUsagePrimaryWatermark: TimeUsage
     }
+
+    "Column containing time usages."
+    type TimeUsageColumn implements TitledColumn {
+        title: Text!
+    }
 `;

@@ -1,6 +1,8 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
-import { ScoreRange, ScoreGradeDomain } from '../feedback/score';
+import { Column } from '../../generated/graphql-types';
+import { ModelFor, ResolversWithModels } from '../../main/resolver-types';
+import { FulfillmentGradeDomain } from '../feedback/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
@@ -29,6 +31,12 @@ export const problemMaterialSchema = gql`
         This list should always include a catch-all rule.
         """
         submissionFileTypeRules: [SubmissionFileTypeRule!]!
+
+        "Columns of the table of submissions for this problem."
+        submissionListColumns: [Column!]!
+
+        "Columns of the table containing evaluation feedback for submissions for this problem."
+        evaluationFeedbackColumns: [Column!]!
 
         totalScoreDomain: ScoreGradeDomain!
     }
@@ -112,6 +120,47 @@ export class ProblemMaterial {
             .filter((d): d is ScoreGradeDomain => d instanceof ScoreGradeDomain)
             .map(d => d.scoreRange),
     );
+
+    submissionListColumns: Array<ModelFor<Column>> = [
+        ...this.awards.map(
+            ({ title, gradeDomain }): ModelFor<Column> => {
+                if (gradeDomain instanceof ScoreGradeDomain) return { __typename: 'ScoreColumn', title };
+                if (gradeDomain instanceof FulfillmentGradeDomain) return { __typename: 'FulfillmentColumn', title };
+                throw new Error(`unexpected grade domain ${gradeDomain}`);
+            },
+        ),
+        {
+            __typename: 'ScoreColumn',
+            title: [{ value: 'Total score' }],
+        },
+    ];
+
+    evaluationFeedbackColumns: Array<ModelFor<Column>> = [
+        {
+            __typename: 'IndexHeaderColumn',
+            title: [{ value: 'Subtask' }],
+        },
+        {
+            __typename: 'IndexHeaderColumn',
+            title: [{ value: 'Case' }],
+        },
+        {
+            __typename: 'TimeUsageColumn',
+            title: [{ value: 'Time usage' }],
+        },
+        {
+            __typename: 'MemoryUsageColumn',
+            title: [{ value: 'Memory usage' }],
+        },
+        {
+            __typename: 'MessageColumn',
+            title: [{ value: 'Message' }],
+        },
+        {
+            __typename: 'ScoreColumn',
+            title: [{ value: 'Message' }],
+        },
+    ];
 }
 
 const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };
@@ -127,6 +176,8 @@ export const problemMaterialResolversExtensions: ResolversWithModels<{
         submissionFields: async problem => (await problem.getMaterial()).submissionFields,
         submissionFileTypes: async problem => (await problem.getMaterial()).submissionFileTypes,
         submissionFileTypeRules: async problem => (await problem.getMaterial()).submissionFileTypeRules,
+        submissionListColumns: async problem => (await problem.getMaterial()).submissionListColumns,
+        evaluationFeedbackColumns: async problem => (await problem.getMaterial()).evaluationFeedbackColumns,
     },
 };
 
