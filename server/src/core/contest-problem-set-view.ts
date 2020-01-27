@@ -1,8 +1,10 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
+import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { ContestView } from './contest-view';
+import { User } from './user';
 
 export const contestProblemSetViewSchema = gql`
     """
@@ -26,16 +28,27 @@ export const contestProblemSetViewSchema = gql`
     }
 `;
 
+export class ContestProblemSetView {
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
+
+    readonly tackling = this.user !== null ? new ContestProblemSetUserTackling(this.problemSet, this.user) : null;
+
+    async getTotalScoreVariable() {
+        return (await this.problemSet.getScoreDomain()).variable((await this.tackling?.getScore()) ?? null);
+    }
+}
+
 export const contestProblemSetViewResolvers: ResolversWithModels<{
-    ContestProblemSetView: ContestView;
+    ContestProblemSetView: ContestProblemSetView;
 }> = {
     ContestProblemSetView: {
-        problemSet: view => view.contest,
-        user: view => view.user,
-        contestView: view => view,
-        assignmentViews: async ({ contest, user }) =>
-            (await contest.getProblemAssignments()).map(a => new ContestProblemAssignmentView(a, user)),
-        tackling: ({ contest, user }) => (user !== null ? new ContestProblemSetUserTackling(contest, user) : null),
+        problemSet: ({ problemSet }) => problemSet,
+        user: ({ user }) => user,
+        contestView: ({ problemSet, user }) => new ContestView(problemSet.contest, user),
+        assignmentViews: async ({ problemSet, user }) =>
+            (await problemSet.contest.getProblemAssignments()).map(a => new ContestProblemAssignmentView(a, user)),
+        tackling: ({ problemSet, user }) =>
+            user !== null ? new ContestProblemSetUserTackling(problemSet, user) : null,
         totalScoreVariable: async view => view.getTotalScoreVariable(),
     },
 };

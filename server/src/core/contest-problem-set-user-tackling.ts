@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
-import { Contest } from './contest';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
-import { ContestView } from './contest-view';
+import { ContestProblemSet } from './contest-problem-set';
+import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreValue } from './feedback/score';
 import { User } from './user';
 
@@ -11,8 +11,8 @@ export const contestProblemSetUserTacklingSchema = gql`
     The problem set of a given contest, tackled by a given user.
     """
     type ContestProblemSetUserTackling {
-        "The given contest."
-        contest: Contest!
+        "The problem set."
+        problemSet: ContestProblemSet!
         "The given user."
         user: User!
 
@@ -22,12 +22,12 @@ export const contestProblemSetUserTacklingSchema = gql`
 `;
 
 export class ContestProblemSetUserTackling {
-    constructor(readonly contest: Contest, readonly user: User) {}
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
 
     async getScore() {
         return ScoreValue.total(
             await Promise.all(
-                (await this.contest.getProblemAssignments()).map(async a =>
+                (await this.problemSet.contest.getProblemAssignments()).map(async a =>
                     new ContestProblemAssignmentUserTackling(a, this.user).getScore(),
                 ),
             ),
@@ -39,8 +39,8 @@ export const contestAssignmentUserTacklingResolvers: ResolversWithModels<{
     ContestProblemSetUserTackling: ContestProblemSetUserTackling;
 }> = {
     ContestProblemSetUserTackling: {
-        contest: ({ contest }) => contest,
+        problemSet: ({ problemSet }) => problemSet,
         user: ({ user }) => user,
-        view: ({ contest, user }) => new ContestView(contest, user),
+        view: ({ problemSet, user }) => new ContestProblemSetView(problemSet, user),
     },
 };

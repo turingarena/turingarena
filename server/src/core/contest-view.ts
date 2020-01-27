@@ -1,7 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
-import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
+import { ContestProblemSet } from './contest-problem-set';
+import { ContestProblemSetView } from './contest-problem-set-view';
 import { User } from './user';
 
 export const contestViewSchema = gql`
@@ -21,12 +22,6 @@ export const contestViewSchema = gql`
 
 export class ContestView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
-
-    readonly tackling = this.user !== null ? new ContestProblemSetUserTackling(this.contest, this.user) : null;
-
-    async getTotalScoreVariable() {
-        return (await this.contest.getScoreDomain()).variable((await this.tackling?.getScore()) ?? null);
-    }
 }
 
 export const contestViewResolvers: ResolversWithModels<{
@@ -35,11 +30,11 @@ export const contestViewResolvers: ResolversWithModels<{
     ContestView: {
         contest: ({ contest }) => contest,
         user: ({ user }) => user,
-        problemSetView: contestView => {
-            switch (contestView.contest.getStatus()) {
+        problemSetView: ({ contest, user }) => {
+            switch (contest.getStatus()) {
                 case 'RUNNING':
                 case 'ENDED':
-                    return contestView;
+                    return new ContestProblemSetView(new ContestProblemSet(contest), user);
                 case 'NOT_STARTED':
                 default:
                     return null;

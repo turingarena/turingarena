@@ -9,7 +9,6 @@ import { ModelRoot } from '../main/model-root';
 import { ResolversWithModels } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ScoreDomain } from './feedback/score';
 import { FileContent } from './file-content';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
@@ -118,10 +117,6 @@ export class Contest extends BaseModel<Contest> {
 
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
         return Promise.all((await this.getProblemAssignments()).map(async a => (await a.getProblem()).getMaterial()));
-    }
-
-    async getScoreDomain(): Promise<ScoreDomain> {
-        return ScoreDomain.total((await this.getProblemSetMaterial()).map(m => m.scoreDomain));
     }
 }
 
