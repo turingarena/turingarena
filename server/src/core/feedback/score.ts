@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 import { Valence } from './valence';
 
 export const scoreSchema = gql`
@@ -74,9 +74,11 @@ export class ScoreField {
     constructor(readonly scoreRange: ScoreRange, readonly score: number | null) {}
 }
 
-export const scoreResolvers: ResolversWithModels<{
+export interface ScoreModelRecord {
     ScoreField: ScoreField;
-}> = {
+}
+
+export const scoreResolvers: Resolvers = {
     ScoreField: {
         valence: ({ scoreRange: { max }, score: value }): Valence | null =>
             value === null ? null : value >= max ? 'SUCCESS' : value > 0 ? 'PARTIAL' : 'FAILURE',

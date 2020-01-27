@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { BaseModel } from '../main/base-model';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ProblemMaterial, problemMaterialResolversExtensions } from './material/problem-material';
 import { getProblemTaskInfo } from './material/problem-task-info';
@@ -51,9 +51,11 @@ export class Problem extends BaseModel<Problem> {
     }
 }
 
-export const problemResolvers: ResolversWithModels<{
+export interface ProblemModelRecord {
     Problem: Problem;
-}> = {
+}
+
+export const problemResolvers: Resolvers = {
     Problem: {
         files: problem => problem.getFiles(),
         ...problemMaterialResolversExtensions.Problem,

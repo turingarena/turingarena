@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { FileContent } from '../file-content';
@@ -162,9 +162,11 @@ export class ProblemMaterial {
 
 const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };
 
-export const problemMaterialResolversExtensions: ResolversWithModels<{
-    Problem: Problem;
-}> = {
+export interface ProblemMaterialModelRecord {
+    ProblemAttachment: ProblemAttachment;
+}
+
+export const problemMaterialResolversExtensions: Resolvers = {
     Problem: {
         title: async problem => (await problem.getMaterial()).title,
         statement: async problem => (await problem.getMaterial()).statement,

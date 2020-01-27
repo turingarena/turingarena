@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ScoreRange } from './feedback/score';
 
@@ -31,9 +31,11 @@ export class ContestProblemSet {
     }
 }
 
-export const contestProblemSetResolvers: ResolversWithModels<{
+export interface ContestProblemSetModelRecord {
     ContestProblemSet: ContestProblemSet;
-}> = {
+}
+
+export const contestProblemSetResolvers: Resolvers = {
     ContestProblemSet: {
         contest: ({ contest }) => contest,
         assignments: ({ contest }) => contest.getProblemAssignments(),

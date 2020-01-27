@@ -32,3 +32,7 @@ export class Participation extends BaseModel<Participation> {
     user!: User;
     getUser!: (options: object) => Promise<User>;
 }
+
+export interface ParticipationModelRecord {
+    Participation: Participation;
+}

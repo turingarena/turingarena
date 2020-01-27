@@ -68,7 +68,7 @@ export enum UserRole {
     ADMIN,
 }
 
-export interface UserMapperRecord {
+export interface UserModelRecord {
     User: User;
 }
 

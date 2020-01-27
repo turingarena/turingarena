@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest, contestMutationResolvers } from './contest';
 import { Problem } from './problem';
 import { submit } from './submit';
@@ -29,13 +29,15 @@ export const mutationSchema = gql`
     }
 `;
 
-export interface MutationMapperRecord {
+export interface MutationModelRecord {
     Mutation: ModelRoot;
 }
 
-export const mutationResolvers: ResolversWithModels<{
+export interface MutationModelRecord {
     Mutation: ModelRoot;
-}> = {
+}
+
+export const mutationResolvers: Resolvers = {
     Mutation: {
         init: async root => {
             await root.sequelize.sync();

@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 
 export const fulfillmentSchema = gql`
     "A grade expressed as a boolean value: fulfilled or not."
@@ -38,9 +38,11 @@ export class FulfillmentField {
     constructor(readonly fulfilled: boolean | null) {}
 }
 
-export const fulfillmentResolvers: ResolversWithModels<{
+export interface FulfillmentModelRecord {
     FulfillmentGradeDomain: unknown;
-}> = {
+}
+
+export const fulfillmentResolvers: Resolvers = {
     FulfillmentGradeDomain: {
         _: () => true,
     },

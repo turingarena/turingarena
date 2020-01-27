@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -51,9 +51,11 @@ export class ContestProblemAssignmentUserTackling {
     }
 }
 
-export const contestProblemAssignmentUserTacklingResolvers: ResolversWithModels<{
+export interface ContestProblemAssignmentUserTacklingModelRecord {
     ContestProblemAssignmentUserTackling: ContestProblemAssignmentUserTackling;
-}> = {
+}
+
+export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
     ContestProblemAssignmentUserTackling: {
         canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
         submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, root } }) =>

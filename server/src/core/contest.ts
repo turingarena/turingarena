@@ -6,9 +6,10 @@ import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-type
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestFile } from './contest-file';
 import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemSet } from './contest-problem-set';
 import { FileContent } from './file-content';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
@@ -122,9 +123,11 @@ export class Contest extends BaseModel<Contest> {
 
 export type ContestStatus = __generated_ContestStatus;
 
-export const contestMutationResolvers: ResolversWithModels<{
+export interface MutationModelRecord {
     Mutation: ModelRoot;
-}> = {
+}
+
+export const contestMutationResolvers: Resolvers = {
     Mutation: {
         addProblem: async (root, { contestName, name }) => {
             const contest =
@@ -153,14 +156,16 @@ export const contestMutationResolvers: ResolversWithModels<{
     },
 };
 
-export const contestResolvers: ResolversWithModels<{
+export interface ContestModelRecord {
     Contest: Contest;
-}> = {
+}
+
+export const contestResolvers: Resolvers = {
     Contest: {
         title: contest => [{ value: contest.title }],
         start: contest => DateTime.fromJSDate(contest.start).toISO(),
         end: contest => DateTime.fromJSDate(contest.end).toISO(),
         status: contest => contest.getStatus(),
-        problemSet: contest => contest,
+        problemSet: contest => new ContestProblemSet(contest),
     },
 };

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
 
@@ -36,9 +36,11 @@ export class ContestProblemAssignment extends BaseModel<ContestProblemAssignment
     getProblem!: () => Promise<Problem>;
 }
 
-export const contestProblemAssignmentResolvers: ResolversWithModels<{
+export interface ContestProblemAssignmentModelRecord {
     ContestProblemAssignment: ContestProblemAssignment;
-}> = {
+}
+
+export const contestProblemAssignmentResolvers: Resolvers = {
     ContestProblemAssignment: {
         contest: assignment => assignment.getContest(),
         problem: assignment => assignment.getProblem(),

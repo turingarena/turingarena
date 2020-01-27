@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
@@ -42,9 +42,11 @@ export class ContestProblemSetView {
     }
 }
 
-export const contestProblemSetViewResolvers: ResolversWithModels<{
+export interface ContestProblemSetViewModelRecord {
     ContestProblemSetView: ContestProblemSetView;
-}> = {
+}
+
+export const contestProblemSetViewResolvers: Resolvers = {
     ContestProblemSetView: {
         problemSet: ({ problemSet }) => problemSet,
         user: ({ user }) => user,

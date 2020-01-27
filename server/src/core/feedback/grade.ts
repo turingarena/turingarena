@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentField, FulfillmentGrade, FulfillmentGradeDomain } from './fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain } from './score';
 
@@ -18,11 +18,13 @@ export const gradeSchema = gql`
     union GradeField = ScoreField | FulfillmentField
 `;
 
-export const gradeResolvers: ResolversWithModels<{
+export interface GradeModelRecord {
     Grade: ScoreGrade | FulfillmentGrade;
     GradeDomain: ScoreGradeDomain | FulfillmentGradeDomain;
     GradeField: ScoreField | FulfillmentField;
-}> = {
+}
+
+export const gradeResolvers: Resolvers = {
     Grade: {
         __resolveType: grade => {
             if (grade instanceof ScoreGrade) return 'ScoreGrade';

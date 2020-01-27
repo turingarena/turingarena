@@ -5,7 +5,7 @@ import { AllowNull, Column, DefaultScope, Index, Scopes, Table, Unique } from 's
 import * as ssri from 'ssri';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 
 export const fileContentSchema = gql`
     type FileContent {
@@ -72,9 +72,11 @@ export class FileContent extends BaseModel<FileContent> {
     }
 }
 
-export const fileContentResolvers: ResolversWithModels<{
+export interface FileContentModelRecord {
     FileContent: FileContent;
-}> = {
+}
+
+export const fileContentResolvers: Resolvers = {
     FileContent: {
         base64: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('base64'),
         utf8: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('utf8'),

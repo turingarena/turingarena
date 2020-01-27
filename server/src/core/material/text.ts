@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 
 export const textSchema = gql`
     """
@@ -20,9 +20,11 @@ export interface TextVariant {
     value: string;
 }
 
-export const textResolvers: ResolversWithModels<{
+export interface TextModelRecord {
     Text: Text;
-}> = {
+}
+
+export const textResolvers: Resolvers = {
     Text: {
         variant: text => text[0].value,
     },

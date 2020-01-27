@@ -51,3 +51,7 @@ export class Achievement extends BaseModel<Achievement> {
         return new FulfillmentGrade(this.grade === 1);
     }
 }
+
+export interface AchievementModelRecord {
+    Achievement: Achievement;
+}

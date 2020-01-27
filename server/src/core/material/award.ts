@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../../main/resolver-types';
+import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
@@ -36,9 +36,11 @@ export class Award {
             : new FulfillmentGradeDomain();
 }
 
-export const awardResolvers: ResolversWithModels<{
+export interface AwardModelRecord {
     Award: Award;
-}> = {
+}
+
+export const awardResolvers: Resolvers = {
     Award: {
         // TODO: id: ({ problem, index }) => `${problem.id}/${index}`,
         problem: award => award.material.problem,

@@ -1,10 +1,11 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
-import { ContestView } from './contest-view';
+import { ContestProblemSet } from './contest-problem-set';
+import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreField } from './feedback/score';
 import { User } from './user';
 
@@ -49,13 +50,16 @@ export class ContestProblemAssignmentView {
     }
 }
 
-export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
+export interface ContestProblemAssignmentViewModelRecord {
     ContestProblemAssignmentView: ContestProblemAssignmentView;
-}> = {
+}
+
+export const contestProblemAssignmentViewResolvers: Resolvers = {
     ContestProblemAssignmentView: {
         assignment: ({ assignment }) => assignment,
         user: ({ user }) => user,
-        problemSetView: async ({ assignment, user }) => new ContestView(await assignment.getContest(), user),
+        problemSetView: async ({ assignment, user }) =>
+            new ContestProblemSetView(new ContestProblemSet(await assignment.getContest()), user),
         tackling: async ({ assignment, user }) =>
             user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null,
         totalScoreField: async view => view.getTotalScoreField(),

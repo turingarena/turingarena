@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Award } from './material/award';
 
@@ -19,9 +19,11 @@ export class ContestAwardAssignment {
     constructor(readonly problemAssignment: ContestProblemAssignment, readonly award: Award) {}
 }
 
-export const contestAwardAssignmentResolvers: ResolversWithModels<{
+export interface ContestAwardAssignmentModelRecord {
     ContestAwardAssignment: ContestAwardAssignment;
-}> = {
+}
+
+export const contestAwardAssignmentResolvers: Resolvers = {
     ContestAwardAssignment: {
         problemAssignment: assignment => assignment.problemAssignment,
         award: assignment => assignment.award,

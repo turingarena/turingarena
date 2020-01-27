@@ -181,7 +181,7 @@ export class Submission extends BaseModel<Submission> {
     }
 }
 
-export interface SubmissionMapperRecord {
+export interface SubmissionModelRecord {
     Submission: Submission;
 }
 

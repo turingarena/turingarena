@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestView } from './contest-view';
 import { User } from './user';
@@ -23,9 +23,11 @@ export class MainView {
     }
 }
 
-export const mainViewResolvers: ResolversWithModels<{
+export interface MainViewModelRecord {
     MainView: MainView;
-}> = {
+}
+
+export const mainViewResolvers: Resolvers = {
     MainView: {
         user: ({ user }) => user,
         title: async mainView => {

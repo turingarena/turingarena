@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
-import { ResolversWithModels } from '../main/resolver-types';
+import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { MainView } from './main-view';
 import { Problem } from './problem';
@@ -20,13 +20,15 @@ export const querySchema = gql`
     }
 `;
 
-export interface QueryMapperRecord {
+export interface QueryModelRecord {
     Query: ModelRoot;
 }
 
-export const queryResolvers: ResolversWithModels<{
+export interface QueryModelRecord {
     Query: ModelRoot;
-}> = {
+}
+
+export const queryResolvers: Resolvers = {
     Query: {
         mainView: async (root, { username }): Promise<MainView> =>
             new MainView(

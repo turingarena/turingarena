@@ -71,3 +71,7 @@ export enum EvaluationStatus {
     /** There was an error in this evaluation */
     ERROR = 'ERROR',
 }
+
+export interface EvaluationModelRecord {
+    Evaluation: Evaluation;
+}
