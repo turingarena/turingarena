@@ -4,6 +4,7 @@ import { ContestProblemAssignmentView } from './contest-problem-assignment-view'
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { ContestView } from './contest-view';
+import { ScoreField } from './feedback/score';
 import { User } from './user';
 
 export const contestProblemSetViewSchema = gql`
@@ -24,7 +25,7 @@ export const contestProblemSetViewSchema = gql`
         tackling: ContestProblemSetUserTackling
 
         "Current total score visible to the given user."
-        totalScoreVariable: ScoreVariable!
+        totalScoreField: ScoreField!
     }
 `;
 
@@ -33,8 +34,11 @@ export class ContestProblemSetView {
 
     readonly tackling = this.user !== null ? new ContestProblemSetUserTackling(this.problemSet, this.user) : null;
 
-    async getTotalScoreVariable() {
-        return (await this.problemSet.getScoreDomain()).variable((await this.tackling?.getScore()) ?? null);
+    async getTotalScoreField() {
+        return new ScoreField(
+            await this.problemSet.getScoreRange(),
+            (await this.tackling?.getScoreGrade())?.score ?? null,
+        );
     }
 }
 
@@ -49,6 +53,6 @@ export const contestProblemSetViewResolvers: ResolversWithModels<{
             (await problemSet.contest.getProblemAssignments()).map(a => new ContestProblemAssignmentView(a, user)),
         tackling: ({ problemSet, user }) =>
             user !== null ? new ContestProblemSetUserTackling(problemSet, user) : null,
-        totalScoreVariable: async view => view.getTotalScoreVariable(),
+        totalScoreField: async view => view.getTotalScoreField(),
     },
 };

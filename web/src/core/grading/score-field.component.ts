@@ -1,27 +1,25 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { ScoreVariableFragment } from '../../generated/graphql-types';
+import { ScoreFieldFragment } from '../../generated/graphql-types';
 
 @Component({
-  selector: 'app-score-variable',
-  templateUrl: './score-variable.component.html',
+  selector: 'app-score-field',
+  templateUrl: './score-field.component.html',
   encapsulation: ViewEncapsulation.None,
 })
 export class GradingNumericComponent {
   @Input()
-  data!: ScoreVariableFragment;
+  data!: ScoreFieldFragment;
 }
 
 export const scoreVariableFragment = gql`
-  fragment ScoreVariable on ScoreVariable {
-    domain {
+  fragment ScoreField on ScoreField {
+    scoreRange {
       max
       allowPartial
       decimalDigits
     }
-    value {
-      score
-      valence
-    }
+    score
+    valence
   }
 `;

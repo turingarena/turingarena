@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../main/resolver-types';
 import { Contest } from './contest';
-import { ScoreDomain } from './feedback/score';
+import { ScoreRange } from './feedback/score';
 
 export const contestProblemSetSchema = gql`
     """
@@ -26,8 +26,8 @@ export const contestProblemSetSchema = gql`
 export class ContestProblemSet {
     constructor(readonly contest: Contest) {}
 
-    async getScoreDomain(): Promise<ScoreDomain> {
-        return ScoreDomain.total((await this.contest.getProblemSetMaterial()).map(m => m.scoreDomain));
+    async getScoreRange(): Promise<ScoreRange> {
+        return ScoreRange.total((await this.contest.getProblemSetMaterial()).map(m => m.scoreRange));
     }
 }
 

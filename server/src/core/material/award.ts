@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
-import { FulfillmentDomain } from '../feedback/fulfillment';
-import { ScoreDomain } from '../feedback/score';
+import { FulfillmentGradeDomain } from '../feedback/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
 
 export const awardSchema = gql`
@@ -31,7 +31,9 @@ export class Award {
     title = [{ value: `Subtask ${this.index}` }];
 
     gradeDomain =
-        this.subtaskInfo.max_score > 0 ? new ScoreDomain(this.subtaskInfo.max_score, 0, true) : new FulfillmentDomain();
+        this.subtaskInfo.max_score > 0
+            ? new ScoreGradeDomain(new ScoreRange(this.subtaskInfo.max_score, 0, true))
+            : new FulfillmentGradeDomain();
 }
 
 export const awardResolvers: ResolversWithModels<{

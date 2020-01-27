@@ -8,7 +8,7 @@ export const timeUsageSchema = gql`
     }
 
     "Object containing a time usage, i.e., the quantity of CPU time used for some computation."
-    type TimeUsageValue implements GenericVariableValue {
+    type TimeUsageValue {
         "The CPU time used."
         timeUsage: TimeUsage!
         "Describes the possible values for 'timeUsage'."
@@ -24,7 +24,7 @@ export const timeUsageSchema = gql`
     }
 
     "Variable containing a time usage."
-    type TimeUsageVariable implements GenericVariable {
+    type TimeUsageVariable {
         domain: TimeUsageDomain!
         value: TimeUsageValue
     }

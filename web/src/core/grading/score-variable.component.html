@@ -1,7 +1,0 @@
-<ng-container *ngIf="!data.value">
-  <span class="score-max"> + {{ data.domain.max.toFixed(data.domain.decimalDigits) }}</span>
-</ng-container>
-<ng-container *ngIf="data.value! as value">
-  <span class="score-value">{{ value.score.toFixed(data.domain.decimalDigits) }}</span>
-  <span class="score-max"> / {{ data.domain.max.toFixed(data.domain.decimalDigits) }}</span>
-</ng-container>

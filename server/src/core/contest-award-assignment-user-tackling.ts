@@ -1,8 +1,8 @@
 import { QueryTypes } from 'sequelize';
 import { Achievement } from './achievement';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import { FulfillmentDomain } from './feedback/fulfillment';
-import { ScoreDomain } from './feedback/score';
+import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
+import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
 export class ContestAwardAssignmentUserTackling {
@@ -70,18 +70,18 @@ export class ContestAwardAssignmentUserTackling {
         return achievements.length > 0 ? achievements[0] : null;
     }
 
-    async getScoreValue(domain: ScoreDomain) {
-        return (await this.getBestAchievement())?.getScoreValue(domain) ?? domain.zero();
+    async getScoreGrade(domain: ScoreGradeDomain) {
+        return (await this.getBestAchievement())?.getScoreGrade(domain) ?? new ScoreGrade(domain.scoreRange, 0);
     }
 
-    async isFulfilled() {
-        return (await this.getBestAchievement())?.isFulfilled() ?? false;
+    async getFulfillmentGrade() {
+        return (await this.getBestAchievement())?.getFulfillmentGrade() ?? new FulfillmentGrade(false);
     }
 
     async getGrade() {
         const { gradeDomain: domain } = this.assignment.award;
-        if (domain instanceof FulfillmentDomain) return (await this.isFulfilled()) ?? null;
-        if (domain instanceof ScoreDomain) return (await this.getScoreValue(domain)) ?? null;
+        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
+        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }

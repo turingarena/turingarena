@@ -8,7 +8,7 @@ export const memoryUsageSchema = gql`
     }
 
     "Object containing a memory usage, i.e., the quantity of memory used for some computation."
-    type MemoryUsageValue implements GenericVariableValue {
+    type MemoryUsageValue {
         "The memory usage."
         memoryUsage: MemoryUsage!
         "Describes the possible values for 'memoryUsage'."
@@ -24,7 +24,7 @@ export const memoryUsageSchema = gql`
     }
 
     "Variable containing a memory usage."
-    type MemoryUsageVariable implements GenericVariable {
+    type MemoryUsageVariable {
         domain: MemoryUsageDomain!
         value: MemoryUsageValue
     }

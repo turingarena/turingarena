@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 
 export const messageSchema = gql`
     "Something that can be assigned a textual message."
-    type MessageVariable implements GenericVariable {
+    type MessageVariable {
         "Dummy object representing the domain of this variable."
         domain: MessageDomain!
         "The score currently assigned to this item, if any. May vary over time."
@@ -10,7 +10,7 @@ export const messageSchema = gql`
     }
 
     "Object containing a textual message."
-    type MessageValue implements GenericVariableValue {
+    type MessageValue {
         "The text of this message."
         text: Text!
         "Dummy object representing the domain of this value."

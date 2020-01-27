@@ -1,8 +1,8 @@
 <ng-container *ngIf="data.problemSetView! as problemSetView">
-  <ng-container *ngIf="problemSetView.totalScoreVariable.value">
-    <h2 class="contest-score-title">Score</h2>
+  <ng-container *ngIf="problemSetView.totalScoreField.score !== $any(null)">
+    <h2 class="contest-score-title">ScoreGrade</h2>
     <div class="contest-score">
-      <app-grade-variable [data]="problemSetView.totalScoreVariable"></app-grade-variable>
+      <app-grade-field [data]="problemSetView.totalScoreField"></app-grade-field>
     </div>
   </ng-container>
 </ng-container>
@@ -16,8 +16,8 @@
       <a class="contest-problem-link" [routerLink]="['/problem', assignmentView.assignment.problem.name]"
         [title]="assignmentView.assignment.problem.title | text" routerLinkActive="active">
         {{ assignmentView.assignment.problem.title | text }}
-        <span class="contest-problem-score" [appValence]="assignmentView.totalScoreVariable.value?.valence">
-          <app-grade-variable [data]="assignmentView.totalScoreVariable"></app-grade-variable>
+        <span class="contest-problem-score" [appValence]="assignmentView.totalScoreField.valence">
+          <app-grade-field [data]="assignmentView.totalScoreField"></app-grade-field>
         </span>
       </a>
     </ng-container>

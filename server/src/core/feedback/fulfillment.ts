@@ -1,54 +1,42 @@
 import { gql } from 'apollo-server-core';
-import { Valence } from '../../generated/graphql-types';
 import { ResolversWithModels } from '../../main/resolver-types';
 
 export const fulfillmentSchema = gql`
-    "Object containing whether something is fulfilled or not."
-    type FulfillmentValue implements GenericGradeValue {
-        "Whether this object represent something fulfilled (true) or not (false)."
+    "A grade expressed as a boolean value: fulfilled or not."
+    type FulfillmentGrade {
+        "Value of this grade: fulfilled (true) or not fulfilled (false)."
         fulfilled: Boolean!
-        "Qualitative feeling (valence) associated with this score."
-        valence: Valence!
-        "Dummy object representing the domain of this value."
-        domain: FulfillmentDomain!
     }
 
-    "Dummy type representing the possible values for a fulfillment (always true and false)"
-    type FulfillmentDomain {
+    "Indicates that a grade is expressed as a fulfillment (boolean)."
+    type FulfillmentGradeDomain {
+        "Dummy field."
         _: Boolean
     }
 
-    "Variable containing a fulfillment value."
-    type FulfillmentVariable implements GenericGradeVariable {
-        domain: FulfillmentDomain!
-        value: FulfillmentValue
+    "Field indicating whether something is fulfilled or not."
+    type FulfillmentField {
+        "Value of this field: fulfilled (true), not fulfilled (false), or unknown (null)."
+        fulfilled: Boolean
+        "Qualitative feeling (valence) associated with this score, if any."
+        valence: Valence
     }
 `;
 
-export class FulfillmentDomain {
-    variable(fulfilled: boolean | null) {
-        return new FulfillmentVariable(fulfilled);
-    }
+export class FulfillmentGrade {
+    constructor(readonly fulfilled: boolean) {}
 }
 
-export class FulfillmentVariable {
-    constructor(readonly value: boolean | null) {}
+export class FulfillmentGradeDomain {}
+
+export class FulfillmentField {
+    constructor(readonly fulfilled: boolean | null) {}
 }
 
 export const fulfillmentResolvers: ResolversWithModels<{
-    FulfillmentValue: boolean;
-    FulfillmentDomain: FulfillmentDomain;
-    FulfillmentVariable: FulfillmentVariable;
+    FulfillmentGradeDomain: unknown;
 }> = {
-    FulfillmentValue: {
-        fulfilled: fulfilled => fulfilled,
-        valence: (fulfilled): Valence => (fulfilled ? 'SUCCESS' : 'FAILURE'),
-        domain: () => ({}),
-    },
-    FulfillmentDomain: {
+    FulfillmentGradeDomain: {
         _: () => true,
-    },
-    FulfillmentVariable: {
-        domain: () => ({}),
     },
 };

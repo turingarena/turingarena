@@ -6,6 +6,7 @@ import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestView } from './contest-view';
 import { User } from './user';
+import { ScoreField } from './feedback/score';
 
 export const contestProblemAssignmentViewSchema = gql`
     """
@@ -28,7 +29,7 @@ export const contestProblemAssignmentViewSchema = gql`
         tackling: ContestProblemAssignmentUserTackling
 
         "Current score seen by the user for this problem in this contest."
-        totalScoreVariable: ScoreVariable!
+        totalScoreField: ScoreField!
 
         "Awards of this problem assigned in same contest as seen by same user (or anonymously)"
         awardAssignmentViews: [ContestAwardAssignmentView!]!
@@ -40,11 +41,11 @@ export class ContestProblemAssignmentView {
 
     tackling = this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user) : null;
 
-    async getTotalScoreVariable() {
+    async getTotalScoreField() {
         const problem = await this.assignment.getProblem();
-        const { scoreDomain: domain } = await problem.getMaterial();
+        const { scoreRange } = await problem.getMaterial();
 
-        return domain.variable((await this.tackling?.getScore()) ?? null);
+        return new ScoreField(scoreRange, (await this.tackling?.getScoreGrade())?.score ?? null);
     }
 }
 
@@ -57,7 +58,7 @@ export const contestProblemAssignmentViewResolvers: ResolversWithModels<{
         problemSetView: async ({ assignment, user }) => new ContestView(await assignment.getContest(), user),
         tackling: async ({ assignment, user }) =>
             user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null,
-        totalScoreVariable: async view => view.getTotalScoreVariable(),
+        totalScoreField: async view => view.getTotalScoreField(),
         awardAssignmentViews: async ({ assignment, user }) => {
             const problem = await assignment.getProblem();
             const material = await problem.getMaterial();

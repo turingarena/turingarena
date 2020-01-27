@@ -34,7 +34,7 @@ import { messageSchema } from './feedback/message';
 import { scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { variableSchema } from './feedback/variable';
+import { fieldSchema } from './feedback/field';
 import { FileContent, fileContentResolvers, fileContentSchema } from './file-content';
 import { mainViewResolvers, mainViewSchema } from './main-view';
 import { awardResolvers, awardSchema } from './material/award';
@@ -81,7 +81,7 @@ export const schema = gql`
     ${mediaSchema}
     ${problemMaterialSchema}
 
-    ${variableSchema}
+    ${fieldSchema}
     ${gradeSchema}
     ${scoreSchema}
     ${fulfillmentSchema}

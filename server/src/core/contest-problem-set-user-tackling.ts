@@ -3,7 +3,7 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetView } from './contest-problem-set-view';
-import { ScoreValue } from './feedback/score';
+import { ScoreGrade } from './feedback/score';
 import { User } from './user';
 
 export const contestProblemSetUserTacklingSchema = gql`
@@ -24,11 +24,11 @@ export const contestProblemSetUserTacklingSchema = gql`
 export class ContestProblemSetUserTackling {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
 
-    async getScore() {
-        return ScoreValue.total(
+    async getScoreGrade() {
+        return ScoreGrade.total(
             await Promise.all(
                 (await this.problemSet.contest.getProblemAssignments()).map(async a =>
-                    new ContestProblemAssignmentUserTackling(a, this.user).getScore(),
+                    new ContestProblemAssignmentUserTackling(a, this.user).getScoreGrade(),
                 ),
             ),
         );

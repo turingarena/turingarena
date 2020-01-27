@@ -3,8 +3,8 @@ import { ResolversWithModels } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
-import { FulfillmentDomain } from './feedback/fulfillment';
-import { ScoreDomain } from './feedback/score';
+import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
+import { ScoreField, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
 export const contestAwardAssignmentViewSchema = gql`
@@ -20,7 +20,7 @@ export const contestAwardAssignmentViewSchema = gql`
         problemAssignmentView: ContestProblemAssignmentView!
 
         "Current grade for this award in this contest, to show to the given user."
-        gradeVariable: GradeVariable!
+        gradeField: GradeField!
     }
 `;
 
@@ -29,10 +29,21 @@ export class ContestAwardAssignmentView {
 
     tackling = this.user !== null ? new ContestAwardAssignmentUserTackling(this.assignment, this.user) : null;
 
-    async getGradeVariable() {
+    async getGradeField() {
         const { gradeDomain: domain } = this.assignment.award;
-        if (domain instanceof FulfillmentDomain) return domain.variable((await this.tackling?.isFulfilled()) ?? null);
-        if (domain instanceof ScoreDomain) return domain.variable((await this.tackling?.getScoreValue(domain)) ?? null);
+
+        if (domain instanceof FulfillmentGradeDomain) {
+            const grade = await this.tackling?.getFulfillmentGrade();
+
+            return new FulfillmentField(grade?.fulfilled ?? null);
+        }
+
+        if (domain instanceof ScoreGradeDomain) {
+            const grade = await this.tackling?.getScoreGrade(domain);
+
+            return new ScoreField(domain.scoreRange, grade?.score ?? null);
+        }
+
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }
@@ -45,6 +56,6 @@ export const contestAwardAssignmentViewResolvers: ResolversWithModels<{
         user: view => view.user,
         problemAssignmentView: async ({ assignment, user }) =>
             new ContestProblemAssignmentView(assignment.problemAssignment, user),
-        gradeVariable: view => view.getGradeVariable(),
+        gradeField: view => view.getGradeField(),
     },
 };

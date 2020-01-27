@@ -4,7 +4,7 @@ import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
-import { ScoreValue } from './feedback/score';
+import { ScoreGrade } from './feedback/score';
 import { Submission } from './submission';
 import { User } from './user';
 
@@ -43,11 +43,11 @@ export class ContestProblemAssignmentUserTackling {
         );
     }
 
-    async getScore() {
+    async getScoreGrade() {
         const awardTacklings = await this.getAwardTacklings();
         const awardGrades = await Promise.all(awardTacklings.map(t => t.getGrade()));
 
-        return ScoreValue.total(awardGrades.filter((g): g is ScoreValue => g instanceof ScoreValue));
+        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
 }
 

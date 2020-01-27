@@ -2,8 +2,8 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { contestProblemAssignmentUserTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside.component';
-import { gradeVariableFragment } from './grading/grade-variable.component';
-import { scoreVariableFragment } from './grading/score-variable.component';
+import { gradeFieldFragment } from './grading/grade-field.component';
+import { scoreVariableFragment } from './grading/score-field.component';
 import { mediaDownloadFragment } from './material/media-download.component';
 import { mediaInlineFragment } from './material/media-inline.component';
 import { textFragment } from './material/text.pipe';
@@ -42,8 +42,8 @@ export const contestProblemAssignmentViewAsideFragment = gql`
       }
     }
 
-    totalScoreVariable {
-      ...ScoreVariable
+    totalScoreField {
+      ...ScoreField
     }
 
     awardAssignmentViews {
@@ -56,8 +56,8 @@ export const contestProblemAssignmentViewAsideFragment = gql`
         }
       }
 
-      gradeVariable {
-        ...GradeVariable
+      gradeField {
+        ...GradeField
       }
     }
 
@@ -70,6 +70,6 @@ export const contestProblemAssignmentViewAsideFragment = gql`
   ${mediaInlineFragment}
   ${mediaDownloadFragment}
   ${scoreVariableFragment}
-  ${gradeVariableFragment}
+  ${gradeFieldFragment}
   ${contestProblemAssignmentUserTacklingAsideFragment}
 `;

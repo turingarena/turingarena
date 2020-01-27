@@ -2,7 +2,8 @@ import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { BaseModel } from '../main/base-model';
 import { Evaluation } from './evaluation';
-import { ScoreDomain, ScoreValue } from './feedback/score';
+import { FulfillmentGrade } from './feedback/fulfillment';
+import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 
 export const achievementSchema = gql`
     type Achievement {
@@ -42,11 +43,11 @@ export class Achievement extends BaseModel<Achievement> {
         return material.awards[this.awardIndex];
     }
 
-    getScoreValue(domain: ScoreDomain): ScoreValue {
-        return new ScoreValue(domain, this.grade);
+    getScoreGrade({ scoreRange }: ScoreGradeDomain): ScoreGrade {
+        return new ScoreGrade(scoreRange, this.grade);
     }
 
-    isFulfilled(): boolean {
-        return this.grade === 1;
+    getFulfillmentGrade(): FulfillmentGrade {
+        return new FulfillmentGrade(this.grade === 1);
     }
 }

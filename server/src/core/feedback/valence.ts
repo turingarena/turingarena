@@ -52,7 +52,7 @@ export const valenceSchema = gql`
     }
 
     "Object containing a qualitative feeling (valence)."
-    type ValenceValue implements GenericVariableValue {
+    type ValenceValue {
         "The qualitative feeling."
         valence: Boolean!
         "Dummy object representing the domain of this value."
@@ -65,7 +65,7 @@ export const valenceSchema = gql`
     }
 
     "Variable containing a valence"
-    type ValenceVariable implements GenericVariable {
+    type ValenceVariable {
         domain: ValenceDomain!
         value: ValenceValue
     }

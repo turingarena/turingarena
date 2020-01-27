@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ResolversWithModels } from '../../main/resolver-types';
-import { ScoreDomain } from '../feedback/score';
+import { ScoreRange, ScoreGradeDomain } from '../feedback/score';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
@@ -30,7 +30,7 @@ export const problemMaterialSchema = gql`
         """
         submissionFileTypeRules: [SubmissionFileTypeRule!]!
 
-        totalScoreDomain: ScoreDomain!
+        totalScoreDomain: ScoreGradeDomain!
     }
 
     type ProblemAttachment {
@@ -106,8 +106,11 @@ export class ProblemMaterial {
     submissionFileTypes = [defaultType];
     submissionFileTypeRules = [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }];
 
-    scoreDomain = ScoreDomain.total(
-        this.awards.map(a => a.gradeDomain).filter((d): d is ScoreDomain => d instanceof ScoreDomain),
+    scoreRange = ScoreRange.total(
+        this.awards
+            .map(a => a.gradeDomain)
+            .filter((d): d is ScoreGradeDomain => d instanceof ScoreGradeDomain)
+            .map(d => d.scoreRange),
     );
 }
 

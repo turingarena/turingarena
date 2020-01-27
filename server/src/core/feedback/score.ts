@@ -3,18 +3,8 @@ import { Valence } from '../../generated/graphql-types';
 import { ResolversWithModels } from '../../main/resolver-types';
 
 export const scoreSchema = gql`
-    "Object containing a score, i.e., a (possibly decimal) number of points from zero to some maximum value."
-    type ScoreValue implements GenericGradeValue {
-        "The number of points."
-        score: Float!
-        "Qualitative feeling (valence) associated with this score."
-        valence: Valence!
-        "Defines the possible values for 'score'."
-        domain: ScoreDomain!
-    }
-
-    "Defines the possible numbers of points for a score"
-    type ScoreDomain {
+    "Defines the possible values for a score."
+    type ScoreRange {
         "Maximum number of points, inclusive."
         max: Float!
         "How many decimal digits are included and relevant."
@@ -23,53 +13,67 @@ export const scoreSchema = gql`
         allowPartial: Boolean!
     }
 
-    "Variable containing a score."
-    type ScoreVariable implements GenericGradeVariable {
-        domain: ScoreDomain!
-        value: ScoreValue
+    "A grade expressed as a number of points from zero to some maximum value."
+    type ScoreGrade {
+        "The number of points."
+        score: Float!
+        "Range of possible values for the number of points."
+        scoreRange: ScoreRange!
+    }
+
+    "Indicates that a grade is expressed as a score, and specifies its range."
+    type ScoreGradeDomain {
+        "Range of possible values for the number of points."
+        scoreRange: ScoreRange!
+    }
+
+    "Field containing a score, i.e., a (possibly decimal) number of points from zero to some maximum value."
+    type ScoreField {
+        "The number of points, if known."
+        score: Float
+        "Qualitative feeling (valence) associated with this score, if any."
+        valence: Valence
+        "Defines the possible values for 'score'."
+        scoreRange: ScoreRange!
     }
 `;
 
-export class ScoreDomain {
+export class ScoreGrade {
+    constructor(readonly scoreRange: ScoreRange, readonly score: number) {}
+
+    static total(values: ScoreGrade[]) {
+        return new ScoreGrade(
+            ScoreRange.total(values.map(v => v.scoreRange)),
+            values.map(v => v.score).reduce((a, b) => a + b, 0),
+        );
+    }
+}
+
+export class ScoreRange {
     constructor(readonly max: number, readonly decimalDigits: number, readonly allowPartial: boolean) {}
 
-    zero() {
-        return new ScoreValue(this, 0);
-    }
-
-    variable(value: ScoreValue | null) {
-        return new ScoreVariable(this, value);
-    }
-
-    static total(domains: ScoreDomain[]) {
-        return new ScoreDomain(
-            domains.map(d => d.max).reduce((a, b) => a + b),
-            domains.map(d => d.decimalDigits).reduce((a, b) => Math.max(a, b)),
+    static total(domains: ScoreRange[]) {
+        return new ScoreRange(
+            domains.map(d => d.max).reduce((a, b) => a + b, 0),
+            domains.map(d => d.decimalDigits).reduce((a, b) => Math.max(a, b), 0),
             true,
         );
     }
 }
 
-export class ScoreValue {
-    constructor(readonly domain: ScoreDomain, readonly score: number) {}
-
-    static total(values: ScoreValue[]) {
-        return new ScoreValue(
-            ScoreDomain.total(values.map(v => v.domain)),
-            values.map(v => v.score).reduce((a, b) => a + b),
-        );
-    }
+export class ScoreGradeDomain {
+    constructor(readonly scoreRange: ScoreRange) {}
 }
 
-export class ScoreVariable {
-    constructor(readonly domain: ScoreDomain, readonly value: ScoreValue | null) {}
+export class ScoreField {
+    constructor(readonly scoreRange: ScoreRange, readonly score: number | null) {}
 }
 
 export const scoreResolvers: ResolversWithModels<{
-    ScoreValue: ScoreValue;
+    ScoreField: ScoreField;
 }> = {
-    ScoreValue: {
-        valence: ({ domain: { max }, score }): Valence =>
-            score >= max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE',
+    ScoreField: {
+        valence: ({ scoreRange: { max }, score: value }): Valence | null =>
+            value === null ? null : value >= max ? 'SUCCESS' : value > 0 ? 'PARTIAL' : 'FAILURE',
     },
 };
