@@ -9,7 +9,7 @@ export const achievementSchema = gql`
     type Achievement {
         evaluation: Submission!
         awardAssignment: ContestAwardAssignment!
-        grade: GradeValue!
+        grade: Grade!
     }
 `;
 
