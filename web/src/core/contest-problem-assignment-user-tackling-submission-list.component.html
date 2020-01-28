@@ -1,3 +1,3 @@
-<ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="data.submissions">
-  <ag-grid-column field="createdAt"></ag-grid-column>
+<ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="data.submissions"
+  [columnDefs]="data.assignmentView.assignment.problem.submissionListColumns | applyPure: getColumns">
 </ag-grid-angular>

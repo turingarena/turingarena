@@ -1,6 +1,12 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { ColDef } from 'ag-grid-community';
 import gql from 'graphql-tag';
-import { ContestProblemAssignmentUserTacklingSubmissionListFragment } from '../generated/graphql-types';
+import {
+  ContestProblemAssignmentUserTacklingSubmissionListColumnFragment,
+  ContestProblemAssignmentUserTacklingSubmissionListFragment,
+  ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment,
+} from '../generated/graphql-types';
+import { textFragment } from './material/text.pipe';
 import { submissionModalFragment } from './submission-modal.component';
 
 @Component({
@@ -12,21 +18,74 @@ import { submissionModalFragment } from './submission-modal.component';
 export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
   @Input()
   data!: ContestProblemAssignmentUserTacklingSubmissionListFragment;
+
+  getColumns(columns: ContestProblemAssignmentUserTacklingSubmissionListColumnFragment[]): ColDef[] {
+    return [
+      {
+        colId: 'createdAt',
+        field: 'createdAt',
+      },
+      ...columns.map(
+        (c, i): ColDef => ({
+          colId: `custom.${i}`,
+          headerName: c.title.variant,
+          valueGetter: ({ data }) =>
+            JSON.stringify(
+              (data as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment).summaryRow.fields[i],
+            ),
+        }),
+      ),
+    ];
+  }
 }
 
 export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
   fragment ContestProblemAssignmentUserTacklingSubmissionList on ContestProblemAssignmentUserTackling {
     submissions {
-      id
-      createdAt
-      # TODO: submission files
-      officialEvaluation {
-        status
-      }
+      ...ContestProblemAssignmentUserTacklingSubmissionListSubmission
+    }
 
-      ...SubmissionModal
+    assignmentView {
+      assignment {
+        problem {
+          submissionListColumns {
+            ...ContestProblemAssignmentUserTacklingSubmissionListColumn
+          }
+        }
+      }
     }
   }
 
+  fragment ContestProblemAssignmentUserTacklingSubmissionListColumn on Column {
+    __typename
+    ... on TitledColumn {
+      title {
+        ...Text
+      }
+    }
+  }
+
+  fragment ContestProblemAssignmentUserTacklingSubmissionListSubmission on Submission {
+    id
+    createdAt
+    # TODO: submission files
+    officialEvaluation {
+      status
+    }
+    summaryRow {
+      fields {
+        ... on FulfillmentField {
+          fulfilled
+        }
+        ... on ScoreField {
+          score
+        }
+      }
+    }
+
+    ...SubmissionModal
+  }
+
   ${submissionModalFragment}
+  ${textFragment}
 `;
