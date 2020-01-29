@@ -1,6 +1,6 @@
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngIf="problemSetView.totalScoreField.score !== $any(null)">
-    <h2 class="contest-score-title">ScoreGrade</h2>
+    <h2 class="contest-score-title">Score</h2>
     <div class="contest-score">
       <app-grade-field [data]="problemSetView.totalScoreField"></app-grade-field>
     </div>
