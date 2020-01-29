@@ -8,7 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "prepare": "graphql-codegen"
+    "prepare": "graphql-codegen",
+    "watch:prepare": "graphql-codegen --watch"
   },
   "private": true,
   "dependencies": {

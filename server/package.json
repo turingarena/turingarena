@@ -18,7 +18,7 @@
         "fix:tslint": "tslint --fix --project .",
         "check:test": "jest",
         "watch:check:test": "jest --watch",
-        "start": "stmux -a a --mouse --title 'PRESS Ctrl-A K TO EXIT' --file spec.stmux",
+        "start": "npm run watch:serve",
         "cli": "ts-node -T src/cli/index.ts"
     },
     "dependencies": {
