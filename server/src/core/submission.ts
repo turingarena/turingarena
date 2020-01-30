@@ -41,6 +41,7 @@ export const submissionSchema = gql`
         evaluations: [Evaluation!]!
 
         summaryRow: Record!
+        feedbackTable: FeedbackTable!
     }
 
     input SubmissionInput {
@@ -175,31 +176,106 @@ export class Submission extends BaseModel<Submission> {
     }
 
     async getSummaryRow() {
-        const fields = [
-            ...(await this.getAwardAchievements()).map(({ award: { gradeDomain }, achievement }) => {
-                if (gradeDomain instanceof ScoreGradeDomain) {
-                    return {
-                        __typename: 'ScoreField',
-                        score: achievement?.getScoreGrade(gradeDomain)?.score ?? null,
-                        scoreRange: gradeDomain.scoreRange,
-                    };
-                }
-                if (gradeDomain instanceof FulfillmentGradeDomain) {
-                    return {
-                        __typename: 'FulfillmentField',
-                        fulfilled: achievement?.getFulfillmentGrade()?.fulfilled ?? null,
-                    };
-                }
-                throw new Error(`unexpected grade domain ${gradeDomain}`);
-            }),
-            {
-                __typename: 'ScoreField',
-                score: (await this.getTotalScore())?.score,
-                scoreRange: (await (await this.getProblem()).getMaterial()).scoreRange,
-            },
-        ];
+        return {
+            __typename: 'Record',
+            fields: [
+                ...(await this.getAwardAchievements()).map(({ award: { gradeDomain }, achievement }) => {
+                    if (gradeDomain instanceof ScoreGradeDomain) {
+                        return {
+                            __typename: 'ScoreField',
+                            score: achievement?.getScoreGrade(gradeDomain)?.score ?? null,
+                            scoreRange: gradeDomain.scoreRange,
+                        };
+                    }
+                    if (gradeDomain instanceof FulfillmentGradeDomain) {
+                        return {
+                            __typename: 'FulfillmentField',
+                            fulfilled: achievement?.getFulfillmentGrade()?.fulfilled ?? null,
+                        };
+                    }
+                    throw new Error(`unexpected grade domain ${gradeDomain}`);
+                }),
+                {
+                    __typename: 'ScoreField',
+                    score: (await this.getTotalScore())?.score,
+                    scoreRange: (await (await this.getProblem()).getMaterial()).scoreRange,
+                },
+            ],
+        };
+    }
 
-        return { __typename: 'Record', fields };
+    async getFeedbackTable() {
+        const problem = await this.getProblem();
+        const { awards, taskInfo, evaluationFeedbackColumns } = await problem.getMaterial();
+
+        const limitsMarginMultiplier = 2;
+        const memoryLimitUnitBytes = 1024 * 1024; // tslint:disable-line:no-magic-numbers
+
+        const events = (await (await this.getOfficialEvaluation())?.getEvents()) ?? [];
+        const testCasesData = awards.flatMap((award, awardIndex) =>
+            new Array(taskInfo.scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
+                award,
+                awardIndex,
+                timeUsage: null as number | null,
+                memoryUsage: null as number | null,
+                message: null as string | null,
+                score: null as number | null,
+            })),
+        );
+
+        for (const { data } of events) {
+            if ('IOITestcaseScore' in data) {
+                console.log(data, taskInfo);
+                const { testcase, score, message } = data.IOITestcaseScore;
+                const testCaseData = testCasesData[testcase];
+                testCaseData.message = message;
+                testCaseData.score = score;
+            }
+        }
+
+        return {
+            __typename: 'FeedbackTable',
+            columns: evaluationFeedbackColumns,
+            rows: testCasesData.map(({ awardIndex, score, message }, testCaseIndex) => ({
+                fields: [
+                    {
+                        __typename: 'IndexHeaderField',
+                        index: awardIndex,
+                    },
+                    {
+                        __typename: 'IndexHeaderField',
+                        index: testCaseIndex,
+                    },
+                    {
+                        __typename: 'TimeUsageField',
+                        timeUsage: null,
+                        timeUsageMaxRelevant: { seconds: taskInfo.limits.time * limitsMarginMultiplier },
+                        timeUsagePrimaryWatermark: { seconds: taskInfo.limits.time },
+                    },
+                    {
+                        __typename: 'MemoryUsageField',
+                        memoryUsage: null,
+                        memoryUsageMaxRelevant: {
+                            bytes: memoryLimitUnitBytes * taskInfo.limits.memory * limitsMarginMultiplier,
+                        },
+                        memoryUsagePrimaryWatermark: { bytes: memoryLimitUnitBytes * taskInfo.limits.memory },
+                    },
+                    {
+                        __typename: 'MessageField',
+                        text: message !== null ? [{ value: message }] : null,
+                    },
+                    {
+                        __typename: 'ScoreField',
+                        score,
+                        scoreRange: {
+                            max: 1,
+                            decimalDigits: 2,
+                            allowPartial: true,
+                        },
+                    },
+                ],
+            })),
+        };
     }
 }
 
@@ -220,5 +296,6 @@ export const submissionResolvers: Resolvers = {
 
         officialEvaluation: submission => submission.getOfficialEvaluation(),
         summaryRow: submission => submission.getSummaryRow(),
+        feedbackTable: submission => submission.getFeedbackTable(),
     },
 };

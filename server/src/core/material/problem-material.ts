@@ -155,7 +155,7 @@ export class ProblemMaterial {
         },
         {
             __typename: 'ScoreColumn',
-            title: [{ value: 'Message' }],
+            title: [{ value: 'Score' }],
         },
     ];
 }

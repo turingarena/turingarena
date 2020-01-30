@@ -1,8 +1,6 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import {
-  ContestProblemAssignmentUserTacklingSubmissionListColumnFragment,
   ContestProblemAssignmentUserTacklingSubmissionListFragment,
   ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment,
 } from '../generated/graphql-types';
@@ -19,30 +17,8 @@ export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
   @Input()
   data!: ContestProblemAssignmentUserTacklingSubmissionListFragment;
 
-  getColumns(columns: ContestProblemAssignmentUserTacklingSubmissionListColumnFragment[]): ColDef[] {
-    return [
-      {
-        colId: 'createdAt',
-        field: 'createdAt',
-      },
-      ...columns.map(
-        (c, i): ColDef => ({
-          colId: `custom.${i}`,
-          headerName: c.title.variant,
-          // FIXME: generated types should not allow undefineds
-          // tslint:disable-next-line: no-null-undefined-union
-          valueGetter: ({ data }) => {
-            const submission = data as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment;
-            const f = submission.summaryRow.fields[i];
-
-            if (c.__typename === 'FulfillmentColumn' && f.__typename === 'FulfillmentField') return f.fulfilled;
-            if (c.__typename === 'ScoreColumn' && f.__typename === 'ScoreField') return f.score;
-
-            throw new Error(`Invalid or unsupported field ${f.__typename} in column ${c.__typename}`);
-          },
-        }),
-      ),
-    ];
+  getSummaryRows(submissions: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment[]) {
+    return submissions.map(s => s.summaryRow);
   }
 }
 
@@ -86,6 +62,17 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
         }
         ... on ScoreField {
           score
+        }
+      }
+    }
+
+    feedbackTable {
+      columns {
+        __typename
+      }
+      rows {
+        fields {
+          __typename
         }
       }
     }

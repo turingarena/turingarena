@@ -30,4 +30,9 @@ export const fieldSchema = gql`
     type Record {
         fields: [Field!]!
     }
+
+    type FeedbackTable {
+        columns: [Column!]!
+        rows: [Record!]!
+    }
 `;

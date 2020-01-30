@@ -1,3 +1,2 @@
-<ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="data.submissions"
-  [columnDefs]="data.assignmentView.assignment.problem.submissionListColumns | applyPure: getColumns">
-</ag-grid-angular>
+<app-feedback-table [columns]="data.assignmentView.assignment.problem.submissionListColumns"
+  [records]="data.submissions | applyPure: getSummaryRows"></app-feedback-table>

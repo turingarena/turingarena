@@ -43,6 +43,7 @@ import { JsonPurePipe } from '../util/json-pure.pipe';
 import { TemplateCellRendererComponent } from '../util/template-cell-renderer.component';
 import { AppRoutingModule } from './app-routing.module';
 import { GraphQLModule } from './graphql.module';
+import { FeedbackTableComponent } from '../core/feedback-table.component';
 
 @NgModule({
   declarations: [
@@ -79,6 +80,7 @@ import { GraphQLModule } from './graphql.module';
     GradingNumericComponent,
     ContestProblemAssignmentUserTacklingSubmitModalComponent,
     ContestProblemAssignmentUserTacklingAsideComponent,
+    FeedbackTableComponent,
   ],
   imports: [
     BrowserModule,

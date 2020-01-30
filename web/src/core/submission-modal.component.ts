@@ -2,6 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import gql from 'graphql-tag';
 import { SubmissionModalFragment } from '../generated/graphql-types';
+import { feedbackTableFragment } from './feedback-table.component';
 import { textFragment } from './material/text.pipe';
 
 @Component({
@@ -30,7 +31,16 @@ export const submissionModalFragment = gql`
         ...Text
       }
     }
+    feedbackTable {
+      columns {
+        ...FeedbackTableColumn
+      }
+      rows {
+        ...FeedbackTableRecord
+      }
+    }
   }
 
   ${textFragment}
+  ${feedbackTableFragment}
 `;
