@@ -29,10 +29,17 @@ export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
         (c, i): ColDef => ({
           colId: `custom.${i}`,
           headerName: c.title.variant,
-          valueGetter: ({ data }) =>
-            JSON.stringify(
-              (data as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment).summaryRow.fields[i],
-            ),
+          // FIXME: generated types should not allow undefineds
+          // tslint:disable-next-line: no-null-undefined-union
+          valueGetter: ({ data }) => {
+            const submission = data as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment;
+            const f = submission.summaryRow.fields[i];
+
+            if (c.__typename === 'FulfillmentColumn' && f.__typename === 'FulfillmentField') return f.fulfilled;
+            if (c.__typename === 'ScoreColumn' && f.__typename === 'ScoreField') return f.score;
+
+            throw new Error(`Invalid or unsupported field ${f.__typename} in column ${c.__typename}`);
+          },
         }),
       ),
     ];

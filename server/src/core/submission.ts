@@ -16,9 +16,9 @@ import { BaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { Evaluation } from './evaluation';
+import { Evaluation, EvaluationStatus } from './evaluation';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreGradeDomain, ScoreRange } from './feedback/score';
+import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFile } from './submission-file';
@@ -146,15 +146,37 @@ export class Submission extends BaseModel<Submission> {
         });
     }
 
-    async getSummaryRow() {
-        const problem = await this.getProblem();
-        const material = await problem.getMaterial();
+    async getMaterial() {
+        return (await this.getProblem()).getMaterial();
+    }
+
+    async getAwardAchievements() {
         const evaluation = await this.getOfficialEvaluation();
         const achievements = (await evaluation?.getAchievements()) ?? [];
 
+        return (await this.getMaterial()).awards.map((award, awardIndex) => ({
+            award,
+            achievement: achievements.find(a => a.awardIndex === awardIndex),
+        }));
+    }
+
+    async getTotalScore() {
+        if ((await this.getOfficialEvaluation())?.status !== EvaluationStatus.SUCCESS) return undefined;
+
+        return ScoreGrade.total(
+            (await this.getAwardAchievements()).flatMap(({ achievement, award: { gradeDomain } }) => {
+                if (gradeDomain instanceof ScoreGradeDomain && achievement !== undefined) {
+                    return [achievement.getScoreGrade(gradeDomain)];
+                }
+
+                return [];
+            }),
+        );
+    }
+
+    async getSummaryRow() {
         const fields = [
-            ...material.awards.map(({ title, gradeDomain }, awardIndex) => {
-                const achievement = achievements.find(a => a.awardIndex === awardIndex);
+            ...(await this.getAwardAchievements()).map(({ award: { gradeDomain }, achievement }) => {
                 if (gradeDomain instanceof ScoreGradeDomain) {
                     return {
                         __typename: 'ScoreField',
@@ -172,8 +194,8 @@ export class Submission extends BaseModel<Submission> {
             }),
             {
                 __typename: 'ScoreField',
-                score: 0, // TODO
-                scoreRange: ScoreRange.total([]),
+                score: (await this.getTotalScore())?.score,
+                scoreRange: (await (await this.getProblem()).getMaterial()).scoreRange,
             },
         ];
 
