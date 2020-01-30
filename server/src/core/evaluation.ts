@@ -41,11 +41,6 @@ export class Evaluation extends BaseModel<Evaluation> {
     @Column
     status!: EvaluationStatus;
 
-    /** True if the evaluation should be considered official for ranking purposes */
-    @AllowNull(false)
-    @Column
-    isOfficial!: boolean;
-
     /** Submission to which this evaluation belongs to */
     @BelongsTo(() => Submission, 'submissionId')
     submission!: Submission;
