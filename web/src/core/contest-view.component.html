@@ -3,14 +3,14 @@
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let assignmentView of problemSetView.assignmentViews">
     <app-contest-problem-assignment-view-aside
-      [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== assignmentView.assignment.problem.name"
+      [hidden]="(route.firstChild!.paramMap | async)?.get('problemName') !== assignmentView.assignment.problem.name"
       [data]="assignmentView"></app-contest-problem-assignment-view-aside>
   </ng-container>
 </ng-container>
 
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let assignmentView of problemSetView.assignmentViews">
-    <app-media-inline [hidden]="(route.firstChild!.paramMap | async).get('problemName') !== assignmentView.assignment.problem.name"
+    <app-media-inline [hidden]="(route.firstChild!.paramMap | async)?.get('problemName') !== assignmentView.assignment.problem.name"
       [data]="assignmentView.assignment.problem.statement"></app-media-inline>
   </ng-container>
 </ng-container>

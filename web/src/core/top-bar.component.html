@@ -4,32 +4,31 @@
       <fa-icon icon="home"></fa-icon> {{ title | text }}
     </h1>
   </a>
-  <ng-container *ngIf="false && data.user! as user">
-    <span class="user-display-name">{{ user.displayName }}</span>
+  <ng-container *ngIf="userDisplayName">
+    <span class="user-display-name">{{ userDisplayName }}</span>
   </ng-container>
   <button class="messages-button">
     <fa-icon icon="comments"></fa-icon>
     Messages
-    <span class="message-count-badge" [hidden]="true || data.contest.view.messages.length === 0">{{
-      false && data.contest.view.messages.length
-    }}</span>
+    <span class="message-count-badge" [hidden]="messagesCount === 0">{{messagesCount}}</span>
   </button>
-  <ng-container *ngIf="false && data.user! as user">
-    <ng-container *ngIf="user.isAdmin">
+  <ng-container *ngIf="isLoggedIn">
+    <ng-container *ngIf="isAdmin">
       <a routerLink="/admin" class="admin-button">
         <fa-icon icon="tools"></fa-icon>
         Admin
       </a>
     </ng-container>
-    <button class="user-logout" (click)="setAuth(undefined)">
+    <button class="user-logout" (click)="logOut()">
       <fa-icon icon="signOutAlt"></fa-icon>
       Logout
     </button>
   </ng-container>
-  <ng-container *ngIf="false && !data.user">
+  <ng-container *ngIf="!isLoggedIn">
     <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
       <fa-icon icon="signInAlt"></fa-icon>
       Login
+      <ng-template #loginDialog></ng-template>
     </button>
   </ng-container>
 </nav>

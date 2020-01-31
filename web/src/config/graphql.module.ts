@@ -13,7 +13,7 @@ const createApollo = (httpLink: HttpLink, authService: AuthService): ApolloClien
     const auth = authService.getAuth();
 
     return {
-      headers: auth !== null ? { Authorization: auth.token } : {},
+      headers: auth.token !== null ? { Authorization: `Bearer ${auth.token}` } : {},
     };
   });
 

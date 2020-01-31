@@ -14,10 +14,10 @@ import { textFragment } from './material/text.pipe';
 })
 export class FeedbackTableComponent {
   @Input()
-  columns!: FeedbackTableColumnFragment;
+  columns!: FeedbackTableColumnFragment[];
 
   @Input()
-  records!: FeedbackTableRecordFragment;
+  records!: FeedbackTableRecordFragment[];
 
   getColumns(columns: FeedbackTableColumnFragment[]): ColDef[] {
     return [

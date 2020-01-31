@@ -12,7 +12,7 @@ export class MediaDownloadComponent {
   @Input()
   data!: MediaDownloadFragment;
 
-  mimeTypeIcons = {
+  mimeTypeIcons: Record<string, string> = {
     'application/pdf': 'file-pdf',
     'text/plain': 'file-alt',
     'application/gzip': 'file-archive',
