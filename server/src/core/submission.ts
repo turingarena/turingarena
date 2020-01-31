@@ -262,7 +262,7 @@ export class Submission extends BaseModel<Submission> {
                     },
                     {
                         __typename: 'MessageField',
-                        text: message !== null ? [{ value: message }] : null,
+                        message: message !== null ? [{ value: message }] : null,
                     },
                     {
                         __typename: 'ScoreField',
