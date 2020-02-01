@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import { FeedbackTableColumnFragment, FeedbackTableRecordFragment } from '../generated/graphql-types';
-import { check, fail, unexpected } from '../util/check';
+import { check, unexpected } from '../util/check';
 import { fulfillmentVariableFragment } from './grading/fulfillment-field.component';
 import { scoreVariableFragment } from './grading/score-field.component';
 import { textFragment } from './material/text.pipe';
@@ -26,8 +26,6 @@ export class FeedbackTableComponent {
         (c, i): ColDef => ({
           colId: `custom.${i}`,
           headerName: c.title.variant,
-          // FIXME: generated types should not allow undefineds
-          // tslint:disable-next-line: no-null-undefined-union
           valueGetter: ({ data }) => {
             const record = data as FeedbackTableRecordFragment;
             const f = record.fields[i];
@@ -52,18 +50,15 @@ export class FeedbackTableComponent {
               case 'TimeUsageColumn':
                 check(f.__typename === 'TimeUsageField', `expected TimeUsageField, got ${f.__typename}`);
 
-                return f.timeUsage?.seconds;
+                return f.timeUsage?.seconds ?? null;
               case 'MemoryUsageColumn':
                 check(f.__typename === 'MemoryUsageField', `expected MemoryUsageField, got ${f.__typename}`);
 
-                return f.memoryUsage?.bytes;
+                return f.memoryUsage?.bytes ?? null;
               case 'MessageColumn':
                 check(f.__typename === 'MessageField', `expected MessageField, got ${f.__typename}`);
 
-                return f.message?.variant;
-              case undefined:
-                // FIXME: generated types should not allow undefineds
-                fail('column has no typename');
+                return f.message?.variant ?? null;
               default:
                 unexpected(c);
             }

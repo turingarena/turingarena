@@ -8,3 +8,5 @@ generates:
       - typescript-operations
     config:
       enumsAsTypes: true
+      avoidOptionals: true
+      nonOptionalTypename: true
