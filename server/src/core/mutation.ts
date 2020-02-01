@@ -26,12 +26,10 @@ export const mutationSchema = gql`
         addUser(contestName: ID!, username: ID!): Boolean!
         removeUser(contestName: ID!, username: ID!): Boolean!
         submit(submission: SubmissionInput!): Boolean!
+
+        logIn(token: String!): AuthResult
     }
 `;
-
-export interface MutationModelRecord {
-    Mutation: ModelRoot;
-}
 
 export interface MutationModelRecord {
     Mutation: ModelRoot;
@@ -90,6 +88,7 @@ export const mutationResolvers: Resolvers = {
             return true;
         },
         submit: (root, { submission }) => submit(root, submission).then(() => true),
+        logIn: (root, { token }) => root.authService.logIn(token),
         ...contestMutationResolvers.Mutation,
     },
 };

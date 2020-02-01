@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
+import { authSchema } from './auth';
 import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
 import {
     ContestAwardAssignmentModelRecord,
@@ -74,6 +75,7 @@ import { User, UserModelRecord, userResolvers, userSchema } from './user';
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
     ${achievementSchema}
+    ${authSchema}
     ${awardSchema}
     ${contestAwardAssignmentSchema}
     ${contestAwardAssignmentViewSchema}

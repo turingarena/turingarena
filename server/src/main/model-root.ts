@@ -1,4 +1,6 @@
+import { randomBytes } from 'crypto';
 import { Model, Sequelize } from 'sequelize-typescript';
+import { AuthService } from '../core/auth';
 import { modelConstructors } from '../core/index';
 import { Submission } from '../core/submission';
 import { Config, defaultConfig } from './config';
@@ -23,6 +25,9 @@ export class ModelRoot {
 
         this.sequelize.root = this;
     }
+
+    // TODO: load secret from environment
+    readonly authService = new AuthService(this, randomBytes(48).toString('hex'));
 
     /** Instance of Sequelize to use in this API operation. */
     readonly sequelize = new Sequelize({
