@@ -209,7 +209,7 @@ export class Submission extends BaseModel<Submission> {
         const { awards, taskInfo, evaluationFeedbackColumns } = await problem.getMaterial();
 
         const limitsMarginMultiplier = 2;
-        const memoryLimitUnitBytes = 1024 * 1024; // tslint:disable-line:no-magic-numbers
+        const memoryUnitBytes = 1024 * 1024; // tslint:disable-line:no-magic-numbers
 
         const events = (await (await this.getOfficialEvaluation())?.getEvents()) ?? [];
         const testCasesData = awards.flatMap((award, awardIndex) =>
@@ -225,18 +225,27 @@ export class Submission extends BaseModel<Submission> {
 
         for (const { data } of events) {
             if ('IOITestcaseScore' in data) {
-                console.log(data, taskInfo);
                 const { testcase, score, message } = data.IOITestcaseScore;
                 const testCaseData = testCasesData[testcase];
                 testCaseData.message = message;
                 testCaseData.score = score;
+            }
+
+            if ('IOIEvaluation' in data) {
+                const { status, testcase } = data.IOIEvaluation;
+                if (status.Done !== undefined) {
+                    const { cpu_time, memory } = status.Done.result.resources;
+                    const testCaseData = testCasesData[testcase];
+                    testCaseData.memoryUsage = memory;
+                    testCaseData.timeUsage = cpu_time;
+                }
             }
         }
 
         return {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
-            rows: testCasesData.map(({ awardIndex, score, message }, testCaseIndex) => ({
+            rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
                 fields: [
                     {
                         __typename: 'IndexHeaderField',
@@ -248,17 +257,17 @@ export class Submission extends BaseModel<Submission> {
                     },
                     {
                         __typename: 'TimeUsageField',
-                        timeUsage: null,
+                        timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
                         timeUsageMaxRelevant: { seconds: taskInfo.limits.time * limitsMarginMultiplier },
                         timeUsagePrimaryWatermark: { seconds: taskInfo.limits.time },
                     },
                     {
                         __typename: 'MemoryUsageField',
-                        memoryUsage: null,
+                        memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
                         memoryUsageMaxRelevant: {
-                            bytes: memoryLimitUnitBytes * taskInfo.limits.memory * limitsMarginMultiplier,
+                            bytes: memoryUnitBytes * taskInfo.limits.memory * limitsMarginMultiplier,
                         },
-                        memoryUsagePrimaryWatermark: { bytes: memoryLimitUnitBytes * taskInfo.limits.memory },
+                        memoryUsagePrimaryWatermark: { bytes: memoryUnitBytes * taskInfo.limits.memory },
                     },
                     {
                         __typename: 'MessageField',

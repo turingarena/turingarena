@@ -4,7 +4,7 @@ export const memoryUsageSchema = gql`
     "Quantity of memory used for some computation."
     type MemoryUsage {
         "Quantity of memory expressed in bytes."
-        bytes: Int!
+        bytes: Float!
     }
 
     "Field containing a memory usage, i.e., the quantity of memory used for some computation."

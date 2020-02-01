@@ -54,7 +54,7 @@ interface TaskMakerExecutionResult {
 
 // FIXME: should this be an enum or union type?
 interface TaskMakerStatus {
-    Done: {
+    Done?: {
         result: TaskMakerExecutionResult;
     };
 }
