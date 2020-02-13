@@ -13,12 +13,17 @@ export function serve(config: Config) {
     console.log(config);
 
     const root = new ModelRoot(config);
-    const api = new ApiContext(root);
 
     const server = new ApolloServer({
-        schema: api.executableSchema,
-        context: api,
-        rootValue: api.root,
+        schema: ApiContext.executableSchema,
+        context: async ({ req }) => {
+            const token = req.headers.authorization;
+            const user = token !== undefined ? await root.authService.auth(token) : undefined;
+            const api = new ApiContext(root, user ?? undefined);
+
+            return api;
+        },
+        rootValue: root,
         debug: true,
         playground: true,
         formatError: err => {

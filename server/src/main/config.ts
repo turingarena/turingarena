@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { Options } from 'sequelize';
+import { randomBytes } from 'crypto';
 
 export interface Config {
     db: Options;
@@ -8,6 +9,8 @@ export interface Config {
     host: string;
     taskMakerExecutable: string;
     cachePath: string;
+    skipAuth: boolean;
+    secret: string;
 }
 
 export const defaultConfig: Config = {
@@ -18,6 +21,8 @@ export const defaultConfig: Config = {
     port: 3000,
     host: 'localhost',
     taskMakerExecutable: 'task-maker-rust',
+    skipAuth: false,
+    secret: randomBytes(48).toString('hex'),
     cachePath: path.join(process.env.HOME ?? '/tmp', '.cache/turingarena/'),
 };
 

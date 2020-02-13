@@ -27,7 +27,7 @@ export class ModelRoot {
     }
 
     // TODO: load secret from environment
-    readonly authService = new AuthService(this, randomBytes(48).toString('hex'));
+    readonly authService = new AuthService(this);
 
     /** Instance of Sequelize to use in this API operation. */
     readonly sequelize = new Sequelize({
