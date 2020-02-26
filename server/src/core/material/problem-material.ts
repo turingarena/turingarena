@@ -84,8 +84,8 @@ export interface ProblemAttachment {
 export class ProblemMaterial {
     constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
 
-    title = [{ value: this.taskInfo.title }];
-    statement = this.taskInfo.statements.map(
+    title = [{ value: this.taskInfo.IOI.title }];
+    statement = this.taskInfo.IOI.statements.map(
         ({ path, language, content_type: type }): MediaVariant => ({
             name: path.slice(path.lastIndexOf('/') + 1),
             language,
@@ -94,7 +94,7 @@ export class ProblemMaterial {
         }),
     );
 
-    attachments = this.taskInfo.attachments.map(
+    attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: [{ value: name }],
             media: [
@@ -107,7 +107,7 @@ export class ProblemMaterial {
         }),
     );
 
-    awards = this.taskInfo.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
+    awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
     submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
     submissionFileTypes = [defaultType];

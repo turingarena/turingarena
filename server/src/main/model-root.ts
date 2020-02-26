@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto';
 import { Model, Sequelize } from 'sequelize-typescript';
 import { AuthService } from '../core/auth';
 import { modelConstructors } from '../core/index';

@@ -5,10 +5,13 @@ import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 import { ProblemFile } from '../problem-file';
 
-/** Generic problem metadata */
 export interface ProblemTaskInfo {
+    IOI: IOITaskInfo;
+    Terry: object; // TODO
+}
+
+export interface IOITaskInfo {
     version: number;
-    task_type: string;
     name: string;
     title: string;
     limits: {
