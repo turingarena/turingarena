@@ -25,7 +25,7 @@ export const awardSchema = gql`
 export class Award {
     constructor(readonly material: ProblemMaterial, readonly index: number) {}
 
-    private readonly subtaskInfo = this.material.taskInfo.scoring.subtasks[this.index];
+    private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];
 
     name = `subtask.${this.index}`;
     title = [{ value: `Subtask ${this.index}` }];

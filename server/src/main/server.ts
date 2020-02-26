@@ -6,6 +6,7 @@ import { FileContent } from '../core/file-content';
 import { ApiContext } from './api-context';
 import { Config } from './config';
 import { ModelRoot } from './model-root';
+import * as util from 'util';
 
 export function serve(config: Config) {
     const app = express();
@@ -27,7 +28,7 @@ export function serve(config: Config) {
         debug: true,
         playground: true,
         formatError: err => {
-            console.warn(err);
+            console.warn(util.inspect(err, false, null, true /* enable colors */));
 
             return err;
         },
