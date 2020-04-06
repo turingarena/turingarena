@@ -207,13 +207,14 @@ export class Submission extends BaseModel<Submission> {
     async getFeedbackTable() {
         const problem = await this.getProblem();
         const { awards, taskInfo, evaluationFeedbackColumns } = await problem.getMaterial();
+        const { scoring, limits } = taskInfo.IOI;
 
         const limitsMarginMultiplier = 2;
         const memoryUnitBytes = 1024 * 1024; // tslint:disable-line:no-magic-numbers
 
         const events = (await (await this.getOfficialEvaluation())?.getEvents()) ?? [];
         const testCasesData = awards.flatMap((award, awardIndex) =>
-            new Array(taskInfo.scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
+            new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
                 award,
                 awardIndex,
                 timeUsage: null as number | null,
@@ -258,16 +259,16 @@ export class Submission extends BaseModel<Submission> {
                     {
                         __typename: 'TimeUsageField',
                         timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
-                        timeUsageMaxRelevant: { seconds: taskInfo.limits.time * limitsMarginMultiplier },
-                        timeUsagePrimaryWatermark: { seconds: taskInfo.limits.time },
+                        timeUsageMaxRelevant: { seconds: limits.time * limitsMarginMultiplier },
+                        timeUsagePrimaryWatermark: { seconds: limits.time },
                     },
                     {
                         __typename: 'MemoryUsageField',
                         memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
                         memoryUsageMaxRelevant: {
-                            bytes: memoryUnitBytes * taskInfo.limits.memory * limitsMarginMultiplier,
+                            bytes: memoryUnitBytes * limits.memory * limitsMarginMultiplier,
                         },
-                        memoryUsagePrimaryWatermark: { bytes: memoryUnitBytes * taskInfo.limits.memory },
+                        memoryUsagePrimaryWatermark: { bytes: memoryUnitBytes * limits.memory },
                     },
                     {
                         __typename: 'MessageField',
