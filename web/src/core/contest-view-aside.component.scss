@@ -49,15 +49,17 @@ app-contest-view-aside {
 }
 
 .contest-problem-link {
-  text-transform: uppercase;
-
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 
-  display: block;
   margin: 0 -16px;
   padding: 0.5rem 16px;
+
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    text-decoration: none;
+  }
 
   &.active {
     color: #fff;
@@ -65,6 +67,15 @@ app-contest-view-aside {
   }
 }
 
+.contest-problem-link-name {
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .contest-problem-score {
   @extend %grading-badge;
+  margin-left: auto;
 }

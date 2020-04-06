@@ -2,7 +2,6 @@
   @extend .badge, .badge-pill;
 
   margin-top: 0.2rem;
-  float: right;
 
   &:not([data-score-tier]):not([data-badge]),
   &[data-score-tier='zero'],

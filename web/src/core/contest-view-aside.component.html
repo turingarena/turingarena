@@ -15,7 +15,9 @@
     <ng-container *ngFor="let assignmentView of problemSetView.assignmentViews; index as index">
       <a class="contest-problem-link" [routerLink]="['/problem', assignmentView.assignment.problem.name]"
         [title]="assignmentView.assignment.problem.title | text" routerLinkActive="active">
-        {{ assignmentView.assignment.problem.title | text }}
+        <span class="contest-problem-link-name">
+          {{ assignmentView.assignment.problem.title | text }}
+        </span>
         <span class="contest-problem-score" [appValence]="assignmentView.totalScoreField.valence">
           <app-grade-field [data]="assignmentView.totalScoreField"></app-grade-field>
         </span>
