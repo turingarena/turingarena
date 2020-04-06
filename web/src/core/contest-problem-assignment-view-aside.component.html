@@ -17,7 +17,7 @@
     <h3 class="problem-attachment-list-title">Attachments</h3>
     <div class="problem-attachment-list">
       <ng-container *ngFor="let attachment of data.assignment.problem.attachments">
-        <app-media-download [data]="attachment.media"></app-media-download>
+        <app-media-download class="problem-attachment" [data]="attachment.media"></app-media-download>
       </ng-container>
     </div>
   </ng-container>

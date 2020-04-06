@@ -57,14 +57,15 @@ app-contest-problem-assignment-view-aside {
 
 .problem-attachment,
 .problem-download-statement {
-  display: block;
-  color: inherit;
+  a {
+    display: block;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
   }
 }
