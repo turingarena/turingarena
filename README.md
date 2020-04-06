@@ -1,4 +1,5 @@
 # Turingarena
+![CI testing](https://github.com/turingarena/turingarena/workflows/CI%20testing/badge.svg)
 
 A collection of libraries and tools to create programming challenges and competitions.
 
