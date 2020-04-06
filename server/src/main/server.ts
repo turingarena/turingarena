@@ -2,11 +2,11 @@ import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { Duration } from 'luxon';
 import * as mime from 'mime-types';
+import * as util from 'util';
 import { FileContent } from '../core/file-content';
 import { ApiContext } from './api-context';
 import { Config } from './config';
 import { ModelRoot } from './model-root';
-import * as util from 'util';
 
 export function serve(config: Config) {
     const app = express();

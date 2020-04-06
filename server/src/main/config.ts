@@ -1,7 +1,7 @@
+import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { Options } from 'sequelize';
-import { randomBytes } from 'crypto';
 
 export interface Config {
     db: Options;

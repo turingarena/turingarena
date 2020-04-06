@@ -1,8 +1,8 @@
 import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { resolvers, schema } from '../core';
-import { ModelRoot } from './model-root';
 import { User, UserRole } from '../core/user';
+import { ModelRoot } from './model-root';
 
 export interface OperationRequest<V> {
     document: DocumentNode;
@@ -18,21 +18,16 @@ export class ApiContext {
     constructor(readonly root: ModelRoot, readonly user?: User) {}
 
     authorizeUser(username: string) {
-        if (this.root.config.skipAuth)
-            return;
-
-        if (this.user?.username != username)
-            throw new Error(`User ${username} not authorized`);
+        if (this.root.config.skipAuth) return;
+        if (this.user?.username !== username) throw new Error(`User ${username} not authorized`);
     }
 
     authrozeAdmin(username: string) {
-        if (this.root.config.skipAuth)
-            return;
+        if (this.root.config.skipAuth) return;
 
         this.authorizeUser(username);
 
-        if (this.user?.role !== UserRole.ADMIN)
-            throw new Error(`User ${username} is not an admin`);
+        if (this.user?.role !== UserRole.ADMIN) throw new Error(`User ${username} is not an admin`);
     }
 
     /** Executable schema, obtained combining full GraphQL schema and resolvers. */
