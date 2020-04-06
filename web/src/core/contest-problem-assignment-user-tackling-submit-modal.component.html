@@ -30,7 +30,8 @@
               </ng-container>
               <ng-container *ngSwitchDefault>
                 {{ typeRule.defaultType!.title | text }}
-                (<button class="submit-field-change-type" (click)="state.overrideDefaultType = true">change</button>)
+                (<a href="#" role="button" class="submit-field-change-type"
+                  (click)="state.overrideDefaultType = true; $event.preventDefault()">change</a>)
                 <input type="hidden" [name]="field.name + '.type'" [value]="typeRule.defaultType!.name" />
               </ng-container>
             </dd>
