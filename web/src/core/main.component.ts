@@ -1,7 +1,8 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { MainViewQuery, MainViewQueryVariables } from '../generated/graphql-types';
+import { map, tap } from 'rxjs/operators';
+import { CurrentAuthQuery, CurrentAuthQueryVariables, MainQuery, MainQueryVariables } from '../generated/graphql-types';
 import { mainViewFragment } from './main-view.component';
 
 @Component({
@@ -13,15 +14,39 @@ import { mainViewFragment } from './main-view.component';
 export class MainComponent {
   constructor(private readonly apollo: Apollo) {}
 
-  readonly queryRef = this.apollo.watchQuery<MainViewQuery, MainViewQueryVariables>({
+  readonly currentAuthRef = this.apollo.watchQuery<CurrentAuthQuery, CurrentAuthQueryVariables>({
     query: gql`
-      query MainView {
-        mainView(username: "user1") {
-          ...MainView
+      query CurrentAuth {
+        currentAuth @client {
+          token
+          user {
+            username
+          }
         }
       }
-
-      ${mainViewFragment}
     `,
+    fetchPolicy: 'cache-only',
   });
+
+  readonly queryRef = this.currentAuthRef.valueChanges.pipe(
+    tap(({ data }) => {
+      console.log(data);
+    }),
+    map(({ data }) =>
+      this.apollo.watchQuery<MainQuery, MainQueryVariables>({
+        query: gql`
+          query Main($username: ID) {
+            mainView(username: $username) {
+              ...MainView
+            }
+          }
+
+          ${mainViewFragment}
+        `,
+        variables: {
+          username: data?.currentAuth?.user.username ?? null,
+        },
+      }),
+    ),
+  );
 }

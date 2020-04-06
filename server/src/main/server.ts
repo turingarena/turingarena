@@ -18,8 +18,10 @@ export function serve(config: Config) {
     const server = new ApolloServer({
         schema: ApiContext.executableSchema,
         context: async ({ req }) => {
-            const token = req.headers.authorization;
-            const user = token !== undefined ? await root.authService.auth(token) : undefined;
+            const token = req.headers.authorization ?? '';
+            const nAuthParts = 2;
+            const [authType, authPayload] = token.split(' ', nAuthParts);
+            const user = authType === 'Bearer' ? await root.authService.auth(authPayload) : undefined;
             const api = new ApiContext(root, user ?? undefined);
 
             return api;

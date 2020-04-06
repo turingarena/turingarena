@@ -1,4 +1,5 @@
-<app-contest-problem-assignment-user-tackling-aside [data]="data.tackling"></app-contest-problem-assignment-user-tackling-aside>
+<app-contest-problem-assignment-user-tackling-aside *ngIf="data.tackling" [data]="data.tackling">
+</app-contest-problem-assignment-user-tackling-aside>
 <div class="problem-info">
   <ng-container *ngIf="data.awardAssignmentViews.length > 0">
     <h3 class="problem-award-list-title">Awards</h3>
@@ -22,5 +23,6 @@
     </div>
   </ng-container>
   <h2 class="problem-download-statement-title">Statement file</h2>
-  <app-media-download class="problem-download-statement" [data]="data.assignment.problem.statement"></app-media-download>
+  <app-media-download class="problem-download-statement" [data]="data.assignment.problem.statement">
+  </app-media-download>
 </div>

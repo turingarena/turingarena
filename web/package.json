@@ -58,6 +58,7 @@
     "@types/luxon": "^1.21.0",
     "@types/node": "^12.11.1",
     "apollo": "^2.21.3",
+    "apollo-cache-persist": "^0.1.1",
     "change-case": "^4.1.1",
     "codelyzer": "^5.1.2",
     "jasmine-core": "~3.4.0",

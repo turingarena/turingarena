@@ -1,1 +1,4 @@
-<p>login-modal works!</p>
+<form (submit)="logIn($event.target.elements.token.value)">
+  <input type="password" id="token" />
+  <button>Log in</button>
+</form>

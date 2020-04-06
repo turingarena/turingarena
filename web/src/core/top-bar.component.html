@@ -28,7 +28,9 @@
     <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
       <fa-icon icon="signInAlt"></fa-icon>
       Login
-      <ng-template #loginDialog></ng-template>
+      <ng-template #loginDialog>
+        <app-login-modal ></app-login-modal>
+      </ng-template>
     </button>
   </ng-container>
 </nav>

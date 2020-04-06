@@ -1,6 +1,5 @@
 directive @client on FIELD
 
 extend type Query {
-  userId: String
-  token: String
+  currentAuth: AuthResult
 }

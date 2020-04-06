@@ -1,3 +1,5 @@
-<ng-container *ngIf="(queryRef.valueChanges | async)?.data as data">
-  <app-main-view [data]="data.mainView"></app-main-view>
+<ng-container *ngIf="(queryRef | async)?.valueChanges | async as result">
+  <ng-container *ngIf="result.data as data">
+    <app-main-view [data]="data.mainView"></app-main-view>
+  </ng-container>
 </ng-container>
