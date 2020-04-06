@@ -1,7 +1,7 @@
 import { Model, Sequelize } from 'sequelize-typescript';
 import { AuthService } from '../core/auth';
 import { modelConstructors } from '../core/index';
-import { Submission } from '../core/submission';
+// import { Submission } from '../core/submission';
 import { Config, defaultConfig } from './config';
 
 export interface ModelRootSequelize extends Sequelize {
@@ -16,11 +16,11 @@ export class ModelRoot {
         /** Current server configuration */
         readonly config: Config = defaultConfig,
     ) {
-        this.table(Submission).afterSync('create foreign key', () => {
-            this.sequelize.query(
-                'ALTER TABLE submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (user_id, contest_id) REFERENCES participations(user_id, contest_id)',
-            );
-        });
+        // this.table(Submission).afterSync('create foreign key', () => {
+        //     this.sequelize.query(
+        //         'ALTER TABLE submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (user_id, contest_id) REFERENCES participations(user_id, contest_id)',
+        //     );
+        // });
 
         this.sequelize.root = this;
     }
