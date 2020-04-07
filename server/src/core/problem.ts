@@ -9,7 +9,7 @@ import { getProblemTaskInfo } from './material/problem-task-info';
 export const problemSchema = gql`
     type Problem {
         name: ID!
-        files: [ProblemFile!]!
+        fileCollection: FileCollection
     }
 
     input ProblemInput {
@@ -53,7 +53,7 @@ export interface ProblemModelRecord {
 
 export const problemResolvers: Resolvers = {
     Problem: {
-        // files: problem => problem.getFiles(),
+        fileCollection: problem => ({ uuid: problem.fileCollectionId }),
         ...problemMaterialResolversExtensions.Problem,
     },
 };

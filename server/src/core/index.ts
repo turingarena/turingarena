@@ -71,7 +71,6 @@ import { TextModelRecord, textResolvers, textSchema } from './material/text';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { Participation, ParticipationModelRecord, participationSchema } from './participation';
 import { Problem, ProblemModelRecord, problemResolvers, problemSchema } from './problem';
-import { ProblemFileModelRecord, problemFileResolvers, problemFileSchema } from './problem-file';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
@@ -105,7 +104,6 @@ export const schema = gql`
     ${messageSchema}
     ${mutationSchema}
     ${participationSchema}
-    ${problemFileSchema}
     ${problemMaterialSchema}
     ${problemSchema}
     ${querySchema}
@@ -160,7 +158,6 @@ export type ModelRecord = unknown &
     MediaModelRecord &
     MutationModelRecord &
     ParticipationModelRecord &
-    ProblemFileModelRecord &
     ProblemMaterialModelRecord &
     ProblemModelRecord &
     QueryModelRecord &
@@ -189,7 +186,6 @@ export const resolvers: Resolvers = {
     ...mainViewResolvers,
     ...mediaResolvers,
     ...mutationResolvers,
-    ...problemFileResolvers,
     ...problemResolvers,
     ...queryResolvers,
     ...scoreResolvers,

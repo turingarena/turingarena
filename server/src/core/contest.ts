@@ -21,6 +21,7 @@ export const contestSchema = gql`
         end: String!
         status: ContestStatus!
         problemSet: ContestProblemSet!
+        fileCollection: FileCollection!
     }
 
     input ContestInput {
@@ -141,5 +142,6 @@ export const contestResolvers: Resolvers = {
         end: contest => DateTime.fromJSDate(contest.end).toISO(),
         status: contest => contest.getStatus(),
         problemSet: contest => new ContestProblemSet(contest),
+        fileCollection: contest => ({ uuid: contest.fileCollectionId }),
     },
 };
