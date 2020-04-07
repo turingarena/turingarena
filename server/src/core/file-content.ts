@@ -10,7 +10,6 @@ import { Resolvers } from '../main/resolver-types';
 export const fileContentSchema = gql`
     type FileContent {
         hash: ID!
-
         base64: String!
         utf8: String!
     }
@@ -71,7 +70,7 @@ export interface FileContentModelRecord {
 
 export const fileContentResolvers: Resolvers = {
     FileContent: {
-        base64: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('base64'),
-        utf8: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('utf8'),
+        base64: content => content.content.toString('base64'),
+        utf8: content => content.content.toString('utf8'),
     },
 };

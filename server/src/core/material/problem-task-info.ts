@@ -42,12 +42,13 @@ export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskI
             uuid: problem.fileCollectionId,
             path: metadataPath,
         },
-        include: [root.table(FileContent)],
     });
 
     if (metadataProblemFile === null) {
         throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
     }
 
-    return JSON.parse(metadataProblemFile.fileContent.content.toString()) as ProblemTaskInfo;
+    const metadataContent = await root.table(FileContent).findOne({ where: { hash: metadataProblemFile.hash } });
+
+    return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
 }

@@ -56,7 +56,12 @@ import { messageSchema } from './feedback/message';
 import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { FileCollection } from './file-collection';
+import {
+    FileCollection,
+    FileCollectionModelRecord,
+    fileCollectionResolvers,
+    fileCollectionSchema,
+} from './file-collection';
 import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './file-content';
 import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './main-view';
 import { AwardModelRecord, awardResolvers, awardSchema } from './material/award';
@@ -89,6 +94,7 @@ export const schema = gql`
     ${contestViewSchema}
     ${evaluationSchema}
     ${fieldSchema}
+    ${fileCollectionSchema}
     ${fileContentSchema}
     ${fulfillmentSchema}
     ${gradeSchema}
@@ -147,6 +153,7 @@ export type ModelRecord = unknown &
     ContestProblemSetViewModelRecord &
     ContestViewModelRecord &
     EvaluationModelRecord &
+    FileCollectionModelRecord &
     FileContentModelRecord &
     FulfillmentModelRecord &
     MainViewModelRecord &
@@ -189,4 +196,5 @@ export const resolvers: Resolvers = {
     ...submissionResolvers,
     ...textResolvers,
     ...userResolvers,
+    ...fileCollectionResolvers,
 };

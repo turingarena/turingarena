@@ -1,23 +1,37 @@
+import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, Column, DataType, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
+import { Resolvers } from '../main/resolver-types';
 import { FileContent } from './file-content';
+
+export const fileCollectionSchema = gql`
+    type FileCollectionElement {
+        path: String!
+        hash: String!
+        fileContent: FileContent!
+    }
+
+    type FileCollection {
+        uuid: String!
+        files: [FileCollectionElement!]!
+    }
+`;
 
 /**
  * A collection of files, identified by a UUID.
  *
  * NOTE: a collection is immutable, when is created files cannot be added/removed.
  */
-@Table({ timestamps: false })
+@Table({ timestamps: false, tableName: 'file_collection' })
 export class FileCollection extends BaseModel<FileCollection> {
     @PrimaryKey
     @Column(DataType.UUIDV4)
     uuid!: string;
 
-    @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
     hash!: string;
@@ -26,10 +40,6 @@ export class FileCollection extends BaseModel<FileCollection> {
     @PrimaryKey
     @Column
     path!: string;
-
-    @BelongsTo(() => FileContent)
-    fileContent!: FileContent;
-    getFileContent!: () => Promise<FileContent>;
 }
 
 /**
@@ -96,8 +106,25 @@ export const extractFileCollection = async (model: ModelRoot, uuid: string) => {
 
         console.debug(`EXTRACT FILE hash = ${file.hash} IN ${filePath}`);
 
-        await (await file.getFileContent()).extract(filePath);
+        const fileContent = await FileContent.findOne({ where: { hash: file.hash } });
+        await fileContent?.extract(filePath);
     }
 
     return tempDir;
+};
+
+export interface FileCollectionModelRecord {
+    FileCollection: {
+        uuid: string;
+    };
+    FileCollectionElement: FileCollection;
+}
+
+export const fileCollectionResolvers: Resolvers = {
+    FileCollection: {
+        files: ({ uuid }, _, ctx) => ctx.root.table(FileCollection).findAll({ where: { uuid } }),
+    },
+    FileCollectionElement: {
+        fileContent: (collection, _, ctx) => ctx.root.table(FileContent).findOne({ where: { hash: collection.hash } }),
+    },
 };
