@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { map, tap } from 'rxjs/operators';
+import { currentAuthQuery } from '../config/graphql.module';
 import { CurrentAuthQuery, CurrentAuthQueryVariables, MainQuery, MainQueryVariables } from '../generated/graphql-types';
 import { mainViewFragment } from './main-view.component';
 
@@ -15,16 +16,7 @@ export class MainComponent {
   constructor(private readonly apollo: Apollo) {}
 
   readonly currentAuthRef = this.apollo.watchQuery<CurrentAuthQuery, CurrentAuthQueryVariables>({
-    query: gql`
-      query CurrentAuth {
-        currentAuth @client {
-          token
-          user {
-            username
-          }
-        }
-      }
-    `,
+    query: currentAuthQuery,
     fetchPolicy: 'cache-only',
   });
 

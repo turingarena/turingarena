@@ -17,6 +17,7 @@ import { ContestProblemAssignmentViewAsideComponent } from '../core/contest-prob
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
+import { FeedbackTableComponent } from '../core/feedback-table.component';
 import { FeedbackSectionComponent } from '../core/feedback/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback/feedback.component';
 import { ValenceDirective } from '../core/feedback/valence.directive';
@@ -43,7 +44,6 @@ import { JsonPurePipe } from '../util/json-pure.pipe';
 import { TemplateCellRendererComponent } from '../util/template-cell-renderer.component';
 import { AppRoutingModule } from './app-routing.module';
 import { GraphQLModule } from './graphql.module';
-import { FeedbackTableComponent } from '../core/feedback-table.component';
 
 @NgModule({
   declarations: [

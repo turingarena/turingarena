@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ApolloModule, APOLLO_OPTIONS } from 'apollo-angular';
+import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
 import { HttpLink, HttpLinkModule } from 'apollo-angular-link-http';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';
@@ -7,8 +7,8 @@ import { ApolloClientOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import gql from 'graphql-tag';
-import schema from '../../../server/src/generated/graphql.schema.json'; // tslint:disable-line: no-default-import
 import { CurrentAuthQuery } from '../generated/graphql-types.js';
+import schema from '../generated/graphql.schema.json'; // tslint:disable-line: no-default-import
 
 export const currentAuthQuery = gql`
   query CurrentAuth {
@@ -40,12 +40,22 @@ const createApollo = (httpLink: HttpLink): ApolloClientOptions<unknown> => {
     console.error(e);
   });
 
-  const link = ApolloLink.from([
-    setContext((operation, context) => {
-      const token =
+  function getCurrentAuth() {
+    // FIXME: should not require a try-catch, change approach.
+    try {
+      return (
         cache.readQuery<CurrentAuthQuery>({
           query: currentAuthQuery,
-        })?.currentAuth?.token ?? null;
+        }) ?? null
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  const link = ApolloLink.from([
+    setContext((operation, context) => {
+      const token = getCurrentAuth()?.currentAuth?.token ?? null;
 
       return {
         headers: token !== null ? { Authorization: `Bearer ${token}` } : {},
@@ -59,10 +69,7 @@ const createApollo = (httpLink: HttpLink): ApolloClientOptions<unknown> => {
     cache,
     resolvers: {
       Query: {
-        currentAuth: () =>
-          cache.readQuery<CurrentAuthQuery>({
-            query: currentAuthQuery,
-          })?.currentAuth ?? null,
+        currentAuth: getCurrentAuth,
       },
     },
   };

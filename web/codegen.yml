@@ -10,3 +10,7 @@ generates:
       enumsAsTypes: true
       avoidOptionals: true
       nonOptionalTypename: true
+  ./src/generated/graphql.schema.json:
+    schema: src/client-schema.graphql
+    plugins:
+      - introspection
