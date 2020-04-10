@@ -16,7 +16,7 @@ export const fulfillmentSchema = gql`
     }
 
     "Field indicating whether something is fulfilled or not."
-    type FulfillmentField {
+    type FulfillmentField implements HasValence {
         "Value of this field: fulfilled (true), not fulfilled (false), or unknown (null)."
         fulfilled: Boolean
         "Qualitative feeling (valence) associated with this fulfillment, if any."

@@ -18,11 +18,7 @@ import { TemplateCellRendererComponent } from '../../util/template-cell-renderer
 import { fulfillmentVariableFragment } from '../grading/fulfillment-field.component';
 import { scoreVariableFragment } from '../grading/score-field.component';
 import { textFragment } from '../material/text.pipe';
-import { indexFieldFragment } from './index-field.component';
-import { memoryUsageFieldFragment } from './memory-usage-field.component';
-import { messageFieldFragment } from './message-field.component';
-import { timeUsageFieldFragment } from './time-usage-field.component';
-import { titleFieldFragment } from './title-field.component';
+import { fieldFragment } from './field.component';
 
 export interface ColumnDefinition {
   def: ColDef;
@@ -30,6 +26,7 @@ export interface ColumnDefinition {
     field: FeedbackTableFieldFragment,
   ): {
     value: unknown;
+    tooltip?: string;
   };
 }
 
@@ -39,39 +36,69 @@ export class ColumnMeta<T extends FeedbackTableColumnFragment> {
 
 const metas = [
   new ColumnMeta<FulfillmentColumn>('FulfillmentColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'FulfillmentField', `expected FulfillmentField, got ${field.__typename}`);
 
-      return { value: field.fulfilled };
+      return {
+        value: field.fulfilled,
+        tooltip: field.fulfilled !== null ? `${c.title.variant}: ${field.fulfilled ? 'Yes' : 'No'}` : undefined,
+      };
     },
   })),
   new ColumnMeta<ScoreColumn>('ScoreColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'ScoreField', `expected ScoreField, got ${field.__typename}`);
 
-      return { value: field.score };
+      return {
+        value: field.score,
+        tooltip:
+          field.score !== null
+            ? `${c.title.variant}: ${field.score.toFixed(field.scoreRange.decimalDigits)} points`
+            : undefined,
+      };
     },
   })),
   new ColumnMeta<IndexColumn>('IndexColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'IndexField', `expected IndexField, got ${field.__typename}`);
 
-      return { value: field.index };
+      return {
+        value: field.index,
+        tooltip: `${c.title.variant} ${field.index}`,
+      };
     },
   })),
   new ColumnMeta<TitleColumn>('TitleColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'TitleField', `expected TitleField, got ${field.__typename}`);
 
-      return { value: field.title };
+      return {
+        value: field.title,
+        tooltip: `${c.title.variant} ${field.title.variant}`,
+      };
     },
   })),
   new ColumnMeta<TimeUsageColumn>('TimeUsageColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'TimeUsageField', `expected TimeUsageField, got ${field.__typename}`);
 
@@ -79,7 +106,10 @@ const metas = [
     },
   })),
   new ColumnMeta<MemoryUsageColumn>('MemoryUsageColumn', c => ({
-    def: {},
+    def: {
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'MemoryUsageField', `expected MemoryUsageField, got ${field.__typename}`);
 
@@ -87,7 +117,9 @@ const metas = [
     },
   })),
   new ColumnMeta<MessageColumn>('MessageColumn', c => ({
-    def: {},
+    def: {
+      filter: 'agTextColumnFilter',
+    },
     getCellData: field => {
       check(field.__typename === 'MessageField', `expected MessageField, got ${field.__typename}`);
 
@@ -118,14 +150,26 @@ export class FeedbackTableComponent {
         const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
         const { def, getCellData } = meta.createColumnDefinition(c);
 
-        function getField({ data }: ValueGetterParams) {
+        function getField({ data }: { data?: unknown }) {
           return (data as FeedbackTableRecordFragment).fields[i];
         }
 
         return {
           colId: `custom.${i}`,
           headerName: c.title.variant,
+          resizable: true,
+
           valueGetter: params => getCellData(getField(params)).value,
+          tooltip: params => getCellData(getField(params)).tooltip ?? '',
+          cellClass: params => {
+            const field = getField(params);
+            if ('valence' in field) {
+              return [`valence-${field.valence}`];
+            } else {
+              return [];
+            }
+          },
+          // tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',
           cellRendererFramework: TemplateCellRendererComponent,
           cellRendererParams: (params: ValueGetterParams) => ({
             template: this.cellRendererTemplate,
@@ -146,42 +190,17 @@ export const feedbackTableFragment = gql`
     }
   }
 
-  fragment FeedbackTableField on Field {
-    ... on FulfillmentField {
-      ...FulfillmentField
-    }
-    ... on ScoreField {
-      ...ScoreField
-    }
-    ... on IndexField {
-      ...IndexField
-    }
-    ... on TitleField {
-      ...TitleField
-    }
-    ... on MessageField {
-      ...MessageField
-    }
-    ... on TimeUsageField {
-      ...TimeUsageField
-    }
-    ... on MemoryUsageField {
-      ...MemoryUsageField
-    }
-  }
-
   fragment FeedbackTableRecord on Record {
     fields {
-      ...FeedbackTableField
+      ...Field
+      ... on HasValence {
+        valence
+      }
     }
   }
 
   ${scoreVariableFragment}
   ${fulfillmentVariableFragment}
-  ${memoryUsageFieldFragment}
-  ${timeUsageFieldFragment}
-  ${messageFieldFragment}
-  ${titleFieldFragment}
-  ${indexFieldFragment}
+  ${fieldFragment}
   ${textFragment}
 `;

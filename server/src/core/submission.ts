@@ -197,6 +197,8 @@ export class Submission extends UuidBaseModel<Submission> {
 
         const limitsMarginMultiplier = 2;
         const memoryUnitBytes = 1024;
+        const memoryLimitUnitMultiplier = 1024;
+        const warningWatermarkMultiplier = 0.2;
 
         const events = (await (await this.getOfficialEvaluation())?.getEvents()) ?? [];
         const testCasesData = awards.flatMap((award, awardIndex) =>
@@ -247,14 +249,32 @@ export class Submission extends UuidBaseModel<Submission> {
                         timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
                         timeUsageMaxRelevant: { seconds: limits.time * limitsMarginMultiplier },
                         timeUsagePrimaryWatermark: { seconds: limits.time },
+                        valence:
+                            timeUsage === null
+                                ? null
+                                : timeUsage <= warningWatermarkMultiplier * limits.time
+                                ? 'NOMINAL'
+                                : timeUsage <= limits.time
+                                ? 'WARNING'
+                                : 'FAILURE',
                     },
                     {
                         __typename: 'MemoryUsageField',
                         memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
                         memoryUsageMaxRelevant: {
-                            bytes: memoryUnitBytes * limits.memory * limitsMarginMultiplier,
+                            bytes: memoryUnitBytes * limits.memory * memoryLimitUnitMultiplier * limitsMarginMultiplier,
                         },
-                        memoryUsagePrimaryWatermark: { bytes: memoryUnitBytes * limits.memory },
+                        memoryUsagePrimaryWatermark: {
+                            bytes: memoryUnitBytes * limits.memory * memoryLimitUnitMultiplier,
+                        },
+                        valence:
+                            memoryUsage === null
+                                ? null
+                                : memoryUsage <= warningWatermarkMultiplier * limits.memory * memoryLimitUnitMultiplier
+                                ? 'NOMINAL'
+                                : memoryUsage <= limits.memory * memoryLimitUnitMultiplier
+                                ? 'WARNING'
+                                : 'FAILURE',
                     },
                     {
                         __typename: 'MessageField',

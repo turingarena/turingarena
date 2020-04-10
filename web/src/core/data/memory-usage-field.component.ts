@@ -17,8 +17,8 @@ export class MemoryUsageFieldComponent {
     const { memoryUsageMaxRelevant } = this.data;
 
     const { bytes } = memoryUsage;
-    const kb = bytes / 1e3;
-    const mb = kb / 1e3;
+    const kb = bytes / 1024;
+    const mb = kb / 1024;
 
     if (memoryUsageMaxRelevant.bytes > 100e6) {
       return `${mb.toFixed(1)} MB`;

@@ -51,6 +51,10 @@ export const valenceSchema = gql`
         """
         BLOCKED
     }
+
+    interface HasValence {
+        valence: Valence
+    }
 `;
 
 export type Valence = __generated_Valence;

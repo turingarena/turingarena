@@ -1,6 +1,11 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { FieldFragment } from '../../generated/graphql-types';
+import { indexFieldFragment } from './index-field.component';
+import { memoryUsageFieldFragment } from './memory-usage-field.component';
+import { messageFieldFragment } from './message-field.component';
+import { timeUsageFieldFragment } from './time-usage-field.component';
+import { titleFieldFragment } from './title-field.component';
 
 @Component({
   selector: 'app-field',
@@ -22,27 +27,25 @@ export const fieldFragment = gql`
       ...ScoreField
     }
     ... on IndexField {
-      index
+      ...IndexField
     }
     ... on TitleField {
-      title {
-        ...Text
-      }
+      ...TitleField
     }
     ... on MessageField {
-      message {
-        ...Text
-      }
+      ...MessageField
     }
     ... on TimeUsageField {
-      timeUsage {
-        seconds
-      }
+      ...TimeUsageField
     }
     ... on MemoryUsageField {
-      memoryUsage {
-        bytes
-      }
+      ...MemoryUsageField
     }
   }
+
+  ${indexFieldFragment}
+  ${memoryUsageFieldFragment}
+  ${messageFieldFragment}
+  ${timeUsageFieldFragment}
+  ${titleFieldFragment}
 `;
