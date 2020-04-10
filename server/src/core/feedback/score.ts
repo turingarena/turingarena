@@ -28,7 +28,7 @@ export const scoreSchema = gql`
     }
 
     "Field containing a score."
-    type ScoreField {
+    type ScoreField implements HasValence {
         "The number of points, if known."
         score: Float
         "Qualitative feeling (valence) associated with this score, if any."

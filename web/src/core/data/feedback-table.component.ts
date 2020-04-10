@@ -161,6 +161,14 @@ export class FeedbackTableComponent {
 
           valueGetter: params => getCellData(getField(params)).value,
           tooltip: params => getCellData(getField(params)).tooltip ?? '',
+          cellClass: params => {
+            const field = getField(params);
+            if ('valence' in field) {
+              return [`valence-${field.valence}`];
+            } else {
+              return [];
+            }
+          },
           // tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',
           cellRendererFramework: TemplateCellRendererComponent,
           cellRendererParams: (params: ValueGetterParams) => ({
@@ -185,6 +193,9 @@ export const feedbackTableFragment = gql`
   fragment FeedbackTableRecord on Record {
     fields {
       ...Field
+      ... on HasValence {
+        valence
+      }
     }
   }
 
