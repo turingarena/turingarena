@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../../main/resolver-types';
+import { Valence } from './valence';
 
 export const fulfillmentSchema = gql`
     "A grade expressed as a boolean value: fulfilled or not."
@@ -47,5 +48,8 @@ export interface FulfillmentModelRecord {
 export const fulfillmentResolvers: Resolvers = {
     FulfillmentGradeDomain: {
         _: () => true,
+    },
+    FulfillmentField: {
+        valence: ({ fulfilled }): Valence | null => (fulfilled === null ? null : fulfilled ? 'SUCCESS' : 'FAILURE'),
     },
 };

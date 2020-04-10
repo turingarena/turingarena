@@ -1,5 +1,7 @@
-<ng-container [ngSwitch]="data.fulfilled">
-  <ng-container *ngSwitchCase="null">+</ng-container>
-  <ng-container *ngSwitchCase="true">&#x2713;</ng-container>
-  <ng-container *ngSwitchCase="false">&#x2717;</ng-container>
-</ng-container>
+<span [appValence]="data.valence">
+  <ng-container [ngSwitch]="data.fulfilled">
+    <ng-container *ngSwitchCase="null">+</ng-container>
+    <ng-container *ngSwitchCase="true">&#x2713;</ng-container>
+    <ng-container *ngSwitchCase="false">&#x2717;</ng-container>
+  </ng-container>
+</span>

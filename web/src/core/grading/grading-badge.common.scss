@@ -1,0 +1,18 @@
+%grading-badge {
+  @extend .badge, .badge-pill;
+
+  margin-top: 0.2rem;
+
+  @extend .badge-light;
+  border: 1px solid #ccc;
+
+  &[data-valence='SUCCESS'] {
+    @extend .badge-success;
+    border-color: transparent;
+  }
+
+  &[data-valence='PARTIAL'] {
+    @extend .badge-warning;
+    border-color: transparent;
+  }
+}

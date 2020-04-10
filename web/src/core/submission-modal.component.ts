@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { SubmissionQuery, SubmissionQueryVariables } from '../generated/graphql-types';
-import { feedbackTableFragment } from './feedback-table.component';
+import { feedbackTableFragment } from './data/feedback-table.component';
 import { textFragment } from './material/text.pipe';
 
 @Component({
