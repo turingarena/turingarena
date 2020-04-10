@@ -1,12 +1,29 @@
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
+import * as fs from 'fs';
 import { Duration } from 'luxon';
 import * as mime from 'mime-types';
+import * as path from 'path';
 import * as util from 'util';
 import { FileContent } from '../core/file-content';
 import { ApiContext } from './api-context';
 import { Config } from './config';
 import { ModelRoot } from './model-root';
+
+const findWebRoot = () => {
+    let dir = __dirname;
+
+    while (!fs.existsSync(path.join(dir, 'web'))) {
+        dir = path.resolve(dir, '../');
+    }
+
+    return path.join(dir, 'web/dist/turingarena-web');
+};
+
+const webRoot = findWebRoot();
+
+// Needed to make Docker exit correctly on CTRL-C
+process.on('SIGINT', () => process.exit(0));
 
 export function serve(config: Config) {
     const app = express();
@@ -36,6 +53,12 @@ export function serve(config: Config) {
         },
     });
     server.applyMiddleware({ app });
+
+    app.use(express.static(webRoot));
+
+    app.get('/', (_, res) => {
+        res.sendFile(path.join(webRoot, 'index.html'));
+    });
 
     /**
      * Serve static files directly from the database.

@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "noEmit": true,
+        "noEmit": false,
         "target": "ES6",
+        "module": "CommonJS",
         "moduleResolution": "node",
 
         "experimentalDecorators": true,
@@ -18,7 +19,8 @@
         "allowUnreachableCode": false,
 
         "allowJs": true,
-        "checkJs": true
+        "checkJs": true,
+        "outDir": "./build"
     },
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "build"]
 }
