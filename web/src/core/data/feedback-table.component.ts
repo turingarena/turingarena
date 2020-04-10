@@ -19,6 +19,7 @@ import { fulfillmentVariableFragment } from '../grading/fulfillment-field.compon
 import { scoreVariableFragment } from '../grading/score-field.component';
 import { textFragment } from '../material/text.pipe';
 import { memoryUsageFieldFragment } from './memory-usage-field.component';
+import { timeUsageFieldFragment } from './time-usage-field.component';
 
 export interface ColumnDefinition {
   def: ColDef;
@@ -165,9 +166,7 @@ export const feedbackTableFragment = gql`
       }
     }
     ... on TimeUsageField {
-      timeUsage {
-        seconds
-      }
+      ...TimeUsageField
     }
     ... on MemoryUsageField {
       ...MemoryUsageField
@@ -183,5 +182,6 @@ export const feedbackTableFragment = gql`
   ${scoreVariableFragment}
   ${fulfillmentVariableFragment}
   ${memoryUsageFieldFragment}
+  ${timeUsageFieldFragment}
   ${textFragment}
 `;
