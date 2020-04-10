@@ -39,6 +39,7 @@ export class MainComponent {
           username: data?.currentAuth?.user.username ?? null,
         },
         fetchPolicy: 'cache-and-network',
+        pollInterval: 30000,
       }),
     ),
   );

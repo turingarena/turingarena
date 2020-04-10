@@ -83,7 +83,7 @@ export class ContestProblemAssignmentUserTacklingSubmitModalComponent implements
             files,
           },
         },
-        refetchQueries: ['MainView'],
+        refetchQueries: ['Main'],
       })
       .toPromise();
 
