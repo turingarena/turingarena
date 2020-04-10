@@ -46,8 +46,20 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": ["src/assets"],
-            "styles": ["src/styles.scss"],
-            "scripts": []
+            "styles": [
+              "src/styles.scss",
+              "node_modules/katex/dist/katex.min.css",
+              "node_modules/prismjs/themes/prism.css"
+            ],
+            "scripts": [
+              "node_modules/katex/dist/katex.min.js",
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-clike.min.js",
+              "node_modules/prismjs/components/prism-c.min.js",
+              "node_modules/prismjs/components/prism-cpp.min.js",
+              "node_modules/prismjs/components/prism-python.min.js",
+              "node_modules/prismjs/components/prism-java.min.js"
+            ]
           },
           "configurations": {
             "production": {

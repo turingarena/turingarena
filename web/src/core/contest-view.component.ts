@@ -26,6 +26,9 @@ export const contestViewFragment = gql`
       title {
         ...Text
       }
+      statement {
+        ...MediaInline
+      }
     }
 
     problemSetView {

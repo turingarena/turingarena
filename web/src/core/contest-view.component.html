@@ -8,9 +8,13 @@
   </ng-container>
 </ng-container>
 
+<app-media-inline [hidden]="(route.firstChild!.paramMap | async)?.has('problemName')" [data]="data.contest.statement">
+</app-media-inline>
+
 <ng-container *ngIf="data.problemSetView! as problemSetView">
   <ng-container *ngFor="let assignmentView of problemSetView.assignmentViews">
-    <app-media-inline [hidden]="(route.firstChild!.paramMap | async)?.get('problemName') !== assignmentView.assignment.problem.name"
+    <app-media-inline
+      [hidden]="(route.firstChild!.paramMap | async)?.get('problemName') !== assignmentView.assignment.problem.name"
       [data]="assignmentView.assignment.problem.statement"></app-media-inline>
   </ng-container>
 </ng-container>

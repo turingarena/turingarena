@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, Column, DataType, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, DataType, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
@@ -40,6 +40,10 @@ export class FileCollection extends BaseModel<FileCollection> {
     @PrimaryKey
     @Column
     path!: string;
+
+    @BelongsTo(() => FileContent, 'hash')
+    fileContent!: FileContent;
+    getFileContent!: () => Promise<FileContent>;
 }
 
 /**

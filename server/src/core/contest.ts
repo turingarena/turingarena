@@ -1,5 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
+import * as mime from 'mime-types';
+import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
@@ -8,6 +10,7 @@ import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
 import { FileCollection } from './file-collection';
+import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
 import { Problem } from './problem';
@@ -17,6 +20,10 @@ export const contestSchema = gql`
     type Contest {
         name: ID!
         title: Text!
+
+        "Statement of this contest, presented as its home page"
+        statement: Media!
+
         start: String!
         end: String!
         status: ContestStatus!
@@ -94,6 +101,29 @@ export class Contest extends BaseModel<Contest> {
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
         return Promise.all((await this.getProblemAssignments()).map(async a => (await a.getProblem()).getMaterial()));
     }
+
+    private statementVariantFromFile(archiveFile: FileCollection): MediaVariant {
+        const type = mime.lookup(archiveFile.path);
+
+        return {
+            name: archiveFile.path,
+            type: type !== false ? type : 'application/octet-stream',
+            content: () => archiveFile.getFileContent(),
+        };
+    }
+
+    async getStatement(): Promise<Media> {
+        const statementFiles = await this.root.table(FileCollection).findAll({
+            where: {
+                uuid: this.fileCollectionId,
+                path: {
+                    [Op.like]: 'home%',
+                },
+            },
+        });
+
+        return statementFiles.map((archiveFile): MediaVariant => this.statementVariantFromFile(archiveFile));
+    }
 }
 
 export type ContestStatus = __generated_ContestStatus;
@@ -143,5 +173,6 @@ export const contestResolvers: Resolvers = {
         status: contest => contest.getStatus(),
         problemSet: contest => new ContestProblemSet(contest),
         fileCollection: contest => ({ uuid: contest.fileCollectionId }),
+        statement: contest => contest.getStatement(),
     },
 };
