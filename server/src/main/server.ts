@@ -56,10 +56,6 @@ export function serve(config: Config) {
 
     app.use(express.static(webRoot));
 
-    app.get('/', (_, res) => {
-        res.sendFile(path.join(webRoot, 'index.html'));
-    });
-
     /**
      * Serve static files directly from the database.
      */
@@ -97,6 +93,11 @@ export function serve(config: Config) {
      */
     app.post('/files/:name', (req, res) => {
         // TODO
+    });
+
+    // All other routes go to index.html
+    app.get('*', (_, res) => {
+        res.sendFile(path.join(webRoot, 'index.html'));
     });
 
     app.listen(config.port, () => {
