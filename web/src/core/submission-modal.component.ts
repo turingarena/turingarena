@@ -57,7 +57,9 @@ export const submissionModalFragment = gql`
   fragment SubmissionModal on Submission {
     id
     # TODO: files
-    createdAt
+    createdAt {
+      local
+    }
     officialEvaluation {
       status
     }

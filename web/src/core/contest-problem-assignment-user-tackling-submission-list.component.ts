@@ -50,7 +50,9 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
 
   fragment ContestProblemAssignmentUserTacklingSubmissionListSubmission on Submission {
     id
-    createdAt
+    createdAt {
+      local
+    }
     # TODO: submission files
     officialEvaluation {
       status

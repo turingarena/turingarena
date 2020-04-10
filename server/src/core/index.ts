@@ -45,6 +45,7 @@ import {
     contestProblemSetViewSchema,
 } from './contest-problem-set-view';
 import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './contest-view';
+import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './date-time';
 import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
@@ -91,6 +92,7 @@ export const schema = gql`
     ${contestProblemSetViewSchema}
     ${contestSchema}
     ${contestViewSchema}
+    ${dateTimeSchema}
     ${evaluationSchema}
     ${fieldSchema}
     ${fileCollectionSchema}
@@ -150,6 +152,7 @@ export type ModelRecord = unknown &
     ContestProblemSetUserTacklingModelRecord &
     ContestProblemSetViewModelRecord &
     ContestViewModelRecord &
+    DateTimeModelRecord &
     EvaluationModelRecord &
     FileCollectionModelRecord &
     FileContentModelRecord &
@@ -180,6 +183,7 @@ export const resolvers: Resolvers = {
     ...contestProblemSetViewResolvers,
     ...contestResolvers,
     ...contestViewResolvers,
+    ...dateTimeResolvers,
     ...fileContentResolvers,
     ...fulfillmentResolvers,
     ...gradeResolvers,
