@@ -1,19 +1,19 @@
 <nav class="top-bar">
   <a routerLink="/" class="top-bar-home">
     <h1 class="top-bar-title">
-      <fa-icon icon="home"></fa-icon> {{ title | text }}
+      <fa-icon icon="home"></fa-icon> {{ data.title | text }}
     </h1>
   </a>
-  <ng-container *ngIf="userDisplayName">
-    <span class="user-display-name">{{ userDisplayName }}</span>
+  <ng-container *ngIf="data.user as user">
+    <span class="user-display-name">{{ user.name }}</span>
   </ng-container>
   <button class="messages-button">
     <fa-icon icon="comments"></fa-icon>
     Messages
     <span class="message-count-badge" [hidden]="messagesCount === 0">{{messagesCount}}</span>
   </button>
-  <ng-container *ngIf="isLoggedIn">
-    <ng-container *ngIf="isAdmin">
+  <ng-container *ngIf="data.user as user">
+    <ng-container *ngIf="data.user.isAdmin">
       <a routerLink="/admin" class="admin-button">
         <fa-icon icon="tools"></fa-icon>
         Admin
@@ -24,7 +24,7 @@
       Logout
     </button>
   </ng-container>
-  <ng-container *ngIf="!isLoggedIn">
+  <ng-container *ngIf="!data.user">
     <button class="user-login" (click)="modalService.open(loginDialog)">
       <fa-icon icon="signInAlt"></fa-icon>
       Login

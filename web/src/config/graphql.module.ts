@@ -12,7 +12,7 @@ import schema from '../generated/graphql.schema.json'; // tslint:disable-line: n
 
 export const currentAuthQuery = gql`
   query CurrentAuth {
-    currentAuth {
+    currentAuth @client {
       token
       user {
         name
@@ -67,6 +67,9 @@ const createApollo = (httpLink: HttpLink): ApolloClientOptions<unknown> => {
   return {
     link,
     cache,
+    resolvers: {
+      Query: {},
+    },
   };
 };
 

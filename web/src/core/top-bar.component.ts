@@ -1,6 +1,9 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TextFragment } from '../generated/graphql-types';
+import gql from 'graphql-tag';
+import { TopBarFragment } from '../generated/graphql-types';
+import { AuthService } from '../util/auth.service';
+import { textFragment } from './material/text.pipe';
 
 @Component({
   selector: 'app-top-bar',
@@ -9,18 +12,30 @@ import { TextFragment } from '../generated/graphql-types';
   encapsulation: ViewEncapsulation.None,
 })
 export class TopBarComponent {
-  constructor(readonly modalService: NgbModal) {}
+  constructor(readonly modalService: NgbModal, readonly authService: AuthService) {}
 
   @Input()
-  title!: TextFragment;
+  data!: TopBarFragment;
 
-  logInInvalidToken!: boolean;
-  userDisplayName!: string | null;
   messagesCount!: number;
-  isLoggedIn!: boolean;
   isAdmin!: boolean;
 
-  logOut() {
-    // TODO
+  logInInvalidToken!: boolean;
+
+  async logOut() {
+    await this.authService.removeAuth();
   }
 }
+
+export const topBarFragment = gql`
+  fragment TopBar on MainView {
+    title {
+      ...Text
+    }
+    user {
+      name
+    }
+  }
+
+  ${textFragment}
+`;

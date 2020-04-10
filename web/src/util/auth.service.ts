@@ -9,21 +9,15 @@ import { AuthResult, CurrentAuthQuery } from '../generated/graphql-types';
 export class AuthService {
   constructor(private readonly apollo: Apollo) {}
 
-  getAuth() {
-    // FIXME: should not require a try-catch, change approach.
-    try {
-      return (
-        this.apollo.getClient().readQuery<CurrentAuthQuery>({
-          query: currentAuthQuery,
-        }) ?? null
-      );
-    } catch {
-      return null;
-    }
-  }
-
   async removeAuth() {
     await this.apollo.getClient().clearStore();
+    this.apollo.getClient().writeQuery<CurrentAuthQuery>({
+      query: currentAuthQuery,
+      data: {
+        __typename: 'Query',
+        currentAuth: null,
+      },
+    });
   }
 
   async setAuth(currentAuth: AuthResult) {

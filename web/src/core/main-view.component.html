@@ -1,4 +1,4 @@
-<app-top-bar [title]="data.title"></app-top-bar>
+<app-top-bar [data]="data"></app-top-bar>
 <ng-container *ngIf="data.contestView as contestView">
   <app-contest-view [data]="contestView"></app-contest-view>
 </ng-container>
