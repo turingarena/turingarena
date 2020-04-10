@@ -84,6 +84,7 @@ export class ContestProblemAssignmentUserTacklingSubmitModalComponent implements
           },
         },
         refetchQueries: ['Main'],
+        awaitRefetchQueries: true,
       })
       .toPromise();
 
