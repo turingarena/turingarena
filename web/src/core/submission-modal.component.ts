@@ -1,7 +1,10 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnChanges, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { SubmissionModalFragment } from '../generated/graphql-types';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { SubmissionQuery, SubmissionQueryVariables } from '../generated/graphql-types';
 import { feedbackTableFragment } from './feedback-table.component';
 import { textFragment } from './material/text.pipe';
 
@@ -11,16 +14,48 @@ import { textFragment } from './material/text.pipe';
   styleUrls: ['./submission-modal.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class SubmissionModalComponent {
+export class SubmissionModalComponent implements OnChanges {
+  constructor(private readonly apollo: Apollo) {}
+
   @Input()
   modal!: NgbActiveModal;
 
   @Input()
-  data!: SubmissionModalFragment;
+  id!: string;
+
+  queryRef!: QueryRef<SubmissionQuery, SubmissionQueryVariables>;
+  dataObservable!: Observable<SubmissionQuery>;
+
+  ngOnChanges() {
+    this.queryRef = this.apollo.watchQuery<SubmissionQuery, SubmissionQueryVariables>({
+      query: gql`
+        query Submission($id: ID!) {
+          submission(id: $id) {
+            ...SubmissionModal
+          }
+        }
+
+        ${submissionModalFragment}
+      `,
+      variables: {
+        id: this.id,
+      },
+      pollInterval: 500,
+    });
+    this.dataObservable = this.queryRef.valueChanges.pipe(
+      map(({ data }) => data),
+      tap(data => {
+        if (data.submission.officialEvaluation?.status !== 'PENDING') {
+          this.queryRef.stopPolling();
+        }
+      }),
+    );
+  }
 }
 
 export const submissionModalFragment = gql`
   fragment SubmissionModal on Submission {
+    id
     # TODO: files
     createdAt
     officialEvaluation {

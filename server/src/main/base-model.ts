@@ -4,6 +4,9 @@ import { ModelRootSequelize } from './model-root';
 
 export abstract class BaseModel<T> extends Model<T> {
     root = (this.sequelize as ModelRootSequelize).root;
+
+    createdAt!: Date;
+    updatedAt!: Date;
 }
 
 export abstract class UuidBaseModel<T> extends BaseModel<T> {

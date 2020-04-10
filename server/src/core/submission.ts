@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { DateTime } from 'luxon';
 import * as path from 'path';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
@@ -289,6 +290,8 @@ export const submissionResolvers: Resolvers = {
 
         participation: submission => submission.getParticipation(),
         contestProblemAssigment: submission => submission.getContestProblemAssignment(),
+
+        createdAt: submission => DateTime.fromJSDate(submission.createdAt).toISO(),
 
         officialEvaluation: submission => submission.getOfficialEvaluation(),
         summaryRow: submission => submission.getSummaryRow(),
