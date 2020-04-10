@@ -32,18 +32,9 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
       assignment {
         problem {
           submissionListColumns {
-            ...ContestProblemAssignmentUserTacklingSubmissionListColumn
+            ...FeedbackTableColumn
           }
         }
-      }
-    }
-  }
-
-  fragment ContestProblemAssignmentUserTacklingSubmissionListColumn on Column {
-    __typename
-    ... on TitledColumn {
-      title {
-        ...Text
       }
     }
   }
@@ -58,24 +49,15 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
       status
     }
     summaryRow {
-      fields {
-        ... on FulfillmentField {
-          fulfilled
-        }
-        ... on ScoreField {
-          score
-        }
-      }
+      ...FeedbackTableRecord
     }
 
     feedbackTable {
       columns {
-        __typename
+        ...FeedbackTableColumn
       }
       rows {
-        fields {
-          __typename
-        }
+        ...FeedbackTableRecord
       }
     }
 

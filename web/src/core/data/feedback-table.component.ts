@@ -122,8 +122,6 @@ export class FeedbackTableComponent {
           return (data as FeedbackTableRecordFragment).fields[i];
         }
 
-        console.log(this.cellRendererTemplate);
-
         return {
           colId: `custom.${i}`,
           headerName: c.title.variant,
