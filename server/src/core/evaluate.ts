@@ -6,7 +6,7 @@ import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from
 import { ModelRoot } from '../main/model-root';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, TaskMakerEvent } from './evaluation-event';
-import { extractProblemFiles } from './material/problem-task-info';
+import { extractFileCollection } from './file-collection';
 import { Submission } from './submission';
 
 /**
@@ -26,7 +26,7 @@ export async function evaluate(root: ModelRoot, submission: Submission) {
     console.log(root.config);
 
     const problem = await submission.getProblem();
-    const problemDir = await extractProblemFiles(problem, path.join(root.config.cachePath, 'problem'));
+    const problemDir = await extractFileCollection(root, problem.fileCollectionId);
 
     const submissionPath = await submission.extract(path.join(root.config.cachePath, 'submission'));
 

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as yaml from 'yaml';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
-import { importProblemFiles } from '../core/material/problem-task-info';
+import { createFileCollection } from '../core/file-collection';
 import { Problem } from '../core/problem';
 import { User, UserRole } from '../core/user';
 import { ModelRoot } from '../main/model-root';
@@ -36,9 +36,12 @@ export async function importContest(root: ModelRoot, dir = process.cwd()) {
     const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
     const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
-    const contest = await root.table(Contest).create(metadata);
+    const contestFileCollectionId = await createFileCollection(root, path.join(dir, 'files'));
 
-    await contest.loadFiles(root, path.join(dir, 'files'));
+    const contest = await root.table(Contest).create({
+        fileCollectionId: contestFileCollectionId,
+        ...metadata,
+    });
 
     for (const user of metadata.users) {
         await contest.createParticipation(
@@ -55,11 +58,12 @@ export async function importContest(root: ModelRoot, dir = process.cwd()) {
     }
 
     for (const name of metadata.problems) {
+        const fileCollectionId = await createFileCollection(root, path.join(dir, name));
+
         const problem = await root.table(Problem).create({
             name,
+            fileCollectionId,
         });
-
-        await importProblemFiles(problem, path.join(dir, name));
 
         await root.table(ContestProblemAssignment).create({
             contestId: contest.id,

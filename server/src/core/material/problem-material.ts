@@ -2,9 +2,9 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
+import { FileCollection } from '../file-collection';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
-import { ProblemFile } from '../problem-file';
 import { Award } from './award';
 import { Media, MediaVariant } from './media';
 import { ProblemTaskInfo } from './problem-task-info';
@@ -180,16 +180,18 @@ export const problemMaterialResolversExtensions: Resolvers = {
     },
 };
 
-async function loadContent(problem: Problem, path: string) {
-    const root = problem.root;
+const loadContent = async (problem: Problem, path: string) => {
+    const file = await problem.root.table(FileCollection).findOne({
+        where: {
+            uuid: problem.fileCollectionId,
+            path,
+        },
+        include: [problem.root.table(FileContent)],
+    });
 
-    return (
-        (await root.table(ProblemFile).findOne({
-            where: {
-                problemId: problem.id as string,
-                path,
-            },
-            include: [root.table(FileContent)],
-        })) ?? root.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`)
-    ).content;
-}
+    if (file === null) {
+        problem.root.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
+    }
+
+    return file!.fileContent;
+};

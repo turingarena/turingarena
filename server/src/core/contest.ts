@@ -1,16 +1,13 @@
 import { gql } from 'apollo-server-core';
-import * as fs from 'fs';
 import { DateTime } from 'luxon';
-import * as path from 'path';
-import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
-import { ContestFile } from './contest-file';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
-import { FileContent } from './file-content';
+import { FileCollection } from './file-collection';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
 import { Problem } from './problem';
@@ -24,6 +21,7 @@ export const contestSchema = gql`
         end: String!
         status: ContestStatus!
         problemSet: ContestProblemSet!
+        fileCollection: FileCollection!
     }
 
     input ContestInput {
@@ -65,6 +63,11 @@ export class Contest extends BaseModel<Contest> {
     @Column
     end!: Date;
 
+    @AllowNull(false)
+    @Column(DataType.UUIDV4)
+    @ForeignKey(() => FileCollection)
+    fileCollectionId!: string;
+
     /** The list of problems in this contest */
     @HasMany(() => ContestProblemAssignment)
     problemAssignments!: ContestProblemAssignment[];
@@ -77,34 +80,6 @@ export class Contest extends BaseModel<Contest> {
     getParticipations!: (options: object) => Promise<Participation[]>;
     createParticipation!: (participation: object, options: object) => Promise<Participation>;
     addParticipation!: (options: object) => Promise<unknown>;
-
-    /** The list of files in this contest */
-    @HasMany(() => ContestFile)
-    files!: ContestFile[];
-    getFiles!: (options: object) => Promise<ContestFile[]>;
-    createFile!: (contestFile: object, options?: object) => Promise<ContestFile>;
-
-    /**
-     * Add files to this contest
-     *
-     * @param root  Context of the database
-     * @param base Base directory to add
-     * @param dir  Relative directory in recursive call
-     */
-    async loadFiles(root: ModelRoot, base: string, dir: string = '') {
-        const files = fs.readdirSync(path.join(base, dir));
-        for (const file of files) {
-            const relPath = path.join(dir, file);
-            if (fs.statSync(path.join(base, relPath)).isDirectory()) await this.loadFiles(root, base, relPath);
-            else {
-                const fileRow = await FileContent.createFromPath(root, path.join(base, relPath));
-                await this.createFile({
-                    path: relPath,
-                    fileId: fileRow.id,
-                });
-            }
-        }
-    }
 
     getStatus(): ContestStatus {
         const start = DateTime.fromJSDate(this.start).valueOf();
@@ -167,5 +142,6 @@ export const contestResolvers: Resolvers = {
         end: contest => DateTime.fromJSDate(contest.end).toISO(),
         status: contest => contest.getStatus(),
         problemSet: contest => new ContestProblemSet(contest),
+        fileCollection: contest => ({ uuid: contest.fileCollectionId }),
     },
 };

@@ -17,6 +17,7 @@ export const querySchema = gql`
         problems: [Problem!]!
         problem(name: ID!): Problem!
         fileContent(hash: ID!): FileContent!
+        fileCollection(uuid: ID!): FileCollection!
     }
 `;
 
@@ -47,5 +48,6 @@ export const queryResolvers: Resolvers = {
         problems: async root => root.table(Problem).findAll(),
         problem: async (root, { name }) =>
             (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem: ${name}`),
+        fileCollection: (_, { uuid }) => ({ uuid }),
     },
 };

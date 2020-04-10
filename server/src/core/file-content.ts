@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, Column, DefaultScope, Index, Scopes, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, Index, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
@@ -10,7 +10,6 @@ import { Resolvers } from '../main/resolver-types';
 export const fileContentSchema = gql`
     type FileContent {
         hash: ID!
-
         base64: String!
         utf8: String!
     }
@@ -22,18 +21,11 @@ export const fileContentSchema = gql`
 `;
 
 /** A generic file in TuringArena. */
-@DefaultScope(() => ({
-    attributes: ['id', 'hash'],
-}))
-@Scopes(() => ({
-    withData: {
-        attributes: ['id', 'hash', 'content'],
-    },
-}))
 @Table({ updatedAt: false })
 export class FileContent extends BaseModel<FileContent> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @Unique
+    @PrimaryKey
     @AllowNull(false)
     @Index
     @Column
@@ -78,7 +70,7 @@ export interface FileContentModelRecord {
 
 export const fileContentResolvers: Resolvers = {
     FileContent: {
-        base64: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('base64'),
-        utf8: async content => (await content.reload({ attributes: ['id', 'content'] })).content.toString('utf8'),
+        base64: content => content.content.toString('base64'),
+        utf8: content => content.content.toString('utf8'),
     },
 };

@@ -13,7 +13,6 @@ import {
     contestAwardAssignmentViewResolvers,
     contestAwardAssignmentViewSchema,
 } from './contest-award-assignment-view';
-import { ContestFile } from './contest-file';
 import {
     ContestProblemAssignment,
     ContestProblemAssignmentModelRecord,
@@ -57,6 +56,12 @@ import { messageSchema } from './feedback/message';
 import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
+import {
+    FileCollection,
+    FileCollectionModelRecord,
+    fileCollectionResolvers,
+    fileCollectionSchema,
+} from './file-collection';
 import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './file-content';
 import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './main-view';
 import { AwardModelRecord, awardResolvers, awardSchema } from './material/award';
@@ -66,7 +71,6 @@ import { TextModelRecord, textResolvers, textSchema } from './material/text';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { Participation, ParticipationModelRecord, participationSchema } from './participation';
 import { Problem, ProblemModelRecord, problemResolvers, problemSchema } from './problem';
-import { ProblemFile, ProblemFileModelRecord, problemFileResolvers, problemFileSchema } from './problem-file';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
@@ -89,6 +93,7 @@ export const schema = gql`
     ${contestViewSchema}
     ${evaluationSchema}
     ${fieldSchema}
+    ${fileCollectionSchema}
     ${fileContentSchema}
     ${fulfillmentSchema}
     ${gradeSchema}
@@ -99,7 +104,6 @@ export const schema = gql`
     ${messageSchema}
     ${mutationSchema}
     ${participationSchema}
-    ${problemFileSchema}
     ${problemMaterialSchema}
     ${problemSchema}
     ${querySchema}
@@ -120,14 +124,13 @@ export const schema = gql`
 export const modelConstructors = {
     Achievement,
     Contest,
-    ContestFile,
     ContestProblemAssignment,
+    FileCollection,
     Evaluation,
     EvaluationEvent,
     FileContent,
     Participation,
     Problem,
-    ProblemFile,
     Submission,
     SubmissionFile,
     User,
@@ -148,13 +151,13 @@ export type ModelRecord = unknown &
     ContestProblemSetViewModelRecord &
     ContestViewModelRecord &
     EvaluationModelRecord &
+    FileCollectionModelRecord &
     FileContentModelRecord &
     FulfillmentModelRecord &
     MainViewModelRecord &
     MediaModelRecord &
     MutationModelRecord &
     ParticipationModelRecord &
-    ProblemFileModelRecord &
     ProblemMaterialModelRecord &
     ProblemModelRecord &
     QueryModelRecord &
@@ -183,11 +186,11 @@ export const resolvers: Resolvers = {
     ...mainViewResolvers,
     ...mediaResolvers,
     ...mutationResolvers,
-    ...problemFileResolvers,
     ...problemResolvers,
     ...queryResolvers,
     ...scoreResolvers,
     ...submissionResolvers,
     ...textResolvers,
     ...userResolvers,
+    ...fileCollectionResolvers,
 };
