@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, DataType, HasMany, Index, Table, Unique } from 'sequelize-typescript';
-import { BaseModel } from '../main/base-model';
+import { UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ProblemMaterial, problemMaterialResolversExtensions } from './material/problem-material';
@@ -20,7 +20,7 @@ export const problemSchema = gql`
 
 /** A problem in TuringArena. */
 @Table
-export class Problem extends BaseModel<Problem> {
+export class Problem extends UuidBaseModel<Problem> {
     /** Name of the problem, must be a valid identifier. */
     @Unique
     @Column

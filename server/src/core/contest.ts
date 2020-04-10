@@ -4,7 +4,7 @@ import * as mime from 'mime-types';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
-import { BaseModel } from '../main/base-model';
+import { UuidBaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -47,7 +47,7 @@ export const contestSchema = gql`
 
 /** A contest in TuringArena */
 @Table
-export class Contest extends BaseModel<Contest> {
+export class Contest extends UuidBaseModel<Contest> {
     /** Name of the contest, must be a valid identifier, e.g. ioi */
     @Unique
     @Index

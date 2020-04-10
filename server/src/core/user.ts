@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, AutoIncrement, Column, HasMany, Index, PrimaryKey, Table, Unique } from 'sequelize-typescript';
-import { BaseModel } from '../main/base-model';
+import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
+import { UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Participation } from './participation';
 
@@ -25,12 +25,7 @@ export const userSchema = gql`
 
 /** A user in TuringArena */
 @Table
-export class User extends BaseModel<User> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
+export class User extends UuidBaseModel<User> {
     /** Username that is used to identify the user, e.g. alerighi */
     @Unique
     @Index

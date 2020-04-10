@@ -1,18 +1,9 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import {
-    AllowNull,
-    AutoIncrement,
-    BelongsTo,
-    Column,
-    ForeignKey,
-    HasMany,
-    PrimaryKey,
-    Table,
-} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
-import { BaseModel } from '../main/base-model';
+import { UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -54,12 +45,7 @@ export const submissionSchema = gql`
 
 /** A Submission in the system */
 @Table({ updatedAt: false })
-export class Submission extends BaseModel<Submission> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id!: number;
-
+export class Submission extends UuidBaseModel<Submission> {
     @ForeignKey(() => Problem)
     @AllowNull(false)
     @Column

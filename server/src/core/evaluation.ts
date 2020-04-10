@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
-import { BaseModel } from '../main/base-model';
+import { UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
@@ -30,7 +30,7 @@ export const evaluationSchema = gql`
 
 /** An evaluation of a submission */
 @Table
-export class Evaluation extends BaseModel<Evaluation> {
+export class Evaluation extends UuidBaseModel<Evaluation> {
     @ForeignKey(() => Submission)
     @AllowNull(false)
     @Column
