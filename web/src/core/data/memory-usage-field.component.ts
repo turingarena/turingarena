@@ -1,6 +1,6 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
-import { MemoryUsageFieldFragment } from '../../generated/graphql-types';
+import { MemoryUsageFieldFragment, MemoryUsageFragment } from '../../generated/graphql-types';
 
 @Component({
   selector: 'app-memory-usage-field',
@@ -11,6 +11,29 @@ import { MemoryUsageFieldFragment } from '../../generated/graphql-types';
 export class MemoryUsageFieldComponent {
   @Input()
   data!: MemoryUsageFieldFragment;
+
+  // tslint:disable: no-magic-numbers
+  displayMemoryUsage(memoryUsage: MemoryUsageFragment) {
+    const { memoryUsageMaxRelevant } = this.data;
+
+    const { bytes } = memoryUsage;
+    const kb = bytes / 1e3;
+    const mb = kb / 1e3;
+
+    if (memoryUsageMaxRelevant.bytes > 100e6) {
+      return `${mb.toFixed(1)} MB`;
+    } else if (memoryUsageMaxRelevant.bytes > 10e6) {
+      return `${mb.toFixed(2)} MB`;
+    } else if (memoryUsageMaxRelevant.bytes > 1e6) {
+      return `${kb.toFixed(0)} KB`;
+    } else if (memoryUsageMaxRelevant.bytes > 100e3) {
+      return `${kb.toFixed(1)} KB`;
+    } else if (memoryUsageMaxRelevant.bytes > 10e3) {
+      return `${kb.toFixed(2)} KB`;
+    } else {
+      return `${kb.toFixed(3)} KB`;
+    }
+  }
 }
 
 export const memoryUsageFieldFragment = gql`

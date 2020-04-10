@@ -196,7 +196,7 @@ export class Submission extends UuidBaseModel<Submission> {
         const { scoring, limits } = taskInfo.IOI;
 
         const limitsMarginMultiplier = 2;
-        const memoryUnitBytes = 1024 * 1024; // tslint:disable-line:no-magic-numbers
+        const memoryUnitBytes = 1024;
 
         const events = (await (await this.getOfficialEvaluation())?.getEvents()) ?? [];
         const testCasesData = awards.flatMap((award, awardIndex) =>

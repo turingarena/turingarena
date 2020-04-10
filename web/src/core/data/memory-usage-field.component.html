@@ -1,1 +1,3 @@
-<span class="memory-usage">{{data.memoryUsage?.bytes}}</span>
+<span class="memory-usage">
+  <ng-container *ngIf="data.memoryUsage as memoryUsage">{{displayMemoryUsage(memoryUsage)}}</ng-container>
+</span>
