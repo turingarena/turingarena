@@ -9,7 +9,7 @@
         "@schematics/angular:component": {
           "style": "scss",
           "path": "src",
-          "spec": false,
+          "skipTests": true,
           "flat": true,
           "viewEncapsulation": "None",
           "module": "config/app"
