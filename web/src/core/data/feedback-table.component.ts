@@ -3,8 +3,8 @@ import { ColDef, ValueGetterParams } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import {
   FeedbackTableColumnFragment,
-  FeedbackTableFieldFragment,
   FeedbackTableRecordFragment,
+  FieldFragment,
   FulfillmentColumn,
   IndexColumn,
   MemoryUsageColumn,
@@ -22,8 +22,9 @@ import { fieldFragment } from './field.component';
 
 export interface ColumnDefinition {
   def: ColDef;
+  mainClasses?: string[];
   getCellData(
-    field: FeedbackTableFieldFragment,
+    field: FieldFragment,
   ): {
     value: unknown;
     tooltip?: string;
@@ -40,6 +41,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
+    mainClasses: ['numeric-cell'],
     getCellData: field => {
       check(field.__typename === 'FulfillmentField', `expected FulfillmentField, got ${field.__typename}`);
 
@@ -54,6 +56,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
+    mainClasses: ['numeric-cell'],
     getCellData: field => {
       check(field.__typename === 'ScoreField', `expected ScoreField, got ${field.__typename}`);
 
@@ -71,6 +74,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
+    mainClasses: ['numeric-cell'],
     getCellData: field => {
       check(field.__typename === 'IndexField', `expected IndexField, got ${field.__typename}`);
 
@@ -99,6 +103,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
+    mainClasses: ['numeric-cell'],
     getCellData: field => {
       check(field.__typename === 'TimeUsageField', `expected TimeUsageField, got ${field.__typename}`);
 
@@ -110,6 +115,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
+    mainClasses: ['numeric-cell'],
     getCellData: field => {
       check(field.__typename === 'MemoryUsageField', `expected MemoryUsageField, got ${field.__typename}`);
 
@@ -148,7 +154,7 @@ export class FeedbackTableComponent {
     columns.map(
       (c, i): ColDef => {
         const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
-        const { def, getCellData } = meta.createColumnDefinition(c);
+        const { def, mainClasses, getCellData } = meta.createColumnDefinition(c);
 
         function getField({ data }: { data?: unknown }) {
           return (data as FeedbackTableRecordFragment).fields[i];
@@ -164,9 +170,9 @@ export class FeedbackTableComponent {
           cellClass: params => {
             const field = getField(params);
             if ('valence' in field) {
-              return [`valence-${field.valence}`];
+              return [...(mainClasses ?? []), `valence-${field.valence}`];
             } else {
-              return [];
+              return [...(mainClasses ?? [])];
             }
           },
           // tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',

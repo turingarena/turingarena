@@ -1,4 +1,4 @@
 <span class="memory-usage">
   <ng-container *ngIf="data.memoryUsage as memoryUsage">{{displayMemoryUsage(memoryUsage)}}</ng-container>
-  <ng-container *ngIf="data.memoryUsagePrimaryWatermark as memoryUsage"> / {{displayMemoryUsage(memoryUsage)}}</ng-container>
+  <small *ngIf="data.memoryUsagePrimaryWatermark as memoryUsage"> / {{displayMemoryUsage(memoryUsage)}}</small>
 </span>
