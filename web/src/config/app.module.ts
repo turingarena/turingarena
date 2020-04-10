@@ -19,6 +19,7 @@ import { ContestViewClockComponent } from '../core/contest-view-clock.component'
 import { ContestViewComponent } from '../core/contest-view.component';
 import { FeedbackTableComponent } from '../core/data/feedback-table.component';
 import { FieldComponent } from '../core/data/field.component';
+import { MemoryUsageFieldComponent } from '../core/data/memory-usage-field.component';
 import { FeedbackSectionComponent } from '../core/feedback/feedback-section.component';
 import { FeedbackComponent } from '../core/feedback/feedback.component';
 import { ValenceDirective } from '../core/feedback/valence.directive';
@@ -83,6 +84,7 @@ import { GraphQLModule } from './graphql.module';
     ContestProblemAssignmentUserTacklingAsideComponent,
     FeedbackTableComponent,
     FieldComponent,
+    MemoryUsageFieldComponent,
   ],
   imports: [
     BrowserModule,

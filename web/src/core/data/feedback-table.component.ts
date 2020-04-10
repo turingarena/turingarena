@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ColDef, ValueGetterParams } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import {
@@ -14,9 +14,11 @@ import {
   TitleHeaderColumn,
 } from '../../generated/graphql-types';
 import { check } from '../../util/check';
+import { TemplateCellRendererComponent } from '../../util/template-cell-renderer.component';
 import { fulfillmentVariableFragment } from '../grading/fulfillment-field.component';
 import { scoreVariableFragment } from '../grading/score-field.component';
 import { textFragment } from '../material/text.pipe';
+import { memoryUsageFieldFragment } from './memory-usage-field.component';
 
 export interface ColumnDefinition {
   def: ColDef;
@@ -103,25 +105,34 @@ export class FeedbackTableComponent {
   @Input()
   records!: FeedbackTableRecordFragment[];
 
-  getColumns(columns: FeedbackTableColumnFragment[]): ColDef[] {
-    return columns.map(
+  @ViewChild('cellRendererTemplate', { static: true })
+  cellRendererTemplate!: TemplateRef<unknown>;
+
+  getColumns = (columns: FeedbackTableColumnFragment[]): ColDef[] =>
+    columns.map(
       (c, i): ColDef => {
         const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
         const { def, getCellData } = meta.createColumnDefinition(c);
 
-        function cellData({ data }: ValueGetterParams) {
-          return getCellData((data as FeedbackTableRecordFragment).fields[i]);
+        function getField({ data }: ValueGetterParams) {
+          return (data as FeedbackTableRecordFragment).fields[i];
         }
+
+        console.log(this.cellRendererTemplate);
 
         return {
           colId: `custom.${i}`,
           headerName: c.title.variant,
-          valueGetter: params => cellData(params).value,
+          valueGetter: params => getCellData(getField(params)).value,
+          cellRendererFramework: TemplateCellRendererComponent,
+          cellRendererParams: (params: ValueGetterParams) => ({
+            template: this.cellRendererTemplate,
+            field: getField(params),
+          }),
           ...def,
         };
       },
     );
-  }
 }
 
 export const feedbackTableFragment = gql`
@@ -159,9 +170,7 @@ export const feedbackTableFragment = gql`
       }
     }
     ... on MemoryUsageField {
-      memoryUsage {
-        bytes
-      }
+      ...MemoryUsageField
     }
   }
 
@@ -173,5 +182,6 @@ export const feedbackTableFragment = gql`
 
   ${scoreVariableFragment}
   ${fulfillmentVariableFragment}
+  ${memoryUsageFieldFragment}
   ${textFragment}
 `;

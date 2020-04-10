@@ -1,3 +1,7 @@
 <ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="records"
   [columnDefs]="columns | applyPure: getColumns">
 </ag-grid-angular>
+
+<ng-template #cellRendererTemplate let-field="field">
+  <app-field *ngIf="field" [data]="field"></app-field>
+</ng-template>
