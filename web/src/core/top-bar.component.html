@@ -13,7 +13,7 @@
     <span class="message-count-badge" [hidden]="messagesCount === 0">{{messagesCount}}</span>
   </button>
   <ng-container *ngIf="data.user as user">
-    <ng-container *ngIf="data.user.isAdmin">
+    <ng-container *ngIf="user.isAdmin">
       <a routerLink="/admin" class="admin-button">
         <fa-icon icon="tools"></fa-icon>
         Admin
