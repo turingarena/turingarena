@@ -14,7 +14,7 @@ export class MessageFieldComponent {
   data!: MessageFieldFragment;
 }
 
-export const timeUsageFieldFragment = gql`
+export const messageFieldFragment = gql`
   fragment MessageField on MessageField {
     message {
       ...Text

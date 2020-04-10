@@ -21,10 +21,10 @@ export const fieldFragment = gql`
     ... on ScoreField {
       ...ScoreField
     }
-    ... on IndexHeaderField {
+    ... on IndexField {
       index
     }
-    ... on TitleHeaderField {
+    ... on TitleField {
       title {
         ...Text
       }

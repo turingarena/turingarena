@@ -6,20 +6,23 @@ import {
   FeedbackTableFieldFragment,
   FeedbackTableRecordFragment,
   FulfillmentColumn,
-  IndexHeaderColumn,
+  IndexColumn,
   MemoryUsageColumn,
   MessageColumn,
   ScoreColumn,
   TimeUsageColumn,
-  TitleHeaderColumn,
+  TitleColumn,
 } from '../../generated/graphql-types';
 import { check } from '../../util/check';
 import { TemplateCellRendererComponent } from '../../util/template-cell-renderer.component';
 import { fulfillmentVariableFragment } from '../grading/fulfillment-field.component';
 import { scoreVariableFragment } from '../grading/score-field.component';
 import { textFragment } from '../material/text.pipe';
+import { indexFieldFragment } from './index-field.component';
 import { memoryUsageFieldFragment } from './memory-usage-field.component';
+import { messageFieldFragment } from './message-field.component';
 import { timeUsageFieldFragment } from './time-usage-field.component';
+import { titleFieldFragment } from './title-field.component';
 
 export interface ColumnDefinition {
   def: ColDef;
@@ -51,18 +54,18 @@ const metas = [
       return { value: field.score };
     },
   })),
-  new ColumnMeta<IndexHeaderColumn>('IndexHeaderColumn', c => ({
+  new ColumnMeta<IndexColumn>('IndexColumn', c => ({
     def: {},
     getCellData: field => {
-      check(field.__typename === 'IndexHeaderField', `expected IndexHeaderField, got ${field.__typename}`);
+      check(field.__typename === 'IndexField', `expected IndexField, got ${field.__typename}`);
 
       return { value: field.index };
     },
   })),
-  new ColumnMeta<TitleHeaderColumn>('TitleHeaderColumn', c => ({
+  new ColumnMeta<TitleColumn>('TitleColumn', c => ({
     def: {},
     getCellData: field => {
-      check(field.__typename === 'TitleHeaderField', `expected TitleHeaderField, got ${field.__typename}`);
+      check(field.__typename === 'TitleField', `expected TitleField, got ${field.__typename}`);
 
       return { value: field.title };
     },
@@ -152,18 +155,14 @@ export const feedbackTableFragment = gql`
     ... on ScoreField {
       ...ScoreField
     }
-    ... on IndexHeaderField {
-      index
+    ... on IndexField {
+      ...IndexField
     }
-    ... on TitleHeaderField {
-      title {
-        ...Text
-      }
+    ... on TitleField {
+      ...TitleField
     }
     ... on MessageField {
-      message {
-        ...Text
-      }
+      ...MessageField
     }
     ... on TimeUsageField {
       ...TimeUsageField
@@ -183,5 +182,8 @@ export const feedbackTableFragment = gql`
   ${fulfillmentVariableFragment}
   ${memoryUsageFieldFragment}
   ${timeUsageFieldFragment}
+  ${messageFieldFragment}
+  ${titleFieldFragment}
+  ${indexFieldFragment}
   ${textFragment}
 `;

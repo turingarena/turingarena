@@ -8,8 +8,8 @@ export const fieldSchema = gql`
         | MessageField
         | TimeUsageField
         | MemoryUsageField
-        | IndexHeaderField
-        | TitleHeaderField
+        | IndexField
+        | TitleField
 
     "A column with a title."
     interface TitledColumn {
@@ -23,8 +23,8 @@ export const fieldSchema = gql`
         | MessageColumn
         | TimeUsageColumn
         | MemoryUsageColumn
-        | IndexHeaderColumn
-        | TitleHeaderColumn
+        | IndexColumn
+        | TitleColumn
 
     "Collection of fields, in 1-to-1 correspondence with a collection of columns."
     type Record {

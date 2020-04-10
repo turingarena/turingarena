@@ -235,11 +235,11 @@ export class Submission extends UuidBaseModel<Submission> {
             rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
                 fields: [
                     {
-                        __typename: 'IndexHeaderField',
+                        __typename: 'IndexField',
                         index: awardIndex,
                     },
                     {
-                        __typename: 'IndexHeaderField',
+                        __typename: 'IndexField',
                         index: testCaseIndex,
                     },
                     {
