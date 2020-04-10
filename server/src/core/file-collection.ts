@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, DataType, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, DataType, PrimaryKey, Table, ForeignKey } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
@@ -11,8 +11,7 @@ import { FileContent } from './file-content';
 export const fileCollectionSchema = gql`
     type FileCollectionElement {
         path: String!
-        hash: String!
-        fileContent: FileContent!
+        content: FileContent!
     }
 
     type FileCollection {
@@ -33,17 +32,18 @@ export class FileCollection extends BaseModel<FileCollection> {
     uuid!: string;
 
     @AllowNull(false)
+    @ForeignKey(() => FileContent)
     @Column
-    hash!: string;
+    contentId!: string;
 
     /** Path of this file in the contest, e.g. home.md */
     @PrimaryKey
     @Column
     path!: string;
 
-    @BelongsTo(() => FileContent, 'hash')
-    fileContent!: FileContent;
-    getFileContent!: () => Promise<FileContent>;
+    @BelongsTo(() => FileContent)
+    content!: FileContent;
+    getContent!: () => Promise<FileContent>;
 }
 
 /**
@@ -67,10 +67,10 @@ export const createFileCollection = async (root: ModelRoot, directory: string) =
                 await addFiles(relPath);
             } else {
                 console.debug(`ADD FILE ${relPath}`);
-                const fileContent = await FileContent.createFromPath(root, path.join(directory, relPath));
+                const content = await FileContent.createFromPath(root, path.join(directory, relPath));
                 await root.table(FileCollection).create({
                     uuid,
-                    hash: fileContent.hash,
+                    contentId: content.id,
                     path: relPath,
                 });
             }
@@ -108,10 +108,10 @@ export const extractFileCollection = async (model: ModelRoot, uuid: string) => {
     for (const file of collection) {
         const filePath = path.join(tempDir, file.path);
 
-        console.debug(`EXTRACT FILE hash = ${file.hash} IN ${filePath}`);
+        console.debug(`EXTRACT FILE hash = ${file.contentId} IN ${filePath}`);
 
-        const fileContent = await FileContent.findOne({ where: { hash: file.hash } });
-        await fileContent?.extract(filePath);
+        const content = await model.table(FileContent).findOne({ where: { id: file.contentId } });
+        await content?.extract(filePath);
     }
 
     return tempDir;
@@ -129,6 +129,6 @@ export const fileCollectionResolvers: Resolvers = {
         files: ({ uuid }, _, ctx) => ctx.root.table(FileCollection).findAll({ where: { uuid } }),
     },
     FileCollectionElement: {
-        fileContent: (collection, _, ctx) => ctx.root.table(FileContent).findOne({ where: { hash: collection.hash } }),
+        content: (collection, _, ctx) => ctx.root.table(FileContent).findOne({ where: { id: collection.contentId } }),
     },
 };

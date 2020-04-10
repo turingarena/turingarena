@@ -16,7 +16,7 @@ export const querySchema = gql`
         contest(name: ID!): Contest!
         problems: [Problem!]!
         problem(name: ID!): Problem!
-        fileContent(hash: ID!): FileContent!
+        fileContent(id: ID!): FileContent!
         fileCollection(uuid: ID!): FileCollection!
     }
 `;

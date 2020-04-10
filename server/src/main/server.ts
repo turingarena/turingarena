@@ -40,10 +40,10 @@ export function serve(config: Config) {
     /**
      * Serve static files directly from the database.
      */
-    app.get('/files/:hash/:filename', async (req, res, next) => {
+    app.get('/files/:contentId/:filename', async (req, res, next) => {
         try {
-            const { hash, filename } = req.params;
-            const file = await root.table(FileContent).findOne({ where: { hash }, attributes: ['content'] });
+            const { contentId, filename } = req.params;
+            const file = await root.table(FileContent).findOne({ where: { id: contentId }, attributes: ['content'] });
             const contentType = mime.lookup(filename);
 
             if (file === null) {

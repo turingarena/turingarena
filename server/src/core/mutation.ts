@@ -19,7 +19,7 @@ export const mutationSchema = gql`
         updateContest(contest: ContestInput!): Boolean!
         deleteContest(contest: ID!): Boolean!
         createFile(file: FileContentInput!): Boolean!
-        deleteFile(hash: ID!): Boolean!
+        deleteFile(id: ID!): Boolean!
 
         addProblem(contestName: ID!, name: ID!): Boolean!
         removeProblem(contestName: ID!, name: ID!): Boolean!

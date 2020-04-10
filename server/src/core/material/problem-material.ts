@@ -193,5 +193,5 @@ const loadContent = async (problem: Problem, path: string) => {
         problem.root.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
     }
 
-    return file!.fileContent;
+    return file!.content;
 };

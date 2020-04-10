@@ -48,7 +48,7 @@ export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskI
         throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
     }
 
-    const metadataContent = await root.table(FileContent).findOne({ where: { hash: metadataProblemFile.hash } });
+    const metadataContent = await root.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
 
     return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
 }

@@ -50,6 +50,6 @@ export const mediaResolvers: Resolvers = {
         variant: media => media[0],
     },
     MediaFile: {
-        url: async variant => `/files/${(await variant.content()).hash}/${variant.name}`,
+        url: async variant => `/files/${(await variant.content()).id}/${variant.name}`,
     },
 };

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, Column, Index, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
@@ -9,7 +9,7 @@ import { Resolvers } from '../main/resolver-types';
 
 export const fileContentSchema = gql`
     type FileContent {
-        hash: ID!
+        id: ID!
         base64: String!
         utf8: String!
     }
@@ -24,12 +24,10 @@ export const fileContentSchema = gql`
 @Table({ updatedAt: false })
 export class FileContent extends BaseModel<FileContent> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
-    @Unique
     @PrimaryKey
     @AllowNull(false)
-    @Index
     @Column
-    hash!: string;
+    id!: string;
 
     /** Content in bytes of the file. */
     @AllowNull(false)
@@ -37,11 +35,11 @@ export class FileContent extends BaseModel<FileContent> {
     content!: Buffer;
 
     static async createFromContent(root: ModelRoot, content: Buffer) {
-        const hash = ssri.fromData(content).hexDigest();
+        const id = ssri.fromData(content).hexDigest();
 
         return (
-            (await root.table(FileContent).findOne({ where: { hash } })) ??
-            (await root.table(FileContent).create({ content, hash }))
+            (await root.table(FileContent).findOne({ where: { id } })) ??
+            (await root.table(FileContent).create({ content, id }))
         );
     }
 

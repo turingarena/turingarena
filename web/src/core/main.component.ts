@@ -38,6 +38,7 @@ export class MainComponent {
         variables: {
           username: data?.currentAuth?.user.username ?? null,
         },
+        fetchPolicy: 'cache-and-network',
       }),
     ),
   );

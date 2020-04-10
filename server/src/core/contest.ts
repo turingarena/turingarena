@@ -108,7 +108,7 @@ export class Contest extends BaseModel<Contest> {
         return {
             name: archiveFile.path,
             type: type !== false ? type : 'application/octet-stream',
-            content: () => archiveFile.getFileContent(),
+            content: () => archiveFile.getContent(),
         };
     }
 

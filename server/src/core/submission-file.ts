@@ -37,7 +37,7 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
     @ForeignKey(() => FileContent)
     @AllowNull(false)
     @Column
-    contentId!: number;
+    contentId!: string;
 
     @AllowNull(false)
     @Column
