@@ -10,9 +10,16 @@ export class AuthService {
   constructor(private readonly apollo: Apollo) {}
 
   getAuth() {
-    return this.apollo.getClient().readQuery<CurrentAuthQuery>({
-      query: currentAuthQuery,
-    });
+    // FIXME: should not require a try-catch, change approach.
+    try {
+      return (
+        this.apollo.getClient().readQuery<CurrentAuthQuery>({
+          query: currentAuthQuery,
+        }) ?? null
+      );
+    } catch {
+      return null;
+    }
   }
 
   async removeAuth() {

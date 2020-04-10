@@ -67,11 +67,6 @@ const createApollo = (httpLink: HttpLink): ApolloClientOptions<unknown> => {
   return {
     link,
     cache,
-    resolvers: {
-      Query: {
-        currentAuth: getCurrentAuth,
-      },
-    },
   };
 };
 
