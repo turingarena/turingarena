@@ -25,11 +25,11 @@
     </button>
   </ng-container>
   <ng-container *ngIf="!isLoggedIn">
-    <button class="user-login" (click)="this.logInInvalidToken = false; modalService.open(loginDialog)">
+    <button class="user-login" (click)="modalService.open(loginDialog)">
       <fa-icon icon="signInAlt"></fa-icon>
       Login
-      <ng-template #loginDialog>
-        <app-login-modal ></app-login-modal>
+      <ng-template #loginDialog let-modal>
+        <app-login-modal [modal]="modal"></app-login-modal>
       </ng-template>
     </button>
   </ng-container>

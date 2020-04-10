@@ -17,8 +17,10 @@ export class LoginModalComponent {
   @Input()
   modal!: NgbActiveModal;
 
+  invalidToken = false;
+
   async logIn(token: string) {
-    const result = await this.apollo
+    const { data } = await this.apollo
       .mutate<LoginMutation, LoginMutationVariables>({
         mutation: gql`
           mutation Login($token: String!) {
@@ -38,10 +40,18 @@ export class LoginModalComponent {
       })
       .toPromise();
 
-    const resultData = result.data?.logIn ?? null;
-
-    if (resultData !== null) {
-      await this.authService.setAuth(resultData);
+    if (data === null || data === undefined) {
+      throw Error('error during login');
     }
+
+    if (data.logIn === null) {
+      this.invalidToken = true;
+
+      return;
+    }
+
+    await this.authService.setAuth(data.logIn);
+
+    this.modal.close();
   }
 }
