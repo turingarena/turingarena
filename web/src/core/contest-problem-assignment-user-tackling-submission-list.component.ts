@@ -1,4 +1,5 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ColDef } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import { DateTime } from 'luxon';
@@ -17,8 +18,12 @@ import { submissionModalFragment } from './submission-modal.component';
   encapsulation: ViewEncapsulation.None,
 })
 export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
+  constructor(readonly modalService: NgbModal) {}
+
   @Input()
   data!: ContestProblemAssignmentUserTacklingSubmissionListFragment;
+
+  openSubmission!: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment;
 
   getSummaryRows(submissions: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment[]) {
     return submissions.map(s => s.summaryRow);

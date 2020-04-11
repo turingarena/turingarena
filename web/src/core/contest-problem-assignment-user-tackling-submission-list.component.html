@@ -1,3 +1,11 @@
 <ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="data.submissions"
-  [columnDefs]="data | applyPure: getColumns" (gridSizeChanged)="$event.api.sizeColumnsToFit()">
+  [columnDefs]="data | applyPure: getColumns" (gridSizeChanged)="$event.api.sizeColumnsToFit()"
+  (rowClicked)="openSubmission = $event.node.data; modalService.open(submissionModal, { size: 'lg' })"
+  rowClass="submission-row"
+  >
 </ag-grid-angular>
+
+<ng-template #submissionModal let-modal>
+  <app-submission-modal [modal]="modal" [id]="openSubmission.id">
+  </app-submission-modal>
+</ng-template>
