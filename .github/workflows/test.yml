@@ -31,5 +31,5 @@ jobs:
         working-directory: web/
       - name: Deploy 
         run: |
-          scp -r web/dist/turingarena-web turingarena@turingarena.org:frontend
-          scp -r server/build turingarena@turingarena.org:backend
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r web/dist/turingarena-web turingarena@turingarena.org:frontend
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r server/build turingarena@turingarena.org:backend
