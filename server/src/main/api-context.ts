@@ -22,7 +22,7 @@ export class ApiContext {
         if (this.user?.username !== username) throw new Error(`User ${username} not authorized`);
     }
 
-    authrozeAdmin(username: string) {
+    authorizeAdmin(username: string) {
         if (this.root.config.skipAuth) return;
 
         this.authorizeUser(username);
