@@ -11,10 +11,13 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+      - uses: webfactory/ssh-agent@v0.2.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install backend dependencies
         run: npm ci
         working-directory: server/
-      - name: Build frontend
+      - name: Build backend
         run: npm run build
         working-directory: server/
       - name: Run all backend tests
@@ -26,3 +29,7 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: web/
+      - name: Deploy 
+        run: |
+          scp -r web/dist/turingarena-web turingarena@turingarena.org:frontend
+          scp -r server/build turingarena@turingarena.org:backend
