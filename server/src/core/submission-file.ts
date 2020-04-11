@@ -43,9 +43,6 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
     @Column
     fileName!: string;
 
-    @BelongsTo(() => Submission)
-    submission!: Submission;
-
     @BelongsTo(() => FileContent)
     content!: FileContent;
     getContent!: (options?: FindOptions) => Promise<FileContent>;

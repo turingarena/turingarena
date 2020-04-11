@@ -1,7 +1,8 @@
 import * as path from 'path';
+import { ApiContext } from '../main/api-context';
 import { ModelRoot } from '../main/model-root';
 import { Contest } from './contest';
-import { evaluate } from './evaluate';
+import { EvaluateApi } from './evaluate';
 import { FileContent } from './file-content';
 import { Problem } from './problem';
 import { Submission, SubmissionInput } from './submission';
@@ -47,8 +48,12 @@ export async function submit(
         });
     }
 
-    evaluate(root, submission).catch(e => {
-        console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
-        console.error(e);
-    });
+    // FIXME: merge with root
+    const ctx = new ApiContext(root);
+    ctx.api(EvaluateApi)
+        .evaluate(submission)
+        .catch(e => {
+            console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
+            console.error(e);
+        });
 }

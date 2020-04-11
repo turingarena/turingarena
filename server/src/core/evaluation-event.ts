@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
-import { AllowNull, BelongsTo, Column, ForeignKey, Table } from 'sequelize-typescript';
+import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
+import { ApiObject } from '../main/api';
 import { UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { Evaluation } from './evaluation';
@@ -12,20 +13,18 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
     @Column
     evaluationId!: number;
 
-    /** Evaluation to which this event belongs to */
-    @BelongsTo(() => Evaluation, 'evaluationId')
-    evaluation!: Evaluation;
-
     /** Data of this event, in a backend-specific format */
     @AllowNull(false)
     @Column(DataTypes.JSON)
     data!: TaskMakerEvent;
+}
 
-    async storeAchievements() {
-        if ('IOISubtaskScore' in this.data) {
-            const { subtask, normalized_score, score } = this.data.IOISubtaskScore;
-            await this.root.table(Achievement).create({
-                evaluationId: this.evaluationId,
+export class EvaluationEventApi extends ApiObject {
+    async storeAchievements(e: EvaluationEvent) {
+        if ('IOISubtaskScore' in e.data) {
+            const { subtask, normalized_score, score } = e.data.IOISubtaskScore;
+            await this.ctx.root.table(Achievement).create({
+                evaluationId: e.evaluationId,
                 awardIndex: subtask,
                 // Store the normalized score if the max score is zero (FIXME: ugly hack)
                 grade: score === 0 ? normalized_score : score,

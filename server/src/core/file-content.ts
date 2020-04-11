@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
-import { BaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { BaseModel, createByIdLoader } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 
@@ -64,6 +65,10 @@ export class FileContent extends BaseModel<FileContent> {
 
 export interface FileContentModelRecord {
     FileContent: FileContent;
+}
+
+export class FileContentApi extends ApiObject {
+    byId = createByIdLoader(this.ctx, FileContent);
 }
 
 export const fileContentResolvers: Resolvers = {

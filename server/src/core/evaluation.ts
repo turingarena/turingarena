@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
-import { UuidBaseModel } from '../main/base-model';
+import { AllowNull, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
+import { ApiObject } from '../main/api';
+import { createByIdLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { EvaluationEvent } from './evaluation-event';
 import { Submission } from './submission';
@@ -34,17 +35,12 @@ export class Evaluation extends UuidBaseModel<Evaluation> {
     @ForeignKey(() => Submission)
     @AllowNull(false)
     @Column
-    submissionId!: number;
+    submissionId!: string;
 
     /** Status of this evaluation */
     @AllowNull(false)
     @Column
     status!: EvaluationStatus;
-
-    /** Submission to which this evaluation belongs to */
-    @BelongsTo(() => Submission, 'submissionId')
-    submission!: Submission;
-    getSubmission!: () => Promise<Submission>;
 
     /** Events of this submission */
     @HasMany(() => EvaluationEvent)
@@ -69,4 +65,8 @@ export enum EvaluationStatus {
 
 export interface EvaluationModelRecord {
     Evaluation: Evaluation;
+}
+
+export class EvaluationApi extends ApiObject {
+    byId = createByIdLoader(this.ctx, Evaluation);
 }

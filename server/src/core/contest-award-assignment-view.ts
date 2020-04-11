@@ -1,7 +1,11 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
+import {
+    ContestAwardAssignmentUserTackling,
+    ContestAwardAssignmentUserTacklingApi,
+} from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGradeDomain } from './feedback/score';
@@ -28,18 +32,30 @@ export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
 
     tackling = this.user !== null ? new ContestAwardAssignmentUserTackling(this.assignment, this.user) : null;
+}
 
-    async getGradeField() {
-        const { gradeDomain: domain } = this.assignment.award;
+export interface ContestAwardAssignmentViewModelRecord {
+    ContestAwardAssignmentView: ContestAwardAssignmentView;
+}
+
+export class ContestAwardAssignmentViewApi extends ApiObject {
+    async getGradeField(v: ContestAwardAssignmentView) {
+        const { gradeDomain: domain } = v.assignment.award;
 
         if (domain instanceof FulfillmentGradeDomain) {
-            const grade = await this.tackling?.getFulfillmentGrade();
+            const grade =
+                v.tackling !== null
+                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(v.tackling)
+                    : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
         }
 
         if (domain instanceof ScoreGradeDomain) {
-            const grade = await this.tackling?.getScoreGrade(domain);
+            const grade =
+                v.tackling !== null
+                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(v.tackling, domain)
+                    : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
         }
@@ -48,16 +64,12 @@ export class ContestAwardAssignmentView {
     }
 }
 
-export interface ContestAwardAssignmentViewModelRecord {
-    ContestAwardAssignmentView: ContestAwardAssignmentView;
-}
-
 export const contestAwardAssignmentViewResolvers: Resolvers = {
     ContestAwardAssignmentView: {
-        assignment: view => view.assignment,
-        user: view => view.user,
+        assignment: v => v.assignment,
+        user: v => v.user,
         problemAssignmentView: async ({ assignment, user }) =>
             new ContestProblemAssignmentView(assignment.problemAssignment, user),
-        gradeField: view => view.getGradeField(),
+        gradeField: (v, {}, ctx) => ctx.api(ContestAwardAssignmentViewApi).getGradeField(v),
     },
 };

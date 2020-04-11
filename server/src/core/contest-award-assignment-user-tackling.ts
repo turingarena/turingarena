@@ -1,5 +1,6 @@
 import { QueryTypes } from 'sequelize';
-import { Achievement } from './achievement';
+import { ApiObject } from '../main/api';
+import { Achievement, AchievementApi } from './achievement';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -7,9 +8,11 @@ import { User } from './user';
 
 export class ContestAwardAssignmentUserTackling {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
+}
 
-    async getBestAchievement() {
-        const { sequelize, root } = this.assignment.problemAssignment;
+export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
+    async getBestAchievement(t: ContestAwardAssignmentUserTackling) {
+        const { sequelize, root } = t.assignment.problemAssignment;
 
         const achievements = await sequelize.query<Achievement>(
             `
@@ -57,9 +60,9 @@ export class ContestAwardAssignmentUserTackling {
             `,
             {
                 bind: {
-                    problemId: this.assignment.problemAssignment.problemId,
-                    userId: this.user.id,
-                    awardIndex: this.assignment.award.index,
+                    problemId: t.assignment.problemAssignment.problemId,
+                    userId: t.user.id,
+                    awardIndex: t.assignment.award.index,
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
@@ -70,18 +73,26 @@ export class ContestAwardAssignmentUserTackling {
         return achievements.length > 0 ? achievements[0] : null;
     }
 
-    async getScoreGrade(domain: ScoreGradeDomain) {
-        return (await this.getBestAchievement())?.getScoreGrade(domain) ?? new ScoreGrade(domain.scoreRange, 0);
+    async getScoreGrade(t: ContestAwardAssignmentUserTackling, domain: ScoreGradeDomain) {
+        const bestAchievement = await this.getBestAchievement(t);
+
+        return bestAchievement !== null
+            ? this.ctx.api(AchievementApi).getScoreGrade(bestAchievement, domain)
+            : new ScoreGrade(domain.scoreRange, 0);
     }
 
-    async getFulfillmentGrade() {
-        return (await this.getBestAchievement())?.getFulfillmentGrade() ?? new FulfillmentGrade(false);
+    async getFulfillmentGrade(t: ContestAwardAssignmentUserTackling) {
+        const bestAchievement = await this.getBestAchievement(t);
+
+        return bestAchievement !== null
+            ? this.ctx.api(AchievementApi).getFulfillmentGrade(bestAchievement)
+            : new FulfillmentGrade(false);
     }
 
-    async getGrade() {
-        const { gradeDomain: domain } = this.assignment.award;
-        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
-        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
+    async getGrade(t: ContestAwardAssignmentUserTackling) {
+        const { gradeDomain: domain } = t.assignment.award;
+        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade(t)) ?? null;
+        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(t, domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }

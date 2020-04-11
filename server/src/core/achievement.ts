@@ -1,9 +1,12 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { ApiObject } from '../main/api';
 import { BaseModel } from '../main/base-model';
-import { Evaluation } from './evaluation';
+import { Evaluation, EvaluationApi } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
+import { ProblemApi } from './problem';
+import { SubmissionApi } from './submission';
 
 export const achievementSchema = gql`
     type Achievement {
@@ -20,7 +23,7 @@ export class Achievement extends BaseModel<Achievement> {
     @ForeignKey(() => Evaluation)
     @AllowNull(false)
     @Column
-    evaluationId!: number;
+    evaluationId!: string;
 
     @PrimaryKey
     @AllowNull(false)
@@ -29,29 +32,27 @@ export class Achievement extends BaseModel<Achievement> {
 
     @Column
     grade!: number;
-
-    @BelongsTo(() => Evaluation, 'evaluationId')
-    evaluation!: Evaluation;
-    getEvaluation!: () => Promise<Evaluation>;
-
-    async getAward() {
-        const evaluation = await this.getEvaluation();
-        const submission = await evaluation.getSubmission();
-        const problem = await submission.getProblem();
-        const material = await problem.getMaterial();
-
-        return material.awards[this.awardIndex];
-    }
-
-    getScoreGrade({ scoreRange }: ScoreGradeDomain): ScoreGrade {
-        return new ScoreGrade(scoreRange, this.grade);
-    }
-
-    getFulfillmentGrade(): FulfillmentGrade {
-        return new FulfillmentGrade(this.grade === 1);
-    }
 }
 
 export interface AchievementModelRecord {
     Achievement: Achievement;
+}
+
+export class AchievementApi extends ApiObject {
+    async getAward(a: Achievement) {
+        const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
+        const submission = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
+        const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
+        const material = await problem.getMaterial();
+
+        return material.awards[a.awardIndex];
+    }
+
+    getScoreGrade(a: Achievement, { scoreRange }: ScoreGradeDomain): ScoreGrade {
+        return new ScoreGrade(scoreRange, a.grade);
+    }
+
+    getFulfillmentGrade(a: Achievement): FulfillmentGrade {
+        return new FulfillmentGrade(a.grade === 1);
+    }
 }
