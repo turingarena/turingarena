@@ -43,18 +43,12 @@ export async function importContest(root: ModelRoot, dir = process.cwd()) {
         ...metadata,
     });
 
-    for (const user of metadata.users) {
-        await contest.createParticipation(
-            {
-                user: {
-                    ...user,
-                    role: user.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
-                },
-            },
-            {
-                include: [root.table(User)],
-            },
-        );
+    for (const userData of metadata.users) {
+        const user = await root.table(User).create({
+            ...userData,
+            role: userData.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
+        });
+        await contest.createParticipation({ userId: user.id });
     }
 
     for (const name of metadata.problems) {

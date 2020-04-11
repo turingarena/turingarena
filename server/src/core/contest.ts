@@ -89,7 +89,7 @@ export class Contest extends UuidBaseModel<Contest> {
     @HasMany(() => Participation)
     participations!: Participation[];
     getParticipations!: (options: object) => Promise<Participation[]>;
-    createParticipation!: (participation: object, options: object) => Promise<Participation>;
+    createParticipation!: (participation: object, options?: object) => Promise<Participation>;
     addParticipation!: (options: object) => Promise<unknown>;
 }
 
