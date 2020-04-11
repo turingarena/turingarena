@@ -13,8 +13,6 @@ import { FileCollection } from './file-collection';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
-import { Problem } from './problem';
-import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
@@ -132,47 +130,19 @@ export interface MutationModelRecord {
     Mutation: ModelRoot;
 }
 
-export const contestMutationResolvers: Resolvers = {
-    Mutation: {
-        addProblem: async (root, { contestName, name }) => {
-            const contest =
-                (await root.table(Contest).findOne({
-                    where: { name: contestName },
-                })) ?? root.fail(`no such contest '${contestName}'`);
-            const problem =
-                (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
-            await contest.createProblemAssignment({
-                problem,
-            });
-
-            return true;
-        },
-        addUser: async (root, { contestName, username }) => {
-            const contest =
-                (await root.table(Contest).findOne({
-                    where: { name: contestName },
-                })) ?? root.fail(`no such contest '${contestName}'`);
-            const user =
-                (await root.table(User).findOne({ where: { username } })) ?? root.fail(`no such user '${username}'`);
-            await contest.addParticipation(user);
-
-            return true;
-        },
-    },
-};
-
 export interface ContestModelRecord {
     Contest: Contest;
 }
 
 export const contestResolvers: Resolvers = {
     Contest: {
-        title: contest => [{ value: contest.title }],
-        start: contest => DateTime.fromJSDate(contest.start).toISO(),
-        end: contest => DateTime.fromJSDate(contest.end).toISO(),
-        status: contest => contest.getStatus(),
-        problemSet: contest => new ContestProblemSet(contest),
-        fileCollection: contest => ({ uuid: contest.fileCollectionId }),
-        statement: contest => contest.getStatement(),
+        name: c => c.name,
+        title: c => [{ value: c.title }],
+        start: c => DateTime.fromJSDate(c.start).toISO(),
+        end: c => DateTime.fromJSDate(c.end).toISO(),
+        status: c => c.getStatus(),
+        problemSet: c => new ContestProblemSet(c),
+        fileCollection: c => ({ uuid: c.fileCollectionId }),
+        statement: c => c.getStatement(),
     },
 };

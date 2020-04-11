@@ -68,7 +68,8 @@ export interface FileContentModelRecord {
 
 export const fileContentResolvers: Resolvers = {
     FileContent: {
-        base64: content => content.content.toString('base64'),
-        utf8: content => content.content.toString('utf8'),
+        id: c => c.id,
+        base64: c => c.content.toString('base64'),
+        utf8: c => c.content.toString('utf8'),
     },
 };

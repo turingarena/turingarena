@@ -303,15 +303,21 @@ export type SubmissionInput = __generated_SubmissionInput;
 
 export const submissionResolvers: Resolvers = {
     Submission: {
-        contest: submission => submission.getContest(),
-        user: submission => submission.getUser(),
-        problem: submission => submission.getProblem(),
+        id: s => s.id,
 
-        participation: submission => submission.getParticipation(),
-        contestProblemAssigment: submission => submission.getContestProblemAssignment(),
+        contest: s => s.getContest(),
+        user: s => s.getUser(),
+        problem: s => s.getProblem(),
 
-        officialEvaluation: submission => submission.getOfficialEvaluation(),
-        summaryRow: submission => submission.getSummaryRow(),
-        feedbackTable: submission => submission.getFeedbackTable(),
+        participation: s => s.getParticipation(),
+        contestProblemAssigment: s => s.getContestProblemAssignment(),
+
+        officialEvaluation: s => s.getOfficialEvaluation(),
+        summaryRow: s => s.getSummaryRow(),
+        feedbackTable: s => s.getFeedbackTable(),
+
+        createdAt: s => s.createdAt,
+        evaluations: s => s.evaluations,
+        files: s => s.submissionFiles,
     },
 };

@@ -50,6 +50,7 @@ export const fulfillmentResolvers: Resolvers = {
         _: () => true,
     },
     FulfillmentField: {
+        fulfilled: f => f.fulfilled,
         valence: ({ fulfilled }): Valence | null => (fulfilled === null ? null : fulfilled ? 'SUCCESS' : 'FAILURE'),
     },
 };

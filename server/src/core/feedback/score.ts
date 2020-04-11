@@ -82,6 +82,8 @@ export interface ScoreModelRecord {
 
 export const scoreResolvers: Resolvers = {
     ScoreField: {
+        score: f => f.score,
+        scoreRange: f => f.scoreRange,
         valence: ({ scoreRange: { max }, score: value }): Valence | null =>
             value === null ? null : value >= max ? 'SUCCESS' : value > 0 ? 'PARTIAL' : 'FAILURE',
     },

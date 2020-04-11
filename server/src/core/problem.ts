@@ -3,7 +3,8 @@ import { AllowNull, Column, DataType, HasMany, Index, Table, Unique } from 'sequ
 import { UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ProblemMaterial, problemMaterialResolversExtensions } from './material/problem-material';
+import { ScoreGradeDomain } from './feedback/score';
+import { ProblemMaterial } from './material/problem-material';
 import { getProblemTaskInfo } from './material/problem-task-info';
 
 export const problemSchema = gql`
@@ -54,6 +55,17 @@ export interface ProblemModelRecord {
 export const problemResolvers: Resolvers = {
     Problem: {
         fileCollection: problem => ({ uuid: problem.fileCollectionId }),
-        ...problemMaterialResolversExtensions.Problem,
+        name: p => p.name,
+
+        title: async p => (await p.getMaterial()).title,
+        statement: async p => (await p.getMaterial()).statement,
+        attachments: async p => (await p.getMaterial()).attachments,
+        awards: async p => (await p.getMaterial()).awards,
+        submissionFields: async p => (await p.getMaterial()).submissionFields,
+        submissionFileTypes: async p => (await p.getMaterial()).submissionFileTypes,
+        submissionFileTypeRules: async p => (await p.getMaterial()).submissionFileTypeRules,
+        submissionListColumns: async p => (await p.getMaterial()).submissionListColumns,
+        evaluationFeedbackColumns: async p => (await p.getMaterial()).evaluationFeedbackColumns,
+        totalScoreDomain: async p => new ScoreGradeDomain((await p.getMaterial()).scoreRange),
     },
 };

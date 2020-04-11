@@ -54,5 +54,6 @@ export const queryResolvers: Resolvers = {
         submission: async (root, { id }) =>
             // TODO: check authorization
             (await root.table(Submission).findByPk(id)) ?? root.fail(`no such submission: ${id}`),
+        fileContent: async root => root.fail(`not implemented`),
     },
 };
