@@ -58,7 +58,7 @@ export interface EvaluationModelRecord {
 export class EvaluationApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Evaluation);
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
-        this.ctx.root.table(Evaluation).findAll({
+        this.ctx.table(Evaluation).findAll({
             where: { submissionId },
         }),
     );

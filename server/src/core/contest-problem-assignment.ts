@@ -35,10 +35,10 @@ export interface ContestProblemAssignmentModelRecord {
 
 export class ContestProblemAssignmentApi extends ApiObject {
     byContestAndProblem = createSimpleLoader(({ contestId, problemId }: { contestId: string; problemId: string }) =>
-        this.ctx.root.table(ContestProblemAssignment).findOne({ where: { contestId, problemId } }),
+        this.ctx.table(ContestProblemAssignment).findOne({ where: { contestId, problemId } }),
     );
     allByContestId = createSimpleLoader((contestId: string) =>
-        this.ctx.root.table(ContestProblemAssignment).findAll({ where: { contestId } }),
+        this.ctx.table(ContestProblemAssignment).findAll({ where: { contestId } }),
     );
 }
 

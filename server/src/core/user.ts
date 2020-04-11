@@ -64,8 +64,8 @@ export interface UserModelRecord {
 }
 
 export class UserApi extends ApiObject {
-    byUsername = createSimpleLoader((username: string) => this.ctx.root.table(User).findOne({ where: { username } }));
-    byToken = createSimpleLoader((token: string) => this.ctx.root.table(User).findOne({ where: { token } }));
+    byUsername = createSimpleLoader((username: string) => this.ctx.table(User).findOne({ where: { username } }));
+    byToken = createSimpleLoader((token: string) => this.ctx.table(User).findOne({ where: { token } }));
 }
 
 export const userResolvers: Resolvers = {

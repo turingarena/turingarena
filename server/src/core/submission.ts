@@ -12,6 +12,8 @@ import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
+import { FileContentApi } from './file-content';
+import { ProblemMaterialApi } from './material/problem-material';
 import { ParticipationApi } from './participation';
 import { Problem, ProblemApi } from './problem';
 import { SubmissionFileApi } from './submission-file';
@@ -74,7 +76,7 @@ export class SubmissionApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Submission);
     allByTackling = createSimpleLoader(
         ({ problemId, contestId, userId }: { problemId: string; contestId: string; userId: string }) =>
-            this.ctx.root
+            this.ctx
                 .table(Submission)
                 .findAll({ where: { problemId, contestId, userId }, order: [['createdAt', 'ASC']] }),
     );
@@ -106,14 +108,14 @@ export class SubmissionApi extends ApiObject {
             const extension = '.cpp'; // FIXME: determine extension from file type
 
             const filePath = path.join(submissionPath, `${fieldName}.${fileTypeName}${extension}`);
-            await content.extract(filePath);
+            await this.ctx.api(FileContentApi).extract(content, filePath);
         }
 
         return submissionPath;
     }
 
     async getOfficialEvaluation(s: Submission) {
-        return this.ctx.root.table(Evaluation).findOne({
+        return this.ctx.table(Evaluation).findOne({
             where: { submissionId: s.id },
             order: [['createdAt', 'DESC']],
         });
@@ -124,9 +126,7 @@ export class SubmissionApi extends ApiObject {
     }
 
     async getMaterial(s: Submission) {
-        const problem = await this.getProblem(s);
-
-        return problem.getMaterial();
+        return this.ctx.api(ProblemMaterialApi).byProblemId.load(s.problemId);
     }
 
     async getAwardAchievements(s: Submission) {

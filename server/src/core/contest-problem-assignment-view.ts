@@ -12,6 +12,7 @@ import {
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreField } from './feedback/score';
+import { ProblemMaterialApi } from './material/problem-material';
 import { ProblemApi } from './problem';
 import { User } from './user';
 
@@ -63,8 +64,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getTotalScoreField(view: ContestProblemAssignmentView) {
-        const problem = await this.getProblem(view);
-        const { scoreRange } = await problem.getMaterial();
+        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).byProblemId.load(view.assignment.problemId);
 
         const scoreGrade =
             view.tackling !== null
@@ -75,8 +75,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getAwardAssignmentViews(view: ContestProblemAssignmentView) {
-        const problem = await this.getProblem(view);
-        const { awards } = await problem.getMaterial();
+        const { awards } = await this.ctx.api(ProblemMaterialApi).byProblemId.load(view.assignment.problemId);
 
         return awards.map(
             award => new ContestAwardAssignmentView(new ContestAwardAssignment(view.assignment, award), view.user),

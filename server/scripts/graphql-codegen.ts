@@ -26,7 +26,7 @@ const config: CodegenConfig = {
             config: {
                 defaultMapper: 'Mapper<{T}>',
                 contextType: '../main/api-context#ApiContext',
-                rootValueType: '../main/model-root#ModelRoot',
+                rootValueType: '{}',
                 noSchemaStitching: true,
                 typesPrefix: '__generated_',
             },

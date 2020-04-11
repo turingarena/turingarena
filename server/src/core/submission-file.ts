@@ -51,6 +51,6 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
 
 export class SubmissionFileApi extends ApiObject {
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
-        this.ctx.root.table(SubmissionFile).findAll({ where: { submissionId } }),
+        this.ctx.table(SubmissionFile).findAll({ where: { submissionId } }),
     );
 }

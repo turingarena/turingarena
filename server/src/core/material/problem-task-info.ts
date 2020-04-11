@@ -1,3 +1,4 @@
+import { ApiObject } from '../../main/api';
 import { FileCollection } from '../file-collection';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
@@ -34,21 +35,24 @@ export interface IOITaskInfo {
     }>;
 }
 
-export async function getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-    const root = problem.root;
-    const metadataPath = '.task-info.json';
-    const metadataProblemFile = await root.table(FileCollection).findOne({
-        where: {
-            uuid: problem.fileCollectionId,
-            path: metadataPath,
-        },
-    });
+export class ProblemTaskInfoApi extends ApiObject {
+    async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
+        const metadataPath = '.task-info.json';
+        const metadataProblemFile = await this.ctx.table(FileCollection).findOne({
+            where: {
+                uuid: problem.fileCollectionId,
+                path: metadataPath,
+            },
+        });
 
-    if (metadataProblemFile === null) {
-        throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
+        if (metadataProblemFile === null) {
+            throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
+        }
+
+        const metadataContent = await this.ctx
+            .table(FileContent)
+            .findOne({ where: { id: metadataProblemFile.contentId } });
+
+        return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
     }
-
-    const metadataContent = await root.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
-
-    return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
 }

@@ -12,9 +12,7 @@ export class ContestAwardAssignmentUserTackling {
 
 export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
     async getBestAchievement(t: ContestAwardAssignmentUserTackling) {
-        const { sequelize, root } = t.assignment.problemAssignment;
-
-        const achievements = await sequelize.query<Achievement>(
+        const achievements = await this.ctx.environment.sequelize.query<Achievement>(
             `
                 WITH
                     successful_evaluations AS (
@@ -66,7 +64,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
-                instance: root.table(Achievement).build(),
+                instance: this.ctx.table(Achievement).build(),
             },
         );
 

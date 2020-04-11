@@ -1,9 +1,9 @@
 import * as commander from 'commander';
+import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
-import { ModelRoot } from '../main/model-root';
 import { serve } from '../main/server';
-import { importContest } from './import';
-import { submitLocalFile } from './submit';
+import { ContestImportApi } from './import';
+import { LocalSubmitApi } from './submit';
 
 const program = new commander.Command();
 
@@ -11,11 +11,12 @@ function _export() {}
 
 function show() {}
 
-async function ctxFromConfig(configFile?: string): Promise<ModelRoot> {
+async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
     console.log(config);
-    const context = new ModelRoot(config);
-    await context.sequelize.sync();
+    const env = new ApiEnvironment(config);
+    const context = new LocalApiContext(env);
+    await env.sequelize.sync();
 
     return context;
 }
@@ -37,14 +38,18 @@ program
 program
     .command('import [dir]')
     .description('import a contest')
-    .action(async (dir, opts) => importContest(await ctxFromConfig(opts.parent.config), dir));
+    .action(async (dir, opts) => {
+        const ctx = await ctxFromConfig(opts.parent.config);
+        await ctx.api(ContestImportApi).importContest(dir);
+    });
 
 program
     .command('submit <user> <contest> <problem> <solution>')
     .description('create a submission')
-    .action(async (user, contest, problem, solution, opts) =>
-        submitLocalFile(await ctxFromConfig(opts.parent.config), user, contest, problem, solution),
-    );
+    .action(async (user, contest, problem, solution, opts) => {
+        const ctx = await ctxFromConfig(opts.parent.config);
+        await ctx.api(LocalSubmitApi).submitLocalFile(user, contest, problem, solution);
+    });
 
 program
     .command('export')

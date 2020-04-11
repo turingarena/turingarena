@@ -32,6 +32,6 @@ export interface ParticipationModelRecord {
 
 export class ParticipationApi extends ApiObject {
     byUserAndContest = createSimpleLoader(({ userId, contestId }: { userId: string; contestId: string }) =>
-        this.ctx.root.table(Participation).findOne({ where: { contestId, userId } }),
+        this.ctx.table(Participation).findOne({ where: { contestId, userId } }),
     );
 }

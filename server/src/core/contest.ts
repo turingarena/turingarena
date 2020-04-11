@@ -6,14 +6,12 @@ import { AllowNull, Column, DataType, ForeignKey, Index, Table, Unique } from 's
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
 import { FileCollection } from './file-collection';
 import { Media, MediaVariant } from './material/media';
-import { ProblemMaterial } from './material/problem-material';
-import { ProblemApi } from './problem';
+import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
 
 export const contestSchema = gql`
     type Contest {
@@ -82,7 +80,7 @@ export class Contest extends UuidBaseModel<Contest> {
 export type ContestStatus = __generated_ContestStatus;
 
 export interface MutationModelRecord {
-    Mutation: ModelRoot;
+    Mutation: {};
 }
 
 export interface ContestModelRecord {
@@ -91,7 +89,7 @@ export interface ContestModelRecord {
 
 export class ContestApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Contest);
-    byName = createSimpleLoader((name: string) => this.ctx.root.table(Contest).findOne({ where: { name } }));
+    byName = createSimpleLoader((name: string) => this.ctx.table(Contest).findOne({ where: { name } }));
 
     getStatus(c: Contest): ContestStatus {
         const start = DateTime.fromJSDate(c.start).valueOf();
@@ -106,9 +104,7 @@ export class ContestApi extends ApiObject {
     async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {
         const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContestId.load(c.id);
 
-        return Promise.all(
-            assignments.map(async a => (await this.ctx.api(ProblemApi).byId.load(a.problemId)).getMaterial()),
-        );
+        return Promise.all(assignments.map(async a => this.ctx.api(ProblemMaterialApi).byProblemId.load(a.problemId)));
     }
 
     private statementVariantFromFile(archiveFile: FileCollection): MediaVariant {
@@ -122,7 +118,7 @@ export class ContestApi extends ApiObject {
     }
 
     async getStatement(c: Contest): Promise<Media> {
-        const statementFiles = await this.ctx.root.table(FileCollection).findAll({
+        const statementFiles = await this.ctx.table(FileCollection).findAll({
             where: {
                 uuid: c.fileCollectionId,
                 path: {

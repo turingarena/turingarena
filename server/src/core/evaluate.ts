@@ -6,7 +6,7 @@ import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from
 import { ApiObject } from '../main/api';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
-import { extractFileCollection } from './file-collection';
+import { FileCollectionApi } from './file-collection';
 import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 
@@ -20,24 +20,24 @@ export class EvaluateApi extends ApiObject {
     async evaluate(submission: Submission) {
         console.log(`Evaluating submission ${submission.id}`);
 
-        const evaluation = await this.ctx.root.table(Evaluation).create({
+        const evaluation = await this.ctx.table(Evaluation).create({
             submissionId: submission.id,
             status: EvaluationStatus.PENDING,
         });
 
-        console.log(this.ctx.root.config);
+        console.log(this.ctx.environment.config);
 
         const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
-        const problemDir = await extractFileCollection(this.ctx.root, problem.fileCollectionId);
+        const problemDir = await this.ctx.api(FileCollectionApi).extractFileCollection(problem.fileCollectionId);
 
         const submissionPath = await this.ctx
             .api(SubmissionApi)
-            .extract(submission, path.join(this.ctx.root.config.cachePath, 'submission'));
+            .extract(submission, path.join(this.ctx.environment.config.cachePath, 'submission'));
 
         const solutionPath = path.join(submissionPath, 'solution.cpp.cpp');
         const taskMakerArgs = ['--ui=json', '--no-statement', '--task-dir', problemDir, '--solution', solutionPath];
 
-        const process = spawn(this.ctx.root.config.taskMakerExecutable, taskMakerArgs);
+        const process = spawn(this.ctx.environment.config.taskMakerExecutable, taskMakerArgs);
 
         const stdoutLineReader = readline.createInterface(process.stdout);
 
@@ -56,7 +56,7 @@ export class EvaluateApi extends ApiObject {
                     concatMap(async eventsData => {
                         console.log(`Inserting ${eventsData.length} buffered events.`);
 
-                        return this.ctx.root.table(EvaluationEvent).bulkCreate(
+                        return this.ctx.table(EvaluationEvent).bulkCreate(
                             eventsData.map(data => ({
                                 evaluationId: evaluation.id,
                                 data,

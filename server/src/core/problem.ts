@@ -4,8 +4,7 @@ import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { ScoreGradeDomain } from './feedback/score';
-import { ProblemMaterial } from './material/problem-material';
-import { getProblemTaskInfo } from './material/problem-task-info';
+import { ProblemMaterialApi } from './material/problem-material';
 
 export const problemSchema = gql`
     type Problem {
@@ -32,16 +31,6 @@ export class Problem extends UuidBaseModel<Problem> {
     @AllowNull(false)
     @Column(DataType.UUIDV4)
     fileCollectionId!: string;
-
-    async getTaskInfo() {
-        return getProblemTaskInfo(this);
-    }
-
-    async getMaterial() {
-        const taskInfo = await this.getTaskInfo();
-
-        return new ProblemMaterial(this, taskInfo);
-    }
 }
 
 export interface ProblemModelRecord {
@@ -50,23 +39,29 @@ export interface ProblemModelRecord {
 
 export class ProblemApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Problem);
-    byName = createSimpleLoader((name: string) => this.ctx.root.table(Problem).findOne({ where: { name } }));
+    byName = createSimpleLoader((name: string) => this.ctx.table(Problem).findOne({ where: { name } }));
 }
 
 export const problemResolvers: Resolvers = {
     Problem: {
-        fileCollection: problem => ({ uuid: problem.fileCollectionId }),
+        fileCollection: p => ({ uuid: p.fileCollectionId }),
         name: p => p.name,
 
-        title: async p => (await p.getMaterial()).title,
-        statement: async p => (await p.getMaterial()).statement,
-        attachments: async p => (await p.getMaterial()).attachments,
-        awards: async p => (await p.getMaterial()).awards,
-        submissionFields: async p => (await p.getMaterial()).submissionFields,
-        submissionFileTypes: async p => (await p.getMaterial()).submissionFileTypes,
-        submissionFileTypeRules: async p => (await p.getMaterial()).submissionFileTypeRules,
-        submissionListColumns: async p => (await p.getMaterial()).submissionListColumns,
-        evaluationFeedbackColumns: async p => (await p.getMaterial()).evaluationFeedbackColumns,
-        totalScoreDomain: async p => new ScoreGradeDomain((await p.getMaterial()).scoreRange),
+        title: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).title,
+        statement: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).statement,
+        attachments: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).attachments,
+        awards: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).awards,
+        submissionFields: async (p, {}, ctx) =>
+            (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).submissionFields,
+        submissionFileTypes: async (p, {}, ctx) =>
+            (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).submissionFileTypes,
+        submissionFileTypeRules: async (p, {}, ctx) =>
+            (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).submissionFileTypeRules,
+        submissionListColumns: async (p, {}, ctx) =>
+            (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).submissionListColumns,
+        evaluationFeedbackColumns: async (p, {}, ctx) =>
+            (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).evaluationFeedbackColumns,
+        totalScoreDomain: async (p, {}, ctx) =>
+            new ScoreGradeDomain((await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).scoreRange),
     },
 };

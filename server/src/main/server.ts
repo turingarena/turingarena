@@ -6,9 +6,9 @@ import * as mime from 'mime-types';
 import * as path from 'path';
 import * as util from 'util';
 import { FileContent } from '../core/file-content';
-import { ApiContext } from './api-context';
+import { ApiEnvironment, RemoteApiContext } from './api-context';
 import { Config } from './config';
-import { ModelRoot } from './model-root';
+import { createSchema } from './executable-schema';
 
 const findWebRoot = () => {
     let dir = __dirname;
@@ -30,20 +30,20 @@ export function serve(config: Config) {
 
     console.log(config);
 
-    const root = new ModelRoot(config);
+    const env = new ApiEnvironment(config);
 
     const server = new ApolloServer({
-        schema: ApiContext.executableSchema,
+        schema: createSchema(),
         context: async ({ req }) => {
             const token = req.headers.authorization ?? '';
             const nAuthParts = 2;
             const [authType, authPayload] = token.split(' ', nAuthParts);
-            const user = authType === 'Bearer' ? await root.authService.auth(authPayload) : undefined;
-            const api = new ApiContext(root, user ?? undefined);
+            const user = authType === 'Bearer' ? await env.authService.auth(authPayload) : undefined;
+            const api = new RemoteApiContext(env, user ?? undefined);
 
             return api;
         },
-        rootValue: root,
+        rootValue: {},
         debug: true,
         playground: true,
         formatError: err => {
@@ -62,7 +62,10 @@ export function serve(config: Config) {
     app.get('/files/:contentId/:filename', async (req, res, next) => {
         try {
             const { contentId, filename } = req.params;
-            const file = await root.table(FileContent).findOne({ where: { id: contentId }, attributes: ['content'] });
+            const apiContext = new RemoteApiContext(env);
+            const file = await apiContext
+                .table(FileContent)
+                .findOne({ where: { id: contentId }, attributes: ['content'] });
             const contentType = mime.lookup(filename);
 
             if (file === null) {

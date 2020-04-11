@@ -10,7 +10,7 @@ import {
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ScoreGrade } from './feedback/score';
-import { ProblemApi } from './problem';
+import { ProblemMaterialApi } from './material/problem-material';
 import { SubmissionApi } from './submission';
 import { User } from './user';
 
@@ -53,8 +53,7 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
     }
 
     async getAwardTacklings(t: ContestProblemAssignmentUserTackling) {
-        const problem = await this.ctx.api(ProblemApi).byId.load(t.assignment.problemId);
-        const material = await problem.getMaterial();
+        const material = await this.ctx.api(ProblemMaterialApi).byProblemId.load(t.assignment.problemId);
 
         return material.awards.map(
             award => new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(t.assignment, award), t.user),

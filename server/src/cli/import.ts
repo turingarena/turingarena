@@ -3,11 +3,12 @@ import * as path from 'path';
 import * as yaml from 'yaml';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
-import { createFileCollection } from '../core/file-collection';
+import { FileCollectionApi } from '../core/file-collection';
+import { ProblemTaskInfoApi } from '../core/material/problem-task-info';
 import { Participation } from '../core/participation';
 import { Problem } from '../core/problem';
 import { User, UserRole } from '../core/user';
-import { ModelRoot } from '../main/model-root';
+import { ApiObject } from '../main/api';
 
 export interface ContestMetadata {
     name: string;
@@ -23,48 +24,51 @@ export interface ContestMetadata {
     problems: string[];
 }
 
-/**
- * Import a contest in the database
- *
- * @param root the model root
- * @param dir base directory of the contest
- */
-export async function importContest(root: ModelRoot, dir = process.cwd()) {
-    const turingarenaYAMLPath = path.join(dir, 'turingarena.yaml');
+export class ContestImportApi extends ApiObject {
+    /**
+     * Import a contest in the database
+     *
+     * @param dir base directory of the contest
+     */
+    async importContest(dir = process.cwd()) {
+        const turingarenaYAMLPath = path.join(dir, 'turingarena.yaml');
 
-    if (!fs.existsSync(turingarenaYAMLPath)) throw Error('Invalid contest directory');
+        if (!fs.existsSync(turingarenaYAMLPath)) throw Error('Invalid contest directory');
 
-    const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
-    const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
+        const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
+        const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
-    const contestFileCollectionId = await createFileCollection(root, path.join(dir, 'files'));
+        const contestFileCollectionId = await this.ctx
+            .api(FileCollectionApi)
+            .createFileCollection(path.join(dir, 'files'));
 
-    const contest = await root.table(Contest).create({
-        fileCollectionId: contestFileCollectionId,
-        ...metadata,
-    });
-
-    for (const userData of metadata.users) {
-        const user = await root.table(User).create({
-            ...userData,
-            role: userData.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
-        });
-        await root.table(Participation).create({ userId: user.id, contestId: contest.id });
-    }
-
-    for (const name of metadata.problems) {
-        const fileCollectionId = await createFileCollection(root, path.join(dir, name));
-
-        const problem = await root.table(Problem).create({
-            name,
-            fileCollectionId,
+        const contest = await this.ctx.table(Contest).create({
+            fileCollectionId: contestFileCollectionId,
+            ...metadata,
         });
 
-        await root.table(ContestProblemAssignment).create({
-            contestId: contest.id,
-            problemId: problem.id,
-        });
+        for (const userData of metadata.users) {
+            const user = await this.ctx.table(User).create({
+                ...userData,
+                role: userData.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
+            });
+            await this.ctx.table(Participation).create({ userId: user.id, contestId: contest.id });
+        }
 
-        console.log(await problem.getTaskInfo());
+        for (const name of metadata.problems) {
+            const fileCollectionId = await this.ctx.api(FileCollectionApi).createFileCollection(path.join(dir, name));
+
+            const problem = await this.ctx.table(Problem).create({
+                name,
+                fileCollectionId,
+            });
+
+            await this.ctx.table(ContestProblemAssignment).create({
+                contestId: contest.id,
+                problemId: problem.id,
+            });
+
+            console.log(await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem));
+        }
     }
 }

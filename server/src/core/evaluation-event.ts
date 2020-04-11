@@ -21,7 +21,7 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
 
 export class EvaluationEventApi extends ApiObject {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
-        this.ctx.root.table(EvaluationEvent).findAll({
+        this.ctx.table(EvaluationEvent).findAll({
             where: { evaluationId },
         }),
     );
@@ -29,7 +29,7 @@ export class EvaluationEventApi extends ApiObject {
     async storeAchievements(e: EvaluationEvent) {
         if ('IOISubtaskScore' in e.data) {
             const { subtask, normalized_score, score } = e.data.IOISubtaskScore;
-            await this.ctx.root.table(Achievement).create({
+            await this.ctx.table(Achievement).create({
                 evaluationId: e.evaluationId,
                 awardIndex: subtask,
                 // Store the normalized score if the max score is zero (FIXME: ugly hack)

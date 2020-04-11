@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { ApiContext } from '../../main/api-context';
 import { Resolvers } from '../../main/resolver-types';
 import { FileContent } from '../file-content';
 
@@ -37,7 +38,7 @@ export interface MediaVariant {
 
     name: string;
     type: string;
-    content: () => Promise<FileContent>;
+    content: (ctx: ApiContext) => Promise<FileContent>;
 }
 
 export interface MediaModelRecord {
@@ -50,8 +51,8 @@ export const mediaResolvers: Resolvers = {
         variant: media => media[0],
     },
     MediaFile: {
-        url: async f => `/files/${(await f.content()).id}/${f.name}`,
-        content: f => f.content(),
+        url: async (f, {}, ctx) => `/files/${(await f.content(ctx)).id}/${f.name}`,
+        content: (f, {}, ctx) => f.content(ctx),
         name: f => f.name,
         type: f => f.type,
     },

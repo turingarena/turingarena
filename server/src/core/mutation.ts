@@ -1,11 +1,10 @@
 import { gql } from 'apollo-server-core';
-import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 import { Contest, ContestApi } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Participation } from './participation';
-import { Problem } from './problem';
-import { submit } from './submit';
+import { Problem, ProblemApi } from './problem';
+import { SubmitApi } from './submit';
 import { User, UserApi } from './user';
 
 export const mutationSchema = gql`
@@ -38,24 +37,24 @@ export const mutationSchema = gql`
 `;
 
 export interface MutationModelRecord {
-    Mutation: ModelRoot;
+    Mutation: {};
 }
 
 export const mutationResolvers: Resolvers = {
     Mutation: {
-        init: async root => {
-            await root.sequelize.sync();
+        init: async ({}, {}, ctx) => {
+            await ctx.environment.sequelize.sync();
 
             return true;
         },
-        updateUser: async (root, { user }) => true, // TODO
-        createUser: async (root, { user }) => {
-            await root.table(User).create(user);
+        updateUser: async ({}, { user }, ctx) => true, // TODO
+        createUser: async ({}, { user }, ctx) => {
+            await ctx.table(User).create(user);
 
             return true;
         },
-        deleteUser: async (root, { user }) => {
-            await root.table(User).destroy({
+        deleteUser: async ({}, { user }, ctx) => {
+            await ctx.table(User).destroy({
                 where: {
                     username: user,
                 },
@@ -63,14 +62,14 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        createProblem: async (root, { problem }) => {
-            await root.table(Problem).create(problem);
+        createProblem: async ({}, { problem }, ctx) => {
+            await ctx.table(Problem).create(problem);
 
             return true;
         },
-        updateProblem: async (root, { problem }) => true, // TODO
-        deleteProblem: async (root, { problem }) => {
-            await root.table(Problem).destroy({
+        updateProblem: async ({}, { problem }, ctx) => true, // TODO
+        deleteProblem: async ({}, { problem }, ctx) => {
+            await ctx.table(Problem).destroy({
                 where: {
                     name: problem,
                 },
@@ -78,14 +77,14 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        createContest: async (root, { contest }) => {
-            await root.table(Contest).create(contest);
+        createContest: async ({}, { contest }, ctx) => {
+            await ctx.table(Contest).create(contest);
 
             return true;
         },
-        updateContest: async (root, { contest }) => true, // TODO
-        deleteContest: async (root, { contest }) => {
-            await root.table(Contest).destroy({
+        updateContest: async ({}, { contest }, ctx) => true, // TODO
+        deleteContest: async ({}, { contest }, ctx) => {
+            await ctx.table(Contest).destroy({
                 where: {
                     name,
                 },
@@ -93,24 +92,27 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        submit: (root, { submission }) => submit(root, submission).then(() => true),
-        logIn: (root, { token }) => root.authService.logIn(token),
+        submit: ({}, { submission }, ctx) =>
+            ctx
+                .api(SubmitApi)
+                .submit(submission)
+                .then(() => true),
+        logIn: ({}, { token }, ctx) => ctx.environment.authService.logIn(token),
 
-        addProblem: async (root, { contestName, name }, ctx) => {
+        addProblem: async ({}, { contestName, name }, ctx) => {
             const contest = await ctx.api(ContestApi).byName.load(contestName);
-            const problem =
-                (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
-            await root.table(ContestProblemAssignment).create({
+            const problem = await ctx.api(ProblemApi).byName.load(name);
+            await ctx.table(ContestProblemAssignment).create({
                 contestId: contest.id,
                 problemId: problem.id,
             });
 
             return true;
         },
-        addUser: async (root, { contestName, username }, ctx) => {
+        addUser: async ({}, { contestName, username }, ctx) => {
             const contest = await ctx.api(ContestApi).byName.load(contestName);
             const user = await ctx.api(UserApi).byUsername.load(username);
-            await root.table(Participation).create({ userId: user.id, contestId: contest.id });
+            await ctx.table(Participation).create({ userId: user.id, contestId: contest.id });
 
             return true;
         },

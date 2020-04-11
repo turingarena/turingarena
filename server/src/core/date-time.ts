@@ -33,7 +33,7 @@ export interface DateTimeModelRecord {
 function makeDateTime(dateTime: DateModel, ctx: ApiContext) {
     if (dateTime instanceof DateTime) return dateTime;
     if (dateTime instanceof Date) return DateTime.fromJSDate(dateTime);
-    ctx.root.fail(`Invalid date-time: ${dateTime}`);
+    ctx.fail(`Invalid date-time: ${dateTime}`);
 }
 
 function makeDateTimeResolver<T>(

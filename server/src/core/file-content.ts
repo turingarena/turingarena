@@ -5,7 +5,6 @@ import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { ApiObject } from '../main/api';
 import { BaseModel, createByIdLoader } from '../main/base-model';
-import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 
 export const fileContentSchema = gql`
@@ -34,33 +33,6 @@ export class FileContent extends BaseModel<FileContent> {
     @AllowNull(false)
     @Column
     content!: Buffer;
-
-    static async createFromContent(root: ModelRoot, content: Buffer) {
-        const id = ssri.fromData(content).hexDigest();
-
-        return (
-            (await root.table(FileContent).findOne({ where: { id } })) ??
-            (await root.table(FileContent).create({ content, id }))
-        );
-    }
-
-    static async createFromPath(root: ModelRoot, filePath: string) {
-        const content = fs.readFileSync(filePath);
-
-        return FileContent.createFromContent(root, content);
-    }
-
-    /**
-     * Extract the file to path.
-     * Creates necessary directories.
-     *
-     * @param path file path
-     */
-    async extract(filePath: string) {
-        await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
-
-        return fs.promises.writeFile(filePath, this.content);
-    }
 }
 
 export interface FileContentModelRecord {
@@ -69,6 +41,33 @@ export interface FileContentModelRecord {
 
 export class FileContentApi extends ApiObject {
     byId = createByIdLoader(this.ctx, FileContent);
+
+    async createFromContent(content: Buffer) {
+        const id = ssri.fromData(content).hexDigest();
+
+        return (
+            (await this.ctx.table(FileContent).findOne({ where: { id } })) ??
+            (await this.ctx.table(FileContent).create({ content, id }))
+        );
+    }
+
+    async createFromPath(filePath: string) {
+        const content = fs.readFileSync(filePath);
+
+        return this.createFromContent(content);
+    }
+
+    /**
+     * Extract the file to path.
+     * Creates necessary directories.
+     *
+     * @param path file path
+     */
+    async extract(fileContent: FileContent, filePath: string) {
+        await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+
+        return fs.promises.writeFile(filePath, fileContent.content);
+    }
 }
 
 export const fileContentResolvers: Resolvers = {

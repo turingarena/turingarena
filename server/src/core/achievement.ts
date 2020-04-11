@@ -5,7 +5,7 @@ import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Evaluation, EvaluationApi } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
-import { ProblemApi } from './problem';
+import { ProblemMaterialApi } from './material/problem-material';
 import { SubmissionApi } from './submission';
 
 export const achievementSchema = gql`
@@ -40,7 +40,7 @@ export interface AchievementModelRecord {
 
 export class AchievementApi extends ApiObject {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
-        this.ctx.root.table(Achievement).findAll({
+        this.ctx.table(Achievement).findAll({
             where: { evaluationId },
         }),
     );
@@ -48,8 +48,7 @@ export class AchievementApi extends ApiObject {
     async getAward(a: Achievement) {
         const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
         const submission = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
-        const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
-        const material = await problem.getMaterial();
+        const material = await this.ctx.api(ProblemMaterialApi).byProblemId.load(submission.problemId);
 
         return material.awards[a.awardIndex];
     }

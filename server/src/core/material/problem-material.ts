@@ -1,12 +1,14 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../../main/api';
+import { createSimpleLoader } from '../../main/base-model';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { FileCollection } from '../file-collection';
 import { FileContent } from '../file-content';
-import { Problem } from '../problem';
+import { Problem, ProblemApi } from '../problem';
 import { Award } from './award';
 import { Media, MediaVariant } from './media';
-import { ProblemTaskInfo } from './problem-task-info';
+import { ProblemTaskInfo, ProblemTaskInfoApi } from './problem-task-info';
 import { Text } from './text';
 
 export const problemMaterialSchema = gql`
@@ -149,7 +151,7 @@ export class ProblemMaterial {
             name: path.slice(path.lastIndexOf('/') + 1),
             language,
             type,
-            content: () => loadContent(this.problem, path),
+            content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
         }),
     );
 
@@ -160,7 +162,7 @@ export class ProblemMaterial {
                 {
                     name,
                     type,
-                    content: () => loadContent(this.problem, path),
+                    content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
                 },
             ],
         }),
@@ -223,18 +225,26 @@ export interface ProblemMaterialModelRecord {
     ProblemAttachment: ProblemAttachment;
 }
 
-const loadContent = async (problem: Problem, path: string) => {
-    const file = await problem.root.table(FileCollection).findOne({
-        where: {
-            uuid: problem.fileCollectionId,
-            path,
-        },
-        include: [problem.root.table(FileContent)],
+export class ProblemMaterialApi extends ApiObject {
+    byProblemId = createSimpleLoader(async (problemId: string) => {
+        const problem = await this.ctx.api(ProblemApi).byId.load(problemId);
+
+        return new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem));
     });
 
-    if (file === null) {
-        problem.root.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
-    }
+    async loadContent(problem: Problem, path: string) {
+        const file = await this.ctx.table(FileCollection).findOne({
+            where: {
+                uuid: problem.fileCollectionId,
+                path,
+            },
+            include: [this.ctx.table(FileContent)],
+        });
 
-    return file!.content;
-};
+        if (file === null) {
+            throw this.ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
+        }
+
+        return file.content;
+    }
+}
