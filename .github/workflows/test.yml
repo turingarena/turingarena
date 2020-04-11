@@ -4,20 +4,25 @@ jobs:
   test-backend:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Install dependencies
-      run: npm ci
-      working-directory: server/
-    - name: Run all tests
-      run: npm run check
-      working-directory: server/
-  test-frontend:
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v1
-      - name: Install dependencies
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: server/
+      - name: Build frontend
+        run: npm run build
+        working-directory: server/
+      - name: Run all backend tests
+        run: npm run check
+        working-directory: server/
+      - name: Install frontend dependencies
         run: npm ci
         working-directory: web/
-      - name: Run all tests
-        run: npm run test
+      - name: Build frontend
+        run: npm run build
         working-directory: web/

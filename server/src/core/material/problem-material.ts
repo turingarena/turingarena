@@ -80,6 +80,66 @@ export interface ProblemAttachment {
     media: Media;
 }
 
+const languages = {
+    python2: {
+        name: 'python2',
+        title: [{ value: 'Python 2 (cpython)' }],
+    },
+    python3: {
+        name: 'python3',
+        title: [{ value: 'Python 3 (cpython)' }],
+    },
+    c: {
+        name: 'c',
+        title: [{ value: 'C (c11)' }],
+    },
+    cpp: {
+        name: 'cpp',
+        title: [{ value: 'C++ (c++17)' }],
+    },
+    rust: {
+        name: 'rust',
+        title: [{ value: 'Rust' }],
+    },
+    java: {
+        name: 'java',
+        title: [{ value: 'Java 8 (JDK)' }],
+    },
+};
+
+const fileRules = [
+    {
+        extensions: ['.c', '.h'],
+        defaultType: languages.c,
+        recommendedTypes: [languages.c],
+        otherTypes: [languages.cpp],
+    },
+    {
+        extensions: ['.py'],
+        defaultType: languages.python3,
+        recommendedTypes: [languages.python3, languages.python2],
+        otherTypes: [],
+    },
+    {
+        extensions: ['.cpp', '.hpp', '.cc', '.cxx'],
+        defaultType: languages.cpp,
+        recommendedTypes: [languages.cpp],
+        otherTypes: [],
+    },
+    {
+        extensions: ['.java'],
+        defaultType: languages.java,
+        recommendedTypes: [languages.java],
+        otherTypes: [],
+    },
+    {
+        extensions: ['.rs'],
+        defaultType: languages.rust,
+        recommendedTypes: [languages.rust],
+        otherTypes: [],
+    },
+];
+
 export class ProblemMaterial {
     constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
 
@@ -109,8 +169,8 @@ export class ProblemMaterial {
     awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
     submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
-    submissionFileTypes = [defaultType];
-    submissionFileTypeRules = [{ defaultType, recommendedTypes: [defaultType], otherTypes: [] }];
+    submissionFileTypes = Object.values(languages);
+    submissionFileTypeRules = fileRules;
 
     scoreRange = ScoreRange.total(
         this.awards
@@ -158,8 +218,6 @@ export class ProblemMaterial {
         },
     ];
 }
-
-const defaultType = { name: 'cpp', title: [{ value: 'C/C++' }] };
 
 export interface ProblemMaterialModelRecord {
     ProblemAttachment: ProblemAttachment;
