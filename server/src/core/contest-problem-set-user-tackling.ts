@@ -1,6 +1,11 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
-import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
+import { ContestProblemAssignmentApi } from './contest-problem-assignment';
+import {
+    ContestProblemAssignmentUserTackling,
+    ContestProblemAssignmentUserTacklingApi,
+} from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreGrade } from './feedback/score';
@@ -23,20 +28,26 @@ export const contestProblemSetUserTacklingSchema = gql`
 
 export class ContestProblemSetUserTackling {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
-
-    async getScoreGrade() {
-        return ScoreGrade.total(
-            await Promise.all(
-                (await this.problemSet.contest.getProblemAssignments()).map(async a =>
-                    new ContestProblemAssignmentUserTackling(a, this.user).getScoreGrade(),
-                ),
-            ),
-        );
-    }
 }
 
 export interface ContestProblemSetUserTacklingModelRecord {
     ContestProblemSetUserTackling: ContestProblemSetUserTackling;
+}
+
+export class ContestProblemSetUserTacklingApi extends ApiObject {
+    async getScoreGrade(t: ContestProblemSetUserTackling) {
+        const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContest.load(t.problemSet.contest.id);
+
+        return ScoreGrade.total(
+            await Promise.all(
+                assignments.map(async a =>
+                    this.ctx
+                        .api(ContestProblemAssignmentUserTacklingApi)
+                        .getScoreGrade(new ContestProblemAssignmentUserTackling(a, t.user)),
+                ),
+            ),
+        );
+    }
 }
 
 export const contestAssignmentUserTacklingResolvers: Resolvers = {

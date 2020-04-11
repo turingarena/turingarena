@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Contest } from './contest';
@@ -24,14 +24,6 @@ export class Participation extends BaseModel<Participation> {
     @PrimaryKey
     @Column
     userId!: number;
-
-    @BelongsTo(() => Contest)
-    contest!: Contest;
-    getContest!: (options: object) => Promise<Contest>;
-
-    @BelongsTo(() => User)
-    user!: User;
-    getUser!: (options: object) => Promise<User>;
 }
 
 export interface ParticipationModelRecord {

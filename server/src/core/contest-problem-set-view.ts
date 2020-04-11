@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
-import { ContestProblemSet } from './contest-problem-set';
-import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
+import { ContestProblemSet, ContestProblemSetApi } from './contest-problem-set';
+import { ContestProblemSetUserTackling, ContestProblemSetUserTacklingApi } from './contest-problem-set-user-tackling';
 import { ContestView } from './contest-view';
 import { ScoreField } from './feedback/score';
 import { User } from './user';
@@ -33,17 +34,20 @@ export class ContestProblemSetView {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
 
     readonly tackling = this.user !== null ? new ContestProblemSetUserTackling(this.problemSet, this.user) : null;
-
-    async getTotalScoreField() {
-        return new ScoreField(
-            await this.problemSet.getScoreRange(),
-            (await this.tackling?.getScoreGrade())?.score ?? null,
-        );
-    }
 }
 
 export interface ContestProblemSetViewModelRecord {
     ContestProblemSetView: ContestProblemSetView;
+}
+
+export class ContestProblemSetViewApi extends ApiObject {
+    async getTotalScoreField(v: ContestProblemSetView) {
+        const scoreRange = await this.ctx.api(ContestProblemSetApi).getScoreRange(v.problemSet);
+        const scoreGrade =
+            v.tackling !== null ? await this.ctx.api(ContestProblemSetUserTacklingApi).getScoreGrade(v.tackling) : null;
+
+        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
+    }
 }
 
 export const contestProblemSetViewResolvers: Resolvers = {
@@ -55,6 +59,6 @@ export const contestProblemSetViewResolvers: Resolvers = {
             (await problemSet.contest.getProblemAssignments()).map(a => new ContestProblemAssignmentView(a, user)),
         tackling: ({ problemSet, user }) =>
             user !== null ? new ContestProblemSetUserTackling(problemSet, user) : null,
-        totalScoreField: async view => view.getTotalScoreField(),
+        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),
     },
 };

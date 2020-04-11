@@ -5,15 +5,16 @@ import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
 import { FileCollection } from './file-collection';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial } from './material/problem-material';
 import { Participation } from './participation';
+import { ProblemApi } from './problem';
 
 export const contestSchema = gql`
     type Contest {
@@ -86,43 +87,6 @@ export class Contest extends UuidBaseModel<Contest> {
     getParticipations!: (options: object) => Promise<Participation[]>;
     createParticipation!: (participation: object, options: object) => Promise<Participation>;
     addParticipation!: (options: object) => Promise<unknown>;
-
-    getStatus(): ContestStatus {
-        const start = DateTime.fromJSDate(this.start).valueOf();
-        const end = DateTime.fromJSDate(this.end).valueOf();
-        const now = DateTime.local().valueOf();
-
-        if (now < start) return 'NOT_STARTED';
-        else if (now < end) return 'RUNNING';
-        else return 'NOT_STARTED';
-    }
-
-    async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
-        return Promise.all((await this.getProblemAssignments()).map(async a => (await a.getProblem()).getMaterial()));
-    }
-
-    private statementVariantFromFile(archiveFile: FileCollection): MediaVariant {
-        const type = mime.lookup(archiveFile.path);
-
-        return {
-            name: archiveFile.path,
-            type: type !== false ? type : 'application/octet-stream',
-            content: () => archiveFile.getContent(),
-        };
-    }
-
-    async getStatement(): Promise<Media> {
-        const statementFiles = await this.root.table(FileCollection).findAll({
-            where: {
-                uuid: this.fileCollectionId,
-                path: {
-                    [Op.like]: 'home%',
-                },
-            },
-        });
-
-        return statementFiles.map((archiveFile): MediaVariant => this.statementVariantFromFile(archiveFile));
-    }
 }
 
 export type ContestStatus = __generated_ContestStatus;
@@ -136,7 +100,49 @@ export interface ContestModelRecord {
 }
 
 export class ContestApi extends ApiObject {
+    byId = createByIdLoader(this.ctx, Contest);
     byName = createSimpleLoader((name: string) => this.ctx.root.table(Contest).findOne({ where: { name } }));
+
+    getStatus(c: Contest): ContestStatus {
+        const start = DateTime.fromJSDate(c.start).valueOf();
+        const end = DateTime.fromJSDate(c.end).valueOf();
+        const now = DateTime.local().valueOf();
+
+        if (now < start) return 'NOT_STARTED';
+        else if (now < end) return 'RUNNING';
+        else return 'NOT_STARTED';
+    }
+
+    async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {
+        const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContest.load(c.id);
+
+        return Promise.all(
+            assignments.map(async a => (await this.ctx.api(ProblemApi).byId.load(a.problemId)).getMaterial()),
+        );
+    }
+
+    private statementVariantFromFile(archiveFile: FileCollection): MediaVariant {
+        const type = mime.lookup(archiveFile.path);
+
+        return {
+            name: archiveFile.path,
+            type: type !== false ? type : 'application/octet-stream',
+            content: () => archiveFile.getContent(),
+        };
+    }
+
+    async getStatement(c: Contest): Promise<Media> {
+        const statementFiles = await this.ctx.root.table(FileCollection).findAll({
+            where: {
+                uuid: c.fileCollectionId,
+                path: {
+                    [Op.like]: 'home%',
+                },
+            },
+        });
+
+        return statementFiles.map((archiveFile): MediaVariant => this.statementVariantFromFile(archiveFile));
+    }
 }
 
 export const contestResolvers: Resolvers = {
@@ -145,9 +151,9 @@ export const contestResolvers: Resolvers = {
         title: c => [{ value: c.title }],
         start: c => DateTime.fromJSDate(c.start).toISO(),
         end: c => DateTime.fromJSDate(c.end).toISO(),
-        status: c => c.getStatus(),
+        status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
         problemSet: c => new ContestProblemSet(c),
         fileCollection: c => ({ uuid: c.fileCollectionId }),
-        statement: c => c.getStatement(),
+        statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
     },
 };

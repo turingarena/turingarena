@@ -1,12 +1,18 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
+import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
+import {
+    ContestProblemAssignmentUserTackling,
+    ContestProblemAssignmentUserTacklingApi,
+} from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreField } from './feedback/score';
+import { ProblemApi } from './problem';
 import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
@@ -41,35 +47,57 @@ export class ContestProblemAssignmentView {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
 
     tackling = this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user) : null;
-
-    async getTotalScoreField() {
-        const problem = await this.assignment.getProblem();
-        const { scoreRange } = await problem.getMaterial();
-
-        return new ScoreField(scoreRange, (await this.tackling?.getScoreGrade())?.score ?? null);
-    }
 }
 
 export interface ContestProblemAssignmentViewModelRecord {
     ContestProblemAssignmentView: ContestProblemAssignmentView;
 }
 
+export class ContestProblemAssignmentViewApi extends ApiObject {
+    async getProblem({ assignment: { problemId } }: ContestProblemAssignmentView) {
+        return this.ctx.api(ProblemApi).byId.load(problemId);
+    }
+
+    async getContest({ assignment: { contestId } }: ContestProblemAssignmentView) {
+        return this.ctx.api(ContestApi).byId.load(contestId);
+    }
+
+    async getTotalScoreField(view: ContestProblemAssignmentView) {
+        const problem = await this.getProblem(view);
+        const { scoreRange } = await problem.getMaterial();
+
+        const scoreGrade =
+            view.tackling !== null
+                ? await this.ctx.api(ContestProblemAssignmentUserTacklingApi).getScoreGrade(view.tackling)
+                : null;
+
+        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
+    }
+
+    async getAwardAssignmentViews(view: ContestProblemAssignmentView) {
+        const problem = await this.getProblem(view);
+        const { awards } = await problem.getMaterial();
+
+        return awards.map(
+            award => new ContestAwardAssignmentView(new ContestAwardAssignment(view.assignment, award), view.user),
+        );
+    }
+
+    async getProblemSetView(view: ContestProblemAssignmentView) {
+        const contest = await this.getContest(view);
+
+        return new ContestProblemSetView(new ContestProblemSet(contest), view.user);
+    }
+}
+
 export const contestProblemAssignmentViewResolvers: Resolvers = {
     ContestProblemAssignmentView: {
-        assignment: ({ assignment }) => assignment,
-        user: ({ user }) => user,
-        problemSetView: async ({ assignment, user }) =>
-            new ContestProblemSetView(new ContestProblemSet(await assignment.getContest()), user),
+        assignment: v => v.assignment,
+        user: v => v.user,
+        problemSetView: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getProblemSetView(v),
         tackling: async ({ assignment, user }) =>
             user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null,
-        totalScoreField: async view => view.getTotalScoreField(),
-        awardAssignmentViews: async ({ assignment, user }) => {
-            const problem = await assignment.getProblem();
-            const material = await problem.getMaterial();
-
-            return material.awards.map(
-                award => new ContestAwardAssignmentView(new ContestAwardAssignment(assignment, award), user),
-            );
-        },
+        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getTotalScoreField(v),
+        awardAssignmentViews: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getAwardAssignmentViews(v),
     },
 };

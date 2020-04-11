@@ -1,11 +1,14 @@
 import { gql } from 'apollo-server-core';
+import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
+import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ScoreGrade } from './feedback/score';
-import { Submission } from './submission';
+import { ProblemApi } from './problem';
+import { SubmissionApi } from './submission';
 import { User } from './user';
 
 export const contestProblemAssignmentUserTacklingSchema = gql`
@@ -32,34 +35,42 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
 
 export class ContestProblemAssignmentUserTackling {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
-
-    async getAwardTacklings() {
-        const problem = await this.assignment.getProblem();
-        const material = await problem.getMaterial();
-
-        return material.awards.map(
-            award =>
-                new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(this.assignment, award), this.user),
-        );
-    }
-
-    async getScoreGrade() {
-        const awardTacklings = await this.getAwardTacklings();
-        const awardGrades = await Promise.all(awardTacklings.map(t => t.getGrade()));
-
-        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
-    }
 }
 
 export interface ContestProblemAssignmentUserTacklingModelRecord {
     ContestProblemAssignmentUserTackling: ContestProblemAssignmentUserTackling;
 }
 
+export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
+    async canSubmit(t: ContestProblemAssignmentUserTackling) {
+        const contest = await this.ctx.api(ContestApi).byId.load(t.assignment.contestId);
+        const status = this.ctx.api(ContestApi).getStatus(contest);
+
+        return status === 'RUNNING';
+    }
+
+    async getAwardTacklings(t: ContestProblemAssignmentUserTackling) {
+        const problem = await this.ctx.api(ProblemApi).byId.load(t.assignment.problemId);
+        const material = await problem.getMaterial();
+
+        return material.awards.map(
+            award => new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(t.assignment, award), t.user),
+        );
+    }
+
+    async getScoreGrade(t: ContestProblemAssignmentUserTackling) {
+        const awardTacklings = await this.getAwardTacklings(t);
+        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade()));
+
+        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
+    }
+}
+
 export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
     ContestProblemAssignmentUserTackling: {
-        canSubmit: async ({ assignment }) => (await assignment.getContest()).getStatus() === 'RUNNING',
-        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId, root } }) =>
-            root.table(Submission).findAll({ where: { problemId, contestId, userId }, order: [['createdAt', 'ASC']] }),
+        canSubmit: async (t, {}, ctx) => ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(t),
+        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId } }, {}, ctx) =>
+            ctx.api(SubmissionApi).allByTackling.load({ problemId, contestId, userId }),
         assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },

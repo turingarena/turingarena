@@ -4,7 +4,7 @@ import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequel
 import { FindOptions } from 'sequelize/types';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, UuidBaseModel } from '../main/base-model';
+import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
@@ -296,6 +296,12 @@ export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Submission);
+    allByTackling = createSimpleLoader(
+        ({ problemId, contestId, userId }: { problemId: string; contestId: string; userId: string }) =>
+            this.ctx.root
+                .table(Submission)
+                .findAll({ where: { problemId, contestId, userId }, order: [['createdAt', 'ASC']] }),
+    );
 }
 
 export const submissionResolvers: Resolvers = {
