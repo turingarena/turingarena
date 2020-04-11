@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
-import { FindOptions } from 'sequelize/types';
+import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
@@ -9,12 +8,13 @@ import { Resolvers } from '../main/resolver-types';
 import { AchievementApi } from './achievement';
 import { Contest, ContestApi } from './contest';
 import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
-import { Evaluation, EvaluationStatus } from './evaluation';
+import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
+import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ParticipationApi } from './participation';
 import { Problem, ProblemApi } from './problem';
-import { SubmissionFile } from './submission-file';
+import { SubmissionFileApi } from './submission-file';
 import { User, UserApi } from './user';
 
 export const submissionSchema = gql`
@@ -62,21 +62,6 @@ export class Submission extends UuidBaseModel<Submission> {
     @AllowNull(false)
     @Column
     userId!: string;
-
-    /** Files of this submission */
-    @HasMany(() => SubmissionFile)
-    submissionFiles!: SubmissionFile[];
-    getSubmissionFiles!: () => Promise<SubmissionFile[]>;
-
-    /** Evaluations of this submission */
-    @HasMany(() => Evaluation)
-    evaluations!: Evaluation[];
-    getEvaluations!: (options?: FindOptions) => Promise<Evaluation[]>;
-
-    /** Problem to which this submission belongs to */
-    @BelongsTo(() => Problem)
-    problem!: Problem;
-    getProblem!: (options?: object) => Promise<Problem>;
 }
 
 export interface SubmissionModelRecord {
@@ -100,6 +85,10 @@ export class SubmissionApi extends ApiObject {
             .byContestAndProblem.load({ contestId: s.contestId, problemId: s.problemId });
     }
 
+    async getSubmissionFiles(s: Submission) {
+        return this.ctx.api(SubmissionFileApi).allBySubmissionId.load(s.id);
+    }
+
     /**
      * Extract the files of this submission in the specified base dir.
      * It extract files as: `${base}/${submissionId}/${fieldName}.${fileTypeName}${extension}`
@@ -107,7 +96,7 @@ export class SubmissionApi extends ApiObject {
      * @param base base directory
      */
     async extract(s: Submission, base: string) {
-        const submissionFiles = await s.getSubmissionFiles();
+        const submissionFiles = await this.getSubmissionFiles(s);
         const submissionPath = path.join(base, s.id);
 
         for (const submissionFile of submissionFiles) {
@@ -142,7 +131,8 @@ export class SubmissionApi extends ApiObject {
 
     async getAwardAchievements(s: Submission) {
         const evaluation = await this.getOfficialEvaluation(s);
-        const achievements = (await evaluation?.getAchievements()) ?? [];
+        const achievements =
+            evaluation !== null ? await this.ctx.api(AchievementApi).allByEvaluationId.load(evaluation.id) : [];
         const material = await this.getMaterial(s);
 
         return material.awards.map((award, awardIndex) => ({
@@ -210,7 +200,8 @@ export class SubmissionApi extends ApiObject {
         const warningWatermarkMultiplier = 0.2;
 
         const evaluation = await this.getOfficialEvaluation(s);
-        const events = (await evaluation?.getEvents()) ?? [];
+        const events =
+            evaluation !== null ? await this.ctx.api(EvaluationEventApi).allByEvaluationId.load(evaluation.id) : [];
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -324,7 +315,7 @@ export const submissionResolvers: Resolvers = {
         feedbackTable: (s, {}, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
 
         createdAt: s => s.createdAt,
-        evaluations: s => s.evaluations,
-        files: s => s.submissionFiles,
+        evaluations: (s, {}, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
+        files: (s, {}, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
     },
 };

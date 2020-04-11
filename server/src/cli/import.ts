@@ -4,6 +4,7 @@ import * as yaml from 'yaml';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
 import { createFileCollection } from '../core/file-collection';
+import { Participation } from '../core/participation';
 import { Problem } from '../core/problem';
 import { User, UserRole } from '../core/user';
 import { ModelRoot } from '../main/model-root';
@@ -48,7 +49,7 @@ export async function importContest(root: ModelRoot, dir = process.cwd()) {
             ...userData,
             role: userData.role === 'admin' ? UserRole.ADMIN : UserRole.USER,
         });
-        await contest.createParticipation({ userId: user.id });
+        await root.table(Participation).create({ userId: user.id, contestId: contest.id });
     }
 
     for (const name of metadata.problems) {

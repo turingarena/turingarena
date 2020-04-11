@@ -37,7 +37,7 @@ export class ContestProblemAssignmentApi extends ApiObject {
     byContestAndProblem = createSimpleLoader(({ contestId, problemId }: { contestId: string; problemId: string }) =>
         this.ctx.root.table(ContestProblemAssignment).findOne({ where: { contestId, problemId } }),
     );
-    allByContest = createSimpleLoader((contestId: string) =>
+    allByContestId = createSimpleLoader((contestId: string) =>
         this.ctx.root.table(ContestProblemAssignment).findAll({ where: { contestId } }),
     );
 }

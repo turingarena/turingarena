@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
-import { UuidBaseModel } from '../main/base-model';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { Evaluation } from './evaluation';
 
@@ -20,6 +20,12 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
 }
 
 export class EvaluationEventApi extends ApiObject {
+    allByEvaluationId = createSimpleLoader((evaluationId: string) =>
+        this.ctx.root.table(EvaluationEvent).findAll({
+            where: { evaluationId },
+        }),
+    );
+
     async storeAchievements(e: EvaluationEvent) {
         if ('IOISubtaskScore' in e.data) {
             const { subtask, normalized_score, score } = e.data.IOISubtaskScore;

@@ -1,9 +1,8 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, Column, DataType, HasMany, Index, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, DataType, Index, Table, Unique } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
-import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterial } from './material/problem-material';
 import { getProblemTaskInfo } from './material/problem-task-info';
@@ -28,10 +27,6 @@ export class Problem extends UuidBaseModel<Problem> {
     @Column
     @Index
     name!: string;
-
-    /** Contests that contains this problem */
-    @HasMany(() => ContestProblemAssignment)
-    contestAssigments!: ContestProblemAssignment[];
 
     /** Files collection that belongs to this problem. */
     @AllowNull(false)

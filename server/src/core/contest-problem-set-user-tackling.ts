@@ -36,7 +36,9 @@ export interface ContestProblemSetUserTacklingModelRecord {
 
 export class ContestProblemSetUserTacklingApi extends ApiObject {
     async getScoreGrade(t: ContestProblemSetUserTackling) {
-        const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContest.load(t.problemSet.contest.id);
+        const assignments = await this.ctx
+            .api(ContestProblemAssignmentApi)
+            .allByContestId.load(t.problemSet.contest.id);
 
         return ScoreGrade.total(
             await Promise.all(

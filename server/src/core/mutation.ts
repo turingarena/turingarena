@@ -2,6 +2,8 @@ import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 import { Contest, ContestApi } from './contest';
+import { ContestProblemAssignment } from './contest-problem-assignment';
+import { Participation } from './participation';
 import { Problem } from './problem';
 import { submit } from './submit';
 import { User, UserApi } from './user';
@@ -98,8 +100,9 @@ export const mutationResolvers: Resolvers = {
             const contest = await ctx.api(ContestApi).byName.load(contestName);
             const problem =
                 (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
-            await contest.createProblemAssignment({
-                problem,
+            await root.table(ContestProblemAssignment).create({
+                contestId: contest.id,
+                problemId: problem.id,
             });
 
             return true;
@@ -107,7 +110,7 @@ export const mutationResolvers: Resolvers = {
         addUser: async (root, { contestName, username }, ctx) => {
             const contest = await ctx.api(ContestApi).byName.load(contestName);
             const user = await ctx.api(UserApi).byUsername.load(username);
-            await contest.addParticipation(user);
+            await root.table(Participation).create({ userId: user.id, contestId: contest.id });
 
             return true;
         },

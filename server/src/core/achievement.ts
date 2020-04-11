@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
-import { BaseModel } from '../main/base-model';
+import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Evaluation, EvaluationApi } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -39,6 +39,12 @@ export interface AchievementModelRecord {
 }
 
 export class AchievementApi extends ApiObject {
+    allByEvaluationId = createSimpleLoader((evaluationId: string) =>
+        this.ctx.root.table(Achievement).findAll({
+            where: { evaluationId },
+        }),
+    );
+
     async getAward(a: Achievement) {
         const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
         const submission = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);

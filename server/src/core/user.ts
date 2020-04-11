@@ -1,9 +1,8 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, Index, Table, Unique } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
-import { Participation } from './participation';
 
 export const userSchema = gql`
     type User {
@@ -50,10 +49,6 @@ export class User extends UuidBaseModel<User> {
     @AllowNull(false)
     @Column
     role!: UserRole;
-
-    /** Contest wich the user belongs to */
-    @HasMany(() => Participation)
-    partitipations!: Participation[];
 }
 
 /** Privilege of a user */

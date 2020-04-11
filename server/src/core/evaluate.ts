@@ -7,6 +7,7 @@ import { ApiObject } from '../main/api';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
 import { extractFileCollection } from './file-collection';
+import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 
 export class EvaluateApi extends ApiObject {
@@ -26,7 +27,7 @@ export class EvaluateApi extends ApiObject {
 
         console.log(this.ctx.root.config);
 
-        const problem = await submission.getProblem();
+        const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
         const problemDir = await extractFileCollection(this.ctx.root, problem.fileCollectionId);
 
         const submissionPath = await this.ctx

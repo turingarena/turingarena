@@ -1,9 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
+import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, UuidBaseModel } from '../main/base-model';
-import { Achievement } from './achievement';
-import { EvaluationEvent } from './evaluation-event';
+import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Submission } from './submission';
 
 export const evaluationSchema = gql`
@@ -41,16 +39,6 @@ export class Evaluation extends UuidBaseModel<Evaluation> {
     @AllowNull(false)
     @Column
     status!: EvaluationStatus;
-
-    /** Events of this submission */
-    @HasMany(() => EvaluationEvent)
-    events!: EvaluationEvent[];
-    getEvents!: () => Promise<EvaluationEvent[]>;
-
-    /** Achievements of this submission */
-    @HasMany(() => Achievement)
-    achievements!: Achievement[];
-    getAchievements!: () => Promise<Achievement[]>;
 }
 
 /** Status of this submission */
@@ -69,4 +57,9 @@ export interface EvaluationModelRecord {
 
 export class EvaluationApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Evaluation);
+    allBySubmissionId = createSimpleLoader((submissionId: string) =>
+        this.ctx.root.table(Evaluation).findAll({
+            where: { submissionId },
+        }),
+    );
 }

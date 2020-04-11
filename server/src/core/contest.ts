@@ -2,18 +2,17 @@ import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
 import * as mime from 'mime-types';
 import { Op } from 'sequelize';
-import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
+import { AllowNull, Column, DataType, ForeignKey, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
-import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
+import { ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
 import { FileCollection } from './file-collection';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial } from './material/problem-material';
-import { Participation } from './participation';
 import { ProblemApi } from './problem';
 
 export const contestSchema = gql`
@@ -78,19 +77,6 @@ export class Contest extends UuidBaseModel<Contest> {
     /** supported languages, e.g [C, C++, Python2] */
     @Column(DataType.JSON)
     languages!: string[];
-
-    /** The list of problems in this contest */
-    @HasMany(() => ContestProblemAssignment)
-    problemAssignments!: ContestProblemAssignment[];
-    createProblemAssignment!: (problem: object, options?: object) => Promise<ContestProblemAssignment>;
-    getProblemAssignments!: () => Promise<ContestProblemAssignment[]>;
-
-    /** The list of users in this contest */
-    @HasMany(() => Participation)
-    participations!: Participation[];
-    getParticipations!: (options: object) => Promise<Participation[]>;
-    createParticipation!: (participation: object, options?: object) => Promise<Participation>;
-    addParticipation!: (options: object) => Promise<unknown>;
 }
 
 export type ContestStatus = __generated_ContestStatus;
@@ -118,7 +104,7 @@ export class ContestApi extends ApiObject {
     }
 
     async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {
-        const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContest.load(c.id);
+        const assignments = await this.ctx.api(ContestProblemAssignmentApi).allByContestId.load(c.id);
 
         return Promise.all(
             assignments.map(async a => (await this.ctx.api(ProblemApi).byId.load(a.problemId)).getMaterial()),
