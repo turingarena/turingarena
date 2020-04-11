@@ -75,6 +75,10 @@ export class Contest extends UuidBaseModel<Contest> {
     @ForeignKey(() => FileCollection)
     fileCollectionId!: string;
 
+    /** supported languages, e.g [C, C++, Python2] */
+    @Column(DataType.JSON)
+    languages!: string[];
+
     /** The list of problems in this contest */
     @HasMany(() => ContestProblemAssignment)
     problemAssignments!: ContestProblemAssignment[];

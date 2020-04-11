@@ -17,6 +17,12 @@ users:
   - username: user2
     token: user2
     name: Mr. User 2
+languages:
+  - C
+  - C++
+  - Python2
+  - Python3
+  - Rust
 problems:
   - easy1
   - easy2
