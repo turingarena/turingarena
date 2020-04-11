@@ -22,13 +22,13 @@
       </a>
     </ng-container>
     <button class="user-logout" (click)="logOut()">
-      <fa-icon icon="signOutAlt"></fa-icon>
+      <fa-icon icon="sign-out-alt"></fa-icon>
       Logout
     </button>
   </ng-container>
   <ng-container *ngIf="!data.user">
     <button class="user-login" (click)="modalService.open(loginDialog)">
-      <fa-icon icon="signInAlt"></fa-icon>
+      <fa-icon icon="sign-in-alt"></fa-icon>
       Login
       <ng-template #loginDialog let-modal>
         <app-login-modal [modal]="modal"></app-login-modal>
