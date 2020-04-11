@@ -27,3 +27,24 @@ To use the script, run:
 ```
 
 5. TODO: running the server in production
+
+## Using Docker
+
+You can run this application with Docker, to have a system ready to use, that you can also use on macOS or Windows.
+
+1. Build the Docker container (at this point we don't provide prebuilt ones)
+
+```bash
+docker build . -t turingarena:turingarena
+```
+
+It will probably take a few minutes, so go to drink a cofee while the system build everything.
+
+2. Start the server like this
+
+```bash
+docker run --privileged -it -p 3000:3000 -v $PWD/server:/data turingarena:turingarena serve
+```
+
+Of course change the port or the working directory (/data) as you wish. It's important to use the `--privileged` option,
+otherwise the sandbox will not work. You may need root privileges on your system to use that.
