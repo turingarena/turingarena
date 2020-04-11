@@ -4,7 +4,8 @@ import * as mime from 'mime-types';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, HasMany, Index, Table, Unique } from 'sequelize-typescript';
 import { __generated_ContestStatus } from '../generated/graphql-types';
-import { UuidBaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -132,6 +133,10 @@ export interface MutationModelRecord {
 
 export interface ContestModelRecord {
     Contest: Contest;
+}
+
+export class ContestApi extends ApiObject {
+    byName = createSimpleLoader((name: string) => this.ctx.root.table(Contest).findOne({ where: { name } }));
 }
 
 export const contestResolvers: Resolvers = {

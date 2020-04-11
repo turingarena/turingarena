@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, DataType, HasMany, Index, Table, Unique } from 'sequelize-typescript';
-import { UuidBaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGradeDomain } from './feedback/score';
@@ -50,6 +51,10 @@ export class Problem extends UuidBaseModel<Problem> {
 
 export interface ProblemModelRecord {
     Problem: Problem;
+}
+
+export class ProblemApi extends ApiObject {
+    byName = createSimpleLoader((name: string) => this.ctx.root.table(Problem).findOne({ where: { name } }));
 }
 
 export const problemResolvers: Resolvers = {

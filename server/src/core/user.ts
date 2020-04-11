@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, HasMany, Index, Table, Unique } from 'sequelize-typescript';
-import { UuidBaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Participation } from './participation';
 
@@ -65,6 +66,11 @@ export enum UserRole {
 
 export interface UserModelRecord {
     User: User;
+}
+
+export class UserApi extends ApiObject {
+    byUsername = createSimpleLoader((username: string) => this.ctx.root.table(User).findOne({ where: { username } }));
+    byToken = createSimpleLoader((token: string) => this.ctx.root.table(User).findOne({ where: { token } }));
 }
 
 export const userResolvers: Resolvers = {

@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
-import { BaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
 import { Problem } from './problem';
@@ -38,6 +39,12 @@ export class ContestProblemAssignment extends BaseModel<ContestProblemAssignment
 
 export interface ContestProblemAssignmentModelRecord {
     ContestProblemAssignment: ContestProblemAssignment;
+}
+
+export class ContestProblemAssignmentApi extends ApiObject {
+    byContestAndProblem = createSimpleLoader(({ contestId, problemId }: { contestId: string; problemId: string }) =>
+        this.ctx.root.table(ContestProblemAssignment).findOne({ where: { contestId, problemId } }),
+    );
 }
 
 export const contestProblemAssignmentResolvers: Resolvers = {

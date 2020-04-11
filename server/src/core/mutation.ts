@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
-import { Contest } from './contest';
+import { Contest, ContestApi } from './contest';
 import { Problem } from './problem';
 import { submit } from './submit';
-import { User } from './user';
+import { User, UserApi } from './user';
 
 export const mutationSchema = gql`
     type Mutation {
@@ -94,11 +94,8 @@ export const mutationResolvers: Resolvers = {
         submit: (root, { submission }) => submit(root, submission).then(() => true),
         logIn: (root, { token }) => root.authService.logIn(token),
 
-        addProblem: async (root, { contestName, name }) => {
-            const contest =
-                (await root.table(Contest).findOne({
-                    where: { name: contestName },
-                })) ?? root.fail(`no such contest '${contestName}'`);
+        addProblem: async (root, { contestName, name }, ctx) => {
+            const contest = await ctx.api(ContestApi).byName.load(contestName);
             const problem =
                 (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
             await contest.createProblemAssignment({
@@ -107,13 +104,9 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        addUser: async (root, { contestName, username }) => {
-            const contest =
-                (await root.table(Contest).findOne({
-                    where: { name: contestName },
-                })) ?? root.fail(`no such contest '${contestName}'`);
-            const user =
-                (await root.table(User).findOne({ where: { username } })) ?? root.fail(`no such user '${username}'`);
+        addUser: async (root, { contestName, username }, ctx) => {
+            const contest = await ctx.api(ContestApi).byName.load(contestName);
+            const user = await ctx.api(UserApi).byUsername.load(username);
             await contest.addParticipation(user);
 
             return true;

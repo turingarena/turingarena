@@ -2,6 +2,7 @@ import { DocumentNode, execute } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { resolvers, schema } from '../core';
 import { User, UserRole } from '../core/user';
+import { ApiObject } from './api';
 import { ModelRoot } from './model-root';
 
 export interface OperationRequest<V> {
@@ -46,5 +47,15 @@ export class ApiContext {
             contextValue: this,
             rootValue: this.root,
         });
+    }
+
+    readonly apiObjectCache = new Map<unknown, unknown>();
+
+    api<T extends ApiObject>(apiClass: new (ctx: ApiContext) => T): T {
+        if (!this.apiObjectCache.has(apiClass)) {
+            this.apiObjectCache.set(apiClass, new apiClass(this));
+        }
+
+        return this.apiObjectCache.get(apiClass) as T;
     }
 }
