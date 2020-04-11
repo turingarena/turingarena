@@ -1,20 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
 
-.user-login,
-.user-logout,
-.user-display-name,
-.messages-button,
-.admin-button {
-  margin-right: 1em;
-}
-
-.user-login,
-.user-logout,
-.messages-button,
-.admin-button {
-  @extend .btn, .btn-sm, .btn-light;
-}
-
 .login-dialog-body {
   @extend .modal-body;
 }
