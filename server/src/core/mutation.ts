@@ -1,14 +1,15 @@
 import { gql } from 'apollo-server-core';
 import { ModelRoot } from '../main/model-root';
 import { Resolvers } from '../main/resolver-types';
-import { Contest, contestMutationResolvers } from './contest';
+import { Contest, ContestApi } from './contest';
 import { Problem } from './problem';
 import { submit } from './submit';
-import { User } from './user';
+import { User, UserApi } from './user';
 
 export const mutationSchema = gql`
     type Mutation {
         init: Boolean!
+
         createUser(user: UserInput!): Boolean!
         updateUser(user: UserInput!): Boolean!
         deleteUser(user: ID!): Boolean!
@@ -18,13 +19,16 @@ export const mutationSchema = gql`
         createContest(contest: ContestInput!): Boolean!
         updateContest(contest: ContestInput!): Boolean!
         deleteContest(contest: ID!): Boolean!
-        createFile(file: FileContentInput!): Boolean!
-        deleteFile(id: ID!): Boolean!
+
+        # createFile(file: FileContentInput!): Boolean!
+        # deleteFile(id: ID!): Boolean!
 
         addProblem(contestName: ID!, name: ID!): Boolean!
-        removeProblem(contestName: ID!, name: ID!): Boolean!
+        # removeProblem(contestName: ID!, name: ID!): Boolean!
+
         addUser(contestName: ID!, username: ID!): Boolean!
-        removeUser(contestName: ID!, username: ID!): Boolean!
+        # removeUser(contestName: ID!, username: ID!): Boolean!
+
         submit(submission: SubmissionInput!): Boolean!
 
         logIn(token: String!): AuthResult
@@ -89,6 +93,23 @@ export const mutationResolvers: Resolvers = {
         },
         submit: (root, { submission }) => submit(root, submission).then(() => true),
         logIn: (root, { token }) => root.authService.logIn(token),
-        ...contestMutationResolvers.Mutation,
+
+        addProblem: async (root, { contestName, name }, ctx) => {
+            const contest = await ctx.api(ContestApi).byName.load(contestName);
+            const problem =
+                (await root.table(Problem).findOne({ where: { name } })) ?? root.fail(`no such problem '${name}'`);
+            await contest.createProblemAssignment({
+                problem,
+            });
+
+            return true;
+        },
+        addUser: async (root, { contestName, username }, ctx) => {
+            const contest = await ctx.api(ContestApi).byName.load(contestName);
+            const user = await ctx.api(UserApi).byUsername.load(username);
+            await contest.addParticipation(user);
+
+            return true;
+        },
     },
 };

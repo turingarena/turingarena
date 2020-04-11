@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
-import { BaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Contest } from './contest';
 import { User } from './user';
 
@@ -35,4 +36,10 @@ export class Participation extends BaseModel<Participation> {
 
 export interface ParticipationModelRecord {
     Participation: Participation;
+}
+
+export class ParticipationApi extends ApiObject {
+    byUserAndContest = createSimpleLoader(({ userId, contestId }: { userId: string; contestId: string }) =>
+        this.ctx.root.table(Participation).findOne({ where: { contestId, userId } }),
+    );
 }

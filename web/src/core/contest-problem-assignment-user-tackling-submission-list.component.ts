@@ -34,6 +34,9 @@ export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
       {
         colId: 'time',
         headerName: 'Submitted at',
+        sortable: true,
+        sort: 'desc',
+        sortingOrder: ['desc', 'asc', null] as string[],
         valueGetter: ({ data: submission }) =>
           (submission as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment).createdAt.local,
         valueFormatter: ({ value: dateString }) =>

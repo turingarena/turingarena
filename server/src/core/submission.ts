@@ -3,17 +3,18 @@ import * as path from 'path';
 import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from 'sequelize-typescript';
 import { FindOptions } from 'sequelize/types';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
-import { UuidBaseModel } from '../main/base-model';
+import { ApiObject } from '../main/api';
+import { createByIdLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { Contest } from './contest';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
-import { Participation } from './participation';
+import { ParticipationApi } from './participation';
 import { Problem } from './problem';
 import { SubmissionFile } from './submission-file';
-import { User } from './user';
+import { User, UserApi } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -49,17 +50,17 @@ export class Submission extends UuidBaseModel<Submission> {
     @ForeignKey(() => Problem)
     @AllowNull(false)
     @Column
-    problemId!: number;
+    problemId!: string;
 
     @ForeignKey(() => Contest)
     @AllowNull(false)
     @Column
-    contestId!: number;
+    contestId!: string;
 
     @ForeignKey(() => User)
     @AllowNull(false)
     @Column
-    userId!: number;
+    userId!: string;
 
     /** Files of this submission */
     @HasMany(() => SubmissionFile)
@@ -90,14 +91,6 @@ export class Submission extends UuidBaseModel<Submission> {
         return (
             (await this.root.table(ContestProblemAssignment).findOne({
                 where: { contestId: this.contestId, problemId: this.problemId },
-            })) ?? this.root.fail()
-        );
-    }
-
-    async getParticipation(): Promise<Participation> {
-        return (
-            (await this.root.table(Participation).findOne({
-                where: { contestId: this.contestId, userId: this.userId },
             })) ?? this.root.fail()
         );
     }
@@ -301,17 +294,29 @@ export interface SubmissionModelRecord {
 
 export type SubmissionInput = __generated_SubmissionInput;
 
+export class SubmissionApi extends ApiObject {
+    byId = createByIdLoader(this.ctx, Submission);
+}
+
 export const submissionResolvers: Resolvers = {
     Submission: {
-        contest: submission => submission.getContest(),
-        user: submission => submission.getUser(),
-        problem: submission => submission.getProblem(),
+        id: s => s.id,
 
-        participation: submission => submission.getParticipation(),
-        contestProblemAssigment: submission => submission.getContestProblemAssignment(),
+        contest: s => s.getContest(),
+        user: (s, {}, ctx) => ctx.api(UserApi).byUsername.load(s.userId),
+        problem: s => s.getProblem(),
 
-        officialEvaluation: submission => submission.getOfficialEvaluation(),
-        summaryRow: submission => submission.getSummaryRow(),
-        feedbackTable: submission => submission.getFeedbackTable(),
+        participation: ({ userId, contestId }, {}, ctx) =>
+            ctx.api(ParticipationApi).byUserAndContest.load({ contestId, userId }),
+        contestProblemAssigment: ({ contestId, problemId }, {}, ctx) =>
+            ctx.api(ContestProblemAssignmentApi).byContestAndProblem.load({ contestId, problemId }),
+
+        officialEvaluation: s => s.getOfficialEvaluation(),
+        summaryRow: s => s.getSummaryRow(),
+        feedbackTable: s => s.getFeedbackTable(),
+
+        createdAt: s => s.createdAt,
+        evaluations: s => s.evaluations,
+        files: s => s.submissionFiles,
     },
 };

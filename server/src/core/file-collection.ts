@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AllowNull, BelongsTo, Column, DataType, PrimaryKey, Table, ForeignKey } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
 import { BaseModel } from '../main/base-model';
 import { ModelRoot } from '../main/model-root';
@@ -126,9 +126,11 @@ export interface FileCollectionModelRecord {
 
 export const fileCollectionResolvers: Resolvers = {
     FileCollection: {
+        uuid: f => f.uuid,
         files: ({ uuid }, _, ctx) => ctx.root.table(FileCollection).findAll({ where: { uuid } }),
     },
     FileCollectionElement: {
+        path: f => f.path,
         content: (collection, _, ctx) => ctx.root.table(FileContent).findOne({ where: { id: collection.contentId } }),
     },
 };

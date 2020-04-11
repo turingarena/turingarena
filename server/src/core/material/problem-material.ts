@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { FileCollection } from '../file-collection';
@@ -223,20 +222,6 @@ export class ProblemMaterial {
 export interface ProblemMaterialModelRecord {
     ProblemAttachment: ProblemAttachment;
 }
-
-export const problemMaterialResolversExtensions: Resolvers = {
-    Problem: {
-        title: async problem => (await problem.getMaterial()).title,
-        statement: async problem => (await problem.getMaterial()).statement,
-        attachments: async problem => (await problem.getMaterial()).attachments,
-        awards: async problem => (await problem.getMaterial()).awards,
-        submissionFields: async problem => (await problem.getMaterial()).submissionFields,
-        submissionFileTypes: async problem => (await problem.getMaterial()).submissionFileTypes,
-        submissionFileTypeRules: async problem => (await problem.getMaterial()).submissionFileTypeRules,
-        submissionListColumns: async problem => (await problem.getMaterial()).submissionListColumns,
-        evaluationFeedbackColumns: async problem => (await problem.getMaterial()).evaluationFeedbackColumns,
-    },
-};
 
 const loadContent = async (problem: Problem, path: string) => {
     const file = await problem.root.table(FileCollection).findOne({

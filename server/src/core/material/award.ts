@@ -43,6 +43,9 @@ export interface AwardModelRecord {
 export const awardResolvers: Resolvers = {
     Award: {
         // TODO: id: ({ problem, index }) => `${problem.id}/${index}`,
-        problem: award => award.material.problem,
+        problem: a => a.material.problem,
+        name: a => a.name,
+        gradeDomain: a => a.gradeDomain,
+        title: a => a.title,
     },
 };
