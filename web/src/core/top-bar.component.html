@@ -7,11 +7,13 @@
   <ng-container *ngIf="data.user as user">
     <span class="user-display-name">{{ user.name }}</span>
   </ng-container>
+  <!-- not implemented yet
   <button class="messages-button">
     <fa-icon icon="comments"></fa-icon>
     Messages
     <span class="message-count-badge" [hidden]="messagesCount === 0">{{messagesCount}}</span>
   </button>
+  -->
   <ng-container *ngIf="data.user as user">
     <ng-container *ngIf="user.isAdmin">
       <a routerLink="/admin" class="admin-button">
