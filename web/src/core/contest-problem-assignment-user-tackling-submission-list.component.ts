@@ -1,5 +1,7 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { ColDef } from 'ag-grid-community';
 import gql from 'graphql-tag';
+import { DateTime } from 'luxon';
 import {
   ContestProblemAssignmentUserTacklingSubmissionListFragment,
   ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment,
@@ -22,11 +24,22 @@ export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
     return submissions.map(s => s.summaryRow);
   }
 
-  getColumns(data: ContestProblemAssignmentUserTacklingSubmissionListFragment) {
-    return getFieldColumns(
-      data.assignmentView.assignment.problem.submissionListColumns,
-      (submission: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment) => submission.summaryRow,
-    );
+  getColumns(data: ContestProblemAssignmentUserTacklingSubmissionListFragment): ColDef[] {
+    return [
+      {
+        colId: 'time',
+        headerName: 'Submitted at',
+        valueGetter: ({ data: submission }) =>
+          (submission as ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment).createdAt.local,
+        valueFormatter: ({ value: dateString }) =>
+          DateTime.fromISO(dateString as string).toRelative() ?? `${dateString}`,
+        tooltipValueGetter: ({ value: dateString }) => `${dateString}`.replace('T', ' '),
+      },
+      ...getFieldColumns(
+        data.assignmentView.assignment.problem.submissionListColumns,
+        (submission: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment) => submission.summaryRow,
+      ),
+    ];
   }
 }
 
