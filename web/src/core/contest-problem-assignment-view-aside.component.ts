@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { contestProblemAssignmentUserTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside.component';
 import { gradeFieldFragment } from './grading/grade-field.component';
-import { scoreVariableFragment } from './grading/score-field.component';
+import { scoreFieldFragment } from './grading/score-field.component';
 import { mediaDownloadFragment } from './material/media-download.component';
 import { mediaInlineFragment } from './material/media-inline.component';
 import { textFragment } from './material/text.pipe';
@@ -69,7 +69,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
   ${textFragment}
   ${mediaInlineFragment}
   ${mediaDownloadFragment}
-  ${scoreVariableFragment}
+  ${scoreFieldFragment}
   ${gradeFieldFragment}
   ${contestProblemAssignmentUserTacklingAsideFragment}
 `;

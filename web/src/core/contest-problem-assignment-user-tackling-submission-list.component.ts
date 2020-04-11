@@ -4,6 +4,7 @@ import {
   ContestProblemAssignmentUserTacklingSubmissionListFragment,
   ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment,
 } from '../generated/graphql-types';
+import { getFieldColumns } from './data/field-table';
 import { textFragment } from './material/text.pipe';
 import { submissionModalFragment } from './submission-modal.component';
 
@@ -20,6 +21,13 @@ export class ContestProblemAssignmentUserTacklingSubmissionListComponent {
   getSummaryRows(submissions: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment[]) {
     return submissions.map(s => s.summaryRow);
   }
+
+  getColumns(data: ContestProblemAssignmentUserTacklingSubmissionListFragment) {
+    return getFieldColumns(
+      data.assignmentView.assignment.problem.submissionListColumns,
+      (submission: ContestProblemAssignmentUserTacklingSubmissionListSubmissionFragment) => submission.summaryRow,
+    );
+  }
 }
 
 export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
@@ -32,7 +40,7 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
       assignment {
         problem {
           submissionListColumns {
-            ...FeedbackTableColumn
+            ...Column
           }
         }
       }
@@ -49,15 +57,15 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
       status
     }
     summaryRow {
-      ...FeedbackTableRecord
+      ...Record
     }
 
     feedbackTable {
       columns {
-        ...FeedbackTableColumn
+        ...Column
       }
       rows {
-        ...FeedbackTableRecord
+        ...Record
       }
     }
 

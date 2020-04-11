@@ -4,8 +4,13 @@ import { Apollo, QueryRef } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { SubmissionQuery, SubmissionQueryVariables } from '../generated/graphql-types';
-import { feedbackTableFragment } from './data/feedback-table.component';
+import {
+  RecordFragment,
+  SubmissionModalFragment,
+  SubmissionQuery,
+  SubmissionQueryVariables,
+} from '../generated/graphql-types';
+import { columnFragment, getFieldColumns, recordFragment } from './data/field-table';
 import { textFragment } from './material/text.pipe';
 
 @Component({
@@ -51,6 +56,10 @@ export class SubmissionModalComponent implements OnChanges {
       }),
     );
   }
+
+  getColumns(data: SubmissionModalFragment) {
+    return getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row);
+  }
 }
 
 export const submissionModalFragment = gql`
@@ -70,14 +79,15 @@ export const submissionModalFragment = gql`
     }
     feedbackTable {
       columns {
-        ...FeedbackTableColumn
+        ...Column
       }
       rows {
-        ...FeedbackTableRecord
+        ...Record
       }
     }
   }
 
   ${textFragment}
-  ${feedbackTableFragment}
+  ${recordFragment}
+  ${columnFragment}
 `;

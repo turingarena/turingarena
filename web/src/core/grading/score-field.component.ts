@@ -12,7 +12,7 @@ export class GradingNumericComponent {
   data!: ScoreFieldFragment;
 }
 
-export const scoreVariableFragment = gql`
+export const scoreFieldFragment = gql`
   fragment ScoreField on ScoreField {
     scoreRange {
       max

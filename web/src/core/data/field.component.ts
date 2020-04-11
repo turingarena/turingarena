@@ -1,6 +1,8 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { FieldFragment } from '../../generated/graphql-types';
+import { fulfillmentFieldFragment } from '../grading/fulfillment-field.component';
+import { scoreFieldFragment } from '../grading/score-field.component';
 import { indexFieldFragment } from './index-field.component';
 import { memoryUsageFieldFragment } from './memory-usage-field.component';
 import { messageFieldFragment } from './message-field.component';
@@ -43,6 +45,8 @@ export const fieldFragment = gql`
     }
   }
 
+  ${fulfillmentFieldFragment}
+  ${scoreFieldFragment}
   ${indexFieldFragment}
   ${memoryUsageFieldFragment}
   ${messageFieldFragment}

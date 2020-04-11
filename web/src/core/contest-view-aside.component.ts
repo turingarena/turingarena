@@ -2,7 +2,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { contestViewClockFragment } from './contest-view-clock.component';
-import { scoreVariableFragment } from './grading/score-field.component';
+import { scoreFieldFragment } from './grading/score-field.component';
 import { textFragment } from './material/text.pipe';
 
 @Component({
@@ -42,6 +42,6 @@ export const contestViewAsideFragment = gql`
   }
 
   ${textFragment}
-  ${scoreVariableFragment}
+  ${scoreFieldFragment}
   ${contestViewClockFragment}
 `;

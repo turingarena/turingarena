@@ -12,7 +12,7 @@ export class GradingBooleanComponent {
   data!: FulfillmentFieldFragment;
 }
 
-export const fulfillmentVariableFragment = gql`
+export const fulfillmentFieldFragment = gql`
   fragment FulfillmentField on FulfillmentField {
     fulfilled
     valence

@@ -1,23 +1,20 @@
-import { Component, Input, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ColDef, ValueGetterParams } from 'ag-grid-community';
 import gql from 'graphql-tag';
 import {
-  FeedbackTableColumnFragment,
-  FeedbackTableRecordFragment,
+  ColumnFragment,
   FieldFragment,
   FulfillmentColumn,
   IndexColumn,
   MemoryUsageColumn,
   MessageColumn,
+  RecordFragment,
   ScoreColumn,
   TimeUsageColumn,
   TitleColumn,
 } from '../../generated/graphql-types';
 import { check } from '../../util/check';
-import { TemplateCellRendererComponent } from '../../util/template-cell-renderer.component';
-import { fulfillmentVariableFragment } from '../grading/fulfillment-field.component';
-import { scoreVariableFragment } from '../grading/score-field.component';
 import { textFragment } from '../material/text.pipe';
+import { FieldCellRendererComponent } from './field-cell-renderer.component';
 import { fieldFragment } from './field.component';
 
 export interface ColumnDefinition {
@@ -31,7 +28,7 @@ export interface ColumnDefinition {
   };
 }
 
-export class ColumnMeta<T extends FeedbackTableColumnFragment> {
+export class ColumnMeta<T extends ColumnFragment> {
   constructor(readonly typename: T['__typename'], readonly createColumnDefinition: (column: T) => ColumnDefinition) {}
 }
 
@@ -134,61 +131,42 @@ const metas = [
   })),
 ];
 
-@Component({
-  selector: 'app-feedback-table',
-  templateUrl: './feedback-table.component.html',
-  styleUrls: ['./feedback-table.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-})
-export class FeedbackTableComponent {
-  @Input()
-  columns!: FeedbackTableColumnFragment[];
+export const getFieldColumns = <T>(columns: ColumnFragment[], recordExtractor: (data: T) => RecordFragment): ColDef[] =>
+  columns.map(
+    (c, i): ColDef => {
+      const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
+      const { def, mainClasses, getCellData } = meta.createColumnDefinition(c);
 
-  @Input()
-  records!: FeedbackTableRecordFragment[];
+      function getField({ data }: { data?: T }) {
+        return recordExtractor(data!).fields[i];
+      }
 
-  @ViewChild('cellRendererTemplate', { static: true })
-  cellRendererTemplate!: TemplateRef<unknown>;
+      return {
+        colId: `custom.${i}`,
+        headerName: c.title.variant,
+        resizable: true,
 
-  getColumns = (columns: FeedbackTableColumnFragment[]): ColDef[] =>
-    columns.map(
-      (c, i): ColDef => {
-        const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
-        const { def, mainClasses, getCellData } = meta.createColumnDefinition(c);
+        valueGetter: params => getCellData(getField(params)).value,
+        tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',
+        cellClass: params => {
+          const field = getField(params);
+          if ('valence' in field) {
+            return [...(mainClasses ?? []), `valence-${field.valence}`];
+          } else {
+            return [...(mainClasses ?? [])];
+          }
+        },
+        cellRendererFramework: FieldCellRendererComponent,
+        cellRendererParams: (params: ValueGetterParams) => ({
+          field: getField(params),
+        }),
+        ...def,
+      };
+    },
+  );
 
-        function getField({ data }: { data?: unknown }) {
-          return (data as FeedbackTableRecordFragment).fields[i];
-        }
-
-        return {
-          colId: `custom.${i}`,
-          headerName: c.title.variant,
-          resizable: true,
-
-          valueGetter: params => getCellData(getField(params)).value,
-          tooltip: params => getCellData(getField(params)).tooltip ?? '',
-          cellClass: params => {
-            const field = getField(params);
-            if ('valence' in field) {
-              return [...(mainClasses ?? []), `valence-${field.valence}`];
-            } else {
-              return [...(mainClasses ?? [])];
-            }
-          },
-          // tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',
-          cellRendererFramework: TemplateCellRendererComponent,
-          cellRendererParams: (params: ValueGetterParams) => ({
-            template: this.cellRendererTemplate,
-            field: getField(params),
-          }),
-          ...def,
-        };
-      },
-    );
-}
-
-export const feedbackTableFragment = gql`
-  fragment FeedbackTableColumn on Column {
+export const columnFragment = gql`
+  fragment Column on Column {
     ... on TitledColumn {
       title {
         ...Text
@@ -196,7 +174,11 @@ export const feedbackTableFragment = gql`
     }
   }
 
-  fragment FeedbackTableRecord on Record {
+  ${textFragment}
+`;
+
+export const recordFragment = gql`
+  fragment Record on Record {
     fields {
       ...Field
       ... on HasValence {
@@ -205,8 +187,5 @@ export const feedbackTableFragment = gql`
     }
   }
 
-  ${scoreVariableFragment}
-  ${fulfillmentVariableFragment}
   ${fieldFragment}
-  ${textFragment}
 `;

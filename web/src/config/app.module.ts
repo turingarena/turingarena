@@ -17,7 +17,7 @@ import { ContestProblemAssignmentViewAsideComponent } from '../core/contest-prob
 import { ContestViewAsideComponent } from '../core/contest-view-aside.component';
 import { ContestViewClockComponent } from '../core/contest-view-clock.component';
 import { ContestViewComponent } from '../core/contest-view.component';
-import { FeedbackTableComponent } from '../core/data/feedback-table.component';
+import { FieldCellRendererComponent } from '../core/data/field-cell-renderer.component';
 import { FieldComponent } from '../core/data/field.component';
 import { IndexFieldComponent } from '../core/data/index-field.component';
 import { MemoryUsageFieldComponent } from '../core/data/memory-usage-field.component';
@@ -86,13 +86,13 @@ import { GraphQLModule } from './graphql.module';
     GradingNumericComponent,
     ContestProblemAssignmentUserTacklingSubmitModalComponent,
     ContestProblemAssignmentUserTacklingAsideComponent,
-    FeedbackTableComponent,
     FieldComponent,
     MemoryUsageFieldComponent,
     TimeUsageFieldComponent,
     MessageFieldComponent,
     TitleFieldComponent,
     IndexFieldComponent,
+    FieldCellRendererComponent,
   ],
   imports: [
     BrowserModule,

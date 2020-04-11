@@ -1,8 +1,8 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import gql from 'graphql-tag';
 import { GradeFieldFragment } from '../../generated/graphql-types';
-import { fulfillmentVariableFragment } from './fulfillment-field.component';
-import { scoreVariableFragment } from './score-field.component';
+import { fulfillmentFieldFragment } from './fulfillment-field.component';
+import { scoreFieldFragment } from './score-field.component';
 
 @Component({
   selector: 'app-grade-field',
@@ -26,6 +26,6 @@ export const gradeFieldFragment = gql`
     }
   }
 
-  ${scoreVariableFragment}
-  ${fulfillmentVariableFragment}
+  ${scoreFieldFragment}
+  ${fulfillmentFieldFragment}
 `;
