@@ -175,7 +175,7 @@ export class SubmissionApi extends ApiObject {
                             __typename: 'ScoreField',
                             score:
                                 achievement !== undefined
-                                    ? this.ctx.api(AchievementApi).getScoreGrade(achievement, gradeDomain)?.score
+                                    ? this.ctx.api(AchievementApi).getScoreGrade(achievement, gradeDomain).score
                                     : null,
                             scoreRange: gradeDomain.scoreRange,
                         };
@@ -185,7 +185,7 @@ export class SubmissionApi extends ApiObject {
                             __typename: 'FulfillmentField',
                             fulfilled:
                                 achievement !== undefined
-                                    ? this.ctx.api(AchievementApi).getFulfillmentGrade(achievement)
+                                    ? this.ctx.api(AchievementApi).getFulfillmentGrade(achievement).fulfilled
                                     : null,
                         };
                     }
