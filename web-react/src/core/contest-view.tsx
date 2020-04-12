@@ -5,7 +5,7 @@ import { Route, Switch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside';
-import { contestViewAsideFragment } from './contest-view-aside';
+import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
 import { MediaDownload } from './media-download';
 import { MediaInline, mediaInlineFragment } from './media-inline';
 import { textFragment } from './text';
@@ -50,7 +50,7 @@ export const contestViewFragment = gql`
 export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
   return (
     <>
-      {/* <ContestViewAside></ContestViewAside> */}
+      <ContestViewAside data={data} />
       <Switch>
         <Route path="/:problem">
           <h1>Problem</h1>
