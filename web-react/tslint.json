@@ -1,6 +1,8 @@
 {
   "extends": "../tslint.json",
-  "rules": {},
+  "rules": {
+    "strict-boolean-expressions": [true, "ignore-rhs"]
+  },
   "linterOptions": {
     "exclude": ["src/**/*.spec.ts", "src/generated/**"]
   }
