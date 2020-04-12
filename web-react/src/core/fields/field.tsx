@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client';
 import React from 'react';
 import { FieldFragment } from '../../generated/graphql-types';
+import { unexpected } from '../../util/check';
 import { FragmentProps } from '../../util/fragment-props';
 import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
-import { indexFieldFragment } from './index-field';
+import { IndexField, indexFieldFragment } from './index-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
 import { MessageField, messageFieldFragment } from './message-field';
 import { TimeUsageField, timeUsageFieldFragment } from './time-usage-field';
@@ -24,8 +25,9 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
     case 'TitleField':
       return <TitleField data={data} />;
     case 'IndexField':
+      return <IndexField data={data} />;
     default:
-      return <h1>Not implemented</h1>;
+      return unexpected(data);
   }
 }
 
