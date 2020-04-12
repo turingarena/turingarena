@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import React from 'react';
-import { MemoryUsageFieldFragment, MemoryUsageFragment } from '../generated/graphql-types';
-import { FragmentProps } from '../util/fragment-props';
+import { MemoryUsageFieldFragment, MemoryUsageFragment } from '../../generated/graphql-types';
+import { FragmentProps } from '../../util/fragment-props';
 
 export function MemoryUsageField({ data }: FragmentProps<MemoryUsageFieldFragment>) {
   // tslint:disable: no-magic-numbers
