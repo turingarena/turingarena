@@ -7,7 +7,7 @@ import { indexFieldFragment } from './index-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
 import { MessageField, messageFieldFragment } from './message-field';
 import { TimeUsageField, timeUsageFieldFragment } from './time-usage-field';
-import { titleFieldFragment } from './title-field';
+import { TitleField, titleFieldFragment } from './title-field';
 
 export function Field({ data }: FragmentProps<FieldFragment>) {
   switch (data.__typename) {
@@ -22,6 +22,7 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
     case 'MessageField':
       return <MessageField data={data} />;
     case 'TitleField':
+      return <TitleField data={data} />;
     case 'IndexField':
     default:
       return <h1>Not implemented</h1>;
