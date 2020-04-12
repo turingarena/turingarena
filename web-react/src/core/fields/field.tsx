@@ -1,10 +1,31 @@
 import { gql } from '@apollo/client';
-import { fulfillmentFieldFragment, scoreFieldFragment } from './grade-field';
+import React from 'react';
+import { FieldFragment } from '../../generated/graphql-types';
+import { FragmentProps } from '../../util/fragment-props';
+import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
 import { indexFieldFragment } from './index-field';
-import { memoryUsageFieldFragment } from './memory-usage-field';
+import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
 import { messageFieldFragment } from './message-field';
-import { timeUsageFieldFragment } from './time-usage-field';
+import { TimeUsageField, timeUsageFieldFragment } from './time-usage-field';
 import { titleFieldFragment } from './title-field';
+
+export function Field({ data }: FragmentProps<FieldFragment>) {
+  switch (data.__typename) {
+    case 'TimeUsageField':
+      return <TimeUsageField data={data} />;
+    case 'MemoryUsageField':
+      return <MemoryUsageField data={data} />;
+    case 'FulfillmentField':
+      return <FulfillmentField data={data} />;
+    case 'ScoreField':
+      return <ScoreField data={data} />;
+    case 'TitleField':
+    case 'IndexField':
+    case 'MessageField':
+    default:
+      return <h1>Not implemented</h1>;
+  }
+}
 
 export const fieldFragment = gql`
   fragment Field on Field {
