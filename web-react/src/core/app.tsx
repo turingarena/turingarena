@@ -1,7 +1,6 @@
 import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client';
 import React from 'react';
-import './app.css'; // tslint:disable-line: no-import-side-effect
-import { MainLoader } from './core/main-loader';
+import { MainLoader } from './main-loader';
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
