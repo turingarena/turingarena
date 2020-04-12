@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
-import { GradeField, scoreFieldFragment } from './grade-field';
+import { GradeField, scoreFieldFragment } from './fields/grade-field';
 import { textFragment } from './text';
 
 // TODO: duplicated?
@@ -38,7 +38,7 @@ const ScoreView = (data: ContestViewAsideFragment) => {
       </ContestScore>
     </div>
   );
-}
+};
 
 const ContestProblemList = styled.div`
   padding: 0;
@@ -101,10 +101,9 @@ export function ContestViewAside({ data }: { data: ContestViewAsideFragment }) {
             // routerLinkActive="active"
             title={assignmentView.assignment.problem.title.variant}
           >
-            <ContestProblemLinkName>
-              {assignmentView.assignment.problem.title.variant}
-            </ContestProblemLinkName>
-            <ContestProblemScore appValence={assignmentView.totalScoreField.valence}>
+            <ContestProblemLinkName>{assignmentView.assignment.problem.title.variant}</ContestProblemLinkName>
+            {/* <ContestProblemScore appValence={assignmentView.totalScoreField.valence}> */}
+            <ContestProblemScore>
               <GradeField data={assignmentView.totalScoreField} />
             </ContestProblemScore>
           </ContestProblemLink>

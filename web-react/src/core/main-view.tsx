@@ -22,8 +22,6 @@ function Home() {
 }
 
 export function MainView({ data }: { data: MainViewFragment }) {
-  const hasDefaultContest = true;
-
   return (
     <BrowserRouter>
       <TopBar data={data} />

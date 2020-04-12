@@ -13,7 +13,7 @@ import {
   TitleColumn,
 } from '../generated/graphql-types';
 import { check } from '../util/check';
-import { fieldFragment } from './field';
+import { fieldFragment } from './fields/field';
 import { textFragment } from './text';
 
 export interface ColumnDefinition {
