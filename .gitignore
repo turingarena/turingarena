@@ -14,3 +14,9 @@ turing/
 __pycache__
 node_modules/
 generated/
+
+# Mac-related
+.DS_Store
+
+# Vim-related
+*.swp
