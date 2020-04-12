@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 import React from 'react';
 import styled from 'styled-components';
 import { FulfillmentFieldFragment, GradeFieldFragment, ScoreFieldFragment } from '../../generated/graphql-types';
-import { unexpected } from '../util/check';
+import { unexpected } from '../../util/check';
 
 export const fulfillmentFieldFragment = gql`
   fragment FulfillmentField on FulfillmentField {
