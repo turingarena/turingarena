@@ -45,45 +45,48 @@ const ScoreValue = styled.span`
 
 const MaxScoreValue = styled.span``;
 
-const ScoreField = ({ data }: FragmentProps<ScoreFieldFragment>) => (
-  <span>
-    {data.score === null ? (
-      <MaxScoreValue>
-        {'+ '}
-        {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
-      </MaxScoreValue>
-    ) : (
-      <>
-        <ScoreValue>{data.score.toFixed(data.scoreRange.decimalDigits)}</ScoreValue>
+export function ScoreField({ data }: FragmentProps<ScoreFieldFragment>) {
+  return (
+    <span>
+      {data.score === null ? (
         <MaxScoreValue>
           {' / '}
           {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
         </MaxScoreValue>
-      </>
-    )}
-  </span>
-);
+      ) : (
+        <>
+          <ScoreValue>{data.score.toFixed(data.scoreRange.decimalDigits)}</ScoreValue>
+          <MaxScoreValue>
+            {' / '}
+            {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
+          </MaxScoreValue>
+        </>
+      )}
+    </span>
+  );
+}
 
-const FulfillmentField = ({ data }: FragmentProps<FulfillmentFieldFragment>) => {
+export const FulfillmentField = ({ data }: FragmentProps<FulfillmentFieldFragment>) => {
   switch (data.fulfilled) {
     case null:
-      return <>+</>;
+      return <span>+</span>;
     case true:
-      return <>&#x2713;</>;
+      return <span>&#x2713;</span>;
     case false:
-      return <>&#x2717;</>;
+      return <span>&#x2717;</span>;
     default:
-      throw unexpected(data.fulfilled);
+      return unexpected(data.fulfilled);
   }
 };
 
-export function GradeField({ data }: FragmentProps<GradeFieldFragment>) {
+export function GradeField({ data }: { data: GradeFieldFragment }) {
   switch (data.__typename) {
     case 'ScoreField':
-      return <ScoreField data={data} />;
+      return ScoreField({ data });
     case 'FulfillmentField':
-      return <FulfillmentField data={data} />;
+      return FulfillmentField({ data });
     default:
-      throw unexpected(data);
+      // return unexpected(data.__typename);
+      throw Error(''); // FIXME: why doesn't the previous line suffice?
   }
 }
