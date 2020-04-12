@@ -1,9 +1,8 @@
 import { gql } from '@apollo/client';
-import { fulfillmentFieldFragment } from './fulfillment-field';
+import { fulfillmentFieldFragment, scoreFieldFragment } from './grade-field';
 import { indexFieldFragment } from './index-field';
 import { memoryUsageFieldFragment } from './memory-usage-field';
 import { messageFieldFragment } from './message-field';
-import { scoreFieldFragment } from './score-field';
 import { timeUsageFieldFragment } from './time-usage-field';
 import { titleFieldFragment } from './title-field';
 
