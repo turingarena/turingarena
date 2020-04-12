@@ -1,9 +1,11 @@
 import { gql } from '@apollo/client';
-import React from 'react'
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { ContestViewFragment } from '../generated/graphql-types';
+import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside';
 import { contestViewAsideFragment } from './contest-view-aside';
-import { mediaInlineFragment } from './media-inline';
+import { MediaInline, mediaInlineFragment } from './media-inline';
 import { textFragment } from './text';
 
 export const contestViewFragment = gql`
@@ -43,15 +45,19 @@ export const contestViewFragment = gql`
   ${contestProblemAssignmentViewAsideFragment}
 `;
 
-export function ContestView() {
+export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
   return (
-    <Switch>
-      <Route path="/:problem">
-        <h1>Problem</h1>
-      </Route>
-      <Route path="/">
-        <h1>Contest view</h1>
-      </Route>
-    </Switch>
+    <>
+      {/* <ContestViewAside></ContestViewAside> */}
+      <Switch>
+        <Route path="/:problem">
+          <h1>Problem</h1>
+        </Route>
+        <Route path="/">
+          <h1>Contest view</h1>
+          <MediaInline data={data.contest.statement} />
+        </Route>
+      </Switch>
+    </>
   );
 }

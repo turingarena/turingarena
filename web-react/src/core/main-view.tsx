@@ -27,14 +27,16 @@ export function MainView({ data }: { data: MainViewFragment }) {
   return (
     <BrowserRouter>
       <TopBar data={data} />
-      <Switch>
-        {!hasDefaultContest ? (
-          <Route path="/:contest">
-            <ContestView />
+      {data.contestView !== null ? (
+        <ContestView data={data.contestView} />
+      ) : (
+        <Switch>
+          <Route path="/">
+            <Home />
           </Route>
-        ) : undefined}
-        <Route path="/">{hasDefaultContest ? <ContestView /> : <Home />}</Route>
-      </Switch>
+          <Route path="/:contest">{/* <ContestView data={TODO} /> */}</Route>
+        </Switch>
+      )}
     </BrowserRouter>
   );
 }
