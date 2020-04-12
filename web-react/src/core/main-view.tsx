@@ -1,12 +1,9 @@
 import { gql } from '@apollo/client';
 import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { MainViewFragment } from '../generated/graphql-types';
-import { contestViewFragment } from './contest-view';
+import { ContestView, contestViewFragment } from './contest-view';
 import { topBarFragment } from './top-bar';
-
-export function MainView({ data }: { data: MainViewFragment }) {
-  return <div>{JSON.stringify(data)}</div>;
-}
 
 export const mainViewFragment = gql`
   fragment MainView on MainView {
@@ -19,3 +16,24 @@ export const mainViewFragment = gql`
   ${topBarFragment}
   ${contestViewFragment}
 `;
+
+function Home() {
+  return <h1>Home</h1>;
+}
+
+export function MainView({ data }: { data: MainViewFragment }) {
+  const hasDefaultContest = true;
+
+  return (
+    <BrowserRouter>
+      <Switch>
+        {!hasDefaultContest ? (
+          <Route path="/:contest">
+            <ContestView />
+          </Route>
+        ) : undefined}
+        <Route path="/">{hasDefaultContest ? <ContestView /> : <Home />}</Route>
+      </Switch>
+    </BrowserRouter>
+  );
+}
