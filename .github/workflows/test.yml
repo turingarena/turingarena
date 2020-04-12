@@ -31,12 +31,10 @@ jobs:
         working-directory: web/
       - name: Deploy 
         run: |
-          if [[ "${GITHUB_REF##*/}" = "develop" ]]; then
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r web/dist/turingarena-web turingarena@turingarena.org:develop/frontend
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r server/build turingarena@turingarena.org:develop/backend
-          fi
-          if [[ "${GITHUB_REF##*/}" = "master" ]]; then
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r web/dist/turingarena-web turingarena@turingarena.org:master/frontend
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r server/build turingarena@turingarena.org:master/backend
+          BRANCH="${GITHUB_REF##*/}"
+          if [[ "${BRANCH}" = "develop" ]] || [[ "${BRANCH}" = "master" ]]; then
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r web/dist/turingarena-web turingarena@turingarena.org:${BRANCH}/frontend
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r server/build turingarena@turingarena.org:${BRANCH}/backend
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r server/node_modules turingarena@turingarena.org:${BRANCH}/backend
           fi
 
