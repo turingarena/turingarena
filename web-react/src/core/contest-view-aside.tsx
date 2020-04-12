@@ -1,9 +1,9 @@
+import { gql } from '@apollo/client';
 import React from 'react';
 import styled from 'styled-components';
-import { gql } from '@apollo/client';
-import { contestViewClockFragment, ContestViewClock } from './contest-view-clock';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
-import { scoreFieldFragment, GradeField } from './grade-field';
+import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
+import { GradeField, scoreFieldFragment } from './grade-field';
 import { textFragment } from './text';
 
 // TODO: duplicated?
@@ -77,18 +77,20 @@ const ContestProblemScore = styled.span`
 `;
 
 export function ContestViewAside({ data }: { data: ContestViewAsideFragment }) {
+  if (data.problemSetView === null) {
+    return null;
+  }
+
   return (
     <>
-      {data.problemSetView && (
-        <div>
-          <AsideHeader>Score</AsideHeader>
-          <ContestScore>
-            <GradeField data={problemSetView.totalScoreField} />
-          </ContestScore>
-        </div>
-      )}
+      <div>
+        <AsideHeader>Score</AsideHeader>
+        <ContestScore>
+          <GradeField data={data.problemSetView.totalScoreField} />
+        </ContestScore>
+      </div>
 
-      <ContestViewClock data="data" />
+      <ContestViewClock data={data} />
 
       <AsideHeader>Problems</AsideHeader>
       <ContestProblemList>
