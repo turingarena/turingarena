@@ -6,6 +6,7 @@ import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside';
 import { contestViewAsideFragment } from './contest-view-aside';
+import { MediaDownload } from './media-download';
 import { MediaInline, mediaInlineFragment } from './media-inline';
 import { textFragment } from './text';
 
@@ -56,6 +57,8 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
         </Route>
         <Route path="/">
           <h1>Contest view</h1>
+          {/* TODO: just for testing */}
+          <MediaDownload data={data.contest.statement} />
           <MediaInline data={data.contest.statement} />
         </Route>
       </Switch>
