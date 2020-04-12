@@ -2,10 +2,10 @@ import { gql } from '@apollo/client';
 import React from 'react';
 import { TitleFieldFragment } from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
-import { textFragment } from '../text';
+import { Text, textFragment } from '../text';
 
 export function TitleField({ data }: FragmentProps<TitleFieldFragment>) {
-  return <>{data.title.variant}</>;
+  return <Text data={data.title} />;
 }
 
 export const titleFieldFragment = gql`
