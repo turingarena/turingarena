@@ -16,6 +16,7 @@
     "ag-grid-react": "^23.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "styled-components": "^5.1.0",
     "typescript": "^3.7.5"
@@ -48,6 +49,7 @@
     "@graphql-codegen/introspection": "^1.13.2",
     "@graphql-codegen/typescript-operations": "^1.13.2",
     "@types/luxon": "^1.22.0",
+    "@types/react-router-dom": "^5.1.4",
     "apollo": "^2.27.0",
     "prettier": "^2.0.4",
     "tslint": "^6.1.1",
