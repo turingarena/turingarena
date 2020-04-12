@@ -3,14 +3,14 @@ import styled from 'styled-components';
 import { gql } from '@apollo/client';
 import { GradeFieldFragment, ScoreFieldFragment, FulfillmentFieldFragment } from '../generated/graphql-types';
 
-const fulfillmentFieldFragment = gql`
+export const fulfillmentFieldFragment = gql`
   fragment FulfillmentField on FulfillmentField {
     fulfilled
     valence
   }
 `;
 
-const scoreFieldFragment = gql`
+export const scoreFieldFragment = gql`
   fragment ScoreField on ScoreField {
     scoreRange {
       max
