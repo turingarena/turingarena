@@ -12,7 +12,7 @@
         "no-inferrable-types": [true, "ignore-params"],
         "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
-        "quotemark": [true, "single"],
+        "quotemark": [true, "single", "jsx-double"],
         "completed-docs": false,
         "typedef": false,
         "file-name-casing": [true, "kebab-case"],
@@ -47,7 +47,8 @@
         "no-non-null-assertion": false,
         "no-any": false,
         "no-null-keyword": false,
-        "prefer-method-signature": false
+        "prefer-method-signature": false,
+        "no-magic-numbers": false
     },
     "linterOptions": {
         "exclude": ["**/generated/**", "**/*.js"]
