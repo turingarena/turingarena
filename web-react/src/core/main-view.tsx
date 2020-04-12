@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { MainViewFragment } from '../generated/graphql-types';
 import { ContestView, contestViewFragment } from './contest-view';
-import { topBarFragment } from './top-bar';
+import { TopBar, topBarFragment } from './top-bar';
 
 export const mainViewFragment = gql`
   fragment MainView on MainView {
@@ -26,6 +26,7 @@ export function MainView({ data }: { data: MainViewFragment }) {
 
   return (
     <BrowserRouter>
+      <TopBar data={data} />
       <Switch>
         {!hasDefaultContest ? (
           <Route path="/:contest">
