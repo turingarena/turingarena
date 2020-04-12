@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import React from 'react';
 import styled from 'styled-components';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
+import { FragmentProps } from '../util/fragment-props';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
 import { GradeField, scoreFieldFragment } from './fields/grade-field';
 import { textFragment } from './text';
@@ -76,7 +77,7 @@ const ContestProblemScore = styled.span`
   margin-left: auto;
 `;
 
-export function ContestViewAside({ data }: { data: ContestViewAsideFragment }) {
+export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragment>) {
   if (data.problemSetView === null) {
     return null;
   }
