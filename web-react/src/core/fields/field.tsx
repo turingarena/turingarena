@@ -5,7 +5,7 @@ import { FragmentProps } from '../../util/fragment-props';
 import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
 import { indexFieldFragment } from './index-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
-import { messageFieldFragment } from './message-field';
+import { MessageField, messageFieldFragment } from './message-field';
 import { TimeUsageField, timeUsageFieldFragment } from './time-usage-field';
 import { titleFieldFragment } from './title-field';
 
@@ -19,9 +19,10 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
       return <FulfillmentField data={data} />;
     case 'ScoreField':
       return <ScoreField data={data} />;
+    case 'MessageField':
+      return <MessageField data={data} />;
     case 'TitleField':
     case 'IndexField':
-    case 'MessageField':
     default:
       return <h1>Not implemented</h1>;
   }
