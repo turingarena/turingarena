@@ -71,7 +71,7 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
           case 'ENDED':
             return now.diff(end);
           default:
-            throw new Error();
+            return unexpected(data.contest.status);
         }
       }),
       map(duration =>
