@@ -1,0 +1,16 @@
+schema: ../server/src/generated/graphql.schema.graphql
+documents: ./src/**/*.tsx
+generates:
+  ./src/generated/graphql-types.ts:
+    schema: src/client-schema.graphql
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      enumsAsTypes: true
+      avoidOptionals: true
+      nonOptionalTypename: true
+  ./src/generated/graphql.schema.json:
+    schema: src/client-schema.graphql
+    plugins:
+      - introspection
