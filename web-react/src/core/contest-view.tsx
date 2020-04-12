@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
@@ -58,6 +59,9 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
           <MediaInline data={data.contest.statement} />
         </Route>
       </Switch>
+      <div className="ag-theme-balham" style={{ height: '200px', width: '600px' }}>
+        <AgGridReact columnDefs={[{ field: 'a' }]} rowData={[{ a: 1 }, { a: 2 }]} />
+      </div>
     </>
   );
 }
