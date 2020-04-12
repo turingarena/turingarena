@@ -33,6 +33,7 @@ export const topBarFragment = gql`
       ...Text
     }
     user {
+      id
       name
     }
   }

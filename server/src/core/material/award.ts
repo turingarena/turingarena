@@ -11,6 +11,8 @@ export const awardSchema = gql`
     Corresponds to a subtask in IOI-like problems, assuming max-by-subtask scoring.
     """
     type Award {
+        id: ID!
+
         problem: Problem!
 
         "Name used to identify this award in this problem. Only for admins."
@@ -42,7 +44,7 @@ export interface AwardModelRecord {
 
 export const awardResolvers: Resolvers = {
     Award: {
-        // TODO: id: ({ problem, index }) => `${problem.id}/${index}`,
+        id: a => `${a.material.problem.id}/${a.index}`,
         problem: a => a.material.problem,
         name: a => a.name,
         gradeDomain: a => a.gradeDomain,

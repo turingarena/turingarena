@@ -73,6 +73,7 @@ export const submissionModalFragment = gql`
       status
     }
     problem {
+      id
       title {
         ...Text
       }

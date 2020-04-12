@@ -8,6 +8,8 @@ import { Problem, ProblemApi } from './problem';
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
+        id: ID!
+
         contest: Contest!
         problem: Problem!
     }
@@ -44,7 +46,8 @@ export class ContestProblemAssignmentApi extends ApiObject {
 
 export const contestProblemAssignmentResolvers: Resolvers = {
     ContestProblemAssignment: {
-        contest: ({ contestId }, {}, ctx) => ctx.api(ContestApi).byId.load(contestId),
-        problem: ({ problemId }, {}, ctx) => ctx.api(ProblemApi).byId.load(problemId),
+        id: a => `${a.contestId}/${a.problemId}`,
+        contest: (a, {}, ctx) => ctx.api(ContestApi).byId.load(a.contestId),
+        problem: (a, {}, ctx) => ctx.api(ProblemApi).byId.load(a.problemId),
     },
 };

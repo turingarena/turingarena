@@ -6,6 +6,8 @@ import { Submission } from './submission';
 
 export const evaluationSchema = gql`
     type Evaluation {
+        id: ID!
+
         submission: Submission!
         events: [EvaluationEvent!]!
         status: EvaluationStatus!

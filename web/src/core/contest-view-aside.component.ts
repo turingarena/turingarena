@@ -25,7 +25,9 @@ export const contestViewAsideFragment = gql`
 
       assignmentViews {
         assignment {
+          id
           problem {
+            id
             name
             title {
               ...Text

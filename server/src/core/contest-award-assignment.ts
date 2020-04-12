@@ -8,6 +8,8 @@ export const contestAwardAssignmentSchema = gql`
     Revers to a given award of a problem, assigned in a given contest.
     """
     type ContestAwardAssignment {
+        id: ID!
+
         "The problem containing the given award, assigned in the same contest."
         problemAssignment: ContestProblemAssignment!
         "The given award."
@@ -25,7 +27,8 @@ export interface ContestAwardAssignmentModelRecord {
 
 export const contestAwardAssignmentResolvers: Resolvers = {
     ContestAwardAssignment: {
-        problemAssignment: assignment => assignment.problemAssignment,
-        award: assignment => assignment.award,
+        id: a => `${a.problemAssignment.contestId}/${a.problemAssignment.problemId}/${a.award.index}`,
+        problemAssignment: a => a.problemAssignment,
+        award: a => a.award,
     },
 };

@@ -8,6 +8,8 @@ import { ProblemMaterialApi } from './material/problem-material';
 
 export const problemSchema = gql`
     type Problem {
+        id: ID!
+
         name: ID!
         fileCollection: FileCollection
     }
@@ -44,8 +46,9 @@ export class ProblemApi extends ApiObject {
 
 export const problemResolvers: Resolvers = {
     Problem: {
-        fileCollection: p => ({ uuid: p.fileCollectionId }),
+        id: p => p.id,
         name: p => p.name,
+        fileCollection: p => ({ uuid: p.fileCollectionId }),
 
         title: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).title,
         statement: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).statement,

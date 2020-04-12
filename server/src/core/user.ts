@@ -6,6 +6,8 @@ import { Resolvers } from '../main/resolver-types';
 
 export const userSchema = gql`
     type User {
+        id: ID!
+
         username: ID!
         name: String!
     }
@@ -70,7 +72,8 @@ export class UserApi extends ApiObject {
 
 export const userResolvers: Resolvers = {
     User: {
-        username: user => user.username,
-        name: user => user.name,
+        id: u => u.id,
+        username: u => u.username,
+        name: u => u.name,
     },
 };

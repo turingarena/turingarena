@@ -15,7 +15,8 @@ import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material
 
 export const contestSchema = gql`
     type Contest {
-        name: ID!
+        id: ID!
+        name: String!
         title: Text!
 
         "Statement of this contest, presented as its home page"
@@ -133,6 +134,7 @@ export class ContestApi extends ApiObject {
 
 export const contestResolvers: Resolvers = {
     Contest: {
+        id: c => c.id,
         name: c => c.name,
         title: c => [{ value: c.title }],
         start: c => DateTime.fromJSDate(c.start).toISO(),

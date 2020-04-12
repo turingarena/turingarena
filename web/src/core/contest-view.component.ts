@@ -23,6 +23,7 @@ export class ContestViewComponent {
 export const contestViewFragment = gql`
   fragment ContestView on ContestView {
     contest {
+      id
       title {
         ...Text
       }
@@ -34,7 +35,9 @@ export const contestViewFragment = gql`
     problemSetView {
       assignmentViews {
         assignment {
+          id
           problem {
+            id
             name
             statement {
               ...MediaInline

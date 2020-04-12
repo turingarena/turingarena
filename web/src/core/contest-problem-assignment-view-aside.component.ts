@@ -22,7 +22,9 @@ export class ContestProblemAssignmentViewAsideComponent {
 export const contestProblemAssignmentViewAsideFragment = gql`
   fragment ContestProblemAssignmentViewAside on ContestProblemAssignmentView {
     assignment {
+      id
       problem {
+        id
         name
         title {
           ...Text
@@ -48,7 +50,9 @@ export const contestProblemAssignmentViewAsideFragment = gql`
 
     awardAssignmentViews {
       assignment {
+        id
         award {
+          id
           name
           title {
             ...Text
