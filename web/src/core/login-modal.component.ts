@@ -26,6 +26,7 @@ export class LoginModalComponent {
           mutation Login($token: String!) {
             logIn(token: $token) {
               user {
+                id
                 name
                 username
               }
