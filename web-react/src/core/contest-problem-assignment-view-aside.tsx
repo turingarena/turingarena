@@ -1,9 +1,8 @@
 import { gql } from '@apollo/client';
 import { contestProblemAssignmentUserTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
-import { gradeFieldFragment } from './grade-field';
+import { gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { mediaDownloadFragment } from './media-download';
 import { mediaInlineFragment } from './media-inline';
-import { scoreFieldFragment } from './score-field';
 import { textFragment } from './text';
 
 export const contestProblemAssignmentViewAsideFragment = gql`

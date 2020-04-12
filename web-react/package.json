@@ -17,6 +17,7 @@
     "@types/styled-components": "^5.0.1",
     "ag-grid-community": "^23.0.2",
     "ag-grid-react": "^23.0.3",
+    "luxon": "^1.23.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-markdown": "^4.3.1",

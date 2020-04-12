@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FulfillmentFieldFragment, GradeFieldFragment, ScoreFieldFragment } from '../../generated/graphql-types';
 import { unexpected } from '../../util/check';
+import { FragmentProps } from '../../util/fragment-props';
 
 export const fulfillmentFieldFragment = gql`
   fragment FulfillmentField on FulfillmentField {
@@ -44,7 +45,7 @@ const ScoreValue = styled.span`
 
 const MaxScoreValue = styled.span``;
 
-const ScoreField = (data: ScoreFieldFragment) => (
+const ScoreField = ({ data }: FragmentProps<ScoreFieldFragment>) => (
   <span>
     {data.score === null ? (
       <MaxScoreValue>
@@ -63,27 +64,26 @@ const ScoreField = (data: ScoreFieldFragment) => (
   </span>
 );
 
-const FulfillmentField = (data: FulfillmentFieldFragment) => {
+const FulfillmentField = ({ data }: FragmentProps<FulfillmentFieldFragment>) => {
   switch (data.fulfilled) {
     case null:
-      return '+';
+      return <>+</>;
     case true:
-      return '&#x2713';
+      return <>&#x2713;</>;
     case false:
-      return '&#x2717;';
+      return <>&#x2717;</>;
     default:
-      return unexpected(data.fulfilled);
+      throw unexpected(data.fulfilled);
   }
 };
 
-export function GradeField({ data }: { data: GradeFieldFragment }) {
+export function GradeField({ data }: FragmentProps<GradeFieldFragment>) {
   switch (data.__typename) {
     case 'ScoreField':
-      return ScoreField(data);
+      return <ScoreField data={data} />;
     case 'FulfillmentField':
-      return FulfillmentField(data);
+      return <FulfillmentField data={data} />;
     default:
-      // return unexpected(data.__typename);
-      throw Error(''); // FIXME: why doesn't the previous line suffice?
+      throw unexpected(data);
   }
 }
