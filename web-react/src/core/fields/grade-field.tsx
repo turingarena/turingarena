@@ -1,7 +1,7 @@
+import { gql } from '@apollo/client';
 import React from 'react';
 import styled from 'styled-components';
-import { gql } from '@apollo/client';
-import { GradeFieldFragment, ScoreFieldFragment, FulfillmentFieldFragment } from '../generated/graphql-types';
+import { FulfillmentFieldFragment, GradeFieldFragment, ScoreFieldFragment } from '../../generated/graphql-types';
 import { unexpected } from '../util/check';
 
 export const fulfillmentFieldFragment = gql`

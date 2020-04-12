@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 import { Duration } from 'luxon';
 import React from 'react';
-import { TimeUsageFieldFragment, TimeUsageFragment } from '../generated/graphql-types';
-import { FragmentProps } from '../util/fragment-props';
+import { TimeUsageFieldFragment, TimeUsageFragment } from '../../generated/graphql-types';
+import { FragmentProps } from '../../util/fragment-props';
 
 export function TimeUsageField({ data }: FragmentProps<TimeUsageFieldFragment>) {
   const displayTimeUsage = (timeUsage: TimeUsageFragment) => {
