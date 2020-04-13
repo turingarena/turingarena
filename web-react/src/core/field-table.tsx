@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
-import { ColDef, ValueGetterParams } from 'ag-grid-community';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import React from 'react';
 import {
   ColumnFragment,
   FieldFragment,
@@ -13,7 +14,7 @@ import {
   TitleColumn,
 } from '../generated/graphql-types';
 import { check } from '../util/check';
-import { fieldFragment } from './fields/field';
+import { Field, fieldFragment } from './fields/field';
 import { textFragment } from './text';
 
 export interface ColumnDefinition {
@@ -158,10 +159,7 @@ export const getFieldColumns = <T extends {}>(
             return [...(mainClasses ?? [])];
           }
         },
-        // cellRendererFramework: FieldCellRendererComponent,
-        cellRendererParams: (params: ValueGetterParams) => ({
-          field: getField(params),
-        }),
+        cellRendererFramework: (props: ICellRendererParams) => <Field data={getField(props)} />,
         ...def,
       };
     },
