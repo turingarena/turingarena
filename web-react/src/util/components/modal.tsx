@@ -7,12 +7,8 @@ interface Props {
   children: React.ReactElement;
 }
 
-export function Modal({
-  onClose,
-  show = true,
-  children
-}: Props) {
-  return show && (
+export function Modal({ onClose, show = true, children }: Props) {
+  return show ? (
     <div>
       <div
         onClick={onClose}
@@ -41,5 +37,7 @@ export function Modal({
         {children}
       </div>
     </div>
+  ) : (
+    <></>
   );
 }
