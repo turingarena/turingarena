@@ -1,12 +1,12 @@
 import { gql, useMutation } from '@apollo/client';
 import React, { useState } from 'react';
-import { LoginMutation } from '../generated/graphql-types';
+import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
 import { Modal } from '../util/components/modal';
 
 export function LoginModal({ show, onClose }: { show: boolean; onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
   const [token, setToken] = useState('');
-  const [logIn] = useMutation<LoginMutation>(gql`
+  const [logIn] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
       logIn(token: $token) {
         user {
