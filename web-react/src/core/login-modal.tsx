@@ -102,12 +102,15 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         <Button
           onPress={onClose}
           disabled={loading}
-          title="Cancel"
           className={css`
             margin-right: 3px;
           `}
-        />
-        <Button onPress={handleLogIn} disabled={loading} title="Log In" primary />
+        >
+          Cancel
+        </Button>
+        <Button onPress={handleLogIn} disabled={loading} primary>
+          Log In
+        </Button>
       </div>
     </form>
   );

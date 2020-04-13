@@ -8,6 +8,7 @@ import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { LoginModal } from './login-modal';
 import { textFragment } from './text';
+import { Button } from '../util/components/button';
 
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
@@ -61,16 +62,16 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
         </Link>
         {data.user !== null && (
           // TODO: admin button
-          <button>
+          <Button onPress={() => {}}>
             <FontAwesomeIcon icon="sign-out-alt" />
-            Logout
-          </button>
+            {' Logout'}
+          </Button>
         )}
         {/* {data.user === null && ( */}
-        <button onClick={() => setShowLogInModal(true)}>
+        <Button onPress={() => setShowLogInModal(true)}>
           <FontAwesomeIcon icon="sign-in-alt" />
-          Login
-        </button>
+          {' Login'}
+        </Button>
         {/* )} */}
       </nav>
     </>

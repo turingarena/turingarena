@@ -2,14 +2,14 @@ import { css } from 'emotion';
 import React from 'react';
 
 interface ButtonProps {
-  title: string;
   disabled?: boolean;
   className?: string;
   primary?: boolean;
+  children: React.ReactNode;
   onPress: () => void;
 }
 
-export function Button({ onPress, title, disabled, className = '', primary }: ButtonProps) {
+export function Button({ onPress, children, disabled, className = '', primary }: ButtonProps) {
   const style = css`
     border-radius: 4px;
     padding: 5px 10px;
@@ -32,7 +32,7 @@ export function Button({ onPress, title, disabled, className = '', primary }: Bu
 
   return (
     <button onClick={onPress} disabled={disabled} className={`${style} ${className}`}>
-      {title}
+      {children}
     </button>
   );
 }
