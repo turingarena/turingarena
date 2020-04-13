@@ -1,10 +1,10 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { css } from 'emotion';
+import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
-import { Button } from '../util/components/button';
+import { buttonCss, buttonPrimaryCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
@@ -63,16 +63,19 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
         </Link>
         {data.user !== null && (
           // TODO: admin button
-          <Button onPress={() => {}}>
-            <FontAwesomeIcon icon="sign-out-alt" />
-            {' Logout'}
-          </Button>
+          <button
+            className={cx(buttonCss, buttonPrimaryCss)}
+            onClick={() => {
+              console.warn('TODO');
+            }}
+          >
+            <FontAwesomeIcon icon="sign-out-alt" /> Logout
+          </button>
         )}
         {/* {data.user === null && ( */}
-        <Button onPress={() => setShowLogInModal(true)}>
-          <FontAwesomeIcon icon="sign-in-alt" />
-          {' Login'}
-        </Button>
+        <button className={cx(buttonCss, buttonPrimaryCss)} onClick={() => setShowLogInModal(true)}>
+          <FontAwesomeIcon icon="sign-in-alt" /> Login
+        </button>
         {/* )} */}
       </nav>
     </>

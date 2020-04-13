@@ -1,7 +1,9 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { cx } from 'emotion';
 import React from 'react';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
+import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentUserTacklingSubmissionListModalFragment } from './contest-problem-assignment-user-tackling-submission-list-modal';
 import { contestProblemAssignmentUserTacklingSubmitModalFragment } from './contest-problem-assignment-user-tackling-submit-modal';
@@ -36,7 +38,7 @@ export function ContestProblemAssignmentUserTacklingAside({
   return (
     <>
       {data.canSubmit && (
-        <button className="btn btn-block btn-success">
+        <button className={cx(buttonCss, buttonPrimaryCss)}>
           <FontAwesomeIcon icon="paper-plane" />
           Submit a solution
         </button>
@@ -44,12 +46,12 @@ export function ContestProblemAssignmentUserTacklingAside({
 
       {lastSubmission !== null && (
         <>
-          <button className="btn btn-block btn-outline">
+          <button className={cx(buttonCss, buttonLightCss)}>
             {lastSubmission.officialEvaluation?.status === 'PENDING' && <FontAwesomeIcon icon="history" />}
             {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="spinner" pulse={true} />}
             Last submission
           </button>
-          <button className="btn btn-block btn-outline">
+          <button className={cx(buttonCss, buttonLightCss)}>
             <FontAwesomeIcon icon="list" />
             All submissions
           </button>

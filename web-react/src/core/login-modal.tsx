@@ -1,5 +1,5 @@
 import { gql, useApolloClient, useMutation } from '@apollo/client';
-import { css } from 'emotion';
+import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import {
   CurrentAuthWriteQuery,
@@ -7,7 +7,7 @@ import {
   LoginMutation,
   LoginMutationVariables,
 } from '../generated/graphql-types';
-import { Button } from '../util/components/button';
+import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
 import { PasswordInput } from '../util/components/password-input';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
@@ -120,19 +120,23 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           align-self: flex-end;
         `}
       >
-        <Button
-          onPress={onClose}
+        <button
+          className={cx(
+            buttonCss,
+            buttonLightCss,
+            css`
+              margin-right: 3px;
+            `,
+          )}
+          onClick={onClose}
           disabled={loading}
           type="button"
-          className={css`
-            margin-right: 3px;
-          `}
         >
           Cancel
-        </Button>
-        <Button onPress={handleLogIn} disabled={loading} primary type="submit">
+        </button>
+        <button className={cx(buttonCss, buttonPrimaryCss)} onClick={handleLogIn} disabled={loading} type="submit">
           Log In
-        </Button>
+        </button>
       </div>
     </form>
   );
