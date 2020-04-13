@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { css } from 'emotion';
 import React from 'react';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
@@ -71,5 +72,15 @@ export const contestProblemAssignmentViewAsideFragment = gql`
 `;
 
 export function ContestProblemAssignmentViewAside({ data }: FragmentProps<ContestProblemAssignmentViewAsideFragment>) {
-  return <>{data.tackling !== null && <ContestProblemAssignmentUserTacklingAside data={data.tackling} />}</>;
+  return (
+    <div
+      className={css`
+        flex: 0 0 auto;
+        width: 15em;
+        background-color: #f8f9fa;
+      `}
+    >
+      {data.tackling !== null && <ContestProblemAssignmentUserTacklingAside data={data.tackling} />}
+    </div>
+  );
 }

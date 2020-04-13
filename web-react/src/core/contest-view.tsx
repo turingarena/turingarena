@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import { AgGridReact } from 'ag-grid-react';
+import { css } from 'emotion';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
@@ -52,7 +53,14 @@ export const contestViewFragment = gql`
 
 export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
   return (
-    <>
+    <div
+      className={css`
+        flex: 1 0 100%;
+
+        display: flex;
+        flex-direction: row;
+      `}
+    >
       <ContestViewAside data={data} />
       <Switch>
         {data.problemSetView !== null &&
@@ -63,15 +71,9 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
             </Route>
           ))}
         <Route exact path="/">
-          <h1>Contest view</h1>
-          {/* TODO: just for testing */}
-          <MediaDownload data={data.contest.statement} />
           <MediaInline data={data.contest.statement} />
         </Route>
       </Switch>
-      <div className="ag-theme-balham" style={{ height: '200px', width: '600px' }}>
-        <AgGridReact columnDefs={[{ field: 'a' }]} rowData={[{ a: 1 }, { a: 2 }]} />
-      </div>
-    </>
+    </div>
   );
 }

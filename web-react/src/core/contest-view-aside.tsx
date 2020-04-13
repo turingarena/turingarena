@@ -23,7 +23,17 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
   }
 
   return (
-    <>
+    <aside
+      className={css`
+        flex: 0 0 auto;
+        overflow-y: auto;
+
+        width: 16em;
+        padding: 16px;
+        background-color: #f8f9fa;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      `}
+    >
       <div>
         <h2 className={headerClass}>Score</h2>
         <div
@@ -95,7 +105,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
           </Link>
         ))}
       </div>
-    </>
+    </aside>
   );
 }
 

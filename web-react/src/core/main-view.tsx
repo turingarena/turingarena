@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { css } from 'emotion';
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { MainViewFragment } from '../generated/graphql-types';
@@ -24,17 +25,25 @@ function Home() {
 export function MainView({ data }: { data: MainViewFragment }) {
   return (
     <BrowserRouter>
-      <TopBar data={data} />
-      {data.contestView !== null ? (
-        <ContestView data={data.contestView} />
-      ) : (
-        <Switch>
-          <Route path="/">
-            <Home />
-          </Route>
-          <Route path="/:contest">{/* <ContestView data={TODO} /> */}</Route>
-        </Switch>
-      )}
+      <div
+        className={css`
+          display: flex;
+          flex-direction: column;
+          flex: 1 0 100%;
+        `}
+      >
+        <TopBar data={data} />
+        {data.contestView !== null ? (
+          <ContestView data={data.contestView} />
+        ) : (
+          <Switch>
+            <Route path="/">
+              <Home />
+            </Route>
+            <Route path="/:contest">{/* <ContestView data={TODO} /> */}</Route>
+          </Switch>
+        )}
+      </div>
     </BrowserRouter>
   );
 }

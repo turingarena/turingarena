@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { css } from 'emotion';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { MediaInlineFragment } from '../generated/graphql-types';
@@ -34,11 +35,42 @@ export function MarkdownMediaInline({ data }: FragmentProps<MediaInlineFragment>
   return <ReactMarkdown source={md}></ReactMarkdown>;
 }
 
-export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
+function MediaInlineContent({ data }: FragmentProps<MediaInlineFragment>) {
   switch (data.variant.type) {
     case 'text/markdown':
-      return <MarkdownMediaInline data={data}></MarkdownMediaInline>;
+      return (
+        <div
+          className={css`
+            padding: 0.75rem;
+            max-width: 60rem;
+          `}
+        >
+          <MarkdownMediaInline data={data}></MarkdownMediaInline>
+        </div>
+      );
     default:
-      return <iframe className="inline-file-iframe" src={data.variant.url}></iframe>;
+      return (
+        <iframe
+          className={css`
+            display: block;
+            flex: 1;
+            border: none;
+          `}
+          src={data.variant.url}
+        ></iframe>
+      );
   }
+}
+
+export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
+  return (
+    <div
+      className={css`
+        display: flex;
+        flex: 1;
+      `}
+    >
+      <MediaInlineContent data={data} />
+    </div>
+  );
 }
