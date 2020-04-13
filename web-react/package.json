@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.13.2",
+    "@graphql-codegen/fragment-matcher": "^1.13.2",
     "@graphql-codegen/introspection": "^1.13.2",
     "@graphql-codegen/typescript-operations": "^1.13.2",
     "@types/luxon": "^1.22.0",

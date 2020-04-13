@@ -5,7 +5,7 @@ import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/
 import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentUserTacklingSubmissionListModalFragment } from './contest-problem-assignment-user-tackling-submission-list-modal';
 import { contestProblemAssignmentUserTacklingSubmitModalFragment } from './contest-problem-assignment-user-tackling-submit-modal';
-import { submissionModalFragment } from './submission-modal';
+import { SubmissionModal, submissionModalFragment } from './submission-modal';
 
 export const contestProblemAssignmentUserTacklingAsideFragment = gql`
   fragment ContestProblemAssignmentUserTacklingAside on ContestProblemAssignmentUserTackling {
@@ -53,6 +53,7 @@ export function ContestProblemAssignmentUserTacklingAside({
             <FontAwesomeIcon icon="list" />
             All submissions
           </button>
+          <SubmissionModal data={lastSubmission} />
         </>
       )}
     </>

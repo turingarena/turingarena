@@ -1,5 +1,9 @@
 import { gql } from '@apollo/client';
-import { columnFragment, recordFragment } from './field-table';
+import { AgGridReact } from 'ag-grid-react';
+import React from 'react';
+import { RecordFragment, SubmissionModalFragment } from '../generated/graphql-types';
+import { FragmentProps } from '../util/fragment-props';
+import { columnFragment, getFieldColumns, recordFragment } from './field-table';
 import { textFragment } from './text';
 
 export const submissionModalFragment = gql`
@@ -32,3 +36,13 @@ export const submissionModalFragment = gql`
   ${recordFragment}
   ${columnFragment}
 `;
+
+export function SubmissionModal({ data }: FragmentProps<SubmissionModalFragment>) {
+  return (
+    <AgGridReact
+      columnDefs={getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row)}
+      domLayout="autoHeight"
+      rowData={data.feedbackTable.rows}
+    />
+  );
+}

@@ -14,3 +14,9 @@ generates:
     schema: src/client-schema.graphql
     plugins:
       - introspection
+  ./src/generated/possible-types.ts:
+    schema: src/client-schema.graphql
+    plugins:
+      - fragment-matcher
+    config:
+      apolloClientVersion: 3

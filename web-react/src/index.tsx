@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect no-submodule-imports
+// tslint:disable: no-import-side-effect no-submodule-imports no-default-import
 import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -7,12 +7,13 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { MainLoader } from './core/main-loader';
+import result from './generated/possible-types';
 import './index.css';
 
 library.add(fas);
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({ possibleTypes: result.possibleTypes }),
   link: new HttpLink({
     uri: '/graphql',
   }),
