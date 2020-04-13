@@ -3,9 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
-import { Modal } from '../util/components/modal';
 
-export function LoginModal({ show, onClose }: { show: boolean; onClose: () => void }) {
+export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState('');
@@ -48,89 +47,96 @@ export function LoginModal({ show, onClose }: { show: boolean; onClose: () => vo
   };
 
   return (
-    <Modal show={show} onClose={onClose}>
-      <form
-        onSubmit={handleSubmit}
+    <form
+      onSubmit={handleSubmit}
+      className={css`
+        display: flex;
+        width: 300px;
+        height: 130px;
+        flex: 1;
+        flex-direction: column;
+        align-items: space-between;
+        margin: 10px;
+      `}
+    >
+      <div
         className={css`
           display: flex;
           flex: 1;
           flex-direction: column;
-          margin: 5px;
         `}
       >
-        <div
+        <label
+          htmlFor="token"
           className={css`
-            display: flex;
-            flex-direction: column;
+            font-size: 20pt;
           `}
         >
-          <label
-            htmlFor="token"
+          Token
+        </label>
+        <div
+          className={css`
+            position: relative;
+            display: inline-block;
+          `}
+        >
+          <input
+            id="token"
+            name="token"
+            type={showPassword ? 'text' : 'password'}
+            value={token}
+            onChange={e => setToken(e.target.value)}
             className={css`
-              font-size: 20pt;
-            `}
-          >
-            Token
-          </label>
-          <div
-            className={css`
-              position: relative;
-              display: inline-block;
-            `}
-          >
-            <input
-              id="token"
-              name="token"
-              type={showPassword ? 'text' : 'password'}
-              value={token}
-              onChange={e => setToken(e.target.value)}
-              className={css`
-                width: 100%;
-                border-width: 0 0 2px;
-                font-size: 16pt;
+              width: 100%;
+              border-width: 0 0 2px;
+              font-size: 16pt;
 
-                &:focus {
-                  outline: none;
-                }
-              `}
-            />
-            <a
-              onClick={() => setShowPassword(!showPassword)}
-              className={css`
-                position: absolute;
-                right: 5px;
-                bottom: 5px;
-              `}
-            >
-              <FontAwesomeIcon icon="eye" color={!showPassword ? '#000000' : '#707070'} />
-            </a>
-          </div>
-          <div
+              &:focus {
+                outline: none;
+              }
+            `}
+          />
+          <a
+            onClick={() => setShowPassword(!showPassword)}
             className={css`
-              margin-top: 1px;
+              position: absolute;
+              right: 5px;
+              bottom: 5px;
             `}
           >
-            {loading && <small>Logging in...</small>}
-            {error !== undefined && <small>Cannot login: {error.message}</small>}
-            {!loading && !invalidToken && error === undefined && (
-              <small>Insert the token or password provided to you. No username needed.</small>
-            )}
-            {!loading && invalidToken && error === undefined && <small>Invalid token.</small>}
-          </div>
+            <FontAwesomeIcon icon="eye" color={!showPassword ? '#000000' : '#707070'} />
+          </a>
         </div>
         <div
           className={css`
-            align-self: flex-end;
+            margin-top: 1px;
           `}
         >
-          <button className="login-dialog-cancel" type="button" onClick={onClose} disabled={loading}>
-            Cancel
-          </button>
-          <button className="login-dialog-submit" type="submit" disabled={loading}>
-            Log in
-          </button>
+          {loading && <small>Logging in...</small>}
+          {error !== undefined && <small>Cannot login: {error.message}</small>}
+          {!loading && !invalidToken && error === undefined && (
+            <small>
+              Insert the token or password provided to you.
+              <br />
+              No username needed.
+            </small>
+          )}
+          {!loading && invalidToken && error === undefined && <small>Invalid token.</small>}
         </div>
-      </form>
-    </Modal>
+      </div>
+      <div
+        className={css`
+          margin-top: 15px;
+          align-self: flex-end;
+        `}
+      >
+        <button className="login-dialog-cancel" type="button" onClick={onClose} disabled={loading}>
+          Cancel
+        </button>
+        <button className="login-dialog-submit" type="submit" disabled={loading}>
+          Log in
+        </button>
+      </div>
+    </form>
   );
 }

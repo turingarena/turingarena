@@ -4,6 +4,7 @@ import { css } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
+import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { LoginModal } from './login-modal';
 import { textFragment } from './text';
@@ -13,7 +14,9 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
 
   return (
     <>
-      <LoginModal show={showLogInModal} onClose={() => setShowLogInModal(false)} />
+      <Modal show={showLogInModal} onClose={() => setShowLogInModal(false)}>
+        <LoginModal onClose={() => setShowLogInModal(false)} />
+      </Modal>
       <nav
         className={css`
           display: flex;
@@ -64,10 +67,10 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
           </button>
         )}
         {/* {data.user === null && ( */}
-          <button onClick={() => setShowLogInModal(true)}>
-            <FontAwesomeIcon icon="sign-in-alt" />
-            Login
-          </button>
+        <button onClick={() => setShowLogInModal(true)}>
+          <FontAwesomeIcon icon="sign-in-alt" />
+          Login
+        </button>
         {/* )} */}
       </nav>
     </>
