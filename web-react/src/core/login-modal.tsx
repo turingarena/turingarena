@@ -72,12 +72,9 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
       onSubmit={e => e.preventDefault()}
       className={css`
         display: flex;
-        width: 300px;
-        height: 130px;
         flex: 1;
         flex-direction: column;
         align-items: space-between;
-        margin: 5px;
       `}
     >
       <div
@@ -85,8 +82,6 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           display: flex;
           flex: 1;
           flex-direction: column;
-          margin-left: 5px;
-          margin-right: 5px;
         `}
       >
         <label
@@ -130,7 +125,10 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
               `,
             )}
           >
-            <FontAwesomeIcon icon={showPassword ? 'eye-slash' : 'eye'} />
+            <FontAwesomeIcon
+              icon={showPassword ? 'eye-slash' : 'eye'}
+              style={{ width: '20px' }} // HACK: 20 is the max between the widths of the two icons
+            />
           </button>
         </div>
         <div

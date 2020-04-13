@@ -9,7 +9,7 @@ interface Props {
 
 export function Modal({ onClose, show = true, children }: Props) {
   return show ? (
-    <div>
+    <>
       <div
         onClick={onClose}
         className={css`
@@ -19,7 +19,7 @@ export function Modal({ onClose, show = true, children }: Props) {
           right: 0;
           bottom: 0;
           z-index: 100;
-          background-color: rgba(0, 0, 0, 0.3);
+          background-color: rgba(0, 0, 0, 0.5);
         `}
       />
 
@@ -33,11 +33,13 @@ export function Modal({ onClose, show = true, children }: Props) {
           transform: translateX(-50%);
           z-index: 101;
           background-color: white;
+          border: 1px solid rgba(0, 0, 0, 0.2);
+          padding: 1rem;
         `}
       >
         {children}
       </div>
-    </div>
+    </>
   ) : (
     <></>
   );
