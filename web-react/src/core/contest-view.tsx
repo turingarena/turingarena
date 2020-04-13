@@ -55,7 +55,7 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
   return (
     <div
       className={css`
-        flex: 1 0 100%;
+        flex: 1;
 
         display: flex;
         flex-direction: row;
