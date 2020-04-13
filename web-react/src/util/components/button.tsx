@@ -1,5 +1,6 @@
 import { css } from 'emotion';
 import React from 'react';
+import { Theme } from '../theme';
 
 interface ButtonProps {
   disabled?: boolean;
@@ -17,7 +18,7 @@ export function Button({ onPress, children, disabled, className = '', primary }:
     display: inline-block;
     font-size: 14px;
     transition: 0.3s;
-    ${primary === true ? 'background-color: #0275d8;' : ''}
+    ${primary === true ? `background-color: ${Theme.colors.primary};` : ''}
     color: ${primary === true ? '#f7f7f7' : '#292b2c'};
     border-width: 0.5px;
     border-color: ${primary === true ? '#f7f7f7' : '#292b2c'};
