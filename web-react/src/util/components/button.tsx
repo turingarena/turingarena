@@ -6,11 +6,12 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   primary?: boolean;
+  type?: 'button' | 'submit' | 'reset';
   children: React.ReactNode;
   onPress: () => void;
 }
 
-export function Button({ onPress, children, disabled, className = '', primary }: ButtonProps) {
+export function Button({ onPress, children, disabled, className = '', primary, type }: ButtonProps) {
   const style = css`
     border-radius: 4px;
     padding: 5px 10px;
@@ -34,7 +35,7 @@ export function Button({ onPress, children, disabled, className = '', primary }:
   `;
 
   return (
-    <button onClick={onPress} disabled={disabled} className={`${style} ${className}`}>
+    <button onClick={onPress} disabled={disabled} type={type} className={`${style} ${className}`}>
       {children}
     </button>
   );

@@ -68,6 +68,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <form
+      action=""
       onSubmit={e => e.preventDefault()}
       className={css`
         display: flex;
@@ -122,13 +123,14 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         <Button
           onPress={onClose}
           disabled={loading}
+          type="button"
           className={css`
             margin-right: 3px;
           `}
         >
           Cancel
         </Button>
-        <Button onPress={handleLogIn} disabled={loading} primary>
+        <Button onPress={handleLogIn} disabled={loading} primary type="submit">
           Log In
         </Button>
       </div>
