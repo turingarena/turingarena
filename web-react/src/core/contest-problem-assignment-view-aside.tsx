@@ -2,7 +2,10 @@ import { gql } from '@apollo/client';
 import React from 'react';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import { contestProblemAssignmentUserTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
+import {
+  ContestProblemAssignmentUserTacklingAside,
+  contestProblemAssignmentUserTacklingAsideFragment,
+} from './contest-problem-assignment-user-tackling-aside';
 import { gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { mediaDownloadFragment } from './media-download';
 import { mediaInlineFragment } from './media-inline';
@@ -68,5 +71,5 @@ export const contestProblemAssignmentViewAsideFragment = gql`
 `;
 
 export function ContestProblemAssignmentViewAside({ data }: FragmentProps<ContestProblemAssignmentViewAsideFragment>) {
-  return <button></button>;
+  return <>{data.tackling !== null && <ContestProblemAssignmentUserTacklingAside data={data.tackling} />}</>;
 }
