@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
+import { Button } from '../util/components/button';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
@@ -21,9 +22,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     }
   `);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleLogIn = async () => {
     const { data } = await logIn({
       variables: {
         token,
@@ -48,7 +47,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={e => e.preventDefault()}
       className={css`
         display: flex;
         width: 300px;
@@ -130,12 +129,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           align-self: flex-end;
         `}
       >
-        <button className="login-dialog-cancel" type="button" onClick={onClose} disabled={loading}>
-          Cancel
-        </button>
-        <button className="login-dialog-submit" type="submit" disabled={loading}>
-          Log in
-        </button>
+        <Button onPress={onClose} disabled={loading} title="Cancel" />
+        <Button onPress={handleLogIn} disabled={loading} title="Log In" />
       </div>
     </form>
   );
