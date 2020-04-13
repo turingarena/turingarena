@@ -19,6 +19,8 @@ export function Button({ onPress, children, disabled, className = '', primary }:
     transition: 0.3s;
     ${primary === true ? 'background-color: #0275d8;' : ''}
     color: ${primary === true ? '#f7f7f7' : '#292b2c'};
+    border-width: 0.5px;
+    border-color: ${primary === true ? '#f7f7f7' : '#292b2c'};
 
     &:focus {
       outline: none;

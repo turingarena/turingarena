@@ -4,11 +4,11 @@ import { css } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
+import { Button } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { LoginModal } from './login-modal';
 import { textFragment } from './text';
-import { Button } from '../util/components/button';
 
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
