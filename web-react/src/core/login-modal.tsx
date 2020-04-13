@@ -8,7 +8,7 @@ import {
   LoginMutation,
   LoginMutationVariables,
 } from '../generated/graphql-types';
-import { buttonCss, buttonLightCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
+import { buttonCss, buttonNormalizeCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
@@ -156,7 +156,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         <button
           className={cx(
             buttonCss,
-            buttonLightCss,
+            buttonSecondaryCss,
             css`
               margin-right: 3px;
             `,

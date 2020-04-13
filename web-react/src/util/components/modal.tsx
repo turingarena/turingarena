@@ -33,6 +33,7 @@ export function Modal({ onClose, show = true, children }: Props) {
           transform: translateX(-50%);
           z-index: 101;
           background-color: white;
+          background-clip: padding-box;
           border: 1px solid rgba(0, 0, 0, 0.2);
           padding: 1rem;
         `}
