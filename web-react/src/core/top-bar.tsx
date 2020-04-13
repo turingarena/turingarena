@@ -7,6 +7,7 @@ import { TopBarFragment } from '../generated/graphql-types';
 import { Button } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
+import { Theme } from '../util/theme';
 import { LoginModal } from './login-modal';
 import { textFragment } from './text';
 
@@ -21,7 +22,7 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
       <nav
         className={css`
           display: flex;
-          background-color: #0275d8;
+          background-color: ${Theme.colors.primary};
           align-items: center;
           padding: 8px 16px;
           color: #fff;
