@@ -19,6 +19,7 @@
     "ag-grid-community": "^23.0.2",
     "ag-grid-react": "^23.0.3",
     "emotion": "^10.0.27",
+    "http-proxy-middleware": "^1.0.3",
     "katex": "^0.11.1",
     "luxon": "^1.23.0",
     "react": "^16.13.1",
