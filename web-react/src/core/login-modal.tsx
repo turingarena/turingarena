@@ -4,6 +4,7 @@ import { css } from 'emotion';
 import React, { useState } from 'react';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
 import { Button } from '../util/components/button';
+import { PasswordInput } from '../util/components/password-input';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
@@ -73,39 +74,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         >
           Token
         </label>
-        <div
-          className={css`
-            position: relative;
-            display: inline-block;
-          `}
-        >
-          <input
-            id="token"
-            name="token"
-            type={showPassword ? 'text' : 'password'}
-            value={token}
-            onChange={e => setToken(e.target.value)}
-            className={css`
-              width: 100%;
-              border-width: 0 0 2px;
-              font-size: 16pt;
-
-              &:focus {
-                outline: none;
-              }
-            `}
-          />
-          <a
-            onClick={() => setShowPassword(!showPassword)}
-            className={css`
-              position: absolute;
-              right: 5px;
-              bottom: 5px;
-            `}
-          >
-            <FontAwesomeIcon icon="eye" color={!showPassword ? '#000000' : '#707070'} />
-          </a>
-        </div>
+        <PasswordInput password={token} onChange={setToken} />
         <div
           className={css`
             margin-top: 1px;
