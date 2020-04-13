@@ -25,11 +25,12 @@ export function Modal({ onClose, show = true, children }: Props) {
 
       <div
         className={css`
+          align-self: center;
           position: fixed;
-          top: 100px;
-          left: 400px;
-          right: 400px;
-          bottom: 100px;
+          border-radius: 5px;
+          top: 70px;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 101;
           background-color: white;
         `}
