@@ -94,17 +94,16 @@ export function LoginModal({ show, onClose }: { show: boolean; onClose: () => vo
                 }
               `}
             />
-            <button
-              type="button"
+            <a
               onClick={() => setShowPassword(!showPassword)}
               className={css`
                 position: absolute;
-                right: 0;
-                top: 1px;
+                right: 5px;
+                bottom: 5px;
               `}
             >
-              <FontAwesomeIcon icon="eye" />
-            </button>
+              <FontAwesomeIcon icon="eye" color={!showPassword ? '#000000' : '#707070'} />
+            </a>
           </div>
           <div
             className={css`
