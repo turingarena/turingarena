@@ -4,6 +4,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'katex/dist/katex.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CurrentAuthProvider, currentAuthQuery, initialCurrentAuthQueryData } from './core/current-auth';
