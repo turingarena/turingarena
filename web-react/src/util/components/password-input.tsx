@@ -39,7 +39,7 @@ export function PasswordInput({ password, onChange }: PasswordInputProps) {
           bottom: 5px;
         `}
       >
-        <FontAwesomeIcon icon="eye" color={!showPassword ? '#000000' : '#707070'} />
+        <FontAwesomeIcon icon={showPassword ? 'eye-slash' : 'eye'} />
       </a>
     </div>
   );
