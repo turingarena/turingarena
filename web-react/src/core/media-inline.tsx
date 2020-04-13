@@ -1,7 +1,11 @@
 import { gql } from '@apollo/client';
+// @ts-ignore
+import TeX from '@matejmazur/react-katex';
 import { css } from 'emotion';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+// @ts-ignore
+import RemarkMathPlugin from 'remark-math';
 import { MediaInlineFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 
@@ -32,7 +36,16 @@ export function MarkdownMediaInline({ data }: FragmentProps<MediaInlineFragment>
 
   if (error !== undefined) return <p>Error while loading markdown: {`${error}`}</p>;
 
-  return <ReactMarkdown source={md}></ReactMarkdown>;
+  return (
+    <ReactMarkdown
+      source={md}
+      plugins={[RemarkMathPlugin]}
+      renderers={{
+        math: (props: { value: string }) => <TeX>{props.value}</TeX>,
+        inlineMath: (props: { value: string }) => <TeX>{props.value}</TeX>,
+      }}
+    />
+  );
 }
 
 function MediaInlineContent({ data }: FragmentProps<MediaInlineFragment>) {
