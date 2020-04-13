@@ -4,7 +4,10 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import { contestProblemAssignmentViewAsideFragment } from './contest-problem-assignment-view-aside';
+import {
+  ContestProblemAssignmentViewAside,
+  contestProblemAssignmentViewAsideFragment,
+} from './contest-problem-assignment-view-aside';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
 import { MediaDownload } from './media-download';
 import { MediaInline, mediaInlineFragment } from './media-inline';
@@ -52,10 +55,14 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
     <>
       <ContestViewAside data={data} />
       <Switch>
-        <Route path="/:problem">
-          <h1>Problem</h1>
-        </Route>
-        <Route path="/">
+        {data.problemSetView !== null &&
+          data.problemSetView.assignmentViews.map(a => (
+            <Route key={a.assignment.problem.id} path={`/problem/${a.assignment.problem.name}`}>
+              <ContestProblemAssignmentViewAside data={a} />
+              <MediaInline data={a.assignment.problem.statement} />
+            </Route>
+          ))}
+        <Route exact path="/">
           <h1>Contest view</h1>
           {/* TODO: just for testing */}
           <MediaDownload data={data.contest.statement} />

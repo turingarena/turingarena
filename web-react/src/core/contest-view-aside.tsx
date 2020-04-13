@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client';
+import { css } from 'emotion';
 import React from 'react';
-import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
@@ -8,73 +9,12 @@ import { GradeField, scoreFieldFragment } from './fields/grade-field';
 import { textFragment } from './text';
 
 // TODO: duplicated?
-const AsideHeader = styled.h2`
+const headerClass = css`
   text-transform: uppercase;
   font-size: 1.25rem;
   margin: 0 0 0.5rem;
   font-weight: 500;
   line-height: 1.2;
-`;
-
-const ContestScore = styled.div`
-  white-space: nowrap;
-  text-align: right;
-
-  font-size: 2rem;
-  margin-bottom: 16px;
-`;
-
-const ScoreView = (data: ContestViewAsideFragment) => {
-  if (data.problemSetView === null) {
-    return null;
-  }
-
-  const score = data.problemSetView.totalScoreField.score;
-
-  return (
-    <div>
-      <AsideHeader>Score</AsideHeader>
-      <ContestScore>
-        <GradeField data={data.problemSetView.totalScoreField} />
-      </ContestScore>
-    </div>
-  );
-};
-
-const ContestProblemList = styled.div`
-  padding: 0;
-  list-style: none;
-`;
-
-const ContestProblemLink = styled.a`
-  overflow: hidden;
-
-  margin: 0 -16px;
-  padding: 0.5rem 16px;
-
-  display: flex;
-  flex-direction: row;
-
-  &:hover {
-    text-decoration: none;
-  }
-
-  &.active {
-    color: #fff;
-    background-color: #007bff;
-  }
-`;
-
-const ContestProblemLinkName = styled.span`
-  text-transform: uppercase;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const ContestProblemScore = styled.span`
-  margin-left: auto;
 `;
 
 export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragment>) {
@@ -85,31 +25,76 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
   return (
     <>
       <div>
-        <AsideHeader>Score</AsideHeader>
-        <ContestScore>
+        <h2 className={headerClass}>Score</h2>
+        <div
+          className={css`
+            white-space: nowrap;
+            text-align: right;
+
+            font-size: 2rem;
+            margin-bottom: 16px;
+          `}
+        >
           <GradeField data={data.problemSetView.totalScoreField} />
-        </ContestScore>
+        </div>
       </div>
 
       <ContestViewClock data={data} />
 
-      <AsideHeader>Problems</AsideHeader>
-      <ContestProblemList>
+      <h2 className={headerClass}>Problems</h2>
+      <div
+        className={css`
+          padding: 0;
+          list-style: none;
+        `}
+      >
         {data.problemSetView.assignmentViews.map((assignmentView, index) => (
-          <ContestProblemLink
+          <Link
+            className={css`
+              overflow: hidden;
+
+              margin: 0 -16px;
+              padding: 0.5rem 16px;
+
+              display: flex;
+              flex-direction: row;
+
+              &:hover {
+                text-decoration: none;
+              }
+
+              &.active {
+                color: #fff;
+                background-color: #007bff;
+              }
+            `}
             key={index}
             // routerLink={['/problem', assignmentView.assignment.problem.name]}
-            // routerLinkActive="active"
             title={assignmentView.assignment.problem.title.variant}
+            to={`/problem/${assignmentView.assignment.problem.name}`}
           >
-            <ContestProblemLinkName>{assignmentView.assignment.problem.title.variant}</ContestProblemLinkName>
+            <span
+              className={css`
+                text-transform: uppercase;
+
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              `}
+            >
+              {assignmentView.assignment.problem.title.variant}
+            </span>
             {/* <ContestProblemScore appValence={assignmentView.totalScoreField.valence}> */}
-            <ContestProblemScore>
+            <span
+              className={css`
+                margin-left: auto;
+              `}
+            >
               <GradeField data={assignmentView.totalScoreField} />
-            </ContestProblemScore>
-          </ContestProblemLink>
+            </span>
+          </Link>
         ))}
-      </ContestProblemList>
+      </div>
     </>
   );
 }
