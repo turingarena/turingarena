@@ -1,8 +1,12 @@
-import { gql, useMutation } from '@apollo/client';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { gql, useApolloClient, useMutation } from '@apollo/client';
 import { css } from 'emotion';
 import React, { useState } from 'react';
-import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
+import {
+  CurrentAuthWriteQuery,
+  CurrentAuthWriteQueryVariables,
+  LoginMutation,
+  LoginMutationVariables,
+} from '../generated/graphql-types';
 import { Button } from '../util/components/button';
 import { PasswordInput } from '../util/components/password-input';
 
@@ -23,6 +27,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     }
   `);
 
+  const client = useApolloClient();
+
   const handleLogIn = async () => {
     const { data } = await logIn({
       variables: {
@@ -41,7 +47,21 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    // await this.authService.setAuth(data.logIn);
+    // FIXME: breaks AgGrid
+    // await client.resetStore();
+    client.writeQuery<CurrentAuthWriteQuery, CurrentAuthWriteQueryVariables>({
+      query: gql`
+        query CurrentAuthWrite {
+          currentToken @client
+          currentUsername @client
+        }
+      `,
+      data: {
+        __typename: 'Query',
+        currentToken: data.logIn?.token,
+        currentUsername: data.logIn?.user.username,
+      },
+    });
 
     onClose();
   };

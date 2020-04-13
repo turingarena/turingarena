@@ -1,9 +1,9 @@
 import { gql, useQuery } from '@apollo/client';
 import React from 'react';
-import { MainQuery, MainQueryVariables } from '../generated/graphql-types';
+import { CurrentAuthQuery, MainQuery, MainQueryVariables } from '../generated/graphql-types';
 import { MainView, mainViewFragment } from './main-view';
 
-export function MainLoader() {
+export function MainLoader({ currentAuth }: { currentAuth: CurrentAuthQuery }) {
   const { loading, error, data } = useQuery<MainQuery, MainQueryVariables>(
     gql`
       query Main($username: ID) {
@@ -15,9 +15,7 @@ export function MainLoader() {
       ${mainViewFragment}
     `,
     {
-      variables: {
-        username: 'user1',
-      },
+      variables: { username: currentAuth.currentUsername },
       fetchPolicy: 'cache-and-network',
       pollInterval: 30000,
     },
