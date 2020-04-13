@@ -23,7 +23,7 @@ export function MainLoader() {
     },
   );
 
-  if (loading) return <>Loading...</>;
+  if (data === undefined && loading) return <>Loading...</>;
   if (error !== undefined) return <>Error! {error.message}</>;
   if (data?.mainView === undefined) return <>No main view!</>;
 
