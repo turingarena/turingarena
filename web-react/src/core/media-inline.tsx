@@ -8,9 +8,9 @@ import ReactMarkdown from 'react-markdown';
 import RemarkMathPlugin from 'remark-math';
 import { MediaInlineFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import SyntaxHighlighter from 'react-syntax-highlighter';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // @ts-ignore
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { xonokai } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export const mediaInlineFragment = gql`
   fragment MediaInline on Media {
@@ -47,7 +47,7 @@ export function MarkdownMediaInline({ data }: FragmentProps<MediaInlineFragment>
         math: (props: { value: string }) => <TeX>{props.value}</TeX>,
         inlineMath: (props: { value: string }) => <TeX>{props.value}</TeX>,
         code: (props: { value: string; language: string }) => (
-          <SyntaxHighlighter language={props.language} style={docco}>
+          <SyntaxHighlighter language={props.language} style={xonokai}>
             {props.value}
           </SyntaxHighlighter>
         ),
