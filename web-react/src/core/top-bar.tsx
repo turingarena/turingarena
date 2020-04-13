@@ -18,7 +18,26 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
         color: #fff;
       `}
     >
-      <Link to="/">
+      <Link
+        to="/"
+        className={css`
+          display: block;
+
+          margin: -8px 0;
+          padding: 8px 0;
+
+          color: white;
+          text-decoration: none;
+          background-color: transparent;
+
+          &:hover {
+            text-decoration: none;
+            color: white;
+          }
+
+          margin-right: auto;
+        `}
+      >
         <h1
           className={css`
             display: block;
@@ -32,6 +51,19 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
           <FontAwesomeIcon icon="home" /> {data.title.variant}
         </h1>
       </Link>
+      {data.user !== null && (
+        // TODO: admin button
+        <button>
+          <FontAwesomeIcon icon="sign-out-alt" />
+          Logout
+        </button>
+      )}
+      {data.user === null && (
+        <button>
+          <FontAwesomeIcon icon="sign-in-alt" />
+          Login
+        </button>
+      )}
     </nav>
   );
 }
