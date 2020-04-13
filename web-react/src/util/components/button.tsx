@@ -4,12 +4,34 @@ import React from 'react';
 interface ButtonProps {
   title: string;
   disabled?: boolean;
+  className?: string;
+  primary?: boolean;
   onPress: () => void;
 }
 
-export function Button({ onPress, title, disabled }: ButtonProps) {
+export function Button({ onPress, title, disabled, className = '', primary }: ButtonProps) {
+  const style = css`
+    border-radius: 4px;
+    padding: 5px 10px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    transition: 0.3s;
+    ${primary === true ? 'background-color: #0275d8;' : ''}
+    color: ${primary === true ? '#f7f7f7' : '#292b2c'};
+
+    &:focus {
+      outline: none;
+      border-color: #292b2c;
+    }
+
+    &:hover {
+      background-color: ${primary === true ? '#004e91' : '#e7e7e7'};
+    }
+  `;
+
   return (
-    <button onClick={onPress} disabled={disabled} className={css``}>
+    <button onClick={onPress} disabled={disabled} className={`${style} ${className}`}>
       {title}
     </button>
   );

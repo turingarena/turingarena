@@ -56,7 +56,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         flex: 1;
         flex-direction: column;
         align-items: space-between;
-        margin: 10px;
+        margin: 5px;
       `}
     >
       <div
@@ -64,6 +64,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           display: flex;
           flex: 1;
           flex-direction: column;
+          margin-left: 5px;
+          margin-right: 5px;
         `}
       >
         <label
@@ -94,12 +96,18 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
       </div>
       <div
         className={css`
-          margin-top: 15px;
           align-self: flex-end;
         `}
       >
-        <Button onPress={onClose} disabled={loading} title="Cancel" />
-        <Button onPress={handleLogIn} disabled={loading} title="Log In" />
+        <Button
+          onPress={onClose}
+          disabled={loading}
+          title="Cancel"
+          className={css`
+            margin-right: 3px;
+          `}
+        />
+        <Button onPress={handleLogIn} disabled={loading} title="Log In" primary />
       </div>
     </form>
   );
