@@ -3,11 +3,16 @@ import React from 'react';
 
 interface Props {
   onClose: () => void;
+  show: boolean;
   children: React.ReactElement;
 }
 
-export function Modal({ onClose, children }: Props) {
-  return (
+export function Modal({
+  onClose,
+  show = true,
+  children
+}: Props) {
+  return show && (
     <div>
       <div
         onClick={onClose}
@@ -29,6 +34,8 @@ export function Modal({ onClose, children }: Props) {
           left: 400px;
           right: 400px;
           bottom: 100px;
+          z-index: 101;
+          background-color: white;
         `}
       >
         {children}
