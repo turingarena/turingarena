@@ -6,7 +6,7 @@ import { Modal } from '../util/components/modal';
 export function LoginModal({ show, onClose }: { show: boolean; onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
   const [token, setToken] = useState('');
-  const [logIn] = useMutation<LoginMutation>(gql`
+  const [logIn, { loading, error }] = useMutation<LoginMutation>(gql`
     mutation Login($token: String!) {
       logIn(token: $token) {
         user {
@@ -66,11 +66,13 @@ export function LoginModal({ show, onClose }: { show: boolean; onClose: () => vo
             Invalid token.
           </small>
         </div>
+        {loading && <p>Logging in...</p>}
+        {error !== undefined && <p>Cannot login: {error.message}</p>}
         <div className="login-dialog-footer">
-          <button className="login-dialog-cancel" type="button" onClick={onClose}>
+          <button className="login-dialog-cancel" type="button" onClick={onClose} disabled={loading}>
             Cancel
           </button>
-          <button className="login-dialog-submit" type="submit">
+          <button className="login-dialog-submit" type="submit" disabled={loading}>
             Log in
           </button>
         </div>
