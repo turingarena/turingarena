@@ -4,7 +4,7 @@ import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
-import { buttonCss, buttonPrimaryCss } from '../util/components/button';
+import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
@@ -73,7 +73,7 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
           </button>
         )}
         {/* {data.user === null && ( */}
-        <button className={cx(buttonCss, buttonPrimaryCss)} onClick={() => setShowLogInModal(true)}>
+        <button className={cx(buttonCss, buttonLightCss)} onClick={() => setShowLogInModal(true)}>
           <FontAwesomeIcon icon="sign-in-alt" /> Login
         </button>
         {/* )} */}

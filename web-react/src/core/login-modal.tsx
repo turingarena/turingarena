@@ -1,4 +1,5 @@
 import { gql, useApolloClient, useMutation } from '@apollo/client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import {
@@ -7,8 +8,7 @@ import {
   LoginMutation,
   LoginMutationVariables,
 } from '../generated/graphql-types';
-import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
-import { PasswordInput } from '../util/components/password-input';
+import { buttonCss, buttonLightCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
@@ -97,7 +97,42 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         >
           Token
         </label>
-        <PasswordInput password={token} onChange={setToken} />
+        <div
+          className={css`
+            position: relative;
+            display: inline-block;
+          `}
+        >
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={token}
+            autoFocus
+            onChange={e => setToken(e.target.value)}
+            className={css`
+              width: 100%;
+              border-width: 0 0 2px;
+              font-size: 16pt;
+
+              &:focus {
+                outline: none;
+              }
+            `}
+          />
+          <button
+            onClick={() => setShowPassword(!showPassword)}
+            className={cx(
+              buttonNormalizeCss,
+              css`
+                position: absolute;
+                right: 5px;
+                bottom: 5px;
+                cursor: pointer;
+              `,
+            )}
+          >
+            <FontAwesomeIcon icon={showPassword ? 'eye-slash' : 'eye'} />
+          </button>
+        </div>
         <div
           className={css`
             margin-top: 1px;

@@ -1,5 +1,4 @@
 import { css } from 'emotion';
-import React from 'react';
 import { Theme } from '../theme';
 
 export const buttonPrimaryCss = css`
@@ -13,6 +12,7 @@ export const buttonPrimaryCss = css`
 `;
 
 export const buttonLightCss = css`
+  background-color: ${Theme.colors.gray100};
   color: '#292b2c';
   border-color: '#292b2c';
 
@@ -21,17 +21,34 @@ export const buttonLightCss = css`
   }
 `;
 
-export const buttonCss = css`
-  border-radius: 4px;
-  padding: 5px 10px;
+/** Shows a <button> as a simple <div> */
+export const buttonNormalizeCss = css`
   text-decoration: none;
   display: inline-block;
-  font-size: 14px;
-  transition: 0.3s;
-  border-width: 0.5px;
 
   &:focus {
     outline: none;
-    border-color: #292b2c;
+  }
+
+  background: transparent;
+  border: none;
+`;
+
+export const buttonCss = css`
+  ${buttonNormalizeCss}
+
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 14px;
+  transition: 0.3s;
+  border: 1px solid transparent;
+
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
   }
 `;
