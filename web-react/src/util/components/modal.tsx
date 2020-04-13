@@ -29,6 +29,8 @@ export function Modal({ onClose, children }: Props) {
           left: 400px;
           right: 400px;
           bottom: 100px;
+          z-index: 101;
+          background-color: white;
         `}
       >
         {children}
