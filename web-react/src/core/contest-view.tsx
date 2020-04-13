@@ -65,7 +65,7 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       <Switch>
         {data.problemSetView !== null &&
           data.problemSetView.assignmentViews.map(a => (
-            <Route key={a.assignment.problem.id} path={`/problem/${a.assignment.problem.name}`}>
+            <Route key={a.assignment.problem.id} path={`/${a.assignment.problem.name}`}>
               <ContestProblemAssignmentViewAside data={a} />
               <MediaInline data={a.assignment.problem.statement} />
             </Route>

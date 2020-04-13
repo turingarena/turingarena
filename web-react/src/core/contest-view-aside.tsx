@@ -81,7 +81,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
             key={index}
             // routerLink={['/problem', assignmentView.assignment.problem.name]}
             title={assignmentView.assignment.problem.title.variant}
-            to={`/problem/${assignmentView.assignment.problem.name}`}
+            to={`/${assignmentView.assignment.problem.name}`}
           >
             <span
               className={css`
