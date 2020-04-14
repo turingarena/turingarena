@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
+import { useAsync } from '../util/async-hook';
 import { useAuth } from '../util/auth';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
 
@@ -11,7 +12,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const [token, setToken] = useState('');
-  const [logIn, { loading, error }] = useMutation<LoginMutation, LoginMutationVariables>(gql`
+
+  const [logInMutate] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
       logIn(token: $token) {
         user {
@@ -24,8 +26,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     }
   `);
 
-  const handleLogIn = async () => {
-    const { data } = await logIn({
+  const [logIn, { loading, error }] = useAsync(async () => {
+    const { data } = await logInMutate({
       variables: {
         token,
       },
@@ -48,13 +50,13 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     });
 
     onClose();
-  };
+  });
 
   return (
     <form
       onSubmit={async e => {
         e.preventDefault();
-        await handleLogIn();
+        await logIn();
       }}
       className={css`
         display: flex;

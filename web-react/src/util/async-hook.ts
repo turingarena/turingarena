@@ -3,7 +3,7 @@ import { useState } from 'react';
 export function useAsync<T extends any[], U>(operation: (...args: T) => Promise<U>) {
   const [data, setData] = useState<U | undefined>(undefined);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | undefined>();
 
   return [
     async (...args: T) => {
@@ -19,7 +19,8 @@ export function useAsync<T extends any[], U>(operation: (...args: T) => Promise<
         setData(nextData);
 
         return nextData;
-      } catch (nextError) {
+      } catch (e) {
+        const nextError = e instanceof Error ? e : new Error(`non-Error thrown: ${e}`);
         setError(nextError);
         throw nextError;
       } finally {

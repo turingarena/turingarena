@@ -8,26 +8,23 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'katex/dist/katex.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CurrentAuthProvider, currentAuthQuery, initialCurrentAuthQueryData } from './core/current-auth';
 import { MainLoader } from './core/main-loader';
-import { CurrentAuthQuery, CurrentAuthQueryVariables } from './generated/graphql-types';
 import result from './generated/possible-types';
 import './index.css';
+import { initAuthCache, readAuthCache } from './util/auth';
 
 library.add(fas);
 
 const cache = new InMemoryCache({ possibleTypes: result.possibleTypes });
-cache.writeQuery<CurrentAuthQuery, CurrentAuthQueryVariables>({
-  query: currentAuthQuery,
-  data: initialCurrentAuthQueryData,
-});
+
+initAuthCache(cache);
 
 const client = new ApolloClient({
   cache,
   link: concat(
     (operation, forward) => {
-      const data = cache.readQuery<CurrentAuthQuery, CurrentAuthQueryVariables>({ query: currentAuthQuery });
-      const token = data?.currentToken ?? null;
+      const data = readAuthCache(cache);
+      const token = data?.currentAuth?.token ?? null;
 
       if (token !== null) {
         operation.setContext({ headers: { authorization: `Bearer ${token}` } });
@@ -46,7 +43,7 @@ function App() {
   return (
     <React.StrictMode>
       <ApolloProvider client={client}>
-        <CurrentAuthProvider component={currentAuth => <MainLoader currentAuth={currentAuth} />} />
+        <MainLoader />
       </ApolloProvider>
     </React.StrictMode>
   );

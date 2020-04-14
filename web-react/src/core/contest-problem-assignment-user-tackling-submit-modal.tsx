@@ -142,7 +142,7 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
           <FileInput key={f.name} data={data} field={f} />
         ))}
       </div>
-      {error !== undefined && <>Error in submission: {error instanceof Error ? error.message : `${error}`}</>}
+      {error !== undefined && <>Error in submission: {error.message}</>}
       <div className={modalFooterCss}>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
           Submit
