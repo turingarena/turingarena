@@ -1,9 +1,4 @@
 import { css } from 'emotion';
-import { Theme } from '../theme';
-
-export const buttonPrimaryCss = 'btn-primary';
-export const buttonSecondaryCss = 'btn-secondary';
-export const buttonLightCss = 'btn-light';
 
 /** Shows a <button> as a simple <div> */
 export const buttonNormalizeCss = css`
@@ -19,3 +14,9 @@ export const buttonNormalizeCss = css`
 `;
 
 export const buttonCss = 'btn';
+export const buttonPrimaryCss = 'btn-primary';
+export const buttonSecondaryCss = 'btn-secondary';
+export const buttonSuccessCss = 'btn-success';
+export const buttonLightCss = 'btn-light';
+export const buttonBlockCss = 'btn-block';
+export const buttonOutlineDarkCss = 'btn-outline-dark';

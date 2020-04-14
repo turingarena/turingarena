@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { cx } from 'emotion';
+import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
-import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
+import { buttonBlockCss, buttonCss, buttonOutlineDarkCss, buttonSuccessCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { contestProblemAssignmentUserTacklingSubmissionListModalFragment } from './contest-problem-assignment-user-tackling-submission-list-modal';
@@ -43,12 +43,17 @@ export function ContestProblemAssignmentUserTacklingAside({
   const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
 
   return (
-    <>
+    <div
+      className={css`
+        display: block;
+        padding: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      `}
+    >
       {data.canSubmit && (
         <>
-          <button onClick={() => setShowSubmitModal(true)} className={cx(buttonCss, buttonPrimaryCss)}>
-            <FontAwesomeIcon icon="paper-plane" />
-            Submit a solution
+          <button onClick={() => setShowSubmitModal(true)} className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)}>
+            <FontAwesomeIcon icon="paper-plane" /> Submit a solution
           </button>
           <Modal show={showSubmitModal} onClose={() => setShowSubmitModal(false)}>
             <ContestProblemAssignmentUserTacklingSubmitModal
@@ -61,20 +66,24 @@ export function ContestProblemAssignmentUserTacklingAside({
 
       {lastSubmission !== null && (
         <>
-          <button onClick={() => setShowLastSubmissionModal(true)} className={cx(buttonCss, buttonLightCss)}>
+          <button
+            onClick={() => setShowLastSubmissionModal(true)}
+            className={cx(buttonCss, buttonBlockCss, buttonOutlineDarkCss)}
+          >
             {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="history" />}
-            {lastSubmission.officialEvaluation?.status === 'PENDING' && <FontAwesomeIcon icon="spinner" pulse={true} />}
+            {lastSubmission.officialEvaluation?.status === 'PENDING' && (
+              <FontAwesomeIcon icon="spinner" pulse={true} />
+            )}{' '}
             Last submission
           </button>
           <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
             <SubmissionModal data={lastSubmission} />
           </Modal>
-          <button className={cx(buttonCss, buttonLightCss)}>
-            <FontAwesomeIcon icon="list" />
-            All submissions
+          <button className={cx(buttonCss, buttonBlockCss, buttonOutlineDarkCss)}>
+            <FontAwesomeIcon icon="list" /> All submissions
           </button>
         </>
       )}
-    </>
+    </div>
   );
 }

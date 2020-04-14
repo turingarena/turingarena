@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { css } from 'emotion';
+import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
+import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
@@ -58,6 +59,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
         >
           <div>
             <h2 className={headerClass}>Score</h2>
+
             <div
               className={css`
                 white-space: nowrap;
@@ -132,10 +134,14 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 </span>
                 {/* <ContestProblemScore appValence={assignmentView.totalScoreField.valence}> */}
                 <span
-                  className={css`
-                    white-space: nowrap;
-                    margin-left: auto;
-                  `}
+                  className={cx(
+                    css`
+                      white-space: nowrap;
+                      margin-left: auto;
+                    `,
+                    badgeCss,
+                    getBadgeCssByValence(assignmentView.totalScoreField.valence),
+                  )}
                 >
                   <GradeField data={assignmentView.totalScoreField} />
                 </span>
