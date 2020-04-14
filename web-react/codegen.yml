@@ -1,5 +1,7 @@
 schema: ../server/src/generated/graphql.schema.graphql
-documents: ./src/**/*.tsx
+documents:
+  - ./src/**/*.ts
+  - ./src/**/*.tsx
 generates:
   ./src/generated/graphql-types.ts:
     schema: src/client-schema.graphql
