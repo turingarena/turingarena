@@ -20,3 +20,4 @@ export const buttonSuccessCss = 'btn-success';
 export const buttonLightCss = 'btn-light';
 export const buttonBlockCss = 'btn-block';
 export const buttonOutlineDarkCss = 'btn-outline-dark';
+export const buttonSmallCss = 'btn-sm';

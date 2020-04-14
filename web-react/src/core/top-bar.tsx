@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
 import { useAuth } from '../util/auth';
-import { buttonCss, buttonLightCss } from '../util/components/button';
+import { buttonCss, buttonLightCss, buttonSmallCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
@@ -74,18 +74,18 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
               {data.user.name}
             </span>
             <button
-              className={cx(buttonCss, buttonLightCss)}
+              className={cx(buttonCss, buttonLightCss, buttonSmallCss)}
               onClick={() => {
                 auth.clearAuth();
               }}
             >
-              <FontAwesomeIcon icon="sign-out-alt" /> Logout
+              <FontAwesomeIcon icon="sign-out-alt" /> Log out
             </button>
           </>
         )}
         {data.user === null && (
-          <button className={cx(buttonCss, buttonLightCss)} onClick={() => setShowLogInModal(true)}>
-            <FontAwesomeIcon icon="sign-in-alt" /> Login
+          <button className={cx(buttonCss, buttonLightCss, buttonSmallCss)} onClick={() => setShowLogInModal(true)}>
+            <FontAwesomeIcon icon="sign-in-alt" /> Log in
           </button>
         )}
       </nav>
