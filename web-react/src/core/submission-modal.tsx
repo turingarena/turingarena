@@ -5,6 +5,7 @@ import { RecordFragment, SubmissionModalFragment } from '../generated/graphql-ty
 import { FragmentProps } from '../util/fragment-props';
 import { columnFragment, getFieldColumns, recordFragment } from './field-table';
 import { textFragment } from './text';
+import { css } from 'emotion';
 
 export const submissionModalFragment = gql`
   fragment SubmissionModal on Submission {
@@ -39,10 +40,17 @@ export const submissionModalFragment = gql`
 
 export function SubmissionModal({ data }: FragmentProps<SubmissionModalFragment>) {
   return (
-    <AgGridReact
-      columnDefs={getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row)}
-      domLayout="autoHeight"
-      rowData={data.feedbackTable.rows}
-    />
+    <div
+      className={css`
+        width: 80vw;
+        overflow: auto;
+      `}
+    >
+      <AgGridReact
+        columnDefs={getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row)}
+        domLayout="autoHeight"
+        rowData={data.feedbackTable.rows}
+      />
+    </div>
   );
 }
