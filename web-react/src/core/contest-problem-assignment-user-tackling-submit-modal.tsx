@@ -1,4 +1,7 @@
 import { gql } from '@apollo/client';
+import React from 'react';
+import { ContestProblemAssignmentUserTacklingSubmitModalFragment } from '../generated/graphql-types';
+import { FragmentProps } from '../util/fragment-props';
 import { textFragment } from './text';
 
 export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
@@ -60,3 +63,9 @@ export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
 
   ${textFragment}
 `;
+
+export function ContestProblemAssignmentUserTacklingSubmitModal({
+  data,
+}: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment>) {
+  return <>Yeah!</>;
+}
