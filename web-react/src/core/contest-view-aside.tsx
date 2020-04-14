@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -8,7 +9,6 @@ import { Theme } from '../util/theme';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
 import { GradeField, scoreFieldFragment } from './fields/grade-field';
 import { textFragment } from './text';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 // TODO: duplicated?
 const headerClass = css`
@@ -33,6 +33,17 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
         flex-direction: row;
       `}
     >
+      <a
+        onClick={() => setVisible(!visible)}
+        className={css`
+          background-color: ${Theme.colors.gray200};
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        `}
+      >
+        <FontAwesomeIcon icon={visible ? 'chevron-left' : 'chevron-right'} />
+      </a>
       {visible && (
         <aside
           className={css`
@@ -126,17 +137,6 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
           </div>
         </aside>
       )}
-      <a
-        onClick={() => setVisible(!visible)}
-        className={css`
-          background-color: ${Theme.colors.gray200};
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        `}
-      >
-        <FontAwesomeIcon icon={visible ? 'chevron-left' : 'chevron-right'} />
-      </a>
     </div>
   );
 }
