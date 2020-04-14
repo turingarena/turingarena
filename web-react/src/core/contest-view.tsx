@@ -1,5 +1,4 @@
 import { gql } from '@apollo/client';
-import { AgGridReact } from 'ag-grid-react';
 import { css } from 'emotion';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -10,7 +9,6 @@ import {
   contestProblemAssignmentViewAsideFragment,
 } from './contest-problem-assignment-view-aside';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
-import { MediaDownload } from './media-download';
 import { MediaInline, mediaInlineFragment } from './media-inline';
 import { textFragment } from './text';
 
