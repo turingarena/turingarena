@@ -1,18 +1,15 @@
-import { gql, useApolloClient, useMutation } from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
-import {
-  CurrentAuthWriteQuery,
-  CurrentAuthWriteQueryVariables,
-  LoginMutation,
-  LoginMutationVariables,
-} from '../generated/graphql-types';
+import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
+import { useAuth } from '../util/auth';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
   const [invalidToken, setInvalidToken] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const auth = useAuth();
   const [token, setToken] = useState('');
   const [logIn, { loading, error }] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
@@ -26,8 +23,6 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
       }
     }
   `);
-
-  const client = useApolloClient();
 
   const handleLogIn = async () => {
     const { data } = await logIn({
@@ -47,20 +42,9 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    // FIXME: breaks AgGrid
-    // await client.resetStore();
-    client.writeQuery<CurrentAuthWriteQuery, CurrentAuthWriteQueryVariables>({
-      query: gql`
-        query CurrentAuthWrite {
-          currentToken @client
-          currentUsername @client
-        }
-      `,
-      data: {
-        __typename: 'Query',
-        currentToken: data.logIn?.token,
-        currentUsername: data.logIn?.user.username,
-      },
+    auth.setAuth({
+      username: data.logIn?.user.username,
+      token: data.logIn?.token,
     });
 
     onClose();
@@ -68,7 +52,6 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <form
-      action=""
       onSubmit={e => e.preventDefault()}
       className={css`
         display: flex;
@@ -115,12 +98,13 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           />
           <button
             onClick={() => setShowPassword(!showPassword)}
+            type="button"
             className={cx(
               buttonNormalizeCss,
               css`
                 position: absolute;
                 right: 5px;
-                bottom: 5px;
+                bottom: 4px;
                 cursor: pointer;
               `,
             )}

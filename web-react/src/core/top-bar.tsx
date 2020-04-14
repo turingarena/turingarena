@@ -4,7 +4,8 @@ import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
-import { buttonCss, buttonLightCss, buttonPrimaryCss } from '../util/components/button';
+import { useAuth } from '../util/auth';
+import { buttonCss, buttonLightCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
@@ -13,6 +14,7 @@ import { textFragment } from './text';
 
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
+  const auth = useAuth();
 
   return (
     <>
@@ -63,20 +65,29 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
         </Link>
         {data.user !== null && (
           // TODO: admin button
-          <button
-            className={cx(buttonCss, buttonPrimaryCss)}
-            onClick={() => {
-              console.warn('TODO');
-            }}
-          >
-            <FontAwesomeIcon icon="sign-out-alt" /> Logout
+          <>
+            <span
+              className={css`
+                margin-right: 10px;
+              `}
+            >
+              {data.user.name}
+            </span>
+            <button
+              className={cx(buttonCss, buttonLightCss)}
+              onClick={() => {
+                auth.clearAuth();
+              }}
+            >
+              <FontAwesomeIcon icon="sign-out-alt" /> Logout
+            </button>
+          </>
+        )}
+        {data.user === null && (
+          <button className={cx(buttonCss, buttonLightCss)} onClick={() => setShowLogInModal(true)}>
+            <FontAwesomeIcon icon="sign-in-alt" /> Login
           </button>
         )}
-        {/* {data.user === null && ( */}
-        <button className={cx(buttonCss, buttonLightCss)} onClick={() => setShowLogInModal(true)}>
-          <FontAwesomeIcon icon="sign-in-alt" /> Login
-        </button>
-        {/* )} */}
       </nav>
     </>
   );
