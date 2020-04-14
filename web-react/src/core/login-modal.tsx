@@ -52,7 +52,10 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <form
-      onSubmit={e => e.preventDefault()}
+      onSubmit={async e => {
+        e.preventDefault();
+        await handleLogIn();
+      }}
       className={css`
         display: flex;
         flex: 1;
@@ -97,7 +100,10 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
             `}
           />
           <button
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={e => {
+              setShowPassword(!showPassword);
+              e.preventDefault();
+            }}
             type="button"
             className={cx(
               buttonNormalizeCss,
@@ -145,13 +151,16 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
               margin-right: 3px;
             `,
           )}
-          onClick={onClose}
+          onClick={e => {
+            e.preventDefault();
+            onClose();
+          }}
           disabled={loading}
           type="button"
         >
           Cancel
         </button>
-        <button className={cx(buttonCss, buttonPrimaryCss)} onClick={handleLogIn} disabled={loading} type="submit">
+        <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
           Log In
         </button>
       </div>
