@@ -50,7 +50,7 @@ export function ScoreField({ data }: FragmentProps<ScoreFieldFragment>) {
         </>
       ) : (
         <>
-          <>{data.score.toFixed(data.scoreRange.decimalDigits)}</>
+          <span className="score">{data.score.toFixed(data.scoreRange.decimalDigits)}</span>
           <>
             {' / '}
             {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
