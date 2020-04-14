@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import {
@@ -50,6 +50,8 @@ export const contestViewFragment = gql`
 `;
 
 export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
+  const problem = useRouteMatch<{ problemName: string }>('/:problemName');
+
   return (
     <div
       className={css`
@@ -60,18 +62,39 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       `}
     >
       <ContestViewAside data={data} />
-      <Switch>
-        {data.problemSetView !== null &&
-          data.problemSetView.assignmentViews.map(a => (
-            <Route key={a.assignment.problem.id} path={`/${a.assignment.problem.name}`}>
-              <ContestProblemAssignmentViewAside data={a} />
-              <MediaInline data={a.assignment.problem.statement} />
-            </Route>
-          ))}
-        <Route exact path="/">
-          <MediaInline data={data.contest.statement} />
-        </Route>
-      </Switch>
+      {data.problemSetView !== null &&
+        data.problemSetView.assignmentViews.map(a => (
+          <div
+            key={a.assignment.problem.id}
+            className={
+              problem !== null && problem.params.problemName === a.assignment.problem.name
+                ? css`
+                    display: flex;
+                    flex: 1;
+                  `
+                : css`
+                    display: none;
+                  `
+            }
+          >
+            <ContestProblemAssignmentViewAside data={a} />
+            <MediaInline data={a.assignment.problem.statement} />
+          </div>
+        ))}
+      <div
+        className={
+          problem === null
+            ? css`
+                display: flex;
+                flex: 1;
+              `
+            : css`
+                display: none;
+              `
+        }
+      >
+        <MediaInline data={data.contest.statement} />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
@@ -81,7 +81,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
             `}
           >
             {data.problemSetView.assignmentViews.map((assignmentView, index) => (
-              <Link
+              <NavLink
                 className={css`
                   overflow: hidden;
 
@@ -101,14 +101,21 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                     text-decoration: none;
                     background-color: ${Theme.colors.gray200};
                   }
+                `}
+                activeClassName={css`
+                  color: ${Theme.colors.white};
+                  background-color: ${Theme.colors.blue};
 
-                  &.active {
-                    color: #fff;
-                    background-color: #007bff;
+                  &:visited {
+                    color: ${Theme.colors.white};
+                  }
+
+                  &:hover {
+                    text-decoration: none;
+                    background-color: ${Theme.colors.blue};
                   }
                 `}
                 key={index}
-                // routerLink={['/problem', assignmentView.assignment.problem.name]}
                 title={assignmentView.assignment.problem.title.variant}
                 to={`/${assignmentView.assignment.problem.name}`}
               >
@@ -132,7 +139,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 >
                   <GradeField data={assignmentView.totalScoreField} />
                 </span>
-              </Link>
+              </NavLink>
             ))}
           </div>
         </aside>

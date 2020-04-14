@@ -4,13 +4,13 @@ import TeX from '@matejmazur/react-katex';
 import { css } from 'emotion';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// @ts-ignore
+import { xonokai } from 'react-syntax-highlighter/dist/esm/styles/prism';
 // @ts-ignore
 import RemarkMathPlugin from 'remark-math';
 import { MediaInlineFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// @ts-ignore
-import { xonokai } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export const mediaInlineFragment = gql`
   fragment MediaInline on Media {
@@ -84,14 +84,5 @@ function MediaInlineContent({ data }: FragmentProps<MediaInlineFragment>) {
 }
 
 export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
-  return (
-    <div
-      className={css`
-        display: flex;
-        flex: 1;
-      `}
-    >
-      <MediaInlineContent data={data} />
-    </div>
-  );
+  return <MediaInlineContent data={data} />;
 }
