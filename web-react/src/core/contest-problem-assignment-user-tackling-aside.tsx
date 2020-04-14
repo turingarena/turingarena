@@ -62,8 +62,8 @@ export function ContestProblemAssignmentUserTacklingAside({
       {lastSubmission !== null && (
         <>
           <button onClick={() => setShowLastSubmissionModal(true)} className={cx(buttonCss, buttonLightCss)}>
-            {lastSubmission.officialEvaluation?.status === 'PENDING' && <FontAwesomeIcon icon="history" />}
-            {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="spinner" pulse={true} />}
+            {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="history" />}
+            {lastSubmission.officialEvaluation?.status === 'PENDING' && <FontAwesomeIcon icon="spinner" pulse={true} />}
             Last submission
           </button>
           <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
