@@ -51,7 +51,10 @@ export function ContestProblemAssignmentUserTacklingAside({
             Submit a solution
           </button>
           <Modal show={showSubmitModal} onClose={() => setShowSubmitModal(false)}>
-            <ContestProblemAssignmentUserTacklingSubmitModal data={data} />
+            <ContestProblemAssignmentUserTacklingSubmitModal
+              data={data}
+              onSubmitSuccessful={() => setShowSubmitModal(false)}
+            />
           </Modal>
         </>
       )}
