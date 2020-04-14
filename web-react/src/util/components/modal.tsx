@@ -7,6 +7,10 @@ interface Props {
   children: React.ReactElement;
 }
 
+export const modalHeaderCss = 'modal-header';
+export const modalBodyCss = 'modal-body';
+export const modalFooterCss = 'modal-footer';
+
 export function Modal({ onClose, show = true, children }: Props) {
   return show ? (
     <>

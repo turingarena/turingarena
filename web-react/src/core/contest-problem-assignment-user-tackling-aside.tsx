@@ -46,7 +46,7 @@ export function ContestProblemAssignmentUserTacklingAside({
     <>
       {data.canSubmit && (
         <>
-          <button onClick={() => setShowLastSubmissionModal(true)} className={cx(buttonCss, buttonPrimaryCss)}>
+          <button onClick={() => setShowSubmitModal(true)} className={cx(buttonCss, buttonPrimaryCss)}>
             <FontAwesomeIcon icon="paper-plane" />
             Submit a solution
           </button>
