@@ -1,13 +1,13 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
 import { buttonBlockCss, buttonCss, buttonOutlineDarkCss, buttonSuccessCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
-import { useBasePath } from '../util/paths';
+import { SetBasePath, useBasePath } from '../util/paths';
 import {
   ContestProblemAssignmentUserTacklingSubmissionListModal,
   contestProblemAssignmentUserTacklingSubmissionListModalFragment,
@@ -16,7 +16,7 @@ import {
   ContestProblemAssignmentUserTacklingSubmitModal,
   contestProblemAssignmentUserTacklingSubmitModalFragment,
 } from './contest-problem-assignment-user-tackling-submit-modal';
-import { SubmissionModal, submissionModalFragment } from './submission-modal';
+import { SubmissionLoader } from './submission-loader';
 
 export const contestProblemAssignmentUserTacklingAsideFragment = gql`
   fragment ContestProblemAssignmentUserTacklingAside on ContestProblemAssignmentUserTackling {
@@ -26,15 +26,12 @@ export const contestProblemAssignmentUserTacklingAsideFragment = gql`
       officialEvaluation {
         status
       }
-
-      ...SubmissionModal
     }
 
     ...ContestProblemAssignmentUserTacklingSubmitModal
     ...ContestProblemAssignmentUserTacklingSubmissionListModal
   }
 
-  ${submissionModalFragment}
   ${contestProblemAssignmentUserTacklingSubmitModalFragment}
   ${contestProblemAssignmentUserTacklingSubmissionListModalFragment}
 `;
@@ -42,11 +39,7 @@ export const contestProblemAssignmentUserTacklingAsideFragment = gql`
 export function ContestProblemAssignmentUserTacklingAside({
   data,
 }: FragmentProps<ContestProblemAssignmentUserTacklingAsideFragment>) {
-  // TODO: change all state to use routing instead
-  const [showLastSubmissionModal, setShowLastSubmissionModal] = useState(false);
-
   const basePath = useBasePath();
-
   const history = useHistory();
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
@@ -79,8 +72,8 @@ export function ContestProblemAssignmentUserTacklingAside({
 
       {lastSubmission !== null && (
         <>
-          <button
-            onClick={() => setShowLastSubmissionModal(true)}
+          <Link
+            to={`${basePath}/submission/${lastSubmission.id}`}
             className={cx(
               buttonCss,
               buttonBlockCss,
@@ -95,11 +88,7 @@ export function ContestProblemAssignmentUserTacklingAside({
               <FontAwesomeIcon icon="spinner" pulse={true} />
             )}{' '}
             Last submission
-          </button>
-
-          <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
-            <SubmissionModal data={lastSubmission} />
-          </Modal>
+          </Link>
 
           <Link
             to={`${basePath}/submissions`}
@@ -124,6 +113,17 @@ export function ContestProblemAssignmentUserTacklingAside({
           </Route>
         </>
       )}
+      <Route path={`${basePath}/submission/:id`}>
+        {({ match }) =>
+          match !== null && (
+            <SetBasePath path={`${basePath}/submission/${(match.params as { id: string }).id}`}>
+              <Modal onClose={() => history.replace(basePath)}>
+                <SubmissionLoader id={(match.params as { id: string }).id} />
+              </Modal>
+            </SetBasePath>
+          )
+        }
+      </Route>
     </div>
   );
 }

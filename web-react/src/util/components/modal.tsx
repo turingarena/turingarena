@@ -1,12 +1,12 @@
 import { css, cx } from 'emotion';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useAsync } from '../async-hook';
 import { animationFrame, delay } from '../delay';
 
 interface Props {
   onClose: () => void;
-  show: boolean;
-  children: React.ReactElement;
+  show?: boolean;
+  children: ReactNode;
 }
 
 export const modalHeaderCss = 'modal-header';
