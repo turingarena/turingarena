@@ -3,7 +3,7 @@ const path = require('path');
 /** @type { import('apollo').ApolloConfig } */
 const config = {
   client: {
-    includes: ['./src/**/*.ts'],
+    includes: ['./src/**/*.ts', './src/**/*.tsx'],
     excludes: [],
     service: {
       name: 'turingarena-server',
