@@ -118,11 +118,14 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
 
   return (
     <form
-      onSubmit={async e => {
+      onSubmit={e => {
         e.preventDefault();
-        await loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
+        loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
         onSubmitSuccessful();
       }}
+      className={css`
+        width: 40rem;
+      `}
     >
       <div className={modalHeaderCss}>
         <h4>
