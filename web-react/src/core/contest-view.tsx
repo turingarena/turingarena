@@ -1,7 +1,6 @@
 import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { PathRouter } from '../util/paths';
@@ -51,8 +50,6 @@ export const contestViewFragment = gql`
 `;
 
 export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
-  const problem = useRouteMatch<{ problemName: string }>('/:problemName');
-
   return (
     <div
       className={css`
