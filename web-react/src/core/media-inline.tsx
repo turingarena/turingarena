@@ -56,17 +56,24 @@ export function MarkdownMediaInline({ data }: FragmentProps<MediaInlineFragment>
   );
 }
 
-function MediaInlineContent({ data }: FragmentProps<MediaInlineFragment>) {
+export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
   switch (data.variant.type) {
     case 'text/markdown':
       return (
         <div
           className={css`
-            padding: 0.75rem;
-            max-width: 60rem;
+            overflow-y: scroll;
+            height: 100%;
           `}
         >
-          <MarkdownMediaInline data={data}></MarkdownMediaInline>
+          <div
+            className={css`
+              padding: 0.75rem;
+              max-width: 60rem;
+            `}
+          >
+            <MarkdownMediaInline data={data}></MarkdownMediaInline>
+          </div>
         </div>
       );
     default:
@@ -74,15 +81,12 @@ function MediaInlineContent({ data }: FragmentProps<MediaInlineFragment>) {
         <iframe
           className={css`
             display: block;
-            flex: 1;
+            height: 100%;
+            width: 100%;
             border: none;
           `}
           src={data.variant.url}
         ></iframe>
       );
   }
-}
-
-export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
-  return <MediaInlineContent data={data} />;
 }

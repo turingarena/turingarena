@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { css, cx } from 'emotion';
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
@@ -92,14 +92,22 @@ const downloadLinkCss = css`
   }
 `;
 
-export function ContestProblemAssignmentViewAside({ data }: FragmentProps<ContestProblemAssignmentViewAsideFragment>) {
+export function ContestProblemAssignmentViewAside({
+  data,
+  className,
+  ...rest
+}: FragmentProps<ContestProblemAssignmentViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={css`
-        flex: 0 0 auto;
-        width: 15em;
-        background-color: #f8f9fa;
-      `}
+      className={cx(
+        className,
+        css`
+          flex: 0 0 auto;
+          width: 15em;
+          background-color: #f8f9fa;
+        `,
+      )}
+      {...rest}
     >
       {data.tackling !== null && <ContestProblemAssignmentUserTacklingAside data={data.tackling} />}
       <div
