@@ -19,7 +19,7 @@
         "allowUnreachableCode": false,
 
         "allowJs": true,
-        "checkJs": true,
+        "checkJs": false,
         "outDir": "./build"
     },
     "exclude": ["node_modules", "build"]
