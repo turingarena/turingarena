@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
+import { PathRouter } from '../util/paths';
 import {
   ContestProblemAssignmentViewAside,
   contestProblemAssignmentViewAsideFragment,
@@ -64,10 +65,31 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       <ContestViewAside data={data} />
       {data.problemSetView !== null &&
         data.problemSetView.assignmentViews.map(a => (
+          <PathRouter key={a.assignment.problem.id} path={`/${a.assignment.problem.name}`}>
+            {({ match }) => (
+              <div
+                className={
+                  match !== null
+                    ? css`
+                        display: flex;
+                        flex: 1;
+                      `
+                    : css`
+                        display: none;
+                      `
+                }
+              >
+                <ContestProblemAssignmentViewAside data={a} />
+                <MediaInline data={a.assignment.problem.statement} />
+              </div>
+            )}
+          </PathRouter>
+        ))}
+      <PathRouter path="/" exact>
+        {({ match }) => (
           <div
-            key={a.assignment.problem.id}
             className={
-              problem !== null && problem.params.problemName === a.assignment.problem.name
+              match !== null
                 ? css`
                     display: flex;
                     flex: 1;
@@ -77,24 +99,10 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
                   `
             }
           >
-            <ContestProblemAssignmentViewAside data={a} />
-            <MediaInline data={a.assignment.problem.statement} />
+            <MediaInline data={data.contest.statement} />
           </div>
-        ))}
-      <div
-        className={
-          problem === null
-            ? css`
-                display: flex;
-                flex: 1;
-              `
-            : css`
-                display: none;
-              `
-        }
-      >
-        <MediaInline data={data.contest.statement} />
-      </div>
+        )}
+      </PathRouter>
     </div>
   );
 }

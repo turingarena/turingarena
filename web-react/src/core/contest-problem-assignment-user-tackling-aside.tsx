@@ -2,10 +2,12 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
 import { buttonBlockCss, buttonCss, buttonOutlineDarkCss, buttonSuccessCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
+import { useBasePath } from '../util/paths';
 import {
   ContestProblemAssignmentUserTacklingSubmissionListModal,
   contestProblemAssignmentUserTacklingSubmissionListModalFragment,
@@ -41,9 +43,11 @@ export function ContestProblemAssignmentUserTacklingAside({
   data,
 }: FragmentProps<ContestProblemAssignmentUserTacklingAsideFragment>) {
   // TODO: change all state to use routing instead
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showLastSubmissionModal, setShowLastSubmissionModal] = useState(false);
-  const [showSubmissionListModal, setShowSubmissionListModal] = useState(false);
+
+  const basePath = useBasePath();
+
+  const history = useHistory();
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
 
@@ -57,15 +61,19 @@ export function ContestProblemAssignmentUserTacklingAside({
     >
       {data.canSubmit && (
         <>
-          <button onClick={() => setShowSubmitModal(true)} className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)}>
+          <Link className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)} to={`${basePath}/submit`} replace>
             <FontAwesomeIcon icon="paper-plane" /> Submit a solution
-          </button>
-          <Modal show={showSubmitModal} onClose={() => setShowSubmitModal(false)}>
-            <ContestProblemAssignmentUserTacklingSubmitModal
-              data={data}
-              onSubmitSuccessful={() => setShowSubmitModal(false)}
-            />
-          </Modal>
+          </Link>
+          <Route path={`${basePath}/submit`}>
+            {({ match }) => (
+              <Modal show={match !== null} onClose={() => history.replace(basePath)}>
+                <ContestProblemAssignmentUserTacklingSubmitModal
+                  data={data}
+                  onSubmitSuccessful={() => history.goBack()}
+                />
+              </Modal>
+            )}
+          </Route>
         </>
       )}
 
@@ -93,8 +101,9 @@ export function ContestProblemAssignmentUserTacklingAside({
             <SubmissionModal data={lastSubmission} />
           </Modal>
 
-          <button
-            onClick={() => setShowSubmissionListModal(true)}
+          <Link
+            to={`${basePath}/submissions`}
+            replace
             className={cx(
               buttonCss,
               buttonBlockCss,
@@ -105,11 +114,14 @@ export function ContestProblemAssignmentUserTacklingAside({
             )}
           >
             <FontAwesomeIcon icon="list" /> All submissions
-          </button>
-
-          <Modal show={showSubmissionListModal} onClose={() => setShowSubmissionListModal(false)}>
-            <ContestProblemAssignmentUserTacklingSubmissionListModal data={data} />
-          </Modal>
+          </Link>
+          <Route path={`${basePath}/submissions`}>
+            {({ match }) => (
+              <Modal show={match !== null} onClose={() => history.replace(basePath)}>
+                <ContestProblemAssignmentUserTacklingSubmissionListModal data={data} />
+              </Modal>
+            )}
+          </Route>
         </>
       )}
     </div>
