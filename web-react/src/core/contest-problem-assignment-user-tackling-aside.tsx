@@ -6,7 +6,10 @@ import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/
 import { buttonBlockCss, buttonCss, buttonOutlineDarkCss, buttonSuccessCss } from '../util/components/button';
 import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
-import { contestProblemAssignmentUserTacklingSubmissionListModalFragment } from './contest-problem-assignment-user-tackling-submission-list-modal';
+import {
+  ContestProblemAssignmentUserTacklingSubmissionListModal,
+  contestProblemAssignmentUserTacklingSubmissionListModalFragment,
+} from './contest-problem-assignment-user-tackling-submission-list-modal';
 import {
   ContestProblemAssignmentUserTacklingSubmitModal,
   contestProblemAssignmentUserTacklingSubmitModalFragment,
@@ -37,8 +40,10 @@ export const contestProblemAssignmentUserTacklingAsideFragment = gql`
 export function ContestProblemAssignmentUserTacklingAside({
   data,
 }: FragmentProps<ContestProblemAssignmentUserTacklingAsideFragment>) {
-  const [showSubmitModal, setShowSubmitModal] = useState(false); // TODO: change to use routing instead
-  const [showLastSubmissionModal, setShowLastSubmissionModal] = useState(false); // TODO: change to use routing instead
+  // TODO: change all state to use routing instead
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showLastSubmissionModal, setShowLastSubmissionModal] = useState(false);
+  const [showSubmissionListModal, setShowSubmissionListModal] = useState(false);
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
 
@@ -83,7 +88,13 @@ export function ContestProblemAssignmentUserTacklingAside({
             )}{' '}
             Last submission
           </button>
+
+          <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
+            <SubmissionModal data={lastSubmission} />
+          </Modal>
+
           <button
+            onClick={() => setShowSubmissionListModal(true)}
             className={cx(
               buttonCss,
               buttonBlockCss,
@@ -96,8 +107,8 @@ export function ContestProblemAssignmentUserTacklingAside({
             <FontAwesomeIcon icon="list" /> All submissions
           </button>
 
-          <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
-            <SubmissionModal data={lastSubmission} />
+          <Modal show={showSubmissionListModal} onClose={() => setShowSubmissionListModal(false)}>
+            <ContestProblemAssignmentUserTacklingSubmissionListModal data={data} />
           </Modal>
         </>
       )}
