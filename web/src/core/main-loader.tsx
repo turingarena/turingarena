@@ -9,7 +9,7 @@ export function MainLoader() {
 
   useEffect(() => {
     restoreAuth();
-  }, []); // load auth data from local storage when first displayed
+  }, [restoreAuth]); // load auth data from local storage when first displayed
 
   const { loading, error, data } = useQuery<MainQuery, MainQueryVariables>(
     gql`

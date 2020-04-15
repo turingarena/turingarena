@@ -79,6 +79,7 @@ export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
     default:
       return (
         <iframe
+          title="inline-iframe"
           className={css`
             display: block;
             height: 100%;

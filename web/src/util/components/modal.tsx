@@ -34,7 +34,7 @@ export function Modal({ onClose, show = true, children }: Props) {
     if (!animating) {
       animate();
     }
-  }, [show]);
+  }, [show, animate, animating]);
 
   if (!show1) return <></>;
 
