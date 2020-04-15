@@ -24,18 +24,6 @@ select-layout tiled
 split-window -c server/ npm run start
 select-layout tiled
 
-split-window -c web/ npm run start
-select-layout tiled
-
-split-window -c web/ npm run watch:prepare
-select-layout tiled
-
-split-window -c web-react/ npm run start
-select-layout tiled
-
-split-window -c web-react/ npm run watch:prepare
-select-layout tiled
-
 split-window -c server/ npm run watch:check:test
 select-layout tiled
 
@@ -46,4 +34,10 @@ split-window -c server/ npm run watch:check:tsc
 select-layout tiled
 
 split-window -c server/ npm run watch:prepare:graphql-codegen
+select-layout tiled
+
+split-window -c web/ npm run start
+select-layout tiled
+
+split-window -c web/ npm run watch:prepare
 select-layout tiled
