@@ -4,14 +4,21 @@ import { css, cx } from 'emotion';
 import React from 'react';
 import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
-import { buttonBlockCss, buttonCss, buttonOutlineDarkCss, buttonSuccessCss } from '../util/components/button';
-import { Modal } from '../util/components/modal';
+import {
+  buttonBlockCss,
+  buttonCss,
+  buttonOutlineDarkCss,
+  buttonPrimaryCss,
+  buttonSuccessCss,
+} from '../util/components/button';
+import { gridCss } from '../util/components/grid';
+import { Modal, modalFooterCss, modalHeaderCss } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { SetBasePath, useBasePath } from '../util/paths';
 import {
-  ContestProblemAssignmentUserTacklingSubmissionListModal,
-  contestProblemAssignmentUserTacklingSubmissionListModalFragment,
-} from './contest-problem-assignment-user-tackling-submission-list-modal';
+  ContestProblemAssignmentUserTacklingSubmissionList,
+  contestProblemAssignmentUserTacklingSubmissionListFragment,
+} from './contest-problem-assignment-user-tackling-submission-list';
 import {
   ContestProblemAssignmentUserTacklingSubmitModal,
   contestProblemAssignmentUserTacklingSubmitModalFragment,
@@ -29,11 +36,11 @@ export const contestProblemAssignmentUserTacklingAsideFragment = gql`
     }
 
     ...ContestProblemAssignmentUserTacklingSubmitModal
-    ...ContestProblemAssignmentUserTacklingSubmissionListModal
+    ...ContestProblemAssignmentUserTacklingSubmissionList
   }
 
   ${contestProblemAssignmentUserTacklingSubmitModalFragment}
-  ${contestProblemAssignmentUserTacklingSubmissionListModalFragment}
+  ${contestProblemAssignmentUserTacklingSubmissionListFragment}
 `;
 
 export function ContestProblemAssignmentUserTacklingAside({
@@ -107,7 +114,29 @@ export function ContestProblemAssignmentUserTacklingAside({
           <Route path={`${basePath}/submissions`}>
             {({ match }) => (
               <Modal show={match !== null} onClose={() => history.replace(basePath)}>
-                <ContestProblemAssignmentUserTacklingSubmissionListModal data={data} />
+                <div className={modalHeaderCss}>
+                  <h4>
+                    Submissions for: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                  </h4>
+                </div>
+                <div
+                  className={cx(
+                    gridCss,
+                    css`
+                      padding: 0;
+                      max-height: calc(100vh - 260px);
+                      overflow-y: auto;
+                      width: 80vw;
+                    `,
+                  )}
+                >
+                  <ContestProblemAssignmentUserTacklingSubmissionList data={data} />
+                </div>
+                <div className={modalFooterCss}>
+                  <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
+                    Close
+                  </button>
+                </div>
               </Modal>
             )}
           </Route>
@@ -118,7 +147,25 @@ export function ContestProblemAssignmentUserTacklingAside({
           match !== null && (
             <SetBasePath path={`${basePath}/submission/${(match.params as { id: string }).id}`}>
               <Modal onClose={() => history.replace(basePath)}>
-                <SubmissionLoader id={(match.params as { id: string }).id} />
+                <div
+                  className={css`
+                    width: 80vw;
+                    overflow: auto;
+                  `}
+                >
+                  <div className={modalHeaderCss}>
+                    <h5>
+                      {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
+                      Submission for: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                    </h5>
+                  </div>
+                  <SubmissionLoader id={(match.params as { id: string }).id} />
+                  <div className={modalFooterCss}>
+                    <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
+                      Close
+                    </button>
+                  </div>
+                </div>
               </Modal>
             </SetBasePath>
           )
