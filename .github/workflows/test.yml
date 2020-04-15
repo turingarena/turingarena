@@ -33,7 +33,7 @@ jobs:
         run: |
           BRANCH="${GITHUB_REF##*/}"
           if [[ "${BRANCH}" = "develop" ]] || [[ "${BRANCH}" = "master" ]]; then
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -v server/build/bundle.js turingarena@turingarena.org:${BRANCH}/
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -v server/dist/bundle.js turingarena@turingarena.org:${BRANCH}/
             scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -vr web/build/ turingarena@turingarena.org:${BRANCH}/
           fi
 
