@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColDef } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { css } from 'emotion';
@@ -85,11 +86,20 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
       }) => (
         <Link
           className={css`
-            display: block;
+            display: flex;
           `}
           to={`${basePath}/submission/${submission.id}`}
         >
           {DateTime.fromISO(submission.createdAt.local).toRelative() ?? `${submission.createdAt.local}`}
+          {submission.officialEvaluation?.status === 'PENDING' && (
+            <span
+              className={css`
+                margin-left: auto;
+              `}
+            >
+              <FontAwesomeIcon icon="spinner" pulse />
+            </span>
+          )}
         </Link>
       ),
     },
