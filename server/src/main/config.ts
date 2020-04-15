@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { readFileSync } from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
 import { Options } from 'sequelize';
 
@@ -11,6 +11,46 @@ export interface Config {
     cachePath: string;
     skipAuth: boolean;
     secret: string;
+    webRoot: string;
+}
+
+const webPaths = [
+    '/usr/local/share/turingarena/webnode',
+    '/usr/share/turingarena/web',
+    `${process.env.HOME}/.local/share/turingarena/web`,
+];
+
+const configPaths = [
+    '/usr/local/etc/turingarena.conf.json',
+    '/etc/turingarena.conf.json',
+    `${process.env.HOME}/.config/turingarena/turingarena.conf.json`,
+    `${process.cwd()}/.turingarena.conf.json`,
+];
+
+function firstPath(paths: string[]) {
+    for (const p of paths) {
+        if (fs.existsSync(p)) {
+            return p;
+        }
+    }
+
+    return null;
+}
+
+function findWebRoot() {
+    let dir = firstPath(webPaths);
+
+    if (dir !== null) {
+        return dir;
+    }
+
+    dir = process.cwd();
+
+    while (!fs.existsSync(path.join(dir, 'web')) && dir !== '/') {
+        dir = path.resolve(dir, '../');
+    }
+
+    return path.join(dir, 'web/dist/turingarena-web');
 }
 
 export const defaultConfig: Config = {
@@ -24,12 +64,17 @@ export const defaultConfig: Config = {
     skipAuth: false,
     secret: randomBytes(48).toString('hex'),
     cachePath: path.join(process.env.HOME ?? '/tmp', '.cache/turingarena/'),
+    webRoot: findWebRoot(),
 };
 
 export function loadConfig(configPath?: string): Config {
-    if (configPath === undefined) return defaultConfig;
+    const configFile = configPath ?? firstPath(configPaths);
 
-    const config = JSON.parse(readFileSync(configPath).toString()) as Config;
+    if (configFile === null) {
+        return defaultConfig;
+    }
+
+    const config = JSON.parse(fs.readFileSync(configFile).toString()) as Config;
 
     return { ...defaultConfig, ...config };
 }
