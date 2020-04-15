@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import { cx } from 'emotion';
+import { css, cx } from 'emotion';
 import React from 'react';
 import {
   ColumnFragment,
@@ -21,7 +21,7 @@ import { textFragment } from './text';
 
 export interface ColumnDefinition {
   def: ColDef;
-  mainClasses?: string[];
+  mainClass?: string;
   getCellData(
     field: FieldFragment,
   ): {
@@ -52,18 +52,24 @@ export class ColumnMeta<T extends ColumnFragment> {
   constructor(readonly typename: T['__typename'], readonly createColumnDefinition: (column: T) => ColumnDefinition) {}
 }
 
+const numericCellCss = css`
+  text-align: right;
+`;
+
 const metas = [
   new ColumnMeta<FulfillmentColumn>('FulfillmentColumn', c => ({
     def: {
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
-    mainClasses: ['numeric-cell'],
+    mainClass: css`
+      text-align: center;
+    `,
     getCellData: field => {
       check(field.__typename === 'FulfillmentField', `expected FulfillmentField, got ${field.__typename}`);
 
       return {
-        value: field.fulfilled,
+        value: field.fulfilled !== null ? (field.fulfilled ? 1 : 0) : null,
         tooltip: field.fulfilled !== null ? `${c.title.variant}: ${field.fulfilled ? 'Yes' : 'No'}` : undefined,
       };
     },
@@ -73,7 +79,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
-    mainClasses: ['numeric-cell'],
+    mainClass: numericCellCss,
     getCellData: field => {
       check(field.__typename === 'ScoreField', `expected ScoreField, got ${field.__typename}`);
 
@@ -91,7 +97,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
-    mainClasses: ['numeric-cell'],
+    mainClass: numericCellCss,
     getCellData: field => {
       check(field.__typename === 'IndexField', `expected IndexField, got ${field.__typename}`);
 
@@ -120,7 +126,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
-    mainClasses: ['numeric-cell'],
+    mainClass: numericCellCss,
     getCellData: field => {
       check(field.__typename === 'TimeUsageField', `expected TimeUsageField, got ${field.__typename}`);
 
@@ -132,7 +138,7 @@ const metas = [
       sortable: true,
       filter: 'agNumberColumnFilter',
     },
-    mainClasses: ['numeric-cell'],
+    mainClass: numericCellCss,
     getCellData: field => {
       check(field.__typename === 'MemoryUsageField', `expected MemoryUsageField, got ${field.__typename}`);
 
@@ -142,6 +148,7 @@ const metas = [
   new ColumnMeta<MessageColumn>('MessageColumn', c => ({
     def: {
       filter: 'agTextColumnFilter',
+      flex: 1,
     },
     getCellData: field => {
       check(field.__typename === 'MessageField', `expected MessageField, got ${field.__typename}`);
@@ -158,7 +165,7 @@ export const getFieldColumns = <T extends {}>(
   columns.map(
     (c, i): ColDef => {
       const meta = metas.find(m => m.typename === c.__typename) as ColumnMeta<typeof c>;
-      const { def, mainClasses, getCellData } = meta.createColumnDefinition(c);
+      const { def, mainClass: mainClasses, getCellData } = meta.createColumnDefinition(c);
 
       function getField({ data }: { data?: T }) {
         return recordExtractor(data!).fields[i];
@@ -168,6 +175,7 @@ export const getFieldColumns = <T extends {}>(
         colId: `custom.${i}`,
         headerName: c.title.variant,
         resizable: true,
+        width: 100,
 
         valueGetter: params => getCellData(getField(params)).value,
         tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',

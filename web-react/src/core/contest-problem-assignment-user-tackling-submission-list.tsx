@@ -68,6 +68,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
       sortable: true,
       sort: 'desc',
       sortingOrder: ['desc', 'asc', null] as string[],
+      flex: 1,
       valueGetter: ({
         data: submission,
       }: {
