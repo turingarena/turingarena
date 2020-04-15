@@ -6,7 +6,7 @@ import React from 'react';
 import { RecordFragment, SubmissionModalFragment } from '../generated/graphql-types';
 import { buttonCss, buttonPrimaryCss } from '../util/components/button';
 import { gridCss } from '../util/components/grid';
-import { modalBodyCss, modalFooterCss, modalHeaderCss } from '../util/components/modal';
+import { modalFooterCss, modalHeaderCss } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { columnFragment, getFieldColumns, recordFragment } from './field-table';
 import { textFragment } from './text';
