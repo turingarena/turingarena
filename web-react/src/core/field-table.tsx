@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import { cx } from 'emotion';
 import React from 'react';
 import {
   ColumnFragment,
@@ -12,6 +13,7 @@ import {
   ScoreColumn,
   TimeUsageColumn,
   TitleColumn,
+  Valence,
 } from '../generated/graphql-types';
 import { check } from '../util/check';
 import { Field, fieldFragment } from './fields/field';
@@ -26,6 +28,24 @@ export interface ColumnDefinition {
     value: unknown;
     tooltip?: string;
   };
+}
+
+const cellValenceSuccessCss = 'table-success';
+const cellValenceDangerCss = 'table-danger';
+const cellValenceWarningCss = 'table-warning';
+
+function getCellClassByValence(valence: Valence | null) {
+  switch (valence) {
+    case 'SUCCESS':
+      return cellValenceSuccessCss;
+    case 'PARTIAL':
+    case 'WARNING':
+      return cellValenceWarningCss;
+    case 'FAILURE':
+      return cellValenceDangerCss;
+    default:
+      return undefined;
+  }
 }
 
 export class ColumnMeta<T extends ColumnFragment> {
@@ -153,11 +173,8 @@ export const getFieldColumns = <T extends {}>(
         tooltipValueGetter: params => getCellData(getField(params)).tooltip ?? '',
         cellClass: params => {
           const field = getField(params);
-          if ('valence' in field) {
-            return [...(mainClasses ?? []), `valence-${field.valence}`];
-          } else {
-            return [...(mainClasses ?? [])];
-          }
+
+          return cx(mainClasses, getCellClassByValence('valence' in field ? field.valence : null));
         },
         cellRendererFramework: (props: ICellRendererParams) => <Field data={getField(props)} />,
         ...def,

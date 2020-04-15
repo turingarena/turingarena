@@ -48,6 +48,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionListModal({
             padding: 0;
             max-height: calc(100vh - 260px);
             overflow-y: auto;
+            width: 80vw;
           `,
         )}
       >
