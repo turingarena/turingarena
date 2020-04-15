@@ -68,7 +68,14 @@ export function ContestProblemAssignmentUserTacklingAside({
         <>
           <button
             onClick={() => setShowLastSubmissionModal(true)}
-            className={cx(buttonCss, buttonBlockCss, buttonOutlineDarkCss)}
+            className={cx(
+              buttonCss,
+              buttonBlockCss,
+              buttonOutlineDarkCss,
+              css`
+                margin-top: 0.5rem !important; /* FIXME: Bootstrap messes up */
+              `,
+            )}
           >
             {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="history" />}
             {lastSubmission.officialEvaluation?.status === 'PENDING' && (
@@ -76,12 +83,22 @@ export function ContestProblemAssignmentUserTacklingAside({
             )}{' '}
             Last submission
           </button>
+          <button
+            className={cx(
+              buttonCss,
+              buttonBlockCss,
+              buttonOutlineDarkCss,
+              css`
+                margin-top: 0.5rem !important; /* FIXME: Bootstrap messes up */
+              `,
+            )}
+          >
+            <FontAwesomeIcon icon="list" /> All submissions
+          </button>
+
           <Modal show={showLastSubmissionModal} onClose={() => setShowLastSubmissionModal(false)}>
             <SubmissionModal data={lastSubmission} />
           </Modal>
-          <button className={cx(buttonCss, buttonBlockCss, buttonOutlineDarkCss)}>
-            <FontAwesomeIcon icon="list" /> All submissions
-          </button>
         </>
       )}
     </div>
