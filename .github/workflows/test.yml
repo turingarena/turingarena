@@ -33,7 +33,7 @@ jobs:
         run: |
           BRANCH="${GITHUB_REF##*/}"
           if [[ "${BRANCH}" = "develop" ]] || [[ "${BRANCH}" = "master" ]]; then
-            tar -cvzf build.tar.gz server/build server/node_modules web/dist
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r build.tar.gz turingarena@turingarena.org:${BRANCH}/
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -v server/build/bundle.js turingarena@turingarena.org:${BRANCH}/
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -vr web/build/ turingarena@turingarena.org:${BRANCH}/
           fi
 
