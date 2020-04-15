@@ -1,45 +1,25 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    // Angular TypeScript compilation options
-    "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "es2015",
-    "typeRoots": [
-      "node_modules/@types",
-      "./src/types"
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
-    "lib": ["es2018", "dom"],
-
-    // Custom TypeScript compilation options
-    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": true,
-
-    // Custom TypeScript code-style options
     "strict": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-
-    "allowJs": true,
-    "checkJs": true
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react"
   },
-  "angularCompilerOptions": {
-    "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
-  },
-  "include": ["src/"]
+  "include": [
+    "src"
+  ]
 }

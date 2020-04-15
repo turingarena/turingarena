@@ -1,5 +1,0 @@
-<ng-container [ngSwitch]="data.variant.type">
-  <markdown class="inline-file-markdown" *ngSwitchCase="'text/markdown'" katex [src]="data.variant.url"></markdown>
-  <iframe *ngSwitchDefault class="inline-file-iframe"
-    [attr.src]="data.variant.url | bypassSanitizer: 'ResourceUrl'"></iframe>
-</ng-container>

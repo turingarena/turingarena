@@ -1,5 +1,7 @@
 schema: ../server/src/generated/graphql.schema.graphql
-documents: ./src/**/*.ts
+documents:
+  - ./src/**/*.ts
+  - ./src/**/*.tsx
 generates:
   ./src/generated/graphql-types.ts:
     schema: src/client-schema.graphql
@@ -14,3 +16,9 @@ generates:
     schema: src/client-schema.graphql
     plugins:
       - introspection
+  ./src/generated/possible-types.ts:
+    schema: src/client-schema.graphql
+    plugins:
+      - fragment-matcher
+    config:
+      apolloClientVersion: 3

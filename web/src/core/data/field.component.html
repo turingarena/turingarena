@@ -1,9 +1,0 @@
-<ng-container [ngSwitch]="data.__typename">
-  <app-score-field *ngSwitchCase="'ScoreField'" [data]="data"></app-score-field>
-  <app-fulfillment-field *ngSwitchCase="'FulfillmentField'" [data]="data"></app-fulfillment-field>
-  <app-memory-usage-field *ngSwitchCase="'MemoryUsageField'" [data]="data"></app-memory-usage-field>
-  <app-time-usage-field *ngSwitchCase="'TimeUsageField'" [data]="data"></app-time-usage-field>
-  <app-message-field *ngSwitchCase="'MessageField'" [data]="data"></app-message-field>
-  <app-title-field *ngSwitchCase="'TitleField'" [data]="data"></app-title-field>
-  <app-index-field *ngSwitchCase="'IndexField'" [data]="data"></app-index-field>
-</ng-container>

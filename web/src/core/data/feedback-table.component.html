@@ -1,7 +1,0 @@
-<ag-grid-angular class="ag-theme-balham" domLayout="autoHeight" [rowData]="records"
-  [columnDefs]="columns | applyPure: getColumns" (gridSizeChanged)="$event.api.sizeColumnsToFit()">
-</ag-grid-angular>
-
-<ng-template #cellRendererTemplate let-field="field">
-  <app-field *ngIf="field" [data]="field"></app-field>
-</ng-template>

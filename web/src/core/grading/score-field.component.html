@@ -1,9 +1,0 @@
-<span [appValence]="data.valence">
-  <ng-container *ngIf="data.score === $any(null)">
-    <span class="score-max"> + {{ data.scoreRange.max.toFixed(data.scoreRange.decimalDigits) }}</span>
-  </ng-container>
-  <ng-container *ngIf="data.score !== $any(null)">
-    <span class="score-value">{{ data.score!.toFixed(data.scoreRange.decimalDigits) }}</span>
-    <span class="score-max"> / {{ data.scoreRange.max.toFixed(data.scoreRange.decimalDigits) }}</span>
-  </ng-container>
-</span>
