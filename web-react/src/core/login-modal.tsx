@@ -145,7 +145,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           Cancel
         </button>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
-          Log In
+          Log in
         </button>
       </div>
     </form>
