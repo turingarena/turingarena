@@ -1,5 +1,7 @@
-import { css } from 'emotion';
-import React from 'react';
+import { css, cx } from 'emotion';
+import React, { useEffect, useState } from 'react';
+import { useAsync } from '../async-hook';
+import { animationFrame, delay } from '../delay';
 
 interface Props {
   onClose: () => void;
@@ -12,40 +14,50 @@ export const modalBodyCss = 'modal-body';
 export const modalFooterCss = 'modal-footer';
 
 export function Modal({ onClose, show = true, children }: Props) {
-  return show ? (
+  const [show1, setShow1] = useState(false);
+  const [show2, setShow2] = useState(false);
+
+  const [animate, { loading: animating }] = useAsync(async () => {
+    if (show) {
+      setShow1(show);
+      await animationFrame();
+      setShow2(show);
+    } else {
+      setShow2(show);
+      await delay(300);
+      await animationFrame();
+      setShow1(show);
+    }
+  });
+
+  useEffect(() => {
+    if (!animating) {
+      animate().catch(e => console.error(e));
+    }
+  }, [show]);
+
+  return (
     <>
+      {show1 && <div className={cx('modal-backdrop', 'fade', ...(show2 ? ['show'] : []))}></div>}
       <div
         onClick={onClose}
-        className={css`
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 100;
-          background-color: rgba(0, 0, 0, 0.5);
-        `}
-      />
-
-      <div
-        className={css`
-          align-self: center;
-          position: fixed;
-          border-radius: 5px;
-          top: 70px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 101;
-          background-color: white;
-          background-clip: padding-box;
-          border: 1px solid rgba(0, 0, 0, 0.2);
-          padding: 1rem;
-        `}
+        className={cx(
+          'modal',
+          'fade',
+          ...(show1
+            ? [
+                css`
+                  display: block;
+                `,
+              ]
+            : []),
+          ...(show2 ? ['show'] : []),
+        )}
       >
-        {children}
+        <div className="modal-dialog">
+          <div className="modal-content">{children}</div>
+        </div>
       </div>
     </>
-  ) : (
-    <></>
   );
 }
