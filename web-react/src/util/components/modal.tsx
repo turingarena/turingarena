@@ -32,9 +32,11 @@ export function Modal({ onClose, show = true, children }: Props) {
 
   useEffect(() => {
     if (!animating) {
-      animate().catch(e => console.error(e));
+      animate();
     }
   }, [show]);
+
+  if (!show1) return <></>;
 
   return (
     <>
@@ -45,7 +47,9 @@ export function Modal({ onClose, show = true, children }: Props) {
           ...(show1
             ? [
                 css`
-                  display: block;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
                   pointer-events: none;
                 `,
               ]
@@ -53,23 +57,29 @@ export function Modal({ onClose, show = true, children }: Props) {
           ...(show2 ? ['show'] : []),
         )}
       >
-        <div className={cx('modal-dialog')}>
+        <div
+          className={cx(
+            'modal-dialog',
+            css`
+              width: auto;
+              max-width: none;
+            `,
+          )}
+        >
           <div className={cx('modal-content')}>{children}</div>
         </div>
       </div>
-      {show1 && (
-        <div
-          className={cx(
-            'modal-backdrop',
-            'fade',
-            ...(show2 ? ['show'] : []),
-            // css`
-            //   z-index: 1051;
-            // `,
-          )}
-          onClick={onClose}
-        ></div>
-      )}
+      <div
+        className={cx(
+          'modal-backdrop',
+          'fade',
+          ...(show2 ? ['show'] : []),
+          // css`
+          //   z-index: 1051;
+          // `,
+        )}
+        onClick={onClose}
+      ></div>
     </>
   );
 }

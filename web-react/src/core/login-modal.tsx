@@ -5,10 +5,20 @@ import React, { useState } from 'react';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
 import { useAsync } from '../util/async-hook';
 import { useAuth } from '../util/auth';
-import { buttonCss, buttonNormalizeCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
+import { buttonCss, buttonOutlineSecondaryCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
+import {
+  formControlCss,
+  formTextCss,
+  inputGroupAppendCss,
+  inputGroupCss,
+  invalidCss,
+  invalidFeedbackCss,
+} from '../util/components/form';
+import { modalBodyCss, modalFooterCss } from '../util/components/modal';
+
+class InvalidTokenError extends Error {}
 
 export function LoginModal({ onClose }: { onClose: () => void }) {
-  const [invalidToken, setInvalidToken] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const [token, setToken] = useState('');
@@ -26,7 +36,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     }
   `);
 
-  const [logIn, { loading, error }] = useAsync(async () => {
+  const [logIn, { loading, error, successful }] = useAsync(async () => {
     const { data } = await logInMutate({
       variables: {
         token,
@@ -35,13 +45,11 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     });
 
     if (data === null || data === undefined) {
-      throw Error('error during login');
+      throw new Error('error during login');
     }
 
     if (data.logIn === null) {
-      setInvalidToken(true);
-
-      return;
+      throw new InvalidTokenError('invalid token');
     }
 
     auth.setAuth({
@@ -54,15 +62,16 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <form
-      onSubmit={async e => {
+      onSubmit={e => {
         e.preventDefault();
-        await logIn();
+        logIn();
       }}
       className={css`
         display: flex;
         flex: 1;
         flex-direction: column;
         align-items: space-between;
+        width: 28rem;
       `}
     >
       <div
@@ -72,79 +81,52 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           flex-direction: column;
         `}
       >
-        <label
-          htmlFor="token"
-          className={css`
-            font-size: 20pt;
-          `}
-        >
-          Token
-        </label>
-        <div
-          className={css`
-            position: relative;
-            display: inline-block;
-          `}
-        >
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={token}
-            autoFocus
-            onChange={e => setToken(e.target.value)}
-            className={css`
-              width: 100%;
-              border-width: 0 0 2px;
-              font-size: 16pt;
-
-              &:focus {
-                outline: none;
-              }
-            `}
-          />
-          <button
-            onClick={e => {
-              setShowPassword(!showPassword);
-              e.preventDefault();
-            }}
-            type="button"
-            className={cx(
-              buttonNormalizeCss,
-              css`
-                position: absolute;
-                right: 5px;
-                bottom: 4px;
-                cursor: pointer;
-              `,
-            )}
-          >
-            <FontAwesomeIcon
-              icon={showPassword ? 'eye-slash' : 'eye'}
-              style={{ width: '20px' }} // HACK: 20 is the max between the widths of the two icons
+        <div className={cx(modalBodyCss)}>
+          <label htmlFor="token">Token</label>
+          <div className={cx(inputGroupCss, error instanceof InvalidTokenError ? [invalidCss] : undefined)}>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={token}
+              autoFocus
+              onChange={e => setToken(e.target.value)}
+              className={cx(formControlCss, error instanceof InvalidTokenError ? [invalidCss] : undefined)}
             />
-          </button>
-        </div>
-        <div
-          className={css`
-            margin-top: 1px;
-          `}
-        >
-          {loading && <small>Logging in...</small>}
-          {error !== undefined && <small>Cannot login: {error.message}</small>}
-          {!loading && !invalidToken && error === undefined && (
-            <small>
-              Insert the token or password provided to you.
-              <br />
-              No username needed.
-            </small>
+            <div className={inputGroupAppendCss}>
+              <button
+                onClick={e => {
+                  setShowPassword(!showPassword);
+                  e.preventDefault();
+                }}
+                type="button"
+                className={cx(
+                  buttonCss,
+                  buttonOutlineSecondaryCss,
+                  css`
+                    cursor: pointer;
+                  `,
+                )}
+              >
+                <FontAwesomeIcon
+                  icon={showPassword ? 'eye-slash' : 'eye'}
+                  style={{ width: '20px' }} // HACK: 20 is the max between the widths of the two icons
+                />
+              </button>
+            </div>
+          </div>
+          {loading ? (
+            <small className={cx(formTextCss)}>Logging in...</small>
+          ) : error instanceof InvalidTokenError ? (
+            <small className={cx(invalidFeedbackCss)}>Invalid token, please try again.</small>
+          ) : error !== undefined ? (
+            <small className={cx(invalidFeedbackCss)}>{error.message}</small>
+          ) : successful ? (
+            <small className={cx(formTextCss)}>Logged in!</small>
+          ) : (
+            <small className={cx(formTextCss)}>Insert the token or password provided to you. No username needed.</small>
           )}
-          {!loading && invalidToken && error === undefined && <small>Invalid token.</small>}
         </div>
       </div>
-      <div
-        className={css`
-          align-self: flex-end;
-        `}
-      >
+      <div className={modalFooterCss}>
         <button
           className={cx(
             buttonCss,
