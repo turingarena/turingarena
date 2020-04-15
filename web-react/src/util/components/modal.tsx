@@ -38,9 +38,7 @@ export function Modal({ onClose, show = true, children }: Props) {
 
   return (
     <>
-      {show1 && <div className={cx('modal-backdrop', 'fade', ...(show2 ? ['show'] : []))}></div>}
       <div
-        onClick={onClose}
         className={cx(
           'modal',
           'fade',
@@ -48,16 +46,30 @@ export function Modal({ onClose, show = true, children }: Props) {
             ? [
                 css`
                   display: block;
+                  pointer-events: none;
                 `,
               ]
             : []),
           ...(show2 ? ['show'] : []),
         )}
       >
-        <div className="modal-dialog">
-          <div className="modal-content">{children}</div>
+        <div className={cx('modal-dialog')}>
+          <div className={cx('modal-content')}>{children}</div>
         </div>
       </div>
+      {show1 && (
+        <div
+          className={cx(
+            'modal-backdrop',
+            'fade',
+            ...(show2 ? ['show'] : []),
+            // css`
+            //   z-index: 1051;
+            // `,
+          )}
+          onClick={onClose}
+        ></div>
+      )}
     </>
   );
 }
