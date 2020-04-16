@@ -4,6 +4,7 @@
     "license": "MPL-2.0",
     "repository": "github:turingarena/turingarena",
     "version": "0.2.0-dev",
+    "main": "./index.js",
     "public": true,
     "bin": {
         "turingarena": "./dist/src/cli/index.js",
