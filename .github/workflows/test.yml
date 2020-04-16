@@ -17,9 +17,9 @@ jobs:
       - name: Build backend
         run: npm ci
         working-directory: server/
-      - name: Run all backend tests
-        run: npm run check
-        working-directory: server/
+      # - name: Run all backend tests
+      #   run: npm run check
+      #   working-directory: server/
       - name: Build frontend
         run: CI=false npm ci
         working-directory: web/
