@@ -33,7 +33,7 @@ export function MainLoader() {
 
   useEffect(() => {
     if ((data?.mainView.pendingSubmissions?.length ?? 0) > 0) {
-      startPolling(1000);
+      startPolling(500);
     } else {
       startPolling(30000);
     }

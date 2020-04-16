@@ -17,7 +17,6 @@ export function SubmissionLoader({ id }: { id: string }) {
     {
       variables: { id },
       fetchPolicy: 'cache-and-network',
-      pollInterval: 30000,
     },
   );
 
