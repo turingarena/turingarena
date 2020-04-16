@@ -31,7 +31,8 @@ jobs:
       - name: Deploy
         if: github.ref == 'refs/heads/master'
         run: |
+          export CI=false
           echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > ~/.npmrc
           (cd server/ && npm publish)
-          (cd web/ && npm publish)
+          (cd web/ && CI=false npm publish)
           (cd turingarena/ && npm publish)
