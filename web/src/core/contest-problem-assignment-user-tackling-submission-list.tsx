@@ -109,5 +109,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
     ),
   ];
 
-  return <AgGridReact domLayout="autoHeight" columnDefs={columns} rowData={data.submissions} />;
+  const rowData = JSON.parse(JSON.stringify(data.submissions)) as typeof data.submissions; // allow AgGrid to mess with this data
+
+  return <AgGridReact domLayout="autoHeight" columnDefs={columns} rowData={rowData} />;
 }

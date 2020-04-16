@@ -41,6 +41,8 @@ export const submissionFragment = gql`
 `;
 
 export function Submission({ data }: FragmentProps<SubmissionFragment>) {
+  const rowData = JSON.parse(JSON.stringify(data.feedbackTable.rows)) as typeof data.feedbackTable.rows; // allow AgGrid to mess with this data
+
   return (
     <>
       <div
@@ -61,7 +63,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
         <AgGridReact
           columnDefs={getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row)}
           domLayout="autoHeight"
-          rowData={data.feedbackTable.rows}
+          rowData={rowData}
         />
       </div>
     </>
