@@ -246,12 +246,14 @@ export class SubmissionApi extends ApiObject {
             rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
                 fields: [
                     {
-                        __typename: 'IndexField',
+                        __typename: 'HeaderField',
                         index: awardIndex,
+                        title: [{ value: `Subtask ${awardIndex}` }],
                     },
                     {
-                        __typename: 'IndexField',
+                        __typename: 'HeaderField',
                         index: testCaseIndex,
+                        title: [{ value: `Case ${testCaseIndex}` }],
                     },
                     {
                         __typename: 'TimeUsageField',

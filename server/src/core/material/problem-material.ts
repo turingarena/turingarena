@@ -195,11 +195,11 @@ export class ProblemMaterial {
 
     evaluationFeedbackColumns = [
         {
-            __typename: 'IndexColumn',
+            __typename: 'HeaderColumn',
             title: [{ value: 'Subtask' }],
         },
         {
-            __typename: 'IndexColumn',
+            __typename: 'HeaderColumn',
             title: [{ value: 'Case' }],
         },
         {

@@ -6,13 +6,12 @@ import {
   ColumnFragment,
   FieldFragment,
   FulfillmentColumn,
-  IndexColumn,
+  HeaderColumn,
   MemoryUsageColumn,
   MessageColumn,
   RecordFragment,
   ScoreColumn,
   TimeUsageColumn,
-  TitleColumn,
   Valence,
 } from '../generated/graphql-types';
 import { check } from '../util/check';
@@ -92,28 +91,13 @@ const metas = [
       };
     },
   })),
-  new ColumnMeta<IndexColumn>('IndexColumn', c => ({
-    def: {
-      sortable: true,
-      filter: 'agNumberColumnFilter',
-    },
-    mainClass: numericCellCss,
-    getCellData: field => {
-      check(field.__typename === 'IndexField', `expected IndexField, got ${field.__typename}`);
-
-      return {
-        value: field.index,
-        tooltip: `${c.title.variant} ${field.index}`,
-      };
-    },
-  })),
-  new ColumnMeta<TitleColumn>('TitleColumn', c => ({
+  new ColumnMeta<HeaderColumn>('HeaderColumn', c => ({
     def: {
       sortable: true,
       filter: 'agTextColumnFilter',
     },
     getCellData: field => {
-      check(field.__typename === 'TitleField', `expected TitleField, got ${field.__typename}`);
+      check(field.__typename === 'HeaderField', `expected HeaderField, got ${field.__typename}`);
 
       return {
         value: field.title,

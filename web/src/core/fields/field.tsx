@@ -4,11 +4,10 @@ import { FieldFragment } from '../../generated/graphql-types';
 import { unexpected } from '../../util/check';
 import { FragmentProps } from '../../util/fragment-props';
 import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
-import { IndexField, indexFieldFragment } from './index-field';
+import { HeaderField, headerFieldFragment } from './header-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
 import { MessageField, messageFieldFragment } from './message-field';
 import { TimeUsageField, timeUsageFieldFragment } from './time-usage-field';
-import { TitleField, titleFieldFragment } from './title-field';
 
 export function Field({ data }: FragmentProps<FieldFragment>) {
   switch (data.__typename) {
@@ -22,10 +21,8 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
       return <ScoreField data={data} />;
     case 'MessageField':
       return <MessageField data={data} />;
-    case 'TitleField':
-      return <TitleField data={data} />;
-    case 'IndexField':
-      return <IndexField data={data} />;
+    case 'HeaderField':
+      return <HeaderField data={data} />;
     default:
       return unexpected(data);
   }
@@ -39,11 +36,8 @@ export const fieldFragment = gql`
     ... on ScoreField {
       ...ScoreField
     }
-    ... on IndexField {
-      ...IndexField
-    }
-    ... on TitleField {
-      ...TitleField
+    ... on HeaderField {
+      ...HeaderField
     }
     ... on MessageField {
       ...MessageField
@@ -56,11 +50,10 @@ export const fieldFragment = gql`
     }
   }
 
+  ${headerFieldFragment}
   ${fulfillmentFieldFragment}
   ${scoreFieldFragment}
-  ${indexFieldFragment}
   ${memoryUsageFieldFragment}
   ${messageFieldFragment}
   ${timeUsageFieldFragment}
-  ${titleFieldFragment}
 `;
