@@ -26,7 +26,7 @@ jobs:
         run: npm run check
         working-directory: server/
       - name: Build frontend
-        run: npm ci
+        run: CI=false npm ci
         working-directory: web/
       - name: Deploy
         if: github.ref == 'refs/heads/master'
