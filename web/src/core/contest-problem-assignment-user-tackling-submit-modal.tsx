@@ -1,6 +1,6 @@
 import { gql, useMutation } from '@apollo/client';
 import { css, cx } from 'emotion';
-import React, { useRef, useState } from 'react';
+import React, { InputHTMLAttributes, useRef, useState } from 'react';
 import {
   ContestProblemAssignmentUserTacklingSubmitModalFragment,
   ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
@@ -125,8 +125,13 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
     }
   });
 
+  const [valid, setValid] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+
   return (
     <form
+      ref={formRef}
+      onChange={e => setValid((e.target as HTMLFormElement).checkValidity())}
       onSubmit={e => {
         e.preventDefault();
         loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
@@ -150,12 +155,17 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
         )}
       >
         {data.assignmentView.assignment.problem.submissionFields.map(f => (
-          <FileInput key={f.name} data={data} field={f} />
+          <FileInput
+            key={f.name}
+            data={data}
+            field={f}
+            onChange={() => setValid(formRef.current?.checkValidity() ?? false)}
+          />
         ))}
       </div>
       {error !== undefined && <>Error in submission: {error.message}</>}
       <div className={modalFooterCss}>
-        <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
+        <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading || !valid} type="submit">
           Submit
         </button>
       </div>
@@ -166,9 +176,11 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
 function FileInput({
   data,
   field,
+  onChange,
+  ...rest
 }: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
   field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment;
-}) {
+} & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
   const fileInput = useRef<HTMLInputElement>(null);
@@ -192,7 +204,12 @@ function FileInput({
         name={fileFieldId}
         ref={fileInput}
         type="file"
-        onChange={e => setFile(e.target.files !== null ? e.target.files[0] : null)}
+        required
+        onChange={e => {
+          setFile(e.target.files !== null ? e.target.files[0] ?? null : null);
+          if (onChange !== undefined) onChange(e);
+        }}
+        {...rest}
       />
       <button
         className={cx(buttonCss, buttonPrimaryCss)}
