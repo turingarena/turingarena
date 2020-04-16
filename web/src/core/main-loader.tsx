@@ -11,10 +11,14 @@ export function MainLoader() {
     restoreAuth();
   }, [restoreAuth]); // load auth data from local storage when first displayed
 
-  const { loading, error, data } = useQuery<MainQuery, MainQueryVariables>(
+  const { loading, error, data, startPolling } = useQuery<MainQuery, MainQueryVariables>(
     gql`
       query Main($username: ID) {
         mainView(username: $username) {
+          pendingSubmissions {
+            id
+          }
+
           ...MainView
         }
       }
@@ -24,9 +28,16 @@ export function MainLoader() {
     {
       variables: { username: auth?.currentAuth?.username ?? null },
       fetchPolicy: 'cache-and-network',
-      pollInterval: 30000,
     },
   );
+
+  useEffect(() => {
+    if ((data?.mainView.pendingSubmissions?.length ?? 0) > 0) {
+      startPolling(1000);
+    } else {
+      startPolling(30000);
+    }
+  }, [data]);
 
   if (data === undefined && loading) return <>Loading...</>;
   if (error !== undefined) return <>Error! {error.message}</>;

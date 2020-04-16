@@ -8,7 +8,10 @@ import { User, UserApi } from './user';
 
 export const querySchema = gql`
     type Query {
-        mainView(username: ID): MainView!
+        """
+        Data visible in a front page, i.e., to contestants.
+        """
+        mainView("Name of the user viewing the front page, if logged in" username: ID): MainView!
 
         users: [User!]!
         user(username: ID!): User!

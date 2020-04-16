@@ -80,6 +80,13 @@ export class SubmissionApi extends ApiObject {
                 .table(Submission)
                 .findAll({ where: { problemId, contestId, userId }, order: [['createdAt', 'ASC']] }),
     );
+    pendingByUser = createSimpleLoader(async (userId: string) => {
+        // TODO: denormalize DB to make this code simpler and faster
+        const submissions = await this.ctx.table(Submission).findAll({ where: { userId } });
+        const officalEvaluations = await Promise.all(submissions.map(async s => this.getOfficialEvaluation(s)));
+
+        return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
+    });
 
     async getContestProblemAssignment(s: Submission): Promise<ContestProblemAssignment> {
         return this.ctx
