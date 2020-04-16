@@ -1,0 +1,12 @@
+{
+    "name": "turingarena",
+    "description": "A platform to host programming competitions",
+    "license": "MPL-2.0",
+    "repository": "github:turingarena/turingarena",
+    "version": "0.2.%BUILD_NUMBER%",
+    "bin": "./bin/turingarena.js",
+    "dependencies": {
+        "turingarena-web": "0.1.3",
+        "turingarena-server": "0.1.2"
+    }
+}

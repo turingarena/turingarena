@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { loadConfig } from '../src/main/config';
 import { serve } from '../src/main/server';
 

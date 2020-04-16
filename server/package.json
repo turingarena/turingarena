@@ -1,6 +1,18 @@
 {
     "name": "turingarena-server",
-    "private": true,
+    "description": "A platform to host programming competitions",
+    "license": "MPL-2.0",
+    "repository": "github:turingarena/turingarena",
+    "version": "0.2.%BUILD_NUMBER%",
+    "main": "./dist/src/index.ts",
+    "public": true,
+    "exports": {
+        "./": "./dist/src/"
+    },
+    "bin": {
+        "turingarena": "dist/src/cli/index.js",
+        "turingarena-serve": "dist/scripts/serve.js"
+    },
     "scripts": {
         "prepare": "npm-run-all --sequential prepare:*",
         "check": "npm-run-all --sequential check:*",
@@ -20,10 +32,9 @@
         "watch:check:test": "jest --watch",
         "start": "npm run watch:serve",
         "cli": "ts-node -T src/cli/index.ts",
-        "build": "webpack"
+        "prepare:build": "tsc"
     },
     "dependencies": {
-        "@types/commander": "^2.12.2",
         "apollo-server-core": "^2.9.16",
         "apollo-server-express": "^2.9.16",
         "commander": "^4.1.0",
@@ -53,6 +64,7 @@
         "@graphql-codegen/typescript-operations": "^1.11.2",
         "@graphql-codegen/typescript-resolvers": "1.11.2",
         "@types/bluebird": "^3.5.29",
+        "@types/commander": "^2.12.2",
         "@types/jest": "^24.9.0",
         "@types/jsonwebtoken": "^8.3.7",
         "@types/listr": "^0.14.2",
@@ -78,8 +90,6 @@
         "tslint": "^5.20.1",
         "tslint-config-prettier": "^1.18.0",
         "tslint-plugin-prettier": "^2.1.0",
-        "typescript": "^3.7.5",
-        "webpack": "^4.42.1",
-        "webpack-cli": "^3.3.11"
+        "typescript": "^3.7.5"
     }
 }

@@ -38,6 +38,10 @@ function firstPath(paths: string[]) {
 }
 
 function findWebRoot() {
+    try {
+        return path.join(require.resolve('turingarena-web'), '..', 'build');
+    } catch (e) {}
+
     let dir = firstPath(webPaths);
 
     if (dir !== null) {
@@ -50,7 +54,7 @@ function findWebRoot() {
         dir = path.resolve(dir, '../');
     }
 
-    return path.join(dir, 'web/dist/turingarena-web');
+    return path.join(dir, 'web/build');
 }
 
 export const defaultConfig: Config = {

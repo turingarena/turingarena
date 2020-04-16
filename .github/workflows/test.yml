@@ -29,11 +29,13 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: web/
-      - name: Deploy 
+      - name: Deploy
+        if: github.ref == 'refs/heads/master'
         run: |
-          BRANCH="${GITHUB_REF##*/}"
-          if [[ "${BRANCH}" = "develop" ]] || [[ "${BRANCH}" = "master" ]]; then
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -v server/dist/bundle.js turingarena@turingarena.org:${BRANCH}/
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -vr web/build/ turingarena@turingarena.org:${BRANCH}/
-          fi
-
+          echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > ~/.npmrc
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" server/package.json
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" web/package.json
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" turingarena/package.json
+          (cd server/ && npm publish)
+          (cd web/ && npm publish)
+          (cd turingarena/ && npm publish)

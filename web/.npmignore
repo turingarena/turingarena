@@ -1,0 +1,5 @@
+# Ignore all file except the built ones
+*
+!build/**/*
+!package.json
+!index.js

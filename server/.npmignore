@@ -1,0 +1,5 @@
+# Ignore all files except the built ones
+*
+!dist/**/*
+!package.json
+

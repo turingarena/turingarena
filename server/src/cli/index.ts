@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as commander from 'commander';
 import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
