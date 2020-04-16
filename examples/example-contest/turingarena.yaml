@@ -1,21 +1,28 @@
+name: default
 title: TuringArena Example Contest
 start: 2020-01-08T20:00:00Z
 end: 2021-01-08T20:00:00Z
 users:
-  - id: alerighi
+  - username: alerighi
     token: alerighi
     name: Alessandro Righi
     role: admin
-  - id: cairomassimo
+  - username: cairomassimo
     token: cairomassimo
     name: Massimo Cairo
     role: admin
-  - id: user1
+  - username: user1
     token: user1
     name: Mr. User 1
-  - id: user2
+  - username: user2
     token: user2
     name: Mr. User 2
+languages:
+  - C
+  - C++
+  - Python2
+  - Python3
+  - Rust
 problems:
   - easy1
   - easy2

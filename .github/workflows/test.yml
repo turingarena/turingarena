@@ -1,42 +1,41 @@
 name: CI testing
 on: [push, pull_request_review]
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Install dependencies
-      run: sudo apt update && sudo apt install libsqlite3-dev libseccomp-dev
-    - name: Install Rust nightly toolchain
-      run: rustup default nightly
-    - name: Update path
-      run: export PATH="$HOME/.cargo/bin:$PATH" && echo $PATH
-    # 2019-12-26
-    # Task-maker installation commented because installation failed     
-    # - name: Install task-maker-rust
-    #  run: cargo install task-maker-rust --git https://github.com/edomora97/task-maker-rust.git
-    - name: Build Rust
-      run: cargo build --all-features
-    - name: Build Rust doc
-      run: cargo doc --no-deps
-    - name: Deploy documentation to GitHub Pages
-      uses: crazy-max/ghaction-github-pages@v1
-      with:
-        target_branch: gh-pages
-        build_dir: target/doc/
-      env:
-        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
-    - name: Check rust formatting
-      run: rustup component add rustfmt && cargo fmt -- --check
-    - name: Run Rust tests
-      run: cargo test --no-fail-fast
-    - name: Install Web
-      run: cd turingarena-web-client/web/ && npm ci
-    - name: Prepare Web
-      run: cd turingarena-web-client/web/ && ./prepare.sh
-    - name: Lint Web
-      run: cd turingarena-web-client/web/ && npm run lint
-    - name: Run Web tests
-      run: cd turingarena-web-client/web/ && npm run test -- --no-watch --no-progress --browsers=ChromeHeadless
-    - name: Run Web e2e tests
-      run: cd turingarena-web-client/web/ && npm run e2e
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: webfactory/ssh-agent@v0.2.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: server/
+      - name: Build backend
+        run: npm run build
+        working-directory: server/
+      - name: Run all backend tests
+        run: npm run check
+        working-directory: server/
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: web/
+      - name: Build frontend
+        run: npm run build
+        working-directory: web/
+      - name: Deploy
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > ~/.npmrc
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" server/package.json
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" web/package.json
+          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" turingarena/package.json
+          (cd server/ && npm publish)
+          (cd web/ && npm publish)
+          (cd turingarena/ && npm publish)

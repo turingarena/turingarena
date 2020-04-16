@@ -1,0 +1,24 @@
+schema: ../server/src/generated/graphql.schema.graphql
+documents:
+  - ./src/**/*.ts
+  - ./src/**/*.tsx
+generates:
+  ./src/generated/graphql-types.ts:
+    schema: src/client-schema.graphql
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      enumsAsTypes: true
+      avoidOptionals: true
+      nonOptionalTypename: true
+  ./src/generated/graphql.schema.json:
+    schema: src/client-schema.graphql
+    plugins:
+      - introspection
+  ./src/generated/possible-types.ts:
+    schema: src/client-schema.graphql
+    plugins:
+      - fragment-matcher
+    config:
+      apolloClientVersion: 3

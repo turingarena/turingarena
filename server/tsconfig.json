@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "noEmit": false,
+        "target": "ES6",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "allowSyntheticDefaultImports": true,
+
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false,
+
+        "allowJs": true,
+        "checkJs": false,
+        "outDir": "./dist"
+    },
+    "exclude": ["node_modules", "dist"]
+}

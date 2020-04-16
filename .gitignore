@@ -1,7 +1,4 @@
-/target
 __generated__
-**/*.rs.bk
-Cargo.lock
 *.sqlite3
 .task-maker-files/
 *.aux
@@ -13,3 +10,13 @@ build/
 dist/
 turing/
 *.egg-info/
+/.turingarena_venv/
+__pycache__
+node_modules/
+generated/
+
+# Mac-related
+.DS_Store
+
+# Vim-related
+*.swp

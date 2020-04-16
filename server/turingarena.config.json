@@ -1,0 +1,10 @@
+{
+    "db": {
+        "storage": "db.sqlite3",
+        "dialect": "sqlite"
+    },
+    "host": "localhost",
+    "port": 3000,
+    "secret": "superSecretCode",
+    "skipAuth": true
+}

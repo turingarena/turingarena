@@ -1,0 +1,11 @@
+{
+  "extends": "../tslint.json",
+  "rules": {
+    "strict-boolean-expressions": [true, "ignore-rhs"],
+    "variable-name": [true, "allow-pascal-case"],
+    "no-void-expression": [true, "ignore-arrow-function-shorthand"]
+  },
+  "linterOptions": {
+    "exclude": ["src/**/*.spec.ts", "src/generated/**"]
+  }
+}

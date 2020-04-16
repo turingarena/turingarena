@@ -1,4 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-mkdir -p __generated__ &&
-cargo run --package turingarena-core --bin turingarena-graphql-schema  > __generated__/graphql-schema.json
+set -ex
+
+( cd server/ ; npm ci )
+( cd web/ ; npm ci )
+
+if [ -f server/db.sqlite3 ] ; then
+    mv server/db.sqlite3 server/db.sqlite3.bak
+fi
+
+( cd server/ ; npm run cli -- import ../examples/example-contest/ )

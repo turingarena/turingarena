@@ -1,0 +1,9 @@
+{
+    "extends": "../tslint.json",
+    "rules": {
+        "import-blacklist": [true, "rxjs/Rx", "graphql-tag"]
+    },
+    "linterOptions": {
+        "exclude": ["**/generated/**", "**/*.js"]
+    }
+}
