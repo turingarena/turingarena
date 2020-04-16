@@ -30,7 +30,7 @@ export const mutationSchema = gql`
         addUser(contestName: ID!, username: ID!): Boolean!
         # removeUser(contestName: ID!, username: ID!): Boolean!
 
-        submit(submission: SubmissionInput!): Boolean!
+        submit(submission: SubmissionInput!): Submission!
 
         logIn(token: String!): AuthResult
     }
@@ -92,11 +92,7 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        submit: ({}, { submission }, ctx) =>
-            ctx
-                .api(SubmitApi)
-                .submit(submission)
-                .then(() => true),
+        submit: ({}, { submission }, ctx) => ctx.api(SubmitApi).submit(submission),
         logIn: ({}, { token }, ctx) => ctx.environment.authService.logIn(token),
 
         addProblem: async ({}, { contestName, name }, ctx) => {

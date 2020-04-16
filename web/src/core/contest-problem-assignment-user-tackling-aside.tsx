@@ -69,7 +69,7 @@ export function ContestProblemAssignmentUserTacklingAside({
               <Modal show={match !== null} onClose={() => history.replace(basePath)}>
                 <ContestProblemAssignmentUserTacklingSubmitModal
                   data={data}
-                  onSubmitSuccessful={() => history.goBack()}
+                  onSubmitSuccessful={id => history.replace(`${basePath}/submission/${id}`)}
                 />
               </Modal>
             )}

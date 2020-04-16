@@ -53,5 +53,7 @@ export class SubmitApi extends ApiObject {
                 console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
                 console.error(e);
             });
+
+        return submission;
     }
 }

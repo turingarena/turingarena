@@ -78,12 +78,14 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
   data,
   onSubmitSuccessful,
 }: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
-  onSubmitSuccessful: () => void;
+  onSubmitSuccessful: (submissionId: string) => void;
 }) {
   const [submit] = useMutation<SubmitMutation, SubmitMutationVariables>(
     gql`
       mutation Submit($submission: SubmissionInput!) {
-        submit(submission: $submission)
+        submit(submission: $submission) {
+          id
+        }
       }
     `,
     {
@@ -92,8 +94,8 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
     },
   );
 
-  const [loadFilesAndSubmit, { loading, error }] = useAsync(async (formData: FormData) =>
-    submit({
+  const [loadFilesAndSubmit, { loading, error }] = useAsync(async (formData: FormData) => {
+    const submission = await submit({
       variables: {
         submission: {
           contestName: data.assignmentView.assignment.contest.name,
@@ -113,15 +115,21 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
           ),
         },
       },
-    }),
-  );
+    });
+
+    const submissionId = submission.data?.submit.id;
+    if (submissionId !== undefined) {
+      onSubmitSuccessful(submissionId);
+    } else {
+      throw new Error(`Cannot get new submission ID.`);
+    }
+  });
 
   return (
     <form
       onSubmit={e => {
         e.preventDefault();
         loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
-        onSubmitSuccessful();
       }}
       className={css`
         width: 40rem;
