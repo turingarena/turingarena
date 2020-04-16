@@ -14,11 +14,6 @@ jobs:
       - uses: webfactory/ssh-agent@v0.2.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Set package versions
-        run: |
-          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" server/package.json
-          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" web/package.json
-          sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" turingarena/package.json
       - name: Build backend
         run: npm ci
         working-directory: server/
@@ -33,6 +28,9 @@ jobs:
         run: |
           export CI=false
           echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > ~/.npmrc
+          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" server/package.json
+          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" web/package.json
+          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" turingarena/package.json
           (cd server/ && npm publish)
           (cd web/ && CI=false npm publish)
           (cd turingarena/ && npm publish)
