@@ -19,20 +19,14 @@ jobs:
           sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" server/package.json
           sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" web/package.json
           sed -i "s/%BUILD_NUMBER%/${GITHUB_RUN_NUMBER}/" turingarena/package.json
-      - name: Install backend dependencies
-        run: npm ci
-        working-directory: server/
       - name: Build backend
-        run: npm run build
+        run: npm ci
         working-directory: server/
       - name: Run all backend tests
         run: npm run check
         working-directory: server/
-      - name: Install frontend dependencies
-        run: npm ci
-        working-directory: web/
       - name: Build frontend
-        run: npm run build
+        run: npm ci
         working-directory: web/
       - name: Deploy
         if: github.ref == 'refs/heads/master'
