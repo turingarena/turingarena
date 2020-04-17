@@ -3,15 +3,12 @@
     "description": "A platform to host programming competitions",
     "license": "MPL-2.0",
     "repository": "github:turingarena/turingarena",
-    "version": "0.2.%BUILD_NUMBER%",
-    "main": "./dist/src/index.ts",
+    "version": "0.2.0-dev",
+    "main": "./index.js",
     "public": true,
-    "exports": {
-        "./": "./dist/src/"
-    },
     "bin": {
-        "turingarena": "dist/src/cli/index.js",
-        "turingarena-serve": "dist/scripts/serve.js"
+        "turingarena": "./dist/src/cli/index.js",
+        "turingarena-serve": "./dist/scripts/serve.js"
     },
     "scripts": {
         "prepare": "npm-run-all --sequential prepare:*",

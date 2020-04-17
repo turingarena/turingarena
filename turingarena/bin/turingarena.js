@@ -1,2 +1,4 @@
 #!/usr/bin/env node
-require('turingarena-server/cli');
+
+// Require the CLI from the main package, to make it npx compatible
+require('turingarena-server');

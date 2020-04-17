@@ -3,7 +3,7 @@
   "description": "A platform to host programming competitions",
   "license": "MPL-2.0",
   "repository": "github:turingarena/turingarena",
-  "version": "0.2.%BUILD_NUMBER%",
+  "version": "0.2.0-dev",
   "main": "./index.js",
   "scripts": {
     "start": "PORT=3001 react-scripts start",
