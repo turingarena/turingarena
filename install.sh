@@ -62,3 +62,23 @@ tee "${CONFIG}" <<EOF
     "webRoot": "${DIST}/frontend"
 }
 EOF
+
+if [ "$(uname)" = "Linux" ]; then
+    msg "You may want to copy this systemd unit file"
+    cat <<EOF
+[Unit]
+Description=turingarena server
+
+[Service]
+User=${USER}
+Group=${USER}
+Type=simple
+WorkingDirectory=${DIST}/backend
+Restart=always
+ExecStart=node ${DIST}/backend/dist/scripts/serve.js
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    msg "Put it in /etc/systemd/system/turingarena.service or your home directory"
+fi
