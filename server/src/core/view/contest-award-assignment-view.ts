@@ -1,15 +1,15 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { ContestAwardAssignment } from './contest-award-assignment';
+import { ApiObject } from '../../main/api';
+import { Resolvers } from '../../main/resolver-types';
+import { ContestAwardAssignment } from '../contest-award-assignment';
 import {
     ContestAwardAssignmentUserTackling,
     ContestAwardAssignmentUserTacklingApi,
-} from './contest-award-assignment-user-tackling';
+} from '../contest-award-assignment-user-tackling';
+import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillment';
+import { ScoreField, ScoreGradeDomain } from '../feedback/score';
+import { User } from '../user';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
-import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreField, ScoreGradeDomain } from './feedback/score';
-import { User } from './user';
 
 export const contestAwardAssignmentViewSchema = gql`
     """
