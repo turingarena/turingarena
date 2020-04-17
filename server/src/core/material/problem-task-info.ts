@@ -1,5 +1,5 @@
 import { ApiObject } from '../../main/api';
-import { FileCollection } from '../file-collection';
+import { Archive } from '../archive';
 import { FileContent } from '../file-content';
 import { Problem } from '../problem';
 
@@ -38,9 +38,9 @@ export interface IOITaskInfo {
 export class ProblemTaskInfoApi extends ApiObject {
     async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
         const metadataPath = '.task-info.json';
-        const metadataProblemFile = await this.ctx.table(FileCollection).findOne({
+        const metadataProblemFile = await this.ctx.table(Archive).findOne({
             where: {
-                uuid: problem.fileCollectionId,
+                uuid: problem.archiveId,
                 path: metadataPath,
             },
         });

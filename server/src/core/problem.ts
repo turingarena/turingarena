@@ -11,7 +11,7 @@ export const problemSchema = gql`
         id: ID!
 
         name: ID!
-        fileCollection: FileCollection
+        archive: Archive
     }
 
     input ProblemInput {
@@ -32,7 +32,7 @@ export class Problem extends UuidBaseModel<Problem> {
     /** Files collection that belongs to this problem. */
     @AllowNull(false)
     @Column(DataType.UUIDV4)
-    fileCollectionId!: string;
+    archiveId!: string;
 }
 
 export interface ProblemModelRecord {
@@ -48,7 +48,7 @@ export const problemResolvers: Resolvers = {
     Problem: {
         id: p => p.id,
         name: p => p.name,
-        fileCollection: p => ({ uuid: p.fileCollectionId }),
+        archive: p => ({ uuid: p.archiveId }),
 
         title: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).title,
         statement: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).byProblemId.load(p.id)).statement,

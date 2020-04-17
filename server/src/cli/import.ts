@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
+import { ArchiveApi } from '../core/archive';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
-import { FileCollectionApi } from '../core/file-collection';
 import { ProblemTaskInfoApi } from '../core/material/problem-task-info';
 import { Participation } from '../core/participation';
 import { Problem } from '../core/problem';
@@ -38,12 +38,10 @@ export class ContestImportApi extends ApiObject {
         const turingarenaYAML = fs.readFileSync(turingarenaYAMLPath).toString();
         const metadata = yaml.parse(turingarenaYAML) as ContestMetadata;
 
-        const contestFileCollectionId = await this.ctx
-            .api(FileCollectionApi)
-            .createFileCollection(path.join(dir, 'files'));
+        const contestArchiveId = await this.ctx.api(ArchiveApi).createArchive(path.join(dir, 'files'));
 
         const contest = await this.ctx.table(Contest).create({
-            fileCollectionId: contestFileCollectionId,
+            archiveId: contestArchiveId,
             ...metadata,
         });
 
@@ -56,11 +54,11 @@ export class ContestImportApi extends ApiObject {
         }
 
         for (const name of metadata.problems) {
-            const fileCollectionId = await this.ctx.api(FileCollectionApi).createFileCollection(path.join(dir, name));
+            const archiveId = await this.ctx.api(ArchiveApi).createArchive(path.join(dir, name));
 
             const problem = await this.ctx.table(Problem).create({
                 name,
-                fileCollectionId,
+                archiveId,
             });
 
             await this.ctx.table(ContestProblemAssignment).create({

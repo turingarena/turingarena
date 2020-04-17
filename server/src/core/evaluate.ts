@@ -4,9 +4,9 @@ import * as readline from 'readline';
 import { fromEvent } from 'rxjs';
 import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
+import { ArchiveApi } from './archive';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
-import { FileCollectionApi } from './file-collection';
 import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 
@@ -28,7 +28,7 @@ export class EvaluateApi extends ApiObject {
         console.log(this.ctx.environment.config);
 
         const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
-        const problemDir = await this.ctx.api(FileCollectionApi).extractFileCollection(problem.fileCollectionId);
+        const problemDir = await this.ctx.api(ArchiveApi).extractArchive(problem.archiveId);
 
         const submissionPath = await this.ctx
             .api(SubmissionApi)

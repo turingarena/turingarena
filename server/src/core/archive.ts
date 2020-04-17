@@ -8,15 +8,15 @@ import { BaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { FileContent, FileContentApi } from './file-content';
 
-export const fileCollectionSchema = gql`
-    type FileCollectionElement {
+export const archiveSchema = gql`
+    type ArchiveElement {
         path: String!
         content: FileContent!
     }
 
-    type FileCollection {
+    type Archive {
         uuid: String!
-        files: [FileCollectionElement!]!
+        files: [ArchiveElement!]!
     }
 `;
 
@@ -26,7 +26,7 @@ export const fileCollectionSchema = gql`
  * NOTE: a collection is immutable, when is created files cannot be added/removed.
  */
 @Table({ timestamps: false, tableName: 'file_collection' })
-export class FileCollection extends BaseModel<FileCollection> {
+export class Archive extends BaseModel<Archive> {
     @PrimaryKey
     @Column(DataType.UUIDV4)
     uuid!: string;
@@ -46,24 +46,24 @@ export class FileCollection extends BaseModel<FileCollection> {
     getContent!: () => Promise<FileContent>;
 }
 
-export interface FileCollectionModelRecord {
-    FileCollection: {
+export interface ArchiveModelRecord {
+    Archive: {
         uuid: string;
     };
-    FileCollectionElement: FileCollection;
+    ArchiveElement: Archive;
 }
 
-export class FileCollectionApi extends ApiObject {
+export class ArchiveApi extends ApiObject {
     /**
-     * Create a new FileCollection from a directory
+     * Create a new Archive from a directory
      *
      * @param directory directory that is the root of the collection
      * @return UUID of the created collection
      */
-    async createFileCollection(directory: string) {
+    async createArchive(directory: string) {
         const uuid = UUIDv4();
 
-        console.debug(`CREATING FileCollection uuid = ${uuid}, directory = ${directory}`);
+        console.debug(`CREATING Archive uuid = ${uuid}, directory = ${directory}`);
 
         const addFiles = async (dir: string) => {
             const files = fs.readdirSync(path.join(directory, dir));
@@ -75,7 +75,7 @@ export class FileCollectionApi extends ApiObject {
                 } else {
                     console.debug(`ADD FILE ${relPath}`);
                     const content = await this.ctx.api(FileContentApi).createFromPath(path.join(directory, relPath));
-                    await this.ctx.table(FileCollection).create({
+                    await this.ctx.table(Archive).create({
                         uuid,
                         contentId: content.id,
                         path: relPath,
@@ -95,7 +95,7 @@ export class FileCollectionApi extends ApiObject {
      *
      * @param uuid UUID of the collection
      */
-    async extractFileCollection(uuid: string) {
+    async extractArchive(uuid: string) {
         const tempDir = path.join(this.ctx.environment.config.cachePath, uuid);
 
         try {
@@ -110,7 +110,7 @@ export class FileCollectionApi extends ApiObject {
 
         console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} INTO ${tempDir}`);
 
-        const collection = await this.ctx.table(FileCollection).findAll({ where: { uuid } });
+        const collection = await this.ctx.table(Archive).findAll({ where: { uuid } });
 
         for (const file of collection) {
             const filePath = path.join(tempDir, file.path);
@@ -125,12 +125,12 @@ export class FileCollectionApi extends ApiObject {
     }
 }
 
-export const fileCollectionResolvers: Resolvers = {
-    FileCollection: {
+export const archiveResolvers: Resolvers = {
+    Archive: {
         uuid: f => f.uuid,
-        files: ({ uuid }, _, ctx) => ctx.table(FileCollection).findAll({ where: { uuid } }),
+        files: ({ uuid }, _, ctx) => ctx.table(Archive).findAll({ where: { uuid } }),
     },
-    FileCollectionElement: {
+    ArchiveElement: {
         path: f => f.path,
         content: (collection, _, ctx) => ctx.table(FileContent).findOne({ where: { id: collection.contentId } }),
     },
