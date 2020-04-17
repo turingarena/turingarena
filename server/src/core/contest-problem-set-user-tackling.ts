@@ -2,7 +2,10 @@ import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignmentApi } from './contest-problem-assignment';
-import { ContestProblemAssignmentUserTackling, ContestProblemAssignmentUserTacklingApi } from './contest-problem-assignment-user-tackling';
+import {
+    ContestProblemAssignmentUserTackling,
+    ContestProblemAssignmentUserTacklingApi,
+} from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
