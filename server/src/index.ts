@@ -1,3 +1,1 @@
-import { cliMain } from './cli';
-
-module.exports = { cliMain };
+export { cliMain } from './cli';
