@@ -4,7 +4,7 @@ import { Duration } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import * as util from 'util';
-import { FileContent } from '../core/file-content';
+import { FileContent } from '../core/files/file-content';
 import { ApiEnvironment, RemoteApiContext } from './api-context';
 import { Config } from './config';
 import { createSchema } from './executable-schema';

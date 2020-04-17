@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
 import { Resolvers } from '../../main/resolver-types';
-import { FileContent } from '../file-content';
+import { FileContent } from '../files/file-content';
 
 export const mediaSchema = gql`
     """

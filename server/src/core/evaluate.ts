@@ -6,7 +6,7 @@ import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from
 import { ApiObject } from '../main/api';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
-import { FileCollectionApi } from './file-collection';
+import { ArchiveApi } from './files/archive';
 import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 
@@ -28,7 +28,7 @@ export class EvaluateApi extends ApiObject {
         console.log(this.ctx.environment.config);
 
         const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
-        const problemDir = await this.ctx.api(FileCollectionApi).extractFileCollection(problem.fileCollectionId);
+        const problemDir = await this.ctx.api(ArchiveApi).extractArchive(problem.archiveId);
 
         const submissionPath = await this.ctx
             .api(SubmissionApi)

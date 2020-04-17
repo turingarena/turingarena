@@ -3,8 +3,8 @@ import { ApiObject } from '../../main/api';
 import { createSimpleLoader } from '../../main/base-model';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
-import { FileCollection } from '../file-collection';
-import { FileContent } from '../file-content';
+import { Archive } from '../files/archive';
+import { FileContent } from '../files/file-content';
 import { Problem, ProblemApi } from '../problem';
 import { Award } from './award';
 import { Media, MediaVariant } from './media';
@@ -233,9 +233,9 @@ export class ProblemMaterialApi extends ApiObject {
     });
 
     async loadContent(problem: Problem, path: string) {
-        const file = await this.ctx.table(FileCollection).findOne({
+        const file = await this.ctx.table(Archive).findOne({
             where: {
-                uuid: problem.fileCollectionId,
+                uuid: problem.archiveId,
                 path,
             },
             include: [this.ctx.table(FileContent)],

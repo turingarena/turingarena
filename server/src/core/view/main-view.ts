@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { Contest } from './contest';
+import { ApiObject } from '../../main/api';
+import { Resolvers } from '../../main/resolver-types';
+import { Contest } from '../contest';
+import { SubmissionApi } from '../submission';
+import { User } from '../user';
 import { ContestView } from './contest-view';
-import { SubmissionApi } from './submission';
-import { User } from './user';
 
 export const mainViewSchema = gql`
     """

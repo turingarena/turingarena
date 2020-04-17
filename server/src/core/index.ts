@@ -3,48 +3,11 @@ import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
-import {
-    ContestAwardAssignmentModelRecord,
-    contestAwardAssignmentResolvers,
-    contestAwardAssignmentSchema,
-} from './contest-award-assignment';
-import {
-    ContestAwardAssignmentViewModelRecord,
-    contestAwardAssignmentViewResolvers,
-    contestAwardAssignmentViewSchema,
-} from './contest-award-assignment-view';
-import {
-    ContestProblemAssignment,
-    ContestProblemAssignmentModelRecord,
-    contestProblemAssignmentResolvers,
-    contestProblemAssignmentSchema,
-} from './contest-problem-assignment';
-import {
-    ContestProblemAssignmentUserTacklingModelRecord,
-    contestProblemAssignmentUserTacklingResolvers,
-    contestProblemAssignmentUserTacklingSchema,
-} from './contest-problem-assignment-user-tackling';
-import {
-    ContestProblemAssignmentViewModelRecord,
-    contestProblemAssignmentViewResolvers,
-    contestProblemAssignmentViewSchema,
-} from './contest-problem-assignment-view';
-import {
-    ContestProblemSetModelRecord,
-    contestProblemSetResolvers,
-    contestProblemSetSchema,
-} from './contest-problem-set';
-import {
-    contestAssignmentUserTacklingResolvers,
-    ContestProblemSetUserTacklingModelRecord,
-    contestProblemSetUserTacklingSchema,
-} from './contest-problem-set-user-tackling';
-import {
-    ContestProblemSetViewModelRecord,
-    contestProblemSetViewResolvers,
-    contestProblemSetViewSchema,
-} from './contest-problem-set-view';
-import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './contest-view';
+import { ContestAwardAssignmentModelRecord, contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
+import { ContestProblemAssignment, ContestProblemAssignmentModelRecord, contestProblemAssignmentResolvers, contestProblemAssignmentSchema } from './contest-problem-assignment';
+import { ContestProblemAssignmentUserTacklingModelRecord, contestProblemAssignmentUserTacklingResolvers, contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
+import { ContestProblemSetModelRecord, contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
+import { contestAssignmentUserTacklingResolvers, ContestProblemSetUserTacklingModelRecord, contestProblemSetUserTacklingSchema } from './contest-problem-set-user-tackling';
 import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
@@ -56,14 +19,8 @@ import { messageSchema } from './feedback/message';
 import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import {
-    FileCollection,
-    FileCollectionModelRecord,
-    fileCollectionResolvers,
-    fileCollectionSchema,
-} from './file-collection';
-import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './file-content';
-import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './main-view';
+import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
+import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './files/file-content';
 import { AwardModelRecord, awardResolvers, awardSchema } from './material/award';
 import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
@@ -76,6 +33,11 @@ import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchem
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { User, UserModelRecord, userResolvers, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
+import { ContestAwardAssignmentViewModelRecord, contestAwardAssignmentViewResolvers, contestAwardAssignmentViewSchema } from './view/contest-award-assignment-view';
+import { ContestProblemAssignmentViewModelRecord, contestProblemAssignmentViewResolvers, contestProblemAssignmentViewSchema } from './view/contest-problem-assignment-view';
+import { ContestProblemSetViewModelRecord, contestProblemSetViewResolvers, contestProblemSetViewSchema } from './view/contest-problem-set-view';
+import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './view/contest-view';
+import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './view/main-view';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
@@ -95,7 +57,7 @@ export const schema = gql`
     ${dateTimeSchema}
     ${evaluationSchema}
     ${fieldSchema}
-    ${fileCollectionSchema}
+    ${archiveSchema}
     ${fileContentSchema}
     ${fulfillmentSchema}
     ${gradeSchema}
@@ -127,7 +89,7 @@ export const modelConstructors = {
     Achievement,
     Contest,
     ContestProblemAssignment,
-    FileCollection,
+    Archive,
     Evaluation,
     EvaluationEvent,
     FileContent,
@@ -154,7 +116,7 @@ export type ModelRecord = unknown &
     ContestViewModelRecord &
     DateTimeModelRecord &
     EvaluationModelRecord &
-    FileCollectionModelRecord &
+    ArchiveModelRecord &
     FileContentModelRecord &
     FulfillmentModelRecord &
     MainViewModelRecord &
@@ -196,5 +158,5 @@ export const resolvers: Resolvers = {
     ...submissionResolvers,
     ...textResolvers,
     ...userResolvers,
-    ...fileCollectionResolvers,
+    ...archiveResolvers,
 };

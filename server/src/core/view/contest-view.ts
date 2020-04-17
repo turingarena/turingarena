@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi } from './contest';
-import { ContestProblemSet } from './contest-problem-set';
+import { Resolvers } from '../../main/resolver-types';
+import { Contest, ContestApi } from '../contest';
+import { ContestProblemSet } from '../contest-problem-set';
+import { User } from '../user';
 import { ContestProblemSetView } from './contest-problem-set-view';
-import { User } from './user';
 
 export const contestViewSchema = gql`
     """

@@ -3,16 +3,13 @@ import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import {
-    ContestAwardAssignmentUserTackling,
-    ContestAwardAssignmentUserTacklingApi,
-} from './contest-award-assignment-user-tackling';
+import { ContestAwardAssignmentUserTackling, ContestAwardAssignmentUserTacklingApi } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
 import { SubmissionApi } from './submission';
 import { User } from './user';
+import { ContestProblemAssignmentView } from './view/contest-problem-assignment-view';
 
 export const contestProblemAssignmentUserTacklingSchema = gql`
     """

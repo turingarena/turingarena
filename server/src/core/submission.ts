@@ -12,7 +12,7 @@ import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
-import { FileContentApi } from './file-content';
+import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { ParticipationApi } from './participation';
 import { Problem, ProblemApi } from './problem';

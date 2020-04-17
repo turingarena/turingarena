@@ -9,7 +9,7 @@ import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/bas
 import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
-import { FileCollection } from './file-collection';
+import { Archive } from './files/archive';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
 
@@ -26,7 +26,7 @@ export const contestSchema = gql`
         end: String!
         status: ContestStatus!
         problemSet: ContestProblemSet!
-        fileCollection: FileCollection!
+        archive: Archive!
     }
 
     input ContestInput {
@@ -70,8 +70,8 @@ export class Contest extends UuidBaseModel<Contest> {
 
     @AllowNull(false)
     @Column(DataType.UUIDV4)
-    @ForeignKey(() => FileCollection)
-    fileCollectionId!: string;
+    @ForeignKey(() => Archive)
+    archiveId!: string;
 
     /** supported languages, e.g [C, C++, Python2] */
     @Column(DataType.JSON)
@@ -108,7 +108,7 @@ export class ContestApi extends ApiObject {
         return Promise.all(assignments.map(async a => this.ctx.api(ProblemMaterialApi).byProblemId.load(a.problemId)));
     }
 
-    private statementVariantFromFile(archiveFile: FileCollection): MediaVariant {
+    private statementVariantFromFile(archiveFile: Archive): MediaVariant {
         const type = mime.lookup(archiveFile.path);
 
         return {
@@ -119,9 +119,9 @@ export class ContestApi extends ApiObject {
     }
 
     async getStatement(c: Contest): Promise<Media> {
-        const statementFiles = await this.ctx.table(FileCollection).findAll({
+        const statementFiles = await this.ctx.table(Archive).findAll({
             where: {
-                uuid: c.fileCollectionId,
+                uuid: c.archiveId,
                 path: {
                     [Op.like]: 'home%',
                 },
@@ -141,7 +141,7 @@ export const contestResolvers: Resolvers = {
         end: c => DateTime.fromJSDate(c.end).toISO(),
         status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
         problemSet: c => new ContestProblemSet(c),
-        fileCollection: c => ({ uuid: c.fileCollectionId }),
+        archive: c => ({ uuid: c.archiveId }),
         statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
     },
 };

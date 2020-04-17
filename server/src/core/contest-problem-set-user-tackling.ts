@@ -7,9 +7,9 @@ import {
     ContestProblemAssignmentUserTacklingApi,
 } from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
-import { ContestProblemSetView } from './contest-problem-set-view';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
+import { ContestProblemSetView } from './view/contest-problem-set-view';
 
 export const contestProblemSetUserTacklingSchema = gql`
     """

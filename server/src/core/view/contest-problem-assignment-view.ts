@@ -1,20 +1,20 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { ContestApi } from './contest';
-import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardAssignmentView } from './contest-award-assignment-view';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ApiObject } from '../../main/api';
+import { Resolvers } from '../../main/resolver-types';
+import { ContestApi } from '../contest';
+import { ContestAwardAssignment } from '../contest-award-assignment';
+import { ContestProblemAssignment } from '../contest-problem-assignment';
 import {
     ContestProblemAssignmentUserTackling,
     ContestProblemAssignmentUserTacklingApi,
-} from './contest-problem-assignment-user-tackling';
-import { ContestProblemSet } from './contest-problem-set';
+} from '../contest-problem-assignment-user-tackling';
+import { ContestProblemSet } from '../contest-problem-set';
+import { ScoreField } from '../feedback/score';
+import { ProblemMaterialApi } from '../material/problem-material';
+import { ProblemApi } from '../problem';
+import { User } from '../user';
+import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemSetView } from './contest-problem-set-view';
-import { ScoreField } from './feedback/score';
-import { ProblemMaterialApi } from './material/problem-material';
-import { ProblemApi } from './problem';
-import { User } from './user';
 
 export const contestProblemAssignmentViewSchema = gql`
     """
