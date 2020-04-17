@@ -4,11 +4,10 @@
     "license": "MPL-2.0",
     "repository": "github:turingarena/turingarena",
     "version": "0.2.0-dev",
-    "main": "./index.js",
+    "main": "./dist/src/index.js",
     "public": true,
     "bin": {
-        "turingarena": "./dist/src/cli/index.js",
-        "turingarena-serve": "./dist/scripts/serve.js"
+        "turingarena": "./dist/src/bin/turingarena.js"
     },
     "scripts": {
         "prepare": "npm-run-all --sequential prepare:*",

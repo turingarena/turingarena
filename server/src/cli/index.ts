@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as commander from 'commander';
 import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
@@ -63,6 +61,8 @@ program
     .description('show information about a contest')
     .action(show);
 
-program.parseAsync(process.argv).catch(e => {
-    process.emit('uncaughtException', e);
-});
+export function cliMain(argv: string[]) {
+    program.parseAsync(argv).catch(e => {
+        process.emit('uncaughtException', e);
+    });
+}
