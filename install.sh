@@ -43,7 +43,7 @@ msg "Install binary ${BIN}"
 tee "${BIN}" << EOF
 #!/bin/sh
 
-NODE_PATH="${DEST}/backend/node_modules/" exec node "${DEST}/backend/dist/src/bin/turingarena.js" --config "${CONFIG}" "\$@"
+NODE_PATH="${DEST}/backend/node_modules/" exec node "${DEST}/backend/dist/src/cli/index.js" --config "${CONFIG}" "\$@"
 EOF
 chmod +x "${BIN}"
 
@@ -59,7 +59,7 @@ tee "${CONFIG}" <<EOF
     "secret": "$(gen_secret)",
     "skipAuth": false,
     "cachePath": "${CACHE}",
-    "webRoot": "${DIST}/frontend"
+    "webRoot": "${DEST}/frontend"
 }
 EOF
 
@@ -73,9 +73,9 @@ Description=turingarena server
 User=${USER}
 Group=${USER}
 Type=simple
-WorkingDirectory=${DIST}/backend
+WorkingDirectory=${DEST}/backend
 Restart=always
-ExecStart=node ${DIST}/backend/dist/scripts/serve.js
+ExecStart=node ${DEST}/backend/dist/scripts/serve.js
 
 [Install]
 WantedBy=multi-user.target
