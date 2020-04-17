@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { createSimpleLoader } from '../../main/base-model';
-import { Archive } from '../archive';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
-import { FileContent } from '../file-content';
+import { Archive } from '../files/archive';
+import { FileContent } from '../files/file-content';
 import { Problem, ProblemApi } from '../problem';
 import { Award } from './award';
 import { Media, MediaVariant } from './media';

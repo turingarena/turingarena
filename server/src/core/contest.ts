@@ -7,9 +7,9 @@ import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
-import { Archive } from './archive';
 import { ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
+import { Archive } from './files/archive';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
 

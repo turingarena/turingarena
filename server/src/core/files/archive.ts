@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
-import { ApiObject } from '../main/api';
-import { BaseModel } from '../main/base-model';
-import { Resolvers } from '../main/resolver-types';
+import { ApiObject } from '../../main/api';
+import { BaseModel } from '../../main/base-model';
+import { Resolvers } from '../../main/resolver-types';
 import { FileContent, FileContentApi } from './file-content';
 
 export const archiveSchema = gql`

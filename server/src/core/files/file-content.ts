@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
-import { ApiObject } from '../main/api';
-import { BaseModel, createByIdLoader } from '../main/base-model';
-import { Resolvers } from '../main/resolver-types';
+import { ApiObject } from '../../main/api';
+import { BaseModel, createByIdLoader } from '../../main/base-model';
+import { Resolvers } from '../../main/resolver-types';
 
 export const fileContentSchema = gql`
     type FileContent {

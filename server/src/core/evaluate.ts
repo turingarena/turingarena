@@ -4,9 +4,9 @@ import * as readline from 'readline';
 import { fromEvent } from 'rxjs';
 import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
-import { ArchiveApi } from './archive';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
+import { ArchiveApi } from './files/archive';
 import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 

@@ -3,7 +3,7 @@ import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'seq
 import { FindOptions } from 'sequelize/types';
 import { ApiObject } from '../main/api';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { FileContent } from './file-content';
+import { FileContent } from './files/file-content';
 import { Submission } from './submission';
 
 export const submissionFileSchema = gql`

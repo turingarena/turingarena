@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
-import { ArchiveApi } from '../core/archive';
 import { Contest } from '../core/contest';
 import { ContestProblemAssignment } from '../core/contest-problem-assignment';
+import { ArchiveApi } from '../core/files/archive';
 import { ProblemTaskInfoApi } from '../core/material/problem-task-info';
 import { Participation } from '../core/participation';
 import { Problem } from '../core/problem';

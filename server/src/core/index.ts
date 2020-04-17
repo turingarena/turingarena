@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
-import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './archive';
 import { authSchema } from './auth';
 import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
 import {
@@ -57,7 +56,8 @@ import { messageSchema } from './feedback/message';
 import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './file-content';
+import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
+import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './files/file-content';
 import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './main-view';
 import { AwardModelRecord, awardResolvers, awardSchema } from './material/award';
 import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';

@@ -2,7 +2,7 @@ import * as path from 'path';
 import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
 import { EvaluateApi } from './evaluate';
-import { FileContentApi } from './file-content';
+import { FileContentApi } from './files/file-content';
 import { ProblemApi } from './problem';
 import { Submission, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';

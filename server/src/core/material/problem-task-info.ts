@@ -1,6 +1,6 @@
 import { ApiObject } from '../../main/api';
-import { Archive } from '../archive';
-import { FileContent } from '../file-content';
+import { Archive } from '../files/archive';
+import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 
 export interface ProblemTaskInfo {
