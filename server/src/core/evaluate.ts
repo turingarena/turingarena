@@ -37,7 +37,18 @@ export class EvaluateApi extends ApiObject {
         const solutionPath = path.join(submissionPath, 'solution.cpp.cpp');
         const taskMakerArgs = ['--ui=json', '--no-statement', '--task-dir', problemDir, '--solution', solutionPath];
 
-        const process = spawn(this.ctx.environment.config.taskMakerExecutable, taskMakerArgs);
+        let process;
+        try {
+            process = spawn(this.ctx.environment.config.taskMakerExecutable, taskMakerArgs);
+        } catch (e) {
+            await evaluation.update({
+                status: EvaluationStatus.ERROR,
+            });
+
+            console.error(`TaskMaker executable  ${this.ctx.environment.config.taskMakerExecutable} not found`);
+
+            return;
+        }
 
         const stdoutLineReader = readline.createInterface(process.stdout);
 
