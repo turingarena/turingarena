@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
-import { ResolverFn } from '../generated/graphql-types';
-import { ApiContext } from '../main/api-context';
-import { Resolvers } from '../main/resolver-types';
+import { ResolverFn } from '../../generated/graphql-types';
+import { ApiContext } from '../../main/api-context';
+import { Resolvers } from '../../main/resolver-types';
 
 export const dateTimeSchema = gql`
     "An instant, i.e., a point in time."

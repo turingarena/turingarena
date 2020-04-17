@@ -45,7 +45,6 @@ import {
     contestProblemSetViewSchema,
 } from './contest-problem-set-view';
 import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './contest-view';
-import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './date-time';
 import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
@@ -76,6 +75,7 @@ import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { User, UserModelRecord, userResolvers, userSchema } from './user';
+import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
