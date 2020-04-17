@@ -6,6 +6,7 @@
     "version": "0.2.0-dev",
     "main": "dist/src/index.js",
     "public": true,
+    "exports": false,
     "bin": {
         "turingarena": "./dist/src/bin/turingarena.js"
     },
