@@ -37,7 +37,7 @@ cd "${REPO}/web/"
 npm ci
 
 msg "Install client"
-cp -r build "${DEST}/frontend"
+cp -r build "${DEST}/frontend/build"
 
 msg "Install binary ${BIN}"
 tee "${BIN}" << EOF
