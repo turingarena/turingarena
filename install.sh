@@ -73,9 +73,8 @@ Description=turingarena server
 User=${USER}
 Group=${USER}
 Type=simple
-WorkingDirectory=${DEST}/backend
 Restart=always
-ExecStart=node ${DEST}/backend/dist/scripts/serve.js
+ExecStart=${BIN}
 
 [Install]
 WantedBy=multi-user.target
