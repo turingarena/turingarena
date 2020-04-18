@@ -11,7 +11,7 @@ import {
 import { ContestProblemSet } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
 import { ProblemMaterialApi } from '../material/problem-material';
-import { ProblemApi } from '../problem';
+import { Problem } from '../problem';
 import { User } from '../user';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemSetView } from './contest-problem-set-view';
@@ -55,8 +55,8 @@ export interface ContestProblemAssignmentViewModelRecord {
 }
 
 export class ContestProblemAssignmentViewApi extends ApiObject {
-    async getProblem({ assignment: { problemId } }: ContestProblemAssignmentView) {
-        return this.ctx.api(ProblemApi).byId.load(problemId);
+    async getProblem({ assignment: { contestId, problemName } }: ContestProblemAssignmentView) {
+        return new Problem(contestId, problemName);
     }
 
     async getContest({ assignment: { contestId } }: ContestProblemAssignmentView) {
@@ -64,7 +64,10 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getTotalScoreField(view: ContestProblemAssignmentView) {
-        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).byProblemId.load(view.assignment.problemId);
+        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
+            contestId: view.assignment.contestId,
+            problemName: view.assignment.problemName,
+        });
 
         const scoreGrade =
             view.tackling !== null
@@ -75,7 +78,10 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getAwardAssignmentViews(view: ContestProblemAssignmentView) {
-        const { awards } = await this.ctx.api(ProblemMaterialApi).byProblemId.load(view.assignment.problemId);
+        const { awards } = await this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
+            contestId: view.assignment.contestId,
+            problemName: view.assignment.problemName,
+        });
 
         return awards.map(
             award => new ContestAwardAssignmentView(new ContestAwardAssignment(view.assignment, award), view.user),

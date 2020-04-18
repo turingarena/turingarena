@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { Resolvers } from '../../main/resolver-types';
-import { ContestProblemAssignmentApi } from '../contest-problem-assignment';
+import { ContestApi } from '../contest';
 import { ContestProblemSet, ContestProblemSetApi } from '../contest-problem-set';
 import { ContestProblemSetUserTackling, ContestProblemSetUserTacklingApi } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
@@ -57,7 +57,7 @@ export const contestProblemSetViewResolvers: Resolvers = {
         user: ({ user }) => user,
         contestView: ({ problemSet, user }) => new ContestView(problemSet.contest, user),
         assignmentViews: async ({ problemSet, user }, {}, ctx) =>
-            (await ctx.api(ContestProblemAssignmentApi).allByContestId.load(problemSet.contest.id)).map(
+            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
                 a => new ContestProblemAssignmentView(a, user),
             ),
         tackling: ({ problemSet, user }) =>

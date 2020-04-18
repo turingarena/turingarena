@@ -2,7 +2,6 @@ import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { Contest, ContestApi } from './contest';
-import { ContestProblemAssignmentApi } from './contest-problem-assignment';
 import { ScoreRange } from './feedback/score';
 
 export const contestProblemSetSchema = gql`
@@ -44,6 +43,6 @@ export class ContestProblemSetApi extends ApiObject {
 export const contestProblemSetResolvers: Resolvers = {
     ContestProblemSet: {
         contest: s => s.contest,
-        assignments: (s, {}, ctx) => ctx.api(ContestProblemAssignmentApi).allByContestId.load(s.contest.id),
+        assignments: (s, {}, ctx) => ctx.api(ContestApi).getProblemAssignments(s.contest),
     },
 };

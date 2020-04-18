@@ -24,13 +24,14 @@ export const dateTimeSchema = gql`
     }
 `;
 
-type DateModel = Date | DateTime;
+type DateModel = Date | DateTime | string;
 
 export interface DateTimeModelRecord {
     DateTime: DateModel;
 }
 
 function makeDateTime(dateTime: DateModel, ctx: ApiContext) {
+    if (typeof dateTime === 'string') return DateTime.fromISO(dateTime);
     if (dateTime instanceof DateTime) return dateTime;
     if (dateTime instanceof Date) return DateTime.fromJSDate(dateTime);
     ctx.fail(`Invalid date-time: ${dateTime}`);

@@ -3,7 +3,6 @@ import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
 import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
-import { ProblemApi } from './problem';
 import { Submission, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
 import { UserApi } from './user';
@@ -16,12 +15,11 @@ export class SubmitApi extends ApiObject {
         solutionPath?: string,
     ) {
         const user = await this.ctx.api(UserApi).byUsername.load(username);
-        const problem = await this.ctx.api(ProblemApi).byName.load(problemName);
         const contest = await this.ctx.api(ContestApi).byName.load(contestName);
 
         const submission = await this.ctx.table(Submission).create({
             contestId: contest.id,
-            problemId: problem.id,
+            problemName,
             userId: user.id,
         });
 

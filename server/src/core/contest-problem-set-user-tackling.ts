@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
-import { ContestProblemAssignmentApi } from './contest-problem-assignment';
+import { ContestApi } from './contest';
 import {
     ContestProblemAssignmentUserTackling,
     ContestProblemAssignmentUserTacklingApi,
@@ -36,9 +36,7 @@ export interface ContestProblemSetUserTacklingModelRecord {
 
 export class ContestProblemSetUserTacklingApi extends ApiObject {
     async getScoreGrade(t: ContestProblemSetUserTackling) {
-        const assignments = await this.ctx
-            .api(ContestProblemAssignmentApi)
-            .allByContestId.load(t.problemSet.contest.id);
+        const assignments = await this.ctx.api(ContestApi).getProblemAssignments(t.problemSet.contest);
 
         return ScoreGrade.total(
             await Promise.all(

@@ -11,8 +11,12 @@ import { unexpected } from '../util/check';
 export const contestViewClockFragment = gql`
   fragment ContestViewClock on ContestView {
     contest {
-      start
-      end
+      start {
+        local
+      }
+      end {
+        local
+      }
       status
     }
   }
@@ -60,8 +64,8 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
       startWith(0),
       map(() => {
         const now = DateTime.local();
-        const start = DateTime.fromISO(data.contest.start);
-        const end = DateTime.fromISO(data.contest.end);
+        const start = DateTime.fromISO(data.contest.start.local);
+        const end = DateTime.fromISO(data.contest.end.local);
 
         switch (data.contest.status) {
           case 'NOT_STARTED':

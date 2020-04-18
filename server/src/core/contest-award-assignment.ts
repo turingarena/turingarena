@@ -27,7 +27,7 @@ export interface ContestAwardAssignmentModelRecord {
 
 export const contestAwardAssignmentResolvers: Resolvers = {
     ContestAwardAssignment: {
-        id: a => `${a.problemAssignment.contestId}/${a.problemAssignment.problemId}/${a.award.index}`,
+        id: a => `${a.problemAssignment.contestId}/${a.problemAssignment.problemName}/${a.award.index}`,
         problemAssignment: a => a.problemAssignment,
         award: a => a.award,
     },

@@ -3,11 +3,31 @@ import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
-import { ContestAwardAssignmentModelRecord, contestAwardAssignmentResolvers, contestAwardAssignmentSchema } from './contest-award-assignment';
-import { ContestProblemAssignment, ContestProblemAssignmentModelRecord, contestProblemAssignmentResolvers, contestProblemAssignmentSchema } from './contest-problem-assignment';
-import { ContestProblemAssignmentUserTacklingModelRecord, contestProblemAssignmentUserTacklingResolvers, contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
-import { ContestProblemSetModelRecord, contestProblemSetResolvers, contestProblemSetSchema } from './contest-problem-set';
-import { contestAssignmentUserTacklingResolvers, ContestProblemSetUserTacklingModelRecord, contestProblemSetUserTacklingSchema } from './contest-problem-set-user-tackling';
+import {
+    ContestAwardAssignmentModelRecord,
+    contestAwardAssignmentResolvers,
+    contestAwardAssignmentSchema,
+} from './contest-award-assignment';
+import {
+    ContestProblemAssignmentModelRecord,
+    contestProblemAssignmentResolvers,
+    contestProblemAssignmentSchema,
+} from './contest-problem-assignment';
+import {
+    ContestProblemAssignmentUserTacklingModelRecord,
+    contestProblemAssignmentUserTacklingResolvers,
+    contestProblemAssignmentUserTacklingSchema,
+} from './contest-problem-assignment-user-tackling';
+import {
+    ContestProblemSetModelRecord,
+    contestProblemSetResolvers,
+    contestProblemSetSchema,
+} from './contest-problem-set';
+import {
+    contestAssignmentUserTacklingResolvers,
+    ContestProblemSetUserTacklingModelRecord,
+    contestProblemSetUserTacklingSchema,
+} from './contest-problem-set-user-tackling';
 import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
@@ -27,15 +47,27 @@ import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/pr
 import { TextModelRecord, textResolvers, textSchema } from './material/text';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { Participation, ParticipationModelRecord, participationSchema } from './participation';
-import { Problem, ProblemModelRecord, problemResolvers, problemSchema } from './problem';
+import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { User, UserModelRecord, userResolvers, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
-import { ContestAwardAssignmentViewModelRecord, contestAwardAssignmentViewResolvers, contestAwardAssignmentViewSchema } from './view/contest-award-assignment-view';
-import { ContestProblemAssignmentViewModelRecord, contestProblemAssignmentViewResolvers, contestProblemAssignmentViewSchema } from './view/contest-problem-assignment-view';
-import { ContestProblemSetViewModelRecord, contestProblemSetViewResolvers, contestProblemSetViewSchema } from './view/contest-problem-set-view';
+import {
+    ContestAwardAssignmentViewModelRecord,
+    contestAwardAssignmentViewResolvers,
+    contestAwardAssignmentViewSchema,
+} from './view/contest-award-assignment-view';
+import {
+    ContestProblemAssignmentViewModelRecord,
+    contestProblemAssignmentViewResolvers,
+    contestProblemAssignmentViewSchema,
+} from './view/contest-problem-assignment-view';
+import {
+    ContestProblemSetViewModelRecord,
+    contestProblemSetViewResolvers,
+    contestProblemSetViewSchema,
+} from './view/contest-problem-set-view';
 import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './view/contest-view';
 import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './view/main-view';
 
@@ -88,13 +120,11 @@ export const schema = gql`
 export const modelConstructors = {
     Achievement,
     Contest,
-    ContestProblemAssignment,
     Archive,
     Evaluation,
     EvaluationEvent,
     FileContent,
     Participation,
-    Problem,
     Submission,
     SubmissionFile,
     User,

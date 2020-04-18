@@ -3,7 +3,10 @@ import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardAssignmentUserTackling, ContestAwardAssignmentUserTacklingApi } from './contest-award-assignment-user-tackling';
+import {
+    ContestAwardAssignmentUserTackling,
+    ContestAwardAssignmentUserTacklingApi,
+} from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -44,13 +47,16 @@ export interface ContestProblemAssignmentUserTacklingModelRecord {
 export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
     async canSubmit(t: ContestProblemAssignmentUserTackling) {
         const contest = await this.ctx.api(ContestApi).byId.load(t.assignment.contestId);
-        const status = this.ctx.api(ContestApi).getStatus(contest);
+        const status = await this.ctx.api(ContestApi).getStatus(contest);
 
         return status === 'RUNNING';
     }
 
     async getAwardTacklings(t: ContestProblemAssignmentUserTackling) {
-        const material = await this.ctx.api(ProblemMaterialApi).byProblemId.load(t.assignment.problemId);
+        const material = await this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
+            contestId: t.assignment.contestId,
+            problemName: t.assignment.problemName,
+        });
 
         return material.awards.map(
             award => new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(t.assignment, award), t.user),
@@ -70,8 +76,8 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
 export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
     ContestProblemAssignmentUserTackling: {
         canSubmit: async (t, {}, ctx) => ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(t),
-        submissions: async ({ assignment: { contestId, problemId }, user: { id: userId } }, {}, ctx) =>
-            ctx.api(SubmissionApi).allByTackling.load({ problemId, contestId, userId }),
+        submissions: async ({ assignment: { contestId, problemName }, user: { id: userId } }, {}, ctx) =>
+            ctx.api(SubmissionApi).allByTackling.load({ problemName, contestId, userId }),
         assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },

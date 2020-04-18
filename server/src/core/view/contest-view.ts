@@ -32,8 +32,8 @@ export const contestViewResolvers: Resolvers = {
     ContestView: {
         contest: ({ contest }) => contest,
         user: ({ user }) => user,
-        problemSetView: ({ contest, user }, {}, ctx) => {
-            const status = ctx.api(ContestApi).getStatus(contest);
+        problemSetView: async ({ contest, user }, {}, ctx) => {
+            const status = await ctx.api(ContestApi).getStatus(contest);
             switch (status) {
                 case 'RUNNING':
                 case 'ENDED':

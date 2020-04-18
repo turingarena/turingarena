@@ -7,7 +7,7 @@ import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/bas
 import { Resolvers } from '../main/resolver-types';
 import { AchievementApi } from './achievement';
 import { Contest, ContestApi } from './contest';
-import { ContestProblemAssignment, ContestProblemAssignmentApi } from './contest-problem-assignment';
+import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
@@ -15,7 +15,7 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { ParticipationApi } from './participation';
-import { Problem, ProblemApi } from './problem';
+import { Problem } from './problem';
 import { SubmissionFileApi } from './submission-file';
 import { User, UserApi } from './user';
 
@@ -50,15 +50,14 @@ export const submissionSchema = gql`
 /** A Submission in the system */
 @Table({ updatedAt: false })
 export class Submission extends UuidBaseModel<Submission> {
-    @ForeignKey(() => Problem)
-    @AllowNull(false)
-    @Column
-    problemId!: string;
-
     @ForeignKey(() => Contest)
     @AllowNull(false)
     @Column
     contestId!: string;
+
+    @AllowNull(false)
+    @Column
+    problemName!: string;
 
     @ForeignKey(() => User)
     @AllowNull(false)
@@ -75,10 +74,10 @@ export type SubmissionInput = __generated_SubmissionInput;
 export class SubmissionApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Submission);
     allByTackling = createSimpleLoader(
-        ({ problemId, contestId, userId }: { problemId: string; contestId: string; userId: string }) =>
+        ({ problemName, contestId, userId }: { problemName: string; contestId: string; userId: string }) =>
             this.ctx
                 .table(Submission)
-                .findAll({ where: { problemId, contestId, userId }, order: [['createdAt', 'ASC']] }),
+                .findAll({ where: { problemName, contestId, userId }, order: [['createdAt', 'ASC']] }),
     );
     pendingByUser = createSimpleLoader(async (userId: string) => {
         // TODO: denormalize DB to make this code simpler and faster
@@ -89,9 +88,7 @@ export class SubmissionApi extends ApiObject {
     });
 
     async getContestProblemAssignment(s: Submission): Promise<ContestProblemAssignment> {
-        return this.ctx
-            .api(ContestProblemAssignmentApi)
-            .byContestAndProblem.load({ contestId: s.contestId, problemId: s.problemId });
+        return new ContestProblemAssignment(s.contestId, s.problemName);
     }
 
     async getSubmissionFiles(s: Submission) {
@@ -129,11 +126,14 @@ export class SubmissionApi extends ApiObject {
     }
 
     async getProblem(s: Submission) {
-        return this.ctx.api(ProblemApi).byId.load(s.problemId);
+        return new Problem(s.contestId, s.problemName);
     }
 
     async getMaterial(s: Submission) {
-        return this.ctx.api(ProblemMaterialApi).byProblemId.load(s.problemId);
+        return this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
+            contestId: s.contestId,
+            problemName: s.problemName,
+        });
     }
 
     async getAwardAchievements(s: Submission) {
@@ -312,12 +312,12 @@ export const submissionResolvers: Resolvers = {
 
         contest: (s, {}, ctx) => ctx.api(ContestApi).byId.load(s.contestId),
         user: (s, {}, ctx) => ctx.api(UserApi).byUsername.load(s.userId),
-        problem: (s, {}, ctx) => ctx.api(ProblemApi).byId.load(s.problemId),
+        problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
 
         participation: ({ userId, contestId }, {}, ctx) =>
             ctx.api(ParticipationApi).byUserAndContest.load({ contestId, userId }),
-        contestProblemAssigment: ({ contestId, problemId }, {}, ctx) =>
-            ctx.api(ContestProblemAssignmentApi).byContestAndProblem.load({ contestId, problemId }),
+        contestProblemAssigment: ({ contestId, problemName }, {}, ctx) =>
+            new ContestProblemAssignment(contestId, problemName),
 
         officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
         summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
