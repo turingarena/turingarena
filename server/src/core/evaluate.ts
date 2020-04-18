@@ -27,11 +27,11 @@ export class EvaluateApi extends ApiObject {
 
         console.log(this.ctx.environment.config);
 
-        const contest = this.ctx.api(ContestApi).fromId(submission.contestId);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
+        const { assignment } = await this.ctx.api(SubmissionApi).getTackling(submission);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest);
         const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
-        const problemDir = path.join(contestDir, submission.problemName);
+        const problemDir = path.join(contestDir, assignment.problem.name);
 
         const submissionPath = await this.ctx
             .api(SubmissionApi)

@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { Submission } from './submission';
+import { SubmissionData } from './submission';
 
 export const evaluationSchema = gql`
     type Evaluation {
@@ -32,7 +32,7 @@ export const evaluationSchema = gql`
 /** An evaluation of a submission */
 @Table
 export class Evaluation extends UuidBaseModel<Evaluation> {
-    @ForeignKey(() => Submission)
+    @ForeignKey(() => SubmissionData)
     @AllowNull(false)
     @Column
     submissionId!: string;

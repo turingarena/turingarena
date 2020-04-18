@@ -3,7 +3,7 @@ import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
 import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
-import { Submission, SubmissionInput } from './submission';
+import { SubmissionApi, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
 import { UserApi } from './user';
 
@@ -17,13 +17,16 @@ export class SubmitApi extends ApiObject {
         const contest = await this.ctx.api(ContestApi).validate({ __typename: 'Contest', id: contestId });
         await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username });
 
-        const submission = await this.ctx.table(Submission).create({ contestId: contest.id, problemName, username });
+        const submissionData = await this.ctx
+            .table(SubmissionData)
+            .create({ contestId: contest.id, problemName, username });
+        const submission = this.ctx.api(SubmissionApi).fromId(submissionData.id);
 
         for (const { content, fieldName, fileName, fileTypeName } of files) {
             await this.ctx.table(SubmissionFile).create({
                 fieldName,
                 fileName,
-                submissionId: submission.id,
+                submissionId: submissionData.id,
                 fileTypeName,
                 contentId: (await this.ctx.api(FileContentApi).createFromContent(Buffer.from(content.base64, 'base64')))
                     .id,
@@ -32,7 +35,7 @@ export class SubmitApi extends ApiObject {
 
         if (solutionPath !== undefined) {
             await this.ctx.table(SubmissionFile).create({
-                submissionId: submission.id,
+                submissionId: submissionData.id,
                 fieldName: 'solution',
                 fileTypeName: 'cpp',
                 fileName: path.basename(solutionPath),

@@ -2,7 +2,6 @@ import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { ContestApi } from './contest';
 import { Evaluation, EvaluationApi } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -48,12 +47,9 @@ export class AchievementApi extends ApiObject {
 
     async getAward(a: Achievement) {
         const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
-        const { contestId, problemName } = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
-        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load({
-            __typename: 'Problem',
-            contest: this.ctx.api(ContestApi).fromId(contestId),
-            name: problemName,
-        });
+        const submission = this.ctx.api(SubmissionApi).fromId(evaluation.submissionId);
+        const { assignment } = await this.ctx.api(SubmissionApi).getTackling(submission);
+        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
         return material.awards[a.awardIndex];
     }

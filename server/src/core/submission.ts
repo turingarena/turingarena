@@ -3,8 +3,9 @@ import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
+import { typed } from '../util/types';
 import { AchievementApi } from './achievement';
 import { ContestApi, ContestData } from './contest';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
@@ -16,7 +17,6 @@ import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
 import { SubmissionFileApi } from './submission-file';
-import { UserApi } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -46,9 +46,8 @@ export const submissionSchema = gql`
     }
 `;
 
-/** A Submission in the system */
-@Table({ updatedAt: false })
-export class Submission extends UuidBaseModel<Submission> {
+@Table({ updatedAt: false, tableName: 'submissions' })
+export class SubmissionData extends UuidBaseModel<SubmissionData> {
     @ForeignKey(() => ContestData)
     @AllowNull(false)
     @Column
@@ -63,6 +62,11 @@ export class Submission extends UuidBaseModel<Submission> {
     username!: string;
 }
 
+export interface Submission {
+    __typename: 'Submission';
+    id: string;
+}
+
 export interface SubmissionModelRecord {
     Submission: Submission;
 }
@@ -70,9 +74,20 @@ export interface SubmissionModelRecord {
 export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionApi extends ApiObject {
-    byId = createByIdDataLoader(this.ctx, Submission);
+    fromId(id: string) {
+        return typed<Submission>({ __typename: 'Submission', id });
+    }
+
+    dataLoader = createSimpleLoader((s: Submission) => this.ctx.table(SubmissionData).findByPk(s.id));
+
+    async validate(submission: Submission) {
+        await this.dataLoader.load(submission);
+
+        return submission;
+    }
+
     allByTackling = createSimpleLoader(
-        ({
+        async ({
             assignment: {
                 problem: {
                     contest: { id: contestId },
@@ -81,23 +96,44 @@ export class SubmissionApi extends ApiObject {
             },
             user: { username },
         }: ContestProblemAssignmentUserTackling) =>
-            this.ctx
-                .table(Submission)
-                .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] }),
+            (
+                await this.ctx
+                    .table(SubmissionData)
+                    .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] })
+            ).map(data => this.fromId(data.id)),
     );
 
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
-            const submissions = await this.ctx.table(Submission).findAll({ where: { username } });
-            const officalEvaluations = await Promise.all(submissions.map(async s => this.getOfficialEvaluation(s)));
+            const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
+            const officalEvaluations = await Promise.all(
+                submissions.map(async s => this.getOfficialEvaluation(this.fromId(s.id))),
+            );
 
-            return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
+            return submissions
+                .filter((s, i) => officalEvaluations[i]?.status === 'PENDING')
+                .map(s => this.fromId(s.id));
         },
     );
 
     async getSubmissionFiles(s: Submission) {
         return this.ctx.api(SubmissionFileApi).allBySubmissionId.load(s.id);
+    }
+
+    async getTackling(s: Submission) {
+        const { contestId, problemName, username } = await this.dataLoader.load(s);
+
+        const contest = this.ctx.api(ContestApi).fromId(contestId);
+
+        return typed<ContestProblemAssignmentUserTackling>({
+            __typename: 'ContestProblemAssignmentUserTackling',
+            assignment: {
+                __typename: 'ContestProblemAssignment',
+                problem: { __typename: 'Problem', contest, name: problemName },
+            },
+            user: { __typename: 'User', contest, username },
+        });
     }
 
     /**
@@ -131,14 +167,9 @@ export class SubmissionApi extends ApiObject {
     }
 
     async getMaterial(s: Submission) {
-        return this.ctx.api(ProblemMaterialApi).dataLoader.load({
-            __typename: 'Problem',
-            contest: {
-                __typename: 'Contest',
-                id: s.contestId,
-            },
-            name: s.problemName,
-        });
+        const { assignment } = await this.getTackling(s);
+
+        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
     }
 
     async getAwardAchievements(s: Submission) {
@@ -315,36 +346,25 @@ export const submissionResolvers: Resolvers = {
     Submission: {
         id: s => s.id,
 
-        contest: (s, {}, ctx) => ctx.api(ContestApi).fromId(s.contestId),
-        user: (s, {}, ctx) =>
-            ctx.api(UserApi).validate({
-                __typename: 'User',
-                contest: ctx.api(ContestApi).fromId(s.contestId),
-                username: s.username,
-            }),
-        problem: ({ contestId, problemName }, {}, ctx) => ({
-            __typename: 'Problem',
-            contest: {
-                __typename: 'Contest',
-                id: contestId,
-            },
-            name: problemName,
-        }),
-        participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),
-        contestProblemAssigment: ({ contestId, problemName }, {}, ctx) => ({
-            __typename: 'ContestProblemAssignment',
-            problem: {
-                __typename: 'Problem',
-                contest: ctx.api(ContestApi).fromId(contestId),
-                name: problemName,
-            },
-        }),
+        contest: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem.contest,
+        user: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).user,
+        problem: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem,
+        participation: async (s, {}, ctx) => {
+            const tackling = await ctx.api(SubmissionApi).getTackling(s);
+
+            return typed<Participation>({
+                __typename: 'Participation',
+                contest: tackling.assignment.problem.contest,
+                user: tackling.user,
+            });
+        },
+        contestProblemAssigment: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment,
 
         officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
         summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
         feedbackTable: (s, {}, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
 
-        createdAt: s => s.createdAt,
+        createdAt: async (s, {}, ctx) => (await ctx.api(SubmissionApi).dataLoader.load(s)).createdAt,
         evaluations: (s, {}, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
         files: (s, {}, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
     },

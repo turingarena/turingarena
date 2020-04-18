@@ -49,7 +49,7 @@ import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutati
 import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
-import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
+import { SubmissionData, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { UserModelRecord, userResolvers, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
@@ -124,7 +124,7 @@ export const modelConstructors = {
     Evaluation,
     EvaluationEvent,
     FileContent,
-    Submission,
+    SubmissionData,
     SubmissionFile,
 };
 

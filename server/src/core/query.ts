@@ -40,7 +40,7 @@ export const queryResolvers: Resolvers = {
         contests: async ({}, {}, ctx) =>
             (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
         archive: (_, { uuid }) => ({ uuid }),
-        submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).byId.load(id),
+        submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).validate({ __typename: 'Submission', id }),
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
     },
 };
