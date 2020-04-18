@@ -79,25 +79,26 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
               `
         }
       >
-        <div>
-          <h2 className={headerClass}>{t('score')}</h2>
+        {data.problemSetView.totalScoreField.score !== null && (
+          <div>
+            <h2 className={headerClass}>{t('score')}</h2>
 
-          <div
-            className={css`
-              white-space: nowrap;
-              text-align: right;
+            <div
+              className={css`
+                white-space: nowrap;
+                text-align: right;
+                font-size: 2rem;
+                margin-bottom: 16px;
 
-              font-size: 2rem;
-              margin-bottom: 16px;
-
-              & > .score {
-                font-size: 4rem;
-              }
-            `}
-          >
-            <GradeField data={data.problemSetView.totalScoreField} />
+                & > .score {
+                  font-size: 4rem;
+                }
+              `}
+            >
+              <GradeField data={data.problemSetView.totalScoreField} />
+            </div>
           </div>
-        </div>
+        )}
 
         <ContestViewClock data={data} />
 
