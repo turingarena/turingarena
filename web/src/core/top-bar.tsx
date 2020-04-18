@@ -16,7 +16,7 @@ import { textFragment } from './text';
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
   const auth = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <>
@@ -90,6 +90,22 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
             <FontAwesomeIcon icon="sign-in-alt" /> {t('logIn')}
           </button>
         )}
+        <select
+          value={i18n.language.substr(0, 2)}
+          className={cx(
+            'custom-select',
+            'custom-select-sm',
+            css`
+              margin-left: 5px;
+              color: #212529;
+              width: auto;
+            `,
+          )}
+          onChange={e => i18n.changeLanguage(e.target.value)}
+        >
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+        </select>
       </nav>
     </>
   );
