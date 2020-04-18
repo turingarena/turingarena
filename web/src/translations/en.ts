@@ -5,7 +5,7 @@ export const en = {
     startingIn: 'starting in',
     remainingTime: 'remaining time',
     ended: 'ended',
-    submitASolution: 'submit a solution',
+    submitASolution: 'Submit a solution',
     attachments: 'Attachments',
     awards: 'Awards',
     statementFile: 'Statement file',
