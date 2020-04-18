@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AgGridReact } from 'ag-grid-react';
 import { css, cx } from 'emotion';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { RecordFragment, SubmissionFragment } from '../generated/graphql-types';
 import { gridCss } from '../util/components/grid';
 import { FragmentProps } from '../util/fragment-props';
@@ -42,6 +43,7 @@ export const submissionFragment = gql`
 
 export function Submission({ data }: FragmentProps<SubmissionFragment>) {
   const rowData = JSON.parse(JSON.stringify(data.feedbackTable.rows)) as typeof data.feedbackTable.rows; // allow AgGrid to mess with this data
+  const { t } = useTranslation();
 
   return (
     <>
@@ -57,7 +59,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
               `
         }
       >
-        <FontAwesomeIcon icon="spinner" pulse /> Evaluating...
+        <FontAwesomeIcon icon="spinner" pulse /> {t('evaluating')}...
       </div>
       <div className={cx(gridCss)}>
         <AgGridReact

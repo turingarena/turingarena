@@ -1,6 +1,7 @@
 import { gql, useMutation } from '@apollo/client';
 import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ContestProblemAssignmentUserTacklingSubmitModalFragment,
   ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
@@ -80,6 +81,7 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
 }: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
   onSubmitSuccessful: (submissionId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [submit] = useMutation<SubmitMutation, SubmitMutationVariables>(
     gql`
       mutation Submit($submission: SubmissionInput!) {
@@ -142,7 +144,7 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
     >
       <div className={modalHeaderCss}>
         <h4>
-          Solution of: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+          {t('solutionOf')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
         </h4>
       </div>
       <div
@@ -163,10 +165,14 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
           />
         ))}
       </div>
-      {error !== undefined && <>Error in submission: {error.message}</>}
+      {error !== undefined && (
+        <>
+          {t('submissionError')}: {error.message}
+        </>
+      )}
       <div className={modalFooterCss}>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading || !valid} type="submit">
-          Submit
+          {t('submit')}
         </button>
       </div>
     </form>
@@ -183,6 +189,7 @@ function FileInput({
 } & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
+  const { t } = useTranslation();
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
 
@@ -218,7 +225,7 @@ function FileInput({
           e.preventDefault();
         }}
       >
-        Choose file
+        {t('chooseFile')}
       </button>
       {file !== null && (
         <dl
@@ -239,14 +246,14 @@ function FileInput({
             }
           `}
         >
-          <dt>Name:</dt>
+          <dt>{t('name')}:</dt>
           <dd>{file.name}</dd>
-          <dt>Type:</dt>
+          <dt>{t('type')}:</dt>
           <dd>
             <FileTypeInfo data={data} field={field} file={file} />
           </dd>
 
-          <dt>Size:</dt>
+          <dt>{t('size')}:</dt>
           <dd>{file.size}</dd>
         </dl>
       )}
@@ -263,7 +270,7 @@ function FileTypeInfo({
   file: File;
 }) {
   const rule = getTypingRule({ data, field, file });
-
+  const { t } = useTranslation();
   const [overrideType, setOverrideType] = useState(false);
   const defaultType = overrideType ? null : rule.defaultType;
 
@@ -272,14 +279,14 @@ function FileTypeInfo({
   if (defaultType === null) {
     return (
       <select name={typeInputId}>
-        {rule.recommendedTypes.map(t => (
-          <option key={t.name} value={t.name}>
-            {t.title.variant}
+        {rule.recommendedTypes.map(type => (
+          <option key={t.name} value={type.name}>
+            {type.title.variant}
           </option>
         ))}
-        {rule.otherTypes.map(t => (
-          <option key={t.name} value={t.name}>
-            {t.title.variant}
+        {rule.otherTypes.map(type => (
+          <option key={t.name} value={type.name}>
+            {type.title.variant}
           </option>
         ))}
       </select>
@@ -299,7 +306,7 @@ function FileTypeInfo({
           )}
           onClick={() => setOverrideType(true)}
         >
-          change
+          {t('change')}
         </button>
         )
         <input type="hidden" name={typeInputId} value={defaultType.name} />

@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import { DateTime, Duration } from 'luxon';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { interval } from 'rxjs';
 import { useObservable } from 'rxjs-hooks';
 import { map, startWith } from 'rxjs/operators';
@@ -21,17 +22,19 @@ export const contestViewClockFragment = gql`
 const getContestStatus = (status: ContestStatus) => {
   switch (status) {
     case 'NOT_STARTED':
-      return 'Starting In';
+      return 'startingIn';
     case 'RUNNING':
-      return 'Remaining Time';
+      return 'remainingTime';
     case 'ENDED':
-      return 'Ended';
+      return 'ended';
     default:
       return unexpected(status);
   }
 };
 
 export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
+  const { t } = useTranslation();
+
   const clock = useObservable(() =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
@@ -76,7 +79,7 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
           line-height: 1.2;
         `}
       >
-        {getContestStatus(data.contest.status)}
+        {t(getContestStatus(data.contest.status))}
       </div>
 
       {clock !== null && (

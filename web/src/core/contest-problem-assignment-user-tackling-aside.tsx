@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
 import {
@@ -48,6 +49,7 @@ export function ContestProblemAssignmentUserTacklingAside({
 }: FragmentProps<ContestProblemAssignmentUserTacklingAsideFragment>) {
   const basePath = useBasePath();
   const history = useHistory();
+  const { t } = useTranslation();
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
 
@@ -62,7 +64,7 @@ export function ContestProblemAssignmentUserTacklingAside({
       {data.canSubmit && (
         <>
           <Link className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)} to={`${basePath}/submit`} replace>
-            <FontAwesomeIcon icon="paper-plane" /> Submit a solution
+            <FontAwesomeIcon icon="paper-plane" /> {t('submitASolution')}
           </Link>
           <Route path={`${basePath}/submit`}>
             {({ match }) => (
@@ -94,7 +96,7 @@ export function ContestProblemAssignmentUserTacklingAside({
             {lastSubmission.officialEvaluation?.status === 'PENDING' && (
               <FontAwesomeIcon icon="spinner" pulse={true} />
             )}{' '}
-            Last submission
+            {t('lastSubmission')}
           </Link>
 
           <Link
@@ -109,14 +111,14 @@ export function ContestProblemAssignmentUserTacklingAside({
               `,
             )}
           >
-            <FontAwesomeIcon icon="list" /> All submissions
+            <FontAwesomeIcon icon="list" /> {t('allSubmissions')}
           </Link>
           <Route path={`${basePath}/submissions`}>
             {({ match }) => (
               <Modal show={match !== null} onClose={() => history.replace(basePath)}>
                 <div className={modalHeaderCss}>
                   <h4>
-                    Submissions for: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                    {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
                   </h4>
                 </div>
                 <div
@@ -156,13 +158,13 @@ export function ContestProblemAssignmentUserTacklingAside({
                   <div className={modalHeaderCss}>
                     <h5>
                       {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
-                      Submission for: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                      {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
                     </h5>
                   </div>
                   <SubmissionLoader id={(match.params as { id: string }).id} />
                   <div className={modalFooterCss}>
                     <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
-                      Close
+                      {t('close')}
                     </button>
                   </div>
                 </div>
