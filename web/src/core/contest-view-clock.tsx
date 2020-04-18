@@ -39,38 +39,41 @@ const getContestStatus = (status: ContestStatus) => {
 export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
   const { t } = useTranslation();
 
-  const clock = useObservable(() =>
-    interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
-      startWith(0),
-      map(() => {
-        const now = DateTime.local();
-        const start = DateTime.fromISO(data.contest.start.local);
-        const end = DateTime.fromISO(data.contest.end.local);
+  const clock =
+    data.contest.end === null
+      ? null
+      : useObservable(() =>
+          interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
+            startWith(0),
+            map(() => {
+              const now = DateTime.local();
+              const start = DateTime.fromISO(data.contest.start.local);
+              const end = DateTime.fromISO(data.contest.end!.local);
 
-        switch (data.contest.status) {
-          case 'NOT_STARTED':
-            return start.diff(now);
-          case 'RUNNING':
-            return end.diff(now);
-          case 'ENDED':
-            return now.diff(end);
-          default:
-            return unexpected(data.contest.status);
-        }
-      }),
-      map(duration =>
-        duration.valueOf() >= 0
-          ? {
-              duration,
-              negated: false,
-            }
-          : {
-              duration: duration.negate(),
-              negated: true,
-            },
-      ),
-    ),
-  );
+              switch (data.contest.status) {
+                case 'NOT_STARTED':
+                  return start.diff(now);
+                case 'RUNNING':
+                  return end.diff(now);
+                case 'ENDED':
+                  return now.diff(end);
+                default:
+                  return unexpected(data.contest.status);
+              }
+            }),
+            map(duration =>
+              duration.valueOf() >= 0
+                ? {
+                    duration,
+                    negated: false,
+                  }
+                : {
+                    duration: duration.negate(),
+                    negated: true,
+                  },
+            ),
+          ),
+        );
 
   return (
     <div>
