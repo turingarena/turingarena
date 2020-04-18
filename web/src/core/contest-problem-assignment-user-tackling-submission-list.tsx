@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import { DateTime } from 'luxon';
 import React from 'react';
+import { Table } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingSubmissionListFragment } from '../generated/graphql-types';
@@ -64,7 +65,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
   const { t } = useTranslation();
 
   return (
-    <table className="table">
+    <Table hover striped responsive>
       <thead className="thead-light">
         <tr>
           <th>{t('submittedAt')}</th>
@@ -105,6 +106,6 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
           </tr>
         ))}
       </tbody>
-    </table>
+    </Table>
   );
 }

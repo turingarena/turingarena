@@ -20,7 +20,7 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
 
   return (
     <>
-      <Modal show={showLogInModal} onHide={() => setShowLogInModal(false)}>
+      <Modal show={showLogInModal} onHide={() => setShowLogInModal(false)} autoFocus={false} animation={false}>
         <LoginModal onClose={() => setShowLogInModal(false)} />
       </Modal>
       <nav

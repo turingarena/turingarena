@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React from 'react';
+import { Table } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { SubmissionFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
@@ -59,7 +60,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
       >
         <FontAwesomeIcon icon="spinner" pulse /> {t('evaluating')}...
       </div>
-      <table className="table">
+      <Table hover responsive striped>
         <thead className="thead-light">
           <tr>
             {data.feedbackTable.columns.map((col, colIndex) => (
@@ -80,7 +81,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </>
   );
 }
