@@ -6,8 +6,10 @@ import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
-export class ContestAwardAssignmentUserTackling {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
+export interface ContestAwardAssignmentUserTackling {
+    __typename: 'ContestAwardAssignmentUserTackling';
+    assignment: ContestAwardAssignment;
+    user: User;
 }
 
 export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
@@ -60,8 +62,8 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
             `,
             {
                 bind: {
-                    contestId: t.assignment.problemAssignment.contestId,
-                    problemName: t.assignment.problemAssignment.problemName,
+                    contestId: t.assignment.problemAssignment.problem.contest.id,
+                    problemName: t.assignment.problemAssignment.problem.name,
                     username: t.user.username,
                     awardIndex: t.assignment.award.index,
                 },

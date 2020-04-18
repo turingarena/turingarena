@@ -8,9 +8,9 @@ import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
+import { typed } from '../util/types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemSet } from './contest-problem-set';
 import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaVariant } from './material/media';
@@ -134,22 +134,22 @@ export class ContestApi extends ApiObject {
         else return 'NOT_STARTED';
     }
 
-    async getProblemAssignments(c: Contest) {
-        const metadata = await this.getMetadata(c);
+    async getProblemAssignments(contest: Contest) {
+        const metadata = await this.getMetadata(contest);
 
-        return metadata.problems.map(name => new ContestProblemAssignment(c.id, name));
+        return metadata.problems.map(name =>
+            typed<ContestProblemAssignment>({
+                __typename: 'ContestProblemAssignment',
+                problem: { __typename: 'Problem', contest, name },
+            }),
+        );
     }
 
     async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {
         const assignments = await this.getProblemAssignments(c);
 
         return Promise.all(
-            assignments.map(async ({ contestId, problemName }) =>
-                this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
-                    contestId,
-                    problemName,
-                }),
-            ),
+            assignments.map(async ({ problem }) => this.ctx.api(ProblemMaterialApi).dataLoader.load(problem)),
         );
     }
 
@@ -187,7 +187,7 @@ export const contestResolvers: Resolvers = {
         start: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).start,
         end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end,
         status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
-        problemSet: c => new ContestProblemSet(c),
+        problemSet: c => ({ __typename: 'ContestProblemSet', contest: c }),
         archive: async (c, {}, ctx) => ({ uuid: (await ctx.api(ContestApi).dataLoader.load(c)).archiveId }),
         statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
     },

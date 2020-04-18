@@ -38,8 +38,7 @@ export interface IOITaskInfo {
 
 export class ProblemTaskInfoApi extends ApiObject {
     async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-        const contest = this.ctx.api(ContestApi).fromId(problem.contestId);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(problem.contest);
         const metadataPath = `${problem.name}/.task-info.json`;
 
         const metadataProblemFile = await this.ctx.table(Archive).findOne({

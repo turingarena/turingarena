@@ -7,7 +7,7 @@ import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main
 import { Resolvers } from '../main/resolver-types';
 import { AchievementApi } from './achievement';
 import { ContestApi, ContestData } from './contest';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
@@ -15,7 +15,6 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
-import { Problem } from './problem';
 import { SubmissionFileApi } from './submission-file';
 import { UserApi } from './user';
 
@@ -73,11 +72,20 @@ export type SubmissionInput = __generated_SubmissionInput;
 export class SubmissionApi extends ApiObject {
     byId = createByIdDataLoader(this.ctx, Submission);
     allByTackling = createSimpleLoader(
-        ({ problemName, contestId, username }: { problemName: string; contestId: string; username: string }) =>
+        ({
+            assignment: {
+                problem: {
+                    contest: { id: contestId },
+                    name: problemName,
+                },
+            },
+            user: { username },
+        }: ContestProblemAssignmentUserTackling) =>
             this.ctx
                 .table(Submission)
                 .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] }),
     );
+
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
@@ -87,10 +95,6 @@ export class SubmissionApi extends ApiObject {
             return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
         },
     );
-
-    async getContestProblemAssignment(s: Submission): Promise<ContestProblemAssignment> {
-        return new ContestProblemAssignment(s.contestId, s.problemName);
-    }
 
     async getSubmissionFiles(s: Submission) {
         return this.ctx.api(SubmissionFileApi).allBySubmissionId.load(s.id);
@@ -126,14 +130,14 @@ export class SubmissionApi extends ApiObject {
         });
     }
 
-    async getProblem(s: Submission) {
-        return new Problem(s.contestId, s.problemName);
-    }
-
     async getMaterial(s: Submission) {
-        return this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
-            contestId: s.contestId,
-            problemName: s.problemName,
+        return this.ctx.api(ProblemMaterialApi).dataLoader.load({
+            __typename: 'Problem',
+            contest: {
+                __typename: 'Contest',
+                id: s.contestId,
+            },
+            name: s.problemName,
         });
     }
 
@@ -318,11 +322,23 @@ export const submissionResolvers: Resolvers = {
                 contest: ctx.api(ContestApi).fromId(s.contestId),
                 username: s.username,
             }),
-        problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
-
+        problem: ({ contestId, problemName }, {}, ctx) => ({
+            __typename: 'Problem',
+            contest: {
+                __typename: 'Contest',
+                id: contestId,
+            },
+            name: problemName,
+        }),
         participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),
-        contestProblemAssigment: ({ contestId, problemName }, {}, ctx) =>
-            new ContestProblemAssignment(contestId, problemName),
+        contestProblemAssigment: ({ contestId, problemName }, {}, ctx) => ({
+            __typename: 'ContestProblemAssignment',
+            problem: {
+                __typename: 'Problem',
+                contest: ctx.api(ContestApi).fromId(contestId),
+                name: problemName,
+            },
+        }),
 
         officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
         summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
