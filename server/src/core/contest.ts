@@ -27,7 +27,7 @@ export const contestSchema = gql`
         statement: Media!
 
         start: DateTime!
-        end: DateTime!
+        end: DateTime
 
         status: ContestStatus!
         problemSet: ContestProblemSet!
@@ -125,12 +125,12 @@ export class ContestApi extends ApiObject {
         const metadata = await this.getMetadata(c);
 
         const start = DateTime.fromISO(metadata.start).valueOf();
-        const end = DateTime.fromISO(metadata.end).valueOf();
+        const end = metadata.end !== undefined ? DateTime.fromISO(metadata.end).valueOf() : null;
         const now = DateTime.local().valueOf();
 
         if (now < start) return 'NOT_STARTED';
-        else if (now < end) return 'RUNNING';
-        else return 'NOT_STARTED';
+        else if (end === null || now < end) return 'RUNNING';
+        else return 'ENDED';
     }
 
     async getProblemAssignments(c: Contest) {
@@ -183,7 +183,7 @@ export const contestResolvers: Resolvers = {
         name: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).name,
         title: async (c, {}, ctx) => [{ value: (await ctx.api(ContestApi).getMetadata(c)).title }],
         start: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).start,
-        end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end,
+        end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end ?? null,
         status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
         problemSet: c => new ContestProblemSet(c),
         archive: c => ({ uuid: c.archiveId }),
