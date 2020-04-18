@@ -1,3 +1,4 @@
+// tslint:disable: ban-ts-ignore no-submodule-imports no-unsafe-any
 import { gql } from '@apollo/client';
 // @ts-ignore
 import TeX from '@matejmazur/react-katex';
@@ -70,6 +71,7 @@ export function MediaInline({ data }: FragmentProps<MediaInlineFragment>) {
             className={css`
               padding: 0.75rem;
               max-width: 60rem;
+              margin: auto;
             `}
           >
             <MarkdownMediaInline data={data}></MarkdownMediaInline>
