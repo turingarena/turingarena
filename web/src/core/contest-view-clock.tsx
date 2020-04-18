@@ -39,41 +39,40 @@ const getContestStatus = (status: ContestStatus) => {
 export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
   const { t } = useTranslation();
 
-  const clock =
-    data.contest.end === null
-      ? null
-      : useObservable(() =>
-          interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
-            startWith(0),
-            map(() => {
-              const now = DateTime.local();
-              const start = DateTime.fromISO(data.contest.start.local);
-              const end = DateTime.fromISO(data.contest.end!.local);
+  const clock = useObservable(() =>
+    interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
+      startWith(0),
+      map(() => {
+        if (data.contest.end === null) return new Duration();
 
-              switch (data.contest.status) {
-                case 'NOT_STARTED':
-                  return start.diff(now);
-                case 'RUNNING':
-                  return end.diff(now);
-                case 'ENDED':
-                  return now.diff(end);
-                default:
-                  return unexpected(data.contest.status);
-              }
-            }),
-            map(duration =>
-              duration.valueOf() >= 0
-                ? {
-                    duration,
-                    negated: false,
-                  }
-                : {
-                    duration: duration.negate(),
-                    negated: true,
-                  },
-            ),
-          ),
-        );
+        const now = DateTime.local();
+        const start = DateTime.fromISO(data.contest.start.local);
+        const end = DateTime.fromISO(data.contest.end.local);
+
+        switch (data.contest.status) {
+          case 'NOT_STARTED':
+            return start.diff(now);
+          case 'RUNNING':
+            return end.diff(now);
+          case 'ENDED':
+            return now.diff(end);
+          default:
+            return unexpected(data.contest.status);
+        }
+      }),
+      map(duration =>
+        duration.valueOf() >= 0
+          ? {
+              duration,
+              negated: false,
+            }
+          : {
+              duration: duration.negate(),
+              negated: true,
+            },
+      ),
+    ),
+  );
 
   return (
     <div>
@@ -89,7 +88,7 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
         {t(getContestStatus(data.contest.status))}
       </div>
 
-      {clock !== null && (
+      {data.contest.end !== null && clock !== null && (
         <div
           className={css`
             font-family: 'Lucida Console', Monaco, monospace;
