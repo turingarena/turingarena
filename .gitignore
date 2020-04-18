@@ -1,22 +1,16 @@
 __generated__
-*.sqlite3
-.task-maker-files/
+__pycache__
+.DS_Store
+.idea/
 *.aux
+*.bak
+*.egg-info/
 *.fdb_latexmk
 *.fls
 *.log
-.idea/
+*.sqlite3
+*.swp
 build/
 dist/
-turing/
-*.egg-info/
-/.turingarena_venv/
-__pycache__
-node_modules/
 generated/
-
-# Mac-related
-.DS_Store
-
-# Vim-related
-*.swp
+node_modules/
