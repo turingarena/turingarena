@@ -2,7 +2,7 @@ import { DocumentNode, execute } from 'graphql';
 import { Model, Sequelize } from 'sequelize-typescript';
 import { modelConstructors } from '../core';
 import { AuthService } from '../core/auth';
-import { User } from '../core/user';
+import { User, UserApi } from '../core/user';
 import { ApiObject } from './api';
 import { Config, defaultConfig } from './config';
 import { createSchema } from './executable-schema';
@@ -84,15 +84,18 @@ export class RemoteApiContext extends ApiContext {
 
     authorizeUser(username: string) {
         if (this.environment.config.skipAuth) return;
-        if (this.user?.metadata.username !== username) throw new Error(`User ${username} not authorized`);
+
+        if (this.user?.username !== username) throw new Error(`User ${username} not authorized`);
     }
 
-    authorizeAdmin(username: string) {
+    async authorizeAdmin(username: string) {
         if (this.environment.config.skipAuth) return;
 
         this.authorizeUser(username);
 
-        if (this.user?.metadata.role !== 'admin') throw new Error(`User ${username} is not an admin`);
+        if (this.user === undefined || (await this.api(UserApi).metadataLoader.load(this.user)).role !== 'admin') {
+            throw new Error(`User ${username} is not an admin`);
+        }
     }
 
     schema = createSchema();

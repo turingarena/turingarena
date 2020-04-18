@@ -15,7 +15,6 @@ import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaVariant } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
-import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
@@ -76,6 +75,12 @@ export class ContestApi extends ApiObject {
 
     dataLoader = createSimpleLoader(({ id }: Contest) => this.ctx.table(ContestData).findByPk(id));
 
+    async validate(contest: Contest) {
+        await this.dataLoader.load(contest);
+
+        return contest;
+    }
+
     byNameLoader = createSimpleLoader(async (name: string) => {
         // FIXME: should contests be addressable by name anyway?
 
@@ -115,24 +120,6 @@ export class ContestApi extends ApiObject {
             .findOne({ where: { id: metadataProblemFile.contentId } });
 
         return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
-    }
-
-    async getUserByUsername(c: Contest, username: string) {
-        const metadata = await this.ctx.api(ContestApi).getMetadata(c);
-        const userMetadata = metadata.users.find(u => u.username === username) ?? null;
-
-        if (userMetadata === null) throw new Error(`contest ${c.id} has no user '${username}'`);
-
-        return new User(c.id, userMetadata);
-    }
-
-    async getUserByToken(c: Contest, token: string) {
-        const metadata = await this.ctx.api(ContestApi).getMetadata(c);
-        const userMetadata = metadata.users.find(u => u.token === token) ?? null;
-
-        if (userMetadata === null) return null;
-
-        return new User(c.id, userMetadata);
     }
 
     async getStatus(c: Contest): Promise<ContestStatus> {

@@ -17,6 +17,7 @@ import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFileApi } from './submission-file';
+import { UserApi } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -311,8 +312,12 @@ export const submissionResolvers: Resolvers = {
         id: s => s.id,
 
         contest: (s, {}, ctx) => ctx.api(ContestApi).fromId(s.contestId),
-        user: async (s, {}, ctx) =>
-            ctx.api(ContestApi).getUserByUsername(ctx.api(ContestApi).fromId(s.contestId), s.username),
+        user: (s, {}, ctx) =>
+            ctx.api(UserApi).validate({
+                __typename: 'User',
+                contest: ctx.api(ContestApi).fromId(s.contestId),
+                username: s.username,
+            }),
         problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
 
         participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),

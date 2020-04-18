@@ -5,6 +5,7 @@ import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
 import { Submission, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
+import { UserApi } from './user';
 
 export class SubmitApi extends ApiObject {
     async submit(
@@ -13,14 +14,10 @@ export class SubmitApi extends ApiObject {
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const contest = this.ctx.api(ContestApi).fromId(contestId);
-        const user = await this.ctx.api(ContestApi).getUserByUsername(contest, username);
+        const contest = await this.ctx.api(ContestApi).validate({ __typename: 'Contest', id: contestId });
+        await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username });
 
-        const submission = await this.ctx.table(Submission).create({
-            contestId: contest.id,
-            problemName,
-            username: user.metadata.username,
-        });
+        const submission = await this.ctx.table(Submission).create({ contestId: contest.id, problemName, username });
 
         for (const { content, fieldName, fileName, fileTypeName } of files) {
             await this.ctx.table(SubmissionFile).create({

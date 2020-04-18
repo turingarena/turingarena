@@ -46,7 +46,7 @@ export const mainViewResolvers: Resolvers = {
             v.user !== null
                 ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
                       contestId: v.contest.id,
-                      username: v.user.metadata.username,
+                      username: v.user.username,
                   })
                 : [],
     },

@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
 import { SubmissionApi } from './submission';
+import { UserApi } from './user';
 import { MainView } from './view/main-view';
 
 export const querySchema = gql`
@@ -32,7 +33,7 @@ export const queryResolvers: Resolvers = {
             return new MainView(
                 contest,
                 username !== null && username !== undefined
-                    ? await ctx.api(ContestApi).getUserByUsername(contest, username)
+                    ? await ctx.api(UserApi).validate({ __typename: 'User', contest, username })
                     : null,
             );
         },

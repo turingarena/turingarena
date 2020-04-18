@@ -76,16 +76,8 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
 export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
     ContestProblemAssignmentUserTackling: {
         canSubmit: async (t, {}, ctx) => ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(t),
-        submissions: async (
-            {
-                assignment: { contestId, problemName },
-                user: {
-                    metadata: { username },
-                },
-            },
-            {},
-            ctx,
-        ) => ctx.api(SubmissionApi).allByTackling.load({ problemName, contestId, username }),
+        submissions: async ({ assignment: { contestId, problemName }, user: { username } }, {}, ctx) =>
+            ctx.api(SubmissionApi).allByTackling.load({ problemName, contestId, username }),
         assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },

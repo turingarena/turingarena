@@ -62,7 +62,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                 bind: {
                     contestId: t.assignment.problemAssignment.contestId,
                     problemName: t.assignment.problemAssignment.problemName,
-                    username: t.user.metadata.username,
+                    username: t.user.username,
                     awardIndex: t.assignment.award.index,
                 },
                 type: QueryTypes.SELECT,
