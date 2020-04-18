@@ -1,10 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
-import { ApiObject } from '../main/api';
-import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi } from './contest';
-import { Problem, ProblemApi } from './problem';
+import { ContestApi } from './contest';
+import { Problem } from './problem';
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
@@ -15,39 +12,18 @@ export const contestProblemAssignmentSchema = gql`
     }
 `;
 
-/** Contest to Problem N-N relation */
-@Table({ timestamps: false })
-export class ContestProblemAssignment extends BaseModel<ContestProblemAssignment> {
-    @ForeignKey(() => Problem)
-    @PrimaryKey
-    @Column
-    problemId!: string;
-
-    @ForeignKey(() => Contest)
-    @PrimaryKey
-    @Column
-    contestId!: string;
-
-    // TODO: add index to make problem order deterministic
+export class ContestProblemAssignment {
+    constructor(readonly contestId: string, readonly problemName: string) {}
 }
 
 export interface ContestProblemAssignmentModelRecord {
     ContestProblemAssignment: ContestProblemAssignment;
 }
 
-export class ContestProblemAssignmentApi extends ApiObject {
-    byContestAndProblem = createSimpleLoader(({ contestId, problemId }: { contestId: string; problemId: string }) =>
-        this.ctx.table(ContestProblemAssignment).findOne({ where: { contestId, problemId } }),
-    );
-    allByContestId = createSimpleLoader((contestId: string) =>
-        this.ctx.table(ContestProblemAssignment).findAll({ where: { contestId } }),
-    );
-}
-
 export const contestProblemAssignmentResolvers: Resolvers = {
     ContestProblemAssignment: {
-        id: a => `${a.contestId}/${a.problemId}`,
+        id: a => `${a.contestId}/${a.problemName}`,
         contest: (a, {}, ctx) => ctx.api(ContestApi).byId.load(a.contestId),
-        problem: (a, {}, ctx) => ctx.api(ProblemApi).byId.load(a.problemId),
+        problem: (a, {}, ctx) => new Problem(a.contestId, a.problemName),
     },
 };

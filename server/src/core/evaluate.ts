@@ -4,10 +4,10 @@ import * as readline from 'readline';
 import { fromEvent } from 'rxjs';
 import { bufferTime, concatAll, concatMap, first, map, takeUntil, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
+import { ContestApi } from './contest';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi, TaskMakerEvent } from './evaluation-event';
 import { ArchiveApi } from './files/archive';
-import { ProblemApi } from './problem';
 import { Submission, SubmissionApi } from './submission';
 
 export class EvaluateApi extends ApiObject {
@@ -27,8 +27,10 @@ export class EvaluateApi extends ApiObject {
 
         console.log(this.ctx.environment.config);
 
-        const problem = await this.ctx.api(ProblemApi).byId.load(submission.problemId);
-        const problemDir = await this.ctx.api(ArchiveApi).extractArchive(problem.archiveId);
+        const contest = await this.ctx.api(ContestApi).byId.load(submission.contestId);
+        const contestDir = await this.ctx.api(ArchiveApi).extractArchive(contest.archiveId);
+
+        const problemDir = path.join(contestDir, submission.problemName);
 
         const submissionPath = await this.ctx
             .api(SubmissionApi)

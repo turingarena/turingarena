@@ -50,7 +50,7 @@ export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
     assignmentView {
       assignment {
         contest {
-          name
+          id
         }
         problem {
           name
@@ -100,7 +100,7 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
     const submission = await submit({
       variables: {
         submission: {
-          contestName: data.assignmentView.assignment.contest.name,
+          contestId: data.assignmentView.assignment.contest.id,
           problemName: data.assignmentView.assignment.problem.name,
           username: data.user.username,
           files: await Promise.all(

@@ -47,8 +47,10 @@ export class AchievementApi extends ApiObject {
 
     async getAward(a: Achievement) {
         const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
-        const submission = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
-        const material = await this.ctx.api(ProblemMaterialApi).byProblemId.load(submission.problemId);
+        const { contestId, problemName } = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
+        const material = await this.ctx
+            .api(ProblemMaterialApi)
+            .byContestAndProblemName.load({ contestId, problemName });
 
         return material.awards[a.awardIndex];
     }

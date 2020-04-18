@@ -1,11 +1,12 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { createSimpleLoader } from '../../main/base-model';
+import { ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { Archive } from '../files/archive';
 import { FileContent } from '../files/file-content';
-import { Problem, ProblemApi } from '../problem';
+import { Problem } from '../problem';
 import { Award } from './award';
 import { Media, MediaVariant } from './media';
 import { ProblemTaskInfo, ProblemTaskInfoApi } from './problem-task-info';
@@ -226,17 +227,20 @@ export interface ProblemMaterialModelRecord {
 }
 
 export class ProblemMaterialApi extends ApiObject {
-    byProblemId = createSimpleLoader(async (problemId: string) => {
-        const problem = await this.ctx.api(ProblemApi).byId.load(problemId);
+    byContestAndProblemName = createSimpleLoader(
+        async ({ contestId, problemName }: { contestId: string; problemName: string }) => {
+            const problem = new Problem(contestId, problemName);
 
-        return new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem));
-    });
+            return new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem));
+        },
+    );
 
     async loadContent(problem: Problem, path: string) {
+        const contest = await this.ctx.api(ContestApi).byId.load(problem.contestId);
         const file = await this.ctx.table(Archive).findOne({
             where: {
-                uuid: problem.archiveId,
-                path,
+                uuid: contest.archiveId,
+                path: `${problem.name}/${path}`,
             },
             include: [this.ctx.table(FileContent)],
         });

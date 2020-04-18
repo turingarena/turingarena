@@ -32,7 +32,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                         )
                     ),
                     submission_achievements AS (
-                        SELECT a.*, s.id as submission_id, s.user_id, s.problem_id, s.created_at
+                        SELECT a.*, s.id as submission_id, s.username, s.contest_id, s.problem_name, s.created_at
                         FROM achievements a
                                 JOIN official_evaluations e ON a.evaluation_id = e.id
                                 JOIN submissions s ON e.submission_id = s.id
@@ -43,8 +43,9 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                         WHERE a.submission_id = (
                             SELECT a2.submission_id
                             FROM submission_achievements a2
-                            WHERE a2.user_id = a.user_id
-                            AND a2.problem_id = a.problem_id
+                            WHERE a2.username = a.username
+                            AND a2.contest_id = a.contest_id
+                            AND a2.problem_name = a.problem_name
                             AND a2.award_index = a.award_index
                             ORDER BY a2.grade DESC, a2.created_at
                             LIMIT 1
@@ -52,14 +53,16 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                     )
                 SELECT *
                 FROM assignment_achievements
-                WHERE user_id = $userId
-                    AND problem_id = $problemId
+                WHERE username = $username
+                    AND contest_id = $contestId
+                    AND problem_name = $problemName
                     AND award_index = $awardIndex;
             `,
             {
                 bind: {
-                    problemId: t.assignment.problemAssignment.problemId,
-                    userId: t.user.id,
+                    contestId: t.assignment.problemAssignment.contestId,
+                    problemName: t.assignment.problemAssignment.problemName,
+                    username: t.user.metadata.username,
                     awardIndex: t.assignment.award.index,
                 },
                 type: QueryTypes.SELECT,

@@ -2,7 +2,7 @@ import { DocumentNode, execute } from 'graphql';
 import { Model, Sequelize } from 'sequelize-typescript';
 import { modelConstructors } from '../core';
 import { AuthService } from '../core/auth';
-import { User, UserRole } from '../core/user';
+import { User } from '../core/user';
 import { ApiObject } from './api';
 import { Config, defaultConfig } from './config';
 import { createSchema } from './executable-schema';
@@ -84,7 +84,7 @@ export class RemoteApiContext extends ApiContext {
 
     authorizeUser(username: string) {
         if (this.environment.config.skipAuth) return;
-        if (this.user?.username !== username) throw new Error(`User ${username} not authorized`);
+        if (this.user?.metadata.username !== username) throw new Error(`User ${username} not authorized`);
     }
 
     authorizeAdmin(username: string) {
@@ -92,7 +92,7 @@ export class RemoteApiContext extends ApiContext {
 
         this.authorizeUser(username);
 
-        if (this.user?.role !== UserRole.ADMIN) throw new Error(`User ${username} is not an admin`);
+        if (this.user?.metadata.role !== 'admin') throw new Error(`User ${username} is not an admin`);
     }
 
     schema = createSchema();

@@ -1,4 +1,5 @@
 import { ApiObject } from '../../main/api';
+import { ContestApi } from '../contest';
 import { Archive } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
@@ -37,10 +38,12 @@ export interface IOITaskInfo {
 
 export class ProblemTaskInfoApi extends ApiObject {
     async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-        const metadataPath = '.task-info.json';
+        const contest = await this.ctx.api(ContestApi).byId.load(problem.contestId);
+        const metadataPath = `${problem.name}/.task-info.json`;
+
         const metadataProblemFile = await this.ctx.table(Archive).findOne({
             where: {
-                uuid: problem.archiveId,
+                uuid: contest.archiveId,
                 path: metadataPath,
             },
         });
