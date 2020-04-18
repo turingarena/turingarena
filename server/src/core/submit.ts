@@ -5,22 +5,21 @@ import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
 import { Submission, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
-import { UserApi } from './user';
 
 export class SubmitApi extends ApiObject {
     async submit(
-        { contestName, problemName, username, files }: SubmissionInput,
+        { contestId, problemName, username, files }: SubmissionInput,
         // Path of a local file to submit as solution (C++ only), used as a shortcut for the CLI
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const user = await this.ctx.api(UserApi).byUsername.load(username);
-        const contest = await this.ctx.api(ContestApi).byName.load(contestName);
+        const contest = await this.ctx.api(ContestApi).byId.load(contestId);
+        const user = await this.ctx.api(ContestApi).getUserByUsername(contest, username);
 
         const submission = await this.ctx.table(Submission).create({
             contestId: contest.id,
             problemName,
-            userId: user.id,
+            username: user.metadata.username,
         });
 
         for (const { content, fieldName, fileName, fileTypeName } of files) {

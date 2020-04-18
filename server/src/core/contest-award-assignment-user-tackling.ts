@@ -32,7 +32,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                         )
                     ),
                     submission_achievements AS (
-                        SELECT a.*, s.id as submission_id, s.user_id, s.contest_id, s.problem_name, s.created_at
+                        SELECT a.*, s.id as submission_id, s.username, s.contest_id, s.problem_name, s.created_at
                         FROM achievements a
                                 JOIN official_evaluations e ON a.evaluation_id = e.id
                                 JOIN submissions s ON e.submission_id = s.id
@@ -43,7 +43,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                         WHERE a.submission_id = (
                             SELECT a2.submission_id
                             FROM submission_achievements a2
-                            WHERE a2.user_id = a.user_id
+                            WHERE a2.username = a.username
                             AND a2.contest_id = a.contest_id
                             AND a2.problem_name = a.problem_name
                             AND a2.award_index = a.award_index
@@ -53,7 +53,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                     )
                 SELECT *
                 FROM assignment_achievements
-                WHERE user_id = $userId
+                WHERE username = $username
                     AND contest_id = $contestId
                     AND problem_name = $problemName
                     AND award_index = $awardIndex;
@@ -62,7 +62,7 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
                 bind: {
                     contestId: t.assignment.problemAssignment.contestId,
                     problemName: t.assignment.problemAssignment.problemName,
-                    userId: t.user.id,
+                    username: t.user.metadata.username,
                     awardIndex: t.assignment.award.index,
                 },
                 type: QueryTypes.SELECT,

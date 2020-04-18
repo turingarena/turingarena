@@ -46,12 +46,12 @@ import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media'
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
 import { TextModelRecord, textResolvers, textSchema } from './material/text';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
-import { Participation, ParticipationModelRecord, participationSchema } from './participation';
+import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
-import { User, UserModelRecord, userResolvers, userSchema } from './user';
+import { UserModelRecord, userResolvers, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
 import {
     ContestAwardAssignmentViewModelRecord,
@@ -124,10 +124,8 @@ export const modelConstructors = {
     Evaluation,
     EvaluationEvent,
     FileContent,
-    Participation,
     Submission,
     SubmissionFile,
-    User,
 };
 
 export type ModelRecord = unknown &

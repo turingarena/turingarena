@@ -14,10 +14,9 @@ import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
-import { ParticipationApi } from './participation';
+import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFileApi } from './submission-file';
-import { User, UserApi } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -40,8 +39,8 @@ export const submissionSchema = gql`
     }
 
     input SubmissionInput {
+        contestId: ID!
         problemName: ID!
-        contestName: ID!
         username: ID!
         files: [SubmissionFileInput!]!
     }
@@ -59,10 +58,9 @@ export class Submission extends UuidBaseModel<Submission> {
     @Column
     problemName!: string;
 
-    @ForeignKey(() => User)
     @AllowNull(false)
     @Column
-    userId!: string;
+    username!: string;
 }
 
 export interface SubmissionModelRecord {
@@ -74,18 +72,20 @@ export type SubmissionInput = __generated_SubmissionInput;
 export class SubmissionApi extends ApiObject {
     byId = createByIdLoader(this.ctx, Submission);
     allByTackling = createSimpleLoader(
-        ({ problemName, contestId, userId }: { problemName: string; contestId: string; userId: string }) =>
+        ({ problemName, contestId, username }: { problemName: string; contestId: string; username: string }) =>
             this.ctx
                 .table(Submission)
-                .findAll({ where: { problemName, contestId, userId }, order: [['createdAt', 'ASC']] }),
+                .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] }),
     );
-    pendingByUser = createSimpleLoader(async (userId: string) => {
-        // TODO: denormalize DB to make this code simpler and faster
-        const submissions = await this.ctx.table(Submission).findAll({ where: { userId } });
-        const officalEvaluations = await Promise.all(submissions.map(async s => this.getOfficialEvaluation(s)));
+    pendingByContestAndUser = createSimpleLoader(
+        async ({ contestId, username }: { contestId: string; username: string }) => {
+            // TODO: denormalize DB to make this code simpler and faster
+            const submissions = await this.ctx.table(Submission).findAll({ where: { username } });
+            const officalEvaluations = await Promise.all(submissions.map(async s => this.getOfficialEvaluation(s)));
 
-        return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
-    });
+            return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
+        },
+    );
 
     async getContestProblemAssignment(s: Submission): Promise<ContestProblemAssignment> {
         return new ContestProblemAssignment(s.contestId, s.problemName);
@@ -311,11 +311,11 @@ export const submissionResolvers: Resolvers = {
         id: s => s.id,
 
         contest: (s, {}, ctx) => ctx.api(ContestApi).byId.load(s.contestId),
-        user: (s, {}, ctx) => ctx.api(UserApi).byUsername.load(s.userId),
+        user: async (s, {}, ctx) =>
+            ctx.api(ContestApi).getUserByUsername(await ctx.api(ContestApi).byId.load(s.contestId), s.username),
         problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
 
-        participation: ({ userId, contestId }, {}, ctx) =>
-            ctx.api(ParticipationApi).byUserAndContest.load({ contestId, userId }),
+        participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),
         contestProblemAssigment: ({ contestId, problemName }, {}, ctx) =>
             new ContestProblemAssignment(contestId, problemName),
 
