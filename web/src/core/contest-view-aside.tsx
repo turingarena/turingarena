@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
@@ -23,6 +24,7 @@ const headerClass = css`
 
 export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragment>) {
   const [visible, setVisible] = useState(true);
+  const { t } = useTranslation();
 
   if (data.problemSetView === null) {
     return null;
@@ -77,29 +79,30 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
               `
         }
       >
-        <div>
-          <h2 className={headerClass}>Score</h2>
+        {data.problemSetView.totalScoreField.score !== null && (
+          <div>
+            <h2 className={headerClass}>{t('score')}</h2>
 
-          <div
-            className={css`
-              white-space: nowrap;
-              text-align: right;
+            <div
+              className={css`
+                white-space: nowrap;
+                text-align: right;
+                font-size: 2rem;
+                margin-bottom: 16px;
 
-              font-size: 2rem;
-              margin-bottom: 16px;
-
-              & > .score {
-                font-size: 4rem;
-              }
-            `}
-          >
-            <GradeField data={data.problemSetView.totalScoreField} />
+                & > .score {
+                  font-size: 4rem;
+                }
+              `}
+            >
+              <GradeField data={data.problemSetView.totalScoreField} />
+            </div>
           </div>
-        </div>
+        )}
 
         <ContestViewClock data={data} />
 
-        <h2 className={headerClass}>Problems</h2>
+        <h2 className={headerClass}>{t('problems')}</h2>
         <div
           className={css`
             padding: 0;

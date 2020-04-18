@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client';
 import { css, cx } from 'emotion';
 import React, { HTMLAttributes } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
@@ -97,6 +98,8 @@ export function ContestProblemAssignmentViewAside({
   className,
   ...rest
 }: FragmentProps<ContestProblemAssignmentViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
+  const { t } = useTranslation();
+
   return (
     <div
       className={cx(
@@ -119,7 +122,7 @@ export function ContestProblemAssignmentViewAside({
       >
         {data.awardAssignmentViews.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>Awards</h3>
+            <h3 className={asideTitleCss}>{t('awards')}</h3>
             <div
               className={css`
                 padding: 0;
@@ -177,7 +180,7 @@ export function ContestProblemAssignmentViewAside({
         )}
         {data.assignment.problem.attachments.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>Attachments</h3>
+            <h3 className={asideTitleCss}>{t('attachments')}</h3>
             <div
               className={css`
                 margin-bottom: 16px;
@@ -189,7 +192,7 @@ export function ContestProblemAssignmentViewAside({
             </div>
           </>
         )}
-        <h2 className={asideTitleCss}>Statement file</h2>
+        <h2 className={asideTitleCss}>{t('statementFile')}</h2>
         <MediaDownload className={downloadLinkCss} data={data.assignment.problem.statement} />
       </div>
     </div>

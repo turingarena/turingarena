@@ -28,6 +28,7 @@ mkdir -p "${HOME}/.config/turingarena"
 msg "Build backend"
 cd "${REPO}/server/"
 npm ci
+npm run build
 
 msg "Install backend"
 cp -r * "${DEST}/backend"
@@ -35,6 +36,7 @@ cp -r * "${DEST}/backend"
 msg "Build client"
 cd "${REPO}/web/"
 npm ci
+npm run build
 
 msg "Install client"
 cp -r build "${DEST}/frontend/build"

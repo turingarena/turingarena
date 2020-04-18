@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
 import { useAuth } from '../util/auth';
@@ -15,6 +16,7 @@ import { textFragment } from './text';
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
   const auth = useAuth();
+  const { t, i18n } = useTranslation();
 
   return (
     <>
@@ -79,15 +81,31 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
                 auth.clearAuth();
               }}
             >
-              <FontAwesomeIcon icon="sign-out-alt" /> Log out
+              <FontAwesomeIcon icon="sign-out-alt" /> {t('logOut')}
             </button>
           </>
         )}
         {data.user === null && (
           <button className={cx(buttonCss, buttonLightCss, buttonSmallCss)} onClick={() => setShowLogInModal(true)}>
-            <FontAwesomeIcon icon="sign-in-alt" /> Log in
+            <FontAwesomeIcon icon="sign-in-alt" /> {t('logIn')}
           </button>
         )}
+        <select
+          value={i18n.language.substr(0, 2)}
+          className={cx(
+            'custom-select',
+            'custom-select-sm',
+            css`
+              margin-left: 5px;
+              color: #212529;
+              width: auto;
+            `,
+          )}
+          onChange={e => i18n.changeLanguage(e.target.value)}
+        >
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+        </select>
       </nav>
     </>
   );

@@ -14,23 +14,18 @@ jobs:
       - uses: webfactory/ssh-agent@v0.2.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Build backend
+      - name: Install backend dependencies
         run: npm ci
         working-directory: server/
-      # - name: Run all backend tests
-      #   run: npm run check
-      #   working-directory: server/
-      - name: Build frontend
-        run: CI=false npm ci
+      - name: Build backend
+        run: npm run build
+        working-directory: server/
+      - name: Run all backend tests
+        run: npm run check
+        working-directory: server/
+      - name: Install frontend dependencies
+        run: npm ci
         working-directory: web/
-      - name: Deploy
-        if: github.ref == 'refs/heads/master'
-        run: |
-          export CI=false
-          echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > ~/.npmrc
-          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" server/package.json
-          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" web/package.json
-          sed -i "s/0-dev/${GITHUB_RUN_NUMBER}/" turingarena/package.json
-          (cd server/ && npm publish)
-          (cd web/ && CI=false npm publish)
-          (cd turingarena/ && npm publish)
+      - name: Build backend
+        run: CI=false npm run build
+        working-directory: web/

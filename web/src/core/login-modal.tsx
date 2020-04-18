@@ -2,6 +2,7 @@ import { gql, useMutation } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
 import { useAsync } from '../util/async-hook';
 import { useAuth } from '../util/auth';
@@ -22,6 +23,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const [token, setToken] = useState('');
+  const { t } = useTranslation();
 
   const [logInMutate] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
@@ -114,15 +116,15 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           {loading ? (
-            <small className={cx(formTextCss)}>Logging in...</small>
+            <small className={cx(formTextCss)}>{t('loggingIn')}...</small>
           ) : error instanceof InvalidTokenError ? (
-            <small className={cx(invalidFeedbackCss)}>Invalid token, please try again.</small>
+            <small className={cx(invalidFeedbackCss)}>{t('invalidToken')}</small>
           ) : error !== undefined ? (
             <small className={cx(invalidFeedbackCss)}>{error.message}</small>
           ) : successful ? (
-            <small className={cx(formTextCss)}>Logged in!</small>
+            <small className={cx(formTextCss)}>{t('logggedIn')}</small>
           ) : (
-            <small className={cx(formTextCss)}>Insert the token or password provided to you. No username needed.</small>
+            <small className={cx(formTextCss)}>{t('tokenRequest')}</small>
           )}
         </div>
       </div>
@@ -142,10 +144,10 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           disabled={loading}
           type="button"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
-          Log in
+          {t('logIn')}
         </button>
       </div>
     </form>
