@@ -4,7 +4,6 @@
     "license": "MPL-2.0",
     "repository": "github:turingarena/turingarena",
     "version": "0.2.0-dev",
-    "main": "./index.js",
     "public": true,
     "bin": {
         "turingarena": "./dist/src/cli/index.js",
@@ -29,7 +28,7 @@
         "watch:check:test": "jest --watch",
         "start": "npm run watch:serve",
         "cli": "ts-node -T src/cli/index.ts",
-        "prepare:build": "tsc"
+        "build": "tsc"
     },
     "dependencies": {
         "apollo-server-core": "^2.9.16",
