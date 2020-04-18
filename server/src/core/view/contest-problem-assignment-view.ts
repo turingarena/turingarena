@@ -59,10 +59,6 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
         return new Problem(contestId, problemName);
     }
 
-    async getContest({ assignment: { contestId } }: ContestProblemAssignmentView) {
-        return this.ctx.api(ContestApi).byId.load(contestId);
-    }
-
     async getTotalScoreField(view: ContestProblemAssignmentView) {
         const { scoreRange } = await this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
             contestId: view.assignment.contestId,
@@ -89,7 +85,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getProblemSetView(view: ContestProblemAssignmentView) {
-        const contest = await this.getContest(view);
+        const contest = this.ctx.api(ContestApi).fromId(view.assignment.contestId);
 
         return new ContestProblemSetView(new ContestProblemSet(contest), view.user);
     }

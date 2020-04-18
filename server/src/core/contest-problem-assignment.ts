@@ -23,7 +23,7 @@ export interface ContestProblemAssignmentModelRecord {
 export const contestProblemAssignmentResolvers: Resolvers = {
     ContestProblemAssignment: {
         id: a => `${a.contestId}/${a.problemName}`,
-        contest: (a, {}, ctx) => ctx.api(ContestApi).byId.load(a.contestId),
+        contest: (a, {}, ctx) => ctx.api(ContestApi).fromId(a.contestId),
         problem: (a, {}, ctx) => new Problem(a.contestId, a.problemName),
     },
 };

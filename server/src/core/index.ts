@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
-import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
+import { ContestData, ContestModelRecord, contestResolvers, contestSchema } from './contest';
 import {
     ContestAwardAssignmentModelRecord,
     contestAwardAssignmentResolvers,
@@ -119,7 +119,7 @@ export const schema = gql`
 /** All model classes constructors. */
 export const modelConstructors = {
     Achievement,
-    Contest,
+    ContestData,
     Archive,
     Evaluation,
     EvaluationEvent,

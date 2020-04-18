@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Submission } from './submission';
 
 export const evaluationSchema = gql`
@@ -58,7 +58,7 @@ export interface EvaluationModelRecord {
 }
 
 export class EvaluationApi extends ApiObject {
-    byId = createByIdLoader(this.ctx, Evaluation);
+    byId = createByIdDataLoader(this.ctx, Evaluation);
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
         this.ctx.table(Evaluation).findAll({
             where: { submissionId },

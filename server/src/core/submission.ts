@@ -3,10 +3,10 @@ import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { AchievementApi } from './achievement';
-import { Contest, ContestApi } from './contest';
+import { ContestApi, ContestData } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
@@ -49,7 +49,7 @@ export const submissionSchema = gql`
 /** A Submission in the system */
 @Table({ updatedAt: false })
 export class Submission extends UuidBaseModel<Submission> {
-    @ForeignKey(() => Contest)
+    @ForeignKey(() => ContestData)
     @AllowNull(false)
     @Column
     contestId!: string;
@@ -70,7 +70,7 @@ export interface SubmissionModelRecord {
 export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionApi extends ApiObject {
-    byId = createByIdLoader(this.ctx, Submission);
+    byId = createByIdDataLoader(this.ctx, Submission);
     allByTackling = createSimpleLoader(
         ({ problemName, contestId, username }: { problemName: string; contestId: string; username: string }) =>
             this.ctx
@@ -310,9 +310,9 @@ export const submissionResolvers: Resolvers = {
     Submission: {
         id: s => s.id,
 
-        contest: (s, {}, ctx) => ctx.api(ContestApi).byId.load(s.contestId),
+        contest: (s, {}, ctx) => ctx.api(ContestApi).fromId(s.contestId),
         user: async (s, {}, ctx) =>
-            ctx.api(ContestApi).getUserByUsername(await ctx.api(ContestApi).byId.load(s.contestId), s.username),
+            ctx.api(ContestApi).getUserByUsername(ctx.api(ContestApi).fromId(s.contestId), s.username),
         problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
 
         participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),

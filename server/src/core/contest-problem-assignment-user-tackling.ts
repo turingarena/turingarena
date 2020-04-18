@@ -46,7 +46,7 @@ export interface ContestProblemAssignmentUserTacklingModelRecord {
 
 export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
     async canSubmit(t: ContestProblemAssignmentUserTackling) {
-        const contest = await this.ctx.api(ContestApi).byId.load(t.assignment.contestId);
+        const contest = this.ctx.api(ContestApi).fromId(t.assignment.contestId);
         const status = await this.ctx.api(ContestApi).getStatus(contest);
 
         return status === 'RUNNING';

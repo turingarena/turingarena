@@ -27,8 +27,9 @@ export class EvaluateApi extends ApiObject {
 
         console.log(this.ctx.environment.config);
 
-        const contest = await this.ctx.api(ContestApi).byId.load(submission.contestId);
-        const contestDir = await this.ctx.api(ArchiveApi).extractArchive(contest.archiveId);
+        const contest = this.ctx.api(ContestApi).fromId(submission.contestId);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
+        const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
         const problemDir = path.join(contestDir, submission.problemName);
 

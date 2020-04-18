@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi } from './contest';
+import { ContestApi, ContestData } from './contest';
 import { SubmissionApi } from './submission';
 import { MainView } from './view/main-view';
 
@@ -36,7 +36,8 @@ export const queryResolvers: Resolvers = {
                     : null,
             );
         },
-        contests: async ({}, {}, ctx) => ctx.table(Contest).findAll(),
+        contests: async ({}, {}, ctx) =>
+            (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
         archive: (_, { uuid }) => ({ uuid }),
         submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).byId.load(id),
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),

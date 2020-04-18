@@ -13,7 +13,7 @@ export class SubmitApi extends ApiObject {
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const contest = await this.ctx.api(ContestApi).byId.load(contestId);
+        const contest = this.ctx.api(ContestApi).fromId(contestId);
         const user = await this.ctx.api(ContestApi).getUserByUsername(contest, username);
 
         const submission = await this.ctx.table(Submission).create({

@@ -6,7 +6,7 @@ import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typesc
 import * as yaml from 'yaml';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -34,13 +34,6 @@ export const contestSchema = gql`
         archive: Archive!
     }
 
-    input ContestInput {
-        name: ID!
-        title: String!
-        start: String!
-        end: String!
-    }
-
     enum ContestStatus {
         NOT_STARTED
         RUNNING
@@ -50,11 +43,16 @@ export const contestSchema = gql`
 
 /** A contest in TuringArena */
 @Table
-export class Contest extends UuidBaseModel<Contest> {
+export class ContestData extends UuidBaseModel<ContestData> {
     @AllowNull(false)
     @Column(DataType.UUIDV4)
     @ForeignKey(() => Archive)
     archiveId!: string;
+}
+
+export interface Contest {
+    __typename: 'Contest';
+    id: string;
 }
 
 export type ContestStatus = __generated_ContestStatus;
@@ -68,26 +66,42 @@ export interface ContestModelRecord {
 }
 
 export class ContestApi extends ApiObject {
-    byId = createByIdLoader(this.ctx, Contest);
-    byName = createSimpleLoader(async (name: string) => {
+    fromId(id: string): Contest {
+        return { __typename: 'Contest', id };
+    }
+
+    fromData(data: ContestData): Contest {
+        return this.fromId(data.id);
+    }
+
+    dataLoader = createSimpleLoader(({ id }: Contest) => this.ctx.table(ContestData).findByPk(id));
+
+    byNameLoader = createSimpleLoader(async (name: string) => {
         // FIXME: should contests be addressable by name anyway?
 
-        const contests = await this.ctx.table(Contest).findAll();
-        const metadata = await Promise.all(contests.map(async c => this.getMetadata(c)));
+        const contests = await this.ctx.table(ContestData).findAll();
+        const metadata = await Promise.all(contests.map(d => this.fromData(d)).map(async c => this.getMetadata(c)));
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
 
-    async getDefault() {
+    async getDefault(): Promise<Contest | null> {
         // FIXME: assumes there is only one contest
-        return this.ctx.table(Contest).findOne();
+        const data = await this.ctx.table(ContestData).findOne();
+        if (data === null) return null;
+
+        return {
+            __typename: 'Contest',
+            id: data.id,
+        };
     }
 
     async getMetadata(c: Contest) {
+        const { archiveId } = await this.dataLoader.load(c);
         const metadataPath = `turingarena.yaml`;
         const metadataProblemFile = await this.ctx.table(Archive).findOne({
             where: {
-                uuid: c.archiveId,
+                uuid: archiveId,
                 path: metadataPath,
             },
         });
@@ -164,9 +178,10 @@ export class ContestApi extends ApiObject {
     }
 
     async getStatement(c: Contest): Promise<Media> {
+        const { archiveId } = await this.dataLoader.load(c);
         const statementFiles = await this.ctx.table(Archive).findAll({
             where: {
-                uuid: c.archiveId,
+                uuid: archiveId,
                 path: {
                     [Op.like]: 'files/home%',
                 },
@@ -186,7 +201,7 @@ export const contestResolvers: Resolvers = {
         end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end,
         status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
         problemSet: c => new ContestProblemSet(c),
-        archive: c => ({ uuid: c.archiveId }),
+        archive: async (c, {}, ctx) => ({ uuid: (await ctx.api(ContestApi).dataLoader.load(c)).archiveId }),
         statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
     },
 };
