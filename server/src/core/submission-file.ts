@@ -4,7 +4,7 @@ import { FindOptions } from 'sequelize/types';
 import { ApiObject } from '../main/api';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { FileContent } from './files/file-content';
-import { Submission } from './submission';
+import { SubmissionData } from './submission';
 
 export const submissionFileSchema = gql`
     type SubmissionFile {
@@ -23,7 +23,7 @@ export const submissionFileSchema = gql`
 /** File in a submission */
 @Table({ timestamps: false })
 export class SubmissionFile extends BaseModel<SubmissionFile> {
-    @ForeignKey(() => Submission)
+    @ForeignKey(() => SubmissionData)
     @PrimaryKey
     @Column
     submissionId!: number;

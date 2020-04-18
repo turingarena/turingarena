@@ -24,8 +24,9 @@ export const contestProblemSetSchema = gql`
     }
 `;
 
-export class ContestProblemSet {
-    constructor(readonly contest: Contest) {}
+export interface ContestProblemSet {
+    __typename: 'ContestProblemSet';
+    contest: Contest;
 }
 
 export interface ContestProblemSetModelRecord {

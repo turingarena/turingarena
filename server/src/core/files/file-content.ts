@@ -4,7 +4,7 @@ import * as path from 'path';
 import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { ApiObject } from '../../main/api';
-import { BaseModel, createByIdLoader } from '../../main/base-model';
+import { BaseModel, createByIdDataLoader } from '../../main/base-model';
 import { Resolvers } from '../../main/resolver-types';
 
 export const fileContentSchema = gql`
@@ -40,7 +40,7 @@ export interface FileContentModelRecord {
 }
 
 export class FileContentApi extends ApiObject {
-    byId = createByIdLoader(this.ctx, FileContent);
+    byId = createByIdDataLoader(this.ctx, FileContent);
 
     async createFromContent(content: Buffer) {
         const id = ssri.fromData(content).hexDigest();

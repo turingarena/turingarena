@@ -47,10 +47,9 @@ export class AchievementApi extends ApiObject {
 
     async getAward(a: Achievement) {
         const evaluation = await this.ctx.api(EvaluationApi).byId.load(a.evaluationId);
-        const { contestId, problemName } = await this.ctx.api(SubmissionApi).byId.load(evaluation.submissionId);
-        const material = await this.ctx
-            .api(ProblemMaterialApi)
-            .byContestAndProblemName.load({ contestId, problemName });
+        const submission = this.ctx.api(SubmissionApi).fromId(evaluation.submissionId);
+        const { assignment } = await this.ctx.api(SubmissionApi).getTackling(submission);
+        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
         return material.awards[a.awardIndex];
     }

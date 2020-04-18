@@ -17,8 +17,10 @@ export const contestAwardAssignmentSchema = gql`
     }
 `;
 
-export class ContestAwardAssignment {
-    constructor(readonly problemAssignment: ContestProblemAssignment, readonly award: Award) {}
+export interface ContestAwardAssignment {
+    __typename: 'ContestAwardAssignment';
+    problemAssignment: ContestProblemAssignment;
+    award: Award;
 }
 
 export interface ContestAwardAssignmentModelRecord {
@@ -27,7 +29,7 @@ export interface ContestAwardAssignmentModelRecord {
 
 export const contestAwardAssignmentResolvers: Resolvers = {
     ContestAwardAssignment: {
-        id: a => `${a.problemAssignment.contestId}/${a.problemAssignment.problemName}/${a.award.index}`,
+        id: a => `${a.problemAssignment.problem.contest.id}/${a.problemAssignment.problem.name}/${a.award.index}`,
         problemAssignment: a => a.problemAssignment,
         award: a => a.award,
     },

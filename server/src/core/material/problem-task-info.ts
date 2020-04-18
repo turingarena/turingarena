@@ -38,14 +38,11 @@ export interface IOITaskInfo {
 
 export class ProblemTaskInfoApi extends ApiObject {
     async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-        const contest = await this.ctx.api(ContestApi).byId.load(problem.contestId);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(problem.contest);
         const metadataPath = `${problem.name}/.task-info.json`;
 
         const metadataProblemFile = await this.ctx.table(Archive).findOne({
-            where: {
-                uuid: contest.archiveId,
-                path: metadataPath,
-            },
+            where: { uuid: archiveId, path: metadataPath },
         });
 
         if (metadataProblemFile === null) {

@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
-import { Contest, ContestModelRecord, contestResolvers, contestSchema } from './contest';
+import { ContestData, ContestModelRecord, contestResolvers, contestSchema } from './contest';
 import {
     ContestAwardAssignmentModelRecord,
     contestAwardAssignmentResolvers,
@@ -49,7 +49,7 @@ import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutati
 import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
-import { Submission, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
+import { SubmissionData, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { UserModelRecord, userResolvers, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
@@ -119,12 +119,12 @@ export const schema = gql`
 /** All model classes constructors. */
 export const modelConstructors = {
     Achievement,
-    Contest,
+    ContestData,
     Archive,
     Evaluation,
     EvaluationEvent,
     FileContent,
-    Submission,
+    SubmissionData,
     SubmissionFile,
 };
 

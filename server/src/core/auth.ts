@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { sign, verify } from 'jsonwebtoken';
 import { ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
-import { User } from './user';
+import { User, UserApi } from './user';
 
 export const authSchema = gql`
     type AuthResult {
@@ -35,10 +35,10 @@ export class AuthService {
         const contest = await this.ctx.api(ContestApi).getDefault();
         if (contest === null) return null;
 
-        const user = await this.ctx.api(ContestApi).getUserByToken(contest, token);
+        const user = await this.ctx.api(UserApi).getUserByToken(contest, token);
         if (user === null) return null;
 
-        const payload: TokenPayload = { contestId: contest.id, username: user.metadata.username };
+        const payload: TokenPayload = { contestId: contest.id, username: user.username };
 
         return { user, token: sign(payload, this.ctx.environment.config.secret) };
     }
@@ -51,7 +51,7 @@ export class AuthService {
             throw new Error(`token not valid for current contest`);
         }
 
-        const user = await this.ctx.api(ContestApi).getUserByUsername(contest, payload.username);
+        const user = await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username: payload.username });
 
         return user;
     }
