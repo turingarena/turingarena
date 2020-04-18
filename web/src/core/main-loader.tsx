@@ -5,7 +5,7 @@ import { useAuth } from '../util/auth';
 import { MainView, mainViewFragment } from './main-view';
 
 export function MainLoader() {
-  const { auth, restoreAuth } = useAuth();
+  const { auth, restoreAuth, clearAuth } = useAuth();
 
   useEffect(() => {
     restoreAuth();
@@ -40,7 +40,11 @@ export function MainLoader() {
   }, [data]);
 
   if (data === undefined && loading) return <>Loading...</>;
-  if (error !== undefined) return <>Error! {error.message}</>;
+  if (error !== undefined) {
+    clearAuth();
+
+    return <>Error! {error.message}</>;
+  }
   if (data?.mainView === undefined) return <>No main view!</>;
 
   return <MainView data={data?.mainView} />;
