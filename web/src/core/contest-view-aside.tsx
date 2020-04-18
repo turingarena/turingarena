@@ -100,7 +100,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
           </div>
         )}
 
-        <ContestViewClock data={data} />
+        {data.contest.end !== null && <ContestViewClock data={data} />}
 
         <h2 className={headerClass}>{t('problems')}</h2>
         <div

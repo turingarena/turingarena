@@ -43,11 +43,9 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
       map(() => {
-        if (data.contest.end === null) return new Duration();
-
         const now = DateTime.local();
         const start = DateTime.fromISO(data.contest.start.local);
-        const end = DateTime.fromISO(data.contest.end.local);
+        const end = DateTime.fromISO(data.contest.end!.local ?? '');
 
         switch (data.contest.status) {
           case 'NOT_STARTED':
@@ -88,7 +86,7 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
         {t(getContestStatus(data.contest.status))}
       </div>
 
-      {data.contest.end !== null && clock !== null && (
+      {clock !== null && (
         <div
           className={css`
             font-family: 'Lucida Console', Monaco, monospace;
